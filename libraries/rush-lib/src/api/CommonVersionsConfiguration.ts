@@ -13,6 +13,7 @@ import {
   Sort
 } from '@rushstack/node-core-library';
 
+import type { OptionalToUndefined } from '../utilities/Utilities';
 import { PackageNameParsers } from './PackageNameParsers';
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
 import type { RushConfiguration } from './RushConfiguration';
@@ -67,6 +68,7 @@ export class CommonVersionsConfiguration {
   private _preferredVersions: ProtectableMap<string, string>;
   private _allowedAlternativeVersions: ProtectableMap<string, string[]>;
   private _modified: boolean = false;
+  private _commonVersionsJsonHasEnsureConsistentVersionsProperty: boolean;
 
   /**
    * Get the absolute file path of the common-versions.json file.
@@ -163,6 +165,8 @@ export class CommonVersionsConfiguration {
 
     this.ensureConsistentVersions =
       commonVersionsEnsureConsistentVersions ?? rushJsonEnsureConsistentVersions ?? false;
+    this._commonVersionsJsonHasEnsureConsistentVersionsProperty =
+      commonVersionsEnsureConsistentVersions !== undefined;
 
     if (commonVersionsJson) {
       try {
@@ -242,7 +246,10 @@ export class CommonVersionsConfiguration {
    */
   public save(): boolean {
     if (this._modified) {
-      JsonFile.save(this._serialize(), this.filePath, { updateExistingFile: true });
+      JsonFile.save(this._serialize(), this.filePath, {
+        updateExistingFile: true,
+        ignoreUndefinedValues: true
+      });
       this._modified = false;
       return true;
     }
@@ -284,20 +291,27 @@ export class CommonVersionsConfiguration {
   }
 
   private _serialize(): ICommonVersionsJson {
-    const result: ICommonVersionsJson = {
-      $schema: JsonSchemaUrls.commonVersions
-    };
-
+    let preferredVersions: ICommonVersionsJsonVersionMap | undefined;
     if (this._preferredVersions.size) {
-      result.preferredVersions = CommonVersionsConfiguration._serializeTable(this.preferredVersions);
+      preferredVersions = CommonVersionsConfiguration._serializeTable(this.preferredVersions);
     }
 
+    let allowedAlternativeVersions: ICommonVersionsJsonVersionsMap | undefined;
     if (this._allowedAlternativeVersions.size) {
-      result.allowedAlternativeVersions = CommonVersionsConfiguration._serializeTable(
+      allowedAlternativeVersions = CommonVersionsConfiguration._serializeTable(
         this.allowedAlternativeVersions
       ) as ICommonVersionsJsonVersionsMap;
     }
 
+    const result: OptionalToUndefined<ICommonVersionsJson> = {
+      $schema: JsonSchemaUrls.commonVersions,
+      preferredVersions,
+      implicitlyPreferredVersions: this.implicitlyPreferredVersions,
+      allowedAlternativeVersions,
+      ensureConsistentVersions: this._commonVersionsJsonHasEnsureConsistentVersionsProperty
+        ? this.ensureConsistentVersions
+        : undefined
+    };
     return result;
   }
 }

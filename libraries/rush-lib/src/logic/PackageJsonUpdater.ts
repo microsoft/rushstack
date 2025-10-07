@@ -31,6 +31,7 @@ import {
   SemVerStyle
 } from './PackageJsonUpdaterTypes';
 import type { Subspace } from '../api/Subspace';
+import { MAKE_CONSISTENT_FLAG_NAME } from '../cli/actions/AddAction';
 
 /**
  * Options for adding a dependency to a particular project.
@@ -409,7 +410,7 @@ export class PackageJsonUpdater {
         const existingVersionList: string = Array.from(existingSpecifiedVersions).join(', ');
         throw new Error(
           `Adding '${packageName}@${version}' ` +
-            `causes mismatched dependencies. Use the "--make-consistent" flag to update other packages to use ` +
+            `causes mismatched dependencies. Use the "${MAKE_CONSISTENT_FLAG_NAME}" flag to update other packages to use ` +
             `this version, or try specify one of the existing versions (${existingVersionList}).`
         );
       }

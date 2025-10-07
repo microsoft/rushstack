@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
+import type {
+  CommandLineFlagParameter,
+  CommandLineStringListParameter,
+  CommandLineStringParameter
+} from '@rushstack/ts-command-line';
 
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -11,6 +15,9 @@ import type {
   IPackageJsonUpdaterRushBaseUpdateOptions
 } from '../../logic/PackageJsonUpdaterTypes';
 import { RushConstants } from '../../logic/RushConstants';
+import { VARIANT_PARAMETER } from '../../api/Variants';
+
+export const PACKAGE_PARAMETER_NAME: '--package' = '--package';
 
 export interface IBasePackageJsonUpdaterRushOptions {
   /**
@@ -31,20 +38,28 @@ export interface IBasePackageJsonUpdaterRushOptions {
   debugInstall: boolean;
 }
 
+export interface IBaseAddAndRemoveActionOptions extends IBaseRushActionOptions {
+  allFlagDescription: string;
+  packageNameListParameterDescription: string;
+}
+
 /**
  * This is the common base class for AddAction and RemoveAction.
  */
 export abstract class BaseAddAndRemoveAction extends BaseRushAction {
-  protected abstract readonly _allFlag: CommandLineFlagParameter;
-  protected readonly _skipUpdateFlag!: CommandLineFlagParameter;
-  protected abstract readonly _packageNameList: CommandLineStringListParameter;
+  protected readonly _skipUpdateFlag: CommandLineFlagParameter;
+  protected readonly _packageNameListParameter: CommandLineStringListParameter;
+  protected readonly _allFlag: CommandLineFlagParameter;
+  protected readonly _variantParameter: CommandLineStringParameter;
 
   protected get specifiedPackageNameList(): readonly string[] {
-    return this._packageNameList.values!;
+    return this._packageNameListParameter.values;
   }
 
-  public constructor(options: IBaseRushActionOptions) {
+  public constructor(options: IBaseAddAndRemoveActionOptions) {
     super(options);
+
+    const { packageNameListParameterDescription, allFlagDescription } = options;
 
     this._skipUpdateFlag = this.defineFlagParameter({
       parameterLongName: '--skip-update',
@@ -52,6 +67,21 @@ export abstract class BaseAddAndRemoveAction extends BaseRushAction {
       description:
         'If specified, the "rush update" command will not be run after updating the package.json files.'
     });
+
+    this._packageNameListParameter = this.defineStringListParameter({
+      parameterLongName: PACKAGE_PARAMETER_NAME,
+      parameterShortName: '-p',
+      required: true,
+      argumentName: 'PACKAGE',
+      description: packageNameListParameterDescription
+    });
+
+    this._allFlag = this.defineFlagParameter({
+      parameterLongName: '--all',
+      description: allFlagDescription
+    });
+
+    this._variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
   }
 
   protected abstract getUpdateOptionsAsync(): Promise<IPackageJsonUpdaterRushBaseUpdateOptions>;
