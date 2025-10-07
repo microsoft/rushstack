@@ -36,7 +36,6 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "@rspack/core": "~1.5.8",
-    "webpack": "~5.98.0",
-    "webpack-dev-server": "^5.1.0"
+    "webpack": "~5.98.0"
   }
 }
