@@ -171,7 +171,7 @@ module.exports = {
           }
         ],
 
-        'no-duplicate-imports': ['warn', { includeExports: true, allowSeparateTypeImports: true }]
+        'no-duplicate-imports': ['warn', { includeExports: false, allowSeparateTypeImports: true }]
       }
     },
     {
