@@ -15,16 +15,16 @@ import type { HeftConfiguration, IHeftTaskSession } from '@rushstack/heft';
 export type RspackCoreImport = typeof import('@rspack/core');
 
 /**
- * The environment passed into the Webpack configuration function. Loosely based
- * on the default Webpack environment options, specified here:
- * https://webpack.js.org/api/cli/#environment-options
+ * The environment passed into the Rspack configuration function. Loosely based
+ * on the default Rspack environment options, specified here:
+ * https://rspack.rs/plugins/webpack/environment-plugin#options
  *
  * @beta
  */
 export interface IRspackConfigurationFnEnvironment {
   /**
    * Whether or not the run is in production mode. Synonym of
-   * IWebpackConfigurationFnEnvironment.production.
+   * {@link IRspackConfigurationFnEnvironment.production}.
    */
   prod: boolean;
   /**
@@ -115,18 +115,18 @@ export interface IRspackPluginAccessorParameters {
  */
 export interface IRspackPluginAccessor {
   /**
-   * Hooks that are called at various points in the Webpack plugin lifecycle.
+   * Hooks that are called at various points in the Rspack plugin lifecycle.
    */
   readonly hooks: IRspackPluginAccessorHooks;
   /**
-   * Parameters that are provided by the Webpack plugin.
+   * Parameters that are provided by the Rspack plugin.
    */
   readonly parameters: IRspackPluginAccessorParameters;
 }
 
 /**
  * The stage in the `onLoadConfiguration` hook at which the config will be loaded from the local
- * webpack config file.
+ * rspack config file.
  * @beta
  */
 export const STAGE_LOAD_LOCAL_CONFIG: 1000 = 1000;
