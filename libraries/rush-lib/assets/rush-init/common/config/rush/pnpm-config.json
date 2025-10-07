@@ -68,6 +68,23 @@
   /*[LINE "DEMO"]*/ "autoInstallPeers": false,
 
   /**
+   * The minimum number of minutes that must pass after a version is published before pnpm will install it.
+   * This setting helps reduce the risk of installing compromised packages, as malicious releases are typically
+   * discovered and removed within a short time frame.
+   *
+   * For example, the following setting ensures that only packages released at least one day ago can be installed:
+   *
+   * "minimumReleaseAge": 1440
+   *
+   * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
+   *
+   * PNPM documentation: https://pnpm.io/settings#minimumreleaseage
+   *
+   * The default value is 0 (disabled).
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "minimumReleaseAge": 1440,
+
+  /**
    * If true, then Rush will add the `--strict-peer-dependencies` command-line parameter when
    * invoking PNPM.  This causes `rush update` to fail if there are unsatisfied peer dependencies,
    * which is an invalid state that can cause build failures or incompatible dependency versions.

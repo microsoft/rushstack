@@ -949,6 +949,28 @@ ${gitLfsHookHandling}
       }
 
       /*
+        If user set minimum-release-age in pnpm-config.json only, use the value in pnpm-config.json
+        If user set minimum-release-age in pnpm-config.json and .npmrc, use the value in pnpm-config.json
+        If user set minimum-release-age in .npmrc only, do nothing, let pnpm handle it
+      */
+      const isMinimumReleaseAgeInNpmrc: boolean = isVariableSetInNpmrcFile(
+        subspace.getSubspaceConfigFolderPath(),
+        'minimum-release-age',
+        this.rushConfiguration.isPnpm
+      );
+
+      const minimumReleaseAge: number | undefined = this.rushConfiguration.pnpmOptions.minimumReleaseAge;
+      if (minimumReleaseAge !== undefined) {
+        if (isMinimumReleaseAgeInNpmrc) {
+          this._terminal.writeWarningLine(
+            `Warning: PNPM's minimum-release-age is specified in both .npmrc and pnpm-config.json. ` +
+              `The value in pnpm-config.json will take precedence.`
+          );
+        }
+        args.push(`--config.minimumReleaseAge=${minimumReleaseAge}`);
+      }
+
+      /*
         If user set resolution-mode in pnpm-config.json only, use the value in pnpm-config.json
         If user set resolution-mode in pnpm-config.json and .npmrc, use the value in pnpm-config.json
         If user set resolution-mode in .npmrc only, do nothing, let pnpm handle it

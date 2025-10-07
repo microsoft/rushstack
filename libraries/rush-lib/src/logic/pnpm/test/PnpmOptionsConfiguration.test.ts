@@ -73,4 +73,13 @@ describe(PnpmOptionsConfiguration.name, () => {
       'level'
     ]);
   });
+
+  it('loads minimumReleaseAge', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-minimumReleaseAge.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(pnpmConfiguration.minimumReleaseAge).toEqual(1440);
+  });
 });
