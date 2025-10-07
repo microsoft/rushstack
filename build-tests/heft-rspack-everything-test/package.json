@@ -8,9 +8,7 @@
     "start": "heft build-watch",
     "serve": "heft build-watch --serve",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:build:ipc": "heft run-watch --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean",
-    "_phase:test:ipc": "heft run-watch --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
     "@rushstack/heft-dev-cert-plugin": "workspace:*",
