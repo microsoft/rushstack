@@ -357,7 +357,6 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
                 taskSession.logger.emitError(error);
               }
             }
-            return true;
           }
         );
 
