@@ -153,6 +153,14 @@ interface ICreateEnvironmentForRushCommandOptions {
   pathOptions?: ICreateEnvironmentForRushCommandPathOptions;
 }
 
+type OptionalKeys<T> = {
+  [K in keyof T]-?: {} extends Pick<T, K> ? K : never;
+}[keyof T];
+
+export type OptionalToUndefined<T> = Omit<T, OptionalKeys<T>> & {
+  [K in OptionalKeys<T>]-?: Exclude<T[K], undefined> | undefined;
+};
+
 export class Utilities {
   public static syncNpmrc: typeof syncNpmrc = syncNpmrc;
 

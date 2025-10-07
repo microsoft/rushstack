@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where `rush add --make-consistent ...` may drop the `implicitlyPreferredVersions` and `ensureConsistentVersions` properties from `common/config/rush/common-versions.json`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
