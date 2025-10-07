@@ -337,9 +337,9 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
               const error: Error | undefined = args?.[0] as Error | undefined;
               if (error) {
                 taskSession.logger.emitError(error);
+                return true;
               }
             }
-            return true;
           }
         );
 
