@@ -33,7 +33,7 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@types/watchpack": "2.4.0",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "@rspack/core": "~1.5.8",
     "webpack": "~5.98.0",

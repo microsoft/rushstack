@@ -23,7 +23,7 @@
     "@rushstack/rush-sdk": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "20.17.19",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-eslint-config": "workspace:*",
     "source-map-loader": "~3.0.1",
     "typescript": "~5.8.2",
