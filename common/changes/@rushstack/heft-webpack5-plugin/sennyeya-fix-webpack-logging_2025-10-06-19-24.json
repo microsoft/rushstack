@@ -2,7 +2,7 @@
   "changes": [
     {
       "comment": "Allow infrastructure logs to be printed.",
-      "type": "patch",
+      "type": "minor",
       "packageName": "@rushstack/heft-webpack5-plugin"
     }
   ],
