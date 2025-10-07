@@ -4,8 +4,7 @@
 import * as path from 'node:path';
 
 import type { Comment } from 'estree';
-import type { Compilation, Module } from 'webpack';
-import type { sources } from 'webpack';
+import type { Compilation, Module, sources } from 'webpack';
 
 import type { IAssetInfo } from './ModuleMinifierPlugin.types';
 
