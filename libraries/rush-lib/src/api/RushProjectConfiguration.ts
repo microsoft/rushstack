@@ -11,7 +11,7 @@ import { RushConstants } from '../logic/RushConstants';
 import type { IPhase } from './CommandLineConfiguration';
 import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';
 import schemaJson from '../schemas/rush-project.schema.json';
-import anythingSchemaJson from '../schemas/rush-project.schema.json';
+import anythingSchemaJson from '../schemas/anything.schema.json';
 import { HotlinkManager } from '../utilities/HotlinkManager';
 import type { RushConfiguration } from './RushConfiguration';
 

@@ -16,9 +16,9 @@ import {
   ConsoleTerminalProvider,
   type ITerminal,
   type ITerminalProvider,
-  Terminal
+  Terminal,
+  PrintUtilities
 } from '@rushstack/terminal';
-import { PrintUtilities } from '@rushstack/terminal';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
