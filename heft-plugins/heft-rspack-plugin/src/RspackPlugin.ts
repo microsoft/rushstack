@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { AddressInfo } from 'net';
+import type { AddressInfo } from 'node:net';
 
 import type * as TRspack from '@rspack/core';
-import type TWebpackDevServer from 'webpack-dev-server';
+import type * as TRspackDevServer from '@rspack/dev-server';
 import { AsyncParallelHook, AsyncSeriesBailHook, AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable';
 
 import { CertificateManager, type ICertificate } from '@rushstack/debug-certificate-manager';
@@ -22,7 +22,8 @@ import {
   type IRspackConfiguration,
   type IRspackPluginAccessor,
   PLUGIN_NAME,
-  type IRspackPluginAccessorHooks
+  type IRspackPluginAccessorHooks,
+  type RspackCoreImport
 } from './shared';
 import { tryLoadRspackConfigurationAsync } from './RspackConfigurationLoader';
 
@@ -32,8 +33,8 @@ export interface IRspackPluginOptions {
 }
 const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';
 const RSPACK_PACKAGE_NAME: '@rspack/core' = '@rspack/core';
-const WEBPACK_DEV_SERVER_PACKAGE_NAME: 'webpack-dev-server' = 'webpack-dev-server';
-const WEBPACK_DEV_SERVER_ENV_VAR_NAME: 'WEBPACK_DEV_SERVER' = 'WEBPACK_DEV_SERVER';
+const RSPACK_DEV_SERVER_PACKAGE_NAME: '@rspack/dev-server' = '@rspack/dev-server';
+const RSPACK_DEV_SERVER_ENV_VAR_NAME: 'RSPACK_DEV_SERVER' = 'RSPACK_DEV_SERVER';
 const WEBPACK_DEV_MIDDLEWARE_PACKAGE_NAME: 'webpack-dev-middleware' = 'webpack-dev-middleware';
 
 /**
@@ -42,7 +43,7 @@ const WEBPACK_DEV_MIDDLEWARE_PACKAGE_NAME: 'webpack-dev-middleware' = 'webpack-d
 export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOptions> {
   private _accessor: IRspackPluginAccessor | undefined;
   private _isServeMode: boolean = false;
-  private _rspack: typeof TRspack | undefined;
+  private _rspack: RspackCoreImport | undefined;
   private _rspackCompiler: TRspack.Compiler | TRspack.MultiCompiler | undefined;
   private _rspackConfiguration: IRspackConfiguration | undefined | false = false;
   private _rspackCompilationDonePromise: Promise<void> | undefined;
@@ -115,7 +116,7 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
     return this._rspackConfiguration;
   }
 
-  private async _loadRspackAsync(): Promise<typeof TRspack> {
+  private async _loadRspackAsync(): Promise<RspackCoreImport> {
     if (!this._rspack) {
       // Allow this to fail if Rspack is not installed
       this._rspack = await import(RSPACK_PACKAGE_NAME);
@@ -128,7 +129,7 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
     rspackConfiguration: IRspackConfiguration
   ): Promise<TRspack.Compiler | TRspack.MultiCompiler> {
     if (!this._rspackCompiler) {
-      const rspack: typeof TRspack = await this._loadRspackAsync();
+      const rspack: RspackCoreImport = await this._loadRspackAsync();
       taskSession.logger.terminal.writeLine(`Using Rspack version ${rspack.version}`);
       this._rspackCompiler = Array.isArray(rspackConfiguration)
         ? rspack.default(rspackConfiguration) /* (rspack.Compilation[]) => MultiCompiler */
@@ -236,9 +237,9 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
       });
 
       // Determine how we will run the compiler. When serving, we will run the compiler
-      // via the webpack-dev-server. Otherwise, we will run the compiler directly.
+      // via the @rspack/dev-server. Otherwise, we will run the compiler directly.
       if (this._isServeMode) {
-        const defaultDevServerOptions: TWebpackDevServer.Configuration = {
+        const defaultDevServerOptions: TRspackDevServer.Configuration = {
           host: 'localhost',
           devMiddleware: {
             publicPath: '/',
@@ -254,23 +255,25 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
               port: 8080
             }
           },
+          watchFiles: [],
+          static: [],
           port: 8080,
-          onListening: (server: TWebpackDevServer) => {
+          onListening: (server: TRspackDevServer.RspackDevServer) => {
             const addressInfo: AddressInfo | string | undefined = server.server?.address() as AddressInfo;
             if (addressInfo) {
               const address: string =
                 typeof addressInfo === 'string' ? addressInfo : `${addressInfo.address}:${addressInfo.port}`;
-              taskSession.logger.terminal.writeLine(`Started Webpack Dev Server at https://${address}`);
+              taskSession.logger.terminal.writeLine(`Started Rspack Dev Server at https://${address}`);
             }
           }
         };
 
-        // Obtain the devServerOptions from the webpack configuration, and combine with the default options
-        let devServerOptions: TWebpackDevServer.Configuration;
+        // Obtain the devServerOptions from the rspack configuration, and combine with the default options
+        let devServerOptions: TRspackDevServer.Configuration;
         if (Array.isArray(rspackConfiguration)) {
-          const filteredDevServerOptions: TWebpackDevServer.Configuration[] = rspackConfiguration
+          const filteredDevServerOptions: TRspackDevServer.Configuration[] = rspackConfiguration
             .map((configuration) => configuration.devServer)
-            .filter((devServer): devServer is TWebpackDevServer.Configuration => !!devServer);
+            .filter((devServer): devServer is TRspackDevServer.Configuration => !!devServer);
           if (filteredDevServerOptions.length > 1) {
             taskSession.logger.emitWarning(
               new Error(`Detected multiple rspack devServer configurations, using the first one.`)
@@ -290,7 +293,7 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
           );
 
           // Update the web socket URL to use the hostname provided by the certificate
-          const clientConfiguration: TWebpackDevServer.Configuration['client'] = devServerOptions.client;
+          const clientConfiguration: TRspackDevServer.Configuration['client'] = devServerOptions.client;
           const hostname: string | undefined = certificate.subjectAltNames?.[0];
           if (hostname && typeof clientConfiguration === 'object') {
             const { webSocketURL } = clientConfiguration;
@@ -318,7 +321,6 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
 
         // Since the webpack-dev-server does not return infrastructure errors via a callback like
         // compiler.watch(...), we will need to intercept them and log them ourselves.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         compiler.hooks.infrastructureLog.tap(
           PLUGIN_NAME,
           (name: string, type: string, args: unknown[] | undefined) => {
@@ -336,22 +338,28 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
         // WEBPACK_DEV_SERVER environment variable -- even if no APIs are accessed. This environment variable
         // causes incorrect behavior if Heft is not running in serve mode. Thus, we need to be careful to call
         // require() only if Heft is in serve mode.
-        taskSession.logger.terminal.writeLine('Starting webpack-dev-server');
-        const WebpackDevServer: typeof TWebpackDevServer = (await import(WEBPACK_DEV_SERVER_PACKAGE_NAME))
-          .default;
-        const webpackDevServer: TWebpackDevServer = new WebpackDevServer(devServerOptions, compiler);
-        await webpackDevServer.start();
+        taskSession.logger.terminal.writeLine('Starting rspack-dev-server');
+        const RspackDevServer: typeof TRspackDevServer.RspackDevServer = (
+          await import(RSPACK_DEV_SERVER_PACKAGE_NAME)
+        ).RspackDevServer;
+        const rspackDevServer: TRspackDevServer.RspackDevServer = new RspackDevServer(
+          devServerOptions,
+          compiler
+        );
+        await rspackDevServer.start();
       } else {
         // Create the watcher. Compilation will start immediately after invoking watch().
         taskSession.logger.terminal.writeLine('Starting Rspack watcher');
 
         const { onGetWatchOptions } = this.accessor.hooks;
 
-        const watchOptions: Parameters<TRspack.Compiler['watch']>[0] = onGetWatchOptions.isUsed()
+        const watchOptions:
+          | Parameters<TRspack.Compiler['watch']>[0]
+          | Parameters<TRspack.MultiCompiler['watch']>[0] = onGetWatchOptions.isUsed()
           ? await onGetWatchOptions.promise({}, rspackConfiguration)
           : {};
 
-        compiler.watch(watchOptions, (error?: Error | null) => {
+        (compiler as TRspack.Compiler).watch(watchOptions, (error?: Error | null) => {
           if (error) {
             taskSession.logger.emitError(error);
           }
@@ -368,12 +376,12 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
   }
 
   private _validateEnvironmentVariable(taskSession: IHeftTaskSession): void {
-    if (!this._isServeMode && process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
+    if (!this._isServeMode && process.env[RSPACK_DEV_SERVER_ENV_VAR_NAME]) {
       taskSession.logger.emitWarning(
         new Error(
-          `The "${WEBPACK_DEV_SERVER_ENV_VAR_NAME}" environment variable is set, ` +
+          `The "${RSPACK_DEV_SERVER_ENV_VAR_NAME}" environment variable is set, ` +
             'which will cause problems when rspack is not running in serve mode. ' +
-            `(Did a dependency inadvertently load the "${WEBPACK_DEV_SERVER_PACKAGE_NAME}" package?)`
+            `(Did a dependency inadvertently load the "${RSPACK_DEV_SERVER_PACKAGE_NAME}" package?)`
         )
       );
     }

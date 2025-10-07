@@ -2,20 +2,29 @@
 // See LICENSE in the project root for license information.
 
 import type * as TRspack from '@rspack/core';
+import type * as TRspackDevServer from '@rspack/dev-server';
+import type {
+  AsyncParallelHook,
+  AsyncSeriesBailHook,
+  AsyncSeriesHook,
+  AsyncSeriesWaterfallHook
+} from 'tapable';
+
 import type { HeftConfiguration, IHeftTaskSession } from '@rushstack/heft';
-import { AsyncParallelHook, AsyncSeriesBailHook, AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable';
+
+export type RspackCoreImport = typeof import('@rspack/core');
 
 /**
  * The environment passed into the Webpack configuration function. Loosely based
  * on the default Webpack environment options, specified here:
  * https://webpack.js.org/api/cli/#environment-options
  *
- * @public
+ * @beta
  */
 export interface IRspackConfigurationFnEnvironment {
   /**
    * Whether or not the run is in production mode. Synonym of
-   * {@link IRspackConfigurationFnEnvironment.production}.
+   * IWebpackConfigurationFnEnvironment.production.
    */
   prod: boolean;
   /**
@@ -36,16 +45,23 @@ export interface IRspackConfigurationFnEnvironment {
   /**
    * The resolved Rspack package.
    */
-  rspack: typeof TRspack;
+  rspack: RspackCoreImport;
 }
 
 /**
- * @public
+ * @beta
+ */
+export interface IRspackConfigurationWithDevServer extends TRspack.Configuration {
+  devServer?: TRspackDevServer.Configuration;
+};
+
+/**
+ * @beta
  */
 export type IRspackConfiguration = TRspack.Configuration | TRspack.Configuration[];
 
 /**
- * @public
+ * @beta
  */
 export interface IRspackPluginAccessorHooks {
   /**
@@ -85,7 +101,7 @@ export interface IRspackPluginAccessorHooks {
 }
 
 /**
- * @public
+ * @beta
  */
 export interface IRspackPluginAccessorParameters {
   /**
@@ -95,7 +111,7 @@ export interface IRspackPluginAccessorParameters {
 }
 
 /**
- * @public
+ * @beta
  */
 export interface IRspackPluginAccessor {
   /**
@@ -111,11 +127,11 @@ export interface IRspackPluginAccessor {
 /**
  * The stage in the `onLoadConfiguration` hook at which the config will be loaded from the local
  * webpack config file.
- * @public
+ * @beta
  */
 export const STAGE_LOAD_LOCAL_CONFIG: 1000 = 1000;
 
 /**
- * @public
+ * @beta
  */
-export const PLUGIN_NAME: 'webpack5-plugin' = 'webpack5-plugin';
+export const PLUGIN_NAME: 'rspack-plugin' = 'rspack-plugin';
