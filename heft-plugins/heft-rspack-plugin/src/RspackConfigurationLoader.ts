@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+
 import type * as TRspack from '@rspack/core';
+
 import { FileSystem } from '@rushstack/node-core-library';
 import type { IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 
@@ -31,7 +33,7 @@ export interface ILoadRspackConfigurationOptions {
   taskSession: IHeftTaskSession;
   heftConfiguration: HeftConfiguration;
   serveMode: boolean;
-  loadRspackAsyncFn: () => Promise<typeof TRspack>;
+  loadRspackAsyncFn: () => Promise<typeof import('@rspack/core')>;
   hooks: Pick<IRspackPluginAccessorHooks, 'onLoadConfiguration' | 'onConfigure' | 'onAfterConfigure'>;
 
   _tryLoadConfigFileAsync?: typeof tryLoadRspackConfigurationFileAsync;
@@ -90,7 +92,7 @@ export async function tryLoadRspackConfigurationAsync(
     rspackConfiguration = undefined;
   } else {
     if (hooks.onConfigure.isUsed()) {
-      // Allow for plugins to customise the configuration
+      // Allow for plugins to customize the configuration
       await hooks.onConfigure.promise(rspackConfiguration);
     }
     if (hooks.onAfterConfigure.isUsed()) {
@@ -98,7 +100,7 @@ export async function tryLoadRspackConfigurationAsync(
       await hooks.onAfterConfigure.promise(rspackConfiguration);
     }
   }
-  return rspackConfiguration;
+  return rspackConfiguration as IRspackConfiguration | undefined;
 }
 
 /**
@@ -142,7 +144,8 @@ export async function tryLoadRspackConfigurationFileAsync(
 
   if (rspackConfigJs) {
     const rspackConfig: IRspackConfigJsExport =
-      (rspackConfigJs as { default: IRspackConfigJsExport }).default || rspackConfigJs;
+      (rspackConfigJs as { default: IRspackConfigJsExport }).default ||
+      (rspackConfigJs as IRspackConfigJsExport);
 
     if (typeof rspackConfig === 'function') {
       // Defer loading of rspack until we know for sure that we will need it

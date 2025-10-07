@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-rspack-plugin",
-  "version": "0.0.0",
+  "version": "0.11.43",
   "description": "Heft plugin for Rspack",
   "repository": {
     "type": "git",
@@ -14,25 +14,29 @@
   "scripts": {
     "build": "heft build --clean",
     "start": "heft test --clean --watch",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.49.7",
-    "@rspack/core": "^0.1.1"
+    "@rushstack/heft": "^0.75.0",
+    "@rspack/core": "^1.5.8"
   },
   "dependencies": {
+    "@rushstack/debug-certificate-manager": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@types/tapable": "1.0.6",
     "tapable": "1.1.3",
-    "@rushstack/debug-certificate-manager": "workspace:*",
-    "webpack-dev-server": "^5.1.0"
+    "watchpack": "2.4.0",
+    "@rspack/dev-server": "^1.1.4"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
-    "@types/node": "20.17.19",
-    "@rspack/core": "^1.2.8"
+    "@rushstack/terminal": "workspace:*",
+    "@types/watchpack": "2.4.0",
+    "eslint": "~9.25.1",
+    "local-node-rig": "workspace:*",
+    "@rspack/core": "~1.5.8",
+    "webpack": "~5.98.0",
+    "webpack-dev-server": "^5.1.0"
   }
 }
