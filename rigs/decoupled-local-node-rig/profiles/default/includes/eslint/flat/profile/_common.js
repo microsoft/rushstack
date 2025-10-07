@@ -193,7 +193,8 @@ module.exports = {
         '**/test/**/*.tsx'
       ],
       rules: {
-        'import/order': 'off'
+        'import/order': 'off',
+        'no-duplicate-imports': 'off'
       }
     }
   ]
