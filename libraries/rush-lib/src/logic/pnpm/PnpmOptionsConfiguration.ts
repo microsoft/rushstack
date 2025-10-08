@@ -143,6 +143,10 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    */
   minimumReleaseAge?: number;
   /**
+   * {@inheritDoc PnpmOptionsConfiguration.minimumReleaseAgeExclude}
+   */
+  minimumReleaseAgeExclude?: string[];
+  /**
    * {@inheritDoc PnpmOptionsConfiguration.alwaysInjectDependenciesFromOtherSubspaces}
    */
   alwaysInjectDependenciesFromOtherSubspaces?: boolean;
@@ -275,6 +279,19 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * The default value is 0 (disabled).
    */
   public readonly minimumReleaseAge: number | undefined;
+
+  /**
+   * List of package names or patterns that are excluded from the minimumReleaseAge check.
+   * These packages will always install the newest version immediately, even if minimumReleaseAge is set.
+   *
+   * @remarks
+   * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
+   *
+   * PNPM documentation: https://pnpm.io/settings#minimumreleaseageexclude
+   *
+   * Example: ["webpack", "react", "\@myorg/*"]
+   */
+  public readonly minimumReleaseAgeExclude: string[] | undefined;
 
   /**
    * If true, then `rush update` add injected install options for all cross-subspace
@@ -444,6 +461,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.resolutionMode = json.resolutionMode;
     this.autoInstallPeers = json.autoInstallPeers;
     this.minimumReleaseAge = json.minimumReleaseAge;
+    this.minimumReleaseAgeExclude = json.minimumReleaseAgeExclude;
     this.alwaysInjectDependenciesFromOtherSubspaces = json.alwaysInjectDependenciesFromOtherSubspaces;
     this.alwaysFullInstall = json.alwaysFullInstall;
     this.pnpmLockfilePolicies = json.pnpmLockfilePolicies;

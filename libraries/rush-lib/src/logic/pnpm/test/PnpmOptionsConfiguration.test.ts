@@ -81,5 +81,9 @@ describe(PnpmOptionsConfiguration.name, () => {
     );
 
     expect(pnpmConfiguration.minimumReleaseAge).toEqual(1440);
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.minimumReleaseAgeExclude)).toEqual([
+      'webpack',
+      '@myorg/*'
+    ]);
   });
 });

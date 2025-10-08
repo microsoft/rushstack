@@ -85,6 +85,21 @@
   /*[LINE "HYPOTHETICAL"]*/ "minimumReleaseAge": 1440,
 
   /**
+   * An array of package names or patterns to exclude from the minimumReleaseAge check.
+   * This allows certain trusted packages to be installed immediately after publication.
+   * Patterns are supported using glob syntax (e.g., "@myorg/*" to exclude all packages from an organization).
+   *
+   * For example:
+   *
+   * "minimumReleaseAgeExclude": ["webpack", "react", "@myorg/*"]
+   *
+   * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
+   *
+   * PNPM documentation: https://pnpm.io/settings#minimumreleaseageexclude
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "minimumReleaseAgeExclude": ["@myorg/*"],
+
+  /**
    * If true, then Rush will add the `--strict-peer-dependencies` command-line parameter when
    * invoking PNPM.  This causes `rush update` to fail if there are unsatisfied peer dependencies,
    * which is an invalid state that can cause build failures or incompatible dependency versions.

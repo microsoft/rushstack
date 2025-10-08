@@ -1,3 +1,4 @@
 {
-  "minimumReleaseAge": 1440
+  "minimumReleaseAge": 1440,
+  "minimumReleaseAgeExclude": ["webpack", "@myorg/*"]
 }
