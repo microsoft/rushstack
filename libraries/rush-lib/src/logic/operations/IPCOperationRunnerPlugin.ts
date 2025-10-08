@@ -38,7 +38,7 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
         before: ShellOperationPluginName
       },
       async (operations: Set<Operation>, context: ICreateOperationsContext) => {
-        const { isWatch, isInitial } = context;
+        const { isWatch, isInitial, remainderArgs } = context;
         if (!isWatch) {
           return operations;
         }
@@ -46,7 +46,7 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
         currentContext = context;
 
         const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
-          getCustomParameterValuesByPhase();
+          getCustomParameterValuesByPhase(remainderArgs);
 
         for (const operation of operations) {
           const { associatedPhase: phase, associatedProject: project, runner } = operation;
