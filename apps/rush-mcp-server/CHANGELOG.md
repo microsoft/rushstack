@@ -1,6 +1,11 @@
 # Change Log - @rushstack/mcp-server
 
-This log was last generated on Fri, 03 Oct 2025 20:09:59 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Oct 2025 00:13:29 GMT and should not be manually modified.
+
+## 0.3.1
+Wed, 08 Oct 2025 00:13:29 GMT
+
+_Version update only_
 
 ## 0.3.0
 Fri, 03 Oct 2025 20:09:59 GMT

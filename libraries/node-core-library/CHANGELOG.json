@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.17.0",
+      "tag": "@rushstack/node-core-library_v5.17.0",
+      "date": "Wed, 08 Oct 2025 00:13:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an `allowOversubscription` option to the `Async` API functions which prevents running tasks from exceeding concurrency.  Change its default to `false`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.16.0",
       "tag": "@rushstack/node-core-library_v5.16.0",
       "date": "Fri, 03 Oct 2025 20:09:59 GMT",

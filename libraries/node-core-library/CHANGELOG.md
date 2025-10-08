@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 03 Oct 2025 20:09:59 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Oct 2025 00:13:28 GMT and should not be manually modified.
+
+## 5.17.0
+Wed, 08 Oct 2025 00:13:28 GMT
+
+### Minor changes
+
+- Add an `allowOversubscription` option to the `Async` API functions which prevents running tasks from exceeding concurrency.  Change its default to `false`.
 
 ## 5.16.0
 Fri, 03 Oct 2025 20:09:59 GMT

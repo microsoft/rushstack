@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Fri, 03 Oct 2025 20:09:59 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Oct 2025 00:13:28 GMT and should not be manually modified.
+
+## 1.6.1
+Wed, 08 Oct 2025 00:13:28 GMT
+
+### Patches
+
+- Add support for the IPv6 localhost address (`::1`).
 
 ## 1.6.0
 Fri, 03 Oct 2025 20:09:59 GMT
