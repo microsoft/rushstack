@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for PNPM's minimumReleaseAge setting to help mitigate supply chain attacks",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

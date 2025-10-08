@@ -139,6 +139,14 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    */
   autoInstallPeers?: boolean;
   /**
+   * {@inheritDoc PnpmOptionsConfiguration.minimumReleaseAge}
+   */
+  minimumReleaseAge?: number;
+  /**
+   * {@inheritDoc PnpmOptionsConfiguration.minimumReleaseAgeExclude}
+   */
+  minimumReleaseAgeExclude?: string[];
+  /**
    * {@inheritDoc PnpmOptionsConfiguration.alwaysInjectDependenciesFromOtherSubspaces}
    */
   alwaysInjectDependenciesFromOtherSubspaces?: boolean;
@@ -257,6 +265,33 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * The default value is same as PNPM default value.  (In PNPM 8.x, this value is true)
    */
   public readonly autoInstallPeers: boolean | undefined;
+
+  /**
+   * The minimum number of minutes that must pass after a version is published before pnpm will install it.
+   * This setting helps reduce the risk of installing compromised packages, as malicious releases are typically
+   * discovered and removed within a short time frame.
+   *
+   * @remarks
+   * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
+   *
+   * PNPM documentation: https://pnpm.io/settings#minimumreleaseage
+   *
+   * The default value is 0 (disabled).
+   */
+  public readonly minimumReleaseAge: number | undefined;
+
+  /**
+   * List of package names or patterns that are excluded from the minimumReleaseAge check.
+   * These packages will always install the newest version immediately, even if minimumReleaseAge is set.
+   *
+   * @remarks
+   * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
+   *
+   * PNPM documentation: https://pnpm.io/settings#minimumreleaseageexclude
+   *
+   * Example: ["webpack", "react", "\@myorg/*"]
+   */
+  public readonly minimumReleaseAgeExclude: string[] | undefined;
 
   /**
    * If true, then `rush update` add injected install options for all cross-subspace
@@ -425,6 +460,8 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this._globalPatchedDependencies = json.globalPatchedDependencies;
     this.resolutionMode = json.resolutionMode;
     this.autoInstallPeers = json.autoInstallPeers;
+    this.minimumReleaseAge = json.minimumReleaseAge;
+    this.minimumReleaseAgeExclude = json.minimumReleaseAgeExclude;
     this.alwaysInjectDependenciesFromOtherSubspaces = json.alwaysInjectDependenciesFromOtherSubspaces;
     this.alwaysFullInstall = json.alwaysFullInstall;
     this.pnpmLockfilePolicies = json.pnpmLockfilePolicies;

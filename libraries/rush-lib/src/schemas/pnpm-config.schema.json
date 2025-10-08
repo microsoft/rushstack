@@ -191,6 +191,20 @@
       "type": "boolean"
     },
 
+    "minimumReleaseAge": {
+      "description": "The minimum number of minutes that must pass after a version is published before pnpm will install it. This setting helps reduce the risk of installing compromised packages, as malicious releases are typically discovered and removed within a short time frame.\n\n(SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)\n\nPNPM documentation: https://pnpm.io/settings#minimumreleaseage\n\nThe default value is 0 (disabled).",
+      "type": "number"
+    },
+
+    "minimumReleaseAgeExclude": {
+      "description": "List of package names or patterns that are excluded from the minimumReleaseAge check. These packages will always install the newest version immediately, even if minimumReleaseAge is set. Supports glob patterns (e.g., \"@myorg/*\").\n\n(SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)\n\nPNPM documentation: https://pnpm.io/settings#minimumreleaseageexclude\n\nExample: [\"webpack\", \"react\", \"@myorg/*\"]",
+      "type": "array",
+      "items": {
+        "description": "Package name or pattern",
+        "type": "string"
+      }
+    },
+
     "alwaysFullInstall": {
       "description": "(EXPERIMENTAL) If 'true', then filtered installs ('rush install --to my-project') * will be disregarded, instead always performing a full installation of the lockfile.",
       "type": "boolean"
