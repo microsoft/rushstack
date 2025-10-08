@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/node-core-library",
-  "version": "5.16.0",
+  "version": "5.17.0",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
   "typings": "dist/node-core-library.d.ts",
