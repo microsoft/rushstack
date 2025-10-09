@@ -337,7 +337,6 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
               const error: Error | undefined = args?.[0] as Error | undefined;
               if (error) {
                 taskSession.logger.emitError(error);
-                return true;
               }
             }
           }
@@ -451,13 +450,13 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
         const [startColumnRaw] = columnRangeRaw.split('-');
         if (lineNumberRaw) {
           lineNumber = parseInt(lineNumberRaw, 10);
-          if (isNaN(lineNumber)) {
+          if (Number.isNaN(lineNumber)) {
             lineNumber = undefined;
           }
         }
         if (startColumnRaw) {
           columnNumber = parseInt(startColumnRaw, 10);
-          if (isNaN(columnNumber)) {
+          if (Number.isNaN(columnNumber)) {
             columnNumber = undefined;
           }
         }
