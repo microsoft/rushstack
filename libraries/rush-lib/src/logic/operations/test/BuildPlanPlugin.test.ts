@@ -88,6 +88,7 @@ describe(BuildPlanPlugin.name, () => {
       debugMode: false,
       quietMode: true,
       destinations: [mockStreamWritable],
+      allowOversubscription: true,
       parallelism: 1,
       abortController: new AbortController()
     });
