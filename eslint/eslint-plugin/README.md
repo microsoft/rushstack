@@ -71,7 +71,6 @@ To balance this strictness with code authoring convenience, the rule deliberatel
 
 - Variable declarations within a function body.
 - Variable declarations within a class method.
-- Variables used in the declaration part of `for...of` or `for...in` statements.
 - Variables declared via object or array destructuring assignments.
 
 #### Examples
@@ -118,13 +117,6 @@ class C {
     const x = 123; // passes
   }
 }
-```
-
-```ts
-// Variables in for...of and for...in declarations are exempt
-for (const x of []) { }  // passes
-
-for (const x in []) { } // passes
 ```
 
 ```ts
