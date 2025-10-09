@@ -131,10 +131,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@rushstack/heft-rspack-plugin",
-      "allowedCategories": [ "tests" ]
-    },
-    {
       "name": "@rushstack/debug-certificate-manager",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
@@ -205,6 +201,10 @@
     {
       "name": "@rushstack/heft-node-rig",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/heft-rspack-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/heft-sass-load-themed-styles-plugin",

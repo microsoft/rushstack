@@ -12,6 +12,7 @@ import type { IRspackPluginOptions } from './RspackPlugin';
 import {
   PLUGIN_NAME,
   STAGE_LOAD_LOCAL_CONFIG,
+  type RspackCoreImport,
   type IRspackConfiguration,
   type IRspackConfigurationFnEnvironment,
   type IRspackPluginAccessorHooks
@@ -33,7 +34,7 @@ export interface ILoadRspackConfigurationOptions {
   taskSession: IHeftTaskSession;
   heftConfiguration: HeftConfiguration;
   serveMode: boolean;
-  loadRspackAsyncFn: () => Promise<typeof import('@rspack/core')>;
+  loadRspackAsyncFn: () => Promise<RspackCoreImport>;
   hooks: Pick<IRspackPluginAccessorHooks, 'onLoadConfiguration' | 'onConfigure' | 'onAfterConfigure'>;
 
   _tryLoadConfigFileAsync?: typeof tryLoadRspackConfigurationFileAsync;
