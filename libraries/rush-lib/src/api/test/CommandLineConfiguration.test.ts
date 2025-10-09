@@ -294,4 +294,77 @@ describe(CommandLineConfiguration.name, () => {
       expect(phase.shellCommand).toEqual('echo');
     });
   });
+
+  describe('allowRemainderArguments configuration', () => {
+    it('should accept allowRemainderArguments for bulk commands', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'bulk',
+            name: 'test-remainder-bulk',
+            summary: 'Test bulk command with remainder arguments',
+            enableParallelism: true,
+            safeForSimultaneousRushProcesses: false,
+            allowRemainderArguments: true
+          }
+        ]
+      });
+
+      const command = commandLineConfiguration.commands.get('test-remainder-bulk');
+      expect(command).toBeDefined();
+    });
+
+    it('should accept allowRemainderArguments for global commands', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'global',
+            name: 'test-remainder-global',
+            summary: 'Test global command with remainder arguments',
+            shellCommand: 'echo',
+            safeForSimultaneousRushProcesses: false,
+            allowRemainderArguments: true
+          }
+        ]
+      });
+
+      const command = commandLineConfiguration.commands.get('test-remainder-global');
+      expect(command).toBeDefined();
+    });
+
+    it('should accept allowRemainderArguments for phased commands with bulk command', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'bulk',
+            name: 'test-remainder-bulk-command',
+            summary: 'Test bulk command with remainder arguments',
+            enableParallelism: true,
+            safeForSimultaneousRushProcesses: false,
+            allowRemainderArguments: true
+          }
+        ]
+      });
+
+      const command = commandLineConfiguration.commands.get('test-remainder-bulk-command');
+      expect(command).toBeDefined();
+    });
+
+    it('should default allowRemainderArguments to false when not specified', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'global',
+            name: 'test-no-remainder',
+            summary: 'Test command without remainder arguments',
+            shellCommand: 'echo',
+            safeForSimultaneousRushProcesses: false
+          }
+        ]
+      });
+
+      const command = commandLineConfiguration.commands.get('test-no-remainder');
+      expect(command).toBeDefined();
+    });
+  });
 });
