@@ -65,21 +65,20 @@ for (const runFolderPath of RUN_FOLDER_PATHS) {
     );
     const shellPathWithEslint = `${dependencyBinFolder}${path.delimiter}${process.env['PATH']}`;
 
-    const executableResult = Executable.spawnSync(
-      process.argv0,
-      [eslintBulkStartPath, 'suppress', '--all', 'src'],
-      {
-        currentWorkingDirectory: folderPath,
-        environment: {
-          ...process.env,
-          PATH: shellPathWithEslint,
-          [ESLINT_PACKAGE_NAME_ENV_VAR_NAME]: eslintPackageName
-        }
+    const args = [eslintBulkStartPath, 'suppress', '--all', 'src'];
+    const executableResult = Executable.spawnSync(process.argv0, args, {
+      currentWorkingDirectory: folderPath,
+      environment: {
+        ...process.env,
+        PATH: shellPathWithEslint,
+        [ESLINT_PACKAGE_NAME_ENV_VAR_NAME]: eslintPackageName
       }
-    );
+    });
 
     if (executableResult.status !== 0) {
-      console.error('The eslint-bulk-suppressions command failed.');
+      console.error(
+        `The eslint-bulk-suppressions command (\`node ${args.join(' ')}\` in ${folderPath}) failed.`
+      );
       console.error('STDOUT:');
       console.error(executableResult.stdout.toString());
       console.error('STDERR:');
