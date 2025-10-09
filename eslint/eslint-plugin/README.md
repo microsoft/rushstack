@@ -55,6 +55,86 @@ let y: typeof import('./file');
 jest.mock('./file'); // okay
 ```
 
+## `@rushstack/typedef-var`
+
+Require explicit type annotations for top-level variable declarations, while exempting local variables within function or method scopes.
+
+#### Rule Details
+
+This rule is implemented to supplement the deprecated `@typescript-eslint/typedef` rule. The `@typescript-eslint/typedef` rule was deprecated based on the judgment that "unnecessary type annotations, where type inference is sufficient, can be cumbersome to maintain and generally reduce code readability."
+
+However, we prioritize code reading and maintenance over code authorship. That is, even when the compiler can infer a type, this rule enforces explicit type annotations to ensure that a code reviewer (e.g., when viewing a GitHub Diff) does not have to rely entirely on inference and can immediately ascertain a variable's type. This approach makes writing code harder but significantly improves the more crucial activity of reading and reviewing code.
+
+Therefore, the `@rushstack/typedef-var` rule enforces type annotations for all variable declarations outside of local function or class method scopes. This includes the module's top-level scope and any block scopes that do not belong to a function or method.
+
+To balance this strictness with code authoring convenience, the rule deliberately relaxes the type annotation requirement for the following local variable declarations:
+
+- Variable declarations within a function body.
+- Variable declarations within a class method.
+- Variables used in the declaration part of `for...of` or `for...in` statements.
+- Variables declared via object or array destructuring assignments.
+
+#### Examples
+
+The following patterns are considered problems when `@rushstack/typedef-var` is enabled:
+
+```ts
+// Top-level declarations lack explicit type annotations
+const x = 123; // error
+
+let x = 123; // error
+
+var x = 123; // error
+```
+
+```ts
+// Declaration within a non-function block scope
+{
+  const x = 123; // error
+}
+```
+
+The following patterns are NOT considered problems:
+
+```ts
+// Local variables inside function expressions are exempt
+function f() { const x = 123; } // passes
+
+const f = () => { const x = 123; }; // passes
+
+const f = function() { const x = 123; } // passes
+```
+
+```ts
+// Local variables inside class methods are exempt
+class C {
+  public m(): void {
+    const x = 123; // passes
+  }
+}
+
+class C {
+  public m = (): void => {
+    const x = 123; // passes
+  }
+}
+```
+
+```ts
+// Variables in for...of and for...in declarations are exempt
+for (const x of []) { }  // passes
+
+for (const x in []) { } // passes
+```
+
+```ts
+// Array and Object Destructuring assignments are exempt
+let { a, b } = { // passes
+  a: 123,
+  b: 234
+}
+```
+
 ## `@rushstack/no-new-null`
 
 Prevent usage of the JavaScript `null` value, while allowing code to access existing APIs that
