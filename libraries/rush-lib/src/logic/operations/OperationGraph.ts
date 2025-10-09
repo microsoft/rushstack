@@ -45,6 +45,7 @@ export interface IOperationGraphOptions {
   quietMode: boolean;
   debugMode: boolean;
   parallelism: number;
+  allowOversubscription: boolean;
   destinations: Iterable<TerminalWritable>;
   /** Optional maximum allowed parallelism. Defaults to os.availableParallelism(). */
   maxParallelism?: number;
