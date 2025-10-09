@@ -430,6 +430,7 @@ export interface ICreateOperationsContext {
     readonly projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>;
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;
     readonly projectsInUnknownState: ReadonlySet<RushConfigurationProject>;
+    readonly remainderArgs?: ReadonlyArray<string>;
     readonly rushConfiguration: RushConfiguration;
 }
 

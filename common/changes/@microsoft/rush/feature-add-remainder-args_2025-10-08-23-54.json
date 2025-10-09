@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for remainder arguments with new allowRemainderArguments option",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -42,6 +42,14 @@ export abstract class BaseScriptAction<TCommand extends Command> extends BaseRus
       return;
     }
 
+    // Define remainder parameter if the command allows it
+    if (this.command.allowRemainderArguments) {
+      this.defineCommandLineRemainder({
+        description:
+          'Additional command-line arguments to be passed through to the shell command or npm script'
+      });
+    }
+
     // Find any parameters that are associated with this command
     for (const parameter of this.command.associatedParameters) {
       let tsCommandLineParameter: CommandLineParameter | undefined;
