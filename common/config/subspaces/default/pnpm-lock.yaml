@@ -1317,10 +1317,13 @@ importers:
         version: link:../../libraries/node-core-library
       '@typescript-eslint/parser':
         specifier: ~8.46.0
-        version: 8.46.0(eslint@8.57.0)(typescript@5.8.2)
-      eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        version: 8.46.0(eslint@9.37.0)(typescript@5.8.2)
+      eslint-9.25:
+        specifier: npm:eslint@~9.25.1
+        version: /eslint@9.25.1
+      eslint-9.37:
+        specifier: npm:eslint@~9.37.0
+        version: /eslint@9.37.0(supports-color@8.1.1)
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -1345,9 +1348,12 @@ importers:
       '@typescript-eslint/parser':
         specifier: ~8.46.0
         version: 8.46.0(eslint@9.37.0)(typescript@5.8.2)
-      eslint:
-        specifier: ~9.37.0
-        version: 9.37.0(supports-color@8.1.1)
+      eslint-9.25:
+        specifier: npm:eslint@~9.25.1
+        version: /eslint@9.25.1
+      eslint-9.37:
+        specifier: npm:eslint@~9.37.0
+        version: /eslint@9.37.0(supports-color@8.1.1)
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
