@@ -1633,7 +1633,7 @@
       let selection = new Set();
       let sortKey = 'status';
       let sortDir = 1; // 1 asc, -1 desc
-      let managerState = null;
+      let graphSettings = null;
       // Stores last execution results (previous iteration) keyed by name
       let lastExecutionResults = new Map();
       const enabledStateDisplay = {
@@ -1708,25 +1708,25 @@
         });
       }
 
-      // Restored: central place to update UI state dependent on managerState
+      // Restored: central place to update UI state dependent on graphSettings
       function updateManagerState() {
-        if (!managerState) return;
+        if (!graphSettings) return;
         // Sync debug / verbose toggle button states
         if (debugBtn) {
-          if (managerState.debugMode) debugBtn.classList.add('active');
+          if (graphSettings.debugMode) debugBtn.classList.add('active');
           else debugBtn.classList.remove('active');
-          debugBtn.setAttribute('aria-pressed', managerState.debugMode ? 'true' : 'false');
-          debugBtn.title = managerState.debugMode ? 'Turn off debug logging' : 'Turn on debug logging';
+          debugBtn.setAttribute('aria-pressed', graphSettings.debugMode ? 'true' : 'false');
+          debugBtn.title = graphSettings.debugMode ? 'Turn off debug logging' : 'Turn on debug logging';
         }
         if (verboseBtn) {
-          if (managerState.verbose) verboseBtn.classList.add('active');
+          if (graphSettings.verbose) verboseBtn.classList.add('active');
           else verboseBtn.classList.remove('active');
-          verboseBtn.setAttribute('aria-pressed', managerState.verbose ? 'true' : 'false');
-          verboseBtn.title = managerState.verbose ? 'Turn off verbose logging' : 'Turn on verbose logging';
+          verboseBtn.setAttribute('aria-pressed', graphSettings.verbose ? 'true' : 'false');
+          verboseBtn.title = graphSettings.verbose ? 'Turn off verbose logging' : 'Turn on verbose logging';
         }
         // Update play/pause visual state
         const ppIcon = playPauseBtn.querySelector('.codicon');
-        if (!managerState.pauseNextIteration) {
+        if (!graphSettings.pauseNextIteration) {
           playPauseBtn.classList.add('playing');
           playPauseBtn.setAttribute('aria-label', 'Switch to manual (pause)');
           playPauseBtn.title = 'Pause automatic iterations';
@@ -1743,12 +1743,12 @@
             ppIcon.classList.add('codicon-debug-start');
           }
         }
-        parallelismInput.value = managerState.parallelism;
+        parallelismInput.value = graphSettings.parallelism;
         managerStateEl.innerHTML = '';
         // Highlight execute button if an iteration is scheduled
         const executeBtn = document.getElementById('execute-btn');
         if (executeBtn) {
-          if (managerState.hasScheduledIteration) {
+          if (graphSettings.hasScheduledIteration) {
             executeBtn.classList.add('queued');
             executeBtn.title = 'Run once (changes detected)';
             executeBtn.setAttribute('aria-label', 'Run once (changes detected)');
@@ -1787,7 +1787,7 @@
       function updateStatusPill() {
         let pillStatus = 'Disconnected';
         if (ws && ws.readyState === WebSocket.OPEN) {
-          pillStatus = managerState?.status || 'Unspecified';
+          pillStatus = graphSettings?.status || 'Unspecified';
         }
         statusPill.className = '';
         statusPill.classList.add('status-pill', 'status-' + pillStatus);
@@ -1837,7 +1837,7 @@
         ws.addEventListener('open', () => {
           log('Connected');
           setConnected(true);
-          // Immediately reflect connected pre-sync (managerState may not yet be populated)
+          // Immediately reflect connected pre-sync (graphSettings may not yet be populated)
           statusEmojiEl.textContent = statusEmoji('Ready');
           statusPill.textContent = overallStatusText('Connected');
         });
@@ -1916,7 +1916,7 @@
             applyExecutionStates(msg.currentExecutionStates);
             queuedStates.clear();
             if (msg.queuedStates) msg.queuedStates.forEach((s) => queuedStates.set(s.name, s));
-            managerState = msg.managerState;
+            graphSettings = msg.graphState;
             if (msg.lastExecutionResults) {
               lastExecutionResults = new Map();
               msg.lastExecutionResults.forEach((r) => lastExecutionResults.set(r.name, r));
@@ -1934,7 +1934,7 @@
             break;
           }
           case 'sync-graph-state': {
-            managerState = msg.managerState;
+            graphSettings = msg.graphState;
             break;
           }
           case 'iteration-scheduled': {
@@ -3653,13 +3653,13 @@
         }
       });
       debugBtn.addEventListener('click', () => {
-        const newVal = !managerState?.debugMode;
+        const newVal = !graphSettings?.debugMode;
         // Optimistic UI update
         debugBtn.title = newVal ? 'Turn off debug logging' : 'Turn on debug logging';
         sendCommand({ command: 'set-debug', value: newVal });
       });
       verboseBtn.addEventListener('click', () => {
-        const newVal = !managerState?.verbose;
+        const newVal = !graphSettings?.verbose;
         verboseBtn.title = newVal ? 'Turn off verbose logging' : 'Turn on verbose logging';
         sendCommand({ command: 'set-verbose', value: newVal });
       });
@@ -3667,8 +3667,8 @@
         sendCommand({ command: 'set-parallelism', parallelism: Number(parallelismInput.value) || 1 })
       );
       playPauseBtn.addEventListener('click', () => {
-        if (!managerState) return;
-        const next = !!managerState.pauseNextIteration; // current boolean
+        if (!graphSettings) return;
+        const next = !!graphSettings.pauseNextIteration; // current boolean
         // Toggle: if currently paused (true), set to false (resume automatic); otherwise set to true (pause)
         sendCommand({ command: 'set-pause-next-iteration', value: !next });
       });
