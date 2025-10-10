@@ -3043,13 +3043,79 @@
           const fromPos = graphState.nodePositions.get(rec.from);
           const toPos = graphState.nodePositions.get(rec.to);
           if (!fromPos || !toPos) continue;
+          // Anchor points: bottom-center of source -> top-center of destination
           const startX = fromPos.x + GRAPH_NODE_WIDTH / 2;
-          const startY = fromPos.y + GRAPH_NODE_HEIGHT / 2;
+          const startY = fromPos.y + GRAPH_NODE_HEIGHT; // bottom of source
           const endX = toPos.x + GRAPH_NODE_WIDTH / 2;
-          const endY = toPos.y - 2; // small offset above
-          const mx = (startX + endX) / 2;
-          const my = (startY + endY) / 2 - 20; // tighter curve for compact layout
-          const d = `M ${startX} ${startY} Q ${mx} ${my} ${endX} ${endY}`;
+          const endY = toPos.y; // top of destination
+
+          // Compute how many rows apart they are using the level gap constant
+          const rowsApart = Math.max(1, Math.round((toPos.y - fromPos.y) / GRAPH_LEVEL_GAP));
+
+          // Horizontal column step between node centers
+          const colStep = GRAPH_COL_WIDTH + GRAPH_NODE_GAP;
+
+          // Helper that emits a quadratic curve path segment from (sx,sy) to (ex,ey)
+          // with control points offset vertically from endpoints by 1/4 of vertical distance
+          function quadratic(sx, sy, ex, ey) {
+            const mx = (sx + ex) / 2;
+            const my = (sy + ey) / 2;
+            // Vertical offset magnitude for endpoint control points
+            const baseOffset = (ey - sy) / 4;
+            return `Q ${sx} ${sy + baseOffset} ${mx} ${my} ${ex} ${my + baseOffset} ${ex} ${ey}`;
+          }
+
+          let d = '';
+          if (startX === endX && rowsApart === 1) {
+            // Direct vertical line from bottom of source to top of destination
+            d = `M ${startX} ${startY} L ${endX} ${endY}`;
+          } else if (rowsApart === 1) {
+            // Exactly one row apart but different x: curve to exact midpoint then to dest
+            // We'll go from bottom of source -> midpoint -> top of dest using two cubic beziers
+            d = `M ${startX} ${startY} ` + quadratic(startX, startY, endX, endY);
+          } else {
+            // More than one row apart: build S-curve to an intermediate x (half-column shifted),
+            // vertical travel, then S-curve into destination.
+            const dir = Math.sign(endX - startX) || 1; // default to positive X if aligned
+            const halfColShift = colStep / 2;
+            // Prefer roughly halfway horizontally between source and destination
+            const candidateX = startX + (endX - startX) * 0.5;
+            // Determine number of column steps between the two nodes
+            const deltaCols = Math.max(1, Math.round(Math.abs(endX - startX) / colStep));
+            // If the candidate lands too close to any column center (i.e. inside a node),
+            // nudge it by half a column into the gap between columns in the direction of travel.
+            let intermediateX = candidateX;
+            let tooClose = false;
+            for (let k = 0; k <= deltaCols; k++) {
+              const center = startX + dir * k * colStep;
+              if (Math.abs(candidateX - center) < GRAPH_NODE_WIDTH / 2 + 2) {
+                tooClose = true;
+                break;
+              }
+            }
+            if (tooClose) intermediateX = candidateX + dir * halfColShift;
+
+            // Y where we first arrive after the S-curve from the source:
+            // set to the top Y coordinate of the row immediately below the source.
+            // This equals origin row top (fromPos.y) + GRAPH_LEVEL_GAP.
+            const firstTargetY = fromPos.y + GRAPH_LEVEL_GAP;
+
+            // Y at which we stop vertical travel: bottom of the row directly above destination
+            const bottomOfRowAboveDest = toPos.y - GRAPH_LEVEL_GAP + GRAPH_NODE_HEIGHT;
+
+            // Ensure we don't compute inverted vertical ranges
+            const midY1 = firstTargetY;
+            const midY2 = bottomOfRowAboveDest;
+
+            // Build pieces:
+            // 1) S-curve from start -> (intermediateX, midY1)
+            d = `M ${startX} ${startY} ` + quadratic(startX, startY, intermediateX, midY1);
+            // 2) Vertical line from midY1 -> midY2 at intermediateX
+            d += ` L ${intermediateX} ${midY2}`;
+            // 3) S-curve from (intermediateX, midY2) -> destination top
+            d += ' ' + quadratic(intermediateX, midY2, endX, endY);
+          }
+
           rec.path.setAttribute('d', d);
           const depStatus = graphState.nodeStatus.get(rec.to) || 'Ready';
           rec.path.setAttribute('stroke', statusColors[depStatus] || '#4b5563');
