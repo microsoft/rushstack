@@ -31,6 +31,7 @@
     "patch"
   ],
   "devDependencies": {
+    "@rushstack/eslint-patch": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/node": "20.17.19",
     "eslint": "~9.37.0",
