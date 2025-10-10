@@ -2188,51 +2188,126 @@
         return arr[Symbol.iterator]();
       }
 
-      // Derive array of operations used for graph layout with pruning of noop leaves.
+      // Derive array of operations used for graph layout with pruning of noop nodes.
+      // New behavior: skip noop nodes that are leaves (no dependents) OR that have exactly
+      // one incoming edge OR exactly one outgoing edge. When pruning a noop, we will
+      // rewire dependencies so remaining ops connect directly (i.e., bypass removed noops).
       function computeGraphOperations() {
         // Stable layout: always all operations; filtering only adjusts classes
         const base = Array.from(operations.values());
         computeFilterSets();
         if (!base.length) return base;
-        // Build dependency reverse map (dependents list) inside the filtered set.
+        // Build lookup and static dependents map (dependents = incoming adjacency)
         const byName = new Map();
         base.forEach((o) => byName.set(o.name, o));
-        const dependents = new Map(); // name -> Set of dependent op names
+        const dependents = new Map(); // name -> Set of direct dependent op names
         base.forEach((o) => {
           (o.dependencies || []).forEach((d) => {
             if (!byName.has(d)) return; // dependency outside filtered set not considered for pruning
             (dependents.get(d) || dependents.set(d, new Set()).get(d)).add(o.name);
           });
         });
-        // We want to remove noop operations that have no dependents OR whose dependents are all pruned noop as well.
-        // Algorithm: iterative pruning queue starting with noop nodes with zero dependents.
+
+        // Active set initially contains all nodes; we'll iteratively remove noop nodes
+        // that meet the pruning criteria.
         const active = new Set(base.map((o) => o.name));
         const noopSet = new Set(base.filter((o) => o.noop).map((o) => o.name));
-        const dependentsCount = new Map();
-        active.forEach((n) => dependentsCount.set(n, (dependents.get(n) || new Set()).size));
+
+        // Compute initial counts (incoming = number of dependents, outgoing = number of deps)
+        const incomingCount = new Map();
+        const outgoingCount = new Map();
+        base.forEach((o) => {
+          incomingCount.set(o.name, (dependents.get(o.name) || new Set()).size);
+          const out = (o.dependencies || []).filter((d) => byName.has(d)).length;
+          outgoingCount.set(o.name, out);
+        });
+
+        // Queue noop nodes that are leaves or have exactly one incoming or one outgoing edge.
         const queue = [];
         active.forEach((n) => {
-          if (noopSet.has(n) && dependentsCount.get(n) === 0) queue.push(n);
+          if (!noopSet.has(n)) return;
+          const inc = incomingCount.get(n) || 0;
+          const out = outgoingCount.get(n) || 0;
+          if (inc === 0 || inc === 1 || out === 1) queue.push(n);
         });
+
         while (queue.length) {
           const name = queue.pop();
           if (!active.has(name)) continue;
-          // Remove this noop leaf
+          // Remove this noop node
           active.delete(name);
-          // Decrement dependency counts for its dependencies (making them closer to leaves)
           const op = byName.get(name);
           if (!op) continue;
+
+          // For each dependency of the removed node, decrement its incoming count
           for (const dep of op.dependencies || []) {
             if (!active.has(dep)) continue;
-            const cnt = dependentsCount.get(dep);
-            if (cnt === undefined) continue;
-            dependentsCount.set(dep, cnt - 1);
-            if (cnt - 1 === 0 && noopSet.has(dep)) {
-              queue.push(dep);
-            }
+            const prev = incomingCount.get(dep) || 0;
+            incomingCount.set(dep, Math.max(0, prev - 1));
+            const inc = incomingCount.get(dep);
+            const out = outgoingCount.get(dep) || 0;
+            if (noopSet.has(dep) && (inc === 0 || inc === 1 || out === 1)) queue.push(dep);
+          }
+
+          // For each dependent (nodes that depended on the removed node), decrement their outgoing count
+          const depsOf = dependents.get(name) || new Set();
+          for (const dependent of depsOf) {
+            if (!active.has(dependent)) continue;
+            const prevOut = outgoingCount.get(dependent) || 0;
+            outgoingCount.set(dependent, Math.max(0, prevOut - 1));
+            const inc = incomingCount.get(dependent) || 0;
+            const out = outgoingCount.get(dependent) || 0;
+            if (noopSet.has(dependent) && (inc === 0 || inc === 1 || out === 1)) queue.push(dependent);
           }
         }
-        return base.filter((o) => active.has(o.name));
+
+        // At this point `active` contains node names to keep. We must return op objects
+        // whose dependency lists are rewritten so that any dependency chains that went
+        // through removed noop nodes are bypassed.
+        const removed = new Set(base.map((o) => o.name).filter((n) => !active.has(n)));
+
+        // Memoize resolved dependencies to avoid repeated recursion.
+        const resolvedMemo = new Map();
+        function resolveDeps(name, seen) {
+          if (resolvedMemo.has(name)) return resolvedMemo.get(name);
+          if (seen.has(name)) return new Set(); // break cycles defensively
+          seen.add(name);
+          const op = byName.get(name);
+          const out = new Set();
+          if (!op) return out;
+          for (const d of op.dependencies || []) {
+            if (!byName.has(d)) continue;
+            if (active.has(d)) {
+              out.add(d);
+            } else {
+              // dependency was removed; splice through it
+              const sub = resolveDeps(d, seen);
+              for (const s of sub) out.add(s);
+            }
+          }
+          seen.delete(name);
+          resolvedMemo.set(name, out);
+          return out;
+        }
+
+        const result = base
+          .filter((o) => active.has(o.name))
+          .map((o) => {
+            // Compute effective dependencies for o by splicing through removed noops
+            const deps = new Set();
+            for (const d of o.dependencies || []) {
+              if (!byName.has(d)) continue;
+              if (active.has(d)) deps.add(d);
+              else {
+                const sub = resolveDeps(d, new Set());
+                for (const s of sub) deps.add(s);
+              }
+            }
+            // Return a shallow copy so callers can freely inspect/modify dependencies
+            return Object.assign({}, o, { dependencies: Array.from(deps) });
+          });
+
+        return result;
       }
 
       function render() {
