@@ -26,7 +26,7 @@ function tryLoadSuppressions(suppressionsJsonPath) {
 }
 
 const RUN_FOLDER_PATHS = ['client', 'server'];
-const ESLINT_PACKAGE_NAMES = ['eslint-9.37', 'eslint-9.25'];
+const ESLINT_PACKAGE_NAMES = ['eslint'];
 
 const updateFilePaths = new Set();
 
