@@ -1006,6 +1006,11 @@
         stroke: var(--accent);
         stroke-width: 2;
       }
+      /* Dim edges that are not executing or failed to de-emphasize passive links */
+      .edge.dim {
+        opacity: 0.28;
+        filter: brightness(0.8);
+      }
       .edge.not-running {
         opacity: 0.55;
       }
@@ -3079,7 +3084,15 @@
             rec.path.setAttribute('stroke', strokeColor);
             rec.path.setAttribute('marker-end', `url(#arrowhead-${depStatus})`);
           } else {
+            // Clear any explicit opacity set by filtering rules
             rec.path.style.opacity = '';
+            // Dim edges that are not semantically important (not executing or failed)
+            const semImportant = depStatus === 'Executing' || depStatus === 'Failure';
+            if (!semImportant && !rec.path.classList.contains('highlight')) {
+              rec.path.classList.add('dim');
+            } else {
+              rec.path.classList.remove('dim');
+            }
           }
         }
         // Update phase pane after node/edge status refresh
