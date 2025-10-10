@@ -237,7 +237,7 @@
       // Used for very simple builds that don't support CLI arguments like `--production` or `--fix`
       "name": "_phase:lite-build",
       "dependencies": {
-        "upstream": ["_phase:lite-build", "_phase:build"]
+        "upstream": ["_phase:build"]
       },
       "missingScriptBehavior": "silent",
       "allowWarningsOnSuccess": false
@@ -245,8 +245,8 @@
     {
       "name": "_phase:build",
       "dependencies": {
-        "self": ["_phase:lite-build"],
-        "upstream": ["_phase:build"]
+        // Don't need to declare the dependency on _phase:build because it is transitive via _phase:lite-build
+        "self": ["_phase:lite-build"]
       },
       "missingScriptBehavior": "log",
       "allowWarningsOnSuccess": false
@@ -254,7 +254,8 @@
     {
       "name": "_phase:test",
       "dependencies": {
-        "self": ["_phase:lite-build", "_phase:build"]
+        // Dependency on _phase:lite-build is transitive via _phase:build
+        "self": ["_phase:build"]
       },
       "missingScriptBehavior": "silent",
       "allowWarningsOnSuccess": false
