@@ -2568,6 +2568,9 @@ importers:
 
   ../../../eslint/eslint-bulk:
     devDependencies:
+      '@rushstack/eslint-patch':
+        specifier: workspace:*
+        version: link:../eslint-patch
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
