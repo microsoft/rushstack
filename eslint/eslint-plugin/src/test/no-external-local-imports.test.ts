@@ -76,10 +76,10 @@ ruleTester.run('no-external-local-imports', noExternalLocalImportsRule, {
     {
       code: "import blah from '../foo'",
       errors: [{ messageId: 'error-external-local-imports' }],
-      filename: 'blah/test.ts',
+      filename: `${__dirname}/blah/test.ts`,
       languageOptions: {
         parserOptions: {
-          tsconfigRootDir: 'blah'
+          tsconfigRootDir: `${__dirname}/blah`
         }
       }
     },
@@ -91,10 +91,10 @@ ruleTester.run('no-external-local-imports', noExternalLocalImportsRule, {
     {
       code: "const blah = await import('../foo')",
       errors: [{ messageId: 'error-external-local-imports' }],
-      filename: 'blah/test.ts',
+      filename: `${__dirname}/blah/test.ts`,
       languageOptions: {
         parserOptions: {
-          tsconfigRootDir: 'blah'
+          tsconfigRootDir: `${__dirname}/blah`
         }
       }
     }
