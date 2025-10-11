@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Enable prerelease version matching in bridge-package command",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
