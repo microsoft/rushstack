@@ -198,7 +198,7 @@ export class HotlinkManager {
       const packageSourcePath: string = `${consumerPackagePnpmDependenciesFolderPath}/${dirName}/${RushConstants.nodeModulesFolderName}/${packageName}`;
       if (await FileSystem.existsAsync(packageSourcePath)) {
         const { version } = await JsonFile.loadAsync(`${packageSourcePath}/${FileConstants.PackageJson}`);
-        if (semver.satisfies(version, versionRange)) {
+        if (semver.satisfies(version, versionRange, { includePrerelease: true })) {
           packageSourcePathSet.add(packageSourcePath);
         }
       }
