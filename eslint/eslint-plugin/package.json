@@ -27,17 +27,18 @@
   },
   "dependencies": {
     "@rushstack/tree-pattern": "workspace:*",
-    "@typescript-eslint/utils": "~8.31.0"
+    "@typescript-eslint/utils": "~8.46.0"
   },
   "peerDependencies": {
     "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.0.0",
-    "@typescript-eslint/parser": "~8.31.0",
-    "@typescript-eslint/rule-tester": "~8.31.0",
+    "@rushstack/heft": "1.1.0",
+    "@typescript-eslint/parser": "~8.46.0",
+    "@typescript-eslint/rule-tester": "~8.46.0",
     "decoupled-local-node-rig": "workspace:*",
-    "eslint": "~9.25.1",
-    "typescript": "~5.8.2"
+    "eslint": "~9.37.0",
+    "typescript": "~5.8.2",
+    "@typescript-eslint/types": "~8.46.0"
   }
 }

@@ -87,7 +87,7 @@
     "@types/strict-uri-encode": "2.0.0",
     "@types/tar": "6.1.6",
     "@types/webpack-env": "1.18.8",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "webpack": "~5.98.0"
   },

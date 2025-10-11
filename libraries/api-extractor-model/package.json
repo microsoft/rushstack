@@ -22,8 +22,8 @@
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.0.0",
+    "@rushstack/heft": "1.1.0",
     "decoupled-local-node-rig": "workspace:*",
-    "eslint": "~9.25.1"
+    "eslint": "~9.37.0"
   }
 }

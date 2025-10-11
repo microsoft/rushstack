@@ -32,7 +32,7 @@
     "@types/react-dom": "17.0.25",
     "@types/webpack-env": "1.18.8",
     "css-loader": "~5.2.7",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "heft-storybook-react-tutorial-storykit": "workspace:*",
     "html-webpack-plugin": "~4.5.2",
     "local-eslint-config": "workspace:*",

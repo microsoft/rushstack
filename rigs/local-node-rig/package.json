@@ -16,7 +16,7 @@
     "@types/heft-jest": "1.0.1",
     "@types/node": "20.17.19",
     "local-eslint-config": "workspace:*",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "jest-junit": "12.3.0",
     "typescript": "~5.8.2"
   }

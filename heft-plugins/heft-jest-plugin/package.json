@@ -47,7 +47,7 @@
     "@types/lodash": "4.14.116",
     "@types/node": "20.17.19",
     "decoupled-local-node-rig": "workspace:*",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "jest-environment-jsdom": "~29.5.0",
     "jest-environment-node": "~29.5.0",
     "jest-watch-select-projects": "2.0.0"
