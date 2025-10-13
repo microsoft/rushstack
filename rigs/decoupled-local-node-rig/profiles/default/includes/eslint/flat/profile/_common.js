@@ -169,7 +169,9 @@ module.exports = {
             ],
             'newlines-between': 'always'
           }
-        ]
+        ],
+
+        'import/no-duplicates': 'warn'
       }
     },
     {
@@ -191,7 +193,8 @@ module.exports = {
         '**/test/**/*.tsx'
       ],
       rules: {
-        'import/order': 'off'
+        'import/order': 'off',
+        'import/no-duplicates': 'off'
       }
     }
   ]

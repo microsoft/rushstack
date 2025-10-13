@@ -14,9 +14,9 @@ import {
   VisualStudioCodeCredential,
   AzureCliCredential,
   AzureDeveloperCliCredential,
-  AzurePowerShellCredential
+  AzurePowerShellCredential,
+  type TokenCredentialOptions
 } from '@azure/identity';
-import type { TokenCredentialOptions } from '@azure/identity';
 
 import type { ITerminal } from '@rushstack/terminal';
 import { CredentialCache } from '@rushstack/rush-sdk';

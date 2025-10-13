@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { sources } from 'webpack';
-import type { Compilation } from 'webpack';
+import type { sources, Compilation } from 'webpack';
 
 import { CHUNK_MODULE_TOKEN, CHUNK_MODULE_REGEX } from './Constants';
 import type { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.types';
