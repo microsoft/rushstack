@@ -2,6 +2,32 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "4.5.0",
+      "tag": "@rushstack/eslint-config_v4.5.0",
+      "date": "Mon, 13 Oct 2025 15:13:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump `eslint` to `~9.37.0` and the `@typescript-eslint/*` packages to `~8.46.0`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.21.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-packlets\" to `0.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.4.1",
       "tag": "@rushstack/eslint-config_v4.4.1",
       "date": "Fri, 03 Oct 2025 20:10:00 GMT",

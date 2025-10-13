@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin-packlets",
   "entries": [
     {
+      "version": "0.14.0",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.14.0",
+      "date": "Mon, 13 Oct 2025 15:13:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump `eslint` to `~9.37.0` and the `@typescript-eslint/*` packages to `~8.46.0`."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.13.0",
       "tag": "@rushstack/eslint-plugin-packlets_v0.13.0",
       "date": "Fri, 03 Oct 2025 20:09:59 GMT",

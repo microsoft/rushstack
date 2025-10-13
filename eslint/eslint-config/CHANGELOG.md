@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Fri, 03 Oct 2025 20:10:00 GMT and should not be manually modified.
+This log was last generated on Mon, 13 Oct 2025 15:13:02 GMT and should not be manually modified.
+
+## 4.5.0
+Mon, 13 Oct 2025 15:13:02 GMT
+
+### Minor changes
+
+- Bump `eslint` to `~9.37.0` and the `@typescript-eslint/*` packages to `~8.46.0`.
 
 ## 4.4.1
 Fri, 03 Oct 2025 20:10:00 GMT

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Wed, 08 Oct 2025 00:13:29 GMT and should not be manually modified.
+This log was last generated on Mon, 13 Oct 2025 15:13:02 GMT and should not be manually modified.
+
+## 2.11.0
+Mon, 13 Oct 2025 15:13:02 GMT
+
+### Minor changes
+
+- Bump `eslint` to `~9.37.0` and the `@typescript-eslint/*` packages to `~8.46.0`.
 
 ## 2.10.2
 Wed, 08 Oct 2025 00:13:29 GMT
