@@ -1033,7 +1033,9 @@ Optional arguments:
                         deleted change requests will be committed and merged 
                         into the target branch.
   -p, --publish         If this flag is specified, applied changes will be 
-                        published to the NPM registry.
+                        published to the NPM registry. If the --pack flag is 
+                        passed, this flag must also be included, otherwise 
+                        tarballs will not be produced.
   --add-commit-details  Adds commit author and hash to the changelog.json 
                         files for each change.
   --regenerate-changelogs
@@ -1071,6 +1073,8 @@ Optional arguments:
                         npm repository. It can only be used when 
                         --include-all is specified. If this flag is specified,
                          NPM registry related parameters will be ignored.
+                        --publish must be specified to produce as tarballs, 
+                        otherwise a dry run will be performed.
   --release-folder FOLDER
                         This parameter is used with --pack parameter to 
                         provide customized location for the tarballs instead 
