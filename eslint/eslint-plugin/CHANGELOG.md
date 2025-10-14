@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Mon, 13 Oct 2025 15:13:02 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Oct 2025 15:13:22 GMT and should not be manually modified.
+
+## 0.21.1
+Tue, 14 Oct 2025 15:13:22 GMT
+
+### Patches
+
+- Added documentation for the @rushstack/typedef-var ESLint rule. This clarifies the rule's rationale (readability over writability) and explicitly lists all local variable exemptions, resolving confusion around its usage.
 
 ## 0.21.0
 Mon, 13 Oct 2025 15:13:02 GMT
