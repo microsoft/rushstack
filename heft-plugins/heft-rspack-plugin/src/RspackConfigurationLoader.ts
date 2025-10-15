@@ -5,17 +5,16 @@ import * as path from 'node:path';
 
 import type * as TRspack from '@rspack/core';
 
+import type { HeftConfiguration, IHeftTaskSession } from '@rushstack/heft';
 import { FileSystem } from '@rushstack/node-core-library';
-import type { IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 
 import type { IRspackPluginOptions } from './RspackPlugin';
 import {
-  PLUGIN_NAME,
-  STAGE_LOAD_LOCAL_CONFIG,
-  type RspackCoreImport,
   type IRspackConfiguration,
   type IRspackConfigurationFnEnvironment,
-  type IRspackPluginAccessorHooks
+  type IRspackPluginAccessorHooks,
+  PLUGIN_NAME,
+  STAGE_LOAD_LOCAL_CONFIG
 } from './shared';
 
 type IRspackConfigJsExport =
@@ -34,13 +33,13 @@ export interface ILoadRspackConfigurationOptions {
   taskSession: IHeftTaskSession;
   heftConfiguration: HeftConfiguration;
   serveMode: boolean;
-  loadRspackAsyncFn: () => Promise<RspackCoreImport>;
+  loadRspackAsyncFn: () => Promise<typeof import('@rspack/core')>;
   hooks: Pick<IRspackPluginAccessorHooks, 'onLoadConfiguration' | 'onConfigure' | 'onAfterConfigure'>;
 
   _tryLoadConfigFileAsync?: typeof tryLoadRspackConfigurationFileAsync;
 }
 
-const DEFAULT_RSPACK_CONFIG_PATH: './rspack.config.js' = './rspack.config.js';
+const DEFAULT_RSPACK_CONFIG_PATH: './rspack.config.mjs' = './rspack.config.mjs';
 const DEFAULT_RSPACK_DEV_CONFIG_PATH: './rspack.dev.config.js' = './rspack.dev.config.js';
 
 /**

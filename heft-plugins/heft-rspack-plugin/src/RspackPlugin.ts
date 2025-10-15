@@ -105,7 +105,7 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
           heftConfiguration,
           hooks: this.accessor.hooks,
           serveMode: this._isServeMode,
-          loadRspackAsyncFn: this._loadRspackAsync.bind(this)
+          loadRspackAsyncFn: this._loadRspackAsync.bind(this, taskSession, heftConfiguration)
         },
         options
       );
@@ -116,20 +116,33 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
     return this._rspackConfiguration;
   }
 
-  private async _loadRspackAsync(): Promise<RspackCoreImport> {
+  private async _loadRspackAsync(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration
+  ): Promise<RspackCoreImport> {
     if (!this._rspack) {
-      // Allow this to fail if Rspack is not installed
-      this._rspack = await import(RSPACK_PACKAGE_NAME);
+      try {
+        const rspackPackagePath: string = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
+          RSPACK_PACKAGE_NAME,
+          taskSession.logger.terminal
+        );
+        this._rspack = await import(rspackPackagePath);
+      } catch (e) {
+        // Fallback to bundled version if not found in rig.
+        this._rspack = await import(RSPACK_PACKAGE_NAME);
+        taskSession.logger.terminal.writeDebugLine(`Using Rspack from built-in "${RSPACK_PACKAGE_NAME}"`);
+      }
     }
     return this._rspack!;
   }
 
   private async _getRspackCompilerAsync(
     taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration,
     rspackConfiguration: IRspackConfiguration
   ): Promise<TRspack.Compiler | TRspack.MultiCompiler> {
     if (!this._rspackCompiler) {
-      const rspack: RspackCoreImport = await this._loadRspackAsync();
+      const rspack: RspackCoreImport = await this._loadRspackAsync(taskSession, heftConfiguration);
       taskSession.logger.terminal.writeLine(`Using Rspack version ${rspack.version}`);
       this._rspackCompiler = Array.isArray(rspackConfiguration)
         ? rspack.default(rspackConfiguration) /* (rspack.Compilation[]) => MultiCompiler */
@@ -160,6 +173,7 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
     }
     const compiler: TRspack.Compiler | TRspack.MultiCompiler = await this._getRspackCompilerAsync(
       taskSession,
+      heftConfiguration,
       rspackConfiguration
     );
     taskSession.logger.terminal.writeLine('Running Rspack compilation');
@@ -216,6 +230,7 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
       // Get the compiler which will be used for both serve and watch mode
       const compiler: TRspack.Compiler | TRspack.MultiCompiler = await this._getRspackCompilerAsync(
         taskSession,
+        heftConfiguration,
         rspackConfiguration
       );
 

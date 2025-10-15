@@ -24,8 +24,7 @@
   "dependencies": {
     "@rushstack/debug-certificate-manager": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@types/tapable": "1.0.6",
-    "tapable": "1.1.3",
+    "tapable": "2.3.0",
     "@rspack/dev-server": "^1.1.4"
   },
   "devDependencies": {

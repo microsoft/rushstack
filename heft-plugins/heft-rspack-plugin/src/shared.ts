@@ -53,7 +53,7 @@ export interface IRspackConfigurationFnEnvironment {
  */
 export interface IRspackConfigurationWithDevServer extends TRspack.Configuration {
   devServer?: TRspackDevServer.Configuration;
-};
+}
 
 /**
  * @beta
@@ -74,28 +74,27 @@ export interface IRspackPluginAccessorHooks {
    * Tapable event handlers can return `false` instead of `undefined` to suppress
    * other handlers from creating a configuration object, and prevent Rspack from running.
    */
-  readonly onLoadConfiguration: AsyncSeriesBailHook<never, never, never, IRspackConfiguration | false>;
+  readonly onLoadConfiguration: AsyncSeriesBailHook<[], IRspackConfiguration | undefined | false>;
   /**
    * A hook that allows for modification of the loaded configuration used by the Rspack
    * plugin. If no configuration was loaded, this hook will not be called.
    */
-  readonly onConfigure: AsyncSeriesHook<IRspackConfiguration, never, never>;
+  readonly onConfigure: AsyncSeriesHook<[IRspackConfiguration], never>;
   /**
    * A hook that provides the finalized configuration that will be used by Rspack.
    * If no configuration was loaded, this hook will not be called.
    */
-  readonly onAfterConfigure: AsyncParallelHook<IRspackConfiguration, never, never>;
+  readonly onAfterConfigure: AsyncParallelHook<[IRspackConfiguration], never>;
   /**
    * A hook that provides the stats output from Rspack. If no configuration is loaded,
    * this hook will not be called.
    */
-  readonly onEmitStats: AsyncParallelHook<TRspack.Stats | TRspack.MultiStats, never, never>;
+  readonly onEmitStats: AsyncParallelHook<[TRspack.Stats | TRspack.MultiStats], never>;
   /**
    * A hook that allows for customization of the file watcher options. If not running in watch mode, this hook will not be called.
    */
   readonly onGetWatchOptions: AsyncSeriesWaterfallHook<
-    Parameters<TRspack.Compiler['watch']>[0],
-    Readonly<IRspackConfiguration>,
+    [Parameters<TRspack.Compiler['watch']>[0], Readonly<IRspackConfiguration>],
     never
   >;
 }

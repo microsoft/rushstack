@@ -1,9 +1,16 @@
+// @ts-check
+/** @typedef {import('@rushstack/heft-rspack-plugin').IRspackConfiguration} IRspackConfiguration */
 'use strict';
 
-const path = require('path');
-const { HtmlRspackPlugin, SwcJsMinimizerRspackPlugin } = require('@rspack/core');
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { HtmlRspackPlugin, SwcJsMinimizerRspackPlugin } from '@rspack/core';
 
-module.exports = {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+/** @type {IRspackConfiguration} */
+const config = {
   mode: 'production',
   module: {
     rules: [
@@ -23,11 +30,11 @@ module.exports = {
     extensions: ['.js', '.jsx', '.json']
   },
   entry: {
-    'heft-test-A': path.join(__dirname, 'lib', 'indexA.js'),
-    'heft-test-B': path.join(__dirname, 'lib', 'indexB.js')
+    'heft-test-A': resolve(__dirname, 'lib', 'indexA.js'),
+    'heft-test-B': resolve(__dirname, 'lib', 'indexB.js')
   },
   output: {
-    path: path.join(__dirname, 'dist'),
+    path: resolve(__dirname, 'dist'),
     filename: '[name]_[contenthash].js',
     chunkFilename: '[id].[name]_[contenthash].js',
     assetModuleFilename: '[name]_[contenthash][ext][query]'
@@ -39,3 +46,5 @@ module.exports = {
   },
   plugins: [new HtmlRspackPlugin()]
 };
+
+export default config;

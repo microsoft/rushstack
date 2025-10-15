@@ -41,11 +41,14 @@ export interface IRspackPluginAccessor {
 
 // @beta (undocumented)
 export interface IRspackPluginAccessorHooks {
-    readonly onAfterConfigure: AsyncParallelHook<IRspackConfiguration, never, never>;
-    readonly onConfigure: AsyncSeriesHook<IRspackConfiguration, never, never>;
-    readonly onEmitStats: AsyncParallelHook<TRspack.Stats | TRspack.MultiStats, never, never>;
-    readonly onGetWatchOptions: AsyncSeriesWaterfallHook<Parameters<TRspack.Compiler['watch']>[0], Readonly<IRspackConfiguration>, never>;
-    readonly onLoadConfiguration: AsyncSeriesBailHook<never, never, never, IRspackConfiguration | false>;
+    readonly onAfterConfigure: AsyncParallelHook<[IRspackConfiguration], never>;
+    readonly onConfigure: AsyncSeriesHook<[IRspackConfiguration], never>;
+    readonly onEmitStats: AsyncParallelHook<[TRspack.Stats | TRspack.MultiStats], never>;
+    readonly onGetWatchOptions: AsyncSeriesWaterfallHook<[
+    Parameters<TRspack.Compiler['watch']>[0],
+    Readonly<IRspackConfiguration>
+    ], never>;
+    readonly onLoadConfiguration: AsyncSeriesBailHook<[], IRspackConfiguration | undefined | false>;
 }
 
 // @beta (undocumented)
