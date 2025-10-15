@@ -3,6 +3,8 @@
   "compilerOptions": {
     "lib": [
       "DOM"
-    ]
+    ],
+    "module": "nodenext",
+    "moduleResolution": "nodenext"
   }
 }

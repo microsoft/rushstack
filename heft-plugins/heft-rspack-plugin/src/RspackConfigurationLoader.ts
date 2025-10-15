@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import type * as TRspack from '@rspack/core';
 
@@ -173,7 +174,8 @@ export async function _tryLoadRspackConfigurationFileInnerAsync(
   const configExists: boolean = await FileSystem.existsAsync(configurationPath);
   if (configExists) {
     try {
-      return await import(configurationPath);
+      const configurationUri: string = pathToFileURL(configurationPath).href;
+      return await import(configurationUri);
     } catch (e) {
       const error: NodeJS.ErrnoException = e as NodeJS.ErrnoException;
       if (error.code === 'ERR_MODULE_NOT_FOUND') {
