@@ -15,7 +15,7 @@ module.exports = {
   },
   target: ['web', 'es2020'],
   resolve: {
-    extensions: ['.js', '.jsx', '.json']
+    extensions: ['.js', '.json']
   },
   entry: {
     'heft-test-A': path.join(__dirname, 'lib', 'indexA.js'),

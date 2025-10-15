@@ -127,6 +127,7 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
           taskSession.logger.terminal
         );
         this._rspack = await import(rspackPackagePath);
+        taskSession.logger.terminal.writeDebugLine(`Using Rspack from rig package at "${rspackPackagePath}"`);
       } catch (e) {
         // Fallback to bundled version if not found in rig.
         this._rspack = await import(RSPACK_PACKAGE_NAME);

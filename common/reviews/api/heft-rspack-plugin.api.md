@@ -22,7 +22,6 @@ export interface IRspackConfigurationFnEnvironment {
     heftConfiguration: HeftConfiguration;
     prod: boolean;
     production: boolean;
-    // Warning: (ae-forgotten-export) The symbol "RspackCoreImport" needs to be exported by the entry point index.d.ts
     rspack: RspackCoreImport;
     taskSession: IHeftTaskSession;
 }
@@ -59,9 +58,10 @@ export interface IRspackPluginAccessorParameters {
 // @beta (undocumented)
 export const PluginName: 'rspack-plugin';
 
+// @beta (undocumented)
+export type RspackCoreImport = rspackCore;
+
 // @beta
 export const STAGE_LOAD_LOCAL_CONFIG: 1000;
-
-// (No @packageDocumentation comment for this package)
 
 ```

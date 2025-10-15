@@ -1858,15 +1858,9 @@ importers:
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
-      source-map-loader:
-        specifier: ~3.0.1
-        version: 3.0.2(webpack@5.98.0)
       typescript:
         specifier: ~5.8.2
         version: 5.8.2
-      webpack:
-        specifier: ~5.98.0
-        version: 5.98.0
 
   ../../../build-tests/heft-sass-test:
     dependencies:
@@ -3084,6 +3078,9 @@ importers:
       tapable:
         specifier: 2.3.0
         version: 2.3.0
+      webpack:
+        specifier: ~5.98.0
+        version: 5.98.0
     devDependencies:
       '@rspack/core':
         specifier: ~1.5.8
@@ -3100,9 +3097,6 @@ importers:
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
-      webpack:
-        specifier: ~5.98.0
-        version: 5.98.0
 
   ../../../heft-plugins/heft-sass-load-themed-styles-plugin:
     dependencies:

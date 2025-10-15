@@ -23,9 +23,7 @@
     "@types/node": "20.17.19",
     "eslint": "~9.37.0",
     "local-eslint-config": "workspace:*",
-    "source-map-loader": "~3.0.1",
     "typescript": "~5.8.2",
-    "@rspack/core": "~1.5.8",
-    "webpack": "~5.98.0"
+    "@rspack/core": "~1.5.8"
   }
 }

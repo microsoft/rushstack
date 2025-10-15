@@ -22,7 +22,7 @@ const config = {
   },
   target: ['web', 'es2020'],
   resolve: {
-    extensions: ['.js', '.jsx', '.json']
+    extensions: ['.js', '.json']
   },
   entry: {
     'heft-test-A': resolve(__dirname, 'lib', 'indexA.js'),

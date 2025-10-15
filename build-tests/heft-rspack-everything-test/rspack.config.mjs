@@ -20,14 +20,15 @@ const config = {
       },
       {
         test: /\.js$/,
-        enforce: 'pre',
-        use: ['source-map-loader']
+        enforce: 'pre'
+        // TODO: enable after rspack drops a new version with this commit https://github.com/web-infra-dev/rspack/commit/d31f2fa07179d72eee99b21db517946d08073767
+        // extractSourceMap: true
       }
     ]
   },
   target: ['web', 'es2020'],
   resolve: {
-    extensions: ['.js', '.jsx', '.json']
+    extensions: ['.js', '.json']
   },
   entry: {
     'heft-test-A': resolve(__dirname, 'lib', 'indexA.js'),

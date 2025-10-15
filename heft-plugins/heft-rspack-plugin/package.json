@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-rspack-plugin",
-  "version": "0.11.43",
+  "version": "0.0.0",
   "description": "Heft plugin for Rspack",
   "repository": {
     "type": "git",
@@ -25,14 +25,14 @@
     "@rushstack/debug-certificate-manager": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "tapable": "2.3.0",
-    "@rspack/dev-server": "^1.1.4"
+    "@rspack/dev-server": "^1.1.4",
+    "webpack": "~5.98.0"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
-    "@rspack/core": "~1.5.8",
-    "webpack": "~5.98.0"
+    "@rspack/core": "~1.5.8"
   }
 }

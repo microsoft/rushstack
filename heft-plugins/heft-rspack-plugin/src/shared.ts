@@ -12,6 +12,9 @@ import type {
 
 import type { HeftConfiguration, IHeftTaskSession } from '@rushstack/heft';
 
+/**
+ * @beta
+ */
 export type RspackCoreImport = typeof import('@rspack/core');
 
 /**
