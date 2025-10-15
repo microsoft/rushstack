@@ -103,7 +103,7 @@
             },
             "allowRemainderArguments": {
               "title": "Allow Remainder Arguments",
-              "description": "If true then this command will accept any additional command-line arguments after the defined parameters. The additional arguments will be passed through to the shell command (or npm script) as-is. This is useful for commands that need to forward arbitrary arguments to an external tool.",
+              "description": "If true, this command will accept additional command-line arguments that appear after the \"--\" separator. Everything after \"--\" (not including the \"--\" itself) will be passed through to the shell command or npm script. Any unrecognized arguments before \"--\" will still cause an error. Example: \"rush my-command --known-flag value -- --arbitrary --args here\" will pass \"--arbitrary --args here\" to the script, but \"rush my-command --unknown-flag\" will fail with an error about the unrecognized parameter.",
               "type": "boolean"
             }
           }
@@ -158,7 +158,7 @@
             },
             "allowRemainderArguments": {
               "title": "Allow Remainder Arguments",
-              "description": "If true then this command will accept any additional command-line arguments after the defined parameters. The additional arguments will be passed through to the shell command as-is. This is useful for commands that need to forward arbitrary arguments to an external tool.",
+              "description": "If true, this command will accept additional command-line arguments that appear after the \"--\" separator. Everything after \"--\" (not including the \"--\" itself) will be passed through to the shell command. Any unrecognized arguments before \"--\" will still cause an error. Example: \"rush my-command --known-flag value -- --arbitrary --args here\" will pass \"--arbitrary --args here\" to the script, but \"rush my-command --unknown-flag\" will fail with an error about the unrecognized parameter.",
               "type": "boolean"
             }
           }
@@ -262,6 +262,11 @@
                   "type": "boolean"
                 }
               }
+            },
+            "allowRemainderArguments": {
+              "title": "Allow Remainder Arguments",
+              "description": "If true, this command will accept additional command-line arguments that appear after the \"--\" separator. Everything after \"--\" (not including the \"--\" itself) will be passed through to the phase scripts. Any unrecognized arguments before \"--\" will still cause an error. Example: \"rush my-command --known-flag value -- --arbitrary --args here\" will pass \"--arbitrary --args here\" to the phase scripts, but \"rush my-command --unknown-flag\" will fail with an error about the unrecognized parameter.",
+              "type": "boolean"
             }
           }
         },
@@ -280,7 +285,8 @@
             "incremental": { "$ref": "#/definitions/anything" },
             "phases": { "$ref": "#/definitions/anything" },
             "watchOptions": { "$ref": "#/definitions/anything" },
-            "installOptions": { "$ref": "#/definitions/anything" }
+            "installOptions": { "$ref": "#/definitions/anything" },
+            "allowRemainderArguments": { "$ref": "#/definitions/anything" }
           }
         }
       ]

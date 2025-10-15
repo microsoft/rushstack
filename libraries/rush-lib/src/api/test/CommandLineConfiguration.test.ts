@@ -312,6 +312,7 @@ describe(CommandLineConfiguration.name, () => {
 
       const command = commandLineConfiguration.commands.get('test-remainder-bulk');
       expect(command).toBeDefined();
+      expect(command?.allowRemainderArguments).toBe(true);
     });
 
     it('should accept allowRemainderArguments for global commands', () => {
@@ -330,24 +331,32 @@ describe(CommandLineConfiguration.name, () => {
 
       const command = commandLineConfiguration.commands.get('test-remainder-global');
       expect(command).toBeDefined();
+      expect(command?.allowRemainderArguments).toBe(true);
     });
 
-    it('should accept allowRemainderArguments for phased commands with bulk command', () => {
+    it('should accept allowRemainderArguments for phased commands', () => {
       const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
         commands: [
           {
-            commandKind: 'bulk',
-            name: 'test-remainder-bulk-command',
-            summary: 'Test bulk command with remainder arguments',
+            commandKind: 'phased',
+            name: 'test-remainder-phased',
+            summary: 'Test phased command with remainder arguments',
             enableParallelism: true,
             safeForSimultaneousRushProcesses: false,
+            phases: ['_phase:test'],
             allowRemainderArguments: true
+          }
+        ],
+        phases: [
+          {
+            name: '_phase:test'
           }
         ]
       });
 
-      const command = commandLineConfiguration.commands.get('test-remainder-bulk-command');
+      const command = commandLineConfiguration.commands.get('test-remainder-phased');
       expect(command).toBeDefined();
+      expect(command?.allowRemainderArguments).toBe(true);
     });
 
     it('should default allowRemainderArguments to false when not specified', () => {
@@ -365,6 +374,49 @@ describe(CommandLineConfiguration.name, () => {
 
       const command = commandLineConfiguration.commands.get('test-no-remainder');
       expect(command).toBeDefined();
+      expect(command?.allowRemainderArguments).toBeUndefined();
+    });
+
+    it('should work with both custom parameters and remainder arguments', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'global',
+            name: 'test-mixed-params',
+            summary: 'Test command with both custom parameters and remainder arguments',
+            shellCommand: 'echo',
+            safeForSimultaneousRushProcesses: false,
+            allowRemainderArguments: true
+          }
+        ],
+        parameters: [
+          {
+            parameterKind: 'flag',
+            longName: '--verbose',
+            associatedCommands: ['test-mixed-params'],
+            description: 'Enable verbose logging'
+          },
+          {
+            parameterKind: 'string',
+            longName: '--output',
+            argumentName: 'PATH',
+            associatedCommands: ['test-mixed-params'],
+            description: 'Output file path'
+          },
+          {
+            parameterKind: 'integer',
+            longName: '--count',
+            argumentName: 'NUM',
+            associatedCommands: ['test-mixed-params'],
+            description: 'Number of iterations'
+          }
+        ]
+      });
+
+      const command = commandLineConfiguration.commands.get('test-mixed-params');
+      expect(command).toBeDefined();
+      expect(command?.allowRemainderArguments).toBe(true);
+      expect(command?.associatedParameters.size).toBe(3);
     });
   });
 });
