@@ -273,8 +273,6 @@ export class CommandLineRemainder {
     appendToArgList(argList: string[]): void;
     readonly description: string;
     // @internal
-    get _hasSeparator(): boolean;
-    // @internal
     _setValue(data: unknown): void;
     get values(): ReadonlyArray<string>;
 }

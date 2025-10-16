@@ -583,9 +583,7 @@ export abstract class CommandLineParameterProvider {
         metavar: '"..."'
       };
 
-      // Using argparse.Const.REMAINDER as the argument name creates circular references
-      // Use a different name to avoid this
-      this._getArgumentParser().addArgument('remainder', argparseOptions);
+      this._getArgumentParser().addArgument(argparse.Const.REMAINDER, argparseOptions);
     }
 
     this._parametersHaveBeenRegistered = true;
@@ -722,7 +720,7 @@ export abstract class CommandLineParameterProvider {
     }
 
     if (this.remainder) {
-      this.remainder._setValue(data.remainder);
+      this.remainder._setValue(data[argparse.Const.REMAINDER]);
     }
 
     this._parametersHaveBeenProcessed = true;
