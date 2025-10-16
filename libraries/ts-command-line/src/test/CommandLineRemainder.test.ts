@@ -88,4 +88,30 @@ describe(CommandLineRemainder.name, () => {
 
     expect(copiedArgs).toMatchSnapshot();
   });
+
+  it('captures unknown parameters in remainder when they appear before --', async () => {
+    // When remainder is defined, argparse treats everything after known parameters as remainder,
+    // even if they look like flags. This is the expected behavior of argparse.Const.REMAINDER.
+    const commandLineParser: CommandLineParser = createParser();
+    const action: CommandLineAction = commandLineParser.getAction('run');
+    const args: string[] = ['run', '--title', 'The title', '--unknown', 'value'];
+
+    await commandLineParser.executeAsync(args);
+
+    expect(commandLineParser.selectedAction).toBe(action);
+    // Unknown parameters are captured as remainder args
+    expect(action.remainder!.values).toEqual(['--unknown', 'value']);
+  });
+
+  it('excludes the -- separator from remainder values', async () => {
+    const commandLineParser: CommandLineParser = createParser();
+    const action: CommandLineAction = commandLineParser.getAction('run');
+    const args: string[] = ['run', '--title', 'The title', '--', '--unknown', 'value'];
+
+    await commandLineParser.executeAsync(args);
+
+    expect(commandLineParser.selectedAction).toBe(action);
+    // The -- separator itself should be filtered out (this is the key requirement from the PR comment)
+    expect(action.remainder!.values).toEqual(['--unknown', 'value']);
+  });
 });
