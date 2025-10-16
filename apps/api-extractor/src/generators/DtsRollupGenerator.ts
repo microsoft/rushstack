@@ -272,6 +272,20 @@ export class DtsRollupGenerator {
       case ts.SyntaxKind.ExportKeyword:
       case ts.SyntaxKind.DefaultKeyword:
       case ts.SyntaxKind.DeclareKeyword:
+        if (astDeclaration.parent) {
+          // Keep it as is for nested declarations.
+          break;
+        }
+        if (
+          ts.isModuleDeclaration(astDeclaration.declaration) &&
+          (TypeScriptHelpers.findFirstParent(span.node, ts.SyntaxKind.ExportDeclaration) ||
+            TypeScriptHelpers.findFirstParent(span.node, ts.SyntaxKind.VariableStatement))
+        ) {
+          // Keep it as is for nested declarations.
+          // (special cases inside namespace. e.g. "export {};", "export const a: number;")
+          break;
+        }
+
         // Delete any explicit "export" or "declare" keywords -- we will re-add them below
         span.modification.skipAll();
         break;
@@ -283,13 +297,16 @@ export class DtsRollupGenerator {
       case ts.SyntaxKind.ModuleKeyword:
       case ts.SyntaxKind.TypeKeyword:
       case ts.SyntaxKind.FunctionKeyword:
+        if (astDeclaration.parent) {
+          // Keep it as is for nested declarations
+          break;
+        }
+
         // Replace the stuff we possibly deleted above
         let replacedModifiers: string = '';
 
         // Add a declare statement for root declarations (but not for nested declarations)
-        if (!astDeclaration.parent) {
-          replacedModifiers += 'declare ';
-        }
+        replacedModifiers += 'declare ';
 
         if (entity.shouldInlineExport) {
           replacedModifiers = 'export ' + replacedModifiers;
@@ -348,6 +365,10 @@ export class DtsRollupGenerator {
             span.modification.prefix = originalComment + span.modification.prefix;
           }
         }
+        break;
+
+      case ts.SyntaxKind.ExportSpecifier:
+        DtsEmitHelpers.modifyExportSpecifierSpan(collector, span);
         break;
 
       case ts.SyntaxKind.Identifier:
