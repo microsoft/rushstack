@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "This change introduces enhanced support for remainder arguments in the CommandLineRemainder class. The -- separator used to delimit remainder arguments is now automatically excluded from the values array. The -- separator used to delimit remainder arguments is now automatically excluded from the values array. For example, my-tool --flag -- arg1 arg2 will result in values being [\"arg1\", \"arg2\"], not [\"--\", \"arg1\", \"arg2\"].",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line"
+}
