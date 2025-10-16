@@ -4,6 +4,7 @@
 import { SCOPING_PARAMETER_GROUP } from '../Constants';
 import { CommandLineAction, type ICommandLineActionOptions } from './CommandLineAction';
 import { CommandLineParser, type ICommandLineParserOptions } from './CommandLineParser';
+import { CommandLineParserExitError } from './CommandLineParserExitError';
 import type { CommandLineParameter } from '../parameters/BaseClasses';
 import type {
   CommandLineParameterProvider,
@@ -180,8 +181,21 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     }
 
     // The remainder values now have the '--' separator already filtered out by CommandLineRemainder._setValue().
-    // All values in remainder are scoped arguments that should be passed to the scoped parser.
-    const scopedArgs: string[] = [...this.remainder.values];
+    // However, if remainder values are provided without the '--' separator, we need to throw an error
+    // because ScopedCommandLineAction requires explicit separation.
+    const scopedArgs: string[] = [];
+    if (this.remainder.values.length) {
+      if (!this.remainder._hasSeparator) {
+        throw new CommandLineParserExitError(
+          // argparse sets exit code 2 for invalid arguments
+          2,
+          // model the message off of the built-in "unrecognized arguments" message
+          `${this.renderUsageText()}\n${this._unscopedParserOptions.toolFilename} ${this.actionName}: ` +
+            `error: Unrecognized arguments: ${this.remainder.values[0]}.\n`
+        );
+      }
+      scopedArgs.push(...this.remainder.values);
+    }
 
     // Call the scoped parser using only the scoped args to handle parsing
     await this._scopedCommandLineParser.executeWithoutErrorHandlingAsync(scopedArgs);

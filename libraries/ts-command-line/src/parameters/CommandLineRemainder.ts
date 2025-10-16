@@ -9,6 +9,7 @@ import type { ICommandLineRemainderDefinition } from './CommandLineDefinition';
  */
 export class CommandLineRemainder {
   private _values: string[] = [];
+  private _hasSeparatorValue: boolean = false;
 
   /** {@inheritDoc IBaseCommandLineDefinition.description} */
   public readonly description: string;
@@ -34,6 +35,22 @@ export class CommandLineRemainder {
   }
 
   /**
+   * Returns true if the `--` separator was explicitly provided on the command line to delimit
+   * remainder arguments.
+   *
+   * @remarks
+   * This property is useful for scenarios where you need to distinguish between remainder arguments
+   * that were explicitly separated with `--` versus those that were captured automatically.
+   * For example, `my-tool --flag -- arg1` will have `hasSeparator=true`, while
+   * `my-tool --flag arg1` will have `hasSeparator=false` (if arg1 is captured as remainder).
+   *
+   * @internal
+   */
+  public get _hasSeparator(): boolean {
+    return this._hasSeparatorValue;
+  }
+
+  /**
    * {@inheritDoc CommandLineParameterBase._setValue}
    * @internal
    */
@@ -41,6 +58,12 @@ export class CommandLineRemainder {
     // abstract
     if (!Array.isArray(data) || !data.every((x) => typeof x === 'string')) {
       throw new Error(`Unexpected data object for remainder: ` + JSON.stringify(data));
+    }
+
+    // Check if the '--' separator is present in the data
+    const hasSeparator: boolean = data.includes('--');
+    if (hasSeparator) {
+      this._hasSeparatorValue = true;
     }
 
     // Filter out the '--' separator that argparse includes in the remainder values.
