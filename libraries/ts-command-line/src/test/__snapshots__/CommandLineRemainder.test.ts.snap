@@ -18,7 +18,6 @@ Array [
   "--title",
   "The title",
   "### remainder output: ###",
-  "--",
   "--the",
   "remaining",
   "--args",
