@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "1.2.1",
+      "tag": "@rushstack/heft-webpack5-plugin_v1.2.1",
+      "date": "Fri, 17 Oct 2025 23:22:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "dev-server: add ipv6 loopback address support in terminal output"
+          },
+          {
+            "comment": "add debug log when Webpack is imported from the rig package"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.0",
       "tag": "@rushstack/heft-webpack5-plugin_v1.2.0",
       "date": "Wed, 08 Oct 2025 00:13:28 GMT",

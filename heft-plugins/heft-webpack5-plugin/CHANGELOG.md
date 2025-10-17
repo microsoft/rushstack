@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft-webpack5-plugin
 
-This log was last generated on Wed, 08 Oct 2025 00:13:28 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Oct 2025 23:22:33 GMT and should not be manually modified.
+
+## 1.2.1
+Fri, 17 Oct 2025 23:22:33 GMT
+
+### Patches
+
+- dev-server: add ipv6 loopback address support in terminal output
+- add debug log when Webpack is imported from the rig package
 
 ## 1.2.0
 Wed, 08 Oct 2025 00:13:28 GMT
