@@ -214,6 +214,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/webpack-local-version-test](./build-tests/webpack-local-version-test/) | Building this project tests the rig loading for the local version of webpack |
 | [/eslint/local-eslint-config](./eslint/local-eslint-config/) | An ESLint configuration consumed projects inside the rushstack repo. |
 | [/heft-plugins/heft-rspack-plugin](./heft-plugins/heft-rspack-plugin/) | Heft plugin for Rspack |
+| [/libraries/npm-check-fork](./libraries/npm-check-fork/) | A fork of npm-check. |
 | [/libraries/rush-themed-ui](./libraries/rush-themed-ui/) | Rush Component Library: a set of themed components for rush projects |
 | [/libraries/rushell](./libraries/rushell/) | Execute shell commands using a consistent syntax on every platform |
 | [/repo-scripts/doc-plugin-rush-stack](./repo-scripts/doc-plugin-rush-stack/) | API Documenter plugin used with the rushstack.io website |
