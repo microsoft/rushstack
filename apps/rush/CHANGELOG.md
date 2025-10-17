@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 03 Oct 2025 22:25:25 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Oct 2025 23:22:50 GMT and should not be manually modified.
+
+## 5.161.0
+Fri, 17 Oct 2025 23:22:50 GMT
+
+### Updates
+
+- Add an `allowOversubscription` option to the command definitions in `common/config/rush/command-line.json` to prevent running tasks from exceeding concurrency.
+- Add support for PNPM's minimumReleaseAge setting to help mitigate supply chain attacks
+- Enable prerelease version matching in bridge-package command
+- Fix an issue where `rush add --make-consistent ...` may drop the `implicitlyPreferredVersions` and `ensureConsistentVersions` properties from `common/config/rush/common-versions.json`.
+- Treat intermittent ignored redis errors as warnings and allow build to continue.
 
 ## 5.160.1
 Fri, 03 Oct 2025 22:25:25 GMT

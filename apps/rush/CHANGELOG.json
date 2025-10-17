@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.161.0",
+      "tag": "@microsoft/rush_v5.161.0",
+      "date": "Fri, 17 Oct 2025 23:22:50 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add an `allowOversubscription` option to the command definitions in `common/config/rush/command-line.json` to prevent running tasks from exceeding concurrency."
+          },
+          {
+            "comment": "Add support for PNPM's minimumReleaseAge setting to help mitigate supply chain attacks"
+          },
+          {
+            "comment": "Enable prerelease version matching in bridge-package command"
+          },
+          {
+            "comment": "Fix an issue where `rush add --make-consistent ...` may drop the `implicitlyPreferredVersions` and `ensureConsistentVersions` properties from `common/config/rush/common-versions.json`."
+          },
+          {
+            "comment": "Treat intermittent ignored redis errors as warnings and allow build to continue."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.160.1",
       "tag": "@microsoft/rush_v5.160.1",
       "date": "Fri, 03 Oct 2025 22:25:25 GMT",
