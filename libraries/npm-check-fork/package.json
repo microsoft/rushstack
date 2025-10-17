@@ -1,0 +1,34 @@
+{
+  "name": "@rushstack/npm-check-fork",
+  "version": "0.0.1",
+  "description": "A fork of npm-check.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "libraries/npm-check-fork"
+  },
+  "homepage": "https://github.com/dylang/npm-check",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "test": "heft test --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "dependencies": {
+    "giturl": "^2.0.0",
+    "lodash": "~4.17.15",
+    "package-json": "^10.0.1",
+    "semver": "~7.5.4",
+    "throat": "^6.0.2"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@types/lodash": "4.14.116",
+    "@types/semver": "7.5.0",
+    "local-node-rig": "workspace:*",
+    "eslint": "~9.37.0"
+  }
+}

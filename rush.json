@@ -1212,6 +1212,12 @@
       "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/npm-check-fork",
+      "projectFolder": "libraries/npm-check-fork",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/operation-graph",
       "projectFolder": "libraries/operation-graph",
       "reviewCategory": "libraries",
