@@ -271,6 +271,10 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/npm-check-fork",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/operation-graph",
       "allowedCategories": [ "libraries" ]
     },
@@ -659,6 +663,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "giturl",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "glob",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
@@ -875,6 +883,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "package-json",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "pnpm-sync-lib",
       "allowedCategories": [ "libraries" ]
     },
@@ -985,6 +997,10 @@
     {
       "name": "terser-webpack-plugin",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "throat",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "timsort",

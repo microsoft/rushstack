@@ -3942,6 +3942,10 @@ packages:
     resolution: {integrity: sha512-qVDEXufVtYUzYqI5hoDUONh9GCEPi0n+e35KNDafdsNt9fPxB0nvFW/kFiw7W42wkg8TUyhBqb+t24yyaoc87A==}
     engines: {node: '>= 0.10.0'}
 
+  /giturl@2.0.0:
+    resolution: {integrity: sha512-FB0MmghWLcqsyrBZyqsLCNeS2kIzYymT34t/6BxM5R0/9Pxvj0K1eK25SBbwRHMjKMLgQ7nYqBSduF6XyfkgFg==}
+    engines: {node: '>= 14.17.0'}
+
   /glob-escape@0.0.2:
     resolution: {integrity: sha512-L/cXYz8x7qer1HAyUQ+mbjcUsJVdpRxpAf7CwqHoNBs9vTpABlGfNN4tzkDxt+u3Z7ZncVyKlCNPtzb0R/7WbA==}
     engines: {node: '>= 0.10'}
@@ -7978,6 +7982,16 @@ packages:
       resolve: 1.22.8
       semver: 7.5.4
 
+  file:../../../libraries/npm-check-fork:
+    resolution: {directory: ../../../libraries/npm-check-fork, type: directory}
+    name: '@rushstack/npm-check-fork'
+    dependencies:
+      giturl: 2.0.0
+      lodash: 4.17.21
+      package-json: 7.0.0
+      semver: 7.5.4
+      throat: 6.0.2
+
   file:../../../libraries/operation-graph(@types/node@20.17.19):
     resolution: {directory: ../../../libraries/operation-graph, type: directory}
     id: file:../../../libraries/operation-graph
@@ -8051,6 +8065,7 @@ packages:
       '@rushstack/heft-config-file': file:../../../libraries/heft-config-file(@types/node@20.17.19)
       '@rushstack/lookup-by-path': file:../../../libraries/lookup-by-path(@types/node@20.17.19)
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
+      '@rushstack/npm-check-fork': file:../../../libraries/npm-check-fork
       '@rushstack/package-deps-hash': file:../../../libraries/package-deps-hash(@types/node@20.17.19)
       '@rushstack/package-extractor': file:../../../libraries/package-extractor(@types/node@20.17.19)
       '@rushstack/rig-package': file:../../../libraries/rig-package
