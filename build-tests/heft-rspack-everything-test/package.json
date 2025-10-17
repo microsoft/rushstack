@@ -24,6 +24,6 @@
     "eslint": "~9.37.0",
     "local-eslint-config": "workspace:*",
     "typescript": "~5.8.2",
-    "@rspack/core": "~1.5.8"
+    "@rspack/core": "~1.6.0-beta.0"
   }
 }
