@@ -3,8 +3,8 @@
 
 import type { AddressInfo } from 'node:net';
 
-import type * as TWebpack from 'webpack';
-import type TWebpackDevServer from 'webpack-dev-server';
+import type * as TRspack from '@rspack/core';
+import type * as TRspackDevServer from '@rspack/dev-server';
 import { AsyncParallelHook, AsyncSeriesBailHook, AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable';
 
 import { CertificateManager, type ICertificate } from '@rushstack/debug-certificate-manager';
@@ -19,41 +19,40 @@ import type {
 } from '@rushstack/heft';
 
 import {
-  type IWebpackConfiguration,
-  type IWebpackPluginAccessor,
+  type IRspackConfiguration,
+  type IRspackPluginAccessor,
   PLUGIN_NAME,
-  type IWebpackPluginAccessorHooks
+  type IRspackPluginAccessorHooks,
+  type RspackCoreImport
 } from './shared';
-import { tryLoadWebpackConfigurationAsync } from './WebpackConfigurationLoader';
-import { type DeferredWatchFileSystem, OverrideNodeWatchFSPlugin } from './DeferredWatchFileSystem';
+import { tryLoadRspackConfigurationAsync } from './RspackConfigurationLoader';
 
-export interface IWebpackPluginOptions {
+export interface IRspackPluginOptions {
   devConfigurationPath?: string | undefined;
   configurationPath?: string | undefined;
 }
 const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';
-const WEBPACK_PACKAGE_NAME: 'webpack' = 'webpack';
-const WEBPACK_DEV_SERVER_PACKAGE_NAME: 'webpack-dev-server' = 'webpack-dev-server';
-const WEBPACK_DEV_SERVER_ENV_VAR_NAME: 'WEBPACK_DEV_SERVER' = 'WEBPACK_DEV_SERVER';
+const RSPACK_PACKAGE_NAME: '@rspack/core' = '@rspack/core';
+const RSPACK_DEV_SERVER_PACKAGE_NAME: '@rspack/dev-server' = '@rspack/dev-server';
+const RSPACK_DEV_SERVER_ENV_VAR_NAME: 'RSPACK_DEV_SERVER' = 'RSPACK_DEV_SERVER';
 const WEBPACK_DEV_MIDDLEWARE_PACKAGE_NAME: 'webpack-dev-middleware' = 'webpack-dev-middleware';
 
 /**
  * @internal
  */
-export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOptions> {
-  private _accessor: IWebpackPluginAccessor | undefined;
+export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOptions> {
+  private _accessor: IRspackPluginAccessor | undefined;
   private _isServeMode: boolean = false;
-  private _webpack: typeof TWebpack | undefined;
-  private _webpackCompiler: TWebpack.Compiler | TWebpack.MultiCompiler | undefined;
-  private _webpackConfiguration: IWebpackConfiguration | undefined | false = false;
-  private _webpackCompilationDonePromise: Promise<void> | undefined;
-  private _webpackCompilationDonePromiseResolveFn: (() => void) | undefined;
-  private _watchFileSystems: Set<DeferredWatchFileSystem> | undefined;
+  private _rspack: RspackCoreImport | undefined;
+  private _rspackCompiler: TRspack.Compiler | TRspack.MultiCompiler | undefined;
+  private _rspackConfiguration: IRspackConfiguration | undefined | false = false;
+  private _rspackCompilationDonePromise: Promise<void> | undefined;
+  private _rspackCompilationDonePromiseResolveFn: (() => void) | undefined;
 
   private _warnings: Error[] = [];
   private _errors: Error[] = [];
 
-  public get accessor(): IWebpackPluginAccessor {
+  public get accessor(): IRspackPluginAccessor {
     if (!this._accessor) {
       this._accessor = {
         hooks: _createAccessorHooks(),
@@ -68,7 +67,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   public apply(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IWebpackPluginOptions = {}
+    options: IRspackPluginOptions = {}
   ): void {
     this._isServeMode = taskSession.parameters.getFlagParameter(SERVE_PARAMETER_LONG_NAME).value;
     if (this._isServeMode && !taskSession.parameters.watch) {
@@ -82,123 +81,109 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     }
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await this._runWebpackAsync(taskSession, heftConfiguration, options);
+      await this._runRspackAsync(taskSession, heftConfiguration, options);
     });
 
     taskSession.hooks.runIncremental.tapPromise(
       PLUGIN_NAME,
       async (runOptions: IHeftTaskRunIncrementalHookOptions) => {
-        await this._runWebpackWatchAsync(taskSession, heftConfiguration, options, runOptions.requestRun);
+        await this._runRspackWatchAsync(taskSession, heftConfiguration, options, runOptions.requestRun);
       }
     );
   }
 
-  private async _getWebpackConfigurationAsync(
+  private async _getRspackConfigurationAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IWebpackPluginOptions,
+    options: IRspackPluginOptions,
     requestRun?: () => void
-  ): Promise<IWebpackConfiguration | undefined> {
-    if (this._webpackConfiguration === false) {
-      const webpackConfiguration: IWebpackConfiguration | undefined = await tryLoadWebpackConfigurationAsync(
+  ): Promise<IRspackConfiguration | undefined> {
+    if (this._rspackConfiguration === false) {
+      const rspackConfiguration: IRspackConfiguration | undefined = await tryLoadRspackConfigurationAsync(
         {
           taskSession,
           heftConfiguration,
           hooks: this.accessor.hooks,
           serveMode: this._isServeMode,
-          loadWebpackAsyncFn: this._loadWebpackAsync.bind(this, taskSession, heftConfiguration)
+          loadRspackAsyncFn: this._loadRspackAsync.bind(this, taskSession, heftConfiguration)
         },
         options
       );
 
-      if (webpackConfiguration && requestRun) {
-        const overrideWatchFSPlugin: OverrideNodeWatchFSPlugin = new OverrideNodeWatchFSPlugin(requestRun);
-        this._watchFileSystems = overrideWatchFSPlugin.fileSystems;
-        for (const config of Array.isArray(webpackConfiguration)
-          ? webpackConfiguration
-          : [webpackConfiguration]) {
-          if (!config.plugins) {
-            config.plugins = [overrideWatchFSPlugin];
-          } else {
-            config.plugins.unshift(overrideWatchFSPlugin);
-          }
-        }
-      }
-
-      this._webpackConfiguration = webpackConfiguration;
+      this._rspackConfiguration = rspackConfiguration;
     }
 
-    return this._webpackConfiguration;
+    return this._rspackConfiguration;
   }
 
-  private async _loadWebpackAsync(
+  private async _loadRspackAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
-  ): Promise<typeof TWebpack> {
-    if (!this._webpack) {
+  ): Promise<RspackCoreImport> {
+    if (!this._rspack) {
       try {
-        const webpackPackagePath: string = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
-          WEBPACK_PACKAGE_NAME,
+        const rspackPackagePath: string = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
+          RSPACK_PACKAGE_NAME,
           taskSession.logger.terminal
         );
-        this._webpack = await import(webpackPackagePath);
-        taskSession.logger.terminal.writeDebugLine(`Using Webpack from rig package at "${webpackPackagePath}"`);
+        this._rspack = await import(rspackPackagePath);
+        taskSession.logger.terminal.writeDebugLine(`Using Rspack from rig package at "${rspackPackagePath}"`);
       } catch (e) {
         // Fallback to bundled version if not found in rig.
-        this._webpack = await import(WEBPACK_PACKAGE_NAME);
-        taskSession.logger.terminal.writeDebugLine(`Using Webpack from built-in "${WEBPACK_PACKAGE_NAME}"`);
+        this._rspack = await import(RSPACK_PACKAGE_NAME);
+        taskSession.logger.terminal.writeDebugLine(`Using Rspack from built-in "${RSPACK_PACKAGE_NAME}"`);
       }
     }
-    return this._webpack!;
+    return this._rspack!;
   }
 
-  private async _getWebpackCompilerAsync(
+  private async _getRspackCompilerAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    webpackConfiguration: IWebpackConfiguration
-  ): Promise<TWebpack.Compiler | TWebpack.MultiCompiler> {
-    if (!this._webpackCompiler) {
-      const webpack: typeof TWebpack = await this._loadWebpackAsync(taskSession, heftConfiguration);
-      taskSession.logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
-      this._webpackCompiler = Array.isArray(webpackConfiguration)
-        ? webpack.default(webpackConfiguration) /* (webpack.Compilation[]) => MultiCompiler */
-        : webpack.default(webpackConfiguration); /* (webpack.Compilation) => Compiler */
+    rspackConfiguration: IRspackConfiguration
+  ): Promise<TRspack.Compiler | TRspack.MultiCompiler> {
+    if (!this._rspackCompiler) {
+      const rspack: RspackCoreImport = await this._loadRspackAsync(taskSession, heftConfiguration);
+      taskSession.logger.terminal.writeLine(`Using Rspack version ${rspack.version}`);
+      this._rspackCompiler = Array.isArray(rspackConfiguration)
+        ? rspack.default(rspackConfiguration) /* (rspack.Compilation[]) => MultiCompiler */
+        : rspack.default(rspackConfiguration); /* (rspack.Compilation) => Compiler */
     }
-    return this._webpackCompiler;
+    return this._rspackCompiler;
   }
 
-  private async _runWebpackAsync(
+  private async _runRspackAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IWebpackPluginOptions
+    options: IRspackPluginOptions
   ): Promise<void> {
     this._validateEnvironmentVariable(taskSession);
     if (taskSession.parameters.watch || this._isServeMode) {
       // Should never happen, but just in case
-      throw new InternalError('Cannot run Webpack in compilation mode when watch mode is enabled');
+      throw new InternalError('Cannot run Rspack in compilation mode when watch mode is enabled');
     }
 
     // Load the config and compiler, and return if there is no config found
-    const webpackConfiguration: IWebpackConfiguration | undefined = await this._getWebpackConfigurationAsync(
+    const rspackConfiguration: IRspackConfiguration | undefined = await this._getRspackConfigurationAsync(
       taskSession,
       heftConfiguration,
       options
     );
-    if (!webpackConfiguration) {
+    if (!rspackConfiguration) {
       return;
     }
-    const compiler: TWebpack.Compiler | TWebpack.MultiCompiler = await this._getWebpackCompilerAsync(
+    const compiler: TRspack.Compiler | TRspack.MultiCompiler = await this._getRspackCompilerAsync(
       taskSession,
       heftConfiguration,
-      webpackConfiguration
+      rspackConfiguration
     );
-    taskSession.logger.terminal.writeLine('Running Webpack compilation');
+    taskSession.logger.terminal.writeLine('Running Rspack compilation');
 
-    // Run the webpack compiler
-    let stats: TWebpack.Stats | TWebpack.MultiStats | undefined;
+    // Run the rspack compiler
+    let stats: TRspack.Stats | TRspack.MultiStats | undefined;
     try {
       stats = await LegacyAdapters.convertCallbackToPromise(
-        (compiler as TWebpack.Compiler).run.bind(compiler)
+        (compiler as TRspack.Compiler).run.bind(compiler)
       );
       await LegacyAdapters.convertCallbackToPromise(compiler.close.bind(compiler));
     } catch (e) {
@@ -215,20 +200,17 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     }
   }
 
-  private async _runWebpackWatchAsync(
+  private async _runRspackWatchAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IWebpackPluginOptions,
+    options: IRspackPluginOptions,
     requestRun: () => void
   ): Promise<void> {
     // Save a handle to the original promise, since the this-scoped promise will be replaced whenever
     // the compilation completes.
-    let webpackCompilationDonePromise: Promise<void> | undefined = this._webpackCompilationDonePromise;
+    let rspackCompilationDonePromise: Promise<void> | undefined = this._rspackCompilationDonePromise;
 
-    let isInitial: boolean = false;
-
-    if (!this._webpackCompiler) {
-      isInitial = true;
+    if (!this._rspackCompiler) {
       this._validateEnvironmentVariable(taskSession);
       if (!taskSession.parameters.watch) {
         // Should never happen, but just in case
@@ -236,29 +218,33 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
       }
 
       // Load the config and compiler, and return if there is no config found
-      const webpackConfiguration: IWebpackConfiguration | undefined =
-        await this._getWebpackConfigurationAsync(taskSession, heftConfiguration, options, requestRun);
-      if (!webpackConfiguration) {
+      const rspackConfiguration: IRspackConfiguration | undefined = await this._getRspackConfigurationAsync(
+        taskSession,
+        heftConfiguration,
+        options,
+        requestRun
+      );
+      if (!rspackConfiguration) {
         return;
       }
 
       // Get the compiler which will be used for both serve and watch mode
-      const compiler: TWebpack.Compiler | TWebpack.MultiCompiler = await this._getWebpackCompilerAsync(
+      const compiler: TRspack.Compiler | TRspack.MultiCompiler = await this._getRspackCompilerAsync(
         taskSession,
         heftConfiguration,
-        webpackConfiguration
+        rspackConfiguration
       );
 
       // Set up the hook to detect when the watcher completes the watcher compilation. We will also log out
       // errors from the compilation if present from the output stats object.
-      this._webpackCompilationDonePromise = new Promise((resolve: () => void) => {
-        this._webpackCompilationDonePromiseResolveFn = resolve;
+      this._rspackCompilationDonePromise = new Promise((resolve: () => void) => {
+        this._rspackCompilationDonePromiseResolveFn = resolve;
       });
-      webpackCompilationDonePromise = this._webpackCompilationDonePromise;
-      compiler.hooks.done.tap(PLUGIN_NAME, (stats?: TWebpack.Stats | TWebpack.MultiStats) => {
-        this._webpackCompilationDonePromiseResolveFn!();
-        this._webpackCompilationDonePromise = new Promise((resolve: () => void) => {
-          this._webpackCompilationDonePromiseResolveFn = resolve;
+      rspackCompilationDonePromise = this._rspackCompilationDonePromise;
+      compiler.hooks.done.tap(PLUGIN_NAME, (stats?: TRspack.Stats | TRspack.MultiStats) => {
+        this._rspackCompilationDonePromiseResolveFn!();
+        this._rspackCompilationDonePromise = new Promise((resolve: () => void) => {
+          this._rspackCompilationDonePromiseResolveFn = resolve;
         });
 
         if (stats) {
@@ -267,9 +253,9 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
       });
 
       // Determine how we will run the compiler. When serving, we will run the compiler
-      // via the webpack-dev-server. Otherwise, we will run the compiler directly.
+      // via the @rspack/dev-server. Otherwise, we will run the compiler directly.
       if (this._isServeMode) {
-        const defaultDevServerOptions: TWebpackDevServer.Configuration = {
+        const defaultDevServerOptions: TRspackDevServer.Configuration = {
           host: 'localhost',
           devMiddleware: {
             publicPath: '/',
@@ -285,8 +271,10 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
               port: 8080
             }
           },
+          watchFiles: [],
+          static: [],
           port: 8080,
-          onListening: (server: TWebpackDevServer) => {
+          onListening: (server: TRspackDevServer.RspackDevServer) => {
             const addressInfo: AddressInfo | string | undefined = server.server?.address() as AddressInfo;
             if (addressInfo) {
               let url: string;
@@ -299,25 +287,25 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
                     : `${addressInfo.address}:${addressInfo.port}`;
                 url = `https://${address}/`;
               }
-              taskSession.logger.terminal.writeLine(`Started Webpack Dev Server at ${url}`);
+              taskSession.logger.terminal.writeLine(`Started Rspack Dev Server at ${url}`);
             }
           }
         };
 
-        // Obtain the devServerOptions from the webpack configuration, and combine with the default options
-        let devServerOptions: TWebpackDevServer.Configuration;
-        if (Array.isArray(webpackConfiguration)) {
-          const filteredDevServerOptions: TWebpackDevServer.Configuration[] = webpackConfiguration
+        // Obtain the devServerOptions from the rspack configuration, and combine with the default options
+        let devServerOptions: TRspackDevServer.Configuration;
+        if (Array.isArray(rspackConfiguration)) {
+          const filteredDevServerOptions: TRspackDevServer.Configuration[] = rspackConfiguration
             .map((configuration) => configuration.devServer)
-            .filter((devServer): devServer is TWebpackDevServer.Configuration => !!devServer);
+            .filter((devServer): devServer is TRspackDevServer.Configuration => !!devServer);
           if (filteredDevServerOptions.length > 1) {
             taskSession.logger.emitWarning(
-              new Error(`Detected multiple webpack devServer configurations, using the first one.`)
+              new Error(`Detected multiple rspack devServer configurations, using the first one.`)
             );
           }
           devServerOptions = { ...defaultDevServerOptions, ...filteredDevServerOptions[0] };
         } else {
-          devServerOptions = { ...defaultDevServerOptions, ...webpackConfiguration.devServer };
+          devServerOptions = { ...defaultDevServerOptions, ...rspackConfiguration.devServer };
         }
 
         // Add the certificate and key to the devServerOptions if these fields don't already have values
@@ -329,7 +317,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           );
 
           // Update the web socket URL to use the hostname provided by the certificate
-          const clientConfiguration: TWebpackDevServer.Configuration['client'] = devServerOptions.client;
+          const clientConfiguration: TRspackDevServer.Configuration['client'] = devServerOptions.client;
           const hostname: string | undefined = certificate.subjectAltNames?.[0];
           if (hostname && typeof clientConfiguration === 'object') {
             const { webSocketURL } = clientConfiguration;
@@ -357,6 +345,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
 
         // Since the webpack-dev-server does not return infrastructure errors via a callback like
         // compiler.watch(...), we will need to intercept them and log them ourselves.
+        // note: @rspack/dev-server extends webpack-dev-server and also has this behavior
         compiler.hooks.infrastructureLog.tap(
           PLUGIN_NAME,
           (name: string, type: string, args: unknown[] | undefined) => {
@@ -373,22 +362,29 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
         // WEBPACK_DEV_SERVER environment variable -- even if no APIs are accessed. This environment variable
         // causes incorrect behavior if Heft is not running in serve mode. Thus, we need to be careful to call
         // require() only if Heft is in serve mode.
-        taskSession.logger.terminal.writeLine('Starting webpack-dev-server');
-        const WebpackDevServer: typeof TWebpackDevServer = (await import(WEBPACK_DEV_SERVER_PACKAGE_NAME))
-          .default;
-        const webpackDevServer: TWebpackDevServer = new WebpackDevServer(devServerOptions, compiler);
-        await webpackDevServer.start();
+        // note: @rspack/dev-server extends webpack-dev-server and also has this behavior
+        taskSession.logger.terminal.writeLine('Starting rspack-dev-server');
+        const RspackDevServer: typeof TRspackDevServer.RspackDevServer = (
+          await import(RSPACK_DEV_SERVER_PACKAGE_NAME)
+        ).RspackDevServer;
+        const rspackDevServer: TRspackDevServer.RspackDevServer = new RspackDevServer(
+          devServerOptions,
+          compiler
+        );
+        await rspackDevServer.start();
       } else {
         // Create the watcher. Compilation will start immediately after invoking watch().
-        taskSession.logger.terminal.writeLine('Starting Webpack watcher');
+        taskSession.logger.terminal.writeLine('Starting Rspack watcher');
 
         const { onGetWatchOptions } = this.accessor.hooks;
 
-        const watchOptions: Parameters<TWebpack.Compiler['watch']>[0] = onGetWatchOptions.isUsed()
-          ? await onGetWatchOptions.promise({}, webpackConfiguration)
+        const watchOptions:
+          | Parameters<TRspack.Compiler['watch']>[0]
+          | Parameters<TRspack.MultiCompiler['watch']>[0] = onGetWatchOptions.isUsed()
+          ? await onGetWatchOptions.promise({}, rspackConfiguration)
           : {};
 
-        compiler.watch(watchOptions, (error?: Error | null) => {
+        (compiler as TRspack.Compiler).watch(watchOptions, (error?: Error | null) => {
           if (error) {
             taskSession.logger.emitError(error);
           }
@@ -396,36 +392,21 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
       }
     }
 
-    let hasChanges: boolean = true;
-    if (!isInitial && this._watchFileSystems) {
-      hasChanges = false;
-      for (const watchFileSystem of this._watchFileSystems) {
-        hasChanges = watchFileSystem.flush() || hasChanges;
-      }
-    }
-
     // Resume the compilation, wait for the compilation to complete, then suspend the watchers until the
     // next iteration. Even if there are no changes, the promise should resolve since resuming from a
     // suspended state invalidates the state of the watcher.
-    if (hasChanges) {
-      taskSession.logger.terminal.writeLine('Running incremental Webpack compilation');
-      await webpackCompilationDonePromise;
-    } else {
-      taskSession.logger.terminal.writeLine(
-        'Webpack has not detected changes. Listing previous diagnostics.'
-      );
-    }
+    await rspackCompilationDonePromise;
 
     this._emitErrors(taskSession.logger);
   }
 
   private _validateEnvironmentVariable(taskSession: IHeftTaskSession): void {
-    if (!this._isServeMode && process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
+    if (!this._isServeMode && process.env[RSPACK_DEV_SERVER_ENV_VAR_NAME]) {
       taskSession.logger.emitWarning(
         new Error(
-          `The "${WEBPACK_DEV_SERVER_ENV_VAR_NAME}" environment variable is set, ` +
-            'which will cause problems when webpack is not running in serve mode. ' +
-            `(Did a dependency inadvertently load the "${WEBPACK_DEV_SERVER_PACKAGE_NAME}" package?)`
+          `The "${RSPACK_DEV_SERVER_ENV_VAR_NAME}" environment variable is set, ` +
+            'which will cause problems when rspack is not running in serve mode. ' +
+            `(Did a dependency inadvertently load the "${RSPACK_DEV_SERVER_PACKAGE_NAME}" package?)`
         )
       );
     }
@@ -440,7 +421,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     }
   }
 
-  private _recordErrors(stats: TWebpack.Stats | TWebpack.MultiStats, buildFolderPath: string): void {
+  private _recordErrors(stats: TRspack.Stats | TRspack.MultiStats, buildFolderPath: string): void {
     const errors: Error[] = this._errors;
     const warnings: Error[] = this._warnings;
 
@@ -448,7 +429,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     warnings.length = 0;
 
     if (stats.hasErrors() || stats.hasWarnings()) {
-      const serializedStats: TWebpack.StatsCompilation[] = [stats.toJson('errors-warnings')];
+      const serializedStats: TRspack.StatsCompilation[] = [stats.toJson('errors-warnings')];
 
       for (const compilationStats of serializedStats) {
         if (compilationStats.warnings) {
@@ -472,7 +453,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     }
   }
 
-  private _normalizeError(buildFolderPath: string, error: TWebpack.StatsError): Error {
+  private _normalizeError(buildFolderPath: string, error: TRspack.StatsError): Error {
     if (error instanceof Error) {
       return error;
     } else if (error.moduleIdentifier) {
@@ -512,12 +493,12 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
 /**
  * @internal
  */
-export function _createAccessorHooks(): IWebpackPluginAccessorHooks {
+export function _createAccessorHooks(): IRspackPluginAccessorHooks {
   return {
     onLoadConfiguration: new AsyncSeriesBailHook(),
-    onConfigure: new AsyncSeriesHook(['webpackConfiguration']),
-    onAfterConfigure: new AsyncParallelHook(['webpackConfiguration']),
-    onEmitStats: new AsyncParallelHook(['webpackStats']),
-    onGetWatchOptions: new AsyncSeriesWaterfallHook(['watchOptions', 'webpackConfiguration'])
+    onConfigure: new AsyncSeriesHook(['rspackConfiguration']),
+    onAfterConfigure: new AsyncParallelHook(['rspackConfiguration']),
+    onEmitStats: new AsyncParallelHook(['rspackStats']),
+    onGetWatchOptions: new AsyncSeriesWaterfallHook(['watchOptions', 'rspackConfiguration'])
   };
 }

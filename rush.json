@@ -894,6 +894,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-rspack-everything-test",
+      "projectFolder": "build-tests/heft-rspack-everything-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-sass-test",
       "projectFolder": "build-tests/heft-sass-test",
       "reviewCategory": "tests",
@@ -1083,6 +1089,13 @@
       "projectFolder": "heft-plugins/heft-localization-typings-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-rspack-plugin",
+      "projectFolder": "heft-plugins/heft-rspack-plugin",
+      "reviewCategory": "libraries"
+      // Not ready to publish yet
+      // "shouldPublish": true
     },
     {
       "packageName": "@rushstack/heft-sass-plugin",

@@ -13,7 +13,7 @@ function createWebpackConfig({ production }) {
     // Documentation: https://webpack.js.org/configuration/mode/
     mode: production ? 'production' : 'development',
     resolve: {
-      extensions: ['.js', '.jsx', '.json']
+      extensions: ['.js', '.json']
     },
     module: {
       rules: [

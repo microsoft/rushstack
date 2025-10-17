@@ -51,7 +51,7 @@ function generateConfiguration(mode, outputFolderName, webpack) {
       ]
     },
     resolve: {
-      extensions: ['.js', '.jsx', '.json', '.ts', '.tsx']
+      extensions: ['.js', '.json', '.ts', '.tsx']
     },
     entry: {
       'localization-test-A': `${__dirname}/src/indexA.ts`,
