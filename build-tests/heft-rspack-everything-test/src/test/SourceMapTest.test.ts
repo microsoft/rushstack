@@ -18,7 +18,6 @@ interface IMapValue {
 interface IMapTestEntry {
   name: string;
   mapRegex: RegExp;
-  sourceFileRegex: RegExp;
   map: IMapValue | undefined;
 }
 
@@ -26,19 +25,16 @@ const mapTests: IMapTestEntry[] = [
   {
     name: 'Test-A',
     mapRegex: /^heft-test-A_[\w\d]*\.js.map$/,
-    sourceFileRegex: /indexA\.ts$/,
     map: undefined
   },
   {
     name: 'Test-B',
     mapRegex: /^heft-test-B_[\w\d]*\.js.map$/,
-    sourceFileRegex: /indexB\.ts$/,
     map: undefined
   },
   {
     name: 'Chunk',
     mapRegex: /^[\w\d\.]*chunk_[\w\d]*\.js.map$/,
-    sourceFileRegex: /ChunkClass\.ts$/,
     map: undefined
   }
 ];
@@ -114,7 +110,7 @@ function mapValueCheck(entry: IMapTestEntry): void {
 
   it(`${entry.name} has a source that matches the sourceFileRegex`, () => {
     if (map.mapObject.sources) {
-      expect(map.mapObject.sources).toContainEqual(expect.stringMatching(entry.sourceFileRegex));
+      expect(map.mapObject.sources).toMatchSnapshot();
     }
   });
 }
