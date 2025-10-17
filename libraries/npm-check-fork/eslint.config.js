@@ -15,6 +15,7 @@ module.exports = [
       }
     },
     rules: {
+      // This package is a fork, so it carries the original copyright.
       'headers/header-format': 'off'
     }
   }

@@ -1214,7 +1214,8 @@
     {
       "packageName": "@rushstack/npm-check-fork",
       "projectFolder": "libraries/npm-check-fork",
-      "reviewCategory": "libraries"
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
     {
       "packageName": "@rushstack/operation-graph",
