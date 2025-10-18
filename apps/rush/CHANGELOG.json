@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.162.0",
+      "tag": "@microsoft/rush_v5.162.0",
+      "date": "Sat, 18 Oct 2025 00:06:36 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fork npm-check to address npm audit CVE"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.161.0",
       "tag": "@microsoft/rush_v5.161.0",
       "date": "Fri, 17 Oct 2025 23:22:50 GMT",

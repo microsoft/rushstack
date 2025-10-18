@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 17 Oct 2025 23:22:50 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Oct 2025 00:06:36 GMT and should not be manually modified.
+
+## 5.162.0
+Sat, 18 Oct 2025 00:06:36 GMT
+
+### Updates
+
+- Fork npm-check to address npm audit CVE
 
 ## 5.161.0
 Fri, 17 Oct 2025 23:22:50 GMT
