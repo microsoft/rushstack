@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/npm-check-fork",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/npm-check-fork_v0.1.0",
+      "date": "Sat, 18 Oct 2025 00:13:48 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial fork of npm-check"
+          }
+        ]
+      }
+    }
+  ]
+}
