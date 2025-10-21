@@ -160,21 +160,12 @@ export interface IWaitForExitWithBufferOptions extends IWaitForExitOptions {
 }
 
 /**
- * The result of running a process to completion using {@link Executable.(waitForExitAsync:3)}.
+ * The result of running a process to completion using {@link Executable.(waitForExitAsync:3)}. This
+ * interface does not include stdout or stderr output because an {@link IWaitForExitOptions.encoding} was not specified.
  *
  * @public
  */
-export interface IWaitForExitResult<T extends Buffer | string | never = never> {
-  /**
-   * The process stdout output, if encoding was specified.
-   */
-  stdout: T;
-
-  /**
-   * The process stderr output, if encoding was specified.
-   */
-  stderr: T;
-
+export interface IWaitForExitResultWithoutOutput {
   /**
    * The process exit code. If the process was terminated, this will be null.
    */
@@ -186,6 +177,25 @@ export interface IWaitForExitResult<T extends Buffer | string | never = never> {
    */
   // eslint-disable-next-line @rushstack/no-new-null
   signal: string | null;
+}
+
+/**
+ * The result of running a process to completion using {@link Executable.(waitForExitAsync:1)},
+ * or {@link Executable.(waitForExitAsync:2)}.
+ *
+ * @public
+ */
+export interface IWaitForExitResult<T extends Buffer | string = never>
+  extends IWaitForExitResultWithoutOutput {
+  /**
+   * The process stdout output, if encoding was specified.
+   */
+  stdout: T;
+
+  /**
+   * The process stderr output, if encoding was specified.
+   */
+  stderr: T;
 }
 
 // Common environmental state used by Executable members
@@ -554,12 +564,12 @@ export class Executable {
   public static async waitForExitAsync(
     childProcess: child_process.ChildProcess,
     options?: IWaitForExitOptions
-  ): Promise<IWaitForExitResult<never>>;
+  ): Promise<IWaitForExitResultWithoutOutput>;
 
-  public static async waitForExitAsync<T extends Buffer | string | never = never>(
+  public static async waitForExitAsync<T extends Buffer | string>(
     childProcess: child_process.ChildProcess,
     options: IWaitForExitOptions = {}
-  ): Promise<IWaitForExitResult<T>> {
+  ): Promise<IWaitForExitResult<T> | IWaitForExitResultWithoutOutput> {
     const { throwOnNonZeroExitCode, throwOnSignal, encoding } = options;
     if (encoding && (!childProcess.stdout || !childProcess.stderr)) {
       throw new Error(
@@ -611,22 +621,31 @@ export class Executable {
       }
     );
 
-    let stdout: T | undefined;
-    let stderr: T | undefined;
-    if (encoding === 'buffer') {
-      stdout = Buffer.concat(collectedStdout as Buffer[]) as T;
-      stderr = Buffer.concat(collectedStderr as Buffer[]) as T;
-    } else if (encoding !== undefined) {
-      stdout = collectedStdout.join('') as T;
-      stderr = collectedStderr.join('') as T;
-    }
+    let result: IWaitForExitResult<T> | IWaitForExitResultWithoutOutput;
+    if (encoding) {
+      let stdout: T | undefined;
+      let stderr: T | undefined;
 
-    const result: IWaitForExitResult<T> = {
-      stdout: stdout as T,
-      stderr: stderr as T,
-      exitCode,
-      signal
-    };
+      if (encoding === 'buffer') {
+        stdout = Buffer.concat(collectedStdout as Buffer[]) as T;
+        stderr = Buffer.concat(collectedStderr as Buffer[]) as T;
+      } else if (encoding !== undefined) {
+        stdout = collectedStdout.join('') as T;
+        stderr = collectedStderr.join('') as T;
+      }
+
+      result = {
+        stdout: stdout as T,
+        stderr: stderr as T,
+        exitCode,
+        signal
+      };
+    } else {
+      result = {
+        exitCode,
+        signal
+      };
+    }
 
     return result;
   }
