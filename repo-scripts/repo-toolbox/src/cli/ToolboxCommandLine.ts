@@ -3,9 +3,9 @@
 
 import { CommandLineParser } from '@rushstack/ts-command-line';
 
-import { ReadmeAction } from './ReadmeAction';
-import { RecordVersionsAction } from './RecordVersionsAction';
-import { BumpCyclicsAction } from './BumpCyclicsAction';
+import { ReadmeAction } from './actions/ReadmeAction';
+import { RecordVersionsAction } from './actions/RecordVersionsAction';
+import { BumpDecoupledLocalDependencies } from './actions/BumpDecoupledLocalDependencies';
 
 export class ToolboxCommandLine extends CommandLineParser {
   public constructor() {
@@ -16,6 +16,6 @@ export class ToolboxCommandLine extends CommandLineParser {
 
     this.addAction(new ReadmeAction());
     this.addAction(new RecordVersionsAction());
-    this.addAction(new BumpCyclicsAction());
+    this.addAction(new BumpDecoupledLocalDependencies());
   }
 }

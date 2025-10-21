@@ -5,14 +5,14 @@ import type { ChildProcess } from 'node:child_process';
 
 import { Async, Executable, JsonFile } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
-import { DependencyType, RushConfiguration } from '@microsoft/rush-lib';
+import { DependencyType, RushConfiguration, type CommonVersionsConfiguration } from '@microsoft/rush-lib';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 
-export class BumpCyclicsAction extends CommandLineAction {
+export class BumpDecoupledLocalDependencies extends CommandLineAction {
   public constructor() {
     super({
-      actionName: 'bump-cyclic-dependencies',
-      summary: 'Updates cyclic dependencies inside the repo.',
+      actionName: 'bump-decoupled-local-dependencies',
+      summary: 'Updates decoupled local dependencies inside the repo.',
       documentation: ''
     });
   }
@@ -46,12 +46,25 @@ export class BumpCyclicsAction extends CommandLineAction {
     terminal.writeLine();
 
     for (const project of rushConfiguration.projects) {
+      const commonVersions: CommonVersionsConfiguration = project.subspace.getCommonVersions();
+
       for (const cyclicDependencyProject of project.decoupledLocalDependencies) {
-        const version: string = cyclicDependencyVersions.get(cyclicDependencyProject)!;
+        const existingVersion: string | undefined =
+          project.packageJson.dependencies?.[cyclicDependencyProject] ??
+          project.packageJson.devDependencies?.[cyclicDependencyProject];
+        if (
+          existingVersion &&
+          commonVersions.allowedAlternativeVersions.get(cyclicDependencyProject)?.includes(existingVersion)
+        ) {
+          // Skip if the existing version is allowed by common-versions.json
+          continue;
+        }
+
+        const newVersion: string = cyclicDependencyVersions.get(cyclicDependencyProject)!;
         if (project.packageJsonEditor.tryGetDependency(cyclicDependencyProject)) {
           project.packageJsonEditor.addOrUpdateDependency(
             cyclicDependencyProject,
-            version,
+            newVersion,
             DependencyType.Regular
           );
         }
@@ -59,7 +72,7 @@ export class BumpCyclicsAction extends CommandLineAction {
         if (project.packageJsonEditor.tryGetDevDependency(cyclicDependencyProject)) {
           project.packageJsonEditor.addOrUpdateDependency(
             cyclicDependencyProject,
-            version,
+            newVersion,
             DependencyType.Dev
           );
         }
