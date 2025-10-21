@@ -32,6 +32,7 @@ export {
   type IWaitForExitWithBufferOptions,
   type IWaitForExitWithStringOptions,
   type IWaitForExitResult,
+  type IWaitForExitResultWithoutOutput,
   type IProcessInfo,
   Executable
 } from './Executable';

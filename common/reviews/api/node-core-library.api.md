@@ -108,7 +108,7 @@ export class Executable {
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
     static waitForExitAsync(childProcess: child_process.ChildProcess, options: IWaitForExitWithStringOptions): Promise<IWaitForExitResult<string>>;
     static waitForExitAsync(childProcess: child_process.ChildProcess, options: IWaitForExitWithBufferOptions): Promise<IWaitForExitResult<Buffer>>;
-    static waitForExitAsync(childProcess: child_process.ChildProcess, options?: IWaitForExitOptions): Promise<IWaitForExitResult<never>>;
+    static waitForExitAsync(childProcess: child_process.ChildProcess, options?: IWaitForExitOptions): Promise<IWaitForExitResultWithoutOutput>;
 }
 
 // @public
@@ -667,11 +667,15 @@ export interface IWaitForExitOptions {
 }
 
 // @public
-export interface IWaitForExitResult<T extends Buffer | string | never = never> {
-    exitCode: number | null;
-    signal: string | null;
+export interface IWaitForExitResult<T extends Buffer | string = never> extends IWaitForExitResultWithoutOutput {
     stderr: T;
     stdout: T;
+}
+
+// @public
+export interface IWaitForExitResultWithoutOutput {
+    exitCode: number | null;
+    signal: string | null;
 }
 
 // @public
