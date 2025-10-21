@@ -391,6 +391,87 @@ import(
 
 Explicit chunk naming improves cache hit rates, observability, and maintainability. Enforcing the practice via an ESLint rule prevents missing or duplicate declarations that could lead to unpredictable bundle naming.
 
+## `@rushstack/pair-react-dom-render-unmount`
+
+Require ReactDOM (legacy) render trees created in a file to be explicitly unmounted in that same file to avoid memory leaks.
+
+#### Rule Details
+
+React 18 introduced `ReactDOM.createRoot()` and `root.unmount()`, but many codebases still use the legacy APIs:
+
+- `ReactDOM.render(element, container)`
+- `ReactDOM.unmountComponentAtNode(container)`
+
+If a component tree is rendered and the container node is later discarded without an explicit unmount, detached DOM nodes and event handlers may remain in memory. This rule enforces a simple pairing discipline: the total number of render calls in a file must match the total number of unmount calls. If they differ, every render and unmount in the file is flagged so the developer can reconcile them.
+
+The rule detects both namespace invocations (e.g. `ReactDOM.render(...)`) and separately imported named functions (e.g. `import { render, unmountComponentAtNode } from 'react-dom'`). Default or namespace imports (e.g. `import * as ReactDOM from 'react-dom'` or `import ReactDOM from 'react-dom'`) are supported.
+
+No configuration options are currently supported.
+
+#### Examples
+
+The following patterns are considered problems when `@rushstack/pair-react-dom-render-unmount` is enabled:
+
+```ts
+import * as ReactDOM from 'react-dom';
+ReactDOM.render(<App /> , document.getElementById('root'));
+// Missing matching unmount
+```
+
+```ts
+import { render } from 'react-dom';
+render(<App /> , document.getElementById('root'));
+// Missing matching unmountComponentAtNode
+```
+
+```ts
+import { unmountComponentAtNode } from 'react-dom';
+// Unmount without a corresponding render in this file
+unmountComponentAtNode(document.getElementById('root')!);
+```
+
+```ts
+import { render, unmountComponentAtNode } from 'react-dom';
+render(<A /> , a);
+render(<B /> , b);
+// Only one unmount
+unmountComponentAtNode(a);
+// "b"'s render is not paired
+```
+
+The following patterns are NOT considered problems:
+
+```ts
+import * as ReactDOM from 'react-dom';
+const rootEl = document.getElementById('root');
+ReactDOM.render(<App /> , rootEl);
+ReactDOM.unmountComponentAtNode(rootEl!);
+```
+
+```ts
+import { render, unmountComponentAtNode } from 'react-dom';
+render(<A /> , a);
+render(<B /> , b);
+unmountComponentAtNode(a);
+unmountComponentAtNode(b);
+// All renders paired
+```
+
+```ts
+// No legacy ReactDOM render/unmount usage in this file
+// (e.g. uses React 18 createRoot API or just defines components) — rule passes
+```
+
+#### Notes
+
+- The rule does not attempt dataflow analysis to verify the same container node is passed; it only enforces count parity.
+- Modern React apps using `createRoot()` should migrate to pairing `root.unmount()`. This legacy rule helps older code until migration is complete.
+- Multiple files can coordinate unmounting (e.g. via a shared cleanup utility); in that case this rule will flag the imbalance—consider colocating the unmount or disabling the rule for that file.
+
+#### Rationale
+
+Unpaired legacy renders are a common cause of memory leaks and test pollution. A lightweight count-based heuristic catches most oversights without requiring complex static analysis.
+
 ## Links
 
 - [CHANGELOG.md](
