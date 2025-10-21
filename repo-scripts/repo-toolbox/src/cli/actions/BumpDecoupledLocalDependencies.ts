@@ -8,11 +8,11 @@ import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 import { DependencyType, RushConfiguration } from '@microsoft/rush-lib';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 
-export class BumpCyclicsAction extends CommandLineAction {
+export class BumpDecoupledLocalDependencies extends CommandLineAction {
   public constructor() {
     super({
-      actionName: 'bump-cyclic-dependencies',
-      summary: 'Updates cyclic dependencies inside the repo.',
+      actionName: 'bump-decoupled-local-dependencies',
+      summary: 'Updates decoupled local dependencies inside the repo.',
       documentation: ''
     });
   }
