@@ -472,6 +472,151 @@ unmountComponentAtNode(b);
 
 Unpaired legacy renders are a common cause of memory leaks and test pollution. A lightweight count-based heuristic catches most oversights without requiring complex static analysis.
 
+## `@rushstack/no-backslash-imports`
+
+Prevent import and export specifiers from using Windows-style backslashes in module paths.
+
+#### Rule Details
+
+JavaScript module specifiers always use POSIX forward slashes. Using backslashes (e.g. `import './src\utils'`) can lead to inconsistent behavior across tools, and may break resolution in some environments. This rule flags any import or export whose source contains a `\` character and provides an autofix that replaces backslashes with `/`.
+
+#### Examples
+
+The following patterns are considered problems when `@rushstack/no-backslash-imports` is enabled:
+
+```ts
+import helper from './lib\\helper'; // error (autofix -> './lib/helper')
+export * from './data\\items'; // error
+```
+
+The following patterns are NOT considered problems:
+
+```ts
+import helper from './lib/helper';
+export * from '../data/items';
+```
+
+#### Notes
+
+- Works for `import`, dynamic `import()`, and `export ... from` forms.
+- Loader/query strings (e.g. `raw-loader!./file`) are preserved during the fix; only path separators are changed.
+
+#### Rationale
+
+Forward slashes are portable and avoid subtle cross-platform inconsistencies. Autofixing reduces churn and enforces a predictable style.
+
+## `@rushstack/no-external-local-imports`
+
+Prevent relative imports that reach outside the configured TypeScript `rootDir` (if specified) or outside the package boundary.
+
+#### Rule Details
+
+Local relative imports should refer only to files that are part of the compiling unit: either under the package directory or (when a `rootDir` is configured) under that root. Reaching outside can accidentally couple a package to sibling projects, untracked build inputs, or files excluded from type checking. This rule resolves each relative import/ export source and ensures the target is contained within the effective root. If not, it is flagged.
+
+#### Examples
+
+Assume `rootDir` is `src` and the package folder is `/repo/packages/example`:
+
+```ts
+// In /repo/packages/example/src/components/Button.ts
+import '../utils/file'; // error if '../utils/file' is outside src
+import '../../../other-package/src/index'; // error (outside package root)
+```
+
+```ts
+// In /repo/packages/example/src/index.ts
+import './utils/file'; // passes (inside rootDir)
+```
+
+#### Notes
+
+- Only relative specifiers are checked. Package specifiers (`react`, `lodash`) are ignored.
+- If no `rootDir` is defined, the package directory acts as the boundary.
+- Useful for enforcing project isolation in monorepos.
+
+#### Rationale
+
+Prevents accidental dependencies on files that aren’t part of the compilation or publishing surface, improving encapsulation and build reproducibility.
+
+## `@rushstack/no-transitive-dependency-imports`
+
+Prevent importing modules from transitive dependencies that are not declared in the package’s direct dependency list.
+
+#### Rule Details
+
+Packages should only import modules from their own direct dependencies. Importing a transitive dependency (available only because another dependency pulled it in) creates hidden coupling and can break when versions change. This rule detects any import path containing multiple `node_modules` segments (for relative paths) or any direct reference to a nested `node_modules` folder for package specifiers, flagging such usages.
+
+Allowed exception: a single relative traversal into `node_modules` (e.g. `import '../node_modules/some-pkg/dist/index.js'`) is tolerated to support bypassing package `exports` fields intentionally. Additional traversals are disallowed.
+
+#### Examples
+
+The following patterns are considered problems when `@rushstack/no-transitive-dependency-imports` is enabled:
+
+```ts
+// Transitive dependency via deep relative path
+import '../../node_modules/some-pkg/lib/internal'; // error (multiple node_modules segments)
+
+// Direct package import that resolves into nested node_modules (caught via parsing)
+import 'other-pkg/node_modules/inner-pkg'; // error
+```
+
+The following patterns are NOT considered problems:
+
+```ts
+// Direct dependency
+import 'react';
+
+// Single bypass to reach a file export
+import '../node_modules/some-pkg/dist/index.js';
+```
+
+#### Notes
+
+- Encourages declaring needed dependencies explicitly in `package.json`.
+- Reduces breakage due to indirect version changes.
+
+#### Rationale
+
+Explicit declarations keep dependency graphs understandable and maintainable; avoiding transitive imports prevents fragile build outcomes.
+
+## `@rushstack/normalized-imports`
+
+Require relative import paths to be written in a normalized minimal form and autofix unnecessary directory traversals.
+
+#### Rule Details
+
+Developers sometimes write relative paths with redundant traversals (e.g. `import '../module'` when already in the parent, or `import '././utils'`). This rule computes the shortest relative path between the importing file and target, rewrites it using POSIX separators, and ensures a leading `./` is present when needed. Non-relative (package) imports are ignored.
+
+If the provided path differs from the normalized form, the rule reports it and autofixes to the canonical specifier while preserving loader/query suffixes.
+
+#### Examples
+
+The following patterns are considered problems when `@rushstack/normalized-imports` is enabled:
+
+```ts
+// Redundant parent traversal
+import '../currentDir/utils'; // error (autofix -> './utils')
+
+// Repeated ./ segments
+import '././components/Button'; // error (autofix -> './components/Button')
+```
+
+The following patterns are NOT considered problems:
+
+```ts
+import './utils';
+import '../shared/types';
+```
+
+#### Notes
+
+- Only relative paths (`./` or `../`) are normalized.
+- Helps produce deterministic diff noise and cleaner refactors.
+
+#### Rationale
+
+Consistent relative paths improve readability and make large-scale moves/renames less error-prone.
+
 ## Links
 
 - [CHANGELOG.md](
