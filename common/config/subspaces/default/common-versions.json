@@ -143,6 +143,10 @@
     "@rushstack/eslint-config": [
       // This is used by the ESLint 7 build tests
       "3.7.1"
+    ],
+    "@rushstack/set-webpack-public-path-plugin": [
+      // This is used by the webpack 4 localization plugin tests
+      "^4.1.16"
     ]
   }
 }
