@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { mockGetHomeFolder } from './CredentialCache.mock';
 import { LockFile, Async, FileSystem } from '@rushstack/node-core-library';
-import { RushUserConfiguration } from '../../api/RushUserConfiguration';
 import { CredentialCache, type ICredentialCacheOptions } from '../CredentialCache';
 
-const FAKE_RUSH_USER_FOLDER: string = 'temp/.rush-user';
+const FAKE_HOME_FOLDER: string = 'temp';
+const FAKE_RUSH_USER_FOLDER: string = `${FAKE_HOME_FOLDER}/.rush-user`;
 
 interface IPathsTestCase extends Required<Pick<ICredentialCacheOptions, 'cacheFilePath'>> {
   testCaseName: string;
@@ -23,7 +24,7 @@ describe(CredentialCache.name, () => {
   });
 
   beforeEach(() => {
-    jest.spyOn(RushUserConfiguration, 'getRushUserFolderPath').mockReturnValue(FAKE_RUSH_USER_FOLDER);
+    mockGetHomeFolder.mockReturnValue(FAKE_HOME_FOLDER);
 
     // TODO: Consider expanding these mocks and moving them to node-core-library
     jest

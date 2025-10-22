@@ -7,7 +7,7 @@
 /// <reference types="node" />
 
 import * as child_process from 'node:child_process';
-import * as nodeFs from 'node:fs';
+import * as fs from 'node:fs';
 import * as nodePath from 'node:path';
 
 // @public
@@ -23,6 +23,9 @@ export class AlreadyReportedError extends Error {
     static [Symbol.hasInstance](instance: object): boolean;
     constructor();
 }
+
+// @public
+function areDeepEqual<TObject>(a: TObject, b: TObject): boolean;
 
 // @public
 export class Async {
@@ -216,7 +219,7 @@ export type FileSystemCopyFilesAsyncFilter = (sourcePath: string, destinationPat
 export type FileSystemCopyFilesFilter = (sourcePath: string, destinationPath: string) => boolean;
 
 // @public
-export type FileSystemStats = nodeFs.Stats;
+export type FileSystemStats = fs.Stats;
 
 // @public
 export class FileWriter {
@@ -234,7 +237,10 @@ export const FolderConstants: {
 };
 
 // @public
-export type FolderItem = nodeFs.Dirent;
+export type FolderItem = fs.Dirent;
+
+// @public
+function getHomeFolder(): string;
 
 // @public
 export interface IAsyncParallelismOptions {
@@ -628,7 +634,7 @@ export interface IReadLinesFromIterableOptions {
 // @public
 export interface IRealNodeModulePathResolverOptions {
     // (undocumented)
-    fs?: Partial<Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>>;
+    fs?: Partial<Pick<typeof fs, 'lstatSync' | 'readlinkSync'>>;
     ignoreMissingPaths?: boolean;
     // (undocumented)
     path?: Partial<Pick<typeof nodePath, 'isAbsolute' | 'join' | 'resolve' | 'sep'>>;
@@ -791,6 +797,13 @@ export enum NewlineKind {
     OsDefault = "os"
 }
 
+declare namespace Objects {
+    export {
+        areDeepEqual
+    }
+}
+export { Objects }
+
 // @public
 export class PackageJsonLookup {
     constructor(parameters?: IPackageJsonLookupParameters);
@@ -931,5 +944,12 @@ export class TypeUuid {
     static isInstanceOf(targetObject: unknown, typeUuid: string): boolean;
     static registerClass(targetClass: any, typeUuid: string): void;
 }
+
+declare namespace User {
+    export {
+        getHomeFolder
+    }
+}
+export { User }
 
 ```

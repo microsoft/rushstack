@@ -5,13 +5,9 @@ jest.mock('@rushstack/rush-sdk/lib/utilities/WebClient', () => {
   return jest.requireActual('@microsoft/rush-lib/lib/utilities/WebClient');
 });
 
+import { CredentialCache } from '@rushstack/credential-cache';
 import { ConsoleTerminalProvider, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
-import {
-  RushSession,
-  CredentialCache,
-  EnvironmentConfiguration,
-  RushUserConfiguration
-} from '@rushstack/rush-sdk';
+import { RushSession, EnvironmentConfiguration, RushUserConfiguration } from '@rushstack/rush-sdk';
 
 import { AmazonS3BuildCacheProvider } from '../AmazonS3BuildCacheProvider';
 

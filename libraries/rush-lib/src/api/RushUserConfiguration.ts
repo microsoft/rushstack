@@ -3,9 +3,8 @@
 
 import * as path from 'node:path';
 
-import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, JsonSchema, User } from '@rushstack/node-core-library';
 
-import { Utilities } from '../utilities/Utilities';
 import { RushConstants } from '../logic/RushConstants';
 import schemaJson from '../schemas/rush-user-settings.schema.json';
 
@@ -52,7 +51,7 @@ export class RushUserConfiguration {
   }
 
   public static getRushUserFolderPath(): string {
-    const homeFolderPath: string = Utilities.getHomeFolder();
+    const homeFolderPath: string = User.getHomeFolder();
     return `${homeFolderPath}/${RushConstants.rushUserConfigurationFolderName}`;
   }
 }

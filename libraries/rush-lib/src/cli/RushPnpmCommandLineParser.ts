@@ -9,7 +9,8 @@ import {
   FileConstants,
   FileSystem,
   JsonFile,
-  type JsonObject
+  type JsonObject,
+  Objects
 } from '@rushstack/node-core-library';
 import {
   Colorize,
@@ -28,7 +29,6 @@ import { PurgeManager } from '../logic/PurgeManager';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import type { BaseInstallManager } from '../logic/base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTypes';
-import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 import { Utilities } from '../utilities/Utilities';
 import type { Subspace } from '../api/Subspace';
 import type { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
@@ -495,7 +495,7 @@ export class RushPnpmCommandLineParser {
         const currentGlobalPatchedDependencies: Record<string, string> | undefined =
           pnpmOptions?.globalPatchedDependencies;
 
-        if (!objectsAreDeepEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
+        if (!Objects.areDeepEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
           const commonTempPnpmPatchesFolder: string = `${subspaceTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
           const rushPnpmPatchesFolder: string = this._subspace.getSubspacePnpmPatchesFolderPath();
 

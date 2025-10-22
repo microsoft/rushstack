@@ -3,7 +3,7 @@
 
 import { pnpmSyncGetJsonVersion } from 'pnpm-sync-lib';
 
-import { JsonFile, type JsonObject, Path, type IPackageJson } from '@rushstack/node-core-library';
+import { JsonFile, type JsonObject, Path, type IPackageJson, Objects } from '@rushstack/node-core-library';
 
 import type { PackageManagerName } from './packageManager/PackageManager';
 import type { RushConfiguration } from './RushConfiguration';
@@ -124,7 +124,7 @@ export class LastInstallFlag extends FlagFile<Partial<ILastInstallFlagJson>> {
       }
     }
 
-    if (!objectUtilities.objectsAreDeepEqual(oldState, newState)) {
+    if (!Objects.areDeepEqual(oldState, newState)) {
       if (checkValidAndReportStoreIssues) {
         const pkgManager: PackageManagerName = newState.packageManager as PackageManagerName;
         if (pkgManager === 'pnpm') {

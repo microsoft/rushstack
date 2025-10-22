@@ -19,6 +19,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
+    "@rushstack/credential-cache": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
     "@rushstack/terminal": "workspace:*",

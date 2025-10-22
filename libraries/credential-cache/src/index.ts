@@ -7,4 +7,4 @@
  * @packageDocumentation
  */
 
-export { CredentialCache } from './CredentialCache';
+export { CredentialCache, type ICredentialCacheEntry, type ICredentialCacheOptions } from './CredentialCache';

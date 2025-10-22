@@ -40,6 +40,7 @@
   "license": "MIT",
   "dependencies": {
     "@pnpm/lockfile.types": "~1.0.3",
+    "@rushstack/credential-cache": "workspace:*",
     "@rushstack/lookup-by-path": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/package-deps-hash": "workspace:*",
