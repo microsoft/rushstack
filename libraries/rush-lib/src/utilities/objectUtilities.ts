@@ -1,13 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Objects } from '@rushstack/node-core-library';
-
-/**
- * Determines if two objects are deeply equal.
- */
-export const objectsAreDeepEqual: typeof Objects.areDeepEqual = Objects.areDeepEqual;
-
 export function cloneDeep<TObject>(obj: TObject): TObject {
   return cloneDeepInner(obj, new Set());
 }
