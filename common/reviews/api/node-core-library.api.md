@@ -61,6 +61,13 @@ export type Brand<T, BrandTag extends string> = T & {
     __brand: BrandTag;
 };
 
+declare namespace Disposables {
+    export {
+        polyfillDisposeSymbols
+    }
+}
+export { Disposables }
+
 // @public
 export enum Encoding {
     // (undocumented)
@@ -853,6 +860,9 @@ export class Path {
     static isUnder(childPath: string, parentFolderPath: string): boolean;
     static isUnderOrEqual(childPath: string, parentFolderPath: string): boolean;
 }
+
+// @public
+function polyfillDisposeSymbols(): void;
 
 // @public
 export enum PosixModeBits {

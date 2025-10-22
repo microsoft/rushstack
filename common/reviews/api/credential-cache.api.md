@@ -6,10 +6,8 @@
 
 // @public (undocumented)
 export class CredentialCache implements Disposable {
-    // Warning: (ae-forgotten-export) The symbol "SYMBOL_DISPOSE" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    [SYMBOL_DISPOSE](): void;
+    [Symbol.dispose](): void;
     // (undocumented)
     deleteCacheEntry(cacheId: string): void;
     // (undocumented)

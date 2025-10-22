@@ -24,6 +24,8 @@ export {
 
 export { FileConstants, FolderConstants } from './Constants';
 
+export { Disposables } from './Disposables';
+
 export { Enum } from './Enum';
 
 export { EnvironmentMap, type IEnvironmentEntry } from './EnvironmentMap';

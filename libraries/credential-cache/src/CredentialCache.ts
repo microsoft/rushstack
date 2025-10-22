@@ -3,9 +3,20 @@
 
 import * as path from 'node:path';
 
-import { FileSystem, JsonFile, JsonSchema, LockFile, User, Objects } from '@rushstack/node-core-library';
+import {
+  Disposables,
+  FileSystem,
+  JsonFile,
+  JsonSchema,
+  LockFile,
+  User,
+  Objects
+} from '@rushstack/node-core-library';
 
 import schemaJson from './schemas/credentials.schema.json';
+
+// Polyfill for node 18
+Disposables.polyfillDisposeSymbols();
 
 /**
  * The name of the default folder in the user's home directory where Rush stores user-specific data.
@@ -28,9 +39,6 @@ interface ICacheEntryJson {
   credential: string;
   credentialMetadata?: object;
 }
-
-// Polyfill for node 18
-const SYMBOL_DISPOSE: typeof Symbol.dispose = Symbol.dispose ?? Symbol.for('Symbol.dispose');
 
 /**
  * @public
@@ -200,7 +208,7 @@ export class CredentialCache implements Disposable {
     }
   }
 
-  public [SYMBOL_DISPOSE](): void {
+  public [Symbol.dispose](): void {
     this.dispose();
   }
 
