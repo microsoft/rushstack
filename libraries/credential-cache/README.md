@@ -6,6 +6,7 @@
 
 ## Overview
 
+This package manages persistent credentials on the local machine. Since these credentials are stored unencrypted, do not use for secure credentials.
 
 ## Links
 
