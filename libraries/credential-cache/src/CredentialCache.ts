@@ -7,6 +7,12 @@ import { FileSystem, JsonFile, JsonSchema, LockFile, User, Objects } from '@rush
 
 import schemaJson from './schemas/credentials.schema.json';
 
+/**
+ * The name of the default folder in the user's home directory where Rush stores user-specific data.
+ * @public
+ */
+export const RUSH_USER_FOLDER_NAME: '.rush-user' = '.rush-user';
+
 const DEFAULT_CACHE_FILENAME: 'credentials.json' = 'credentials.json';
 const LATEST_CREDENTIALS_JSON_VERSION: string = '0.1.0';
 
@@ -76,7 +82,7 @@ export class CredentialCache implements Disposable {
       cacheDirectory = path.dirname(options.cacheFilePath);
       cacheFileName = options.cacheFilePath.slice(cacheDirectory.length + 1);
     } else {
-      cacheDirectory = `${User.getHomeFolder()}/.rush-user`;
+      cacheDirectory = `${User.getHomeFolder()}/${RUSH_USER_FOLDER_NAME}`;
       cacheFileName = DEFAULT_CACHE_FILENAME;
     }
     const cacheFilePath: string = `${cacheDirectory}/${cacheFileName}`;

@@ -7,4 +7,9 @@
  * @packageDocumentation
  */
 
-export { CredentialCache, type ICredentialCacheEntry, type ICredentialCacheOptions } from './CredentialCache';
+export {
+  CredentialCache,
+  type ICredentialCacheEntry,
+  type ICredentialCacheOptions,
+  RUSH_USER_FOLDER_NAME
+} from './CredentialCache';

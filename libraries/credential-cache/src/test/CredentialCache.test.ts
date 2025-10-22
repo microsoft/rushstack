@@ -3,10 +3,10 @@
 
 import { mockGetHomeFolder } from './CredentialCache.mock';
 import { LockFile, Async, FileSystem } from '@rushstack/node-core-library';
-import { CredentialCache, type ICredentialCacheOptions } from '../CredentialCache';
+import { CredentialCache, type ICredentialCacheOptions, RUSH_USER_FOLDER_NAME } from '../CredentialCache';
 
 const FAKE_HOME_FOLDER: string = 'temp';
-const FAKE_RUSH_USER_FOLDER: string = `${FAKE_HOME_FOLDER}/.rush-user`;
+const FAKE_RUSH_USER_FOLDER: string = `${FAKE_HOME_FOLDER}/${RUSH_USER_FOLDER_NAME}`;
 
 interface IPathsTestCase extends Required<Pick<ICredentialCacheOptions, 'cacheFilePath'>> {
   testCaseName: string;
