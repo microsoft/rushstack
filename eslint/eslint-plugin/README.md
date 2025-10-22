@@ -354,7 +354,7 @@ The following patterns are considered problems when `@rushstack/no-transitive-de
 
 ```ts
 // Transitive dependency via deep relative path
-import '../../node_modules/some-pkg/lib/internal'; // error (multiple node_modules segments)
+import '../../node_modules/some-pkg/node_modules/other-pkg/lib/internal'; // error (multiple node_modules segments)
 
 // Direct package import that resolves into nested node_modules (caught via parsing)
 import 'other-pkg/node_modules/inner-pkg'; // error
