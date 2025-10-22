@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin",
+      "comment": "Include missing rule documentation.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin"
+}
