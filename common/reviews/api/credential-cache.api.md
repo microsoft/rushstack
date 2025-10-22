@@ -46,4 +46,7 @@ export interface ICredentialCacheOptions {
     supportEditing: boolean;
 }
 
+// @public
+export const RUSH_USER_FOLDER_NAME: '.rush-user';
+
 ```
