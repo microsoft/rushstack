@@ -18,7 +18,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.75.0",
+    "@rushstack/heft": "^1.1.2",
     "@rspack/core": "^1.6.0-beta.0"
   },
   "dependencies": {
