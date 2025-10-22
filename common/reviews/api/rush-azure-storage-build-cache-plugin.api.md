@@ -5,9 +5,9 @@
 ```ts
 
 import { AzureAuthorityHosts } from '@azure/identity';
-import { CredentialCache } from '@rushstack/rush-sdk';
+import { CredentialCache } from '@rushstack/credential-cache';
 import { DeviceCodeCredentialOptions } from '@azure/identity';
-import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
+import type { ICredentialCacheEntry } from '@rushstack/credential-cache';
 import { InteractiveBrowserCredentialNodeOptions } from '@azure/identity';
 import type { IRushPlugin } from '@rushstack/rush-sdk';
 import type { ITerminal } from '@rushstack/terminal';
