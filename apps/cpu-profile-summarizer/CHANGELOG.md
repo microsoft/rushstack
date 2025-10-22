@@ -1,6 +1,11 @@
 # Change Log - @rushstack/cpu-profile-summarizer
 
-This log was last generated on Wed, 08 Oct 2025 00:13:29 GMT and should not be manually modified.
+This log was last generated on Wed, 22 Oct 2025 00:57:54 GMT and should not be manually modified.
+
+## 0.1.31
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
 
 ## 0.1.30
 Wed, 08 Oct 2025 00:13:29 GMT

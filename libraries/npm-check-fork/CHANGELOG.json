@@ -2,6 +2,18 @@
   "name": "@rushstack/npm-check-fork",
   "entries": [
     {
+      "version": "0.1.1",
+      "tag": "@rushstack/npm-check-fork_v0.1.1",
+      "date": "Wed, 22 Oct 2025 00:57:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@rushstack/npm-check-fork_v0.1.0",
       "date": "Sat, 18 Oct 2025 00:06:19 GMT",

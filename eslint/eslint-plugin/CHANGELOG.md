@@ -1,6 +1,18 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Tue, 14 Oct 2025 15:13:22 GMT and should not be manually modified.
+This log was last generated on Wed, 22 Oct 2025 00:57:54 GMT and should not be manually modified.
+
+## 0.22.0
+Wed, 22 Oct 2025 00:57:54 GMT
+
+### Minor changes
+
+- Introduce a `@rushstack/import-requires-chunk-name` rule. This rule requires that dynamic imports include a Webpack chunk name magic comment.
+- Introduce a `@rushstack/pair-react-dom-render-unmount` rule. This rule requires that every React DOM `render` call has a matching `unmountComponentAtNode` call.
+
+### Patches
+
+- Include missing rule documentation.
 
 ## 0.21.1
 Tue, 14 Oct 2025 15:13:22 GMT
