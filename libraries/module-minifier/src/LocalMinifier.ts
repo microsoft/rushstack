@@ -20,6 +20,10 @@ import { minifySingleFileAsync } from './MinifySingleFile';
  * @public
  */
 export interface ILocalMinifierOptions {
+  /**
+   * Indicates whether to cache minification results in memory.
+   */
+  cache?: boolean;
   terserOptions?: MinifyOptions;
 }
 
@@ -30,11 +34,11 @@ export interface ILocalMinifierOptions {
 export class LocalMinifier implements IModuleMinifier {
   private readonly _terserOptions: MinifyOptions;
 
-  private readonly _resultCache: Map<string, IModuleMinificationResult>;
+  private readonly _resultCache: Map<string, IModuleMinificationResult> | undefined;
   private readonly _configHash: string;
 
   public constructor(options: ILocalMinifierOptions) {
-    const { terserOptions = {} } = options || {};
+    const { terserOptions = {}, cache = true } = options || {};
 
     this._terserOptions = {
       ...terserOptions,
@@ -53,7 +57,7 @@ export class LocalMinifier implements IModuleMinifier {
       .update(serialize(terserOptions))
       .digest('base64');
 
-    this._resultCache = new Map();
+    this._resultCache = cache ? new Map() : undefined;
   }
 
   /**
@@ -64,14 +68,14 @@ export class LocalMinifier implements IModuleMinifier {
   public minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void {
     const { hash } = request;
 
-    const cached: IModuleMinificationResult | undefined = this._resultCache.get(hash);
+    const cached: IModuleMinificationResult | undefined = this._resultCache?.get(hash);
     if (cached) {
       return callback(cached);
     }
 
     minifySingleFileAsync(request, this._terserOptions)
       .then((result: IModuleMinificationResult) => {
-        this._resultCache.set(hash, result);
+        this._resultCache?.set(hash, result);
         callback(result);
       })
       .catch((error) => {
