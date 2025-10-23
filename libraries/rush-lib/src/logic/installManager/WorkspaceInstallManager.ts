@@ -13,6 +13,7 @@ import {
   AlreadyReportedError,
   Async,
   type IDependenciesMetaTable,
+  Objects,
   Path,
   Sort
 } from '@rushstack/node-core-library';
@@ -39,7 +40,6 @@ import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
 import type { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
-import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
 import type { Subspace } from '../../api/Subspace';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 import { FlagFile } from '../../api/FlagFile';
@@ -372,7 +372,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // Now, we compare these two objects to see if they are equal or not
-    const dependenciesMetaAreEqual: boolean = objectsAreDeepEqual(
+    const dependenciesMetaAreEqual: boolean = Objects.areDeepEqual(
       expectedDependenciesMetaByProjectRelativePath,
       lockfileDependenciesMetaByProjectRelativePath
     );
@@ -388,7 +388,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     const pnpmOptions: PnpmOptionsConfiguration =
       subspace.getPnpmOptions() || this.rushConfiguration.pnpmOptions;
 
-    const overridesAreEqual: boolean = objectsAreDeepEqual<Record<string, string>>(
+    const overridesAreEqual: boolean = Objects.areDeepEqual<Record<string, string>>(
       pnpmOptions.globalOverrides ?? {},
       shrinkwrapFile?.overrides ? Object.fromEntries(shrinkwrapFile?.overrides) : {}
     );

@@ -33,6 +33,7 @@
     "@pnpm/dependency-path-lockfile-pre-v10": "npm:@pnpm/dependency-path@~5.1.7",
     "@pnpm/dependency-path": "~1000.0.9",
     "@pnpm/link-bins": "~5.3.7",
+    "@rushstack/credential-cache": "workspace:*",
     "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/lookup-by-path": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",

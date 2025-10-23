@@ -1155,6 +1155,12 @@
       "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/credential-cache",
+      "projectFolder": "libraries/credential-cache",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/debug-certificate-manager",
       "projectFolder": "libraries/debug-certificate-manager",
       "reviewCategory": "libraries",

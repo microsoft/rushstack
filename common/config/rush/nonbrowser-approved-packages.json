@@ -131,6 +131,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/credential-cache",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/debug-certificate-manager",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },

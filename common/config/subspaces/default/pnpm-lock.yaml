@@ -3365,6 +3365,22 @@ importers:
         specifier: ~9.37.0
         version: 9.37.0(supports-color@8.1.1)
 
+  ../../../libraries/credential-cache:
+    dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../node-core-library
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      eslint:
+        specifier: ~9.37.0
+        version: 9.37.0(supports-color@8.1.1)
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../libraries/debug-certificate-manager:
     dependencies:
       '@rushstack/node-core-library':
@@ -3737,6 +3753,9 @@ importers:
       '@pnpm/link-bins':
         specifier: ~5.3.7
         version: 5.3.25
+      '@rushstack/credential-cache':
+        specifier: workspace:*
+        version: link:../credential-cache
       '@rushstack/heft-config-file':
         specifier: workspace:*
         version: link:../heft-config-file
@@ -3909,6 +3928,9 @@ importers:
       '@pnpm/lockfile.types':
         specifier: ~1.0.3
         version: 1.0.3
+      '@rushstack/credential-cache':
+        specifier: workspace:*
+        version: link:../credential-cache
       '@rushstack/lookup-by-path':
         specifier: workspace:*
         version: link:../lookup-by-path
@@ -4497,6 +4519,9 @@ importers:
 
   ../../../rush-plugins/rush-amazon-s3-build-cache-plugin:
     dependencies:
+      '@rushstack/credential-cache':
+        specifier: workspace:*
+        version: link:../../libraries/credential-cache
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
@@ -4531,6 +4556,9 @@ importers:
       '@azure/storage-blob':
         specifier: ~12.26.0
         version: 12.26.0
+      '@rushstack/credential-cache':
+        specifier: workspace:*
+        version: link:../../libraries/credential-cache
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
@@ -4609,6 +4637,9 @@ importers:
 
   ../../../rush-plugins/rush-http-build-cache-plugin:
     dependencies:
+      '@rushstack/credential-cache':
+        specifier: workspace:*
+        version: link:../../libraries/credential-cache
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library

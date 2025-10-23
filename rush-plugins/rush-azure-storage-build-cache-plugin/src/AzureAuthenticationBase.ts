@@ -19,10 +19,10 @@ import {
 } from '@azure/identity';
 
 import type { ITerminal } from '@rushstack/terminal';
-import { CredentialCache } from '@rushstack/rush-sdk';
+import { CredentialCache } from '@rushstack/credential-cache';
 // Use a separate import line so the .d.ts file ends up with an `import type { ... }`
 // See https://github.com/microsoft/rushstack/issues/3432
-import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
+import type { ICredentialCacheEntry } from '@rushstack/credential-cache';
 import { PrintUtilities } from '@rushstack/terminal';
 
 import { AdoCodespacesAuthCredential } from './AdoCodespacesAuthCredential';

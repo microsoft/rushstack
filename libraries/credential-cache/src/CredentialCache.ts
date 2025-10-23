@@ -3,12 +3,26 @@
 
 import * as path from 'node:path';
 
-import { FileSystem, JsonFile, JsonSchema, LockFile } from '@rushstack/node-core-library';
+import {
+  Disposables,
+  FileSystem,
+  JsonFile,
+  JsonSchema,
+  LockFile,
+  User,
+  Objects
+} from '@rushstack/node-core-library';
 
-import { Utilities } from '../utilities/Utilities';
-import { RushUserConfiguration } from '../api/RushUserConfiguration';
-import schemaJson from '../schemas/credentials.schema.json';
-import { objectsAreDeepEqual } from '../utilities/objectUtilities';
+import schemaJson from './schemas/credentials.schema.json';
+
+// Polyfill for node 18
+Disposables.polyfillDisposeSymbols();
+
+/**
+ * The name of the default folder in the user's home directory where Rush stores user-specific data.
+ * @public
+ */
+export const RUSH_USER_FOLDER_NAME: '.rush-user' = '.rush-user';
 
 const DEFAULT_CACHE_FILENAME: 'credentials.json' = 'credentials.json';
 const LATEST_CREDENTIALS_JSON_VERSION: string = '0.1.0';
@@ -27,7 +41,7 @@ interface ICacheEntryJson {
 }
 
 /**
- * @beta
+ * @public
  */
 export interface ICredentialCacheEntry {
   expires?: Date;
@@ -36,25 +50,22 @@ export interface ICredentialCacheEntry {
 }
 
 /**
- * @beta
+ * @public
  */
 export interface ICredentialCacheOptions {
   supportEditing: boolean;
-  /**
-   * If specified, use the specified path instead of the default path of `~/.rush-user/credentials.json`
-   */
   cacheFilePath?: string;
 }
 
 /**
- * @beta
+ * @public
  */
-export class CredentialCache /* implements IDisposable */ {
+export class CredentialCache implements Disposable {
   private readonly _cacheFilePath: string;
   private readonly _cacheEntries: Map<string, ICacheEntryJson>;
   private _modified: boolean = false;
   private _disposed: boolean = false;
-  private _supportsEditing: boolean;
+  private readonly _supportsEditing: boolean;
   private readonly _lockfile: LockFile | undefined;
 
   private constructor(
@@ -79,7 +90,7 @@ export class CredentialCache /* implements IDisposable */ {
       cacheDirectory = path.dirname(options.cacheFilePath);
       cacheFileName = options.cacheFilePath.slice(cacheDirectory.length + 1);
     } else {
-      cacheDirectory = RushUserConfiguration.getRushUserFolderPath();
+      cacheDirectory = `${User.getHomeFolder()}/${RUSH_USER_FOLDER_NAME}`;
       cacheFileName = DEFAULT_CACHE_FILENAME;
     }
     const cacheFilePath: string = `${cacheDirectory}/${cacheFileName}`;
@@ -108,7 +119,12 @@ export class CredentialCache /* implements IDisposable */ {
     options: ICredentialCacheOptions,
     doActionAsync: (credentialCache: CredentialCache) => Promise<void> | void
   ): Promise<void> {
-    await Utilities.usingAsync(async () => await CredentialCache.initializeAsync(options), doActionAsync);
+    const cache: CredentialCache = await CredentialCache.initializeAsync(options);
+    try {
+      await doActionAsync(cache);
+    } finally {
+      cache.dispose();
+    }
   }
 
   public setCacheEntry(cacheId: string, entry: ICredentialCacheEntry): void {
@@ -120,7 +136,7 @@ export class CredentialCache /* implements IDisposable */ {
     if (
       existingCacheEntry?.credential !== credential ||
       existingCacheEntry?.expires !== expiresMilliseconds ||
-      !objectsAreDeepEqual(existingCacheEntry?.credentialMetadata, credentialMetadata)
+      !Objects.areDeepEqual(existingCacheEntry?.credentialMetadata, credentialMetadata)
     ) {
       this._modified = true;
       this._cacheEntries.set(cacheId, {
@@ -190,6 +206,10 @@ export class CredentialCache /* implements IDisposable */ {
 
       this._modified = false;
     }
+  }
+
+  public [Symbol.dispose](): void {
+    this.dispose();
   }
 
   public dispose(): void {
