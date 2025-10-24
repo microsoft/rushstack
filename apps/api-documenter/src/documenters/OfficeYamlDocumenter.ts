@@ -106,8 +106,10 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     //
     // Hyperlink it like this:
     // \[ [API set: ExcelApi 1.1](http://bing.com?type=excel) \]
-    markup = markup.replace(/Api/, 'API');
-    return markup.replace(/\\\[(API set:[^\]]+)\\\]/, '\\[ [$1](' + this._getApiSetUrl(uid) + ') \\]');
+    return markup.replace(
+      /\\\[[Aa][Pp][Ii] set:([^\]]+)\\\]/,
+      '\\[ [API set:$1](' + this._getApiSetUrl(uid) + ') \\]'
+    );
   }
 
   // Gets the link to the API set based on product context. Seeks a case-insensitive match in the hash set.
