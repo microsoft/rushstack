@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-vscode-extension-plugin",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Heft plugin for building vscode extensions.",
   "repository": {
     "type": "git",

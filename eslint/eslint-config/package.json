@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-config",
-  "version": "4.5.2",
+  "version": "4.5.3",
   "description": "A TypeScript ESLint ruleset designed for large teams and projects",
   "license": "MIT",
   "repository": {
