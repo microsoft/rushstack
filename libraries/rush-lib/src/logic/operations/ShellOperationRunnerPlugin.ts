@@ -29,10 +29,10 @@ export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
         operations: Set<Operation>,
         context: ICreateOperationsContext
       ): Set<Operation> {
-        const { rushConfiguration, isInitial } = context;
+        const { rushConfiguration, isInitial, remainderArgs } = context;
 
         const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
-          getCustomParameterValuesByPhase();
+          getCustomParameterValuesByPhase(remainderArgs);
         for (const operation of operations) {
           const { associatedPhase: phase, associatedProject: project } = operation;
 
@@ -120,7 +120,9 @@ export function initializeShellOperationRunner(options: {
  * Memoizer for custom parameter values by phase
  * @returns A function that returns the custom parameter values for a given phase
  */
-export function getCustomParameterValuesByPhase(): (phase: IPhase) => ReadonlyArray<string> {
+export function getCustomParameterValuesByPhase(
+  remainderArgs?: ReadonlyArray<string>
+): (phase: IPhase) => ReadonlyArray<string> {
   const customParametersByPhase: Map<IPhase, string[]> = new Map();
 
   function getCustomParameterValuesForPhase(phase: IPhase): ReadonlyArray<string> {
@@ -129,6 +131,11 @@ export function getCustomParameterValuesByPhase(): (phase: IPhase) => ReadonlyAr
       customParameterValues = [];
       for (const tsCommandLineParameter of phase.associatedParameters) {
         tsCommandLineParameter.appendToArgList(customParameterValues);
+      }
+
+      // Add remainder arguments if they exist
+      if (remainderArgs && remainderArgs.length > 0) {
+        customParameterValues.push(...remainderArgs);
       }
 
       customParametersByPhase.set(phase, customParameterValues);
