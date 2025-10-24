@@ -343,6 +343,7 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
         if (internalSlotsMap.get(this) === undefined) {
             internalSlotsMap.set(this, {
               cwd: normalizeCwd(cwd),
+              flags: [],
               lastConfigArray: null,
               lastSourceCode: null,
               lastSuppressedMessages: [],
