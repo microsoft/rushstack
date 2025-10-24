@@ -2,6 +2,27 @@
   "name": "@rushstack/mcp-server",
   "entries": [
     {
+      "version": "0.3.3",
+      "tag": "@rushstack/mcp-server_v0.3.3",
+      "date": "Fri, 24 Oct 2025 00:13:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.18.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.19.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.1.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.2",
       "tag": "@rushstack/mcp-server_v0.3.2",
       "date": "Wed, 22 Oct 2025 00:57:54 GMT",

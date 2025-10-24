@@ -2,6 +2,21 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "4.5.3",
+      "tag": "@rushstack/package-deps-hash_v4.5.3",
+      "date": "Fri, 24 Oct 2025 00:13:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.18.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.5.2",
       "tag": "@rushstack/package-deps-hash_v4.5.2",
       "date": "Wed, 22 Oct 2025 00:57:54 GMT",
