@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "comment": "Fix an issue where suppressed rule violations still show up in the report in ESLint >=9.37.0.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch"
+}

@@ -273,8 +273,19 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   }
 
   outputFile += `
-    // --- BEGIN MONKEY PATCH ---
-    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode: args[0]?.node ?? currentNode, ruleId, problem })) return;
+    // --- BEGIN MONKEY PATCH ---`;
+  if (majorVersion >= 9 && minorVersion >= 37) {
+    outputFile += `
+    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode: args[0]?.node ?? currentNode, ruleId, problem })) {
+      report.messages.splice(report.messages.indexOf(problem), 1);
+      return;
+    }`;
+  } else {
+    outputFile += `
+    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode: args[0]?.node ?? currentNode, ruleId, problem })) return;`;
+  }
+
+  outputFile += `
     // --- END MONKEY PATCH ---`;
 
   //
