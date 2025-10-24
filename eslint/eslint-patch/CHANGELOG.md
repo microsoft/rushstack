@@ -1,6 +1,14 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Mon, 13 Oct 2025 15:13:02 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Oct 2025 11:22:09 GMT and should not be manually modified.
+
+## 1.14.1
+Fri, 24 Oct 2025 11:22:09 GMT
+
+### Patches
+
+- Fix an issue where suppressed rule violations still show up in the report in ESLint >=9.37.0.
+- Fix an issue where the ESLint process will crash when running in the ESLint VSCode extension in ESLint >=9.37.0.
 
 ## 1.14.0
 Mon, 13 Oct 2025 15:13:02 GMT

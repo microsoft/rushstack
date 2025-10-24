@@ -2,6 +2,21 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.14.1",
+      "tag": "@rushstack/eslint-patch_v1.14.1",
+      "date": "Fri, 24 Oct 2025 11:22:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where suppressed rule violations still show up in the report in ESLint >=9.37.0."
+          },
+          {
+            "comment": "Fix an issue where the ESLint process will crash when running in the ESLint VSCode extension in ESLint >=9.37.0."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.14.0",
       "tag": "@rushstack/eslint-patch_v1.14.0",
       "date": "Mon, 13 Oct 2025 15:13:02 GMT",

@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "4.5.3",
+      "tag": "@rushstack/eslint-config_v4.5.3",
+      "date": "Fri, 24 Oct 2025 11:22:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.14.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.5.2",
       "tag": "@rushstack/eslint-config_v4.5.2",
       "date": "Wed, 22 Oct 2025 00:57:54 GMT",
