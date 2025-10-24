@@ -638,7 +638,7 @@ Object {
           "shortName": "-b",
         },
         Object {
-          "description": "If this flag is specified, applied changes will be published to the NPM registry.",
+          "description": "If this flag is specified, applied changes will be published to the NPM registry. If the --pack flag is passed, this flag must also be included, otherwise tarballs will not be produced.",
           "environmentVariable": undefined,
           "kind": "Flag",
           "longName": "--publish",
@@ -694,7 +694,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "Packs projects into tarballs instead of publishing to npm repository. It can only be used when --include-all is specified. If this flag is specified, NPM registry related parameters will be ignored.",
+          "description": "Packs projects into tarballs instead of publishing to npm repository. It can only be used when --include-all is specified. If this flag is specified, NPM registry related parameters will be ignored.--publish must be specified to produce as tarballs, otherwise a dry run will be performed.",
           "environmentVariable": undefined,
           "kind": "Flag",
           "longName": "--pack",
