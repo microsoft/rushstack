@@ -319,6 +319,55 @@ importers:
         specifier: 5.8.2
         version: 5.8.2
 
+  ../../../apps/playwright-browser-tunnel:
+    dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
+      '@rushstack/ts-command-line':
+        specifier: workspace:*
+        version: link:../../libraries/ts-command-line
+      playwright:
+        specifier: 1.56.1
+        version: 1.56.1
+      semver:
+        specifier: ~7.5.4
+        version: 7.5.4
+      string-argv:
+        specifier: ~0.3.1
+        version: 0.3.2
+      ws:
+        specifier: ~8.14.1
+        version: 8.14.2
+    devDependencies:
+      '@playwright/test':
+        specifier: ~1.56.1
+        version: 1.56.1
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../heft
+      '@types/node':
+        specifier: 20.17.19
+        version: 20.17.19
+      '@types/semver':
+        specifier: 7.5.0
+        version: 7.5.0
+      '@types/ws':
+        specifier: 8.5.5
+        version: 8.5.5
+      eslint:
+        specifier: ~9.37.0
+        version: 9.37.0(supports-color@8.1.1)
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+      playwright-core:
+        specifier: ~1.56.1
+        version: 1.56.1
+
   ../../../apps/rundown:
     dependencies:
       '@rushstack/node-core-library':
@@ -10661,6 +10710,14 @@ packages:
     dependencies:
       mkdirp: 1.0.4
       rimraf: 3.0.2
+    dev: true
+
+  /@playwright/test@1.56.1:
+    resolution: {integrity: sha512-vSMYtL/zOcFpvJCW71Q/OEGQb7KYBPAdKh35WNSkaZA75JlAO8ED8UN6GUNTm3drWomcbcqRPFqQbLae8yBTdg==}
+    engines: {node: '>=18'}
+    hasBin: true
+    dependencies:
+      playwright: 1.56.1
     dev: true
 
   /@pmmmwh/react-refresh-webpack-plugin@0.5.11(react-refresh@0.11.0)(webpack@4.47.0):
@@ -21378,7 +21435,6 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
     requiresBuild: true
-    dev: true
     optional: true
 
   /fsevents@2.3.3:
@@ -25910,6 +25966,20 @@ packages:
     dependencies:
       find-up: 3.0.0
     dev: true
+
+  /playwright-core@1.56.1:
+    resolution: {integrity: sha512-hutraynyn31F+Bifme+Ps9Vq59hKuUCz7H1kDOcBs+2oGguKkWTU50bBWrtz34OUWmIwpBTWDxaRPXrIXkgvmQ==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  /playwright@1.56.1:
+    resolution: {integrity: sha512-aFi5B0WovBHTEvpM3DzXTUaeN6eN0qWnTkKx4NQaH4Wvcmc153PdaY2UBdSYKaGYw+UyWXSVyxDUg5DoPEttjw==}
+    engines: {node: '>=18'}
+    hasBin: true
+    dependencies:
+      playwright-core: 1.56.1
+    optionalDependencies:
+      fsevents: 2.3.2
 
   /pnp-webpack-plugin@1.6.4(typescript@5.8.2):
     resolution: {integrity: sha512-7Wjy+9E3WwLOEL30D+m8TSTF7qJJUJLONBnwQp0518siuMxUQUbgZwssaFX+QKlZkjHZcw/IpZCt/H0srrntSg==}
