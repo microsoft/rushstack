@@ -91,6 +91,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@playwright/test",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@pnpm/dependency-path",
       "allowedCategories": [ "libraries" ]
     },
@@ -888,6 +892,14 @@
     },
     {
       "name": "package-json",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "playwright",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "playwright-core",
       "allowedCategories": [ "libraries" ]
     },
     {
