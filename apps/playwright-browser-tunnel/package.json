@@ -1,0 +1,44 @@
+{
+  "name": "@rushstack/playwright-browser-tunnel",
+  "version": "0.0.1",
+  "description": "Run a remote Playwright Browser Tunnel. Useful in remote development environments.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "apps/playwright-browser-tunnel"
+  },
+  "main": "lib/index.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "engineStrict": true,
+  "homepage": "https://rushstack.io",
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "demo": "playwright test --config=playwright.config.ts"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
+    "@rushstack/ts-command-line": "workspace:*",
+    "string-argv": "~0.3.1",
+    "semver": "~7.5.4",
+    "ws": "~8.14.1",
+    "playwright": "1.56.1"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*",
+    "@types/semver": "7.5.0",
+    "@types/ws": "8.5.5",
+    "playwright-core": "~1.56.1",
+    "@playwright/test": "~1.56.1",
+    "@types/node": "20.17.19"
+  },
+  "peerDependencies": {
+    "playwright-core": "~1.56.1"
+  }
+}

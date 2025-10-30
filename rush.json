@@ -467,6 +467,12 @@
       "reviewCategory": "libraries"
     },
     {
+      "packageName": "@rushstack/playwright-browser-tunnel",
+      "projectFolder": "apps/playwright-browser-tunnel",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/rush-themed-ui",
       "projectFolder": "libraries/rush-themed-ui",
       "reviewCategory": "libraries"
@@ -1462,6 +1468,12 @@
     {
       "packageName": "debug-certificate-manager",
       "projectFolder": "vscode-extensions/debug-certificate-manager-vscode-extension",
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"]
+    },
+    {
+      "packageName": "playwright-on-codespaces",
+      "projectFolder": "vscode-extensions/playwright-on-codespaces-vscode-extension",
       "reviewCategory": "vscode-extensions",
       "tags": ["vsix"]
     },

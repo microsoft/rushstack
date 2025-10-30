@@ -1,0 +1,113 @@
+{
+  "name": "playwright-on-codespaces",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "vscode-extensions/playwright-on-codespaces-vscode-extension"
+  },
+  "license": "MIT",
+  "publisher": "ms-RushStack",
+  "preview": true,
+  "displayName": "Playwright on Codespaces",
+  "description": "VS Code extension to enable Playwright testing in GitHub Codespaces.",
+  "homepage": "https://github.com/microsoft/rushstack/tree/main/vscode-extensions/playwright-on-codespaces-vscode-extension",
+  "icon": "assets/extension-icon.png",
+  "extensionKind": [
+    "ui"
+  ],
+  "enabledApiProposals": [],
+  "categories": [
+    "Other",
+    "Testing"
+  ],
+  "keywords": [],
+  "galleryBanner": {
+    "color": "#f0f0f0",
+    "theme": "light"
+  },
+  "engines": {
+    "vscode": "^1.103.0"
+  },
+  "main": "./extension.js",
+  "scripts": {
+    "build": "heft build --clean",
+    "build:watch": "heft build-watch",
+    "start": "heft start",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": ""
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "playwright-tunnel.start",
+        "title": "Start Playwright Browser Tunnel",
+        "category": "Playwright"
+      },
+      {
+        "command": "playwright-tunnel.stop",
+        "title": "Stop Playwright Browser Tunnel",
+        "category": "Playwright"
+      },
+      {
+        "command": "playwright-tunnel.manageAllowlist",
+        "title": "Manage Launch Options Allowlist",
+        "category": "Playwright on Codespaces"
+      },
+      {
+        "command": "playwright-tunnel.showLog",
+        "title": "Show Log",
+        "category": "Playwright on Codespaces"
+      },
+      {
+        "command": "playwright-tunnel.showSettings",
+        "title": "Show Settings",
+        "category": "Playwright on Codespaces"
+      },
+      {
+        "command": "playwright-tunnel.showMenu",
+        "title": "Show Tunnel Menu",
+        "category": "Playwright on Codespaces"
+      }
+    ],
+    "configuration": {
+      "title": "Playwright Browser Tunnel",
+      "properties": {
+        "playwright-tunnel.autoStart": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically start the Playwright browser tunnel when the extension activates. For security, this is disabled by default."
+        },
+        "playwright-tunnel.promptBeforeLaunch": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a confirmation prompt before launching the browser server with the requested launch options. This helps protect against potentially malicious launch options from compromised environments."
+        },
+        "playwright-tunnel.tunnelPort": {
+          "type": "number",
+          "default": 3000,
+          "description": "Port for the browser tunnel server"
+        }
+      }
+    }
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "dependencies": {
+    "@rushstack/playwright-browser-tunnel": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
+    "@rushstack/vscode-shared": "workspace:*",
+    "playwright-core": "~1.56.1",
+    "tslib": "~2.8.1"
+  },
+  "devDependencies": {
+    "@rushstack/heft-vscode-extension-rig": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/node": "20.17.19",
+    "@types/vscode": "1.103.0",
+    "@types/webpack-env": "1.18.8"
+  }
+}
