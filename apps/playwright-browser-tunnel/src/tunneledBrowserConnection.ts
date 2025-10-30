@@ -90,6 +90,7 @@ export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBr
   // Local HTTP + WebSocket server where the playwright client will connect providing params
   const httpServer: HttpServer = new HttpServer();
   await httpServer.listen();
+  console.log(`Remote WebSocket server listening on ws://localhost:${LISTEN_PORT}`);
 
   const localProxyWs: WebSocketServer = httpServer.wsServer;
   const localProxyWsEndpoint: string = httpServer.endpoint;
@@ -115,10 +116,6 @@ export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBr
   }
 
   return new Promise((resolve) => {
-    remoteWsServer.on('listening', () => {
-      console.log(`Remote WebSocket server listening on ws://localhost:${LISTEN_PORT}`);
-    });
-
     remoteWsServer.on('error', (error) => {
       console.error(`Remote WebSocket server error: ${error}`);
     });
