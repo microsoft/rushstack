@@ -21,13 +21,13 @@ export namespace n1 {
         export function someFunction2(): SomeType2;
         // (undocumented)
         export type SomeType2 = number;
-            {};
+        export {};
     }
     // (undocumented)
     export function someFunction1(): SomeType1;
     // (undocumented)
     export type SomeType1 = number;
-        {};
+    export {};
 }
 
 // @public (undocumented)
