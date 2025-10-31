@@ -4,6 +4,8 @@
 
 ```ts
 
+/** @ts-ignore */
+import { Invalid as Invalid_2 } from 'maybe-invalid-import';
 import type { Lib1Class } from 'api-extractor-lib1-test';
 import { Lib1Interface } from 'api-extractor-lib1-test';
 
@@ -18,6 +20,11 @@ export interface B extends Lib1Interface {
 // @public (undocumented)
 export interface C extends Lib1Interface {
 }
+
+// Warning: (ae-forgotten-export) The symbol "Invalid" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type MaybeImported = [0] extends [1 & Invalid] ? never : Invalid;
 
 // (No @packageDocumentation comment for this package)
 

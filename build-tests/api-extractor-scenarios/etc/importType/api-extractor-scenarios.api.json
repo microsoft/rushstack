@@ -264,6 +264,46 @@
               "endIndex": 2
             }
           ]
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "api-extractor-scenarios!MaybeImported:type",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MaybeImported = "
+            },
+            {
+              "kind": "Content",
+              "text": "[0] extends [1 & "
+            },
+            {
+              "kind": "Reference",
+              "text": "Invalid",
+              "canonicalReference": "api-extractor-scenarios!~Invalid:type"
+            },
+            {
+              "kind": "Content",
+              "text": "] ? never : "
+            },
+            {
+              "kind": "Reference",
+              "text": "Invalid",
+              "canonicalReference": "api-extractor-scenarios!~Invalid:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/importType/index.ts",
+          "releaseTag": "Public",
+          "name": "MaybeImported",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 5
+          }
         }
       ]
     }

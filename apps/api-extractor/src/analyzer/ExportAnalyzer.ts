@@ -9,7 +9,7 @@ import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
 import { AstImport, type IAstImportOptions, AstImportKind } from './AstImport';
 import { AstModule, type IAstModuleExportInfo } from './AstModule';
-import { TypeScriptInternals } from './TypeScriptInternals';
+import { CommentDirectiveType, TypeScriptInternals } from './TypeScriptInternals';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 import type { IFetchAstSymbolOptions } from './AstSymbolTable';
 import type { AstEntity } from './AstEntity';
@@ -460,7 +460,7 @@ export class ExportAnalyzer {
         exportName = SyntaxHelpers.makeCamelCaseIdentifier(externalModulePath);
       }
 
-      return this._fetchAstImport(undefined, {
+      return this._fetchAstImport(undefined, node, {
         importKind: AstImportKind.ImportType,
         exportName: exportName,
         modulePath: externalModulePath,
@@ -587,7 +587,7 @@ export class ExportAnalyzer {
         const externalModulePath: string | undefined = this._tryGetExternalModulePath(exportDeclaration);
 
         if (externalModulePath !== undefined) {
-          return this._fetchAstImport(declarationSymbol, {
+          return this._fetchAstImport(declarationSymbol, declaration, {
             importKind: AstImportKind.NamedImport,
             modulePath: externalModulePath,
             exportName: exportName,
@@ -653,7 +653,7 @@ export class ExportAnalyzer {
 
         // Here importSymbol=undefined because {@inheritDoc} and such are not going to work correctly for
         // a package or source file.
-        return this._fetchAstImport(undefined, {
+        return this._fetchAstImport(undefined, importDeclaration, {
           importKind: AstImportKind.StarImport,
           exportName: declarationSymbol.name,
           modulePath: externalModulePath,
@@ -686,7 +686,7 @@ export class ExportAnalyzer {
         const exportName: string = (importSpecifier.propertyName || importSpecifier.name).getText().trim();
 
         if (externalModulePath !== undefined) {
-          return this._fetchAstImport(declarationSymbol, {
+          return this._fetchAstImport(declarationSymbol, declaration, {
             importKind: AstImportKind.NamedImport,
             modulePath: externalModulePath,
             exportName: exportName,
@@ -720,7 +720,7 @@ export class ExportAnalyzer {
           : ts.InternalSymbolName.Default;
 
         if (externalModulePath !== undefined) {
-          return this._fetchAstImport(declarationSymbol, {
+          return this._fetchAstImport(declarationSymbol, declaration, {
             importKind: AstImportKind.DefaultImport,
             modulePath: externalModulePath,
             exportName,
@@ -762,7 +762,7 @@ export class ExportAnalyzer {
             declaration.moduleReference.expression
           );
 
-          return this._fetchAstImport(declarationSymbol, {
+          return this._fetchAstImport(declarationSymbol, declaration, {
             importKind: AstImportKind.EqualsImport,
             modulePath: externalModuleName,
             exportName: variableName,
@@ -874,7 +874,7 @@ export class ExportAnalyzer {
         if (starExportedModule.externalModulePath !== undefined) {
           // This entity was obtained from an external module, so return an AstImport instead
           const astSymbol: AstSymbol = astEntity as AstSymbol;
-          return this._fetchAstImport(astSymbol.followedSymbol, {
+          return this._fetchAstImport(astSymbol.followedSymbol, undefined, {
             importKind: AstImportKind.NamedImport,
             modulePath: starExportedModule.externalModulePath,
             exportName: exportName,
@@ -965,7 +965,11 @@ export class ExportAnalyzer {
     return specifierAstModule;
   }
 
-  private _fetchAstImport(importSymbol: ts.Symbol | undefined, options: IAstImportOptions): AstImport {
+  private _fetchAstImport(
+    importSymbol: ts.Symbol | undefined,
+    importNode: ts.Node | undefined,
+    options: IAstImportOptions
+  ): AstImport {
     const key: string = AstImport.getKey(options);
 
     let astImport: AstImport | undefined = this._astImportsByKey.get(key);
@@ -989,6 +993,27 @@ export class ExportAnalyzer {
       // then the .d.ts rollup will NOT use "import type".
       if (!options.isTypeOnly) {
         astImport.isTypeOnlyEverywhere = false;
+      }
+    }
+
+    if (importNode && !astImport.isTsIgnored) {
+      const sourceFile: ts.SourceFile = importNode.getSourceFile();
+      for (const commentDirective of TypeScriptInternals.getCommentDirectives(sourceFile)) {
+        if (commentDirective.type !== CommentDirectiveType.Ignore) continue;
+        /* Directive comments apply to the first line after them that isn't whitespace or a single line comment */
+        const trailingCommentsAndWhitespace: number =
+          sourceFile
+            .getText()
+            .slice(commentDirective.range.end)
+            .match(/^(\/\/.*|[\t\v\f\ufeff\p{Zs}]|\r?\n|[\r\u2028\u2029])*/u)?.[0].length ?? 0;
+        if (
+          sourceFile.getLineAndCharacterOfPosition(importNode.getStart()).line ===
+          sourceFile.getLineAndCharacterOfPosition(commentDirective.range.end + trailingCommentsAndWhitespace)
+            .line
+        ) {
+          astImport.isTsIgnored = true;
+          break;
+        }
       }
     }
 
