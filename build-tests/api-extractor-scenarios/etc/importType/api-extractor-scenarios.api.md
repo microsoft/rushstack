@@ -26,6 +26,10 @@ export interface C extends Lib1Interface {
 // @public (undocumented)
 export type MaybeImported = [0] extends [1 & Invalid] ? never : Invalid;
 
+// Warnings were encountered during analysis:
+//
+// src/importType/index.ts:9:5 - (tsdoc-characters-after-block-tag) The token "@ts" looks like a TSDoc tag but contains an invalid character "-"; if it is not a tag, use a backslash to escape the "@"
+
 // (No @packageDocumentation comment for this package)
 
 ```
