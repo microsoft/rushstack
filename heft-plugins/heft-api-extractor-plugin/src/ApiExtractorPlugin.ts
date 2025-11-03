@@ -57,7 +57,7 @@ export interface IApiExtractorTaskConfiguration {
    * a non-local build, regardless of the verbosity level. This corresponds to API Extractor's
    * `IExtractorInvokeOptions.enableApiReportConsoleDiff` API option. This option defaults to false
    */
-  enableApiReportConsoleDiff?: boolean;
+  enableApiReportDiff?: boolean;
 }
 
 export default class ApiExtractorPlugin implements IHeftTaskPlugin {
@@ -168,14 +168,11 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     apiExtractor: typeof TApiExtractor,
     apiExtractorConfiguration: TApiExtractor.ExtractorConfig
   ): Promise<void> {
-    const {
-      runInWatchMode,
-      useProjectTypescriptVersion,
-      enableApiReportConsoleDiff: enableApiReportDiff
-    } = (await heftConfiguration.tryLoadProjectConfigurationFileAsync(
-      API_EXTRACTOR_CONFIG_SPECIFICATION,
-      taskSession.logger.terminal
-    )) ?? {};
+    const { runInWatchMode, useProjectTypescriptVersion, enableApiReportDiff } =
+      (await heftConfiguration.tryLoadProjectConfigurationFileAsync(
+        API_EXTRACTOR_CONFIG_SPECIFICATION,
+        taskSession.logger.terminal
+      )) ?? {};
 
     if (runOptions.requestRun) {
       if (!runInWatchMode) {
