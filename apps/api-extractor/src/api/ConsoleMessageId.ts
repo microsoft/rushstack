@@ -63,9 +63,7 @@ export enum ConsoleMessageId {
 
   /**
    * Changes to the API report:
-   * ____
-   * ____
-   * ____
+   * ___
    */
   ApiReportDiff = 'console-api-report-diff',
 
