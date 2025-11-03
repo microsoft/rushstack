@@ -202,6 +202,26 @@ export class Extractor {
    */
   public static invoke(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): ExtractorResult {
     const {
+      packageFolder,
+      messages,
+      tsdocConfiguration,
+      tsdocConfigFile: { filePath: tsdocConfigFilePath, fileNotFound: tsdocConfigFileNotFound },
+      apiJsonFilePath,
+      newlineKind,
+      reportTempFolder,
+      reportFolder,
+      apiReportEnabled,
+      reportConfigs,
+      testMode,
+      rollupEnabled,
+      publicTrimmedFilePath,
+      alphaTrimmedFilePath,
+      betaTrimmedFilePath,
+      untrimmedFilePath,
+      tsdocMetadataEnabled,
+      tsdocMetadataFilePath
+    } = extractorConfig;
+    const {
       localBuild = false,
       compilerState = CompilerState.create(extractorConfig, options),
       messageCallback,
@@ -213,20 +233,20 @@ export class Extractor {
     const sourceMapper: SourceMapper = new SourceMapper();
 
     const messageRouter: MessageRouter = new MessageRouter({
-      workingPackageFolder: extractorConfig.packageFolder,
+      workingPackageFolder: packageFolder,
       messageCallback,
-      messagesConfig: extractorConfig.messages || {},
+      messagesConfig: messages || {},
       showVerboseMessages,
       showDiagnostics,
-      tsdocConfiguration: extractorConfig.tsdocConfiguration,
+      tsdocConfiguration,
       sourceMapper
     });
 
-    if (extractorConfig.tsdocConfigFile.filePath && !extractorConfig.tsdocConfigFile.fileNotFound) {
-      if (!Path.isEqual(extractorConfig.tsdocConfigFile.filePath, ExtractorConfig._tsdocBaseFilePath)) {
+    if (tsdocConfigFilePath && !tsdocConfigFileNotFound) {
+      if (!Path.isEqual(tsdocConfigFilePath, ExtractorConfig._tsdocBaseFilePath)) {
         messageRouter.logVerbose(
           ConsoleMessageId.UsingCustomTSDocConfig,
-          'Using custom TSDoc config from ' + extractorConfig.tsdocConfigFile.filePath
+          `Using custom TSDoc config from ${tsdocConfigFilePath}`
         );
       }
     }
@@ -248,9 +268,7 @@ export class Extractor {
 
       messageRouter.logDiagnosticHeader('TSDoc configuration');
       // Convert the TSDocConfiguration into a tsdoc.json representation
-      const combinedConfigFile: TSDocConfigFile = TSDocConfigFile.loadFromParser(
-        extractorConfig.tsdocConfiguration
-      );
+      const combinedConfigFile: TSDocConfigFile = TSDocConfigFile.loadFromParser(tsdocConfiguration);
       const serializedTSDocConfig: object = MessageRouter.buildJsonDumpObject(
         combinedConfigFile.saveToObject()
       );
@@ -278,17 +296,14 @@ export class Extractor {
     }
 
     if (modelBuilder.docModelEnabled) {
-      messageRouter.logVerbose(
-        ConsoleMessageId.WritingDocModelFile,
-        'Writing: ' + extractorConfig.apiJsonFilePath
-      );
-      apiPackage.saveToJsonFile(extractorConfig.apiJsonFilePath, {
+      messageRouter.logVerbose(ConsoleMessageId.WritingDocModelFile, `Writing: ${apiJsonFilePath}`);
+      apiPackage.saveToJsonFile(apiJsonFilePath, {
         toolPackage: Extractor.packageName,
         toolVersion: Extractor.version,
 
-        newlineConversion: extractorConfig.newlineKind,
+        newlineConversion: newlineKind,
         ensureFolderExists: true,
-        testMode: extractorConfig.testMode
+        testMode
       });
     }
 
@@ -297,8 +312,8 @@ export class Extractor {
         collector,
         extractorConfig,
         messageRouter,
-        extractorConfig.reportTempFolder,
-        extractorConfig.reportFolder,
+        reportTempFolder,
+        reportFolder,
         reportConfig,
         localBuild,
         enableApiReportConsoleDiff
@@ -306,45 +321,42 @@ export class Extractor {
     }
 
     let anyReportChanged: boolean = false;
-    if (extractorConfig.apiReportEnabled) {
-      for (const reportConfig of extractorConfig.reportConfigs) {
+    if (apiReportEnabled) {
+      for (const reportConfig of reportConfigs) {
         anyReportChanged = writeApiReport(reportConfig) || anyReportChanged;
       }
     }
 
-    if (extractorConfig.rollupEnabled) {
+    if (rollupEnabled) {
       Extractor._generateRollupDtsFile(
         collector,
-        extractorConfig.publicTrimmedFilePath,
+        publicTrimmedFilePath,
         DtsRollupKind.PublicRelease,
-        extractorConfig.newlineKind
+        newlineKind
       );
       Extractor._generateRollupDtsFile(
         collector,
-        extractorConfig.alphaTrimmedFilePath,
+        alphaTrimmedFilePath,
         DtsRollupKind.AlphaRelease,
-        extractorConfig.newlineKind
+        newlineKind
       );
       Extractor._generateRollupDtsFile(
         collector,
-        extractorConfig.betaTrimmedFilePath,
+        betaTrimmedFilePath,
         DtsRollupKind.BetaRelease,
-        extractorConfig.newlineKind
+        newlineKind
       );
       Extractor._generateRollupDtsFile(
         collector,
-        extractorConfig.untrimmedFilePath,
+        untrimmedFilePath,
         DtsRollupKind.InternalRelease,
-        extractorConfig.newlineKind
+        newlineKind
       );
     }
 
-    if (extractorConfig.tsdocMetadataEnabled) {
+    if (tsdocMetadataEnabled) {
       // Write the tsdoc-metadata.json file for this project
-      PackageMetadataManager.writeTsdocMetadataFile(
-        extractorConfig.tsdocMetadataFilePath,
-        extractorConfig.newlineKind
-      );
+      PackageMetadataManager.writeTsdocMetadataFile(tsdocMetadataFilePath, newlineKind);
     }
 
     // Show all the messages that we collected during analysis
