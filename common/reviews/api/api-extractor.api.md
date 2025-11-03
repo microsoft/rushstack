@@ -28,6 +28,7 @@ export class CompilerState {
 export enum ConsoleMessageId {
     ApiReportCopied = "console-api-report-copied",
     ApiReportCreated = "console-api-report-created",
+    ApiReportDiff = "console-api-report-diff",
     ApiReportFolderMissing = "console-api-report-folder-missing",
     ApiReportNotCopied = "console-api-report-not-copied",
     ApiReportUnchanged = "console-api-report-unchanged",
@@ -285,6 +286,7 @@ export interface IExtractorConfigPrepareOptions {
 
 // @public
 export interface IExtractorInvokeOptions {
+    alwaysShowChangedApiReportDiffOnNonLocalBuild?: boolean;
     compilerState?: CompilerState;
     localBuild?: boolean;
     messageCallback?: (message: ExtractorMessage) => void;

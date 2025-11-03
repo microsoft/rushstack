@@ -11,7 +11,7 @@ import type { ApiPackage } from '@microsoft/api-extractor-model';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 import {
   FileSystem,
-  type NewlineKind,
+  NewlineKind,
   PackageJsonLookup,
   type IPackageJson,
   type INodePackageJson,
@@ -91,6 +91,15 @@ export interface IExtractorInvokeOptions {
    * the STDERR/STDOUT console.
    */
   messageCallback?: (message: ExtractorMessage) => void;
+
+  /**
+   * If true, then when running a non-local build, the differences between the
+   * actual and expected API reports will be displayed in the console.
+   *
+   * @remarks
+   * Note that the diff is always shown in verbose mode and is not shown if the destination report file is missing.
+   */
+  alwaysShowChangedApiReportDiffOnNonLocalBuild?: boolean;
 }
 
 /**
@@ -192,27 +201,23 @@ export class Extractor {
    * Invoke API Extractor using an already prepared `ExtractorConfig` object.
    */
   public static invoke(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): ExtractorResult {
-    if (!options) {
-      options = {};
-    }
-
-    const localBuild: boolean = options.localBuild || false;
-
-    let compilerState: CompilerState | undefined;
-    if (options.compilerState) {
-      compilerState = options.compilerState;
-    } else {
-      compilerState = CompilerState.create(extractorConfig, options);
-    }
+    const {
+      localBuild = false,
+      compilerState = CompilerState.create(extractorConfig, options),
+      messageCallback,
+      showVerboseMessages = false,
+      showDiagnostics = false,
+      alwaysShowChangedApiReportDiffOnNonLocalBuild = false
+    } = options ?? {};
 
     const sourceMapper: SourceMapper = new SourceMapper();
 
     const messageRouter: MessageRouter = new MessageRouter({
       workingPackageFolder: extractorConfig.packageFolder,
-      messageCallback: options.messageCallback,
+      messageCallback,
       messagesConfig: extractorConfig.messages || {},
-      showVerboseMessages: !!options.showVerboseMessages,
-      showDiagnostics: !!options.showDiagnostics,
+      showVerboseMessages,
+      showDiagnostics,
       tsdocConfiguration: extractorConfig.tsdocConfiguration,
       sourceMapper
     });
@@ -295,7 +300,8 @@ export class Extractor {
         extractorConfig.reportTempFolder,
         extractorConfig.reportFolder,
         reportConfig,
-        localBuild
+        localBuild,
+        alwaysShowChangedApiReportDiffOnNonLocalBuild
       );
     }
 
@@ -373,6 +379,7 @@ export class Extractor {
    * @param reportDirectoryPath - The path to the directory under which the existing report file is located, and to
    * which the new report will be written post-comparison.
    * @param reportConfig - API report configuration, including its file name and {@link ApiReportVariant}.
+   * @param alwaysShowChangedApiReportDiffOnNonLocalBuild - {@link IExtractorInvokeOptions.alwaysShowChangedApiReportDiffOnNonLocalBuild}
    *
    * @returns Whether or not the newly generated report differs from the existing report (if one exists).
    */
@@ -383,7 +390,8 @@ export class Extractor {
     reportTempDirectoryPath: string,
     reportDirectoryPath: string,
     reportConfig: IExtractorConfigApiReport,
-    localBuild: boolean
+    localBuild: boolean,
+    alwaysShowChangedApiReportDiffOnNonLocalBuild: boolean
   ): boolean {
     let apiReportChanged: boolean = false;
 
@@ -411,7 +419,9 @@ export class Extractor {
 
     // Compare it against the expected file
     if (FileSystem.exists(expectedApiReportPath)) {
-      const expectedApiReportContent: string = FileSystem.readFile(expectedApiReportPath);
+      const expectedApiReportContent: string = FileSystem.readFile(expectedApiReportPath, {
+        convertLineEndings: NewlineKind.Lf
+      });
 
       if (
         !ApiReportGenerator.areEquivalentApiFileContents(actualApiReportContent, expectedApiReportContent)
@@ -427,6 +437,26 @@ export class Extractor {
               ` or perform a local build (which does this automatically).` +
               ` See the Git repo documentation for more info.`
           );
+
+          if (messageRouter.showVerboseMessages || alwaysShowChangedApiReportDiffOnNonLocalBuild) {
+            const Diff: typeof import('diff') = require('diff');
+            const patch: import('diff').StructuredPatch = Diff.structuredPatch(
+              expectedApiReportShortPath,
+              actualApiReportShortPath,
+              expectedApiReportContent,
+              actualApiReportContent
+            );
+            const logFunction:
+              | (typeof MessageRouter.prototype)['logWarning']
+              | (typeof MessageRouter.prototype)['logVerbose'] = alwaysShowChangedApiReportDiffOnNonLocalBuild
+              ? messageRouter.logWarning.bind(messageRouter)
+              : messageRouter.logVerbose.bind(messageRouter);
+
+            logFunction(
+              ConsoleMessageId.ApiReportDiff,
+              'Changes to the API report:\n' + Diff.formatPatch(patch)
+            );
+          }
         } else {
           // For a local build, just copy the file automatically.
           messageRouter.logWarning(
