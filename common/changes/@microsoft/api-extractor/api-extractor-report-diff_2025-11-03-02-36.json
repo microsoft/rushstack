@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Print a diff of the API report file if it's changed in a non-local build in verbose mode or if the new `enableApiReportConsoleDiff` extractor option is set to `true`.",
+      "comment": "Add a new setting `IExtractorInvokeOptions.enableApiReportConsoleDiff` that makes build logs easier to diagnose by printing a diff of any changes to API report files (*.api.md).",
       "type": "minor"
     }
   ],
