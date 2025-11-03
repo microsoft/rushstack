@@ -2875,6 +2875,11 @@ packages:
     engines: {node: '>=0.3.1'}
     dev: true
 
+  /diff@8.0.2:
+    resolution: {integrity: sha512-sSuxWU5j5SR9QQji/o2qMvqRNYRDOcBTgsJ/DeCf4iSN4gW+gNMXM7wFIP+fdXZxoNiAnHUTGjCr+TSWXdRDKg==}
+    engines: {node: '>=0.3.1'}
+    dev: true
+
   /dir-glob@3.0.1:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
@@ -7624,6 +7629,7 @@ packages:
       '@rushstack/rig-package': file:../../../libraries/rig-package
       '@rushstack/terminal': file:../../../libraries/terminal(@types/node@20.17.19)
       '@rushstack/ts-command-line': file:../../../libraries/ts-command-line(@types/node@20.17.19)
+      diff: 8.0.2
       lodash: 4.17.21
       minimatch: 10.0.3
       resolve: 1.22.8
