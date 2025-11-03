@@ -77,40 +77,43 @@ export class ApiExtractorRunner {
     const extractorOptions: TApiExtractor.IExtractorInvokeOptions = {
       localBuild: !this._configuration.production,
       typescriptCompilerFolder: this._configuration.typescriptPackagePath,
+      // Always show verbose messages - we'll decide what to do with them in the callback
+      showVerboseMessages: true,
       messageCallback: (message: TApiExtractor.ExtractorMessage) => {
-        switch (message.logLevel) {
+        const { logLevel, sourceFilePath, messageId, text, sourceFileLine, sourceFileColumn } = message;
+        switch (logLevel) {
           case this._apiExtractor.ExtractorLogLevel.Error:
           case this._apiExtractor.ExtractorLogLevel.Warning: {
             let errorToEmit: Error | undefined;
-            if (message.sourceFilePath) {
-              errorToEmit = new FileError(`(${message.messageId}) ${message.text}`, {
-                absolutePath: message.sourceFilePath,
+            if (sourceFilePath) {
+              errorToEmit = new FileError(`(${messageId}) ${text}`, {
+                absolutePath: sourceFilePath,
                 projectFolder: this._configuration.buildFolder,
-                line: message.sourceFileLine,
-                column: message.sourceFileColumn
+                line: sourceFileLine,
+                column: sourceFileColumn
               });
             } else {
-              errorToEmit = new Error(message.text);
+              errorToEmit = new Error(text);
             }
 
-            if (message.logLevel === this._apiExtractor.ExtractorLogLevel.Error) {
+            if (logLevel === this._apiExtractor.ExtractorLogLevel.Error) {
               this._scopedLogger.emitError(errorToEmit);
-            } else if (message.logLevel === this._apiExtractor.ExtractorLogLevel.Warning) {
+            } else if (logLevel === this._apiExtractor.ExtractorLogLevel.Warning) {
               this._scopedLogger.emitWarning(errorToEmit);
             } else {
               // Should never happen, but just in case
-              throw new InternalError(`Unexpected log level: ${message.logLevel}`);
+              throw new InternalError(`Unexpected log level: ${logLevel}`);
             }
             break;
           }
 
           case this._apiExtractor.ExtractorLogLevel.Verbose: {
-            this._terminal.writeVerboseLine(message.text);
+            this._terminal.writeVerboseLine(text);
             break;
           }
 
           case this._apiExtractor.ExtractorLogLevel.Info: {
-            this._terminal.writeLine(message.text);
+            this._terminal.writeLine(text);
             break;
           }
 
@@ -120,9 +123,7 @@ export class ApiExtractorRunner {
           }
 
           default:
-            this._scopedLogger.emitError(
-              new Error(`Unexpected API Extractor log level: ${message.logLevel}`)
-            );
+            this._scopedLogger.emitError(new Error(`Unexpected API Extractor log level: ${logLevel}`));
         }
 
         message.handled = true;
