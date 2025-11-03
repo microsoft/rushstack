@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-api-extractor-plugin",
+      "comment": "Expose a `alwaysShowChangedApiReportDiffOnNonLocalBuild` config option to print a diff if the API report file exists and is changed during a non-local build. This is useful for diagnosing issues that only show up in CI.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-api-extractor-plugin"
+}
