@@ -466,7 +466,7 @@ export class Extractor {
 
             logFunction(
               ConsoleMessageId.ApiReportDiff,
-              'Changes to the API report:\n' + Diff.formatPatch(patch)
+              'Changes to the API report:\n\n' + Diff.formatPatch(patch)
             );
           }
         } else {
