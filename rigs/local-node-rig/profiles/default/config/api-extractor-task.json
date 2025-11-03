@@ -1,5 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/api-extractor-task.schema.json",
 
-  "extends": "@rushstack/heft-node-rig/profiles/default/config/api-extractor-task.json"
+  "extends": "@rushstack/heft-node-rig/profiles/default/config/api-extractor-task.json",
+
+  "alwaysShowChangedApiReportDiffOnNonLocalBuild": true
 }
