@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-api-extractor-plugin",
-      "comment": "Expose a `IExtractorInvokeOptions.enableApiReportConsoleDiff` config option to print a diff if the API report file exists and is changed during a non-local build. This is useful for diagnosing issues that only show up in CI.",
+      "comment": "Include a `enableApiReportDiff` option in the `config/api-extractor-task.json` config file that, when set to `true`, causes a diff of the API report (*.api.md) file is changed during a non-local build. This is useful for diagnosing issues that only show up in CI.",
       "type": "minor"
     }
   ],

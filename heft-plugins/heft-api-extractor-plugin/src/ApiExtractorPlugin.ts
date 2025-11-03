@@ -168,11 +168,14 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     apiExtractor: typeof TApiExtractor,
     apiExtractorConfiguration: TApiExtractor.ExtractorConfig
   ): Promise<void> {
-    const { runInWatchMode, useProjectTypescriptVersion, enableApiReportConsoleDiff } =
-      (await heftConfiguration.tryLoadProjectConfigurationFileAsync(
-        API_EXTRACTOR_CONFIG_SPECIFICATION,
-        taskSession.logger.terminal
-      )) ?? {};
+    const {
+      runInWatchMode,
+      useProjectTypescriptVersion,
+      enableApiReportConsoleDiff: enableApiReportDiff
+    } = (await heftConfiguration.tryLoadProjectConfigurationFileAsync(
+      API_EXTRACTOR_CONFIG_SPECIFICATION,
+      taskSession.logger.terminal
+    )) ?? {};
 
     if (runOptions.requestRun) {
       if (!runInWatchMode) {
@@ -202,7 +205,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
       buildFolder: heftConfiguration.buildFolderPath,
       production: taskSession.parameters.production,
       scopedLogger: taskSession.logger,
-      enableApiReportConsoleDiff
+      enableApiReportDiff
     });
   }
 }

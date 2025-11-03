@@ -43,7 +43,7 @@ export interface IApiExtractorRunnerConfiguration {
   /**
    * {@inheritdoc IApiExtractorTaskConfiguration.enableApiReportConsoleDiff}
    */
-  enableApiReportConsoleDiff: boolean | undefined;
+  enableApiReportDiff: boolean | undefined;
 }
 
 const MIN_SUPPORTED_MAJOR_VERSION: number = 7;
@@ -59,7 +59,7 @@ export async function invokeApiExtractorAsync(
     production,
     typescriptPackagePath,
     apiExtractorConfiguration,
-    enableApiReportConsoleDiff
+    enableApiReportDiff: enableApiReportConsoleDiff
   } = configuration;
   const { terminal } = scopedLogger;
 
