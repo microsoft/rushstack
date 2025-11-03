@@ -286,8 +286,8 @@ export interface IExtractorConfigPrepareOptions {
 
 // @public
 export interface IExtractorInvokeOptions {
-    alwaysShowChangedApiReportDiffOnNonLocalBuild?: boolean;
     compilerState?: CompilerState;
+    enableApiReportConsoleDiff?: boolean;
     localBuild?: boolean;
     messageCallback?: (message: ExtractorMessage) => void;
     showDiagnostics?: boolean;

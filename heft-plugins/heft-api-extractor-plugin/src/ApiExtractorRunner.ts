@@ -41,9 +41,9 @@ export interface IApiExtractorRunnerConfiguration {
   scopedLogger: IScopedLogger;
 
   /**
-   * {@inheritdoc IApiExtractorTaskConfiguration.alwaysShowChangedApiReportDiffOnNonLocalBuild}
+   * {@inheritdoc IApiExtractorTaskConfiguration.enableApiReportConsoleDiff}
    */
-  alwaysShowChangedApiReportDiffOnNonLocalBuild: boolean | undefined;
+  enableApiReportConsoleDiff: boolean | undefined;
 }
 
 const MIN_SUPPORTED_MAJOR_VERSION: number = 7;
@@ -59,7 +59,7 @@ export async function invokeApiExtractorAsync(
     production,
     typescriptPackagePath,
     apiExtractorConfiguration,
-    alwaysShowChangedApiReportDiffOnNonLocalBuild
+    enableApiReportConsoleDiff
   } = configuration;
   const { terminal } = scopedLogger;
 
@@ -80,7 +80,7 @@ export async function invokeApiExtractorAsync(
     typescriptCompilerFolder: typescriptPackagePath,
     // Always show verbose messages - we'll decide what to do with them in the callback
     showVerboseMessages: true,
-    alwaysShowChangedApiReportDiffOnNonLocalBuild,
+    enableApiReportConsoleDiff,
     messageCallback: (message: TApiExtractor.ExtractorMessage) => {
       const { logLevel, sourceFilePath, messageId, text, sourceFileLine, sourceFileColumn } = message;
       switch (logLevel) {

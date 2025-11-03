@@ -55,9 +55,9 @@ export interface IApiExtractorTaskConfiguration {
   /**
    * If set to true, API Extractor will print a diff of the API report file if it's changed in
    * a non-local build, regardless of the verbosity level. This corresponds to API Extractor's
-   * `IExtractorInvokeOptions.alwaysShowChangedApiReportDiffOnNonLocalBuild` API option. This option defaults to false
+   * `IExtractorInvokeOptions.enableApiReportConsoleDiff` API option. This option defaults to false
    */
-  alwaysShowChangedApiReportDiffOnNonLocalBuild?: boolean;
+  enableApiReportConsoleDiff?: boolean;
 }
 
 export default class ApiExtractorPlugin implements IHeftTaskPlugin {
@@ -168,7 +168,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     apiExtractor: typeof TApiExtractor,
     apiExtractorConfiguration: TApiExtractor.ExtractorConfig
   ): Promise<void> {
-    const { runInWatchMode, useProjectTypescriptVersion, alwaysShowChangedApiReportDiffOnNonLocalBuild } =
+    const { runInWatchMode, useProjectTypescriptVersion, enableApiReportConsoleDiff } =
       (await heftConfiguration.tryLoadProjectConfigurationFileAsync(
         API_EXTRACTOR_CONFIG_SPECIFICATION,
         taskSession.logger.terminal
@@ -202,7 +202,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
       buildFolder: heftConfiguration.buildFolderPath,
       production: taskSession.parameters.production,
       scopedLogger: taskSession.logger,
-      alwaysShowChangedApiReportDiffOnNonLocalBuild
+      enableApiReportConsoleDiff
     });
   }
 }

@@ -93,13 +93,13 @@ export interface IExtractorInvokeOptions {
   messageCallback?: (message: ExtractorMessage) => void;
 
   /**
-   * If true, then when running a non-local build, the differences between the
-   * actual and expected API reports will be displayed in the console.
+   * If true, then any differences between the actual and expected API reports will be
+   * printed on the console.
    *
    * @remarks
-   * Note that the diff is always shown in verbose mode and is not shown if the destination report file is missing.
+   * The diff is not printed if the expected API report file has not been created yet.
    */
-  alwaysShowChangedApiReportDiffOnNonLocalBuild?: boolean;
+  enableApiReportConsoleDiff?: boolean;
 }
 
 /**
@@ -207,7 +207,7 @@ export class Extractor {
       messageCallback,
       showVerboseMessages = false,
       showDiagnostics = false,
-      alwaysShowChangedApiReportDiffOnNonLocalBuild = false
+      enableApiReportConsoleDiff = false
     } = options ?? {};
 
     const sourceMapper: SourceMapper = new SourceMapper();
@@ -301,7 +301,7 @@ export class Extractor {
         extractorConfig.reportFolder,
         reportConfig,
         localBuild,
-        alwaysShowChangedApiReportDiffOnNonLocalBuild
+        enableApiReportConsoleDiff
       );
     }
 
@@ -379,7 +379,7 @@ export class Extractor {
    * @param reportDirectoryPath - The path to the directory under which the existing report file is located, and to
    * which the new report will be written post-comparison.
    * @param reportConfig - API report configuration, including its file name and {@link ApiReportVariant}.
-   * @param alwaysShowChangedApiReportDiffOnNonLocalBuild - {@link IExtractorInvokeOptions.alwaysShowChangedApiReportDiffOnNonLocalBuild}
+   * @param enableApiReportConsoleDiff - {@link IExtractorInvokeOptions.enableApiReportConsoleDiff}
    *
    * @returns Whether or not the newly generated report differs from the existing report (if one exists).
    */
@@ -391,7 +391,7 @@ export class Extractor {
     reportDirectoryPath: string,
     reportConfig: IExtractorConfigApiReport,
     localBuild: boolean,
-    alwaysShowChangedApiReportDiffOnNonLocalBuild: boolean
+    enableApiReportConsoleDiff: boolean
   ): boolean {
     let apiReportChanged: boolean = false;
 
@@ -438,7 +438,7 @@ export class Extractor {
               ` See the Git repo documentation for more info.`
           );
 
-          if (messageRouter.showVerboseMessages || alwaysShowChangedApiReportDiffOnNonLocalBuild) {
+          if (messageRouter.showVerboseMessages || enableApiReportConsoleDiff) {
             const Diff: typeof import('diff') = require('diff');
             const patch: import('diff').StructuredPatch = Diff.structuredPatch(
               expectedApiReportShortPath,
@@ -448,7 +448,7 @@ export class Extractor {
             );
             const logFunction:
               | (typeof MessageRouter.prototype)['logWarning']
-              | (typeof MessageRouter.prototype)['logVerbose'] = alwaysShowChangedApiReportDiffOnNonLocalBuild
+              | (typeof MessageRouter.prototype)['logVerbose'] = enableApiReportConsoleDiff
               ? messageRouter.logWarning.bind(messageRouter)
               : messageRouter.logVerbose.bind(messageRouter);
 

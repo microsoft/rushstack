@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Print a diff of the API report file if it's changed in a non-local build in verbose mode or if the new `alwaysShowChangedApiReportDiffOnNonLocalBuild` extractor option is set to `true`.",
+      "comment": "Print a diff of the API report file if it's changed in a non-local build in verbose mode or if the new `enableApiReportConsoleDiff` extractor option is set to `true`.",
       "type": "minor"
     }
   ],

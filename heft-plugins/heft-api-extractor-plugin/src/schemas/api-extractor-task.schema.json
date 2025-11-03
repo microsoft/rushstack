@@ -27,9 +27,9 @@
       "description": "If set to true, api-extractor will be run even in watch mode. This option defaults to false."
     },
 
-    "alwaysShowChangedApiReportDiffOnNonLocalBuild": {
+    "enableApiReportConsoleDiff": {
       "type": "boolean",
-      "description": "If set to true, API Extractor will print a diff of the API report file if it's changed in a non-local build, regardless of the verbosity level. This corresponds to API Extractor's `IExtractorInvokeOptions.alwaysShowChangedApiReportDiffOnNonLocalBuild` API option. This option defaults to false."
+      "description": "If set to true, API Extractor will print a diff of the API report file if it's changed in a non-local build, regardless of the verbosity level. This corresponds to API Extractor's `IExtractorInvokeOptions.enableApiReportConsoleDiff` API option. This option defaults to false."
     }
   }
 }
