@@ -53,11 +53,13 @@ export interface IApiExtractorTaskConfiguration {
   runInWatchMode?: boolean;
 
   /**
-   * If set to true, API Extractor will print a diff of the API report file if it's changed in
-   * a non-local build, regardless of the verbosity level. This corresponds to API Extractor's
-   * `IExtractorInvokeOptions.printApiReportDiff` API option. This option defaults to false
+   * Controls whether API Extractor prints a diff of the API report file if it's changed.
+   * If set to `"production"`, this will only be printed if Heft is run in `--production`
+   * mode, and if set to `"always"`, this will always be printed if the API report is changed.
+   * This corresponds to API Extractor's `IExtractorInvokeOptions.printApiReportDiff` API option.
+   * This option defaults to `"never"`.
    */
-  printApiReportDiff?: boolean;
+  printApiReportDiff?: 'production' | 'always' | 'never';
 }
 
 export default class ApiExtractorPlugin implements IHeftTaskPlugin {
@@ -168,11 +170,14 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     apiExtractor: typeof TApiExtractor,
     apiExtractorConfiguration: TApiExtractor.ExtractorConfig
   ): Promise<void> {
-    const { runInWatchMode, useProjectTypescriptVersion, printApiReportDiff } =
-      (await heftConfiguration.tryLoadProjectConfigurationFileAsync(
-        API_EXTRACTOR_CONFIG_SPECIFICATION,
-        taskSession.logger.terminal
-      )) ?? {};
+    const {
+      runInWatchMode,
+      useProjectTypescriptVersion,
+      printApiReportDiff: printApiReportDiffOption
+    } = (await heftConfiguration.tryLoadProjectConfigurationFileAsync(
+      API_EXTRACTOR_CONFIG_SPECIFICATION,
+      taskSession.logger.terminal
+    )) ?? {};
 
     if (runOptions.requestRun) {
       if (!runInWatchMode) {
@@ -194,13 +199,17 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
       );
     }
 
+    const production: boolean = taskSession.parameters.production;
+    const printApiReportDiff: boolean =
+      printApiReportDiffOption === 'always' || (printApiReportDiffOption === 'production' && production);
+
     // Run API Extractor
     await invokeApiExtractorAsync({
       apiExtractor,
       apiExtractorConfiguration,
       typescriptPackagePath,
       buildFolder: heftConfiguration.buildFolderPath,
-      production: taskSession.parameters.production,
+      production,
       scopedLogger: taskSession.logger,
       printApiReportDiff
     });

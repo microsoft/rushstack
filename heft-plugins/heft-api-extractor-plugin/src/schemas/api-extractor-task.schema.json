@@ -28,8 +28,9 @@
     },
 
     "printApiReportDiff": {
-      "type": "boolean",
-      "description": "If set to true, API Extractor will print a diff of the API report file if it's changed in a non-local build, regardless of the verbosity level. This corresponds to API Extractor's `IExtractorInvokeOptions.printApiReportDiff` API option. This option defaults to false."
+      "type": "string",
+      "description": "Controls whether API Extractor prints a diff of the API report file if it's changed. If set to `\"production\"`, this will only be printed if Heft is run in `--production` mode, and if set to `\"always\"`, this will always be printed if the API report is changed. This corresponds to API Extractor's `IExtractorInvokeOptions.printApiReportDiff` API option. This option defaults to `\"never\"`.",
+      "enum": ["always", "production", "never"]
     }
   }
 }
