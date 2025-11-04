@@ -4,7 +4,7 @@
 import * as Diff from 'diff';
 
 import { StringBuilder, Sort, FileSystem, Text, AlreadyReportedError } from '@rushstack/node-core-library';
-import { Terminal, ConsoleTerminalProvider, Colorize } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { RushConfiguration, type RushConfigurationProject, LockStepVersionPolicy } from '@microsoft/rush-lib';
 import { CommandLineAction, type CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
@@ -16,12 +16,16 @@ const README_FILENAME: string = 'README.md';
 export class ReadmeAction extends CommandLineAction {
   private readonly _verifyParameter: CommandLineFlagParameter;
 
-  public constructor() {
+  private readonly _terminal: ITerminal;
+
+  public constructor(terminal: ITerminal) {
     super({
       actionName: 'readme',
       summary: 'Generates README.md project table based on rush.json inventory',
       documentation: "Use this to update the repo's README.md"
     });
+
+    this._terminal = terminal;
 
     this._verifyParameter = this.defineFlagParameter({
       parameterLongName: '--verify',
@@ -154,7 +158,7 @@ export class ReadmeAction extends CommandLineAction {
     );
     const readmeIsUpToDate: boolean = diff.hunks.length === 0;
 
-    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+    const terminal: ITerminal = this._terminal;
 
     if (!readmeIsUpToDate) {
       if (this._verifyParameter.value) {

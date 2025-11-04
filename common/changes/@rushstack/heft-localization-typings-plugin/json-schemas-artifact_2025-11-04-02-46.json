@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/heft-localization-typings-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-localization-typings-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

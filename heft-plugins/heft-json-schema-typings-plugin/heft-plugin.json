@@ -5,7 +5,7 @@
     {
       "pluginName": "json-schema-typings-plugin",
       "entryPoint": "./lib/JsonSchemaTypingsPlugin",
-      "optionsSchema": "./lib/schemas/options.schema.json"
+      "optionsSchema": "./lib/schemas/heft-json-schema-typings-plugin.schema.json"
     }
   ]
 }

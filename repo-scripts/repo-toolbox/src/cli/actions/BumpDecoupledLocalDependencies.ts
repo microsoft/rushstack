@@ -4,21 +4,25 @@
 import type { ChildProcess } from 'node:child_process';
 
 import { Async, Executable, JsonFile } from '@rushstack/node-core-library';
-import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
+import type { ITerminal } from '@rushstack/terminal';
 import { DependencyType, RushConfiguration, type CommonVersionsConfiguration } from '@microsoft/rush-lib';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 
 export class BumpDecoupledLocalDependencies extends CommandLineAction {
-  public constructor() {
+  private readonly _terminal: ITerminal;
+
+  public constructor(terminal: ITerminal) {
     super({
       actionName: 'bump-decoupled-local-dependencies',
       summary: 'Updates decoupled local dependencies inside the repo.',
       documentation: ''
     });
+
+    this._terminal = terminal;
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+    const terminal: ITerminal = this._terminal;
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
       startingFolder: process.cwd()
     });
@@ -93,7 +97,7 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
     terminal.writeLine(`Updated ${rushConfiguration.rushJsonFile}`);
   }
 
-  private async _getLatestPublishedVersionAsync(terminal: Terminal, packageName: string): Promise<string> {
+  private async _getLatestPublishedVersionAsync(terminal: ITerminal, packageName: string): Promise<string> {
     return await new Promise((resolve: (result: string) => void, reject: (error: Error) => void) => {
       const childProcess: ChildProcess = Executable.spawn('npm', ['view', packageName, 'version'], {
         stdio: ['ignore', 'pipe', 'pipe']

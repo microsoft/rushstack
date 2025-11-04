@@ -5,7 +5,7 @@
     {
       "pluginName": "localization-typings-plugin",
       "entryPoint": "./lib/LocalizationTypingsPlugin",
-      "optionsSchema": "./lib/schemas/options.schema.json"
+      "optionsSchema": "./lib/schemas/heft-localization-typings-plugin.schema.json"
     }
   ]
 }

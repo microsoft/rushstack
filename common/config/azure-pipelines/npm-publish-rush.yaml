@@ -29,6 +29,9 @@ extends:
                 - output: pipelineArtifact
                   targetPath: $(Build.ArtifactStagingDirectory)/published-versions
                   artifactName: published-versions
+                - output: pipelineArtifact
+                  targetPath: $(Build.ArtifactStagingDirectory)/json-schemas
+                  artifactName: json-schemas
             steps:
               - checkout: self
                 persistCredentials: true
@@ -60,4 +63,4 @@ extends:
                   VersionPolicyName: rush
                   BranchName: $(SourceBranch)
 
-              - template: /common/config/azure-pipelines/templates/record-published-versions.yaml@self
+              - template: /common/config/azure-pipelines/templates/post-publish.yaml
