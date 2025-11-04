@@ -82,6 +82,9 @@ importers:
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../../libraries/ts-command-line
+      diff:
+        specifier: ~8.0.2
+        version: 8.0.2
       lodash:
         specifier: ~4.17.15
         version: 4.17.21
@@ -4213,15 +4216,12 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/ts-command-line
       diff:
-        specifier: ~5.0.0
-        version: 5.0.0
+        specifier: ~8.0.2
+        version: 8.0.2
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@types/diff':
-        specifier: 5.0.1
-        version: 5.0.1
       eslint:
         specifier: ~9.37.0
         version: 9.37.0(supports-color@8.1.1)
@@ -14197,10 +14197,6 @@ packages:
       '@types/node': 17.0.41
     dev: true
 
-  /@types/diff@5.0.1:
-    resolution: {integrity: sha512-XIpxU6Qdvp1ZE6Kr3yrkv1qgUab0fyf4mHYvW8N3Bx3PCsbN6or1q9/q72cv5jIFWolaGH08U9XyYoLLIykyKQ==}
-    dev: true
-
   /@types/eslint-scope@3.7.7:
     resolution: {integrity: sha512-MzMFlSLBqNF2gcHWO0G1vP/YQyfvrxZ0bF+u7mzUdZ1/xK4A4sru+nraZz5i3iEIk1l1uyicaDVTB4QbbEkAYg==}
     dependencies:
@@ -18759,6 +18755,12 @@ packages:
   /diff@5.0.0:
     resolution: {integrity: sha512-/VTCrvm5Z0JGty/BWHljh+BAiw3IK+2j87NGMu8Nwc/f48WoDAC395uomO9ZD117ZOBaHmkX1oyLvkVM/aIT3w==}
     engines: {node: '>=0.3.1'}
+    dev: true
+
+  /diff@8.0.2:
+    resolution: {integrity: sha512-sSuxWU5j5SR9QQji/o2qMvqRNYRDOcBTgsJ/DeCf4iSN4gW+gNMXM7wFIP+fdXZxoNiAnHUTGjCr+TSWXdRDKg==}
+    engines: {node: '>=0.3.1'}
+    dev: false
 
   /diffie-hellman@5.0.3:
     resolution: {integrity: sha512-kqag/Nl+f3GwyK25fhUMYj81BUOrZ9IuJsjIcDE5icNM9FJHAVm3VcUDxdLPoQtTuUylWm6ZIknYJwwaPxsUzg==}

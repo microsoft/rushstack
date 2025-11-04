@@ -11,7 +11,7 @@ import type {
   ConfigurationFile
 } from '@rushstack/heft';
 
-import { ApiExtractorRunner } from './ApiExtractorRunner';
+import { invokeApiExtractorAsync } from './ApiExtractorRunner';
 import apiExtractorConfigSchema from './schemas/api-extractor-task.schema.json';
 
 // eslint-disable-next-line @rushstack/no-new-null
@@ -51,6 +51,15 @@ export interface IApiExtractorTaskConfiguration {
    * If set to true, do a full run of api-extractor on every build.
    */
   runInWatchMode?: boolean;
+
+  /**
+   * Controls whether API Extractor prints a diff of the API report file if it's changed.
+   * If set to `"production"`, this will only be printed if Heft is run in `--production`
+   * mode, and if set to `"always"`, this will always be printed if the API report is changed.
+   * This corresponds to API Extractor's `IExtractorInvokeOptions.printApiReportDiff` API option.
+   * This option defaults to `"never"`.
+   */
+  printApiReportDiff?: 'production' | 'always' | 'never';
 }
 
 export default class ApiExtractorPlugin implements IHeftTaskPlugin {
@@ -161,14 +170,17 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     apiExtractor: typeof TApiExtractor,
     apiExtractorConfiguration: TApiExtractor.ExtractorConfig
   ): Promise<void> {
-    const apiExtractorTaskConfiguration: IApiExtractorTaskConfiguration | undefined =
-      await heftConfiguration.tryLoadProjectConfigurationFileAsync(
-        API_EXTRACTOR_CONFIG_SPECIFICATION,
-        taskSession.logger.terminal
-      );
+    const {
+      runInWatchMode,
+      useProjectTypescriptVersion,
+      printApiReportDiff: printApiReportDiffOption
+    } = (await heftConfiguration.tryLoadProjectConfigurationFileAsync(
+      API_EXTRACTOR_CONFIG_SPECIFICATION,
+      taskSession.logger.terminal
+    )) ?? {};
 
     if (runOptions.requestRun) {
-      if (!apiExtractorTaskConfiguration?.runInWatchMode) {
+      if (!runInWatchMode) {
         if (!this._printedWatchWarning) {
           this._printedWatchWarning = true;
           taskSession.logger.terminal.writeWarningLine(
@@ -180,23 +192,26 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     }
 
     let typescriptPackagePath: string | undefined;
-    if (apiExtractorTaskConfiguration?.useProjectTypescriptVersion) {
+    if (useProjectTypescriptVersion) {
       typescriptPackagePath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
         'typescript',
         taskSession.logger.terminal
       );
     }
 
-    const apiExtractorRunner: ApiExtractorRunner = new ApiExtractorRunner({
+    const production: boolean = taskSession.parameters.production;
+    const printApiReportDiff: boolean =
+      printApiReportDiffOption === 'always' || (printApiReportDiffOption === 'production' && production);
+
+    // Run API Extractor
+    await invokeApiExtractorAsync({
       apiExtractor,
       apiExtractorConfiguration,
       typescriptPackagePath,
       buildFolder: heftConfiguration.buildFolderPath,
-      production: taskSession.parameters.production,
-      scopedLogger: taskSession.logger
+      production,
+      scopedLogger: taskSession.logger,
+      printApiReportDiff
     });
-
-    // Run API Extractor
-    await apiExtractorRunner.invokeAsync();
   }
 }

@@ -62,6 +62,12 @@ export enum ConsoleMessageId {
   ApiReportNotCopied = 'console-api-report-not-copied',
 
   /**
+   * Changes to the API report:
+   * ___
+   */
+  ApiReportDiff = 'console-api-report-diff',
+
+  /**
    * "You have changed the public API signature for this project.  Updating ___"
    */
   ApiReportCopied = 'console-api-report-copied',

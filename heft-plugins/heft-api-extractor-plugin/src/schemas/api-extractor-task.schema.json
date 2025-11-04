@@ -25,6 +25,12 @@
     "runInWatchMode": {
       "type": "boolean",
       "description": "If set to true, api-extractor will be run even in watch mode. This option defaults to false."
+    },
+
+    "printApiReportDiff": {
+      "type": "string",
+      "description": "Controls whether API Extractor prints a diff of the API report file if it's changed. If set to `\"production\"`, this will only be printed if Heft is run in `--production` mode, and if set to `\"always\"`, this will always be printed if the API report is changed. This corresponds to API Extractor's `IExtractorInvokeOptions.printApiReportDiff` API option. This option defaults to `\"never\"`.",
+      "enum": ["always", "production", "never"]
     }
   }
 }
