@@ -449,26 +449,6 @@ export class Extractor {
               ` or perform a local build (which does this automatically).` +
               ` See the Git repo documentation for more info.`
           );
-
-          if (messageRouter.showVerboseMessages || printApiReportDiff) {
-            const Diff: typeof import('diff') = require('diff');
-            const patch: import('diff').StructuredPatch = Diff.structuredPatch(
-              expectedApiReportShortPath,
-              actualApiReportShortPath,
-              expectedApiReportContent,
-              actualApiReportContent
-            );
-            const logFunction:
-              | (typeof MessageRouter.prototype)['logWarning']
-              | (typeof MessageRouter.prototype)['logVerbose'] = printApiReportDiff
-              ? messageRouter.logWarning.bind(messageRouter)
-              : messageRouter.logVerbose.bind(messageRouter);
-
-            logFunction(
-              ConsoleMessageId.ApiReportDiff,
-              'Changes to the API report:\n\n' + Diff.formatPatch(patch)
-            );
-          }
         } else {
           // For a local build, just copy the file automatically.
           messageRouter.logWarning(
@@ -480,6 +460,26 @@ export class Extractor {
             ensureFolderExists: true,
             convertLineEndings: extractorConfig.newlineKind
           });
+        }
+
+        if (messageRouter.showVerboseMessages || printApiReportDiff) {
+          const Diff: typeof import('diff') = require('diff');
+          const patch: import('diff').StructuredPatch = Diff.structuredPatch(
+            expectedApiReportShortPath,
+            actualApiReportShortPath,
+            expectedApiReportContent,
+            actualApiReportContent
+          );
+          const logFunction:
+            | (typeof MessageRouter.prototype)['logWarning']
+            | (typeof MessageRouter.prototype)['logVerbose'] = printApiReportDiff
+            ? messageRouter.logWarning.bind(messageRouter)
+            : messageRouter.logVerbose.bind(messageRouter);
+
+          logFunction(
+            ConsoleMessageId.ApiReportDiff,
+            'Changes to the API report:\n\n' + Diff.formatPatch(patch)
+          );
         }
       } else {
         messageRouter.logVerbose(
