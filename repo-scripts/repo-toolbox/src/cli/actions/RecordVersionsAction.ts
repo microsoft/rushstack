@@ -4,19 +4,23 @@
 import * as path from 'node:path';
 
 import { JsonFile } from '@rushstack/node-core-library';
-import { Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
+import type { ITerminal } from '@rushstack/terminal';
 import { RushConfiguration } from '@microsoft/rush-lib';
 import { CommandLineAction, type CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 export class RecordVersionsAction extends CommandLineAction {
   private readonly _outFilePath: CommandLineStringParameter;
 
-  public constructor() {
+  private readonly _terminal: ITerminal;
+
+  public constructor(terminal: ITerminal) {
     super({
       actionName: 'record-versions',
       summary: 'Generates a JSON file recording the version numbers of all published packages.',
       documentation: ''
     });
+
+    this._terminal = terminal;
 
     this._outFilePath = this.defineStringParameter({
       parameterLongName: '--out-file',
@@ -28,7 +32,7 @@ export class RecordVersionsAction extends CommandLineAction {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+    const terminal: ITerminal = this._terminal;
     const rushConfig: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
       startingFolder: process.cwd()
     });

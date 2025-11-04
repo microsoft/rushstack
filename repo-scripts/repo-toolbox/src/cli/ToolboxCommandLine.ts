@@ -2,10 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { CommandLineParser } from '@rushstack/ts-command-line';
+import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
 
 import { ReadmeAction } from './actions/ReadmeAction';
 import { RecordVersionsAction } from './actions/RecordVersionsAction';
 import { BumpDecoupledLocalDependencies } from './actions/BumpDecoupledLocalDependencies';
+import { CollectJsonSchemasAction } from './actions/CollectJsonSchemasAction';
 
 export class ToolboxCommandLine extends CommandLineParser {
   public constructor() {
@@ -14,8 +16,11 @@ export class ToolboxCommandLine extends CommandLineParser {
       toolDescription: 'Used to execute various operations specific to this repo'
     });
 
-    this.addAction(new ReadmeAction());
-    this.addAction(new RecordVersionsAction());
-    this.addAction(new BumpDecoupledLocalDependencies());
+    const terminal: ITerminal = new Terminal(new ConsoleTerminalProvider());
+
+    this.addAction(new ReadmeAction(terminal));
+    this.addAction(new RecordVersionsAction(terminal));
+    this.addAction(new BumpDecoupledLocalDependencies(terminal));
+    this.addAction(new CollectJsonSchemasAction(terminal));
   }
 }

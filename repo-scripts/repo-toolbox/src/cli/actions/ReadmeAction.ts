@@ -6,7 +6,7 @@ import * as path from 'node:path';
 import * as Diff from 'diff';
 
 import { StringBuilder, Sort, FileSystem, Text, AlreadyReportedError } from '@rushstack/node-core-library';
-import { Terminal, ConsoleTerminalProvider, Colorize } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { RushConfiguration, type RushConfigurationProject, LockStepVersionPolicy } from '@microsoft/rush-lib';
 import { CommandLineAction, type CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
@@ -16,12 +16,16 @@ const GENERATED_PROJECT_SUMMARY_END_COMMENT_TEXT: string = '<!-- GENERATED PROJE
 export class ReadmeAction extends CommandLineAction {
   private readonly _verifyParameter: CommandLineFlagParameter;
 
-  public constructor() {
+  private readonly _terminal: ITerminal;
+
+  public constructor(terminal: ITerminal) {
     super({
       actionName: 'readme',
       summary: 'Generates README.md project table based on rush.json inventory',
       documentation: "Use this to update the repo's README.md"
     });
+
+    this._terminal = terminal;
 
     this._verifyParameter = this.defineFlagParameter({
       parameterLongName: '--verify',
@@ -149,7 +153,7 @@ export class ReadmeAction extends CommandLineAction {
     const diff: Diff.Change[] = Diff.diffLines(existingReadme, readmeString);
     const readmeIsUpToDate: boolean = diff.length === 1 && !diff[0].added && !diff[0].removed;
 
-    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+    const terminal: ITerminal = this._terminal;
 
     if (!readmeIsUpToDate) {
       if (this._verifyParameter.value) {
