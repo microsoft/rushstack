@@ -16,6 +16,7 @@ import type { HeftConfiguration } from '@rushstack/heft';
 
 import { LinterBase, type ILinterBaseOptions } from './LinterBase';
 import type { IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
+import { name as pluginName, version as pluginVersion } from '../package.json';
 
 interface IEslintOptions extends ILinterBaseOptions {
   eslintPackage: typeof TEslint | typeof TEslintLegacy;
@@ -153,6 +154,23 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       };
       overrideConfig = legacyEslintOverrideConfig;
     } else {
+      let overrideParserOptions: TEslint.Linter.ParserOptions = {
+        programs: [tsProgram],
+        // Used by stableStringify and ESLint > 9.28.0
+        toJSON: parserOptionsToJson
+      };
+      if (this._eslintPackageVersion.minor < 28) {
+        overrideParserOptions = Object.defineProperties(overrideParserOptions, {
+          // Support for `toJSON` within languageOptions was added in ESLint 9.28.0
+          // This hack tells ESLint's `languageOptionsToJSON` function to replace the entire `parserOptions` object with `@rushstack/heft-lint-plugin@${version}`
+          meta: {
+            value: {
+              name: pluginName,
+              version: pluginVersion
+            }
+          }
+        });
+      }
       // The @typescript-eslint/parser package allows providing an existing TypeScript program to avoid needing
       // to reparse. However, fixers in ESLint run in multiple passes against the underlying code until the
       // fix fully succeeds. This conflicts with providing an existing program as the code no longer maps to
@@ -160,20 +178,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       // if we're not fixing.
       const eslintOverrideConfig: TEslint.Linter.Config = {
         languageOptions: {
-          parserOptions: Object.defineProperties(
-            {
-              programs: [tsProgram],
-              toJSON: parserOptionsToJson
-            },
-            {
-              // Make ESLint's `languageOptionsToJSON` function ignore the `parserOptions` property.
-              meta: {
-                value: {
-                  name: 'parserOptions'
-                }
-              }
-            }
-          )
+          parserOptions: overrideParserOptions
         }
       };
       overrideConfig = eslintOverrideConfig;
