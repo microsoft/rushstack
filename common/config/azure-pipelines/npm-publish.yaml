@@ -53,4 +53,4 @@ extends:
                   VersionPolicyName: noRush
                   BranchName: $(SourceBranch)
 
-              - template: /common/config/azure-pipelines/templates/post-publish.yaml
+              - template: /common/config/azure-pipelines/templates/post-publish.yaml@self
