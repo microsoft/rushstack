@@ -97,7 +97,7 @@ export class CollectJsonSchemasAction extends CommandLineAction {
           }
 
           absolutePaths.push(absolutePath);
-        });
+        }, { concurrency: 5 });
       },
       { concurrency: 5 }
     );
