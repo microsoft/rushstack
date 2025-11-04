@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.54.0",
+      "tag": "@microsoft/api-extractor_v7.54.0",
+      "date": "Tue, 04 Nov 2025 07:31:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new setting `IExtractorInvokeOptions.printApiReportDiff` that makes build logs easier to diagnose by printing a diff of any changes to API report files (*.api.md)."
+          },
+          {
+            "comment": "Add a `--print-api-report-diff` CLI flag that causes a diff of any changes to API report files (*.api.md) to be printed."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.53.3",
       "tag": "@microsoft/api-extractor_v7.53.3",
       "date": "Fri, 24 Oct 2025 00:13:38 GMT",

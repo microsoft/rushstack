@@ -2,6 +2,29 @@
   "name": "@rushstack/heft-api-extractor-plugin",
   "entries": [
     {
+      "version": "1.2.0",
+      "tag": "@rushstack/heft-api-extractor-plugin_v1.2.0",
+      "date": "Tue, 04 Nov 2025 07:31:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Include a `printApiReportDiff` option in the `config/api-extractor-task.json` config file that, when set to `\"production\"` (and the `--production` flag is specified) or `\"always\"`, causes a diff of the API report (*.api.md) to be printed if the report is changed. This is useful for diagnosing issues that only show up in CI."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.54.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `1.1.3` to `1.1.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.3",
       "tag": "@rushstack/heft-api-extractor-plugin_v1.1.3",
       "date": "Fri, 24 Oct 2025 00:13:38 GMT",
