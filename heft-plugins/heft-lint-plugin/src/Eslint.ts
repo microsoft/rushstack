@@ -61,32 +61,13 @@ function getFormattedErrorMessage(
   return lintMessage.ruleId ? `(${lintMessage.ruleId}) ${lintMessage.message}` : lintMessage.message;
 }
 
-interface IExtendedEslintConfig extends TEslint.Linter.Config {
-  // https://github.com/eslint/eslint/blob/d6fa4ac031c2fe24fb778e84940393fbda3ddf77/lib/config/config.js#L264
-  toJSON: () => object;
-  __originalToJSON: () => object;
-}
-
-function patchedToJSON(this: IExtendedEslintConfig): object {
-  // If the input config has a parserOptions.programs property, we need to recreate it
-  // as a non-enumerable property so that it does not get serialized, as it is not
-  // serializable.
-  if (
-    this.languageOptions?.parserOptions?.programs &&
-    this.languageOptions.parserOptions.propertyIsEnumerable('programs')
-  ) {
-    let { programs } = this.languageOptions.parserOptions;
-    Object.defineProperty(this.languageOptions.parserOptions, 'programs', {
-      get: () => programs,
-      set: (value: TTypescript.Program[]) => {
-        programs = value;
-      },
-      enumerable: false
-    });
-  }
-
-  const serializableConfig: object = this.__originalToJSON.call(this);
-  return serializableConfig;
+function parserOptionsToJson(this: TEslint.Linter.LanguageOptions['parserOptions']): object {
+  const serializableParserOptions: TEslint.Linter.LanguageOptions['parserOptions'] = {
+    ...this,
+    // Remove the programs to avoid circular references and non-serializable data
+    programs: undefined
+  };
+  return serializableParserOptions;
 }
 
 const ESLINT_CONFIG_JS_FILENAME: string = 'eslint.config.js';
@@ -112,6 +93,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     (TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage)[]
   > = new Map();
   private readonly _sarifLogPath: string | undefined;
+  private readonly _configHashMap: WeakMap<object, string> = new WeakMap();
 
   protected constructor(options: IEslintOptions) {
     super('eslint', options);
@@ -165,7 +147,8 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       // if we're not fixing.
       const legacyEslintOverrideConfig: TEslintLegacy.Linter.Config = {
         parserOptions: {
-          programs: [tsProgram]
+          programs: [tsProgram],
+          toJSON: parserOptionsToJson
         }
       };
       overrideConfig = legacyEslintOverrideConfig;
@@ -178,7 +161,8 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       const eslintOverrideConfig: TEslint.Linter.Config = {
         languageOptions: {
           parserOptions: {
-            programs: [tsProgram]
+            programs: [tsProgram],
+            toJSON: parserOptionsToJson
           }
         }
       };
@@ -254,17 +238,9 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
   }
 
   protected override async getSourceFileHashAsync(sourceFile: IExtendedSourceFile): Promise<string> {
-    const sourceFileEslintConfiguration: IExtendedEslintConfig = await this._linter.calculateConfigForFile(
+    const sourceFileEslintConfiguration: TEslint.Linter.Config = await this._linter.calculateConfigForFile(
       sourceFile.fileName
     );
-
-    // The eslint configuration object contains a toJSON() method that returns a serializable version of the
-    // configuration. However, we are manually injecting the TypeScript program into the parserOptions, which
-    // is not serializable. Patch the function to remove the program before returning the serializable version.
-    if (sourceFileEslintConfiguration.toJSON && !sourceFileEslintConfiguration.__originalToJSON) {
-      sourceFileEslintConfiguration.__originalToJSON = sourceFileEslintConfiguration.toJSON;
-      sourceFileEslintConfiguration.toJSON = patchedToJSON.bind(sourceFileEslintConfiguration);
-    }
 
     const hash: Hash = createHash('sha1');
     // Use a stable stringifier to ensure that the hash is always the same, even if the order of the properties
