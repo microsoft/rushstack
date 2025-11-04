@@ -99,7 +99,7 @@ export interface IExtractorInvokeOptions {
    * @remarks
    * The diff is not printed if the expected API report file has not been created yet.
    */
-  enableApiReportConsoleDiff?: boolean;
+  printApiReportDiff?: boolean;
 }
 
 /**
@@ -227,7 +227,7 @@ export class Extractor {
       messageCallback,
       showVerboseMessages = false,
       showDiagnostics = false,
-      enableApiReportConsoleDiff = false
+      printApiReportDiff = false
     } = options ?? {};
 
     const sourceMapper: SourceMapper = new SourceMapper();
@@ -316,7 +316,7 @@ export class Extractor {
         reportFolder,
         reportConfig,
         localBuild,
-        enableApiReportConsoleDiff
+        printApiReportDiff
       );
     }
 
@@ -391,7 +391,7 @@ export class Extractor {
    * @param reportDirectoryPath - The path to the directory under which the existing report file is located, and to
    * which the new report will be written post-comparison.
    * @param reportConfig - API report configuration, including its file name and {@link ApiReportVariant}.
-   * @param enableApiReportConsoleDiff - {@link IExtractorInvokeOptions.enableApiReportConsoleDiff}
+   * @param printApiReportDiff - {@link IExtractorInvokeOptions.printApiReportDiff}
    *
    * @returns Whether or not the newly generated report differs from the existing report (if one exists).
    */
@@ -403,7 +403,7 @@ export class Extractor {
     reportDirectoryPath: string,
     reportConfig: IExtractorConfigApiReport,
     localBuild: boolean,
-    enableApiReportConsoleDiff: boolean
+    printApiReportDiff: boolean
   ): boolean {
     let apiReportChanged: boolean = false;
 
@@ -450,7 +450,7 @@ export class Extractor {
               ` See the Git repo documentation for more info.`
           );
 
-          if (messageRouter.showVerboseMessages || enableApiReportConsoleDiff) {
+          if (messageRouter.showVerboseMessages || printApiReportDiff) {
             const Diff: typeof import('diff') = require('diff');
             const patch: import('diff').StructuredPatch = Diff.structuredPatch(
               expectedApiReportShortPath,
@@ -460,7 +460,7 @@ export class Extractor {
             );
             const logFunction:
               | (typeof MessageRouter.prototype)['logWarning']
-              | (typeof MessageRouter.prototype)['logVerbose'] = enableApiReportConsoleDiff
+              | (typeof MessageRouter.prototype)['logVerbose'] = printApiReportDiff
               ? messageRouter.logWarning.bind(messageRouter)
               : messageRouter.logVerbose.bind(messageRouter);
 

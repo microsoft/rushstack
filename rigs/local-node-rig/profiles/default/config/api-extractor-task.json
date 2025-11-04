@@ -3,5 +3,5 @@
 
   "extends": "@rushstack/heft-node-rig/profiles/default/config/api-extractor-task.json",
 
-  "enableApiReportDiff": true
+  "printApiReportDiff": true
 }

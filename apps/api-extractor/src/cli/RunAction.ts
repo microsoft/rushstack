@@ -79,7 +79,7 @@ export class RunAction extends CommandLineAction {
     });
 
     this._apiReportConsoleDiffFlag = this.defineFlagParameter({
-      parameterLongName: '--api-report-diff',
+      parameterLongName: '--print-api-report-diff',
       description:
         'If provided, then any differences between the actual and expected API reports will be ' +
         'printed on the console. Note that the diff is not printed if the expected API report file has not been ' +
@@ -149,7 +149,7 @@ export class RunAction extends CommandLineAction {
       showVerboseMessages: this._verboseFlag.value,
       showDiagnostics: this._diagnosticsParameter.value,
       typescriptCompilerFolder: typescriptCompilerFolder,
-      enableApiReportConsoleDiff: this._apiReportConsoleDiffFlag.value
+      printApiReportDiff: this._apiReportConsoleDiffFlag.value
     });
 
     if (extractorResult.succeeded) {

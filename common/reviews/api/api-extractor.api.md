@@ -287,7 +287,7 @@ export interface IExtractorConfigPrepareOptions {
 // @public
 export interface IExtractorInvokeOptions {
     compilerState?: CompilerState;
-    enableApiReportConsoleDiff?: boolean;
+    printApiReportDiff?: boolean;
     localBuild?: boolean;
     messageCallback?: (message: ExtractorMessage) => void;
     showDiagnostics?: boolean;

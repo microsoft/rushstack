@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Add a new setting `IExtractorInvokeOptions.enableApiReportConsoleDiff` that makes build logs easier to diagnose by printing a diff of any changes to API report files (*.api.md).",
+      "comment": "Add a new setting `IExtractorInvokeOptions.printApiReportDiff` that makes build logs easier to diagnose by printing a diff of any changes to API report files (*.api.md).",
       "type": "minor"
     }
   ],
