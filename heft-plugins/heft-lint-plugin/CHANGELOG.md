@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-lint-plugin
 
-This log was last generated on Fri, 24 Oct 2025 00:13:38 GMT and should not be manually modified.
+This log was last generated on Tue, 04 Nov 2025 08:15:14 GMT and should not be manually modified.
+
+## 1.1.4
+Tue, 04 Nov 2025 08:15:14 GMT
+
+### Patches
+
+- Fix bug where TypeScript program is not reused in ESLint 9.
 
 ## 1.1.3
 Fri, 24 Oct 2025 00:13:38 GMT

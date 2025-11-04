@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 24 Oct 2025 00:13:38 GMT and should not be manually modified.
+This log was last generated on Tue, 04 Nov 2025 08:15:14 GMT and should not be manually modified.
+
+## 7.54.0
+Tue, 04 Nov 2025 08:15:14 GMT
+
+### Minor changes
+
+- Add a new setting `IExtractorInvokeOptions.printApiReportDiff` that makes build logs easier to diagnose by printing a diff of any changes to API report files (*.api.md).
+- Add a `--print-api-report-diff` CLI flag that causes a diff of any changes to API report files (*.api.md) to be printed.
 
 ## 7.53.3
 Fri, 24 Oct 2025 00:13:38 GMT
