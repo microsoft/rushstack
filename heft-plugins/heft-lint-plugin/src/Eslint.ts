@@ -160,10 +160,20 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       // if we're not fixing.
       const eslintOverrideConfig: TEslint.Linter.Config = {
         languageOptions: {
-          parserOptions: {
-            programs: [tsProgram],
-            toJSON: parserOptionsToJson
-          }
+          parserOptions: Object.defineProperties(
+            {
+              programs: [tsProgram],
+              toJSON: parserOptionsToJson
+            },
+            {
+              // Make ESLint's `languageOptionsToJSON` function ignore the `parserOptions` property.
+              meta: {
+                value: {
+                  name: 'parserOptions'
+                }
+              }
+            }
+          )
         }
       };
       overrideConfig = eslintOverrideConfig;
