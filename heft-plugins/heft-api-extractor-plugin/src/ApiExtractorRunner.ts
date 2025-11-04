@@ -59,7 +59,7 @@ export async function invokeApiExtractorAsync(
     production,
     typescriptPackagePath,
     apiExtractorConfiguration,
-    printApiReportDiff: printApiReportDiff
+    printApiReportDiff
   } = configuration;
   const { terminal } = scopedLogger;
 

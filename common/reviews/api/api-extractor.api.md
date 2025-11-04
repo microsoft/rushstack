@@ -287,9 +287,9 @@ export interface IExtractorConfigPrepareOptions {
 // @public
 export interface IExtractorInvokeOptions {
     compilerState?: CompilerState;
-    printApiReportDiff?: boolean;
     localBuild?: boolean;
     messageCallback?: (message: ExtractorMessage) => void;
+    printApiReportDiff?: boolean;
     showDiagnostics?: boolean;
     showVerboseMessages?: boolean;
     typescriptCompilerFolder?: string;

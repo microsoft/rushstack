@@ -28,7 +28,7 @@ export class RunAction extends CommandLineAction {
   private readonly _verboseFlag: CommandLineFlagParameter;
   private readonly _diagnosticsParameter: CommandLineFlagParameter;
   private readonly _typescriptCompilerFolderParameter: CommandLineStringParameter;
-  private readonly _apiReportConsoleDiffFlag: CommandLineFlagParameter;
+  private readonly _printApiReportDiffFlag: CommandLineFlagParameter;
 
   public constructor(parser: ApiExtractorCommandLine) {
     super({
@@ -78,7 +78,7 @@ export class RunAction extends CommandLineAction {
         " and API Extractor's compiler will use those system typings instead."
     });
 
-    this._apiReportConsoleDiffFlag = this.defineFlagParameter({
+    this._printApiReportDiffFlag = this.defineFlagParameter({
       parameterLongName: '--print-api-report-diff',
       description:
         'If provided, then any differences between the actual and expected API reports will be ' +
@@ -149,7 +149,7 @@ export class RunAction extends CommandLineAction {
       showVerboseMessages: this._verboseFlag.value,
       showDiagnostics: this._diagnosticsParameter.value,
       typescriptCompilerFolder: typescriptCompilerFolder,
-      printApiReportDiff: this._apiReportConsoleDiffFlag.value
+      printApiReportDiff: this._printApiReportDiffFlag.value
     });
 
     if (extractorResult.succeeded) {
