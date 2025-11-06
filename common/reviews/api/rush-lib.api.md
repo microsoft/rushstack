@@ -670,6 +670,7 @@ export interface IOperationSettings {
     ignoreChangedProjectsOnlyFlag?: boolean;
     operationName: string;
     outputFolderNames?: string[];
+    parameterNamesToIgnore?: string[];
     sharding?: IRushPhaseSharding;
     weight?: number;
 }

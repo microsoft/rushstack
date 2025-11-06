@@ -30,6 +30,7 @@ export interface IIPCOperationRunnerOptions {
   commandForHash: string;
   persist: boolean;
   requestRun: OperationRequestRunCallback;
+  ignoredParameterNames: ReadonlyArray<string>;
 }
 
 function isAfterExecuteEventMessage(message: unknown): message is IAfterExecuteEventMessage {
@@ -59,6 +60,7 @@ export class IPCOperationRunner implements IOperationRunner {
   private readonly _commandForHash: string;
   private readonly _persist: boolean;
   private readonly _requestRun: OperationRequestRunCallback;
+  private readonly _ignoredParameterNames: ReadonlyArray<string>;
 
   private _ipcProcess: ChildProcess | undefined;
   private _processReadyPromise: Promise<void> | undefined;
@@ -75,6 +77,7 @@ export class IPCOperationRunner implements IOperationRunner {
 
     this._persist = options.persist;
     this._requestRun = options.requestRun;
+    this._ignoredParameterNames = options.ignoredParameterNames;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
@@ -84,6 +87,11 @@ export class IPCOperationRunner implements IOperationRunner {
         if (!this._ipcProcess || typeof this._ipcProcess.exitCode === 'number') {
           // Run the operation
           terminal.writeLine('Invoking: ' + this._commandToRun);
+
+          // Log any ignored parameters in verbose mode
+          if (this._ignoredParameterNames.length > 0) {
+            terminal.writeVerboseLine(`Ignored parameters: ${this._ignoredParameterNames.join(', ')}`);
+          }
 
           const { rushConfiguration, projectFolder } = this._rushProject;
 

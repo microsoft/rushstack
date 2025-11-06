@@ -110,6 +110,14 @@
           "ignoreChangedProjectsOnlyFlag": {
             "type": "boolean",
             "description": "If true, this operation never be skipped by the `--changed-projects-only` flag. This is useful for projects that bundle code from other packages."
+          },
+          "parameterNamesToIgnore": {
+            "type": "array",
+            "description": "An optional list of custom command-line parameter names (their parameterLongName values from command-line.json) that should be ignored when invoking the command for this operation. This allows a project to opt out of parameters that don't affect its operation, preventing unnecessary cache invalidation for this operation and its consumers.",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
           }
         }
       }

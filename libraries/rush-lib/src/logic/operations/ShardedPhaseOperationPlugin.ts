@@ -137,7 +137,8 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         displayName: collatorDisplayName,
         rushConfiguration,
         commandToRun,
-        customParameterValues: collatorParameters
+        customParameterValues: collatorParameters,
+        ignoredParameterNames: []
       });
 
       const shardOperationName: string = `${phase.name}:shard`;
@@ -207,7 +208,8 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
           commandToRun: baseCommand,
           customParameterValues: shardedParameters,
           displayName: shardDisplayName,
-          rushConfiguration
+          rushConfiguration,
+          ignoredParameterNames: []
         });
 
         shardOperation.addDependency(preShardOperation);
