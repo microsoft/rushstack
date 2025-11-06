@@ -136,6 +136,21 @@ export interface ICustomParameterValuesForOperation {
 }
 
 /**
+ * Helper function to collect all parameter arguments for a phase
+ */
+function collectPhaseParameterArguments(phase: IPhase): Set<string> {
+  const customParameterSet: Set<string> = new Set();
+  for (const tsCommandLineParameter of phase.associatedParameters) {
+    const tempArgs: string[] = [];
+    tsCommandLineParameter.appendToArgList(tempArgs);
+    for (const arg of tempArgs) {
+      customParameterSet.add(arg);
+    }
+  }
+  return customParameterSet;
+}
+
+/**
  * Memoizer for custom parameter values by phase
  * @returns A function that returns the custom parameter values for a given phase
  */
@@ -145,12 +160,7 @@ export function getCustomParameterValuesByPhase(): (phase: IPhase) => ReadonlyAr
   function getCustomParameterValuesForPhase(phase: IPhase): ReadonlyArray<string> {
     let customParameterSet: Set<string> | undefined = customParametersByPhase.get(phase);
     if (!customParameterSet) {
-      const customParameterValues: string[] = [];
-      for (const tsCommandLineParameter of phase.associatedParameters) {
-        tsCommandLineParameter.appendToArgList(customParameterValues);
-      }
-
-      customParameterSet = new Set(customParameterValues);
+      customParameterSet = collectPhaseParameterArguments(phase);
       customParametersByPhase.set(phase, customParameterSet);
     }
 
@@ -176,15 +186,7 @@ export function getCustomParameterValuesForOperation(): (
     // Get or compute the set of all custom parameters for this phase
     let customParameterSet: Set<string> | undefined = customParametersByPhase.get(phase);
     if (!customParameterSet) {
-      customParameterSet = new Set();
-      for (const tsCommandLineParameter of phase.associatedParameters) {
-        const tempArgs: string[] = [];
-        tsCommandLineParameter.appendToArgList(tempArgs);
-        for (const arg of tempArgs) {
-          customParameterSet.add(arg);
-        }
-      }
-
+      customParameterSet = collectPhaseParameterArguments(phase);
       customParametersByPhase.set(phase, customParameterSet);
     }
 
