@@ -183,26 +183,26 @@ export function getCustomParameterValuesForOperation(): (
   function getCustomParameterValuesForOp(operation: Operation): ICustomParameterValuesForOperation {
     const { associatedPhase: phase, settings } = operation;
 
-    // Get or compute the set of all custom parameters for this phase
-    let customParameterSet: Set<string> | undefined = customParametersByPhase.get(phase);
-    if (!customParameterSet) {
-      customParameterSet = collectPhaseParameterArguments(phase);
-      customParametersByPhase.set(phase, customParameterSet);
-    }
-
-    // If there are no parameters to ignore, return early with all parameters
+    // Check if there are any parameters to ignore
     const parameterNamesToIgnore: string[] | undefined = settings?.parameterNamesToIgnore;
     if (!parameterNamesToIgnore || parameterNamesToIgnore.length === 0) {
+      // No filtering needed - use the cached parameter set for efficiency
+      let customParameterSet: Set<string> | undefined = customParametersByPhase.get(phase);
+      if (!customParameterSet) {
+        customParameterSet = collectPhaseParameterArguments(phase);
+        customParametersByPhase.set(phase, customParameterSet);
+      }
+
       return {
         parameterValues: Array.from(customParameterSet),
         ignoredParameterNames: []
       };
     }
 
-    // Create a set of parameter long names to ignore for fast lookup
+    // Filtering is needed - we must iterate through parameter objects to check longName
+    // Note: We cannot use the cached parameter set here because we need access to
+    // the parameter objects to get their longName property for filtering
     const ignoreSet: Set<string> = new Set(parameterNamesToIgnore);
-
-    // Filter out ignored parameters and track which ones were ignored
     const filteredParameterValues: string[] = [];
     const ignoredParameterNames: string[] = [];
 
