@@ -1,5 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`ShellOperationRunnerPlugin parameters should be filtered when parameterNamesToIgnore is specified 1`] = `
+Array [
+  Object {
+    "commandToRun": "echo building a ",
+    "name": "a",
+  },
+  Object {
+    "commandToRun": "echo building b ",
+    "name": "b",
+  },
+]
+`;
+
 exports[`ShellOperationRunnerPlugin shellCommand "echo custom shellCommand" should be set to commandToRun 1`] = `
 Array [
   Object {
