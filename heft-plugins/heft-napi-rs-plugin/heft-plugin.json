@@ -1,0 +1,13 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
+  "taskPlugins": [
+    {
+      "pluginName": "napi-rs-plugin",
+      "entryPoint": "./lib/NapiRsPlugin",
+      "optionsSchema": "./lib/schemas/heft-napi-rs-plugin.schema.json",
+
+      "parameterScope": "napirs"
+    }
+  ]
+}
