@@ -32,7 +32,7 @@ export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
         const { rushConfiguration, isInitial } = context;
 
         const getCustomParameterValues: (operation: Operation) => ICustomParameterValuesForOperation =
-          getCustomParameterValuesForOperation();
+          getCustomParameterValuesByOperation();
 
         for (const operation of operations) {
           const { associatedPhase: phase, associatedProject: project } = operation;
@@ -40,7 +40,7 @@ export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
           if (!operation.runner) {
             // This is a shell command. In the future, may consider having a property on the initial operation
             // to specify a runner type requested in rush-project.json
-            const { parameterValues: customParameterValues, ignoredParameterNames } =
+            const { parameterValues: customParameterValues, ignoredParameterValues } =
               getCustomParameterValues(operation);
 
             const displayName: string = getDisplayName(phase, project);
@@ -65,7 +65,7 @@ export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
               commandForHash,
               commandToRun,
               customParameterValues,
-              ignoredParameterNames,
+              ignoredParameterValues,
               rushConfiguration
             });
           }
@@ -85,9 +85,9 @@ export function initializeShellOperationRunner(options: {
   commandToRun: string | undefined;
   commandForHash?: string;
   customParameterValues: ReadonlyArray<string>;
-  ignoredParameterNames: ReadonlyArray<string>;
+  ignoredParameterValues: ReadonlyArray<string>;
 }): IOperationRunner {
-  const { phase, project, commandToRun: rawCommandToRun, displayName, ignoredParameterNames } = options;
+  const { phase, project, commandToRun: rawCommandToRun, displayName, ignoredParameterValues } = options;
 
   if (typeof rawCommandToRun !== 'string' && phase.missingScriptBehavior === 'error') {
     throw new Error(
@@ -109,7 +109,7 @@ export function initializeShellOperationRunner(options: {
       displayName,
       phase,
       rushProject: project,
-      ignoredParameterNames
+      ignoredParameterValues
     });
   } else {
     // Empty build script indicates a no-op, so use a no-op runner
@@ -130,9 +130,9 @@ export interface ICustomParameterValuesForOperation {
    */
   parameterValues: ReadonlyArray<string>;
   /**
-   * The names of parameters that were ignored for this operation
+   * The serialized custom parameter values that were ignored for this operation
    */
-  ignoredParameterNames: ReadonlyArray<string>;
+  ignoredParameterValues: ReadonlyArray<string>;
 }
 
 /**
@@ -173,9 +173,9 @@ export function getCustomParameterValuesByPhase(): (phase: IPhase) => ReadonlyAr
 /**
  * Gets custom parameter values for an operation, filtering out any parameters that should be ignored
  * based on the operation's settings.
- * @returns A function that returns the filtered custom parameter values and ignored parameter names for a given operation
+ * @returns A function that returns the filtered custom parameter values and ignored parameter values for a given operation
  */
-export function getCustomParameterValuesForOperation(): (
+export function getCustomParameterValuesByOperation(): (
   operation: Operation
 ) => ICustomParameterValuesForOperation {
   const customParametersByPhase: Map<IPhase, Set<string>> = new Map();
@@ -195,7 +195,7 @@ export function getCustomParameterValuesForOperation(): (
 
       return {
         parameterValues: Array.from(customParameterSet),
-        ignoredParameterNames: []
+        ignoredParameterValues: []
       };
     }
 
@@ -204,23 +204,19 @@ export function getCustomParameterValuesForOperation(): (
     // the parameter objects to get their longName property for filtering
     const ignoreSet: Set<string> = new Set(parameterNamesToIgnore);
     const filteredParameterValues: string[] = [];
-    const ignoredParameterNames: string[] = [];
+    const ignoredParameterValues: string[] = [];
 
     for (const tsCommandLineParameter of phase.associatedParameters) {
       const parameterLongName: string = tsCommandLineParameter.longName;
 
-      if (ignoreSet.has(parameterLongName)) {
-        // This parameter should be ignored for this operation
-        ignoredParameterNames.push(parameterLongName);
-      } else {
-        // Include this parameter in the command
-        tsCommandLineParameter.appendToArgList(filteredParameterValues);
-      }
+      tsCommandLineParameter.appendToArgList(
+        ignoreSet.has(parameterLongName) ? ignoredParameterValues : filteredParameterValues
+      );
     }
 
     return {
       parameterValues: filteredParameterValues,
-      ignoredParameterNames
+      ignoredParameterValues
     };
   }
 

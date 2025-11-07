@@ -13,7 +13,7 @@ import { OperationStatus } from './OperationStatus';
 import {
   PLUGIN_NAME as ShellOperationPluginName,
   formatCommand,
-  getCustomParameterValuesForOperation,
+  getCustomParameterValuesByOperation,
   type ICustomParameterValuesForOperation,
   getDisplayName
 } from './ShellOperationRunnerPlugin';
@@ -46,7 +46,7 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
         currentContext = context;
 
         const getCustomParameterValues: (operation: Operation) => ICustomParameterValuesForOperation =
-          getCustomParameterValuesForOperation();
+          getCustomParameterValuesByOperation();
 
         for (const operation of operations) {
           const { associatedPhase: phase, associatedProject: project, runner } = operation;
@@ -73,7 +73,7 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
           // for this operation (or downstream operations) to be restored from the build cache.
           const commandForHash: string | undefined = phase.shellCommand ?? scripts?.[phaseName];
 
-          const { parameterValues: customParameterValues, ignoredParameterNames } =
+          const { parameterValues: customParameterValues, ignoredParameterValues } =
             getCustomParameterValues(operation);
           const commandToRun: string = formatCommand(rawScript, customParameterValues);
 
@@ -87,7 +87,7 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
               commandToRun,
               commandForHash,
               persist: true,
-              ignoredParameterNames,
+              ignoredParameterValues,
               requestRun: (requestor: string, detail?: string) => {
                 const operationState: IOperationExecutionResult | undefined =
                   operationStatesByRunner.get(ipcOperationRunner);

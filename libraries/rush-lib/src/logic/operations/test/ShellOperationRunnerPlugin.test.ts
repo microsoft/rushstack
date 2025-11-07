@@ -156,13 +156,15 @@ describe(ShellOperationRunnerPlugin.name, () => {
       | 'projectsInUnknownState'
       | 'projectConfigurations'
       | 'rushConfiguration'
+      | 'customParameters'
     > = {
       phaseOriginal: buildCommand.phases,
       phaseSelection: buildCommand.phases,
       projectSelection: new Set(rushConfiguration.projects),
       projectsInUnknownState: new Set(rushConfiguration.projects),
       projectConfigurations,
-      rushConfiguration
+      rushConfiguration,
+      customParameters: new Map()
     };
 
     const hooks: PhasedCommandHooks = new PhasedCommandHooks();
