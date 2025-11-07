@@ -21,6 +21,7 @@ export interface ILinterBaseOptions {
   linterToolPath: string;
   linterConfigFilePath: string;
   tsProgram: IExtendedProgram;
+  tsconfigFilePath: string;
   fix?: boolean;
   sarifLogPath?: string;
 }
@@ -51,6 +52,12 @@ interface ILinterCacheData {
    * each array item is the file's path and the second element is the file's hash.
    */
   fileVersions: [string, string][];
+
+  /**
+   * A hash of the list of filenames that were linted. This is used to verify that
+   * the cache was run with the same files.
+   */
+  filesHash?: string;
 }
 
 export abstract class LinterBase<TLintResult> {
@@ -59,6 +66,7 @@ export abstract class LinterBase<TLintResult> {
   protected readonly _buildFolderPath: string;
   protected readonly _buildMetadataFolderPath: string;
   protected readonly _linterConfigFilePath: string;
+  protected readonly _tsconfigFilePath: string;
   protected readonly _fix: boolean;
 
   protected _fixesPossible: boolean = false;
@@ -71,6 +79,7 @@ export abstract class LinterBase<TLintResult> {
     this._buildFolderPath = options.buildFolderPath;
     this._buildMetadataFolderPath = options.buildMetadataFolderPath;
     this._linterConfigFilePath = options.linterConfigFilePath;
+    this._tsconfigFilePath = options.tsconfigFilePath;
     this._linterName = linterName;
     this._fix = options.fix || false;
   }
@@ -85,14 +94,31 @@ export abstract class LinterBase<TLintResult> {
 
     const relativePaths: Map<string, string> = new Map();
 
-    const fileHash: Hash = createHash('md5');
+    // Calculate the hash of the list of filenames for verification purposes
+    const filesHash: Hash = createHash('md5');
     for (const file of options.typeScriptFilenames) {
       // Need to use relative paths to ensure portability.
       const relative: string = Path.convertToSlashes(path.relative(commonDirectory, file));
       relativePaths.set(file, relative);
-      fileHash.update(relative);
+      filesHash.update(relative);
     }
-    const hashSuffix: string = fileHash.digest('base64').replace(/\+/g, '-').replace(/\//g, '_').slice(0, 8);
+    const filesHashString: string = filesHash
+      .digest('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .slice(0, 8);
+
+    // Calculate the hash suffix based on the project-relative path of the tsconfig file
+    const relativeTsconfigPath: string = Path.convertToSlashes(
+      path.relative(this._buildFolderPath, this._tsconfigFilePath)
+    );
+    const tsconfigHash: Hash = createHash('md5');
+    tsconfigHash.update(relativeTsconfigPath);
+    const hashSuffix: string = tsconfigHash
+      .digest('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .slice(0, 8);
 
     const linterCacheVersion: string = await this.getCacheVersionAsync();
     const linterCacheFilePath: string = path.resolve(
@@ -121,7 +147,9 @@ export abstract class LinterBase<TLintResult> {
     }
 
     const cachedNoFailureFileVersions: Map<string, string> = new Map<string, string>(
-      linterCacheData?.cacheVersion === linterCacheVersion ? linterCacheData.fileVersions : []
+      linterCacheData?.cacheVersion === linterCacheVersion && linterCacheData?.filesHash === filesHashString
+        ? linterCacheData.fileVersions
+        : []
     );
 
     const newNoFailureFileVersions: Map<string, string> = new Map<string, string>();
@@ -172,7 +200,8 @@ export abstract class LinterBase<TLintResult> {
 
     const updatedTslintCacheData: ILinterCacheData = {
       cacheVersion: linterCacheVersion,
-      fileVersions: Array.from(newNoFailureFileVersions)
+      fileVersions: Array.from(newNoFailureFileVersions),
+      filesHash: filesHashString
     };
     await JsonFile.saveAsync(updatedTslintCacheData, linterCacheFilePath, { ensureFolderExists: true });
 
