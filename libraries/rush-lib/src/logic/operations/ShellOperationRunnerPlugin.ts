@@ -138,16 +138,12 @@ export interface ICustomParameterValuesForOperation {
 /**
  * Helper function to collect all parameter arguments for a phase
  */
-function collectPhaseParameterArguments(phase: IPhase): Set<string> {
-  const customParameterSet: Set<string> = new Set();
+function collectPhaseParameterArguments(phase: IPhase): string[] {
+  const customParameterList: string[] = [];
   for (const tsCommandLineParameter of phase.associatedParameters) {
-    const tempArgs: string[] = [];
-    tsCommandLineParameter.appendToArgList(tempArgs);
-    for (const arg of tempArgs) {
-      customParameterSet.add(arg);
-    }
+    tsCommandLineParameter.appendToArgList(customParameterList);
   }
-  return customParameterSet;
+  return customParameterList;
 }
 
 /**
@@ -155,16 +151,16 @@ function collectPhaseParameterArguments(phase: IPhase): Set<string> {
  * @returns A function that returns the custom parameter values for a given phase
  */
 export function getCustomParameterValuesByPhase(): (phase: IPhase) => ReadonlyArray<string> {
-  const customParametersByPhase: Map<IPhase, Set<string>> = new Map();
+  const customParametersByPhase: Map<IPhase, string[]> = new Map();
 
   function getCustomParameterValuesForPhase(phase: IPhase): ReadonlyArray<string> {
-    let customParameterSet: Set<string> | undefined = customParametersByPhase.get(phase);
-    if (!customParameterSet) {
-      customParameterSet = collectPhaseParameterArguments(phase);
-      customParametersByPhase.set(phase, customParameterSet);
+    let customParameterList: string[] | undefined = customParametersByPhase.get(phase);
+    if (!customParameterList) {
+      customParameterList = collectPhaseParameterArguments(phase);
+      customParametersByPhase.set(phase, customParameterList);
     }
 
-    return Array.from(customParameterSet);
+    return customParameterList;
   }
 
   return getCustomParameterValuesForPhase;
@@ -178,7 +174,7 @@ export function getCustomParameterValuesByPhase(): (phase: IPhase) => ReadonlyAr
 export function getCustomParameterValuesByOperation(): (
   operation: Operation
 ) => ICustomParameterValuesForOperation {
-  const customParametersByPhase: Map<IPhase, Set<string>> = new Map();
+  const customParametersByPhase: Map<IPhase, string[]> = new Map();
 
   function getCustomParameterValuesForOp(operation: Operation): ICustomParameterValuesForOperation {
     const { associatedPhase: phase, settings } = operation;
@@ -186,21 +182,21 @@ export function getCustomParameterValuesByOperation(): (
     // Check if there are any parameters to ignore
     const parameterNamesToIgnore: string[] | undefined = settings?.parameterNamesToIgnore;
     if (!parameterNamesToIgnore || parameterNamesToIgnore.length === 0) {
-      // No filtering needed - use the cached parameter set for efficiency
-      let customParameterSet: Set<string> | undefined = customParametersByPhase.get(phase);
-      if (!customParameterSet) {
-        customParameterSet = collectPhaseParameterArguments(phase);
-        customParametersByPhase.set(phase, customParameterSet);
+      // No filtering needed - use the cached parameter list for efficiency
+      let customParameterList: string[] | undefined = customParametersByPhase.get(phase);
+      if (!customParameterList) {
+        customParameterList = collectPhaseParameterArguments(phase);
+        customParametersByPhase.set(phase, customParameterList);
       }
 
       return {
-        parameterValues: Array.from(customParameterSet),
+        parameterValues: customParameterList,
         ignoredParameterValues: []
       };
     }
 
     // Filtering is needed - we must iterate through parameter objects to check longName
-    // Note: We cannot use the cached parameter set here because we need access to
+    // Note: We cannot use the cached parameter list here because we need access to
     // the parameter objects to get their longName property for filtering
     const ignoreSet: Set<string> = new Set(parameterNamesToIgnore);
     const filteredParameterValues: string[] = [];

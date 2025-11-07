@@ -4,11 +4,23 @@
 import path from 'node:path';
 import { JsonFile } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
+import {
+  CommandLineAction,
+  type CommandLineParameter,
+  type CommandLineFlagParameter,
+  type CommandLineStringParameter,
+  type CommandLineChoiceParameter,
+  type CommandLineStringListParameter
+} from '@rushstack/ts-command-line';
 
 import { RushConfiguration } from '../../../api/RushConfiguration';
-import { CommandLineConfiguration, type IPhasedCommandConfig } from '../../../api/CommandLineConfiguration';
+import {
+  CommandLineConfiguration,
+  type IPhasedCommandConfig,
+  type IParameterJson
+} from '../../../api/CommandLineConfiguration';
 import type { Operation } from '../Operation';
-import type { ICommandLineJson } from '../../../api/CommandLineJson';
+import type { ICommandLineJson, ParameterJson } from '../../../api/CommandLineJson';
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../ShellOperationRunnerPlugin';
 import {
@@ -16,6 +28,7 @@ import {
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
 import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
+import { RushConstants } from '../../RushConstants';
 
 interface ISerializedOperation {
   name: string;
@@ -27,6 +40,106 @@ function serializeOperation(operation: Operation): ISerializedOperation {
     name: operation.name,
     commandToRun: operation.runner!.getConfigHash()
   };
+}
+
+/**
+ * Helper function to create CommandLineParameter instances from parameter definitions.
+ * Extracted logic from BaseScriptAction.defineScriptParameters()
+ */
+function createCommandLineParameters(
+  action: CommandLineAction,
+  associatedParameters: Set<IParameterJson>
+): Map<string, CommandLineParameter> {
+  const customParameters: Map<string, CommandLineParameter> = new Map();
+
+  for (const parameter of associatedParameters) {
+    let tsCommandLineParameter: CommandLineParameter | undefined;
+
+    switch (parameter.parameterKind) {
+      case 'flag':
+        tsCommandLineParameter = action.defineFlagParameter({
+          parameterShortName: parameter.shortName,
+          parameterLongName: parameter.longName,
+          description: parameter.description,
+          required: parameter.required
+        });
+        break;
+      case 'choice':
+        tsCommandLineParameter = action.defineChoiceParameter({
+          parameterShortName: parameter.shortName,
+          parameterLongName: parameter.longName,
+          description: parameter.description,
+          required: parameter.required,
+          alternatives: parameter.alternatives.map((x) => x.name),
+          defaultValue: parameter.defaultValue
+        });
+        break;
+      case 'string':
+        tsCommandLineParameter = action.defineStringParameter({
+          parameterLongName: parameter.longName,
+          parameterShortName: parameter.shortName,
+          description: parameter.description,
+          required: parameter.required,
+          argumentName: parameter.argumentName
+        });
+        break;
+      case 'integer':
+        tsCommandLineParameter = action.defineIntegerParameter({
+          parameterLongName: parameter.longName,
+          parameterShortName: parameter.shortName,
+          description: parameter.description,
+          required: parameter.required,
+          argumentName: parameter.argumentName
+        });
+        break;
+      case 'stringList':
+        tsCommandLineParameter = action.defineStringListParameter({
+          parameterLongName: parameter.longName,
+          parameterShortName: parameter.shortName,
+          description: parameter.description,
+          required: parameter.required,
+          argumentName: parameter.argumentName
+        });
+        break;
+      case 'integerList':
+        tsCommandLineParameter = action.defineIntegerListParameter({
+          parameterLongName: parameter.longName,
+          parameterShortName: parameter.shortName,
+          description: parameter.description,
+          required: parameter.required,
+          argumentName: parameter.argumentName
+        });
+        break;
+      case 'choiceList':
+        tsCommandLineParameter = action.defineChoiceListParameter({
+          parameterShortName: parameter.shortName,
+          parameterLongName: parameter.longName,
+          description: parameter.description,
+          required: parameter.required,
+          alternatives: parameter.alternatives.map((x) => x.name)
+        });
+        break;
+      default:
+        throw new Error(
+          `${RushConstants.commandLineFilename} defines a parameter "${
+            (parameter as ParameterJson).longName
+          }" using an unsupported parameter kind "${(parameter as ParameterJson).parameterKind}"`
+        );
+    }
+
+    customParameters.set(parameter.longName, tsCommandLineParameter);
+  }
+
+  return customParameters;
+}
+
+/**
+ * Test implementation of CommandLineAction for testing parameter handling
+ */
+class TestCommandLineAction extends CommandLineAction {
+  protected async onExecuteAsync(): Promise<void> {
+    // No-op for testing
+  }
 }
 
 describe(ShellOperationRunnerPlugin.name, () => {
@@ -148,6 +261,58 @@ describe(ShellOperationRunnerPlugin.name, () => {
       terminal
     );
 
+    // Create a dummy CommandLineAction to host the parameters
+    const action: TestCommandLineAction = new TestCommandLineAction({
+      actionName: 'build',
+      summary: 'Test build action',
+      documentation: 'Test'
+    });
+
+    // Create CommandLineParameter instances from the parameter definitions
+    const customParametersMap: Map<string, CommandLineParameter> = createCommandLineParameters(
+      action,
+      buildCommand.associatedParameters
+    );
+
+    // Set values on the parameters to test filtering
+    // Set --production flag
+    const productionParam = customParametersMap.get('--production') as CommandLineFlagParameter | undefined;
+    if (productionParam) {
+      (productionParam as unknown as { _setValue(value: boolean): void })._setValue(true);
+    }
+
+    // Set --verbose flag
+    const verboseParam = customParametersMap.get('--verbose') as CommandLineFlagParameter | undefined;
+    if (verboseParam) {
+      (verboseParam as unknown as { _setValue(value: boolean): void })._setValue(true);
+    }
+
+    // Set --config parameter
+    const configParam = customParametersMap.get('--config') as CommandLineStringParameter | undefined;
+    if (configParam) {
+      (configParam as unknown as { _setValue(value: string): void })._setValue('/path/to/config.json');
+    }
+
+    // Set --mode parameter
+    const modeParam = customParametersMap.get('--mode') as CommandLineChoiceParameter | undefined;
+    if (modeParam) {
+      (modeParam as unknown as { _setValue(value: string): void })._setValue('prod');
+    }
+
+    // Set --tags parameter
+    const tagsParam = customParametersMap.get('--tags') as CommandLineStringListParameter | undefined;
+    if (tagsParam) {
+      (tagsParam as unknown as { _setValue(value: string[]): void })._setValue(['tag1', 'tag2']);
+    }
+
+    // Update the phase's associatedParameters to use our created CommandLineParameters
+    for (const phase of buildCommand.phases) {
+      phase.associatedParameters.clear();
+      for (const param of customParametersMap.values()) {
+        phase.associatedParameters.add(param);
+      }
+    }
+
     const fakeCreateOperationsContext: Pick<
       ICreateOperationsContext,
       | 'phaseOriginal'
@@ -164,7 +329,7 @@ describe(ShellOperationRunnerPlugin.name, () => {
       projectsInUnknownState: new Set(rushConfiguration.projects),
       projectConfigurations,
       rushConfiguration,
-      customParameters: new Map()
+      customParameters: customParametersMap
     };
 
     const hooks: PhasedCommandHooks = new PhasedCommandHooks();
@@ -185,12 +350,21 @@ describe(ShellOperationRunnerPlugin.name, () => {
     const commandHashA = operationA!.runner!.getConfigHash();
     // Should not contain --production but should contain other parameters
     expect(commandHashA).not.toContain('--production');
+    expect(commandHashA).toContain('--verbose');
+    expect(commandHashA).toContain('--config');
+    expect(commandHashA).toContain('--mode');
+    expect(commandHashA).toContain('--tags');
 
     // Verify that project 'b' has all parameters (no filtering)
     const operationB = Array.from(operations).find((op) => op.name === 'b');
     expect(operationB).toBeDefined();
+    const commandHashB = operationB!.runner!.getConfigHash();
     // Should contain all parameters since no filtering is configured
-    // Note: Parameters only appear if they are provided, so we can't test for them without setting them
+    expect(commandHashB).toContain('--production');
+    expect(commandHashB).toContain('--verbose');
+    expect(commandHashB).toContain('--config');
+    expect(commandHashB).toContain('--mode');
+    expect(commandHashB).toContain('--tags');
 
     // All projects snapshot
     expect(Array.from(operations, serializeOperation)).toMatchSnapshot();

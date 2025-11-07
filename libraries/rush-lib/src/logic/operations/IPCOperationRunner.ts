@@ -85,13 +85,15 @@ export class IPCOperationRunner implements IOperationRunner {
       async (terminal: ITerminal, terminalProvider: ITerminalProvider): Promise<OperationStatus> => {
         let isConnected: boolean = false;
         if (!this._ipcProcess || typeof this._ipcProcess.exitCode === 'number') {
+          // Log any ignored parameters
+          if (this._ignoredParameterValues.length > 0) {
+            terminal.writeLine(
+              `These parameters were ignored for this operation by project-level configuration: ${this._ignoredParameterValues.join(' ')}`
+            );
+          }
+
           // Run the operation
           terminal.writeLine('Invoking: ' + this._commandToRun);
-
-          // Log any ignored parameters in verbose mode
-          if (this._ignoredParameterValues.length > 0) {
-            terminal.writeVerboseLine(`Ignored parameters: ${this._ignoredParameterValues.join(' ')}`);
-          }
 
           const { rushConfiguration, projectFolder } = this._rushProject;
 
