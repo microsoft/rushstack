@@ -4,7 +4,7 @@
 import { Text } from '../Text';
 
 describe('Text', () => {
-  describe('padEnd', () => {
+  describe(Text.padEnd.name, () => {
     it("Throws an exception if the padding character isn't a single character", () => {
       expect(() => Text.padEnd('123', 1, '')).toThrow();
       expect(() => Text.padEnd('123', 1, '  ')).toThrow();
@@ -28,7 +28,7 @@ describe('Text', () => {
     });
   });
 
-  describe('padStart', () => {
+  describe(Text.padStart.name, () => {
     it("Throws an exception if the padding character isn't a single character", () => {
       expect(() => Text.padStart('123', 1, '')).toThrow();
       expect(() => Text.padStart('123', 1, '  ')).toThrow();
@@ -52,7 +52,7 @@ describe('Text', () => {
     });
   });
 
-  describe('truncateWithEllipsis', () => {
+  describe(Text.truncateWithEllipsis.name, () => {
     it('Throws an exception if the maximum length is less than zero', () => {
       expect(() => Text.truncateWithEllipsis('123', -1)).toThrow();
     });
@@ -74,7 +74,7 @@ describe('Text', () => {
     });
   });
 
-  describe('convertToLf', () => {
+  describe(Text.convertToLf.name, () => {
     it('degenerate adjacent newlines', () => {
       expect(Text.convertToLf('')).toEqual('');
       expect(Text.convertToLf('\n')).toEqual('\n');
@@ -99,7 +99,7 @@ describe('Text', () => {
     });
   });
 
-  describe('escapeRegExp', () => {
+  describe(Text.escapeRegExp.name, () => {
     it('escapes special characters', () => {
       expect(Text.escapeRegExp('')).toEqual('');
       expect(Text.escapeRegExp('abc')).toEqual('abc');
@@ -120,7 +120,7 @@ describe('Text', () => {
     });
   });
 
-  describe('splitByNewLines', () => {
+  describe(Text.splitByNewLines.name, () => {
     it('splits a string by newlines', () => {
       expect(Text.splitByNewLines(undefined)).toEqual(undefined);
       expect(Text.splitByNewLines('')).toEqual(['']);

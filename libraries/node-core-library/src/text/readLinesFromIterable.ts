@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { NEWLINE_REGEX } from './_newlineHelpers';
+
 /**
  * The allowed types of encodings, as supported by Node.js
  * @public
@@ -31,8 +33,6 @@ interface IReadLinesFromIterableState {
   remaining: string;
 }
 
-const NEWLINE_REGEX: RegExp = /\r\n|\n\r|\r|\n/g;
-
 function* readLinesFromChunk(
   // eslint-disable-next-line @rushstack/no-new-null
   chunk: string | Buffer | null,
@@ -45,7 +45,7 @@ function* readLinesFromChunk(
   }
   const remaining: string = state.remaining + (typeof chunk === 'string' ? chunk : chunk.toString(encoding));
   let startIndex: number = 0;
-  const matches: IterableIterator<RegExpMatchArray> = remaining.matchAll(NEWLINE_REGEX);
+  const matches: IterableIterator<RegExpMatchArray> = NEWLINE_REGEX[Symbol.matchAll](remaining);
   for (const match of matches) {
     const endIndex: number = match.index!;
     if (startIndex !== endIndex || !ignoreEmptyLines) {
