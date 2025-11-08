@@ -5,8 +5,7 @@ import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction, type IBaseRushActionOptions } from '../actions/BaseRushAction';
 import type { Command, CommandLineConfiguration, IParameterJson } from '../../api/CommandLineConfiguration';
-import { RushConstants } from '../../logic/RushConstants';
-import type { ParameterJson } from '../../api/CommandLineJson';
+import { createCommandLineParameters } from '../../utilities/CommandLineParameterHelpers';
 
 /**
  * Constructor parameters for BaseScriptAction
@@ -42,83 +41,20 @@ export abstract class BaseScriptAction<TCommand extends Command> extends BaseRus
       return;
     }
 
-    // Find any parameters that are associated with this command
+    // Use the centralized helper to create CommandLineParameter instances
+    const parametersByLongName: Map<string, CommandLineParameter> = createCommandLineParameters(
+      this,
+      this.command.associatedParameters
+    );
+
+    // Map them by IParameterJson for internal use
     for (const parameter of this.command.associatedParameters) {
-      let tsCommandLineParameter: CommandLineParameter | undefined;
-
-      switch (parameter.parameterKind) {
-        case 'flag':
-          tsCommandLineParameter = this.defineFlagParameter({
-            parameterShortName: parameter.shortName,
-            parameterLongName: parameter.longName,
-            description: parameter.description,
-            required: parameter.required
-          });
-          break;
-        case 'choice':
-          tsCommandLineParameter = this.defineChoiceParameter({
-            parameterShortName: parameter.shortName,
-            parameterLongName: parameter.longName,
-            description: parameter.description,
-            required: parameter.required,
-            alternatives: parameter.alternatives.map((x) => x.name),
-            defaultValue: parameter.defaultValue
-          });
-          break;
-        case 'string':
-          tsCommandLineParameter = this.defineStringParameter({
-            parameterLongName: parameter.longName,
-            parameterShortName: parameter.shortName,
-            description: parameter.description,
-            required: parameter.required,
-            argumentName: parameter.argumentName
-          });
-          break;
-        case 'integer':
-          tsCommandLineParameter = this.defineIntegerParameter({
-            parameterLongName: parameter.longName,
-            parameterShortName: parameter.shortName,
-            description: parameter.description,
-            required: parameter.required,
-            argumentName: parameter.argumentName
-          });
-          break;
-        case 'stringList':
-          tsCommandLineParameter = this.defineStringListParameter({
-            parameterLongName: parameter.longName,
-            parameterShortName: parameter.shortName,
-            description: parameter.description,
-            required: parameter.required,
-            argumentName: parameter.argumentName
-          });
-          break;
-        case 'integerList':
-          tsCommandLineParameter = this.defineIntegerListParameter({
-            parameterLongName: parameter.longName,
-            parameterShortName: parameter.shortName,
-            description: parameter.description,
-            required: parameter.required,
-            argumentName: parameter.argumentName
-          });
-          break;
-        case 'choiceList':
-          tsCommandLineParameter = this.defineChoiceListParameter({
-            parameterShortName: parameter.shortName,
-            parameterLongName: parameter.longName,
-            description: parameter.description,
-            required: parameter.required,
-            alternatives: parameter.alternatives.map((x) => x.name)
-          });
-          break;
-        default:
-          throw new Error(
-            `${RushConstants.commandLineFilename} defines a parameter "${
-              (parameter as ParameterJson).longName
-            }" using an unsupported parameter kind "${(parameter as ParameterJson).parameterKind}"`
-          );
+      const tsCommandLineParameter: CommandLineParameter | undefined = parametersByLongName.get(
+        parameter.longName
+      );
+      if (tsCommandLineParameter) {
+        this.customParameters.set(parameter, tsCommandLineParameter);
       }
-
-      this.customParameters.set(parameter, tsCommandLineParameter);
     }
   }
 }

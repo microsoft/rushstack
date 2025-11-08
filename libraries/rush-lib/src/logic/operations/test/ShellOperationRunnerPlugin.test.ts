@@ -14,13 +14,9 @@ import {
 } from '@rushstack/ts-command-line';
 
 import { RushConfiguration } from '../../../api/RushConfiguration';
-import {
-  CommandLineConfiguration,
-  type IPhasedCommandConfig,
-  type IParameterJson
-} from '../../../api/CommandLineConfiguration';
+import { CommandLineConfiguration, type IPhasedCommandConfig } from '../../../api/CommandLineConfiguration';
 import type { Operation } from '../Operation';
-import type { ICommandLineJson, ParameterJson } from '../../../api/CommandLineJson';
+import type { ICommandLineJson } from '../../../api/CommandLineJson';
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../ShellOperationRunnerPlugin';
 import {
@@ -28,7 +24,7 @@ import {
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
 import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
-import { RushConstants } from '../../RushConstants';
+import { createCommandLineParameters } from '../../../utilities/CommandLineParameterHelpers';
 
 interface ISerializedOperation {
   name: string;
@@ -40,97 +36,6 @@ function serializeOperation(operation: Operation): ISerializedOperation {
     name: operation.name,
     commandToRun: operation.runner!.getConfigHash()
   };
-}
-
-/**
- * Helper function to create CommandLineParameter instances from parameter definitions.
- * Extracted logic from BaseScriptAction.defineScriptParameters()
- */
-function createCommandLineParameters(
-  action: CommandLineAction,
-  associatedParameters: Set<IParameterJson>
-): Map<string, CommandLineParameter> {
-  const customParameters: Map<string, CommandLineParameter> = new Map();
-
-  for (const parameter of associatedParameters) {
-    let tsCommandLineParameter: CommandLineParameter | undefined;
-
-    switch (parameter.parameterKind) {
-      case 'flag':
-        tsCommandLineParameter = action.defineFlagParameter({
-          parameterShortName: parameter.shortName,
-          parameterLongName: parameter.longName,
-          description: parameter.description,
-          required: parameter.required
-        });
-        break;
-      case 'choice':
-        tsCommandLineParameter = action.defineChoiceParameter({
-          parameterShortName: parameter.shortName,
-          parameterLongName: parameter.longName,
-          description: parameter.description,
-          required: parameter.required,
-          alternatives: parameter.alternatives.map((x) => x.name),
-          defaultValue: parameter.defaultValue
-        });
-        break;
-      case 'string':
-        tsCommandLineParameter = action.defineStringParameter({
-          parameterLongName: parameter.longName,
-          parameterShortName: parameter.shortName,
-          description: parameter.description,
-          required: parameter.required,
-          argumentName: parameter.argumentName
-        });
-        break;
-      case 'integer':
-        tsCommandLineParameter = action.defineIntegerParameter({
-          parameterLongName: parameter.longName,
-          parameterShortName: parameter.shortName,
-          description: parameter.description,
-          required: parameter.required,
-          argumentName: parameter.argumentName
-        });
-        break;
-      case 'stringList':
-        tsCommandLineParameter = action.defineStringListParameter({
-          parameterLongName: parameter.longName,
-          parameterShortName: parameter.shortName,
-          description: parameter.description,
-          required: parameter.required,
-          argumentName: parameter.argumentName
-        });
-        break;
-      case 'integerList':
-        tsCommandLineParameter = action.defineIntegerListParameter({
-          parameterLongName: parameter.longName,
-          parameterShortName: parameter.shortName,
-          description: parameter.description,
-          required: parameter.required,
-          argumentName: parameter.argumentName
-        });
-        break;
-      case 'choiceList':
-        tsCommandLineParameter = action.defineChoiceListParameter({
-          parameterShortName: parameter.shortName,
-          parameterLongName: parameter.longName,
-          description: parameter.description,
-          required: parameter.required,
-          alternatives: parameter.alternatives.map((x) => x.name)
-        });
-        break;
-      default:
-        throw new Error(
-          `${RushConstants.commandLineFilename} defines a parameter "${
-            (parameter as ParameterJson).longName
-          }" using an unsupported parameter kind "${(parameter as ParameterJson).parameterKind}"`
-        );
-    }
-
-    customParameters.set(parameter.longName, tsCommandLineParameter);
-  }
-
-  return customParameters;
 }
 
 /**
