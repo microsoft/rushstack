@@ -39,7 +39,6 @@ interface ILintOptions {
   taskSession: IHeftTaskSession;
   heftConfiguration: HeftConfiguration;
   tsProgram: IExtendedProgram;
-  tsconfigFilePath: string;
   fix?: boolean;
   sarifLogPath?: string;
   changedFiles?: ReadonlySet<IExtendedSourceFile>;
@@ -105,8 +104,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     let inTypescriptPhase: boolean = false;
 
     // Use the changed files hook to collect the files and programs from TypeScript
-    // Also track the tsconfig path for cache file naming
-    let typescriptChangedFiles: [IExtendedProgram, ReadonlySet<IExtendedSourceFile>, string][] = [];
+    let typescriptChangedFiles: [IExtendedProgram, ReadonlySet<IExtendedSourceFile>][] = [];
     taskSession.requestAccessToPluginByName(
       TYPESCRIPT_PLUGIN_PACKAGE_NAME,
       TYPESCRIPT_PLUGIN_NAME,
@@ -116,13 +114,9 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
 
         // Hook into the changed files hook to collect the changed files and their programs
         accessor.onChangedFilesHook.tap(PLUGIN_NAME, (changedFilesHookOptions: IChangedFilesHookOptions) => {
-          // When using the TypeScript plugin, we need to determine the tsconfig path
-          // The default tsconfig path is used when not explicitly specified
-          const tsconfigPath: string = path.resolve(heftConfiguration.buildFolderPath, 'tsconfig.json');
           typescriptChangedFiles.push([
             changedFilesHookOptions.program as IExtendedProgram,
-            changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>,
-            tsconfigPath
+            changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>
           ]);
         });
       }
@@ -132,22 +126,20 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       // If we are not in the typescript phase, we need to create a typescript program
       // from the tsconfig file
       if (!inTypescriptPhase) {
-        const tsconfigPath: string = path.resolve(heftConfiguration.buildFolderPath, 'tsconfig.json');
         const tsProgram: IExtendedProgram = await this._createTypescriptProgramAsync(
           heftConfiguration,
           taskSession
         );
-        typescriptChangedFiles.push([tsProgram, new Set(tsProgram.getSourceFiles()), tsconfigPath]);
+        typescriptChangedFiles.push([tsProgram, new Set(tsProgram.getSourceFiles())]);
       }
 
       // Run the linters to completion. Linters emit errors and warnings to the logger.
-      for (const [tsProgram, changedFiles, tsconfigFilePath] of typescriptChangedFiles) {
+      for (const [tsProgram, changedFiles] of typescriptChangedFiles) {
         try {
           await this._lintAsync({
             taskSession,
             heftConfiguration,
             tsProgram,
-            tsconfigFilePath,
             changedFiles,
             fix,
             sarifLogPath
@@ -230,8 +222,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
   }
 
   private async _lintAsync(options: ILintOptions): Promise<void> {
-    const { taskSession, heftConfiguration, tsProgram, tsconfigFilePath, changedFiles, fix, sarifLogPath } =
-      options;
+    const { taskSession, heftConfiguration, tsProgram, changedFiles, fix, sarifLogPath } = options;
 
     // Ensure that we have initialized. This promise is cached, so calling init
     // multiple times will only init once.
@@ -241,7 +232,6 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     if (this._eslintConfigFilePath && this._eslintToolPath) {
       const eslintLinter: Eslint = await Eslint.initializeAsync({
         tsProgram,
-        tsconfigFilePath,
         fix,
         sarifLogPath,
         scopedLogger: taskSession.logger,
@@ -256,7 +246,6 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     if (this._tslintConfigFilePath && this._tslintToolPath) {
       const tslintLinter: Tslint = await Tslint.initializeAsync({
         tsProgram,
-        tsconfigFilePath,
         fix,
         scopedLogger: taskSession.logger,
         linterToolPath: this._tslintToolPath,

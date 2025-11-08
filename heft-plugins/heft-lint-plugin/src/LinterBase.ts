@@ -5,6 +5,8 @@ import * as path from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { createHash, type Hash } from 'node:crypto';
 
+import type * as TTypescript from 'typescript';
+
 import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import type { IScopedLogger } from '@rushstack/heft';
@@ -21,7 +23,6 @@ export interface ILinterBaseOptions {
   linterToolPath: string;
   linterConfigFilePath: string;
   tsProgram: IExtendedProgram;
-  tsconfigFilePath: string;
   fix?: boolean;
   sarifLogPath?: string;
 }
@@ -66,7 +67,6 @@ export abstract class LinterBase<TLintResult> {
   protected readonly _buildFolderPath: string;
   protected readonly _buildMetadataFolderPath: string;
   protected readonly _linterConfigFilePath: string;
-  protected readonly _tsconfigFilePath: string;
   protected readonly _fix: boolean;
 
   protected _fixesPossible: boolean = false;
@@ -79,7 +79,6 @@ export abstract class LinterBase<TLintResult> {
     this._buildFolderPath = options.buildFolderPath;
     this._buildMetadataFolderPath = options.buildMetadataFolderPath;
     this._linterConfigFilePath = options.linterConfigFilePath;
-    this._tsconfigFilePath = options.tsconfigFilePath;
     this._linterName = linterName;
     this._fix = options.fix || false;
   }
@@ -94,31 +93,40 @@ export abstract class LinterBase<TLintResult> {
 
     const relativePaths: Map<string, string> = new Map();
 
-    // Calculate the hash of the list of filenames for verification purposes
-    const filesHash: Hash = createHash('md5');
+    // Collect and sort file paths for stable hashing
+    const relativePathsArray: string[] = [];
     for (const file of options.typeScriptFilenames) {
       // Need to use relative paths to ensure portability.
       const relative: string = Path.convertToSlashes(path.relative(commonDirectory, file));
       relativePaths.set(file, relative);
+      relativePathsArray.push(relative);
+    }
+    relativePathsArray.sort();
+
+    // Calculate the hash of the list of filenames for verification purposes
+    const filesHash: Hash = createHash('md5');
+    for (const relative of relativePathsArray) {
       filesHash.update(relative);
     }
-    const filesHashString: string = filesHash
-      .digest('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .slice(0, 8);
+    const filesHashString: string = filesHash.digest('base64url');
 
     // Calculate the hash suffix based on the project-relative path of the tsconfig file
-    const relativeTsconfigPath: string = Path.convertToSlashes(
-      path.relative(this._buildFolderPath, this._tsconfigFilePath)
-    );
-    const tsconfigHash: Hash = createHash('md5');
-    tsconfigHash.update(relativeTsconfigPath);
-    const hashSuffix: string = tsconfigHash
-      .digest('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .slice(0, 8);
+    // Extract the config file path from the program's compiler options
+    const compilerOptions: TTypescript.CompilerOptions = options.tsProgram.getCompilerOptions();
+    const tsconfigFilePath: string | undefined = compilerOptions.configFilePath as string | undefined;
+
+    let hashSuffix: string;
+    if (tsconfigFilePath) {
+      const relativeTsconfigPath: string = Path.convertToSlashes(
+        path.relative(this._buildFolderPath, tsconfigFilePath)
+      );
+      const tsconfigHash: Hash = createHash('md5');
+      tsconfigHash.update(relativeTsconfigPath);
+      hashSuffix = tsconfigHash.digest('base64url').slice(0, 8);
+    } else {
+      // Fallback to a default hash if configFilePath is not available
+      hashSuffix = 'default';
+    }
 
     const linterCacheVersion: string = await this.getCacheVersionAsync();
     const linterCacheFilePath: string = path.resolve(
