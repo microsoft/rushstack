@@ -260,16 +260,16 @@ describe(ShellOperationRunnerPlugin.name, () => {
     expect(commandHashA).toContain('--mode');
     expect(commandHashA).toContain('--tags');
 
-    // Verify that project 'b' has all parameters (no filtering)
+    // Verify that project 'b' has --verbose, --config, --mode, and --tags filtered out
     const operationB = Array.from(operations).find((op) => op.name === 'b');
     expect(operationB).toBeDefined();
     const commandHashB = operationB!.runner!.getConfigHash();
-    // Should contain all parameters since no filtering is configured
+    // Should contain --production but not the other parameters since they are filtered
     expect(commandHashB).toContain('--production');
-    expect(commandHashB).toContain('--verbose');
-    expect(commandHashB).toContain('--config');
-    expect(commandHashB).toContain('--mode');
-    expect(commandHashB).toContain('--tags');
+    expect(commandHashB).not.toContain('--verbose');
+    expect(commandHashB).not.toContain('--config');
+    expect(commandHashB).not.toContain('--mode');
+    expect(commandHashB).not.toContain('--tags');
 
     // All projects snapshot
     expect(Array.from(operations, serializeOperation)).toMatchSnapshot();

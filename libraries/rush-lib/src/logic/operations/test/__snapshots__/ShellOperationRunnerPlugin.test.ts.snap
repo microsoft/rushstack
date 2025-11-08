@@ -7,7 +7,7 @@ Array [
     "name": "a",
   },
   Object {
-    "commandToRun": "echo building b --production --verbose --config /path/to/config.json --mode prod --tags tag1 --tags tag2",
+    "commandToRun": "echo building b --production",
     "name": "b",
   },
 ]
