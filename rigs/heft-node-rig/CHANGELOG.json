@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "2.11.6",
+      "tag": "@rushstack/heft-node-rig_v2.11.6",
+      "date": "Mon, 10 Nov 2025 16:12:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include lib-dts and lib-esm folders in default files to clean"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.11.5",
       "tag": "@rushstack/heft-node-rig_v2.11.5",
       "date": "Tue, 04 Nov 2025 08:15:15 GMT",

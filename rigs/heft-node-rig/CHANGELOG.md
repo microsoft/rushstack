@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Tue, 04 Nov 2025 08:15:15 GMT and should not be manually modified.
+This log was last generated on Mon, 10 Nov 2025 16:12:32 GMT and should not be manually modified.
+
+## 2.11.6
+Mon, 10 Nov 2025 16:12:32 GMT
+
+### Patches
+
+- Include lib-dts and lib-esm folders in default files to clean
 
 ## 2.11.5
 Tue, 04 Nov 2025 08:15:15 GMT
