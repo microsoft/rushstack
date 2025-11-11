@@ -1,0 +1,111 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Sarif Logs has the expected content 1`] = `
+Object {
+  "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
+  "runs": Array [
+    Object {
+      "artifacts": Array [
+        Object {
+          "location": Object {
+            "uri": "src/index.ts",
+          },
+        },
+        Object {
+          "location": Object {
+            "uri": "src/sarif.test.ts",
+          },
+        },
+      ],
+      "results": Array [
+        Object {
+          "level": "warning",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "index": 0,
+                  "uri": "src/index.ts",
+                },
+                "region": Object {
+                  "endColumn": 24,
+                  "endLine": 6,
+                  "startColumn": 3,
+                  "startLine": 6,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "text": "Expected _bar to have a type annotation.",
+          },
+          "ruleId": "@typescript-eslint/typedef",
+          "ruleIndex": 0,
+          "suppressions": Array [
+            Object {
+              "justification": "",
+              "kind": "inSource",
+            },
+          ],
+        },
+        Object {
+          "level": "warning",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "index": 0,
+                  "uri": "src/index.ts",
+                },
+                "region": Object {
+                  "endColumn": 30,
+                  "endLine": 10,
+                  "startColumn": 14,
+                  "startLine": 10,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "text": "Variable name \`Bad_Name\` must match one of the following formats: camelCase, UPPER_CASE, PascalCase",
+          },
+          "ruleId": "@typescript-eslint/naming-convention",
+          "ruleIndex": 1,
+          "suppressions": Array [
+            Object {
+              "justification": "",
+              "kind": "external",
+            },
+          ],
+        },
+      ],
+      "tool": Object {
+        "driver": Object {
+          "informationUri": "https://eslint.org",
+          "name": "ESLint",
+          "rules": Array [
+            Object {
+              "helpUri": "https://typescript-eslint.io/rules/typedef",
+              "id": "@typescript-eslint/typedef",
+              "properties": Object {},
+              "shortDescription": Object {
+                "text": "Require type annotations in certain places",
+              },
+            },
+            Object {
+              "helpUri": "https://typescript-eslint.io/rules/naming-convention",
+              "id": "@typescript-eslint/naming-convention",
+              "properties": Object {},
+              "shortDescription": Object {
+                "text": "Enforce naming conventions for everything across a codebase",
+              },
+            },
+          ],
+          "version": "9.37.0",
+        },
+      },
+    },
+  ],
+  "version": "2.1.0",
+}
+`;

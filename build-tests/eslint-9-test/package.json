@@ -7,7 +7,8 @@
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
