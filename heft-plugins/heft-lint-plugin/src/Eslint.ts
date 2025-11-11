@@ -157,7 +157,9 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       let overrideParserOptions: TEslint.Linter.ParserOptions = {
         programs: [tsProgram],
         // Used by stableStringify and ESLint > 9.28.0
-        toJSON: parserOptionsToJson
+        toJSON: parserOptionsToJson,
+        // ESlint's merge logic for parserOptions is a "replace", so we need to set this again
+        tsconfigRootDir: buildFolderPath
       };
       if (this._eslintPackageVersion.minor < 28) {
         overrideParserOptions = Object.defineProperties(overrideParserOptions, {
