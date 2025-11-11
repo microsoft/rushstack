@@ -203,7 +203,19 @@ export async function loadPartialTsconfigFileAsync(
           },
           jsonPathMetadata: {
             '$.compilerOptions.outDir': {
-              pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
+              pathResolutionMethod: PathResolutionMethod.custom,
+              customResolver(
+                resolverOptions: ConfigurationFile.IJsonPathMetadataResolverOptions<IPartialTsconfig>
+              ): string {
+                if (resolverOptions.propertyValue.includes('${configDir}')) {
+                  // Typescript supports the `${configDir}` token to refer to the directory containing the root tsconfig
+                  const configDir: string = path.dirname(tsconfigFilePath);
+                  return path.resolve(resolverOptions.propertyValue.replace('${configDir}', configDir));
+                } else {
+                  const thisConfigDir: string = path.dirname(resolverOptions.configurationFilePath);
+                  return path.resolve(thisConfigDir, resolverOptions.propertyValue);
+                }
+              }
             }
           }
         });

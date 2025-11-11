@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-typescript-plugin",
+      "comment": "Support \"${configDir}\" token in tsconfig when using file copier.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-typescript-plugin"
+}
