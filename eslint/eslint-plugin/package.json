@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-plugin",
-  "version": "0.22.0",
+  "version": "0.22.1",
   "description": "An ESLint plugin providing supplementary rules for use with the @rushstack/eslint-config package",
   "license": "MIT",
   "repository": {
