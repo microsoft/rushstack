@@ -21,7 +21,7 @@ export const noExternalLocalImportsRule: RuleModule = {
       [MESSAGE_ID]:
         'The specified import target "{{ importAbsolutePath }}" is not under the root directory, "{{ rootDirectory }}". Ensure that ' +
         'all local import targets are either under the "parserOptions.tsconfigRootDir" specified in your eslint.config.js (if one ' +
-        'exists) or else not under the folder that contains your tsconfig.json.'
+        'exists) or else under the folder that contains your tsconfig.json.'
     },
     schema: [],
     docs: {
