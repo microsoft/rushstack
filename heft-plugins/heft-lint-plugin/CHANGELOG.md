@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-lint-plugin
 
-This log was last generated on Tue, 04 Nov 2025 08:15:14 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Nov 2025 16:13:26 GMT and should not be manually modified.
+
+## 1.1.5
+Tue, 11 Nov 2025 16:13:26 GMT
+
+### Patches
+
+- Ensure that `parserOptions.tsconfigRootDir` is set for use by custom lint rules.
 
 ## 1.1.4
 Tue, 04 Nov 2025 08:15:14 GMT

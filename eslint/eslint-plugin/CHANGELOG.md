@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Wed, 22 Oct 2025 00:57:54 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Nov 2025 16:13:26 GMT and should not be manually modified.
+
+## 0.22.1
+Tue, 11 Nov 2025 16:13:26 GMT
+
+### Patches
+
+- Fix calculation of project root folder when using the ESLint extension in VS Code. Report the paths being compared in 'no-external-local-imports' rule violations.
 
 ## 0.22.0
 Wed, 22 Oct 2025 00:57:54 GMT

@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "1.1.7",
+      "tag": "@rushstack/heft-web-rig_v1.1.7",
+      "date": "Tue, 11 Nov 2025 16:13:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `4.5.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `1.1.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.6",
       "tag": "@rushstack/heft-web-rig_v1.1.6",
       "date": "Tue, 04 Nov 2025 08:15:14 GMT",

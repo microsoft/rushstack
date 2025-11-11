@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.22.1",
+      "tag": "@rushstack/eslint-plugin_v0.22.1",
+      "date": "Tue, 11 Nov 2025 16:13:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix calculation of project root folder when using the ESLint extension in VS Code. Report the paths being compared in 'no-external-local-imports' rule violations."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.22.0",
       "tag": "@rushstack/eslint-plugin_v0.22.0",
       "date": "Wed, 22 Oct 2025 00:57:54 GMT",

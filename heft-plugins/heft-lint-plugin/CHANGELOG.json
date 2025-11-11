@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "1.1.5",
+      "tag": "@rushstack/heft-lint-plugin_v1.1.5",
+      "date": "Tue, 11 Nov 2025 16:13:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Ensure that `parserOptions.tsconfigRootDir` is set for use by custom lint rules."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.4",
       "tag": "@rushstack/heft-lint-plugin_v1.1.4",
       "date": "Tue, 04 Nov 2025 08:15:14 GMT",
