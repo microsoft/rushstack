@@ -292,19 +292,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
         return lintResult.fixableErrorCount + lintResult.fixableWarningCount > 0;
       });
 
-    const trimmedLintResults: (TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult)[] = [];
-    for (const lintResult of lintResults) {
-      if (
-        lintResult.messages.length > 0 ||
-        lintResult.warningCount > 0 ||
-        lintResult.errorCount > 0 ||
-        fixMessages.length > 0
-      ) {
-        trimmedLintResults.push(lintResult);
-      }
-    }
-
-    return trimmedLintResults;
+    return lintResults;
   }
 
   protected override async lintingFinishedAsync(lintResults: TEslint.ESLint.LintResult[]): Promise<void> {
