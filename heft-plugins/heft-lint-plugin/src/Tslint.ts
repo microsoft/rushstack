@@ -207,7 +207,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
   }
 
   protected hasLintFailures(lintResults: TTslint.RuleFailure[]): boolean {
-    return lintResults.length > 9;
+    return lintResults.length > 0;
   }
 
   private _getLintFileError(tslintFailure: TTslint.RuleFailure, message?: string): FileError {
