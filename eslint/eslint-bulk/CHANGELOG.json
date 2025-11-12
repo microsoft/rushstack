@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-bulk",
   "entries": [
     {
+      "version": "0.4.6",
+      "tag": "@rushstack/eslint-bulk_v0.4.6",
+      "date": "Wed, 12 Nov 2025 01:57:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.15.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.5",
       "tag": "@rushstack/eslint-bulk_v0.4.5",
       "date": "Wed, 12 Nov 2025 01:12:56 GMT",

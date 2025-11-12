@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Fri, 24 Oct 2025 11:22:09 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Nov 2025 01:57:54 GMT and should not be manually modified.
+
+## 1.15.0
+Wed, 12 Nov 2025 01:57:54 GMT
+
+### Minor changes
+
+- In ESLint >= 9.37, report bulk suppressed messages as suppressed messages rather than removing them completely.
 
 ## 1.14.1
 Fri, 24 Oct 2025 11:22:09 GMT

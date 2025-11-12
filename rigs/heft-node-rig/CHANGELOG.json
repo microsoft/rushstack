@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "2.11.9",
+      "tag": "@rushstack/heft-node-rig_v2.11.9",
+      "date": "Wed, 12 Nov 2025 01:57:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `4.6.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `1.1.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.11.8",
       "tag": "@rushstack/heft-node-rig_v2.11.8",
       "date": "Wed, 12 Nov 2025 01:12:56 GMT",
