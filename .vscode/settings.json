@@ -21,5 +21,35 @@
   "files.associations": {
     "**/package.json": "json",
     "**/*.json": "jsonc"
-  }
+  },
+  "json.schemas": [
+    {
+      "fileMatch": ["/rush.json"],
+      "url": "./libraries/rush-lib/src/schemas/rush.schema.json"
+    },
+    {
+      "fileMatch": ["**/rush-plugin.json"],
+      "url": "./libraries/rush-lib/src/schemas/rush-plugin-manifest.schema.json"
+    },
+    {
+      "fileMatch": ["**/config/heft.json"],
+      "url": "./apps/heft/src/schemas/heft.schema.json"
+    },
+    {
+      "fileMatch": ["**/config/rig.json"],
+      "url": "./libraries/rig-package/src/schemas/rig.schema.json"
+    },
+    {
+      "fileMatch": ["**/config/rush-project.json"],
+      "url": "./libraries/rush-lib/src/schemas/rush-project.schema.json"
+    },
+    {
+      "fileMatch": ["**/config/typescript.json"],
+      "url": "./heft-plugins/heft-typescript-plugin/src/schemas/typescript.schema.json"
+    },
+    {
+      "fileMatch": ["**/heft-plugin.json"],
+      "url": "./apps/heft/src/schemas/heft-plugin.schema.json"
+    }
+  ]
 }
