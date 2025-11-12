@@ -3,9 +3,9 @@
 
 import type { CommandLineAction, CommandLineParameter } from '@rushstack/ts-command-line';
 
-import type { IParameterJson } from '../api/CommandLineConfiguration';
-import { RushConstants } from '../logic/RushConstants';
-import type { ParameterJson } from '../api/CommandLineJson';
+import type { IParameterJson } from '../../api/CommandLineConfiguration';
+import { RushConstants } from '../../logic/RushConstants';
+import type { ParameterJson } from '../../api/CommandLineJson';
 
 /**
  * Helper function to create CommandLineParameter instances from parameter definitions.
@@ -13,14 +13,13 @@ import type { ParameterJson } from '../api/CommandLineJson';
  *
  * @param action - The CommandLineAction to define the parameters on
  * @param associatedParameters - The set of parameter definitions
- * @returns A map from parameter longName to the created CommandLineParameter instance
+ * @param targetMap - The map to populate with parameter definitions to CommandLineParameter instances
  */
-export function createCommandLineParameters(
+export function defineCustomParameters(
   action: CommandLineAction,
-  associatedParameters: Iterable<IParameterJson>
-): Map<string, CommandLineParameter> {
-  const customParameters: Map<string, CommandLineParameter> = new Map();
-
+  associatedParameters: Iterable<IParameterJson>,
+  targetMap: Map<IParameterJson, CommandLineParameter>
+): void {
   for (const parameter of associatedParameters) {
     let tsCommandLineParameter: CommandLineParameter | undefined;
 
@@ -96,8 +95,6 @@ export function createCommandLineParameters(
         );
     }
 
-    customParameters.set(parameter.longName, tsCommandLineParameter);
+    targetMap.set(parameter, tsCommandLineParameter);
   }
-
-  return customParameters;
 }

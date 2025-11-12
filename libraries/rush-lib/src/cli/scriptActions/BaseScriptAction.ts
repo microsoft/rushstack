@@ -5,7 +5,7 @@ import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction, type IBaseRushActionOptions } from '../actions/BaseRushAction';
 import type { Command, CommandLineConfiguration, IParameterJson } from '../../api/CommandLineConfiguration';
-import { createCommandLineParameters } from '../../utilities/CommandLineParameterHelpers';
+import { defineCustomParameters } from '../parsing/defineCustomParameters';
 
 /**
  * Constructor parameters for BaseScriptAction
@@ -42,19 +42,6 @@ export abstract class BaseScriptAction<TCommand extends Command> extends BaseRus
     }
 
     // Use the centralized helper to create CommandLineParameter instances
-    const parametersByLongName: Map<string, CommandLineParameter> = createCommandLineParameters(
-      this,
-      this.command.associatedParameters
-    );
-
-    // Map them by IParameterJson for internal use
-    for (const parameter of this.command.associatedParameters) {
-      const tsCommandLineParameter: CommandLineParameter | undefined = parametersByLongName.get(
-        parameter.longName
-      );
-      if (tsCommandLineParameter) {
-        this.customParameters.set(parameter, tsCommandLineParameter);
-      }
-    }
+    defineCustomParameters(this, this.command.associatedParameters, this.customParameters);
   }
 }

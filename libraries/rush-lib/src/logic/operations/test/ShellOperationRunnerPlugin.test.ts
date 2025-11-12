@@ -4,17 +4,15 @@
 import path from 'node:path';
 import { JsonFile } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
-import {
-  CommandLineAction,
-  type CommandLineParameter,
-  type CommandLineFlagParameter,
-  type CommandLineStringParameter,
-  type CommandLineChoiceParameter,
-  type CommandLineStringListParameter
-} from '@rushstack/ts-command-line';
+import { CommandLineAction, type CommandLineParameter } from '@rushstack/ts-command-line';
 
 import { RushConfiguration } from '../../../api/RushConfiguration';
-import { CommandLineConfiguration, type IPhasedCommandConfig } from '../../../api/CommandLineConfiguration';
+import {
+  CommandLineConfiguration,
+  type IPhasedCommandConfig,
+  type IParameterJson,
+  type IPhase
+} from '../../../api/CommandLineConfiguration';
 import type { Operation } from '../Operation';
 import type { ICommandLineJson } from '../../../api/CommandLineJson';
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
@@ -24,7 +22,8 @@ import {
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
 import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
-import { createCommandLineParameters } from '../../../utilities/CommandLineParameterHelpers';
+import { defineCustomParameters } from '../../../cli/parsing/defineCustomParameters';
+import { associateParametersByPhase } from '../../../cli/parsing/associateParametersByPhase';
 
 interface ISerializedOperation {
   name: string;
@@ -174,48 +173,58 @@ describe(ShellOperationRunnerPlugin.name, () => {
     });
 
     // Create CommandLineParameter instances from the parameter definitions
-    const customParametersMap: Map<string, CommandLineParameter> = createCommandLineParameters(
-      action,
-      buildCommand.associatedParameters
-    );
+    const customParametersMap: Map<IParameterJson, CommandLineParameter> = new Map();
+    defineCustomParameters(action, buildCommand.associatedParameters, customParametersMap);
 
     // Set values on the parameters to test filtering
+    // Create a map by longName for easier lookup
+    const paramsByLongName: Map<string, { param: IParameterJson; cli: CommandLineParameter }> = new Map();
+    for (const [param, cli] of customParametersMap) {
+      paramsByLongName.set(param.longName, { param, cli });
+    }
+
     // Set --production flag
-    const productionParam = customParametersMap.get('--production') as CommandLineFlagParameter | undefined;
-    if (productionParam) {
-      (productionParam as unknown as { _setValue(value: boolean): void })._setValue(true);
+    const production = paramsByLongName.get('--production');
+    if (production) {
+      (production.cli as unknown as { _setValue(value: boolean): void })._setValue(true);
     }
 
     // Set --verbose flag
-    const verboseParam = customParametersMap.get('--verbose') as CommandLineFlagParameter | undefined;
-    if (verboseParam) {
-      (verboseParam as unknown as { _setValue(value: boolean): void })._setValue(true);
+    const verbose = paramsByLongName.get('--verbose');
+    if (verbose) {
+      (verbose.cli as unknown as { _setValue(value: boolean): void })._setValue(true);
     }
 
     // Set --config parameter
-    const configParam = customParametersMap.get('--config') as CommandLineStringParameter | undefined;
-    if (configParam) {
-      (configParam as unknown as { _setValue(value: string): void })._setValue('/path/to/config.json');
+    const config = paramsByLongName.get('--config');
+    if (config) {
+      (config.cli as unknown as { _setValue(value: string): void })._setValue('/path/to/config.json');
     }
 
     // Set --mode parameter
-    const modeParam = customParametersMap.get('--mode') as CommandLineChoiceParameter | undefined;
-    if (modeParam) {
-      (modeParam as unknown as { _setValue(value: string): void })._setValue('prod');
+    const mode = paramsByLongName.get('--mode');
+    if (mode) {
+      (mode.cli as unknown as { _setValue(value: string): void })._setValue('prod');
     }
 
     // Set --tags parameter
-    const tagsParam = customParametersMap.get('--tags') as CommandLineStringListParameter | undefined;
-    if (tagsParam) {
-      (tagsParam as unknown as { _setValue(value: string[]): void })._setValue(['tag1', 'tag2']);
+    const tags = paramsByLongName.get('--tags');
+    if (tags) {
+      (tags.cli as unknown as { _setValue(value: string[]): void })._setValue(['tag1', 'tag2']);
     }
 
-    // Update the phase's associatedParameters to use our created CommandLineParameters
+    // Associate parameters with phases using the helper
+    // Create a map of phase names to phases for the helper
+    const phasesMap: Map<string, IPhase> = new Map();
     for (const phase of buildCommand.phases) {
-      phase.associatedParameters.clear();
-      for (const param of customParametersMap.values()) {
-        phase.associatedParameters.add(param);
-      }
+      phasesMap.set(phase.name, phase);
+    }
+    associateParametersByPhase(customParametersMap, phasesMap);
+
+    // Create customParameters map for ICreateOperationsContext (keyed by longName)
+    const customParametersForContext: Map<string, CommandLineParameter> = new Map();
+    for (const [param, cli] of customParametersMap) {
+      customParametersForContext.set(param.longName, cli);
     }
 
     const fakeCreateOperationsContext: Pick<
@@ -234,7 +243,7 @@ describe(ShellOperationRunnerPlugin.name, () => {
       projectsInUnknownState: new Set(rushConfiguration.projects),
       projectConfigurations,
       rushConfiguration,
-      customParameters: customParametersMap
+      customParameters: customParametersForContext
     };
 
     const hooks: PhasedCommandHooks = new PhasedCommandHooks();
