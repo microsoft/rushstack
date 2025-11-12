@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/lookup-by-path",
-  "version": "0.8.6",
+  "version": "0.8.7",
   "description": "Strongly typed trie data structure for path and URL-like strings.",
   "main": "lib/index.js",
   "typings": "dist/lookup-by-path.d.ts",
