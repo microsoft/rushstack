@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "4.6.0",
+      "tag": "@rushstack/eslint-config_v4.6.0",
+      "date": "Wed, 12 Nov 2025 01:12:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump the `eslint-plugin-tsdoc` dependency to `~0.5.0`."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.5.4",
       "tag": "@rushstack/eslint-config_v4.5.4",
       "date": "Tue, 11 Nov 2025 16:13:26 GMT",

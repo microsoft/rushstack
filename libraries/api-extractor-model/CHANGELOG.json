@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.32.0",
+      "tag": "@microsoft/api-extractor-model_v7.32.0",
+      "date": "Wed, 12 Nov 2025 01:12:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump the `@microsoft/tsdoc` dependency to `~0.16.0`."
+          },
+          {
+            "comment": "Bump the `@microsoft/tsdoc-config` dependency to `~0.18.0`."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.31.3",
       "tag": "@microsoft/api-extractor-model_v7.31.3",
       "date": "Fri, 24 Oct 2025 00:13:38 GMT",

@@ -2,6 +2,18 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "2.0.6",
+      "tag": "@rushstack/lockfile-explorer_v2.0.6",
+      "date": "Wed, 12 Nov 2025 01:12:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.5",
       "tag": "@rushstack/lockfile-explorer_v2.0.5",
       "date": "Tue, 04 Nov 2025 08:15:14 GMT",
