@@ -34,7 +34,7 @@ export const PLUGIN_NAME: 'typescript-plugin' = 'typescript-plugin';
 
 /**
  * The ${configDir} token supported in TypeScript 5.5
- * https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-5.html#the-configdir-template-variable-for-configuration-files
+ * @see {@link https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-5.html#the-configdir-template-variable-for-configuration-files}
  */
 const CONFIG_DIR_TOKEN: '${configDir}' = '${configDir}';
 
