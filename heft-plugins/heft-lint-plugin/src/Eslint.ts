@@ -292,19 +292,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
         return lintResult.fixableErrorCount + lintResult.fixableWarningCount > 0;
       });
 
-    const trimmedLintResults: (TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult)[] = [];
-    for (const lintResult of lintResults) {
-      if (
-        lintResult.messages.length > 0 ||
-        lintResult.warningCount > 0 ||
-        lintResult.errorCount > 0 ||
-        fixMessages.length > 0
-      ) {
-        trimmedLintResults.push(lintResult);
-      }
-    }
-
-    return trimmedLintResults;
+    return lintResults;
   }
 
   protected override async lintingFinishedAsync(lintResults: TEslint.ESLint.LintResult[]): Promise<void> {
@@ -380,6 +368,16 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
 
   protected override async isFileExcludedAsync(filePath: string): Promise<boolean> {
     return await this._linter.isPathIgnored(filePath);
+  }
+
+  protected override hasLintFailures(
+    lintResults: (TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult)[]
+  ): boolean {
+    return lintResults.some((lintResult: TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult) => {
+      return (
+        !lintResult.suppressedMessages?.length && (lintResult.errorCount > 0 || lintResult.warningCount > 0)
+      );
+    });
   }
 
   private _getLintFileError(

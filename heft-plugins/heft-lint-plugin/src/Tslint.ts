@@ -206,6 +206,10 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     return this._tslintPackage.Configuration.isFileExcluded(filePath, this._tslintConfiguration);
   }
 
+  protected hasLintFailures(lintResults: TTslint.RuleFailure[]): boolean {
+    return lintResults.length > 0;
+  }
+
   private _getLintFileError(tslintFailure: TTslint.RuleFailure, message?: string): FileError {
     if (!message) {
       message = getFormattedErrorMessage(tslintFailure);
