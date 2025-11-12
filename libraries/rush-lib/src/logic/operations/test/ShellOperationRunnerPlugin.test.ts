@@ -191,10 +191,7 @@ describe(ShellOperationRunnerPlugin.name, () => {
     defineCustomParameters(action, buildCommand.associatedParameters, customParametersMap);
 
     // Parse parameter values using the parser
-    (
-      parser as unknown as { _registerDefinedParameters(state: { parentParameterNames: Set<string> }): void }
-    )._registerDefinedParameters({ parentParameterNames: new Set() });
-    await parser.executeAsync([
+    await parser.executeWithoutErrorHandlingAsync([
       'build',
       '--production',
       '--verbose',
