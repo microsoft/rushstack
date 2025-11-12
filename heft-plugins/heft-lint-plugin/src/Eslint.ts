@@ -370,6 +370,16 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     return await this._linter.isPathIgnored(filePath);
   }
 
+  protected override hasLintFailures(
+    lintResults: (TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult)[]
+  ): boolean {
+    return lintResults.some((lintResult: TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult) => {
+      return (
+        !lintResult.suppressedMessages?.length && (lintResult.errorCount > 0 || lintResult.warningCount > 0)
+      );
+    });
+  }
+
   private _getLintFileError(
     lintResult: TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult,
     lintMessage: TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage,
