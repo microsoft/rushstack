@@ -33,6 +33,12 @@ import { getTsconfigFilePath } from './tsconfigLoader';
 export const PLUGIN_NAME: 'typescript-plugin' = 'typescript-plugin';
 
 /**
+ * The ${configDir} token supported in TypeScript 5.5
+ * https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-5.html#the-configdir-template-variable-for-configuration-files
+ */
+const CONFIG_DIR_TOKEN: '${configDir}' = '${configDir}';
+
+/**
  * @beta
  */
 export interface IEmitModuleKind {
@@ -207,10 +213,11 @@ export async function loadPartialTsconfigFileAsync(
               customResolver(
                 resolverOptions: ConfigurationFile.IJsonPathMetadataResolverOptions<IPartialTsconfig>
               ): string {
-                if (resolverOptions.propertyValue.includes('${configDir}')) {
-                  // Typescript supports the `${configDir}` token to refer to the directory containing the root tsconfig
+                if (resolverOptions.propertyValue.includes(CONFIG_DIR_TOKEN)) {
+                  // Typescript 5.5. introduced the `${configDir}` token to refer to the directory containing the root tsconfig
                   const configDir: string = path.dirname(tsconfigFilePath);
-                  return path.resolve(resolverOptions.propertyValue.replace('${configDir}', configDir));
+                  // The token is an absolute path, so it should occur at most once.
+                  return path.resolve(resolverOptions.propertyValue.replace(CONFIG_DIR_TOKEN, configDir));
                 } else {
                   const thisConfigDir: string = path.dirname(resolverOptions.configurationFilePath);
                   return path.resolve(thisConfigDir, resolverOptions.propertyValue);
