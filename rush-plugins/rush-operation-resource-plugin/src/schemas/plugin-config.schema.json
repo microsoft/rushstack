@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Configuration for Rush Operation Resource Plugin",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "resourceConstraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["appliesTo", "resourcePool"],
+        "properties": {
+          "appliesTo": {
+            "type": "object"
+          },
+          "resourcePool": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["poolName"],
+            "properties": {
+              "poolName": {
+                "type": "string",
+                "description": "The name of the resource pool to use"
+              },
+              "envVarName": {
+                "type": "string",
+                "description": "(Optional) Set this environment variable to the ID of the resource selected from the pool and pass it to the underlying operation"
+              }
+            }
+          }
+        }
+      }
+    },
+    "resourcePools": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["poolName", "resources"],
+            "properties": {
+              "poolName": {
+                "type": "string",
+                "description": "(Required) A unique name for this pool of resources"
+              },
+              "resources": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "A list of named resources that belong to this pool"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["poolName", "resourceCount"],
+            "properties": {
+              "poolName": {
+                "type": "string",
+                "description": "(Required) A unique name for this pool of resources"
+              },
+              "resourceCount": {
+                "type": "integer",
+                "description": "The number of resources available in this pool"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
