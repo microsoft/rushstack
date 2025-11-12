@@ -260,7 +260,7 @@ export class DtsRollupGenerator {
     switch (span.kind) {
       case ts.SyntaxKind.JSDocComment:
         // If the @packageDocumentation comment seems to be attached to one of the regular API items,
-        // omit it.  It gets explictly emitted at the top of the file.
+        // omit it.  It gets explicitly emitted at the top of the file.
         if (span.node.getText().match(/(?:\s|\*)@packageDocumentation(?:\s|\*)/gi)) {
           span.modification.skipAll();
         }
@@ -272,7 +272,16 @@ export class DtsRollupGenerator {
       case ts.SyntaxKind.ExportKeyword:
       case ts.SyntaxKind.DefaultKeyword:
       case ts.SyntaxKind.DeclareKeyword:
-        // Delete any explicit "export" or "declare" keywords -- we will re-add them below
+        // Don't remove the export keyword from `export { ... }` declarations
+        if (
+          span.parent?.node &&
+          ts.isExportDeclaration(span.parent.node) &&
+          span.parent.node.exportClause?.kind === ts.SyntaxKind.NamedExports
+        ) {
+          break;
+        }
+
+        // Delete other explicit "export" or "declare" keywords -- we will re-add them below
         span.modification.skipAll();
         break;
 
@@ -283,6 +292,11 @@ export class DtsRollupGenerator {
       case ts.SyntaxKind.ModuleKeyword:
       case ts.SyntaxKind.TypeKeyword:
       case ts.SyntaxKind.FunctionKeyword:
+        // Don't touch `type` keywords inside `export { ... }` declarations
+        if (span.node.parent.kind === ts.SyntaxKind.ExportSpecifier) {
+          break;
+        }
+
         // Replace the stuff we possibly deleted above
         let replacedModifiers: string = '';
 
@@ -368,6 +382,33 @@ export class DtsRollupGenerator {
           } else {
             // For debugging:
             // span.modification.prefix += '/*R=KEEP*/';
+          }
+        }
+        break;
+
+      case ts.SyntaxKind.ExportSpecifier:
+        recurseChildren = false;
+        const node: ts.ExportSpecifier = span.node as ts.ExportSpecifier;
+        const localName: ts.ModuleName = node.propertyName ?? node.name;
+        const exportedName: ts.ModuleName = node.name;
+        let exportedSymbol: ts.Symbol | undefined = collector.typeChecker.getSymbolAtLocation(localName);
+        // eslint-disable-next-line no-bitwise
+        if (exportedSymbol && exportedSymbol.flags & ts.SymbolFlags.Alias) {
+          exportedSymbol = collector.typeChecker.getAliasedSymbol(exportedSymbol);
+        }
+        if (exportedSymbol) {
+          const exportEntity: CollectorEntity | undefined = collector.tryGetEntityForSymbol(exportedSymbol);
+          if (exportEntity && exportEntity.nameForEmit && localName.getText() !== exportEntity.nameForEmit) {
+            const nameSpan: Span | undefined = span.children.find((e) => e.node === localName);
+            if (nameSpan) {
+              if (exportedName === localName) {
+                nameSpan.modification.skipAll();
+                nameSpan.modification.prefix = exportEntity.nameForEmit + ' as ' + nameSpan.getText();
+              } else {
+                nameSpan.modification.skipAll();
+                nameSpan.modification.prefix = exportEntity.nameForEmit + ' ';
+              }
+            }
           }
         }
         break;
