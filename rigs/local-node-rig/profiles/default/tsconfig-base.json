@@ -8,11 +8,11 @@
     "isolatedModules": true,
     "target": "es2018",
 
-    "outDir": "../../../../lib",
-    "rootDir": "../../../../src",
+    "outDir": "${configDir}/lib",
+    "rootDir": "${configDir}/src",
 
     "types": ["heft-jest", "node"],
-    "typeRoots": ["../../../../node_modules/@types", "../../node_modules/@types"]
+    "typeRoots": ["${configDir}/node_modules/@types", "../../node_modules/@types"]
   },
-  "include": ["../../../../src/**/*.ts", "../../../../src/**/*.tsx"]
+  "include": ["${configDir}/src/**/*.ts", "${configDir}/src/**/*.tsx"]
 }
