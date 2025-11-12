@@ -4,7 +4,7 @@
 import path from 'node:path';
 import { JsonFile } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
-import { CommandLineAction, type CommandLineParameter } from '@rushstack/ts-command-line';
+import { CommandLineAction, CommandLineParser, type CommandLineParameter } from '@rushstack/ts-command-line';
 
 import { RushConfiguration } from '../../../api/RushConfiguration';
 import {
@@ -43,6 +43,18 @@ function serializeOperation(operation: Operation): ISerializedOperation {
 class TestCommandLineAction extends CommandLineAction {
   protected async onExecuteAsync(): Promise<void> {
     // No-op for testing
+  }
+}
+
+/**
+ * Test implementation of CommandLineParser for testing parameter handling
+ */
+class TestCommandLineParser extends CommandLineParser {
+  public constructor() {
+    super({
+      toolFilename: 'test-tool',
+      toolDescription: 'Test tool for parameter parsing'
+    });
   }
 }
 
@@ -165,53 +177,36 @@ describe(ShellOperationRunnerPlugin.name, () => {
       terminal
     );
 
-    // Create a dummy CommandLineAction to host the parameters
+    // Create CommandLineParser and action to parse parameter values
+    const parser: TestCommandLineParser = new TestCommandLineParser();
     const action: TestCommandLineAction = new TestCommandLineAction({
       actionName: 'build',
       summary: 'Test build action',
       documentation: 'Test'
     });
+    parser.addAction(action);
 
     // Create CommandLineParameter instances from the parameter definitions
     const customParametersMap: Map<IParameterJson, CommandLineParameter> = new Map();
     defineCustomParameters(action, buildCommand.associatedParameters, customParametersMap);
 
-    // Set values on the parameters to test filtering
-    // Create a map by longName for easier lookup
-    const paramsByLongName: Map<string, { param: IParameterJson; cli: CommandLineParameter }> = new Map();
-    for (const [param, cli] of customParametersMap) {
-      paramsByLongName.set(param.longName, { param, cli });
-    }
-
-    // Set --production flag
-    const production = paramsByLongName.get('--production');
-    if (production) {
-      (production.cli as unknown as { _setValue(value: boolean): void })._setValue(true);
-    }
-
-    // Set --verbose flag
-    const verbose = paramsByLongName.get('--verbose');
-    if (verbose) {
-      (verbose.cli as unknown as { _setValue(value: boolean): void })._setValue(true);
-    }
-
-    // Set --config parameter
-    const config = paramsByLongName.get('--config');
-    if (config) {
-      (config.cli as unknown as { _setValue(value: string): void })._setValue('/path/to/config.json');
-    }
-
-    // Set --mode parameter
-    const mode = paramsByLongName.get('--mode');
-    if (mode) {
-      (mode.cli as unknown as { _setValue(value: string): void })._setValue('prod');
-    }
-
-    // Set --tags parameter
-    const tags = paramsByLongName.get('--tags');
-    if (tags) {
-      (tags.cli as unknown as { _setValue(value: string[]): void })._setValue(['tag1', 'tag2']);
-    }
+    // Parse parameter values using the parser
+    (
+      parser as unknown as { _registerDefinedParameters(state: { parentParameterNames: Set<string> }): void }
+    )._registerDefinedParameters({ parentParameterNames: new Set() });
+    await parser.executeAsync([
+      'build',
+      '--production',
+      '--verbose',
+      '--config',
+      '/path/to/config.json',
+      '--mode',
+      'prod',
+      '--tags',
+      'tag1',
+      '--tags',
+      'tag2'
+    ]);
 
     // Associate parameters with phases using the helper
     // Create a map of phase names to phases for the helper
