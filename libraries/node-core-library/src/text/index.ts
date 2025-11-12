@@ -1,6 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/**
+ * Operations for working with strings that contain text.
+ *
+ * @remarks
+ * The utilities provided by this class are intended to be simple, small, and very
+ * broadly applicable.
+ *
+ * @module
+ * @public
+ */
+
 export { replaceAll } from './replaceAll';
 export { convertToCrLf } from './convertToCrLf';
 export { convertToLf } from './convertToLf';
