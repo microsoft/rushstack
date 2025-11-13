@@ -1,0 +1,9 @@
+{
+  "operationSettings": [
+    {
+      "operationName": "_phase:build",
+      "outputFolderNames": ["lib"],
+      "parameterNamesToIgnore": ["--invalid-parameter", "--another-invalid", "-malformed-parameter"]
+    }
+  ]
+}
