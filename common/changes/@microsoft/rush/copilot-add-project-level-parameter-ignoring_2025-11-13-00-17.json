@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Add project-level parameter ignoring to prevent unnecessary cache invalidation. Projects can now use parameterNamesToIgnore in rush-project.json to exclude custom command-line parameters that don't affect their operations.",
+      "comment": "Add project-level parameter ignoring to prevent unnecessary cache invalidation. Projects can now use \"parameterNamesToIgnore\" in \"rush-project.json\" to exclude custom command-line parameters that don't affect their operations.",
       "type": "minor",
       "packageName": "@microsoft/rush"
     }
