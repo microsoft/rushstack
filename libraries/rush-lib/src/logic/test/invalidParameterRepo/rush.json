@@ -1,0 +1,10 @@
+{
+  "rushVersion": "5.162.0",
+  "pnpmVersion": "9.12.1",
+  "projects": [
+    {
+      "packageName": "a",
+      "projectFolder": "a"
+    }
+  ]
+}

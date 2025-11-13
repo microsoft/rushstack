@@ -57,7 +57,7 @@ function validateConfiguration(rushProjectConfiguration: RushProjectConfiguratio
     try {
       rushProjectConfiguration.validatePhaseConfiguration(
         Array.from(rushProjectConfiguration.operationSettingsByOperationName.keys()).map(
-          (phaseName) => ({ name: phaseName }) as IPhase
+          (phaseName) => ({ name: phaseName, associatedParameters: new Set() }) as IPhase
         ),
         terminal
       );
@@ -97,6 +97,13 @@ describe(RushProjectConfiguration.name, () => {
     it('does not allow one outputFolderName to be under another', async () => {
       const rushProjectConfiguration: RushProjectConfiguration | undefined =
         await loadProjectConfigurationAsync('test-project-d');
+
+      expect(() => validateConfiguration(rushProjectConfiguration)).toThrowError();
+    });
+
+    it('validates that parameters in parameterNamesToIgnore exist for the operation', async () => {
+      const rushProjectConfiguration: RushProjectConfiguration | undefined =
+        await loadProjectConfigurationAsync('test-project-e');
 
       expect(() => validateConfiguration(rushProjectConfiguration)).toThrowError();
     });

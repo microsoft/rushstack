@@ -341,6 +341,29 @@ export class RushProjectConfiguration {
             }
           }
         }
+
+        // Validate that parameter names to ignore actually exist for this operation
+        if (operationSettings.parameterNamesToIgnore) {
+          // Build a set of valid parameter names for this phase
+          const validParameterNames: Set<string> = new Set<string>();
+          for (const parameter of phase.associatedParameters) {
+            validParameterNames.add(parameter.longName);
+          }
+
+          // Check each parameter name to ignore
+          for (const parameterName of operationSettings.parameterNamesToIgnore) {
+            if (!validParameterNames.has(parameterName)) {
+              terminal.writeErrorLine(
+                `The project "${project.packageName}" has a ` +
+                  `"${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" configuration that specifies ` +
+                  `"${parameterName}" in "parameterNamesToIgnore" for operation "${operationName}", ` +
+                  `but this parameter is not associated with the operation. ` +
+                  `Valid parameters for this operation are: ${Array.from(validParameterNames).sort().join(', ') || '(none)'}.`
+              );
+              hasErrors = true;
+            }
+          }
+        }
       }
     }
 

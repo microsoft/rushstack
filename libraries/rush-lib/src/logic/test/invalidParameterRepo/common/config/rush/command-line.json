@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "commands": [],
+  "parameters": [
+    {
+      "longName": "--production",
+      "description": "A production flag",
+      "parameterKind": "flag",
+      "associatedCommands": ["build"]
+    }
+  ]
+}

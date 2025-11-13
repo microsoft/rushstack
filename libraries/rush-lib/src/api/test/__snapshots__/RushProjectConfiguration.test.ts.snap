@@ -71,3 +71,11 @@ exports[`RushProjectConfiguration operationSettingsByOperationName loads a rush-
 exports[`RushProjectConfiguration operationSettingsByOperationName loads a rush-project.json config that extends another config file: validation: terminal warning 1`] = `""`;
 
 exports[`RushProjectConfiguration operationSettingsByOperationName throws an error when loading a rush-project.json config that lists an operation twice 1`] = `"The operation \\"_phase:a\\" occurs multiple times in the \\"operationSettings\\" array in \\"<testFolder>/config/rush-project.json\\"."`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName validates that parameters in parameterNamesToIgnore exist for the operation: validation: terminal error 1`] = `"The project \\"test-project-e\\" has a \\"config/rush-project.json\\" configuration that specifies \\"--invalid-parameter\\" in \\"parameterNamesToIgnore\\" for operation \\"_phase:build\\", but this parameter is not associated with the operation. Valid parameters for this operation are: (none).[n]The project \\"test-project-e\\" has a \\"config/rush-project.json\\" configuration that specifies \\"--another-invalid\\" in \\"parameterNamesToIgnore\\" for operation \\"_phase:build\\", but this parameter is not associated with the operation. Valid parameters for this operation are: (none).[n]"`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName validates that parameters in parameterNamesToIgnore exist for the operation: validation: terminal output 1`] = `""`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName validates that parameters in parameterNamesToIgnore exist for the operation: validation: terminal verbose 1`] = `""`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName validates that parameters in parameterNamesToIgnore exist for the operation: validation: terminal warning 1`] = `""`;
