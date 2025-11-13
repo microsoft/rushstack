@@ -22,6 +22,7 @@ import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 import type { IAstModuleExportInfo } from '../analyzer/AstModule';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
 import type { AstEntity } from '../analyzer/AstEntity';
+import { ModuleDocComment } from '../aedoc/ModuleDocComment';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -180,6 +181,18 @@ export class DtsRollupGenerator {
         // signatures may reference them directly (without using the namespace qualifier).
 
         writer.ensureSkippedLine();
+
+        // Check if the source file has a @module comment and emit it before the namespace declaration
+        const sourceFile: ts.SourceFile = astEntity.astModule.sourceFile;
+        const moduleCommentRange: ts.TextRange | undefined = ModuleDocComment.tryFindInSourceFile(sourceFile);
+        if (moduleCommentRange) {
+          const moduleComment: string = sourceFile.text.substring(
+            moduleCommentRange.pos,
+            moduleCommentRange.end
+          );
+          writer.writeLine(moduleComment);
+        }
+
         if (entity.shouldInlineExport) {
           writer.write('export ');
         }
@@ -262,6 +275,12 @@ export class DtsRollupGenerator {
         // If the @packageDocumentation comment seems to be attached to one of the regular API items,
         // omit it.  It gets explictly emitted at the top of the file.
         if (span.node.getText().match(/(?:\s|\*)@packageDocumentation(?:\s|\*)/gi)) {
+          span.modification.skipAll();
+        }
+
+        // If the @module comment seems to be attached to one of the regular API items,
+        // omit it.  It gets emitted with the namespace declaration.
+        if (span.node.getText().match(/(?:\s|\*)@module(?:\s|\*)/gi)) {
           span.modification.skipAll();
         }
 
