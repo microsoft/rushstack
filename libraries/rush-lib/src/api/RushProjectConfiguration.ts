@@ -350,18 +350,24 @@ export class RushProjectConfiguration {
             validParameterNames.add(parameter.longName);
           }
 
-          // Check each parameter name to ignore
+          // Collect all invalid parameter names
+          const invalidParameterNames: string[] = [];
           for (const parameterName of operationSettings.parameterNamesToIgnore) {
             if (!validParameterNames.has(parameterName)) {
-              terminal.writeErrorLine(
-                `The project "${project.packageName}" has a ` +
-                  `"${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" configuration that specifies ` +
-                  `"${parameterName}" in "parameterNamesToIgnore" for operation "${operationName}", ` +
-                  `but this parameter is not associated with the operation. ` +
-                  `Valid parameters for this operation are: ${Array.from(validParameterNames).sort().join(', ') || '(none)'}.`
-              );
-              hasErrors = true;
+              invalidParameterNames.push(parameterName);
             }
+          }
+
+          // Report all invalid parameters in a single message
+          if (invalidParameterNames.length > 0) {
+            terminal.writeErrorLine(
+              `The project "${project.packageName}" has a ` +
+                `"${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" configuration that specifies ` +
+                `invalid parameter(s) in "parameterNamesToIgnore" for operation "${operationName}": ` +
+                `${invalidParameterNames.join(', ')}. ` +
+                `Valid parameters for this operation are: ${Array.from(validParameterNames).sort().join(', ') || '(none)'}.`
+            );
+            hasErrors = true;
           }
         }
       }
