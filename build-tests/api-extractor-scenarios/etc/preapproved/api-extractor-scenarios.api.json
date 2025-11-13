@@ -139,6 +139,10 @@
           "syntaxKind": "block"
         },
         {
+          "tagName": "@module",
+          "syntaxKind": "modifier"
+        },
+        {
           "tagName": "@preapproved",
           "syntaxKind": "modifier"
         }
@@ -171,6 +175,7 @@
         "@virtual": true,
         "@betaDocumentation": true,
         "@internalRemarks": true,
+        "@module": true,
         "@preapproved": true
       },
       "reportUnsupportedHtmlElements": false
