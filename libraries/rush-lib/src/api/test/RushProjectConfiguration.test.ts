@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
+import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
 import type { IPhase } from '../CommandLineConfiguration';
 import type { RushConfigurationProject } from '../RushConfigurationProject';
@@ -70,6 +71,35 @@ function validateConfiguration(rushProjectConfiguration: RushProjectConfiguratio
   }
 }
 
+function validateConfigurationWithParameters(
+  rushProjectConfiguration: RushProjectConfiguration | undefined,
+  parameterNames: string[]
+): void {
+  const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+  const terminal: Terminal = new Terminal(terminalProvider);
+
+  if (rushProjectConfiguration) {
+    try {
+      // Create mock parameters with the specified names
+      const mockParameters = new Set<CommandLineParameter>(
+        parameterNames.map((name) => ({ longName: name }) as CommandLineParameter)
+      );
+
+      rushProjectConfiguration.validatePhaseConfiguration(
+        Array.from(rushProjectConfiguration.operationSettingsByOperationName.keys()).map(
+          (phaseName) => ({ name: phaseName, associatedParameters: mockParameters }) as IPhase
+        ),
+        terminal
+      );
+    } finally {
+      expect(terminalProvider.getOutput()).toMatchSnapshot('validation: terminal output');
+      expect(terminalProvider.getErrorOutput()).toMatchSnapshot('validation: terminal error');
+      expect(terminalProvider.getWarningOutput()).toMatchSnapshot('validation: terminal warning');
+      expect(terminalProvider.getVerboseOutput()).toMatchSnapshot('validation: terminal verbose');
+    }
+  }
+}
+
 describe(RushProjectConfiguration.name, () => {
   describe('operationSettingsByOperationName', () => {
     it('loads a rush-project.json config that extends another config file', async () => {
@@ -106,6 +136,26 @@ describe(RushProjectConfiguration.name, () => {
         await loadProjectConfigurationAsync('test-project-e');
 
       expect(() => validateConfiguration(rushProjectConfiguration)).toThrowError();
+    });
+
+    it('validates nonexistent parameters when operation has valid parameters', async () => {
+      const rushProjectConfiguration: RushProjectConfiguration | undefined =
+        await loadProjectConfigurationAsync('test-project-f');
+
+      // Provide some valid parameters for the operation
+      expect(() =>
+        validateConfigurationWithParameters(rushProjectConfiguration, ['--production', '--verbose'])
+      ).toThrowError();
+    });
+
+    it('validates mix of existent and nonexistent parameters', async () => {
+      const rushProjectConfiguration: RushProjectConfiguration | undefined =
+        await loadProjectConfigurationAsync('test-project-g');
+
+      // Provide some valid parameters, test-project-g references both valid and invalid ones
+      expect(() =>
+        validateConfigurationWithParameters(rushProjectConfiguration, ['--production', '--verbose'])
+      ).toThrowError();
     });
   });
 

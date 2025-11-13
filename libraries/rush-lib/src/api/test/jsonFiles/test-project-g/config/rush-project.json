@@ -1,0 +1,9 @@
+{
+  "operationSettings": [
+    {
+      "operationName": "_phase:build",
+      "outputFolderNames": ["lib"],
+      "parameterNamesToIgnore": ["--production", "--nonexistent-param", "--verbose"]
+    }
+  ]
+}
