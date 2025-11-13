@@ -3,7 +3,7 @@
 
 import type { AsyncSeriesHook } from 'tapable';
 
-import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
 import type {
   CommandLineFlagParameter,
@@ -33,6 +33,7 @@ import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfiguration';
 import type { Operation } from '../../logic/operations/Operation';
 import type { OperationExecutionRecord } from '../../logic/operations/OperationExecutionRecord';
+import { associateParametersByPhase } from '../parsing/associateParametersByPhase';
 import { PhasedOperationPlugin } from '../../logic/operations/PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperationRunnerPlugin';
 import { Event } from '../../api/EventHooks';
@@ -327,17 +328,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
     this.defineScriptParameters();
 
-    for (const [{ associatedPhases }, tsCommandLineParameter] of this.customParameters) {
-      if (associatedPhases) {
-        for (const phaseName of associatedPhases) {
-          const phase: IPhase | undefined = this._knownPhases.get(phaseName);
-          if (!phase) {
-            throw new InternalError(`Could not find a phase matching ${phaseName}.`);
-          }
-          phase.associatedParameters.add(tsCommandLineParameter);
-        }
-      }
-    }
+    // Associate parameters with their respective phases
+    associateParametersByPhase(this.customParameters, this._knownPhases);
   }
 
   public async runAsync(): Promise<void> {
