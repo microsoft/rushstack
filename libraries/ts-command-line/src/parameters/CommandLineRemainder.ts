@@ -43,10 +43,18 @@ export class CommandLineRemainder {
       throw new Error(`Unexpected data object for remainder: ` + JSON.stringify(data));
     }
 
-    // Filter out the '--' separator that argparse includes in the remainder values.
+    // Filter out the first '--' separator that argparse includes in the remainder values.
     // Users expect everything AFTER '--' to be passed through, not including '--' itself.
-    const filteredData: string[] = data.filter((value: string) => value !== '--');
-    this._values.push(...filteredData);
+    // However, if '--' appears again later, it should be preserved in case the underlying
+    // tool needs it for its own purposes.
+    const firstSeparatorIndex: number = data.indexOf('--');
+    if (firstSeparatorIndex !== -1) {
+      // Remove the first '--' and keep everything after it
+      this._values.push(...data.slice(firstSeparatorIndex + 1));
+    } else {
+      // No separator found, push all data
+      this._values.push(...data);
+    }
   }
 
   /** {@inheritDoc CommandLineParameterBase.appendToArgList} @override */
