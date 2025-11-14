@@ -30,6 +30,7 @@ export interface IBulkCommandJson extends IBaseCommandJson {
   allowWarningsInSuccessfulBuild?: boolean;
   watchForChanges?: boolean;
   disableBuildCache?: boolean;
+  allowRemainderArguments?: boolean;
 }
 
 /**
@@ -41,6 +42,7 @@ export interface IPhasedCommandWithoutPhasesJson extends IBaseCommandJson {
   enableParallelism: boolean;
   allowOversubscription?: boolean;
   incremental?: boolean;
+  allowRemainderArguments?: boolean;
 }
 
 /**
@@ -64,6 +66,7 @@ export interface IPhasedCommandJson extends IPhasedCommandWithoutPhasesJson {
 export interface IGlobalCommandJson extends IBaseCommandJson {
   commandKind: 'global';
   shellCommand: string;
+  allowRemainderArguments?: boolean;
 }
 
 export type CommandJson = IBulkCommandJson | IGlobalCommandJson | IPhasedCommandJson;
