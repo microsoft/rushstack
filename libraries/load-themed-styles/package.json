@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/load-themed-styles",
-  "version": "2.1.16",
+  "version": "2.1.20",
   "description": "Loads themed styles.",
   "license": "MIT",
   "repository": {
@@ -19,7 +19,7 @@
   "keywords": [],
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-web-rig": "workspace:*"
   },
   "exports": {

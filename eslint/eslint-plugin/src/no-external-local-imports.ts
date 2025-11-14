@@ -19,15 +19,15 @@ export const noExternalLocalImportsRule: RuleModule = {
     type: 'problem',
     messages: {
       [MESSAGE_ID]:
-        'The specified import target is not under the root directory. Ensure that ' +
-        'all local import targets are either under the "rootDir" specified in your tsconfig.json (if one ' +
-        'exists) or under the package directory.'
+        'The specified import target "{{ importAbsolutePath }}" is not under the root directory, "{{ rootDirectory }}". Ensure that ' +
+        'all local import targets are either under the "parserOptions.tsconfigRootDir" specified in your eslint.config.js (if one ' +
+        'exists) or else under the folder that contains your tsconfig.json.'
     },
     schema: [],
     docs: {
       description:
-        'Prevents referencing relative imports that are either not under the "rootDir" specified in ' +
-        'the tsconfig.json (if one exists) or not under the package directory.',
+        'Prevents referencing relative imports that are either not under the "parserOptions.tsconfigRootDir" specified in ' +
+        'your eslint.config.js (if one exists) or else not under the folder that contains your tsconfig.json.',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
     }
   },
@@ -54,7 +54,11 @@ export const noExternalLocalImportsRule: RuleModule = {
 
       const relativePathToRoot: string = path.relative(importAbsolutePath, rootDirectory);
       if (!_relativePathRegex.test(relativePathToRoot)) {
-        context.report({ node: importExpression, messageId: MESSAGE_ID });
+        context.report({
+          node: importExpression,
+          messageId: MESSAGE_ID,
+          data: { importAbsolutePath, rootDirectory }
+        });
       }
     };
 

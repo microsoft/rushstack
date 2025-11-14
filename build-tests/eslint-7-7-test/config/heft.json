@@ -1,0 +1,16 @@
+{
+  "extends": "local-node-rig/profiles/default/config/heft.json",
+
+  "phasesByName": {
+    "build": {
+      "tasksByName": {
+        "lint": {
+          "taskPlugin": {
+            // Clear the SARIF emitter
+            "options": null
+          }
+        }
+      }
+    }
+  }
+}

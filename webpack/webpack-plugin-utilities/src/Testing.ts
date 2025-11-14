@@ -4,9 +4,16 @@
 import path from 'node:path';
 
 import { createFsFromVolume, Volume, type IFs } from 'memfs';
-import type { StatsCompilation as WebpackStatsCompilation } from 'webpack';
+import type {
+  StatsCompilation as WebpackStatsCompilation,
+  MultiStats,
+  Stats,
+  Configuration,
+  Compiler,
+  StatsError,
+  OutputFileSystem
+} from 'webpack';
 import webpackMerge from 'webpack-merge';
-import type { MultiStats, Stats, Configuration, Compiler, StatsError, OutputFileSystem } from 'webpack';
 
 /**
  * @public

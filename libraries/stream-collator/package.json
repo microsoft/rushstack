@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/stream-collator",
-  "version": "4.1.113",
+  "version": "4.1.117",
   "description": "Display intelligible realtime output from concurrent processes",
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
   }
 }

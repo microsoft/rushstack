@@ -16,7 +16,8 @@ import {
   SubprocessTerminator,
   Executable,
   type IWaitForExitResult,
-  Async
+  Async,
+  type IWaitForExitResultWithoutOutput
 } from '@rushstack/node-core-library';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -159,6 +160,11 @@ type OptionalKeys<T> = {
 
 export type OptionalToUndefined<T> = Omit<T, OptionalKeys<T>> & {
   [K in OptionalKeys<T>]-?: Exclude<T[K], undefined> | undefined;
+};
+
+type IExecuteCommandInternalOptions = Omit<IExecuteCommandOptions, 'suppressOutput'> & {
+  stdio: child_process.SpawnSyncOptions['stdio'];
+  captureOutput: boolean;
 };
 
 export class Utilities {
@@ -781,6 +787,16 @@ export class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
+  private static async _executeCommandInternalAsync(
+    options: IExecuteCommandInternalOptions & { captureOutput: true }
+  ): Promise<IWaitForExitResult<string>>;
+  /**
+   * Executes the command with the specified command-line parameters, and waits for it to complete.
+   * The current directory will be set to the specified workingDirectory. This does not capture output.
+   */
+  private static async _executeCommandInternalAsync(
+    options: IExecuteCommandInternalOptions & { captureOutput: false | undefined }
+  ): Promise<IWaitForExitResultWithoutOutput>;
   private static async _executeCommandInternalAsync({
     command,
     args,
@@ -791,10 +807,7 @@ export class Utilities {
     onStdoutStreamChunk,
     captureOutput,
     captureExitCodeAndSignal
-  }: Omit<IExecuteCommandOptions, 'suppressOutput'> & {
-    stdio: child_process.SpawnSyncOptions['stdio'];
-    captureOutput: boolean;
-  }): Promise<IWaitForExitResult> {
+  }: IExecuteCommandInternalOptions): Promise<IWaitForExitResult<string> | IWaitForExitResultWithoutOutput> {
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
       shell: true,

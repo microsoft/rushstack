@@ -2,6 +2,104 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "4.6.1",
+      "tag": "@rushstack/eslint-config_v4.6.1",
+      "date": "Wed, 12 Nov 2025 01:57:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.15.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.6.0",
+      "tag": "@rushstack/eslint-config_v4.6.0",
+      "date": "Wed, 12 Nov 2025 01:12:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump the `eslint-plugin-tsdoc` dependency to `~0.5.0`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.5.4",
+      "tag": "@rushstack/eslint-config_v4.5.4",
+      "date": "Tue, 11 Nov 2025 16:13:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.22.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.5.3",
+      "tag": "@rushstack/eslint-config_v4.5.3",
+      "date": "Fri, 24 Oct 2025 11:22:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.14.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.5.2",
+      "tag": "@rushstack/eslint-config_v4.5.2",
+      "date": "Wed, 22 Oct 2025 00:57:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.22.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.5.1",
+      "tag": "@rushstack/eslint-config_v4.5.1",
+      "date": "Tue, 14 Oct 2025 15:13:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.21.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.5.0",
+      "tag": "@rushstack/eslint-config_v4.5.0",
+      "date": "Mon, 13 Oct 2025 15:13:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump `eslint` to `~9.37.0` and the `@typescript-eslint/*` packages to `~8.46.0`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.21.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-packlets\" to `0.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.4.1",
       "tag": "@rushstack/eslint-config_v4.4.1",
       "date": "Fri, 03 Oct 2025 20:10:00 GMT",

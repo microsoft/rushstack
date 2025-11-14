@@ -3,7 +3,8 @@
 
 import * as path from 'node:path';
 
-import { Utilities } from '../utilities/Utilities';
+import { User } from '@rushstack/node-core-library';
+
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 
 /**
@@ -45,7 +46,7 @@ export class RushGlobalFolder {
     if (rushGlobalFolderOverride !== undefined) {
       this.path = rushGlobalFolderOverride;
     } else {
-      this.path = path.join(Utilities.getHomeFolder(), '.rush');
+      this.path = path.join(User.getHomeFolder(), '.rush');
     }
 
     const normalizedNodeVersion: string = process.version.match(/^[a-z0-9\-\.]+$/i)

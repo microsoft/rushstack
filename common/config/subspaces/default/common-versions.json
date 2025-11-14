@@ -32,7 +32,7 @@
     "typescript": "~5.8.2",
 
     // This should be the ESLint version that's used to build most of the projects in the repo.
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
 
     // Updated minimatch and its types to latest major version to resolve ReDoS vulnerability
     "minimatch": "10.0.3"
@@ -143,6 +143,10 @@
     "@rushstack/eslint-config": [
       // This is used by the ESLint 7 build tests
       "3.7.1"
+    ],
+    "@rushstack/set-webpack-public-path-plugin": [
+      // This is used by the webpack 4 localization plugin tests
+      "^4.1.16"
     ]
   }
 }

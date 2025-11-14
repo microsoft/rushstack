@@ -24,7 +24,9 @@ export function generatePatchedLinterJsFileIfDoesNotExist(
     return;
   }
 
-  const majorVersion: number = parseInt(eslintPackageVersion, 10);
+  const [majorVersionString, minorVersionString] = eslintPackageVersion.split('.');
+  const majorVersion: number = parseInt(majorVersionString, 10);
+  const minorVersion: number = parseInt(minorVersionString, 10);
 
   const inputFile: string = fs.readFileSync(inputFilePath).toString();
 
@@ -179,14 +181,19 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
 `;
 
   if (majorVersion >= 9) {
-    outputFile += scanUntilMarker('const emitter = createEmitter();');
+    if (minorVersion >= 37) {
+      outputFile += scanUntilMarker('const visitor = new SourceCodeVisitor();');
+    } else {
+      outputFile += scanUntilMarker('const emitter = createEmitter();');
+    }
+
     outputFile += `
       // --- BEGIN MONKEY PATCH ---
       let currentNode = undefined;
       // --- END MONKEY PATCH ---`;
   }
 
-  // Match this:
+  // Match this (9.25.1):
   // ```
   //      if (reportTranslator === null) {
   //        reportTranslator = createReportTranslator({
@@ -203,8 +210,22 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   //        throw new Error("Fixable rules must set the `meta.fixable` property to \"code\" or \"whitespace\".");
   //    }
   // ```
+  // Or this (9.37.0):
+  // ```
+  //    const problem = report.addRuleMessage(
+  //      ruleId,
+  //      severity,
+  //      ...args,
+  //    );
   //
-  // Convert to something like this:
+  //    if (problem.fix && !(rule.meta && rule.meta.fixable)) {
+  //      throw new Error(
+  //        'Fixable rules must set the `meta.fixable` property to "code" or "whitespace".',
+  //      );
+  //    }
+  // ```
+  //
+  // Convert to something like this (9.25.1):
   // ```
   //      if (reportTranslator === null) {
   //        reportTranslator = createReportTranslator({
@@ -224,10 +245,46 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   //        throw new Error("Fixable rules must set the `meta.fixable` property to \"code\" or \"whitespace\".");
   //    }
   // ```
-  outputFile += scanUntilMarker('const problem = reportTranslator(...args);');
+  // Or this (9.37.0):
+  // ```
+  //    const problem = report.addRuleMessage(
+  //      ruleId,
+  //      severity,
+  //      ...args,
+  //    );
+  //    // --- BEGIN MONKEY PATCH ---
+  //    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode: args[0]?.node ?? currentNode, ruleId, problem })) return;
+  //    // --- END MONKEY PATCH ---
+  //
+  //    if (problem.fix && !(rule.meta && rule.meta.fixable)) {
+  //      throw new Error(
+  //        'Fixable rules must set the `meta.fixable` property to "code" or "whitespace".',
+  //      );
+  //    }
+  // ```
+  if (majorVersion > 9 || (majorVersion === 9 && minorVersion >= 37)) {
+    outputFile += scanUntilMarker('const problem = report.addRuleMessage(');
+    outputFile += scanUntilMarker('ruleId,');
+    outputFile += scanUntilMarker('severity,');
+    outputFile += scanUntilMarker('...args,');
+    outputFile += scanUntilMarker(');');
+  } else {
+    outputFile += scanUntilMarker('const problem = reportTranslator(...args);');
+  }
+
   outputFile += `
-    // --- BEGIN MONKEY PATCH ---
-    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode: args[0]?.node ?? currentNode, ruleId, problem })) return;
+    // --- BEGIN MONKEY PATCH ---`;
+  if (majorVersion > 9 || (majorVersion === 9 && minorVersion >= 37)) {
+    outputFile += `
+    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode: args[0]?.node ?? currentNode, ruleId, problem })) {
+      problem.suppressions ??= []; problem.suppressions.push({kind:"bulk",justification:""});
+    }`;
+  } else {
+    outputFile += `
+    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode: args[0]?.node ?? currentNode, ruleId, problem })) return;`;
+  }
+
+  outputFile += `
     // --- END MONKEY PATCH ---`;
 
   //
@@ -238,7 +295,7 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   //    });
   // ```
   //
-  // Convert to something like this:
+  // Convert to something like this (9.25.1):
   // ```
   //    Object.keys(ruleListeners).forEach(selector => {
   //      // --- BEGIN MONKEY PATCH ---
@@ -247,11 +304,27 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   //      ...
   //    });
   // ```
+  // Or this (9.37.0):
+  // ```
+  //    Object.keys(ruleListeners).forEach(selector => {
+  //      // --- BEGIN MONKEY PATCH ---
+  //      visitor.add(selector, (...args) => { currentNode = args[args.length - 1]; });
+  //      // --- END MONKEY PATCH ---
+  //      ...
+  //    });
+  // ```
   if (majorVersion >= 9) {
     outputFile += scanUntilMarker('Object.keys(ruleListeners).forEach(selector => {');
     outputFile += `
       // --- BEGIN MONKEY PATCH ---
-      emitter.on(selector, (...args) => { currentNode = args[args.length - 1]; });
+`;
+    if (minorVersion >= 37) {
+      outputFile += `visitor.add(selector, (...args) => { currentNode = args[args.length - 1]; });`;
+    } else {
+      outputFile += `emitter.on(selector, (...args) => { currentNode = args[args.length - 1]; });`;
+    }
+
+    outputFile += `
       // --- END MONKEY PATCH ---`;
   }
 
@@ -269,6 +342,7 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
         if (internalSlotsMap.get(this) === undefined) {
             internalSlotsMap.set(this, {
               cwd: normalizeCwd(cwd),
+              flags: [],
               lastConfigArray: null,
               lastSourceCode: null,
               lastSuppressedMessages: [],

@@ -12,7 +12,8 @@ import {
   parseProcessListOutputAsync,
   type IProcessInfo,
   type IExecutableSpawnSyncOptions,
-  type IWaitForExitResult
+  type IWaitForExitResult,
+  type IWaitForExitResultWithoutOutput
 } from '../Executable';
 import { FileSystem } from '../FileSystem';
 import { PosixModeBits } from '../PosixModeBits';
@@ -236,11 +237,11 @@ describe('Executable process tests', () => {
       environment,
       currentWorkingDirectory: executableFolder
     });
-    const result: IWaitForExitResult = await Executable.waitForExitAsync(childProcess);
+    const result: IWaitForExitResultWithoutOutput = await Executable.waitForExitAsync(childProcess);
     expect(result.exitCode).toEqual(0);
     expect(result.signal).toBeNull();
-    expect(result.stderr).toBeUndefined();
-    expect(result.stderr).toBeUndefined();
+    expect('stdout' in result).toBe(false);
+    expect('stderr' in result).toBe(false);
   });
 
   test('Executable.runToCompletion(Executable.spawn("npm-binary-wrapper")) with buffer output', async () => {

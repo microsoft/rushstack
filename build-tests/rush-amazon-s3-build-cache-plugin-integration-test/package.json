@@ -18,7 +18,7 @@
     "@rushstack/terminal": "workspace:*",
     "@types/http-proxy": "~1.17.8",
     "@types/node": "20.17.19",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "http-proxy": "~1.18.1",
     "local-node-rig": "workspace:*"
   }

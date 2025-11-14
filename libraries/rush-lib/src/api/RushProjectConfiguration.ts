@@ -11,7 +11,7 @@ import { RushConstants } from '../logic/RushConstants';
 import type { IPhase } from './CommandLineConfiguration';
 import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';
 import schemaJson from '../schemas/rush-project.schema.json';
-import anythingSchemaJson from '../schemas/rush-project.schema.json';
+import anythingSchemaJson from '../schemas/anything.schema.json';
 import { HotlinkManager } from '../utilities/HotlinkManager';
 import type { RushConfiguration } from './RushConfiguration';
 
@@ -146,6 +146,14 @@ export interface IOperationSettings {
    * If true, this operation will never be skipped by the `--changed-projects-only` flag.
    */
   ignoreChangedProjectsOnlyFlag?: boolean;
+
+  /**
+   * An optional list of custom command-line parameter names (their `parameterLongName` values from
+   * command-line.json) that should be ignored when invoking the command for this operation.
+   * This allows a project to opt out of parameters that don't affect its operation, preventing
+   * unnecessary cache invalidation for this operation and its consumers.
+   */
+  parameterNamesToIgnore?: string[];
 }
 
 interface IOldRushProjectJson {

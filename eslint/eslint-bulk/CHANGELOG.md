@@ -1,6 +1,43 @@
 # Change Log - @rushstack/eslint-bulk
 
-This log was last generated on Wed, 08 Oct 2025 00:13:29 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Nov 2025 01:57:54 GMT and should not be manually modified.
+
+## 0.4.6
+Wed, 12 Nov 2025 01:57:54 GMT
+
+_Version update only_
+
+## 0.4.5
+Wed, 12 Nov 2025 01:12:56 GMT
+
+_Version update only_
+
+## 0.4.4
+Tue, 04 Nov 2025 08:15:15 GMT
+
+_Version update only_
+
+## 0.4.3
+Fri, 24 Oct 2025 11:22:09 GMT
+
+_Version update only_
+
+## 0.4.2
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 0.4.1
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 0.4.0
+Mon, 13 Oct 2025 15:13:02 GMT
+
+### Minor changes
+
+- Bump `eslint` to `~9.37.0` and the `@typescript-eslint/*` packages to `~8.46.0`.
 
 ## 0.3.1
 Wed, 08 Oct 2025 00:13:29 GMT

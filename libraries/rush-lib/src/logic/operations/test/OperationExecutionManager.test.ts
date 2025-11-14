@@ -16,9 +16,8 @@ jest.mock('@rushstack/terminal', () => {
   };
 });
 
-import { Terminal } from '@rushstack/terminal';
+import { Terminal, MockWritable, PrintUtilities } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
-import { MockWritable, PrintUtilities } from '@rushstack/terminal';
 
 import type { IPhase } from '../../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';

@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { CredentialCache } from '@rushstack/credential-cache';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
-import { CredentialCache, EnvironmentConfiguration, RushUserConfiguration } from '@rushstack/rush-sdk';
+import { EnvironmentConfiguration, RushUserConfiguration } from '@rushstack/rush-sdk';
 
 import { AzureStorageBuildCacheProvider } from '../AzureStorageBuildCacheProvider';
 import type { AzureEnvironmentName } from '../AzureAuthenticationBase';

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/node-core-library",
-  "version": "5.17.0",
+  "version": "5.18.0",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
   "typings": "dist/node-core-library.d.ts",
@@ -26,14 +26,14 @@
     "ajv-formats": "~3.0.1"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.0.0",
+    "@rushstack/heft": "1.1.4",
     "@rushstack/problem-matcher": "workspace:*",
     "@types/fs-extra": "7.0.0",
     "@types/jju": "1.4.1",
     "@types/resolve": "1.20.2",
     "@types/semver": "7.5.0",
     "decoupled-local-node-rig": "workspace:*",
-    "eslint": "~9.25.1"
+    "eslint": "~9.37.0"
   },
   "peerDependencies": {
     "@types/node": "*"

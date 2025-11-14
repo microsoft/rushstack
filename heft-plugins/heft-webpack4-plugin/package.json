@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-webpack4-plugin",
-  "version": "1.1.1",
+  "version": "1.1.5",
   "description": "Heft plugin for Webpack 4",
   "repository": {
     "type": "git",
@@ -23,7 +23,7 @@
     }
   },
   "peerDependencies": {
-    "@rushstack/heft": "^1.1.1",
+    "@rushstack/heft": "^1.1.5",
     "@types/webpack": "^4",
     "webpack": "~4.47.0"
   },
@@ -40,7 +40,7 @@
     "@rushstack/terminal": "workspace:*",
     "@types/watchpack": "2.4.0",
     "@types/webpack": "4.41.32",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "webpack": "~4.47.0"
   }

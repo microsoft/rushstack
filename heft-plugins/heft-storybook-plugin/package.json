@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-storybook-plugin",
-  "version": "1.1.1",
+  "version": "1.1.6",
   "description": "Heft plugin for supporting UI development using Storybook",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^1.1.1"
+    "@rushstack/heft": "^1.1.5"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
@@ -26,7 +26,7 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-webpack4-plugin": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
   }
 }

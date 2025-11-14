@@ -1,12 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference path="../npm-check-typings.d.ts" preserve="true" />
-
-import npmCheck from 'npm-check';
-import type * as NpmCheck from 'npm-check';
 import Prompt from 'inquirer/lib/ui/prompt';
 
+import { NpmCheck, type INpmCheckState, type INpmCheckPackageSummary } from '@rushstack/npm-check-fork';
 import { Colorize } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -29,7 +26,7 @@ export class InteractiveUpgrader {
   public async upgradeAsync(): Promise<IUpgradeInteractiveDeps> {
     const rushProject: RushConfigurationProject = await this._getUserSelectedProjectForUpgradeAsync();
 
-    const dependenciesState: NpmCheck.INpmCheckPackage[] =
+    const dependenciesState: INpmCheckPackageSummary[] =
       await this._getPackageDependenciesStatusAsync(rushProject);
 
     const depsToUpgrade: IDepsToUpgradeAnswers =
@@ -38,7 +35,7 @@ export class InteractiveUpgrader {
   }
 
   private async _getUserSelectedDependenciesToUpgradeAsync(
-    packages: NpmCheck.INpmCheckPackage[]
+    packages: INpmCheckPackageSummary[]
   ): Promise<IDepsToUpgradeAnswers> {
     return upgradeInteractive(packages);
   }
@@ -69,14 +66,13 @@ export class InteractiveUpgrader {
 
   private async _getPackageDependenciesStatusAsync(
     rushProject: RushConfigurationProject
-  ): Promise<NpmCheck.INpmCheckPackage[]> {
+  ): Promise<INpmCheckPackageSummary[]> {
     const { projectFolder } = rushProject;
 
-    const currentState: NpmCheck.INpmCheckCurrentState = await npmCheck({
-      cwd: projectFolder,
-      skipUnused: true
+    const currentState: INpmCheckState = await NpmCheck({
+      cwd: projectFolder
     });
 
-    return currentState.get('packages');
+    return currentState.packages ?? [];
   }
 }

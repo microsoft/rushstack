@@ -1,6 +1,28 @@
 # Change Log - @rushstack/heft-api-extractor-plugin
 
-This log was last generated on Wed, 08 Oct 2025 00:13:29 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Nov 2025 01:12:56 GMT and should not be manually modified.
+
+## 1.2.1
+Wed, 12 Nov 2025 01:12:56 GMT
+
+_Version update only_
+
+## 1.2.0
+Tue, 04 Nov 2025 08:15:14 GMT
+
+### Minor changes
+
+- Include a `printApiReportDiff` option in the `config/api-extractor-task.json` config file that, when set to `"production"` (and the `--production` flag is specified) or `"always"`, causes a diff of the API report (*.api.md) to be printed if the report is changed. This is useful for diagnosing issues that only show up in CI.
+
+## 1.1.3
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 1.1.2
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
 
 ## 1.1.1
 Wed, 08 Oct 2025 00:13:29 GMT

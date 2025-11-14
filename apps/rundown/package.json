@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rundown",
-  "version": "1.2.1",
+  "version": "1.2.5",
   "description": "Detect load time regressions by running an app, tracing require() calls, and generating a deterministic report",
   "repository": {
     "type": "git",
@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
   }
 }

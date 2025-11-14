@@ -307,7 +307,7 @@
     "@types/vscode": "1.103.0",
     "@types/webpack-env": "1.18.8",
     "@vscode/test-electron": "^1.6.2",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "glob": "~7.0.5",
     "@rushstack/heft-vscode-extension-rig": "workspace:*",
     "mocha": "^10.1.0"

@@ -21,7 +21,7 @@
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "20.17.19",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "heft-example-lifecycle-plugin": "workspace:*",
     "heft-example-plugin-01": "workspace:*",
     "heft-example-plugin-02": "workspace:*",

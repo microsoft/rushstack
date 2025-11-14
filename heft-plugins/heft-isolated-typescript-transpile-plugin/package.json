@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
-  "version": "1.1.1",
+  "version": "1.1.5",
   "description": "Heft plugin for transpiling TypeScript with SWC",
   "repository": {
     "type": "git",
@@ -18,13 +18,13 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^1.1.1",
+    "@rushstack/heft": "^1.1.5",
     "@rushstack/heft-typescript-plugin": "workspace:^"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
   },
   "dependencies": {

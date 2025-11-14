@@ -1,6 +1,39 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Fri, 03 Oct 2025 20:09:59 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Nov 2025 16:13:26 GMT and should not be manually modified.
+
+## 0.22.1
+Tue, 11 Nov 2025 16:13:26 GMT
+
+### Patches
+
+- Fix calculation of project root folder when using the ESLint extension in VS Code. Report the paths being compared in 'no-external-local-imports' rule violations.
+
+## 0.22.0
+Wed, 22 Oct 2025 00:57:54 GMT
+
+### Minor changes
+
+- Introduce a `@rushstack/import-requires-chunk-name` rule. This rule requires that dynamic imports include a Webpack chunk name magic comment.
+- Introduce a `@rushstack/pair-react-dom-render-unmount` rule. This rule requires that every React DOM `render` call has a matching `unmountComponentAtNode` call.
+
+### Patches
+
+- Include missing rule documentation.
+
+## 0.21.1
+Tue, 14 Oct 2025 15:13:22 GMT
+
+### Patches
+
+- Added documentation for the @rushstack/typedef-var ESLint rule. This clarifies the rule's rationale (readability over writability) and explicitly lists all local variable exemptions, resolving confusion around its usage.
+
+## 0.21.0
+Mon, 13 Oct 2025 15:13:02 GMT
+
+### Minor changes
+
+- Bump `eslint` to `~9.37.0` and the `@typescript-eslint/*` packages to `~8.46.0`.
 
 ## 0.20.0
 Fri, 03 Oct 2025 20:09:59 GMT

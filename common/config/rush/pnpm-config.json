@@ -204,7 +204,15 @@
 
     // TODO: Remove once https://github.com/dylang/npm-check/issues/499
     // has been closed and a new version of `npm-check` is published.
-    "package-json": "^7"
+    "package-json": "^7",
+
+    // Remove these when decoupled dependencies are bumped
+    "@rushstack/eslint-config@4.4.1>@typescript-eslint/eslint-plugin": "~8.46.0",
+    "@rushstack/eslint-config@4.4.1>@typescript-eslint/utils": "~8.46.0",
+    "@rushstack/eslint-config@4.4.1>@typescript-eslint/parser": "~8.46.0",
+    "@rushstack/eslint-config@4.4.1>@typescript-eslint/typescript-estree": "~8.46.0",
+    "@rushstack/eslint-plugin@0.20.0>@typescript-eslint/utils": "~8.46.0",
+    "@rushstack/heft-node-rig@2.10.1>eslint": "~9.37.0"
   },
 
   /**

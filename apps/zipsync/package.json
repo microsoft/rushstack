@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/zipsync",
-  "version": "0.2.1",
+  "version": "0.2.5",
   "description": "CLI tool for creating and extracting ZIP archives with intelligent filesystem synchronization",
   "repository": {
     "type": "git",
@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
   }
 }

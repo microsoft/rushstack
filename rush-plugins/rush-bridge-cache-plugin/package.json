@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-bridge-cache-plugin",
-  "version": "5.160.1",
+  "version": "5.162.0",
   "description": "Rush plugin that provides a --set-cache-only command flag to populate the cache from content on disk.",
   "license": "MIT",
   "main": "lib/index.js",
@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
   }
 }

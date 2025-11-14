@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin-packlets
 
-This log was last generated on Fri, 03 Oct 2025 20:09:59 GMT and should not be manually modified.
+This log was last generated on Mon, 13 Oct 2025 15:13:02 GMT and should not be manually modified.
+
+## 0.14.0
+Mon, 13 Oct 2025 15:13:02 GMT
+
+### Minor changes
+
+- Bump `eslint` to `~9.37.0` and the `@typescript-eslint/*` packages to `~8.46.0`.
 
 ## 0.13.0
 Fri, 03 Oct 2025 20:09:59 GMT
