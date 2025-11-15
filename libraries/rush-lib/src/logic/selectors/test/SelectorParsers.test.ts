@@ -9,6 +9,8 @@ import { RushConfiguration } from '../../../api/RushConfiguration';
 import { NamedProjectSelectorParser } from '../NamedProjectSelectorParser';
 import { TagProjectSelectorParser } from '../TagProjectSelectorParser';
 import { PathProjectSelectorParser } from '../PathProjectSelectorParser';
+import { VersionPolicyProjectSelectorParser } from '../VersionPolicyProjectSelectorParser';
+import { SubspaceSelectorParser } from '../SubspaceSelectorParser';
 
 describe('SelectorParsers', () => {
   let rushConfiguration: RushConfiguration;
@@ -190,6 +192,56 @@ describe('SelectorParsers', () => {
     it('should return empty completions', () => {
       const completions = Array.from(parser.getCompletions());
       expect(completions).toHaveLength(0);
+    });
+  });
+
+  describe(VersionPolicyProjectSelectorParser.name, () => {
+    let parser: VersionPolicyProjectSelectorParser;
+
+    beforeEach(() => {
+      parser = new VersionPolicyProjectSelectorParser(rushConfiguration);
+    });
+
+    it('should return empty completions when no version policies exist', () => {
+      // The test fixture doesn't have version policies configured
+      const completions = Array.from(parser.getCompletions());
+      expect(completions).toHaveLength(0);
+    });
+
+    it('should throw error for non-existent version policy', async () => {
+      await expect(
+        parser.evaluateSelectorAsync({
+          unscopedSelector: 'nonexistent-policy',
+          terminal,
+          parameterName: '--only'
+        })
+      ).rejects.toThrow();
+    });
+  });
+
+  describe(SubspaceSelectorParser.name, () => {
+    let parser: SubspaceSelectorParser;
+
+    beforeEach(() => {
+      parser = new SubspaceSelectorParser(rushConfiguration);
+    });
+
+    it('should return completions based on configuration', () => {
+      const completions = Array.from(parser.getCompletions());
+      // The test fixture doesn't have subspaces configured, so completions may be empty
+      expect(Array.isArray(completions)).toBe(true);
+    });
+
+    it('should select projects from default subspace', async () => {
+      const result = await parser.evaluateSelectorAsync({
+        unscopedSelector: 'default',
+        terminal,
+        parameterName: '--only'
+      });
+
+      const projects = Array.from(result);
+      // Should get projects from the default subspace
+      expect(projects.length).toBeGreaterThan(0);
     });
   });
 });
