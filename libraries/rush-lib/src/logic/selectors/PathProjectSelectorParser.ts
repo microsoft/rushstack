@@ -13,9 +13,11 @@ import { RushConstants } from '../RushConstants';
 
 export class PathProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {
   private readonly _rushConfiguration: RushConfiguration;
+  private readonly _workingDirectory: string;
 
-  public constructor(rushConfiguration: RushConfiguration) {
+  public constructor(rushConfiguration: RushConfiguration, workingDirectory?: string) {
     this._rushConfiguration = rushConfiguration;
+    this._workingDirectory = workingDirectory ?? process.cwd();
   }
 
   public async evaluateSelectorAsync({
@@ -24,7 +26,7 @@ export class PathProjectSelectorParser implements ISelectorParser<RushConfigurat
     parameterName
   }: IEvaluateSelectorOptions): Promise<Iterable<RushConfigurationProject>> {
     // Resolve the input path against the working directory
-    const absolutePath: string = nodePath.resolve(process.cwd(), unscopedSelector);
+    const absolutePath: string = nodePath.resolve(this._workingDirectory, unscopedSelector);
 
     // Relativize it to the rushJsonFolder
     const relativePath: string = nodePath.relative(this._rushConfiguration.rushJsonFolder, absolutePath);
