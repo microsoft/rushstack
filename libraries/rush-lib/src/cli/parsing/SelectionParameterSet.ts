@@ -21,6 +21,7 @@ import { NamedProjectSelectorParser } from '../../logic/selectors/NamedProjectSe
 import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelectorParser';
 import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser';
 import { SubspaceSelectorParser } from '../../logic/selectors/SubspaceSelectorParser';
+import { PathProjectSelectorParser } from '../../logic/selectors/PathProjectSelectorParser';
 import { RushConstants } from '../../logic/RushConstants';
 import type { Subspace } from '../../api/Subspace';
 
@@ -72,6 +73,7 @@ export class SelectionParameterSet {
     selectorParsers.set('tag', new TagProjectSelectorParser(rushConfiguration));
     selectorParsers.set('version-policy', new VersionPolicyProjectSelectorParser(rushConfiguration));
     selectorParsers.set('subspace', new SubspaceSelectorParser(rushConfiguration));
+    selectorParsers.set('path', new PathProjectSelectorParser(rushConfiguration));
 
     this._selectorParserByScope = selectorParsers;
 
