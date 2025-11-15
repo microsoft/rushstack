@@ -29,42 +29,24 @@ export class PathProjectSelectorParser implements ISelectorParser<RushConfigurat
     // Relativize it to the rushJsonFolder
     const relativePath: string = nodePath.relative(this._rushConfiguration.rushJsonFolder, absolutePath);
 
-    // If the path is outside the Rush workspace, it's an error
-    if (relativePath.startsWith('..') || nodePath.isAbsolute(relativePath)) {
-      terminal.writeErrorLine(
-        `The path "${unscopedSelector}" passed to "${parameterName}" resolves to "${absolutePath}" ` +
-          `which is outside the Rush workspace root "${this._rushConfiguration.rushJsonFolder}".`
-      );
-      throw new AlreadyReportedError();
-    }
-
     // Get the LookupByPath instance for the Rush root
     const lookupByPath: LookupByPath<RushConfigurationProject> =
       this._rushConfiguration.getProjectLookupForRoot(this._rushConfiguration.rushJsonFolder);
 
-    // Try to find a project that contains this path, or all projects within this path
-    const exactProject: RushConfigurationProject | undefined = lookupByPath.get(relativePath);
-
-    if (exactProject) {
-      // The path exactly matches a project folder
-      return [exactProject];
-    }
-
-    // Check if this is a path within a project
+    // Check if this path is within a project or matches a project exactly
     const containingProject: RushConfigurationProject | undefined = lookupByPath.findChildPath(relativePath);
 
     if (containingProject) {
-      // The path is within a project
       return [containingProject];
     }
 
     // Check if there are any projects under this path (i.e., it's a directory containing projects)
-    const projectsUnderPath: RushConfigurationProject[] = [];
+    const projectsUnderPath: Set<RushConfigurationProject> = new Set();
     for (const [, project] of lookupByPath.entries(relativePath)) {
-      projectsUnderPath.push(project);
+      projectsUnderPath.add(project);
     }
 
-    if (projectsUnderPath.length > 0) {
+    if (projectsUnderPath.size > 0) {
       return projectsUnderPath;
     }
 
