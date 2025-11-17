@@ -3,7 +3,7 @@
     {
       "comment": "",
       "type": "none",
-      "packageName": "@microsoft/rush-lib"
+      "packageName": "@microsoft/rush"
     }
   ],
   "packageName": "@microsoft/rush-lib",
