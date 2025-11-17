@@ -86,7 +86,7 @@ function validateConfigurationWithParameters(
       );
 
       rushProjectConfiguration.validatePhaseConfiguration(
-        Array.from(rushProjectConfiguration.operationSettingsByOperationName.keys()).map(
+        Array.from(rushProjectConfiguration.operationSettingsByOperationName.keys(),
           (phaseName) => ({ name: phaseName, associatedParameters: mockParameters }) as IPhase
         ),
         terminal
