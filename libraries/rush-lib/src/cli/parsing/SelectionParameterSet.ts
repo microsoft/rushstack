@@ -73,7 +73,7 @@ export class SelectionParameterSet {
     selectorParsers.set('tag', new TagProjectSelectorParser(rushConfiguration));
     selectorParsers.set('version-policy', new VersionPolicyProjectSelectorParser(rushConfiguration));
     selectorParsers.set('subspace', new SubspaceSelectorParser(rushConfiguration));
-    selectorParsers.set('path', new PathProjectSelectorParser(rushConfiguration));
+    selectorParsers.set('path', new PathProjectSelectorParser(rushConfiguration, process.cwd()));
 
     this._selectorParserByScope = selectorParsers;
 

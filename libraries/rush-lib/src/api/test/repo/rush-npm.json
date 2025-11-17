@@ -28,7 +28,8 @@
       "packageName": "project1",
       "projectFolder": "project1",
       "reviewCategory": "third-party",
-      "tags": ["frontend", "ui"]
+      "tags": ["frontend", "ui"],
+      "versionPolicyName": "testPolicy"
     },
 
     {
@@ -43,7 +44,20 @@
       "packageName": "project3",
       "projectFolder": "project3",
       "reviewCategory": "prototype",
-      "tags": ["frontend"]
+      "tags": ["frontend"],
+      "versionPolicyName": "testPolicy"
+    },
+
+    {
+      "packageName": "app1",
+      "projectFolder": "apps/app1",
+      "reviewCategory": "first-party"
+    },
+
+    {
+      "packageName": "app2",
+      "projectFolder": "apps/app2",
+      "reviewCategory": "first-party"
     }
   ]
 }

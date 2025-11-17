@@ -15,9 +15,9 @@ export class PathProjectSelectorParser implements ISelectorParser<RushConfigurat
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _workingDirectory: string;
 
-  public constructor(rushConfiguration: RushConfiguration, workingDirectory?: string) {
+  public constructor(rushConfiguration: RushConfiguration, workingDirectory: string) {
     this._rushConfiguration = rushConfiguration;
-    this._workingDirectory = workingDirectory ?? process.cwd();
+    this._workingDirectory = workingDirectory;
   }
 
   public async evaluateSelectorAsync({

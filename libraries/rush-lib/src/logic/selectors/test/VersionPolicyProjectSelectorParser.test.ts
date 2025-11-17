@@ -22,10 +22,23 @@ describe(VersionPolicyProjectSelectorParser.name, () => {
     parser = new VersionPolicyProjectSelectorParser(rushConfiguration);
   });
 
-  it('should return empty completions when no version policies exist', () => {
-    // The test fixture doesn't have version policies configured
+  it('should return completions for version policies', () => {
     const completions = Array.from(parser.getCompletions());
-    expect(completions).toHaveLength(0);
+    expect(completions.length).toBeGreaterThan(0);
+    expect(completions).toContain('testPolicy');
+  });
+
+  it('should select projects by version policy', async () => {
+    const result = await parser.evaluateSelectorAsync({
+      unscopedSelector: 'testPolicy',
+      terminal,
+      parameterName: '--only'
+    });
+
+    const projects = Array.from(result);
+    expect(projects).toHaveLength(2);
+    const packageNames = projects.map((p) => p.packageName).sort();
+    expect(packageNames).toEqual(['project1', 'project3']);
   });
 
   it('should throw error for non-existent version policy', async () => {

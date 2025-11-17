@@ -62,6 +62,19 @@ describe(PathProjectSelectorParser.name, () => {
     expect(packageNames).toContain('project3');
   });
 
+  it('should select multiple projects from a shared subfolder', async () => {
+    const result = await parser.evaluateSelectorAsync({
+      unscopedSelector: 'apps',
+      terminal,
+      parameterName: '--only'
+    });
+
+    const projects = Array.from(result);
+    expect(projects).toHaveLength(2);
+    const packageNames = projects.map((p) => p.packageName).sort();
+    expect(packageNames).toEqual(['app1', 'app2']);
+  });
+
   it('should select project from specified directory', async () => {
     const project1Path = path.join(rushConfiguration.rushJsonFolder, 'project1');
     const parserWithCustomCwd = new PathProjectSelectorParser(rushConfiguration, project1Path);
