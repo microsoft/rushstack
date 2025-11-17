@@ -236,7 +236,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         // Enable filtering to reduce evaluation cost
         enableFiltering: true
       },
-      includeSubspaceSelector: false
+      includeSubspaceSelector: false,
+      cwd: this.parser.cwd
     });
 
     this._verboseParameter = this.defineFlagParameter({

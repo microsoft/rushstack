@@ -116,7 +116,8 @@ export class ListAction extends BaseRushAction {
         // Disable filtering because rush-project.json is riggable and therefore may not be available
         enableFiltering: false
       },
-      includeSubspaceSelector: false
+      includeSubspaceSelector: false,
+      cwd: this.parser.cwd
     });
   }
 

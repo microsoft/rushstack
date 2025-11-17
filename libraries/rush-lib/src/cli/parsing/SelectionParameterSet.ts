@@ -30,6 +30,11 @@ export const SUBSPACE_LONG_ARG_NAME: '--subspace' = '--subspace';
 interface ISelectionParameterSetOptions {
   gitOptions: IGitSelectorParserOptions;
   includeSubspaceSelector: boolean;
+  /**
+   * The working directory used to resolve relative paths.
+   * This should be the same directory that was used to find the Rush configuration.
+   */
+  cwd: string;
 }
 
 /**
@@ -59,7 +64,7 @@ export class SelectionParameterSet {
     action: CommandLineParameterProvider,
     options: ISelectionParameterSetOptions
   ) {
-    const { gitOptions, includeSubspaceSelector } = options;
+    const { gitOptions, includeSubspaceSelector, cwd } = options;
     this._rushConfiguration = rushConfiguration;
 
     const selectorParsers: Map<string, ISelectorParser<RushConfigurationProject>> = new Map<
@@ -73,7 +78,7 @@ export class SelectionParameterSet {
     selectorParsers.set('tag', new TagProjectSelectorParser(rushConfiguration));
     selectorParsers.set('version-policy', new VersionPolicyProjectSelectorParser(rushConfiguration));
     selectorParsers.set('subspace', new SubspaceSelectorParser(rushConfiguration));
-    selectorParsers.set('path', new PathProjectSelectorParser(rushConfiguration, process.cwd()));
+    selectorParsers.set('path', new PathProjectSelectorParser(rushConfiguration, cwd));
 
     this._selectorParserByScope = selectorParsers;
 
