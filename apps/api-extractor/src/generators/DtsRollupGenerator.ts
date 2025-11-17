@@ -23,6 +23,7 @@ import type { IAstModuleExportInfo } from '../analyzer/AstModule';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
 import type { AstEntity } from '../analyzer/AstEntity';
 import { ModuleDocComment } from '../aedoc/ModuleDocComment';
+import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -184,7 +185,10 @@ export class DtsRollupGenerator {
 
         // Check if the source file has a @module comment and emit it before the namespace declaration
         const sourceFile: ts.SourceFile = astEntity.astModule.sourceFile;
-        const moduleCommentRange: ts.TextRange | undefined = ModuleDocComment.tryFindInSourceFile(sourceFile);
+        const moduleCommentRange: ts.TextRange | undefined = ModuleDocComment.tryFindInSourceFile(
+          sourceFile,
+          collector
+        );
         if (moduleCommentRange) {
           const moduleComment: string = sourceFile.text.substring(
             moduleCommentRange.pos,

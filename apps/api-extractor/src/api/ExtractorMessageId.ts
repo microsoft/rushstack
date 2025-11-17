@@ -57,6 +57,11 @@ export enum ExtractorMessageId {
   MisplacedPackageTag = 'ae-misplaced-package-tag',
 
   /**
+   * "The `@module` comment must only appear on modules that are re-exported as namespaces."
+   */
+  MisplacedModuleTag = 'ae-misplaced-module-tag',
+
+  /**
    * "The symbol ___ needs to be exported by the entry point ___."
    */
   ForgottenExport = 'ae-forgotten-export',
@@ -130,6 +135,7 @@ export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-incompatible-release-tags',
   'ae-missing-release-tag',
   'ae-misplaced-package-tag',
+  'ae-misplaced-module-tag',
   'ae-forgotten-export',
   'ae-internal-missing-underscore',
   'ae-internal-mixed-release-tag',
