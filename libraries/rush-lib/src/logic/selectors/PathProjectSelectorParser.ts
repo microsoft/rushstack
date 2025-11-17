@@ -31,12 +31,16 @@ export class PathProjectSelectorParser implements ISelectorParser<RushConfigurat
     // Relativize it to the rushJsonFolder
     const relativePath: string = nodePath.relative(this._rushConfiguration.rushJsonFolder, absolutePath);
 
+    // Normalize path separators to forward slashes for LookupByPath
+    const normalizedPath: string = relativePath.split(nodePath.sep).join('/');
+
     // Get the LookupByPath instance for the Rush root
     const lookupByPath: LookupByPath<RushConfigurationProject> =
       this._rushConfiguration.getProjectLookupForRoot(this._rushConfiguration.rushJsonFolder);
 
     // Check if this path is within a project or matches a project exactly
-    const containingProject: RushConfigurationProject | undefined = lookupByPath.findChildPath(relativePath);
+    const containingProject: RushConfigurationProject | undefined =
+      lookupByPath.findChildPath(normalizedPath);
 
     if (containingProject) {
       return [containingProject];
@@ -44,7 +48,7 @@ export class PathProjectSelectorParser implements ISelectorParser<RushConfigurat
 
     // Check if there are any projects under this path (i.e., it's a directory containing projects)
     const projectsUnderPath: Set<RushConfigurationProject> = new Set();
-    for (const [, project] of lookupByPath.entries(relativePath)) {
+    for (const [, project] of lookupByPath.entries(normalizedPath)) {
       projectsUnderPath.add(project);
     }
 
