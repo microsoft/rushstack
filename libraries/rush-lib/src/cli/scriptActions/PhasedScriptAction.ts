@@ -170,6 +170,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   private readonly _nodeDiagnosticDirParameter: CommandLineStringParameter;
   private readonly _debugBuildCacheIdsParameter: CommandLineFlagParameter;
   private readonly _includePhaseDeps: CommandLineFlagParameter | undefined;
+  private readonly _showExistingFailureLogsParameter: CommandLineFlagParameter;
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
@@ -324,6 +325,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       parameterLongName: '--debug-build-cache-ids',
       description:
         'Logs information about the components of the build cache ids for individual operations. This is useful for debugging the incremental build logic.'
+    });
+
+    this._showExistingFailureLogsParameter = this.defineFlagParameter({
+      parameterLongName: '--show-existing-failure-logs',
+      description:
+        'Skips execution of operations and instead displays any existing failure logs for the selected projects. ' +
+        'This is useful for reviewing failures from a previous run without re-executing the operations. ' +
+        'Operations without existing failure logs will be silenced.'
     });
 
     this.defineScriptParameters();
@@ -485,9 +494,25 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       }
 
       const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
+      const showExistingFailureLogs: boolean = this._showExistingFailureLogsParameter.value;
+
+      // If showing existing failure logs, we don't want to enable watch mode
+      if (showExistingFailureLogs && isWatch) {
+        throw new Error('The --show-existing-failure-logs parameter cannot be used with --watch.');
+      }
 
       await measureAsyncFn(`${PERF_PREFIX}:applySituationalPlugins`, async () => {
-        if (isWatch && this._noIPCParameter?.value === false) {
+        if (showExistingFailureLogs) {
+          // Apply the plugin that replays existing failure logs without executing operations
+          terminal.writeVerboseLine(`Mode: showing existing failure logs`);
+          const { ShowExistingFailureLogsPlugin } = await import(
+            /* webpackChunkName: 'ShowExistingFailureLogsPlugin' */
+            '../../logic/operations/ShowExistingFailureLogsPlugin'
+          );
+          new ShowExistingFailureLogsPlugin({
+            terminal
+          }).apply(this.hooks);
+        } else if (isWatch && this._noIPCParameter?.value === false) {
           new (
             await import(
               /* webpackChunkName: 'IPCOperationRunnerPlugin' */ '../../logic/operations/IPCOperationRunnerPlugin'
@@ -495,33 +520,36 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           ).IPCOperationRunnerPlugin().apply(this.hooks);
         }
 
-        if (buildCacheConfiguration?.buildCacheEnabled) {
-          terminal.writeVerboseLine(`Incremental strategy: cache restoration`);
-          new CacheableOperationPlugin({
-            allowWarningsInSuccessfulBuild:
-              !!this.rushConfiguration.experimentsConfiguration.configuration
-                .buildCacheWithAllowWarningsInSuccessfulBuild,
-            buildCacheConfiguration,
-            cobuildConfiguration,
-            terminal
-          }).apply(this.hooks);
+        // Skip build cache and legacy skip plugins when showing existing failure logs
+        if (!showExistingFailureLogs) {
+          if (buildCacheConfiguration?.buildCacheEnabled) {
+            terminal.writeVerboseLine(`Incremental strategy: cache restoration`);
+            new CacheableOperationPlugin({
+              allowWarningsInSuccessfulBuild:
+                !!this.rushConfiguration.experimentsConfiguration.configuration
+                  .buildCacheWithAllowWarningsInSuccessfulBuild,
+              buildCacheConfiguration,
+              cobuildConfiguration,
+              terminal
+            }).apply(this.hooks);
 
-          if (this._debugBuildCacheIdsParameter.value) {
-            new DebugHashesPlugin(terminal).apply(this.hooks);
+            if (this._debugBuildCacheIdsParameter.value) {
+              new DebugHashesPlugin(terminal).apply(this.hooks);
+            }
+          } else if (!this._disableBuildCache) {
+            terminal.writeVerboseLine(`Incremental strategy: output preservation`);
+            // Explicitly disabling the build cache also disables legacy skip detection.
+            new LegacySkipPlugin({
+              allowWarningsInSuccessfulBuild:
+                this.rushConfiguration.experimentsConfiguration.configuration
+                  .buildSkipWithAllowWarningsInSuccessfulBuild,
+              terminal,
+              changedProjectsOnly,
+              isIncrementalBuildAllowed: this._isIncrementalBuildAllowed
+            }).apply(this.hooks);
+          } else {
+            terminal.writeVerboseLine(`Incremental strategy: none (full rebuild)`);
           }
-        } else if (!this._disableBuildCache) {
-          terminal.writeVerboseLine(`Incremental strategy: output preservation`);
-          // Explicitly disabling the build cache also disables legacy skip detection.
-          new LegacySkipPlugin({
-            allowWarningsInSuccessfulBuild:
-              this.rushConfiguration.experimentsConfiguration.configuration
-                .buildSkipWithAllowWarningsInSuccessfulBuild,
-            terminal,
-            changedProjectsOnly,
-            isIncrementalBuildAllowed: this._isIncrementalBuildAllowed
-          }).apply(this.hooks);
-        } else {
-          terminal.writeVerboseLine(`Incremental strategy: none (full rebuild)`);
         }
 
         const showBuildPlan: boolean = this._cobuildPlanParameter?.value ?? false;
