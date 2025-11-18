@@ -17,6 +17,6 @@
     "eslint": "~9.25.1",
     "html-webpack-plugin": "~5.5.0",
     "typescript": "~5.8.2",
-    "webpack": "5.94.0"
+    "webpack": "~5.98.0"
   }
 }
