@@ -3,7 +3,7 @@
 
 import * as nodePath from 'node:path';
 
-import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { AlreadyReportedError, Path } from '@rushstack/node-core-library';
 import type { LookupByPath } from '@rushstack/lookup-by-path';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
@@ -32,7 +32,7 @@ export class PathProjectSelectorParser implements ISelectorParser<RushConfigurat
     const relativePath: string = nodePath.relative(this._rushConfiguration.rushJsonFolder, absolutePath);
 
     // Normalize path separators to forward slashes for LookupByPath
-    const normalizedPath: string = relativePath.split(nodePath.sep).join('/');
+    const normalizedPath: string = Path.convertToSlashes(relativePath);
 
     // Get the LookupByPath instance for the Rush root
     const lookupByPath: LookupByPath<RushConfigurationProject> =
