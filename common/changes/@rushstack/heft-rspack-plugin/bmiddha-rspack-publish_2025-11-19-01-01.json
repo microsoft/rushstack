@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-rspack-plugin",
+      "comment": "Initial package release.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-rspack-plugin"
+}
