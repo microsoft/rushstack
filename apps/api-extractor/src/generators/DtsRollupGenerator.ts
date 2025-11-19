@@ -23,7 +23,6 @@ import type { IAstModuleExportInfo } from '../analyzer/AstModule';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
 import type { AstEntity } from '../analyzer/AstEntity';
 import { ModuleDocComment } from '../aedoc/ModuleDocComment';
-import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
