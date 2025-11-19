@@ -344,11 +344,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     this.overrides = new Map(Object.entries(shrinkwrapJson.overrides || {}));
     this.packageExtensionsChecksum = shrinkwrapJson.packageExtensionsChecksum;
 
-    // Lockfile v9 always has "." in importers filed.
-    this.isWorkspaceCompatible =
-      this.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V9
-        ? this.importers.size > 1
-        : this.importers.size > 0;
+    this.isWorkspaceCompatible = this.importers.size > 0;
 
     this._integrities = new Map();
   }
