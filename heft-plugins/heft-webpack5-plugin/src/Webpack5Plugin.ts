@@ -232,7 +232,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
       this._validateEnvironmentVariable(taskSession);
       if (!taskSession.parameters.watch) {
         // Should never happen, but just in case
-        throw new InternalError('Cannot run Rspack in watch mode when watch mode is not enabled');
+        throw new InternalError('Cannot run Webpack in watch mode when watch mode is not enabled');
       }
 
       // Load the config and compiler, and return if there is no config found
