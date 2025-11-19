@@ -1,6 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { RUSH_USER_FOLDER_NAME } from '@rushstack/credential-cache';
+
+// Use the typing here to enforce consistency between the two libraries
+const rushUserConfigurationFolderName: typeof RUSH_USER_FOLDER_NAME = '.rush-user';
+
 /**
  * Constants used by the Rush tool.
  * @beta
@@ -298,7 +303,7 @@ export class RushConstants {
   /**
    * The name of the per-user Rush configuration data folder.
    */
-  public static readonly rushUserConfigurationFolderName: '.rush-user' = '.rush-user';
+  public static readonly rushUserConfigurationFolderName: '.rush-user' = rushUserConfigurationFolderName;
 
   /**
    * The name of the project `rush-logs` folder.

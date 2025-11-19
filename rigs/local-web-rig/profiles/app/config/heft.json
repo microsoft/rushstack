@@ -1,5 +1,19 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
 
-  "extends": "@rushstack/heft-web-rig/profiles/app/config/heft.json"
+  "extends": "@rushstack/heft-web-rig/profiles/app/config/heft.json",
+
+  "phasesByName": {
+    "build": {
+      "tasksByName": {
+        "lint": {
+          "taskPlugin": {
+            "options": {
+              "sarifLogPath": "temp/build/lint/lint.sarif"
+            }
+          }
+        }
+      }
+    }
+  }
 }

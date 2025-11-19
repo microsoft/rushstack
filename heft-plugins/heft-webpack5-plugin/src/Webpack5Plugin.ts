@@ -142,6 +142,9 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           taskSession.logger.terminal
         );
         this._webpack = await import(webpackPackagePath);
+        taskSession.logger.terminal.writeDebugLine(
+          `Using Webpack from rig package at "${webpackPackagePath}"`
+        );
       } catch (e) {
         // Fallback to bundled version if not found in rig.
         this._webpack = await import(WEBPACK_PACKAGE_NAME);
@@ -231,7 +234,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
       this._validateEnvironmentVariable(taskSession);
       if (!taskSession.parameters.watch) {
         // Should never happen, but just in case
-        throw new InternalError('Cannot run Webpack in watch mode when compilation mode is enabled');
+        throw new InternalError('Cannot run Rspack in watch mode when watch mode is not enabled');
       }
 
       // Load the config and compiler, and return if there is no config found
@@ -288,9 +291,17 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           onListening: (server: TWebpackDevServer) => {
             const addressInfo: AddressInfo | string | undefined = server.server?.address() as AddressInfo;
             if (addressInfo) {
-              const address: string =
-                typeof addressInfo === 'string' ? addressInfo : `${addressInfo.address}:${addressInfo.port}`;
-              taskSession.logger.terminal.writeLine(`Started Webpack Dev Server at https://${address}`);
+              let url: string;
+              if (typeof addressInfo === 'string') {
+                url = addressInfo;
+              } else {
+                const address: string =
+                  addressInfo.family === 'IPv6'
+                    ? `[${addressInfo.address}]:${addressInfo.port}`
+                    : `${addressInfo.address}:${addressInfo.port}`;
+                url = `https://${address}/`;
+              }
+              taskSession.logger.terminal.writeLine(`Started Webpack Dev Server at ${url}`);
             }
           }
         };
@@ -476,13 +487,13 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
         const [startColumnRaw] = columnRangeRaw.split('-');
         if (lineNumberRaw) {
           lineNumber = parseInt(lineNumberRaw, 10);
-          if (isNaN(lineNumber)) {
+          if (Number.isNaN(lineNumber)) {
             lineNumber = undefined;
           }
         }
         if (startColumnRaw) {
           columnNumber = parseInt(startColumnRaw, 10);
-          if (isNaN(columnNumber)) {
+          if (Number.isNaN(columnNumber)) {
             columnNumber = undefined;
           }
         }

@@ -3,12 +3,11 @@
 
 import type { SpawnSyncReturns } from 'node:child_process';
 
+import { type ICredentialCacheEntry, CredentialCache } from '@rushstack/credential-cache';
 import { Executable, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import {
   type ICloudBuildCacheProvider,
-  type ICredentialCacheEntry,
-  CredentialCache,
   type RushSession,
   EnvironmentConfiguration
 } from '@rushstack/rush-sdk';

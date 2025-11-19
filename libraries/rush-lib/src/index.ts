@@ -8,8 +8,15 @@
  * @packageDocumentation
  */
 
-// For backwards compatibility
+// #region Backwards compatibility
 export { LookupByPath as LookupByPath, type IPrefixMatch } from '@rushstack/lookup-by-path';
+
+export {
+  type ICredentialCacheOptions,
+  type ICredentialCacheEntry,
+  CredentialCache
+} from '@rushstack/credential-cache';
+// #endregion
 
 export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
@@ -175,12 +182,6 @@ export type {
   ICobuildContext,
   ICobuildCompletedState
 } from './logic/cobuild/ICobuildLockProvider';
-
-export {
-  type ICredentialCacheOptions,
-  type ICredentialCacheEntry,
-  CredentialCache
-} from './logic/CredentialCache';
 
 export type { ITelemetryData, ITelemetryMachineInfo, ITelemetryOperationResult } from './logic/Telemetry';
 

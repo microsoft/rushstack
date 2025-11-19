@@ -30,6 +30,7 @@ export interface IIPCOperationRunnerOptions {
   commandForHash: string;
   persist: boolean;
   requestRun: OperationRequestRunCallback;
+  ignoredParameterValues: ReadonlyArray<string>;
 }
 
 function isAfterExecuteEventMessage(message: unknown): message is IAfterExecuteEventMessage {
@@ -59,6 +60,7 @@ export class IPCOperationRunner implements IOperationRunner {
   private readonly _commandForHash: string;
   private readonly _persist: boolean;
   private readonly _requestRun: OperationRequestRunCallback;
+  private readonly _ignoredParameterValues: ReadonlyArray<string>;
 
   private _ipcProcess: ChildProcess | undefined;
   private _processReadyPromise: Promise<void> | undefined;
@@ -75,6 +77,7 @@ export class IPCOperationRunner implements IOperationRunner {
 
     this._persist = options.persist;
     this._requestRun = options.requestRun;
+    this._ignoredParameterValues = options.ignoredParameterValues;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
@@ -82,6 +85,13 @@ export class IPCOperationRunner implements IOperationRunner {
       async (terminal: ITerminal, terminalProvider: ITerminalProvider): Promise<OperationStatus> => {
         let isConnected: boolean = false;
         if (!this._ipcProcess || typeof this._ipcProcess.exitCode === 'number') {
+          // Log any ignored parameters
+          if (this._ignoredParameterValues.length > 0) {
+            terminal.writeLine(
+              `These parameters were ignored for this operation by project-level configuration: ${this._ignoredParameterValues.join(' ')}`
+            );
+          }
+
           // Run the operation
           terminal.writeLine('Invoking: ' + this._commandToRun);
 

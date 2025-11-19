@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-patch",
-  "version": "1.13.0",
+  "version": "1.15.0",
   "description": "Enhance ESLint with better support for large scale monorepos",
   "main": "lib/usage.js",
   "license": "MIT",
@@ -30,7 +30,7 @@
     "patch"
   ],
   "devDependencies": {
-    "@rushstack/heft": "1.1.0",
+    "@rushstack/heft": "1.1.4",
     "@types/eslint-8": "npm:@types/eslint@8.56.10",
     "@types/eslint-9": "npm:@types/eslint@9.6.1",
     "@typescript-eslint/types": "~8.46.0",

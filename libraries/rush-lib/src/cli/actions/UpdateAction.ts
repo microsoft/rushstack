@@ -45,7 +45,8 @@ export class UpdateAction extends BaseInstallAction {
           // Disable filtering because rush-project.json is riggable and therefore may not be available
           enableFiltering: false
         },
-        includeSubspaceSelector: true
+        includeSubspaceSelector: true,
+        cwd: this.parser.cwd
       });
     }
 

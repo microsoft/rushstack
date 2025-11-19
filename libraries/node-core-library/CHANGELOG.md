@@ -1,6 +1,20 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 08 Oct 2025 00:13:28 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Oct 2025 00:13:38 GMT and should not be manually modified.
+
+## 5.18.0
+Fri, 24 Oct 2025 00:13:38 GMT
+
+### Minor changes
+
+- Add "Objects.areDeepEqual" and "User.getHomeFolder" APIs.
+
+## 5.17.1
+Wed, 22 Oct 2025 00:57:54 GMT
+
+### Patches
+
+- Update the return type of `Executable.waitForExitAsync` to omit `stdout` and `stderr` if an `encoding` parameter isn't passed to the options object.
 
 ## 5.17.0
 Wed, 08 Oct 2025 00:13:28 GMT

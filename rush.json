@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.160.1",
+  "rushVersion": "5.162.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -894,6 +894,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-rspack-everything-test",
+      "projectFolder": "build-tests/heft-rspack-everything-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-sass-test",
       "projectFolder": "build-tests/heft-sass-test",
       "reviewCategory": "tests",
@@ -1085,6 +1091,13 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-rspack-plugin",
+      "projectFolder": "heft-plugins/heft-rspack-plugin",
+      "reviewCategory": "libraries"
+      // Not ready to publish yet
+      // "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-sass-plugin",
       "projectFolder": "heft-plugins/heft-sass-plugin",
       "reviewCategory": "libraries",
@@ -1142,6 +1155,12 @@
       "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/credential-cache",
+      "projectFolder": "libraries/credential-cache",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/debug-certificate-manager",
       "projectFolder": "libraries/debug-certificate-manager",
       "reviewCategory": "libraries",
@@ -1197,6 +1216,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "decoupledLocalDependencies": ["@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/npm-check-fork",
+      "projectFolder": "libraries/npm-check-fork",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
     {
       "packageName": "@rushstack/operation-graph",

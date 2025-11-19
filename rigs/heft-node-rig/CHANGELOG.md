@@ -1,6 +1,60 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Wed, 08 Oct 2025 00:13:29 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Nov 2025 01:57:54 GMT and should not be manually modified.
+
+## 2.11.9
+Wed, 12 Nov 2025 01:57:54 GMT
+
+_Version update only_
+
+## 2.11.8
+Wed, 12 Nov 2025 01:12:56 GMT
+
+_Version update only_
+
+## 2.11.7
+Tue, 11 Nov 2025 16:13:26 GMT
+
+_Version update only_
+
+## 2.11.6
+Mon, 10 Nov 2025 16:12:32 GMT
+
+### Patches
+
+- Include lib-dts and lib-esm folders in default files to clean
+
+## 2.11.5
+Tue, 04 Nov 2025 08:15:15 GMT
+
+_Version update only_
+
+## 2.11.4
+Fri, 24 Oct 2025 11:22:09 GMT
+
+_Version update only_
+
+## 2.11.3
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 2.11.2
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 2.11.1
+Tue, 14 Oct 2025 15:13:22 GMT
+
+_Version update only_
+
+## 2.11.0
+Mon, 13 Oct 2025 15:13:02 GMT
+
+### Minor changes
+
+- Bump `eslint` to `~9.37.0` and the `@typescript-eslint/*` packages to `~8.46.0`.
 
 ## 2.10.2
 Wed, 08 Oct 2025 00:13:29 GMT

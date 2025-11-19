@@ -1,6 +1,63 @@
 # Change Log - @rushstack/heft-vscode-extension-rig
 
-This log was last generated on Wed, 08 Oct 2025 00:13:28 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Nov 2025 01:57:54 GMT and should not be manually modified.
+
+## 1.1.10
+Wed, 12 Nov 2025 01:57:54 GMT
+
+_Version update only_
+
+## 1.1.9
+Wed, 12 Nov 2025 01:12:56 GMT
+
+_Version update only_
+
+## 1.1.8
+Tue, 11 Nov 2025 16:13:26 GMT
+
+_Version update only_
+
+## 1.1.7
+Mon, 10 Nov 2025 16:12:32 GMT
+
+_Version update only_
+
+## 1.1.6
+Tue, 04 Nov 2025 08:15:14 GMT
+
+_Version update only_
+
+## 1.1.5
+Fri, 24 Oct 2025 11:22:09 GMT
+
+_Version update only_
+
+## 1.1.4
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 1.1.3
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 1.1.2
+Fri, 17 Oct 2025 23:22:33 GMT
+
+_Version update only_
+
+## 1.1.1
+Tue, 14 Oct 2025 15:13:22 GMT
+
+_Version update only_
+
+## 1.1.0
+Mon, 13 Oct 2025 15:13:02 GMT
+
+### Minor changes
+
+- Bump `eslint` to `~9.37.0` and the `@typescript-eslint/*` packages to `~8.46.0`.
 
 ## 1.0.2
 Wed, 08 Oct 2025 00:13:28 GMT

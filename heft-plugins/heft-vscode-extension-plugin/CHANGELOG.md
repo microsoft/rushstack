@@ -1,6 +1,56 @@
 # Change Log - @rushstack/heft-vscode-extension-plugin
 
-This log was last generated on Wed, 08 Oct 2025 00:13:29 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Nov 2025 01:57:54 GMT and should not be manually modified.
+
+## 1.0.12
+Wed, 12 Nov 2025 01:57:54 GMT
+
+_Version update only_
+
+## 1.0.11
+Wed, 12 Nov 2025 01:12:56 GMT
+
+_Version update only_
+
+## 1.0.10
+Tue, 11 Nov 2025 16:13:26 GMT
+
+_Version update only_
+
+## 1.0.9
+Mon, 10 Nov 2025 16:12:32 GMT
+
+_Version update only_
+
+## 1.0.8
+Tue, 04 Nov 2025 08:15:15 GMT
+
+_Version update only_
+
+## 1.0.7
+Fri, 24 Oct 2025 11:22:09 GMT
+
+_Version update only_
+
+## 1.0.6
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 1.0.5
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 1.0.4
+Tue, 14 Oct 2025 15:13:22 GMT
+
+_Version update only_
+
+## 1.0.3
+Mon, 13 Oct 2025 15:13:02 GMT
+
+_Version update only_
 
 ## 1.0.2
 Wed, 08 Oct 2025 00:13:29 GMT

@@ -1,0 +1,8 @@
+{
+  "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json",
+  "compilerOptions": {
+    "lib": ["DOM"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext"
+  }
+}

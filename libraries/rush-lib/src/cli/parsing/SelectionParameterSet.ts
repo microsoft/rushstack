@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AlreadyReportedError, PackageJsonLookup, type IPackageJson } from '@rushstack/node-core-library';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 import type {
   CommandLineParameterProvider,
@@ -21,7 +21,7 @@ import { NamedProjectSelectorParser } from '../../logic/selectors/NamedProjectSe
 import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelectorParser';
 import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser';
 import { SubspaceSelectorParser } from '../../logic/selectors/SubspaceSelectorParser';
-import { RushConstants } from '../../logic/RushConstants';
+import { PathProjectSelectorParser } from '../../logic/selectors/PathProjectSelectorParser';
 import type { Subspace } from '../../api/Subspace';
 
 export const SUBSPACE_LONG_ARG_NAME: '--subspace' = '--subspace';
@@ -29,6 +29,11 @@ export const SUBSPACE_LONG_ARG_NAME: '--subspace' = '--subspace';
 interface ISelectionParameterSetOptions {
   gitOptions: IGitSelectorParserOptions;
   includeSubspaceSelector: boolean;
+  /**
+   * The working directory used to resolve relative paths.
+   * This should be the same directory that was used to find the Rush configuration.
+   */
+  cwd: string;
 }
 
 /**
@@ -58,7 +63,7 @@ export class SelectionParameterSet {
     action: CommandLineParameterProvider,
     options: ISelectionParameterSetOptions
   ) {
-    const { gitOptions, includeSubspaceSelector } = options;
+    const { gitOptions, includeSubspaceSelector, cwd } = options;
     this._rushConfiguration = rushConfiguration;
 
     const selectorParsers: Map<string, ISelectorParser<RushConfigurationProject>> = new Map<
@@ -72,6 +77,7 @@ export class SelectionParameterSet {
     selectorParsers.set('tag', new TagProjectSelectorParser(rushConfiguration));
     selectorParsers.set('version-policy', new VersionPolicyProjectSelectorParser(rushConfiguration));
     selectorParsers.set('subspace', new SubspaceSelectorParser(rushConfiguration));
+    selectorParsers.set('path', new PathProjectSelectorParser(rushConfiguration, cwd));
 
     this._selectorParserByScope = selectorParsers;
 
@@ -416,39 +422,35 @@ export class SelectionParameterSet {
     const selection: Set<RushConfigurationProject> = new Set();
 
     for (const rawSelector of listParameter.values) {
-      // Handle the special case of "current project" without a scope
-      if (rawSelector === '.') {
-        const packageJsonLookup: PackageJsonLookup = PackageJsonLookup.instance;
-        const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(process.cwd());
-        if (packageJson) {
-          const project: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
-            packageJson.name
-          );
-
-          if (project) {
-            selection.add(project);
-          } else {
-            terminal.writeErrorLine(
-              `Rush is not currently running in a project directory specified in ${RushConstants.rushJsonFilename}. ` +
-                `The "." value for the ${parameterName} parameter is not allowed.`
-            );
-            throw new AlreadyReportedError();
-          }
-        } else {
-          terminal.writeErrorLine(
-            'Rush is not currently running in a project directory. ' +
-              `The "." value for the ${parameterName} parameter is not allowed.`
-          );
-          throw new AlreadyReportedError();
-        }
-
-        continue;
-      }
-
       const scopeIndex: number = rawSelector.indexOf(':');
 
-      const scope: string = scopeIndex < 0 ? 'name' : rawSelector.slice(0, scopeIndex);
-      const unscopedSelector: string = scopeIndex < 0 ? rawSelector : rawSelector.slice(scopeIndex + 1);
+      let scope: string;
+      let unscopedSelector: string;
+
+      if (scopeIndex < 0) {
+        // No explicit scope - determine if this looks like a path
+        // Check for relative paths: '.', '..', or those followed by '/' and more
+        // Check for absolute POSIX paths: starting with '/'
+        const isRelativePath: boolean =
+          rawSelector === '.' ||
+          rawSelector === '..' ||
+          rawSelector.startsWith('./') ||
+          rawSelector.startsWith('../');
+        const isAbsolutePosixPath: boolean = rawSelector.startsWith('/');
+
+        if (isRelativePath || isAbsolutePosixPath) {
+          // Route to path: selector
+          scope = 'path';
+          unscopedSelector = rawSelector;
+        } else {
+          // Default to name: selector
+          scope = 'name';
+          unscopedSelector = rawSelector;
+        }
+      } else {
+        scope = rawSelector.slice(0, scopeIndex);
+        unscopedSelector = rawSelector.slice(scopeIndex + 1);
+      }
 
       const handler: ISelectorParser<RushConfigurationProject> | undefined =
         this._selectorParserByScope.get(scope);

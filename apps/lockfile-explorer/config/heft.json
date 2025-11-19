@@ -58,9 +58,27 @@
             }
           }
         },
+
         "typescript": {
           // The "typescript" task should not run until after "pre-compile-copy" completes.
           "taskDependencies": ["pre-compile-copy"]
+        },
+
+        "copy-json-schemas": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "src/schemas",
+                  "destinationFolders": ["temp/json-schemas/lockfile-explorer"],
+                  "fileExtensions": [".schema.json"],
+                  "hardlink": true
+                }
+              ]
+            }
+          }
         }
       }
     }

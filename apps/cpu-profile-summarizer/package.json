@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/cpu-profile-summarizer",
-  "version": "0.1.30",
+  "version": "0.1.34",
   "description": "CLI tool for running analytics on multiple V8 .cpuprofile files",
   "repository": {
     "type": "git",

@@ -88,6 +88,13 @@ export class RushCommandLineParser extends CommandLineParser {
   private readonly _terminal: Terminal;
   private readonly _autocreateBuildCommand: boolean;
 
+  /**
+   * The current working directory that was used to find the Rush configuration.
+   */
+  public get cwd(): string {
+    return this._rushOptions.cwd;
+  }
+
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
       toolFilename: 'rush',

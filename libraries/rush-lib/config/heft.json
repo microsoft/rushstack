@@ -63,6 +63,23 @@
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-webpack5-plugin"
           }
+        },
+
+        "copy-json-schemas": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "src/schemas",
+                  "destinationFolders": ["temp/json-schemas/rush/v5"],
+                  "fileExtensions": [".schema.json"],
+                  "hardlink": true
+                }
+              ]
+            }
+          }
         }
       }
     }

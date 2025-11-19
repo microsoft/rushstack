@@ -262,7 +262,7 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   //      );
   //    }
   // ```
-  if (majorVersion >= 9 && minorVersion >= 37) {
+  if (majorVersion > 9 || (majorVersion === 9 && minorVersion >= 37)) {
     outputFile += scanUntilMarker('const problem = report.addRuleMessage(');
     outputFile += scanUntilMarker('ruleId,');
     outputFile += scanUntilMarker('severity,');
@@ -273,8 +273,18 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   }
 
   outputFile += `
-    // --- BEGIN MONKEY PATCH ---
-    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode: args[0]?.node ?? currentNode, ruleId, problem })) return;
+    // --- BEGIN MONKEY PATCH ---`;
+  if (majorVersion > 9 || (majorVersion === 9 && minorVersion >= 37)) {
+    outputFile += `
+    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode: args[0]?.node ?? currentNode, ruleId, problem })) {
+      problem.suppressions ??= []; problem.suppressions.push({kind:"bulk",justification:""});
+    }`;
+  } else {
+    outputFile += `
+    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode: args[0]?.node ?? currentNode, ruleId, problem })) return;`;
+  }
+
+  outputFile += `
     // --- END MONKEY PATCH ---`;
 
   //
@@ -332,6 +342,7 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
         if (internalSlotsMap.get(this) === undefined) {
             internalSlotsMap.set(this, {
               cwd: normalizeCwd(cwd),
+              flags: [],
               lastConfigArray: null,
               lastSourceCode: null,
               lastSuppressedMessages: [],

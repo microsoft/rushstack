@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-plugin",
-  "version": "0.20.0",
+  "version": "0.22.1",
   "description": "An ESLint plugin providing supplementary rules for use with the @rushstack/eslint-config package",
   "license": "MIT",
   "repository": {
@@ -33,7 +33,7 @@
     "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.1.0",
+    "@rushstack/heft": "1.1.4",
     "@typescript-eslint/parser": "~8.46.0",
     "@typescript-eslint/rule-tester": "~8.46.0",
     "decoupled-local-node-rig": "workspace:*",

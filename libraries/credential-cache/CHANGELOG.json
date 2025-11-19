@@ -1,0 +1,49 @@
+{
+  "name": "@rushstack/credential-cache",
+  "entries": [
+    {
+      "version": "0.1.2",
+      "tag": "@rushstack/credential-cache_v0.1.2",
+      "date": "Wed, 12 Nov 2025 01:12:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@rushstack/credential-cache_v0.1.1",
+      "date": "Tue, 04 Nov 2025 08:15:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/credential-cache_v0.1.0",
+      "date": "Fri, 24 Oct 2025 00:13:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Create dedicated package for the Rush \"CredentialCache\" API. This API manages credential persistence on the local machine."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.18.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.3`"
+          }
+        ]
+      }
+    }
+  ]
+}

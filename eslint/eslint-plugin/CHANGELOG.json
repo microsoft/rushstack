@@ -2,6 +2,62 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.22.1",
+      "tag": "@rushstack/eslint-plugin_v0.22.1",
+      "date": "Tue, 11 Nov 2025 16:13:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix calculation of project root folder when using the ESLint extension in VS Code. Report the paths being compared in 'no-external-local-imports' rule violations."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.22.0",
+      "tag": "@rushstack/eslint-plugin_v0.22.0",
+      "date": "Wed, 22 Oct 2025 00:57:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce a `@rushstack/import-requires-chunk-name` rule. This rule requires that dynamic imports include a Webpack chunk name magic comment."
+          },
+          {
+            "comment": "Introduce a `@rushstack/pair-react-dom-render-unmount` rule. This rule requires that every React DOM `render` call has a matching `unmountComponentAtNode` call."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Include missing rule documentation."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.21.1",
+      "tag": "@rushstack/eslint-plugin_v0.21.1",
+      "date": "Tue, 14 Oct 2025 15:13:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added documentation for the @rushstack/typedef-var ESLint rule. This clarifies the rule's rationale (readability over writability) and explicitly lists all local variable exemptions, resolving confusion around its usage."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.21.0",
+      "tag": "@rushstack/eslint-plugin_v0.21.0",
+      "date": "Mon, 13 Oct 2025 15:13:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump `eslint` to `~9.37.0` and the `@typescript-eslint/*` packages to `~8.46.0`."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.20.0",
       "tag": "@rushstack/eslint-plugin_v0.20.0",
       "date": "Fri, 03 Oct 2025 20:09:59 GMT",
