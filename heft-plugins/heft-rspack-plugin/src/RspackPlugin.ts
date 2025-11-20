@@ -26,6 +26,7 @@ import {
   type RspackCoreImport
 } from './shared';
 import { tryLoadRspackConfigurationAsync } from './RspackConfigurationLoader';
+import { type DeferredWatchFileSystem, OverrideNodeWatchFSPlugin } from './DeferredWatchFileSystem';
 
 export interface IRspackPluginOptions {
   devConfigurationPath?: string | undefined;
@@ -48,6 +49,7 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
   private _rspackConfiguration: IRspackConfiguration | undefined | false = false;
   private _rspackCompilationDonePromise: Promise<void> | undefined;
   private _rspackCompilationDonePromiseResolveFn: (() => void) | undefined;
+  private _watchFileSystems: Set<DeferredWatchFileSystem> | undefined;
 
   private _warnings: Error[] = [];
   private _errors: Error[] = [];
@@ -109,6 +111,20 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
         },
         options
       );
+
+      if (rspackConfiguration && requestRun) {
+        const overrideWatchFSPlugin: OverrideNodeWatchFSPlugin = new OverrideNodeWatchFSPlugin(requestRun);
+        this._watchFileSystems = overrideWatchFSPlugin.fileSystems;
+        for (const config of Array.isArray(rspackConfiguration)
+          ? rspackConfiguration
+          : [rspackConfiguration]) {
+          if (!config.plugins) {
+            config.plugins = [overrideWatchFSPlugin];
+          } else {
+            config.plugins.unshift(overrideWatchFSPlugin);
+          }
+        }
+      }
 
       this._rspackConfiguration = rspackConfiguration;
     }
@@ -210,7 +226,10 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
     // the compilation completes.
     let rspackCompilationDonePromise: Promise<void> | undefined = this._rspackCompilationDonePromise;
 
+    let isInitial: boolean = false;
+
     if (!this._rspackCompiler) {
+      isInitial = true;
       this._validateEnvironmentVariable(taskSession);
       if (!taskSession.parameters.watch) {
         // Should never happen, but just in case
@@ -392,10 +411,25 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
       }
     }
 
+    let hasChanges: boolean = true;
+    if (!isInitial && this._watchFileSystems) {
+      hasChanges = false;
+      for (const watchFileSystem of this._watchFileSystems) {
+        hasChanges = watchFileSystem.flush() || hasChanges;
+      }
+    }
+
     // Resume the compilation, wait for the compilation to complete, then suspend the watchers until the
     // next iteration. Even if there are no changes, the promise should resolve since resuming from a
     // suspended state invalidates the state of the watcher.
-    await rspackCompilationDonePromise;
+    if (hasChanges) {
+      taskSession.logger.terminal.writeLine('Running incremental Rspack compilation');
+      await rspackCompilationDonePromise;
+    } else {
+      taskSession.logger.terminal.writeLine(
+        'Rspack has not detected changes. Listing previous diagnostics.'
+      );
+    }
 
     this._emitErrors(taskSession.logger);
   }
