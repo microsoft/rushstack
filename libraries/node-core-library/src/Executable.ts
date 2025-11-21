@@ -214,7 +214,8 @@ interface ICommandLineOptions {
 /**
  * Process information sourced from the system. This process info is sourced differently depending
  * on the operating system:
- * - On Windows, this uses the `wmic.exe` utility.
+ * - On Windows, this uses `powershell.exe` and a scriptlet to retrieve process information.
+ *   The wmic utility that was previously used is no longer present on the latest Windows versions.
  * - On Unix, this uses the `ps` utility.
  *
  * @public
@@ -281,18 +282,15 @@ export function parseProcessListOutput(
 }
 
 // win32 format:
-// Name             ParentProcessId   ProcessId
-// process name     1234              5678
+// PPID PID NAME
+// 51234 56784 process name
 // unix format:
 //  PPID     PID   COMMAND
 // 51234   56784   process name
 const NAME_GROUP: 'name' = 'name';
 const PROCESS_ID_GROUP: 'pid' = 'pid';
 const PARENT_PROCESS_ID_GROUP: 'ppid' = 'ppid';
-const PROCESS_LIST_ENTRY_REGEX_WIN32: RegExp = new RegExp(
-  `^(?<${NAME_GROUP}>.+?)\\s+(?<${PARENT_PROCESS_ID_GROUP}>\\d+)\\s+(?<${PROCESS_ID_GROUP}>\\d+)\\s*$`
-);
-const PROCESS_LIST_ENTRY_REGEX_UNIX: RegExp = new RegExp(
+const PROCESS_LIST_ENTRY_REGEX: RegExp = new RegExp(
   `^\\s*(?<${PARENT_PROCESS_ID_GROUP}>\\d+)\\s+(?<${PROCESS_ID_GROUP}>\\d+)\\s+(?<${NAME_GROUP}>.+?)\\s*$`
 );
 
@@ -301,8 +299,7 @@ function parseProcessInfoEntry(
   existingProcessInfoById: Map<number, IProcessInfo>,
   platform: NodeJS.Platform
 ): void {
-  const processListEntryRegex: RegExp =
-    platform === 'win32' ? PROCESS_LIST_ENTRY_REGEX_WIN32 : PROCESS_LIST_ENTRY_REGEX_UNIX;
+  const processListEntryRegex: RegExp = PROCESS_LIST_ENTRY_REGEX;
   const match: RegExpMatchArray | null = line.match(processListEntryRegex);
   if (!match?.groups) {
     throw new InternalError(`Invalid process list entry: ${line}`);
@@ -369,15 +366,20 @@ function getProcessListProcessOptions(): ICommandLineOptions {
   let command: string;
   let args: string[];
   if (OS_PLATFORM === 'win32') {
-    command = 'wmic.exe';
-    // Order of declared properties does not impact the order of the output
-    args = ['process', 'get', 'Name,ParentProcessId,ProcessId'];
+    command = 'powershell.exe';
+    // Order of declared properties sets the order of the output.
+    // Put name last to simplify parsing, since it can contain spaces.
+    args = [
+      '-NoProfile',
+      '-Command',
+      `'PPID PID Name'; Get-CimInstance Win32_Process | % { '{0} {1} {2}' -f $_.ParentProcessId, $_.ProcessId, $_.Name }`
+    ];
   } else {
     command = 'ps';
     // -A: Select all processes
     // -w: Wide format
     // -o: User-defined format
-    // Order of declared properties impacts the order of the output. We will
+    // Order of declared properties sets the order of the output. We will
     // need to request the "comm" property last in order to ensure that the
     // process names are not truncated on certain platforms
     args = ['-Awo', 'ppid,pid,comm'];
@@ -654,7 +656,7 @@ export class Executable {
    * Get the list of processes currently running on the system, keyed by the process ID.
    *
    * @remarks The underlying implementation depends on the operating system:
-   * - On Windows, this uses the `wmic.exe` utility.
+   * - On Windows, this uses `powershell.exe` and the `Get-CimInstance` cmdlet.
    * - On Unix, this uses the `ps` utility.
    */
   public static async getProcessInfoByIdAsync(): Promise<Map<number, IProcessInfo>> {
@@ -693,7 +695,7 @@ export class Executable {
    * with the same name will be grouped.
    *
    * @remarks The underlying implementation depends on the operating system:
-   * - On Windows, this uses the `wmic.exe` utility.
+   * - On Windows, this uses `powershell.exe` and the `Get-CimInstance` cmdlet.
    * - On Unix, this uses the `ps` utility.
    */
   public static async getProcessInfoByNameAsync(): Promise<Map<string, IProcessInfo[]>> {
