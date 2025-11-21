@@ -2,6 +2,21 @@
   "name": "@rushstack/credential-cache",
   "entries": [
     {
+      "version": "0.1.3",
+      "tag": "@rushstack/credential-cache_v0.1.3",
+      "date": "Fri, 21 Nov 2025 16:13:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.19.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.2",
       "tag": "@rushstack/credential-cache_v0.1.2",
       "date": "Wed, 12 Nov 2025 01:12:56 GMT",

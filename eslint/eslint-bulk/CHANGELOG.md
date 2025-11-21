@@ -1,6 +1,11 @@
 # Change Log - @rushstack/eslint-bulk
 
-This log was last generated on Wed, 12 Nov 2025 01:57:54 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+
+## 0.4.7
+Fri, 21 Nov 2025 16:13:56 GMT
+
+_Version update only_
 
 ## 0.4.6
 Wed, 12 Nov 2025 01:57:54 GMT
