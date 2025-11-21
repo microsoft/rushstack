@@ -177,11 +177,6 @@ export async function _tryLoadRspackConfigurationFileInnerAsync(
       const configurationUri: string = pathToFileURL(configurationPath).href;
       return await import(configurationUri);
     } catch (e) {
-      const error: NodeJS.ErrnoException = e as NodeJS.ErrnoException;
-      if (error.code === 'ERR_MODULE_NOT_FOUND') {
-        // No configuration found, return undefined.
-        return undefined;
-      }
       throw new Error(`Error loading Rspack configuration at "${configurationPath}": ${e}`);
     }
   } else {
