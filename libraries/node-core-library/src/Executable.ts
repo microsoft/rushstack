@@ -656,7 +656,7 @@ export class Executable {
    * Get the list of processes currently running on the system, keyed by the process ID.
    *
    * @remarks The underlying implementation depends on the operating system:
-   * - On Windows, this uses the `wmic.exe` utility.
+   * - On Windows, this uses `powershell.exe` and the `Get-CimInstance` cmdlet.
    * - On Unix, this uses the `ps` utility.
    */
   public static async getProcessInfoByIdAsync(): Promise<Map<number, IProcessInfo>> {
@@ -695,7 +695,7 @@ export class Executable {
    * with the same name will be grouped.
    *
    * @remarks The underlying implementation depends on the operating system:
-   * - On Windows, this uses the `wmic.exe` utility.
+   * - On Windows, this uses `powershell.exe` and the `Get-CimInstance` cmdlet.
    * - On Unix, this uses the `ps` utility.
    */
   public static async getProcessInfoByNameAsync(): Promise<Map<string, IProcessInfo[]>> {
