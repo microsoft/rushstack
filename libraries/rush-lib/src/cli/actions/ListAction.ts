@@ -45,6 +45,10 @@ export interface IJsonEntry {
    * @see {@link ../../api/RushConfigurationProject#RushConfigurationProject.tags | RushConfigurationProject.tags}
    */
   tags: string[];
+  /**
+   * @see {@link ../../api/Subspace#Subspace.subspaceName | Subspace.subspaceName}
+   */
+  subspaceName: string | undefined;
 }
 
 export interface IJsonOutput {
@@ -145,6 +149,7 @@ export class ListAction extends BaseRushAction {
       let shouldPublish: undefined | boolean;
       let versionPolicy: undefined | string;
       let versionPolicyName: undefined | string;
+      let subspaceName: undefined | string;
       if (config.versionPolicy !== undefined) {
         const definitionName: string = VersionPolicyDefinitionName[config.versionPolicy.definitionName];
         versionPolicy = `${definitionName}`;
@@ -157,6 +162,10 @@ export class ListAction extends BaseRushAction {
         reviewCategory = config.reviewCategory;
       }
 
+      if (this.rushConfiguration.subspacesFeatureEnabled) {
+        subspaceName = config.subspace.subspaceName;
+      }
+
       return {
         name: config.packageName,
         version: config.packageJson.version,
@@ -166,7 +175,8 @@ export class ListAction extends BaseRushAction {
         versionPolicyName,
         shouldPublish,
         reviewCategory,
-        tags: Array.from(config.tags)
+        tags: Array.from(config.tags),
+        subspaceName
       };
     });
 
@@ -186,6 +196,10 @@ export class ListAction extends BaseRushAction {
 
   private async _printListTableAsync(selection: Set<RushConfigurationProject>): Promise<void> {
     const tableHeader: string[] = ['Project'];
+    if (this.rushConfiguration.subspacesFeatureEnabled) {
+      tableHeader.push('Subspace');
+    }
+
     if (this._version.value || this._detailedFlag.value) {
       tableHeader.push('Version');
     }
@@ -218,6 +232,10 @@ export class ListAction extends BaseRushAction {
       }
 
       appendToPackageRow(project.packageName);
+
+      if (this.rushConfiguration.subspacesFeatureEnabled) {
+        appendToPackageRow(project.subspace.subspaceName);
+      }
 
       if (this._version.value || this._detailedFlag.value) {
         appendToPackageRow(project.packageJson.version);
