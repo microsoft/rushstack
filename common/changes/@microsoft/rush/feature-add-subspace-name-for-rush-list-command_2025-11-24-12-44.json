@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add subspaceName to the output of the `rush list` command",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
