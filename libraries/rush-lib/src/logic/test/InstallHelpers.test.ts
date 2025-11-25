@@ -67,6 +67,15 @@ describe('InstallHelpers', () => {
               }
             },
             neverBuiltDependencies: ['fsevents', 'level'],
+            catalog: {
+              react: '^18.0.0',
+              lodash: '^4.17.21'
+            },
+            catalogs: {
+              test: {
+                jest: '^29.0.0'
+              }
+            },
             pnpmFutureFeature: true
           }
         })

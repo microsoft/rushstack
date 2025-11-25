@@ -6,6 +6,6 @@ Object {
   "error": "",
   "output": "",
   "verbose": "",
-  "warning": "",
+  "warning": "Your version of pnpm (6.23.1) doesn't support the \\"globalCatalog\\" field in /Users/aramis.sennyey/Projects/rushstack/libraries/rush-lib/lib-commonjs/logic/test/pnpmConfig/common/config/rush/pnpm-config.json. Remove this field or upgrade to pnpm 9.5.0 or newer.[n]Your version of pnpm (6.23.1) doesn't support the \\"globalCatalogs\\" field in /Users/aramis.sennyey/Projects/rushstack/libraries/rush-lib/lib-commonjs/logic/test/pnpmConfig/common/config/rush/pnpm-config.json. Remove this field or upgrade to pnpm 9.5.0 or newer.[n]",
 }
 `;

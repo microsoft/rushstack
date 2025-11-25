@@ -86,4 +86,28 @@ describe(PnpmOptionsConfiguration.name, () => {
       '@myorg/*'
     ]);
   });
+
+  it('loads catalog and catalogs', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-catalog.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.globalCatalog)).toEqual({
+      react: '^18.0.0',
+      'react-dom': '^18.0.0',
+      typescript: '~5.3.0'
+    });
+
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.globalCatalogs)).toEqual({
+      frontend: {
+        vue: '^3.4.0',
+        'vue-router': '^4.2.0'
+      },
+      backend: {
+        express: '^4.18.0',
+        fastify: '^4.26.0'
+      }
+    });
+  });
 });
