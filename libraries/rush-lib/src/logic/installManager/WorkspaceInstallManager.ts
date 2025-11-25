@@ -440,53 +440,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       shrinkwrapIsUpToDate = false;
     }
 
-    // Check if catalogsChecksum matches catalog's hash
-    let catalogsChecksum: string | undefined;
-    let existingCatalogsChecksum: string | undefined;
-    if (shrinkwrapFile) {
-      existingCatalogsChecksum = shrinkwrapFile.catalogsChecksum;
-      let catalogsChecksumAlgorithm: string | undefined;
-      if (existingCatalogsChecksum) {
-        const dashIndex: number = existingCatalogsChecksum.indexOf('-');
-        if (dashIndex !== -1) {
-          catalogsChecksumAlgorithm = existingCatalogsChecksum.substring(0, dashIndex);
-        }
-
-        if (catalogsChecksumAlgorithm && catalogsChecksumAlgorithm !== 'sha256') {
-          this._terminal.writeErrorLine(
-            `The existing catalogsChecksum algorithm "${catalogsChecksumAlgorithm}" is not supported. ` +
-              `This may indicate that the shrinkwrap was created with a newer version of PNPM than Rush supports.`
-          );
-          throw new AlreadyReportedError();
-        }
-      }
-
-      // Combine both catalog and catalogs into a single object for checksum calculation
-      const catalogData: Record<string, unknown> = {};
-      if (pnpmOptions.globalCatalog && Object.keys(pnpmOptions.globalCatalog).length !== 0) {
-        catalogData.default = pnpmOptions.globalCatalog;
-      }
-      if (pnpmOptions.globalCatalogs && Object.keys(pnpmOptions.globalCatalogs).length !== 0) {
-        Object.assign(catalogData, pnpmOptions.globalCatalogs);
-      }
-
-      if (Object.keys(catalogData).length !== 0) {
-        if (catalogsChecksumAlgorithm) {
-          // In PNPM v10, the algorithm changed to SHA256 and the digest changed from hex to base64
-          catalogsChecksum = await createObjectChecksumAsync(catalogData);
-        } else {
-          catalogsChecksum = createObjectChecksumLegacy(catalogData);
-        }
-      }
-    }
-
-    const catalogsChecksumAreEqual: boolean = catalogsChecksum === existingCatalogsChecksum;
-
-    if (!catalogsChecksumAreEqual) {
-      shrinkwrapWarnings.push("The catalog hash doesn't match the current shrinkwrap.");
-      shrinkwrapIsUpToDate = false;
-    }
-
     // Write the common package.json
     InstallHelpers.generateCommonPackageJson(this.rushConfiguration, subspace, undefined, this._terminal);
 

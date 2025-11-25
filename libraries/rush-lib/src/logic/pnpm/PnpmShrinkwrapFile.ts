@@ -121,8 +121,6 @@ export interface IPnpmShrinkwrapYaml extends Lockfile {
   specifiers?: Record<string, string>;
   /** URL of the registry which was used */
   registry?: string;
-  /** The checksum for catalog definitions */
-  catalogsChecksum?: string;
 }
 
 export interface ILoadFromFileOptions {
@@ -312,7 +310,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly packages: ReadonlyMap<string, IPnpmShrinkwrapDependencyYaml>;
   public readonly overrides: ReadonlyMap<string, string>;
   public readonly packageExtensionsChecksum: undefined | string;
-  public readonly catalogsChecksum: undefined | string;
   public readonly hash: string;
 
   private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
@@ -346,7 +343,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     this.packages = new Map(Object.entries(shrinkwrapJson.packages || {}));
     this.overrides = new Map(Object.entries(shrinkwrapJson.overrides || {}));
     this.packageExtensionsChecksum = shrinkwrapJson.packageExtensionsChecksum;
-    this.catalogsChecksum = shrinkwrapJson.catalogsChecksum;
 
     // Lockfile v9 always has "." in importers filed.
     this.isWorkspaceCompatible =
