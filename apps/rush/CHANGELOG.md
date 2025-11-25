@@ -1,6 +1,19 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 18 Oct 2025 00:06:36 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Nov 2025 17:04:05 GMT and should not be manually modified.
+
+## 5.163.0
+Tue, 25 Nov 2025 17:04:05 GMT
+
+### Minor changes
+
+- Added the ability to select projects via path, e.g. `rush build --to path:./my-project` or `rush build --only path:/some/absolute/path`
+- Add project-level parameter ignoring to prevent unnecessary cache invalidation. Projects can now use "parameterNamesToIgnore" in "rush-project.json" to exclude custom command-line parameters that don't affect their operations.
+
+### Updates
+
+- Extract CredentialCache API out into "@rushstack/credential-cache". Reference directly in plugins to avoid pulling in all of "@rushstack/rush-sdk" unless necessary.
+- Add subspaceName to the output of the `rush list` command
 
 ## 5.162.0
 Sat, 18 Oct 2025 00:06:36 GMT

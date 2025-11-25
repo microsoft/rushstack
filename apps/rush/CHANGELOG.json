@@ -2,6 +2,29 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.163.0",
+      "tag": "@microsoft/rush_v5.163.0",
+      "date": "Tue, 25 Nov 2025 17:04:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added the ability to select projects via path, e.g. `rush build --to path:./my-project` or `rush build --only path:/some/absolute/path`"
+          },
+          {
+            "comment": "Add project-level parameter ignoring to prevent unnecessary cache invalidation. Projects can now use \"parameterNamesToIgnore\" in \"rush-project.json\" to exclude custom command-line parameters that don't affect their operations."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Extract CredentialCache API out into \"@rushstack/credential-cache\". Reference directly in plugins to avoid pulling in all of \"@rushstack/rush-sdk\" unless necessary."
+          },
+          {
+            "comment": "Add subspaceName to the output of the `rush list` command"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.162.0",
       "tag": "@microsoft/rush_v5.162.0",
       "date": "Sat, 18 Oct 2025 00:06:36 GMT",
