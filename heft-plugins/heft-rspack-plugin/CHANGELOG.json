@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-rspack-plugin",
   "entries": [
     {
+      "version": "0.1.1",
+      "tag": "@rushstack/heft-rspack-plugin_v0.1.1",
+      "date": "Tue, 25 Nov 2025 17:03:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix issue where ignoring ERR_MODULE_NOT_FOUND errors when importing the rspack config masks legitimate import issues."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@rushstack/heft-rspack-plugin_v0.1.0",
       "date": "Fri, 21 Nov 2025 16:13:55 GMT",
