@@ -380,6 +380,22 @@ describe(PnpmShrinkwrapFile.name, () => {
       });
     });
   });
+
+  describe('Catalog checksum', () => {
+    it('reads catalogsChecksum from pnpm-lock.yaml', () => {
+      const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+        `${__dirname}/yamlFiles/pnpm-lock-with-catalog.yaml`
+      );
+      expect(pnpmShrinkwrapFile.catalogsChecksum).toBe('1a2b3c4d5e6f7890abcdef1234567890');
+    });
+
+    it('returns undefined when catalogsChecksum is not present', () => {
+      const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+        `${__dirname}/yamlFiles/pnpm-lock-v9/pnpm-lock-v9.yaml`
+      );
+      expect(pnpmShrinkwrapFile.catalogsChecksum).toBeUndefined();
+    });
+  });
 });
 
 function getPnpmShrinkwrapFileFromFile(filepath: string): PnpmShrinkwrapFile {
