@@ -8,9 +8,11 @@ import { PnpmWorkspaceFile } from '../PnpmWorkspaceFile';
 describe(PnpmWorkspaceFile.name, () => {
   const tempDir: string = path.join(__dirname, 'temp');
   const workspaceFilePath: string = path.join(tempDir, 'pnpm-workspace.yaml');
+  const projectsDir: string = path.join(tempDir, 'projects');
 
   beforeEach(() => {
     FileSystem.ensureFolder(tempDir);
+    FileSystem.ensureFolder(projectsDir);
   });
 
   afterEach(() => {
@@ -22,23 +24,23 @@ describe(PnpmWorkspaceFile.name, () => {
   describe('basic functionality', () => {
     it('generates workspace file with packages only', () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage('/projects/app1');
-      workspaceFile.addPackage('/projects/app2');
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(path.join(projectsDir, 'app2'));
 
       workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
 
       const content: string = FileSystem.readFile(workspaceFilePath);
       expect(content).toMatchInlineSnapshot(`
 "packages:
-  - ../../../../../../../../../../../projects/app1
-  - ../../../../../../../../../../../projects/app2
+  - projects/app1
+  - projects/app2
 "
 `);
     });
 
     it('escapes special characters in package paths', () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage('/projects/[app-with-brackets]');
+      workspaceFile.addPackage(path.join(projectsDir, '[app-with-brackets]'));
 
       workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
 
@@ -50,7 +52,7 @@ describe(PnpmWorkspaceFile.name, () => {
   describe('catalog functionality', () => {
     it('generates workspace file with default catalog only', () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage('/projects/app1');
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
 
       workspaceFile.setCatalogs({
         default: {
@@ -70,14 +72,14 @@ describe(PnpmWorkspaceFile.name, () => {
     react-dom: ^18.0.0
     typescript: ~5.3.0
 packages:
-  - ../../../../../../../../../../../projects/app1
+  - projects/app1
 "
 `);
     });
 
     it('generates workspace file with named catalogs', () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage('/projects/app1');
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
 
       workspaceFile.setCatalogs({
         default: {
@@ -107,14 +109,14 @@ packages:
     vue: ^3.4.0
     vue-router: ^4.2.0
 packages:
-  - ../../../../../../../../../../../projects/app1
+  - projects/app1
 "
 `);
     });
 
     it('handles empty catalog object', () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage('/projects/app1');
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
 
       workspaceFile.setCatalogs({});
 
@@ -123,14 +125,14 @@ packages:
       const content: string = FileSystem.readFile(workspaceFilePath);
       expect(content).toMatchInlineSnapshot(`
 "packages:
-  - ../../../../../../../../../../../projects/app1
+  - projects/app1
 "
 `);
     });
 
     it('handles undefined catalog', () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage('/projects/app1');
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
 
       workspaceFile.setCatalogs(undefined);
 
@@ -139,14 +141,14 @@ packages:
       const content: string = FileSystem.readFile(workspaceFilePath);
       expect(content).toMatchInlineSnapshot(`
 "packages:
-  - ../../../../../../../../../../../projects/app1
+  - projects/app1
 "
 `);
     });
 
     it('handles scoped packages in catalogs', () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage('/projects/app1');
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
 
       workspaceFile.setCatalogs({
         default: {
@@ -166,14 +168,14 @@ packages:
     '@types/cookies': ^0.7.7
     '@types/node': ~22.9.4
 packages:
-  - ../../../../../../../../../../../projects/app1
+  - projects/app1
 "
 `);
     });
 
     it('can update catalogs after initial creation', () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage('/projects/app1');
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
 
       workspaceFile.setCatalogs({
         default: {
@@ -200,7 +202,7 @@ packages:
     react: ^18.2.0
     react-dom: ^18.2.0
 packages:
-  - ../../../../../../../../../../../projects/app1
+  - projects/app1
 "
 `);
     });
