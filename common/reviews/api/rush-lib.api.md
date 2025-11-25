@@ -1207,6 +1207,7 @@ export class RepoStateFile {
     get isValid(): boolean;
     static loadFromFile(jsonFilename: string): RepoStateFile;
     get packageJsonInjectedDependenciesHash(): string | undefined;
+    get pnpmCatalogsHash(): string | undefined;
     get pnpmShrinkwrapHash(): string | undefined;
     get preferredVersionsHash(): string | undefined;
     refreshState(rushConfiguration: RushConfiguration, subspace: Subspace | undefined, variant?: string): boolean;
@@ -1570,6 +1571,7 @@ export class Subspace {
     getCommonVersionsFilePath(variant?: string): string;
     // @beta
     getPackageJsonInjectedDependenciesHash(variant?: string): string | undefined;
+    getPnpmCatalogsHash(): string | undefined;
     // @beta
     getPnpmConfigFilePath(): string;
     // @beta
