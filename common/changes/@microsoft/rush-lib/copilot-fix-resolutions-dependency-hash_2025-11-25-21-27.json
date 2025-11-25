@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Hash full shrinkwrap entry to detect sub-dependency resolution changes",
+      "type": "minor",
+      "packageName": "@microsoft/rush-lib"
+    }
+  ],
+  "packageName": "@microsoft/rush-lib",
+  "email": "198982749+Copilot@users.noreply.github.com"
+}
