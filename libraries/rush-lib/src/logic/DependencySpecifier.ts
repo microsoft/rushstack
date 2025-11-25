@@ -14,6 +14,14 @@ import { InternalError } from '@rushstack/node-core-library';
 const WORKSPACE_PREFIX_REGEX: RegExp = /^workspace:((?<alias>[^._/][^@]*)@)?(?<version>.*)$/;
 
 /**
+ * match catalog protocol in dependencies value declaration in `package.json`
+ * example:
+ * `"catalog:"` - references the default catalog
+ * `"catalog:catalogName"` - references a named catalog
+ */
+const CATALOG_PREFIX_REGEX: RegExp = /^catalog:(?<catalogName>.*)$/;
+
+/**
  * resolve workspace protocol(from `@pnpm/workspace.spec-parser`).
  * used by pnpm. see [pkgs-graph](https://github.com/pnpm/pnpm/blob/27c33f0319f86c45c1645d064cd9c28aada80780/workspace/pkgs-graph/src/index.ts#L49)
  */
@@ -37,6 +45,29 @@ class WorkspaceSpec {
 
   public toString(): `workspace:${string}` {
     return `workspace:${this.versionSpecifier}`;
+  }
+}
+
+/**
+ * resolve catalog protocol.
+ * Used by pnpm for centralized version management via catalogs.
+ */
+class CatalogSpec {
+  public readonly catalogName: string;
+
+  public constructor(catalogName: string) {
+    this.catalogName = catalogName;
+  }
+
+  public static tryParse(pref: string): CatalogSpec | undefined {
+    const parts: RegExpExecArray | null = CATALOG_PREFIX_REGEX.exec(pref);
+    if (parts?.groups !== undefined) {
+      return new CatalogSpec(parts.groups.catalogName);
+    }
+  }
+
+  public toString(): `catalog:${string}` {
+    return `catalog:${this.catalogName}`;
   }
 }
 
@@ -87,7 +118,12 @@ export enum DependencySpecifierType {
   /**
    * A package specified using workspace protocol, e.g. "workspace:^1.2.3"
    */
-  Workspace = 'Workspace'
+  Workspace = 'Workspace',
+
+  /**
+   * A package specified using catalog protocol, e.g. "catalog:" or "catalog:react18"
+   */
+  Catalog = 'Catalog'
 }
 
 const dependencySpecifierParseCache: Map<string, DependencySpecifier> = new Map();
@@ -124,6 +160,15 @@ export class DependencySpecifier {
   public constructor(packageName: string, versionSpecifier: string) {
     this.packageName = packageName;
     this.versionSpecifier = versionSpecifier;
+
+    // Catalog protocol is a feature from PNPM for centralized version management
+    const catalogSpecResult: CatalogSpec | undefined = CatalogSpec.tryParse(versionSpecifier);
+    if (catalogSpecResult) {
+      this.specifierType = DependencySpecifierType.Catalog;
+      this.versionSpecifier = catalogSpecResult.catalogName;
+      this.aliasTarget = undefined;
+      return;
+    }
 
     // Workspace ranges are a feature from PNPM and Yarn. Set the version specifier
     // to the trimmed version range.

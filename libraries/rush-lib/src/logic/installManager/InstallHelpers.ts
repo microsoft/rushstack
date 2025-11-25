@@ -36,8 +36,6 @@ interface ICommonPackageJson extends IPackageJson {
     patchedDependencies?: typeof PnpmOptionsConfiguration.prototype.globalPatchedDependencies;
     minimumReleaseAge?: typeof PnpmOptionsConfiguration.prototype.minimumReleaseAge;
     minimumReleaseAgeExclude?: typeof PnpmOptionsConfiguration.prototype.minimumReleaseAgeExclude;
-    catalog?: typeof PnpmOptionsConfiguration.prototype.globalCatalog;
-    catalogs?: typeof PnpmOptionsConfiguration.prototype.globalCatalogs;
   };
 }
 
@@ -126,42 +124,6 @@ export class InstallHelpers {
         if (pnpmOptions.minimumReleaseAgeExclude) {
           commonPackageJson.pnpm.minimumReleaseAgeExclude = pnpmOptions.minimumReleaseAgeExclude;
         }
-      }
-
-      if (pnpmOptions.globalCatalog) {
-        if (
-          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '9.5.0')
-        ) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-                `doesn't support the "globalCatalog" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to pnpm 9.5.0 or newer.'
-            )
-          );
-        }
-
-        commonPackageJson.pnpm.catalog = pnpmOptions.globalCatalog;
-      }
-
-      if (pnpmOptions.globalCatalogs) {
-        if (
-          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '9.5.0')
-        ) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-                `doesn't support the "globalCatalogs" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to pnpm 9.5.0 or newer.'
-            )
-          );
-        }
-
-        commonPackageJson.pnpm.catalogs = pnpmOptions.globalCatalogs;
       }
 
       if (pnpmOptions.unsupportedPackageJsonSettings) {

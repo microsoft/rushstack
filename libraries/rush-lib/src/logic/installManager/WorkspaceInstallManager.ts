@@ -490,6 +490,36 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Write the common package.json
     InstallHelpers.generateCommonPackageJson(this.rushConfiguration, subspace, undefined, this._terminal);
 
+    // Set catalog definitions in the workspace file if specified
+    if (pnpmOptions.globalCatalog || pnpmOptions.globalCatalogs) {
+      if (
+        this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+        semver.lt(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '9.5.0')
+      ) {
+        this._terminal.writeWarningLine(
+          Colorize.yellow(
+            `Your version of pnpm (${this.rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `doesn't support the "globalCatalog" or "globalCatalogs" fields in ` +
+              `${this.rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+              'Remove these fields or upgrade to pnpm 9.5.0 or newer.'
+          )
+        );
+      }
+
+      const catalogs: Record<string, Record<string, string>> = {};
+
+      if (pnpmOptions.globalCatalog) {
+        // https://pnpm.io/catalogs#default-catalog, basically `catalog` is an alias for `catalogs.default` in pnpm.
+        catalogs.default = pnpmOptions.globalCatalog;
+      }
+
+      if (pnpmOptions.globalCatalogs) {
+        Object.assign(catalogs, pnpmOptions.globalCatalogs);
+      }
+
+      workspaceFile.setCatalogs(catalogs);
+    }
+
     // Save the generated workspace file. Don't update the file timestamp unless the content has changed,
     // since "rush install" will consider this timestamp
     workspaceFile.save(workspaceFile.workspaceFilename, { onlyIfChanged: true });
