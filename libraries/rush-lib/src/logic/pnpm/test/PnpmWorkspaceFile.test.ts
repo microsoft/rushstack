@@ -10,15 +10,40 @@ describe(PnpmWorkspaceFile.name, () => {
   const workspaceFilePath: string = path.join(tempDir, 'pnpm-workspace.yaml');
   const projectsDir: string = path.join(tempDir, 'projects');
 
+  let mockWriteFile: jest.SpyInstance;
+  let mockReadFile: jest.SpyInstance;
+  let mockExists: jest.SpyInstance;
+  let writtenContent: string | undefined;
+
   beforeEach(() => {
-    FileSystem.ensureFolder(tempDir);
-    FileSystem.ensureFolder(projectsDir);
+    writtenContent = undefined;
+
+    // Mock FileSystem.writeFile to capture content instead of writing to disk
+    mockWriteFile = jest
+      .spyOn(FileSystem, 'writeFile')
+      .mockImplementation((filePath: string, contents: string | Buffer) => {
+        void filePath; // Unused parameter
+        writtenContent = typeof contents === 'string' ? contents : contents.toString();
+      });
+
+    // Mock FileSystem.readFile to return the written content
+    mockReadFile = jest.spyOn(FileSystem, 'readFile').mockImplementation(() => {
+      if (writtenContent === undefined) {
+        throw new Error('File not found');
+      }
+      return writtenContent;
+    });
+
+    // Mock FileSystem.exists to return true if content was written
+    mockExists = jest.spyOn(FileSystem, 'exists').mockImplementation(() => {
+      return writtenContent !== undefined;
+    });
   });
 
   afterEach(() => {
-    if (FileSystem.exists(tempDir)) {
-      FileSystem.deleteFolder(tempDir);
-    }
+    mockWriteFile.mockRestore();
+    mockReadFile.mockRestore();
+    mockExists.mockRestore();
   });
 
   describe('basic functionality', () => {
@@ -30,12 +55,7 @@ describe(PnpmWorkspaceFile.name, () => {
       workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
 
       const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchInlineSnapshot(`
-"packages:
-  - projects/app1
-  - projects/app2
-"
-`);
+      expect(content).toMatchSnapshot();
     });
 
     it('escapes special characters in package paths', () => {
@@ -65,16 +85,7 @@ describe(PnpmWorkspaceFile.name, () => {
       workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
 
       const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchInlineSnapshot(`
-"catalogs:
-  default:
-    react: ^18.0.0
-    react-dom: ^18.0.0
-    typescript: ~5.3.0
-packages:
-  - projects/app1
-"
-`);
+      expect(content).toMatchSnapshot();
     });
 
     it('generates workspace file with named catalogs', () => {
@@ -98,20 +109,7 @@ packages:
       workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
 
       const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchInlineSnapshot(`
-"catalogs:
-  backend:
-    express: ^4.18.0
-    fastify: ^4.26.0
-  default:
-    typescript: ~5.3.0
-  frontend:
-    vue: ^3.4.0
-    vue-router: ^4.2.0
-packages:
-  - projects/app1
-"
-`);
+      expect(content).toMatchSnapshot();
     });
 
     it('handles empty catalog object', () => {
@@ -123,11 +121,7 @@ packages:
       workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
 
       const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchInlineSnapshot(`
-"packages:
-  - projects/app1
-"
-`);
+      expect(content).toMatchSnapshot();
     });
 
     it('handles undefined catalog', () => {
@@ -139,11 +133,7 @@ packages:
       workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
 
       const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchInlineSnapshot(`
-"packages:
-  - projects/app1
-"
-`);
+      expect(content).toMatchSnapshot();
     });
 
     it('handles scoped packages in catalogs', () => {
@@ -161,16 +151,7 @@ packages:
       workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
 
       const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchInlineSnapshot(`
-"catalogs:
-  default:
-    '@rushstack/node-core-library': ~5.0.0
-    '@types/cookies': ^0.7.7
-    '@types/node': ~22.9.4
-packages:
-  - projects/app1
-"
-`);
+      expect(content).toMatchSnapshot();
     });
 
     it('can update catalogs after initial creation', () => {
@@ -196,15 +177,7 @@ packages:
       workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
 
       const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchInlineSnapshot(`
-"catalogs:
-  default:
-    react: ^18.2.0
-    react-dom: ^18.2.0
-packages:
-  - projects/app1
-"
-`);
+      expect(content).toMatchSnapshot();
     });
   });
 });
