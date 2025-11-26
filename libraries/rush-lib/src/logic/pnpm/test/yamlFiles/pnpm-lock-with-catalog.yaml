@@ -4,8 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-catalogsChecksum: 1a2b3c4d5e6f7890abcdef1234567890
-
 catalogs:
   default:
     react: 18.2.0
@@ -17,10 +15,10 @@ importers:
   .:
     dependencies:
       react:
-        specifier: 'catalog:'
+        specifier: 'catalog:default'
         version: 18.2.0
       typescript:
-        specifier: 'catalog:'
+        specifier: 'catalog:default'
         version: 5.3.0
 
 packages:
