@@ -15,7 +15,8 @@ import type { Subspace } from '../api/Subspace';
  *  {
  *    "pnpmShrinkwrapHash": "...",
  *    "preferredVersionsHash": "...",
- *    "packageJsonInjectedDependenciesHash": "..."
+ *    "packageJsonInjectedDependenciesHash": "...",
+ *    "pnpmCatalogsHash": "..."
  *  }
  */
 interface IRepoStateJson {
@@ -31,6 +32,10 @@ interface IRepoStateJson {
    * A hash of the injected dependencies in related package.json
    */
   packageJsonInjectedDependenciesHash?: string;
+  /**
+   * A hash of the PNPM catalog definitions
+   */
+  pnpmCatalogsHash?: string;
 }
 
 /**
@@ -45,6 +50,7 @@ export class RepoStateFile {
   private _pnpmShrinkwrapHash: string | undefined;
   private _preferredVersionsHash: string | undefined;
   private _packageJsonInjectedDependenciesHash: string | undefined;
+  private _pnpmCatalogsHash: string | undefined;
   private _isValid: boolean;
   private _modified: boolean = false;
 
@@ -61,6 +67,7 @@ export class RepoStateFile {
       this._pnpmShrinkwrapHash = repoStateJson.pnpmShrinkwrapHash;
       this._preferredVersionsHash = repoStateJson.preferredVersionsHash;
       this._packageJsonInjectedDependenciesHash = repoStateJson.packageJsonInjectedDependenciesHash;
+      this._pnpmCatalogsHash = repoStateJson.pnpmCatalogsHash;
     }
   }
 
@@ -83,6 +90,13 @@ export class RepoStateFile {
    */
   public get packageJsonInjectedDependenciesHash(): string | undefined {
     return this._packageJsonInjectedDependenciesHash;
+  }
+
+  /**
+   * The hash of the PNPM catalog definitions at the end of the last update.
+   */
+  public get pnpmCatalogsHash(): string | undefined {
+    return this._pnpmCatalogsHash;
   }
 
   /**
@@ -219,6 +233,16 @@ export class RepoStateFile {
         this._packageJsonInjectedDependenciesHash = undefined;
         this._modified = true;
       }
+
+      // Track catalog hash to detect when catalog definitions change
+      const pnpmCatalogsHash: string | undefined = subspace.getPnpmCatalogsHash();
+      if (pnpmCatalogsHash && pnpmCatalogsHash !== this._pnpmCatalogsHash) {
+        this._pnpmCatalogsHash = pnpmCatalogsHash;
+        this._modified = true;
+      } else if (!pnpmCatalogsHash && this._pnpmCatalogsHash) {
+        this._pnpmCatalogsHash = undefined;
+        this._modified = true;
+      }
     }
 
     // Now that the file has been refreshed, we know its contents are valid
@@ -254,6 +278,9 @@ export class RepoStateFile {
     }
     if (this._packageJsonInjectedDependenciesHash) {
       repoStateJson.packageJsonInjectedDependenciesHash = this._packageJsonInjectedDependenciesHash;
+    }
+    if (this._pnpmCatalogsHash) {
+      repoStateJson.pnpmCatalogsHash = this._pnpmCatalogsHash;
     }
 
     return JsonFile.stringify(repoStateJson, { newlineConversion: NewlineKind.Lf });

@@ -410,6 +410,34 @@ export class Subspace {
   }
 
   /**
+   * Computes a hash of the PNPM catalog definitions for this subspace.
+   * Returns undefined if no catalogs are defined.
+   */
+  public getPnpmCatalogsHash(): string | undefined {
+    const pnpmOptions: PnpmOptionsConfiguration | undefined = this.getPnpmOptions();
+    if (!pnpmOptions) {
+      return undefined;
+    }
+
+    const catalogData: Record<string, unknown> = {};
+    if (pnpmOptions.globalCatalog && Object.keys(pnpmOptions.globalCatalog).length !== 0) {
+      catalogData.default = pnpmOptions.globalCatalog;
+    }
+    if (pnpmOptions.globalCatalogs && Object.keys(pnpmOptions.globalCatalogs).length !== 0) {
+      Object.assign(catalogData, pnpmOptions.globalCatalogs);
+    }
+
+    // If no catalogs are defined, return undefined
+    if (Object.keys(catalogData).length === 0) {
+      return undefined;
+    }
+
+    const hash: crypto.Hash = crypto.createHash('sha1');
+    hash.update(JSON.stringify(catalogData));
+    return hash.digest('hex');
+  }
+
+  /**
    * Returns hash value of injected dependencies in related package.json.
    * @beta
    */

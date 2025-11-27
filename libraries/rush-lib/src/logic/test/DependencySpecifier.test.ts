@@ -140,6 +140,32 @@ DependencySpecifier {
     });
   });
 
+  describe('Catalog protocol', () => {
+    it('correctly parses a "catalog:" version (default catalog)', () => {
+      const specifier = new DependencySpecifier('dep', 'catalog:');
+      expect(specifier).toMatchInlineSnapshot(`
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "dep",
+  "specifierType": "Catalog",
+  "versionSpecifier": "",
+}
+`);
+    });
+
+    it('correctly parses a "catalog:catalogName" version (named catalog)', () => {
+      const specifier = new DependencySpecifier('dep', 'catalog:react18');
+      expect(specifier).toMatchInlineSnapshot(`
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "dep",
+  "specifierType": "Catalog",
+  "versionSpecifier": "react18",
+}
+`);
+    });
+  });
+
   describe(DependencySpecifier.parseWithCache.name, () => {
     it('returns a cached instance for the same input', () => {
       const specifier1 = DependencySpecifier.parseWithCache('dep', '1.2.3');
