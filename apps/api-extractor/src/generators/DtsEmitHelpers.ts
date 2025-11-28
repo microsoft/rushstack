@@ -94,6 +94,30 @@ export class DtsEmitHelpers {
     }
   }
 
+  public static modifyExportSpecifierSpan(collector: Collector, span: Span): void {
+    // For "export { A }" (inside namespace), we need to emit as "export { AcutalName as A }"
+    const node: ts.ExportSpecifier = span.node as ts.ExportSpecifier;
+    if (!node.propertyName) {
+      if (!ts.isIdentifier(node.name)) {
+        throw new Error(
+          `Export specifier name should be an identifier, but got ${ts.SyntaxKind[node.name.kind]}.\n` +
+            SourceFileLocationFormatter.formatDeclaration(node)
+        );
+      }
+
+      const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityForNode(node.name);
+      if (!referencedEntity?.nameForEmit) {
+        throw new InternalError('referencedEntry or referencedEntry.nameForEmit is undefined');
+      }
+
+      const exportName: string = node.name.getText().trim();
+      if (referencedEntity.nameForEmit !== exportName) {
+        span.modification.skipAll();
+        span.modification.prefix = `${referencedEntity.nameForEmit} as ${span.getText()}`;
+      }
+    }
+  }
+
   public static modifyImportTypeSpan(
     collector: Collector,
     span: Span,

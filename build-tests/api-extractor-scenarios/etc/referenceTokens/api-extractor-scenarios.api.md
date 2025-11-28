@@ -13,21 +13,21 @@ export namespace n1 {
         // (undocumented)
         export namespace n3 {
             // (undocumented)
-            export function someFunction3(): n2.n3.SomeType3;
+            function someFunction3(): n2.n3.SomeType3;
             // (undocumented)
-            export type SomeType3 = number;
+            type SomeType3 = number;
         }
         // (undocumented)
         export function someFunction2(): SomeType2;
         // (undocumented)
-        export type SomeType2 = number;
-            {};
+        type SomeType2 = number;
+        export {};
     }
     // (undocumented)
     export function someFunction1(): SomeType1;
     // (undocumented)
-    export type SomeType1 = number;
-        {};
+    type SomeType1 = number;
+    export {};
 }
 
 // @public (undocumented)
