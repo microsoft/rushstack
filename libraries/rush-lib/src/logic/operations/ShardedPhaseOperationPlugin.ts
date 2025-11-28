@@ -44,10 +44,10 @@ export class ShardedPhasedOperationPlugin implements IPhasedCommandPlugin {
 }
 
 function spliceShards(existingOperations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> {
-  const { rushConfiguration, projectConfigurations } = context;
+  const { rushConfiguration, projectConfigurations, remainderArgs } = context;
 
   const getCustomParameterValues: (operation: Operation) => ICustomParameterValuesForOperation =
-    getCustomParameterValuesByOperation();
+    getCustomParameterValuesByOperation(remainderArgs);
 
   for (const operation of existingOperations) {
     const {
