@@ -241,6 +241,40 @@
   },
 
   /**
+   * The "globalCatalogs" setting defines named catalogs for the PNPM workspace.
+   * Catalogs allow you to define reusable dependency version ranges that can be referenced
+   * in package.json files. Use the "default" catalog name for packages that should be
+   * referenced with "catalog:" (no name), or use custom catalog names for "catalog:<name>"
+   * references.
+   *
+   * For example, if you define a "default" catalog with `"lodash": "^4.17.21"`, projects can
+   * use `"lodash": "catalog:"`. If you define a "react18" catalog with `"react": "^18.2.0"`,
+   * projects can use `"react": "catalog:react18"` in their dependencies.
+   *
+   * This setting is written to the `catalogs` field in the generated `pnpm-workspace.yaml` file.
+   *
+   * (SUPPORTED ONLY IN PNPM 9.5.0 AND NEWER)
+   *
+   * PNPM documentation: https://pnpm.io/catalogs
+   */
+  "globalCatalogs": {
+    /*[BEGIN "HYPOTHETICAL"]*/
+    "default": {
+      "lodash": "^4.17.21",
+      "typescript": "~5.0.0"
+    },
+    "react18": {
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0"
+    },
+    "react19": {
+      "react": "^19.0.0",
+      "react-dom": "^19.0.0"
+    }
+    /*[END "HYPOTHETICAL"]*/
+  },
+
+  /**
    * The `globalPeerDependencyRules` setting provides various settings for suppressing validation errors
    * that are reported during installation with `strictPeerDependencies=true`.  The settings are copied
    * into the `pnpm.peerDependencyRules` field of the `common/temp/package.json` file that is generated

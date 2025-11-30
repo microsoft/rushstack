@@ -440,6 +440,13 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       shrinkwrapIsUpToDate = false;
     }
 
+    // Set catalog configuration from pnpmOptions if defined
+    // Catalogs allow defining reusable dependency version ranges that can be referenced
+    // in package.json files using the "catalog:" or "catalog:<name>" protocol
+    if (pnpmOptions.globalCatalogs) {
+      workspaceFile.setCatalogs(pnpmOptions.globalCatalogs);
+    }
+
     // Write the common package.json
     InstallHelpers.generateCommonPackageJson(this.rushConfiguration, subspace, undefined, this._terminal);
 

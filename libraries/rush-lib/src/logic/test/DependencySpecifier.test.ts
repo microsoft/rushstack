@@ -13,6 +13,7 @@ describe(DependencySpecifier.name, () => {
     expect(specifier).toMatchInlineSnapshot(`
 DependencySpecifier {
   "aliasTarget": undefined,
+  "catalogName": undefined,
   "packageName": "dep",
   "specifierType": "Version",
   "versionSpecifier": "1.2.3",
@@ -25,6 +26,7 @@ DependencySpecifier {
     expect(specifier).toMatchInlineSnapshot(`
 DependencySpecifier {
   "aliasTarget": undefined,
+  "catalogName": undefined,
   "packageName": "dep",
   "specifierType": "Range",
   "versionSpecifier": "^1.2.3",
@@ -38,10 +40,12 @@ DependencySpecifier {
 DependencySpecifier {
   "aliasTarget": DependencySpecifier {
     "aliasTarget": undefined,
+    "catalogName": undefined,
     "packageName": "alias-target",
     "specifierType": "Version",
     "versionSpecifier": "1.2.3",
   },
+  "catalogName": undefined,
   "packageName": "dep",
   "specifierType": "Alias",
   "versionSpecifier": "npm:alias-target@1.2.3",
@@ -54,6 +58,7 @@ DependencySpecifier {
     expect(specifier).toMatchInlineSnapshot(`
 DependencySpecifier {
   "aliasTarget": undefined,
+  "catalogName": undefined,
   "packageName": "dep",
   "specifierType": "Git",
   "versionSpecifier": "git+https://github.com/user/foo",
@@ -66,6 +71,7 @@ DependencySpecifier {
     expect(specifier).toMatchInlineSnapshot(`
 DependencySpecifier {
   "aliasTarget": undefined,
+  "catalogName": undefined,
   "packageName": "dep",
   "specifierType": "File",
   "versionSpecifier": "file:foo.tar.gz",
@@ -78,6 +84,7 @@ DependencySpecifier {
     expect(specifier).toMatchInlineSnapshot(`
 DependencySpecifier {
   "aliasTarget": undefined,
+  "catalogName": undefined,
   "packageName": "dep",
   "specifierType": "Directory",
   "versionSpecifier": "file:../foo/bar/",
@@ -90,6 +97,7 @@ DependencySpecifier {
     expect(specifier).toMatchInlineSnapshot(`
 DependencySpecifier {
   "aliasTarget": undefined,
+  "catalogName": undefined,
   "packageName": "dep",
   "specifierType": "Remote",
   "versionSpecifier": "https://example.com/foo.tgz",
@@ -103,6 +111,7 @@ DependencySpecifier {
       expect(specifier).toMatchInlineSnapshot(`
 DependencySpecifier {
   "aliasTarget": undefined,
+  "catalogName": undefined,
   "packageName": "dep",
   "specifierType": "Workspace",
   "versionSpecifier": "*",
@@ -115,6 +124,7 @@ DependencySpecifier {
       expect(specifier).toMatchInlineSnapshot(`
 DependencySpecifier {
   "aliasTarget": undefined,
+  "catalogName": undefined,
   "packageName": "dep",
   "specifierType": "Workspace",
   "versionSpecifier": "^1.0.0",
@@ -128,10 +138,12 @@ DependencySpecifier {
 DependencySpecifier {
   "aliasTarget": DependencySpecifier {
     "aliasTarget": undefined,
+    "catalogName": undefined,
     "packageName": "alias-target",
     "specifierType": "Range",
     "versionSpecifier": "*",
   },
+  "catalogName": undefined,
   "packageName": "dep",
   "specifierType": "Workspace",
   "versionSpecifier": "alias-target@*",
@@ -156,6 +168,34 @@ DependencySpecifier {
       const specifier1 = DependencySpecifier.parseWithCache('dep', '1.2.3');
       const specifier2 = DependencySpecifier.parseWithCache('dep', '1.2.4');
       expect(specifier1).not.toBe(specifier2);
+    });
+  });
+
+  describe('catalog: specifier', () => {
+    it('parses default catalog (catalog:)', () => {
+      const specifier = new DependencySpecifier('lodash', 'catalog:');
+      expect(specifier).toMatchInlineSnapshot(`
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "catalogName": "default",
+  "packageName": "lodash",
+  "specifierType": "Catalog",
+  "versionSpecifier": "catalog:",
+}
+`);
+    });
+
+    it('parses named catalog (catalog:react18)', () => {
+      const specifier = new DependencySpecifier('react', 'catalog:react18');
+      expect(specifier).toMatchInlineSnapshot(`
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "catalogName": "react18",
+  "packageName": "react",
+  "specifierType": "Catalog",
+  "versionSpecifier": "catalog:react18",
+}
+`);
     });
   });
 });

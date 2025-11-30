@@ -86,4 +86,26 @@ describe(PnpmOptionsConfiguration.name, () => {
       '@myorg/*'
     ]);
   });
+
+  it('loads globalCatalogs', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-catalogs.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.globalCatalogs)).toEqual({
+      default: {
+        lodash: '^4.17.21',
+        typescript: '~5.0.0'
+      },
+      react18: {
+        react: '^18.2.0',
+        'react-dom': '^18.2.0'
+      },
+      testing: {
+        jest: '^29.0.0',
+        mocha: '^10.0.0'
+      }
+    });
+  });
 });

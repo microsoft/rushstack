@@ -103,6 +103,10 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    */
   globalOverrides?: Record<string, string>;
   /**
+   * {@inheritDoc PnpmOptionsConfiguration.globalCatalogs}
+   */
+  globalCatalogs?: Record<string, Record<string, string>>;
+  /**
    * {@inheritDoc PnpmOptionsConfiguration.globalPeerDependencyRules}
    */
   globalPeerDependencyRules?: IPnpmPeerDependencyRules;
@@ -320,6 +324,22 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public readonly globalOverrides: Record<string, string> | undefined;
 
   /**
+   * The "globalCatalogs" setting defines named catalogs for the PNPM workspace.
+   * Named catalogs allow you to organize dependency version ranges into logical groups
+   * that can be referenced using the "catalog:\<name\>" protocol. For example, if you define
+   * a "react18" catalog with `"react": "^18.2.0"`, projects can use `"react": "catalog:react18"`
+   * in their dependencies.
+   *
+   * This setting is written to the `catalogs` field in the generated `pnpm-workspace.yaml` file.
+   *
+   * @remarks
+   * (SUPPORTED ONLY IN PNPM 9.5.0 AND NEWER)
+   *
+   * PNPM documentation: https://pnpm.io/catalogs
+   */
+  public readonly globalCatalogs: Record<string, Record<string, string>> | undefined;
+
+  /**
    * The `globalPeerDependencyRules` setting provides various settings for suppressing validation errors
    * that are reported during installation with `strictPeerDependencies=true`.  The settings are copied
    * into the `pnpm.peerDependencyRules` field of the `common/temp/package.json` file that is generated
@@ -451,6 +471,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.useWorkspaces = !!json.useWorkspaces;
 
     this.globalOverrides = json.globalOverrides;
+    this.globalCatalogs = json.globalCatalogs;
     this.globalPeerDependencyRules = json.globalPeerDependencyRules;
     this.globalPackageExtensions = json.globalPackageExtensions;
     this.globalNeverBuiltDependencies = json.globalNeverBuiltDependencies;

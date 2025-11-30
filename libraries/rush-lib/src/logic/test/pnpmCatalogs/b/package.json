@@ -1,0 +1,11 @@
+{
+  "name": "b",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo building b"
+  },
+  "dependencies": {
+    "react": "catalog:react19",
+    "jest": "catalog:testing"
+  }
+}

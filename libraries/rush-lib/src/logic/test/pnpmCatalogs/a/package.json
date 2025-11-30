@@ -1,0 +1,11 @@
+{
+  "name": "a",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo building a"
+  },
+  "dependencies": {
+    "react": "catalog:react18",
+    "jest": "catalog:testing"
+  }
+}

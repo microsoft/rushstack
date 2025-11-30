@@ -14,6 +14,14 @@ import { InternalError } from '@rushstack/node-core-library';
 const WORKSPACE_PREFIX_REGEX: RegExp = /^workspace:((?<alias>[^._/][^@]*)@)?(?<version>.*)$/;
 
 /**
+ * match catalog protocol in dependencies value declaration in `package.json`
+ * example:
+ * `"catalog:"` - uses the default catalog
+ * `"catalog:react18"` - uses the named catalog "react18"
+ */
+const CATALOG_PREFIX_REGEX: RegExp = /^catalog:(?<catalogName>.*)$/;
+
+/**
  * resolve workspace protocol(from `@pnpm/workspace.spec-parser`).
  * used by pnpm. see [pkgs-graph](https://github.com/pnpm/pnpm/blob/27c33f0319f86c45c1645d064cd9c28aada80780/workspace/pkgs-graph/src/index.ts#L49)
  */
@@ -87,7 +95,12 @@ export enum DependencySpecifierType {
   /**
    * A package specified using workspace protocol, e.g. "workspace:^1.2.3"
    */
-  Workspace = 'Workspace'
+  Workspace = 'Workspace',
+
+  /**
+   * A package specified using catalog protocol, e.g. "catalog:" or "catalog:react18"
+   */
+  Catalog = 'Catalog'
 }
 
 const dependencySpecifierParseCache: Map<string, DependencySpecifier> = new Map();
@@ -121,14 +134,32 @@ export class DependencySpecifier {
    */
   public readonly aliasTarget: DependencySpecifier | undefined;
 
+  /**
+   * If `specifierType` is `Catalog`, then this is the catalog name.
+   * For example, if version specifier is `"catalog:react18"` then this is `"react18"`.
+   * If version specifier is `"catalog:"` (default catalog), then this is `"default"`.
+   */
+  public readonly catalogName: string | undefined;
+
   public constructor(packageName: string, versionSpecifier: string) {
     this.packageName = packageName;
     this.versionSpecifier = versionSpecifier;
+
+    // Catalog protocol is a PNPM feature. Parse the catalog name.
+    const catalogMatch: RegExpExecArray | null = CATALOG_PREFIX_REGEX.exec(versionSpecifier);
+    if (catalogMatch?.groups) {
+      this.specifierType = DependencySpecifierType.Catalog;
+      // If no catalog name is provided, use "default"
+      this.catalogName = catalogMatch.groups.catalogName || 'default';
+      this.aliasTarget = undefined;
+      return;
+    }
 
     // Workspace ranges are a feature from PNPM and Yarn. Set the version specifier
     // to the trimmed version range.
     const workspaceSpecResult: WorkspaceSpec | undefined = WorkspaceSpec.tryParse(versionSpecifier);
     if (workspaceSpecResult) {
+      this.catalogName = undefined;
       this.specifierType = DependencySpecifierType.Workspace;
       this.versionSpecifier = workspaceSpecResult.versionSpecifier;
 
@@ -144,6 +175,8 @@ export class DependencySpecifier {
 
       return;
     }
+
+    this.catalogName = undefined;
 
     const result: npmPackageArg.Result = npmPackageArg.resolve(packageName, versionSpecifier);
     this.specifierType = DependencySpecifier.getDependencySpecifierType(result.type);
