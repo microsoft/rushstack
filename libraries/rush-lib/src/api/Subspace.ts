@@ -420,9 +420,6 @@ export class Subspace {
     }
 
     const catalogData: Record<string, unknown> = {};
-    if (pnpmOptions.globalCatalog && Object.keys(pnpmOptions.globalCatalog).length !== 0) {
-      catalogData.default = pnpmOptions.globalCatalog;
-    }
     if (pnpmOptions.globalCatalogs && Object.keys(pnpmOptions.globalCatalogs).length !== 0) {
       Object.assign(catalogData, pnpmOptions.globalCatalogs);
     }

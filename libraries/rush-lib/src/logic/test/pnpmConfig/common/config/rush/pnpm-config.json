@@ -13,11 +13,11 @@
     }
   },
   "globalNeverBuiltDependencies": ["fsevents", "level"],
-  "globalCatalog": {
-    "react": "^18.0.0",
-    "lodash": "^4.17.21"
-  },
   "globalCatalogs": {
+    "default": {
+      "react": "^18.0.0",
+      "lodash": "^4.17.21"
+    },
     "test": {
       "jest": "^29.0.0"
     }

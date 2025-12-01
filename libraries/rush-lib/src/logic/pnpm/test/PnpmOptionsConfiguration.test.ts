@@ -93,13 +93,12 @@ describe(PnpmOptionsConfiguration.name, () => {
       fakeCommonTempFolder
     );
 
-    expect(TestUtilities.stripAnnotations(pnpmConfiguration.globalCatalog)).toEqual({
-      react: '^18.0.0',
-      'react-dom': '^18.0.0',
-      typescript: '~5.3.0'
-    });
-
     expect(TestUtilities.stripAnnotations(pnpmConfiguration.globalCatalogs)).toEqual({
+      default: {
+        react: '^18.0.0',
+        'react-dom': '^18.0.0',
+        typescript: '~5.3.0'
+      },
       frontend: {
         vue: '^3.4.0',
         'vue-router': '^4.2.0'
