@@ -1,17 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { SpawnSyncReturns } from 'node:child_process';
+
+import { type ICredentialCacheEntry, CredentialCache } from '@rushstack/credential-cache';
 import { Executable, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import {
   type ICloudBuildCacheProvider,
-  type ICredentialCacheEntry,
-  CredentialCache,
   type RushSession,
   EnvironmentConfiguration
 } from '@rushstack/rush-sdk';
 import { WebClient, type IWebClientResponse } from '@rushstack/rush-sdk/lib/utilities/WebClient';
-import type { SpawnSyncReturns } from 'child_process';
 
 enum CredentialsOptions {
   Optional,

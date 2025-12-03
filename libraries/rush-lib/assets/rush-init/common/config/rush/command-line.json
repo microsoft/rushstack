@@ -78,6 +78,14 @@
       "enableParallelism": false,
 
       /**
+       * Controls whether weighted operations can start when the total weight would exceed the limit
+       * but is currently below the limit. This setting only applies when "enableParallelism" is true
+       * and operations have a "weight" property configured in their rush-project.json "operationSettings".
+       * Choose true (the default) to favor parallelism.  Choose false to strictly stay under the limit.
+       */
+      "allowOversubscription": false,
+
+      /**
        * Normally projects will be processed according to their dependency order: a given project will not start
        * processing the command until all of its dependencies have completed.  This restriction doesn't apply for
        * certain operations, for example a "clean" task that deletes output files.  In this case

@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
 
 import { DeclarationReference, Navigation } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
+
 import type { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
 import type { DeserializerContext } from '../model/DeserializerContext';
 

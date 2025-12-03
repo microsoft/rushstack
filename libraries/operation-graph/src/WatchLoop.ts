@@ -5,6 +5,7 @@ import { once } from 'node:events';
 
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 
+import type { OperationRequestRunCallback } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import type {
   IAfterExecuteEventMessage,
@@ -30,8 +31,11 @@ export interface IWatchLoopOptions {
   onBeforeExecute: () => void;
   /**
    * Logging callback when a run is requested (and hasn't already been).
+   *
+   * @param requestor - The name of the operation requesting a rerun.
+   * @param detail - Optional detail about why the rerun is requested, e.g. the name of a changed file.
    */
-  onRequestRun: (requestor?: string) => void;
+  onRequestRun: OperationRequestRunCallback;
   /**
    * Logging callback when a run is aborted.
    */
@@ -45,7 +49,7 @@ export interface IWatchLoopOptions {
  */
 export interface IWatchLoopState {
   get abortSignal(): AbortSignal;
-  requestRun: (requestor?: string) => void;
+  requestRun: OperationRequestRunCallback;
 }
 
 /**
@@ -59,8 +63,8 @@ export class WatchLoop implements IWatchLoopState {
   private _abortController: AbortController;
   private _isRunning: boolean;
   private _runRequested: boolean;
-  private _requestRunPromise: Promise<string | undefined>;
-  private _resolveRequestRun!: (requestor?: string) => void;
+  private _requestRunPromise: Promise<[string, string?]>;
+  private _resolveRequestRun!: (value: [string, string?]) => void;
 
   public constructor(options: IWatchLoopOptions) {
     this._options = options;
@@ -69,7 +73,7 @@ export class WatchLoop implements IWatchLoopState {
     this._isRunning = false;
     // Always start as true, so that any requests prior to first run are silenced.
     this._runRequested = true;
-    this._requestRunPromise = new Promise<string | undefined>((resolve) => {
+    this._requestRunPromise = new Promise<[string, string?]>((resolve) => {
       this._resolveRequestRun = resolve;
     });
   }
@@ -113,7 +117,6 @@ export class WatchLoop implements IWatchLoopState {
 
     const abortPromise: Promise<unknown> = once(abortSignal, 'abort');
 
-    // eslint-disable-next-line no-constant-condition
     while (!abortSignal.aborted) {
       await this.runUntilStableAsync(abortSignal);
 
@@ -147,7 +150,7 @@ export class WatchLoop implements IWatchLoopState {
         }
       }
 
-      function requestRunFromHost(requestor?: string): void {
+      function requestRunFromHost(requestor: string, detail?: string): void {
         if (runRequestedFromHost) {
           return;
         }
@@ -156,7 +159,8 @@ export class WatchLoop implements IWatchLoopState {
 
         const requestRunMessage: IRequestRunEventMessage = {
           event: 'requestRun',
-          requestor
+          requestor,
+          detail
         };
 
         tryMessageHost(requestRunMessage);
@@ -193,8 +197,12 @@ export class WatchLoop implements IWatchLoopState {
             try {
               status = await this.runUntilStableAsync(abortController.signal);
               // ESLINT: "Promises must be awaited, end with a call to .catch, end with a call to .then ..."
-              // eslint-disable-next-line @typescript-eslint/no-floating-promises
-              this._requestRunPromise.finally(requestRunFromHost);
+              this._requestRunPromise.then(
+                ([requestor, detail]) => requestRunFromHost(requestor, detail),
+                (error: Error) => {
+                  // Unreachable code. The promise will never be rejected.
+                }
+              );
             } catch (err) {
               status = OperationStatus.Failure;
               return reject(err);
@@ -225,16 +233,16 @@ export class WatchLoop implements IWatchLoopState {
   /**
    * Requests that a new run occur.
    */
-  public requestRun: (requestor?: string) => void = (requestor?: string) => {
+  public requestRun: OperationRequestRunCallback = (requestor: string, detail?: string) => {
     if (!this._runRequested) {
-      this._options.onRequestRun(requestor);
+      this._options.onRequestRun(requestor, detail);
       this._runRequested = true;
       if (this._isRunning) {
         this._options.onAbort();
         this._abortCurrent();
       }
     }
-    this._resolveRequestRun(requestor);
+    this._resolveRequestRun([requestor, detail]);
   };
 
   /**
@@ -261,7 +269,7 @@ export class WatchLoop implements IWatchLoopState {
 
     if (this._runRequested) {
       this._runRequested = false;
-      this._requestRunPromise = new Promise<string | undefined>((resolve) => {
+      this._requestRunPromise = new Promise<[string, string?]>((resolve) => {
         this._resolveRequestRun = resolve;
       });
     }

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
+  "taskPlugins": [
+    {
+      "pluginName": "json-schema-typings-plugin",
+      "entryPoint": "./lib/JsonSchemaTypingsPlugin",
+      "optionsSchema": "./lib/schemas/heft-json-schema-typings-plugin.schema.json"
+    }
+  ]
+}

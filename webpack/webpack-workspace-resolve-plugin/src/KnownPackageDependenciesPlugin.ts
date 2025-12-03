@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import type { Resolver } from 'webpack';
+
 import type { IPrefixMatch } from '@rushstack/lookup-by-path';
+
 import type { IResolveContext, WorkspaceLayoutCache } from './WorkspaceLayoutCache';
 
 type ResolveRequest = Parameters<Resolver['hooks']['resolveStep']['call']>[1];
@@ -100,7 +102,6 @@ export class KnownPackageDependenciesPlugin {
           file: request.file,
           internal: request.internal
         };
-        // eslint-disable-next-line @rushstack/no-new-null
         resolver.doResolve(target, obj, null, resolveContext, callback);
       });
   }

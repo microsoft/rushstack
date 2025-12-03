@@ -1,6 +1,105 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Tue, 13 May 2025 02:09:20 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+
+## 0.11.7
+Fri, 21 Nov 2025 16:13:56 GMT
+
+_Version update only_
+
+## 0.11.6
+Wed, 12 Nov 2025 01:12:56 GMT
+
+_Version update only_
+
+## 0.11.5
+Tue, 04 Nov 2025 08:15:15 GMT
+
+_Version update only_
+
+## 0.11.4
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 0.11.3
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 0.11.2
+Fri, 17 Oct 2025 23:22:33 GMT
+
+_Version update only_
+
+## 0.11.1
+Wed, 08 Oct 2025 00:13:28 GMT
+
+_Version update only_
+
+## 0.11.0
+Fri, 03 Oct 2025 20:09:59 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
+
+## 0.10.40
+Tue, 30 Sep 2025 23:57:45 GMT
+
+_Version update only_
+
+## 0.10.39
+Tue, 30 Sep 2025 20:33:51 GMT
+
+_Version update only_
+
+## 0.10.38
+Fri, 12 Sep 2025 15:13:07 GMT
+
+_Version update only_
+
+## 0.10.37
+Thu, 11 Sep 2025 00:22:31 GMT
+
+_Version update only_
+
+## 0.10.36
+Fri, 29 Aug 2025 00:08:01 GMT
+
+_Version update only_
+
+## 0.10.35
+Tue, 26 Aug 2025 00:12:57 GMT
+
+_Version update only_
+
+## 0.10.34
+Tue, 19 Aug 2025 20:45:02 GMT
+
+_Version update only_
+
+## 0.10.33
+Fri, 01 Aug 2025 00:12:48 GMT
+
+### Patches
+
+- Upgrades the minimatch dependency from ~3.0.3 to 10.0.3 across the entire Rush monorepo to address a Regular Expression Denial of Service (ReDoS) vulnerability in the underlying brace-expansion dependency.
+
+## 0.10.32
+Sat, 26 Jul 2025 00:12:22 GMT
+
+_Version update only_
+
+## 0.10.31
+Wed, 23 Jul 2025 20:55:57 GMT
+
+_Version update only_
+
+## 0.10.30
+Sat, 21 Jun 2025 00:13:15 GMT
+
+_Version update only_
 
 ## 0.10.29
 Tue, 13 May 2025 02:09:20 GMT

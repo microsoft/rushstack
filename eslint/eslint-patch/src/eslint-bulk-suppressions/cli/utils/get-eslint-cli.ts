@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import path from 'path';
+import path from 'node:path';
+
 import { BULK_SUPPRESSIONS_CLI_ESLINT_PACKAGE_NAME } from '../../constants';
 
 // When this list is updated, update the `eslint-bulk-suppressions-newest-test`
@@ -13,10 +14,12 @@ const TESTED_VERSIONS: Set<string> = new Set([
   '8.22.0',
   '8.23.0',
   '8.23.1',
-  '8.57.0'
+  '8.57.0',
+  '9.25.1',
+  '9.37.0'
 ]);
 
-export function getEslintPath(packagePath: string): string {
+export function getEslintPathAndVersion(packagePath: string): [string, string] {
   // Try to find a local ESLint installation, the one that should be listed as a dev dependency in package.json
   // and installed in node_modules
   try {
@@ -32,7 +35,7 @@ export function getEslintPath(packagePath: string): string {
       );
     }
 
-    return localEslintApiPath;
+    return [localEslintApiPath, localEslintVersion];
   } catch (e1) {
     try {
       const {

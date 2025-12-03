@@ -5,22 +5,29 @@
   "description": "An ESLint configuration consumed projects inside the rushstack repo.",
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft build --clean"
+    "_phase:lite-build": "heft build --clean"
+  },
+  "peerDependencies": {
+    "eslint": "^9.25.1",
+    "typescript": ">=4.7.0"
   },
   "devDependencies": {
-    "eslint": "~8.57.0",
+    "eslint": "~9.37.0",
     "typescript": "~5.8.2",
-    "@rushstack/heft": "0.73.2",
+    "@rushstack/heft": "1.1.4",
     "decoupled-local-node-rig": "workspace:*"
   },
   "dependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/eslint-patch": "workspace:*",
-    "@typescript-eslint/parser": "~8.26.1",
-    "eslint-plugin-deprecation": "2.0.0",
+    "@rushstack/eslint-plugin": "workspace:*",
+    "@typescript-eslint/eslint-plugin": "~8.46.0",
+    "@typescript-eslint/parser": "~8.46.0",
+    "eslint-import-resolver-node": "0.3.9",
     "eslint-plugin-header": "~3.1.1",
-    "eslint-plugin-import": "2.25.4",
-    "eslint-plugin-jsdoc": "37.6.1",
-    "eslint-plugin-react-hooks": "4.3.0"
+    "eslint-plugin-headers": "~1.2.1",
+    "eslint-plugin-import": "2.32.0",
+    "eslint-plugin-jsdoc": "50.6.11",
+    "eslint-plugin-react-hooks": "5.2.0"
   }
 }

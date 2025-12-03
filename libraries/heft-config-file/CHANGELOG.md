@@ -1,6 +1,54 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Thu, 01 May 2025 00:11:12 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Nov 2025 16:13:55 GMT and should not be manually modified.
+
+## 0.19.4
+Fri, 21 Nov 2025 16:13:55 GMT
+
+_Version update only_
+
+## 0.19.3
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 0.19.2
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 0.19.1
+Wed, 08 Oct 2025 00:13:29 GMT
+
+_Version update only_
+
+## 0.19.0
+Fri, 03 Oct 2025 20:09:59 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
+- Add the ability to get the original value of the `$schema` property.
+
+## 0.18.6
+Tue, 30 Sep 2025 23:57:45 GMT
+
+_Version update only_
+
+## 0.18.5
+Tue, 30 Sep 2025 20:33:51 GMT
+
+_Version update only_
+
+## 0.18.4
+Thu, 11 Sep 2025 00:22:31 GMT
+
+_Version update only_
+
+## 0.18.3
+Wed, 23 Jul 2025 20:55:57 GMT
+
+_Version update only_
 
 ## 0.18.2
 Thu, 01 May 2025 00:11:12 GMT

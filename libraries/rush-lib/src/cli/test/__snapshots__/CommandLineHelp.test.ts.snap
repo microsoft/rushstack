@@ -87,8 +87,8 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: add 1`] = `
-"usage: rush add [-h] [-s] -p PACKAGE [--exact] [--caret] [--dev] [--peer] [-m]
-                [--all] [--variant VARIANT]
+"usage: rush add [-h] [-s] -p PACKAGE [--all] [--variant VARIANT] [--exact]
+                [--caret] [--dev] [--peer] [-m]
                 
 
 Adds specified package(s) to the dependencies of the current project (as 
@@ -115,6 +115,11 @@ Optional arguments:
                         \\"rush add --package example@^1.2.3\\". To add multiple 
                         packages, write \\"rush add --package foo --package 
                         bar\\".
+  --all                 If specified, the dependency will be added to all 
+                        projects.
+  --variant VARIANT     Run command using a variant installation 
+                        configuration. This parameter may alternatively be 
+                        specified via the RUSH_VARIANT environment variable.
   --exact               If specified, the SemVer specifier added to the 
                         package.json will be an exact version (e.g. without 
                         tilde or caret).
@@ -129,11 +134,6 @@ Optional arguments:
                         If specified, other packages with this dependency 
                         will have their package.json files updated to use the 
                         same version of the dependency.
-  --all                 If specified, the dependency will be added to all 
-                        projects.
-  --variant VARIANT     Run command using a variant installation 
-                        configuration. This parameter may alternatively be 
-                        specified via the RUSH_VARIANT environment variable.
 "
 `;
 

@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import type { ISpecChange } from '../parsing/compareSpec';
-import type { LockfileEntry } from '../parsing/LockfileEntry';
+import type { LfxGraphEntry } from '../packlets/lfx-shared';
 
 export const isEntryModified = (
-  entry: LockfileEntry | undefined,
+  entry: LfxGraphEntry | undefined,
   specChanges: Map<string, ISpecChange>
 ): boolean => {
   if (!entry) return false;

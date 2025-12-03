@@ -13,21 +13,22 @@ import type {
 } from './IOperationRunner';
 import type { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
+import type { OperationGroupRecord } from './OperationGroupRecord';
 
 /**
  * Options for constructing a new Operation.
  * @beta
  */
-export interface IOperationOptions {
+export interface IOperationOptions<TMetadata extends {} = {}, TGroupMetadata extends {} = {}> {
   /**
    * The name of this operation, for logging.
    */
-  name?: string | undefined;
+  name: string;
 
   /**
    * The group that this operation belongs to. Will be used for logging and duration tracking.
    */
-  groupName?: string | undefined;
+  group?: OperationGroupRecord<TGroupMetadata> | undefined;
 
   /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
@@ -39,7 +40,18 @@ export interface IOperationOptions {
    * The weight used by the scheduler to determine order of execution.
    */
   weight?: number | undefined;
+
+  /**
+   * The metadata for this operation.
+   */
+  metadata?: TMetadata | undefined;
 }
+
+/**
+ * Type for the `requestRun` callback.
+ * @beta
+ */
+export type OperationRequestRunCallback = (requestor: string, detail?: string) => void;
 
 /**
  * Information provided to `executeAsync` by the `OperationExecutionManager`.
@@ -67,8 +79,11 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
   /**
    * A callback to the overarching orchestrator to request that the operation be invoked again.
    * Used in watch mode to signal that inputs have changed.
+   *
+   * @param requestor - The name of the operation requesting a rerun.
+   * @param detail - Optional detail about why the rerun is requested, e.g. the name of a changed file.
    */
-  requestRun?: (requestor?: string) => void;
+  requestRun?: OperationRequestRunCallback;
 
   /**
    * Terminal to write output to.
@@ -85,23 +100,29 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
  *
  * @beta
  */
-export class Operation implements IOperationStates {
+export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}>
+  implements IOperationStates
+{
   /**
    * A set of all dependencies which must be executed before this operation is complete.
    */
-  public readonly dependencies: Set<Operation> = new Set<Operation>();
+  public readonly dependencies: Set<Operation<TMetadata, TGroupMetadata>> = new Set<
+    Operation<TMetadata, TGroupMetadata>
+  >();
   /**
    * A set of all operations that wait for this operation.
    */
-  public readonly consumers: Set<Operation> = new Set<Operation>();
+  public readonly consumers: Set<Operation<TMetadata, TGroupMetadata>> = new Set<
+    Operation<TMetadata, TGroupMetadata>
+  >();
   /**
    * If specified, the name of a grouping to which this Operation belongs, for logging start and end times.
    */
-  public readonly groupName: string | undefined;
+  public readonly group: OperationGroupRecord<TGroupMetadata> | undefined;
   /**
    * The name of this operation, for logging.
    */
-  public readonly name: string | undefined;
+  public readonly name: string;
 
   /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
@@ -174,19 +195,26 @@ export class Operation implements IOperationStates {
    */
   private _runPending: boolean = true;
 
-  public constructor(options?: IOperationOptions) {
-    this.groupName = options?.groupName;
-    this.runner = options?.runner;
-    this.weight = options?.weight || 1;
-    this.name = options?.name;
+  public readonly metadata: TMetadata;
+
+  public constructor(options: IOperationOptions<TMetadata, TGroupMetadata>) {
+    this.group = options.group;
+    this.runner = options.runner;
+    this.weight = options.weight ?? 1;
+    this.name = options.name;
+    this.metadata = options.metadata || ({} as TMetadata);
+
+    if (this.group) {
+      this.group.addOperation(this);
+    }
   }
 
-  public addDependency(dependency: Operation): void {
+  public addDependency(dependency: Operation<TMetadata, TGroupMetadata>): void {
     this.dependencies.add(dependency);
     dependency.consumers.add(this);
   }
 
-  public deleteDependency(dependency: Operation): void {
+  public deleteDependency(dependency: Operation<TMetadata, TGroupMetadata>): void {
     this.dependencies.delete(dependency);
     dependency.consumers.delete(this);
   }
@@ -257,7 +285,7 @@ export class Operation implements IOperationStates {
       abortSignal,
       isFirstRun: !state.hasBeenRun,
       requestRun: requestRun
-        ? () => {
+        ? (detail?: string) => {
             switch (this.state?.status) {
               case OperationStatus.Waiting:
               case OperationStatus.Ready:
@@ -280,7 +308,7 @@ export class Operation implements IOperationStates {
                 // The requestRun callback is assumed to remain constant
                 // throughout the lifetime of the process, so it is safe
                 // to capture here.
-                return requestRun(this.name);
+                return requestRun(this.name, detail);
               default:
                 // This line is here to enforce exhaustiveness
                 const currentStatus: undefined = this.state?.status;

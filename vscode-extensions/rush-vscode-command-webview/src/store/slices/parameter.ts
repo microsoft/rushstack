@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import { type SliceCaseReducers, createSlice, type Slice, type PayloadAction } from '@reduxjs/toolkit';
-import type { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import type { FieldValues } from 'react-hook-form';
+
+import type { CommandLineParameterKind } from '@rushstack/ts-command-line';
 
 import { useAppSelector } from '../hooks';
 

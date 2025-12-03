@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type child_process from 'child_process';
-import gitInfo from 'git-repo-info';
-import * as path from 'path';
-import * as url from 'url';
+import type child_process from 'node:child_process';
+import * as path from 'node:path';
+import * as url from 'node:url';
 
+import gitInfo from 'git-repo-info';
 import { trueCasePathSync } from 'true-case-path';
+
 import { Executable, AlreadyReportedError, Path, Async } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { ensureGitMinimumVersion } from '@rushstack/package-deps-hash';
@@ -391,8 +392,7 @@ export class Git {
 
   public async hasUncommittedChangesAsync(): Promise<boolean> {
     const gitStatusEntries: Iterable<IGitStatusEntry> = await this.getGitStatusAsync();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const gitStatusEntry of gitStatusEntries) {
+    for (const _ of gitStatusEntries) {
       // If there are any changes, return true. We only need to evaluate the first iterator entry
       return true;
     }

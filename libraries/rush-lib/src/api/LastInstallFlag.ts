@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, type JsonObject, Path, type IPackageJson } from '@rushstack/node-core-library';
 import { pnpmSyncGetJsonVersion } from 'pnpm-sync-lib';
+
+import { JsonFile, type JsonObject, Path, type IPackageJson, Objects } from '@rushstack/node-core-library';
+
 import type { PackageManagerName } from './packageManager/PackageManager';
 import type { RushConfiguration } from './RushConfiguration';
 import * as objectUtilities from '../utilities/objectUtilities';
@@ -122,7 +124,7 @@ export class LastInstallFlag extends FlagFile<Partial<ILastInstallFlagJson>> {
       }
     }
 
-    if (!objectUtilities.objectsAreDeepEqual(oldState, newState)) {
+    if (!Objects.areDeepEqual(oldState, newState)) {
       if (checkValidAndReportStoreIssues) {
         const pkgManager: PackageManagerName = newState.packageManager as PackageManagerName;
         if (pkgManager === 'pnpm') {

@@ -1,16 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { z } from 'zod';
-import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import path from 'node:path';
 
-import { BaseTool, type CallToolResult } from './base.tool';
-import { getRushConfiguration } from '../utilities/common';
-import path from 'path';
+import { z } from 'zod';
+
+import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 import type { ISubspacesConfigurationJson } from '@rushstack/rush-sdk/lib/api/SubspacesConfiguration';
 import type { RushConfiguration, RushConfigurationProject } from '@rushstack/rush-sdk';
 import type { IRushConfigurationProjectJson } from '@rushstack/rush-sdk/lib/api/RushConfigurationProject';
 import type { IRushConfigurationJson } from '@rushstack/rush-sdk/lib/api/RushConfiguration';
+
+import { BaseTool, type CallToolResult } from './base.tool';
+import { getRushConfiguration } from '../utilities/common';
 
 export class RushMigrateProjectTool extends BaseTool {
   private _rushWorkspacePath: string;

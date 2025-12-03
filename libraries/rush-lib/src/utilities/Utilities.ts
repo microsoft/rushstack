@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as child_process from 'child_process';
-import * as os from 'os';
-import * as path from 'path';
-import { performance } from 'perf_hooks';
-import { Transform } from 'stream';
+import * as child_process from 'node:child_process';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { performance } from 'node:perf_hooks';
+import { Transform } from 'node:stream';
+
 import {
   JsonFile,
   type IPackageJson,
@@ -15,7 +16,8 @@ import {
   SubprocessTerminator,
   Executable,
   type IWaitForExitResult,
-  Async
+  Async,
+  type IWaitForExitResultWithoutOutput
 } from '@rushstack/node-core-library';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -152,23 +154,44 @@ interface ICreateEnvironmentForRushCommandOptions {
   pathOptions?: ICreateEnvironmentForRushCommandPathOptions;
 }
 
+type OptionalKeys<T> = {
+  [K in keyof T]-?: {} extends Pick<T, K> ? K : never;
+}[keyof T];
+
+export type OptionalToUndefined<T> = Omit<T, OptionalKeys<T>> & {
+  [K in OptionalKeys<T>]-?: Exclude<T[K], undefined> | undefined;
+};
+
+type IExecuteCommandInternalOptions = Omit<IExecuteCommandOptions, 'suppressOutput'> & {
+  stdio: child_process.SpawnSyncOptions['stdio'];
+  captureOutput: boolean;
+};
+
 export class Utilities {
   public static syncNpmrc: typeof syncNpmrc = syncNpmrc;
+
+  private static _homeFolder: string | undefined;
 
   /**
    * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
    * this looks something like "/home/username/"
    */
   public static getHomeFolder(): string {
-    const unresolvedUserFolder: string | undefined =
-      process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
-    const dirError: string = "Unable to determine the current user's home directory";
-    if (unresolvedUserFolder === undefined) {
-      throw new Error(dirError);
-    }
-    const homeFolder: string = path.resolve(unresolvedUserFolder);
-    if (!FileSystem.exists(homeFolder)) {
-      throw new Error(dirError);
+    let homeFolder: string | undefined = Utilities._homeFolder;
+    if (!homeFolder) {
+      const unresolvedUserFolder: string | undefined =
+        process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
+      const dirError: string = "Unable to determine the current user's home directory";
+      if (unresolvedUserFolder === undefined) {
+        throw new Error(dirError);
+      }
+
+      homeFolder = path.resolve(unresolvedUserFolder);
+      if (!FileSystem.exists(homeFolder)) {
+        throw new Error(dirError);
+      }
+
+      Utilities._homeFolder = homeFolder;
     }
 
     return homeFolder;
@@ -764,6 +787,16 @@ export class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
+  private static async _executeCommandInternalAsync(
+    options: IExecuteCommandInternalOptions & { captureOutput: true }
+  ): Promise<IWaitForExitResult<string>>;
+  /**
+   * Executes the command with the specified command-line parameters, and waits for it to complete.
+   * The current directory will be set to the specified workingDirectory. This does not capture output.
+   */
+  private static async _executeCommandInternalAsync(
+    options: IExecuteCommandInternalOptions & { captureOutput: false | undefined }
+  ): Promise<IWaitForExitResultWithoutOutput>;
   private static async _executeCommandInternalAsync({
     command,
     args,
@@ -774,10 +807,7 @@ export class Utilities {
     onStdoutStreamChunk,
     captureOutput,
     captureExitCodeAndSignal
-  }: Omit<IExecuteCommandOptions, 'suppressOutput'> & {
-    stdio: child_process.SpawnSyncOptions['stdio'];
-    captureOutput: boolean;
-  }): Promise<IWaitForExitResult> {
+  }: IExecuteCommandInternalOptions): Promise<IWaitForExitResult<string> | IWaitForExitResultWithoutOutput> {
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
       shell: true,

@@ -3,6 +3,7 @@
 
 import os from 'node:os';
 import path from 'node:path';
+
 import type { TARGET_ROOT_SCRIPT_RELATIVE_PATH_TEMPLATE_STRING as TargetRootScriptRelativePathTemplateString } from '../../../PackageExtractor';
 
 /**

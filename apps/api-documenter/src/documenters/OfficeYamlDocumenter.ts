@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+
 import yaml = require('js-yaml');
 
 import type { ApiModel } from '@microsoft/api-extractor-model';
@@ -48,8 +49,8 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     console.log('Loading snippets from ' + snippetsFilePath);
 
     const snippetsContent: string = FileSystem.readFile(snippetsFilePath);
-    this._snippets = yaml.load(snippetsContent, { filename: snippetsFilePath });
-    this._snippetsAll = yaml.load(snippetsContent, { filename: snippetsFilePath });
+    this._snippets = yaml.load(snippetsContent, { filename: snippetsFilePath }) as ISnippetsFile;
+    this._snippetsAll = yaml.load(snippetsContent, { filename: snippetsFilePath }) as ISnippetsFile;
   }
 
   /** @override */

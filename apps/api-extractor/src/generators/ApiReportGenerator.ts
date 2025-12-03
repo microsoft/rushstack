@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { Text, InternalError } from '@rushstack/node-core-library';
+
 import { ReleaseTag } from '@microsoft/api-extractor-model';
+import { Text, InternalError } from '@rushstack/node-core-library';
 
 import { Collector } from '../collector/Collector';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
@@ -283,7 +284,6 @@ export class ApiReportGenerator {
     reportVariant: ApiReportVariant
   ): void {
     // Should we process this declaration at all?
-    // eslint-disable-next-line no-bitwise
     if (!ApiReportGenerator._shouldIncludeDeclaration(collector, astDeclaration, reportVariant)) {
       span.modification.skipAll();
       return;

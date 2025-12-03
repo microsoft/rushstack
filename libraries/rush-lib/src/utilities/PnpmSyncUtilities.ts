@@ -1,14 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AlreadyReportedError } from '@rushstack/node-core-library';
-import { Colorize, type ITerminal } from '@rushstack/terminal';
 import {
   type ILogMessageCallbackOptions,
   LogMessageIdentifier,
   type LogMessageDetails,
   LogMessageKind
 } from 'pnpm-sync-lib';
+
+import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
+
 import { RushConstants } from '../logic/RushConstants';
 
 export class PnpmSyncUtilities {

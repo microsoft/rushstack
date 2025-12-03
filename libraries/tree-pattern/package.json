@@ -16,7 +16,8 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
-    "@rushstack/heft": "0.73.2",
-    "decoupled-local-node-rig": "workspace:*"
+    "@rushstack/heft": "1.1.4",
+    "decoupled-local-node-rig": "workspace:*",
+    "eslint": "~9.37.0"
   }
 }

@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as nodeJsPath from 'path';
+import * as nodeJsPath from 'node:path';
+
 import { JSONPath } from 'jsonpath-plus';
-import { JsonSchema, JsonFile, Import, FileSystem } from '@rushstack/node-core-library';
 import structuredClone from '@ungap/structured-clone';
+
+import { JsonSchema, JsonFile, Import, FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 interface IConfigurationJson {
@@ -158,13 +160,30 @@ export const CONFIGURATION_FILE_FIELD_ANNOTATION: unique symbol = Symbol(
   'configuration-file-field-annotation'
 );
 
-export interface IAnnotatedField<TField> {
-  [CONFIGURATION_FILE_FIELD_ANNOTATION]: IConfigurationFileFieldAnnotation<TField>;
+export interface IAnnotatedField<
+  TField,
+  TConfigurationFileFieldAnnotation extends
+    IConfigurationFileFieldAnnotation<TField> = IConfigurationFileFieldAnnotation<TField>
+> {
+  [CONFIGURATION_FILE_FIELD_ANNOTATION]: TConfigurationFileFieldAnnotation;
 }
+
+type IAnnotatedObject<TParentProperty> = Partial<IAnnotatedField<TParentProperty>>;
+type IRootAnnotatedObject<TParentProperty> = Partial<
+  IAnnotatedField<TParentProperty, IRootConfigurationFileFieldAnnotation<TParentProperty>>
+>;
 
 interface IConfigurationFileFieldAnnotation<TField> {
   configurationFilePath: string | undefined;
   originalValues: { [propertyName in keyof TField]: unknown };
+}
+
+interface IRootConfigurationFileFieldAnnotation<TField> extends IConfigurationFileFieldAnnotation<TField> {
+  schemaPropertyOriginalValue?: string;
+}
+
+interface IObjectWithSchema {
+  $schema?: string;
 }
 
 /**
@@ -451,15 +470,8 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
    * loaded from.
    */
   public getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const annotation: IConfigurationFileFieldAnnotation<TObject> | undefined = (obj as any)[
-      CONFIGURATION_FILE_FIELD_ANNOTATION
-    ];
-    if (annotation) {
-      return annotation.configurationFilePath;
-    }
-
-    return undefined;
+    const { [CONFIGURATION_FILE_FIELD_ANNOTATION]: annotation }: IAnnotatedObject<TObject> = obj;
+    return annotation?.configurationFilePath;
   }
 
   /**
@@ -469,13 +481,20 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
   public getPropertyOriginalValue<TParentProperty extends object, TValue>(
     options: IOriginalValueOptions<TParentProperty>
   ): TValue | undefined {
-    const {
-      [CONFIGURATION_FILE_FIELD_ANNOTATION]: annotation
-    }: { [CONFIGURATION_FILE_FIELD_ANNOTATION]?: IConfigurationFileFieldAnnotation<TParentProperty> } =
-      options.parentObject;
-    if (annotation?.originalValues.hasOwnProperty(options.propertyName)) {
-      return annotation.originalValues[options.propertyName] as TValue;
+    const { parentObject, propertyName } = options;
+    const { [CONFIGURATION_FILE_FIELD_ANNOTATION]: annotation }: IAnnotatedObject<TParentProperty> =
+      parentObject;
+    if (annotation?.originalValues.hasOwnProperty(propertyName)) {
+      return annotation.originalValues[propertyName] as TValue;
     }
+  }
+
+  /**
+   * Get the original value of the `$schema` property from the original configuration file, it one was present.
+   */
+  public getSchemaPropertyOriginalValue<TObject extends object>(obj: TObject): string | undefined {
+    const { [CONFIGURATION_FILE_FIELD_ANNOTATION]: annotation }: IRootAnnotatedObject<TObject> = obj;
+    return annotation?.schemaPropertyOriginalValue;
   }
 
   protected _loadConfigurationFileInnerWithCache(
@@ -977,7 +996,7 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
 
     // Need to do a dance with the casting here because while we know that JSON keys are always
     // strings, TypeScript doesn't.
-    return this._mergeObjects(
+    const result: Partial<TConfigurationFile> = this._mergeObjects(
       parentConfiguration as { [key: string]: unknown },
       configurationJson as { [key: string]: unknown },
       resolvedConfigurationFilePath,
@@ -985,6 +1004,13 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
       this._propertyInheritanceTypes as IPropertiesInheritance<{ [key: string]: unknown }>,
       ignoreProperties
     ) as Partial<TConfigurationFile>;
+
+    const schemaPropertyOriginalValue: string | undefined = (configurationJson as IObjectWithSchema).$schema;
+    (result as unknown as Required<IRootAnnotatedObject<{}>>)[
+      CONFIGURATION_FILE_FIELD_ANNOTATION
+    ].schemaPropertyOriginalValue = schemaPropertyOriginalValue;
+
+    return result;
   }
 
   private _mergeObjects<TField extends { [key: string]: unknown }>(

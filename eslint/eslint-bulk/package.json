@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-bulk",
-  "version": "0.1.94",
+  "version": "0.4.7",
   "description": "Roll out new ESLint rules in a large monorepo without cluttering up your code with \"eslint-ignore-next-line\"",
   "main": "index.js",
   "license": "MIT",
@@ -31,8 +31,10 @@
     "patch"
   ],
   "devDependencies": {
+    "@rushstack/eslint-patch": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*",
-    "@types/node": "20.17.19"
+    "@types/node": "20.17.19",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
   }
 }

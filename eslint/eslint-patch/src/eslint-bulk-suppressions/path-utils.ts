@@ -1,10 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import fs from 'fs';
-import os from 'os';
+import fs from 'node:fs';
+import os from 'node:os';
+
 import { eslintFolder, eslintPackageVersion } from '../_patch-base';
-import { ESLINT_BULK_DETECT_ENV_VAR_NAME } from './constants';
+import {
+  ESLINT_BULK_DETECT_ENV_VAR_NAME,
+  ESLINT_BULK_STDOUT_END_DELIMETER,
+  ESLINT_BULK_STDOUT_START_DELIMETER
+} from './constants';
 import currentPackageJson from '../../package.json';
 
 interface IConfiguration {
@@ -20,9 +25,6 @@ export function findAndConsoleLogPatchPathCli(): void {
     return;
   }
 
-  const startDelimiter: string = 'RUSHSTACK_ESLINT_BULK_START';
-  const endDelimiter: string = 'RUSHSTACK_ESLINT_BULK_END';
-
   const configuration: IConfiguration = {
     /**
      * `@rushstack/eslint-bulk` should report an error if its package.json is older than this number
@@ -34,7 +36,9 @@ export function findAndConsoleLogPatchPathCli(): void {
     cliEntryPoint: require.resolve('../exports/eslint-bulk')
   };
 
-  console.log(startDelimiter + JSON.stringify(configuration) + endDelimiter);
+  console.log(
+    ESLINT_BULK_STDOUT_START_DELIMETER + JSON.stringify(configuration) + ESLINT_BULK_STDOUT_END_DELIMETER
+  );
 }
 
 export function getPathToLinterJS(): string {

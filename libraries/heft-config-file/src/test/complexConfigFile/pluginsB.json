@@ -1,5 +1,5 @@
 {
-  "$schema": "http://schema.net/",
+  "$schema": "http://schema.net/B",
 
   "extends": "./pluginsA.json",
 

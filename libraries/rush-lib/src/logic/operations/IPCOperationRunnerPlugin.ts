@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IPhase } from '../../api/CommandLineConfiguration';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
@@ -14,7 +13,8 @@ import { OperationStatus } from './OperationStatus';
 import {
   PLUGIN_NAME as ShellOperationPluginName,
   formatCommand,
-  getCustomParameterValuesByPhase,
+  getCustomParameterValuesByOperation,
+  type ICustomParameterValuesForOperation,
   getDisplayName
 } from './ShellOperationRunnerPlugin';
 
@@ -45,8 +45,8 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
 
         currentContext = context;
 
-        const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
-          getCustomParameterValuesByPhase();
+        const getCustomParameterValues: (operation: Operation) => ICustomParameterValuesForOperation =
+          getCustomParameterValuesByOperation();
 
         for (const operation of operations) {
           const { associatedPhase: phase, associatedProject: project, runner } = operation;
@@ -73,7 +73,8 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
           // for this operation (or downstream operations) to be restored from the build cache.
           const commandForHash: string | undefined = phase.shellCommand ?? scripts?.[phaseName];
 
-          const customParameterValues: ReadonlyArray<string> = getCustomParameterValuesForPhase(phase);
+          const { parameterValues: customParameterValues, ignoredParameterValues } =
+            getCustomParameterValues(operation);
           const commandToRun: string = formatCommand(rawScript, customParameterValues);
 
           const operationName: string = getDisplayName(phase, project);
@@ -86,7 +87,8 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
               commandToRun,
               commandForHash,
               persist: true,
-              requestRun: (requestor?: string) => {
+              ignoredParameterValues,
+              requestRun: (requestor: string, detail?: string) => {
                 const operationState: IOperationExecutionResult | undefined =
                   operationStatesByRunner.get(ipcOperationRunner);
                 if (!operationState) {
@@ -103,7 +105,10 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
                   return;
                 }
 
-                currentContext?.invalidateOperation?.(operation, requestor || 'IPC');
+                currentContext?.invalidateOperation?.(
+                  operation,
+                  detail ? `${requestor}: ${detail}` : requestor
+                );
               }
             }));
             runnerCache.set(operationName, ipcOperationRunner);

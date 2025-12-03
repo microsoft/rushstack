@@ -7,8 +7,6 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 import { PublishUtilities, type IChangeRequests } from '../PublishUtilities';
 import { ChangeFiles } from '../ChangeFiles';
 
-/* eslint-disable dot-notation */
-
 function generateChangeSnapshot(
   allPackages: ReadonlyMap<string, RushConfigurationProject>,
   allChanges: IChangeRequests

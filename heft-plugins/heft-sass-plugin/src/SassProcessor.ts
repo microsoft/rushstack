@@ -331,7 +331,6 @@ export class SassProcessor {
     // Compile the files. Allow parallelism
     if (affectedRecords.size) {
       // Using `>>2` instead of `/4` because it also ensures that the result is an integer
-      // eslint-disable-next-line no-bitwise
       const compilerCount: number = Math.min(affectedRecords.size >> 2, concurrency, 8) || 1;
       const compilers: AsyncCompiler[] = await Promise.all(
         Array.from({ length: compilerCount }, () => initAsyncCompiler())
@@ -433,7 +432,6 @@ export class SassProcessor {
     // Exact file didn't exist, was this a partial?
     if (basename.startsWith('_')) {
       // Was already a partial, so fail resolution.
-      // eslint-disable-next-line @rushstack/no-null
       return null;
     }
 
@@ -575,7 +573,6 @@ export class SassProcessor {
       }
     }
 
-    // eslint-disable-next-line @rushstack/no-null
     return null;
   }
 
@@ -784,7 +781,7 @@ export class SassProcessor {
 
     const filename: string = path.basename(relativeFilePath);
     const extensionStart: number = filename.lastIndexOf('.');
-    const cssPathFromJs: string = `./${relativeFilePath.slice(0, extensionStart)}.css`;
+    const cssPathFromJs: string = `./${filename.slice(0, extensionStart)}.css`;
     const relativeCssPath: string = `${relativeFilePath.slice(0, relativeFilePath.lastIndexOf('.'))}.css`;
 
     if (cssOutputFolders && cssOutputFolders.length > 0) {

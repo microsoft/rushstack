@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IRunScriptOptions } from '@rushstack/heft';
 import type { ChildProcess } from 'node:child_process';
-import { Executable, FileSystem, JsonFile } from '@rushstack/node-core-library';
+
 import { runScenariosAsync } from 'run-scenarios-helpers';
+
+import type { IRunScriptOptions } from '@rushstack/heft';
+import { Executable, FileSystem, JsonFile } from '@rushstack/node-core-library';
 
 export async function runAsync(runScriptOptions: IRunScriptOptions): Promise<void> {
   const {

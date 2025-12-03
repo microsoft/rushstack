@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { EnumMemberOrder } from '@microsoft/api-extractor-model';
+
 import type { ExtractorLogLevel } from './ExtractorLogLevel';
 
 /**

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { AddressInfo } from 'net';
+import type { AddressInfo } from 'node:net';
 
 import type * as TWebpack from 'webpack';
 import type TWebpackDevServer from 'webpack-dev-server';
@@ -106,7 +106,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           heftConfiguration,
           hooks: this.accessor.hooks,
           serveMode: this._isServeMode,
-          loadWebpackAsyncFn: this._loadWebpackAsync.bind(this)
+          loadWebpackAsyncFn: this._loadWebpackAsync.bind(this, taskSession, heftConfiguration)
         },
         options
       );
@@ -131,20 +131,34 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     return this._webpackConfiguration;
   }
 
-  private async _loadWebpackAsync(): Promise<typeof TWebpack> {
+  private async _loadWebpackAsync(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration
+  ): Promise<typeof TWebpack> {
     if (!this._webpack) {
-      // Allow this to fail if webpack is not installed
-      this._webpack = await import(WEBPACK_PACKAGE_NAME);
+      try {
+        const webpackPackagePath: string = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
+          WEBPACK_PACKAGE_NAME,
+          taskSession.logger.terminal
+        );
+        this._webpack = await import(webpackPackagePath);
+        taskSession.logger.terminal.writeDebugLine(`Using Webpack from rig package at "${webpackPackagePath}"`);
+      } catch (e) {
+        // Fallback to bundled version if not found in rig.
+        this._webpack = await import(WEBPACK_PACKAGE_NAME);
+        taskSession.logger.terminal.writeDebugLine(`Using Webpack from built-in "${WEBPACK_PACKAGE_NAME}"`);
+      }
     }
     return this._webpack!;
   }
 
   private async _getWebpackCompilerAsync(
     taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration,
     webpackConfiguration: IWebpackConfiguration
   ): Promise<TWebpack.Compiler | TWebpack.MultiCompiler> {
     if (!this._webpackCompiler) {
-      const webpack: typeof TWebpack = await this._loadWebpackAsync();
+      const webpack: typeof TWebpack = await this._loadWebpackAsync(taskSession, heftConfiguration);
       taskSession.logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
       this._webpackCompiler = Array.isArray(webpackConfiguration)
         ? webpack.default(webpackConfiguration) /* (webpack.Compilation[]) => MultiCompiler */
@@ -175,6 +189,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     }
     const compiler: TWebpack.Compiler | TWebpack.MultiCompiler = await this._getWebpackCompilerAsync(
       taskSession,
+      heftConfiguration,
       webpackConfiguration
     );
     taskSession.logger.terminal.writeLine('Running Webpack compilation');
@@ -217,7 +232,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
       this._validateEnvironmentVariable(taskSession);
       if (!taskSession.parameters.watch) {
         // Should never happen, but just in case
-        throw new InternalError('Cannot run Webpack in watch mode when compilation mode is enabled');
+        throw new InternalError('Cannot run Webpack in watch mode when watch mode is not enabled');
       }
 
       // Load the config and compiler, and return if there is no config found
@@ -230,6 +245,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
       // Get the compiler which will be used for both serve and watch mode
       const compiler: TWebpack.Compiler | TWebpack.MultiCompiler = await this._getWebpackCompilerAsync(
         taskSession,
+        heftConfiguration,
         webpackConfiguration
       );
 
@@ -273,9 +289,17 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           onListening: (server: TWebpackDevServer) => {
             const addressInfo: AddressInfo | string | undefined = server.server?.address() as AddressInfo;
             if (addressInfo) {
-              const address: string =
-                typeof addressInfo === 'string' ? addressInfo : `${addressInfo.address}:${addressInfo.port}`;
-              taskSession.logger.terminal.writeLine(`Started Webpack Dev Server at https://${address}`);
+              let url: string;
+              if (typeof addressInfo === 'string') {
+                url = addressInfo;
+              } else {
+                const address: string =
+                  addressInfo.family === 'IPv6'
+                    ? `[${addressInfo.address}]:${addressInfo.port}`
+                    : `${addressInfo.address}:${addressInfo.port}`;
+                url = `https://${address}/`;
+              }
+              taskSession.logger.terminal.writeLine(`Started Webpack Dev Server at ${url}`);
             }
           }
         };
@@ -333,7 +357,6 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
 
         // Since the webpack-dev-server does not return infrastructure errors via a callback like
         // compiler.watch(...), we will need to intercept them and log them ourselves.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         compiler.hooks.infrastructureLog.tap(
           PLUGIN_NAME,
           (name: string, type: string, args: unknown[] | undefined) => {
@@ -343,7 +366,6 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
                 taskSession.logger.emitError(error);
               }
             }
-            return true;
           }
         );
 
@@ -463,13 +485,13 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
         const [startColumnRaw] = columnRangeRaw.split('-');
         if (lineNumberRaw) {
           lineNumber = parseInt(lineNumberRaw, 10);
-          if (isNaN(lineNumber)) {
+          if (Number.isNaN(lineNumber)) {
             lineNumber = undefined;
           }
         }
         if (startColumnRaw) {
           columnNumber = parseInt(startColumnRaw, 10);
-          if (isNaN(columnNumber)) {
+          if (Number.isNaN(columnNumber)) {
             columnNumber = undefined;
           }
         }

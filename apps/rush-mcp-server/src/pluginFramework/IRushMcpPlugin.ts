@@ -15,7 +15,6 @@ export interface IRushMcpPlugin {
  * The plugin's entry point should return this function as its default export.
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RushMcpPluginFactory<TConfigFile = {}> = (
   session: RushMcpPluginSession,
   configFile: TConfigFile | undefined

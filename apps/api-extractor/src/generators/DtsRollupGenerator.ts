@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable no-bitwise */
-
 import * as ts from 'typescript';
-import { FileSystem, type NewlineKind, InternalError } from '@rushstack/node-core-library';
+
 import { ReleaseTag } from '@microsoft/api-extractor-model';
+import { FileSystem, type NewlineKind, InternalError } from '@rushstack/node-core-library';
 
 import type { Collector } from '../collector/Collector';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';

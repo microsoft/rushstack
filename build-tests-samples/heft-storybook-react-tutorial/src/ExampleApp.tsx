@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as React from 'react';
+
 import { ToggleSwitch, type IToggleEventArgs } from './ToggleSwitch';
 
 /**

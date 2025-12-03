@@ -1,0 +1,28 @@
+{
+  "name": "@rushstack/vscode-shared",
+  "version": "0.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "typings": "dist/index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "vscode-extensions/vscode-shared"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/node": "20.17.19",
+    "@types/vscode": "1.103.0"
+  }
+}

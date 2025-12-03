@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import { InternalError, Text } from '@rushstack/node-core-library';
-import { type ITerminal, Colorize } from '@rushstack/terminal';
+import * as path from 'node:path';
+
 import type {
   Reporter,
   Test,
@@ -14,6 +13,8 @@ import type {
   Config
 } from '@jest/reporters';
 
+import { InternalError, Text } from '@rushstack/node-core-library';
+import { type ITerminal, Colorize } from '@rushstack/terminal';
 import type { HeftConfiguration, IScopedLogger } from '@rushstack/heft';
 
 export interface IHeftJestReporterOptions {

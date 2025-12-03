@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack-plugin-utilities",
-  "version": "0.4.86",
+  "version": "0.5.6",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "lib/index.js",
   "typings": "dist/webpack-plugin-utilities.d.ts",
@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "@types/tapable": "1.0.6",
     "webpack": "~5.98.0"

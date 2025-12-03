@@ -30,3 +30,6 @@
 # ---------------------------------------------------------------------------
 # DO NOT MODIFY ABOVE THIS LINE!  Add any project-specific overrides below.
 # ---------------------------------------------------------------------------
+
+# heft.json copies this folder from lockfile-explorer-web:
+!/build/lfx-shared/**

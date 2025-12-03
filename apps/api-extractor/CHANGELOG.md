@@ -1,6 +1,90 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 13 May 2025 02:09:20 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+
+## 7.55.1
+Fri, 21 Nov 2025 16:13:56 GMT
+
+_Version update only_
+
+## 7.55.0
+Wed, 12 Nov 2025 01:12:56 GMT
+
+### Minor changes
+
+- Bump the `@microsoft/tsdoc` dependency to `~0.16.0`.
+- Bump the `@microsoft/tsdoc-config` dependency to `~0.18.0`.
+
+## 7.54.0
+Tue, 04 Nov 2025 08:15:14 GMT
+
+### Minor changes
+
+- Add a new setting `IExtractorInvokeOptions.printApiReportDiff` that makes build logs easier to diagnose by printing a diff of any changes to API report files (*.api.md).
+- Add a `--print-api-report-diff` CLI flag that causes a diff of any changes to API report files (*.api.md) to be printed.
+
+## 7.53.3
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 7.53.2
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 7.53.1
+Wed, 08 Oct 2025 00:13:28 GMT
+
+_Version update only_
+
+## 7.53.0
+Fri, 03 Oct 2025 20:09:59 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
+
+## 7.52.15
+Tue, 30 Sep 2025 23:57:45 GMT
+
+_Version update only_
+
+## 7.52.14
+Tue, 30 Sep 2025 20:33:51 GMT
+
+_Version update only_
+
+## 7.52.13
+Fri, 12 Sep 2025 15:13:07 GMT
+
+### Patches
+
+- Fixes a bug in ExtractorAnalyzer._isExternalModulePath where type import declarations were not resolved.
+
+## 7.52.12
+Thu, 11 Sep 2025 00:22:31 GMT
+
+_Version update only_
+
+## 7.52.11
+Tue, 19 Aug 2025 20:45:02 GMT
+
+### Patches
+
+- Fix self-package import resolution by removing outDir/declarationDir from compiler options
+
+## 7.52.10
+Fri, 01 Aug 2025 00:12:48 GMT
+
+### Patches
+
+- Upgrades the minimatch dependency from ~3.0.3 to 10.0.3 across the entire Rush monorepo to address a Regular Expression Denial of Service (ReDoS) vulnerability in the underlying brace-expansion dependency.
+
+## 7.52.9
+Wed, 23 Jul 2025 20:55:57 GMT
+
+_Version update only_
 
 ## 7.52.8
 Tue, 13 May 2025 02:09:20 GMT

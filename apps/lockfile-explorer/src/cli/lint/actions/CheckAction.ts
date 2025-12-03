@@ -1,12 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Colorize, type ITerminal } from '@rushstack/terminal';
-import { CommandLineAction } from '@rushstack/ts-command-line';
-import { RushConfiguration, type RushConfigurationProject, type Subspace } from '@rushstack/rush-sdk';
-import path from 'path';
+import path from 'node:path';
+
 import yaml from 'js-yaml';
 import semver from 'semver';
+import type * as lockfileTypes from '@pnpm/lockfile.types';
+import type * as pnpmTypes from '@pnpm/types';
+
+import { RushConfiguration, type RushConfigurationProject, type Subspace } from '@rushstack/rush-sdk';
+import { CommandLineAction } from '@rushstack/ts-command-line';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { AlreadyReportedError, Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
 import lockfileLintSchema from '../../../schemas/lockfile-lint.schema.json';
@@ -17,7 +21,6 @@ import {
   parseDependencyPath,
   splicePackageWithVersion
 } from '../../../utils/shrinkwrap';
-import type { Lockfile, LockfileV6 } from '@pnpm/lockfile-types';
 
 export interface ILintRule {
   rule: 'restrict-versions';
@@ -40,7 +43,7 @@ export class CheckAction extends CommandLineAction {
 
   private _rushConfiguration!: RushConfiguration;
   private _checkedProjects: Set<RushConfigurationProject>;
-  private _docMap: Map<string, Lockfile | LockfileV6>;
+  private _docMap: Map<string, lockfileTypes.LockfileObject>;
 
   public constructor(parser: LintCommandLineParser) {
     super({
@@ -59,8 +62,8 @@ export class CheckAction extends CommandLineAction {
 
   private async _checkVersionCompatibilityAsync(
     shrinkwrapFileMajorVersion: number,
-    packages: Lockfile['packages'],
-    dependencyPath: string,
+    packages: lockfileTypes.PackageSnapshots | undefined,
+    dependencyPath: pnpmTypes.DepPath,
     requiredVersions: Record<string, string>,
     checkedDependencyPaths: Set<string>
   ): Promise<void> {
@@ -84,7 +87,7 @@ export class CheckAction extends CommandLineAction {
                 shrinkwrapFileMajorVersion,
                 dependencyPackageName,
                 dependencyPackageVersion
-              ),
+              ) as pnpmTypes.DepPath,
               requiredVersions,
               checkedDependencyPaths
             );
@@ -103,12 +106,12 @@ export class CheckAction extends CommandLineAction {
     const projectFolder: string = project.projectFolder;
     const subspace: Subspace = project.subspace;
     const shrinkwrapFilename: string = subspace.getCommittedShrinkwrapFilePath();
-    let doc: Lockfile | LockfileV6;
+    let doc: lockfileTypes.LockfileObject;
     if (this._docMap.has(shrinkwrapFilename)) {
       doc = this._docMap.get(shrinkwrapFilename)!;
     } else {
       const pnpmLockfileText: string = await FileSystem.readFileAsync(shrinkwrapFilename);
-      doc = yaml.load(pnpmLockfileText) as Lockfile | LockfileV6;
+      doc = yaml.load(pnpmLockfileText) as lockfileTypes.LockfileObject;
       this._docMap.set(shrinkwrapFilename, doc);
     }
     const { importers, lockfileVersion, packages } = doc;
@@ -118,9 +121,9 @@ export class CheckAction extends CommandLineAction {
     await Promise.all(
       Object.entries(importers).map(async ([relativePath, { dependencies }]) => {
         if (path.resolve(projectFolder, relativePath) === projectFolder) {
-          const dependenciesEntries = Object.entries(dependencies ?? {});
+          const dependenciesEntries: [string, unknown][] = Object.entries(dependencies ?? {});
           for (const [dependencyName, dependencyValue] of dependenciesEntries) {
-            const fullDependencyPath = splicePackageWithVersion(
+            const fullDependencyPath: pnpmTypes.DepPath = splicePackageWithVersion(
               shrinkwrapFileMajorVersion,
               dependencyName,
               typeof dependencyValue === 'string'
@@ -131,7 +134,7 @@ export class CheckAction extends CommandLineAction {
                       specifier: string;
                     }
                   ).version
-            );
+            ) as pnpmTypes.DepPath;
             if (fullDependencyPath.includes('link:')) {
               const dependencyProject: RushConfigurationProject | undefined =
                 this._rushConfiguration.getProjectByName(dependencyName);

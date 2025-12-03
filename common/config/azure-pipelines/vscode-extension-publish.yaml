@@ -2,6 +2,27 @@ variables:
   - name: FORCE_COLOR
     value: 1
 
+parameters:
+  - name: shouldPublish
+    type: boolean
+    default: true
+  - name: publishUnsigned
+    type: boolean
+    default: true
+  - name: ExtensionPublishConfig
+    type: object
+    default:
+      - key: 'debug-certificate-manager-vscode-extension'
+        projectRelativeAssetsDir: dist/vsix
+        vsixPath: 'extension.vsix'
+        manifestPath: 'extension.signature.manifest'
+        projectPath: '$(Build.SourcesDirectory)/vscode-extensions/debug-certificate-manager-vscode-extension'
+      - key: 'rush-vscode-extension'
+        projectRelativeAssetsDir: dist/vsix
+        vsixPath: 'extension.vsix'
+        manifestPath: 'extension.signature.manifest'
+        projectPath: '$(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension'
+
 resources:
   repositories:
     - repository: 1esPipelines
@@ -22,6 +43,14 @@ extends:
             pool:
               name: publish-rushstack
               os: linux
+            templateContext:
+              outputs:
+                - ${{ each extension in parameters.ExtensionPublishConfig }}:
+                    - output: pipelineArtifact
+                      artifactName: ${{ extension.key }}
+                      targetPath: ${{ extension.projectPath }}/${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }}
+                      displayName: 'Publish Artifact: ${{ extension.key }}'
+
             steps:
               - checkout: self
                 persistCredentials: true
@@ -31,14 +60,58 @@ extends:
               - template: /common/config/azure-pipelines/templates/build.yaml@self
                 parameters:
                   BuildParameters: >
-                    --to rushstack
+                    --to tag:vsix
 
-              - script: node $(Build.SourcesDirectory)/common/scripts/install-run-rushx.js package
-                workingDirectory: $(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension
-                displayName: 'Package vscode extension'
+              - ${{ if parameters.shouldPublish }}:
+                  - task: AzureCLI@2
+                    displayName: 'Get managed identity user info'
+                    inputs:
+                      azureSubscription: 'rushstack-vscode-publish'
+                      scriptType: bash
+                      scriptLocation: inlineScript
+                      inlineScript: |
+                        az rest -u https://app.vssps.visualstudio.com/_apis/profile/profiles/me --resource 499b84ac-1321-427f-aa17-267ca6975798
 
-              - script: node $(Build.SourcesDirectory)/common/scripts/install-run-rushx.js deploy
-                workingDirectory: $(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension
-                displayName: 'Publish vscode extension'
-                env:
-                  VSCE_PAT: $(vscePat)
+                  - ${{ each extension in parameters.ExtensionPublishConfig }}:
+                      - bash: cp ${{ extension.manifestPath }} extension.signature.p7s
+                        workingDirectory: ${{ extension.projectPath }}/${{ extension.projectRelativeAssetsDir }}
+                        displayName: 'Prepare manifest for signing: ${{ extension.key }}'
+
+                      - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@5
+                        displayName: 'ESRP CodeSigning'
+                        inputs:
+                          connectedservicename: 'rushstack-esrp-codesign-client'
+                          AppRegistrationClientId: 'ceb49532-1c6a-445c-8d34-91ab779bdf50'
+                          AppRegistrationTenantId: 'cdc5aeea-15c5-4db6-b079-fcadd2505dc2'
+                          AuthAKVName: 'rushstack-esrp'
+                          AuthCertName: 'ceb49532-rushstack-esrp'
+                          AuthSignCertName: 'rushstack-vs-marketplace-publisher-signing-certificate'
+                          FolderPath: '${{ extension.projectPath }}/${{ extension.projectRelativeAssetsDir }}'
+                          Pattern: 'extension.signature.p7s'
+                          signConfigType: inlineSignParams
+                          inlineOperation: |
+                            [
+                                {
+                                    "keyCode": "CP-401405",
+                                    "operationSetCode": "VSCodePublisherSign",
+                                    "parameters": [],
+                                    "toolName": "sign",
+                                    "toolVersion": "1.0"
+                                }
+                            ]
+
+                      - bash: node node_modules/@rushstack/heft/lib/start.js verify-signature --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --manifest-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.manifestPath }} --signature-path ${{ extension.projectRelativeAssetsDir }}/extension.signature.p7s
+                        displayName: 'Verify Signature: ${{ extension.key }}'
+                        workingDirectory: ${{ extension.projectPath }}
+
+                      - task: AzureCLI@2
+                        displayName: 'Publish VSIX: ${{ extension.key }}'
+                        inputs:
+                          azureSubscription: rushstack-vscode-publish
+                          scriptType: 'bash'
+                          scriptLocation: 'inlineScript'
+                          workingDirectory: ${{ extension.projectPath }}
+                          ${{ if parameters.publishUnsigned }}:
+                            inlineScript: node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --publish-unsigned
+                          ${{ else }}:
+                            inlineScript: node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --manifest-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.manifestPath }} --signature-path ${{ extension.projectRelativeAssetsDir }}/extension.signature.p7s

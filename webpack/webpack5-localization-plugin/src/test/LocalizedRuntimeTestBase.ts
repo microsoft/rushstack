@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { resolve } from 'path';
-import { promisify } from 'util';
+import { resolve } from 'node:path';
+import { promisify } from 'node:util';
 
 import webpack, { type Compiler, type Stats } from 'webpack';
 import { Volume } from 'memfs/lib/volume';
@@ -11,6 +11,86 @@ import { MemFSPlugin } from './MemFSPlugin';
 import type { ILocalizationPluginOptions } from '../interfaces';
 import { LocalizationPlugin } from '../LocalizationPlugin';
 import { type ITrueHashPluginOptions, TrueHashPlugin } from '../TrueHashPlugin';
+import { markEntity } from '../utilities/EntityMarker';
+
+class InjectCustomPlaceholderPlugin implements webpack.WebpackPluginInstance {
+  private readonly _localizationPlugin: LocalizationPlugin;
+  private readonly _localizedChunkNameByLocaleName: Map<string, Record<string, string>>;
+
+  public constructor(
+    localizationPlugin: LocalizationPlugin,
+    localizedChunkNameByLocaleName: Map<string, Record<string, string>>
+  ) {
+    this._localizationPlugin = localizationPlugin;
+    this._localizedChunkNameByLocaleName = localizedChunkNameByLocaleName;
+  }
+
+  public apply(compiler: Compiler): void {
+    const PLUGIN_NAME: 'inject-custom-placeholder' = 'inject-custom-placeholder';
+    const printLocalizedChunkName: 'printLocalizedChunkName' = 'printLocalizedChunkName';
+
+    const { runtime, RuntimeModule, Template, RuntimeGlobals } = compiler.webpack;
+    const localizationPlugin: LocalizationPlugin = this._localizationPlugin;
+    const localizedChunkNameByLocaleName: Map<string, Record<string, string>> = this
+      ._localizedChunkNameByLocaleName;
+
+    function getLocalizedChunkNamesString(locale: string): string {
+      return `/* ${locale} */ ${JSON.stringify(localizedChunkNameByLocaleName.get(locale))}`;
+    }
+
+    class GetIntegrityHashRuntimeModule extends RuntimeModule {
+      public constructor() {
+        super('custom data module', -10);
+        this.fullHash = true;
+      }
+
+      public override generate(): string {
+        const placeholder: string = localizationPlugin.getCustomDataPlaceholderForValueFunction(
+          getLocalizedChunkNamesString,
+          printLocalizedChunkName
+        );
+
+        return Template.asString([
+          `var localizedChunkNames = ${placeholder};`,
+          `function ${printLocalizedChunkName}(chunkId) {`,
+          Template.indent([`console.log(localizedChunkNames[chunkId]);`]),
+          `}`
+        ]);
+      }
+
+      public override shouldIsolate(): boolean {
+        return false;
+      }
+    }
+
+    compiler.hooks.thisCompilation.tap({ name: PLUGIN_NAME, stage: 10 }, (compilation, data) => {
+      runtime.LoadScriptRuntimeModule.getCompilationHooks(compilation).createScript.tap(
+        PLUGIN_NAME,
+        (originalSource): string => {
+          return Template.asString([originalSource, '', `${printLocalizedChunkName}(chunkId);`]);
+        }
+      );
+
+      function integrityHandler(chunk: webpack.Chunk, set: Set<string>): void {
+        markEntity(chunk, true);
+        set.add(printLocalizedChunkName);
+      }
+
+      compilation.hooks.runtimeRequirementInTree
+        .for(printLocalizedChunkName)
+        .tap(PLUGIN_NAME, (chunk: webpack.Chunk, set: Set<string>) => {
+          compilation.addRuntimeModule(chunk, new GetIntegrityHashRuntimeModule());
+          return true;
+        });
+      compilation.hooks.runtimeRequirementInTree
+        .for(RuntimeGlobals.loadScript)
+        .tap(PLUGIN_NAME, integrityHandler);
+      compilation.hooks.runtimeRequirementInTree
+        .for(RuntimeGlobals.preloadChunkHandlers)
+        .tap(PLUGIN_NAME, integrityHandler);
+    });
+  }
+}
 
 export function runTests(trueHashPluginOptions: ITrueHashPluginOptions = {}): void {
   async function testLocalizedRuntimeInner(minimize: boolean): Promise<void> {
@@ -51,6 +131,11 @@ export function runTests(trueHashPluginOptions: ITrueHashPluginOptions = {}): vo
 
     const localizationPlugin: LocalizationPlugin = new LocalizationPlugin(options);
 
+    const localizedChunkNameByLocaleName: Map<string, Record<string, string>> = new Map([
+      ['LOCALE1', { async1: 'async1-LOCALE1-123456', async2: 'async2-LOCALE1-123456' }],
+      ['LOCALE2', { async1: 'async1-LOCALE2-abcdef', async2: 'async2-LOCALE2-abcdef' }]
+    ]);
+
     const compiler: Compiler = webpack({
       entry: {
         mainSingleChunk: '/a/entrySingleChunk.js',
@@ -80,7 +165,12 @@ export function runTests(trueHashPluginOptions: ITrueHashPluginOptions = {}): vo
       },
       context: '/',
       mode: 'production',
-      plugins: [localizationPlugin, trueHashPlugin, new MemFSPlugin(memoryFileSystem)]
+      plugins: [
+        localizationPlugin,
+        new InjectCustomPlaceholderPlugin(localizationPlugin, localizedChunkNameByLocaleName),
+        trueHashPlugin,
+        new MemFSPlugin(memoryFileSystem)
+      ]
     });
 
     const stats: Stats | undefined = await promisify(compiler.run.bind(compiler))();

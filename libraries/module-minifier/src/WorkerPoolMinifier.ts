@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { createHash } from 'crypto';
-import os from 'os';
-import type { ResourceLimits } from 'worker_threads';
+import { createHash } from 'node:crypto';
+import os from 'node:os';
+import type { ResourceLimits } from 'node:worker_threads';
 
 import serialize from 'serialize-javascript';
 import type { MinifyOptions } from 'terser';
+
 import { WorkerPool } from '@rushstack/worker-pool';
 
 import type {

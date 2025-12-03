@@ -340,7 +340,6 @@ export class AssetProcessor {
     let lastIndex: number = 0;
     let regexResult: RegExpExecArray | null;
     while ((regexResult = PLACEHOLDER_REGEX.exec(source))) {
-      // eslint-disable-line no-cond-assign
       const staticElement: IStaticReconstructionElement = {
         kind: 'static',
         staticString: source.substring(lastIndex, regexResult.index)

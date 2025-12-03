@@ -27,19 +27,19 @@
     "react": "~17.0.2",
     "redux": "~4.2.0",
     "scheduler": "0.19.0",
-    "tslib": "~2.3.1"
+    "tslib": "~2.8.1"
   },
   "devDependencies": {
-    "local-web-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
+    "@types/react": "17.0.74",
     "@types/react-dom": "17.0.25",
     "@types/react-redux": "~7.1.22",
-    "@types/react": "17.0.74",
-    "@types/vscode": "^1.63.0",
-    "eslint": "~8.57.0",
+    "@types/vscode": "1.103.0",
+    "eslint": "~9.37.0",
     "html-webpack-plugin": "~5.5.0",
-    "webpack-bundle-analyzer": "~4.5.0",
-    "webpack": "~5.98.0"
+    "local-web-rig": "workspace:*",
+    "webpack": "~5.98.0",
+    "webpack-bundle-analyzer": "~4.5.0"
   }
 }

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { TSESLint } from '@typescript-eslint/utils';
+
 import { noUnsafeRegExp } from './no-unsafe-regexp';
 
 interface IPlugin {

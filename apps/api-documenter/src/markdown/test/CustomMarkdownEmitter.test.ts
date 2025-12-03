@@ -171,6 +171,13 @@ test('render Markdown from TSDoc', () => {
     )
   ]);
 
+  output.appendNodes([
+    new DocHeading({ configuration, title: 'After a table' }),
+    new DocParagraph({ configuration }, [
+      new DocPlainText({ configuration, text: 'just checking lines after a table' })
+    ])
+  ]);
+
   const stringBuilder: StringBuilder = new StringBuilder();
   const apiModel: ApiModel = new ApiModel();
   const markdownEmitter: CustomMarkdownEmitter = new CustomMarkdownEmitter(apiModel);

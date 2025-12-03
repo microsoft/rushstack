@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
 
 import { InternalError, type IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
 import type { ITerminalProvider } from '@rushstack/terminal';
@@ -15,6 +15,7 @@ import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor'
 import { EnvironmentVariableNames } from './EnvironmentConfiguration';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { RushPnpmCommandLine } from '../cli/RushPnpmCommandLine';
+import { measureAsyncFn } from '../utilities/performance';
 
 /**
  * Options to pass to the rush "launch" functions.
@@ -93,8 +94,9 @@ export class Rush {
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError,
       builtInPluginConfigurations: options.builtInPluginConfigurations
     });
+    // CommandLineParser.executeAsync() should never reject the promise
     // eslint-disable-next-line no-console
-    parser.executeAsync().catch(console.error); // CommandLineParser.executeAsync() should never reject the promise
+    measureAsyncFn('rush:parser:executeAsync', () => parser.executeAsync()).catch(console.error);
   }
 
   /**

@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
-import * as path from 'path';
+import * as os from 'node:os';
+import * as path from 'node:path';
+
 import { trueCasePathSync } from 'true-case-path';
 
 import type { IEnvironment } from '../utilities/Utilities';
@@ -145,6 +146,34 @@ export const EnvironmentVariableNames = {
   RUSH_BUILD_CACHE_WRITE_ALLOWED: 'RUSH_BUILD_CACHE_WRITE_ALLOWED',
 
   /**
+   * Set this environment variable to a JSON string to override the build cache configuration that normally lives
+   * at `common/config/rush/build-cache.json`.
+   *
+   * This is useful for testing purposes, or for OSS repos that are have a local-only cache, but can have
+   * a different cache configuration in CI/CD pipelines.
+   *
+   * @remarks
+   * This is similar to {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH}, but it allows you to specify
+   * a JSON string instead of a file path. The two environment variables are mutually exclusive, meaning you can
+   * only use one of them at a time.
+   */
+  RUSH_BUILD_CACHE_OVERRIDE_JSON: 'RUSH_BUILD_CACHE_OVERRIDE_JSON',
+
+  /**
+   * Set this environment variable to the path to a `build-cache.json` file to override the build cache configuration
+   * that normally lives at `common/config/rush/build-cache.json`.
+   *
+   * This is useful for testing purposes, or for OSS repos that are have a local-only cache, but can have
+   * a different cache configuration in CI/CD pipelines.
+   *
+   * @remarks
+   * This is similar to {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON}, but it allows you to specify
+   * a file path instead of a JSON string. The two environment variables are mutually exclusive, meaning you can
+   * only use one of them at a time.
+   */
+  RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH: 'RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH',
+
+  /**
    * Setting this environment variable opts into running with cobuilds. The context id should be the same across
    * multiple VMs, but changed when it is a new round of cobuilds.
    *
@@ -250,6 +279,10 @@ export class EnvironmentConfiguration {
 
   private static _buildCacheWriteAllowed: boolean | undefined;
 
+  private static _buildCacheOverrideJson: string | undefined;
+
+  private static _buildCacheOverrideJsonFilePath: string | undefined;
+
   private static _cobuildContextId: string | undefined;
 
   private static _cobuildRunnerId: string | undefined;
@@ -259,6 +292,13 @@ export class EnvironmentConfiguration {
   private static _gitBinaryPath: string | undefined;
 
   private static _tarBinaryPath: string | undefined;
+
+  /**
+   * If true, the environment configuration has been validated and initialized.
+   */
+  public static get hasBeenValidated(): boolean {
+    return EnvironmentConfiguration._hasBeenValidated;
+  }
 
   /**
    * An override for the common/temp folder path.
@@ -351,6 +391,24 @@ export class EnvironmentConfiguration {
   public static get buildCacheWriteAllowed(): boolean | undefined {
     EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._buildCacheWriteAllowed;
+  }
+
+  /**
+   * If set, overrides the build cache configuration that normally lives at `common/config/rush/build-cache.json`.
+   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON}
+   */
+  public static get buildCacheOverrideJson(): string | undefined {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._buildCacheOverrideJson;
+  }
+
+  /**
+   * If set, overrides the build cache configuration that normally lives at `common/config/rush/build-cache.json`.
+   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH}
+   */
+  public static get buildCacheOverrideJsonFilePath(): string | undefined {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._buildCacheOverrideJsonFilePath;
   }
 
   /**
@@ -510,6 +568,16 @@ export class EnvironmentConfiguration {
             break;
           }
 
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON: {
+            EnvironmentConfiguration._buildCacheOverrideJson = value;
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH: {
+            EnvironmentConfiguration._buildCacheOverrideJsonFilePath = value;
+            break;
+          }
+
           case EnvironmentVariableNames.RUSH_COBUILD_CONTEXT_ID: {
             EnvironmentConfiguration._cobuildContextId = value;
             break;
@@ -568,6 +636,17 @@ export class EnvironmentConfiguration {
       throw new Error(
         'The following environment variables were found with the "RUSH_" prefix, but they are not ' +
           `recognized by this version of Rush: ${unknownEnvVariables.join(', ')}`
+      );
+    }
+
+    if (
+      EnvironmentConfiguration._buildCacheOverrideJsonFilePath &&
+      EnvironmentConfiguration._buildCacheOverrideJson
+    ) {
+      throw new Error(
+        `Environment variable ${EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH} and ` +
+          `${EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON} are mutually exclusive. ` +
+          `Only one may be specified.`
       );
     }
 

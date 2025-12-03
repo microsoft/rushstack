@@ -24,6 +24,4 @@
 ## Project specific definitions
 # -----------------------------
 
-!/mixins/**
-!/patch/**
-!/profile/**
+!/flat/**

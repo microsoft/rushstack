@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
+
 import { FileSystem, Import, JsonFile, type JsonObject, JsonSchema } from '@rushstack/node-core-library';
 import { Autoinstaller } from '@rushstack/rush-sdk/lib/logic/Autoinstaller';
 import { RushGlobalFolder } from '@rushstack/rush-sdk/lib/api/RushGlobalFolder';
 import { RushConfiguration } from '@rushstack/rush-sdk/lib/api/RushConfiguration';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
 
 import type { IRushMcpPlugin, RushMcpPluginFactory } from './IRushMcpPlugin';
 import { RushMcpPluginSessionInternal } from './RushMcpPluginSession';
-
 import rushMcpJsonSchemaObject from '../schemas/rush-mcp.schema.json';
 import rushMcpPluginSchemaObject from '../schemas/rush-mcp-plugin.schema.json';
 

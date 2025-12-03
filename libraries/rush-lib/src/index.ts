@@ -8,8 +8,15 @@
  * @packageDocumentation
  */
 
-// For backwards compatibility
+// #region Backwards compatibility
 export { LookupByPath as LookupByPath, type IPrefixMatch } from '@rushstack/lookup-by-path';
+
+export {
+  type ICredentialCacheOptions,
+  type ICredentialCacheEntry,
+  CredentialCache
+} from '@rushstack/credential-cache';
+// #endregion
 
 export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
@@ -107,7 +114,12 @@ export {
   VersionPolicy
 } from './api/VersionPolicy';
 
-export { VersionPolicyConfiguration } from './api/VersionPolicyConfiguration';
+export {
+  VersionPolicyConfiguration,
+  type ILockStepVersionJson,
+  type IIndividualVersionJson,
+  type IVersionPolicyJson
+} from './api/VersionPolicyConfiguration';
 
 export { type ILaunchOptions, Rush } from './api/Rush';
 export { RushInternals as _RushInternals } from './api/RushInternals';
@@ -170,12 +182,6 @@ export type {
   ICobuildContext,
   ICobuildCompletedState
 } from './logic/cobuild/ICobuildLockProvider';
-
-export {
-  type ICredentialCacheOptions,
-  type ICredentialCacheEntry,
-  CredentialCache
-} from './logic/CredentialCache';
 
 export type { ITelemetryData, ITelemetryMachineInfo, ITelemetryOperationResult } from './logic/Telemetry';
 

@@ -31,8 +31,11 @@
     // engine for API Extractor.
     "typescript": "~5.8.2",
 
-    // Workaround for https://github.com/microsoft/rushstack/issues/1466
-    "eslint": "~8.57.0"
+    // This should be the ESLint version that's used to build most of the projects in the repo.
+    "eslint": "~9.37.0",
+
+    // Updated minimatch and its types to latest major version to resolve ReDoS vulnerability
+    "minimatch": "10.0.3"
   },
 
   /**
@@ -75,6 +78,9 @@
    * This design avoids unnecessary churn in this file.
    */
   "allowedAlternativeVersions": {
+    // Allow Lockfile Explorer to support PNPM 9.x
+    // TODO: Remove this after Rush adds support for PNPM 9.x
+    "@pnpm/lockfile.types": ["1002.0.1"],
     "@typescript-eslint/parser": [
       "~6.19.0" // Used by build-tests/eslint-7(-*)-test / build-tests/eslint-bulk-suppressions-test-legacy
     ],
@@ -83,7 +89,8 @@
       "7.11.0", // Used by build-tests/eslint-7-11-test
       "~7.30.0", // Used by build-tests/eslint-7-test
       "8.6.0", // Used by build-tests/eslint-bulk-suppressions-test-legacy
-      "8.23.1" // Used by build-tests/eslint-bulk-suppressions-test-legacy
+      "8.23.1", // Used by build-tests/eslint-bulk-suppressions-test-legacy
+      "~8.57.0" // Used by build-tests/eslint-bulk-suppressions-test
     ],
     /**
      * For example, allow some projects to use an older TypeScript compiler
@@ -136,6 +143,10 @@
     "@rushstack/eslint-config": [
       // This is used by the ESLint 7 build tests
       "3.7.1"
+    ],
+    "@rushstack/set-webpack-public-path-plugin": [
+      // This is used by the webpack 4 localization plugin tests
+      "^4.1.16"
     ],
     "@pnpm/logger": [
       // For pnpm kit v8

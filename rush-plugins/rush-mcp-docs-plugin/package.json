@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-mcp-docs-plugin",
-  "version": "0.1.0",
+  "version": "0.2.6",
   "description": "Docs plugin for @rushstack/mcp-server",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "local-eslint-config": "workspace:*"
   }

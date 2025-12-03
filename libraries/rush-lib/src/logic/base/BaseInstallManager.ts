@@ -1,9 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
-import * as path from 'path';
-import * as crypto from 'crypto';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import * as crypto from 'node:crypto';
+import { existsSync } from 'node:fs';
+import { readFile, unlink } from 'node:fs/promises';
+
 import * as semver from 'semver';
 import {
   FileSystem,
@@ -16,8 +19,6 @@ import {
   type FolderItem,
   Async
 } from '@rushstack/node-core-library';
-import { existsSync } from 'fs';
-import { readFile, unlink } from 'fs/promises';
 import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
 import {
   type ILockfile,
@@ -293,11 +294,16 @@ export abstract class BaseInstallManager {
     if (this.rushConfiguration.isPnpm && experiments?.usePnpmSyncForInjectedDependencies) {
       const pnpmLockfilePath: string = subspace.getTempShrinkwrapFilename();
       const dotPnpmFolder: string = `${subspace.getSubspaceTempFolderPath()}/node_modules/.pnpm`;
+      const modulesFilePath: string = `${subspace.getSubspaceTempFolderPath()}/node_modules/.modules.yaml`;
 
       // we have an edge case here
       // if a package.json has no dependencies, pnpm will still generate the pnpm-lock.yaml but not .pnpm folder
       // so we need to make sure pnpm-lock.yaml and .pnpm exists before calling the pnpmSync APIs
-      if ((await FileSystem.existsAsync(pnpmLockfilePath)) && (await FileSystem.existsAsync(dotPnpmFolder))) {
+      if (
+        (await FileSystem.existsAsync(pnpmLockfilePath)) &&
+        (await FileSystem.existsAsync(dotPnpmFolder)) &&
+        (await FileSystem.existsAsync(modulesFilePath))
+      ) {
         await pnpmSyncPrepareAsync({
           lockfilePath: pnpmLockfilePath,
           dotPnpmFolder,

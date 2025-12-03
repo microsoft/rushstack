@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 // Mock child_process so we can verify tasks are (or are not) invoked as we expect
-jest.mock('child_process');
+jest.mock('node:child_process', () => jest.requireActual('./mock_child_process'));
 
 function mockReportErrorAndSetExitCode(error: Error): void {
   // Just rethrow the error so the unit tests can catch it

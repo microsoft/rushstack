@@ -1,6 +1,90 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Tue, 13 May 2025 02:09:20 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+
+## 0.15.6
+Fri, 21 Nov 2025 16:13:56 GMT
+
+_Version update only_
+
+## 0.15.5
+Wed, 12 Nov 2025 01:12:56 GMT
+
+_Version update only_
+
+## 0.15.4
+Tue, 04 Nov 2025 08:15:15 GMT
+
+_Version update only_
+
+## 0.15.3
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 0.15.2
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 0.15.1
+Wed, 08 Oct 2025 00:13:29 GMT
+
+_Version update only_
+
+## 0.15.0
+Fri, 03 Oct 2025 20:10:00 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
+
+## 0.14.7
+Tue, 30 Sep 2025 23:57:45 GMT
+
+_Version update only_
+
+## 0.14.6
+Tue, 30 Sep 2025 20:33:51 GMT
+
+_Version update only_
+
+## 0.14.5
+Fri, 12 Sep 2025 15:13:07 GMT
+
+_Version update only_
+
+## 0.14.4
+Thu, 11 Sep 2025 00:22:31 GMT
+
+_Version update only_
+
+## 0.14.3
+Tue, 19 Aug 2025 20:45:02 GMT
+
+_Version update only_
+
+## 0.14.2
+Fri, 01 Aug 2025 00:12:49 GMT
+
+_Version update only_
+
+## 0.14.1
+Wed, 23 Jul 2025 20:55:57 GMT
+
+_Version update only_
+
+## 0.14.0
+Mon, 30 Jun 2025 22:04:32 GMT
+
+### Minor changes
+
+- Add a feature for injecting custom localized values into a compilation via the `getCustomDataPlaceholderForValueFunction` function on an instance of the `LocalizationPlugin`.
+
+## 0.13.16
+Sat, 21 Jun 2025 00:13:15 GMT
+
+_Version update only_
 
 ## 0.13.15
 Tue, 13 May 2025 02:09:20 GMT

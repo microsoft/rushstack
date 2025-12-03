@@ -1,19 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+import { createHash } from 'node:crypto';
+
 import * as semver from 'semver';
 import yaml from 'js-yaml';
+
 import {
   FileSystem,
   FileConstants,
   AlreadyReportedError,
   Async,
   type IDependenciesMetaTable,
+  Objects,
   Path,
   Sort
 } from '@rushstack/node-core-library';
-import { createHash } from 'crypto';
+import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
@@ -36,9 +40,7 @@ import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
 import type { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
-import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
 import type { Subspace } from '../../api/Subspace';
-import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 import { FlagFile } from '../../api/FlagFile';
 import { Stopwatch } from '../../utilities/Stopwatch';
@@ -220,7 +222,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           continue;
         }
 
-        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(name, version);
+        const dependencySpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(name, version);
 
         // Is there a locally built Rush project that could satisfy this dependency?
         let referencedLocalProject: RushConfigurationProject | undefined =
@@ -370,7 +372,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // Now, we compare these two objects to see if they are equal or not
-    const dependenciesMetaAreEqual: boolean = objectsAreDeepEqual(
+    const dependenciesMetaAreEqual: boolean = Objects.areDeepEqual(
       expectedDependenciesMetaByProjectRelativePath,
       lockfileDependenciesMetaByProjectRelativePath
     );
@@ -386,7 +388,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     const pnpmOptions: PnpmOptionsConfiguration =
       subspace.getPnpmOptions() || this.rushConfiguration.pnpmOptions;
 
-    const overridesAreEqual: boolean = objectsAreDeepEqual<Record<string, string>>(
+    const overridesAreEqual: boolean = Objects.areDeepEqual<Record<string, string>>(
       pnpmOptions.globalOverrides ?? {},
       shrinkwrapFile?.overrides ? Object.fromEntries(shrinkwrapFile?.overrides) : {}
     );
@@ -397,11 +399,41 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // Check if packageExtensionsChecksum matches globalPackageExtension's hash
-    const packageExtensionsChecksum: string | undefined = this._getPackageExtensionChecksum(
-      pnpmOptions.globalPackageExtensions
-    );
+    let packageExtensionsChecksum: string | undefined;
+    let existingPackageExtensionsChecksum: string | undefined;
+    if (shrinkwrapFile) {
+      existingPackageExtensionsChecksum = shrinkwrapFile.packageExtensionsChecksum;
+      let packageExtensionsChecksumAlgorithm: string | undefined;
+      if (existingPackageExtensionsChecksum) {
+        const dashIndex: number = existingPackageExtensionsChecksum.indexOf('-');
+        if (dashIndex !== -1) {
+          packageExtensionsChecksumAlgorithm = existingPackageExtensionsChecksum.substring(0, dashIndex);
+        }
+
+        if (packageExtensionsChecksumAlgorithm && packageExtensionsChecksumAlgorithm !== 'sha256') {
+          this._terminal.writeErrorLine(
+            `The existing packageExtensionsChecksum algorithm "${packageExtensionsChecksumAlgorithm}" is not supported. ` +
+              `This may indicate that the shrinkwrap was created with a newer version of PNPM than Rush supports.`
+          );
+          throw new AlreadyReportedError();
+        }
+      }
+
+      const globalPackageExtensions: Record<string, unknown> | undefined =
+        pnpmOptions.globalPackageExtensions;
+      // https://github.com/pnpm/pnpm/blob/ba9409ffcef0c36dc1b167d770a023c87444822d/pkg-manager/core/src/install/index.ts#L331
+      if (globalPackageExtensions && Object.keys(globalPackageExtensions).length !== 0) {
+        if (packageExtensionsChecksumAlgorithm) {
+          // In PNPM v10, the algorithm changed to SHA256 and the digest changed from hex to base64
+          packageExtensionsChecksum = await createObjectChecksumAsync(globalPackageExtensions);
+        } else {
+          packageExtensionsChecksum = createObjectChecksumLegacy(globalPackageExtensions);
+        }
+      }
+    }
+
     const packageExtensionsChecksumAreEqual: boolean =
-      packageExtensionsChecksum === shrinkwrapFile?.packageExtensionsChecksum;
+      packageExtensionsChecksum === existingPackageExtensionsChecksum;
 
     if (!packageExtensionsChecksumAreEqual) {
       shrinkwrapWarnings.push("The package extension hash doesn't match the current shrinkwrap.");
@@ -416,18 +448,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     workspaceFile.save(workspaceFile.workspaceFilename, { onlyIfChanged: true });
 
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
-  }
-
-  private _getPackageExtensionChecksum(
-    packageExtensions: Record<string, unknown> | undefined
-  ): string | undefined {
-    // https://github.com/pnpm/pnpm/blob/ba9409ffcef0c36dc1b167d770a023c87444822d/pkg-manager/core/src/install/index.ts#L331
-    const packageExtensionsChecksum: string | undefined =
-      Object.keys(packageExtensions ?? {}).length === 0
-        ? undefined
-        : createObjectChecksum(packageExtensions!);
-
-    return packageExtensionsChecksum;
   }
 
   protected async canSkipInstallAsync(
@@ -697,7 +717,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       ) {
         // Find the .modules.yaml file in the subspace temp/node_modules folder
         const modulesContent: string = await FileSystem.readFileAsync(modulesFilePath);
-        const yamlContent: IPnpmModules = yaml.load(modulesContent, { filename: modulesFilePath });
+        const yamlContent: IPnpmModules = yaml.load(modulesContent, {
+          filename: modulesFilePath
+        }) as IPnpmModules;
         const { hoistedDependencies } = yamlContent;
         const subspaceProject: RushConfigurationProject = subspace.getProjects()[0];
         const projectNodeModulesPath: string = `${subspaceProject.projectFolder}/node_modules`;
@@ -789,10 +811,36 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
 /**
  * Source: https://github.com/pnpm/pnpm/blob/ba9409ffcef0c36dc1b167d770a023c87444822d/pkg-manager/core/src/install/index.ts#L821-L824
- * @param obj
- * @returns
  */
-function createObjectChecksum(obj: Record<string, unknown>): string {
+function createObjectChecksumLegacy(obj: Record<string, unknown>): string {
   const s: string = JSON.stringify(Sort.sortKeys(obj));
   return createHash('md5').update(s).digest('hex');
+}
+
+/**
+ * Source: https://github.com/pnpm/pnpm/blob/bdbd31aa4fa6546d65b6eee50a79b51879340d40/crypto/object-hasher/src/index.ts#L8-L12
+ */
+const defaultOptions: import('object-hash').NormalOption = {
+  respectType: false,
+  algorithm: 'sha256',
+  encoding: 'base64'
+};
+
+/**
+ * https://github.com/pnpm/pnpm/blob/bdbd31aa4fa6546d65b6eee50a79b51879340d40/crypto/object-hasher/src/index.ts#L21-L26
+ */
+const withSortingOptions: import('object-hash').NormalOption = {
+  ...defaultOptions,
+  unorderedArrays: true,
+  unorderedObjects: true,
+  unorderedSets: true
+};
+
+/**
+ * Source: https://github.com/pnpm/pnpm/blob/bdbd31aa4fa6546d65b6eee50a79b51879340d40/crypto/object-hasher/src/index.ts#L45-L49
+ */
+async function createObjectChecksumAsync(obj: Record<string, unknown>): Promise<string> {
+  const { default: hash } = await import('object-hash');
+  const packageExtensionsChecksum: string = hash(obj, withSortingOptions);
+  return `${defaultOptions.algorithm}-${packageExtensionsChecksum}`;
 }

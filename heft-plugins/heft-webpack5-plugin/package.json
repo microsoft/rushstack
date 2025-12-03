@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-webpack5-plugin",
-  "version": "0.11.33",
+  "version": "1.2.6",
   "description": "Heft plugin for Webpack 5",
   "repository": {
     "type": "git",
@@ -18,7 +18,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.73.6",
+    "@rushstack/heft": "^1.1.6",
     "webpack": "^5.82.1"
   },
   "dependencies": {
@@ -33,7 +33,8 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@types/watchpack": "2.4.0",
-    "webpack": "~5.98.0",
-    "local-node-rig": "workspace:*"
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*",
+    "webpack": "~5.98.0"
   }
 }

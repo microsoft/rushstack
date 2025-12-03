@@ -532,7 +532,38 @@ Array [
 ]
 `;
 
-exports[`CommandLineParameterBase prints the action help 1`] = `
+exports[`CommandLineParameterBase prints the same usage if a required parameter backed by an env variable is not provided as when a different required parameter is missing: Usage 1`] = `
+"usage: example do:the-job [-h] [-c {one,two,three,default}]
+                          [--choice-with-default {one,two,three,default}]
+                          [-C {red,green,blue}] [-f] [-i NUMBER]
+                          [--integer-with-default NUMBER] --integer-required
+                          NUMBER --env-integer-required NUMBER [-I LIST_ITEM]
+                          [-s TEXT] [--string-with-default TEXT]
+                          [--string-with-undocumented-synonym TEXT]
+                          [-l LIST_ITEM]
+                          
+"
+`;
+
+exports[`CommandLineParameterBase raises an error if a required parameter backed by an env variable is not provided: Error 1`] = `
+[Error: example do:the-job: error: Argument "--env-integer-required" is required
+]
+`;
+
+exports[`CommandLineParameterBase raises an error if a required parameter backed by an env variable is not provided: Usage 1`] = `
+"usage: example do:the-job [-h] [-c {one,two,three,default}]
+                          [--choice-with-default {one,two,three,default}]
+                          [-C {red,green,blue}] [-f] [-i NUMBER]
+                          [--integer-with-default NUMBER] --integer-required
+                          NUMBER --env-integer-required NUMBER [-I LIST_ITEM]
+                          [-s TEXT] [--string-with-default TEXT]
+                          [--string-with-undocumented-synonym TEXT]
+                          [-l LIST_ITEM]
+                          
+"
+`;
+
+exports[`CommandLineParameterBase renders help text: do:the-job 1`] = `
 "usage: example do:the-job [-h] [-c {one,two,three,default}]
                           [--choice-with-default {one,two,three,default}]
                           [-C {red,green,blue}] [-f] [-i NUMBER]
@@ -597,7 +628,7 @@ Optional arguments:
 "
 `;
 
-exports[`CommandLineParameterBase prints the global help 1`] = `
+exports[`CommandLineParameterBase renders help text: global help 1`] = `
 "usage: example [-h] [-g] <command> ...
 
 An example project
@@ -610,37 +641,6 @@ Optional arguments:
   -h, --help         Show this help message and exit.
   -g, --global-flag  A flag that affects all actions
 
-For detailed help about a specific command, use: example <command> -h
-"
-`;
-
-exports[`CommandLineParameterBase prints the same usage if a required parameter backed by an env variable is not provided as when a different required parameter is missing: Usage 1`] = `
-"usage: example do:the-job [-h] [-c {one,two,three,default}]
-                          [--choice-with-default {one,two,three,default}]
-                          [-C {red,green,blue}] [-f] [-i NUMBER]
-                          [--integer-with-default NUMBER] --integer-required
-                          NUMBER --env-integer-required NUMBER [-I LIST_ITEM]
-                          [-s TEXT] [--string-with-default TEXT]
-                          [--string-with-undocumented-synonym TEXT]
-                          [-l LIST_ITEM]
-                          
-"
-`;
-
-exports[`CommandLineParameterBase raises an error if a required parameter backed by an env variable is not provided: Error 1`] = `
-[Error: example do:the-job: error: Argument "--env-integer-required" is required
-]
-`;
-
-exports[`CommandLineParameterBase raises an error if a required parameter backed by an env variable is not provided: Usage 1`] = `
-"usage: example do:the-job [-h] [-c {one,two,three,default}]
-                          [--choice-with-default {one,two,three,default}]
-                          [-C {red,green,blue}] [-f] [-i NUMBER]
-                          [--integer-with-default NUMBER] --integer-required
-                          NUMBER --env-integer-required NUMBER [-I LIST_ITEM]
-                          [-s TEXT] [--string-with-default TEXT]
-                          [--string-with-undocumented-synonym TEXT]
-                          [-l LIST_ITEM]
-                          
+[bold]For detailed help about a specific command, use: example <command> -h[normal]
 "
 `;

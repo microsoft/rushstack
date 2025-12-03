@@ -1,6 +1,105 @@
 # Change Log - @rushstack/heft-serverless-stack-plugin
 
-This log was last generated on Tue, 13 May 2025 02:09:20 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+
+## 1.1.7
+Fri, 21 Nov 2025 16:13:56 GMT
+
+_Version update only_
+
+## 1.1.6
+Wed, 12 Nov 2025 01:12:56 GMT
+
+_Version update only_
+
+## 1.1.5
+Tue, 04 Nov 2025 08:15:14 GMT
+
+_Version update only_
+
+## 1.1.4
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 1.1.3
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 1.1.2
+Fri, 17 Oct 2025 23:22:33 GMT
+
+_Version update only_
+
+## 1.1.1
+Wed, 08 Oct 2025 00:13:28 GMT
+
+_Version update only_
+
+## 1.1.0
+Fri, 03 Oct 2025 20:09:59 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
+
+## 1.0.0
+Tue, 30 Sep 2025 23:57:45 GMT
+
+### Breaking changes
+
+- Release Heft version 1.0.0
+
+## 0.4.22
+Tue, 30 Sep 2025 20:33:51 GMT
+
+_Version update only_
+
+## 0.4.21
+Fri, 12 Sep 2025 15:13:07 GMT
+
+_Version update only_
+
+## 0.4.20
+Thu, 11 Sep 2025 00:22:31 GMT
+
+_Version update only_
+
+## 0.4.19
+Fri, 29 Aug 2025 00:08:01 GMT
+
+_Version update only_
+
+## 0.4.18
+Tue, 26 Aug 2025 00:12:57 GMT
+
+_Version update only_
+
+## 0.4.17
+Tue, 19 Aug 2025 20:45:02 GMT
+
+_Version update only_
+
+## 0.4.16
+Fri, 01 Aug 2025 00:12:48 GMT
+
+_Version update only_
+
+## 0.4.15
+Sat, 26 Jul 2025 00:12:22 GMT
+
+_Version update only_
+
+## 0.4.14
+Wed, 23 Jul 2025 20:55:57 GMT
+
+_Version update only_
+
+## 0.4.13
+Sat, 21 Jun 2025 00:13:15 GMT
+
+_Version update only_
 
 ## 0.4.12
 Tue, 13 May 2025 02:09:20 GMT

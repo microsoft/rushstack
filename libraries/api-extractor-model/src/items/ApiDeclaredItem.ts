@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
+
 import {
   ApiDocumentedItem,
   type IApiDocumentedItemJson,
@@ -39,7 +40,6 @@ export interface IApiDeclaredItemJson extends IApiDocumentedItemJson {
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export class ApiDeclaredItem extends ApiDocumentedItem {
   private _excerptTokens: ExcerptToken[];
   private _excerpt: Excerpt;

@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type * as child_process from 'child_process';
-import { once } from 'events';
-import { Readable, pipeline } from 'stream';
+import type * as child_process from 'node:child_process';
+import { once } from 'node:events';
+import { Readable, pipeline } from 'node:stream';
 
 import { Executable, FileSystem, type IExecutableSpawnOptions } from '@rushstack/node-core-library';
 

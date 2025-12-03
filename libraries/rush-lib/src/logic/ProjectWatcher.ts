@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
-import * as os from 'os';
-import * as readline from 'readline';
-import { once } from 'events';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as readline from 'node:readline';
+import { once } from 'node:events';
+
 import { getRepoRoot } from '@rushstack/package-deps-hash';
 import { AlreadyReportedError, Path, type FileSystemStats, FileSystem } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
@@ -156,6 +157,13 @@ export class ProjectWatcher {
    * `waitForChange` is not allowed to be called multiple times concurrently.
    */
   public async waitForChangeAsync(onWatchingFiles?: () => void): Promise<IProjectChangeResult> {
+    if (this.isPaused) {
+      this._setStatus(`Project watcher paused.`);
+      await new Promise<void>((resolve) => {
+        this._resolveIfChanged = async () => resolve();
+      });
+    }
+
     const initialChangeResult: IProjectChangeResult = await this._computeChangedAsync();
     // Ensure that the new state is recorded so that we don't loop infinitely
     this._commitChanges(initialChangeResult.inputsSnapshot);

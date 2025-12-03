@@ -19,10 +19,28 @@ export interface IAsyncParallelismOptions {
   concurrency?: number;
 
   /**
-   * Optionally used with the {@link (Async:class).(forEachAsync:2)} to enable weighted operations where an operation can
-   * take up more or less than one concurrency unit.
+   * Optionally used with the {@link (Async:class).(forEachAsync:2)} to enable weighted operations where an
+   * operation can take up more or less than one concurrency unit.
    */
   weighted?: boolean;
+
+  /**
+   * This option affects the handling of task weights, applying a softer policy that favors maximizing parallelism
+   * instead of avoiding overload.
+   *
+   * @remarks
+   * By default, a new task cannot start executing if doing so would push the total weight above the concurrency limit.
+   * Set `allowOversubscription` to true to relax this rule, allowing a new task to start as long as the current
+   * total weight is below the concurrency limit.  Either way, a task cannot start if the total weight already equals
+   * the concurrency limit; therefore, `allowOversubscription` has no effect when all tasks have weight 1.
+   *
+   * Example: Suppose the concurrency limit is 8, and seven tasks are running whose weights are 1, so the current
+   * total weight is 7.  If an available task has weight 2, that would push the total weight to 9, exceeding
+   * the limit.  This task can start only if `allowOversubscription` is true.
+   *
+   * @defaultValue false
+   */
+  allowOversubscription?: boolean;
 }
 
 /**
@@ -47,6 +65,27 @@ export interface IRunWithRetriesOptions<TResult> {
    * The delay in milliseconds between retries.
    */
   retryDelayMs?: number;
+}
+
+/**
+ * @remarks
+ * Used with {@link Async.runWithTimeoutAsync}.
+ *
+ * @public
+ */
+export interface IRunWithTimeoutOptions<TResult> {
+  /**
+   * The action to be performed. The action is executed with a timeout.
+   */
+  action: () => Promise<TResult> | TResult;
+  /**
+   * The timeout in milliseconds.
+   */
+  timeoutMs: number;
+  /**
+   * The message to use for the error if the timeout is reached.
+   */
+  timeoutMessage?: string;
 }
 
 /**
@@ -180,6 +219,8 @@ export class Async {
       let arrayIndex: number = 0;
       let iteratorIsComplete: boolean = false;
       let promiseHasResolvedOrRejected: boolean = false;
+      // iterator that is stored when the loop exits early due to not enough concurrency
+      let nextIterator: IteratorResult<TEntry> | undefined = undefined;
 
       async function queueOperationsAsync(): Promise<void> {
         while (
@@ -192,7 +233,7 @@ export class Async {
           //  there will be effectively no cap on the number of operations waiting.
           const limitedConcurrency: number = !Number.isFinite(concurrency) ? 1 : concurrency;
           concurrentUnitsInProgress += limitedConcurrency;
-          const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
+          const currentIteratorResult: IteratorResult<TEntry> = nextIterator ?? (await iterator.next());
           // eslint-disable-next-line require-atomic-updates
           iteratorIsComplete = !!currentIteratorResult.done;
 
@@ -204,8 +245,20 @@ export class Async {
 
             // Remove the "lock" from the concurrency check and only apply the current weight.
             //  This should allow other operations to execute.
-            concurrentUnitsInProgress += weight;
             concurrentUnitsInProgress -= limitedConcurrency;
+
+            // Wait until there's enough capacity to run this job, this function will be re-entered as tasks call `onOperationCompletionAsync`
+            const wouldExceedConcurrency: boolean = concurrentUnitsInProgress + weight > concurrency;
+            const allowOversubscription: boolean = options?.allowOversubscription ?? false;
+            if (!allowOversubscription && wouldExceedConcurrency) {
+              // eslint-disable-next-line require-atomic-updates
+              nextIterator = currentIteratorResult;
+              break;
+            }
+
+            // eslint-disable-next-line require-atomic-updates
+            nextIterator = undefined;
+            concurrentUnitsInProgress += weight;
 
             Promise.resolve(callback(currentIteratorValue.element, arrayIndex++))
               .then(async () => {
@@ -285,6 +338,7 @@ export class Async {
    * number of concurrency units that can be in progress at once. The weight of each operation
    * determines how many concurrency units it takes up. For example, if the concurrency is 2
    * and the first operation has a weight of 2, then only one more operation can be in progress.
+   * Operations may exceed the concurrency limit based on the `allowOversubscription` option.
    *
    * If `callback` throws a synchronous exception, or if it returns a promise that rejects,
    * then the loop stops immediately.  Any remaining array items will be skipped, and
@@ -326,7 +380,6 @@ export class Async {
     retryDelayMs = 0
   }: IRunWithRetriesOptions<TResult>): Promise<TResult> {
     let retryCount: number = 0;
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
         return await action(retryCount);
@@ -358,6 +411,31 @@ export class Async {
    */
   public static getSignal(): [Promise<void>, () => void, (err: Error) => void] {
     return getSignal();
+  }
+
+  /**
+   * Runs a promise with a timeout. If the promise does not resolve within the specified timeout,
+   * it will reject with an error.
+   * @remarks If the action is completely synchronous, runWithTimeoutAsync doesn't do anything meaningful.
+   */
+  public static async runWithTimeoutAsync<TResult>({
+    action,
+    timeoutMs,
+    timeoutMessage = 'Operation timed out'
+  }: IRunWithTimeoutOptions<TResult>): Promise<TResult> {
+    let timeoutHandle: NodeJS.Timeout | undefined;
+    const promise: Promise<TResult> = Promise.resolve(action());
+    const timeoutPromise: Promise<never> = new Promise<never>((resolve, reject) => {
+      timeoutHandle = setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
+    });
+
+    try {
+      return Promise.race([promise, timeoutPromise]);
+    } finally {
+      if (timeoutHandle) {
+        clearTimeout(timeoutHandle);
+      }
+    }
   }
 }
 

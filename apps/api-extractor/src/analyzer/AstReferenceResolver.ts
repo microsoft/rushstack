@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+
 import * as tsdoc from '@microsoft/tsdoc';
 
 import type { AstSymbolTable } from './AstSymbolTable';

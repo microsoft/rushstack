@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-sdk",
-  "version": "5.155.0",
+  "version": "5.163.0",
   "description": "An API for interacting with the Rush engine",
   "repository": {
     "type": "git",
@@ -40,6 +40,7 @@
   "license": "MIT",
   "dependencies": {
     "@pnpm/lockfile.types-900": "npm:@pnpm/lockfile.types@~900.0.0",
+    "@rushstack/credential-cache": "workspace:*",
     "@rushstack/lookup-by-path": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/package-deps-hash": "workspace:*",
@@ -49,13 +50,14 @@
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/semver": "7.5.0",
     "@types/webpack-env": "1.18.8",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*",
     "webpack": "~5.98.0"
   }
 }

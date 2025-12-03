@@ -9,21 +9,24 @@
     "_phase:build": ""
   },
   "dependencies": {
-    "@microsoft/api-extractor": "7.52.5",
-    "@rushstack/eslint-config": "4.3.0",
-    "@rushstack/eslint-patch": "1.11.0",
-    "@rushstack/heft-node-rig": "2.8.9",
-    "@rushstack/heft": "0.73.2",
+    "@microsoft/api-extractor": "7.54.0",
+    "@rushstack/eslint-config": "4.5.3",
+    "@rushstack/eslint-patch": "1.14.1",
+    "@rushstack/eslint-plugin": "0.22.0",
+    "@rushstack/heft-node-rig": "2.11.6",
+    "@rushstack/heft": "1.1.4",
     "@types/heft-jest": "1.0.1",
     "@types/node": "20.17.19",
-    "@typescript-eslint/parser": "~8.26.1",
-    "eslint-plugin-deprecation": "2.0.0",
+    "@typescript-eslint/eslint-plugin": "~8.46.0",
+    "@typescript-eslint/parser": "~8.46.0",
     "eslint-plugin-header": "~3.1.1",
-    "eslint-plugin-import": "2.25.4",
-    "eslint-plugin-jsdoc": "37.6.1",
-    "eslint-plugin-react-hooks": "4.3.0",
-    "eslint": "~8.57.0",
+    "eslint-plugin-headers": "~1.2.1",
+    "eslint-plugin-import": "2.32.0",
+    "eslint-plugin-jsdoc": "50.6.11",
+    "eslint-plugin-react-hooks": "5.2.0",
+    "eslint": "~9.37.0",
     "jest-junit": "12.3.0",
-    "typescript": "~5.8.2"
+    "typescript": "~5.8.2",
+    "eslint-import-resolver-node": "0.3.9"
   }
 }

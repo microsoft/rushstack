@@ -10,7 +10,7 @@ describe(convertLockfileV9ToLockfileObject.name, () => {
   const lockfileContent: string = FileSystem.readFile(
     `${__dirname}/yamlFiles/pnpm-lock-v9/pnpm-lock-v9.yaml`
   );
-  const lockfileJson: LockfileFileV9 = yamlModule.safeLoad(lockfileContent);
+  const lockfileJson: LockfileFileV9 = yamlModule.load(lockfileContent) as LockfileFileV9;
   const lockfile = convertLockfileV9ToLockfileObject(lockfileJson);
 
   it('merge packages and snapshots', () => {

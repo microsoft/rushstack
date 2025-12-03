@@ -1,6 +1,60 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 01 May 2025 00:11:12 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+
+## 5.19.0
+Fri, 21 Nov 2025 16:13:56 GMT
+
+### Minor changes
+
+- Update `Executable.getProcessInfoBy*` APIs to use PowerShell on Windows to support latest Windows 11 versions.
+
+## 5.18.0
+Fri, 24 Oct 2025 00:13:38 GMT
+
+### Minor changes
+
+- Add "Objects.areDeepEqual" and "User.getHomeFolder" APIs.
+
+## 5.17.1
+Wed, 22 Oct 2025 00:57:54 GMT
+
+### Patches
+
+- Update the return type of `Executable.waitForExitAsync` to omit `stdout` and `stderr` if an `encoding` parameter isn't passed to the options object.
+
+## 5.17.0
+Wed, 08 Oct 2025 00:13:28 GMT
+
+### Minor changes
+
+- Add an `allowOversubscription` option to the `Async` API functions which prevents running tasks from exceeding concurrency.  Change its default to `false`.
+
+## 5.16.0
+Fri, 03 Oct 2025 20:09:59 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
+
+## 5.15.1
+Tue, 30 Sep 2025 23:57:45 GMT
+
+_Version update only_
+
+## 5.15.0
+Tue, 30 Sep 2025 20:33:51 GMT
+
+### Minor changes
+
+- Add `FileError.getProblemMatcher()` which returns the problem matcher compatible with `IOperationExecutionResult.problemCollector` as well as VS Code, GitHub Actions
+
+## 5.14.0
+Wed, 23 Jul 2025 20:55:57 GMT
+
+### Minor changes
+
+- Add a `Async.runWithTimeoutAsync` function that executes an async function, resolving if the specified timeout elapses first.
 
 ## 5.13.1
 Thu, 01 May 2025 00:11:12 GMT

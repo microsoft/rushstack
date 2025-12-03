@@ -1,6 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import path from 'node:path';
+
+import yaml = require('js-yaml');
+
+import { FileSystem, Encoding, NewlineKind } from '@rushstack/node-core-library';
+
 import type {
   IYamlItem,
   IYamlApiFile,
@@ -17,9 +23,6 @@ import type {
   FunctionYamlModel,
   CommonYamlModel
 } from '../yaml/ISDPYamlFile';
-import path from 'path';
-import { FileSystem, Encoding, NewlineKind } from '@rushstack/node-core-library';
-import yaml = require('js-yaml');
 
 export function convertUDPYamlToSDP(folderPath: string): void {
   convert(folderPath, folderPath);
@@ -49,10 +52,10 @@ function convert(inputPath: string, outputPath: string): void {
 
       console.log(`convert file ${fpath} from udp to sdp`);
 
-      const file: IYamlApiFile = yaml.safeLoad(yamlContent) as IYamlApiFile;
+      const file: IYamlApiFile = yaml.load(yamlContent) as IYamlApiFile;
       const result: { model: CommonYamlModel; type: string } | undefined = convertToSDP(file);
       if (result && result.model) {
-        const stringified: string = `### YamlMime:TS${result.type}\n${yaml.safeDump(result.model, {
+        const stringified: string = `### YamlMime:TS${result.type}\n${yaml.dump(result.model, {
           lineWidth: 120
         })}`;
         FileSystem.writeFile(`${outputPath}/${name}`, stringified, {

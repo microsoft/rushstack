@@ -37,7 +37,7 @@
     "color": "#f0f0f0",
     "theme": "light"
   },
-  "icon": "resources/rushstack-icon.png",
+  "icon": "assets/rushstack-icon.png",
   "badges": [
     {
       "url": "https://img.shields.io/badge/Rush-db714a",
@@ -70,17 +70,14 @@
       "description": "Rush Stack community support"
     }
   ],
-  "main": "./dist/extension.js",
+  "main": "./extension.js",
   "scripts": {
     "build": "heft build --clean",
     "build:watch": "heft build-watch",
-    "vscode:prepublish": "heft build --clean --production",
-    "deploy": "vsce publish --no-dependencies",
-    "package": "vsce package --no-dependencies",
     "start": "heft start",
     "pretest": "npm run build",
     "test": "node ./lib/test/runTest.js",
-    "_phase:build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
     "_phase:test": ""
   },
   "contributes": {
@@ -220,6 +217,46 @@
         }
       }
     ],
+    "problemMatchers": [
+      {
+        "name": "rushstack-file-error-unix",
+        "owner": "typescript",
+        "source": "rushstack",
+        "fileLocation": [
+          "relative",
+          "${cwd}"
+        ],
+        "applyTo": "allDocuments",
+        "pattern": {
+          "regexp": "^\\[[^\\]]+\\]\\s+(Error|Warning):\\s+([^:]+):(\\d+):(\\d+)\\s+-\\s+(?:\\(([^)]+)\\)\\s+)?(.*)$",
+          "severity": 1,
+          "file": 2,
+          "line": 3,
+          "column": 4,
+          "code": 5,
+          "message": 6
+        }
+      },
+      {
+        "name": "rushstack-file-error-visualstudio",
+        "owner": "typescript",
+        "source": "rushstack",
+        "fileLocation": [
+          "relative",
+          "${cwd}"
+        ],
+        "applyTo": "allDocuments",
+        "pattern": {
+          "regexp": "^\\[[^\\]]+\\]\\s+(Error|Warning):\\s+([^\\(]+)\\((\\d+),(\\d+)\\)\\s+-\\s+(?:\\(([^)]+)\\)\\s+)?(.*)$",
+          "severity": 1,
+          "file": 2,
+          "line": 3,
+          "column": 4,
+          "code": 5,
+          "message": 6
+        }
+      }
+    ],
     "views": {
       "rushstack": [
         {
@@ -238,7 +275,7 @@
         {
           "id": "rushstack",
           "title": "Rush Stack",
-          "icon": "resources/rushstack-icon.svg"
+          "icon": "assets/rushstack-icon.svg"
         }
       ]
     },
@@ -264,21 +301,18 @@
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
-    "local-node-rig": "workspace:*",
-    "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/package-extractor": "workspace:*",
-    "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/glob": "7.1.1",
     "@types/mocha": "10.0.6",
-    "@types/vscode": "^1.63.0",
+    "@types/vscode": "1.103.0",
     "@types/webpack-env": "1.18.8",
     "@vscode/test-electron": "^1.6.2",
+    "eslint": "~9.37.0",
     "glob": "~7.0.5",
-    "mocha": "^10.1.0",
-    "vsce": "~2.14.0"
+    "@rushstack/heft-vscode-extension-rig": "workspace:*",
+    "mocha": "^10.1.0"
   },
   "engines": {
-    "vscode": "^1.63.0"
+    "vscode": "^1.103.0"
   }
 }

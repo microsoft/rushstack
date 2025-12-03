@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import os from 'os';
-import { resolve } from 'path';
-import type { Worker } from 'worker_threads';
+import os from 'node:os';
+import { resolve } from 'node:path';
+import type { Worker } from 'node:worker_threads';
 
 import type { Configuration } from 'webpack';
 
@@ -56,8 +56,7 @@ function formatTime(timeNs: bigint): string {
 
 export async function runParallel(options: IParallelWebpackOptions): Promise<void> {
   const resolvedPath: string = resolve(options.configFilePath);
-
-  const rawConfig: Configuration | Configuration[] = require(resolvedPath); // eslint-disable-line @typescript-eslint/no-var-requires
+  const rawConfig: Configuration | Configuration[] = require(resolvedPath);
   const configArray: Configuration[] = Array.isArray(rawConfig) ? rawConfig : [rawConfig];
   const configCount: number = configArray.length;
 

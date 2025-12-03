@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.153.0",
+  "rushVersion": "5.162.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -304,7 +304,7 @@
    * that read these JSON files and do something with them.  These scripts are typically registered
    * in the "eventHooks" section.
    */
-  // "telemetryEnabled": false,
+  "telemetryEnabled": true,
 
   /**
    * Allows creation of hotfix changes. This feature is experimental so it is disabled by default.
@@ -489,6 +489,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
+    {
+      "packageName": "@rushstack/zipsync",
+      "projectFolder": "apps/zipsync",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
 
     // "build-tests" folder (alphabetical order)
     {
@@ -597,25 +603,25 @@
       "tags": ["api-extractor-tests"]
     },
     {
-      "packageName": "eslint-7-7-test",
-      "projectFolder": "build-tests/eslint-7-7-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false,
-      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
-    },
-    {
       "packageName": "eslint-7-11-test",
       "projectFolder": "build-tests/eslint-7-11-test",
       "reviewCategory": "tests",
       "shouldPublish": false,
-      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
+      "decoupledLocalDependencies": ["@rushstack/eslint-config"]
+    },
+    {
+      "packageName": "eslint-7-7-test",
+      "projectFolder": "build-tests/eslint-7-7-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "eslint-7-test",
       "projectFolder": "build-tests/eslint-7-test",
       "reviewCategory": "tests",
       "shouldPublish": false,
-      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
+      "decoupledLocalDependencies": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "eslint-8-test",
@@ -624,8 +630,20 @@
       "shouldPublish": false
     },
     {
+      "packageName": "eslint-9-test",
+      "projectFolder": "build-tests/eslint-9-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "eslint-bulk-suppressions-test",
       "projectFolder": "build-tests/eslint-bulk-suppressions-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "eslint-bulk-suppressions-test-flat",
+      "projectFolder": "build-tests/eslint-bulk-suppressions-test-flat",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -798,6 +816,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-example-lifecycle-plugin",
+      "projectFolder": "build-tests/heft-example-lifecycle-plugin",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-example-plugin-01",
       "projectFolder": "build-tests/heft-example-plugin-01",
       "reviewCategory": "tests",
@@ -818,6 +842,12 @@
     {
       "packageName": "heft-jest-reporters-test",
       "projectFolder": "build-tests/heft-jest-reporters-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-json-schema-typings-plugin-test",
+      "projectFolder": "build-tests/heft-json-schema-typings-plugin-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -860,6 +890,12 @@
     {
       "packageName": "heft-parameter-plugin-test",
       "projectFolder": "build-tests/heft-parameter-plugin-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-rspack-everything-test",
+      "projectFolder": "build-tests/heft-rspack-everything-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -980,6 +1016,13 @@
       "shouldPublish": false
     },
     {
+      "packageName": "webpack-local-version-test",
+      "projectFolder": "build-tests/webpack-local-version-test",
+      "reviewCategory": "tests",
+      "subspaceName": "build-tests-subspace",
+      "shouldPublish": false
+    },
+    {
       "packageName": "rush-lib-declaration-paths-test",
       "projectFolder": "build-tests/rush-lib-declaration-paths-test",
       "reviewCategory": "tests",
@@ -1030,6 +1073,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-json-schema-typings-plugin",
+      "projectFolder": "heft-plugins/heft-json-schema-typings-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-lint-plugin",
       "projectFolder": "heft-plugins/heft-lint-plugin",
       "reviewCategory": "libraries",
@@ -1038,6 +1087,12 @@
     {
       "packageName": "@rushstack/heft-localization-typings-plugin",
       "projectFolder": "heft-plugins/heft-localization-typings-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-rspack-plugin",
+      "projectFolder": "heft-plugins/heft-rspack-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
@@ -1072,6 +1127,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-vscode-extension-plugin",
+      "projectFolder": "heft-plugins/heft-vscode-extension-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-webpack4-plugin",
       "projectFolder": "heft-plugins/heft-webpack4-plugin",
       "reviewCategory": "libraries",
@@ -1093,6 +1154,12 @@
       "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/credential-cache",
+      "projectFolder": "libraries/credential-cache",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/debug-certificate-manager",
       "projectFolder": "libraries/debug-certificate-manager",
       "reviewCategory": "libraries",
@@ -1103,6 +1170,13 @@
       "projectFolder": "libraries/package-extractor",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/problem-matcher",
+      "projectFolder": "libraries/problem-matcher",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/heft-config-file",
@@ -1141,6 +1215,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "decoupledLocalDependencies": ["@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/npm-check-fork",
+      "projectFolder": "libraries/npm-check-fork",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
     {
       "packageName": "@rushstack/operation-graph",
@@ -1219,6 +1299,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
+    {
+      "packageName": "@rushstack/vscode-shared",
+      "projectFolder": "vscode-extensions/vscode-shared",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
 
     // "repo-scripts" folder (alphabetical order)
     {
@@ -1248,15 +1334,22 @@
       "shouldPublish": false,
       "decoupledLocalDependencies": [
         "@microsoft/api-extractor",
-        "@rushstack/heft-node-rig",
-        "@rushstack/heft",
+        "@rushstack/eslint-config",
         "@rushstack/eslint-patch",
-        "@rushstack/eslint-config"
+        "@rushstack/eslint-plugin",
+        "@rushstack/heft-node-rig",
+        "@rushstack/heft"
       ]
     },
     {
       "packageName": "@rushstack/heft-node-rig",
       "projectFolder": "rigs/heft-node-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-vscode-extension-rig",
+      "projectFolder": "rigs/heft-vscode-extension-rig",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
@@ -1339,12 +1432,20 @@
     {
       "packageName": "rushstack",
       "projectFolder": "vscode-extensions/rush-vscode-extension",
-      "reviewCategory": "vscode-extensions"
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"]
     },
     {
       "packageName": "@rushstack/rush-vscode-command-webview",
       "projectFolder": "vscode-extensions/rush-vscode-command-webview",
-      "reviewCategory": "vscode-extensions"
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"]
+    },
+    {
+      "packageName": "debug-certificate-manager",
+      "projectFolder": "vscode-extensions/debug-certificate-manager-vscode-extension",
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"]
     },
 
     // "webpack" folder (alphabetical order)

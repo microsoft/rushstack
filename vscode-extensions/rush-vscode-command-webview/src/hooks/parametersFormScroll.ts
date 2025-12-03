@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { type MutableRefObject, type UIEventHandler, useCallback, useEffect, useRef } from 'react';
+import type { Dispatch, AnyAction } from '@reduxjs/toolkit';
+
 import { useAppDispatch } from '../store/hooks';
 import {
   setCurretParameterName,
@@ -11,8 +13,6 @@ import {
   useIsToolbarSticky,
   useUserSelectedParameterName
 } from '../store/slices/ui';
-
-import type { Dispatch, AnyAction } from '@reduxjs/toolkit';
 
 export const SCROLLABLE_ELEMENT_ID: string = 'parameters-scrollable-element';
 export const FIELD_ANCHOR_CLASSNAME: string = 'parameters-field-anchor';

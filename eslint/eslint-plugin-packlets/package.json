@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-plugin-packlets",
-  "version": "0.11.0",
+  "version": "0.14.0",
   "description": "A lightweight alternative to NPM packages for organizing source files within a single project",
   "license": "MIT",
   "repository": {
@@ -24,19 +24,16 @@
   },
   "dependencies": {
     "@rushstack/tree-pattern": "workspace:*",
-    "@typescript-eslint/utils": "~8.26.1"
+    "@typescript-eslint/utils": "~8.46.0"
   },
   "peerDependencies": {
-    "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0"
+    "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0"
   },
   "devDependencies": {
-    "@rushstack/heft": "0.73.2",
-    "@types/eslint": "8.56.10",
-    "@types/estree": "1.0.6",
-    "@typescript-eslint/parser": "~8.26.1",
-    "@typescript-eslint/typescript-estree": "~8.26.1",
+    "@rushstack/heft": "1.1.4",
+    "@typescript-eslint/parser": "~8.46.0",
     "decoupled-local-node-rig": "workspace:*",
-    "eslint": "~8.57.0",
+    "eslint": "~9.37.0",
     "typescript": "~5.8.2"
   }
 }

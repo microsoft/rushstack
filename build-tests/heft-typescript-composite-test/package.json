@@ -10,7 +10,6 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
-    "local-eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
@@ -18,7 +17,8 @@
     "@types/heft-jest": "1.0.1",
     "@types/jest": "29.2.5",
     "@types/webpack-env": "1.18.8",
-    "eslint": "~8.57.0",
+    "eslint": "~9.37.0",
+    "local-eslint-config": "workspace:*",
     "tslint": "~5.20.1",
     "typescript": "~5.8.2"
   }

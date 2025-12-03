@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as tsdoc from '@microsoft/tsdoc';
+
 import { ApiItem, type IApiItemOptions, type IApiItemJson } from './ApiItem';
 import type { DeserializerContext } from '../model/DeserializerContext';
 

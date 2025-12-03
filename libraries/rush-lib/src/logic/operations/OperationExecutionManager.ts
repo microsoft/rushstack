@@ -25,6 +25,7 @@ export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
   debugMode: boolean;
   parallelism: number;
+  allowOversubscription: boolean;
   inputsSnapshot?: IInputsSnapshot;
   destination?: TerminalWritable;
 
@@ -69,6 +70,7 @@ export class OperationExecutionManager {
   private readonly _executionRecords: Map<Operation, OperationExecutionRecord>;
   private readonly _quietMode: boolean;
   private readonly _parallelism: number;
+  private readonly _allowOversubscription: boolean;
   private readonly _totalOperations: number;
 
   private readonly _outputWritable: TerminalWritable;
@@ -90,6 +92,7 @@ export class OperationExecutionManager {
   // Variables for current status
   private _hasAnyFailures: boolean;
   private _hasAnyNonAllowedWarnings: boolean;
+  private _hasAnyAborted: boolean;
   private _completedOperations: number;
   private _executionQueue: AsyncOperationQueue;
 
@@ -98,6 +101,7 @@ export class OperationExecutionManager {
       quietMode,
       debugMode,
       parallelism,
+      allowOversubscription,
       inputsSnapshot,
       beforeExecuteOperationAsync: beforeExecuteOperation,
       afterExecuteOperationAsync: afterExecuteOperation,
@@ -109,7 +113,9 @@ export class OperationExecutionManager {
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
+    this._hasAnyAborted = false;
     this._parallelism = parallelism;
+    this._allowOversubscription = allowOversubscription;
 
     this._beforeExecuteOperation = beforeExecuteOperation;
     this._afterExecuteOperation = afterExecuteOperation;
@@ -232,9 +238,10 @@ export class OperationExecutionManager {
    * Executes all operations which have been registered, returning a promise which is resolved when all the
    * operations are completed successfully, or rejects when any operation fails.
    */
-  public async executeAsync(): Promise<IExecutionResult> {
+  public async executeAsync(abortController: AbortController): Promise<IExecutionResult> {
     this._completedOperations = 0;
     const totalOperations: number = this._totalOperations;
+    const abortSignal: AbortSignal = abortController.signal;
 
     if (!this._quietMode) {
       const plural: string = totalOperations === 1 ? '' : 's';
@@ -263,14 +270,19 @@ export class OperationExecutionManager {
     const onOperationCompleteAsync: (record: OperationExecutionRecord) => Promise<void> = async (
       record: OperationExecutionRecord
     ) => {
-      try {
-        await this._afterExecuteOperation?.(record);
-      } catch (e) {
-        this._reportOperationErrorIfAny(record);
-        record.error = e;
-        record.status = OperationStatus.Failure;
+      // If the operation is not terminal, we should _only_ notify the queue to assign operations.
+      if (!record.isTerminal) {
+        this._executionQueue.assignOperations();
+      } else {
+        try {
+          await this._afterExecuteOperation?.(record);
+        } catch (e) {
+          this._reportOperationErrorIfAny(record);
+          record.error = e;
+          record.status = OperationStatus.Failure;
+        }
+        this._onOperationComplete(record);
       }
-      this._onOperationComplete(record);
     };
 
     const onOperationStartAsync: (
@@ -282,12 +294,21 @@ export class OperationExecutionManager {
     await Async.forEachAsync(
       this._executionQueue,
       async (record: OperationExecutionRecord) => {
-        await record.executeAsync({
-          onStart: onOperationStartAsync,
-          onResult: onOperationCompleteAsync
-        });
+        if (abortSignal.aborted) {
+          record.status = OperationStatus.Aborted;
+          // Bypass the normal completion handler, directly mark the operation as aborted and unblock the queue.
+          // We do this to ensure that we aren't messing with the stopwatch or terminal.
+          this._hasAnyAborted = true;
+          this._executionQueue.complete(record);
+        } else {
+          await record.executeAsync({
+            onStart: onOperationStartAsync,
+            onResult: onOperationCompleteAsync
+          });
+        }
       },
       {
+        allowOversubscription: this._allowOversubscription,
         concurrency: maxParallelism,
         weighted: true
       }
@@ -295,9 +316,11 @@ export class OperationExecutionManager {
 
     const status: OperationStatus = this._hasAnyFailures
       ? OperationStatus.Failure
-      : this._hasAnyNonAllowedWarnings
-      ? OperationStatus.SuccessWithWarning
-      : OperationStatus.Success;
+      : this._hasAnyAborted
+        ? OperationStatus.Aborted
+        : this._hasAnyNonAllowedWarnings
+          ? OperationStatus.SuccessWithWarning
+          : OperationStatus.Success;
 
     return {
       operationResults: this._executionRecords,
@@ -431,13 +454,17 @@ export class OperationExecutionManager {
         this._hasAnyNonAllowedWarnings = this._hasAnyNonAllowedWarnings || !runner.warningsAreAllowed;
         break;
       }
+
+      case OperationStatus.Aborted: {
+        this._hasAnyAborted ||= true;
+        break;
+      }
+
+      default: {
+        throw new InternalError(`Unexpected operation status: ${status}`);
+      }
     }
 
-    if (record.isTerminal) {
-      // If the operation was not remote, then we can notify queue that it is complete
-      this._executionQueue.complete(record);
-    } else {
-      this._executionQueue.assignOperations();
-    }
+    this._executionQueue.complete(record);
   }
 }

@@ -98,6 +98,7 @@ jspm_packages/
 .vscode/
 !.vscode/tasks.json
 !.vscode/launch.json
+!.vscode/debug-certificate-manager.json
 
 # Rush temporary files
 common/deploy/
@@ -107,6 +108,7 @@ common/autoinstallers/*/.npmrc
 *.lock
 
 # Common toolchain intermediate files
+build/
 temp/
 lib/
 lib-amd/
@@ -123,3 +125,6 @@ dist-storybook/
 # Heft temporary files
 .cache/
 .heft/
+
+# VS Code test runner files
+.vscode-test/

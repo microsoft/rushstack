@@ -14,6 +14,8 @@
 
   "phasesByName": {
     "build": {
+      "cleanFiles": [{ "includeGlobs": ["build"] }],
+
       "tasksByName": {
         "copy-app-bundle": {
           "taskPlugin": {
@@ -30,6 +32,49 @@
                   "sourcePath": "assets",
                   "destinationFolders": ["dist"],
                   "includeGlobs": ["favicon.ico"]
+                }
+              ]
+            }
+          }
+        },
+
+        "pre-compile-copy": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "node_modules/@rushstack/lockfile-explorer-web/lib/packlets/lfx-shared",
+                  "destinationFolders": ["build/lfx-shared"],
+                  "includeGlobs": ["*.d.ts"]
+                },
+                {
+                  "sourcePath": "node_modules/@rushstack/lockfile-explorer-web/lib-commonjs/packlets/lfx-shared",
+                  "destinationFolders": ["build/lfx-shared"],
+                  "includeGlobs": ["*.js", "*.map"]
+                }
+              ]
+            }
+          }
+        },
+
+        "typescript": {
+          // The "typescript" task should not run until after "pre-compile-copy" completes.
+          "taskDependencies": ["pre-compile-copy"]
+        },
+
+        "copy-json-schemas": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "src/schemas",
+                  "destinationFolders": ["temp/json-schemas/lockfile-explorer"],
+                  "fileExtensions": [".schema.json"],
+                  "hardlink": true
                 }
               ]
             }

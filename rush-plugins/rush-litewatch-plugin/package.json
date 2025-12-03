@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
   }
 }

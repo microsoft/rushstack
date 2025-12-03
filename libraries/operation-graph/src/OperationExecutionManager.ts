@@ -5,8 +5,8 @@ import { Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { IOperationState } from './IOperationRunner';
-import type { IExecuteOperationContext, Operation } from './Operation';
-import { OperationGroupRecord } from './OperationGroupRecord';
+import type { IExecuteOperationContext, Operation, OperationRequestRunCallback } from './Operation';
+import type { OperationGroupRecord } from './OperationGroupRecord';
 import { OperationStatus } from './OperationStatus';
 import { calculateCriticalPathLengths } from './calculateCriticalPath';
 import { WorkQueue } from './WorkQueue';
@@ -16,12 +16,20 @@ import { WorkQueue } from './WorkQueue';
  *
  * @beta
  */
-export interface IOperationExecutionOptions {
+export interface IOperationExecutionOptions<
+  TOperationMetadata extends {} = {},
+  TGroupMetadata extends {} = {}
+> {
   abortSignal: AbortSignal;
   parallelism: number;
   terminal: ITerminal;
 
-  requestRun?: (requestor?: string) => void;
+  requestRun?: OperationRequestRunCallback;
+
+  beforeExecuteOperation?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => void;
+  afterExecuteOperation?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => void;
+  beforeExecuteOperationGroup?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => void;
+  afterExecuteOperationGroup?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => void;
 }
 
 /**
@@ -32,37 +40,22 @@ export interface IOperationExecutionOptions {
  *
  * @beta
  */
-export class OperationExecutionManager {
+export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGroupMetadata extends {} = {}> {
   /**
    * The set of operations that will be executed
    */
-  private readonly _operations: Operation[];
-  /**
-   * Group records are metadata-only entities used for tracking the start and end of a set of related tasks.
-   * This is the only extent to which the operation graph is aware of Heft phases.
-   */
-  private readonly _groupRecordByName: Map<string, OperationGroupRecord>;
+  private readonly _operations: Operation<TOperationMetadata, TGroupMetadata>[];
   /**
    * The total number of non-silent operations in the graph.
    * Silent operations are generally used to simplify the construction of the graph.
    */
   private readonly _trackedOperationCount: number;
 
-  public constructor(operations: ReadonlySet<Operation>) {
-    const groupRecordByName: Map<string, OperationGroupRecord> = new Map();
-    this._groupRecordByName = groupRecordByName;
+  private readonly _groupRecords: Set<OperationGroupRecord<TGroupMetadata>>;
 
+  public constructor(operations: ReadonlySet<Operation<TOperationMetadata, TGroupMetadata>>) {
     let trackedOperationCount: number = 0;
     for (const operation of operations) {
-      const { groupName } = operation;
-      let group: OperationGroupRecord | undefined = undefined;
-      if (groupName && !(group = groupRecordByName.get(groupName))) {
-        group = new OperationGroupRecord(groupName);
-        groupRecordByName.set(groupName, group);
-      }
-
-      group?.addOperation(operation);
-
       if (!operation.runner?.silent) {
         // Only count non-silent operations
         trackedOperationCount++;
@@ -72,6 +65,8 @@ export class OperationExecutionManager {
     this._trackedOperationCount = trackedOperationCount;
 
     this._operations = calculateCriticalPathLengths(operations);
+
+    this._groupRecords = new Set(Array.from(this._operations, (e) => e.group).filter((e) => e !== undefined));
 
     for (const consumer of operations) {
       for (const dependency of consumer.dependencies) {
@@ -89,7 +84,9 @@ export class OperationExecutionManager {
    * Executes all operations which have been registered, returning a promise which is resolved when all the
    * operations are completed successfully, or rejects when any operation fails.
    */
-  public async executeAsync(executionOptions: IOperationExecutionOptions): Promise<OperationStatus> {
+  public async executeAsync(
+    executionOptions: IOperationExecutionOptions<TOperationMetadata, TGroupMetadata>
+  ): Promise<OperationStatus> {
     let hasReportedFailures: boolean = false;
 
     const { abortSignal, parallelism, terminal, requestRun } = executionOptions;
@@ -102,8 +99,8 @@ export class OperationExecutionManager {
     const finishedGroups: Set<OperationGroupRecord> = new Set();
 
     const maxParallelism: number = Math.min(this._operations.length, parallelism);
-    const groupRecords: Map<string, OperationGroupRecord> = this._groupRecordByName;
-    for (const groupRecord of groupRecords.values()) {
+
+    for (const groupRecord of this._groupRecords) {
       groupRecord.reset();
     }
 
@@ -129,26 +126,29 @@ export class OperationExecutionManager {
           return workQueue.pushAsync(workFn, priority);
         },
 
-        beforeExecute: (operation: Operation): void => {
+        beforeExecute: (operation: Operation<TOperationMetadata, TGroupMetadata>): void => {
           // Initialize group if uninitialized and log the group name
-          const { groupName } = operation;
-          const groupRecord: OperationGroupRecord | undefined = groupName
-            ? groupRecords.get(groupName)
-            : undefined;
-          if (groupRecord && !startedGroups.has(groupRecord)) {
-            startedGroups.add(groupRecord);
-            groupRecord.startTimer();
-            terminal.writeLine(` ---- ${groupRecord.name} started ---- `);
+          const { group, runner } = operation;
+          if (group) {
+            if (!startedGroups.has(group)) {
+              startedGroups.add(group);
+              group.startTimer();
+              terminal.writeLine(` ---- ${group.name} started ---- `);
+              executionOptions.beforeExecuteOperationGroup?.(group);
+            }
+          }
+          if (!runner?.silent) {
+            executionOptions.beforeExecuteOperation?.(operation);
           }
         },
 
-        afterExecute: (operation: Operation, state: IOperationState): void => {
-          const { groupName } = operation;
-          const groupRecord: OperationGroupRecord | undefined = groupName
-            ? groupRecords.get(groupName)
-            : undefined;
-          if (groupRecord) {
-            groupRecord.setOperationAsComplete(operation, state);
+        afterExecute: (
+          operation: Operation<TOperationMetadata, TGroupMetadata>,
+          state: IOperationState
+        ): void => {
+          const { group, runner } = operation;
+          if (group) {
+            group.setOperationAsComplete(operation, state);
           }
 
           if (state.status === OperationStatus.Failure) {
@@ -162,17 +162,24 @@ export class OperationExecutionManager {
             hasReportedFailures = true;
           }
 
-          // Log out the group name and duration if it is the last operation in the group
-          if (groupRecord?.finished && !finishedGroups.has(groupRecord)) {
-            finishedGroups.add(groupRecord);
-            const finishedLoggingWord: string = groupRecord.hasFailures
-              ? 'encountered an error'
-              : groupRecord.hasCancellations
-                ? 'cancelled'
-                : 'finished';
-            terminal.writeLine(
-              ` ---- ${groupRecord.name} ${finishedLoggingWord} (${groupRecord.duration.toFixed(3)}s) ---- `
-            );
+          if (!runner?.silent) {
+            executionOptions.afterExecuteOperation?.(operation);
+          }
+
+          if (group) {
+            // Log out the group name and duration if it is the last operation in the group
+            if (group?.finished && !finishedGroups.has(group)) {
+              finishedGroups.add(group);
+              const finishedLoggingWord: string = group.hasFailures
+                ? 'encountered an error'
+                : group.hasCancellations
+                  ? 'cancelled'
+                  : 'finished';
+              terminal.writeLine(
+                ` ---- ${group.name} ${finishedLoggingWord} (${group.duration.toFixed(3)}s) ---- `
+              );
+              executionOptions.afterExecuteOperationGroup?.(group);
+            }
           }
         }
       };

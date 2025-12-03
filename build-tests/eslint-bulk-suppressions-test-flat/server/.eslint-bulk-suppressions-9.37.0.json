@@ -1,0 +1,69 @@
+{
+  "suppressions": [
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-namespace"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".AbsurdClass.absurdClassMethod",
+      "rule": "@typescript-eslint/explicit-function-return-type"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".AbsurdClass.absurdClassMethod",
+      "rule": "@typescript-eslint/explicit-member-accessibility"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".AbsurdClass.absurdClassMethod.AbsurdClass2",
+      "rule": "@typescript-eslint/explicit-member-accessibility"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".AbsurdClass.absurdClassMethod.AbsurdClass2",
+      "rule": "@typescript-eslint/typedef"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".AbsurdClass.absurdClassMethod.AbsurdClass2.constructor",
+      "rule": "@typescript-eslint/explicit-member-accessibility"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".AbsurdClass.absurdClassMethod.AbsurdClass2.constructor.absurdObject",
+      "rule": "@typescript-eslint/typedef"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".ExampleEnum",
+      "rule": "dot-notation"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".ExampleInterface",
+      "rule": "@typescript-eslint/naming-convention"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".ExampleInterface2",
+      "rule": "@typescript-eslint/naming-convention"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".ExampleObjectType",
+      "rule": "@typescript-eslint/consistent-type-definitions"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".ExampleObjectType",
+      "rule": "@typescript-eslint/no-wrapper-object-types"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleObject2",
+      "rule": "@typescript-eslint/typedef"
+    }
+  ]
+}

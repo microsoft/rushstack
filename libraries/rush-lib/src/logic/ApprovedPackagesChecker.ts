@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { IPackageJson } from '@rushstack/node-core-library';
+
 import type { ApprovedPackagesPolicy } from '../api/ApprovedPackagesPolicy';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { DependencySpecifier } from './DependencySpecifier';
-import type { IPackageJson } from '@rushstack/node-core-library';
 
 export class ApprovedPackagesChecker {
   private readonly _rushConfiguration: RushConfiguration;
@@ -70,7 +71,7 @@ export class ApprovedPackagesChecker {
         // "dependencies": {
         //   "alias-name": "npm:target-name@^1.2.3"
         // }
-        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(
+        const dependencySpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(
           packageName,
           dependencies[packageName]
         );

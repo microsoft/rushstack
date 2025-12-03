@@ -3,7 +3,6 @@
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IPhase } from '../../api/CommandLineConfiguration';
-
 import { Operation } from './Operation';
 import type {
   ICreateOperationsContext,

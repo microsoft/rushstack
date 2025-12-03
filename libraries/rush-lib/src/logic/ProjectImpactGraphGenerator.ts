@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, Text, Async } from '@rushstack/node-core-library';
 import yaml from 'js-yaml';
+
+import { FileSystem, Text, Async } from '@rushstack/node-core-library';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Stopwatch } from '../utilities/Stopwatch';
 import { RushConstants } from './RushConstants';
-import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 /**
  * Project property configuration
@@ -141,7 +142,7 @@ export class ProjectImpactGraphGenerator {
     const projects: Record<string, IProjectImpactGraphProjectConfiguration> =
       Object.fromEntries(projectEntries);
     const content: IProjectImpactGraphFile = { globalExcludedGlobs, projects };
-    await FileSystem.writeFileAsync(this._projectImpactGraphFilePath, yaml.safeDump(content));
+    await FileSystem.writeFileAsync(this._projectImpactGraphFilePath, yaml.dump(content));
 
     stopwatch.stop();
     this._terminal.writeLine();

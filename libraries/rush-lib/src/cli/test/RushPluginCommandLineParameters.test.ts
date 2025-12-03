@@ -3,10 +3,11 @@
 
 import './mockRushCommandLineParser';
 
-import path from 'path';
+import path from 'node:path';
 import { FileSystem, LockFile } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Autoinstaller } from '../../logic/Autoinstaller';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 describe('PluginCommandLineParameters', () => {
   let originCWD: string | undefined;
@@ -61,6 +62,8 @@ describe('PluginCommandLineParameters', () => {
       originCWD = undefined;
       process.argv = _argv;
     }
+
+    EnvironmentConfiguration.reset();
   });
 
   afterAll(() => {

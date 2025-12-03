@@ -17,7 +17,7 @@ import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { CustomValidationFunction } from '@rushstack/heft-config-file';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import { ICustomJsonPathMetadata } from '@rushstack/heft-config-file';
 import { ICustomPropertyInheritance } from '@rushstack/heft-config-file';
 import { IJsonPathMetadata } from '@rushstack/heft-config-file';
@@ -34,8 +34,11 @@ import { IPropertyInheritanceDefaults } from '@rushstack/heft-config-file';
 import { IRigConfig } from '@rushstack/rig-package';
 import { ITerminal } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
+import type { Operation } from '@rushstack/operation-graph';
+import type { OperationGroupRecord } from '@rushstack/operation-graph';
 import { PathResolutionMethod } from '@rushstack/heft-config-file';
 import { PropertyInheritanceCustomFunction } from '@rushstack/heft-config-file';
+import type { SyncHook } from 'tapable';
 
 export { CommandLineChoiceListParameter }
 
@@ -150,7 +153,11 @@ export interface IHeftLifecycleCleanHookOptions {
 // @public
 export interface IHeftLifecycleHooks {
     clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
+    phaseFinish: SyncHook<IHeftPhaseFinishHookOptions>;
+    phaseStart: SyncHook<IHeftPhaseStartHookOptions>;
     recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
+    taskFinish: SyncHook<IHeftTaskFinishHookOptions>;
+    taskStart: SyncHook<IHeftTaskStartHookOptions>;
     toolFinish: AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>;
     toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;
 }
@@ -193,6 +200,42 @@ export interface IHeftParsedCommandLine {
     readonly unaliasedCommandName: string;
 }
 
+// @public (undocumented)
+export interface IHeftPhase {
+    // (undocumented)
+    cleanFiles: ReadonlySet<IDeleteOperation>;
+    // (undocumented)
+    consumingPhases: ReadonlySet<IHeftPhase>;
+    // (undocumented)
+    dependencyPhases: ReadonlySet<IHeftPhase>;
+    // (undocumented)
+    readonly phaseDescription: string | undefined;
+    // (undocumented)
+    readonly phaseName: string;
+    // (undocumented)
+    tasks: ReadonlySet<IHeftTask>;
+    // (undocumented)
+    tasksByName: ReadonlyMap<string, IHeftTask>;
+}
+
+// @public (undocumented)
+export interface IHeftPhaseFinishHookOptions {
+    // (undocumented)
+    operation: OperationGroupRecord<IHeftPhaseOperationMetadata>;
+}
+
+// @public
+export interface IHeftPhaseOperationMetadata {
+    // (undocumented)
+    phase: IHeftPhase;
+}
+
+// @public (undocumented)
+export interface IHeftPhaseStartHookOptions {
+    // (undocumented)
+    operation: OperationGroupRecord<IHeftPhaseOperationMetadata>;
+}
+
 // @public
 export interface IHeftPlugin<TSession extends IHeftLifecycleSession | IHeftTaskSession = IHeftLifecycleSession | IHeftTaskSession, TOptions = void> {
     readonly accessor?: object;
@@ -207,10 +250,28 @@ export interface IHeftRecordMetricsHookOptions {
     metricName: string;
 }
 
+// @public (undocumented)
+export interface IHeftTask {
+    // (undocumented)
+    readonly consumingTasks: ReadonlySet<IHeftTask>;
+    // (undocumented)
+    readonly dependencyTasks: ReadonlySet<IHeftTask>;
+    // (undocumented)
+    readonly parentPhase: IHeftPhase;
+    // (undocumented)
+    readonly taskName: string;
+}
+
 // @public
 export interface IHeftTaskFileOperations {
     copyOperations: Set<ICopyOperation>;
     deleteOperations: Set<IDeleteOperation>;
+}
+
+// @public (undocumented)
+export interface IHeftTaskFinishHookOptions {
+    // (undocumented)
+    operation: Operation<IHeftTaskOperationMetadata>;
 }
 
 // @public
@@ -218,6 +279,14 @@ export interface IHeftTaskHooks {
     readonly registerFileOperations: AsyncSeriesWaterfallHook<IHeftTaskFileOperations>;
     readonly run: AsyncParallelHook<IHeftTaskRunHookOptions>;
     readonly runIncremental: AsyncParallelHook<IHeftTaskRunIncrementalHookOptions>;
+}
+
+// @public
+export interface IHeftTaskOperationMetadata {
+    // (undocumented)
+    phase: IHeftPhase;
+    // (undocumented)
+    task: IHeftTask;
 }
 
 // @public
@@ -247,6 +316,12 @@ export interface IHeftTaskSession {
     requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
     readonly taskName: string;
     readonly tempFolderPath: string;
+}
+
+// @public (undocumented)
+export interface IHeftTaskStartHookOptions {
+    // (undocumented)
+    operation: Operation<IHeftTaskOperationMetadata>;
 }
 
 // @public

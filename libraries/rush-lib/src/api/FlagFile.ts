@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, JsonFile, type JsonObject } from '@rushstack/node-core-library';
-import { objectsAreDeepEqual } from '../utilities/objectUtilities';
+import { FileSystem, JsonFile, type JsonObject, Objects } from '@rushstack/node-core-library';
 
 /**
  * A base class for flag file.
@@ -37,7 +36,7 @@ export class FlagFile<TState extends JsonObject = JsonObject> {
     try {
       oldState = await JsonFile.loadAsync(this.path);
       const newState: JsonObject = this._state;
-      return objectsAreDeepEqual(oldState, newState);
+      return Objects.areDeepEqual(oldState, newState);
     } catch (err) {
       return false;
     }

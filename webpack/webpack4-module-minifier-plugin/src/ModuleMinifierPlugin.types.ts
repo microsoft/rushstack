@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IModuleMinifier } from '@rushstack/module-minifier';
 import type { AsyncSeriesWaterfallHook, SyncWaterfallHook } from 'tapable';
 import type * as webpack from 'webpack';
 import type { ReplaceSource, Source } from 'webpack-sources';
+
+import type { IModuleMinifier } from '@rushstack/module-minifier';
 
 /**
  * Information about where the module was rendered in the emitted asset.

@@ -2,6 +2,122 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.32.1",
+      "tag": "@microsoft/api-extractor-model_v7.32.1",
+      "date": "Fri, 21 Nov 2025 16:13:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.19.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.32.0",
+      "tag": "@microsoft/api-extractor-model_v7.32.0",
+      "date": "Wed, 12 Nov 2025 01:12:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump the `@microsoft/tsdoc` dependency to `~0.16.0`."
+          },
+          {
+            "comment": "Bump the `@microsoft/tsdoc-config` dependency to `~0.18.0`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.31.3",
+      "tag": "@microsoft/api-extractor-model_v7.31.3",
+      "date": "Fri, 24 Oct 2025 00:13:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.18.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.31.2",
+      "tag": "@microsoft/api-extractor-model_v7.31.2",
+      "date": "Wed, 22 Oct 2025 00:57:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.17.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.31.1",
+      "tag": "@microsoft/api-extractor-model_v7.31.1",
+      "date": "Wed, 08 Oct 2025 00:13:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.17.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.31.0",
+      "tag": "@microsoft/api-extractor-model_v7.31.0",
+      "date": "Fri, 03 Oct 2025 20:09:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize import of builtin modules to use the `node:` protocol."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.16.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.30.9",
+      "tag": "@microsoft/api-extractor-model_v7.30.9",
+      "date": "Tue, 30 Sep 2025 23:57:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.15.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.30.8",
+      "tag": "@microsoft/api-extractor-model_v7.30.8",
+      "date": "Tue, 30 Sep 2025 20:33:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.15.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.30.7",
+      "tag": "@microsoft/api-extractor-model_v7.30.7",
+      "date": "Wed, 23 Jul 2025 20:55:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.14.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.30.6",
       "tag": "@microsoft/api-extractor-model_v7.30.6",
       "date": "Thu, 01 May 2025 00:11:12 GMT",

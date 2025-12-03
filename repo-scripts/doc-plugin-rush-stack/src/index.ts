@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IApiDocumenterPluginManifest } from '@microsoft/api-documenter';
+
 import { RushStackFeature } from './RushStackFeature';
 
 export const apiDocumenterPluginManifest: IApiDocumenterPluginManifest = {

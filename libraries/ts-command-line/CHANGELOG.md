@@ -1,6 +1,55 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Thu, 01 May 2025 00:11:12 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+
+## 5.1.4
+Fri, 21 Nov 2025 16:13:56 GMT
+
+_Version update only_
+
+## 5.1.3
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 5.1.2
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 5.1.1
+Wed, 08 Oct 2025 00:13:29 GMT
+
+_Version update only_
+
+## 5.1.0
+Fri, 03 Oct 2025 20:10:00 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
+
+## 5.0.5
+Tue, 30 Sep 2025 23:57:45 GMT
+
+_Version update only_
+
+## 5.0.4
+Tue, 30 Sep 2025 20:33:51 GMT
+
+_Version update only_
+
+## 5.0.3
+Thu, 11 Sep 2025 00:22:31 GMT
+
+_Version update only_
+
+## 5.0.2
+Wed, 23 Jul 2025 20:55:57 GMT
+
+### Patches
+
+- Escape `%` characters in help text to fix an issue where they were previously interpreted as sprintf-style tokens.
 
 ## 5.0.1
 Thu, 01 May 2025 00:11:12 GMT

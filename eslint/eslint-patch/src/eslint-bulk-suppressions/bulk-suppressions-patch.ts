@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import fs from 'node:fs';
+
 import type { TSESTree } from '@typescript-eslint/types';
-import fs from 'fs';
 
 import * as Guards from './ast-guards';
-
 import { eslintFolder } from '../_patch-base';
 import {
   ESLINT_BULK_ENABLE_ENV_VAR_NAME,
@@ -13,15 +13,18 @@ import {
   ESLINT_BULK_SUPPRESS_ENV_VAR_NAME
 } from './constants';
 import {
-  getSuppressionsConfigForEslintrcFolderPath,
+  getSuppressionsConfigForEslintConfigFolderPath,
   serializeSuppression,
   type IBulkSuppressionsConfig,
   type ISuppression,
   writeSuppressionsJsonToFile,
-  getAllBulkSuppressionsConfigsByEslintrcFolderPath
+  getAllBulkSuppressionsConfigsByEslintConfigFolderPath
 } from './bulk-suppressions-file';
 
-const ESLINTRC_FILENAMES: string[] = [
+const ESLINT_CONFIG_FILENAMES: string[] = [
+  'eslint.config.js',
+  'eslint.config.cjs',
+  'eslint.config.mjs',
   '.eslintrc.js',
   '.eslintrc.cjs'
   // Several other filenames are allowed, but this patch requires that it be loaded via a JS config file,
@@ -88,11 +91,11 @@ function calculateScopeId(node: NodeWithParent | undefined): string {
   }
 }
 
-const eslintrcPathByFileOrFolderPath: Map<string, string> = new Map();
+const eslintConfigPathByFileOrFolderPath: Map<string, string> = new Map();
 
-function findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFilePath: string): string {
+function findEslintConfigFolderPathForNormalizedFileAbsolutePath(normalizedFilePath: string): string {
   const cachedFolderPathForFilePath: string | undefined =
-    eslintrcPathByFileOrFolderPath.get(normalizedFilePath);
+    eslintConfigPathByFileOrFolderPath.get(normalizedFilePath);
   if (cachedFolderPathForFilePath) {
     return cachedFolderPathForFilePath;
   }
@@ -102,34 +105,35 @@ function findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFilePath:
   );
 
   const pathsToCache: string[] = [normalizedFilePath];
-  let eslintrcFolderPath: string | undefined;
-  findEslintrcFileLoop: for (
+  let eslintConfigFolderPath: string | undefined;
+  findEslintConfigFileLoop: for (
     let currentFolder: string = normalizedFileFolderPath;
     currentFolder; // 'something'.substring(0, -1) is ''
     currentFolder = currentFolder.substring(0, currentFolder.lastIndexOf('/'))
   ) {
-    const cachedEslintrcFolderPath: string | undefined = eslintrcPathByFileOrFolderPath.get(currentFolder);
+    const cachedEslintrcFolderPath: string | undefined =
+      eslintConfigPathByFileOrFolderPath.get(currentFolder);
     if (cachedEslintrcFolderPath) {
       // Need to cache this result into the intermediate paths
-      eslintrcFolderPath = cachedEslintrcFolderPath;
+      eslintConfigFolderPath = cachedEslintrcFolderPath;
       break;
     }
 
     pathsToCache.push(currentFolder);
-    for (const eslintrcFilename of ESLINTRC_FILENAMES) {
-      if (fs.existsSync(`${currentFolder}/${eslintrcFilename}`)) {
-        eslintrcFolderPath = currentFolder;
-        break findEslintrcFileLoop;
+    for (const eslintConfigFilename of ESLINT_CONFIG_FILENAMES) {
+      if (fs.existsSync(`${currentFolder}/${eslintConfigFilename}`)) {
+        eslintConfigFolderPath = currentFolder;
+        break findEslintConfigFileLoop;
       }
     }
   }
 
-  if (eslintrcFolderPath) {
+  if (eslintConfigFolderPath) {
     for (const checkedFolder of pathsToCache) {
-      eslintrcPathByFileOrFolderPath.set(checkedFolder, eslintrcFolderPath);
+      eslintConfigPathByFileOrFolderPath.set(checkedFolder, eslintConfigFolderPath);
     }
 
-    return eslintrcFolderPath;
+    return eslintConfigFolderPath;
   } else {
     throw new Error(`Cannot locate an ESLint configuration file for ${normalizedFilePath}`);
   }
@@ -149,13 +153,14 @@ export function shouldBulkSuppress(params: {
 
   const { filename: fileAbsolutePath, currentNode, ruleId: rule, problem } = params;
   const normalizedFileAbsolutePath: string = fileAbsolutePath.replace(/\\/g, '/');
-  const eslintrcDirectory: string =
-    findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFileAbsolutePath);
-  const fileRelativePath: string = normalizedFileAbsolutePath.substring(eslintrcDirectory.length + 1);
+  const eslintConfigDirectory: string =
+    findEslintConfigFolderPathForNormalizedFileAbsolutePath(normalizedFileAbsolutePath);
+  const fileRelativePath: string = normalizedFileAbsolutePath.substring(eslintConfigDirectory.length + 1);
   const scopeId: string = calculateScopeId(currentNode);
   const suppression: ISuppression = { file: fileRelativePath, scopeId, rule };
 
-  const config: IBulkSuppressionsConfig = getSuppressionsConfigForEslintrcFolderPath(eslintrcDirectory);
+  const config: IBulkSuppressionsConfig =
+    getSuppressionsConfigForEslintConfigFolderPath(eslintConfigDirectory);
   const serializedSuppression: string = serializeSuppression(suppression);
   const currentNodeIsSuppressed: boolean = config.serializedSuppressions.has(serializedSuppression);
 
@@ -172,9 +177,9 @@ export function shouldBulkSuppress(params: {
 
 export function prune(): void {
   for (const [
-    eslintrcFolderPath,
+    eslintConfigFolderPath,
     suppressionsConfig
-  ] of getAllBulkSuppressionsConfigsByEslintrcFolderPath()) {
+  ] of getAllBulkSuppressionsConfigsByEslintConfigFolderPath()) {
     if (suppressionsConfig) {
       const { newSerializedSuppressions, newJsonObject } = suppressionsConfig;
       const newSuppressionsConfig: IBulkSuppressionsConfig = {
@@ -184,7 +189,7 @@ export function prune(): void {
         newJsonObject: { suppressions: [] }
       };
 
-      writeSuppressionsJsonToFile(eslintrcFolderPath, newSuppressionsConfig);
+      writeSuppressionsJsonToFile(eslintConfigFolderPath, newSuppressionsConfig);
     }
   }
 }
@@ -193,7 +198,7 @@ export function write(): void {
   for (const [
     eslintrcFolderPath,
     suppressionsConfig
-  ] of getAllBulkSuppressionsConfigsByEslintrcFolderPath()) {
+  ] of getAllBulkSuppressionsConfigsByEslintConfigFolderPath()) {
     if (suppressionsConfig) {
       writeSuppressionsJsonToFile(eslintrcFolderPath, suppressionsConfig);
     }
@@ -201,7 +206,9 @@ export function write(): void {
 }
 
 // utility function for linter-patch.js to make require statements that use relative paths in linter.js work in linter-patch.js
-export function requireFromPathToLinterJS(importPath: string): import('eslint').Linter {
+export function requireFromPathToLinterJS(
+  importPath: string
+): import('eslint-9').Linter | import('eslint-8').Linter {
   if (!eslintFolder) {
     return require(importPath);
   }

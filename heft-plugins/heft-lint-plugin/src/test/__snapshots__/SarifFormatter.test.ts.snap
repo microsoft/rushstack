@@ -43,13 +43,13 @@ Object {
                   "uri": "src/file1.ts",
                 },
                 "region": Object {
-                  "endColumn": 6,
-                  "endLine": 10,
+                  "endColumn": 8,
+                  "endLine": 1,
                   "snippet": Object {
-                    "text": "const x = 1;",
+                    "text": "x",
                   },
-                  "startColumn": 5,
-                  "startLine": 10,
+                  "startColumn": 7,
+                  "startLine": 1,
                 },
               },
             },
@@ -109,13 +109,13 @@ Object {
                   "uri": "src/file1.ts",
                 },
                 "region": Object {
-                  "endColumn": 6,
-                  "endLine": 10,
+                  "endColumn": 8,
+                  "endLine": 1,
                   "snippet": Object {
-                    "text": "const x = 1;",
+                    "text": "x",
                   },
-                  "startColumn": 5,
-                  "startLine": 10,
+                  "startColumn": 7,
+                  "startLine": 1,
                 },
               },
             },
@@ -202,13 +202,13 @@ Object {
                   "uri": "src/file4.ts",
                 },
                 "region": Object {
-                  "endColumn": 9,
-                  "endLine": 20,
+                  "endColumn": 10,
+                  "endLine": 1,
                   "snippet": Object {
                     "text": "debugger;",
                   },
                   "startColumn": 1,
-                  "startLine": 20,
+                  "startLine": 1,
                 },
               },
             },
@@ -230,13 +230,13 @@ Object {
                   "uri": "src/file4.ts",
                 },
                 "region": Object {
-                  "endColumn": 16,
-                  "endLine": 10,
+                  "endColumn": 12,
+                  "endLine": 2,
                   "snippet": Object {
-                    "text": "console.log(\\"test\\");",
+                    "text": "console.log",
                   },
-                  "startColumn": 5,
-                  "startLine": 10,
+                  "startColumn": 1,
+                  "startLine": 2,
                 },
               },
             },
@@ -312,13 +312,13 @@ Object {
                   "uri": "src/file4.ts",
                 },
                 "region": Object {
-                  "endColumn": 9,
-                  "endLine": 20,
+                  "endColumn": 10,
+                  "endLine": 1,
                   "snippet": Object {
                     "text": "debugger;",
                   },
                   "startColumn": 1,
-                  "startLine": 20,
+                  "startLine": 1,
                 },
               },
             },
@@ -343,72 +343,6 @@ Object {
               },
               "shortDescription": Object {
                 "text": "Disallow the use of debugger",
-              },
-            },
-          ],
-          "version": "7.32.0",
-        },
-      },
-    },
-  ],
-  "version": "2.1.0",
-}
-`;
-
-exports[`formatEslintResultsAsSARIF should handle messages without file locations 1`] = `
-Object {
-  "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
-  "runs": Array [
-    Object {
-      "artifacts": Array [
-        Object {
-          "location": Object {
-            "uri": "src/file5.ts",
-          },
-        },
-      ],
-      "results": Array [
-        Object {
-          "level": "warning",
-          "locations": Array [
-            Object {
-              "physicalLocation": Object {
-                "artifactLocation": Object {
-                  "index": 0,
-                  "uri": "src/file5.ts",
-                },
-                "region": Object {
-                  "endColumn": undefined,
-                  "endLine": undefined,
-                  "snippet": Object {
-                    "text": "console.log(\\"test\\");",
-                  },
-                  "startColumn": 5,
-                  "startLine": 10,
-                },
-              },
-            },
-          ],
-          "message": Object {
-            "text": "Unexpected console statement.",
-          },
-          "ruleId": "no-console",
-          "ruleIndex": 0,
-        },
-      ],
-      "tool": Object {
-        "driver": Object {
-          "informationUri": "https://eslint.org",
-          "name": "ESLint",
-          "rules": Array [
-            Object {
-              "helpUri": "https://eslint.org/docs/latest/rules/no-console",
-              "id": "no-console",
-              "properties": Object {
-                "category": undefined,
-              },
-              "shortDescription": Object {
-                "text": "Disallow the use of \`console\`",
               },
             },
           ],
@@ -449,13 +383,13 @@ Object {
                   "uri": "src/file1.ts",
                 },
                 "region": Object {
-                  "endColumn": 6,
-                  "endLine": 10,
+                  "endColumn": 8,
+                  "endLine": 1,
                   "snippet": Object {
-                    "text": "const x = 1;",
+                    "text": "x",
                   },
-                  "startColumn": 5,
-                  "startLine": 10,
+                  "startColumn": 7,
+                  "startLine": 1,
                 },
               },
             },
@@ -475,13 +409,13 @@ Object {
                   "uri": "src/file2.ts",
                 },
                 "region": Object {
-                  "endColumn": 10,
-                  "endLine": 15,
+                  "endColumn": 15,
+                  "endLine": 1,
                   "snippet": Object {
-                    "text": "if (a == b) { }",
+                    "text": "z == 2",
                   },
-                  "startColumn": 8,
-                  "startLine": 15,
+                  "startColumn": 9,
+                  "startLine": 1,
                 },
               },
             },
@@ -541,13 +475,13 @@ Object {
                   "uri": "src/file2.ts",
                 },
                 "region": Object {
-                  "endColumn": 11,
-                  "endLine": 5,
+                  "endColumn": 6,
+                  "endLine": 1,
                   "snippet": Object {
-                    "text": "let x;",
+                    "text": "x",
                   },
-                  "startColumn": 10,
-                  "startLine": 5,
+                  "startColumn": 5,
+                  "startLine": 1,
                 },
               },
             },
@@ -568,13 +502,13 @@ Object {
                   "uri": "src/file2.ts",
                 },
                 "region": Object {
-                  "endColumn": 16,
-                  "endLine": 10,
+                  "endColumn": 12,
+                  "endLine": 2,
                   "snippet": Object {
-                    "text": "console.log(\\"test\\");",
+                    "text": "console.log",
                   },
-                  "startColumn": 5,
-                  "startLine": 10,
+                  "startColumn": 1,
+                  "startLine": 2,
                 },
               },
             },

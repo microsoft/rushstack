@@ -1,14 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'node:path';
+import { EOL } from 'node:os';
+
 import type { pki } from 'node-forge';
-import * as path from 'path';
-import { EOL } from 'os';
+
 import { FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { runSudoAsync, type IRunResult, runAsync } from './runCommand';
-import { CertificateStore } from './CertificateStore';
+import { darwinRunSudoAsync, type IRunResult, randomTmpPath, runAsync } from './runCommand';
+import { CertificateStore, type ICertificateStoreOptions } from './CertificateStore';
 
 const CA_SERIAL_NUMBER: string = '731c321744e34650a202e3ef91c3c1b0';
 const TLS_SERIAL_NUMBER: string = '731c321744e34650a202e3ef00000001';
@@ -28,7 +30,7 @@ export const DEFAULT_CERTIFICATE_SUBJECT_NAMES: ReadonlyArray<string> = ['localh
  * The set of ip addresses the certificate should be generated for, by default.
  * @public
  */
-export const DEFAULT_CERTIFICATE_SUBJECT_IP_ADDRESSES: ReadonlyArray<string> = ['127.0.0.1'];
+export const DEFAULT_CERTIFICATE_SUBJECT_IP_ADDRESSES: ReadonlyArray<string> = ['127.0.0.1', '::1'];
 
 const DISABLE_CERT_GENERATION_VARIABLE_NAME: 'RUSHSTACK_DISABLE_DEV_CERT_GENERATION' =
   'RUSHSTACK_DISABLE_DEV_CERT_GENERATION';
@@ -58,6 +60,27 @@ export interface ICertificate {
    * The subject names the TLS server certificate is valid for
    */
   subjectAltNames: readonly string[] | undefined;
+}
+
+/**
+ * Information about certificate validation results
+ * @public
+ */
+export interface ICertificateValidationResult {
+  /**
+   * Whether valid certificates exist and are usable
+   */
+  isValid: boolean;
+
+  /**
+   * List of validation messages/issues found
+   */
+  validationMessages: string[];
+
+  /**
+   * The existing certificate if it exists and is valid
+   */
+  certificate?: ICertificate;
 }
 
 interface ICaCertificate {
@@ -116,7 +139,17 @@ export interface ICertificateGenerationOptions {
   skipCertificateTrust?: boolean;
 }
 
+/**
+ * Options for configuring the `CertificateManager`.
+ * @public
+ */
+export interface ICertificateManagerOptions extends ICertificateStoreOptions {}
+
 const MAX_CERTIFICATE_VALIDITY_DAYS: 365 = 365;
+
+const VS_CODE_EXTENSION_FIX_MESSAGE: string =
+  'Use the "Debug Certificate Manager" Extension for VS Code (ms-RushStack.debug-certificate-manager) and run the ' +
+  '"Debug Certificate Manager: Ensure and Sync TLS Certificates" command to fix certificate issues. ';
 
 /**
  * A utility class to handle generating, trusting, and untrustring a debug certificate.
@@ -124,10 +157,14 @@ const MAX_CERTIFICATE_VALIDITY_DAYS: 365 = 365;
  * @public
  */
 export class CertificateManager {
-  private _certificateStore: CertificateStore;
+  /**
+   * Get the certificate store used by this manager.
+   * @public
+   */
+  public readonly certificateStore: CertificateStore;
 
-  public constructor() {
-    this._certificateStore = new CertificateStore();
+  public constructor(options: ICertificateManagerOptions = {}) {
+    this.certificateStore = new CertificateStore(options);
   }
 
   /**
@@ -143,119 +180,52 @@ export class CertificateManager {
   ): Promise<ICertificate> {
     const optionsWithDefaults: Required<ICertificateGenerationOptions> = applyDefaultOptions(options);
 
-    const { certificateData: existingCert, keyData: existingKey } = this._certificateStore;
-
     if (process.env[DISABLE_CERT_GENERATION_VARIABLE_NAME] === '1') {
       // Allow the environment (e.g. GitHub codespaces) to forcibly disable dev cert generation
       terminal.writeLine(
-        `Found environment variable ${DISABLE_CERT_GENERATION_VARIABLE_NAME}=1, disabling certificate generation.`
+        `Found environment variable ${DISABLE_CERT_GENERATION_VARIABLE_NAME}=1, disabling certificate generation. ` +
+          VS_CODE_EXTENSION_FIX_MESSAGE
       );
       canGenerateNewCertificate = false;
     }
 
-    if (existingCert && existingKey) {
-      const messages: string[] = [];
+    // Validate existing certificates
+    const validationResult: ICertificateValidationResult = await this.validateCertificateAsync(
+      terminal,
+      options
+    );
 
-      const forge: typeof import('node-forge') = await import('node-forge');
-      const certificate: pki.Certificate = forge.pki.certificateFromPem(existingCert);
-      const altNamesExtension: ISubjectAltNameExtension | undefined = certificate.getExtension(
-        'subjectAltName'
-      ) as ISubjectAltNameExtension;
-      if (!altNamesExtension) {
-        messages.push(
-          'The existing development certificate is missing the subjectAltName ' +
-            'property and will not work with the latest versions of some browsers.'
+    if (validationResult.isValid && validationResult.certificate) {
+      // Existing certificate is valid, return it
+      return validationResult.certificate;
+    }
+
+    // Certificate is invalid or doesn't exist
+    if (validationResult.validationMessages.length > 0) {
+      if (canGenerateNewCertificate) {
+        validationResult.validationMessages.push(
+          'Attempting to untrust the certificate and generate a new one.'
         );
+        terminal.writeWarningLine(validationResult.validationMessages.join(' '));
+        if (!options?.skipCertificateTrust) {
+          await this.untrustCertificateAsync(terminal);
+        }
+        return await this._ensureCertificateInternalAsync(optionsWithDefaults, terminal);
       } else {
-        const missingSubjectNames: Set<string> = new Set(optionsWithDefaults.subjectAltNames);
-        for (const altName of altNamesExtension.altNames) {
-          missingSubjectNames.delete(isIPAddress(altName) ? altName.ip : altName.value);
-        }
-        if (missingSubjectNames.size) {
-          messages.push(
-            `The existing development certificate does not include the following expected subjectAltName values: ` +
-              Array.from(missingSubjectNames, (name: string) => `"${name}"`).join(', ')
-          );
-        }
-      }
-
-      const { notBefore, notAfter } = certificate.validity;
-      const now: Date = new Date();
-      if (now < notBefore) {
-        messages.push(
-          `The existing development certificate's validity period does not start until ${notBefore}. It is currently ${now}.`
+        validationResult.validationMessages.push(
+          'Untrust the certificate and generate a new one, or set the ' +
+            '`canGenerateNewCertificate` parameter to `true` when calling `ensureCertificateAsync`. ' +
+            VS_CODE_EXTENSION_FIX_MESSAGE
         );
-      }
-
-      if (now > notAfter) {
-        messages.push(
-          `The existing development certificate's validity period ended ${notAfter}. It is currently ${now}.`
-        );
-      }
-
-      now.setUTCDate(now.getUTCDate() + optionsWithDefaults.validityInDays);
-      if (notAfter > now) {
-        messages.push(
-          `The existing development certificate's expiration date ${notAfter} exceeds the allowed limit ${now}. ` +
-            `This will be rejected by many browsers.`
-        );
-      }
-
-      if (
-        notBefore.getTime() - notAfter.getTime() >
-        optionsWithDefaults.validityInDays * ONE_DAY_IN_MILLISECONDS
-      ) {
-        messages.push(
-          "The existing development certificate's validity period is longer " +
-            `than ${optionsWithDefaults.validityInDays} days.`
-        );
-      }
-
-      const { caCertificateData } = this._certificateStore;
-
-      if (!caCertificateData) {
-        messages.push(
-          'The existing development certificate is missing a separate CA cert as the root ' +
-            'of trust and will not work with the latest versions of some browsers.'
-        );
-      }
-
-      const isTrusted: boolean = await this._detectIfCertificateIsTrustedAsync(terminal);
-      if (!isTrusted) {
-        messages.push('The existing development certificate is not currently trusted by your system.');
-      }
-
-      if (messages.length > 0) {
-        if (canGenerateNewCertificate) {
-          messages.push('Attempting to untrust the certificate and generate a new one.');
-          terminal.writeWarningLine(messages.join(' '));
-          if (!options?.skipCertificateTrust) {
-            await this.untrustCertificateAsync(terminal);
-          }
-          return await this._ensureCertificateInternalAsync(optionsWithDefaults, terminal);
-        } else {
-          messages.push(
-            'Untrust the certificate and generate a new one, or set the ' +
-              '`canGenerateNewCertificate` parameter to `true` when calling `ensureCertificateAsync`.'
-          );
-          throw new Error(messages.join(' '));
-        }
-      } else {
-        return {
-          pemCaCertificate: caCertificateData,
-          pemCertificate: existingCert,
-          pemKey: existingKey,
-          subjectAltNames: altNamesExtension.altNames.map((entry) =>
-            isIPAddress(entry) ? entry.ip : entry.value
-          )
-        };
+        throw new Error(validationResult.validationMessages.join(' '));
       }
     } else if (canGenerateNewCertificate) {
       return await this._ensureCertificateInternalAsync(optionsWithDefaults, terminal);
     } else {
       throw new Error(
         'No development certificate found. Generate a new certificate manually, or set the ' +
-          '`canGenerateNewCertificate` parameter to `true` when calling `ensureCertificateAsync`.'
+          '`canGenerateNewCertificate` parameter to `true` when calling `ensureCertificateAsync`. ' +
+          VS_CODE_EXTENSION_FIX_MESSAGE
       );
     }
   }
@@ -266,8 +236,9 @@ export class CertificateManager {
    * @public
    */
   public async untrustCertificateAsync(terminal: ITerminal): Promise<boolean> {
-    this._certificateStore.certificateData = undefined;
-    this._certificateStore.keyData = undefined;
+    this.certificateStore.certificateData = undefined;
+    this.certificateStore.keyData = undefined;
+    this.certificateStore.caCertificateData = undefined;
 
     switch (process.platform) {
       case 'win32':
@@ -292,7 +263,7 @@ export class CertificateManager {
         const macFindCertificateResult: IRunResult = await runAsync('security', [
           'find-certificate',
           '-c',
-          'localhost',
+          CA_ALT_NAME,
           '-a',
           '-Z',
           MAC_KEYCHAIN
@@ -315,7 +286,7 @@ export class CertificateManager {
           terminal.writeVerboseLine(`Found the development certificate. SHA is ${shaHash}`);
         }
 
-        const macUntrustResult: IRunResult = await runSudoAsync('security', [
+        const macUntrustResult: IRunResult = await darwinRunSudoAsync(terminal, 'security', [
           'delete-certificate',
           '-Z',
           shaHash,
@@ -335,7 +306,7 @@ export class CertificateManager {
         terminal.writeLine(
           'Automatic certificate untrust is only implemented for debug-certificate-manager on Windows ' +
             'and macOS. To untrust the development certificate, remove this certificate from your trusted ' +
-            `root certification authorities: "${this._certificateStore.certificatePath}". The ` +
+            `root certification authorities: "${this.certificateStore.certificatePath}". The ` +
             `certificate has serial number "${CA_SERIAL_NUMBER}".`
         );
         return false;
@@ -568,7 +539,7 @@ export class CertificateManager {
             'root password in the prompt.'
         );
 
-        const result: IRunResult = await runSudoAsync('security', [
+        const result: IRunResult = await darwinRunSudoAsync(terminal, 'security', [
           'add-trusted-cert',
           '-d',
           '-r',
@@ -639,7 +610,7 @@ export class CertificateManager {
         const macFindCertificateResult: IRunResult = await runAsync('security', [
           'find-certificate',
           '-c',
-          'localhost',
+          CA_ALT_NAME,
           '-a',
           '-Z',
           MAC_KEYCHAIN
@@ -673,7 +644,7 @@ export class CertificateManager {
         terminal.writeVerboseLine(
           'Automatic certificate trust validation is only implemented for debug-certificate-manager on Windows ' +
             'and macOS. Manually verify this development certificate is present in your trusted ' +
-            `root certification authorities: "${this._certificateStore.certificatePath}". ` +
+            `root certification authorities: "${this.certificateStore.certificatePath}". ` +
             `The certificate has serial number "${CA_SERIAL_NUMBER}".`
         );
         // Always return true on Linux to prevent breaking flow.
@@ -723,11 +694,12 @@ export class CertificateManager {
     options: Required<ICertificateGenerationOptions>,
     terminal: ITerminal
   ): Promise<ICertificate> {
-    const certificateStore: CertificateStore = this._certificateStore;
+    const certificateStore: CertificateStore = this.certificateStore;
     const generatedCertificate: ICertificate = await this._createDevelopmentCertificateAsync(options);
 
     const certificateName: string = Date.now().toString();
-    const tempDirName: string = path.join(__dirname, '..', 'temp');
+    const tempDirName: string = randomTmpPath('rushstack', 'temp');
+    await FileSystem.ensureFolderAsync(tempDirName);
 
     const tempCertificatePath: string = path.join(tempDirName, `${certificateName}.pem`);
     const pemFileContents: string | undefined = generatedCertificate.pemCaCertificate;
@@ -766,6 +738,116 @@ export class CertificateManager {
       pemCertificate: certificateStore.certificateData,
       pemKey: certificateStore.keyData,
       subjectAltNames
+    };
+  }
+
+  /**
+   * Validate existing certificates to check if they are usable.
+   *
+   * @public
+   */
+  public async validateCertificateAsync(
+    terminal: ITerminal,
+    options?: ICertificateGenerationOptions
+  ): Promise<ICertificateValidationResult> {
+    const optionsWithDefaults: Required<ICertificateGenerationOptions> = applyDefaultOptions(options);
+    const { certificateData: existingCert, keyData: existingKey } = this.certificateStore;
+
+    if (!existingCert || !existingKey) {
+      return {
+        isValid: false,
+        validationMessages: ['No development certificate found.']
+      };
+    }
+
+    const messages: string[] = [];
+
+    const forge: typeof import('node-forge') = await import('node-forge');
+    const parsedCertificate: pki.Certificate = forge.pki.certificateFromPem(existingCert);
+    const altNamesExtension: ISubjectAltNameExtension | undefined = parsedCertificate.getExtension(
+      'subjectAltName'
+    ) as ISubjectAltNameExtension;
+
+    if (!altNamesExtension) {
+      messages.push(
+        'The existing development certificate is missing the subjectAltName ' +
+          'property and will not work with the latest versions of some browsers.'
+      );
+    } else {
+      const missingSubjectNames: Set<string> = new Set(optionsWithDefaults.subjectAltNames);
+      for (const altName of altNamesExtension.altNames) {
+        missingSubjectNames.delete(isIPAddress(altName) ? altName.ip : altName.value);
+      }
+      if (missingSubjectNames.size) {
+        messages.push(
+          `The existing development certificate does not include the following expected subjectAltName values: ` +
+            Array.from(missingSubjectNames, (name: string) => `"${name}"`).join(', ')
+        );
+      }
+    }
+
+    const { notBefore, notAfter } = parsedCertificate.validity;
+    const now: Date = new Date();
+    if (now < notBefore) {
+      messages.push(
+        `The existing development certificate's validity period does not start until ${notBefore}. It is currently ${now}.`
+      );
+    }
+
+    if (now > notAfter) {
+      messages.push(
+        `The existing development certificate's validity period ended ${notAfter}. It is currently ${now}.`
+      );
+    }
+
+    now.setUTCDate(now.getUTCDate() + optionsWithDefaults.validityInDays);
+    if (notAfter > now) {
+      messages.push(
+        `The existing development certificate's expiration date ${notAfter} exceeds the allowed limit ${now}. ` +
+          `This will be rejected by many browsers.`
+      );
+    }
+
+    if (
+      notBefore.getTime() - notAfter.getTime() >
+      optionsWithDefaults.validityInDays * ONE_DAY_IN_MILLISECONDS
+    ) {
+      messages.push(
+        "The existing development certificate's validity period is longer " +
+          `than ${optionsWithDefaults.validityInDays} days.`
+      );
+    }
+
+    const { caCertificateData } = this.certificateStore;
+
+    if (!caCertificateData) {
+      messages.push(
+        'The existing development certificate is missing a separate CA cert as the root ' +
+          'of trust and will not work with the latest versions of some browsers.'
+      );
+    }
+
+    const isTrusted: boolean = await this._detectIfCertificateIsTrustedAsync(terminal);
+    if (!isTrusted) {
+      messages.push('The existing development certificate is not currently trusted by your system.');
+    }
+
+    const isValid: boolean = messages.length === 0;
+    const validCertificate: ICertificate | undefined = isValid
+      ? {
+          pemCaCertificate: caCertificateData,
+          pemCertificate: existingCert,
+          pemKey: existingKey,
+          subjectAltNames: altNamesExtension?.altNames.map((entry) =>
+            isIPAddress(entry) ? entry.ip : entry.value
+          )
+        }
+      : undefined;
+
+    return {
+      isValid,
+      validationMessages: messages,
+      certificate: validCertificate
     };
   }
 

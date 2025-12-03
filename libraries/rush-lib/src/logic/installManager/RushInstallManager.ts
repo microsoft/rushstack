@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+
 import * as semver from 'semver';
 import * as ssri from 'ssri';
+
 import {
   JsonFile,
   Text,
@@ -132,7 +134,10 @@ export class RushInstallManager extends BaseInstallManager {
     if (shrinkwrapFile) {
       // Check any (explicitly) preferred dependencies first
       allExplicitPreferredVersions.forEach((version: string, dependency: string) => {
-        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependency, version);
+        const dependencySpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(
+          dependency,
+          version
+        );
 
         if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependencySpecifier)) {
           shrinkwrapWarnings.push(
@@ -230,7 +235,10 @@ export class RushInstallManager extends BaseInstallManager {
       Sort.sortMapKeys(tempDependencies);
 
       for (const [packageName, packageVersion] of tempDependencies.entries()) {
-        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(packageName, packageVersion);
+        const dependencySpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(
+          packageName,
+          packageVersion
+        );
 
         // Is there a locally built Rush project that could satisfy this dependency?
         // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
@@ -391,7 +399,10 @@ export class RushInstallManager extends BaseInstallManager {
   }
 
   private _revertWorkspaceNotation(dependency: PackageJsonDependency): boolean {
-    const specifier: DependencySpecifier = new DependencySpecifier(dependency.name, dependency.version);
+    const specifier: DependencySpecifier = DependencySpecifier.parseWithCache(
+      dependency.name,
+      dependency.version
+    );
     if (specifier.specifierType !== DependencySpecifierType.Workspace) {
       return false;
     }

@@ -3,7 +3,7 @@
 
   "operationSettings": [
     {
-      "operationName": "_phase:build",
+      "operationName": "_phase:lite-build",
       "outputFolderNames": [
         "out-all",
         "out-all-except-for-images",

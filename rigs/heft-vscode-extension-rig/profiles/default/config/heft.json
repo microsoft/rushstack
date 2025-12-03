@@ -1,0 +1,79 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+  "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
+  /**
+   * The list of Heft phases that can be run by Heft.
+   */
+  "phasesByName": {
+    "build": {
+      "phaseDescription": "Build and lint the project.",
+      "cleanFiles": [{ "includeGlobs": ["lib-esm", "lib-dts", "release", ".vscode-test"] }],
+
+      "tasksByName": {
+        "webpack": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-webpack5-plugin"
+          }
+        },
+        "copy-assets": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": ".",
+                  "destinationFolders": ["dist/vsix/unpacked"],
+                  "includeGlobs": ["package.json", "README.md", "LICENSE", ".vscodeignore", "assets/**"]
+                }
+              ]
+            }
+          }
+        },
+        "package-vsix": {
+          "taskDependencies": ["typescript", "webpack", "copy-assets"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-vscode-extension-plugin",
+            "pluginName": "vscode-extension-package-plugin",
+            "options": {
+              "unpackedFolderPath": "dist/vsix/unpacked",
+              "vsixPath": "dist/vsix/extension.vsix",
+              "manifestPath": "dist/vsix/extension.signature.manifest"
+            }
+          }
+        }
+      }
+    },
+    "verify-signature": {
+      "phaseDescription": "Verify the signature of the VSIX package",
+      "tasksByName": {
+        "verify-signature": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-vscode-extension-plugin",
+            "pluginName": "vscode-extension-verify-signature-plugin",
+            "options": {
+              "vsixPath": "dist/vsix/extension.vsix",
+              "manifestPath": "dist/vsix/extension.signature.manifest"
+            }
+          }
+        }
+      }
+    },
+    "publish-vsix": {
+      "phaseDescription": "Publish the VSIX package.",
+      "tasksByName": {
+        "publish-vsix": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-vscode-extension-plugin",
+            "pluginName": "vscode-extension-publish-plugin",
+            "options": {
+              "vsixPath": "dist/vsix/extension.vsix",
+              "manifestPath": "dist/vsix/extension.signature.manifest"
+            }
+          }
+        }
+      }
+    }
+  }
+}

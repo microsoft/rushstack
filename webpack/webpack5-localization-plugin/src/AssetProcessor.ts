@@ -4,11 +4,19 @@
 import type { Asset, AssetInfo, Chunk, Compilation, sources } from 'webpack';
 
 import * as Constants from './utilities/Constants';
-import type { LocalizationPlugin, IStringPlaceholder } from './LocalizationPlugin';
+import type {
+  LocalizationPlugin,
+  IStringPlaceholder,
+  ValueForLocaleFn,
+  ICustomDataPlaceholder
+} from './LocalizationPlugin';
 import type { ILocalizedWebpackChunk, IAssetPathOptions } from './webpackInterfaces';
 
+const LOCALIZED_RECONSTRUCTION_ELEMENT_KIND: 1 = 1;
+const DYNAMIC_RECONSTRUCTION_ELEMENT_KIND: 2 = 2;
+
 interface ILocalizedReconstructionElement {
-  kind: 'localized';
+  kind: typeof LOCALIZED_RECONSTRUCTION_ELEMENT_KIND;
   start: number;
   end: number;
   escapedBackslash: string;
@@ -16,14 +24,19 @@ interface ILocalizedReconstructionElement {
 }
 
 interface IDynamicReconstructionElement {
-  kind: 'dynamic';
+  kind: typeof DYNAMIC_RECONSTRUCTION_ELEMENT_KIND;
   start: number;
   end: number;
-  valueFn: (locale: string) => string;
+  valueFn: ValueForLocaleFn;
 }
 
 type IReconstructionElement = ILocalizedReconstructionElement | IDynamicReconstructionElement;
-type FormatLocaleForFilenameFn = (locale: string) => string;
+/**
+ * @remarks
+ * Include the `chunk` parameter so that the functions arity is the same as the
+ * `ValueForLocaleFn` type.
+ */
+type FormatLocaleForFilenameFn = (locale: string, chunk: unknown) => string;
 
 interface IParseResult {
   issues: string[];
@@ -64,23 +77,13 @@ export interface IProcessLocalizedAssetOptions extends IProcessAssetOptionsBase 
   formatLocaleForFilenameFn: FormatLocaleForFilenameFn;
 }
 
-export interface IProcessAssetResult {
-  filename: string;
-  asset: sources.Source;
-}
-
-export const PLACEHOLDER_REGEX: RegExp = new RegExp(
-  `${Constants.STRING_PLACEHOLDER_PREFIX}_([A-C])_(\\\\*)_([0-9a-f$]+)_`,
-  'g'
-);
-
-export interface IProcessedAsset {
+interface IProcessedAsset {
   filename: string;
   source: sources.CachedSource;
   info: AssetInfo;
 }
 
-export interface IProcessLocalizedAssetResult {
+interface IProcessLocalizedAssetResult {
   localizedFiles: Record<string, string>;
   processedAssets: IProcessedAsset[];
 }
@@ -124,12 +127,22 @@ export async function processLocalizedAssetCachedAsync(
 }
 
 export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): IProcessLocalizedAssetResult {
-  const { compilation, asset, chunk, filenameTemplate, locales, formatLocaleForFilenameFn } = options;
-
+  const {
+    compilation,
+    asset,
+    chunk,
+    filenameTemplate,
+    locales,
+    formatLocaleForFilenameFn,
+    plugin,
+    fillMissingTranslationStrings,
+    defaultLocale,
+    passthroughLocaleName
+  } = options;
   const { sources, WebpackError } = compilation.compiler.webpack;
-
   const { source: originalSource } = asset;
 
+  const fallbackLocale: string | undefined = fillMissingTranslationStrings ? defaultLocale : undefined;
   const rawSource: sources.CachedSource =
     originalSource instanceof sources.CachedSource
       ? originalSource
@@ -137,7 +150,7 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): I
   const assetSource: string = rawSource.source().toString();
 
   const parsedAsset: IParseResult = _parseStringToReconstructionSequence(
-    options.plugin,
+    plugin,
     assetSource,
     formatLocaleForFilenameFn
   );
@@ -158,8 +171,9 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): I
       new sources.ReplaceSource(rawSource, locale),
       parsedAsset.reconstructionSeries,
       locale,
-      options.fillMissingTranslationStrings ? options.defaultLocale : undefined,
-      options.passthroughLocaleName
+      fallbackLocale,
+      passthroughLocaleName,
+      chunk
     );
 
     for (const issue of localeIssues) {
@@ -236,7 +250,7 @@ export async function processNonLocalizedAssetCachedAsync(
 }
 
 export function processNonLocalizedAsset(options: IProcessNonLocalizedAssetOptions): IProcessedAsset {
-  const { asset, fileName, compilation, formatLocaleForFilenameFn, hasUrlGenerator } = options;
+  const { asset, fileName, compilation, formatLocaleForFilenameFn, hasUrlGenerator, chunk } = options;
 
   const { sources, WebpackError } = compilation.compiler.webpack;
 
@@ -260,7 +274,8 @@ export function processNonLocalizedAsset(options: IProcessNonLocalizedAssetOptio
     const { issues: localeIssues, result } = _reconstructNonLocalized(
       new sources.ReplaceSource(cachedSource, locale),
       parsedAsset.reconstructionSeries,
-      locale
+      locale,
+      chunk
     );
 
     for (const issue of localeIssues) {
@@ -307,14 +322,16 @@ function _reconstructLocalized(
   reconstructionSeries: IReconstructionElement[],
   locale: string,
   fallbackLocale: string | undefined,
-  passthroughLocale: string | undefined
+  passthroughLocale: string | undefined,
+  chunk: Chunk
 ): ILocalizedReconstructionResult {
   const issues: string[] = [];
 
   for (const element of reconstructionSeries) {
-    switch (element.kind) {
-      case 'localized': {
-        const { data } = element;
+    const { kind, start, end } = element;
+    switch (kind) {
+      case LOCALIZED_RECONSTRUCTION_ELEMENT_KIND: {
+        const { data, escapedBackslash } = element;
         const { stringName, translations } = data;
         let newValue: string | undefined =
           locale === passthroughLocale ? stringName : translations.get(locale)?.get(stringName);
@@ -329,8 +346,6 @@ function _reconstructLocalized(
 
           newValue = '-- MISSING STRING --';
         }
-
-        const escapedBackslash: string = element.escapedBackslash || '\\';
 
         if (newValue.includes('\\')) {
           // The vast majority of localized strings do not contain `\\`, so this check avoids an allocation.
@@ -352,13 +367,13 @@ function _reconstructLocalized(
           );
         }
 
-        result.replace(element.start, element.end - 1, newValue);
+        result.replace(start, end - 1, newValue);
         break;
       }
 
-      case 'dynamic': {
-        const newValue: string = element.valueFn(locale);
-        result.replace(element.start, element.end - 1, newValue);
+      case DYNAMIC_RECONSTRUCTION_ELEMENT_KIND: {
+        const newValue: string = element.valueFn(locale, chunk);
+        result.replace(start, end - 1, newValue);
         break;
       }
     }
@@ -373,13 +388,14 @@ function _reconstructLocalized(
 function _reconstructNonLocalized(
   result: sources.ReplaceSource,
   reconstructionSeries: IReconstructionElement[],
-  noStringsLocaleName: string
+  noStringsLocaleName: string,
+  chunk: Chunk
 ): INonLocalizedReconstructionResult {
   const issues: string[] = [];
 
   for (const element of reconstructionSeries) {
     switch (element.kind) {
-      case 'localized': {
+      case LOCALIZED_RECONSTRUCTION_ELEMENT_KIND: {
         issues.push(
           `The string "${element.data.stringName}" in "${element.data.locFilePath}" appeared in an asset ` +
             'that is not expected to contain localized resources.'
@@ -390,8 +406,8 @@ function _reconstructNonLocalized(
         break;
       }
 
-      case 'dynamic': {
-        const newValue: string = element.valueFn(noStringsLocaleName);
+      case DYNAMIC_RECONSTRUCTION_ELEMENT_KIND: {
+        const newValue: string = element.valueFn(noStringsLocaleName, chunk);
         result.replace(element.start, element.end - 1, newValue);
         break;
       }
@@ -425,18 +441,18 @@ function _parseStringToReconstructionSequence(
     switch (elementLabel) {
       case Constants.STRING_PLACEHOLDER_LABEL: {
         const backslashEnd: number = source.indexOf('_', end);
-        const escapedBackslash: string = source.slice(end, backslashEnd);
+        const escapedBackslash: string = source.slice(end, backslashEnd) || '\\';
         end = backslashEnd + 1;
-        const serialEnd: number = source.indexOf('_', end);
-        const serial: string = source.slice(end, serialEnd);
-        end = serialEnd + 1;
+        const suffixEnd: number = source.indexOf('_', end);
+        const suffix: string = source.slice(end, suffixEnd);
+        end = suffixEnd + 1;
 
-        const stringData: IStringPlaceholder | undefined = plugin.getDataForSerialNumber(serial);
+        const stringData: IStringPlaceholder | undefined = plugin._getStringDataForSerialNumber(suffix);
         if (!stringData) {
-          issues.push(`Missing placeholder ${serial}`);
+          issues.push(`Missing placeholder ${suffix}`);
         } else {
           const localizedElement: ILocalizedReconstructionElement = {
-            kind: 'localized',
+            kind: LOCALIZED_RECONSTRUCTION_ELEMENT_KIND,
             start,
             end,
             escapedBackslash,
@@ -446,9 +462,10 @@ function _parseStringToReconstructionSequence(
         }
         break;
       }
+
       case Constants.LOCALE_NAME_PLACEHOLDER_LABEL: {
         const dynamicElement: IDynamicReconstructionElement = {
-          kind: 'dynamic',
+          kind: DYNAMIC_RECONSTRUCTION_ELEMENT_KIND,
           start,
           end,
           valueFn: formatLocaleForFilenameFn
@@ -456,11 +473,12 @@ function _parseStringToReconstructionSequence(
         reconstructionSeries.push(dynamicElement);
         break;
       }
+
       case Constants.JSONP_PLACEHOLDER_LABEL: {
-        jsonStringifyFormatLocaleForFilenameFn ||= (locale: string) =>
-          JSON.stringify(formatLocaleForFilenameFn(locale));
+        jsonStringifyFormatLocaleForFilenameFn ||= (locale: string, chunk: unknown) =>
+          JSON.stringify(formatLocaleForFilenameFn(locale, chunk));
         const dynamicElement: IDynamicReconstructionElement = {
-          kind: 'dynamic',
+          kind: DYNAMIC_RECONSTRUCTION_ELEMENT_KIND,
           start,
           end,
           valueFn: jsonStringifyFormatLocaleForFilenameFn
@@ -468,6 +486,26 @@ function _parseStringToReconstructionSequence(
         reconstructionSeries.push(dynamicElement);
         break;
       }
+
+      case Constants.CUSTOM_PLACEHOLDER_LABEL: {
+        const serialEnd: number = source.indexOf('_', end);
+        const serial: string = source.slice(end, serialEnd);
+        end = serialEnd + 1;
+        const customData: ICustomDataPlaceholder | undefined = plugin._getCustomDataForSerialNumber(serial);
+        if (!customData) {
+          issues.push(`Missing custom placeholder ${serial}`);
+        } else {
+          const dynamicElement: IDynamicReconstructionElement = {
+            kind: DYNAMIC_RECONSTRUCTION_ELEMENT_KIND,
+            start,
+            end,
+            valueFn: customData.valueForLocaleFn
+          };
+          reconstructionSeries.push(dynamicElement);
+        }
+        break;
+      }
+
       default: {
         throw new Error(`Unexpected label ${elementLabel} in pattern ${source.slice(start, end)}`);
       }

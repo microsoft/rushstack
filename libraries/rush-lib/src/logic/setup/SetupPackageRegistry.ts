@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import type * as child_process from 'child_process';
+import * as path from 'node:path';
+import type * as child_process from 'node:child_process';
+
 import {
   AlreadyReportedError,
   Executable,
@@ -10,7 +11,8 @@ import {
   InternalError,
   type JsonObject,
   NewlineKind,
-  Text
+  Text,
+  User
 } from '@rushstack/node-core-library';
 import { PrintUtilities, Colorize, ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
@@ -352,7 +354,7 @@ export class SetupPackageRegistry {
     // ...then append the stuff we got from the REST API, but discard any junk that isn't a proper key/value
     linesToAdd.push(...responseLines.filter((x) => SetupPackageRegistry._getNpmrcKey(x) !== undefined));
 
-    const npmrcPath: string = path.join(Utilities.getHomeFolder(), '.npmrc');
+    const npmrcPath: string = path.join(User.getHomeFolder(), '.npmrc');
 
     this._mergeLinesIntoNpmrc(npmrcPath, linesToAdd);
   }

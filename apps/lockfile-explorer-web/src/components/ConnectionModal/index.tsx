@@ -2,10 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import React, { useCallback, useEffect, useState } from 'react';
+
 import { Button, Text } from '@rushstack/rush-themed-ui';
+
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
-import { checkAliveAsync } from '../../parsing/getPackageFiles';
+import { checkAliveAsync } from '../../helpers/lfxApiClient';
 import type { ReactNull } from '../../types/ReactNull';
 
 export const ConnectionModal = (): JSX.Element | ReactNull => {

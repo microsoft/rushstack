@@ -11,9 +11,10 @@ interface IPackageInfo {
 
 export function convertLockfileV6DepPathToV5DepPath(newDepPath: string): string {
   if (!newDepPath.includes('@', 2) || newDepPath.startsWith('file:')) return newDepPath;
-  const index = newDepPath.indexOf('@', newDepPath.indexOf('/@') + 2);
-  if (newDepPath.includes('(') && index > pnpmKitV8.dependencyPath.indexOfPeersSuffix(newDepPath))
+  const index: number = newDepPath.indexOf('@', newDepPath.indexOf('/@') + 2);
+  if (newDepPath.includes('(') && index > pnpmKitV8.dependencyPath.indexOfPeersSuffix(newDepPath)) {
     return newDepPath;
+  }
   return `${newDepPath.substring(0, index)}/${newDepPath.substring(index + 1)}`;
 }
 
@@ -22,7 +23,8 @@ export function parseDependencyPath(shrinkwrapFileMajorVersion: number, newDepPa
   if (shrinkwrapFileMajorVersion === 6) {
     dependencyPath = convertLockfileV6DepPathToV5DepPath(newDepPath);
   }
-  const packageInfo = pnpmKitV8.dependencyPath.parse(dependencyPath);
+  const packageInfo: ReturnType<typeof dependencyPathLockfilePreV9.parse> =
+    pnpmKitV8.parse(dependencyPath);
   return {
     name: packageInfo.name as string,
     peersSuffix: packageInfo.peersSuffix,
@@ -56,5 +58,7 @@ export function splicePackageWithVersion(
   dependencyPackageName: string,
   dependencyPackageVersion: string
 ): string {
-  return `/${dependencyPackageName}${shrinkwrapFileMajorVersion === 6 ? '@' : '/'}${dependencyPackageVersion}`;
+  return `/${dependencyPackageName}${
+    shrinkwrapFileMajorVersion === 6 ? '@' : '/'
+  }${dependencyPackageVersion}`;
 }

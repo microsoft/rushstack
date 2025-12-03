@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Text } from '@rushstack/node-core-library';
+
 import type { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
 
 /**
@@ -73,7 +74,6 @@ export class PrefixProxyTerminalProvider implements ITerminalProvider {
 
     this._isOnNewline = true;
 
-    // eslint-disable-next-line @rushstack/security/no-unsafe-regexp
     this._newlineRegex = new RegExp(`${Text.escapeRegExp(terminalProvider.eolCharacter)}|\\n`, 'g');
   }
 
@@ -91,7 +91,6 @@ export class PrefixProxyTerminalProvider implements ITerminalProvider {
   public write(data: string, severity: TerminalProviderSeverity): void {
     // We need to track newlines to ensure that the prefix is added to each line
     let currentIndex: number = 0;
-    // eslint-disable-next-line @rushstack/no-new-null
     let newlineMatch: RegExpExecArray | null;
 
     while ((newlineMatch = this._newlineRegex.exec(data))) {

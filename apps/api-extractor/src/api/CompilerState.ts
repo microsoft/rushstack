@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+
 import * as ts from 'typescript';
 
 import { JsonFile } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import { ExtractorConfig } from './ExtractorConfig';
 import type { IExtractorInvokeOptions } from './Extractor';
-import { Colorize } from '@rushstack/terminal';
 
 /**
  * Options for {@link CompilerState.create}
@@ -66,6 +67,15 @@ export class CompilerState {
         )
       );
     }
+
+    // Delete outDir and declarationDir to prevent TypeScript from redirecting self-package
+    // imports to source files. When these options are set, TypeScript's module resolution
+    // tries to map output .d.ts files back to their source .ts files to avoid analyzing
+    // build outputs during compilation. However, API Extractor specifically wants to analyze
+    // the .d.ts build artifacts, not the source files. Since API Extractor doesn't emit any
+    // files, these options are unnecessary and interfere with correct module resolution.
+    delete commandLine.options.outDir;
+    delete commandLine.options.declarationDir;
 
     const inputFilePaths: string[] = commandLine.fileNames.concat(extractorConfig.mainEntryPointFilePath);
     if (options && options.additionalEntryPoints) {

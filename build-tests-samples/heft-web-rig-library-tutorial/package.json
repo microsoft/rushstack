@@ -15,14 +15,15 @@
   "dependencies": {
     "react": "~17.0.2",
     "react-dom": "~17.0.2",
-    "tslib": "~2.3.1"
+    "tslib": "~2.8.1"
   },
   "devDependencies": {
-    "local-eslint-config": "workspace:*",
     "@rushstack/heft-web-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/react-dom": "17.0.25",
     "@types/react": "17.0.74",
-    "@types/webpack-env": "1.18.8"
+    "@types/webpack-env": "1.18.8",
+    "eslint": "~9.37.0",
+    "local-eslint-config": "workspace:*"
   }
 }

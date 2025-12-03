@@ -1,38 +1,39 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+
 import {
   AlreadyReportedError,
   EnvironmentMap,
   FileConstants,
   FileSystem,
   JsonFile,
-  type JsonObject
+  type JsonObject,
+  Objects
 } from '@rushstack/node-core-library';
 import {
   Colorize,
   ConsoleTerminalProvider,
   type ITerminal,
   type ITerminalProvider,
-  Terminal
+  Terminal,
+  PrintUtilities
 } from '@rushstack/terminal';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
-import { PrintUtilities } from '@rushstack/terminal';
 import { RushConstants } from '../logic/RushConstants';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { PurgeManager } from '../logic/PurgeManager';
-
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import type { BaseInstallManager } from '../logic/base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTypes';
-import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 import { Utilities } from '../utilities/Utilities';
 import type { Subspace } from '../api/Subspace';
 import type { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+import { initializeDotEnv } from '../logic/dotenv';
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
@@ -78,10 +79,17 @@ export class RushPnpmCommandLineParser {
     this._terminal = terminal;
 
     // Are we in a Rush repo?
-    const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation({
+    const rushJsonFilePath: string | undefined = RushConfiguration.tryFindRushJsonLocation({
       // showVerbose is false because the logging message may break JSON output
       showVerbose: false
     });
+
+    initializeDotEnv(terminal, rushJsonFilePath);
+
+    const rushConfiguration: RushConfiguration | undefined = rushJsonFilePath
+      ? RushConfiguration.loadFromConfigurationFile(rushJsonFilePath)
+      : undefined;
+
     NodeJsCompatibility.warnAboutCompatibilityIssues({
       isRushLib: true,
       alreadyReportedNodeTooNewError: !!options.alreadyReportedNodeTooNewError,
@@ -487,7 +495,7 @@ export class RushPnpmCommandLineParser {
         const currentGlobalPatchedDependencies: Record<string, string> | undefined =
           pnpmOptions?.globalPatchedDependencies;
 
-        if (!objectsAreDeepEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
+        if (!Objects.areDeepEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
           const commonTempPnpmPatchesFolder: string = `${subspaceTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
           const rushPnpmPatchesFolder: string = this._subspace.getSubspacePnpmPatchesFolderPath();
 

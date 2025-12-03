@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rush-sdk';
-import type { AzureEnvironmentName, LoginFlowType } from './AzureAuthenticationBase';
+
+import type { AzureEnvironmentName, LoginFlowFailoverMap, LoginFlowType } from './AzureAuthenticationBase';
 
 const PLUGIN_NAME: string = 'AzureStorageBuildCachePlugin';
 
@@ -13,17 +14,17 @@ interface IAzureBlobStorageConfigurationJson {
   /**
    * The name of the the Azure storage account to use for build cache.
    */
-  storageAccountName: string;
+  readonly storageAccountName: string;
 
   /**
    * The name of the container in the Azure storage account to use for build cache.
    */
-  storageContainerName: string;
+  readonly storageContainerName: string;
 
   /**
    * The Azure environment the storage account exists in. Defaults to AzureCloud.
    */
-  azureEnvironment?: AzureEnvironmentName;
+  readonly azureEnvironment?: AzureEnvironmentName;
 
   /**
    * Login flow to use for interactive authentication.
@@ -32,19 +33,24 @@ interface IAzureBlobStorageConfigurationJson {
   readonly loginFlow?: LoginFlowType;
 
   /**
+   * Fallback login flows to use if the primary login flow fails.
+   */
+  readonly loginFlowFailover?: LoginFlowFailoverMap;
+
+  /**
    * An optional prefix for cache item blob names.
    */
-  blobPrefix?: string;
+  readonly blobPrefix?: string;
 
   /**
    * If set to true, allow writing to the cache. Defaults to false.
    */
-  isCacheWriteAllowed?: boolean;
+  readonly isCacheWriteAllowed?: boolean;
 
   /**
    * If set to true, reading the cache requires authentication. Defaults to false.
    */
-  readRequiresAuthentication?: boolean;
+  readonly readRequiresAuthentication?: boolean;
 }
 
 /**
@@ -67,6 +73,7 @@ export class RushAzureStorageBuildCachePlugin implements IRushPlugin {
           azureEnvironment: azureBlobStorageConfiguration.azureEnvironment,
           blobPrefix: azureBlobStorageConfiguration.blobPrefix,
           loginFlow: azureBlobStorageConfiguration.loginFlow,
+          loginFlowFailover: azureBlobStorageConfiguration.loginFlowFailover,
           isCacheWriteAllowed: !!azureBlobStorageConfiguration.isCacheWriteAllowed,
           readRequiresAuthentication: !!azureBlobStorageConfiguration.readRequiresAuthentication
         });

@@ -3,8 +3,11 @@
 
 /* eslint max-lines: off */
 
-import * as path from 'path';
+import * as path from 'node:path';
+
 import * as semver from 'semver';
+import { trueCasePathSync } from 'true-case-path';
+
 import {
   JsonFile,
   JsonSchema,
@@ -16,7 +19,6 @@ import {
   type JsonNull
 } from '@rushstack/node-core-library';
 import { LookupByPath } from '@rushstack/lookup-by-path';
-import { trueCasePathSync } from 'true-case-path';
 
 import { Rush } from './Rush';
 import { RushConfigurationProject, type IRushConfigurationProjectJson } from './RushConfigurationProject';
@@ -39,7 +41,6 @@ import { type IPnpmOptionsJson, PnpmOptionsConfiguration } from '../logic/pnpm/P
 import { type INpmOptionsJson, NpmOptionsConfiguration } from '../logic/npm/NpmOptionsConfiguration';
 import { type IYarnOptionsJson, YarnOptionsConfiguration } from '../logic/yarn/YarnOptionsConfiguration';
 import schemaJson from '../schemas/rush.schema.json';
-
 import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer';
 import type { PackageManagerOptionsConfigurationBase } from '../logic/base/BasePackageManagerOptionsConfiguration';
 import { CustomTipsConfiguration } from './CustomTipsConfiguration';

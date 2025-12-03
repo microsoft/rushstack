@@ -9,16 +9,17 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {
-    "@rushstack/webpack4-localization-plugin": "workspace:*",
-    "@rushstack/webpack4-module-minifier-plugin": "workspace:*",
-    "@rushstack/set-webpack-public-path-plugin": "^4.1.16",
-    "@types/webpack-env": "1.18.8",
-    "html-webpack-plugin": "~4.5.2",
-    "webpack": "~4.47.0",
-    "webpack-bundle-analyzer": "~4.5.0",
-    "webpack-dev-server": "~4.9.3",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-webpack4-plugin": "workspace:*",
-    "local-node-rig": "workspace:*"
+    "@rushstack/set-webpack-public-path-plugin": "^4.1.16",
+    "@rushstack/webpack4-localization-plugin": "workspace:*",
+    "@rushstack/webpack4-module-minifier-plugin": "workspace:*",
+    "@types/webpack-env": "1.18.8",
+    "eslint": "~9.37.0",
+    "html-webpack-plugin": "~4.5.2",
+    "local-node-rig": "workspace:*",
+    "webpack": "~4.47.0",
+    "webpack-bundle-analyzer": "~4.5.0",
+    "webpack-dev-server": "~4.9.3"
   }
 }

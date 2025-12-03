@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import type { LoaderContext, LoaderDefinitionFunction } from 'webpack';
+
 import { Terminal } from '@rushstack/terminal';
 import { parseResx } from '@rushstack/localization-utilities';
-import type { IResxLocLoaderOptions } from './IResxLoaderOptions';
 
+import type { IResxLocLoaderOptions } from './IResxLoaderOptions';
 import { createLoader } from './LoaderFactory';
 import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
 

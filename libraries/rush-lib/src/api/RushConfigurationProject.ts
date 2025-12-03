@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+
 import * as semver from 'semver';
+
 import { type IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
 
 import type { RushConfiguration } from './RushConfiguration';
@@ -411,7 +413,10 @@ export class RushConfigurationProject {
       ]) {
         if (dependencySet) {
           for (const [dependency, version] of Object.entries(dependencySet)) {
-            const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependency, version);
+            const dependencySpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(
+              dependency,
+              version
+            );
             const dependencyName: string =
               dependencySpecifier.aliasTarget?.packageName ?? dependencySpecifier.packageName;
             // Skip if we can't find the local project or it's a cyclic dependency

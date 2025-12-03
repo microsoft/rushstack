@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
 import { PnpmOptionsConfiguration } from '../PnpmOptionsConfiguration';
 import { TestUtilities } from '@rushstack/heft-config-file';
 
@@ -71,6 +71,19 @@ describe(PnpmOptionsConfiguration.name, () => {
     expect(TestUtilities.stripAnnotations(pnpmConfiguration.globalNeverBuiltDependencies)).toEqual([
       'fsevents',
       'level'
+    ]);
+  });
+
+  it('loads minimumReleaseAge', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-minimumReleaseAge.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(pnpmConfiguration.minimumReleaseAge).toEqual(1440);
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.minimumReleaseAgeExclude)).toEqual([
+      'webpack',
+      '@myorg/*'
     ]);
   });
 });

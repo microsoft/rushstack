@@ -1,21 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as parser from '@typescript-eslint/parser';
-import { RuleTester } from '@typescript-eslint/rule-tester';
+import type { RuleTester } from '@typescript-eslint/rule-tester';
+
+import { getRuleTesterWithProject } from './ruleTester';
 import { noNewNullRule } from '../no-new-null';
 
-const ruleTester = new RuleTester({
-  languageOptions: {
-    parser,
-    parserOptions: {
-      sourceType: 'module',
-      // Do not run under 'lib" folder
-      tsconfigRootDir: __dirname + '/../../src/test/fixtures',
-      project: './tsconfig.json'
-    }
-  }
-});
+const ruleTester: RuleTester = getRuleTesterWithProject();
 
 ruleTester.run('no-new-null', noNewNullRule, {
   invalid: [

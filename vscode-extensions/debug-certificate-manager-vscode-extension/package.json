@@ -1,0 +1,126 @@
+{
+  "name": "debug-certificate-manager",
+  "version": "0.0.5",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "vscode-extensions/debug-certificate-manager-vscode-extension"
+  },
+  "license": "MIT",
+  "publisher": "ms-RushStack",
+  "preview": true,
+  "displayName": "Debug Certificate Manager",
+  "description": "VS Code extension to manage debug TLS certificates and sync them to the VS Code workspace. Works with VS Code remote development (Codespaces, SSH, Dev Containers, WSL, VS Code Tunnels).",
+  "homepage": "https://github.com/microsoft/rushstack/tree/main/vscode-extensions/debug-certificate-manager-vscode-extension",
+  "icon": "assets/extension-icon.png",
+  "extensionKind": [
+    "ui"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "keywords": [],
+  "galleryBanner": {
+    "color": "#f0f0f0",
+    "theme": "light"
+  },
+  "engines": {
+    "vscode": "^1.103.0"
+  },
+  "main": "./extension.js",
+  "scripts": {
+    "build": "heft build --clean",
+    "build:watch": "heft build-watch",
+    "start": "heft start",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": ""
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "debugCertificateManager.showLog",
+        "title": "Show Log",
+        "category": "Debug Certificate Manager"
+      },
+      {
+        "command": "debugCertificateManager.untrustCertificate",
+        "title": "Untrust Certificate",
+        "category": "Debug Certificate Manager"
+      },
+      {
+        "command": "debugCertificateManager.ensureCertificate",
+        "title": "Ensure Certificate",
+        "category": "Debug Certificate Manager"
+      },
+      {
+        "command": "debugCertificateManager.sync",
+        "title": "Ensure and Sync TLS Certificates",
+        "category": "Debug Certificate Manager"
+      },
+      {
+        "command": "debugCertificateManager.showSettings",
+        "title": "Show Settings",
+        "category": "Debug Certificate Manager"
+      }
+    ],
+    "configuration": {
+      "title": "Debug Certificate Manager",
+      "properties": {
+        "debugCertificateManager.storePath.osx": {
+          "type": "string",
+          "title": "Local Machine - Debug Certificate Manager Store Path (macOS)",
+          "description": "[Local machine] [macOS] Directory where TLS certificates are read and written."
+        },
+        "debugCertificateManager.storePath.windows": {
+          "type": "string",
+          "title": "Local Machine - Debug Certificate Manager Store Path (Windows)",
+          "description": "[Local machine] [Windows] Directory where TLS certificates are read and written."
+        },
+        "debugCertificateManager.storePath.linux": {
+          "type": "string",
+          "title": "Local Machine - Debug Certificate Manager Store Path (Linux)",
+          "description": "[Local machine] [Linux] Directory where TLS certificates are read and written."
+        },
+        "debugCertificateManager.caCertificateFilename": {
+          "type": "string",
+          "title": "CA Certificate Filename",
+          "description": "Filename for the CA certificate."
+        },
+        "debugCertificateManager.certificateFilename": {
+          "type": "string",
+          "title": "Server Certificate Filename",
+          "description": "Filename for the server certificate."
+        },
+        "debugCertificateManager.keyFilename": {
+          "type": "string",
+          "title": "Server Key Filename",
+          "description": "Filename for the server key."
+        },
+        "debugCertificateManager.autoSync": {
+          "type": "boolean",
+          "title": "Automatically Sync Certificates",
+          "default": true,
+          "description": "Check certificates when extension is activated. Extension is automatically activated when a `.vscode/debug-certificate-manager.json` file is present in the workspace."
+        }
+      }
+    }
+  },
+  "enabledApiProposals": [],
+  "activationEvents": [
+    "*"
+  ],
+  "dependencies": {
+    "@rushstack/debug-certificate-manager": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
+    "@rushstack/vscode-shared": "workspace:*",
+    "tslib": "~2.8.1"
+  },
+  "devDependencies": {
+    "@rushstack/heft-vscode-extension-rig": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/node": "20.17.19",
+    "@types/vscode": "1.103.0",
+    "@types/webpack-env": "1.18.8"
+  }
+}

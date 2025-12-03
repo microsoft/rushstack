@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
+
 import { type IPackageJson, FileConstants, Enum } from '@rushstack/node-core-library';
 import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
@@ -15,7 +16,6 @@ import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
 import { RushConstants } from '../../logic/RushConstants';
-
 import type * as VersionManagerType from '../../logic/VersionManager';
 
 export const DEFAULT_PACKAGE_UPDATE_MESSAGE: string = 'Bump versions [skip ci]';
@@ -280,14 +280,14 @@ export class VersionAction extends BaseRushAction {
     }
 
     if (changeLogUpdated || packageJsonUpdated) {
-      await publishGit.pushAsync(tempBranch, !this._ignoreGitHooksParameter.value);
+      await publishGit.pushAsync(tempBranch, !this._ignoreGitHooksParameter.value, false);
 
       // Now merge to target branch.
       await publishGit.fetchAsync();
       await publishGit.checkoutAsync(targetBranch);
       await publishGit.pullAsync(!this._ignoreGitHooksParameter.value);
       await publishGit.mergeAsync(tempBranch, !this._ignoreGitHooksParameter.value);
-      await publishGit.pushAsync(targetBranch, !this._ignoreGitHooksParameter.value);
+      await publishGit.pushAsync(targetBranch, !this._ignoreGitHooksParameter.value, false);
       await publishGit.deleteBranchAsync(tempBranch, true, !this._ignoreGitHooksParameter.value);
     } else {
       // skip commits

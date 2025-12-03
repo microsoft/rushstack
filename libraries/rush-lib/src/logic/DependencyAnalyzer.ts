@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
+
 import type { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
 import { DependencyType, type PackageJsonDependency } from '../api/PackageJsonEditor';
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -118,6 +119,11 @@ export class DependencyAnalyzer {
         if (dependencyType === DependencyType.Peer) {
           // If this is a peer dependency, it isn't a real dependency in this context, so it shouldn't
           // be included in the list of dependency versions.
+          continue;
+        }
+
+        if (dependencyVersion.startsWith('workspace:')) {
+          // If this is a workspace protocol dependency, ignore it.
           continue;
         }
 

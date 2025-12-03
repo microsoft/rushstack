@@ -1,0 +1,136 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TabCompleteAction renders help text: add 1`] = `
+"usage: rush add [-h] -p PACKAGE [--exact] [--caret] [--dev] [-m] [-s] [--all]
+
+Adds a dependency to the package.json and runs rush update.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -p PACKAGE, --package PACKAGE
+                        (Required) The name of the package which should be 
+                        added as a dependency. A SemVer version specifier can 
+                        be appended after an \\"@\\" sign. WARNING: Symbol 
+                        characters are usually interpreted by your shell, so 
+                        it's recommended to use quotes. For example, write 
+                        \\"rush add --package \\"example@^1.2.3\\"\\" instead of 
+                        \\"rush add --package example@^1.2.3\\".
+  --exact               If specified, the SemVer specifier added to the 
+                        package.json will be an exact version (e.g. without 
+                        tilde or caret).
+  --caret               If specified, the SemVer specifier added to the 
+                        package.json will be a prepended with a \\"caret\\" 
+                        specifier (\\"^\\").
+  --dev                 If specified, the package will be added to the 
+                        \\"devDependencies\\" section of the package.json
+  -m, --make-consistent
+                        If specified, other packages with this dependency 
+                        will have their package.json files updated to use the 
+                        same version of the dependency.
+  -s, --skip-update     If specified, the \\"rush update\\" command will not be 
+                        run after updating the package.json files.
+  --all                 If specified, the dependency will be added to all 
+                        projects.
+"
+`;
+
+exports[`TabCompleteAction renders help text: build 1`] = `
+"usage: rush build [-h] [-p COUNT] [-t PROJECT1] [-f PROJECT2]
+
+Build all projects that haven't been built.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -p COUNT, --parallelism COUNT
+                        Specifies the maximum number of concurrent processes 
+                        to launch during a build.
+  -t PROJECT1, --to PROJECT1
+                        Run command in the specified project and all of its 
+                        dependencies.
+  -f PROJECT2, --from PROJECT2
+                        Run command in the specified project and all projects 
+                        that directly or indirectly depend on the specified 
+                        project.
+"
+`;
+
+exports[`TabCompleteAction renders help text: change 1`] = `
+"usage: rush change [-h] [-v] [--no-fetch] [-b BRANCH] [--overwrite]
+                   [--email EMAIL] [--bulk] [--message MESSAGE]
+                   [--bump-type {major,minor,patch,none}]
+                   
+
+Asks a series of questions and then generates a <branchname>-<timestamp>.json 
+file.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -v, --verify          Verify the change file has been generated and that it 
+                        is a valid JSON file
+  --no-fetch            Skips fetching the baseline branch before running 
+                        \\"git diff\\" to detect changes.
+  -b BRANCH, --target-branch BRANCH
+                        If this parameter is specified, compare the checked 
+                        out branch with the specified branch.
+  --overwrite           If a changefile already exists, overwrite without 
+                        prompting.
+  --email EMAIL         The email address to use in changefiles. If this 
+                        parameter is not provided, the email address will be 
+                        detected or prompted for in interactive mode.
+  --bulk                If this flag is specified, apply the same change 
+                        message and bump type to all changed projects.
+  --message MESSAGE     The message to apply to all changed projects.
+  --bump-type {major,minor,patch,none}
+                        The bump type to apply to all changed projects.
+"
+`;
+
+exports[`TabCompleteAction renders help text: global help 1`] = `
+"usage: rush [-h] [-d] <command> ...
+
+Rush: a scalable monorepo manager for the web
+
+Positional arguments:
+  <command>
+    add        Adds a dependency to the package.json and runs rush update.
+    build      Build all projects that haven't been built.
+    change     Records changes made to projects, indicating how the package 
+               version number should be bumped for the next publish.
+    install    Install package dependencies for all projects in the repo 
+               according to the shrinkwrap file.
+
+Optional arguments:
+  -h, --help   Show this help message and exit.
+  -d, --debug  Show the full call stack if an error occurs while executing 
+               the tool
+
+[bold]For detailed help about a specific command, use: rush <command> -h[normal]
+"
+`;
+
+exports[`TabCompleteAction renders help text: install 1`] = `
+"usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
+                    [--network-concurrency COUNT] [--debug-package-manager]
+                    [--max-install-attempts NUMBER]
+                    
+
+Longer description: Install package dependencies for all projects in the repo 
+according to the shrinkwrap file.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -p, --purge           Perform \\"rush purge\\" before starting the installation
+  --bypass-policy       Overrides enforcement of the \\"gitPolicy\\" rules from 
+                        rush.json (use honorably!)
+  --no-link             If \\"--no-link\\" is specified, then project symlinks 
+                        will NOT be created
+  --network-concurrency COUNT
+                        If specified, limits the maximum number of concurrent 
+                        network requests.
+  --debug-package-manager
+                        Activates verbose logging for the package manager.
+  --max-install-attempts NUMBER
+                        Overrides the default maximum number of install 
+                        attempts. The default value is 3.
+"
+`;

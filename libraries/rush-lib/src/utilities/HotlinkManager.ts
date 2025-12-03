@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { pnpmSyncUpdateFileAsync, pnpmSyncCopyAsync, type ILogMessageCallbackOptions } from 'pnpm-sync-lib';
+import * as semver from 'semver';
+
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 import {
   AlreadyExistsBehavior,
@@ -14,8 +17,6 @@ import {
   type IPackageJsonDependencyTable
 } from '@rushstack/node-core-library';
 import { PackageExtractor } from '@rushstack/package-extractor';
-import { pnpmSyncUpdateFileAsync, pnpmSyncCopyAsync, type ILogMessageCallbackOptions } from 'pnpm-sync-lib';
-import * as semver from 'semver';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
@@ -197,7 +198,7 @@ export class HotlinkManager {
       const packageSourcePath: string = `${consumerPackagePnpmDependenciesFolderPath}/${dirName}/${RushConstants.nodeModulesFolderName}/${packageName}`;
       if (await FileSystem.existsAsync(packageSourcePath)) {
         const { version } = await JsonFile.loadAsync(`${packageSourcePath}/${FileConstants.PackageJson}`);
-        if (semver.satisfies(version, versionRange)) {
+        if (semver.satisfies(version, versionRange, { includePrerelease: true })) {
           packageSourcePathSet.add(packageSourcePath);
         }
       }

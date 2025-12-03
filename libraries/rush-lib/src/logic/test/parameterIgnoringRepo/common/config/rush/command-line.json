@@ -1,0 +1,48 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "commands": [],
+  "parameters": [
+    {
+      "longName": "--production",
+      "description": "A production flag",
+      "parameterKind": "flag",
+      "associatedCommands": ["build"]
+    },
+    {
+      "longName": "--verbose",
+      "description": "A verbose flag",
+      "parameterKind": "flag",
+      "associatedCommands": ["build"]
+    },
+    {
+      "longName": "--config",
+      "description": "Config file path",
+      "parameterKind": "string",
+      "argumentName": "PATH",
+      "associatedCommands": ["build"]
+    },
+    {
+      "longName": "--mode",
+      "description": "Build mode",
+      "parameterKind": "choice",
+      "alternatives": [
+        {
+          "name": "dev",
+          "description": "Development mode"
+        },
+        {
+          "name": "prod",
+          "description": "Production mode"
+        }
+      ],
+      "associatedCommands": ["build"]
+    },
+    {
+      "longName": "--tags",
+      "description": "Build tags",
+      "parameterKind": "stringList",
+      "argumentName": "TAG",
+      "associatedCommands": ["build"]
+    }
+  ]
+}

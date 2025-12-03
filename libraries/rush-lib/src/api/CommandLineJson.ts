@@ -23,6 +23,7 @@ export interface IBaseCommandJson {
 export interface IBulkCommandJson extends IBaseCommandJson {
   commandKind: 'bulk';
   enableParallelism: boolean;
+  allowOversubscription?: boolean;
   ignoreDependencyOrder?: boolean;
   ignoreMissingScript?: boolean;
   incremental?: boolean;
@@ -38,6 +39,7 @@ export interface IBulkCommandJson extends IBaseCommandJson {
 export interface IPhasedCommandWithoutPhasesJson extends IBaseCommandJson {
   commandKind: 'phased';
   enableParallelism: boolean;
+  allowOversubscription?: boolean;
   incremental?: boolean;
 }
 

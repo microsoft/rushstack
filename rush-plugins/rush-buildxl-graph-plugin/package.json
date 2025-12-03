@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-buildxl-graph-plugin",
-  "version": "5.155.0",
+  "version": "5.163.0",
   "description": "Rush plugin for generating a BuildXL graph.",
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
   }
 }

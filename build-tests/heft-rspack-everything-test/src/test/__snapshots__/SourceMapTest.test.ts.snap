@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Source Maps Chunk has a source that matches the sourceFileRegex 1`] = `
+Array [
+  "webpack://heft-rspack-everything-test/./lib/chunks/ChunkClass.js",
+]
+`;
+
+exports[`Source Maps Test-A has a source that matches the sourceFileRegex 1`] = `
+Array [
+  "webpack://heft-rspack-everything-test/webpack/runtime/jsonp_chunk_loading",
+  "webpack://heft-rspack-everything-test/webpack/runtime/define_property_getters",
+  "webpack://heft-rspack-everything-test/webpack/runtime/ensure_chunk",
+  "webpack://heft-rspack-everything-test/webpack/runtime/get javascript chunk filename",
+  "webpack://heft-rspack-everything-test/webpack/runtime/global",
+  "webpack://heft-rspack-everything-test/webpack/runtime/has_own_property",
+  "webpack://heft-rspack-everything-test/webpack/runtime/load_script",
+  "webpack://heft-rspack-everything-test/webpack/runtime/rspack_version",
+  "webpack://heft-rspack-everything-test/webpack/runtime/auto_public_path",
+  "webpack://heft-rspack-everything-test/webpack/runtime/rspack_unique_id",
+  "webpack://heft-rspack-everything-test/./lib/indexA.js",
+]
+`;
+
+exports[`Source Maps Test-B has a source that matches the sourceFileRegex 1`] = `
+Array [
+  "webpack://heft-rspack-everything-test/webpack/runtime/rspack_version",
+  "webpack://heft-rspack-everything-test/webpack/runtime/rspack_unique_id",
+  "webpack://heft-rspack-everything-test/./lib/indexB.js",
+]
+`;

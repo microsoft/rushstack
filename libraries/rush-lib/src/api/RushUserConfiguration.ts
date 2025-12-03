@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
-import * as path from 'path';
+import * as path from 'node:path';
 
-import { Utilities } from '../utilities/Utilities';
+import { FileSystem, JsonFile, JsonSchema, User } from '@rushstack/node-core-library';
+
 import { RushConstants } from '../logic/RushConstants';
 import schemaJson from '../schemas/rush-user-settings.schema.json';
 
@@ -51,11 +51,7 @@ export class RushUserConfiguration {
   }
 
   public static getRushUserFolderPath(): string {
-    const homeFolderPath: string = Utilities.getHomeFolder();
-    const rushUserSettingsFilePath: string = path.join(
-      homeFolderPath,
-      RushConstants.rushUserConfigurationFolderName
-    );
-    return rushUserSettingsFilePath;
+    const homeFolderPath: string = User.getHomeFolder();
+    return `${homeFolderPath}/${RushConstants.rushUserConfigurationFolderName}`;
   }
 }

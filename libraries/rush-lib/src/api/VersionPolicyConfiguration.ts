@@ -7,6 +7,12 @@ import { VersionPolicy, type BumpType, type LockStepVersionPolicy } from './Vers
 import type { RushConfigurationProject } from './RushConfigurationProject';
 import schemaJson from '../schemas/version-policies.schema.json';
 
+/**
+ * This interface represents the raw version policy JSON object which allows repo
+ * maintainers to define how different groups of projects will be published by Rush,
+ * and how their version numbers will be determined.
+ * @public
+ */
 export interface IVersionPolicyJson {
   policyName: string;
   definitionName: string;
@@ -15,26 +21,42 @@ export interface IVersionPolicyJson {
   includeEmailInChangeFile?: boolean;
 }
 
+/**
+ * This interface represents the raw lock-step version policy JSON object which extends the base version policy
+ * with additional fields specific to lock-step versioning.
+ * @public
+ */
 export interface ILockStepVersionJson extends IVersionPolicyJson {
   version: string;
   nextBump?: string;
   mainProject?: string;
 }
 
+/**
+ * This interface represents the raw individual version policy JSON object which extends the base version policy
+ * with additional fields specific to individual versioning.
+ * @public
+ */
 export interface IIndividualVersionJson extends IVersionPolicyJson {
   lockedMajor?: number;
 }
 
-export enum VersionFormatForPublish {
-  original = 'original',
-  exact = 'exact'
-}
+/**
+ * @public
+ */
+export type VersionFormatForPublish = 'original' | 'exact';
 
-export enum VersionFormatForCommit {
-  wildcard = 'wildcard',
-  original = 'original'
-}
+/**
+ * @public
+ */
+export type VersionFormatForCommit = 'wildcard' | 'original';
 
+/**
+ * This interface represents the `dependencies` field in a version policy JSON object,
+ * allowing repo maintainers to specify how dependencies' versions should be handled
+ * during publishing and committing.
+ * @public
+ */
 export interface IVersionPolicyDependencyJson {
   versionFormatForPublish?: VersionFormatForPublish;
   versionFormatForCommit?: VersionFormatForCommit;

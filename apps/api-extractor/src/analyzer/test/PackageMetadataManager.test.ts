@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-jest.mock('path', () => {
-  const actualPath: typeof import('path') = jest.requireActual('path');
+jest.mock('node:path', () => {
+  const actualPath: typeof import('path') = jest.requireActual('node:path');
   return {
     ...actualPath,
     resolve: actualPath.posix.resolve

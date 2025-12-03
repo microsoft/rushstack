@@ -2,6 +2,18 @@
   "name": "@rushstack/rig-package",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@rushstack/rig-package_v0.6.0",
+      "date": "Fri, 03 Oct 2025 20:09:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize import of builtin modules to use the `node:` protocol."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.3",
       "tag": "@rushstack/rig-package_v0.5.3",
       "date": "Sat, 27 Jul 2024 00:10:27 GMT",

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { once } from 'events';
-import type * as WorkerThreads from 'worker_threads';
+import { once } from 'node:events';
+import type * as WorkerThreads from 'node:worker_threads';
 
 import type {
   IMinifierConnection,

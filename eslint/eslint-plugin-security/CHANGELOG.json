@@ -2,6 +2,42 @@
   "name": "@rushstack/eslint-plugin-security",
   "entries": [
     {
+      "version": "0.13.0",
+      "tag": "@rushstack/eslint-plugin-security_v0.13.0",
+      "date": "Mon, 13 Oct 2025 15:13:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump `eslint` to `~9.37.0` and the `@typescript-eslint/*` packages to `~8.46.0`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.0",
+      "tag": "@rushstack/eslint-plugin-security_v0.12.0",
+      "date": "Fri, 03 Oct 2025 20:09:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize import of builtin modules to use the `node:` protocol."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.0",
+      "tag": "@rushstack/eslint-plugin-security_v0.11.0",
+      "date": "Thu, 26 Jun 2025 18:57:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update for compatibility with ESLint 9"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.0",
       "tag": "@rushstack/eslint-plugin-security_v0.10.0",
       "date": "Tue, 11 Mar 2025 02:12:33 GMT",

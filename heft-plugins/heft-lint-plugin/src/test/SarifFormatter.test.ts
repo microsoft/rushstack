@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
+
 import { formatEslintResultsAsSARIF } from '../SarifFormatter';
 import type { ISerifFormatterOptions } from '../SarifFormatter';
 import type { ESLint } from 'eslint';
@@ -9,17 +10,17 @@ describe('formatEslintResultsAsSARIF', () => {
     const mockLintResults: ESLint.LintResult[] = [
       {
         filePath: '/src/file1.ts',
+        source: 'const x = 1;',
         messages: [
           {
             ruleId: 'no-unused-vars',
             severity: 2,
             message: "'x' is defined but never used.",
-            line: 10,
-            column: 5,
+            line: 1,
+            column: 7,
             nodeType: 'Identifier',
-            endLine: 10,
-            endColumn: 6,
-            source: 'const x = 1;'
+            endLine: 1,
+            endColumn: 8
           }
         ],
         suppressedMessages: [],
@@ -94,17 +95,17 @@ describe('formatEslintResultsAsSARIF', () => {
     const mockLintResults: ESLint.LintResult[] = [
       {
         filePath: '/src/file1.ts',
+        source: 'const x = 1;',
         messages: [
           {
             ruleId: 'no-unused-vars',
             severity: 2,
             message: "'x' is defined but never used.",
-            line: 10,
-            column: 5,
+            line: 1,
+            column: 7,
             nodeType: 'Identifier',
-            endLine: 10,
-            endColumn: 6,
-            source: 'const x = 1;'
+            endLine: 1,
+            endColumn: 8
           }
         ],
         suppressedMessages: [],
@@ -163,28 +164,27 @@ describe('formatEslintResultsAsSARIF', () => {
     const mockLintResults: ESLint.LintResult[] = [
       {
         filePath: '/src/file2.ts',
+        source: 'let x;\nconsole.log("test");',
         messages: [
           {
             ruleId: 'no-unused-vars',
             severity: 2,
             message: "'x' is defined but never used.",
-            line: 5,
-            column: 10,
+            line: 1,
+            column: 5,
             nodeType: 'Identifier',
-            endLine: 5,
-            endColumn: 11,
-            source: 'let x;'
+            endLine: 1,
+            endColumn: 6
           },
           {
             ruleId: 'no-console',
             severity: 1,
             message: 'Unexpected console statement.',
-            line: 10,
-            column: 5,
+            line: 2,
+            column: 1,
             nodeType: 'MemberExpression',
-            endLine: 10,
-            endColumn: 16,
-            source: 'console.log("test");'
+            endLine: 2,
+            endColumn: 12
           }
         ],
         suppressedMessages: [],
@@ -300,17 +300,17 @@ describe('formatEslintResultsAsSARIF', () => {
     const mockLintResults: ESLint.LintResult[] = [
       {
         filePath: '/src/file1.ts',
+        source: 'const x = 1;',
         messages: [
           {
             ruleId: 'no-unused-vars',
             severity: 2,
             message: "'x' is defined but never used.",
-            line: 10,
-            column: 5,
+            line: 1,
+            column: 7,
             nodeType: 'Identifier',
-            endLine: 10,
-            endColumn: 6,
-            source: 'const x = 1;'
+            endLine: 1,
+            endColumn: 8
           }
         ],
         suppressedMessages: [],
@@ -323,17 +323,17 @@ describe('formatEslintResultsAsSARIF', () => {
       },
       {
         filePath: '/src/file2.ts',
+        source: 'let y = z == 2;',
         messages: [
           {
             ruleId: 'eqeqeq',
             severity: 2,
             message: "Expected '===' and instead saw '=='.",
-            line: 15,
-            column: 8,
+            line: 1,
+            column: 9,
             nodeType: 'BinaryExpression',
-            endLine: 15,
-            endColumn: 10,
-            source: 'if (a == b) { }'
+            endLine: 1,
+            endColumn: 15
           }
         ],
         suppressedMessages: [],
@@ -421,17 +421,17 @@ describe('formatEslintResultsAsSARIF', () => {
     const mockLintResults: ESLint.LintResult[] = [
       {
         filePath: '/src/file4.ts',
+        source: 'debugger;\nconsole.log("test");',
         messages: [
           {
             ruleId: 'no-debugger',
             severity: 2,
             message: "Unexpected 'debugger' statement.",
-            line: 20,
+            line: 1,
             column: 1,
             nodeType: 'DebuggerStatement',
-            endLine: 20,
-            endColumn: 9,
-            source: 'debugger;'
+            endLine: 1,
+            endColumn: 10
           }
         ],
         suppressedMessages: [
@@ -439,12 +439,11 @@ describe('formatEslintResultsAsSARIF', () => {
             ruleId: 'no-console',
             severity: 1,
             message: 'Unexpected console statement.',
-            line: 10,
-            column: 5,
+            line: 2,
+            column: 1,
             nodeType: 'MemberExpression',
-            endLine: 10,
-            endColumn: 16,
-            source: 'console.log("test");',
+            endLine: 2,
+            endColumn: 12,
             suppressions: [
               {
                 kind: 'inSource',
@@ -537,17 +536,17 @@ describe('formatEslintResultsAsSARIF', () => {
     const mockLintResults: ESLint.LintResult[] = [
       {
         filePath: '/src/file4.ts',
+        source: 'debugger;\nconsole.log("test");',
         messages: [
           {
             ruleId: 'no-debugger',
             severity: 2,
             message: "Unexpected 'debugger' statement.",
-            line: 20,
+            line: 1,
             column: 1,
             nodeType: 'DebuggerStatement',
-            endLine: 20,
-            endColumn: 9,
-            source: 'debugger;'
+            endLine: 1,
+            endColumn: 10
           }
         ],
         suppressedMessages: [
@@ -555,12 +554,11 @@ describe('formatEslintResultsAsSARIF', () => {
             ruleId: 'no-console',
             severity: 1,
             message: 'Unexpected console statement.',
-            line: 10,
-            column: 5,
+            line: 2,
+            column: 1,
             nodeType: 'MemberExpression',
-            endLine: 10,
-            endColumn: 16,
-            source: 'console.log("test");',
+            endLine: 2,
+            endColumn: 12,
             suppressions: [
               {
                 kind: 'inSource',

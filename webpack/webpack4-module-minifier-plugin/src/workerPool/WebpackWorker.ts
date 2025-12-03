@@ -1,9 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as workerThreads from 'node:worker_threads';
+
 import webpack = require('webpack');
-import * as workerThreads from 'worker_threads';
+
 import { MessagePortMinifier } from '@rushstack/module-minifier';
+
 import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin';
 import '../OverrideWebpackIdentifierAllocation';
 
@@ -12,7 +15,7 @@ process.umask = () => 0;
 
 const { configFilePath, sourceMap, usePortableModules } = workerThreads.workerData;
 
-const webpackConfigs: webpack.Configuration[] = require(configFilePath); // eslint-disable-line @typescript-eslint/no-var-requires
+const webpackConfigs: webpack.Configuration[] = require(configFilePath);
 
 // chalk.enabled = enableColor;
 

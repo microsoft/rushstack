@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
 
 import { JsonFile, Path, Text } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../RushConfiguration';
@@ -77,7 +77,7 @@ describe(RushConfiguration.name, () => {
     expect(rushConfiguration.projectFolderMinDepth).toEqual(1);
     expect(rushConfiguration.hotfixChangeEnabled).toEqual(true);
 
-    expect(rushConfiguration.projects).toHaveLength(3);
+    expect(rushConfiguration.projects).toHaveLength(5);
 
     // "approvedPackagesPolicy" feature
     const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;

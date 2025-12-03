@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import Ajv, { type ValidateFunction } from 'ajv';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import stripJsonComments from 'strip-json-comments';
 
 import { RigConfig } from '../RigConfig';

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { createHash, type Hash } from 'node:crypto';
+
 import { glob } from 'fast-glob';
 
 import {
@@ -9,7 +10,6 @@ import {
   type IOperationRunnerContext,
   OperationStatus
 } from '@rushstack/operation-graph';
-
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 
 import type { HeftTask } from '../../pluginFramework/HeftTask';

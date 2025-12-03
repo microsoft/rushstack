@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ScopedLogger } from './ScopedLogger';
 import {
   FileError,
   type FileLocationStyle,
   type IFileErrorFormattingOptions
 } from '@rushstack/node-core-library';
 import type { ITerminalProvider } from '@rushstack/terminal';
+
+import { ScopedLogger } from './ScopedLogger';
 export interface ILoggingManagerOptions {
   terminalProvider: ITerminalProvider;
 }

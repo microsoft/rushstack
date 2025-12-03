@@ -3,11 +3,12 @@
 
 /* eslint-disable @typescript-eslint/no-redeclare */
 
+import { InternalError } from '@rushstack/node-core-library';
+
 import type { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
 import { Parameter } from '../model/Parameter';
 import { ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import type { IExcerptTokenRange } from './Excerpt';
-import { InternalError } from '@rushstack/node-core-library';
 import type { DeserializerContext } from '../model/DeserializerContext';
 
 /**

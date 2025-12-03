@@ -2,12 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import type { IRequiredCommandLineStringParameter } from '@rushstack/ts-command-line';
+import { Async, FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
+
 import { assetsFolderPath } from '../../utilities/PathConstants';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { type ISubspacesConfigurationJson, SubspacesConfiguration } from '../../api/SubspacesConfiguration';
-import { Async, FileSystem, JsonFile } from '@rushstack/node-core-library';
-import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 import { copyTemplateFileAsync } from '../../utilities/templateUtilities';
 
 export class InitSubspaceAction extends BaseRushAction {
@@ -86,7 +87,6 @@ export class InitSubspaceAction extends BaseRushAction {
       updateExistingFile: true
     });
 
-    // eslint-disable-next-line no-console
     terminal.writeLine(
       '\nSubspace successfully created. Please review the subspace configuration files before committing.'
     );

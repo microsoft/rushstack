@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
+
 import { InternalError, JsonFile } from '@rushstack/node-core-library';
 
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
@@ -142,21 +143,16 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
       return;
     }
 
-    let integrity: string | undefined = shrinkwrapEntry.resolution?.integrity;
-    if (!integrity) {
-      // git dependency specifiers do not have an integrity entry. Instead, they specify the tarball field.
-      // So instead, we will hash the contents of the dependency entry and use that as the integrity hash.
-      // Ex:
-      // github.com/chfritz/node-xmlrpc/948db2fbd0260e5d56ed5ba58df0f5b6599bbe38:
-      //   ...
-      //   resolution:
-      //     tarball: 'https://codeload.github.com/chfritz/node-xmlrpc/tar.gz/948db2fbd0260e5d56ed5ba58df0f5b6599bbe38'
-      const sha256Digest: string = crypto
-        .createHash('sha256')
-        .update(JSON.stringify(shrinkwrapEntry))
-        .digest('hex');
-      integrity = `${name}@${version}:${sha256Digest}:`;
-    }
+    // Hash the full shrinkwrap entry instead of using just resolution.integrity.
+    // This ensures that changes to sub-dependency resolutions are detected.
+    // For example, if package A depends on B@1.0 and B@1.0's resolution of C changes
+    // from C@1.3 to C@1.2, the hash of A's shrinkwrap entry will change because
+    // the dependencies field in the entry reflects the resolved versions.
+    const sha256Digest: string = crypto
+      .createHash('sha256')
+      .update(JSON.stringify(shrinkwrapEntry))
+      .digest('hex');
+    const integrity: string = `${name}@${version}:${sha256Digest}:`;
 
     // Add the current dependency
     projectShrinkwrapMap.set(specifier, integrity);

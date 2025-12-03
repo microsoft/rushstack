@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as ts from 'typescript';
+
 import { InternalError } from '@rushstack/node-core-library';
 
 /**
@@ -17,7 +18,7 @@ export class TypeScriptInternals {
   public static getImmediateAliasedSymbol(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
     // Compiler internal:
     // https://github.com/microsoft/TypeScript/blob/v3.2.2/src/compiler/checker.ts
-    return (typeChecker as any).getImmediateAliasedSymbol(symbol); // eslint-disable-line @typescript-eslint/no-explicit-any
+    return (typeChecker as any).getImmediateAliasedSymbol(symbol);
   }
 
   /**

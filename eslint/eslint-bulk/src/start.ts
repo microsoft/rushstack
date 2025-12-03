@@ -6,9 +6,32 @@ import {
   type SpawnSyncOptionsWithBufferEncoding,
   execSync,
   spawnSync
-} from 'child_process';
-import * as process from 'process';
-import * as fs from 'fs';
+} from 'node:child_process';
+import * as process from 'node:process';
+import * as fs from 'node:fs';
+
+import type {
+  ESLINT_BULK_STDOUT_START_DELIMETER as ESLINT_BULK_STDOUT_START_DELIMETER_TYPE,
+  ESLINT_BULK_STDOUT_END_DELIMETER as ESLINT_BULK_STDOUT_END_DELIMETER_TYPE,
+  ESLINT_PACKAGE_NAME_ENV_VAR_NAME as ESLINT_PACKAGE_NAME_ENV_VAR_NAME_TYPE
+} from '@rushstack/eslint-patch/lib/eslint-bulk-suppressions/constants';
+
+const ESLINT_BULK_STDOUT_START_DELIMETER: typeof ESLINT_BULK_STDOUT_START_DELIMETER_TYPE =
+  'RUSHSTACK_ESLINT_BULK_START';
+const ESLINT_BULK_STDOUT_END_DELIMETER: typeof ESLINT_BULK_STDOUT_END_DELIMETER_TYPE =
+  'RUSHSTACK_ESLINT_BULK_END';
+const ESLINT_PACKAGE_NAME_ENV_VAR_NAME: typeof ESLINT_PACKAGE_NAME_ENV_VAR_NAME_TYPE =
+  '_RUSHSTACK_ESLINT_PACKAGE_NAME';
+const BULK_SUPPRESSIONS_CLI_ESLINT_PACKAGE_NAME: string =
+  process.env[ESLINT_PACKAGE_NAME_ENV_VAR_NAME] ?? 'eslint';
+
+const ESLINT_CONFIG_FILES: string[] = [
+  'eslint.config.js',
+  'eslint.config.cjs',
+  'eslint.config.mjs',
+  '.eslintrc.js',
+  '.eslintrc.cjs'
+];
 
 interface IEslintBulkConfigurationJson {
   /**
@@ -22,18 +45,19 @@ interface IEslintBulkConfigurationJson {
 }
 
 function findPatchPath(): string {
-  const candidatePaths: string[] = [`${process.cwd()}/.eslintrc.js`, `${process.cwd()}/.eslintrc.cjs`];
-  let eslintrcPath: string | undefined;
+  const candidatePaths: string[] = ESLINT_CONFIG_FILES.map((fileName) => `${process.cwd()}/${fileName}`);
+  let eslintConfigPath: string | undefined;
   for (const candidatePath of candidatePaths) {
     if (fs.existsSync(candidatePath)) {
-      eslintrcPath = candidatePath;
+      eslintConfigPath = candidatePath;
       break;
     }
   }
 
-  if (!eslintrcPath) {
+  if (!eslintConfigPath) {
     console.error(
-      '@rushstack/eslint-bulk: Please run this command from the directory that contains .eslintrc.js or .eslintrc.cjs'
+      '@rushstack/eslint-bulk: Please run this command from the directory that contains one of the following ' +
+        `ESLint configuration files: ${ESLINT_CONFIG_FILES.join(', ')}`
     );
     process.exit(1);
   }
@@ -42,7 +66,9 @@ function findPatchPath(): string {
 
   let eslintPackageJsonPath: string | undefined;
   try {
-    eslintPackageJsonPath = require.resolve('eslint/package.json', { paths: [process.cwd()] });
+    eslintPackageJsonPath = require.resolve(`${BULK_SUPPRESSIONS_CLI_ESLINT_PACKAGE_NAME}/package.json`, {
+      paths: [process.cwd()]
+    });
   } catch (e) {
     if (e.code !== 'MODULE_NOT_FOUND') {
       throw e;
@@ -80,10 +106,10 @@ function findPatchPath(): string {
   let runEslintFn: () => Buffer;
   if (eslintBinPath) {
     runEslintFn = () =>
-      spawnSync(process.argv0, [eslintBinPath, ...eslintArgs, eslintrcPath], spawnOrExecOptions).stdout;
+      spawnSync(process.argv0, [eslintBinPath, ...eslintArgs, eslintConfigPath], spawnOrExecOptions).stdout;
   } else {
     // Try to use a globally-installed eslint if a local package was not found
-    runEslintFn = () => execSync(`eslint ${eslintArgs.join(' ')} "${eslintrcPath}"`, spawnOrExecOptions);
+    runEslintFn = () => execSync(`eslint ${eslintArgs.join(' ')} "${eslintConfigPath}"`, spawnOrExecOptions);
   }
 
   let stdout: Buffer;
@@ -94,10 +120,9 @@ function findPatchPath(): string {
     process.exit(1);
   }
 
-  const startDelimiter: string = 'RUSHSTACK_ESLINT_BULK_START';
-  const endDelimiter: string = 'RUSHSTACK_ESLINT_BULK_END';
-
-  const regex: RegExp = new RegExp(`${startDelimiter}(.*?)${endDelimiter}`);
+  const regex: RegExp = new RegExp(
+    `${ESLINT_BULK_STDOUT_START_DELIMETER}(.*?)${ESLINT_BULK_STDOUT_END_DELIMETER}`
+  );
   const match: RegExpMatchArray | null = stdout.toString().match(regex);
 
   if (match) {

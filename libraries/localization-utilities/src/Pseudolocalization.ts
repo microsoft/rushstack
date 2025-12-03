@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import vm from 'vm';
+import vm from 'node:vm';
+
 import { FileSystem } from '@rushstack/node-core-library';
 
 import type { IPseudolocaleOptions } from './interfaces';

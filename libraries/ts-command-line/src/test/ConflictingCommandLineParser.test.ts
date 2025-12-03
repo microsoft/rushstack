@@ -5,6 +5,7 @@ import { CommandLineAction } from '../providers/CommandLineAction';
 import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import { CommandLineParser } from '../providers/CommandLineParser';
 import type { IScopedLongNameParseResult } from '../providers/CommandLineParameterProvider';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
 
 class GenericCommandLine extends CommandLineParser {
   public constructor(action: new () => CommandLineAction) {
@@ -124,6 +125,8 @@ describe(`Conflicting ${CommandLineParser.name}`, () => {
   it('executes an action', async () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(TestAction);
 
+    ensureHelpTextMatchesSnapshot(commandLineParser);
+
     await commandLineParser.executeAsync([
       'do:the-job',
       '--scope1:arg',
@@ -146,6 +149,8 @@ describe(`Conflicting ${CommandLineParser.name}`, () => {
 
   it('parses the scope out of a long name correctly', async () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(TestAction);
+
+    ensureHelpTextMatchesSnapshot(commandLineParser);
 
     let result: IScopedLongNameParseResult = commandLineParser.parseScopedLongName('--scope1:arg');
     expect(result.scope).toEqual('scope1');

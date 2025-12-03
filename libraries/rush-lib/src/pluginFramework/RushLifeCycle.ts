@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { AsyncParallelHook, AsyncSeriesHook, HookMap } from 'tapable';
-import type { ITelemetryData } from '../logic/Telemetry';
 
+import type { ITelemetryData } from '../logic/Telemetry';
 import type { PhasedCommandHooks } from './PhasedCommandHooks';
 import type { Subspace } from '../api/Subspace';
 
@@ -36,6 +36,13 @@ export interface IPhasedCommand extends IRushCommand {
    * @alpha
    */
   readonly hooks: PhasedCommandHooks;
+
+  /**
+   * An abort controller that can be used to abort the command.
+   * Long-lived plugins should listen to the signal to handle any cleanup logic.
+   * @alpha
+   */
+  readonly sessionAbortController: AbortController;
 }
 
 /**

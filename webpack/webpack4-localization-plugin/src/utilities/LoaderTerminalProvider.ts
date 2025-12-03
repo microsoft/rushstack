@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type * as webpack from 'webpack';
+
 import { type ITerminalProvider, TerminalProviderSeverity } from '@rushstack/terminal';
 
 export class LoaderTerminalProvider {

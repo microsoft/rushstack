@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-redis-cobuild-plugin",
-  "version": "5.155.0",
+  "version": "5.163.0",
   "description": "Rush plugin for Redis cobuild lock",
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@redis/client": "~1.5.5",
+    "@redis/client": "~5.8.2",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*"
   },
@@ -27,6 +27,7 @@
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/terminal": "workspace:*",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
   }
 }

@@ -2,11 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import type { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
+import { InternalError } from '@rushstack/node-core-library';
+
 import type { Constructor, PropertiesOf } from '../mixins/Mixin';
 import type { ApiPackage } from '../model/ApiPackage';
 import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import type { DeserializerContext } from '../model/DeserializerContext';
-import { InternalError } from '@rushstack/node-core-library';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 import type { ApiModel } from '../model/ApiModel';
 

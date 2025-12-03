@@ -49,11 +49,12 @@ function extractBundledDependencies(
   contexts: Map<string, IResolverContext>,
   context: IResolverContext
 ): void {
-  const { nestedPackageDirs } = context;
+  let { nestedPackageDirs } = context;
   if (!nestedPackageDirs) {
     return;
   }
 
+  let foundBundledDependencies: boolean = false;
   for (let i: number = nestedPackageDirs.length - 1; i >= 0; i--) {
     const nestedDir: string = nestedPackageDirs[i];
     if (!nestedDir.startsWith('node_modules/')) {
@@ -71,6 +72,12 @@ function extractBundledDependencies(
       continue;
     }
 
+    if (!foundBundledDependencies) {
+      foundBundledDependencies = true;
+      // Make a copy of the nestedPackageDirs array so that we don't mutate the version being
+      // saved into the subpackage index cache.
+      context.nestedPackageDirs = nestedPackageDirs = nestedPackageDirs.slice(0);
+    }
     // Remove this nested package from the list
     nestedPackageDirs.splice(i, 1);
 

@@ -8,6 +8,23 @@
       "items": {
         "$ref": "#/definitions/anything"
       }
+    },
+    "entraLoginFlow": {
+      "type": "string",
+      "description": "The Primary Entra ID login flow to use. Defaults to 'AdoCodespacesAuth' on GitHub Codespaces, 'VisualStudioCode' otherwise. If this flow fails it will fall back based on the configuration in `loginFlowFailover`.",
+      "enum": [
+        "AdoCodespacesAuth",
+        "InteractiveBrowser",
+        "DeviceCode",
+        "VisualStudioCode",
+        "AzureCli",
+        "AzureDeveloperCli",
+        "AzurePowerShell"
+      ]
+    },
+    "fallbackEntraLoginFlow": {
+      "$ref": "#/definitions/entraLoginFlow",
+      "description": "The Entra ID login flow to fall back to. If null, a failure in this login mode is terminal."
     }
   },
   "type": "object",
@@ -55,9 +72,56 @@
               "enum": ["AzurePublicCloud", "AzureChina", "AzureGermany", "AzureGovernment"]
             },
             "loginFlow": {
-              "type": "string",
-              "description": "The Entra ID login flow to use. Defaults to 'AdoCodespacesAuth' on GitHub Codespaces, 'InteractiveBrowser' otherwise.",
-              "enum": ["AdoCodespacesAuth", "InteractiveBrowser", "DeviceCode"]
+              "$ref": "#/definitions/entraLoginFlow"
+            },
+            "loginFlowFailover": {
+              "type": "object",
+              "description": "Optional configuration for a fallback login flow if the primary login flow fails. If not defined, the default order is: AdoCodespacesAuth -> VisualStudioCode -> AzureCli -> AzureDeveloperCli -> AzurePowerShell -> InteractiveBrowser -> DeviceCode.",
+              "additionalProperties": false,
+              "properties": {
+                "AdoCodespacesAuth": {
+                  "allOf": [
+                    { "$ref": "#/definitions/fallbackEntraLoginFlow" },
+                    { "not": { "enum": ["AdoCodespacesAuth"] } }
+                  ]
+                },
+                "InteractiveBrowser": {
+                  "allOf": [
+                    { "$ref": "#/definitions/fallbackEntraLoginFlow" },
+                    { "not": { "enum": ["InteractiveBrowser"] } }
+                  ]
+                },
+                "DeviceCode": {
+                  "allOf": [
+                    { "$ref": "#/definitions/fallbackEntraLoginFlow" },
+                    { "not": { "enum": ["DeviceCode"] } }
+                  ]
+                },
+                "VisualStudioCode": {
+                  "allOf": [
+                    { "$ref": "#/definitions/fallbackEntraLoginFlow" },
+                    { "not": { "enum": ["VisualStudioCode"] } }
+                  ]
+                },
+                "AzureCli": {
+                  "allOf": [
+                    { "$ref": "#/definitions/fallbackEntraLoginFlow" },
+                    { "not": { "enum": ["AzureCli"] } }
+                  ]
+                },
+                "AzureDeveloperCli": {
+                  "allOf": [
+                    { "$ref": "#/definitions/fallbackEntraLoginFlow" },
+                    { "not": { "enum": ["AzureDeveloperCli"] } }
+                  ]
+                },
+                "AzurePowerShell": {
+                  "allOf": [
+                    { "$ref": "#/definitions/fallbackEntraLoginFlow" },
+                    { "not": { "enum": ["AzurePowerShell"] } }
+                  ]
+                }
+              }
             },
             "blobPrefix": {
               "type": "string",

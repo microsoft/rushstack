@@ -4,9 +4,10 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname } from 'node:path';
 
-import { Async } from '@rushstack/node-core-library/lib/Async';
 import type { Output } from '@swc/core';
 import { transformFile } from '@swc/core/binding';
+
+import { Async } from '@rushstack/node-core-library/lib/Async';
 
 import type { IWorkerResult, ITransformTask, ITransformModulesRequestMessage } from './types';
 

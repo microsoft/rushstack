@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
 
 import type * as TTypescript from 'typescript';
 import { SyncHook } from 'tapable';
+
 import { FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { ProjectConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
@@ -30,6 +31,12 @@ import { getTsconfigFilePath } from './tsconfigLoader';
  * @public
  */
 export const PLUGIN_NAME: 'typescript-plugin' = 'typescript-plugin';
+
+/**
+ * The ${configDir} token supported in TypeScript 5.5
+ * @see {@link https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-5.html#the-configdir-template-variable-for-configuration-files}
+ */
+const CONFIG_DIR_TOKEN: '${configDir}' = '${configDir}';
 
 /**
  * @beta
@@ -202,7 +209,20 @@ export async function loadPartialTsconfigFileAsync(
           },
           jsonPathMetadata: {
             '$.compilerOptions.outDir': {
-              pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
+              pathResolutionMethod: PathResolutionMethod.custom,
+              customResolver(
+                resolverOptions: ConfigurationFile.IJsonPathMetadataResolverOptions<IPartialTsconfig>
+              ): string {
+                if (resolverOptions.propertyValue.includes(CONFIG_DIR_TOKEN)) {
+                  // Typescript 5.5. introduced the `${configDir}` token to refer to the directory containing the root tsconfig
+                  const configDir: string = path.dirname(tsconfigFilePath);
+                  // The token is an absolute path, so it should occur at most once.
+                  return path.resolve(resolverOptions.propertyValue.replace(CONFIG_DIR_TOKEN, configDir));
+                } else {
+                  const thisConfigDir: string = path.dirname(resolverOptions.configurationFilePath);
+                  return path.resolve(thisConfigDir, resolverOptions.propertyValue);
+                }
+              }
             }
           }
         });

@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import type * as pnpmKitV8 from '@rushstack/rush-pnpm-kit-v8';
+
 import type { IPackageJson } from '@rushstack/node-core-library';
+
 import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 

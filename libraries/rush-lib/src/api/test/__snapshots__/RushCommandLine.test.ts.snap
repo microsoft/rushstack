@@ -23,6 +23,22 @@ Object {
           "shortName": "-p",
         },
         Object {
+          "description": "If specified, the dependency will be added to all projects.",
+          "environmentVariable": undefined,
+          "kind": "Flag",
+          "longName": "--all",
+          "required": false,
+          "shortName": undefined,
+        },
+        Object {
+          "description": "Run command using a variant installation configuration",
+          "environmentVariable": "RUSH_VARIANT",
+          "kind": "String",
+          "longName": "--variant",
+          "required": false,
+          "shortName": undefined,
+        },
+        Object {
           "description": "If specified, the SemVer specifier added to the package.json will be an exact version (e.g. without tilde or caret).",
           "environmentVariable": undefined,
           "kind": "Flag",
@@ -61,22 +77,6 @@ Object {
           "longName": "--make-consistent",
           "required": false,
           "shortName": "-m",
-        },
-        Object {
-          "description": "If specified, the dependency will be added to all projects.",
-          "environmentVariable": undefined,
-          "kind": "Flag",
-          "longName": "--all",
-          "required": false,
-          "shortName": undefined,
-        },
-        Object {
-          "description": "Run command using a variant installation configuration",
-          "environmentVariable": "RUSH_VARIANT",
-          "kind": "String",
-          "longName": "--variant",
-          "required": false,
-          "shortName": undefined,
         },
       ],
     },
@@ -1191,7 +1191,7 @@ Object {
       "actionName": "import-strings",
       "parameters": Array [
         Object {
-          "description": "Specifies the maximum number of concurrent processes to launch during a build. The COUNT should be a positive integer, a percentage value (eg. \\"50%%\\") or the word \\"max\\" to specify a count that is equal to the number of CPU cores. If this parameter is omitted, then the default value depends on the operating system and number of CPU cores.",
+          "description": "Specifies the maximum number of concurrent processes to launch during a build. The COUNT should be a positive integer, a percentage value (eg. \\"50%\\") or the word \\"max\\" to specify a count that is equal to the number of CPU cores. If this parameter is omitted, then the default value depends on the operating system and number of CPU cores.",
           "environmentVariable": "RUSH_PARALLELISM",
           "kind": "String",
           "longName": "--parallelism",
@@ -1345,7 +1345,7 @@ Object {
       "actionName": "build",
       "parameters": Array [
         Object {
-          "description": "Specifies the maximum number of concurrent processes to launch during a build. The COUNT should be a positive integer, a percentage value (eg. \\"50%%\\") or the word \\"max\\" to specify a count that is equal to the number of CPU cores. If this parameter is omitted, then the default value depends on the operating system and number of CPU cores.",
+          "description": "Specifies the maximum number of concurrent processes to launch during a build. The COUNT should be a positive integer, a percentage value (eg. \\"50%\\") or the word \\"max\\" to specify a count that is equal to the number of CPU cores. If this parameter is omitted, then the default value depends on the operating system and number of CPU cores.",
           "environmentVariable": "RUSH_PARALLELISM",
           "kind": "String",
           "longName": "--parallelism",
@@ -1502,7 +1502,7 @@ Object {
       "actionName": "rebuild",
       "parameters": Array [
         Object {
-          "description": "Specifies the maximum number of concurrent processes to launch during a build. The COUNT should be a positive integer, a percentage value (eg. \\"50%%\\") or the word \\"max\\" to specify a count that is equal to the number of CPU cores. If this parameter is omitted, then the default value depends on the operating system and number of CPU cores.",
+          "description": "Specifies the maximum number of concurrent processes to launch during a build. The COUNT should be a positive integer, a percentage value (eg. \\"50%\\") or the word \\"max\\" to specify a count that is equal to the number of CPU cores. If this parameter is omitted, then the default value depends on the operating system and number of CPU cores.",
           "environmentVariable": "RUSH_PARALLELISM",
           "kind": "String",
           "longName": "--parallelism",

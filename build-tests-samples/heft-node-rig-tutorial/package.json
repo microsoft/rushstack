@@ -15,6 +15,7 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "20.17.19"
+    "@types/node": "20.17.19",
+    "eslint": "~9.37.0"
   }
 }

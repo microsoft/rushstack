@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
 
 import { FileError } from '../FileError';
+import type { FileLocationStyle } from '../Path';
 
 describe(FileError.name, () => {
   let originalValue: string | undefined;
@@ -334,5 +335,82 @@ describe(`${FileError.name} using unsupported base folder token`, () => {
       column: 12
     });
     expect(() => error1.getFormattedErrorMessage({ format: 'Unix' })).toThrowError();
+  });
+});
+
+describe(`${FileError.name} problem matcher patterns`, () => {
+  let originalValue: string | undefined;
+
+  beforeEach(() => {
+    originalValue = process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER;
+    delete process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER;
+    FileError._sanitizedEnvironmentVariable = undefined;
+    FileError._environmentVariableIsAbsolutePath = false;
+  });
+
+  afterEach(() => {
+    if (originalValue) {
+      process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = originalValue;
+    } else {
+      delete process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER;
+    }
+  });
+
+  const errorStringFormats = ['Unix', 'VisualStudio'] satisfies FileLocationStyle[];
+  errorStringFormats.forEach((format) => {
+    it(`${format} format - message without code`, () => {
+      const projectFolder = '/path/to/project';
+      const relativePathToFile = 'path/to/file';
+      const absolutePathToFile = `${projectFolder}/${relativePathToFile}`;
+      const lineNumber = 5;
+      const columnNumber = 12;
+
+      const error1 = new FileError('message', {
+        absolutePath: absolutePathToFile,
+        projectFolder: projectFolder,
+        line: lineNumber,
+        column: columnNumber
+      });
+      const errorMessage = error1.getFormattedErrorMessage({ format });
+      const pattern = FileError.getProblemMatcher({ format });
+
+      const regexp = new RegExp(pattern.regexp);
+      const matches = regexp.exec(errorMessage);
+      expect(matches).toBeDefined();
+      if (matches) {
+        expect(matches[pattern.file!]).toEqual(relativePathToFile);
+        expect(parseInt(matches[pattern.line!], 10)).toEqual(lineNumber);
+        expect(parseInt(matches[pattern.column!], 10)).toEqual(columnNumber);
+        expect(matches[pattern.message]).toEqual('message');
+      }
+    });
+
+    it(`${format} format - message with code`, () => {
+      const projectFolder = '/path/to/project';
+      const relativePathToFile = 'path/to/file';
+      const absolutePathToFile = `${projectFolder}/${relativePathToFile}`;
+      const lineNumber = 5;
+      const columnNumber = 12;
+
+      const error1 = new FileError('(code) message', {
+        absolutePath: absolutePathToFile,
+        projectFolder: projectFolder,
+        line: lineNumber,
+        column: columnNumber
+      });
+      const errorMessage = error1.getFormattedErrorMessage({ format });
+      const pattern = FileError.getProblemMatcher({ format });
+
+      const regexp = new RegExp(pattern.regexp);
+      const matches = regexp.exec(errorMessage);
+      expect(matches).toBeDefined();
+      if (matches) {
+        expect(matches[pattern.file!]).toEqual(relativePathToFile);
+        expect(parseInt(matches[pattern.line!], 10)).toEqual(lineNumber);
+        expect(parseInt(matches[pattern.column!], 10)).toEqual(columnNumber);
+        expect(matches[pattern.message]).toEqual('message');
+        expect(matches[pattern.code!]).toEqual('code');
+      }
+    });
   });
 });

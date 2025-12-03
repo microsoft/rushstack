@@ -10,16 +10,12 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "eslint": "~8.57.0",
+    "eslint": "~9.25.1",
     "local-node-rig": "workspace:*",
     "typescript": "~5.8.2"
   },
   "dependenciesMeta": {
-    "@rushstack/eslint-config": {
-      "injected": true
-    },
     "@rushstack/heft": {
       "injected": true
     },

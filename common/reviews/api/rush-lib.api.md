@@ -13,16 +13,21 @@ import { AsyncSeriesWaterfallHook } from 'tapable';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
+import { CredentialCache } from '@rushstack/credential-cache';
 import { HookMap } from 'tapable';
+import { ICredentialCacheEntry } from '@rushstack/credential-cache';
+import { ICredentialCacheOptions } from '@rushstack/credential-cache';
 import { IFileDiffStatus } from '@rushstack/package-deps-hash';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { IPrefixMatch } from '@rushstack/lookup-by-path';
+import type { IProblemCollector } from '@rushstack/terminal';
 import { ITerminal } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
 import { JsonNull } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { LookupByPath } from '@rushstack/lookup-by-path';
 import { PackageNameParser } from '@rushstack/node-core-library';
+import type { PerformanceEntry as PerformanceEntry_2 } from 'node:perf_hooks';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
 import { SyncWaterfallHook } from 'tapable';
@@ -137,25 +142,7 @@ export class CommonVersionsConfiguration {
     save(): boolean;
 }
 
-// @beta (undocumented)
-export class CredentialCache {
-    // (undocumented)
-    deleteCacheEntry(cacheId: string): void;
-    // (undocumented)
-    dispose(): void;
-    // (undocumented)
-    static initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache>;
-    // (undocumented)
-    saveIfModifiedAsync(): Promise<void>;
-    // (undocumented)
-    setCacheEntry(cacheId: string, entry: ICredentialCacheEntry): void;
-    // (undocumented)
-    trimExpiredEntries(): void;
-    // (undocumented)
-    tryGetCacheEntry(cacheId: string): ICredentialCacheEntry | undefined;
-    // (undocumented)
-    static usingAsync(options: ICredentialCacheOptions, doActionAsync: (credentialCache: CredentialCache) => Promise<void> | void): Promise<void>;
-}
+export { CredentialCache }
 
 // @beta
 export enum CustomTipId {
@@ -236,6 +223,8 @@ export class EnvironmentConfiguration {
     static get allowWarningsInSuccessfulBuild(): boolean;
     static get buildCacheCredential(): string | undefined;
     static get buildCacheEnabled(): boolean | undefined;
+    static get buildCacheOverrideJson(): string | undefined;
+    static get buildCacheOverrideJsonFilePath(): string | undefined;
     static get buildCacheWriteAllowed(): boolean | undefined;
     static get cobuildContextId(): string | undefined;
     static get cobuildLeafProjectLogOnlyAllowed(): boolean | undefined;
@@ -245,6 +234,7 @@ export class EnvironmentConfiguration {
     // @internal
     static _getRushGlobalFolderOverride(processEnv: IEnvironment): string | undefined;
     static get gitBinaryPath(): string | undefined;
+    static get hasBeenValidated(): boolean;
     // (undocumented)
     static parseBooleanEnvironmentVariable(name: string, value: string | undefined): boolean | undefined;
     static get pnpmStorePathOverride(): string | undefined;
@@ -272,6 +262,8 @@ export const EnvironmentVariableNames: {
     readonly RUSH_BUILD_CACHE_CREDENTIAL: "RUSH_BUILD_CACHE_CREDENTIAL";
     readonly RUSH_BUILD_CACHE_ENABLED: "RUSH_BUILD_CACHE_ENABLED";
     readonly RUSH_BUILD_CACHE_WRITE_ALLOWED: "RUSH_BUILD_CACHE_WRITE_ALLOWED";
+    readonly RUSH_BUILD_CACHE_OVERRIDE_JSON: "RUSH_BUILD_CACHE_OVERRIDE_JSON";
+    readonly RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH: "RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH";
     readonly RUSH_COBUILD_CONTEXT_ID: "RUSH_COBUILD_CONTEXT_ID";
     readonly RUSH_COBUILD_RUNNER_ID: "RUSH_COBUILD_RUNNER_ID";
     readonly RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED";
@@ -417,6 +409,7 @@ export interface ICreateOperationsContext {
     readonly isIncrementalBuildAllowed: boolean;
     readonly isInitial: boolean;
     readonly isWatch: boolean;
+    readonly parallelism: number;
     readonly phaseOriginal: ReadonlySet<IPhase>;
     readonly phaseSelection: ReadonlySet<IPhase>;
     readonly projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>;
@@ -425,22 +418,9 @@ export interface ICreateOperationsContext {
     readonly rushConfiguration: RushConfiguration;
 }
 
-// @beta (undocumented)
-export interface ICredentialCacheEntry {
-    // (undocumented)
-    credential: string;
-    // (undocumented)
-    credentialMetadata?: object;
-    // (undocumented)
-    expires?: Date;
-}
+export { ICredentialCacheEntry }
 
-// @beta (undocumented)
-export interface ICredentialCacheOptions {
-    cacheFilePath?: string;
-    // (undocumented)
-    supportEditing: boolean;
-}
+export { ICredentialCacheOptions }
 
 // @beta
 export interface ICustomTipInfo {
@@ -470,6 +450,7 @@ export interface IEnvironmentConfigurationInitializeOptions {
 
 // @alpha
 export interface IExecuteOperationsContext extends ICreateOperationsContext {
+    readonly abortController: AbortController;
     readonly inputsSnapshot?: IInputsSnapshot;
 }
 
@@ -531,6 +512,12 @@ export interface IGetChangedProjectsOptions {
 export interface IGlobalCommand extends IRushCommand {
 }
 
+// @public
+export interface IIndividualVersionJson extends IVersionPolicyJson {
+    // (undocumented)
+    lockedMajor?: number;
+}
+
 // @beta
 export interface IInputsSnapshot {
     getOperationOwnStateHash(project: IRushConfigurationProjectForSnapshot, operationName?: string): string;
@@ -547,6 +534,16 @@ export interface ILaunchOptions {
     builtInPluginConfigurations?: _IBuiltInPluginConfiguration[];
     isManaged: boolean;
     terminalProvider?: ITerminalProvider;
+}
+
+// @public
+export interface ILockStepVersionJson extends IVersionPolicyJson {
+    // (undocumented)
+    mainProject?: string;
+    // (undocumented)
+    nextBump?: string;
+    // (undocumented)
+    version: string;
 }
 
 // @alpha
@@ -568,15 +565,13 @@ export interface ILogger {
 
 // @public
 export class IndividualVersionPolicy extends VersionPolicy {
-    // Warning: (ae-forgotten-export) The symbol "IIndividualVersionJson" needs to be exported by the entry point index.d.ts
-    //
     // @internal
     constructor(versionPolicyJson: IIndividualVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
     ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
-    // @internal
-    get _json(): IIndividualVersionJson;
-    readonly lockedMajor: number | undefined;
+    // @internal (undocumented)
+    readonly _json: IIndividualVersionJson;
+    get lockedMajor(): number | undefined;
     validate(versionString: string, packageName: string): void;
 }
 
@@ -599,6 +594,7 @@ export interface IOperationExecutionResult {
     readonly metadataFolderPath: string | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly operation: Operation;
+    readonly problemCollector: IProblemCollector;
     readonly silent: boolean;
     readonly status: OperationStatus;
     readonly stdioSummarizer: StdioSummarizer;
@@ -674,6 +670,7 @@ export interface IOperationSettings {
     ignoreChangedProjectsOnlyFlag?: boolean;
     operationName: string;
     outputFolderNames?: string[];
+    parameterNamesToIgnore?: string[];
     sharding?: IRushPhaseSharding;
     weight?: number;
 }
@@ -723,6 +720,8 @@ export type IPhaseBehaviorForMissingScript = 'silent' | 'log' | 'error';
 export interface IPhasedCommand extends IRushCommand {
     // @alpha
     readonly hooks: PhasedCommandHooks;
+    // @alpha
+    readonly sessionAbortController: AbortController;
 }
 
 // @public
@@ -735,6 +734,8 @@ export interface IPnpmLockfilePolicies {
 
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
+    // (undocumented)
+    $schema?: string;
     alwaysFullInstall?: boolean;
     alwaysInjectDependenciesFromOtherSubspaces?: boolean;
     autoInstallPeers?: boolean;
@@ -745,6 +746,8 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalPackageExtensions?: Record<string, IPnpmPackageExtension>;
     globalPatchedDependencies?: Record<string, string>;
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
+    minimumReleaseAge?: number;
+    minimumReleaseAgeExclude?: string[];
     pnpmLockfilePolicies?: IPnpmLockfilePolicies;
     pnpmStore?: PnpmStoreLocation;
     preventManualShrinkwrapChanges?: boolean;
@@ -883,6 +886,7 @@ export interface ITelemetryData {
     readonly machineInfo?: ITelemetryMachineInfo;
     readonly name: string;
     readonly operationResults?: Record<string, ITelemetryOperationResult>;
+    readonly performanceEntries?: readonly PerformanceEntry_2[];
     readonly platform?: string;
     readonly result: 'Succeeded' | 'Failed';
     readonly rushVersion?: string;
@@ -914,6 +918,22 @@ export interface ITryFindRushJsonLocationOptions {
     startingFolder?: string;
 }
 
+// @public
+export interface IVersionPolicyJson {
+    // (undocumented)
+    definitionName: string;
+    // Warning: (ae-forgotten-export) The symbol "IVersionPolicyDependencyJson" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    dependencies?: IVersionPolicyDependencyJson;
+    // (undocumented)
+    exemptFromRushChange?: boolean;
+    // (undocumented)
+    includeEmailInChangeFile?: boolean;
+    // (undocumented)
+    policyName: string;
+}
+
 // @internal
 export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
     ignoreEngines?: boolean;
@@ -921,16 +941,14 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 
 // @public
 export class LockStepVersionPolicy extends VersionPolicy {
-    // Warning: (ae-forgotten-export) The symbol "ILockStepVersionJson" needs to be exported by the entry point index.d.ts
-    //
     // @internal
     constructor(versionPolicyJson: ILockStepVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
     ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
-    // @internal
-    get _json(): ILockStepVersionJson;
-    readonly mainProject: string | undefined;
-    readonly nextBump: BumpType | undefined;
+    // @internal (undocumented)
+    readonly _json: ILockStepVersionJson;
+    get mainProject(): string | undefined;
+    get nextBump(): BumpType | undefined;
     update(newVersionString: string): boolean;
     validate(versionString: string, packageName: string): void;
     get version(): string;
@@ -1017,6 +1035,7 @@ export class _OperationStateFile {
 
 // @beta
 export enum OperationStatus {
+    Aborted = "ABORTED",
     Blocked = "BLOCKED",
     Executing = "EXECUTING",
     Failure = "FAILURE",
@@ -1141,9 +1160,11 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     // (undocumented)
     readonly jsonFilename: string | undefined;
     // @internal (undocumented)
-    static loadFromJsonFileOrThrow(jsonFilename: string, commonTempFolder: string): PnpmOptionsConfiguration;
+    static loadFromJsonFileOrThrow(jsonFilePath: string, commonTempFolder: string): PnpmOptionsConfiguration;
     // @internal (undocumented)
     static loadFromJsonObject(json: _IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration;
+    readonly minimumReleaseAge: number | undefined;
+    readonly minimumReleaseAgeExclude: string[] | undefined;
     readonly pnpmLockfilePolicies: IPnpmLockfilePolicies | undefined;
     readonly pnpmStore: PnpmStoreLocation;
     readonly pnpmStorePath: string;
@@ -1595,21 +1616,19 @@ export class SubspacesConfiguration {
 
 // @public
 export abstract class VersionPolicy {
-    // Warning: (ae-forgotten-export) The symbol "IVersionPolicyJson" needs to be exported by the entry point index.d.ts
-    //
     // @internal
     constructor(versionPolicyJson: IVersionPolicyJson);
     abstract bump(bumpType?: BumpType, identifier?: string): void;
-    readonly definitionName: VersionPolicyDefinitionName;
+    get definitionName(): VersionPolicyDefinitionName;
     abstract ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
-    readonly exemptFromRushChange: boolean;
-    readonly includeEmailInChangeFile: boolean;
+    get exemptFromRushChange(): boolean;
+    get includeEmailInChangeFile(): boolean;
     get isLockstepped(): boolean;
     // @internal
-    abstract get _json(): IVersionPolicyJson;
+    readonly _json: IVersionPolicyJson;
     // @internal
     static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
-    readonly policyName: string;
+    get policyName(): string;
     setDependenciesBeforeCommit(packageName: string, configuration: RushConfiguration): void;
     setDependenciesBeforePublish(packageName: string, configuration: RushConfiguration): void;
     abstract validate(versionString: string, packageName: string): void;

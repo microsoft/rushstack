@@ -9,6 +9,7 @@ import type { CommandLineStringParameter } from '../parameters/CommandLineString
 import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
 import type { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider';
 import { SCOPING_PARAMETER_GROUP } from '../Constants';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
 
 class GenericCommandLine extends CommandLineParser {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -250,6 +251,17 @@ class AbbreviationScopedAction extends ScopedCommandLineAction {
 }
 
 describe(`Ambiguous ${CommandLineParser.name}`, () => {
+  it('renders help text', () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(
+      AmbiguousAction,
+      AbbreviationAction,
+      AliasAction,
+      AmbiguousScopedAction,
+      AbbreviationScopedAction
+    );
+    ensureHelpTextMatchesSnapshot(commandLineParser);
+  });
+
   it('fails to execute when an ambiguous short name is provided', async () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(AmbiguousAction);
 

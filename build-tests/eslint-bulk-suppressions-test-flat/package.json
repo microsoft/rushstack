@@ -1,0 +1,19 @@
+{
+  "name": "eslint-bulk-suppressions-test-flat",
+  "description": "Sample code to test eslint bulk suppressions with flat configs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "_phase:build": "node build.js"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-bulk": "workspace:*",
+    "@rushstack/eslint-patch": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@typescript-eslint/parser": "~8.46.0",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*",
+    "typescript": "~5.8.2"
+  }
+}

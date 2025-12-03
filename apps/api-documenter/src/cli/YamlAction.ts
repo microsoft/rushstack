@@ -8,7 +8,6 @@ import type {
 
 import type { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
-
 import { YamlDocumenter, type YamlFormat } from '../documenters/YamlDocumenter';
 import { OfficeYamlDocumenter } from '../documenters/OfficeYamlDocumenter';
 

@@ -1,8 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import type { AsyncParallelHook } from 'tapable';
+import * as path from 'node:path';
+
+import type { AsyncParallelHook, SyncHook } from 'tapable';
+
+import type { Operation, OperationGroupRecord } from '@rushstack/operation-graph';
 
 import type { IHeftRecordMetricsHookOptions, MetricsCollector } from '../metrics/MetricsCollector';
 import type { ScopedLogger, IScopedLogger } from './logging/ScopedLogger';
@@ -11,6 +14,7 @@ import type { IHeftParameters } from './HeftParameterManager';
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
 import type { HeftPluginHost } from './HeftPluginHost';
+import type { IHeftPhaseOperationMetadata, IHeftTaskOperationMetadata } from '../cli/HeftActionRunner';
 
 /**
  * The lifecycle session is responsible for providing session-specific information to Heft lifecycle
@@ -68,6 +72,34 @@ export interface IHeftLifecycleSession {
 }
 
 /**
+ * @public
+ */
+export interface IHeftTaskStartHookOptions {
+  operation: Operation<IHeftTaskOperationMetadata>;
+}
+
+/**
+ * @public
+ */
+export interface IHeftTaskFinishHookOptions {
+  operation: Operation<IHeftTaskOperationMetadata>;
+}
+
+/**
+ * @public
+ */
+export interface IHeftPhaseStartHookOptions {
+  operation: OperationGroupRecord<IHeftPhaseOperationMetadata>;
+}
+
+/**
+ * @public
+ */
+export interface IHeftPhaseFinishHookOptions {
+  operation: OperationGroupRecord<IHeftPhaseOperationMetadata>;
+}
+
+/**
  * Hooks that are available to the lifecycle plugin.
  *
  * @public
@@ -111,6 +143,38 @@ export interface IHeftLifecycleHooks {
    * @public
    */
   recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
+
+  /**
+   * The `taskStart` hook is called at the beginning of a task. It is called before the task has begun
+   * to execute. To use it, call `taskStart.tap(<pluginName>, <callback>)`.
+   *
+   * @public
+   */
+  taskStart: SyncHook<IHeftTaskStartHookOptions>;
+
+  /**
+   * The `taskFinish` hook is called at the end of a task. It is called after the task has completed
+   * execution. To use it, call `taskFinish.tap(<pluginName>, <callback>)`.
+   *
+   * @public
+   */
+  taskFinish: SyncHook<IHeftTaskFinishHookOptions>;
+
+  /**
+   * The `phaseStart` hook is called at the beginning of a phase. It is called before the phase has
+   * begun to execute. To use it, call `phaseStart.tap(<pluginName>, <callback>)`.
+   *
+   * @public
+   */
+  phaseStart: SyncHook<IHeftPhaseStartHookOptions>;
+
+  /**
+   * The `phaseFinish` hook is called at the end of a phase. It is called after the phase has completed
+   * execution. To use it, call `phaseFinish.tap(<pluginName>, <callback>)`.
+   *
+   * @public
+   */
+  phaseFinish: SyncHook<IHeftPhaseFinishHookOptions>;
 }
 
 /**

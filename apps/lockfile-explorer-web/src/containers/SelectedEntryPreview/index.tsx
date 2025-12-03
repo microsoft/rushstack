@@ -2,6 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import React, { useCallback } from 'react';
+
+import { Button, ScrollArea, Text } from '@rushstack/rush-themed-ui';
+
 import styles from './styles.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
@@ -11,7 +14,6 @@ import {
   removeBookmark,
   selectCurrentEntry
 } from '../../store/slices/entrySlice';
-import { Button, ScrollArea, Text } from '@rushstack/rush-themed-ui';
 
 export const SelectedEntryPreview = (): JSX.Element => {
   const selectedEntry = useAppSelector(selectCurrentEntry);

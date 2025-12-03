@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+
 import * as semver from 'semver';
+
 import { type IPackageJson, JsonFile, FileConstants } from '@rushstack/node-core-library';
 
 import { type VersionPolicy, type BumpType, LockStepVersionPolicy } from '../api/VersionPolicy';
@@ -341,7 +343,7 @@ export class VersionManager {
     oldDependencyVersion: string,
     newDependencyVersion: string
   ): void {
-    const oldSpecifier: DependencySpecifier = new DependencySpecifier(
+    const oldSpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(
       updatedDependentProject.name,
       oldDependencyVersion
     );

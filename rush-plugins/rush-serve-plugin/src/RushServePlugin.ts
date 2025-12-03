@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
 
 import type { IRushPlugin, RushSession, RushConfiguration, IPhasedCommand } from '@rushstack/rush-sdk';
-import { PLUGIN_NAME } from './constants';
 
-import type { IBaseRoutingRuleJson, IRoutingRule } from './RushProjectServeConfigFile';
+import { PLUGIN_NAME } from './constants';
+import type { IBaseRoutingRuleJson, IRoutingRule } from './types';
 
 export interface IGlobalRoutingFolderRuleJson extends IBaseRoutingRuleJson {
   workspaceRelativeFile: undefined;

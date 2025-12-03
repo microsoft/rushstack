@@ -10,12 +10,13 @@
   },
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",
+    "@rushstack/eslint-patch": "workspace:*",
     "@rushstack/heft-web-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/webpack-env": "1.18.8",
     "local-eslint-config": "workspace:*",
-    "eslint": "~8.57.0",
+    "eslint": "~9.37.0",
     "jest-junit": "12.3.0",
     "typescript": "~5.8.2"
   }

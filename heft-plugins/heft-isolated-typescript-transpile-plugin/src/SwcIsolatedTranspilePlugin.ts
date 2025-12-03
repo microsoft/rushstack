@@ -1,18 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { Dirent } from 'node:fs';
 import path from 'node:path';
 import { type ChildProcess, fork } from 'node:child_process';
 
-import { Path } from '@rushstack/node-core-library';
-import type { HeftConfiguration, IHeftTaskPlugin, IHeftTaskSession, IScopedLogger } from '@rushstack/heft';
-import { LookupByPath } from '@rushstack/lookup-by-path';
-import {
-  _loadTypeScriptToolAsync as loadTypeScriptToolAsync,
-  _loadTsconfig as loadTsconfig,
-  type _TTypeScript as TTypeScript,
-  _getTsconfigFilePath as getTsconfigFilePath
-} from '@rushstack/heft-typescript-plugin';
 import type {
   Config,
   JscTarget,
@@ -23,6 +15,23 @@ import type {
   TransformConfig
 } from '@swc/core';
 import { SyncWaterfallHook } from 'tapable';
+
+import { Async, Path } from '@rushstack/node-core-library';
+import type {
+  HeftConfiguration,
+  IHeftTaskPlugin,
+  IHeftTaskSession,
+  IScopedLogger,
+  IWatchFileSystem,
+  IWatchedFileState
+} from '@rushstack/heft';
+import { LookupByPath } from '@rushstack/lookup-by-path';
+import {
+  _loadTypeScriptToolAsync as loadTypeScriptToolAsync,
+  _loadTsconfig as loadTsconfig,
+  type _TTypeScript as TTypeScript,
+  _getTsconfigFilePath as getTsconfigFilePath
+} from '@rushstack/heft-typescript-plugin';
 
 import type {
   ISwcIsolatedTranspileOptions,
@@ -120,6 +129,18 @@ export default class SwcIsolatedTranspilePlugin implements IHeftTaskPlugin<ISwcI
 
       await transpileProjectAsync(heftConfiguration, pluginOptions, logger, this.accessor);
     });
+
+    heftSession.hooks.runIncremental.tapPromise(PLUGIN_NAME, async (incrementalOptions) => {
+      const { logger } = heftSession;
+
+      await transpileProjectAsync(
+        heftConfiguration,
+        pluginOptions,
+        logger,
+        this.accessor,
+        () => incrementalOptions.watchFs
+      );
+    });
   }
 }
 
@@ -127,7 +148,8 @@ async function transpileProjectAsync(
   heftConfiguration: HeftConfiguration,
   pluginOptions: ISwcIsolatedTranspileOptions,
   logger: IScopedLogger,
-  { hooks: { getSwcOptions: getSwcOptionsHook } }: ISwcIsolatedTranspilePluginAccessor
+  { hooks: { getSwcOptions: getSwcOptionsHook } }: ISwcIsolatedTranspilePluginAccessor,
+  getWatchFs?: (() => IWatchFileSystem) | undefined
 ): Promise<void> {
   const { buildFolderPath } = heftConfiguration;
   const { emitKinds = [] } = pluginOptions;
@@ -144,6 +166,36 @@ async function transpileProjectAsync(
   if (!parsedTsConfig) {
     logger.terminal.writeLine('tsconfig.json not found. Skipping parse and transpile for this project.');
     return;
+  }
+
+  if (getWatchFs && parsedTsConfig.wildcardDirectories) {
+    // If the tsconfig has wildcard directories, we need to ensure that they are watched for file changes.
+    const directoryQueue: Map<string, boolean> = new Map();
+    for (const [wildcardDirectory, type] of Object.entries(parsedTsConfig.wildcardDirectories)) {
+      directoryQueue.set(path.normalize(wildcardDirectory), type === ts.WatchDirectoryFlags.Recursive);
+    }
+
+    if (directoryQueue.size > 0) {
+      const watchFs: IWatchFileSystem = getWatchFs();
+
+      for (const [wildcardDirectory, isRecursive] of directoryQueue) {
+        const dirents: Dirent[] = watchFs.readdirSync(wildcardDirectory, {
+          withFileTypes: true
+        });
+
+        if (isRecursive) {
+          for (const dirent of dirents) {
+            if (dirent.isDirectory()) {
+              // Using path.join because we want platform-normalized paths.
+              const absoluteDirentPath: string = path.join(wildcardDirectory, dirent.name);
+              directoryQueue.set(absoluteDirentPath, true);
+            }
+          }
+        }
+      }
+
+      logger.terminal.writeDebugLine(`Watching for changes in ${directoryQueue.size} directories`);
+    }
   }
 
   if (emitKinds.length < 1) {
@@ -170,6 +222,29 @@ async function transpileProjectAsync(
   }
 
   const sourceFilePaths: string[] = filesFromTsConfig.filter((filePath) => !filePath.endsWith('.d.ts'));
+  const changedFilePaths: string[] = getWatchFs ? [] : sourceFilePaths;
+  if (getWatchFs) {
+    const watchFs: IWatchFileSystem = getWatchFs();
+    await Async.forEachAsync(
+      sourceFilePaths,
+      async (file: string) => {
+        const fileState: IWatchedFileState = await watchFs.getStateAndTrackAsync(path.normalize(file));
+        if (fileState.changed) {
+          changedFilePaths.push(file);
+        }
+      },
+      {
+        concurrency: 4
+      }
+    );
+  }
+
+  if (changedFilePaths.length < 1) {
+    logger.terminal.writeLine('No changed files found. Skipping transpile.');
+    return;
+  }
+
+  changedFilePaths.sort();
 
   logger.terminal.writeVerboseLine('Reading Config');
 
@@ -216,10 +291,10 @@ async function transpileProjectAsync(
 
     // https://github.com/swc-project/swc-node/blob/e6cd8b83d1ce76a0abf770f52425704e5d2872c6/packages/register/read-default-tsconfig.ts#L131C7-L139C20
     const react: Partial<ReactConfig> | undefined =
-      tsConfigOptions.jsxFactory ??
+      (tsConfigOptions.jsxFactory ??
       tsConfigOptions.jsxFragmentFactory ??
       tsConfigOptions.jsx ??
-      tsConfigOptions.jsxImportSource
+      tsConfigOptions.jsxImportSource)
         ? {
             pragma: tsConfigOptions.jsxFactory,
             pragmaFrag: tsConfigOptions.jsxFragmentFactory,
@@ -289,7 +364,7 @@ async function transpileProjectAsync(
   };
 
   const indexForOptions: Map<string, number> = new Map();
-  for (const srcFilePath of sourceFilePaths) {
+  for (const srcFilePath of changedFilePaths) {
     const rootPrefixLength: number | undefined = rootDirsPaths.findChildPath(srcFilePath);
 
     if (rootPrefixLength === undefined) {
@@ -327,7 +402,7 @@ async function transpileProjectAsync(
     }
   }
 
-  logger.terminal.writeLine(`Transpiling ${tasks.length} files...`);
+  logger.terminal.writeLine(`Transpiling ${changedFilePaths.length} changed source files...`);
 
   const result: IWorkerResult = await new Promise((resolve, reject) => {
     const workerPath: string = require.resolve('./TranspileWorker.js');

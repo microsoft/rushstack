@@ -17,14 +17,20 @@ module.exports = function createConfig(env, argv) {
         }
       },
       performance: {
-        hints: env.production ? 'error' : false
+        hints: env.production ? 'error' : false,
         // This specifies the bundle size limit that will trigger Webpack's warning saying:
         // "The following entrypoint(s) combined asset size exceeds the recommended limit."
-        // maxEntrypointSize: 500000,
-        // maxAssetSize: 500000
+        maxEntrypointSize: Infinity,
+        maxAssetSize: Infinity
       },
       devServer: {
         port: 8096,
+
+        open: '/',
+        // Disable HTTPS to simplify Fiddler configuration
+        server: { type: 'http' },
+        //hot: false,
+
         static: {
           directory: path.join(__dirname, 'dist')
         },

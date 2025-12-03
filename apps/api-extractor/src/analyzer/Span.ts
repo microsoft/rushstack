@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+
 import { InternalError, Sort, Text } from '@rushstack/node-core-library';
 
 import { IndentedWriter } from '../generators/IndentedWriter';

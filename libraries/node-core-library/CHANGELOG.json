@@ -2,6 +2,107 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.19.0",
+      "tag": "@rushstack/node-core-library_v5.19.0",
+      "date": "Fri, 21 Nov 2025 16:13:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update `Executable.getProcessInfoBy*` APIs to use PowerShell on Windows to support latest Windows 11 versions."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.18.0",
+      "tag": "@rushstack/node-core-library_v5.18.0",
+      "date": "Fri, 24 Oct 2025 00:13:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add \"Objects.areDeepEqual\" and \"User.getHomeFolder\" APIs."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.17.1",
+      "tag": "@rushstack/node-core-library_v5.17.1",
+      "date": "Wed, 22 Oct 2025 00:57:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the return type of `Executable.waitForExitAsync` to omit `stdout` and `stderr` if an `encoding` parameter isn't passed to the options object."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.17.0",
+      "tag": "@rushstack/node-core-library_v5.17.0",
+      "date": "Wed, 08 Oct 2025 00:13:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an `allowOversubscription` option to the `Async` API functions which prevents running tasks from exceeding concurrency.  Change its default to `false`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.16.0",
+      "tag": "@rushstack/node-core-library_v5.16.0",
+      "date": "Fri, 03 Oct 2025 20:09:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize import of builtin modules to use the `node:` protocol."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.15.1",
+      "tag": "@rushstack/node-core-library_v5.15.1",
+      "date": "Tue, 30 Sep 2025 23:57:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/problem-matcher\" to `0.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.15.0",
+      "tag": "@rushstack/node-core-library_v5.15.0",
+      "date": "Tue, 30 Sep 2025 20:33:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `FileError.getProblemMatcher()` which returns the problem matcher compatible with `IOperationExecutionResult.problemCollector` as well as VS Code, GitHub Actions"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/problem-matcher\" to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.14.0",
+      "tag": "@rushstack/node-core-library_v5.14.0",
+      "date": "Wed, 23 Jul 2025 20:55:57 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `Async.runWithTimeoutAsync` function that executes an async function, resolving if the specified timeout elapses first."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.13.1",
       "tag": "@rushstack/node-core-library_v5.13.1",
       "date": "Thu, 01 May 2025 00:11:12 GMT",

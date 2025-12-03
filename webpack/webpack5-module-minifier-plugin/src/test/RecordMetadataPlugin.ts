@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { Compilation, Compiler, WebpackPluginInstance } from 'webpack';
+
 import type { IModuleStats, IModuleMinifierPluginStats, IAssetStats } from '../ModuleMinifierPlugin.types';
 import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin';
 

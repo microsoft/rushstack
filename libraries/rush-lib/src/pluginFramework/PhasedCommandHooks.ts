@@ -9,6 +9,7 @@ import {
   SyncHook,
   SyncWaterfallHook
 } from 'tapable';
+
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
 import type { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';
@@ -78,6 +79,10 @@ export interface ICreateOperationsContext {
    */
   readonly isWatch: boolean;
   /**
+   * The currently configured maximum parallelism for the command.
+   */
+  readonly parallelism: number;
+  /**
    * The set of phases original for the current command execution.
    */
   readonly phaseOriginal: ReadonlySet<IPhase>;
@@ -127,6 +132,11 @@ export interface IExecuteOperationsContext extends ICreateOperationsContext {
    * Not part of the creation context to avoid the overhead of Git calls when initializing the graph.
    */
   readonly inputsSnapshot?: IInputsSnapshot;
+
+  /**
+   * An abort controller that can be used to abort the current set of queued operations.
+   */
+  readonly abortController: AbortController;
 }
 
 /**

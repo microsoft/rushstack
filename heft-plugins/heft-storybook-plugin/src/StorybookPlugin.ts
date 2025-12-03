@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as child_process from 'child_process';
-import * as path from 'path';
+import * as child_process from 'node:child_process';
+import * as path from 'node:path';
 
 import {
   AlreadyExistsBehavior,
@@ -569,7 +569,6 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     //
     // Storing the original env and restoring it like happens with argv does not seem to work
     // At the time when storybook checks env.npm_config_user_agent it has been reset to undefined
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     if (patchNpmConfigUserAgent) {
       process.env.npm_config_user_agent = 'npm';
     }

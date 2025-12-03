@@ -2,44 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
-import { Colorize, SgrParameterAttribute } from './Colorize';
+import { Colorize } from './Colorize';
 import type { ITerminal, ITerminalWriteOptions, TerminalWriteParameters } from './ITerminal';
 import { AnsiEscape } from './AnsiEscape';
-
-/**
- * Colors used with {@link ILegacyColorableSequence}.
- */
-enum ColorValue {
-  Black,
-  Red,
-  Green,
-  Yellow,
-  Blue,
-  Magenta,
-  Cyan,
-  White,
-  Gray
-}
-
-/**
- * Text styles used with {@link ILegacyColorableSequence}.
- */
-enum TextAttribute {
-  Bold,
-  Dim,
-  Underline,
-  Blink,
-  InvertColor,
-  Hidden
-}
-
-interface ILegacyColorableSequence {
-  text: string;
-  isEol?: boolean;
-  foregroundColor?: ColorValue;
-  backgroundColor?: ColorValue;
-  textAttributes?: TextAttribute[];
-}
 
 /**
  * This class facilitates writing to a console.
@@ -47,11 +12,10 @@ interface ILegacyColorableSequence {
  * @beta
  */
 export class Terminal implements ITerminal {
-  private _providers: Set<ITerminalProvider>;
+  private readonly _providers: Set<ITerminalProvider>;
 
   public constructor(provider: ITerminalProvider) {
-    this._providers = new Set<ITerminalProvider>();
-    this._providers.add(provider);
+    this._providers = new Set<ITerminalProvider>([provider]);
   }
 
   /**
@@ -65,9 +29,7 @@ export class Terminal implements ITerminal {
    * {@inheritdoc ITerminal.unregisterProvider}
    */
   public unregisterProvider(provider: ITerminalProvider): void {
-    if (this._providers.has(provider)) {
-      this._providers.delete(provider);
-    }
+    this._providers.delete(provider);
   }
 
   /**
@@ -183,30 +145,11 @@ export class Terminal implements ITerminal {
   }
 
   private _writeSegmentsToProviders(
-    segments: (string | ILegacyColorableSequence)[],
+    segments: string[],
     severity: TerminalProviderSeverity,
     followedByEol: boolean
   ): void {
-    const linesSegments: string[][] = [[]];
-    let currentLineSegments: string[] = linesSegments[0];
-    for (const segment of segments) {
-      if (typeof segment === 'string') {
-        currentLineSegments.push(segment);
-      } else {
-        if (segment.isEol) {
-          linesSegments.push([]);
-          currentLineSegments = linesSegments[linesSegments.length - 1];
-        } else {
-          currentLineSegments.push(this._serializeLegacyColorableSequence(segment));
-        }
-      }
-    }
-
-    const lines: string[] = [];
-    for (const lineSegments of linesSegments) {
-      lines.push(lineSegments.join(''));
-    }
-
+    const lines: string[] = [segments.join('')];
     if (followedByEol) {
       lines.push('');
     }
@@ -241,179 +184,6 @@ export class Terminal implements ITerminal {
 
       provider.write(textToWrite, severity);
     }
-  }
-
-  private _serializeLegacyColorableSequence(segment: ILegacyColorableSequence): string {
-    const startColorCodes: number[] = [];
-    const endColorCodes: number[] = [];
-    switch (segment.foregroundColor) {
-      case ColorValue.Black: {
-        startColorCodes.push(SgrParameterAttribute.BlackForeground);
-        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
-        break;
-      }
-
-      case ColorValue.Red: {
-        startColorCodes.push(SgrParameterAttribute.RedForeground);
-        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
-        break;
-      }
-
-      case ColorValue.Green: {
-        startColorCodes.push(SgrParameterAttribute.GreenForeground);
-        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
-        break;
-      }
-
-      case ColorValue.Yellow: {
-        startColorCodes.push(SgrParameterAttribute.YellowForeground);
-        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
-        break;
-      }
-
-      case ColorValue.Blue: {
-        startColorCodes.push(SgrParameterAttribute.BlueForeground);
-        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
-        break;
-      }
-
-      case ColorValue.Magenta: {
-        startColorCodes.push(SgrParameterAttribute.MagentaForeground);
-        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
-        break;
-      }
-
-      case ColorValue.Cyan: {
-        startColorCodes.push(SgrParameterAttribute.CyanForeground);
-        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
-        break;
-      }
-
-      case ColorValue.White: {
-        startColorCodes.push(SgrParameterAttribute.WhiteForeground);
-        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
-        break;
-      }
-
-      case ColorValue.Gray: {
-        startColorCodes.push(SgrParameterAttribute.GrayForeground);
-        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
-        break;
-      }
-    }
-
-    switch (segment.backgroundColor) {
-      case ColorValue.Black: {
-        startColorCodes.push(SgrParameterAttribute.BlackBackground);
-        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
-        break;
-      }
-
-      case ColorValue.Red: {
-        startColorCodes.push(SgrParameterAttribute.RedBackground);
-        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
-        break;
-      }
-
-      case ColorValue.Green: {
-        startColorCodes.push(SgrParameterAttribute.GreenBackground);
-        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
-        break;
-      }
-
-      case ColorValue.Yellow: {
-        startColorCodes.push(SgrParameterAttribute.YellowBackground);
-        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
-        break;
-      }
-
-      case ColorValue.Blue: {
-        startColorCodes.push(SgrParameterAttribute.BlueBackground);
-        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
-        break;
-      }
-
-      case ColorValue.Magenta: {
-        startColorCodes.push(SgrParameterAttribute.MagentaBackground);
-        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
-        break;
-      }
-
-      case ColorValue.Cyan: {
-        startColorCodes.push(SgrParameterAttribute.CyanBackground);
-        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
-        break;
-      }
-
-      case ColorValue.White: {
-        startColorCodes.push(SgrParameterAttribute.WhiteBackground);
-        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
-        break;
-      }
-
-      case ColorValue.Gray: {
-        startColorCodes.push(SgrParameterAttribute.GrayBackground);
-        endColorCodes.push(49);
-        break;
-      }
-    }
-
-    if (segment.textAttributes) {
-      for (const textAttribute of segment.textAttributes) {
-        switch (textAttribute) {
-          case TextAttribute.Bold: {
-            startColorCodes.push(SgrParameterAttribute.Bold);
-            endColorCodes.push(SgrParameterAttribute.NormalColorOrIntensity);
-            break;
-          }
-
-          case TextAttribute.Dim: {
-            startColorCodes.push(SgrParameterAttribute.Dim);
-            endColorCodes.push(SgrParameterAttribute.NormalColorOrIntensity);
-            break;
-          }
-
-          case TextAttribute.Underline: {
-            startColorCodes.push(SgrParameterAttribute.Underline);
-            endColorCodes.push(SgrParameterAttribute.UnderlineOff);
-            break;
-          }
-
-          case TextAttribute.Blink: {
-            startColorCodes.push(SgrParameterAttribute.Blink);
-            endColorCodes.push(SgrParameterAttribute.BlinkOff);
-            break;
-          }
-
-          case TextAttribute.InvertColor: {
-            startColorCodes.push(SgrParameterAttribute.InvertColor);
-            endColorCodes.push(SgrParameterAttribute.InvertColorOff);
-            break;
-          }
-
-          case TextAttribute.Hidden: {
-            startColorCodes.push(SgrParameterAttribute.Hidden);
-            endColorCodes.push(SgrParameterAttribute.HiddenOff);
-            break;
-          }
-        }
-      }
-    }
-
-    const resultSegments: string[] = [];
-    for (let j: number = 0; j < startColorCodes.length; j++) {
-      const code: number = startColorCodes[j];
-      resultSegments.push(AnsiEscape.getEscapeSequenceForAnsiCode(code));
-    }
-
-    resultSegments.push(segment.text);
-
-    for (let j: number = endColorCodes.length - 1; j >= 0; j--) {
-      const code: number = endColorCodes[j];
-      resultSegments.push(AnsiEscape.getEscapeSequenceForAnsiCode(code));
-    }
-
-    return resultSegments.join('');
   }
 
   private _normalizeWriteParameters(parameters: TerminalWriteParameters): {

@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-web-rig": "workspace:*"
+    "@rushstack/heft-web-rig": "workspace:*",
+    "eslint": "~9.37.0"
   }
 }

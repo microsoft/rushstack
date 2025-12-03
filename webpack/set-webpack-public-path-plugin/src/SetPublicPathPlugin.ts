@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Text } from '@rushstack/node-core-library';
-
 import type webpack from 'webpack';
+
+import { Text } from '@rushstack/node-core-library';
 
 import { type IInternalOptions, getSetPublicPathCode } from './codeGenerator';
 import { SetPublicPathPluginBase } from './SetPublicPathPluginBase';

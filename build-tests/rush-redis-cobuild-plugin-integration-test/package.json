@@ -12,12 +12,13 @@
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-redis-cobuild-plugin": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@types/http-proxy": "~1.17.8",
     "@types/node": "20.17.19",
-    "http-proxy": "~1.18.1"
+    "eslint": "~9.37.0",
+    "http-proxy": "~1.18.1",
+    "local-node-rig": "workspace:*"
   }
 }

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+
 import type * as tsdoc from '@microsoft/tsdoc';
 import { Sort, InternalError } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
@@ -421,7 +422,7 @@ export class MessageRouter {
 
   /**
    * This returns all remaining messages that were flagged with `addToApiReportFile`, but which were not
-   * retreieved using `fetchAssociatedMessagesForReviewFile()`.
+   * retrieved using `fetchAssociatedMessagesForReviewFile()`.
    */
   public fetchUnassociatedMessagesForReviewFile(): ExtractorMessage[] {
     const messagesForApiReportFile: ExtractorMessage[] = [];

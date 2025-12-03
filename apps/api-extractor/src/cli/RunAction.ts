@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
-import * as path from 'path';
+import * as os from 'node:os';
+import * as path from 'node:path';
+
 import {
   PackageJsonLookup,
   FileSystem,
@@ -23,10 +24,11 @@ import { ExtractorConfig, type IExtractorConfigPrepareOptions } from '../api/Ext
 
 export class RunAction extends CommandLineAction {
   private readonly _configFileParameter: CommandLineStringParameter;
-  private readonly _localParameter: CommandLineFlagParameter;
-  private readonly _verboseParameter: CommandLineFlagParameter;
+  private readonly _localFlag: CommandLineFlagParameter;
+  private readonly _verboseFlag: CommandLineFlagParameter;
   private readonly _diagnosticsParameter: CommandLineFlagParameter;
-  private readonly _typescriptCompilerFolder: CommandLineStringParameter;
+  private readonly _typescriptCompilerFolderParameter: CommandLineStringParameter;
+  private readonly _printApiReportDiffFlag: CommandLineFlagParameter;
 
   public constructor(parser: ApiExtractorCommandLine) {
     super({
@@ -42,7 +44,7 @@ export class RunAction extends CommandLineAction {
       description: `Use the specified ${ExtractorConfig.FILENAME} file path, rather than guessing its location`
     });
 
-    this._localParameter = this.defineFlagParameter({
+    this._localFlag = this.defineFlagParameter({
       parameterLongName: '--local',
       parameterShortName: '-l',
       description:
@@ -52,7 +54,7 @@ export class RunAction extends CommandLineAction {
         ' report file is automatically copied in a local build.'
     });
 
-    this._verboseParameter = this.defineFlagParameter({
+    this._verboseFlag = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
       description: 'Show additional informational messages in the output.'
@@ -65,7 +67,7 @@ export class RunAction extends CommandLineAction {
         '  This flag also enables the "--verbose" flag.'
     });
 
-    this._typescriptCompilerFolder = this.defineStringParameter({
+    this._typescriptCompilerFolderParameter = this.defineStringParameter({
       parameterLongName: '--typescript-compiler-folder',
       argumentName: 'PATH',
       description:
@@ -75,13 +77,21 @@ export class RunAction extends CommandLineAction {
         ' "--typescriptCompilerFolder" option to specify the folder path where you installed the TypeScript package,' +
         " and API Extractor's compiler will use those system typings instead."
     });
+
+    this._printApiReportDiffFlag = this.defineFlagParameter({
+      parameterLongName: '--print-api-report-diff',
+      description:
+        'If provided, then any differences between the actual and expected API reports will be ' +
+        'printed on the console. Note that the diff is not printed if the expected API report file has not been ' +
+        'created yet.'
+    });
   }
 
   protected override async onExecuteAsync(): Promise<void> {
     const lookup: PackageJsonLookup = new PackageJsonLookup();
     let configFilename: string;
 
-    let typescriptCompilerFolder: string | undefined = this._typescriptCompilerFolder.value;
+    let typescriptCompilerFolder: string | undefined = this._typescriptCompilerFolderParameter.value;
     if (typescriptCompilerFolder) {
       typescriptCompilerFolder = path.normalize(typescriptCompilerFolder);
 
@@ -92,17 +102,17 @@ export class RunAction extends CommandLineAction {
           : undefined;
         if (!typescriptCompilerPackageJson) {
           throw new Error(
-            `The path specified in the ${this._typescriptCompilerFolder.longName} parameter is not a package.`
+            `The path specified in the ${this._typescriptCompilerFolderParameter.longName} parameter is not a package.`
           );
         } else if (typescriptCompilerPackageJson.name !== 'typescript') {
           throw new Error(
-            `The path specified in the ${this._typescriptCompilerFolder.longName} parameter is not a TypeScript` +
+            `The path specified in the ${this._typescriptCompilerFolderParameter.longName} parameter is not a TypeScript` +
               ' compiler package.'
           );
         }
       } else {
         throw new Error(
-          `The path specified in the ${this._typescriptCompilerFolder.longName} parameter does not exist.`
+          `The path specified in the ${this._typescriptCompilerFolderParameter.longName} parameter does not exist.`
         );
       }
     }
@@ -135,10 +145,11 @@ export class RunAction extends CommandLineAction {
     }
 
     const extractorResult: ExtractorResult = Extractor.invoke(extractorConfig, {
-      localBuild: this._localParameter.value,
-      showVerboseMessages: this._verboseParameter.value,
+      localBuild: this._localFlag.value,
+      showVerboseMessages: this._verboseFlag.value,
       showDiagnostics: this._diagnosticsParameter.value,
-      typescriptCompilerFolder: typescriptCompilerFolder
+      typescriptCompilerFolder: typescriptCompilerFolder,
+      printApiReportDiff: this._printApiReportDiffFlag.value
     });
 
     if (extractorResult.succeeded) {

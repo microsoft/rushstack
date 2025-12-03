@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { RushMcpPluginSession, RushMcpPluginFactory } from '@rushstack/mcp-server';
+
 import { DocsPlugin, type IDocsPluginConfigFile } from './DocsPlugin';
 
 function createPlugin(

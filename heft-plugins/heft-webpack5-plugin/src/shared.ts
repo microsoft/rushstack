@@ -9,6 +9,7 @@ import type {
   AsyncSeriesHook,
   AsyncSeriesWaterfallHook
 } from 'tapable';
+
 import type { IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 
 /**
@@ -21,12 +22,12 @@ import type { IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 export interface IWebpackConfigurationFnEnvironment {
   /**
    * Whether or not the run is in production mode. Synonym of
-   * IWebpackConfigurationFnEnvironment.production.
+   * {@link IWebpackConfigurationFnEnvironment.production}.
    */
   prod: boolean;
   /**
    * Whether or not the run is in production mode. Synonym of
-   * IWebpackConfigurationFnEnvironment.prod.
+   * {@link IWebpackConfigurationFnEnvironment.prod}.
    */
   production: boolean;
 

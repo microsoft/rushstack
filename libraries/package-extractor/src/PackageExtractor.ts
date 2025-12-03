@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import { type IMinimatch, Minimatch } from 'minimatch';
+import * as path from 'node:path';
+
+import { Minimatch } from 'minimatch';
 import semver from 'semver';
 import npmPacklist from 'npm-packlist';
 import ignore, { type Ignore } from 'ignore';
+
 import {
   Async,
   AsyncQueue,
@@ -723,8 +725,8 @@ export class PackageExtractor {
         patternsToInclude: string[] | undefined,
         patternsToExclude: string[] | undefined
       ): boolean => {
-        let includeFilters: IMinimatch[] | undefined;
-        let excludeFilters: IMinimatch[] | undefined;
+        let includeFilters: Minimatch[] | undefined;
+        let excludeFilters: Minimatch[] | undefined;
         if (patternsToInclude?.length) {
           includeFilters = patternsToInclude?.map((p) => new Minimatch(p, { dot: true }));
         }

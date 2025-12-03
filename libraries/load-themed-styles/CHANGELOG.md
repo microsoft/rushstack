@@ -1,6 +1,81 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Tue, 13 May 2025 02:09:20 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+
+## 2.1.21
+Fri, 21 Nov 2025 16:13:56 GMT
+
+_Version update only_
+
+## 2.1.20
+Wed, 12 Nov 2025 01:12:56 GMT
+
+_Version update only_
+
+## 2.1.19
+Tue, 04 Nov 2025 08:15:14 GMT
+
+_Version update only_
+
+## 2.1.18
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 2.1.17
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 2.1.16
+Wed, 08 Oct 2025 00:13:28 GMT
+
+_Version update only_
+
+## 2.1.15
+Fri, 03 Oct 2025 20:10:00 GMT
+
+_Version update only_
+
+## 2.1.14
+Tue, 30 Sep 2025 23:57:45 GMT
+
+_Version update only_
+
+## 2.1.13
+Tue, 30 Sep 2025 20:33:51 GMT
+
+_Version update only_
+
+## 2.1.12
+Fri, 12 Sep 2025 15:13:07 GMT
+
+_Version update only_
+
+## 2.1.11
+Thu, 11 Sep 2025 00:22:31 GMT
+
+_Version update only_
+
+## 2.1.10
+Tue, 19 Aug 2025 20:45:02 GMT
+
+_Version update only_
+
+## 2.1.9
+Fri, 01 Aug 2025 00:12:48 GMT
+
+_Version update only_
+
+## 2.1.8
+Wed, 23 Jul 2025 20:55:57 GMT
+
+_Version update only_
+
+## 2.1.7
+Sat, 21 Jun 2025 00:13:15 GMT
+
+_Version update only_
 
 ## 2.1.6
 Tue, 13 May 2025 02:09:20 GMT

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { SyncHook } from 'tapable';
+
 import type {
   IHeftTaskPlugin,
   IHeftTaskSession,

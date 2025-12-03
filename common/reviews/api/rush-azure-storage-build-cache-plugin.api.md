@@ -5,9 +5,9 @@
 ```ts
 
 import { AzureAuthorityHosts } from '@azure/identity';
-import { CredentialCache } from '@rushstack/rush-sdk';
+import { CredentialCache } from '@rushstack/credential-cache';
 import { DeviceCodeCredentialOptions } from '@azure/identity';
-import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
+import type { ICredentialCacheEntry } from '@rushstack/credential-cache';
 import { InteractiveBrowserCredentialNodeOptions } from '@azure/identity';
 import type { IRushPlugin } from '@rushstack/rush-sdk';
 import type { ITerminal } from '@rushstack/terminal';
@@ -87,9 +87,7 @@ export interface IAzureAuthenticationBaseOptions {
     credentialUpdateCommandForLogging?: string | undefined;
     // (undocumented)
     loginFlow?: LoginFlowType;
-    loginFlowFailover?: {
-        [key in LoginFlowType]?: LoginFlowType;
-    };
+    loginFlowFailover?: LoginFlowFailoverMap;
 }
 
 // @public (undocumented)
@@ -135,6 +133,11 @@ export interface ITryGetCachedCredentialOptionsLogWarning extends ITryGetCachedC
 export interface ITryGetCachedCredentialOptionsThrow extends ITryGetCachedCredentialOptionsBase {
     expiredCredentialBehavior: 'throwError';
 }
+
+// @public (undocumented)
+export type LoginFlowFailoverMap = {
+    readonly [LoginFlow in LoginFlowType]?: Exclude<LoginFlowType, LoginFlow>;
+};
 
 // @public (undocumented)
 export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser' | 'AdoCodespacesAuth' | 'VisualStudioCode' | 'AzureCli' | 'AzureDeveloperCli' | 'AzurePowerShell';

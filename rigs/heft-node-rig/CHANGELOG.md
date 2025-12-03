@@ -1,6 +1,129 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Fri, 06 Jun 2025 00:11:09 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+
+## 2.11.10
+Fri, 21 Nov 2025 16:13:56 GMT
+
+_Version update only_
+
+## 2.11.9
+Wed, 12 Nov 2025 01:57:54 GMT
+
+_Version update only_
+
+## 2.11.8
+Wed, 12 Nov 2025 01:12:56 GMT
+
+_Version update only_
+
+## 2.11.7
+Tue, 11 Nov 2025 16:13:26 GMT
+
+_Version update only_
+
+## 2.11.6
+Mon, 10 Nov 2025 16:12:32 GMT
+
+### Patches
+
+- Include lib-dts and lib-esm folders in default files to clean
+
+## 2.11.5
+Tue, 04 Nov 2025 08:15:15 GMT
+
+_Version update only_
+
+## 2.11.4
+Fri, 24 Oct 2025 11:22:09 GMT
+
+_Version update only_
+
+## 2.11.3
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 2.11.2
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 2.11.1
+Tue, 14 Oct 2025 15:13:22 GMT
+
+_Version update only_
+
+## 2.11.0
+Mon, 13 Oct 2025 15:13:02 GMT
+
+### Minor changes
+
+- Bump `eslint` to `~9.37.0` and the `@typescript-eslint/*` packages to `~8.46.0`.
+
+## 2.10.2
+Wed, 08 Oct 2025 00:13:29 GMT
+
+_Version update only_
+
+## 2.10.1
+Fri, 03 Oct 2025 20:10:00 GMT
+
+_Version update only_
+
+## 2.10.0
+Tue, 30 Sep 2025 23:57:45 GMT
+
+### Minor changes
+
+- Release Heft version 1.0.0
+
+## 2.9.7
+Tue, 30 Sep 2025 20:33:51 GMT
+
+_Version update only_
+
+## 2.9.6
+Fri, 12 Sep 2025 15:13:07 GMT
+
+_Version update only_
+
+## 2.9.5
+Thu, 11 Sep 2025 00:22:31 GMT
+
+_Version update only_
+
+## 2.9.4
+Tue, 19 Aug 2025 20:45:02 GMT
+
+_Version update only_
+
+## 2.9.3
+Fri, 01 Aug 2025 00:12:49 GMT
+
+_Version update only_
+
+## 2.9.2
+Mon, 28 Jul 2025 15:11:56 GMT
+
+_Version update only_
+
+## 2.9.1
+Wed, 23 Jul 2025 20:55:57 GMT
+
+_Version update only_
+
+## 2.9.0
+Thu, 26 Jun 2025 18:57:04 GMT
+
+### Minor changes
+
+- Add flat config compatible versions of profiles and mixins for ESLint. These are located under the `profiles/default/includes/eslint/flat/*` path. If you need to remain on ESLint 8, ensure your rig or project consumes ESLint 8, and that you use the legacy configuration files.
+
+## 2.8.15
+Sat, 21 Jun 2025 00:13:15 GMT
+
+_Version update only_
 
 ## 2.8.14
 Fri, 06 Jun 2025 00:11:09 GMT

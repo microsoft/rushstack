@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line import/order
 import type * as TWebpack from 'webpack';
 // Compensate for webpack-dev-server referencing constructs from webpack 5
 declare module 'webpack' {
@@ -15,6 +16,7 @@ declare module 'webpack' {
 }
 import type { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 import type { AsyncParallelHook, AsyncSeriesBailHook, AsyncSeriesHook } from 'tapable';
+
 import type { IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 
 /**

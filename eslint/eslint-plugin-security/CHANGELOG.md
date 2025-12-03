@@ -1,6 +1,27 @@
 # Change Log - @rushstack/eslint-plugin-security
 
-This log was last generated on Tue, 11 Mar 2025 02:12:33 GMT and should not be manually modified.
+This log was last generated on Mon, 13 Oct 2025 15:13:02 GMT and should not be manually modified.
+
+## 0.13.0
+Mon, 13 Oct 2025 15:13:02 GMT
+
+### Minor changes
+
+- Bump `eslint` to `~9.37.0` and the `@typescript-eslint/*` packages to `~8.46.0`.
+
+## 0.12.0
+Fri, 03 Oct 2025 20:09:59 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
+
+## 0.11.0
+Thu, 26 Jun 2025 18:57:04 GMT
+
+### Minor changes
+
+- Update for compatibility with ESLint 9
 
 ## 0.10.0
 Tue, 11 Mar 2025 02:12:33 GMT

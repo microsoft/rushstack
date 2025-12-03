@@ -1,6 +1,113 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Tue, 13 May 2025 02:09:20 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+
+## 1.6.6
+Fri, 21 Nov 2025 16:13:56 GMT
+
+_Version update only_
+
+## 1.6.5
+Wed, 12 Nov 2025 01:12:56 GMT
+
+_Version update only_
+
+## 1.6.4
+Tue, 04 Nov 2025 08:15:14 GMT
+
+_Version update only_
+
+## 1.6.3
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 1.6.2
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 1.6.1
+Wed, 08 Oct 2025 00:13:28 GMT
+
+### Patches
+
+- Add support for the IPv6 localhost address (`::1`).
+
+## 1.6.0
+Fri, 03 Oct 2025 20:09:59 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
+
+## 1.5.9
+Tue, 30 Sep 2025 23:57:45 GMT
+
+_Version update only_
+
+## 1.5.8
+Tue, 30 Sep 2025 20:33:50 GMT
+
+### Patches
+
+- Add message to use VS Code extension to errors.
+
+## 1.5.7
+Fri, 12 Sep 2025 15:13:07 GMT
+
+_Version update only_
+
+## 1.5.6
+Thu, 11 Sep 2025 00:22:31 GMT
+
+_Version update only_
+
+## 1.5.5
+Fri, 29 Aug 2025 00:08:01 GMT
+
+### Patches
+
+- Fix homedir resolution in CertificateStore
+
+## 1.5.4
+Tue, 26 Aug 2025 00:12:57 GMT
+
+### Patches
+
+- Fix handling of home directory paths when reading debug-certificate-manager.json config file.
+
+## 1.5.3
+Tue, 19 Aug 2025 20:45:02 GMT
+
+_Version update only_
+
+## 1.5.2
+Fri, 01 Aug 2025 00:12:48 GMT
+
+_Version update only_
+
+## 1.5.1
+Sat, 26 Jul 2025 00:12:22 GMT
+
+### Patches
+
+- Read CertificateStore configuration from .vscode/debug-certificate-manager.json
+
+## 1.5.0
+Wed, 23 Jul 2025 20:55:57 GMT
+
+### Minor changes
+
+- CertificateStore - Add params to support custom paths and filenames
+- CertificateManager - Update `untrustCertificateAsync` to clear `caCertificateData`
+- CertificateManager - Use osascript (applescript) to run elevated command on macOS instead of sudo package.
+- CertificateManager - Expose `getCertificateExpirationAsync` method to retrieve certificate expiration date
+
+## 1.4.37
+Sat, 21 Jun 2025 00:13:15 GMT
+
+_Version update only_
 
 ## 1.4.36
 Tue, 13 May 2025 02:09:20 GMT

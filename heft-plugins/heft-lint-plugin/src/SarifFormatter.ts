@@ -1,8 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-import type * as TEslint from 'eslint';
+
 import path from 'node:path';
-import { Path } from '@rushstack/node-core-library';
+
+import type * as TEslint from 'eslint';
+import type * as TEslintLegacy from 'eslint-8';
+
+import { Path, Text } from '@rushstack/node-core-library';
 
 export interface ISerifFormatterOptions {
   ignoreSuppressed: boolean;
@@ -118,9 +122,9 @@ export interface ISarifRule {
   };
 }
 
-interface IMessage extends TEslint.Linter.LintMessage {
+type IExtendedLintMessage = (TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage) & {
   suppressions?: ISuppressedAnalysis[];
-}
+};
 
 const INTERNAL_ERROR_ID: 'ESL0999' = 'ESL0999';
 const SARIF_VERSION: '2.1.0' = '2.1.0';
@@ -150,8 +154,8 @@ const SARIF_INFORMATION_URI: 'http://json.schemastore.org/sarif-2.1.0-rtm.5' =
  */
 
 export function formatEslintResultsAsSARIF(
-  results: TEslint.ESLint.LintResult[],
-  rulesMeta: TEslint.ESLint.LintResultData['rulesMeta'],
+  results: (TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult)[],
+  rulesMeta: (TEslint.ESLint.LintResultData | TEslintLegacy.ESLint.LintResultData)['rulesMeta'],
   options: ISerifFormatterOptions
 ): ISarifLog {
   const { ignoreSuppressed, eslintVersion, buildFolderPath } = options;
@@ -184,7 +188,7 @@ export function formatEslintResultsAsSARIF(
   let currentRuleIndex: number = 0;
 
   for (const result of results) {
-    const { filePath } = result;
+    const { filePath, source } = result;
     const fileUrl: string = Path.convertToSlashes(path.relative(buildFolderPath, filePath));
     let sarifFileIndex: number | undefined = sarifArtifactIndices.get(fileUrl);
 
@@ -205,10 +209,12 @@ export function formatEslintResultsAsSARIF(
 
     const containsSuppressedMessages: boolean =
       result.suppressedMessages && result.suppressedMessages.length > 0;
-    const messages: IMessage[] =
+    const messages: IExtendedLintMessage[] =
       containsSuppressedMessages && !ignoreSuppressed
         ? [...result.messages, ...result.suppressedMessages]
         : result.messages;
+
+    const sourceLines: string[] | undefined = Text.splitByNewLines(source);
 
     for (const message of messages) {
       const level: string = message.fatal || message.severity === 2 ? 'error' : 'warning';
@@ -232,7 +238,7 @@ export function formatEslintResultsAsSARIF(
         sarifRepresentation.ruleId = message.ruleId;
 
         if (rulesMeta && sarifRuleIndices.get(message.ruleId) === undefined) {
-          const meta: TEslint.Rule.RuleMetaData = rulesMeta[message.ruleId];
+          const meta: TEslint.Rule.RuleMetaData | TEslintLegacy.Rule.RuleMetaData = rulesMeta[message.ruleId];
 
           // An unknown ruleId will return null. This check prevents unit test failure.
           if (meta) {
@@ -303,10 +309,31 @@ export function formatEslintResultsAsSARIF(
         physicalLocation.region = region;
       }
 
-      if (message.source) {
+      if (sourceLines) {
+        // Build the snippet from the source lines
+        const startLine: number = message.line - 1;
+        const endLine: number = message.endLine !== undefined ? message.endLine - 1 : startLine;
+        const startLineColumn: number = message.column - 1;
+        const endLineColumn: number | undefined =
+          message.endColumn !== undefined ? message.endColumn - 1 : undefined;
+        const snippetLines: string[] = sourceLines.slice(startLine, endLine + 1);
+        const snippetText: string = snippetLines
+          .map((line, index) => {
+            let startColumn: number = 0;
+            let endColumn: number | undefined = undefined;
+            if (index === 0) {
+              startColumn = startLineColumn;
+            }
+            if (index === snippetLines.length - 1 && endLineColumn !== undefined) {
+              endColumn = endLineColumn;
+            }
+            return line.slice(startColumn, endColumn);
+          })
+          .join('\n');
+
         physicalLocation.region ??= {};
         physicalLocation.region.snippet = {
-          text: message.source
+          text: snippetText
         };
       }
 

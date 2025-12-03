@@ -3,8 +3,8 @@
 
   "operationSettings": [
     {
-      "operationName": "_phase:build",
-      "outputFolderNames": ["mixins", "patch", "profile"]
+      "operationName": "_phase:lite-build",
+      "outputFolderNames": ["flat"]
     }
   ]
 }

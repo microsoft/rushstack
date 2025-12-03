@@ -4,7 +4,7 @@
   "packages": [
     {
       "name": "@fluentui/react",
-      "allowedCategories": [ "vscode-extensions" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@fluentui/react-components",
@@ -39,6 +39,10 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/problem-matcher",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rush-themed-ui",
       "allowedCategories": [ "libraries" ]
     },
@@ -51,12 +55,20 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "axios",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "dependency-path",
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "local-web-rig",
-      "allowedCategories": [ "libraries", "vscode-extensions" ]
+      "name": "office-ui-fabric-core",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "prism-react-renderer",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "react",
@@ -88,7 +100,11 @@
     },
     {
       "name": "tslib",
-      "allowedCategories": [ "tests", "vscode-extensions" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "zod",
+      "allowedCategories": [ "libraries" ]
     }
   ]
 }

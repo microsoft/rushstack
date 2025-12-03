@@ -1,0 +1,22 @@
+{
+  "name": "heft-example-lifecycle-plugin",
+  "description": "This is an example heft plugin for testing the lifecycle hooks",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./lib/index.js",
+  "typings": "./lib/index.d.ts",
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "heft build-watch",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
+    "@types/node": "20.17.19",
+    "eslint": "~9.37.0",
+    "local-eslint-config": "workspace:*",
+    "typescript": "~5.8.2"
+  }
+}

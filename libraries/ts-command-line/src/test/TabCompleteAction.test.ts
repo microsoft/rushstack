@@ -4,6 +4,7 @@
 import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
 import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
 import { TabCompleteAction } from '../providers/TabCompletionAction';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
 
 async function arrayFromAsyncIteratorAsync(iterator: AsyncIterable<string>): Promise<string[]> {
   const ret: string[] = [];
@@ -91,7 +92,6 @@ function getCommandLineParser(): DynamicCommandLineParser {
     parameterShortName: '-t',
     argumentName: 'PROJECT1',
     description: 'Run command in the specified project and all of its dependencies.',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     getCompletionsAsync: async (): Promise<string[]> => {
       return ['abc', 'def', 'hij'];
     }
@@ -205,6 +205,10 @@ const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
 const tc: TabCompleteAction = new TabCompleteAction(commandLineParser.actions, commandLineParser.parameters);
 
 describe(TabCompleteAction.name, () => {
+  it('renders help text', () => {
+    ensureHelpTextMatchesSnapshot(commandLineParser);
+  });
+
   it(`gets completion(s) for rush <tab>`, async () => {
     const commandLine: string = 'rush ';
     const actual: string[] = await arrayFromAsyncIteratorAsync(

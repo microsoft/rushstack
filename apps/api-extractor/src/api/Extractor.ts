@@ -1,13 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+
 import * as semver from 'semver';
 import * as ts from 'typescript';
 import * as resolve from 'resolve';
+
+import type { ApiPackage } from '@microsoft/api-extractor-model';
+import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 import {
   FileSystem,
-  type NewlineKind,
+  NewlineKind,
   PackageJsonLookup,
   type IPackageJson,
   type INodePackageJson,
@@ -18,7 +22,6 @@ import { ExtractorConfig, type IExtractorConfigApiReport } from './ExtractorConf
 import { Collector } from '../collector/Collector';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator';
 import { ApiModelGenerator } from '../generators/ApiModelGenerator';
-import type { ApiPackage } from '@microsoft/api-extractor-model';
 import { ApiReportGenerator } from '../generators/ApiReportGenerator';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { ValidationEnhancer } from '../enhancers/ValidationEnhancer';
@@ -27,7 +30,6 @@ import { CompilerState } from './CompilerState';
 import type { ExtractorMessage } from './ExtractorMessage';
 import { MessageRouter } from '../collector/MessageRouter';
 import { ConsoleMessageId } from './ConsoleMessageId';
-import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 import { SourceMapper } from '../collector/SourceMapper';
 
 /**
@@ -89,6 +91,15 @@ export interface IExtractorInvokeOptions {
    * the STDERR/STDOUT console.
    */
   messageCallback?: (message: ExtractorMessage) => void;
+
+  /**
+   * If true, then any differences between the actual and expected API reports will be
+   * printed on the console.
+   *
+   * @remarks
+   * The diff is not printed if the expected API report file has not been created yet.
+   */
+  printApiReportDiff?: boolean;
 }
 
 /**
@@ -190,36 +201,52 @@ export class Extractor {
    * Invoke API Extractor using an already prepared `ExtractorConfig` object.
    */
   public static invoke(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): ExtractorResult {
-    if (!options) {
-      options = {};
-    }
-
-    const localBuild: boolean = options.localBuild || false;
-
-    let compilerState: CompilerState | undefined;
-    if (options.compilerState) {
-      compilerState = options.compilerState;
-    } else {
-      compilerState = CompilerState.create(extractorConfig, options);
-    }
+    const {
+      packageFolder,
+      messages,
+      tsdocConfiguration,
+      tsdocConfigFile: { filePath: tsdocConfigFilePath, fileNotFound: tsdocConfigFileNotFound },
+      apiJsonFilePath,
+      newlineKind,
+      reportTempFolder,
+      reportFolder,
+      apiReportEnabled,
+      reportConfigs,
+      testMode,
+      rollupEnabled,
+      publicTrimmedFilePath,
+      alphaTrimmedFilePath,
+      betaTrimmedFilePath,
+      untrimmedFilePath,
+      tsdocMetadataEnabled,
+      tsdocMetadataFilePath
+    } = extractorConfig;
+    const {
+      localBuild = false,
+      compilerState = CompilerState.create(extractorConfig, options),
+      messageCallback,
+      showVerboseMessages = false,
+      showDiagnostics = false,
+      printApiReportDiff = false
+    } = options ?? {};
 
     const sourceMapper: SourceMapper = new SourceMapper();
 
     const messageRouter: MessageRouter = new MessageRouter({
-      workingPackageFolder: extractorConfig.packageFolder,
-      messageCallback: options.messageCallback,
-      messagesConfig: extractorConfig.messages || {},
-      showVerboseMessages: !!options.showVerboseMessages,
-      showDiagnostics: !!options.showDiagnostics,
-      tsdocConfiguration: extractorConfig.tsdocConfiguration,
+      workingPackageFolder: packageFolder,
+      messageCallback,
+      messagesConfig: messages || {},
+      showVerboseMessages,
+      showDiagnostics,
+      tsdocConfiguration,
       sourceMapper
     });
 
-    if (extractorConfig.tsdocConfigFile.filePath && !extractorConfig.tsdocConfigFile.fileNotFound) {
-      if (!Path.isEqual(extractorConfig.tsdocConfigFile.filePath, ExtractorConfig._tsdocBaseFilePath)) {
+    if (tsdocConfigFilePath && !tsdocConfigFileNotFound) {
+      if (!Path.isEqual(tsdocConfigFilePath, ExtractorConfig._tsdocBaseFilePath)) {
         messageRouter.logVerbose(
           ConsoleMessageId.UsingCustomTSDocConfig,
-          'Using custom TSDoc config from ' + extractorConfig.tsdocConfigFile.filePath
+          `Using custom TSDoc config from ${tsdocConfigFilePath}`
         );
       }
     }
@@ -241,9 +268,7 @@ export class Extractor {
 
       messageRouter.logDiagnosticHeader('TSDoc configuration');
       // Convert the TSDocConfiguration into a tsdoc.json representation
-      const combinedConfigFile: TSDocConfigFile = TSDocConfigFile.loadFromParser(
-        extractorConfig.tsdocConfiguration
-      );
+      const combinedConfigFile: TSDocConfigFile = TSDocConfigFile.loadFromParser(tsdocConfiguration);
       const serializedTSDocConfig: object = MessageRouter.buildJsonDumpObject(
         combinedConfigFile.saveToObject()
       );
@@ -271,17 +296,14 @@ export class Extractor {
     }
 
     if (modelBuilder.docModelEnabled) {
-      messageRouter.logVerbose(
-        ConsoleMessageId.WritingDocModelFile,
-        'Writing: ' + extractorConfig.apiJsonFilePath
-      );
-      apiPackage.saveToJsonFile(extractorConfig.apiJsonFilePath, {
+      messageRouter.logVerbose(ConsoleMessageId.WritingDocModelFile, `Writing: ${apiJsonFilePath}`);
+      apiPackage.saveToJsonFile(apiJsonFilePath, {
         toolPackage: Extractor.packageName,
         toolVersion: Extractor.version,
 
-        newlineConversion: extractorConfig.newlineKind,
+        newlineConversion: newlineKind,
         ensureFolderExists: true,
-        testMode: extractorConfig.testMode
+        testMode
       });
     }
 
@@ -290,53 +312,51 @@ export class Extractor {
         collector,
         extractorConfig,
         messageRouter,
-        extractorConfig.reportTempFolder,
-        extractorConfig.reportFolder,
+        reportTempFolder,
+        reportFolder,
         reportConfig,
-        localBuild
+        localBuild,
+        printApiReportDiff
       );
     }
 
     let anyReportChanged: boolean = false;
-    if (extractorConfig.apiReportEnabled) {
-      for (const reportConfig of extractorConfig.reportConfigs) {
+    if (apiReportEnabled) {
+      for (const reportConfig of reportConfigs) {
         anyReportChanged = writeApiReport(reportConfig) || anyReportChanged;
       }
     }
 
-    if (extractorConfig.rollupEnabled) {
+    if (rollupEnabled) {
       Extractor._generateRollupDtsFile(
         collector,
-        extractorConfig.publicTrimmedFilePath,
+        publicTrimmedFilePath,
         DtsRollupKind.PublicRelease,
-        extractorConfig.newlineKind
+        newlineKind
       );
       Extractor._generateRollupDtsFile(
         collector,
-        extractorConfig.alphaTrimmedFilePath,
+        alphaTrimmedFilePath,
         DtsRollupKind.AlphaRelease,
-        extractorConfig.newlineKind
+        newlineKind
       );
       Extractor._generateRollupDtsFile(
         collector,
-        extractorConfig.betaTrimmedFilePath,
+        betaTrimmedFilePath,
         DtsRollupKind.BetaRelease,
-        extractorConfig.newlineKind
+        newlineKind
       );
       Extractor._generateRollupDtsFile(
         collector,
-        extractorConfig.untrimmedFilePath,
+        untrimmedFilePath,
         DtsRollupKind.InternalRelease,
-        extractorConfig.newlineKind
+        newlineKind
       );
     }
 
-    if (extractorConfig.tsdocMetadataEnabled) {
+    if (tsdocMetadataEnabled) {
       // Write the tsdoc-metadata.json file for this project
-      PackageMetadataManager.writeTsdocMetadataFile(
-        extractorConfig.tsdocMetadataFilePath,
-        extractorConfig.newlineKind
-      );
+      PackageMetadataManager.writeTsdocMetadataFile(tsdocMetadataFilePath, newlineKind);
     }
 
     // Show all the messages that we collected during analysis
@@ -371,6 +391,7 @@ export class Extractor {
    * @param reportDirectoryPath - The path to the directory under which the existing report file is located, and to
    * which the new report will be written post-comparison.
    * @param reportConfig - API report configuration, including its file name and {@link ApiReportVariant}.
+   * @param printApiReportDiff - {@link IExtractorInvokeOptions.printApiReportDiff}
    *
    * @returns Whether or not the newly generated report differs from the existing report (if one exists).
    */
@@ -381,7 +402,8 @@ export class Extractor {
     reportTempDirectoryPath: string,
     reportDirectoryPath: string,
     reportConfig: IExtractorConfigApiReport,
-    localBuild: boolean
+    localBuild: boolean,
+    printApiReportDiff: boolean
   ): boolean {
     let apiReportChanged: boolean = false;
 
@@ -409,7 +431,9 @@ export class Extractor {
 
     // Compare it against the expected file
     if (FileSystem.exists(expectedApiReportPath)) {
-      const expectedApiReportContent: string = FileSystem.readFile(expectedApiReportPath);
+      const expectedApiReportContent: string = FileSystem.readFile(expectedApiReportPath, {
+        convertLineEndings: NewlineKind.Lf
+      });
 
       if (
         !ApiReportGenerator.areEquivalentApiFileContents(actualApiReportContent, expectedApiReportContent)
@@ -436,6 +460,26 @@ export class Extractor {
             ensureFolderExists: true,
             convertLineEndings: extractorConfig.newlineKind
           });
+        }
+
+        if (messageRouter.showVerboseMessages || printApiReportDiff) {
+          const Diff: typeof import('diff') = require('diff');
+          const patch: import('diff').StructuredPatch = Diff.structuredPatch(
+            expectedApiReportShortPath,
+            actualApiReportShortPath,
+            expectedApiReportContent,
+            actualApiReportContent
+          );
+          const logFunction:
+            | (typeof MessageRouter.prototype)['logWarning']
+            | (typeof MessageRouter.prototype)['logVerbose'] = printApiReportDiff
+            ? messageRouter.logWarning.bind(messageRouter)
+            : messageRouter.logVerbose.bind(messageRouter);
+
+          logFunction(
+            ConsoleMessageId.ApiReportDiff,
+            'Changes to the API report:\n\n' + Diff.formatPatch(patch)
+          );
         }
       } else {
         messageRouter.logVerbose(

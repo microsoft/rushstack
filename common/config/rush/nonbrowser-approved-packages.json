@@ -123,12 +123,28 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@pnpm/types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@redis/client",
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@rushstack/debug-certificate-manager",
+      "name": "@rspack/core",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rspack/dev-server",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/credential-cache",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/debug-certificate-manager",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/eslint-bulk",
@@ -183,6 +199,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-json-schema-typings-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/heft-lint-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -193,6 +213,10 @@
     {
       "name": "@rushstack/heft-node-rig",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/heft-rspack-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/heft-sass-load-themed-styles-plugin",
@@ -213,6 +237,14 @@
     {
       "name": "@rushstack/heft-typescript-plugin",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/heft-vscode-extension-plugin",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/heft-vscode-extension-rig",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "@rushstack/heft-web-rig",
@@ -249,6 +281,10 @@
     {
       "name": "@rushstack/node-core-library",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/npm-check-fork",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/operation-graph",
@@ -323,6 +359,10 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/tls-sync-vscode-shared",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "@rushstack/tree-pattern",
       "allowedCategories": [ "libraries" ]
     },
@@ -333,6 +373,10 @@
     {
       "name": "@rushstack/typings-generator",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/vscode-shared",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "@rushstack/webpack-deep-imports-plugin",
@@ -364,6 +408,10 @@
     },
     {
       "name": "@rushstack/worker-pool",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/zipsync",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -445,6 +493,10 @@
     {
       "name": "@vscode/test-electron",
       "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "@vscode/vsce",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@yarnpkg/lockfile",
@@ -559,8 +611,16 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "dotenv",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "eslint",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "eslint-import-resolver-node",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "eslint-plugin-deprecation",
@@ -568,6 +628,10 @@
     },
     {
       "name": "eslint-plugin-header",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "eslint-plugin-headers",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -623,6 +687,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "giturl",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "glob",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
@@ -632,6 +700,10 @@
     },
     {
       "name": "heft-action-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "heft-example-lifecycle-plugin",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -739,6 +811,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "json-schema-to-typescript",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "json-stable-stringify-without-jsonify",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jsonpath-plus",
       "allowedCategories": [ "libraries" ]
     },
@@ -757,6 +837,10 @@
     {
       "name": "local-node-rig",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "local-web-rig",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "lodash",
@@ -807,6 +891,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "object-hash",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "open",
       "allowedCategories": [ "libraries" ]
     },
@@ -817,6 +905,10 @@
     {
       "name": "package-extractor-test-03",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "package-json",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "pnpm-sync-lib",
@@ -931,8 +1023,20 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "throat",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "timsort",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "tls-sync-vscode-ui-extension",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "tls-sync-vscode-workspace-extension",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "true-case-path",
@@ -961,10 +1065,6 @@
     {
       "name": "uuid",
       "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "vsce",
-      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "watchpack",

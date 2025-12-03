@@ -1,6 +1,56 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Thu, 01 May 2025 00:11:12 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+
+## 7.32.1
+Fri, 21 Nov 2025 16:13:56 GMT
+
+_Version update only_
+
+## 7.32.0
+Wed, 12 Nov 2025 01:12:56 GMT
+
+### Minor changes
+
+- Bump the `@microsoft/tsdoc` dependency to `~0.16.0`.
+- Bump the `@microsoft/tsdoc-config` dependency to `~0.18.0`.
+
+## 7.31.3
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 7.31.2
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 7.31.1
+Wed, 08 Oct 2025 00:13:29 GMT
+
+_Version update only_
+
+## 7.31.0
+Fri, 03 Oct 2025 20:09:59 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
+
+## 7.30.9
+Tue, 30 Sep 2025 23:57:45 GMT
+
+_Version update only_
+
+## 7.30.8
+Tue, 30 Sep 2025 20:33:50 GMT
+
+_Version update only_
+
+## 7.30.7
+Wed, 23 Jul 2025 20:55:57 GMT
+
+_Version update only_
 
 ## 7.30.6
 Thu, 01 May 2025 00:11:12 GMT

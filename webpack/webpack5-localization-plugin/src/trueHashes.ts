@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { default as webpack, Compilation, Chunk, Asset, sources, util } from 'webpack';
+
 import { Text } from '@rushstack/node-core-library';
 
 import type { ILocalizedWebpackChunk } from './webpackInterfaces';

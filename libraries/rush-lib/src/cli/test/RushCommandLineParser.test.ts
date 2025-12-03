@@ -32,6 +32,7 @@ import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { ITelemetryData } from '../../logic/Telemetry';
 import { getCommandLineParserInstanceAsync } from './TestUtils';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 function pathEquals(actual: string, expected: string): void {
   expect(Path.convertToSlashes(actual)).toEqual(Path.convertToSlashes(expected));
@@ -45,6 +46,11 @@ describe('RushCommandLineParser', () => {
   describe('execute', () => {
     afterEach(() => {
       jest.clearAllMocks();
+      EnvironmentConfiguration.reset();
+      jest
+        .spyOn(EnvironmentConfiguration, 'buildCacheOverrideJsonFilePath', 'get')
+        .mockReturnValue(undefined);
+      jest.spyOn(EnvironmentConfiguration, 'buildCacheOverrideJson', 'get').mockReturnValue(undefined);
     });
 
     describe('in basic repo', () => {

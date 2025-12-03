@@ -2,15 +2,16 @@
 // See LICENSE in the project root for license information.
 
 import React, { useCallback, useEffect, useState } from 'react';
+
 import { ScrollArea, Text } from '@rushstack/rush-themed-ui';
+
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
-import { IDependencyType, type LockfileDependency } from '../../parsing/LockfileDependency';
-import { readPackageJsonAsync } from '../../parsing/getPackageFiles';
+import { LfxDependencyKind, type LfxGraphDependency, type LfxGraphEntry } from '../../packlets/lfx-shared';
+import { readPackageJsonAsync } from '../../helpers/lfxApiClient';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { pushToStack, selectCurrentEntry } from '../../store/slices/entrySlice';
 import { ReactNull } from '../../types/ReactNull';
-import type { LockfileEntry } from '../../parsing/LockfileEntry';
 import { logDiagnosticInfo } from '../../helpers/logDiagnosticInfo';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 import type { IPackageJson } from '../../types/IPackageJson';
@@ -27,7 +28,7 @@ enum DependencyKey {
 }
 
 interface IInfluencerType {
-  entry: LockfileEntry;
+  entry: LfxGraphEntry;
   type: DependencyType;
 }
 
@@ -36,14 +37,14 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   const specChanges = useAppSelector((state) => state.workspace.specChanges);
   const dispatch = useAppDispatch();
 
-  const [inspectDependency, setInspectDependency] = useState<LockfileDependency | null>(null);
+  const [inspectDependency, setInspectDependency] = useState<LfxGraphDependency | null>(null);
   const [influencers, setInfluencers] = useState<IInfluencerType[]>([]);
   const [directRefsPackageJSON, setDirectRefsPackageJSON] = useState<Map<string, IPackageJson | undefined>>(
     new Map()
   );
 
   useEffect(() => {
-    async function loadPackageJson(referrers: LockfileEntry[]): Promise<void> {
+    async function loadPackageJson(referrers: LfxGraphEntry[]): Promise<void> {
       const referrersJsonMap = new Map<string, IPackageJson | undefined>();
       await Promise.all(
         referrers.map(async (ref) => {
@@ -80,15 +81,15 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
 
         // Check if we need to calculate influencers.
         // If the current dependencyToTrace is a peer dependency then we do
-        if (dependencyToTrace.dependencyType !== IDependencyType.PEER_DEPENDENCY) {
+        if (dependencyToTrace.dependencyType !== LfxDependencyKind.Peer) {
           return;
         }
 
         // calculate influencers
         const stack = [selectedEntry];
-        const determinants = new Set<LockfileEntry>();
-        const transitiveReferrers = new Set<LockfileEntry>();
-        const visitedNodes = new Set<LockfileEntry>();
+        const determinants = new Set<LfxGraphEntry>();
+        const transitiveReferrers = new Set<LfxGraphEntry>();
+        const visitedNodes = new Set<LfxGraphEntry>();
         visitedNodes.add(selectedEntry);
         while (stack.length) {
           const currEntry = stack.pop();
@@ -171,7 +172,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
               Selected&nbsp;Dependency:{' '}
             </Text>
             <Text type="span">
-              {inspectDependency.name}: {inspectDependency.version}
+              {inspectDependency.name}: {inspectDependency.versionPath}
             </Text>
           </div>
           <div className={styles.DependencyDetailInfo}>
@@ -179,11 +180,11 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
               package.json spec:{' '}
             </Text>
             <Text type="span">
-              {inspectDependency.dependencyType === IDependencyType.PEER_DEPENDENCY
+              {inspectDependency.dependencyKind === LfxDependencyKind.Peer
                 ? `"${inspectDependency.peerDependencyMeta.version}" ${
                     inspectDependency.peerDependencyMeta.optional ? 'Optional' : 'Required'
                   } Peer`
-                : inspectDependency.version}
+                : inspectDependency.versionPath}
             </Text>
           </div>
           <div className={styles.DependencyDetailInfo}>
@@ -203,9 +204,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
 
   const renderPeerDependencies = (): JSX.Element | ReactNull => {
     if (!selectedEntry) return ReactNull;
-    const peerDeps = selectedEntry.dependencies.filter(
-      (d) => d.dependencyType === IDependencyType.PEER_DEPENDENCY
-    );
+    const peerDeps = selectedEntry.dependencies.filter((d) => d.dependencyKind === LfxDependencyKind.Peer);
     if (!peerDeps.length) {
       return (
         <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
@@ -213,7 +212,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
         </div>
       );
     }
-    if (!inspectDependency || inspectDependency.dependencyType !== IDependencyType.PEER_DEPENDENCY) {
+    if (!inspectDependency || inspectDependency.dependencyKind !== LfxDependencyKind.Peer) {
       return (
         <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
           <Text type="h5">Select a peer dependency to view its influencers</Text>
@@ -301,7 +300,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
           </Text>
           <div className={styles.DependencyListWrapper}>
             <ScrollArea>
-              {selectedEntry.referrers?.map((referrer: LockfileEntry) => (
+              {selectedEntry.referrers?.map((referrer: LfxGraphEntry) => (
                 <div
                   className={styles.DependencyItem}
                   key={referrer.rawEntryId}
@@ -328,7 +327,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
           </Text>
           <div className={styles.DependencyListWrapper}>
             <ScrollArea>
-              {selectedEntry.dependencies?.map((dependency: LockfileDependency) => (
+              {selectedEntry.dependencies?.map((dependency: LfxGraphDependency) => (
                 <div
                   className={`${styles.DependencyItem} ${
                     inspectDependency?.entryId === dependency.entryId && styles.SelectedDependencyItem
@@ -338,14 +337,14 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
                 >
                   <Text type="h5" bold>
                     Name: {dependency.name}{' '}
-                    {dependency.dependencyType === IDependencyType.PEER_DEPENDENCY
+                    {dependency.dependencyKind === LfxDependencyKind.Peer
                       ? `${
                           dependency.peerDependencyMeta.optional ? '(Optional)' : '(Non-optional)'
                         } Peer Dependency`
                       : ''}
                   </Text>
                   <div>
-                    <Text type="p">Version: {dependency.version}</Text>
+                    <Text type="p">Version: {dependency.versionPath}</Text>
                     <Text type="p">Entry ID: {dependency.entryId}</Text>
                   </div>
                 </div>

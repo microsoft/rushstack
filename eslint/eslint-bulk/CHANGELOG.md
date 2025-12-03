@@ -1,6 +1,107 @@
 # Change Log - @rushstack/eslint-bulk
 
-This log was last generated on Tue, 13 May 2025 02:09:20 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+
+## 0.4.7
+Fri, 21 Nov 2025 16:13:56 GMT
+
+_Version update only_
+
+## 0.4.6
+Wed, 12 Nov 2025 01:57:54 GMT
+
+_Version update only_
+
+## 0.4.5
+Wed, 12 Nov 2025 01:12:56 GMT
+
+_Version update only_
+
+## 0.4.4
+Tue, 04 Nov 2025 08:15:15 GMT
+
+_Version update only_
+
+## 0.4.3
+Fri, 24 Oct 2025 11:22:09 GMT
+
+_Version update only_
+
+## 0.4.2
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 0.4.1
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 0.4.0
+Mon, 13 Oct 2025 15:13:02 GMT
+
+### Minor changes
+
+- Bump `eslint` to `~9.37.0` and the `@typescript-eslint/*` packages to `~8.46.0`.
+
+## 0.3.1
+Wed, 08 Oct 2025 00:13:29 GMT
+
+_Version update only_
+
+## 0.3.0
+Fri, 03 Oct 2025 20:09:59 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
+
+## 0.2.7
+Tue, 30 Sep 2025 23:57:45 GMT
+
+_Version update only_
+
+## 0.2.6
+Tue, 30 Sep 2025 20:33:51 GMT
+
+_Version update only_
+
+## 0.2.5
+Fri, 12 Sep 2025 15:13:07 GMT
+
+_Version update only_
+
+## 0.2.4
+Thu, 11 Sep 2025 00:22:31 GMT
+
+_Version update only_
+
+## 0.2.3
+Tue, 19 Aug 2025 20:45:02 GMT
+
+_Version update only_
+
+## 0.2.2
+Fri, 01 Aug 2025 00:12:49 GMT
+
+_Version update only_
+
+## 0.2.1
+Wed, 23 Jul 2025 20:55:57 GMT
+
+_Version update only_
+
+## 0.2.0
+Thu, 26 Jun 2025 18:57:04 GMT
+
+### Minor changes
+
+- Update for compatibility with ESLint flat configuration files
+
+## 0.1.95
+Sat, 21 Jun 2025 00:13:15 GMT
+
+_Version update only_
 
 ## 0.1.94
 Tue, 13 May 2025 02:09:20 GMT

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
+
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { RushConstants } from '../RushConstants';

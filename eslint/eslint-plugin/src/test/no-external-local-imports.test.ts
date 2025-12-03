@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TSESLint } from '@typescript-eslint/utils';
+import type { RuleTester } from '@typescript-eslint/rule-tester';
+
+import { getRuleTesterWithoutProject } from './ruleTester';
 import { noExternalLocalImportsRule } from '../no-external-local-imports';
 
-const { RuleTester } = TSESLint;
-const ruleTester = new RuleTester({
-  parser: require.resolve('@typescript-eslint/parser')
-});
+const ruleTester: RuleTester = getRuleTesterWithoutProject();
 
 // The root in the test cases is the immediate directory
 ruleTester.run('no-external-local-imports', noExternalLocalImportsRule, {
@@ -77,9 +76,11 @@ ruleTester.run('no-external-local-imports', noExternalLocalImportsRule, {
     {
       code: "import blah from '../foo'",
       errors: [{ messageId: 'error-external-local-imports' }],
-      filename: 'blah/test.ts',
-      parserOptions: {
-        tsconfigRootDir: 'blah'
+      filename: `${__dirname}/blah/test.ts`,
+      languageOptions: {
+        parserOptions: {
+          tsconfigRootDir: `${__dirname}/blah`
+        }
       }
     },
     // Test async imports
@@ -90,9 +91,11 @@ ruleTester.run('no-external-local-imports', noExternalLocalImportsRule, {
     {
       code: "const blah = await import('../foo')",
       errors: [{ messageId: 'error-external-local-imports' }],
-      filename: 'blah/test.ts',
-      parserOptions: {
-        tsconfigRootDir: 'blah'
+      filename: `${__dirname}/blah/test.ts`,
+      languageOptions: {
+        parserOptions: {
+          tsconfigRootDir: `${__dirname}/blah`
+        }
       }
     }
   ],

@@ -1,0 +1,125 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: false
+  excludeLinksFromLockfile: false
+
+pnpmfileChecksum: sha256-La8sfCMI7irxJPTW6u4mJb4vNiyLrXeEbKaXv5G3dL0=
+
+importers:
+  .: {}
+
+  ../../projects/a:
+    dependencies:
+      '@rushstack/d':
+        specifier: workspace:*
+        version: link:../d
+
+  ../../projects/b:
+    dependencies:
+      '@rushstack/d':
+        specifier: workspace:*
+        version: link:../d
+      '@rushstack/n':
+        specifier: ^2.0.0
+        version: 2.0.0
+
+  ../../projects/c:
+    dependencies:
+      '@rushstack/e':
+        specifier: workspace:*
+        version: link:../e
+      '@rushstack/k':
+        specifier: ^1.0.0
+        version: 1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+      '@rushstack/m':
+        specifier: ~1.0.0
+        version: 1.0.0
+
+  ../../projects/d:
+    dependencies:
+      '@rushstack/e':
+        specifier: workspace:*
+        version: link:../e
+      '@rushstack/j':
+        specifier: ^1.0.0
+        version: 1.0.0(@rushstack/n@2.0.0)
+      '@rushstack/n':
+        specifier: ^2.0.0
+        version: 2.0.0
+
+  ../../projects/e:
+    dependencies:
+      '@rushstack/n':
+        specifier: ^3.0.0
+        version: 3.0.0
+
+packages:
+  '@rushstack/j@1.0.0':
+    resolution:
+      {
+        integrity: sha512-D799Tv8advqKGl9u/j1x1cTG1pef6uY9CE7ETPqz9RHSNTRBL4Ftw98M95EK/dWS41OFlJ+eNGVwzWn3PjL85g==
+      }
+
+  '@rushstack/k@1.0.0':
+    resolution:
+      {
+        integrity: sha512-HIap/n3FPoZMx+J6GbzziJTaVd8Q0FpHXUgYU1EHSM7Sy6suMbCxx6KSRuuM0Iv2BB3rht5jn6yv2l7pGBpXAA==
+      }
+
+  '@rushstack/l@1.0.0':
+    resolution:
+      {
+        integrity: sha512-qJvPD0WLK6P+4KmczcuKA0f/6oUpZXYWYPIvMNJfasFy3DGMoUHg+3TSpisqQQb7OuWzf1mHQCG/suYiIeXQaQ==
+      }
+    peerDependencies:
+      '@rushstack/m': ^1.0.0
+      '@rushstack/n': ^2.0.0
+    peerDependenciesMeta:
+      '@rushstack/n':
+        optional: true
+
+  '@rushstack/m@1.0.0':
+    resolution:
+      {
+        integrity: sha512-iZtUynf07U6UNf4QeYFdCNq7t+VTB3YyRb66v2U0uc3yP486dbXFO4LCCyqPpCsRlkwt4y/hKJH7lsODB+ISMA==
+      }
+
+  '@rushstack/n@2.0.0':
+    resolution:
+      {
+        integrity: sha512-cOGhNwbSaZv6hcfuUtut43vENNyGAPlhNU7r2kixj7dKKeyiQ1XlyhABxvFya2qEyFDRjbFW7/gSMrFmtLAxRg==
+      }
+
+  '@rushstack/n@3.0.0':
+    resolution:
+      {
+        integrity: sha512-GyiYvYT2KHlVlsiQ1Z+Lgt7lB5SR6axKASYKaj9qM+ycvpHTs8MoHJGp/Mbt+Iqrjfjlk3t4cXzLvftqFbPWuw==
+      }
+
+snapshots:
+  '@rushstack/j@1.0.0(@rushstack/n@2.0.0)':
+    dependencies:
+      '@rushstack/k': 1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+      '@rushstack/m': 1.0.0
+    transitivePeerDependencies:
+      - '@rushstack/n'
+
+  '@rushstack/k@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)':
+    dependencies:
+      '@rushstack/l': 1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+    transitivePeerDependencies:
+      - '@rushstack/m'
+      - '@rushstack/n'
+
+  '@rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)':
+    dependencies:
+      '@rushstack/m': 1.0.0
+    optionalDependencies:
+      '@rushstack/n': 2.0.0
+
+  '@rushstack/m@1.0.0': {}
+
+  '@rushstack/n@2.0.0': {}
+
+  '@rushstack/n@3.0.0': {}

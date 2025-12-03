@@ -1,0 +1,36 @@
+{
+  "$id": "http://example.com/schemas/test-schema-nested.schema.json",
+  "title": "Test Schema File",
+  "type": "object",
+
+  "properties": {
+    "exampleString": {
+      "type": "string"
+    },
+    "exampleLink": {
+      "type": "string",
+      "format": "uri"
+    },
+    "exampleArray": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "exampleOneOf": {
+      "description": "Description for exampleOneOf - this is a very long description to show in an error message",
+      "type": "object",
+      "oneOf": [
+        { "$ref": "test-schema-nested-child.schema.json#/definitions/type1" },
+        { "$ref": "test-schema-nested-child.schema.json#/definitions/type2" }
+      ]
+    },
+    "exampleUniqueObjectArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "test-schema-nested-child.schema.json#/definitions/type2" }
+    }
+  },
+  "additionalProperties": false,
+  "required": ["exampleString", "exampleArray"]
+}

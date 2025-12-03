@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
-import * as path from 'path';
-import type * as child_process from 'child_process';
-import { once } from 'events';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import type * as child_process from 'node:child_process';
+import { once } from 'node:events';
 
 import {
   Executable,
@@ -12,12 +12,13 @@ import {
   parseProcessListOutputAsync,
   type IProcessInfo,
   type IExecutableSpawnSyncOptions,
-  type IWaitForExitResult
+  type IWaitForExitResult,
+  type IWaitForExitResultWithoutOutput
 } from '../Executable';
 import { FileSystem } from '../FileSystem';
 import { PosixModeBits } from '../PosixModeBits';
 import { Text } from '../Text';
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 
 describe('Executable process tests', () => {
   // The PosixModeBits are intended to be used with bitwise operations.
@@ -236,11 +237,11 @@ describe('Executable process tests', () => {
       environment,
       currentWorkingDirectory: executableFolder
     });
-    const result: IWaitForExitResult = await Executable.waitForExitAsync(childProcess);
+    const result: IWaitForExitResultWithoutOutput = await Executable.waitForExitAsync(childProcess);
     expect(result.exitCode).toEqual(0);
     expect(result.signal).toBeNull();
-    expect(result.stderr).toBeUndefined();
-    expect(result.stderr).toBeUndefined();
+    expect('stdout' in result).toBe(false);
+    expect('stderr' in result).toBe(false);
   });
 
   test('Executable.runToCompletion(Executable.spawn("npm-binary-wrapper")) with buffer output', async () => {
@@ -353,22 +354,20 @@ describe('Executable process tests', () => {
 
 describe('Executable process list', () => {
   const WIN32_PROCESS_LIST_OUTPUT: (string | null)[] = [
-    'Name                                                         ParentProcessId  ProcessId\r\r\n',
+    'PPID PID NAME\r\n',
     // Test that the parser can handle referencing a parent that is the same as the current process
     // Test that the parser can handle multiple return characters
-    'System Idle Process                                          0                0\r\r\n',
-    'System                                                       0                1\r\r\n',
-    'executable2.exe                                       ',
-    // Test that the parser can handle a line that is truncated in the middle of a field
+    '0 0 System Idle Process\r\n',
+    '0 1 System\r\n',
     // Test that the parser can handle an entry referencing a parent that hasn't been seen yet
-    '       2                4\r\r\n',
-    'executable0.exe                                              1                2\r\r\n',
+    '2 4 executable2.exe\r\n',
+    '1 2 executable0.exe\r\n',
     // Test children handling when multiple entries reference the same parent
-    'executable1.exe                                              1                3\r\r\n',
+    '1 3 executable1.exe\r\n',
     // Test that the parser can handle empty strings
     '',
     // Test that the parser can handle referencing a parent that doesn't exist
-    'executable3.exe                                              6                5\r\r\n'
+    '6 5 executable3.exe\r\n'
   ];
 
   const UNIX_PROCESS_LIST_OUTPUT: (string | null)[] = [
@@ -386,6 +385,22 @@ describe('Executable process list', () => {
     // Test children handling when multiple entries reference the same parent
     '   1     3   process1\n'
   ];
+
+  test('contains the current pid (sync)', () => {
+    const results: ReadonlyMap<number, IProcessInfo> = Executable.getProcessInfoById();
+    const currentProcessInfo: IProcessInfo | undefined = results.get(process.pid);
+    expect(currentProcessInfo).toBeDefined();
+    expect(currentProcessInfo?.parentProcessInfo?.processId).toEqual(process.ppid);
+    expect(currentProcessInfo?.processName.startsWith('node')).toBe(true);
+  });
+
+  test('contains the current pid (async)', async () => {
+    const results: ReadonlyMap<number, IProcessInfo> = await Executable.getProcessInfoByIdAsync();
+    const currentProcessInfo: IProcessInfo | undefined = results.get(process.pid);
+    expect(currentProcessInfo).toBeDefined();
+    expect(currentProcessInfo?.parentProcessInfo?.processId).toEqual(process.ppid);
+    expect(currentProcessInfo?.processName.startsWith('node')).toBe(true);
+  });
 
   test('parses win32 output', () => {
     const processListMap: Map<number, IProcessInfo> = parseProcessListOutput(

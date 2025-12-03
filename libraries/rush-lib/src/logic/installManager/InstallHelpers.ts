@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+
+import * as semver from 'semver';
+
 import {
   FileConstants,
   FileSystem,
@@ -21,7 +24,6 @@ import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration'
 import { merge } from '../../utilities/objectUtilities';
 import type { Subspace } from '../../api/Subspace';
 import { RushConstants } from '../RushConstants';
-import * as semver from 'semver';
 
 interface ICommonPackageJson extends IPackageJson {
   pnpm?: {
@@ -32,6 +34,8 @@ interface ICommonPackageJson extends IPackageJson {
     ignoredOptionalDependencies?: typeof PnpmOptionsConfiguration.prototype.globalIgnoredOptionalDependencies;
     allowedDeprecatedVersions?: typeof PnpmOptionsConfiguration.prototype.globalAllowedDeprecatedVersions;
     patchedDependencies?: typeof PnpmOptionsConfiguration.prototype.globalPatchedDependencies;
+    minimumReleaseAge?: typeof PnpmOptionsConfiguration.prototype.minimumReleaseAge;
+    minimumReleaseAgeExclude?: typeof PnpmOptionsConfiguration.prototype.minimumReleaseAgeExclude;
   };
 }
 
@@ -96,6 +100,30 @@ export class InstallHelpers {
 
       if (pnpmOptions.globalPatchedDependencies) {
         commonPackageJson.pnpm.patchedDependencies = pnpmOptions.globalPatchedDependencies;
+      }
+
+      if (pnpmOptions.minimumReleaseAge !== undefined || pnpmOptions.minimumReleaseAgeExclude) {
+        if (
+          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.16.0')
+        ) {
+          terminal.writeWarningLine(
+            Colorize.yellow(
+              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+                `doesn't support the "minimumReleaseAge" or "minimumReleaseAgeExclude" fields in ` +
+                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+                'Remove these fields or upgrade to pnpm 10.16.0 or newer.'
+            )
+          );
+        }
+
+        if (pnpmOptions.minimumReleaseAge !== undefined) {
+          commonPackageJson.pnpm.minimumReleaseAge = pnpmOptions.minimumReleaseAge;
+        }
+
+        if (pnpmOptions.minimumReleaseAgeExclude) {
+          commonPackageJson.pnpm.minimumReleaseAgeExclude = pnpmOptions.minimumReleaseAgeExclude;
+        }
       }
 
       if (pnpmOptions.unsupportedPackageJsonSettings) {

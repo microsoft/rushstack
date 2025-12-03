@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as nodeJsPath from 'path';
-import * as fs from 'fs';
-import * as fsPromises from 'fs/promises';
+import * as nodeJsPath from 'node:path';
+import * as fs from 'node:fs';
+import * as fsPromises from 'node:fs/promises';
+
 import * as fsx from 'fs-extra';
 
 import { Text, type NewlineKind, Encoding } from './Text';
@@ -1615,25 +1616,19 @@ export class FileSystem {
   private static _updateErrorMessage(error: Error): void {
     if (FileSystem.isErrnoException(error)) {
       if (FileSystem.isFileDoesNotExistError(error)) {
-        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `File does not exist: ${error.path}\n${error.message}`;
       } else if (FileSystem.isFolderDoesNotExistError(error)) {
-        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `Folder does not exist: ${error.path}\n${error.message}`;
       } else if (FileSystem.isExistError(error)) {
         // Oddly, the typing does not include the `dest` property even though the documentation
         // indicates it is there: https://nodejs.org/docs/latest-v10.x/api/errors.html#errors_error_dest
         const extendedError: NodeJS.ErrnoException & { dest?: string } = error;
-        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `File or folder already exists: ${extendedError.dest}\n${error.message}`;
       } else if (FileSystem.isUnlinkNotPermittedError(error)) {
-        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `File or folder could not be deleted: ${error.path}\n${error.message}`;
       } else if (FileSystem.isDirectoryError(error)) {
-        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `Target is a folder, not a file: ${error.path}\n${error.message}`;
       } else if (FileSystem.isNotDirectoryError(error)) {
-        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `Target is not a folder: ${error.path}\n${error.message}`;
       }
     }

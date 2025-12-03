@@ -38,7 +38,9 @@
 				"--inspect-brk",
 				"${workspaceFolder}/apps/heft/lib/start.js",
 				"--debug",
-				"test-watch"
+				"test",
+				"--test-path-pattern",
+        "${fileBasenameNoExtension}"
 			],
 			"skipFiles": ["<node_internals>/**"],
 			"outFiles": [],
@@ -65,6 +67,25 @@
 			"internalConsoleOptions": "neverOpen"
 		},
 		{
+			"type": "node",
+			"request": "launch",
+			"name": "Debug Clean Build in Selected Project (Heft)",
+			"cwd": "${fileDirname}",
+			"runtimeArgs": [
+				"--nolazy",
+				"--inspect-brk",
+				"${workspaceFolder}/apps/heft/lib/start.js",
+				"--debug",
+				"build",
+				"--clean"
+			],
+			"skipFiles": ["<node_internals>/**"],
+			"outFiles": [],
+			"sourceMaps": true,
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen"
+		},
+		{
 			"name": "Attach",
 			"type": "node",
 			"request": "attach",
@@ -77,12 +98,25 @@
 			"request": "launch",
 			"cwd": "${workspaceFolder}/vscode-extensions/rush-vscode-extension",
 			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}/vscode-extensions/rush-vscode-extension"
+				"--extensionDevelopmentPath=${workspaceFolder}/vscode-extensions/rush-vscode-extension/dist/vsix/unpacked"
 			],
 			"outFiles": [
-				"${workspaceFolder}/vscode-extensions/rush-vscode-extension/dist/**/*.js"
+				"${workspaceFolder}/vscode-extensions/rush-vscode-extension/**"
 			]
 			// "preLaunchTask": "npm: build:watch - vscode-extensions/rush-vscode-extension"
+		},
+		{
+			"name": "Launch Debug Certificate Manager VS Code Extension",
+			"type": "extensionHost",
+			"request": "launch",
+			"cwd": "${workspaceFolder}/vscode-extensions/debug-certificate-manager-vscode-extension/dist/vsix/unpacked",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}/vscode-extensions/debug-certificate-manager-vscode-extension/dist/vsix/unpacked"
+			],
+			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/vscode-extensions/debug-certificate-manager-vscode-extension/**"
+			]
 		}
 	]
 }

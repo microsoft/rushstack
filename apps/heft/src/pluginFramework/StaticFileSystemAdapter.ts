@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type * as fs from 'fs';
-import * as path from 'path';
+import type * as fs from 'node:fs';
+import * as path from 'node:path';
+
 import type { FileSystemAdapter } from 'fast-glob';
+
 import { Path } from '@rushstack/node-core-library';
 
 interface IVirtualFileSystemEntry {
@@ -45,7 +47,7 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
         callback(e, {} as fs.Stats);
         return;
       }
-      // eslint-disable-next-line @rushstack/no-new-null
+
       callback(null, result);
     });
   }) as FileSystemAdapter['lstat'];
@@ -115,10 +117,8 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
       // When "withFileTypes" is false or undefined, the callback is expected to return a string array.
       // Otherwise, we return a fs.Dirent array.
       if (options?.withFileTypes) {
-        // eslint-disable-next-line @rushstack/no-new-null
         (callback as ReaddirDirentCallback)(null, result as fs.Dirent[]);
       } else {
-        // eslint-disable-next-line @rushstack/no-new-null
         (callback as ReaddirStringCallback)(null, result as string[]);
       }
     });

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
+
 import { Colorize } from '@rushstack/terminal';
 
 // Minimize dependencies to avoid compatibility errors that might be encountered before

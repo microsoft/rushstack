@@ -14,16 +14,18 @@ import {
   VisualStudioCodeCredential,
   AzureCliCredential,
   AzureDeveloperCliCredential,
-  AzurePowerShellCredential
+  AzurePowerShellCredential,
+  type TokenCredentialOptions
 } from '@azure/identity';
-import type { TokenCredentialOptions } from '@azure/identity';
-import { AdoCodespacesAuthCredential } from './AdoCodespacesAuthCredential';
+
 import type { ITerminal } from '@rushstack/terminal';
-import { CredentialCache } from '@rushstack/rush-sdk';
+import { CredentialCache } from '@rushstack/credential-cache';
 // Use a separate import line so the .d.ts file ends up with an `import type { ... }`
 // See https://github.com/microsoft/rushstack/issues/3432
-import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
+import type { ICredentialCacheEntry } from '@rushstack/credential-cache';
 import { PrintUtilities } from '@rushstack/terminal';
+
+import { AdoCodespacesAuthCredential } from './AdoCodespacesAuthCredential';
 
 /**
  * @public
@@ -98,6 +100,13 @@ export type LoginFlowType =
 /**
  * @public
  */
+export type LoginFlowFailoverMap = {
+  readonly [LoginFlow in LoginFlowType]?: Exclude<LoginFlowType, LoginFlow>;
+};
+
+/**
+ * @public
+ */
 export interface IAzureAuthenticationBaseOptions {
   azureEnvironment?: AzureEnvironmentName;
   credentialUpdateCommandForLogging?: string | undefined;
@@ -120,9 +129,7 @@ export interface IAzureAuthenticationBaseOptions {
    * }
    * ```
    */
-  loginFlowFailover?: {
-    [key in LoginFlowType]?: LoginFlowType;
-  };
+  loginFlowFailover?: LoginFlowFailoverMap;
 }
 
 /**

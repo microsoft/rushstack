@@ -1,9 +1,8 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
 import type { OperationStatus } from './OperationStatus';
 import type { OperationError } from './OperationError';
-
 import type { Stopwatch } from './Stopwatch';
 
 /**
@@ -26,8 +25,10 @@ export interface IOperationRunnerContext {
   /**
    * A callback to the overarching orchestrator to request that the operation be invoked again.
    * Used in watch mode to signal that inputs have changed.
+   *
+   * @param detail - Optional detail about why the rerun is requested, e.g. the name of a changed file.
    */
-  requestRun?: () => void;
+  requestRun?: (detail?: string) => void;
 }
 
 /**

@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import os from 'os';
+import * as path from 'node:path';
+import os from 'node:os';
+import type { ChildProcess } from 'node:child_process';
+import events from 'node:events';
+
 import { Executable, FileSystem, FileWriter } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import type { ChildProcess } from 'child_process';
-import events from 'events';
 
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
@@ -40,9 +41,10 @@ export class TarExecutable {
     if (!tarExecutablePath) {
       terminal.writeVerboseLine('"tar" was not found on the PATH');
       return undefined;
+    } else {
+      terminal.writeVerboseLine(`Using "tar" binary: ${tarExecutablePath}`);
+      return new TarExecutable(tarExecutablePath);
     }
-
-    return new TarExecutable(tarExecutablePath);
   }
 
   /**

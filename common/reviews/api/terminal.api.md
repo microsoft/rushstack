@@ -7,9 +7,12 @@
 /// <reference types="node" />
 
 import type { Brand } from '@rushstack/node-core-library';
+import type { IProblem } from '@rushstack/problem-matcher';
+import type { IProblemMatcher } from '@rushstack/problem-matcher';
+import type { IProblemMatcherJson } from '@rushstack/problem-matcher';
 import { NewlineKind } from '@rushstack/node-core-library';
-import { Writable } from 'stream';
-import { WritableOptions } from 'stream';
+import { Writable } from 'node:stream';
+import { WritableOptions } from 'node:stream';
 
 // @public
 export class AnsiEscape {
@@ -142,9 +145,21 @@ export interface IPrefixProxyTerminalProviderOptionsBase {
     terminalProvider: ITerminalProvider;
 }
 
+// @beta
+export interface IProblemCollector {
+    get problems(): ReadonlySet<IProblem>;
+}
+
+// @beta
+export interface IProblemCollectorOptions extends ITerminalWritableOptions {
+    matcherJson?: IProblemMatcherJson[];
+    matchers?: IProblemMatcher[];
+    onProblem?: (problem: IProblem) => void;
+}
+
 // @public
 export interface ISplitterTransformOptions extends ITerminalWritableOptions {
-    destinations: TerminalWritable[];
+    destinations: Iterable<TerminalWritable>;
 }
 
 // @beta
@@ -287,6 +302,14 @@ export class PrintUtilities {
     static wrapWordsToLines(text: string, maxLineLength?: number, indentOrLinePrefix?: number | string): string[];
 }
 
+// @beta
+export class ProblemCollector extends TerminalWritable implements IProblemCollector {
+    constructor(options: IProblemCollectorOptions);
+    protected onClose(): void;
+    protected onWriteChunk(chunk: ITerminalChunk): void;
+    get problems(): ReadonlySet<IProblem>;
+}
+
 // @public
 export class RemoveColorsTextRewriter extends TextRewriter {
     // (undocumented)
@@ -300,12 +323,14 @@ export class RemoveColorsTextRewriter extends TextRewriter {
 // @public
 export class SplitterTransform extends TerminalWritable {
     constructor(options: ISplitterTransformOptions);
+    addDestination(destination: TerminalWritable): void;
     // (undocumented)
-    readonly destinations: ReadonlyArray<TerminalWritable>;
+    get destinations(): ReadonlySet<TerminalWritable>;
     // (undocumented)
     protected onClose(): void;
     // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
+    removeDestination(destination: TerminalWritable, close?: boolean): boolean;
 }
 
 // @beta

@@ -1,6 +1,113 @@
 # Change Log - @rushstack/heft-lint-plugin
 
-This log was last generated on Fri, 06 Jun 2025 00:11:09 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+
+## 1.1.8
+Fri, 21 Nov 2025 16:13:56 GMT
+
+_Version update only_
+
+## 1.1.7
+Wed, 12 Nov 2025 01:57:54 GMT
+
+### Patches
+
+- Forward suppressed messages to formatters.
+
+## 1.1.6
+Wed, 12 Nov 2025 01:12:56 GMT
+
+_Version update only_
+
+## 1.1.5
+Tue, 11 Nov 2025 16:13:26 GMT
+
+### Patches
+
+- Ensure that `parserOptions.tsconfigRootDir` is set for use by custom lint rules.
+
+## 1.1.4
+Tue, 04 Nov 2025 08:15:14 GMT
+
+### Patches
+
+- Fix bug where TypeScript program is not reused in ESLint 9.
+
+## 1.1.3
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 1.1.2
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 1.1.1
+Wed, 08 Oct 2025 00:13:29 GMT
+
+_Version update only_
+
+## 1.1.0
+Fri, 03 Oct 2025 20:09:59 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
+
+## 1.0.0
+Tue, 30 Sep 2025 23:57:45 GMT
+
+### Breaking changes
+
+- Release Heft version 1.0.0
+
+## 0.7.7
+Tue, 30 Sep 2025 20:33:51 GMT
+
+_Version update only_
+
+## 0.7.6
+Fri, 12 Sep 2025 15:13:07 GMT
+
+_Version update only_
+
+## 0.7.5
+Thu, 11 Sep 2025 00:22:31 GMT
+
+_Version update only_
+
+## 0.7.4
+Tue, 19 Aug 2025 20:45:02 GMT
+
+_Version update only_
+
+## 0.7.3
+Fri, 01 Aug 2025 00:12:49 GMT
+
+_Version update only_
+
+## 0.7.2
+Mon, 28 Jul 2025 15:11:56 GMT
+
+_Version update only_
+
+## 0.7.1
+Wed, 23 Jul 2025 20:55:57 GMT
+
+_Version update only_
+
+## 0.7.0
+Thu, 26 Jun 2025 18:57:04 GMT
+
+### Minor changes
+
+- Add support for ESLint 9. When using ESLint 9, the configuration will be loaded from `eslint.config.js`, and flat configs will be required by the Heft plugin
+
+## 0.6.1
+Sat, 21 Jun 2025 00:13:15 GMT
+
+_Version update only_
 
 ## 0.6.0
 Fri, 06 Jun 2025 00:11:09 GMT

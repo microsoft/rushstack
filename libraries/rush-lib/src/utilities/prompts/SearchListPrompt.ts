@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { Interface } from 'readline';
-import { Colorize } from '@rushstack/terminal';
+import type { Interface } from 'node:readline';
 
 // Modified from the choice list prompt in inquirer:
 // https://github.com/SBoudrias/Inquirer.js/blob/inquirer%407.3.3/packages/inquirer/lib/prompts/list.js
@@ -14,10 +13,10 @@ import Paginator from 'inquirer/lib/utils/paginator';
 import type Separator from 'inquirer/lib/objects/separator';
 import type Choice from 'inquirer/lib/objects/choice';
 import type Choices from 'inquirer/lib/objects/choices';
-
 import figures from 'figures';
-
 import { map, takeUntil } from 'rxjs/operators';
+
+import { Colorize } from '@rushstack/terminal';
 
 interface IKeyPressEvent {
   key: { name: string; ctrl: boolean; sequence?: string };
@@ -60,17 +59,13 @@ export class SearchListPrompt extends BasePrompt<ListQuestion> {
     // eslint-disable-next-line @typescript-eslint/typedef
     const validation = this.handleSubmitEvents(events.line.pipe(map(this._getCurrentValue.bind(this))));
 
-    //eslint-disable-next-line no-void
     void validation.success.forEach(this._onSubmit.bind(this));
-    //eslint-disable-next-line no-void
     void validation.error.forEach(this._onError.bind(this));
 
-    // eslint-disable-next-line no-void
     void events.numberKey
       .pipe(takeUntil(events.line))
       .forEach(this._onNumberKey.bind(this) as (evt: unknown) => void);
 
-    // eslint-disable-next-line no-void
     void events.keypress
       .pipe(takeUntil(validation.success))
       .forEach(this._onKeyPress.bind(this) as (evt: unknown) => void);

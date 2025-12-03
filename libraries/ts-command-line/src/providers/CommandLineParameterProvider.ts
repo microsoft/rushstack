@@ -39,6 +39,7 @@ import { CommandLineStringListParameter } from '../parameters/CommandLineStringL
 import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
 import { SCOPING_PARAMETER_GROUP } from '../Constants';
 import { CommandLineParserExitError } from './CommandLineParserExitError';
+import { escapeSprintf } from '../escapeSprintf';
 
 /**
  * The result containing the parsed parameter long name and scope. Returned when calling
@@ -858,7 +859,7 @@ export abstract class CommandLineParameterProvider {
     // NOTE: Our "environmentVariable" feature takes precedence over argparse's "defaultValue",
     // so we have to reimplement that feature.
     const argparseOptions: argparse.ArgumentOptions = {
-      help: finalDescription,
+      help: escapeSprintf(finalDescription),
       dest: parserKey,
       metavar: (parameter as CommandLineParameterWithArgument).argumentName,
       required,

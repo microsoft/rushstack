@@ -2,7 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+import { minimatch } from 'minimatch';
+
 import * as tsdoc from '@microsoft/tsdoc';
+import { ReleaseTag } from '@microsoft/api-extractor-model';
 import {
   PackageJsonLookup,
   Sort,
@@ -10,11 +13,8 @@ import {
   type INodePackageJson,
   PackageName
 } from '@rushstack/node-core-library';
-import { ReleaseTag } from '@microsoft/api-extractor-model';
-import minimatch from 'minimatch';
 
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
-
 import { CollectorEntity } from './CollectorEntity';
 import { AstSymbolTable } from '../analyzer/AstSymbolTable';
 import type { AstEntity } from '../analyzer/AstEntity';

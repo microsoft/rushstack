@@ -1,6 +1,128 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 13 Jun 2025 16:10:38 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Nov 2025 17:04:05 GMT and should not be manually modified.
+
+## 5.163.0
+Tue, 25 Nov 2025 17:04:05 GMT
+
+### Minor changes
+
+- Added the ability to select projects via path, e.g. `rush build --to path:./my-project` or `rush build --only path:/some/absolute/path`
+- Add project-level parameter ignoring to prevent unnecessary cache invalidation. Projects can now use "parameterNamesToIgnore" in "rush-project.json" to exclude custom command-line parameters that don't affect their operations.
+
+### Updates
+
+- Extract CredentialCache API out into "@rushstack/credential-cache". Reference directly in plugins to avoid pulling in all of "@rushstack/rush-sdk" unless necessary.
+- Add subspaceName to the output of the `rush list` command
+
+## 5.162.0
+Sat, 18 Oct 2025 00:06:36 GMT
+
+### Updates
+
+- Fork npm-check to address npm audit CVE
+
+## 5.161.0
+Fri, 17 Oct 2025 23:22:50 GMT
+
+### Updates
+
+- Add an `allowOversubscription` option to the command definitions in `common/config/rush/command-line.json` to prevent running tasks from exceeding concurrency.
+- Add support for PNPM's minimumReleaseAge setting to help mitigate supply chain attacks
+- Enable prerelease version matching in bridge-package command
+- Fix an issue where `rush add --make-consistent ...` may drop the `implicitlyPreferredVersions` and `ensureConsistentVersions` properties from `common/config/rush/common-versions.json`.
+- Treat intermittent ignored redis errors as warnings and allow build to continue.
+
+## 5.160.1
+Fri, 03 Oct 2025 22:25:25 GMT
+
+### Updates
+
+- Fix an issue with validation of the `pnpm-lock.yaml` `packageExtensionsChecksum` field in pnpm v10.
+
+## 5.160.0
+Fri, 03 Oct 2025 20:10:21 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
+
+### Updates
+
+- Bump the default Node and `pnpm` versions in the `rush init` template.
+- Fix an issue with validation of the `pnpm-lock.yaml` `packageExtensionsChecksum` field in pnpm v10.
+- Fix an issue where the `$schema` property is dropped from `common/config/rush/pnpm-config.json` when running `rush-pnpm patch-commit ...`
+
+## 5.159.0
+Fri, 03 Oct 2025 00:50:08 GMT
+
+### Patches
+
+- [rush-azure-storage-build-cache-plugin] Trim access token output in AdoCodespacesAuthCredential
+
+### Updates
+
+- Fix to allow Bridge Cache plugin be installed but not used when build cache disabled; add cache key to terminal logs
+- Add `IOperationExecutionResult.problemCollector` API which matches and collects VS Code style problem matchers
+- Replace uuid package dependency with Node.js built-in crypto.randomUUID
+- [rush-resolver-cache] Ensure that the correct version of rush-lib is loaded when the global version doesn't match the repository version.
+- Upgraded `js-yaml` dependency
+- Enhance logging for IPC mode by allowing IPC runners to report detailed reasons for rerun, e.g. specific changed files.
+- Support aborting execution in phased commands. The CLI allows aborting via the "a" key in watch mode, and it is available to plugin authors for more advanced scenarios.
+- [rush-serve-plugin] Support aborting execution via Web Socket. Include information about the dependencies of operations in messages to the client..
+- Add a logging message after the 'Trying to find "tar" binary' message when the binary is found.
+- Upgrade inquirer to 8.2.7 in rush-lib
+- Bump "express" to 4.21.1 to address reported vulnerabilities in 4.20.0.
+
+## 5.158.1
+Fri, 29 Aug 2025 00:08:18 GMT
+
+### Updates
+
+- Deduplicate parsing of dependency specifiers.
+- Optimize detection of local projects when collecting implicit preferred versions.
+- Dedupe shrinkwrap parsing by content hash.
+- [resolver-cache] Use shrinkwrap hash to skip resolver cache regeneration.
+
+## 5.158.0
+Tue, 26 Aug 2025 23:27:47 GMT
+
+### Updates
+
+- Adds an optional safety check flag to the Bridge Cache plugin write action.
+- Fix a bug in "@rushstack/rush-bridge-cache-plugin" where the cache replay did not block the normal execution process and instead was a floating promise.
+- [resolver-cache-plugin] Optimize search for nested package.json files with persistent cache file keyed by integrity hash.
+- [rush-serve-plugin] Allow the Rush process to exit if the server is the only active handle.
+- Fix poor performance scaling during `rush install` when identifying projects in the lockfile that no longer exist.
+- [resolver-cache-plugin] Improve performance of scan for nested package.json files in external packages.
+- Optimize `setPreferredVersions` in install setup.
+- Ensure that `rush version` and `rush publish` preserve all fields in `version-policies-json`.
+
+## 5.157.0
+Fri, 25 Jul 2025 01:24:42 GMT
+
+### Updates
+
+- Improve performance for publishing on filtered clones.
+
+## 5.156.0
+Wed, 23 Jul 2025 20:56:15 GMT
+
+### Updates
+
+- Include "parallelism" in phased operation execution context. Update "rush-bridge-cache-plugin" to support both cache read and cache write, selectable via command line choice parameter. Fixes an issue that the options schema for "rush-bridge-cache-plugin" was invalid.
+- Add support for `RUSH_BUILD_CACHE_OVERRIDE_JSON` environment variable that takes a JSON string with the same format as the `common/config/build-cache.json` file and a `RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH` environment variable that takes a file path that can be used to override the build cache configuration that is normally provided by that file.
+- Add support for setting environment variables via `<repo-root>/.env` and `~/.rush-user/.env` files.
+- [azure-storage-build-cache] Update build-cache.json schema to allow the full range of `loginFlow` options supported by the underlying authentication provider. Add `loginFlowFailover` option to customize fallback sequencing.
+- Add performance measures around various operations, include performance entries in telemetry payload.
+- Do not run afterExecuteOperation if the operation has not actually completed.
+
+## 5.155.1
+Fri, 27 Jun 2025 19:57:04 GMT
+
+### Updates
+
+- Fix pnpm-sync caused .modules.yaml ENOENT during install
 
 ## 5.155.0
 Fri, 13 Jun 2025 16:10:38 GMT

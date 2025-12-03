@@ -16,9 +16,8 @@ jest.mock('@rushstack/terminal', () => {
   };
 });
 
-import { Terminal } from '@rushstack/terminal';
+import { Terminal, MockWritable, PrintUtilities } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
-import { MockWritable, PrintUtilities } from '@rushstack/terminal';
 
 import type { IPhase } from '../../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
@@ -103,6 +102,7 @@ describe(OperationExecutionManager.name, () => {
         quietMode: false,
         debugMode: false,
         parallelism: 1,
+        allowOversubscription: true,
         destination: mockWritable
       };
     });
@@ -117,7 +117,8 @@ describe(OperationExecutionManager.name, () => {
         })
       );
 
-      const result: IExecutionResult = await executionManager.executeAsync();
+      const abortController = new AbortController();
+      const result: IExecutionResult = await executionManager.executeAsync(abortController);
       _printOperationStatus(mockTerminal, result);
       expect(result.status).toEqual(OperationStatus.Failure);
       expect(result.operationResults.size).toEqual(1);
@@ -141,7 +142,8 @@ describe(OperationExecutionManager.name, () => {
         })
       );
 
-      const result: IExecutionResult = await executionManager.executeAsync();
+      const abortController = new AbortController();
+      const result: IExecutionResult = await executionManager.executeAsync(abortController);
       _printOperationStatus(mockTerminal, result);
       expect(result.status).toEqual(OperationStatus.Failure);
       expect(result.operationResults.size).toEqual(1);
@@ -154,6 +156,49 @@ describe(OperationExecutionManager.name, () => {
       expect(allOutput).toMatch(/Build step 1/);
       expect(allOutput).toMatch(/Error: step 1 failed/);
       expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
+    });
+  });
+
+  describe('Aborting', () => {
+    it('Aborted operations abort', async () => {
+      const mockRun: jest.Mock = jest.fn();
+
+      const firstOperation = new Operation({
+        runner: new MockOperationRunner('1', mockRun),
+        phase: mockPhase,
+        project: getOrCreateProject('1'),
+        logFilenameIdentifier: '1'
+      });
+
+      const secondOperation = new Operation({
+        runner: new MockOperationRunner('2', mockRun),
+        phase: mockPhase,
+        project: getOrCreateProject('2'),
+        logFilenameIdentifier: '2'
+      });
+
+      secondOperation.addDependency(firstOperation);
+
+      const manager: OperationExecutionManager = new OperationExecutionManager(
+        new Set([firstOperation, secondOperation]),
+        {
+          quietMode: false,
+          debugMode: false,
+          parallelism: 1,
+          allowOversubscription: true,
+          destination: mockWritable
+        }
+      );
+
+      const abortController = new AbortController();
+      abortController.abort();
+
+      const result = await manager.executeAsync(abortController);
+      expect(result.status).toEqual(OperationStatus.Aborted);
+      expect(mockRun).not.toHaveBeenCalled();
+      expect(result.operationResults.size).toEqual(2);
+      expect(result.operationResults.get(firstOperation)?.status).toEqual(OperationStatus.Aborted);
+      expect(result.operationResults.get(secondOperation)?.status).toEqual(OperationStatus.Aborted);
     });
   });
 
@@ -185,11 +230,13 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: 1,
+          allowOversubscription: true,
           destination: mockWritable
         }
       );
 
-      const result = await manager.executeAsync();
+      const abortController = new AbortController();
+      const result = await manager.executeAsync(abortController);
       expect(result.status).toEqual(OperationStatus.Failure);
       expect(blockedRunFn).not.toHaveBeenCalled();
       expect(result.operationResults.size).toEqual(2);
@@ -205,6 +252,7 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: 1,
+          allowOversubscription: true,
           destination: mockWritable
         };
       });
@@ -219,7 +267,8 @@ describe(OperationExecutionManager.name, () => {
           })
         );
 
-        const result: IExecutionResult = await executionManager.executeAsync();
+        const abortController = new AbortController();
+        const result: IExecutionResult = await executionManager.executeAsync(abortController);
         _printOperationStatus(mockTerminal, result);
         expect(result.status).toEqual(OperationStatus.SuccessWithWarning);
         expect(result.operationResults.size).toEqual(1);
@@ -241,6 +290,7 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: 1,
+          allowOversubscription: true,
           destination: mockWritable
         };
       });
@@ -259,7 +309,8 @@ describe(OperationExecutionManager.name, () => {
           )
         );
 
-        const result: IExecutionResult = await executionManager.executeAsync();
+        const abortController = new AbortController();
+        const result: IExecutionResult = await executionManager.executeAsync(abortController);
         _printOperationStatus(mockTerminal, result);
         expect(result.status).toEqual(OperationStatus.Success);
         expect(result.operationResults.size).toEqual(1);
@@ -287,7 +338,8 @@ describe(OperationExecutionManager.name, () => {
           )
         );
 
-        const result: IExecutionResult = await executionManager.executeAsync();
+        const abortController = new AbortController();
+        const result: IExecutionResult = await executionManager.executeAsync(abortController);
         _printTimeline({ terminal: mockTerminal, result, cobuildConfiguration: undefined });
         _printOperationStatus(mockTerminal, result);
         const allMessages: string = mockWritable.getAllOutput();
@@ -359,7 +411,8 @@ describe(OperationExecutionManager.name, () => {
         {} as unknown as RushConfigurationProject
       );
 
-      const result: IExecutionResult = await executionManager.executeAsync();
+      const abortController = new AbortController();
+      const result: IExecutionResult = await executionManager.executeAsync(abortController);
       _printTimeline({
         terminal: mockTerminal,
         result,
@@ -384,7 +437,8 @@ describe(OperationExecutionManager.name, () => {
         {} as unknown as RushConfigurationProject
       );
 
-      const result: IExecutionResult = await executionManager.executeAsync();
+      const abortController = new AbortController();
+      const result: IExecutionResult = await executionManager.executeAsync(abortController);
       _printTimeline({
         terminal: mockTerminal,
         result,

@@ -6,8 +6,8 @@
 
 /// <reference types="node" />
 
-import { ResourceLimits } from 'worker_threads';
-import { Worker } from 'worker_threads';
+import { ResourceLimits } from 'node:worker_threads';
+import { Worker } from 'node:worker_threads';
 
 // Warning: (ae-internal-missing-underscore) The name "IWorkerPoolOptions" should be prefixed with an underscore because the declaration is marked as @internal
 //

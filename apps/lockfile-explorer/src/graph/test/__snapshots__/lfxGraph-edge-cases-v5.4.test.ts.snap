@@ -1,0 +1,287 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
+"entries:
+  - dependencies:
+      - dependencyKind: regular
+        entryId: /mime-db/1.54.0
+        name: mime-db
+        originalSpecifier: ^1.52.0
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 11
+        versionPath: 1.54.0
+      - dependencyKind: dev
+        entryId: /color-string/2.1.2
+        name: color-string
+        originalSpecifier: ^2.1.2
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 8
+        versionPath: 2.1.2
+    displayText: 'Project: dev-dependencies'
+    entryId: project:packages/dev-dependencies
+    entryPackageName: dev-dependencies
+    entryPackageVersion: ''
+    entrySuffix: ''
+    jsonId: 0
+    kind: 1
+    packageJsonFolderPath: packages/dev-dependencies
+    rawEntryId: packages/dev-dependencies
+    referrerJsonIds: []
+    transitivePeerDependencies: []
+  - dependencies:
+      - dependencyKind: regular
+        entryId: /color/5.0.2
+        name: color
+        originalSpecifier: ^5.0.2
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 9
+        versionPath: 5.0.2
+    displayText: 'Project: duplicate (packages/duplicate-1/duplicate)'
+    entryId: project:packages/duplicate-1/duplicate
+    entryPackageName: duplicate (packages/duplicate-1/duplicate)
+    entryPackageVersion: ''
+    entrySuffix: ''
+    jsonId: 1
+    kind: 1
+    packageJsonFolderPath: packages/duplicate-1/duplicate
+    rawEntryId: packages/duplicate-1/duplicate
+    referrerJsonIds: []
+    transitivePeerDependencies: []
+  - dependencies:
+      - dependencyKind: regular
+        entryId: /color-string/2.1.2
+        name: color-string
+        originalSpecifier: ^2.1.2
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 8
+        versionPath: 2.1.2
+    displayText: 'Project: duplicate (packages/duplicate-2/duplicate)'
+    entryId: project:packages/duplicate-2/duplicate
+    entryPackageName: duplicate (packages/duplicate-2/duplicate)
+    entryPackageVersion: ''
+    entrySuffix: ''
+    jsonId: 2
+    kind: 1
+    packageJsonFolderPath: packages/duplicate-2/duplicate
+    rawEntryId: packages/duplicate-2/duplicate
+    referrerJsonIds: []
+    transitivePeerDependencies: []
+  - dependencies:
+      - dependencyKind: regular
+        entryId: /has-symbols/1.0.2
+        name: has-symbols
+        originalSpecifier: 1.0.2
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 10
+        versionPath: 1.0.2
+      - dependencyKind: regular
+        entryId: project:packages/link-specifier/linker/packages/link-specifier/target-folder
+        name: target-folder
+        originalSpecifier: link:packages/link-specifier/target-folder
+        peerDependencyMeta: {}
+        versionPath: link:packages/link-specifier/target-folder
+    displayText: 'Project: linker'
+    entryId: project:packages/link-specifier/linker
+    entryPackageName: linker
+    entryPackageVersion: ''
+    entrySuffix: ''
+    jsonId: 3
+    kind: 1
+    packageJsonFolderPath: packages/link-specifier/linker
+    rawEntryId: packages/link-specifier/linker
+    referrerJsonIds: []
+    transitivePeerDependencies: []
+  - dependencies:
+      - dependencyKind: regular
+        entryId: /address/1.2.2
+        name: address
+        originalSpecifier: ^1.0.0
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 5
+        versionPath: 1.2.2
+      - dependencyKind: regular
+        entryId: /uri-js/4.4.1
+        name: uri-js
+        originalSpecifier: ^4.0.0
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 13
+        versionPath: 4.4.1
+    displayText: 'Project: pnpmfile-transforms'
+    entryId: project:packages/pnpmfile-transforms
+    entryPackageName: pnpmfile-transforms
+    entryPackageVersion: ''
+    entrySuffix: ''
+    jsonId: 4
+    kind: 1
+    packageJsonFolderPath: packages/pnpmfile-transforms
+    rawEntryId: packages/pnpmfile-transforms
+    referrerJsonIds: []
+    transitivePeerDependencies: []
+  - dependencies: []
+    displayText: address 1.2.2
+    entryId: /address/1.2.2
+    entryPackageName: address
+    entryPackageVersion: 1.2.2
+    entrySuffix: ''
+    jsonId: 5
+    kind: 2
+    packageJsonFolderPath: node_modules/.pnpm/address@1.2.2/node_modules/address
+    rawEntryId: /address/1.2.2
+    referrerJsonIds:
+      - 4
+    transitivePeerDependencies: []
+  - dependencies:
+      - dependencyKind: regular
+        entryId: /color-name/2.0.2
+        name: color-name
+        originalSpecifier: ''
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 7
+        versionPath: 2.0.2
+    displayText: color-convert 3.1.2
+    entryId: /color-convert/3.1.2
+    entryPackageName: color-convert
+    entryPackageVersion: 3.1.2
+    entrySuffix: ''
+    jsonId: 6
+    kind: 2
+    packageJsonFolderPath: node_modules/.pnpm/color-convert@3.1.2/node_modules/color-convert
+    rawEntryId: /color-convert/3.1.2
+    referrerJsonIds:
+      - 9
+    transitivePeerDependencies: []
+  - dependencies: []
+    displayText: color-name 2.0.2
+    entryId: /color-name/2.0.2
+    entryPackageName: color-name
+    entryPackageVersion: 2.0.2
+    entrySuffix: ''
+    jsonId: 7
+    kind: 2
+    packageJsonFolderPath: node_modules/.pnpm/color-name@2.0.2/node_modules/color-name
+    rawEntryId: /color-name/2.0.2
+    referrerJsonIds:
+      - 6
+      - 8
+    transitivePeerDependencies: []
+  - dependencies:
+      - dependencyKind: regular
+        entryId: /color-name/2.0.2
+        name: color-name
+        originalSpecifier: ''
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 7
+        versionPath: 2.0.2
+    displayText: color-string 2.1.2
+    entryId: /color-string/2.1.2
+    entryPackageName: color-string
+    entryPackageVersion: 2.1.2
+    entrySuffix: ''
+    jsonId: 8
+    kind: 2
+    packageJsonFolderPath: node_modules/.pnpm/color-string@2.1.2/node_modules/color-string
+    rawEntryId: /color-string/2.1.2
+    referrerJsonIds:
+      - 0
+      - 2
+      - 9
+    transitivePeerDependencies: []
+  - dependencies:
+      - dependencyKind: regular
+        entryId: /color-convert/3.1.2
+        name: color-convert
+        originalSpecifier: ''
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 6
+        versionPath: 3.1.2
+      - dependencyKind: regular
+        entryId: /color-string/2.1.2
+        name: color-string
+        originalSpecifier: ''
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 8
+        versionPath: 2.1.2
+    displayText: color 5.0.2
+    entryId: /color/5.0.2
+    entryPackageName: color
+    entryPackageVersion: 5.0.2
+    entrySuffix: ''
+    jsonId: 9
+    kind: 2
+    packageJsonFolderPath: node_modules/.pnpm/color@5.0.2/node_modules/color
+    rawEntryId: /color/5.0.2
+    referrerJsonIds:
+      - 1
+    transitivePeerDependencies: []
+  - dependencies:
+      - dependencyKind: regular
+        entryId: ''
+        name: target-folder
+        originalSpecifier: ''
+        peerDependencyMeta: {}
+        versionPath: link:link-specifier/target-folder
+    displayText: has-symbols 1.0.2
+    entryId: /has-symbols/1.0.2
+    entryPackageName: has-symbols
+    entryPackageVersion: 1.0.2
+    entrySuffix: ''
+    jsonId: 10
+    kind: 2
+    packageJsonFolderPath: node_modules/.pnpm/has-symbols@1.0.2/node_modules/has-symbols
+    rawEntryId: /has-symbols/1.0.2
+    referrerJsonIds:
+      - 3
+    transitivePeerDependencies: []
+  - dependencies: []
+    displayText: mime-db 1.54.0
+    entryId: /mime-db/1.54.0
+    entryPackageName: mime-db
+    entryPackageVersion: 1.54.0
+    entrySuffix: ''
+    jsonId: 11
+    kind: 2
+    packageJsonFolderPath: node_modules/.pnpm/mime-db@1.54.0/node_modules/mime-db
+    rawEntryId: /mime-db/1.54.0
+    referrerJsonIds:
+      - 0
+    transitivePeerDependencies: []
+  - dependencies: []
+    displayText: punycode 2.3.1
+    entryId: /punycode/2.3.1
+    entryPackageName: punycode
+    entryPackageVersion: 2.3.1
+    entrySuffix: ''
+    jsonId: 12
+    kind: 2
+    packageJsonFolderPath: node_modules/.pnpm/punycode@2.3.1/node_modules/punycode
+    rawEntryId: /punycode/2.3.1
+    referrerJsonIds:
+      - 13
+    transitivePeerDependencies: []
+  - dependencies:
+      - dependencyKind: regular
+        entryId: /punycode/2.3.1
+        name: punycode
+        originalSpecifier: ''
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 12
+        versionPath: 2.3.1
+    displayText: uri-js 4.4.1
+    entryId: /uri-js/4.4.1
+    entryPackageName: uri-js
+    entryPackageVersion: 4.4.1
+    entrySuffix: ''
+    jsonId: 13
+    kind: 2
+    packageJsonFolderPath: node_modules/.pnpm/uri-js@4.4.1/node_modules/uri-js
+    rawEntryId: /uri-js/4.4.1
+    referrerJsonIds:
+      - 4
+    transitivePeerDependencies: []
+workspace:
+  pnpmLockfileFolder: ''
+  pnpmLockfilePath: pnpm-lock.yaml
+  pnpmfilePath: .pnpmfile.cjs
+  workspaceRootFullPath: /repo
+"
+`;

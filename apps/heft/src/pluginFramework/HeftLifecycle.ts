@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AsyncParallelHook } from 'tapable';
+import { AsyncParallelHook, SyncHook } from 'tapable';
+
 import { InternalError } from '@rushstack/node-core-library';
 
 import { HeftPluginConfiguration } from '../configuration/HeftPluginConfiguration';
@@ -19,7 +20,11 @@ import {
   type IHeftLifecycleHooks,
   type IHeftLifecycleToolStartHookOptions,
   type IHeftLifecycleToolFinishHookOptions,
-  type IHeftLifecycleSession
+  type IHeftLifecycleSession,
+  type IHeftTaskStartHookOptions,
+  type IHeftTaskFinishHookOptions,
+  type IHeftPhaseStartHookOptions,
+  type IHeftPhaseFinishHookOptions
 } from './HeftLifecycleSession';
 import type { ScopedLogger } from './logging/ScopedLogger';
 
@@ -67,7 +72,11 @@ export class HeftLifecycle extends HeftPluginHost {
       clean: new AsyncParallelHook<IHeftLifecycleCleanHookOptions>(),
       toolStart: new AsyncParallelHook<IHeftLifecycleToolStartHookOptions>(),
       toolFinish: new AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>(),
-      recordMetrics: internalHeftSession.metricsCollector.recordMetricsHook
+      recordMetrics: internalHeftSession.metricsCollector.recordMetricsHook,
+      taskStart: new SyncHook<IHeftTaskStartHookOptions>(['task']),
+      taskFinish: new SyncHook<IHeftTaskFinishHookOptions>(['task']),
+      phaseStart: new SyncHook<IHeftPhaseStartHookOptions>(['phase']),
+      phaseFinish: new SyncHook<IHeftPhaseFinishHookOptions>(['phase'])
     };
   }
 

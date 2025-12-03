@@ -3,6 +3,7 @@
 
 import React from 'react';
 import * as RadixScrollArea from '@radix-ui/react-scroll-area';
+
 import styles from './styles.scss';
 
 /**

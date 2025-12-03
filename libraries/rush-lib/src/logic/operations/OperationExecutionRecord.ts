@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-import * as crypto from 'crypto';
+
+import * as crypto from 'node:crypto';
 
 import {
   type ITerminal,
@@ -9,11 +10,12 @@ import {
   SplitterTransform,
   StderrLineTransform,
   StdioSummarizer,
+  ProblemCollector,
   TextRewriterTransform,
   Terminal,
   type TerminalWritable
 } from '@rushstack/terminal';
-import { InternalError, NewlineKind } from '@rushstack/node-core-library';
+import { InternalError, NewlineKind, FileError } from '@rushstack/node-core-library';
 import { CollatedTerminal, type CollatedWriter, type StreamCollator } from '@rushstack/stream-collator';
 
 import { OperationStatus, TERMINAL_STATUSES } from './OperationStatus';
@@ -110,6 +112,18 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   public readonly stdioSummarizer: StdioSummarizer = new StdioSummarizer({
     // Allow writing to this object after transforms have been closed. We clean it up manually in a finally block.
     preventAutoclose: true
+  });
+  public readonly problemCollector: ProblemCollector = new ProblemCollector({
+    matcherJson: [
+      {
+        name: 'rushstack-file-error-unix',
+        pattern: FileError.getProblemMatcher({ format: 'Unix' })
+      },
+      {
+        name: 'rushstack-file-error-visualstudio',
+        pattern: FileError.getProblemMatcher({ format: 'VisualStudio' })
+      }
+    ]
   });
 
   public readonly runner: IOperationRunner;
@@ -284,7 +298,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       logFileSuffix: string;
     }
   ): Promise<T> {
-    const { associatedProject, stdioSummarizer } = this;
+    const { associatedProject, stdioSummarizer, problemCollector } = this;
     const { createLogFile, logFileSuffix = '' } = options;
 
     const logFilePaths: ILogFilePaths | undefined = createLogFile
@@ -313,7 +327,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       //                                                        +--> stdioSummarizer
       const destination: TerminalWritable = projectLogWritable
         ? new SplitterTransform({
-            destinations: [projectLogWritable, stdioSummarizer]
+            destinations: [projectLogWritable, stdioSummarizer, problemCollector]
           })
         : stdioSummarizer;
 
@@ -402,6 +416,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       if (this.isTerminal) {
         this._collatedWriter?.close();
         this.stdioSummarizer.close();
+        this.problemCollector.close();
       }
     }
   }

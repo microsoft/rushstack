@@ -1,19 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ESLint } from 'eslint';
-import { getEslintPath } from './utils/get-eslint-cli';
+import type { ESLint as TEslintLegacy } from 'eslint-8';
+import type { ESLint as TEslint } from 'eslint-9';
+
+import { getEslintPathAndVersion } from './utils/get-eslint-cli';
 
 export async function runEslintAsync(files: string[], mode: 'suppress' | 'prune'): Promise<void> {
   const cwd: string = process.cwd();
-  const eslintPath: string = getEslintPath(cwd);
-  const { ESLint }: typeof import('eslint') = require(eslintPath);
-  const eslint: ESLint = new ESLint({
-    useEslintrc: true,
-    cwd
-  });
+  const [eslintPath, eslintVersion] = getEslintPathAndVersion(cwd);
+  const { ESLint }: typeof import('eslint-9') | typeof import('eslint-8') = require(eslintPath);
 
-  let results: ESLint.LintResult[];
+  let eslint: TEslint | TEslintLegacy;
+  const majorVersion: number = parseInt(eslintVersion, 10);
+  if (majorVersion < 9) {
+    eslint = new ESLint({ cwd, useEslintrc: true });
+  } else {
+    eslint = new ESLint({ cwd });
+  }
+
+  let results: (TEslint.LintResult | TEslintLegacy.LintResult)[];
   try {
     results = await eslint.lintFiles(files);
   } catch (e) {
@@ -34,8 +40,9 @@ export async function runEslintAsync(files: string[], mode: 'suppress' | 'prune'
   }
 
   if (results.length > 0) {
-    const stylishFormatter: ESLint.Formatter = await eslint.loadFormatter();
-    const formattedResults: string = await Promise.resolve(stylishFormatter.format(results));
+    const stylishFormatter: TEslint.Formatter | TEslintLegacy.Formatter = await eslint.loadFormatter();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const formattedResults: string = await Promise.resolve(stylishFormatter.format(results as any));
     console.log(formattedResults);
   }
 

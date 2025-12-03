@@ -1,0 +1,26 @@
+{
+  "name": "@rushstack/credential-cache",
+  "version": "0.1.3",
+  "description": "Cross-platform functionality to manage cached credentials.",
+  "main": "lib/index.js",
+  "typings": "dist/credential-cache.d.ts",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "libraries/credential-cache"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
+  }
+}

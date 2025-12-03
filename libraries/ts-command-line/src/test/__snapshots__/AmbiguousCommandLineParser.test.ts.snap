@@ -39,6 +39,42 @@ exports[`Ambiguous CommandLineParser fails to execute when an ambiguous short na
 "
 `;
 
+exports[`Ambiguous CommandLineParser renders help text: do:the-job 1`] = `
+"usage: example do:the-job [-h] [--short1 ARG] [--short2 ARG]
+                          [--scope1:arg ARG] [--scope2:arg ARG]
+                          [--non-conflicting-arg ARG]
+                          
+
+a longer description
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  --short1 ARG          The argument
+  --short2 ARG          The argument
+  --scope1:arg ARG      The argument
+  --scope2:arg ARG      The argument
+  --non-conflicting-arg ARG, --scope:non-conflicting-arg ARG
+                        The argument
+"
+`;
+
+exports[`Ambiguous CommandLineParser renders help text: global help 1`] = `
+"usage: example [-h] <command> ...
+
+An example project
+
+Positional arguments:
+  <command>
+    do:the-job
+              does the job
+
+Optional arguments:
+  -h, --help  Show this help message and exit.
+
+[bold]For detailed help about a specific command, use: example <command> -h[normal]
+"
+`;
+
 exports[`Ambiguous aliased CommandLineParser can execute the non-ambiguous scoped long names 1`] = `
 "usage: example do:the-job [-h] [--short1 ARG] [--short2 ARG]
                           [--scope1:arg ARG] [--scope2:arg ARG]

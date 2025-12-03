@@ -186,6 +186,15 @@ export interface IReadonlyLookupByPath<TItem extends {}> extends Iterable<[strin
    * @param infoByPath - The info to be grouped, keyed by path
    */
   groupByChild<TInfo>(infoByPath: Map<string, TInfo>, delimiter?: string): Map<TItem, Map<string, TInfo>>;
+
+  /**
+   * Retrieves the trie node at the specified prefix, if it exists.
+   *
+   * @param query - The prefix to check for
+   * @param delimiter - The path delimiter
+   * @returns The trie node at the specified prefix, or `undefined` if no node was found
+   */
+  getNodeAtPrefix(query: string, delimiter?: string): IReadonlyPathTrieNode<TItem> | undefined;
 }
 
 /**
@@ -504,7 +513,6 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
 
     const stack: [string, IPathTrieNode<TItem>][] = [[query ?? '', root]];
     while (stack.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const [prefix, node] = stack.pop()!;
       if (node.value !== undefined) {
         yield [prefix, node.value];
@@ -525,6 +533,16 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
     delimiter: string = this.delimiter
   ): IterableIterator<[string, TItem]> {
     return this.entries(query, delimiter);
+  }
+
+  /**
+   * {@inheritdoc IReadonlyLookupByPath}
+   */
+  public getNodeAtPrefix(
+    query: string,
+    delimiter: string = this.delimiter
+  ): IReadonlyPathTrieNode<TItem> | undefined {
+    return this._findNodeAtPrefix(query, delimiter);
   }
 
   /**

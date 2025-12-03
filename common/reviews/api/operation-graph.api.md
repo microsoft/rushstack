@@ -33,7 +33,7 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
     afterExecute(operation: Operation, state: IOperationState): void;
     beforeExecute(operation: Operation, state: IOperationState): void;
     queueWork(workFn: () => Promise<OperationStatus>, priority: number): Promise<OperationStatus>;
-    requestRun?: (requestor?: string) => void;
+    requestRun?: OperationRequestRunCallback;
     terminal: ITerminal;
 }
 
@@ -44,21 +44,30 @@ export interface IExitCommandMessage {
 }
 
 // @beta
-export interface IOperationExecutionOptions {
+export interface IOperationExecutionOptions<TOperationMetadata extends {} = {}, TGroupMetadata extends {} = {}> {
     // (undocumented)
     abortSignal: AbortSignal;
     // (undocumented)
+    afterExecuteOperation?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => void;
+    // (undocumented)
+    afterExecuteOperationGroup?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => void;
+    // (undocumented)
+    beforeExecuteOperation?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => void;
+    // (undocumented)
+    beforeExecuteOperationGroup?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => void;
+    // (undocumented)
     parallelism: number;
     // (undocumented)
-    requestRun?: (requestor?: string) => void;
+    requestRun?: OperationRequestRunCallback;
     // (undocumented)
     terminal: ITerminal;
 }
 
 // @beta
-export interface IOperationOptions {
-    groupName?: string | undefined;
-    name?: string | undefined;
+export interface IOperationOptions<TMetadata extends {} = {}, TGroupMetadata extends {} = {}> {
+    group?: OperationGroupRecord<TGroupMetadata> | undefined;
+    metadata?: TMetadata | undefined;
+    name: string;
     runner?: IOperationRunner | undefined;
     weight?: number | undefined;
 }
@@ -74,7 +83,7 @@ export interface IOperationRunner {
 export interface IOperationRunnerContext {
     abortSignal: AbortSignal;
     isFirstRun: boolean;
-    requestRun?: () => void;
+    requestRun?: (detail?: string) => void;
 }
 
 // @beta
@@ -96,10 +105,10 @@ export type IPCHost = Pick<typeof process, 'on' | 'send'>;
 
 // @beta
 export interface IRequestRunEventMessage {
+    detail?: string;
     // (undocumented)
     event: 'requestRun';
-    // (undocumented)
-    requestor?: string;
+    requestor: string;
 }
 
 // @beta
@@ -127,7 +136,7 @@ export interface IWatchLoopOptions {
     executeAsync: (state: IWatchLoopState) => Promise<OperationStatus>;
     onAbort: () => void;
     onBeforeExecute: () => void;
-    onRequestRun: (requestor?: string) => void;
+    onRequestRun: OperationRequestRunCallback;
 }
 
 // @beta
@@ -135,24 +144,26 @@ export interface IWatchLoopState {
     // (undocumented)
     get abortSignal(): AbortSignal;
     // (undocumented)
-    requestRun: (requestor?: string) => void;
+    requestRun: OperationRequestRunCallback;
 }
 
 // @beta
-export class Operation implements IOperationStates {
-    constructor(options?: IOperationOptions);
+export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}> implements IOperationStates {
+    constructor(options: IOperationOptions<TMetadata, TGroupMetadata>);
     // (undocumented)
-    addDependency(dependency: Operation): void;
-    readonly consumers: Set<Operation>;
+    addDependency(dependency: Operation<TMetadata, TGroupMetadata>): void;
+    readonly consumers: Set<Operation<TMetadata, TGroupMetadata>>;
     criticalPathLength: number | undefined;
     // (undocumented)
-    deleteDependency(dependency: Operation): void;
-    readonly dependencies: Set<Operation>;
+    deleteDependency(dependency: Operation<TMetadata, TGroupMetadata>): void;
+    readonly dependencies: Set<Operation<TMetadata, TGroupMetadata>>;
     // @internal (undocumented)
     _executeAsync(context: IExecuteOperationContext): Promise<OperationStatus>;
-    readonly groupName: string | undefined;
+    readonly group: OperationGroupRecord<TGroupMetadata> | undefined;
     lastState: IOperationState | undefined;
-    readonly name: string | undefined;
+    // (undocumented)
+    readonly metadata: TMetadata;
+    readonly name: string;
     // (undocumented)
     reset(): void;
     runner: IOperationRunner | undefined;
@@ -172,14 +183,14 @@ export class OperationError extends Error {
 }
 
 // @beta
-export class OperationExecutionManager {
-    constructor(operations: ReadonlySet<Operation>);
-    executeAsync(executionOptions: IOperationExecutionOptions): Promise<OperationStatus>;
+export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGroupMetadata extends {} = {}> {
+    constructor(operations: ReadonlySet<Operation<TOperationMetadata, TGroupMetadata>>);
+    executeAsync(executionOptions: IOperationExecutionOptions<TOperationMetadata, TGroupMetadata>): Promise<OperationStatus>;
 }
 
 // @beta
-export class OperationGroupRecord {
-    constructor(name: string);
+export class OperationGroupRecord<TMetadata extends {} = {}> {
+    constructor(name: string, metadata?: TMetadata);
     // (undocumented)
     addOperation(operation: Operation): void;
     // (undocumented)
@@ -191,6 +202,8 @@ export class OperationGroupRecord {
     // (undocumented)
     get hasFailures(): boolean;
     // (undocumented)
+    readonly metadata: TMetadata;
+    // (undocumented)
     readonly name: string;
     // (undocumented)
     reset(): void;
@@ -199,6 +212,9 @@ export class OperationGroupRecord {
     // (undocumented)
     startTimer(): void;
 }
+
+// @beta
+export type OperationRequestRunCallback = (requestor: string, detail?: string) => void;
 
 // @beta
 export enum OperationStatus {
@@ -231,7 +247,7 @@ export class Stopwatch {
 export class WatchLoop implements IWatchLoopState {
     constructor(options: IWatchLoopOptions);
     get abortSignal(): AbortSignal;
-    requestRun: (requestor?: string) => void;
+    requestRun: OperationRequestRunCallback;
     runIPCAsync(host?: IPCHost): Promise<void>;
     runUntilAbortedAsync(abortSignal: AbortSignal, onWaiting: () => void): Promise<void>;
     runUntilStableAsync(abortSignal: AbortSignal): Promise<OperationStatus>;

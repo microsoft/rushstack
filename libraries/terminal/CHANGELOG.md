@@ -1,6 +1,60 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Thu, 01 May 2025 00:11:12 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+
+## 0.19.4
+Fri, 21 Nov 2025 16:13:56 GMT
+
+_Version update only_
+
+## 0.19.3
+Fri, 24 Oct 2025 00:13:38 GMT
+
+_Version update only_
+
+## 0.19.2
+Wed, 22 Oct 2025 00:57:54 GMT
+
+_Version update only_
+
+## 0.19.1
+Wed, 08 Oct 2025 00:13:29 GMT
+
+_Version update only_
+
+## 0.19.0
+Fri, 03 Oct 2025 20:10:00 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
+
+## 0.18.0
+Tue, 30 Sep 2025 23:57:45 GMT
+
+### Minor changes
+
+- Add ProblemCollector.onProblem notification callback
+- Update API contract for `SplitterTransform` to support adding and removing destinations after creation.
+
+## 0.17.0
+Tue, 30 Sep 2025 20:33:51 GMT
+
+### Minor changes
+
+- Add `ProblemCollector extends TerminalWritable` API which matches and collects VS Code style problem matchers
+
+## 0.16.0
+Thu, 11 Sep 2025 00:22:31 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Remove support for legacy `IColorableSequence` parameters passed to `Terminal` insance `write*` functions. Note that types for `IColorableSequence` were removed with #3176 in 2022.
+
+## 0.15.4
+Wed, 23 Jul 2025 20:55:57 GMT
+
+_Version update only_
 
 ## 0.15.3
 Thu, 01 May 2025 00:11:12 GMT

@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import { BaseReportAction } from './BaseReportAction';
-
 import { Rundown } from '../Rundown';
 
 export class SnapshotAction extends BaseReportAction {

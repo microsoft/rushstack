@@ -2,6 +2,138 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.19.4",
+      "tag": "@rushstack/terminal_v0.19.4",
+      "date": "Fri, 21 Nov 2025 16:13:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.19.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.19.3",
+      "tag": "@rushstack/terminal_v0.19.3",
+      "date": "Fri, 24 Oct 2025 00:13:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.18.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.19.2",
+      "tag": "@rushstack/terminal_v0.19.2",
+      "date": "Wed, 22 Oct 2025 00:57:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.17.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.19.1",
+      "tag": "@rushstack/terminal_v0.19.1",
+      "date": "Wed, 08 Oct 2025 00:13:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.17.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.19.0",
+      "tag": "@rushstack/terminal_v0.19.0",
+      "date": "Fri, 03 Oct 2025 20:10:00 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize import of builtin modules to use the `node:` protocol."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.16.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.18.0",
+      "tag": "@rushstack/terminal_v0.18.0",
+      "date": "Tue, 30 Sep 2025 23:57:45 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add ProblemCollector.onProblem notification callback"
+          },
+          {
+            "comment": "Update API contract for `SplitterTransform` to support adding and removing destinations after creation."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.15.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/problem-matcher\" to `0.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.17.0",
+      "tag": "@rushstack/terminal_v0.17.0",
+      "date": "Tue, 30 Sep 2025 20:33:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `ProblemCollector extends TerminalWritable` API which matches and collects VS Code style problem matchers"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.15.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/problem-matcher\" to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.16.0",
+      "tag": "@rushstack/terminal_v0.16.0",
+      "date": "Thu, 11 Sep 2025 00:22:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) Remove support for legacy `IColorableSequence` parameters passed to `Terminal` insance `write*` functions. Note that types for `IColorableSequence` were removed with #3176 in 2022."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.15.4",
+      "tag": "@rushstack/terminal_v0.15.4",
+      "date": "Wed, 23 Jul 2025 20:55:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.14.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.15.3",
       "tag": "@rushstack/terminal_v0.15.3",
       "date": "Thu, 01 May 2025 00:11:12 GMT",

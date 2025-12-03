@@ -167,10 +167,8 @@ export class GraphProcessor {
         nonEmptyDependencies = new Set();
         nonEmptyDependenciesByOperation.set(node, nonEmptyDependencies);
         for (const dependencyID of node.dependencies) {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           if (!inputNodeMap.get(dependencyID)!.command) {
             // If the dependency is empty, recursively inherit its non-empty dependencies
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             for (const deepDependency of getNonEmptyDependencies(inputNodeMap.get(dependencyID)!)) {
               nonEmptyDependencies.add(deepDependency);
             }

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
 
 import {
   CommandLineParser,
@@ -25,8 +25,9 @@ import {
   type IGlobalCommandConfig,
   type IPhasedCommandConfig
 } from '../api/CommandLineConfiguration';
-
 import { AddAction } from './actions/AddAction';
+import { AlertAction } from './actions/AlertAction';
+import { BridgePackageAction } from './actions/BridgePackageAction';
 import { ChangeAction } from './actions/ChangeAction';
 import { CheckAction } from './actions/CheckAction';
 import { DeployAction } from './actions/DeployAction';
@@ -34,7 +35,9 @@ import { InitAction } from './actions/InitAction';
 import { InitAutoinstallerAction } from './actions/InitAutoinstallerAction';
 import { InitDeployAction } from './actions/InitDeployAction';
 import { InstallAction } from './actions/InstallAction';
+import { InstallAutoinstallerAction } from './actions/InstallAutoinstallerAction';
 import { LinkAction } from './actions/LinkAction';
+import { LinkPackageAction } from './actions/LinkPackageAction';
 import { ListAction } from './actions/ListAction';
 import { PublishAction } from './actions/PublishAction';
 import { PurgeAction } from './actions/PurgeAction';
@@ -43,27 +46,23 @@ import { ScanAction } from './actions/ScanAction';
 import { UnlinkAction } from './actions/UnlinkAction';
 import { UpdateAction } from './actions/UpdateAction';
 import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction';
-import { VersionAction } from './actions/VersionAction';
 import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAction';
 import { UpgradeInteractiveAction } from './actions/UpgradeInteractiveAction';
-import { AlertAction } from './actions/AlertAction';
-
+import { VersionAction } from './actions/VersionAction';
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
+import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 import type { IBaseScriptActionOptions } from './scriptActions/BaseScriptAction';
-
 import { Telemetry } from '../logic/Telemetry';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { SetupAction } from './actions/SetupAction';
 import { type ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager';
 import { RushSession } from '../pluginFramework/RushSession';
-import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
 import { RushAlerts } from '../utilities/RushAlerts';
-import { InstallAutoinstallerAction } from './actions/InstallAutoinstallerAction';
-import { LinkPackageAction } from './actions/LinkPackageAction';
-import { BridgePackageAction } from './actions/BridgePackageAction';
+import { initializeDotEnv } from '../logic/dotenv';
+import { measureAsyncFn } from '../utilities/performance';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -88,6 +87,13 @@ export class RushCommandLineParser extends CommandLineParser {
   private readonly _terminalProvider: ConsoleTerminalProvider;
   private readonly _terminal: Terminal;
   private readonly _autocreateBuildCommand: boolean;
+
+  /**
+   * The current working directory that was used to find the Rush configuration.
+   */
+  public get cwd(): string {
+    return this._rushOptions.cwd;
+  }
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
@@ -116,17 +122,24 @@ export class RushCommandLineParser extends CommandLineParser {
       description: 'Hide rush startup information'
     });
 
-    this._terminalProvider = new ConsoleTerminalProvider();
-    this._terminal = new Terminal(this._terminalProvider);
+    const terminalProvider: ConsoleTerminalProvider = new ConsoleTerminalProvider();
+    this._terminalProvider = terminalProvider;
+    const terminal: Terminal = new Terminal(this._terminalProvider);
+    this._terminal = terminal;
     this._rushOptions = this._normalizeOptions(options || {});
+    const { cwd, alreadyReportedNodeTooNewError, builtInPluginConfigurations } = this._rushOptions;
 
+    let rushJsonFilePath: string | undefined;
     try {
-      const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
-        startingFolder: this._rushOptions.cwd,
+      rushJsonFilePath = RushConfiguration.tryFindRushJsonLocation({
+        startingFolder: cwd,
         showVerbose: !this._restrictConsoleOutput
       });
-      if (rushJsonFilename) {
-        this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
+
+      initializeDotEnv(terminal, rushJsonFilePath);
+
+      if (rushJsonFilePath) {
+        this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilePath);
       }
     } catch (error) {
       this._reportErrorAndSetExitCode(error as Error);
@@ -134,7 +147,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
     NodeJsCompatibility.warnAboutCompatibilityIssues({
       isRushLib: true,
-      alreadyReportedNodeTooNewError: this._rushOptions.alreadyReportedNodeTooNewError,
+      alreadyReportedNodeTooNewError,
       rushConfiguration: this.rushConfiguration
     });
 
@@ -142,13 +155,13 @@ export class RushCommandLineParser extends CommandLineParser {
 
     this.rushSession = new RushSession({
       getIsDebugMode: () => this.isDebug,
-      terminalProvider: this._terminalProvider
+      terminalProvider
     });
     this.pluginManager = new PluginManager({
       rushSession: this.rushSession,
       rushConfiguration: this.rushConfiguration,
-      terminal: this._terminal,
-      builtInPluginConfigurations: this._rushOptions.builtInPluginConfigurations,
+      terminal,
+      builtInPluginConfigurations,
       restrictConsoleOutput: this._restrictConsoleOutput,
       rushGlobalFolder: this.rushGlobalFolder
     });
@@ -219,7 +232,9 @@ export class RushCommandLineParser extends CommandLineParser {
     this._terminalProvider.verboseEnabled = this._terminalProvider.debugEnabled =
       process.argv.indexOf('--debug') >= 0;
 
-    await this.pluginManager.tryInitializeUnassociatedPluginsAsync();
+    await measureAsyncFn('rush:initializeUnassociatedPlugins', () =>
+      this.pluginManager.tryInitializeUnassociatedPluginsAsync()
+    );
 
     return await super.executeAsync(args);
   }
@@ -298,7 +313,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     try {
-      await super.onExecuteAsync();
+      await measureAsyncFn('rush:commandLineParser:onExecuteAsync', () => super.onExecuteAsync());
     } finally {
       if (this.telemetry) {
         this.flushTelemetry();
@@ -458,6 +473,11 @@ export class RushCommandLineParser extends CommandLineParser {
         enableParallelism: command.enableParallelism,
         incremental: command.incremental || false,
         disableBuildCache: command.disableBuildCache || false,
+
+        // The Async.forEachAsync() API defaults allowOversubscription=false, whereas Rush historically
+        // defaults allowOversubscription=true to favor faster builds rather than strictly staying below
+        // the CPU limit.
+        allowOversubscription: command.allowOversubscription ?? true,
 
         initialPhases: command.phases,
         originalPhases: command.originalPhases,

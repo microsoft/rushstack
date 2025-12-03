@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+jest.mock('../../logic/dotenv', () => ({
+  initializeDotEnv: () => {}
+}));
+
 import { PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { Utilities } from '../../utilities/Utilities';
@@ -61,7 +65,8 @@ describe(RushXCommandLine.name, () => {
         return projects.find((project) => project.projectFolder === path);
       }
     } as RushConfiguration;
-    jest.spyOn(RushConfiguration, 'tryLoadFromDefaultLocation').mockReturnValue(rushConfiguration);
+    jest.spyOn(RushConfiguration, 'tryFindRushJsonLocation').mockReturnValue('/Users/jdoe/bigrepo');
+    jest.spyOn(RushConfiguration, 'loadFromConfigurationFile').mockReturnValue(rushConfiguration);
 
     // Mock command execution
     executeLifecycleCommandMock = jest.spyOn(Utilities, 'executeLifecycleCommand');

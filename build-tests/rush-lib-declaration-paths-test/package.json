@@ -11,9 +11,10 @@
     "@microsoft/rush-lib": "workspace:*"
   },
   "devDependencies": {
-    "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@types/node": "20.17.19"
+    "@types/node": "20.17.19",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
   }
 }

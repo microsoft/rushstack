@@ -4,13 +4,14 @@
 // Load the Jest patches before anything else loads
 import './patches/jestWorkerPatch';
 
-import type { EventEmitter } from 'events';
-import * as path from 'path';
+import type { EventEmitter } from 'node:events';
+import * as path from 'node:path';
 
 import type { AggregatedResult } from '@jest/reporters';
 import type { Config } from '@jest/types';
 import { resolveRunner, resolveSequencer, resolveTestEnvironment, resolveWatchPlugin } from 'jest-resolve';
 import { mergeWith, isObject } from 'lodash';
+
 import type {
   HeftConfiguration,
   IScopedLogger,
@@ -685,7 +686,6 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       const shallowObjectInheritanceFunc: <T extends Record<string, unknown> | undefined>(
         currentObject: T,
         parentObject: T
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ) => T = <T>(currentObject: T, parentObject?: T): T => {
         // Merged in this order to ensure that the currentObject properties take priority in order-of-definition,
         // since Jest executes them in this order. For example, if the extended Jest configuration contains a
@@ -1040,7 +1040,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
             // resolved value from the rootDir. If it does not resolve, then we will return the
             // original value to allow Jest to resolve within the target directory.
             // See: https://github.com/jestjs/jest/blob/268afca708199c0e64ef26f35995907faf4454ff/packages/jest-config/src/normalize.ts#L123
-            // eslint-disable-next-line @rushstack/no-null
+
             let resolvedValue: string | null | undefined;
             try {
               resolvedValue = jestResolve(/*resolver:*/ undefined, {

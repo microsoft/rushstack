@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import process from 'node:process';
+import * as path from 'node:path';
+
 import express from 'express';
 import yaml from 'js-yaml';
 import cors from 'cors';
-import process from 'process';
 import open from 'open';
 import updateNotifier from 'update-notifier';
 
@@ -15,12 +17,19 @@ import {
   CommandLineParser,
   type IRequiredCommandLineStringParameter
 } from '@rushstack/ts-command-line';
-import type { IAppContext } from '@rushstack/lockfile-explorer-web/lib/AppContext';
-import type { Lockfile } from '@pnpm/lockfile-types';
 
+import {
+  type LfxGraph,
+  lfxGraphSerializer,
+  type IAppContext,
+  type IJsonLfxGraph,
+  type IJsonLfxWorkspace
+} from '../../../build/lfx-shared';
+import * as lockfilePath from '../../graph/lockfilePath';
 import type { IAppState } from '../../state';
 import { init } from '../../utils/init';
-import { convertLockfileV6DepPathToV5DepPath, getShrinkwrapFileMajorVersion } from '../../utils/shrinkwrap';
+import { PnpmfileRunner } from '../../graph/PnpmfileRunner';
+import * as lfxGraphLoader from '../../graph/lfxGraphLoader';
 
 const EXPLORER_TOOL_FILENAME: 'lockfile-explorer' = 'lockfile-explorer';
 
@@ -94,6 +103,8 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       subspaceName: this._subspaceParameter.value
     });
 
+    const lfxWorkspace: IJsonLfxWorkspace = appState.lfxWorkspace;
+
     // Important: This must happen after init() reads the current working directory
     process.chdir(appState.lockfileExplorerProjectRoot);
 
@@ -135,27 +146,6 @@ export class ExplorerCommandLineParser extends CommandLineParser {
 
     app.use('/favicon.ico', express.static(distFolderPath, { index: 'favicon.ico' }));
 
-    app.get('/api/lockfile', async (req: express.Request, res: express.Response) => {
-      const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
-      const doc = yaml.load(pnpmLockfileText) as Lockfile;
-      const { packages, lockfileVersion } = doc;
-
-      const shrinkwrapFileMajorVersion: number = getShrinkwrapFileMajorVersion(lockfileVersion);
-
-      if (packages && shrinkwrapFileMajorVersion === 6) {
-        const updatedPackages: Lockfile['packages'] = {};
-        for (const [dependencyPath, dependency] of Object.entries(packages)) {
-          updatedPackages[convertLockfileV6DepPathToV5DepPath(dependencyPath)] = dependency;
-        }
-        doc.packages = updatedPackages;
-      }
-
-      res.send({
-        doc,
-        subspaceName: this._subspaceParameter.value
-      });
-    });
-
     app.get('/api/health', (req: express.Request, res: express.Response) => {
       awaitingFirstConnect = false;
       isClientConnected = true;
@@ -166,11 +156,21 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       res.status(200).send();
     });
 
+    app.get('/api/graph', async (req: express.Request, res: express.Response) => {
+      const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
+      const lockfile: unknown = yaml.load(pnpmLockfileText) as unknown;
+
+      const graph: LfxGraph = lfxGraphLoader.generateLockfileGraph(lockfile, lfxWorkspace);
+
+      const jsonGraph: IJsonLfxGraph = lfxGraphSerializer.serializeToJson(graph);
+      res.type('application/json').send(jsonGraph);
+    });
+
     app.post(
       '/api/package-json',
       async (req: express.Request<{}, {}, { projectPath: string }, {}>, res: express.Response) => {
         const { projectPath } = req.body;
-        const fileLocation = `${appState.projectRoot}/${projectPath}/package.json`;
+        const fileLocation: string = `${appState.projectRoot}/${projectPath}/package.json`;
         let packageJsonText: string;
         try {
           packageJsonText = await FileSystem.readFileAsync(fileLocation);
@@ -190,13 +190,18 @@ export class ExplorerCommandLineParser extends CommandLineParser {
     );
 
     app.get('/api/pnpmfile', async (req: express.Request, res: express.Response) => {
+      const pnpmfilePath: string = lockfilePath.join(
+        lfxWorkspace.workspaceRootFullPath,
+        lfxWorkspace.rushConfig?.rushPnpmfilePath ?? lfxWorkspace.pnpmfilePath
+      );
+
       let pnpmfile: string;
       try {
-        pnpmfile = await FileSystem.readFileAsync(appState.pnpmfileLocation);
+        pnpmfile = await FileSystem.readFileAsync(pnpmfilePath);
       } catch (e) {
         if (FileSystem.isNotExistError(e)) {
           return res.status(404).send({
-            message: `Could not load pnpmfile file in this repo.`,
+            message: `Could not load .pnpmfile.cjs file in this repo: "${pnpmfilePath}"`,
             error: `No .pnpmifile.cjs found.`
           });
         } else {
@@ -211,7 +216,7 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       '/api/package-spec',
       async (req: express.Request<{}, {}, { projectPath: string }, {}>, res: express.Response) => {
         const { projectPath } = req.body;
-        const fileLocation = `${appState.projectRoot}/${projectPath}/package.json`;
+        const fileLocation: string = `${appState.projectRoot}/${projectPath}/package.json`;
         let packageJson: IPackageJson;
         try {
           packageJson = await JsonFile.loadAsync(fileLocation);
@@ -225,10 +230,18 @@ export class ExplorerCommandLineParser extends CommandLineParser {
           }
         }
 
-        const {
-          hooks: { readPackage }
-        } = require(appState.pnpmfileLocation);
-        const parsedPackage = readPackage(packageJson, {});
+        let parsedPackage: IPackageJson = packageJson;
+
+        const pnpmfilePath: string = path.join(lfxWorkspace.workspaceRootFullPath, lfxWorkspace.pnpmfilePath);
+        if (await FileSystem.existsAsync(pnpmfilePath)) {
+          const pnpmFileRunner: PnpmfileRunner = new PnpmfileRunner(pnpmfilePath);
+          try {
+            parsedPackage = await pnpmFileRunner.transformPackageAsync(packageJson, fileLocation);
+          } finally {
+            await pnpmFileRunner.disposeAsync();
+          }
+        }
+
         res.send(parsedPackage);
       }
     );

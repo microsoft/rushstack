@@ -9,7 +9,8 @@ import type {
   IRequestRunEventMessage,
   ISyncEventMessage,
   IRunCommandMessage,
-  IExitCommandMessage
+  IExitCommandMessage,
+  OperationRequestRunCallback
 } from '@rushstack/operation-graph';
 import { TerminalProviderSeverity, type ITerminal, type ITerminalProvider } from '@rushstack/terminal';
 
@@ -28,7 +29,8 @@ export interface IIPCOperationRunnerOptions {
   commandToRun: string;
   commandForHash: string;
   persist: boolean;
-  requestRun: (requestor?: string) => void;
+  requestRun: OperationRequestRunCallback;
+  ignoredParameterValues: ReadonlyArray<string>;
 }
 
 function isAfterExecuteEventMessage(message: unknown): message is IAfterExecuteEventMessage {
@@ -57,7 +59,8 @@ export class IPCOperationRunner implements IOperationRunner {
   private readonly _commandToRun: string;
   private readonly _commandForHash: string;
   private readonly _persist: boolean;
-  private readonly _requestRun: (requestor?: string) => void;
+  private readonly _requestRun: OperationRequestRunCallback;
+  private readonly _ignoredParameterValues: ReadonlyArray<string>;
 
   private _ipcProcess: ChildProcess | undefined;
   private _processReadyPromise: Promise<void> | undefined;
@@ -74,6 +77,7 @@ export class IPCOperationRunner implements IOperationRunner {
 
     this._persist = options.persist;
     this._requestRun = options.requestRun;
+    this._ignoredParameterValues = options.ignoredParameterValues;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
@@ -81,6 +85,13 @@ export class IPCOperationRunner implements IOperationRunner {
       async (terminal: ITerminal, terminalProvider: ITerminalProvider): Promise<OperationStatus> => {
         let isConnected: boolean = false;
         if (!this._ipcProcess || typeof this._ipcProcess.exitCode === 'number') {
+          // Log any ignored parameters
+          if (this._ignoredParameterValues.length > 0) {
+            terminal.writeLine(
+              `These parameters were ignored for this operation by project-level configuration: ${this._ignoredParameterValues.join(' ')}`
+            );
+          }
+
           // Run the operation
           terminal.writeLine('Invoking: ' + this._commandToRun);
 
@@ -109,7 +120,7 @@ export class IPCOperationRunner implements IOperationRunner {
 
           this._ipcProcess.on('message', (message: unknown) => {
             if (isRequestRunEventMessage(message)) {
-              this._requestRun(message.requestor);
+              this._requestRun(message.requestor, message.detail);
             } else if (isSyncEventMessage(message)) {
               resolveReadyPromise();
             }

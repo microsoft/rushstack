@@ -21,7 +21,9 @@
 
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-amd", "lib-commonjs", "lib-es6"] }],
+      "cleanFiles": [
+        { "includeGlobs": ["dist", "lib", "lib-amd", "lib-commonjs", "lib-es6", "temp/sass-ts"] }
+      ],
 
       "tasksByName": {
         "set-browserslist-ignore-old-data-env-var": {

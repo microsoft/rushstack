@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference path="../npm-check-typings.d.ts" preserve="true" />
-
 import * as semver from 'semver';
-import type * as NpmCheck from 'npm-check';
+
+import type { INpmCheckPackageSummary } from '@rushstack/npm-check-fork';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -30,6 +29,7 @@ import {
   SemVerStyle
 } from './PackageJsonUpdaterTypes';
 import type { Subspace } from '../api/Subspace';
+import { MAKE_CONSISTENT_FLAG_NAME } from '../cli/actions/AddAction';
 
 /**
  * Options for adding a dependency to a particular project.
@@ -42,7 +42,7 @@ export interface IPackageJsonUpdaterRushUpgradeOptions {
   /**
    * The dependencies to be added.
    */
-  packagesToAdd: NpmCheck.INpmCheckPackage[];
+  packagesToAdd: INpmCheckPackageSummary[];
   /**
    * If specified, other packages that use this dependency will also have their package.json's updated.
    */
@@ -136,13 +136,7 @@ export class PackageJsonUpdater {
     const devDependenciesToUpdate: Record<string, string> = {};
     const peerDependenciesToUpdate: Record<string, string> = {};
 
-    for (const {
-      moduleName,
-      latest: latestVersion,
-      packageJson,
-      devDependency,
-      peerDependency
-    } of packagesToAdd) {
+    for (const { moduleName, latest: latestVersion, packageJson, devDependency } of packagesToAdd) {
       const inferredRangeStyle: SemVerStyle = this._cheaplyDetectSemVerRangeStyle(packageJson);
       const implicitlyPreferredVersion: string | undefined =
         implicitlyPreferredVersionByPackageName.get(moduleName);
@@ -162,8 +156,6 @@ export class PackageJsonUpdater {
 
       if (devDependency) {
         devDependenciesToUpdate[moduleName] = version;
-      } else if (peerDependency) {
-        peerDependenciesToUpdate[moduleName] = version;
       } else {
         dependenciesToUpdate[moduleName] = version;
       }
@@ -408,7 +400,7 @@ export class PackageJsonUpdater {
         const existingVersionList: string = Array.from(existingSpecifiedVersions).join(', ');
         throw new Error(
           `Adding '${packageName}@${version}' ` +
-            `causes mismatched dependencies. Use the "--make-consistent" flag to update other packages to use ` +
+            `causes mismatched dependencies. Use the "${MAKE_CONSISTENT_FLAG_NAME}" flag to update other packages to use ` +
             `this version, or try specify one of the existing versions (${existingVersionList}).`
         );
       }
@@ -901,7 +893,7 @@ export class PackageJsonUpdater {
     }
   }
 
-  private _normalizeDepsToUpgrade(deps: NpmCheck.INpmCheckPackage[]): IPackageForRushAdd[] {
+  private _normalizeDepsToUpgrade(deps: INpmCheckPackageSummary[]): IPackageForRushAdd[] {
     return deps.map((dep) => {
       return {
         packageName: dep.moduleName,

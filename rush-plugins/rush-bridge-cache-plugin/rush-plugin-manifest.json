@@ -3,7 +3,7 @@
   "plugins": [
     {
       "pluginName": "rush-bridge-cache-plugin",
-      "description": "Rush plugin that provides a --set-cache-only command flag to populate the cache from content on disk.",
+      "description": "Rush plugin that provides the ability to directly read or write the build cache from the command line via a custom choice parameter on build commands.",
       "entryPoint": "./lib/index.js",
       "optionsSchema": "lib/schemas/bridge-cache-config.schema.json"
     }

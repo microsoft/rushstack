@@ -18,10 +18,10 @@ jobs:
           - NodeVersion: 20.18.x
             NodeVersionDisplayName: 20
             OS: ubuntu-latest
-          - NodeVersion: 22.12.x
+          - NodeVersion: 22.19.x
             NodeVersionDisplayName: 22
             OS: ubuntu-latest
-          - NodeVersion: 22.12.x
+          - NodeVersion: 22.19.x
             NodeVersionDisplayName: 22
             OS: windows-latest
     name: Node.js v${{ matrix.NodeVersionDisplayName }} (${{ matrix.OS }})
@@ -76,6 +76,10 @@ jobs:
         run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
         working-directory: repo-a
 
+      - name: Collect JSON schemas
+        run: node repo-scripts/repo-toolbox/lib/start.js collect-json-schemas --output-path ${GITHUB_WORKSPACE}/artifacts/json-schemas
+        working-directory: repo-a
+
       - name: Clone another copy of the repo to test the build cache
         uses: actions/checkout@v3
         with:
@@ -93,5 +97,9 @@ jobs:
         working-directory: repo-b
 
       - name: Rush test (rush-lib)
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
+        working-directory: repo-b
+
+      - name: Rush test (rush-lib) again to verify build cache hits
         run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
         working-directory: repo-b

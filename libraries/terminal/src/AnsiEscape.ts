@@ -41,7 +41,6 @@ export class AnsiEscape {
    * colorized console output to a log file.
    */
   public static removeCodes(text: string): string {
-    // eslint-disable-next-line no-control-regex
     return text.replace(AnsiEscape._csiRegExp, '');
   }
 

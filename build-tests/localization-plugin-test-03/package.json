@@ -9,19 +9,20 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {
-    "@rushstack/heft-webpack4-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-webpack4-plugin": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/set-webpack-public-path-plugin": "^4.1.16",
     "@rushstack/webpack4-localization-plugin": "workspace:*",
     "@rushstack/webpack4-module-minifier-plugin": "workspace:*",
     "@types/webpack-env": "1.18.8",
+    "eslint": "~9.37.0",
     "html-webpack-plugin": "~4.5.2",
     "local-node-rig": "workspace:*",
     "ts-loader": "6.0.0",
     "typescript": "~5.8.2",
+    "webpack": "~4.47.0",
     "webpack-bundle-analyzer": "~4.5.0",
-    "webpack-dev-server": "~4.9.3",
-    "webpack": "~4.47.0"
+    "webpack-dev-server": "~4.9.3"
   }
 }

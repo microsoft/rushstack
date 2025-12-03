@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CLI Tool Tests should display help for "zipsync --help" 1`] = `
+"
+zipsync {version} - https://rushstack.io
+
+usage: zipsync [-h] [-d] [-v] -m {pack,unpack} -a ARCHIVE_PATH -t
+               TARGET_DIRECTORIES -b BASE_DIR -z {store,deflate,zstd,auto}
+               
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -d, --debug           Show the full call stack if an error occurs while 
+                        executing the tool
+  -v, --verbose         Show verbose output
+  -m {pack,unpack}, --mode {pack,unpack}
+                        The mode of operation: \\"pack\\" to create a zip archive,
+                         or \\"unpack\\" to extract files from a zip archive
+  -a ARCHIVE_PATH, --archive-path ARCHIVE_PATH
+                        Zip file path
+  -t TARGET_DIRECTORIES, --target-directory TARGET_DIRECTORIES
+                        Target directories to pack or unpack
+  -b BASE_DIR, --base-dir BASE_DIR
+                        Base directory for relative paths within the archive
+  -z {store,deflate,zstd,auto}, --compression {store,deflate,zstd,auto}
+                        Compression strategy when packing. \\"deflate\\" and 
+                        \\"zlib\\" attempts compression for every file (keeps 
+                        only if smaller); \\"auto\\" first skips 
+                        likely-compressed types before attempting \\"deflate\\" 
+                        compression; \\"store\\" disables compression.
+
+[1mFor detailed help about a specific command, use: zipsync <command> -h[22m
+"
+`;

@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+
 import { Sort, Import, Path } from '@rushstack/node-core-library';
 
 import { BaseWorkspaceFile } from '../base/BaseWorkspaceFile';
@@ -66,6 +67,6 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     const workspaceYaml: IPnpmWorkspaceYaml = {
       packages: Array.from(this._workspacePackages)
     };
-    return yamlModule.safeDump(workspaceYaml, PNPM_SHRINKWRAP_YAML_FORMAT);
+    return yamlModule.dump(workspaceYaml, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
 }

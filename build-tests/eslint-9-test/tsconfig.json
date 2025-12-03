@@ -1,0 +1,5 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+
+  "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json"
+}
