@@ -17,6 +17,7 @@ import {
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
+import type { Subspace } from '../api/Subspace';
 import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
@@ -134,53 +135,76 @@ export class ProjectChangeAnalyzer {
       // Even though changing the installed version of a nested dependency merits a change file,
       // ignore lockfile changes for `rush change` for the moment
 
+      const subspaces: ReadonlySet<Subspace> = rushConfiguration.subspacesFeatureEnabled
+        ? new Set(rushConfiguration.subspaces)
+        : new Set([rushConfiguration.defaultSubspace]);
+
       const variantToUse: string | undefined =
         variant ?? (await this._rushConfiguration.getCurrentlyInstalledVariantAsync());
-      const fullShrinkwrapPath: string =
-        rushConfiguration.defaultSubspace.getCommittedShrinkwrapFilePath(variantToUse);
 
-      const relativeShrinkwrapFilePath: string = Path.convertToSlashes(
-        path.relative(repoRoot, fullShrinkwrapPath)
-      );
-      const shrinkwrapStatus: IFileDiffStatus | undefined = changedFiles.get(relativeShrinkwrapFilePath);
+      await Async.forEachAsync(subspaces, async (subspace: Subspace) => {
+        const fullShrinkwrapPath: string = subspace.getCommittedShrinkwrapFilePath(variantToUse);
 
-      if (shrinkwrapStatus) {
-        if (shrinkwrapStatus.status !== 'M') {
-          terminal.writeLine(`Lockfile was created or deleted. Assuming all projects are affected.`);
-          return new Set(rushConfiguration.projects);
-        }
+        const relativeShrinkwrapFilePath: string = Path.convertToSlashes(
+          path.relative(repoRoot, fullShrinkwrapPath)
+        );
+        const shrinkwrapStatus: IFileDiffStatus | undefined = changedFiles.get(relativeShrinkwrapFilePath);
+        const subspaceProjects: RushConfigurationProject[] = subspace.getProjects();
 
-        if (rushConfiguration.isPnpm) {
-          const currentShrinkwrap: PnpmShrinkwrapFile | undefined =
-            PnpmShrinkwrapFile.loadFromFile(fullShrinkwrapPath);
-
-          if (!currentShrinkwrap) {
-            throw new Error(`Unable to obtain current shrinkwrap file.`);
-          }
-
-          const oldShrinkwrapText: string = await this._git.getBlobContentAsync({
-            // <ref>:<path> syntax: https://git-scm.com/docs/gitrevisions
-            blobSpec: `${mergeCommit}:${relativeShrinkwrapFilePath}`,
-            repositoryRoot: repoRoot
-          });
-          const oldShrinkWrap: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromString(oldShrinkwrapText);
-
-          for (const project of rushConfiguration.projects) {
-            if (
-              currentShrinkwrap
-                .getProjectShrinkwrap(project)
-                .hasChanges(oldShrinkWrap.getProjectShrinkwrap(project))
-            ) {
+        if (shrinkwrapStatus) {
+          if (shrinkwrapStatus.status !== 'M') {
+            if (rushConfiguration.subspacesFeatureEnabled) {
+              terminal.writeLine(
+                `"${subspace.subspaceName}" subspace lockfile was created or deleted. Assuming all projects are affected.`
+              );
+            } else {
+              terminal.writeLine(`Lockfile was created or deleted. Assuming all projects are affected.`);
+            }
+            for (const project of subspaceProjects) {
               changedProjects.add(project);
             }
+            return;
           }
-        } else {
-          terminal.writeLine(
-            `Lockfile has changed and lockfile content comparison is only supported for pnpm. Assuming all projects are affected.`
-          );
-          return new Set(rushConfiguration.projects);
+
+          if (rushConfiguration.isPnpm) {
+            const currentShrinkwrap: PnpmShrinkwrapFile | undefined =
+              PnpmShrinkwrapFile.loadFromFile(fullShrinkwrapPath);
+
+            if (!currentShrinkwrap) {
+              throw new Error(`Unable to obtain current shrinkwrap file.`);
+            }
+
+            const oldShrinkwrapText: string = await this._git.getBlobContentAsync({
+              // <ref>:<path> syntax: https://git-scm.com/docs/gitrevisions
+              blobSpec: `${mergeCommit}:${relativeShrinkwrapFilePath}`,
+              repositoryRoot: repoRoot
+            });
+            const oldShrinkWrap: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromString(oldShrinkwrapText);
+
+            for (const project of subspaceProjects) {
+              if (
+                currentShrinkwrap
+                  .getProjectShrinkwrap(project)
+                  .hasChanges(oldShrinkWrap.getProjectShrinkwrap(project))
+              ) {
+                changedProjects.add(project);
+              }
+            }
+          } else {
+            if (rushConfiguration.subspacesFeatureEnabled) {
+              terminal.writeLine(
+                `"${subspace.subspaceName}" subspace lockfile has changed and lockfile content comparison is only supported for pnpm. Assuming all projects are affected.`
+              );
+            } else {
+              terminal.writeLine(
+                `Lockfile has changed and lockfile content comparison is only supported for pnpm. Assuming all projects are affected.`
+              );
+            }
+            subspace.getProjects().forEach((project) => changedProjects.add(project));
+            return;
+          }
         }
-      }
+      });
     }
 
     return changedProjects;
