@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-lint-plugin",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "A Heft plugin for using ESLint or TSLint. Intended for use with @rushstack/heft-typescript-plugin",
   "repository": {
     "type": "git",
