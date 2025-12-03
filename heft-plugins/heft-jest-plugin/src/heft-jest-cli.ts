@@ -161,8 +161,12 @@ function parseJestArgsToHeft(args: string[]): IHeftJestArgs {
 
     // Handle --outputFile (skip with its value)
     if (arg === '--outputFile') {
-      // Skip this and the next argument (the file path)
-      i += 2;
+      // Skip this and the next argument (the file path) if it exists
+      if (i + 1 < args.length) {
+        i += 2;
+      } else {
+        i++;
+      }
       continue;
     }
     if (arg.startsWith('--outputFile=')) {
@@ -172,8 +176,12 @@ function parseJestArgsToHeft(args: string[]): IHeftJestArgs {
 
     // Handle --reporters (skip with its value)
     if (arg === '--reporters') {
-      // Skip this and the next argument (the reporter)
-      i += 2;
+      // Skip this and the next argument (the reporter) if it exists
+      if (i + 1 < args.length) {
+        i += 2;
+      } else {
+        i++;
+      }
       continue;
     }
     if (arg.startsWith('--reporters=')) {
@@ -183,7 +191,12 @@ function parseJestArgsToHeft(args: string[]): IHeftJestArgs {
 
     // Handle --config (skip with its value as Heft has its own config handling)
     if (arg === '--config' || arg === '-c') {
-      i += 2;
+      // Skip this and the next argument (the config path) if it exists
+      if (i + 1 < args.length) {
+        i += 2;
+      } else {
+        i++;
+      }
       continue;
     }
     if (arg.startsWith('--config=')) {
