@@ -9,6 +9,13 @@ import { readFile, unlink } from 'node:fs/promises';
 
 import * as semver from 'semver';
 import {
+  type ILockfile,
+  type ILogMessageCallbackOptions,
+  pnpmSyncGetJsonVersion,
+  pnpmSyncPrepareAsync
+} from 'pnpm-sync-lib';
+
+import {
   FileSystem,
   JsonFile,
   PosixModeBits,
@@ -20,12 +27,6 @@ import {
   Async
 } from '@rushstack/node-core-library';
 import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
-import {
-  type ILockfile,
-  type ILogMessageCallbackOptions,
-  pnpmSyncGetJsonVersion,
-  pnpmSyncPrepareAsync
-} from 'pnpm-sync-lib';
 import * as pnpmKitV8 from '@rushstack/rush-pnpm-kit-v8';
 import * as pnpmKitV9 from '@rushstack/rush-pnpm-kit-v9';
 
@@ -310,13 +311,15 @@ export abstract class BaseInstallManager {
           lockfileId: subspace.subspaceName,
           ensureFolderAsync: FileSystem.ensureFolderAsync.bind(FileSystem),
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          readPnpmLockfile: async (lockfilePath: string, options) => {
+          readPnpmLockfile: async (lockfilePath: string, options): Promise<ILockfile | undefined> => {
             const pnpmLockFolder: string = path.dirname(lockfilePath);
 
-            const lockfileV9: ILockfile | null = await pnpmKitV9.lockfileFs.readWantedLockfile(
+            const lockfileV9: ILockfile | null = (await pnpmKitV9.lockfileFs.readWantedLockfile(
               pnpmLockFolder,
               options
-            );
+              // TODO: pnpm-sync-lib.d.ts was at some point generalized to support multiple lockfile formats,
+              // however its API still returns a single "ILockfile" that is incompatible with the newer interfaces
+            )) as ILockfile | null;
 
             if (lockfileV9?.lockfileVersion.toString().startsWith('9')) {
               return lockfileV9;

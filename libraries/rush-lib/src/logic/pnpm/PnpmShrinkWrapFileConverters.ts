@@ -13,7 +13,6 @@
  * 2. @pnpm/lockfile.fs only provides asynchronous read methods, while rush requires synchronous reading of the lockfile file.
  * Perhaps this file will be deleted in the future and instead depend on @pnpm/lockfile.fs directly.
  */
-import * as pnpmKitV9 from '@rushstack/rush-pnpm-kit-v9';
 import type {
   InlineSpecifiersProjectSnapshot,
   InlineSpecifiersResolvedDependencies,
@@ -24,6 +23,8 @@ import type {
   ProjectSnapshot,
   ResolvedDependencies
 } from '@pnpm/lockfile.types-900';
+
+import * as pnpmKitV9 from '@rushstack/rush-pnpm-kit-v9';
 
 import { removeNullishProps } from '../../utilities/objectUtilities';
 

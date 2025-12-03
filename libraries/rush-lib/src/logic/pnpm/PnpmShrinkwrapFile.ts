@@ -12,7 +12,7 @@ import type {
   ProjectSnapshot,
   LockfileFileV9,
   ResolvedDependencies
-} from '@pnpm/lockfile.types';
+} from '@pnpm/lockfile.types-900';
 
 import {
   FileSystem,
@@ -43,14 +43,6 @@ import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
 import type { IPnpmfile, IPnpmfileContext } from './IPnpmfile';
 import type { Subspace } from '../../api/Subspace';
 import { CustomTipId, type CustomTipsConfiguration } from '../../api/CustomTipsConfiguration';
-import type {
-  ProjectId,
-  Lockfile,
-  PackageSnapshot,
-  ProjectSnapshot,
-  LockfileFileV9,
-  ResolvedDependencies
-} from '@pnpm/lockfile.types-900';
 import { convertLockfileV9ToLockfileObject } from './PnpmShrinkWrapFileConverters';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
@@ -390,15 +382,15 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     shrinkwrapYamlFilePath: string,
     options: ILoadFromFileOptions = {}
   ): PnpmShrinkwrapFile | undefined {
-      try {
-        const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilePath);
-        return PnpmShrinkwrapFile.loadFromString(shrinkwrapContent);
-      } catch (error) {
-        if (FileSystem.isNotExistError(error as Error)) {
-          return undefined; // file does not exist
-        }
-        throw new Error(`Error reading "${shrinkwrapYamlFilePath}":\n  ${(error as Error).message}`);
+    try {
+      const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilePath);
+      return PnpmShrinkwrapFile.loadFromString(shrinkwrapContent);
+    } catch (error) {
+      if (FileSystem.isNotExistError(error as Error)) {
+        return undefined; // file does not exist
       }
+      throw new Error(`Error reading "${shrinkwrapYamlFilePath}":\n  ${(error as Error).message}`);
+    }
   }
 
   public static loadFromString(shrinkwrapContent: string): PnpmShrinkwrapFile {
@@ -406,7 +398,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const cached: PnpmShrinkwrapFile | undefined = cacheByLockfileHash.get(hash);
     if (cached) {
       return cached;
-  }
+    }
 
     const shrinkwrapJson: IPnpmShrinkwrapYaml = yamlModule.load(shrinkwrapContent) as IPnpmShrinkwrapYaml;
     if ((shrinkwrapJson as LockfileFileV9).snapshots) {
@@ -839,7 +831,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const orphanedProjectPaths: string[] = [];
     for (const importerKey of this.getImporterKeys()) {
       if (!lookup.findChildPath(importerKey)) {
-      // PNPM importer keys are relative paths from the workspace root, which is the common temp folder
+        // PNPM importer keys are relative paths from the workspace root, which is the common temp folder
         orphanedProjectPaths.push(path.resolve(subspaceTempFolder, importerKey));
       }
     }
@@ -1211,10 +1203,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // For example, if package A depends on B@1.0 and B@1.0's resolution of C changes
     // from C@1.3 to C@1.2, the hash of A's shrinkwrap entry will change because
     // the dependencies field in the entry reflects the resolved versions.
-      const sha256Digest: string = crypto
-        .createHash('sha256')
-        .update(JSON.stringify(shrinkwrapEntry))
-        .digest('base64');
+    const sha256Digest: string = crypto
+      .createHash('sha256')
+      .update(JSON.stringify(shrinkwrapEntry))
+      .digest('base64');
     const selfIntegrity: string = `${specifier}:${sha256Digest}:`;
 
     integrityMap.set(specifier, selfIntegrity);
