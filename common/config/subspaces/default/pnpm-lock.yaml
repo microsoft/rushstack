@@ -211,9 +211,6 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
-      '@rushstack/rush-pnpm-kit-v8':
-        specifier: workspace:*
-        version: link:../../libraries/rush-pnpm-kit-v8
       '@rushstack/rush-sdk':
         specifier: workspace:*
         version: link:../../libraries/rush-sdk

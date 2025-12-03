@@ -71,7 +71,6 @@
     "express": "4.21.1",
     "js-yaml": "~4.1.0",
     "open": "~8.4.0",
-    "@rushstack/rush-pnpm-kit-v8": "workspace:*",
     "semver": "~7.5.4",
     "update-notifier": "~5.1.0"
   }
