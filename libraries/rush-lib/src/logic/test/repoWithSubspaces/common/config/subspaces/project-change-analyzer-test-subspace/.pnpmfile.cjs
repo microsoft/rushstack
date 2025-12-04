@@ -2,6 +2,8 @@
 
 module.exports = {
   hooks: {
-    readPackage
+    readPackage(pkgJson) {
+      return pkgJson;
+    }
   }
 };

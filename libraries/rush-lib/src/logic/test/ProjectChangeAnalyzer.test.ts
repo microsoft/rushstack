@@ -188,7 +188,8 @@ describe(ProjectChangeAnalyzer.name, () => {
         expect(changedProjects.has(rushConfiguration.getProjectByName(projectName)!)).toBe(true);
       });
 
-      // e depends on d via workspace:*, but its own package.json didn't change, so it's not included. e will be included by expandConsumers if needed.
+      // e depends on d via workspace:*, but its calculated lockfile (e.g. "e/.rush/temp/shrinkwrap-deps.json") didn't change.
+      // So it's not included. e will be included by `expandConsumers` if needed.
       ['e', 'f'].forEach((projectName) => {
         expect(changedProjects.has(rushConfiguration.getProjectByName(projectName)!)).toBe(false);
       });
