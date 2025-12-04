@@ -13,7 +13,6 @@
  * 2. @pnpm/lockfile.fs only provides asynchronous read methods, while rush requires synchronous reading of the lockfile file.
  * Perhaps this file will be deleted in the future and instead depend on @pnpm/lockfile.fs directly.
  */
-import { removeSuffix } from '@pnpm/dependency-path';
 import type {
   InlineSpecifiersProjectSnapshot,
   InlineSpecifiersResolvedDependencies,
@@ -23,7 +22,9 @@ import type {
   PackageSnapshots,
   ProjectSnapshot,
   ResolvedDependencies
-} from '@pnpm/lockfile.types';
+} from '@pnpm/lockfile.types-900';
+
+import * as pnpmKitV9 from '@rushstack/rush-pnpm-kit-v9';
 
 import { removeNullishProps } from '../../utilities/objectUtilities';
 
@@ -107,7 +108,7 @@ export function convertLockfileV9ToLockfileObject(lockfile: LockfileFileV9): Loc
 
   const packages: PackageSnapshots = {};
   for (const [depPath, pkg] of Object.entries(lockfile.snapshots ?? {})) {
-    const pkgId: string = removeSuffix(depPath);
+    const pkgId: string = pnpmKitV9.dependencyPath.removeSuffix(depPath);
     packages[depPath as DepPath] = Object.assign(pkg, lockfile.packages?.[pkgId]);
   }
   return {

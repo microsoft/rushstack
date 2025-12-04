@@ -103,7 +103,15 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@pnpm/lockfile-file",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@pnpm/lockfile-types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@pnpm/lockfile.fs",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -312,6 +320,18 @@
     },
     {
       "name": "@rushstack/rush-http-build-cache-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-pnpm-kit-v10",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-pnpm-kit-v8",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-pnpm-kit-v9",
       "allowedCategories": [ "libraries" ]
     },
     {
