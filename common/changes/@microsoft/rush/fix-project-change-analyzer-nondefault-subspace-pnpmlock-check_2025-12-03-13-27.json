@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix: ProjectChangeAnalyzer should check pnpm-lock.yaml changes for all subspaces.",
+      "comment": "Fix an issue where ProjectChangeAnalyzer checked the pnpm-lock.yaml file in the default subspace only, when it should consider all subspaces.",
       "type": "none"
     }
   ],
