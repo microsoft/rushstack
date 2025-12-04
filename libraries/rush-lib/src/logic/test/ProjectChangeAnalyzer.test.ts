@@ -69,7 +69,7 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
   };
 });
 
-const { Git: OriginGit } = jest.requireActual('../Git');
+const { Git: OriginalGit } = jest.requireActual('../Git');
 /** Mock Git to test `getChangedProjectsAsync` */
 jest.mock('../Git', () => {
   return {
