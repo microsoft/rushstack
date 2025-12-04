@@ -135,9 +135,9 @@ export class ProjectChangeAnalyzer {
       // Even though changing the installed version of a nested dependency merits a change file,
       // ignore lockfile changes for `rush change` for the moment
 
-      const subspaces: ReadonlySet<Subspace> = rushConfiguration.subspacesFeatureEnabled
-        ? new Set(rushConfiguration.subspaces)
-        : new Set([rushConfiguration.defaultSubspace]);
+      const subspaces: Iterable<Subspace> = rushConfiguration.subspacesFeatureEnabled
+        ? rushConfiguration.subspaces
+        : [rushConfiguration.defaultSubspace];
 
       const variantToUse: string | undefined =
         variant ?? (await this._rushConfiguration.getCurrentlyInstalledVariantAsync());

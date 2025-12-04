@@ -73,7 +73,7 @@ const { Git: OriginalGit } = jest.requireActual('../Git');
 /** Mock Git to test `getChangedProjectsAsync` */
 jest.mock('../Git', () => {
   return {
-    Git: class MockGit extends OriginGit {
+    Git: class MockGit extends OriginalGit {
       public async determineIfRefIsACommitAsync(ref: string): Promise<boolean> {
         return true;
       }
@@ -164,7 +164,7 @@ describe(ProjectChangeAnalyzer.name, () => {
     });
   });
 
-  describe.skip(ProjectChangeAnalyzer.prototype.getChangedProjectsAsync.name, () => {
+  describe(ProjectChangeAnalyzer.prototype.getChangedProjectsAsync.name, () => {
     it('Subspaces detects external changes', async () => {
       const rootDir: string = resolve(__dirname, 'repoWithSubspaces');
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
