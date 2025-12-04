@@ -1,0 +1,8 @@
+{
+  "name": "e",
+  "version": "10.10.0",
+  "description": "Test package e",
+  "dependencies": {
+    "d": "workspace:*"
+  }
+}

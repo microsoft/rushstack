@@ -1,0 +1,8 @@
+{
+  "name": "d",
+  "version": "4.1.1",
+  "description": "Test package d",
+  "dependencies": {
+    "foo": "~1.0.0"
+  }
+}
