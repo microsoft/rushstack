@@ -1,16 +1,29 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { FileSystemStats } from './FileSystem';
-import { Import } from './Import';
+import * as fs from 'node:fs';
 
-const fsx: typeof import('fs-extra') = Import.lazy('fs-extra', require);
+import type { FileSystemStats } from './FileSystem';
 
 /**
  * Available file handle opening flags.
  * @public
  */
 type NodeFileFlags = 'r' | 'r+' | 'rs+' | 'w' | 'wx' | 'w+' | 'wx+' | 'a' | 'ax' | 'a+' | 'ax+';
+
+/**
+ * Helper function to convert the file writer array to a Node.js style string (e.g. "wx" or "a").
+ * @param flags - The flags that should be converted.
+ */
+function convertFlagsForNode(flags: IFileWriterFlags | undefined): NodeFileFlags {
+  flags = {
+    append: false,
+    exclusive: false,
+    ...flags
+  };
+  const result: NodeFileFlags = `${flags.append ? 'a' : 'w'}${flags.exclusive ? 'x' : ''}` as NodeFileFlags;
+  return result;
+}
 
 /**
  * Interface which represents the flags about which mode the file should be opened in.
@@ -60,20 +73,7 @@ export class FileWriter {
    * @param flags - The flags for opening the handle
    */
   public static open(filePath: string, flags?: IFileWriterFlags): FileWriter {
-    return new FileWriter(fsx.openSync(filePath, FileWriter._convertFlagsForNode(flags)), filePath);
-  }
-
-  /**
-   * Helper function to convert the file writer array to a Node.js style string (e.g. "wx" or "a").
-   * @param flags - The flags that should be converted.
-   */
-  private static _convertFlagsForNode(flags: IFileWriterFlags | undefined): NodeFileFlags {
-    flags = {
-      append: false,
-      exclusive: false,
-      ...flags
-    };
-    return [flags.append ? 'a' : 'w', flags.exclusive ? 'x' : ''].join('') as NodeFileFlags;
+    return new FileWriter(fs.openSync(filePath, convertFlagsForNode(flags)), filePath);
   }
 
   /**
@@ -86,7 +86,7 @@ export class FileWriter {
       throw new Error(`Cannot write to file, file descriptor has already been released.`);
     }
 
-    fsx.writeSync(this._fileDescriptor, text);
+    fs.writeSync(this._fileDescriptor, text);
   }
 
   /**
@@ -100,7 +100,7 @@ export class FileWriter {
     const fd: number | undefined = this._fileDescriptor;
     if (fd) {
       this._fileDescriptor = undefined;
-      fsx.closeSync(fd);
+      fs.closeSync(fd);
     }
   }
 
@@ -113,6 +113,6 @@ export class FileWriter {
       throw new Error(`Cannot get file statistics, file descriptor has already been released.`);
     }
 
-    return fsx.fstatSync(this._fileDescriptor);
+    return fs.fstatSync(this._fileDescriptor);
   }
 }

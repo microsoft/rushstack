@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Replace fs-extra with node:fs in FileWriter",
+      "type": "patch",
+      "packageName": "@rushstack/node-core-library"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "198982749+Copilot@users.noreply.github.com"
+}
