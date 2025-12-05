@@ -17,7 +17,7 @@ export function failWithMissingReference(): void;
 // @public (undocumented)
 export namespace MyNamespace {
     // (undocumented)
-    export class MyClass {
+    class MyClass {
         // @beta
         myMethod(x: number): number;
     }
