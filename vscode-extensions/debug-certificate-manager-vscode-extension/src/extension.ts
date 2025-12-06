@@ -202,15 +202,29 @@ export function activate(context: vscode.ExtensionContext): void {
         resolvedWorkspaceStorePath = storePath;
       } else if (storePath.startsWith('~')) {
         let homeDir: string;
+
         if (vscode.env.remoteName) {
-          homeDir = await runWorkspaceCommandAsync({
+          const markerPrefix: string = '<<<HOMEDIR_START>>>';
+          const markerSuffix: string = '<<<HOMEDIR_END>>>';
+          const output: string = await runWorkspaceCommandAsync({
             terminalOptions: { name: 'debug-certificate-manager', hideFromUser: true },
-            commandLine: `node -p "require('os').homedir()"`,
+            // Wrapping the desired node output in markers to trim uninteresting shell output.
+            commandLine: `node -p "'${markerPrefix}' + require('os').homedir() + '${markerSuffix}'"`,
             terminal
           });
+          terminal.writeLine(`Running command to resolve home directory: ${output}`);
+
+          const startIndex: number = output.indexOf(markerPrefix);
+          const endIndex: number = output.indexOf(markerSuffix);
+          if (startIndex !== -1 && endIndex !== -1) {
+            homeDir = output.substring(startIndex + markerPrefix.length, endIndex).trim();
+          } else {
+            throw new Error('Failed to parse home directory from command output');
+          }
         } else {
           homeDir = require('os').homedir();
         }
+
         terminal.writeLine(`Resolved home directory: ${homeDir}`);
         const homeDirUri: vscode.Uri = vscode.Uri.from({
           scheme: workspaceUri.scheme,
