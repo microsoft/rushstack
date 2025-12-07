@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for Node 24 and bump the `rush init` template to default to Node 24.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
