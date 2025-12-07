@@ -24,11 +24,11 @@ jobs:
           - NodeVersion: 22.19.x
             NodeVersionDisplayName: 22
             OS: ubuntu-latest
-          - NodeVersion: 24.9.x
+          - NodeVersion: 24.11.x
             NodeVersionDisplayName: 24
             OS: ubuntu-latest
-          - NodeVersion: 22.19.x
-            NodeVersionDisplayName: 22
+          - NodeVersion: 24.11.x
+            NodeVersionDisplayName: 24
             OS: windows-latest
     name: Node.js v${{ matrix.NodeVersionDisplayName }} (${{ matrix.OS }})
     runs-on: ${{ matrix.OS }}
