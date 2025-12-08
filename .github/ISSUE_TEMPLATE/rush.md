@@ -60,7 +60,8 @@ Please answer these questions to help us investigate your issue more quickly:
 | -------- | -------- |
 | `@microsoft/rush` globally installed version? | <!-- X.Y.Z --> |
 | `rushVersion` from rush.json? | <!-- X.Y.Z --> |
-| `useWorkspaces` from rush.json? | <!-- X.Y.Z --> |
+| `pnpmVersion`, `npmVersion`, or `yarnVersion` from rush.json? | <!-- pnpm@X.Y.Z --> |
+| (if pnpm) `useWorkspaces` from pnpm-config.json? | <!-- X.Y.Z --> |
 | Operating system? | <!-- Windows / Mac / Linux --> |
 | Would you consider contributing a PR? | <!-- Yes / No --> |
 | Node.js version (`node -v`)? | <!-- X.Y.Z --> |
