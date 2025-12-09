@@ -19,6 +19,32 @@ import {
 import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
 import type { IEnvironment } from '../../../utilities/Utilities';
 
+/**
+ * Helper function to create a minimal mock record for testing the createEnvironmentForOperation hook
+ */
+function createMockRecord(operation: Operation): any {
+  return {
+    operation,
+    collatedWriter: {} as any,
+    debugMode: false,
+    quietMode: true,
+    _operationMetadataManager: {} as any,
+    stopwatch: {} as any,
+    status: {} as any,
+    environment: undefined,
+    error: undefined,
+    silent: false,
+    stdioSummarizer: {} as any,
+    problemCollector: {} as any,
+    nonCachedDurationMs: undefined,
+    metadataFolderPath: undefined,
+    logFilePaths: undefined,
+    getStateHash: () => '',
+    getStateHashComponents: () => [],
+    runWithTerminalAsync: async () => {}
+  };
+}
+
 describe(IgnoredParametersPlugin.name, () => {
   it('should set RUSHSTACK_OPERATION_IGNORED_PARAMETERS environment variable', async () => {
     const rushJsonFile: string = path.resolve(__dirname, `../../test/parameterIgnoringRepo/rush.json`);
@@ -78,26 +104,7 @@ describe(IgnoredParametersPlugin.name, () => {
     expect(operationA).toBeDefined();
 
     // Create a mock operation execution result with required fields
-    const mockRecordA = {
-      operation: operationA!,
-      collatedWriter: {} as any,
-      debugMode: false,
-      quietMode: true,
-      _operationMetadataManager: {} as any,
-      stopwatch: {} as any,
-      status: {} as any,
-      environment: undefined,
-      error: undefined,
-      silent: false,
-      stdioSummarizer: {} as any,
-      problemCollector: {} as any,
-      nonCachedDurationMs: undefined,
-      metadataFolderPath: undefined,
-      logFilePaths: undefined,
-      getStateHash: () => '',
-      getStateHashComponents: () => [],
-      runWithTerminalAsync: async () => {}
-    } as any;
+    const mockRecordA = createMockRecord(operationA!);
 
     // Call the hook to get the environment
     const envA: IEnvironment = hooks.createEnvironmentForOperation.call({ ...process.env }, mockRecordA);
@@ -109,26 +116,7 @@ describe(IgnoredParametersPlugin.name, () => {
     const operationB = Array.from(operations).find((op) => op.name === 'b');
     expect(operationB).toBeDefined();
 
-    const mockRecordB = {
-      operation: operationB!,
-      collatedWriter: {} as any,
-      debugMode: false,
-      quietMode: true,
-      _operationMetadataManager: {} as any,
-      stopwatch: {} as any,
-      status: {} as any,
-      environment: undefined,
-      error: undefined,
-      silent: false,
-      stdioSummarizer: {} as any,
-      problemCollector: {} as any,
-      nonCachedDurationMs: undefined,
-      metadataFolderPath: undefined,
-      logFilePaths: undefined,
-      getStateHash: () => '',
-      getStateHashComponents: () => [],
-      runWithTerminalAsync: async () => {}
-    } as any;
+    const mockRecordB = createMockRecord(operationB!);
 
     const envB: IEnvironment = hooks.createEnvironmentForOperation.call({ ...process.env }, mockRecordB);
 
@@ -158,12 +146,14 @@ describe(IgnoredParametersPlugin.name, () => {
       | 'projectSelection'
       | 'projectsInUnknownState'
       | 'projectConfigurations'
+      | 'rushConfiguration'
     > = {
       phaseOriginal: echoCommand.phases,
       phaseSelection: echoCommand.phases,
       projectSelection: new Set(rushConfiguration.projects),
       projectsInUnknownState: new Set(rushConfiguration.projects),
-      projectConfigurations: new Map()
+      projectConfigurations: new Map(),
+      rushConfiguration
     };
 
     const hooks: PhasedCommandHooks = new PhasedCommandHooks();
@@ -182,26 +172,7 @@ describe(IgnoredParametersPlugin.name, () => {
     const operation = Array.from(operations)[0];
     expect(operation).toBeDefined();
 
-    const mockRecord = {
-      operation,
-      collatedWriter: {} as any,
-      debugMode: false,
-      quietMode: true,
-      _operationMetadataManager: {} as any,
-      stopwatch: {} as any,
-      status: {} as any,
-      environment: undefined,
-      error: undefined,
-      silent: false,
-      stdioSummarizer: {} as any,
-      problemCollector: {} as any,
-      nonCachedDurationMs: undefined,
-      metadataFolderPath: undefined,
-      logFilePaths: undefined,
-      getStateHash: () => '',
-      getStateHashComponents: () => [],
-      runWithTerminalAsync: async () => {}
-    } as any;
+    const mockRecord = createMockRecord(operation);
 
     const env: IEnvironment = hooks.createEnvironmentForOperation.call({ ...process.env }, mockRecord);
 
