@@ -51,6 +51,14 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
+      "name": "@storybook/react-webpack5",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@testing-library/dom",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@ungap/structured-clone",
       "allowedCategories": [ "libraries" ]
     },
@@ -97,6 +105,10 @@
     {
       "name": "scheduler",
       "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "storybook",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "tslib",

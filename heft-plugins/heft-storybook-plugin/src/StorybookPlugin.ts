@@ -37,6 +37,7 @@ import type {
 const PLUGIN_NAME: 'storybook-plugin' = 'storybook-plugin';
 const WEBPACK4_PLUGIN_NAME: typeof Webpack4PluginName = 'webpack4-plugin';
 const WEBPACK5_PLUGIN_NAME: typeof Webpack5PluginName = 'webpack5-plugin';
+const RSPACK_PLUGIN_NAME: 'rspack-plugin' = 'rspack-plugin';
 
 /**
  * Storybook CLI build type targets
@@ -58,7 +59,8 @@ enum StorybookBuildMode {
 enum StorybookCliVersion {
   STORYBOOK6 = 'storybook6',
   STORYBOOK7 = 'storybook7',
-  STORYBOOK8 = 'storybook8'
+  STORYBOOK8 = 'storybook8',
+  STORYBOOK9 = 'storybook9'
 }
 
 /**
@@ -198,6 +200,13 @@ const DEFAULT_STORYBOOK_CLI_CONFIG: Record<StorybookCliVersion, IStorybookCliCal
       watch: ['sb', 'dev'],
       build: ['sb', 'build']
     }
+  },
+  [StorybookCliVersion.STORYBOOK9]: {
+    packageName: 'storybook',
+    command: {
+      watch: ['sb', 'dev'],
+      build: ['sb', 'build']
+    }
   }
 };
 
@@ -233,13 +242,14 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
 
     // Only tap if the --storybook flag is present.
     if (storybookParameter.value) {
-      const configureWebpackTap: () => Promise<false> = async () => {
-        // Discard Webpack's configuration to prevent Webpack from running
-        logger.terminal.writeLine(
-          'The command line includes "--storybook", redirecting Webpack to Storybook'
-        );
-        return false;
-      };
+      const configureWebpackTap: (packager: string) => () => Promise<false> =
+        (packager: string) => async () => {
+          // Discard Webpack's configuration to prevent Webpack from running
+          logger.terminal.writeLine(
+            'The command line includes "--storybook", redirecting ' + packager + ' to Storybook'
+          );
+          return false;
+        };
 
       let isServeMode: boolean = false;
       taskSession.requestAccessToPluginByName(
@@ -249,7 +259,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
           isServeMode = accessor.parameters.isServeMode;
 
           // Discard Webpack's configuration to prevent Webpack from running only when performing Storybook build
-          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap);
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap('Webpack'));
         }
       );
 
@@ -260,7 +270,18 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
           isServeMode = accessor.parameters.isServeMode;
 
           // Discard Webpack's configuration to prevent Webpack from running only when performing Storybook build
-          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap);
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap('Webpack'));
+        }
+      );
+
+      taskSession.requestAccessToPluginByName(
+        '@rushstack/heft-rspack-plugin',
+        RSPACK_PLUGIN_NAME,
+        (accessor: any) => {
+          isServeMode = accessor.parameters.isServeMode;
+
+          // Discard Webpack's configuration to prevent Webpack from running only when performing Storybook build
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap('Rspack'));
         }
       );
 
@@ -340,13 +361,26 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
 
     const storyBookPackagePackageJsonFile: string = path.join(storyBookCliPackage, FileConstants.PackageJson);
     const packageJson: IPackageJson = await JsonFile.loadAsync(storyBookPackagePackageJsonFile);
-    if (!packageJson.bin || typeof packageJson.bin === 'string') {
+    if (!packageJson.bin) {
       throw new Error(
         `The cli package "${cliPackageName}" does not provide a 'bin' executables in the 'package.json'`
       );
     }
+
     const [moduleExecutableName, ...moduleDefaultArgs] = storyBookCliConfig.command[buildMode];
-    const modulePath: string | undefined = packageJson.bin[moduleExecutableName];
+    const modulePath: string | undefined = (() => {
+      if (storybookCliVersion === StorybookCliVersion.STORYBOOK9) {
+        return packageJson.bin as string;
+      }
+
+      if (typeof packageJson.bin !== 'string') {
+        return packageJson.bin[moduleExecutableName];
+      } else {
+        throw new Error(
+          `The cli package "${cliPackageName}" provides a 'bin' executables in the 'package.json' but it is a string`
+        );
+      }
+    })();
     logger.terminal.writeVerboseLine(
       `Found storybook "${modulePath}" for "${buildMode}" mode in "${cliPackageName}"`
     );

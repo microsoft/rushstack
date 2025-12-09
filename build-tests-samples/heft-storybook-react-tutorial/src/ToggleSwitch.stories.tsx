@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as React from 'react';
-import type { ComponentStory, ComponentMeta } from 'heft-storybook-react-tutorial-storykit';
+import type { Meta, StoryObj } from 'heft-storybook-react-tutorial-storykit';
 
 import { ToggleSwitch } from './ToggleSwitch';
 
@@ -13,14 +12,15 @@ export default {
     leftColor: { control: 'color' },
     rightColor: { control: 'color' }
   }
-} as ComponentMeta<typeof ToggleSwitch>;
+} as Meta<typeof ToggleSwitch>;
 
-const Template: ComponentStory<typeof ToggleSwitch> = (args) => <ToggleSwitch {...args} />;
+export const Primary: StoryObj<typeof ToggleSwitch> = {
+  args: {
+    leftColor: '#880000',
+    rightColor: '#008000'
+  }
+};
 
-// eslint-disable-next-line
-export const Primary: any = Template.bind({});
-Primary.args = {};
-
-// eslint-disable-next-line
-export const Secondary: any = Template.bind({});
-Secondary.args = {};
+export const Secondary: StoryObj<typeof ToggleSwitch> = {
+  args: {}
+};

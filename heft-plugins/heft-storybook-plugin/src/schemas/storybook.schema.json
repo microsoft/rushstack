@@ -15,7 +15,7 @@
     "cliCallingConvention": {
       "title": "Specifies the calling convention of the storybook CLI based on the storybook version.",
       "description": "Specify how the Storybook CLI should be invoked. Possible values: \"storybook6\" or \"storybook7\", defaults to \"storybook7\".",
-      "enum": ["storybook6", "storybook7", "storybook8"]
+      "enum": ["storybook6", "storybook7", "storybook8", "storybook9"]
     },
     "cliPackageName": {
       "title": "The NPM package that Heft should use to launch the Storybook toolchain.",
