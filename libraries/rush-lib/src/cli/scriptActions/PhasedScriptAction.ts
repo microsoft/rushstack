@@ -59,6 +59,7 @@ import { WeightedOperationPlugin } from '../../logic/operations/WeightedOperatio
 import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 import { Selection } from '../../logic/Selection';
 import { NodeDiagnosticDirPlugin } from '../../logic/operations/NodeDiagnosticDirPlugin';
+import { IgnoredParametersPlugin } from '../../logic/operations/IgnoredParametersPlugin';
 import { DebugHashesPlugin } from '../../logic/operations/DebugHashesPlugin';
 import { measureAsyncFn, measureFn } from '../../utilities/performance';
 
@@ -408,6 +409,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
       new WeightedOperationPlugin().apply(hooks);
       new ValidateOperationsPlugin(terminal).apply(hooks);
+
+      // Forward ignored parameters to child processes as an environment variable
+      new IgnoredParametersPlugin().apply(hooks);
 
       const showTimeline: boolean = this._timelineParameter?.value ?? false;
       if (showTimeline) {
