@@ -5,7 +5,7 @@ import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFrame
 import type { IEnvironment } from '../../utilities/Utilities';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 
-const PLUGIN_NAME: 'IgnoredParametersPlugin' = 'IgnoredParametersPlugin';
+const PLUGIN_NAME: string = 'IgnoredParametersPlugin';
 
 /**
  * Phased command plugin that forwards the value of the `parameterNamesToIgnore` operation setting
