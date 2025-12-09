@@ -11,38 +11,27 @@ import type { Operation } from '../Operation';
 import type { ICommandLineJson } from '../../../api/CommandLineJson';
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../ShellOperationRunnerPlugin';
-import { IgnoredParametersPlugin } from '../IgnoredParametersPlugin';
+import {
+  IgnoredParametersPlugin,
+  RUSHSTACK_OPERATION_IGNORED_PARAMETERS_ENV_VAR
+} from '../IgnoredParametersPlugin';
 import {
   type ICreateOperationsContext,
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
 import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
 import type { IEnvironment } from '../../../utilities/Utilities';
+import type { IOperationRunnerContext } from '../IOperationRunner';
+import type { IOperationExecutionResult } from '../IOperationExecutionResult';
 
 /**
  * Helper function to create a minimal mock record for testing the createEnvironmentForOperation hook
  */
-function createMockRecord(operation: Operation): any {
+function createMockRecord(operation: Operation): IOperationRunnerContext & IOperationExecutionResult {
   return {
     operation,
-    collatedWriter: {} as any,
-    debugMode: false,
-    quietMode: true,
-    _operationMetadataManager: {} as any,
-    stopwatch: {} as any,
-    status: {} as any,
-    environment: undefined,
-    error: undefined,
-    silent: false,
-    stdioSummarizer: {} as any,
-    problemCollector: {} as any,
-    nonCachedDurationMs: undefined,
-    metadataFolderPath: undefined,
-    logFilePaths: undefined,
-    getStateHash: () => '',
-    getStateHashComponents: () => [],
-    runWithTerminalAsync: async () => {}
-  };
+    environment: undefined
+  } as IOperationRunnerContext & IOperationExecutionResult;
 }
 
 describe(IgnoredParametersPlugin.name, () => {
@@ -110,7 +99,7 @@ describe(IgnoredParametersPlugin.name, () => {
     const envA: IEnvironment = hooks.createEnvironmentForOperation.call({ ...process.env }, mockRecordA);
 
     // Verify the environment variable is set correctly for project 'a'
-    expect(envA.RUSHSTACK_OPERATION_IGNORED_PARAMETERS).toBe('--production');
+    expect(envA[RUSHSTACK_OPERATION_IGNORED_PARAMETERS_ENV_VAR]).toBe('--production');
 
     // Test project 'b' which has parameterNamesToIgnore: ["--verbose", "--config", "--mode", "--tags"]
     const operationB = Array.from(operations).find((op) => op.name === 'b');
@@ -121,7 +110,7 @@ describe(IgnoredParametersPlugin.name, () => {
     const envB: IEnvironment = hooks.createEnvironmentForOperation.call({ ...process.env }, mockRecordB);
 
     // Verify the environment variable is set correctly for project 'b'
-    expect(envB.RUSHSTACK_OPERATION_IGNORED_PARAMETERS).toBe('--verbose --config --mode --tags');
+    expect(envB[RUSHSTACK_OPERATION_IGNORED_PARAMETERS_ENV_VAR]).toBe('--verbose --config --mode --tags');
   });
 
   it('should not set environment variable when parameterNamesToIgnore is not specified', async () => {
@@ -177,6 +166,6 @@ describe(IgnoredParametersPlugin.name, () => {
     const env: IEnvironment = hooks.createEnvironmentForOperation.call({ ...process.env }, mockRecord);
 
     // Verify the environment variable is not set
-    expect(env.RUSHSTACK_OPERATION_IGNORED_PARAMETERS).toBeUndefined();
+    expect(env[RUSHSTACK_OPERATION_IGNORED_PARAMETERS_ENV_VAR]).toBeUndefined();
   });
 });
