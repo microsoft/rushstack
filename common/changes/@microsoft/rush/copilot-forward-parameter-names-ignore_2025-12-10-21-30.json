@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Forward parameterNamesToIgnore to child processes via RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES environment variable",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "198982749+Copilot@users.noreply.github.com"
+}
