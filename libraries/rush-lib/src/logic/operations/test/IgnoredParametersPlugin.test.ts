@@ -13,7 +13,7 @@ import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../ShellOperationRunnerPlugin';
 import {
   IgnoredParametersPlugin,
-  RUSHSTACK_OPERATION_IGNORED_PARAMETERS_ENV_VAR
+  RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR
 } from '../IgnoredParametersPlugin';
 import {
   type ICreateOperationsContext,
@@ -99,7 +99,7 @@ describe(IgnoredParametersPlugin.name, () => {
     const envA: IEnvironment = hooks.createEnvironmentForOperation.call({ ...process.env }, mockRecordA);
 
     // Verify the environment variable is set correctly for project 'a'
-    expect(envA[RUSHSTACK_OPERATION_IGNORED_PARAMETERS_ENV_VAR]).toBe('--production');
+    expect(envA[RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR]).toBe('--production');
 
     // Test project 'b' which has parameterNamesToIgnore: ["--verbose", "--config", "--mode", "--tags"]
     const operationB = Array.from(operations).find((op) => op.name === 'b');
@@ -110,7 +110,7 @@ describe(IgnoredParametersPlugin.name, () => {
     const envB: IEnvironment = hooks.createEnvironmentForOperation.call({ ...process.env }, mockRecordB);
 
     // Verify the environment variable is set correctly for project 'b'
-    expect(envB[RUSHSTACK_OPERATION_IGNORED_PARAMETERS_ENV_VAR]).toBe('--verbose,--config,--mode,--tags');
+    expect(envB[RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR]).toBe('--verbose,--config,--mode,--tags');
   });
 
   it('should not set environment variable when parameterNamesToIgnore is not specified', async () => {
@@ -166,6 +166,6 @@ describe(IgnoredParametersPlugin.name, () => {
     const env: IEnvironment = hooks.createEnvironmentForOperation.call({ ...process.env }, mockRecord);
 
     // Verify the environment variable is not set
-    expect(env[RUSHSTACK_OPERATION_IGNORED_PARAMETERS_ENV_VAR]).toBeUndefined();
+    expect(env[RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR]).toBeUndefined();
   });
 });
