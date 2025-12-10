@@ -27,7 +27,7 @@ export class IgnoredParametersPlugin implements IPhasedCommandPlugin {
 
         // If there are parameter names to ignore, set the environment variable
         if (settings?.parameterNamesToIgnore && settings.parameterNamesToIgnore.length > 0) {
-          env[RUSHSTACK_OPERATION_IGNORED_PARAMETERS_ENV_VAR] = settings.parameterNamesToIgnore.join(' ');
+          env[RUSHSTACK_OPERATION_IGNORED_PARAMETERS_ENV_VAR] = settings.parameterNamesToIgnore.join(',');
         }
 
         return env;

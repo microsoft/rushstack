@@ -110,7 +110,7 @@ describe(IgnoredParametersPlugin.name, () => {
     const envB: IEnvironment = hooks.createEnvironmentForOperation.call({ ...process.env }, mockRecordB);
 
     // Verify the environment variable is set correctly for project 'b'
-    expect(envB[RUSHSTACK_OPERATION_IGNORED_PARAMETERS_ENV_VAR]).toBe('--verbose --config --mode --tags');
+    expect(envB[RUSHSTACK_OPERATION_IGNORED_PARAMETERS_ENV_VAR]).toBe('--verbose,--config,--mode,--tags');
   });
 
   it('should not set environment variable when parameterNamesToIgnore is not specified', async () => {
