@@ -61,7 +61,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     if (this._rushConfiguration.projects.length > 0) {
       // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
       // See https://github.com/microsoft/rushstack/issues/1273#issuecomment-492779995
-      const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = await PnpmShrinkwrapFile.loadFromFileAsync(
+      const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
         this._rushConfiguration.defaultSubspace.getTempShrinkwrapFilename()
       );
 
@@ -323,9 +323,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         RushConstants.nodeModulesFolderName
       );
     } else if (this._pnpmVersion.major >= 10) {
-      const pnpmKitV10: typeof import('@rushstack/rush-pnpm-kit-v10') = await import(
-        '@rushstack/rush-pnpm-kit-v10'
-      );
+      const pnpmKitV10: typeof import('@rushstack/rush-pnpm-kit-v10') = await import('@rushstack/rush-pnpm-kit-v10');
 
       // project@file+projects+presentation-integration-tests.tgz_jsdom@11.12.0
       // The second parameter is max length of virtual store dir,
@@ -343,9 +341,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         RushConstants.nodeModulesFolderName
       );
     } else if (this._pnpmVersion.major >= 9) {
-      const pnpmKitV9: typeof import('@rushstack/rush-pnpm-kit-v9') = await import(
-        '@rushstack/rush-pnpm-kit-v9'
-      );
+      const pnpmKitV9: typeof import('@rushstack/rush-pnpm-kit-v9') = await import('@rushstack/rush-pnpm-kit-v9');
 
       // project@file+projects+presentation-integration-tests.tgz_jsdom@11.12.0
       // The second parameter is max length of virtual store dir, for v9 default is 120 https://pnpm.io/9.x/npmrc#virtual-store-dir-max-length
@@ -359,9 +355,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         RushConstants.nodeModulesFolderName
       );
     } else if (this._pnpmVersion.major >= 8) {
-      const pnpmKitV8: typeof import('@rushstack/rush-pnpm-kit-v8') = await import(
-        '@rushstack/rush-pnpm-kit-v8'
-      );
+      const pnpmKitV8: typeof import('@rushstack/rush-pnpm-kit-v8') = await import('@rushstack/rush-pnpm-kit-v8');
       // PNPM 8 changed the local path format again and the hashing algorithm, and
       // is now using the scoped '@pnpm/dependency-path' package
       // See https://github.com/pnpm/pnpm/releases/tag/v8.0.0

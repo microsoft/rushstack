@@ -1205,7 +1205,7 @@ export class RepoStateFile {
     get packageJsonInjectedDependenciesHash(): string | undefined;
     get pnpmShrinkwrapHash(): string | undefined;
     get preferredVersionsHash(): string | undefined;
-    refreshStateAsync(rushConfiguration: RushConfiguration, subspace: Subspace | undefined, variant?: string): Promise<boolean>;
+    refreshState(rushConfiguration: RushConfiguration, subspace: Subspace | undefined, variant?: string): boolean;
 }
 
 // @public

@@ -2,11 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { type DependencySpecifier, DependencySpecifierType } from '../../DependencySpecifier';
-import {
-  PnpmShrinkwrapFile,
-  parsePnpm9DependencyKeyAsync,
-  parsePnpmDependencyKey
-} from '../PnpmShrinkwrapFile';
+import { PnpmShrinkwrapFile, parsePnpm9DependencyKey, parsePnpmDependencyKey } from '../PnpmShrinkwrapFile';
 import { RushConfiguration } from '../../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 
@@ -130,21 +126,17 @@ describe(PnpmShrinkwrapFile.name, () => {
     });
   });
 
-  describe(parsePnpm9DependencyKeyAsync.name, () => {
+  describe(parsePnpm9DependencyKey.name, () => {
     it('Does not support file:// specifiers', () => {
-      expect(parsePnpm9DependencyKeyAsync(DEPENDENCY_NAME, 'file:///path/to/file')).toBeUndefined();
-      expect(parsePnpm9DependencyKeyAsync(DEPENDENCY_NAME, 'pad-left@file:///path/to/file')).toBeUndefined();
-      expect(parsePnpm9DependencyKeyAsync(DEPENDENCY_NAME, 'link:///path/to/file')).toBeUndefined();
+      expect(parsePnpm9DependencyKey(DEPENDENCY_NAME, 'file:///path/to/file')).toBeUndefined();
+      expect(parsePnpm9DependencyKey(DEPENDENCY_NAME, 'pad-left@file:///path/to/file')).toBeUndefined();
+      expect(parsePnpm9DependencyKey(DEPENDENCY_NAME, 'link:///path/to/file')).toBeUndefined();
     });
 
-    it('Supports a variety of non-aliased package specifiers', async () => {
-      async function testSpecifiersAsync(
-        specifiers: string[],
-        expectedName: string,
-        expectedVersion: string
-      ): Promise<void> {
+    it('Supports a variety of non-aliased package specifiers', () => {
+      function testSpecifiers(specifiers: string[], expectedName: string, expectedVersion: string): void {
         for (const specifier of specifiers) {
-          const parsedSpecifier: DependencySpecifier | undefined = await parsePnpm9DependencyKeyAsync(
+          const parsedSpecifier: DependencySpecifier | undefined = parsePnpm9DependencyKey(
             expectedName,
             specifier
           );
@@ -156,14 +148,14 @@ describe(PnpmShrinkwrapFile.name, () => {
       }
 
       // non-scoped, non-prerelease
-      await testSpecifiersAsync(
+      testSpecifiers(
         [`${DEPENDENCY_NAME}@${VERSION}`, `${DEPENDENCY_NAME}@${VERSION}(peer@3.5.0+peer2@1.17.7)`],
         DEPENDENCY_NAME,
         VERSION
       );
 
       // scoped, non-prerelease
-      await testSpecifiersAsync(
+      testSpecifiers(
         [
           `${SCOPED_DEPENDENCY_NAME}@${VERSION}`,
           `${SCOPED_DEPENDENCY_NAME}@${VERSION}(peer@3.5.0+peer2@1.17.7)`
@@ -173,7 +165,7 @@ describe(PnpmShrinkwrapFile.name, () => {
       );
 
       // non-scoped, prerelease
-      await testSpecifiersAsync(
+      testSpecifiers(
         [
           `${DEPENDENCY_NAME}@${PRERELEASE_VERSION}`,
           `${DEPENDENCY_NAME}@${PRERELEASE_VERSION}(peer@3.5.0+peer2@1.17.7)`
@@ -183,7 +175,7 @@ describe(PnpmShrinkwrapFile.name, () => {
       );
 
       // scoped, prerelease
-      await testSpecifiersAsync(
+      testSpecifiers(
         [
           `${SCOPED_DEPENDENCY_NAME}@${PRERELEASE_VERSION}`,
           `${SCOPED_DEPENDENCY_NAME}@${PRERELEASE_VERSION}(peer@3.5.0+peer2@1.17.7)`
@@ -193,8 +185,8 @@ describe(PnpmShrinkwrapFile.name, () => {
       );
     });
 
-    it('Supports aliased package specifiers (v9)', async () => {
-      const parsedSpecifier: DependencySpecifier | undefined = await parsePnpm9DependencyKeyAsync(
+    it('Supports aliased package specifiers (v9)', () => {
+      const parsedSpecifier: DependencySpecifier | undefined = parsePnpm9DependencyKey(
         SCOPED_DEPENDENCY_NAME,
         `${DEPENDENCY_NAME}@${VERSION}`
       );
@@ -204,7 +196,7 @@ describe(PnpmShrinkwrapFile.name, () => {
       expect(parsedSpecifier!.versionSpecifier).toMatchInlineSnapshot(`"npm:${DEPENDENCY_NAME}@${VERSION}"`);
     });
 
-    it('Supports URL package specifiers', async () => {
+    it('Supports URL package specifiers', () => {
       const specifiers: string[] = [
         'https://github.com/jonschlinkert/pad-left/tarball/2.1.0',
         'https://xxx.xxxx.org/pad-left/-/pad-left-2.1.0.tgz',
@@ -215,7 +207,7 @@ describe(PnpmShrinkwrapFile.name, () => {
       ];
 
       for (const specifier of specifiers) {
-        const parsedSpecifier: DependencySpecifier | undefined = await parsePnpm9DependencyKeyAsync(
+        const parsedSpecifier: DependencySpecifier | undefined = parsePnpm9DependencyKey(
           SCOPED_DEPENDENCY_NAME,
           specifier
         );
@@ -228,7 +220,7 @@ describe(PnpmShrinkwrapFile.name, () => {
   });
 
   describe('getIntegrityForImporter', () => {
-    it('produces different hashes when sub-dependency resolutions change', async () => {
+    it('produces different hashes when sub-dependency resolutions change', () => {
       // This test verifies that changes to sub-dependency resolutions are detected.
       // The issue is that if package A depends on B, and B's resolution of C changes
       // (e.g., from C@1.3 to C@1.2), the integrity hash for A should change.
@@ -290,14 +282,14 @@ snapshots:
   bar@1.2.0: {}
 `;
 
-      const shrinkwrapFile1 = await PnpmShrinkwrapFile.loadFromStringAsync(shrinkwrapContent1);
-      const shrinkwrapFile2 = await PnpmShrinkwrapFile.loadFromStringAsync(shrinkwrapContent2);
+      const shrinkwrapFile1 = PnpmShrinkwrapFile.loadFromString(shrinkwrapContent1);
+      const shrinkwrapFile2 = PnpmShrinkwrapFile.loadFromString(shrinkwrapContent2);
 
       // Clear cache to ensure fresh computation
       PnpmShrinkwrapFile.clearCache();
 
-      const integrityMap1 = await shrinkwrapFile1.getIntegrityForImporterAsync('.');
-      const integrityMap2 = await shrinkwrapFile2.getIntegrityForImporterAsync('.');
+      const integrityMap1 = shrinkwrapFile1.getIntegrityForImporter('.');
+      const integrityMap2 = shrinkwrapFile2.getIntegrityForImporter('.');
 
       // Both should have integrity maps
       expect(integrityMap1).toBeDefined();
@@ -320,7 +312,7 @@ snapshots:
     describe('pnpm lockfile major version 5', () => {
       it('can detect not modified', async () => {
         const project = getMockRushProject();
-        const pnpmShrinkwrapFile = await getPnpmShrinkwrapFileFromFileAsync(
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v5/not-modified.yaml`
         );
         await expect(
@@ -334,7 +326,7 @@ snapshots:
 
       it('can detect modified', async () => {
         const project = getMockRushProject();
-        const pnpmShrinkwrapFile = await getPnpmShrinkwrapFileFromFileAsync(
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v5/modified.yaml`
         );
         await expect(
@@ -348,7 +340,7 @@ snapshots:
 
       it('can detect overrides', async () => {
         const project = getMockRushProject();
-        const pnpmShrinkwrapFile = await getPnpmShrinkwrapFileFromFileAsync(
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v5/overrides-not-modified.yaml`
         );
         await expect(
@@ -364,7 +356,7 @@ snapshots:
     describe('pnpm lockfile major version 6', () => {
       it('can detect not modified', async () => {
         const project = getMockRushProject();
-        const pnpmShrinkwrapFile = await getPnpmShrinkwrapFileFromFileAsync(
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v6/not-modified.yaml`
         );
         await expect(
@@ -378,7 +370,7 @@ snapshots:
 
       it('can detect modified', async () => {
         const project = getMockRushProject();
-        const pnpmShrinkwrapFile = await getPnpmShrinkwrapFileFromFileAsync(
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v6/modified.yaml`
         );
         await expect(
@@ -392,7 +384,7 @@ snapshots:
 
       it('can detect overrides', async () => {
         const project = getMockRushProject();
-        const pnpmShrinkwrapFile = await getPnpmShrinkwrapFileFromFileAsync(
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v6/overrides-not-modified.yaml`
         );
         await expect(
@@ -406,7 +398,7 @@ snapshots:
 
       it('can handle the inconsistent version of a package declared in dependencies and devDependencies', async () => {
         const project = getMockRushProject2();
-        const pnpmShrinkwrapFile = await getPnpmShrinkwrapFileFromFileAsync(
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v6/inconsistent-dep-devDep.yaml`
         );
         await expect(
@@ -422,7 +414,7 @@ snapshots:
     describe('pnpm lockfile major version 9', () => {
       it('can detect not modified', async () => {
         const project = getMockRushProject();
-        const pnpmShrinkwrapFile = await getPnpmShrinkwrapFileFromFileAsync(
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v9/not-modified.yaml`
         );
         await expect(
@@ -436,7 +428,7 @@ snapshots:
 
       it('can detect modified', async () => {
         const project = getMockRushProject();
-        const pnpmShrinkwrapFile = await getPnpmShrinkwrapFileFromFileAsync(
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v9/modified.yaml`
         );
         await expect(
@@ -450,7 +442,7 @@ snapshots:
 
       it('can detect overrides', async () => {
         const project = getMockRushProject();
-        const pnpmShrinkwrapFile = await getPnpmShrinkwrapFileFromFileAsync(
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v9/overrides-not-modified.yaml`
         );
         await expect(
@@ -464,7 +456,7 @@ snapshots:
 
       it('can handle the inconsistent version of a package declared in dependencies and devDependencies', async () => {
         const project = getMockRushProject2();
-        const pnpmShrinkwrapFile = await getPnpmShrinkwrapFileFromFileAsync(
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v9/inconsistent-dep-devDep.yaml`
         );
         await expect(
@@ -479,8 +471,8 @@ snapshots:
   });
 });
 
-async function getPnpmShrinkwrapFileFromFileAsync(filepath: string): Promise<PnpmShrinkwrapFile> {
-  const pnpmShrinkwrapFile = await PnpmShrinkwrapFile.loadFromFileAsync(filepath);
+function getPnpmShrinkwrapFileFromFile(filepath: string): PnpmShrinkwrapFile {
+  const pnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromFile(filepath);
   if (!pnpmShrinkwrapFile) {
     throw new Error(`Get PnpmShrinkwrapFileFromFile failed from ${filepath}`);
   }

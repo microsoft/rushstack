@@ -233,13 +233,13 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     return packageNameAndSemVer.packageName + '@' + packageNameAndSemVer.semVerRange;
   }
 
-  public override getTempProjectNames(): ReadonlyArray<string> {
+  /** @override */
+  public getTempProjectNames(): ReadonlyArray<string> {
     return this._tempProjectNames;
   }
 
-  public override async hasCompatibleTopLevelDependencyAsync(
-    dependencySpecifier: DependencySpecifier
-  ): Promise<boolean> {
+  /** @override */
+  public hasCompatibleTopLevelDependency(dependencySpecifier: DependencySpecifier): boolean {
     // It seems like we should normalize the key somehow, but Yarn apparently does not
     // do any normalization.
     const key: string = YarnShrinkwrapFile._encodePackageNameAndSemVer({
@@ -251,37 +251,41 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     return Object.hasOwnProperty.call(this._shrinkwrapJson, key);
   }
 
-  public override async tryEnsureCompatibleDependencyAsync(
+  /** @override */
+  public tryEnsureCompatibleDependency(
     dependencySpecifier: DependencySpecifier,
     tempProjectName: string
-  ): Promise<boolean> {
-    return this.hasCompatibleTopLevelDependencyAsync(dependencySpecifier);
+  ): boolean {
+    return this.hasCompatibleTopLevelDependency(dependencySpecifier);
   }
 
-  protected override serialize(): string {
+  /** @override */
+  protected serialize(): string {
     return lockfileModule.stringify(this._shrinkwrapJson);
   }
 
-  protected override async getTopLevelDependencyVersionAsync(
-    dependencyName: string
-  ): Promise<DependencySpecifier | undefined> {
+  /** @override */
+  protected getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
     throw new InternalError('Not implemented');
   }
 
-  protected override async tryEnsureDependencyVersionAsync(
+  /** @override */
+  protected tryEnsureDependencyVersion(
     dependencySpecifier: DependencySpecifier,
     tempProjectName: string
-  ): Promise<DependencySpecifier | undefined> {
+  ): DependencySpecifier | undefined {
     throw new InternalError('Not implemented');
   }
 
-  public override getProjectShrinkwrap(
+  /** @override */
+  public getProjectShrinkwrap(
     project: RushConfigurationProject
   ): BaseProjectShrinkwrapFile<YarnShrinkwrapFile> | undefined {
     return undefined;
   }
 
-  public override async isWorkspaceProjectModifiedAsync(
+  /** @override */
+  public async isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
     subspace: Subspace
   ): Promise<boolean> {

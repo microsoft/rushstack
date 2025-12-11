@@ -260,12 +260,11 @@ export abstract class BaseInstallManager {
 
       if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
         const committedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilePath(variant);
-        const shrinkwrapFile: BaseShrinkwrapFile | undefined =
-          await ShrinkwrapFileFactory.getShrinkwrapFileAsync(
-            this.rushConfiguration.packageManager,
-            committedShrinkwrapFileName
-          );
-        shrinkwrapFile?.validateShrinkwrapAfterUpdateAsync(this.rushConfiguration, subspace, this._terminal);
+        const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
+          this.rushConfiguration.packageManager,
+          committedShrinkwrapFileName
+        );
+        shrinkwrapFile?.validateShrinkwrapAfterUpdate(this.rushConfiguration, subspace, this._terminal);
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
         Utilities.syncFile(subspace.getTempShrinkwrapFilename(), committedShrinkwrapFileName);
       } else {
@@ -274,7 +273,7 @@ export abstract class BaseInstallManager {
 
       // Always update the state file if running "rush update"
       if (this.options.allowShrinkwrapUpdates) {
-        if (await subspace.getRepoState().refreshStateAsync(this.rushConfiguration, subspace, variant)) {
+        if (subspace.getRepoState().refreshState(this.rushConfiguration, subspace, variant)) {
           // eslint-disable-next-line no-console
           console.log(
             Colorize.yellow(
@@ -471,7 +470,7 @@ export abstract class BaseInstallManager {
     if (!this.options.fullUpgrade) {
       const committedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilePath(variant);
       try {
-        shrinkwrapFile = await ShrinkwrapFileFactory.getShrinkwrapFileAsync(
+        shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
           this.rushConfiguration.packageManager,
           committedShrinkwrapFileName
         );

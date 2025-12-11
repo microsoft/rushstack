@@ -25,7 +25,7 @@ export async function validatePolicyAsync(
     if (!options.allowShrinkwrapUpdates) {
       // Don't validate the shrinkwrap if updates are allowed, as it's likely to change
       // It also may have merge conflict markers, which PNPM can gracefully handle, but the validator cannot
-      await ShrinkwrapFilePolicy.validateAsync(rushConfiguration, subspace, variant, options);
+      ShrinkwrapFilePolicy.validate(rushConfiguration, subspace, variant, options);
     }
   }
 }

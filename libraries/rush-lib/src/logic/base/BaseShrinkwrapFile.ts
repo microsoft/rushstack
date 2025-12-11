@@ -35,7 +35,7 @@ export abstract class BaseShrinkwrapFile {
    *
    * @virtual
    */
-  public validateShrinkwrapAfterUpdateAsync(
+  public validateShrinkwrapAfterUpdate(
     rushConfiguration: RushConfiguration,
     subspace: Subspace,
     terminal: ITerminal
@@ -58,11 +58,10 @@ export abstract class BaseShrinkwrapFile {
    *
    * @virtual
    */
-  public async hasCompatibleTopLevelDependencyAsync(
-    dependencySpecifier: DependencySpecifier
-  ): Promise<boolean> {
-    const shrinkwrapDependency: DependencySpecifier | undefined =
-      await this.getTopLevelDependencyVersionAsync(dependencySpecifier.packageName);
+  public hasCompatibleTopLevelDependency(dependencySpecifier: DependencySpecifier): boolean {
+    const shrinkwrapDependency: DependencySpecifier | undefined = this.getTopLevelDependencyVersion(
+      dependencySpecifier.packageName
+    );
     if (!shrinkwrapDependency) {
       return false;
     }
@@ -89,11 +88,11 @@ export abstract class BaseShrinkwrapFile {
    *
    * @virtual
    */
-  public async tryEnsureCompatibleDependencyAsync(
+  public tryEnsureCompatibleDependency(
     dependencySpecifier: DependencySpecifier,
     tempProjectName: string
-  ): Promise<boolean> {
-    const shrinkwrapDependency: DependencySpecifier | undefined = await this.tryEnsureDependencyVersionAsync(
+  ): boolean {
+    const shrinkwrapDependency: DependencySpecifier | undefined = this.tryEnsureDependencyVersion(
       dependencySpecifier,
       tempProjectName
     );
@@ -113,15 +112,13 @@ export abstract class BaseShrinkwrapFile {
   public abstract getTempProjectNames(): ReadonlyArray<string>;
 
   /** @virtual */
-  protected abstract tryEnsureDependencyVersionAsync(
+  protected abstract tryEnsureDependencyVersion(
     dependencySpecifier: DependencySpecifier,
     tempProjectName: string
-  ): Promise<DependencySpecifier | undefined>;
+  ): DependencySpecifier | undefined;
 
   /** @virtual */
-  protected abstract getTopLevelDependencyVersionAsync(
-    dependencyName: string
-  ): Promise<DependencySpecifier | undefined>;
+  protected abstract getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined;
 
   /**
    * Check for projects that exist in the shrinkwrap file, but don't exist
