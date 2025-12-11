@@ -4913,6 +4913,40 @@ importers:
         specifier: 1.18.8
         version: 1.18.8
 
+  ../../../vscode-extensions/playwright-on-codespaces-vscode-extension:
+    dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@rushstack/playwright-browser-tunnel':
+        specifier: workspace:*
+        version: link:../../apps/playwright-browser-tunnel
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
+      '@rushstack/vscode-shared':
+        specifier: workspace:*
+        version: link:../vscode-shared
+      tslib:
+        specifier: ~2.8.1
+        version: 2.8.1
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/heft-vscode-extension-rig':
+        specifier: workspace:*
+        version: link:../../rigs/heft-vscode-extension-rig
+      '@types/node':
+        specifier: 20.17.19
+        version: 20.17.19
+      '@types/vscode':
+        specifier: 1.103.0
+        version: 1.103.0
+      '@types/webpack-env':
+        specifier: 1.18.8
+        version: 1.18.8
+
   ../../../vscode-extensions/rush-vscode-command-webview:
     dependencies:
       '@fluentui/react':
