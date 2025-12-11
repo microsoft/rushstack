@@ -24,12 +24,13 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
    * @returns True if the project shrinkwrap was created or updated, false otherwise.
    */
   public async updateProjectShrinkwrapAsync(): Promise<void> {
-    const projectShrinkwrapMap: Map<string, string> | undefined = this.generateProjectShrinkwrapMap();
+    const projectShrinkwrapMap: Map<string, string> | undefined =
+      await this.generateProjectShrinkwrapMapAsync();
 
     return projectShrinkwrapMap ? this.saveAsync(projectShrinkwrapMap) : this.deleteIfExistsAsync();
   }
 
-  public hasChanges(otherShrinkwrap: PnpmProjectShrinkwrapFile): boolean {
+  public async hasChangesAsync(otherShrinkwrap: PnpmProjectShrinkwrapFile): Promise<boolean> {
     if (
       !otherShrinkwrap.shrinkwrapFile.isWorkspaceCompatible &&
       !otherShrinkwrap.shrinkwrapFile.getTempProjectDependencyKey(this.project.tempProjectName)
@@ -38,8 +39,9 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
       return true;
     }
 
-    const otherMap: Map<string, string> | undefined = otherShrinkwrap.generateProjectShrinkwrapMap();
-    const thisMap: Map<string, string> | undefined = this.generateProjectShrinkwrapMap();
+    const otherMap: Map<string, string> | undefined =
+      await otherShrinkwrap.generateProjectShrinkwrapMapAsync();
+    const thisMap: Map<string, string> | undefined = await this.generateProjectShrinkwrapMapAsync();
 
     if (!thisMap || !otherMap) {
       // Handle one or both being undefined.
@@ -64,15 +66,15 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
   /**
    * Generate the project shrinkwrap file content
    */
-  protected generateProjectShrinkwrapMap(): Map<string, string> | undefined {
+  protected async generateProjectShrinkwrapMapAsync(): Promise<Map<string, string> | undefined> {
     const projectShrinkwrapMap: Map<string, string> | undefined = this.shrinkwrapFile.isWorkspaceCompatible
-      ? this.generateWorkspaceProjectShrinkwrapMap()
-      : this.generateLegacyProjectShrinkwrapMap();
+      ? await this.generateWorkspaceProjectShrinkwrapMapAsync()
+      : await this.generateLegacyProjectShrinkwrapMapAsync();
 
     return projectShrinkwrapMap;
   }
 
-  protected generateWorkspaceProjectShrinkwrapMap(): Map<string, string> | undefined {
+  protected async generateWorkspaceProjectShrinkwrapMapAsync(): Promise<Map<string, string> | undefined> {
     // Obtain the workspace importer from the shrinkwrap, which lists resolved dependencies
     const subspace: Subspace = this.project.subspace;
 
@@ -82,12 +84,12 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
     );
 
     const projectShrinkwrapMap: Map<string, string> | undefined =
-      this.shrinkwrapFile.getIntegrityForImporter(importerKey);
+      await this.shrinkwrapFile.getIntegrityForImporterAsync(importerKey);
 
     return projectShrinkwrapMap;
   }
 
-  protected generateLegacyProjectShrinkwrapMap(): Map<string, string> {
+  protected async generateLegacyProjectShrinkwrapMapAsync(): Promise<Map<string, string>> {
     const tempProjectDependencyKey: string | undefined = this.shrinkwrapFile.getTempProjectDependencyKey(
       this.project.tempProjectName
     );
@@ -107,34 +109,32 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
       if (name.indexOf(`${RushConstants.rushTempNpmScope}/`) < 0) {
         // Only select the shrinkwrap dependencies that are non-local since we already handle local
         // project changes
-        this._addDependencyRecursive(projectShrinkwrapMap, name, version, parentShrinkwrapEntry);
+        await this._addDependencyRecursiveAsync(projectShrinkwrapMap, name, version, parentShrinkwrapEntry);
       }
     }
 
     // Since peer dependencies within on external packages may be hoisted up to the top-level package,
     // we need to resolve and add these dependencies directly
-    this._resolveAndAddPeerDependencies(projectShrinkwrapMap, parentShrinkwrapEntry);
+    await this._resolveAndAddPeerDependenciesAsync(projectShrinkwrapMap, parentShrinkwrapEntry);
 
     return projectShrinkwrapMap;
   }
 
-  private _addDependencyRecursive(
+  private async _addDependencyRecursiveAsync(
     projectShrinkwrapMap: Map<string, string>,
     name: string,
     version: IPnpmVersionSpecifier,
     parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
     throwIfShrinkwrapEntryMissing: boolean = true
-  ): void {
+  ): Promise<void> {
     const specifier: string = `${name}@${version}`;
     if (projectShrinkwrapMap.has(specifier)) {
       // getShrinkwrapEntry is idempotent with respect to name and version
       return;
     }
 
-    const shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined = this.shrinkwrapFile.getShrinkwrapEntry(
-      name,
-      version
-    );
+    const shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined =
+      await this.shrinkwrapFile.getShrinkwrapEntryAsync(name, version);
 
     if (!shrinkwrapEntry) {
       if (throwIfShrinkwrapEntryMissing) {
@@ -159,14 +159,19 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
 
     // Add the dependencies of the dependency
     for (const [dependencyName, dependencyVersion] of Object.entries(shrinkwrapEntry.dependencies || {})) {
-      this._addDependencyRecursive(projectShrinkwrapMap, dependencyName, dependencyVersion, shrinkwrapEntry);
+      await this._addDependencyRecursiveAsync(
+        projectShrinkwrapMap,
+        dependencyName,
+        dependencyVersion,
+        shrinkwrapEntry
+      );
     }
 
     // Add the optional dependencies of the dependency, and don't blow up if they don't exist
     for (const [dependencyName, dependencyVersion] of Object.entries(
       shrinkwrapEntry.optionalDependencies || {}
     )) {
-      this._addDependencyRecursive(
+      await this._addDependencyRecursiveAsync(
         projectShrinkwrapMap,
         dependencyName,
         dependencyVersion,
@@ -180,15 +185,19 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
     // is no need to look for peer dependencies, since it is simply a constraint to be validated by the
     // package manager.
     if (!this.shrinkwrapFile.isWorkspaceCompatible) {
-      this._resolveAndAddPeerDependencies(projectShrinkwrapMap, shrinkwrapEntry, parentShrinkwrapEntry);
+      await this._resolveAndAddPeerDependenciesAsync(
+        projectShrinkwrapMap,
+        shrinkwrapEntry,
+        parentShrinkwrapEntry
+      );
     }
   }
 
-  private _resolveAndAddPeerDependencies(
+  private async _resolveAndAddPeerDependenciesAsync(
     projectShrinkwrapMap: Map<string, string>,
     shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
     parentShrinkwrapEntry?: IPnpmShrinkwrapDependencyYaml
-  ): void {
+  ): Promise<void> {
     for (const peerDependencyName of Object.keys(shrinkwrapEntry.peerDependencies || {})) {
       // Skip peer dependency resolution of local package peer dependencies
       if (peerDependencyName.indexOf(RushConstants.rushTempNpmScope) !== -1) {
@@ -212,10 +221,10 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
       // we can't find it, we can assume that it's already been provided somewhere up the
       // dependency tree.
       const topLevelDependencySpecifier: DependencySpecifier | undefined =
-        this.shrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
+        await this.shrinkwrapFile.getTopLevelDependencyVersionAsync(peerDependencyName);
 
       if (topLevelDependencySpecifier) {
-        this._addDependencyRecursive(
+        await this._addDependencyRecursiveAsync(
           projectShrinkwrapMap,
           peerDependencyName,
           this.shrinkwrapFile.getTopLevelDependencyKey(peerDependencyName)!,

@@ -15,27 +15,30 @@ import { DependencySpecifier } from '../DependencySpecifier';
 import { NpmShrinkwrapFile } from '../npm/NpmShrinkwrapFile';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
-describe(NpmShrinkwrapFile.name, () => {
+describe(NpmShrinkwrapFile.name, async () => {
   const filename: string = `${__dirname}/shrinkwrapFile/npm-shrinkwrap.json`;
-  const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('npm', filename)!;
+  const shrinkwrapFile: BaseShrinkwrapFile = (await ShrinkwrapFileFactory.getShrinkwrapFileAsync(
+    'npm',
+    filename
+  ))!;
 
   it('verifies root-level dependency', () => {
-    expect(shrinkwrapFile.hasCompatibleTopLevelDependency(new DependencySpecifier('q', '~1.5.0'))).toEqual(
-      true
-    );
+    expect(
+      shrinkwrapFile.hasCompatibleTopLevelDependencyAsync(new DependencySpecifier('q', '~1.5.0'))
+    ).toEqual(true);
   });
 
   it('verifies temp project dependencies', () => {
     // Found locally
     expect(
-      shrinkwrapFile.tryEnsureCompatibleDependency(
+      shrinkwrapFile.tryEnsureCompatibleDependencyAsync(
         new DependencySpecifier('jquery', '>=2.2.4 <3.0.0'),
         '@rush-temp/project2'
       )
     ).toEqual(true);
     // Found at root
     expect(
-      shrinkwrapFile.tryEnsureCompatibleDependency(
+      shrinkwrapFile.tryEnsureCompatibleDependencyAsync(
         new DependencySpecifier('q', '~1.5.0'),
         '@rush-temp/project2'
       )
@@ -54,25 +57,25 @@ describe(PnpmShrinkwrapFile.name, () => {
     function validateNonWorkspaceLockfile(shrinkwrapFile: BaseShrinkwrapFile): void {
       it('verifies root-level dependency', () => {
         expect(
-          shrinkwrapFile.hasCompatibleTopLevelDependency(new DependencySpecifier('q', '~1.5.0'))
+          shrinkwrapFile.hasCompatibleTopLevelDependencyAsync(new DependencySpecifier('q', '~1.5.0'))
         ).toEqual(false);
       });
 
       it('verifies temp project dependencies', () => {
         expect(
-          shrinkwrapFile.tryEnsureCompatibleDependency(
+          shrinkwrapFile.tryEnsureCompatibleDependencyAsync(
             new DependencySpecifier('jquery', '>=1.0.0 <2.0.0'),
             '@rush-temp/project1'
           )
         ).toEqual(true);
         expect(
-          shrinkwrapFile.tryEnsureCompatibleDependency(
+          shrinkwrapFile.tryEnsureCompatibleDependencyAsync(
             new DependencySpecifier('q', '~1.5.0'),
             '@rush-temp/project2'
           )
         ).toEqual(true);
         expect(
-          shrinkwrapFile.tryEnsureCompatibleDependency(
+          shrinkwrapFile.tryEnsureCompatibleDependencyAsync(
             new DependencySpecifier('pad-left', '^2.0.0'),
             '@rush-temp/project1'
           )
@@ -83,7 +86,7 @@ describe(PnpmShrinkwrapFile.name, () => {
           shrinkwrapFile.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V9
         ) {
           expect(
-            shrinkwrapFile.tryEnsureCompatibleDependency(
+            shrinkwrapFile.tryEnsureCompatibleDependencyAsync(
               new DependencySpecifier(
                 '@scope/testDep',
                 'https://github.com/jonschlinkert/pad-left/tarball/2.1.0'
@@ -93,7 +96,7 @@ describe(PnpmShrinkwrapFile.name, () => {
           ).toEqual(true);
         } else {
           expect(
-            shrinkwrapFile.tryEnsureCompatibleDependency(
+            shrinkwrapFile.tryEnsureCompatibleDependencyAsync(
               new DependencySpecifier('@scope/testDep', '>=2.0.0 <3.0.0'),
               '@rush-temp/project3'
             )
@@ -112,42 +115,54 @@ describe(PnpmShrinkwrapFile.name, () => {
       });
     }
 
-    describe('V5.0 lockfile', () => {
+    describe('V5.0 lockfile', async () => {
       const filename: string = path.resolve(
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/non-workspace-pnpm-lock-v5.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+      const shrinkwrapFile: BaseShrinkwrapFile = (await ShrinkwrapFileFactory.getShrinkwrapFileAsync(
+        'pnpm',
+        filename
+      ))!;
 
       validateNonWorkspaceLockfile(shrinkwrapFile);
     });
 
-    describe('V5.3 lockfile', () => {
+    describe('V5.3 lockfile', async () => {
       const filename: string = path.resolve(
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/non-workspace-pnpm-lock-v5.3.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+      const shrinkwrapFile: BaseShrinkwrapFile = (await ShrinkwrapFileFactory.getShrinkwrapFileAsync(
+        'pnpm',
+        filename
+      ))!;
 
       validateNonWorkspaceLockfile(shrinkwrapFile);
     });
 
-    describe('V6.1 lockfile', () => {
+    describe('V6.1 lockfile', async () => {
       const filename: string = path.resolve(
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/non-workspace-pnpm-lock-v6.1.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+      const shrinkwrapFile: BaseShrinkwrapFile = (await ShrinkwrapFileFactory.getShrinkwrapFileAsync(
+        'pnpm',
+        filename
+      ))!;
 
       validateNonWorkspaceLockfile(shrinkwrapFile);
     });
 
-    describe('V9 lockfile', () => {
+    describe('V9 lockfile', async () => {
       const filename: string = path.resolve(
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/non-workspace-pnpm-lock-v9.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+      const shrinkwrapFile: BaseShrinkwrapFile = (await ShrinkwrapFileFactory.getShrinkwrapFileAsync(
+        'pnpm',
+        filename
+      ))!;
       validateNonWorkspaceLockfile(shrinkwrapFile);
     });
   });
@@ -191,33 +206,42 @@ describe(PnpmShrinkwrapFile.name, () => {
       });
     }
 
-    describe('V5.3 lockfile', () => {
+    describe('V5.3 lockfile', async () => {
       const filename: string = path.resolve(
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/workspace-pnpm-lock-v5.3.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+      const shrinkwrapFile: BaseShrinkwrapFile = (await ShrinkwrapFileFactory.getShrinkwrapFileAsync(
+        'pnpm',
+        filename
+      ))!;
 
       validateWorkspaceLockfile(shrinkwrapFile);
     });
 
-    describe('V6.1 lockfile', () => {
+    describe('V6.1 lockfile', async () => {
       const filename: string = path.resolve(
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/workspace-pnpm-lock-v5.3.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+      const shrinkwrapFile: BaseShrinkwrapFile = (await ShrinkwrapFileFactory.getShrinkwrapFileAsync(
+        'pnpm',
+        filename
+      ))!;
 
       validateWorkspaceLockfile(shrinkwrapFile);
     });
 
-    describe('V9 lockfile', () => {
+    describe('V9 lockfile', async () => {
       const filename: string = path.resolve(
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/workspace-pnpm-lock-v9.yaml'
       );
 
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+      const shrinkwrapFile: BaseShrinkwrapFile = (await ShrinkwrapFileFactory.getShrinkwrapFileAsync(
+        'pnpm',
+        filename
+      ))!;
 
       validateWorkspaceLockfile(shrinkwrapFile);
     });

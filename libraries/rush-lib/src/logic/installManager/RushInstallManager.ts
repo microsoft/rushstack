@@ -139,7 +139,7 @@ export class RushInstallManager extends BaseInstallManager {
           version
         );
 
-        if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependencySpecifier)) {
+        if (!shrinkwrapFile.hasCompatibleTopLevelDependencyAsync(dependencySpecifier)) {
           shrinkwrapWarnings.push(
             `Missing dependency "${dependency}" (${version}) required by the preferred versions from ` +
               RushConstants.commonVersionsFilename
@@ -269,7 +269,7 @@ export class RushInstallManager extends BaseInstallManager {
 
         if (
           shrinkwrapFile &&
-          !shrinkwrapFile.tryEnsureCompatibleDependency(dependencySpecifier, rushProject.tempProjectName)
+          !shrinkwrapFile.tryEnsureCompatibleDependencyAsync(dependencySpecifier, rushProject.tempProjectName)
         ) {
           shrinkwrapWarnings.push(
             `Missing dependency "${packageName}" (${packageVersion}) required by "${rushProject.packageName}"`

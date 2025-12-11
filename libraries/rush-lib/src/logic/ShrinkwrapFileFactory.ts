@@ -8,15 +8,15 @@ import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { YarnShrinkwrapFile } from './yarn/YarnShrinkwrapFile';
 
 export class ShrinkwrapFileFactory {
-  public static getShrinkwrapFile(
+  public static async getShrinkwrapFileAsync(
     packageManager: PackageManagerName,
     shrinkwrapFilename: string
-  ): BaseShrinkwrapFile | undefined {
+  ): Promise<BaseShrinkwrapFile | undefined> {
     switch (packageManager) {
       case 'npm':
         return NpmShrinkwrapFile.loadFromFile(shrinkwrapFilename);
       case 'pnpm':
-        return PnpmShrinkwrapFile.loadFromFile(shrinkwrapFilename);
+        return await PnpmShrinkwrapFile.loadFromFileAsync(shrinkwrapFilename);
       case 'yarn':
         return YarnShrinkwrapFile.loadFromFile(shrinkwrapFilename);
       default:
@@ -24,15 +24,15 @@ export class ShrinkwrapFileFactory {
     }
   }
 
-  public static parseShrinkwrapFile(
+  public static async parseShrinkwrapFileAsync(
     packageManager: PackageManagerName,
     shrinkwrapContent: string
-  ): BaseShrinkwrapFile | undefined {
+  ): Promise<BaseShrinkwrapFile | undefined> {
     switch (packageManager) {
       case 'npm':
         return NpmShrinkwrapFile.loadFromString(shrinkwrapContent);
       case 'pnpm':
-        return PnpmShrinkwrapFile.loadFromString(shrinkwrapContent);
+        return await PnpmShrinkwrapFile.loadFromStringAsync(shrinkwrapContent);
       case 'yarn':
         return YarnShrinkwrapFile.loadFromString(shrinkwrapContent);
       default:

@@ -665,10 +665,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // more up-to-date than the checked-in shrinkwrap since filtered installs are not written back.
     // Note that if there are no projects, or if we're in PNPM workspace mode and there are no
     // projects with dependencies, a lockfile won't be generated.
-    const tempShrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
-      this.rushConfiguration.packageManager,
-      subspace.getTempShrinkwrapFilename()
-    );
+    const tempShrinkwrapFile: BaseShrinkwrapFile | undefined =
+      await ShrinkwrapFileFactory.getShrinkwrapFileAsync(
+        this.rushConfiguration.packageManager,
+        subspace.getTempShrinkwrapFilename()
+      );
 
     if (tempShrinkwrapFile) {
       // Write or delete all project shrinkwraps related to the install

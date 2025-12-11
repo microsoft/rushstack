@@ -15,15 +15,15 @@ export interface IShrinkwrapFilePolicyValidatorOptions extends IPolicyValidatorO
 /**
  *  A policy that validates shrinkwrap files used by package managers.
  */
-export function validate(
+export async function validateAsync(
   rushConfiguration: RushConfiguration,
   subspace: Subspace,
   variant: string | undefined,
   options: IPolicyValidatorOptions
-): void {
+): Promise<void> {
   // eslint-disable-next-line no-console
   console.log('Validating package manager shrinkwrap file.\n');
-  const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
+  const shrinkwrapFile: BaseShrinkwrapFile | undefined = await ShrinkwrapFileFactory.getShrinkwrapFileAsync(
     rushConfiguration.packageManager,
     subspace.getCommittedShrinkwrapFilePath(variant)
   );

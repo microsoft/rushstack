@@ -151,11 +151,11 @@ export class RepoStateFile {
    *
    * @returns true if the file was modified, otherwise false.
    */
-  public refreshState(
+  public async refreshStateAsync(
     rushConfiguration: RushConfiguration,
     subspace: Subspace | undefined,
     variant?: string
-  ): boolean {
+  ): Promise<boolean> {
     if (subspace === undefined) {
       subspace = rushConfiguration.defaultSubspace;
     }
@@ -166,7 +166,7 @@ export class RepoStateFile {
       rushConfiguration.pnpmOptions &&
       rushConfiguration.pnpmOptions.preventManualShrinkwrapChanges;
     if (preventShrinkwrapChanges) {
-      const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
+      const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = await PnpmShrinkwrapFile.loadFromFileAsync(
         subspace.getCommittedShrinkwrapFilePath(variant)
       );
 
