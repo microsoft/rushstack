@@ -24,8 +24,6 @@ import {
 } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 import type { IReadonlyLookupByPath } from '@rushstack/lookup-by-path';
-import * as pnpmKitV8 from '@rushstack/rush-pnpm-kit-v8';
-import * as pnpmKitV9 from '@rushstack/rush-pnpm-kit-v9';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -46,6 +44,14 @@ import { CustomTipId, type CustomTipsConfiguration } from '../../api/CustomTipsC
 import { convertLockfileV9ToLockfileObject } from './PnpmShrinkWrapFileConverters';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
+const pnpmKitV8: typeof import('@rushstack/rush-pnpm-kit-v8') = Import.lazy(
+  '@rushstack/rush-pnpm-kit-v8',
+  require
+);
+const pnpmKitV9: typeof import('@rushstack/rush-pnpm-kit-v9') = Import.lazy(
+  '@rushstack/rush-pnpm-kit-v9',
+  require
+);
 
 export enum ShrinkwrapFileMajorVersion {
   V6 = 6,
@@ -161,7 +167,8 @@ export function parsePnpm9DependencyKey(
   // Example: https://github.com/jonschlinkert/pad-left/tarball/2.1.0                           -> name=undefined         version=undefined
   // Example: pad-left@https://github.com/jonschlinkert/pad-left/tarball/2.1.0                  -> name=pad-left          nonSemverVersion=https://xxxx
   // Example: pad-left@https://codeload.github.com/jonschlinkert/pad-left/tar.gz/7798d648225aa5 -> name=pad-left          nonSemverVersion=https://xxxx
-  const dependency: pnpmKitV9.dependencyPath.DependencyPath = pnpmKitV9.dependencyPath.parse(dependencyKey);
+  const dependency: import('@rushstack/rush-pnpm-kit-v9').dependencyPath.DependencyPath =
+    pnpmKitV9.dependencyPath.parse(dependencyKey);
 
   const name: string = dependency.name ?? dependencyName;
   const version: string = dependency.version ?? dependency.nonSemverVersion ?? dependencyKey;
