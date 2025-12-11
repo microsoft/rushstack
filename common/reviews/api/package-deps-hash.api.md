@@ -33,6 +33,7 @@ export interface IDetailedRepoState {
     files: Map<string, string>;
     hasSubmodules: boolean;
     hasUncommittedChanges: boolean;
+    symlinks: Map<string, string>;
 }
 
 // @beta

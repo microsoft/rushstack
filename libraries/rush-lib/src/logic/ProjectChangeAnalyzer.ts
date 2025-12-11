@@ -305,7 +305,7 @@ export class ProjectChangeAnalyzer {
 
       return async function tryGetSnapshotAsync(): Promise<IInputsSnapshot | undefined> {
         try {
-          const [{ files: hashes, hasUncommittedChanges }, additionalFiles] = await Promise.all([
+          const [{ files: hashes, symlinks, hasUncommittedChanges }, additionalFiles] = await Promise.all([
             getDetailedRepoStateAsync(rootDirectory, additionalRelativePathsToHash, gitPath, filterPath),
             getAdditionalFilesFromRushProjectConfigurationAsync(
               additionalGlobs,
@@ -315,8 +315,15 @@ export class ProjectChangeAnalyzer {
             )
           ]);
 
+          if (symlinks.size > 0) {
+            terminal.writeWarningLine(
+              `Warning: Detected ${symlinks.size} Git-tracked symlinks in the repository. ` +
+                `These will be ignored by the change detection engine.`
+            );
+          }
+
           for (const file of additionalFiles) {
-            if (hashes.has(file)) {
+            if (hashes.has(file) || symlinks.has(file)) {
               additionalFiles.delete(file);
             }
           }

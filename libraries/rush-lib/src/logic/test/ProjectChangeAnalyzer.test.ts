@@ -30,7 +30,8 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
       return {
         hasSubmodules: false,
         hasUncommittedChanges: false,
-        files: mockHashes
+        files: mockHashes,
+        symlinks: new Map()
       };
     },
     getRepoChangesAsync(): ReadonlyMap<string, string> {
