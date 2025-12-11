@@ -27,6 +27,11 @@ const STANDARD_GIT_OPTIONS: readonly string[] = [
   'maintenance.auto=false'
 ];
 
+const OBJECTMODE_SUBMODULE: '160000' = '160000';
+const OBJECTMODE_SYMLINK: '120000' = '120000';
+const OBJECTMODE_FILE_NONEXECUTABLE: '100644' = '100644';
+const OBJECTMODE_FILE_EXECUTABLE: '100755' = '100755';
+
 interface IGitTreeState {
   files: Map<string, string>; // type "blob"
   symlinks: Map<string, string>; // type "link"
@@ -34,8 +39,7 @@ interface IGitTreeState {
 }
 
 /**
- * Parses the output of the "git ls-tree -r -z" command
- * or the "git ls-files --cached -z --format='%(objectmode) %(objecttype) %(objectname)%x09%(path)'" command
+ * Parses the output of the "git ls-tree -r -z" command or of other commands that have been coerced to match its format.
  * @internal
  */
 export function parseGitLsTree(output: string): IGitTreeState {
@@ -63,18 +67,18 @@ export function parseGitLsTree(output: string): IGitTreeState {
     const mode: string = item.slice(0, item.indexOf(' '));
 
     switch (mode) {
-      case '160000': {
+      case OBJECTMODE_SUBMODULE: {
         // This is a submodule
         submodules.set(filePath, hash);
         break;
       }
-      case '120000': {
+      case OBJECTMODE_SYMLINK: {
         // This is a symbolic link
         symlinks.set(filePath, hash);
         break;
       }
-      case '100644':
-      case '100755':
+      case OBJECTMODE_FILE_NONEXECUTABLE:
+      case OBJECTMODE_FILE_EXECUTABLE:
       default: {
         files.set(filePath, hash);
         break;
