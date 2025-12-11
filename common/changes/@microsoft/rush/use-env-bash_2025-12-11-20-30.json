@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Change hook file shebang to use env bash",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
