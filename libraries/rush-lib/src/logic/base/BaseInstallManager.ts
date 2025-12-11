@@ -322,13 +322,22 @@ export abstract class BaseInstallManager {
             )) as ILockfile | null;
 
             if (lockfileV9?.lockfileVersion.toString().startsWith('9')) {
+              const { lockfileFs } = await import('@rushstack/rush-pnpm-kit-v9');
+              const lockfileV9: ILockfile | null = (await lockfileFs.readWantedLockfile(
+                pnpmLockFolder,
+                options
+                // TODO: pnpm-sync-lib.d.ts was at some point generalized to support multiple lockfile formats,
+                // however its API still returns a single "ILockfile" that is incompatible with the newer interfaces
+              )) as ILockfile | null;
               return lockfileV9;
             }
 
-            const lockfileV6: ILockfile | null = await pnpmKitV8.lockfileFs.readWantedLockfile(
-              pnpmLockFolder,
-              options
-            );
+            if (lockfileV6?.lockfileVersion.toString().startsWith('6')) {
+              const { lockfileFs } = await import('@rushstack/rush-pnpm-kit-v8');
+              const lockfileV6: ILockfile | null = await lockfileFs.readWantedLockfile(
+                pnpmLockFolder,
+                options
+              );
 
             if (lockfileV6?.lockfileVersion.toString().startsWith('6')) {
               return lockfileV6;
