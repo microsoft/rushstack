@@ -11,7 +11,7 @@ export class PlaywrightBrowserTunnelCommandLine extends CommandLineParser {
   private readonly _terminalProvider: ITerminalProvider;
   private readonly _globalTerminal: ITerminal;
 
-  public constructor() {
+  public constructor(terminal?: ITerminal) {
     super({
       toolFilename: 'playwright-browser-tunnel',
       toolDescription:
@@ -22,7 +22,7 @@ export class PlaywrightBrowserTunnelCommandLine extends CommandLineParser {
       debugEnabled: true,
       verboseEnabled: true
     });
-    this._globalTerminal = new Terminal(this._terminalProvider);
+    this._globalTerminal = terminal ?? new Terminal(this._terminalProvider);
   }
 
   public async executeAsync(args?: string[]): Promise<boolean> {

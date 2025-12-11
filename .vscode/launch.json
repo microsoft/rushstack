@@ -98,6 +98,19 @@
 			"outFiles": [
 				"${workspaceFolder}/vscode-extensions/debug-certificate-manager-vscode-extension/**"
 			]
+		},
+		{
+			"name": "Launch Playwright on Codespaces VS Code Extension",
+			"type": "extensionHost",
+			"request": "launch",
+			"cwd": "${workspaceFolder}/vscode-extensions/playwright-on-codespaces-vscode-extension/dist/vsix/unpacked",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}/vscode-extensions/playwright-on-codespaces-vscode-extension/dist/vsix/unpacked"
+			],
+			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/vscode-extensions/playwright-on-codespaces-vscode-extension/**"
+			]
 		}
 	]
 }

@@ -17,9 +17,6 @@
     "_phase:build": "heft run --only build -- --clean",
     "demo": "playwright test --config=playwright.config.ts"
   },
-  "bin": {
-    "playwright-browser-tunnel": "./bin/playwright-browser-tunnel"
-  },
   "license": "MIT",
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",

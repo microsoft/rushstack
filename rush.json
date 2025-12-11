@@ -1454,6 +1454,12 @@
       "reviewCategory": "vscode-extensions",
       "tags": ["vsix"]
     },
+    {
+      "packageName": "playwright-on-codespaces",
+      "projectFolder": "vscode-extensions/playwright-on-codespaces-vscode-extension",
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"]
+    },
 
     // "webpack" folder (alphabetical order)
     {

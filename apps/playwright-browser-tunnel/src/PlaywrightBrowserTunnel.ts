@@ -308,10 +308,19 @@ export class PlaywrightTunnel {
 
     const { chromium, firefox, webkit } = playwright;
     const browsers: Record<ISupportedBrowsers, BrowserType> = { chromium, firefox, webkit };
-    const browserServer: BrowserServer = await browsers[browserName].launchServer({
+
+    // Ensure headed mode for local browser display with container-safe fallbacks
+    const launchOptionsWithDefaults: LaunchOptions = {
+      headless: false, // Keep headed mode for local browser display
       ...launchOptions,
-      headless: false
-    });
+      args: [
+        '--no-sandbox', // Required for container environments
+        '--disable-dev-shm-usage', // Prevents /dev/shm crashes in containers
+        ...(launchOptions.args || [])
+      ]
+    };
+
+    const browserServer: BrowserServer = await browsers[browserName].launchServer(launchOptionsWithDefaults);
     if (!browserServer) {
       throw new Error(
         `Failed to launch browser server for ${browserName} with options: ${JSON.stringify(launchOptions)}`
@@ -444,9 +453,8 @@ export class PlaywrightTunnel {
             console.log(`Validated handshake: ${JSON.stringify(handshake)}`);
 
             this.status = 'setting-up-browser-server';
-            const browserServerProxy: IBrowserServerProxy = await this._getPlaywrightBrowserServerProxyAsync(
-              handshake
-            );
+            const browserServerProxy: IBrowserServerProxy =
+              await this._getPlaywrightBrowserServerProxyAsync(handshake);
             client = browserServerProxy.client;
             browserServer = browserServerProxy.browserServer;
 
