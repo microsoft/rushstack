@@ -645,11 +645,9 @@ export class Utilities {
   ): TCommandResult {
     let shellCommand: string = process.env.comspec || 'cmd';
     let commandFlags: string = '/d /s /c';
-    let useShell: boolean = true;
     if (process.platform !== 'win32') {
       shellCommand = 'sh';
       commandFlags = '-c';
-      useShell = false;
     }
 
     const environment: IEnvironment = Utilities._createEnvironmentForRushCommand({
@@ -670,7 +668,6 @@ export class Utilities {
 
     const spawnOptions: child_process.SpawnOptions = {
       cwd: options.workingDirectory,
-      shell: useShell,
       env: environment,
       stdio
     };
@@ -810,7 +807,6 @@ export class Utilities {
   }: IExecuteCommandInternalOptions): Promise<IWaitForExitResult<string> | IWaitForExitResultWithoutOutput> {
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
-      shell: true,
       stdio: stdio,
       env: keepEnvironment
         ? environment

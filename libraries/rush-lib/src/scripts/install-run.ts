@@ -197,8 +197,7 @@ function _resolvePackageVersion(
 
       const spawnSyncOptions: childProcess.SpawnSyncOptions = {
         cwd: rushTempFolder,
-        stdio: [],
-        shell: _isWindows()
+        stdio: []
       };
       const platformNpmPath: string = _getPlatformPath(npmPath);
       const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer | string> = childProcess.spawnSync(
@@ -365,8 +364,7 @@ function _installPackage(
     const result: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(platformNpmPath, [command], {
       stdio: 'inherit',
       cwd: packageInstallFolder,
-      env: process.env,
-      shell: _isWindows()
+      env: process.env
     });
 
     if (result.status !== 0) {
@@ -466,7 +464,6 @@ export function installAndRun(
     result = childProcess.spawnSync(platformBinPath, packageBinArgs, {
       stdio: 'inherit',
       windowsVerbatimArguments: false,
-      shell: _isWindows(),
       cwd: process.cwd(),
       env: process.env
     });
