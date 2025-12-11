@@ -32,6 +32,10 @@ const OBJECTMODE_SYMLINK: '120000' = '120000';
 const OBJECTMODE_FILE_NONEXECUTABLE: '100644' = '100644';
 const OBJECTMODE_FILE_EXECUTABLE: '100755' = '100755';
 
+// Note that `type` is a stub that is being ignored by the parser in favor of using `mode` to infer, since `%(objecttype)` requires git 2.51.0+
+// e.g. 10644 blob <hash>\t<path>
+const GIT_LSTREE_FORMAT: string = '%(objectmode) type %(objectname)%x09%(path)';
+
 interface IGitTreeState {
   files: Map<string, string>; // type "blob"
   symlinks: Map<string, string>; // type "link"
@@ -438,7 +442,7 @@ export async function getDetailedRepoStateAsync(
       // Specify the full path to files relative to the root
       '--full-name',
       // Match the format of "git ls-tree". The %(objecttype) placeholder requires git 2.51.0+, so not using yet.
-      '--format=%(objectmode) type %(objectname)%x09%(path)',
+      `--format=${GIT_LSTREE_FORMAT}`,
       '--',
       ...(filterPath ?? [])
     ]),
