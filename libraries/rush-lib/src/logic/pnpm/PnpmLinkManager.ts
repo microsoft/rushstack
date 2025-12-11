@@ -323,8 +323,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         RushConstants.nodeModulesFolderName
       );
     } else if (this._pnpmVersion.major >= 10) {
-      // eslint-disable-next-line @typescript-eslint/typedef
-      const pnpmKitV10 = await import('@rushstack/rush-pnpm-kit-v10');
+      const pnpmKitV10: typeof import('@rushstack/rush-pnpm-kit-v10') = await import('@rushstack/rush-pnpm-kit-v10');
 
       // project@file+projects+presentation-integration-tests.tgz_jsdom@11.12.0
       // The second parameter is max length of virtual store dir,
@@ -342,8 +341,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         RushConstants.nodeModulesFolderName
       );
     } else if (this._pnpmVersion.major >= 9) {
-      // eslint-disable-next-line @typescript-eslint/typedef
-      const pnpmKitV9 = await import('@rushstack/rush-pnpm-kit-v9');
+      const pnpmKitV9: typeof import('@rushstack/rush-pnpm-kit-v9') = await import('@rushstack/rush-pnpm-kit-v9');
 
       // project@file+projects+presentation-integration-tests.tgz_jsdom@11.12.0
       // The second parameter is max length of virtual store dir, for v9 default is 120 https://pnpm.io/9.x/npmrc#virtual-store-dir-max-length
@@ -357,8 +355,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         RushConstants.nodeModulesFolderName
       );
     } else if (this._pnpmVersion.major >= 8) {
-      // eslint-disable-next-line @typescript-eslint/typedef
-      const pnpmKitV8 = await import('@rushstack/rush-pnpm-kit-v8');
+      const pnpmKitV8: typeof import('@rushstack/rush-pnpm-kit-v8') = await import('@rushstack/rush-pnpm-kit-v8');
       // PNPM 8 changed the local path format again and the hashing algorithm, and
       // is now using the scoped '@pnpm/dependency-path' package
       // See https://github.com/pnpm/pnpm/releases/tag/v8.0.0
