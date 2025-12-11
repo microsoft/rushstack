@@ -27,8 +27,6 @@ import {
   Async
 } from '@rushstack/node-core-library';
 import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
-import * as pnpmKitV8 from '@rushstack/rush-pnpm-kit-v8';
-import * as pnpmKitV9 from '@rushstack/rush-pnpm-kit-v9';
 
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
 import type { AsyncRecycler } from '../../utilities/AsyncRecycler';
@@ -314,7 +312,8 @@ export abstract class BaseInstallManager {
           readPnpmLockfile: async (lockfilePath: string, options): Promise<ILockfile | undefined> => {
             const pnpmLockFolder: string = path.dirname(lockfilePath);
 
-            const lockfileV9: ILockfile | null = (await pnpmKitV9.lockfileFs.readWantedLockfile(
+            const { lockfileFs: lockfileFsV9 } = await import('@rushstack/rush-pnpm-kit-v9');
+            const lockfileV9: ILockfile | null = (await lockfileFsV9.readWantedLockfile(
               pnpmLockFolder,
               options
               // TODO: pnpm-sync-lib.d.ts was at some point generalized to support multiple lockfile formats,
@@ -322,22 +321,14 @@ export abstract class BaseInstallManager {
             )) as ILockfile | null;
 
             if (lockfileV9?.lockfileVersion.toString().startsWith('9')) {
-              const { lockfileFs } = await import('@rushstack/rush-pnpm-kit-v9');
-              const lockfileV9: ILockfile | null = (await lockfileFs.readWantedLockfile(
-                pnpmLockFolder,
-                options
-                // TODO: pnpm-sync-lib.d.ts was at some point generalized to support multiple lockfile formats,
-                // however its API still returns a single "ILockfile" that is incompatible with the newer interfaces
-              )) as ILockfile | null;
               return lockfileV9;
             }
 
-            if (lockfileV6?.lockfileVersion.toString().startsWith('6')) {
-              const { lockfileFs } = await import('@rushstack/rush-pnpm-kit-v8');
-              const lockfileV6: ILockfile | null = await lockfileFs.readWantedLockfile(
-                pnpmLockFolder,
-                options
-              );
+            const { lockfileFs: lockfileFsV6 } = await import('@rushstack/rush-pnpm-kit-v8');
+            const lockfileV6: ILockfile | null = await lockfileFsV6.readWantedLockfile(
+              pnpmLockFolder,
+              options
+            );
 
             if (lockfileV6?.lockfileVersion.toString().startsWith('6')) {
               return lockfileV6;
