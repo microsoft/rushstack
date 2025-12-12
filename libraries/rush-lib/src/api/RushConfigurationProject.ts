@@ -31,6 +31,16 @@ export interface IRushConfigurationProjectJson {
   publishFolder?: string;
   tags?: string[];
   subspaceName?: string;
+  access?: PackageAccessType;
+}
+
+/**
+ * The type of package access restrictions
+ */
+export enum PackageAccessType {
+  Private = 'private',
+  Protected = 'protected',
+  Public = 'public'
 }
 
 /**
@@ -208,13 +218,23 @@ export class RushConfigurationProject {
    */
   public readonly configuredSubspaceName: string | undefined;
 
+  /**
+   * Access restrictions
+   */
+  public readonly access: PackageAccessType;
+
   /** @internal */
   public constructor(options: IRushConfigurationProjectOptions) {
     const { projectJson, rushConfiguration, tempProjectName, allowedProjectTags } = options;
-    const { packageName, projectFolder: projectRelativeFolder } = projectJson;
+    const {
+      packageName,
+      projectFolder: projectRelativeFolder,
+      access = PackageAccessType.Public
+    } = projectJson;
     this.rushConfiguration = rushConfiguration;
     this.packageName = packageName;
     this.projectRelativeFolder = projectRelativeFolder;
+    this.access = access;
 
     validateRelativePathField(projectRelativeFolder, 'projectFolder', rushConfiguration.rushJsonFile);
 
@@ -518,6 +538,31 @@ export class RushConfigurationProject {
       }
     }
     return isMain;
+  }
+
+  /**
+   * Validates if this project can access its local dependencies.
+   *
+   */
+  public validateAccess(): void {
+    const invalidDeps: string[] = [];
+    for (const project of this.dependencyProjects) {
+      if (project.access === PackageAccessType.Public) {
+        continue;
+      } else if (project.access === PackageAccessType.Private) {
+        invalidDeps.push(project.packageName);
+      } else if (this.subspace.subspaceName !== project.subspace.subspaceName) {
+        invalidDeps.push(project.packageName);
+      }
+    }
+
+    if (invalidDeps.length > 0) {
+      throw new Error(
+        `${this.packageName} doesn't have permissions to access ${invalidDeps.join(
+          ', '
+        )}.\nPlease remove this dependency or update the ${RushConstants.rushJsonFilename} access rights.`
+      );
+    }
   }
 }
 
