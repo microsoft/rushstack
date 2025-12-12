@@ -31,7 +31,7 @@ export class PlaywrightBrowserTunnelCommandLine extends CommandLineParser {
       mode: 'poll-connection',
       onStatusChange: (status) => this._globalTerminal.writeLine(`Tunnel status: ${status}`),
       tmpPath: '/tmp/playwright-browser-tunnel',
-      wsEndpoint: 'ws://localhost:3000'
+      wsEndpoint: 'ws://127.0.0.1:3000'
     });
 
     let isShuttingDown: boolean = false;
