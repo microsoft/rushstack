@@ -139,7 +139,7 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   async function handleShowSettings(): Promise<void> {
-    await vscode.commands.executeCommand(VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS, `@ext:${EXTENSION_ID}`);
+    await vscode.commands.executeCommand(VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS, EXTENSION_ID);
   }
 
   async function handleSync(): Promise<void> {

@@ -3,7 +3,7 @@
 
 export const EXTENSION_DISPLAY_NAME: string = 'Debug Certificate Manager';
 
-export const EXTENSION_ID: string = 'RushStack.debug-certificate-manager';
+export const EXTENSION_ID: string = '@ext:ms-RushStack.debug-certificate-manager';
 
 export const COMMAND_PREFIX: string = 'debugCertificateManager';
 export const COMMAND_SYNC: string = `${COMMAND_PREFIX}.sync`;
