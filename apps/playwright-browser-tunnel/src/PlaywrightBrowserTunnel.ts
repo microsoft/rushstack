@@ -309,18 +309,11 @@ export class PlaywrightTunnel {
     const { chromium, firefox, webkit } = playwright;
     const browsers: Record<ISupportedBrowsers, BrowserType> = { chromium, firefox, webkit };
 
-    // Ensure headed mode for local browser display with container-safe fallbacks
-    const launchOptionsWithDefaults: LaunchOptions = {
-      headless: false, // Keep headed mode for local browser display
+    const browserServer: BrowserServer = await browsers[browserName].launchServer({
       ...launchOptions,
-      args: [
-        '--no-sandbox', // Required for container environments
-        '--disable-dev-shm-usage', // Prevents /dev/shm crashes in containers
-        ...(launchOptions.args || [])
-      ]
-    };
+      headless: false
+    });
 
-    const browserServer: BrowserServer = await browsers[browserName].launchServer(launchOptionsWithDefaults);
     if (!browserServer) {
       throw new Error(
         `Failed to launch browser server for ${browserName} with options: ${JSON.stringify(launchOptions)}`
