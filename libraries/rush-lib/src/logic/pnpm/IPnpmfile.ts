@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { LogBase } from '@pnpm/logger';
-
+import type * as pnpmKitV8 from '@rushstack/rush-pnpm-kit-v8';
 import type { IPackageJson } from '@rushstack/node-core-library';
 
 import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
@@ -53,7 +52,7 @@ export interface IPnpmfileContext {
 /**
  * The `log` parameter passed to {@link IPnpmfile.hooks.filterLog}.
  */
-export type IPnpmLog = LogBase & {
+export type IPnpmLog = pnpmKitV8.logger.LogBase & {
   [key: string]: unknown;
 };
 
