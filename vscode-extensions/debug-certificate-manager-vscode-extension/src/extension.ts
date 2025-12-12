@@ -214,9 +214,9 @@ export function activate(context: vscode.ExtensionContext): void {
           });
           terminal.writeLine(`Running command to resolve home directory: ${output}`);
 
-          const startIndex: number = output.indexOf(markerPrefix);
-          const endIndex: number = output.indexOf(markerSuffix);
-          if (startIndex !== -1 && endIndex !== -1) {
+          const startIndex: number = output.lastIndexOf(markerPrefix);
+          const endIndex: number = output.lastIndexOf(markerSuffix);
+          if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
             homeDir = output.substring(startIndex + markerPrefix.length, endIndex).trim();
           } else {
             throw new Error('Failed to parse home directory from command output');
