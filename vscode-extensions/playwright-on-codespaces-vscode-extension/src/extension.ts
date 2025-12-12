@@ -9,16 +9,6 @@ const EXTENSION_DISPLAY_NAME: string = 'Playwright on Codespaces';
 let terminal: Terminal;
 
 export function activate(context: vscode.ExtensionContext): void {
-  // Check if running in remote environment
-  if (vscode.env.remoteName) {
-    void vscode.window.showErrorMessage(
-      `Playwright on Codespaces extension is running remotely (${vscode.env.remoteName}). ` +
-        'This extension must run locally to display browsers on your machine. ' +
-        'Please install it as a local extension only.'
-    );
-    return;
-  }
-
   // Setup Logging Terminal
   const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel(EXTENSION_DISPLAY_NAME);
   const terminalProvider: VScodeOutputChannelTerminalProvider = new VScodeOutputChannelTerminalProvider(
