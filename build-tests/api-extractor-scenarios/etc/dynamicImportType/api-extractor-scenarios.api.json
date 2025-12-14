@@ -206,6 +206,71 @@
           "members": [
             {
               "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!Item#defaultImport:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "defaultImport: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "import('api-extractor-lib2-test')."
+                },
+                {
+                  "kind": "Reference",
+                  "text": "default",
+                  "canonicalReference": "api-extractor-lib2-test!DefaultClass:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "defaultImport",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              },
+              "isStatic": false,
+              "isProtected": false,
+              "isAbstract": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!Item#externalModule:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "externalModule: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "typeof import('api-extractor-lib3-test')"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "externalModule",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false,
+              "isProtected": false,
+              "isAbstract": false
+            },
+            {
+              "kind": "Property",
               "canonicalReference": "api-extractor-scenarios!Item#lib1:member",
               "docComment": "",
               "excerptTokens": [
@@ -311,6 +376,36 @@
             },
             {
               "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!Item#localModule:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "localModule: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "typeof import('./Options')"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "localModule",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false,
+              "isProtected": false,
+              "isAbstract": false
+            },
+            {
+              "kind": "Property",
               "canonicalReference": "api-extractor-scenarios!Item#options:member",
               "docComment": "",
               "excerptTokens": [
@@ -325,7 +420,7 @@
                 {
                   "kind": "Reference",
                   "text": "Options",
-                  "canonicalReference": "api-extractor-scenarios!~Options:interface"
+                  "canonicalReference": "api-extractor-scenarios!~Options_2~Options:interface"
                 },
                 {
                   "kind": "Content",
@@ -346,12 +441,47 @@
             },
             {
               "kind": "Property",
-              "canonicalReference": "api-extractor-scenarios!Item#reExport:member",
+              "canonicalReference": "api-extractor-scenarios!Item#reExportExternal:member",
               "docComment": "",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "reExport: "
+                  "text": "reExportExternal: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "import('./re-export')."
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Lib3Class",
+                  "canonicalReference": "api-extractor-lib3-test!Lib3Class:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "reExportExternal",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              },
+              "isStatic": false,
+              "isProtected": false,
+              "isAbstract": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!Item#reExportLocal:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "reExportLocal: "
                 },
                 {
                   "kind": "Content",
@@ -370,7 +500,77 @@
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
-              "name": "reExport",
+              "name": "reExportLocal",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              },
+              "isStatic": false,
+              "isProtected": false,
+              "isAbstract": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!Item#typeofImportExternal:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "typeofImportExternal: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "typeof import('api-extractor-lib3-test')."
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Lib1Class",
+                  "canonicalReference": "api-extractor-lib1-test!Lib1Class:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "typeofImportExternal",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              },
+              "isStatic": false,
+              "isProtected": false,
+              "isAbstract": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!Item#typeofImportLocal:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "typeofImportLocal: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "typeof import('./Options')."
+                },
+                {
+                  "kind": "Reference",
+                  "text": "OptionsClass",
+                  "canonicalReference": "api-extractor-scenarios!~Options_2~OptionsClass:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "typeofImportLocal",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 3
