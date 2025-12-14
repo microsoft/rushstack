@@ -115,6 +115,22 @@
           "syntaxKind": "modifier"
         },
         {
+          "tagName": "@jsx",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@jsxRuntime",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@jsxFrag",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@jsxImportSource",
+          "syntaxKind": "block"
+        },
+        {
           "tagName": "@betaDocumentation",
           "syntaxKind": "modifier"
         },
