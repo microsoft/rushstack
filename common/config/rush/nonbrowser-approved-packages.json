@@ -208,7 +208,7 @@
     },
     {
       "name": "@rushstack/heft-rspack-plugin",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/heft-sass-load-themed-styles-plugin",

@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { ExampleApp } from './ExampleApp';
 
 import './index.css';
 
 const rootDiv: HTMLElement = document.getElementById('root') as HTMLElement;
-ReactDOM.render(<ExampleApp />, rootDiv);
+createRoot(rootDiv).render(<ExampleApp />);

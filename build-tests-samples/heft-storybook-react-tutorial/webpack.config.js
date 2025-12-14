@@ -2,7 +2,8 @@
 
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/webpack4-module-minifier-plugin');
+const { ModuleMinifierPlugin } = require('@rushstack/webpack5-module-minifier-plugin');
+const { WorkerPoolMinifier } = require('@rushstack/module-minifier');
 
 /**
  * If the "--production" command-line parameter is specified when invoking Heft, then the
@@ -57,7 +58,13 @@ function createWebpackConfig({ production }) {
     optimization: {
       minimizer: [
         new ModuleMinifierPlugin({
-          minifier: new WorkerPoolMinifier(),
+          minifier: new WorkerPoolMinifier({
+            terserOptions: {
+              ecma: 2020,
+              mangle: true
+            },
+            verbose: true
+          }),
           useSourceMap: true
         })
       ]
