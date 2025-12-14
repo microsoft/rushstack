@@ -1,6 +1,6 @@
 /** @public */
 export declare namespace A {
-    export class B {
+    class B {
         myMethod(): void;
     }
 }

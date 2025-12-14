@@ -109,7 +109,7 @@ export declare type IInterfaceLikeTypeAlias = {
 /** @public */
 export declare namespace Namespace1 {
     /** @public */
-    export class Class3 {
+    class Class3 {
         /** Some prop. */
         someProp: number;
         /** Some method. */
