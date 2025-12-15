@@ -28,8 +28,8 @@ function createConfig({ production, webpack }) {
 
   // Add fallbacks for Node.js modules not available in the VS Code extension host
   Object.assign(config.resolve.fallback, {
-    bufferutil: false,
-    'utf-8-validate': false
+    bufferutil: require.resolve('bufferutil/'),
+    'utf-8-validate': require.resolve('utf-8-validate/')
   });
 
   return config;
