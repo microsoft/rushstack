@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Sat, 06 Dec 2025 01:12:28 GMT and should not be manually modified.
+This log was last generated on Fri, 12 Dec 2025 01:12:05 GMT and should not be manually modified.
+
+## 4.6.0
+Fri, 12 Dec 2025 01:12:05 GMT
+
+### Minor changes
+
+- Replace "git ls-tree" with "git ls-files" to improve performance. Identify symbolic links and return them separately in "getDetailedRepoStateAsync". Symbolic links will be omitted from the result returned by "getRepoStateAsync", as they are not "files".
 
 ## 4.5.7
 Sat, 06 Dec 2025 01:12:28 GMT
