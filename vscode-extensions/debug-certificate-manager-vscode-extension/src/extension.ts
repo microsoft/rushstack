@@ -22,7 +22,7 @@ import {
   COMMAND_SYNC,
   COMMAND_UNTRUST_CERTIFICATE,
   EXTENSION_DISPLAY_NAME,
-  EXTENSION_ID,
+  VSCODE_SETTINGS_EXTENSION_ID_FILTER,
   VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS
 } from './constants';
 import { runWorkspaceCommandAsync } from './terminal';
@@ -139,7 +139,10 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   async function handleShowSettings(): Promise<void> {
-    await vscode.commands.executeCommand(VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS, EXTENSION_ID);
+    await vscode.commands.executeCommand(
+      VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS,
+      VSCODE_SETTINGS_EXTENSION_ID_FILTER
+    );
   }
 
   async function handleSync(): Promise<void> {
