@@ -48,17 +48,32 @@
         "command": "playwright-tunnel.stop",
         "title": "Stop Playwright Browser Tunnel",
         "category": "Playwright"
+      },
+      {
+        "command": "playwright-tunnel.showLog",
+        "title": "Show Log",
+        "category": "Playwright on Codespaces"
+      },
+      {
+        "command": "playwright-tunnel.showSettings",
+        "title": "Show Settings",
+        "category": "Playwright on Codespaces"
+      },
+      {
+        "command": "playwright-tunnel.showMenu",
+        "title": "Show Tunnel Menu",
+        "category": "Playwright on Codespaces"
       }
     ],
     "configuration": {
       "title": "Playwright Browser Tunnel",
       "properties": {
-        "playwrightTunnel.autoStart": {
+        "playwright-tunnel.autoStart": {
           "type": "boolean",
           "default": true,
           "description": "Automatically start tunnel when Playwright projects are detected"
         },
-        "playwrightTunnel.tunnelPort": {
+        "playwright-tunnel.tunnelPort": {
           "type": "number",
           "default": 3000,
           "description": "Port for the browser tunnel server"
