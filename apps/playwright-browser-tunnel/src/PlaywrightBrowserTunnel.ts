@@ -156,6 +156,7 @@ export class PlaywrightTunnel {
     }
   }
 
+  // TODO: This is not used but we should use this in a vscode command to perform cleanup.
   public async uninstallPlaywrightBrowsersAsync(): Promise<void> {
     try {
       const playwrightVersion: semver.SemVer | null = semver.coerce('latest');
@@ -208,6 +209,8 @@ export class PlaywrightTunnel {
     await Executable.waitForExitAsync(cp);
   }
 
+  // TODO: Add a installation cache to avoid reinstalling same version multiple times
+  // Map which stores the state of installed playwright-core versions
   private async _installPlaywrightCoreAsync({
     playwrightVersion
   }: Pick<IHandshake, 'playwrightVersion'>): Promise<void> {
@@ -248,6 +251,8 @@ export class PlaywrightTunnel {
     });
   }
 
+  // TODO: Only supporting one test at a time.
+  // Need to support multiple simultaneous connections for parallel tests.
   private async _pollConnectionAsync(): Promise<WebSocket> {
     this._terminal.writeLine(`Waiting for WebSocket connection`);
     return new Promise((resolve, reject) => {
@@ -367,6 +372,7 @@ export class PlaywrightTunnel {
     };
   }
 
+  // ws1 is the tunnel websocket, ws2 is the browser server websocket
   private async _setupForwardingAsync(ws1: WebSocket, ws2: WebSocket): Promise<void> {
     console.log('Setting up message forwarding between ws1 and ws2');
     ws1.on('message', (data) => {
