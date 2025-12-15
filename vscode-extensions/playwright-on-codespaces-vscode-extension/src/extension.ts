@@ -223,6 +223,9 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     }
   );
+
+  // Auto-start the tunnel on activation
+  void handleStartTunnel();
 }
 
 export function deactivate(): void {}
