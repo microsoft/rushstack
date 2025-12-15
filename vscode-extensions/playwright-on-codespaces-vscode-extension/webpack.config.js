@@ -26,7 +26,7 @@ function createConfig({ production, webpack }) {
     config.resolve.fallback = {};
   }
 
-  // Add fallbacks for Node.js modules not available in the VS Code extension host
+  // `ws` module depends on `bufferutil` and `utf-8-validate`
   Object.assign(config.resolve.fallback, {
     bufferutil: require.resolve('bufferutil/'),
     'utf-8-validate': require.resolve('utf-8-validate/')
