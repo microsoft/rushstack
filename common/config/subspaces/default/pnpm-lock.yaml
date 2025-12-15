@@ -4934,6 +4934,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      '@rushstack/heft-node-rig':
+        specifier: workspace:*
+        version: link:../../rigs/heft-node-rig
       '@rushstack/heft-vscode-extension-rig':
         specifier: workspace:*
         version: link:../../rigs/heft-vscode-extension-rig

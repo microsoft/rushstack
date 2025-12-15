@@ -105,7 +105,7 @@
 			"request": "launch",
 			"cwd": "${workspaceFolder}/vscode-extensions/playwright-on-codespaces-vscode-extension/dist/vsix/unpacked",
 			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}/vscode-extensions/playwright-on-codespaces-vscode-extension/dist/vsix/unpacked"
+				"--extensionDevelopmentPath=${workspaceFolder}/vscode-extensions/playwright-on-codespaces-vscode-extension"
 			],
 			"sourceMaps": true,
 			"outFiles": [

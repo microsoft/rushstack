@@ -29,7 +29,7 @@
   "engines": {
     "vscode": "^1.103.0"
   },
-  "main": "./extension.js",
+  "main": "./lib/extension.js",
   "scripts": {
     "build": "heft build --clean",
     "build:watch": "heft build-watch",
@@ -93,6 +93,7 @@
   },
   "devDependencies": {
     "@rushstack/heft-vscode-extension-rig": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/node": "20.17.19",
     "@types/vscode": "1.103.0",
