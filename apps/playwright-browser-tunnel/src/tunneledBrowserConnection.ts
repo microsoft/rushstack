@@ -42,6 +42,7 @@ class HttpServer {
     return new Promise((resolve) => {
       this._server.listen(0, '127.0.0.1', () => {
         this._listeningPort = (this._server.address() as AddressInfo).port;
+        // This MUST be printed to terminal so VS Code can auto-port forward
         console.log(`Local proxy HttpServer listening at ws://127.0.0.1:${this._listeningPort}`);
         resolve();
       });
