@@ -15,7 +15,7 @@ export interface IGitVersion {
 
 const MINIMUM_GIT_VERSION: IGitVersion = {
   major: 2,
-  minor: 20,
+  minor: 35,
   patch: 0
 };
 
