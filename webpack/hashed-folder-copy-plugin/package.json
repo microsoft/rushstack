@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@types/estree": "1.0.6",
+    "@types/estree": "1.0.8",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "memfs": "4.12.0",

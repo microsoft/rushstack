@@ -91,12 +91,14 @@ export class SetPublicPathCurrentScriptPlugin extends SetPublicPathPluginBase {
       }
 
       if (hasProblematicLibraryType) {
-        const codeGenerationResults: CodeGenerationResults = compilation.codeGenerationResults;
+        const codeGenerationResults: CodeGenerationResults | undefined = compilation.codeGenerationResults;
         let appliesToAnyChunk: boolean = false;
-        for (const chunk of compilation.chunks) {
-          if (appliesToChunk(chunk, codeGenerationResults)) {
-            appliesToAnyChunk = true;
-            break;
+        if (codeGenerationResults) {
+          for (const chunk of compilation.chunks) {
+            if (appliesToChunk(chunk, codeGenerationResults)) {
+              appliesToAnyChunk = true;
+              break;
+            }
           }
         }
 

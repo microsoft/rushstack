@@ -12,6 +12,7 @@ overrides:
   '@rushstack/eslint-config@4.4.1>@typescript-eslint/typescript-estree': ~8.46.0
   '@rushstack/eslint-plugin@0.20.0>@typescript-eslint/utils': ~8.46.0
   '@rushstack/heft-node-rig@2.10.1>eslint': ~9.37.0
+  '@types/estree': 1.0.8
 
 packageExtensionsChecksum: e59cfa9a35183eeeb6f2ac48c9ddd4b2
 
@@ -1278,10 +1279,6 @@ packages:
     dependencies:
       '@types/estree': 1.0.8
       '@types/json-schema': 7.0.15
-    dev: true
-
-  /@types/estree@1.0.7:
-    resolution: {integrity: sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ==}
     dev: true
 
   /@types/estree@1.0.8:
@@ -3542,7 +3539,7 @@ packages:
       '@humanfs/node': 0.16.6
       '@humanwhocodes/module-importer': 1.0.1
       '@humanwhocodes/retry': 0.4.2
-      '@types/estree': 1.0.7
+      '@types/estree': 1.0.8
       '@types/json-schema': 7.0.15
       ajv: 6.12.6
       chalk: 4.1.2
@@ -3591,7 +3588,7 @@ packages:
       '@humanfs/node': 0.16.6
       '@humanwhocodes/module-importer': 1.0.1
       '@humanwhocodes/retry': 0.4.2
-      '@types/estree': 1.0.7
+      '@types/estree': 1.0.8
       '@types/json-schema': 7.0.15
       ajv: 6.12.6
       chalk: 4.1.2
