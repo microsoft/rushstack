@@ -1,6 +1,19 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 25 Nov 2025 17:04:05 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Dec 2025 21:49:00 GMT and should not be manually modified.
+
+## 5.164.0
+Tue, 16 Dec 2025 21:49:00 GMT
+
+### Minor changes
+
+- Hash full shrinkwrap entry to detect sub-dependency resolution changes
+
+### Updates
+
+- Fix an issue where ProjectChangeAnalyzer checked the pnpm-lock.yaml file in the default subspace only, when it should consider all subspaces.
+- Log a warning if Git-tracked symbolic links are encountered during repo state analysis.
+- Add support for defining pnpm catalog config.
 
 ## 5.163.0
 Tue, 25 Nov 2025 17:04:05 GMT
