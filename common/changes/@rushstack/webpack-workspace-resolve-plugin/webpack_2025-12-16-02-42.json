@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Updated Webpack version",
+      "type": "minor",
+      "packageName": "@rushstack/webpack-workspace-resolve-plugin"
+    }
+  ],
+  "packageName": "@rushstack/webpack-workspace-resolve-plugin",
+  "email": "yashwanth195@users.noreply.github.com"
+}

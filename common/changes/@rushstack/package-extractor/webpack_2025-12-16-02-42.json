@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Updated Webpack version",
+      "type": "minor",
+      "packageName": "@rushstack/package-extractor"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor",
+  "email": "yashwanth195@users.noreply.github.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Updated Webpack version",
+      "type": "minor",
+      "packageName": "@microsoft/webpack5-load-themed-styles-loader"
+    }
+  ],
+  "packageName": "@microsoft/webpack5-load-themed-styles-loader",
+  "email": "yashwanth195@users.noreply.github.com"
+}

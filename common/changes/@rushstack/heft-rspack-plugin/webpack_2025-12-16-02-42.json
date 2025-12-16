@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Updated Webpack version",
+      "type": "minor",
+      "packageName": "@rushstack/heft-rspack-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-rspack-plugin",
+  "email": "yashwanth195@users.noreply.github.com"
+}
