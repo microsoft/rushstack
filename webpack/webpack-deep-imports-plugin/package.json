@@ -19,13 +19,13 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "webpack": "^5.68.0"
+    "webpack": "^5.103.0"
   },
   "devDependencies": {
     "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "eslint": "~9.37.0",
-    "webpack": "~5.98.0"
+    "webpack": "~5.103.0"
   },
   "sideEffects": false,
   "dependencies": {

@@ -19,7 +19,7 @@
   },
   "peerDependencies": {
     "@rushstack/heft": "^1.1.7",
-    "webpack": "^5.82.1"
+    "webpack": "^5.103.0"
   },
   "dependencies": {
     "@rushstack/debug-certificate-manager": "workspace:*",
@@ -35,6 +35,6 @@
     "@types/watchpack": "2.4.0",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
-    "webpack": "~5.98.0"
+    "webpack": "~5.103.0"
   }
 }

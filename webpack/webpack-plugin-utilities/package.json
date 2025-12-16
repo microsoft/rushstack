@@ -20,7 +20,7 @@
   },
   "peerDependencies": {
     "@types/webpack": "^4.39.8",
-    "webpack": "^5.35.1 || ^4.31.0"
+    "webpack": "^5.103.0 || ^4.31.0"
   },
   "peerDependenciesMeta": {
     "@types/webpack": {
@@ -35,6 +35,6 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "@types/tapable": "1.0.6",
-    "webpack": "~5.98.0"
+    "webpack": "~5.103.0"
   }
 }

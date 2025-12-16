@@ -20,7 +20,7 @@
   },
   "peerDependencies": {
     "@rushstack/module-minifier": "*",
-    "webpack": "^5.68.0",
+    "webpack": "^5.103.0",
     "@types/node": "*"
   },
   "dependencies": {
@@ -36,7 +36,7 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "memfs": "4.12.0",
-    "webpack": "~5.98.0"
+    "webpack": "~5.103.0"
   },
   "sideEffects": false,
   "peerDependenciesMeta": {
