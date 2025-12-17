@@ -309,6 +309,8 @@ async function spawnGitAsync(
 
   const [status] = await once(proc, 'close');
   if (status !== 0) {
+    ensureGitMinimumVersion(gitPath);
+
     throw new Error(`git ${args[0]} exited with code ${status}:\n${stderr}`);
   }
 
