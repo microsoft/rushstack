@@ -5,13 +5,14 @@ import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFrame
 import type { IEnvironment } from '../../utilities/Utilities';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 
-const PLUGIN_NAME: string = 'IgnoredParametersPlugin';
+const PLUGIN_NAME: 'IgnoredParametersPlugin' = 'IgnoredParametersPlugin';
 
 /**
  * Environment variable name for forwarding ignored parameters to child processes
  * @public
  */
-export const RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR: string = 'RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES';
+export const RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR: 'RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES' =
+  'RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES';
 
 /**
  * Phased command plugin that forwards the value of the `parameterNamesToIgnore` operation setting
@@ -26,7 +27,9 @@ export class IgnoredParametersPlugin implements IPhasedCommandPlugin {
 
         // If there are parameter names to ignore, set the environment variable
         if (settings?.parameterNamesToIgnore && settings.parameterNamesToIgnore.length > 0) {
-          env[RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR] = settings.parameterNamesToIgnore.join(',');
+          env[RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR] = JSON.stringify(
+            settings.parameterNamesToIgnore
+          );
         }
 
         return env;

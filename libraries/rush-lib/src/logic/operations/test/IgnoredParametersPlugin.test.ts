@@ -99,7 +99,7 @@ describe(IgnoredParametersPlugin.name, () => {
     const envA: IEnvironment = hooks.createEnvironmentForOperation.call({ ...process.env }, mockRecordA);
 
     // Verify the environment variable is set correctly for project 'a'
-    expect(envA[RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR]).toBe('--production');
+    expect(envA[RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR]).toBe('["--production"]');
 
     // Test project 'b' which has parameterNamesToIgnore: ["--verbose", "--config", "--mode", "--tags"]
     const operationB = Array.from(operations).find((op) => op.name === 'b');
@@ -110,7 +110,9 @@ describe(IgnoredParametersPlugin.name, () => {
     const envB: IEnvironment = hooks.createEnvironmentForOperation.call({ ...process.env }, mockRecordB);
 
     // Verify the environment variable is set correctly for project 'b'
-    expect(envB[RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR]).toBe('--verbose,--config,--mode,--tags');
+    expect(envB[RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR]).toBe(
+      '["--verbose","--config","--mode","--tags"]'
+    );
   });
 
   it('should not set environment variable when parameterNamesToIgnore is not specified', async () => {
