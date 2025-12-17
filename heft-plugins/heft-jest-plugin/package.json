@@ -9,6 +9,9 @@
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
   "license": "MIT",
+  "bin": {
+    "heft-jest": "./bin/heft-jest"
+  },
   "scripts": {
     "build": "heft test --clean",
     "start": "heft build-watch",
