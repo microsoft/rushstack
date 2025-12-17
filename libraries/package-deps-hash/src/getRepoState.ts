@@ -5,7 +5,8 @@ import type * as child_process from 'node:child_process';
 import { once } from 'node:events';
 import { Readable, pipeline } from 'node:stream';
 
-import { Executable, FileSystem, type IExecutableSpawnOptions } from '@rushstack/node-core-library';
+import { Executable, type IExecutableSpawnOptions } from '@rushstack/node-core-library/lib/Executable';
+import { FileSystem } from '@rushstack/node-core-library/lib/FileSystem';
 
 export interface IGitVersion {
   major: number;
