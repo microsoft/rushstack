@@ -331,9 +331,10 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
     }
 
     for (const file of files) {
-      if (file.isFile() && LICENSE_FILES_REGEXP.test(file.name.toString())) {
+      const fileName: string = file.name.toString();
+      if (file.isFile() && LICENSE_FILES_REGEXP.test(fileName)) {
         // Grabbing the first license file if multiple are found
-        return path.join(modulePath, file.name.toString());
+        return path.join(modulePath, fileName);
       }
     }
   }

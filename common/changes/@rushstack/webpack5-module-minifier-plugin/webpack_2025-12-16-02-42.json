@@ -1,8 +1,8 @@
 {
   "changes": [
     {
-      "comment": "Updated Webpack version",
-      "type": "minor",
+      "comment": "",
+      "type": "none",
       "packageName": "@rushstack/webpack5-module-minifier-plugin"
     }
   ],

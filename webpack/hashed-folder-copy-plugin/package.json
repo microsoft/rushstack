@@ -40,7 +40,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "webpack": "^5.103.0"
+    "webpack": "^5.68.0"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",

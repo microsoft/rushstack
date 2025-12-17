@@ -1,8 +1,8 @@
 {
   "changes": [
     {
-      "comment": "Updated Webpack version",
-      "type": "minor",
+      "comment": "Fix support for newer webpack typings.",
+      "type": "patch",
       "packageName": "@rushstack/set-webpack-public-path-plugin"
     }
   ],

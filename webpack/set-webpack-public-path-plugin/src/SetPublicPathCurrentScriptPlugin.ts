@@ -92,13 +92,19 @@ export class SetPublicPathCurrentScriptPlugin extends SetPublicPathPluginBase {
 
       if (hasProblematicLibraryType) {
         const codeGenerationResults: CodeGenerationResults | undefined = compilation.codeGenerationResults;
+        if (!codeGenerationResults) {
+          compilation.errors.push(
+            new thisWebpack.WebpackError(
+              `${PLUGIN_NAME}: codeGenerationResults is undefined in afterSeal. This is unexpected and may indicate a misconfiguration or bug.`
+            )
+          );
+          return;
+        }
         let appliesToAnyChunk: boolean = false;
-        if (codeGenerationResults) {
-          for (const chunk of compilation.chunks) {
-            if (appliesToChunk(chunk, codeGenerationResults)) {
-              appliesToAnyChunk = true;
-              break;
-            }
+        for (const chunk of compilation.chunks) {
+          if (appliesToChunk(chunk, codeGenerationResults)) {
+            appliesToAnyChunk = true;
+            break;
           }
         }
 

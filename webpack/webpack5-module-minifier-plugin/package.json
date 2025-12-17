@@ -20,7 +20,7 @@
   },
   "peerDependencies": {
     "@rushstack/module-minifier": "*",
-    "webpack": "^5.103.0",
+    "webpack": "^5.68.0",
     "@types/node": "*"
   },
   "dependencies": {

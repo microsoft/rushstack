@@ -20,7 +20,7 @@
     "@rushstack/node-core-library": "workspace:*"
   },
   "peerDependencies": {
-    "webpack": "^5.103.0"
+    "webpack": "^5.35.1"
   },
   "peerDependenciesMeta": {
     "webpack": {
