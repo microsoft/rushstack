@@ -648,22 +648,7 @@ Object {
 }
 `;
 
-exports[`ModuleMinifierPlugin Handles multiple runtimes (mock): Warnings 1`] = `
-Array [
-  Object {
-    "loc": "3:0-87",
-    "message": "You don't need \`webpackExports\` if the usage of dynamic import is statically analyse-able. You can safely remove the \`webpackExports\` magic comment.",
-    "moduleIdentifier": "/entry-1.js",
-    "moduleName": "./entry-1.js",
-  },
-  Object {
-    "loc": "3:0-83",
-    "message": "You don't need \`webpackExports\` if the usage of dynamic import is statically analyse-able. You can safely remove the \`webpackExports\` magic comment.",
-    "moduleIdentifier": "/entry-2.js",
-    "moduleName": "./entry-2.js",
-  },
-]
-`;
+exports[`ModuleMinifierPlugin Handles multiple runtimes (mock): Warnings 1`] = `Array []`;
 
 exports[`ModuleMinifierPlugin Handles multiple runtimes (terser): Content 1`] = `
 Object {
@@ -737,19 +722,4 @@ Object {
 }
 `;
 
-exports[`ModuleMinifierPlugin Handles multiple runtimes (terser): Warnings 1`] = `
-Array [
-  Object {
-    "loc": "3:0-87",
-    "message": "You don't need \`webpackExports\` if the usage of dynamic import is statically analyse-able. You can safely remove the \`webpackExports\` magic comment.",
-    "moduleIdentifier": "/entry-1.js",
-    "moduleName": "./entry-1.js",
-  },
-  Object {
-    "loc": "3:0-83",
-    "message": "You don't need \`webpackExports\` if the usage of dynamic import is statically analyse-able. You can safely remove the \`webpackExports\` magic comment.",
-    "moduleIdentifier": "/entry-2.js",
-    "moduleName": "./entry-2.js",
-  },
-]
-`;
+exports[`ModuleMinifierPlugin Handles multiple runtimes (terser): Warnings 1`] = `Array []`;
