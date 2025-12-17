@@ -177,6 +177,8 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
       const thirdPartyPackages: ThirdPartyPackageMap = new Map();
 
       normalModuleFactory.hooks.module.tap(PLUGIN_NAME, (module, moduleCreateData, resolveData) => {
+        /* moduleCreateData.resourceResolveData is typed as 'unknown' in Webpack's typings, so we cast it to our expected shape (IResourceResolveData)
+        to access its properties safely.*/
         const resourceResolveData: IResourceResolveData | undefined = moduleCreateData.resourceResolveData as
           | IResourceResolveData
           | undefined;
