@@ -21,7 +21,7 @@ const VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS: string = 'workbench.action.openSet
 const EXTENSION_ID: string = `${packageJson.publisher}.${packageJson.name}`;
 const VSCODE_SETTINGS_EXTENSION_FILTER: string = `@ext:${EXTENSION_ID}`;
 
-async function writeExensionInstalledFile(terminal: ITerminal): Promise<void> {
+async function writeExtensionInstalledFile(terminal: ITerminal): Promise<void> {
   try {
     // If on a remote environment, write a file to os.tempdir() using workspace fs
     let tempDir: string;
@@ -85,7 +85,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   const terminal: ITerminal = new Terminal(terminalProvider);
 
-  await writeExensionInstalledFile(terminal);
+  await writeExtensionInstalledFile(terminal);
 
   // Create status bar item
   const statusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(
