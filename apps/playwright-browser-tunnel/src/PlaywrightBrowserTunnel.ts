@@ -209,8 +209,6 @@ export class PlaywrightTunnel {
     await Executable.waitForExitAsync(cp);
   }
 
-  // TODO: Add a installation cache to avoid reinstalling same version multiple times
-  // Map which stores the state of installed playwright-core versions
   private async _installPlaywrightCoreAsync({
     playwrightVersion
   }: Pick<IHandshake, 'playwrightVersion'>): Promise<void> {
@@ -226,7 +224,7 @@ export class PlaywrightTunnel {
     browserName
   }: Pick<IHandshake, 'playwrightVersion' | 'browserName'>): Promise<void> {
     await this._installPlaywrightCoreAsync({ playwrightVersion });
-    this._terminal.writeLine(`Installing browsers for playwright-core version ${playwrightVersion}`);
+    this._terminal.writeLine(`Executing playwright-core version ${playwrightVersion}`);
     await this._runCommandAsync('node', [
       `node_modules/playwright-core-${playwrightVersion}/cli.js`,
       'install',
@@ -265,7 +263,7 @@ export class PlaywrightTunnel {
         } catch {
           // no-op
         }
-      }, 1000);
+      }, 500);
     });
   }
 
@@ -285,13 +283,19 @@ export class PlaywrightTunnel {
     });
   }
 
+  // TODO: If a user runs this for the first time, `this._playwrightBrowsersInstalled` will be empty
+  // and it will try to install the browsers every time. We should persist this information. Maybe a cache file with text per
+  // machine instance?
   private async _setupPlaywrightAsync({
     playwrightVersion,
     browserName
   }: Pick<IHandshake, 'playwrightVersion' | 'browserName'>): Promise<typeof import('playwright-core')> {
     const browserKey: string = `${playwrightVersion}-${browserName}`;
+    this._terminal.writeLine(`Checking for installed playwright browsers. Installed browsers: ${browserKey}`);
     if (!this._playwrightBrowsersInstalled.has(browserKey)) {
-      this._terminal.writeLine(`Installing playwright-core version ${playwrightVersion}`);
+      this._terminal.writeLine(
+        `Playwright browser not found. Installing playwright-core version ${playwrightVersion}`
+      );
       await this._installPlaywrightBrowsersAsync({ playwrightVersion, browserName });
       this._playwrightBrowsersInstalled.add(browserKey);
     }
@@ -324,6 +328,7 @@ export class PlaywrightTunnel {
         `Failed to launch browser server for ${browserName} with options: ${JSON.stringify(launchOptions)}`
       );
     }
+
     terminal.writeLine(`Launched ${browserName} browser server`);
     const client: WebSocket = new WebSocket(browserServer.wsEndpoint());
 
@@ -449,7 +454,6 @@ export class PlaywrightTunnel {
             const rawHandshake: unknown = JSON.parse(event.data.toString());
             terminal.writeLine(`Received handshake: ${JSON.stringify(handshake)}`);
             handshake = this._validateHandshake(rawHandshake);
-            console.log(`Validated handshake: ${JSON.stringify(handshake)}`);
 
             this.status = 'setting-up-browser-server';
             const browserServerProxy: IBrowserServerProxy =
