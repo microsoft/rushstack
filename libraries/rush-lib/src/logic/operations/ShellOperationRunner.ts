@@ -20,6 +20,7 @@ export interface IShellOperationRunnerOptions {
   displayName: string;
   commandToRun: string;
   commandForHash: string;
+  ignoredParameterValues: ReadonlyArray<string>;
 }
 
 /**
@@ -44,6 +45,8 @@ export class ShellOperationRunner implements IOperationRunner {
 
   private readonly _rushProject: RushConfigurationProject;
 
+  private readonly _ignoredParameterValues: ReadonlyArray<string>;
+
   public constructor(options: IShellOperationRunnerOptions) {
     const { phase } = options;
 
@@ -53,6 +56,7 @@ export class ShellOperationRunner implements IOperationRunner {
     this._rushProject = options.rushProject;
     this.commandToRun = options.commandToRun;
     this._commandForHash = options.commandForHash;
+    this._ignoredParameterValues = options.ignoredParameterValues;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
@@ -71,6 +75,13 @@ export class ShellOperationRunner implements IOperationRunner {
     return await context.runWithTerminalAsync(
       async (terminal: ITerminal, terminalProvider: ITerminalProvider) => {
         let hasWarningOrError: boolean = false;
+
+        // Log any ignored parameters
+        if (this._ignoredParameterValues.length > 0) {
+          terminal.writeLine(
+            `These parameters were ignored for this operation by project-level configuration: ${this._ignoredParameterValues.join(' ')}`
+          );
+        }
 
         // Run the operation
         terminal.writeLine(`Invoking: ${this.commandToRun}`);

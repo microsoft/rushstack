@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
+import packageJson from '../package.json';
 
 export const EXTENSION_DISPLAY_NAME: string = 'Debug Certificate Manager';
 
-export const EXTENSION_ID: string = 'RushStack.debug-certificate-manager';
+export const EXTENSION_ID: string = `${packageJson.publisher}.${packageJson.name}`;
+export const VSCODE_SETTINGS_EXTENSION_ID_FILTER: string = `@ext:${EXTENSION_ID}`;
 
 export const COMMAND_PREFIX: string = 'debugCertificateManager';
 export const COMMAND_SYNC: string = `${COMMAND_PREFIX}.sync`;

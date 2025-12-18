@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Change the Git hook file shebangs to use `/usr/bin/env bash` instead of `/bin/bash` for greater platform compatability.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

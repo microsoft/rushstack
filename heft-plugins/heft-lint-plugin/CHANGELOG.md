@@ -1,6 +1,49 @@
 # Change Log - @rushstack/heft-lint-plugin
 
-This log was last generated on Fri, 24 Oct 2025 00:13:38 GMT and should not be manually modified.
+This log was last generated on Sat, 06 Dec 2025 01:12:28 GMT and should not be manually modified.
+
+## 1.1.10
+Sat, 06 Dec 2025 01:12:28 GMT
+
+_Version update only_
+
+## 1.1.9
+Wed, 03 Dec 2025 01:12:28 GMT
+
+### Patches
+
+- Stabilize the hash suffix in the linter cache file by using tsconfig path hash instead of file list hash
+
+## 1.1.8
+Fri, 21 Nov 2025 16:13:56 GMT
+
+_Version update only_
+
+## 1.1.7
+Wed, 12 Nov 2025 01:57:54 GMT
+
+### Patches
+
+- Forward suppressed messages to formatters.
+
+## 1.1.6
+Wed, 12 Nov 2025 01:12:56 GMT
+
+_Version update only_
+
+## 1.1.5
+Tue, 11 Nov 2025 16:13:26 GMT
+
+### Patches
+
+- Ensure that `parserOptions.tsconfigRootDir` is set for use by custom lint rules.
+
+## 1.1.4
+Tue, 04 Nov 2025 08:15:14 GMT
+
+### Patches
+
+- Fix bug where TypeScript program is not reused in ESLint 9.
 
 ## 1.1.3
 Fri, 24 Oct 2025 00:13:38 GMT

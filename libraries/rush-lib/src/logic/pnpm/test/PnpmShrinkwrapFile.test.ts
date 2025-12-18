@@ -219,6 +219,95 @@ describe(PnpmShrinkwrapFile.name, () => {
     });
   });
 
+  describe('getIntegrityForImporter', () => {
+    it('produces different hashes when sub-dependency resolutions change', () => {
+      // This test verifies that changes to sub-dependency resolutions are detected.
+      // The issue is that if package A depends on B, and B's resolution of C changes
+      // (e.g., from C@1.3 to C@1.2), the integrity hash for A should change.
+      // This is important for build orchestrators that rely on shrinkwrap-deps.json
+      // to detect changes to resolution and invalidate caches appropriately.
+
+      // Two shrinkwrap files with the same package but different sub-dependency resolutions
+      const shrinkwrapContent1: string = `
+lockfileVersion: '9.0'
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+importers:
+  .:
+    dependencies:
+      foo:
+        specifier: ~1.0.0
+        version: 1.0.0
+packages:
+  foo@1.0.0:
+    resolution:
+      integrity: sha512-abc123==
+    dependencies:
+      bar: 1.3.0
+  bar@1.3.0:
+    resolution:
+      integrity: sha512-bar130==
+snapshots:
+  foo@1.0.0:
+    dependencies:
+      bar: 1.3.0
+  bar@1.3.0: {}
+`;
+
+      const shrinkwrapContent2: string = `
+lockfileVersion: '9.0'
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+importers:
+  .:
+    dependencies:
+      foo:
+        specifier: ~1.0.0
+        version: 1.0.0
+packages:
+  foo@1.0.0:
+    resolution:
+      integrity: sha512-abc123==
+    dependencies:
+      bar: 1.2.0
+  bar@1.2.0:
+    resolution:
+      integrity: sha512-bar120==
+snapshots:
+  foo@1.0.0:
+    dependencies:
+      bar: 1.2.0
+  bar@1.2.0: {}
+`;
+
+      const shrinkwrapFile1 = PnpmShrinkwrapFile.loadFromString(shrinkwrapContent1);
+      const shrinkwrapFile2 = PnpmShrinkwrapFile.loadFromString(shrinkwrapContent2);
+
+      // Clear cache to ensure fresh computation
+      PnpmShrinkwrapFile.clearCache();
+
+      const integrityMap1 = shrinkwrapFile1.getIntegrityForImporter('.');
+      const integrityMap2 = shrinkwrapFile2.getIntegrityForImporter('.');
+
+      // Both should have integrity maps
+      expect(integrityMap1).toBeDefined();
+      expect(integrityMap2).toBeDefined();
+
+      // The integrity for 'foo@1.0.0' should be different because bar's resolution changed
+      const fooIntegrity1 = integrityMap1!.get('foo@1.0.0');
+      const fooIntegrity2 = integrityMap2!.get('foo@1.0.0');
+
+      expect(fooIntegrity1).toBeDefined();
+      expect(fooIntegrity2).toBeDefined();
+
+      // This is the key assertion: the integrity hashes should be different
+      // because the sub-dependency (bar) resolved to different versions
+      expect(fooIntegrity1).not.toEqual(fooIntegrity2);
+    });
+  });
+
   describe('Check is workspace project modified', () => {
     describe('pnpm lockfile major version 5', () => {
       it('can detect not modified', async () => {

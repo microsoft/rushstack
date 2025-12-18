@@ -146,6 +146,14 @@ export interface IOperationSettings {
    * If true, this operation will never be skipped by the `--changed-projects-only` flag.
    */
   ignoreChangedProjectsOnlyFlag?: boolean;
+
+  /**
+   * An optional list of custom command-line parameter names (their `parameterLongName` values from
+   * command-line.json) that should be ignored when invoking the command for this operation.
+   * This allows a project to opt out of parameters that don't affect its operation, preventing
+   * unnecessary cache invalidation for this operation and its consumers.
+   */
+  parameterNamesToIgnore?: string[];
 }
 
 interface IOldRushProjectJson {
@@ -331,6 +339,35 @@ export class RushProjectConfiguration {
 
               hasErrors = true;
             }
+          }
+        }
+
+        // Validate that parameter names to ignore actually exist for this operation
+        if (operationSettings.parameterNamesToIgnore) {
+          // Build a set of valid parameter names for this phase
+          const validParameterNames: Set<string> = new Set<string>();
+          for (const parameter of phase.associatedParameters) {
+            validParameterNames.add(parameter.longName);
+          }
+
+          // Collect all invalid parameter names
+          const invalidParameterNames: string[] = [];
+          for (const parameterName of operationSettings.parameterNamesToIgnore) {
+            if (!validParameterNames.has(parameterName)) {
+              invalidParameterNames.push(parameterName);
+            }
+          }
+
+          // Report all invalid parameters in a single message
+          if (invalidParameterNames.length > 0) {
+            terminal.writeErrorLine(
+              `The project "${project.packageName}" has a ` +
+                `"${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" configuration that specifies ` +
+                `invalid parameter(s) in "parameterNamesToIgnore" for operation "${operationName}": ` +
+                `${invalidParameterNames.join(', ')}. ` +
+                `Valid parameters for this operation are: ${Array.from(validParameterNames).sort().join(', ') || '(none)'}.`
+            );
+            hasErrors = true;
           }
         }
       }

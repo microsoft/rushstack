@@ -670,6 +670,7 @@ export interface IOperationSettings {
     ignoreChangedProjectsOnlyFlag?: boolean;
     operationName: string;
     outputFolderNames?: string[];
+    parameterNamesToIgnore?: string[];
     sharding?: IRushPhaseSharding;
     weight?: number;
 }
@@ -739,6 +740,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     alwaysInjectDependenciesFromOtherSubspaces?: boolean;
     autoInstallPeers?: boolean;
     globalAllowedDeprecatedVersions?: Record<string, string>;
+    globalCatalogs?: Record<string, Record<string, string>>;
     globalIgnoredOptionalDependencies?: string[];
     globalNeverBuiltDependencies?: string[];
     globalOverrides?: Record<string, string>;
@@ -1150,6 +1152,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly alwaysInjectDependenciesFromOtherSubspaces: boolean | undefined;
     readonly autoInstallPeers: boolean | undefined;
     readonly globalAllowedDeprecatedVersions: Record<string, string> | undefined;
+    readonly globalCatalogs: Record<string, Record<string, string>> | undefined;
     readonly globalIgnoredOptionalDependencies: string[] | undefined;
     readonly globalNeverBuiltDependencies: string[] | undefined;
     readonly globalOverrides: Record<string, string> | undefined;
@@ -1202,6 +1205,7 @@ export class RepoStateFile {
     get isValid(): boolean;
     static loadFromFile(jsonFilename: string): RepoStateFile;
     get packageJsonInjectedDependenciesHash(): string | undefined;
+    get pnpmCatalogsHash(): string | undefined;
     get pnpmShrinkwrapHash(): string | undefined;
     get preferredVersionsHash(): string | undefined;
     refreshState(rushConfiguration: RushConfiguration, subspace: Subspace | undefined, variant?: string): boolean;
@@ -1565,6 +1569,7 @@ export class Subspace {
     getCommonVersionsFilePath(variant?: string): string;
     // @beta
     getPackageJsonInjectedDependenciesHash(variant?: string): string | undefined;
+    getPnpmCatalogsHash(): string | undefined;
     // @beta
     getPnpmConfigFilePath(): string;
     // @beta

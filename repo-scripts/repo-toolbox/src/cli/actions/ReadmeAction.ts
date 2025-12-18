@@ -1,27 +1,31 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'node:path';
-
 import * as Diff from 'diff';
 
 import { StringBuilder, Sort, FileSystem, Text, AlreadyReportedError } from '@rushstack/node-core-library';
-import { Terminal, ConsoleTerminalProvider, Colorize } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { RushConfiguration, type RushConfigurationProject, LockStepVersionPolicy } from '@microsoft/rush-lib';
 import { CommandLineAction, type CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 const GENERATED_PROJECT_SUMMARY_START_COMMENT_TEXT: string = '<!-- GENERATED PROJECT SUMMARY START -->';
 const GENERATED_PROJECT_SUMMARY_END_COMMENT_TEXT: string = '<!-- GENERATED PROJECT SUMMARY END -->';
 
+const README_FILENAME: string = 'README.md';
+
 export class ReadmeAction extends CommandLineAction {
   private readonly _verifyParameter: CommandLineFlagParameter;
 
-  public constructor() {
+  private readonly _terminal: ITerminal;
+
+  public constructor(terminal: ITerminal) {
     super({
       actionName: 'readme',
       summary: 'Generates README.md project table based on rush.json inventory',
       documentation: "Use this to update the repo's README.md"
     });
+
+    this._terminal = terminal;
 
     this._verifyParameter = this.defineFlagParameter({
       parameterLongName: '--verify',
@@ -37,7 +41,7 @@ export class ReadmeAction extends CommandLineAction {
   protected override async onExecuteAsync(): Promise<void> {
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
-    const repoReadmePath: string = path.resolve(rushConfiguration.rushJsonFolder, 'README.md');
+    const repoReadmePath: string = `${rushConfiguration.rushJsonFolder}/${README_FILENAME}`;
     let existingReadme: string = await FileSystem.readFileAsync(repoReadmePath);
     existingReadme = Text.convertToLf(existingReadme);
     const generatedProjectSummaryStartIndex: number = existingReadme.indexOf(
@@ -54,12 +58,12 @@ export class ReadmeAction extends CommandLineAction {
       );
     }
 
-    const readmePrefix: string = existingReadme.substr(
+    const readmePrefix: string = existingReadme.substring(
       0,
       generatedProjectSummaryStartIndex + GENERATED_PROJECT_SUMMARY_START_COMMENT_TEXT.length
     );
 
-    const readmePostfix: string = existingReadme.substr(generatedProjectSummaryEndIndex);
+    const readmePostfix: string = existingReadme.substring(generatedProjectSummaryEndIndex);
 
     const builder: StringBuilder = new StringBuilder();
     const orderedProjects: RushConfigurationProject[] = [...rushConfiguration.projects];
@@ -146,32 +150,19 @@ export class ReadmeAction extends CommandLineAction {
     builder.append(readmePostfix);
 
     const readmeString: string = builder.toString();
-    const diff: Diff.Change[] = Diff.diffLines(existingReadme, readmeString);
-    const readmeIsUpToDate: boolean = diff.length === 1 && !diff[0].added && !diff[0].removed;
+    const diff: Diff.StructuredPatch = Diff.structuredPatch(
+      README_FILENAME,
+      README_FILENAME,
+      existingReadme,
+      readmeString
+    );
+    const readmeIsUpToDate: boolean = diff.hunks.length === 0;
 
-    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+    const terminal: ITerminal = this._terminal;
 
     if (!readmeIsUpToDate) {
       if (this._verifyParameter.value) {
-        for (const change of diff) {
-          const lines: string[] = change.value.trimEnd().split('\n');
-          let linePrefix: string;
-          let colorizer: (text: string) => string;
-          if (change.added) {
-            linePrefix = '+ ';
-            colorizer = Colorize.green;
-          } else if (change.removed) {
-            linePrefix = '- ';
-            colorizer = Colorize.red;
-          } else {
-            linePrefix = '  ';
-            colorizer = Colorize.gray;
-          }
-
-          for (const line of lines) {
-            terminal.writeLine(colorizer(linePrefix + line));
-          }
-        }
+        terminal.writeLine(Diff.formatPatch(diff));
 
         terminal.writeLine();
         terminal.writeLine();

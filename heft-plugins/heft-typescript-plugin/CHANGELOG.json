@@ -2,6 +2,89 @@
   "name": "@rushstack/heft-typescript-plugin",
   "entries": [
     {
+      "version": "1.1.7",
+      "tag": "@rushstack/heft-typescript-plugin_v1.1.7",
+      "date": "Sat, 06 Dec 2025 01:12:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.19.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.19.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.19.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `1.1.6` to `1.1.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.6",
+      "tag": "@rushstack/heft-typescript-plugin_v1.1.6",
+      "date": "Fri, 21 Nov 2025 16:13:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.19.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.19.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.19.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `1.1.5` to `1.1.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.5",
+      "tag": "@rushstack/heft-typescript-plugin_v1.1.5",
+      "date": "Wed, 12 Nov 2025 01:12:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Support \"${configDir}\" token in tsconfig when using file copier."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `1.1.4` to `1.1.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.4",
+      "tag": "@rushstack/heft-typescript-plugin_v1.1.4",
+      "date": "Tue, 04 Nov 2025 08:15:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `1.1.3` to `1.1.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.3",
       "tag": "@rushstack/heft-typescript-plugin_v1.1.3",
       "date": "Fri, 24 Oct 2025 00:13:38 GMT",

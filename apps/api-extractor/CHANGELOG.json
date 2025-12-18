@@ -2,6 +2,83 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.55.2",
+      "tag": "@microsoft/api-extractor_v7.55.2",
+      "date": "Sat, 06 Dec 2025 01:12:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.32.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.19.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.19.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.1.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.55.1",
+      "tag": "@microsoft/api-extractor_v7.55.1",
+      "date": "Fri, 21 Nov 2025 16:13:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.32.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.19.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.19.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.1.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.55.0",
+      "tag": "@microsoft/api-extractor_v7.55.0",
+      "date": "Wed, 12 Nov 2025 01:12:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump the `@microsoft/tsdoc` dependency to `~0.16.0`."
+          },
+          {
+            "comment": "Bump the `@microsoft/tsdoc-config` dependency to `~0.18.0`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.32.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.54.0",
+      "tag": "@microsoft/api-extractor_v7.54.0",
+      "date": "Tue, 04 Nov 2025 08:15:14 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new setting `IExtractorInvokeOptions.printApiReportDiff` that makes build logs easier to diagnose by printing a diff of any changes to API report files (*.api.md)."
+          },
+          {
+            "comment": "Add a `--print-api-report-diff` CLI flag that causes a diff of any changes to API report files (*.api.md) to be printed."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.53.3",
       "tag": "@microsoft/api-extractor_v7.53.3",
       "date": "Fri, 24 Oct 2025 00:13:38 GMT",

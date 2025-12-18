@@ -3,7 +3,7 @@
 
 import type { AsyncSeriesHook } from 'tapable';
 
-import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
 import type {
   CommandLineFlagParameter,
@@ -33,6 +33,7 @@ import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfiguration';
 import type { Operation } from '../../logic/operations/Operation';
 import type { OperationExecutionRecord } from '../../logic/operations/OperationExecutionRecord';
+import { associateParametersByPhase } from '../parsing/associateParametersByPhase';
 import { PhasedOperationPlugin } from '../../logic/operations/PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperationRunnerPlugin';
 import { Event } from '../../api/EventHooks';
@@ -58,6 +59,7 @@ import { WeightedOperationPlugin } from '../../logic/operations/WeightedOperatio
 import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 import { Selection } from '../../logic/Selection';
 import { NodeDiagnosticDirPlugin } from '../../logic/operations/NodeDiagnosticDirPlugin';
+import { IgnoredParametersPlugin } from '../../logic/operations/IgnoredParametersPlugin';
 import { DebugHashesPlugin } from '../../logic/operations/DebugHashesPlugin';
 import { measureAsyncFn, measureFn } from '../../utilities/performance';
 
@@ -235,7 +237,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         // Enable filtering to reduce evaluation cost
         enableFiltering: true
       },
-      includeSubspaceSelector: false
+      includeSubspaceSelector: false,
+      cwd: this.parser.cwd
     });
 
     this._verboseParameter = this.defineFlagParameter({
@@ -327,17 +330,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
     this.defineScriptParameters();
 
-    for (const [{ associatedPhases }, tsCommandLineParameter] of this.customParameters) {
-      if (associatedPhases) {
-        for (const phaseName of associatedPhases) {
-          const phase: IPhase | undefined = this._knownPhases.get(phaseName);
-          if (!phase) {
-            throw new InternalError(`Could not find a phase matching ${phaseName}.`);
-          }
-          phase.associatedParameters.add(tsCommandLineParameter);
-        }
-      }
-    }
+    // Associate parameters with their respective phases
+    associateParametersByPhase(this.customParameters, this._knownPhases);
   }
 
   public async runAsync(): Promise<void> {
@@ -415,6 +409,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
       new WeightedOperationPlugin().apply(hooks);
       new ValidateOperationsPlugin(terminal).apply(hooks);
+
+      // Forward ignored parameters to child processes as an environment variable
+      new IgnoredParametersPlugin().apply(hooks);
 
       const showTimeline: boolean = this._timelineParameter?.value ?? false;
       if (showTimeline) {

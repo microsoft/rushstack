@@ -27,20 +27,37 @@
     {
       "packageName": "project1",
       "projectFolder": "project1",
-      "reviewCategory": "third-party"
+      "reviewCategory": "third-party",
+      "tags": ["frontend", "ui"],
+      "versionPolicyName": "testPolicy"
     },
 
     {
       "packageName": "project2",
       "projectFolder": "project2",
       "reviewCategory": "third-party",
-      "skipRushCheck": true
+      "skipRushCheck": true,
+      "tags": ["backend"]
     },
 
     {
       "packageName": "project3",
       "projectFolder": "project3",
-      "reviewCategory": "prototype"
+      "reviewCategory": "prototype",
+      "tags": ["frontend"],
+      "versionPolicyName": "testPolicy"
+    },
+
+    {
+      "packageName": "app1",
+      "projectFolder": "apps/app1",
+      "reviewCategory": "first-party"
+    },
+
+    {
+      "packageName": "app2",
+      "projectFolder": "apps/app2",
+      "reviewCategory": "first-party"
     }
   ]
 }

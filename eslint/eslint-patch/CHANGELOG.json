@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.15.0",
+      "tag": "@rushstack/eslint-patch_v1.15.0",
+      "date": "Wed, 12 Nov 2025 01:57:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "In ESLint >= 9.37, report bulk suppressed messages as suppressed messages rather than removing them completely."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.14.1",
       "tag": "@rushstack/eslint-patch_v1.14.1",
       "date": "Fri, 24 Oct 2025 11:22:09 GMT",

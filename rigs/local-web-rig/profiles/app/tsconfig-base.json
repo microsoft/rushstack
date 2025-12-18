@@ -10,12 +10,12 @@
     "target": "es2017",
     "lib": ["es2017", "scripthost", "es2015.collection", "es2015.promise", "es2015.iterable", "dom"],
 
-    "outDir": "../../../../lib",
-    "rootDir": "../../../../src",
-    "rootDirs": ["../../../../src", "../../../../temp/sass-ts"],
+    "outDir": "${configDir}/lib",
+    "rootDir": "${configDir}/src",
+    "rootDirs": ["${configDir}/src", "${configDir}/temp/sass-ts"],
 
     "types": ["heft-jest", "webpack-env"],
-    "typeRoots": ["../../../../node_modules/@types", "../../node_modules/@types"]
+    "typeRoots": ["${configDir}/node_modules/@types", "../../node_modules/@types"]
   },
-  "include": ["../../../../src/**/*.ts", "../../../../src/**/*.tsx"]
+  "include": ["${configDir}/src/**/*.ts", "${configDir}/src/**/*.tsx"]
 }

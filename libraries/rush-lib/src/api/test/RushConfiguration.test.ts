@@ -77,7 +77,7 @@ describe(RushConfiguration.name, () => {
     expect(rushConfiguration.projectFolderMinDepth).toEqual(1);
     expect(rushConfiguration.hotfixChangeEnabled).toEqual(true);
 
-    expect(rushConfiguration.projects).toHaveLength(3);
+    expect(rushConfiguration.projects).toHaveLength(5);
 
     // "approvedPackagesPolicy" feature
     const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;

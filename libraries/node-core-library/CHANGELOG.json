@@ -2,6 +2,30 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.19.1",
+      "tag": "@rushstack/node-core-library_v5.19.1",
+      "date": "Sat, 06 Dec 2025 01:12:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace fs-extra with node:fs in FileWriter"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.19.0",
+      "tag": "@rushstack/node-core-library_v5.19.0",
+      "date": "Fri, 21 Nov 2025 16:13:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update `Executable.getProcessInfoBy*` APIs to use PowerShell on Windows to support latest Windows 11 versions."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.18.0",
       "tag": "@rushstack/node-core-library_v5.18.0",
       "date": "Fri, 24 Oct 2025 00:13:38 GMT",

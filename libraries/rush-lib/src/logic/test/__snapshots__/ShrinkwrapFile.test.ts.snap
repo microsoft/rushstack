@@ -5,9 +5,9 @@ Array [
   Array [
     Object {
       "../../project1": "../../project1:D5ar2j+w6/zH15/eOoF37Nkdbamt2tX47iijyj7LVXk=:",
-      "/jquery/1.12.3": "sha512-FzM42/Ew+Hb8ha2OlhHRBLgWIZS32gZ0+NvWTf+ZvVvGaIlJkOiXQyb7VBjv4L6fJfmTrRf3EsAmbfsHDhfemw==",
-      "/pad-left/1.0.2": "sha512-saxSV1EYAytuZDtQYEwi0DPzooG6aN18xyHrnJtzwjVwmMauzkEecd7hynVJGolNGk1Pl9tltmZqfze4TZTCxg==",
-      "/repeat-string/1.6.1": "sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==",
+      "/jquery/1.12.3": "/jquery/1.12.3:Y74h7210GWDRLFidqe7W0rGD9dEVjPuIpExxLG3ql7U=:",
+      "/pad-left/1.0.2": "/pad-left/1.0.2:fNuxq+VtdNt2R9HJ6ip7x62AjQvQK7tiTHVLF6JGjpE=:",
+      "/repeat-string/1.6.1": "/repeat-string/1.6.1:FSrgyzed38htiD39oWRz9lAr9wD9AxuRmBW5tC28Jvc=:",
     },
     "project1/.rush/temp/shrinkwrap-deps.json",
     Object {
@@ -22,8 +22,8 @@ Array [
   Array [
     Object {
       "../../project2": "../../project2:PQ2FvyHHwmt/FIUaiJBVAfpHv6hj9EGJrAw69+0IY50=:",
-      "/jquery/2.2.4": "sha512-lBHj60ezci2u1v2FqnZIraShGgEXq35qCzMv4lITyHGppTnA13rwR0MgwyNJh9TnDs3aXUvd1xjAotfraMHX/Q==",
-      "/q/1.5.1": "sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw==",
+      "/jquery/2.2.4": "/jquery/2.2.4:PIfhtCRWsOQOCNHXI0s+2Ssbxc/U0IZ1ZXD+YcrHwi4=:",
+      "/q/1.5.1": "/q/1.5.1:A6WReS0f6nc67cF0NQHN3YGoUP6sLNfcWK/7orfz1J4=:",
     },
     "project2/.rush/temp/shrinkwrap-deps.json",
     Object {
@@ -38,8 +38,8 @@ Array [
   Array [
     Object {
       "../../project3": "../../project3:jomsZKvXG32qqYOfW3HUBGfWWSw6ybFV1WDf9c/kiP4=:",
-      "/q/1.5.1": "sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw==",
-      "/repeat-string/1.6.1": "sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==",
+      "/q/1.5.1": "/q/1.5.1:A6WReS0f6nc67cF0NQHN3YGoUP6sLNfcWK/7orfz1J4=:",
+      "/repeat-string/1.6.1": "/repeat-string/1.6.1:FSrgyzed38htiD39oWRz9lAr9wD9AxuRmBW5tC28Jvc=:",
       "example.pkgs.visualstudio.com/@scope/testDep/2.1.0": "example.pkgs.visualstudio.com/@scope/testDep/2.1.0:i5jbUOp/IxUgiN0dHYsTRzmimOVBwu7f9908rRaC9VY=:",
     },
     "project3/.rush/temp/shrinkwrap-deps.json",
@@ -55,9 +55,9 @@ Array [
   Array [
     Object {
       "../../project1": "../../project1:D5ar2j+w6/zH15/eOoF37Nkdbamt2tX47iijyj7LVXk=:",
-      "/jquery/1.12.3": "sha512-FzM42/Ew+Hb8ha2OlhHRBLgWIZS32gZ0+NvWTf+ZvVvGaIlJkOiXQyb7VBjv4L6fJfmTrRf3EsAmbfsHDhfemw==",
-      "/pad-left/1.0.2": "sha512-saxSV1EYAytuZDtQYEwi0DPzooG6aN18xyHrnJtzwjVwmMauzkEecd7hynVJGolNGk1Pl9tltmZqfze4TZTCxg==",
-      "/repeat-string/1.6.1": "sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==",
+      "/jquery/1.12.3": "/jquery/1.12.3:Y74h7210GWDRLFidqe7W0rGD9dEVjPuIpExxLG3ql7U=:",
+      "/pad-left/1.0.2": "/pad-left/1.0.2:fNuxq+VtdNt2R9HJ6ip7x62AjQvQK7tiTHVLF6JGjpE=:",
+      "/repeat-string/1.6.1": "/repeat-string/1.6.1:FSrgyzed38htiD39oWRz9lAr9wD9AxuRmBW5tC28Jvc=:",
     },
     "project1/.rush/temp/shrinkwrap-deps.json",
     Object {
@@ -72,8 +72,8 @@ Array [
   Array [
     Object {
       "../../project2": "../../project2:PQ2FvyHHwmt/FIUaiJBVAfpHv6hj9EGJrAw69+0IY50=:",
-      "/jquery/2.2.4": "sha512-lBHj60ezci2u1v2FqnZIraShGgEXq35qCzMv4lITyHGppTnA13rwR0MgwyNJh9TnDs3aXUvd1xjAotfraMHX/Q==",
-      "/q/1.5.1": "sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw==",
+      "/jquery/2.2.4": "/jquery/2.2.4:PIfhtCRWsOQOCNHXI0s+2Ssbxc/U0IZ1ZXD+YcrHwi4=:",
+      "/q/1.5.1": "/q/1.5.1:A6WReS0f6nc67cF0NQHN3YGoUP6sLNfcWK/7orfz1J4=:",
     },
     "project2/.rush/temp/shrinkwrap-deps.json",
     Object {
@@ -88,8 +88,8 @@ Array [
   Array [
     Object {
       "../../project3": "../../project3:jomsZKvXG32qqYOfW3HUBGfWWSw6ybFV1WDf9c/kiP4=:",
-      "/q/1.5.1": "sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw==",
-      "/repeat-string/1.6.1": "sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==",
+      "/q/1.5.1": "/q/1.5.1:A6WReS0f6nc67cF0NQHN3YGoUP6sLNfcWK/7orfz1J4=:",
+      "/repeat-string/1.6.1": "/repeat-string/1.6.1:FSrgyzed38htiD39oWRz9lAr9wD9AxuRmBW5tC28Jvc=:",
       "example.pkgs.visualstudio.com/@scope/testDep/2.1.0": "example.pkgs.visualstudio.com/@scope/testDep/2.1.0:i5jbUOp/IxUgiN0dHYsTRzmimOVBwu7f9908rRaC9VY=:",
     },
     "project3/.rush/temp/shrinkwrap-deps.json",
@@ -105,9 +105,9 @@ Array [
   Array [
     Object {
       "../../project1": "../../project1:6yFTI2g+Ny0Au80xpo6zIY61TCNDUuLUd6EgLlbOBtc=:",
-      "jquery@1.12.3": "sha512-FzM42/Ew+Hb8ha2OlhHRBLgWIZS32gZ0+NvWTf+ZvVvGaIlJkOiXQyb7VBjv4L6fJfmTrRf3EsAmbfsHDhfemw==",
-      "pad-left@1.0.2": "sha512-saxSV1EYAytuZDtQYEwi0DPzooG6aN18xyHrnJtzwjVwmMauzkEecd7hynVJGolNGk1Pl9tltmZqfze4TZTCxg==",
-      "repeat-string@1.6.1": "sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==",
+      "jquery@1.12.3": "jquery@1.12.3:nkmD9jsJt8eUeR2cOltYXX5TFnlK30nBsVeOz047iPo=:",
+      "pad-left@1.0.2": "pad-left@1.0.2:R80aACjIFOqWnDG/5JgPO4SM4jLta89Xjp5el1RQm+g=:",
+      "repeat-string@1.6.1": "repeat-string@1.6.1:YqQsoCDmP4kj4raEmb5SYE4GsoFGxpBoRbOA/U9rqB4=:",
     },
     "project1/.rush/temp/shrinkwrap-deps.json",
     Object {
@@ -122,8 +122,8 @@ Array [
   Array [
     Object {
       "../../project2": "../../project2:l6v/HWUhScMI0m4k6D5qHiCOFj3Z0GoIFJEcp4I63w0=:",
-      "jquery@2.2.4": "sha512-lBHj60ezci2u1v2FqnZIraShGgEXq35qCzMv4lITyHGppTnA13rwR0MgwyNJh9TnDs3aXUvd1xjAotfraMHX/Q==",
-      "q@1.5.0": "sha512-VVMcd+HnuWZalHPycK7CsbVJ+sSrrrnCvHcW38YJVK9Tywnb5DUWJjONi81bLUj7aqDjIXnePxBl5t1r/F/ncg==",
+      "jquery@2.2.4": "jquery@2.2.4:e3VqitHw5v+hfYoCAwnNmSwfWqvOCOLGdwIKR1fzqhM=:",
+      "q@1.5.0": "q@1.5.0:lSldncUZjX1nP6wk6WAWwPXA6wLli1dIBnuA3SPeIE4=:",
     },
     "project2/.rush/temp/shrinkwrap-deps.json",
     Object {
@@ -139,8 +139,8 @@ Array [
     Object {
       "../../project3": "../../project3:vMoje8cXfsHYOc6EXbxEw/qyBGXGUL1RApmNfwl7oA8=:",
       "pad-left@https://github.com/jonschlinkert/pad-left/tarball/2.1.0": "pad-left@https://github.com/jonschlinkert/pad-left/tarball/2.1.0:bKrL+SvVYubL0HwTq/GOOXq1d05LTQ+HGqlXabzGEAU=:",
-      "q@1.5.0": "sha512-VVMcd+HnuWZalHPycK7CsbVJ+sSrrrnCvHcW38YJVK9Tywnb5DUWJjONi81bLUj7aqDjIXnePxBl5t1r/F/ncg==",
-      "repeat-string@1.6.1": "sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==",
+      "q@1.5.0": "q@1.5.0:lSldncUZjX1nP6wk6WAWwPXA6wLli1dIBnuA3SPeIE4=:",
+      "repeat-string@1.6.1": "repeat-string@1.6.1:YqQsoCDmP4kj4raEmb5SYE4GsoFGxpBoRbOA/U9rqB4=:",
     },
     "project3/.rush/temp/shrinkwrap-deps.json",
     Object {

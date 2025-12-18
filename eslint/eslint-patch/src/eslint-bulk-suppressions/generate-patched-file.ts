@@ -262,7 +262,7 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   //      );
   //    }
   // ```
-  if (majorVersion >= 9 && minorVersion >= 37) {
+  if (majorVersion > 9 || (majorVersion === 9 && minorVersion >= 37)) {
     outputFile += scanUntilMarker('const problem = report.addRuleMessage(');
     outputFile += scanUntilMarker('ruleId,');
     outputFile += scanUntilMarker('severity,');
@@ -274,11 +274,10 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
 
   outputFile += `
     // --- BEGIN MONKEY PATCH ---`;
-  if (majorVersion >= 9 && minorVersion >= 37) {
+  if (majorVersion > 9 || (majorVersion === 9 && minorVersion >= 37)) {
     outputFile += `
     if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode: args[0]?.node ?? currentNode, ruleId, problem })) {
-      report.messages.splice(report.messages.indexOf(problem), 1);
-      return;
+      problem.suppressions ??= []; problem.suppressions.push({kind:"bulk",justification:""});
     }`;
   } else {
     outputFile += `

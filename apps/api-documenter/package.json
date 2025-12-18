@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-documenter",
-  "version": "7.27.3",
+  "version": "7.28.2",
   "description": "Read JSON files from api-extractor, generate documentation pages",
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
   "typings": "dist/rollup.d.ts",
   "dependencies": {
     "@microsoft/api-extractor-model": "workspace:*",
-    "@microsoft/tsdoc": "~0.15.1",
+    "@microsoft/tsdoc": "~0.16.0",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",

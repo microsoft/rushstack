@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack-embedded-dependencies-plugin",
-  "version": "0.3.3",
+  "version": "0.3.8",
   "description": "This plugin analyzes bundled dependencies from Node Modules for use with Component Governance and License Scanning.",
   "main": "lib/index.js",
   "typings": "dist/webpack-embedded-dependencies-plugin.d.ts",
@@ -32,7 +32,7 @@
     "@rushstack/heft": "workspace:*",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
-    "webpack": "~5.98.0",
+    "webpack": "~5.103.0",
     "memfs": "4.12.0"
   }
 }

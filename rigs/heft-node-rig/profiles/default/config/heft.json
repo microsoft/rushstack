@@ -21,7 +21,7 @@
 
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-commonjs"] }],
+      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-commonjs", "lib-dts", "lib-esm"] }],
 
       "tasksByName": {
         "typescript": {

@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PnpmWorkspaceFile basic functionality generates workspace file with packages only 1`] = `
+"packages:
+  - projects/app1
+  - projects/app2
+"
+`;
+
+exports[`PnpmWorkspaceFile catalog functionality can update catalogs after initial creation 1`] = `
+"catalogs:
+  default:
+    react: ^18.2.0
+    react-dom: ^18.2.0
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile catalog functionality generates workspace file with default catalog only 1`] = `
+"catalogs:
+  default:
+    react: ^18.0.0
+    react-dom: ^18.0.0
+    typescript: ~5.3.0
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile catalog functionality generates workspace file with named catalogs 1`] = `
+"catalogs:
+  backend:
+    express: ^4.18.0
+    fastify: ^4.26.0
+  default:
+    typescript: ~5.3.0
+  frontend:
+    vue: ^3.4.0
+    vue-router: ^4.2.0
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile catalog functionality handles empty catalog object 1`] = `
+"packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile catalog functionality handles scoped packages in catalogs 1`] = `
+"catalogs:
+  default:
+    '@rushstack/node-core-library': ~5.0.0
+    '@types/cookies': ^0.7.7
+    '@types/node': ~22.9.4
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile catalog functionality handles undefined catalog 1`] = `
+"packages:
+  - projects/app1
+"
+`;

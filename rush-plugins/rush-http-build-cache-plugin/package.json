@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-http-build-cache-plugin",
-  "version": "5.162.0",
+  "version": "5.164.0",
   "description": "Rush plugin for generic HTTP cloud build cache",
   "repository": {
     "type": "git",

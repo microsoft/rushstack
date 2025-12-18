@@ -4,7 +4,7 @@
 import * as path from 'node:path';
 
 import { ESLintUtils, TSESTree, type TSESLint } from '@typescript-eslint/utils';
-import type { Program } from 'typescript';
+import type { CompilerOptions, Program } from 'typescript';
 
 export interface IParsedImportSpecifier {
   loader?: string;
@@ -33,23 +33,41 @@ export function getFilePathFromContext(context: TSESLint.RuleContext<string, unk
 export function getRootDirectoryFromContext(
   context: TSESLint.RuleContext<string, unknown[]>
 ): string | undefined {
-  let rootDirectory: string | undefined;
+  /*
+   * Precedence of root directory resolution:
+   * 1. parserOptions.tsconfigRootDir if available (since set by repo maintainer)
+   * 2. tsconfig.json directory if available (but might be in a subfolder)
+   * 3. TS Program current directory if available
+   * 4. ESLint working directory (probably wrong, but better than nothing?)
+   */
+  const tsConfigRootDir: string | undefined = context.parserOptions?.tsconfigRootDir;
+  if (tsConfigRootDir) {
+    return tsConfigRootDir;
+  }
+
   try {
-    // First attempt to get the root directory from the tsconfig baseUrl, then the program current directory
     const program: Program | null | undefined = (
       context.sourceCode?.parserServices ?? ESLintUtils.getParserServices(context)
     ).program;
-    rootDirectory = program?.getCompilerOptions().baseUrl ?? program?.getCurrentDirectory();
+    const compilerOptions: CompilerOptions | undefined = program?.getCompilerOptions();
+
+    const tsConfigPath: string | undefined = compilerOptions?.configFilePath as string | undefined;
+    if (tsConfigPath) {
+      const tsConfigDir: string = path.dirname(tsConfigPath);
+      return tsConfigDir;
+    }
+
+    // Next, try to get the current directory from the TS program
+    const rootDirectory: string | undefined = program?.getCurrentDirectory();
+    if (rootDirectory) {
+      return rootDirectory;
+    }
   } catch {
     // Ignore the error if we cannot retrieve a TS program
   }
 
-  // Fall back to the parserOptions.tsconfigRootDir if available, otherwise the eslint working directory
-  if (!rootDirectory) {
-    rootDirectory = context.parserOptions?.tsconfigRootDir ?? context.getCwd?.();
-  }
-
-  return rootDirectory;
+  // Last resort: use ESLint's current working directory
+  return context.getCwd?.();
 }
 
 export function parseImportSpecifierFromExpression(

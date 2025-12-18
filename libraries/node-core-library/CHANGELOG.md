@@ -1,6 +1,20 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 24 Oct 2025 00:13:38 GMT and should not be manually modified.
+This log was last generated on Sat, 06 Dec 2025 01:12:28 GMT and should not be manually modified.
+
+## 5.19.1
+Sat, 06 Dec 2025 01:12:28 GMT
+
+### Patches
+
+- Replace fs-extra with node:fs in FileWriter
+
+## 5.19.0
+Fri, 21 Nov 2025 16:13:56 GMT
+
+### Minor changes
+
+- Update `Executable.getProcessInfoBy*` APIs to use PowerShell on Windows to support latest Windows 11 versions.
 
 ## 5.18.0
 Fri, 24 Oct 2025 00:13:38 GMT

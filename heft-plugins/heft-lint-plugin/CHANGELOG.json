@@ -2,6 +2,131 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "1.1.10",
+      "tag": "@rushstack/heft-lint-plugin_v1.1.10",
+      "date": "Sat, 06 Dec 2025 01:12:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.19.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `1.1.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.19.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `1.1.6` to `1.1.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.9",
+      "tag": "@rushstack/heft-lint-plugin_v1.1.9",
+      "date": "Wed, 03 Dec 2025 01:12:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Stabilize the hash suffix in the linter cache file by using tsconfig path hash instead of file list hash"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.8",
+      "tag": "@rushstack/heft-lint-plugin_v1.1.8",
+      "date": "Fri, 21 Nov 2025 16:13:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.19.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `1.1.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.19.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `1.1.5` to `1.1.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.7",
+      "tag": "@rushstack/heft-lint-plugin_v1.1.7",
+      "date": "Wed, 12 Nov 2025 01:57:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Forward suppressed messages to formatters."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.6",
+      "tag": "@rushstack/heft-lint-plugin_v1.1.6",
+      "date": "Wed, 12 Nov 2025 01:12:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `1.1.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `1.1.4` to `1.1.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.5",
+      "tag": "@rushstack/heft-lint-plugin_v1.1.5",
+      "date": "Tue, 11 Nov 2025 16:13:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Ensure that `parserOptions.tsconfigRootDir` is set for use by custom lint rules."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.4",
+      "tag": "@rushstack/heft-lint-plugin_v1.1.4",
+      "date": "Tue, 04 Nov 2025 08:15:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix bug where TypeScript program is not reused in ESLint 9."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `1.1.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `1.1.3` to `1.1.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.3",
       "tag": "@rushstack/heft-lint-plugin_v1.1.3",
       "date": "Fri, 24 Oct 2025 00:13:38 GMT",

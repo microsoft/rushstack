@@ -29,6 +29,23 @@
               ]
             }
           }
+        },
+
+        "copy-json-schemas": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "src/schemas",
+                  "destinationFolders": ["temp/json-schemas/api-extractor/v7"],
+                  "fileExtensions": [".schema.json"],
+                  "hardlink": true
+                }
+              ]
+            }
+          }
         }
       }
     }
