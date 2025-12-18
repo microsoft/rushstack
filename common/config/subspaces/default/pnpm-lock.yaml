@@ -3198,6 +3198,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      '@rushstack/heft-rspack-plugin':
+        specifier: workspace:*
+        version: link:../heft-rspack-plugin
       '@rushstack/heft-webpack4-plugin':
         specifier: workspace:*
         version: link:../heft-webpack4-plugin

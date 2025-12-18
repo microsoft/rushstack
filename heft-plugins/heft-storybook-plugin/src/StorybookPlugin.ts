@@ -33,11 +33,12 @@ import type {
   PluginName as Webpack5PluginName,
   IWebpackPluginAccessor as IWebpack5PluginAccessor
 } from '@rushstack/heft-webpack5-plugin';
+import type { IRspackPluginAccessor, PluginName as RspackPluginName } from '@rushstack/heft-rspack-plugin';
 
 const PLUGIN_NAME: 'storybook-plugin' = 'storybook-plugin';
 const WEBPACK4_PLUGIN_NAME: typeof Webpack4PluginName = 'webpack4-plugin';
 const WEBPACK5_PLUGIN_NAME: typeof Webpack5PluginName = 'webpack5-plugin';
-const RSPACK_PLUGIN_NAME: 'rspack-plugin' = 'rspack-plugin';
+const RSPACK_PLUGIN_NAME: typeof RspackPluginName = 'rspack-plugin';
 
 /**
  * Storybook CLI build type targets
@@ -277,7 +278,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-rspack-plugin',
         RSPACK_PLUGIN_NAME,
-        (accessor: any) => {
+        (accessor: IRspackPluginAccessor) => {
           isServeMode = accessor.parameters.isServeMode;
 
           // Discard Rspack's configuration to prevent Rspack from running only when performing Storybook build

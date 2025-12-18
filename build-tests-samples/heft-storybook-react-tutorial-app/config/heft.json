@@ -12,8 +12,8 @@
             "pluginPackage": "@rushstack/heft-storybook-plugin",
             "options": {
               "storykitPackageName": "heft-storybook-react-tutorial-storykit",
-              "cliPackageName": "@storybook/react",
-              "cliCallingConvention": "storybook6",
+              "cliPackageName": "storybook",
+              "cliCallingConvention": "storybook9",
               "staticBuildOutputFolder": "dist",
               "cwdPackageName": "heft-storybook-react-tutorial"
             }
