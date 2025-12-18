@@ -1089,6 +1089,18 @@
     {
       "name": "zod",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@storybook/react-webpack5",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@testing-library/dom",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "storybook",
+      "allowedCategories": [ "tests" ]
     }
   ]
 }

@@ -1,3 +1,6 @@
 {
-  "extends": "./node_modules/local-web-rig/profiles/app/tsconfig-base.json"
+  "extends": "./node_modules/local-web-rig/profiles/app/tsconfig-base.json",
+  "compilerOptions": {
+    "skipLibCheck": true
+  }
 }

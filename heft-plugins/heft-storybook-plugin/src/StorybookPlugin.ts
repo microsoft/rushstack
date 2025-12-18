@@ -242,7 +242,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
 
     // Only tap if the --storybook flag is present.
     if (storybookParameter.value) {
-      const configureWebpackTap: (packager: string) => () => Promise<false> =
+      const configurePackagerTap: (packager: 'Webpack' | 'Rspack') => () => Promise<false> =
         (packager: string) => async () => {
           // Discard Webpack's configuration to prevent Webpack from running
           logger.terminal.writeLine(
@@ -259,7 +259,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
           isServeMode = accessor.parameters.isServeMode;
 
           // Discard Webpack's configuration to prevent Webpack from running only when performing Storybook build
-          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap('Webpack'));
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configurePackagerTap('Webpack'));
         }
       );
 
@@ -270,7 +270,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
           isServeMode = accessor.parameters.isServeMode;
 
           // Discard Webpack's configuration to prevent Webpack from running only when performing Storybook build
-          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap('Webpack'));
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configurePackagerTap('Webpack'));
         }
       );
 
@@ -280,8 +280,8 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
         (accessor: any) => {
           isServeMode = accessor.parameters.isServeMode;
 
-          // Discard Webpack's configuration to prevent Webpack from running only when performing Storybook build
-          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap('Rspack'));
+          // Discard Rspack's configuration to prevent Rspack from running only when performing Storybook build
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configurePackagerTap('Rspack'));
         }
       );
 
@@ -369,8 +369,8 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
 
     const [moduleExecutableName, ...moduleDefaultArgs] = storyBookCliConfig.command[buildMode];
     const modulePath: string | undefined = (() => {
-      if (storybookCliVersion === StorybookCliVersion.STORYBOOK9) {
-        return packageJson.bin as string;
+      if (storybookCliVersion === StorybookCliVersion.STORYBOOK9 && typeof packageJson.bin === 'string') {
+        return packageJson.bin;
       }
 
       if (typeof packageJson.bin !== 'string') {
