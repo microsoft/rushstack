@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update Webpack dependency to `~5.103.0`",
+      "type": "minor",
+      "packageName": "@rushstack/heft-web-rig"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig",
+  "email": "yashwanth195@users.noreply.github.com"
+}
