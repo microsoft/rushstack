@@ -80,12 +80,12 @@ export declare namespace EntangledNamespace {
      * This is a nested namespace.
      * The "beta" release tag is inherited from the parent.
      */
-    export namespace N2 {
+    namespace N2 {
         /**
          * This class is in a nested namespace.
          * @alpha
          */
-        export class ClassX {
+        class ClassX {
             /**
              * The "alpha" release tag is inherited from the parent.
              */
@@ -96,7 +96,7 @@ export declare namespace EntangledNamespace {
      * This is a nested namespace.
      * The "beta" release tag is inherited from the parent.
      */
-    export namespace N3 {
+    namespace N3 {
         /* Excluded from this release type: _ClassY */
     }
 }
