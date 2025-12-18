@@ -239,7 +239,18 @@ export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBr
     // Resolve immediately so caller can initiate local connection with query params (handshake completes later)
     resolve({
       remoteEndpoint: localProxyWsEndpoint,
-      [Symbol.dispose]() {},
+      [Symbol.dispose]() {
+        try {
+          remoteWsServer.close();
+        } catch {
+          // ignore errors during remote WebSocket server shutdown
+        }
+        try {
+          localProxyWs.close();
+        } catch {
+          // ignore errors during local proxy WebSocket server shutdown
+        }
+      },
       // eslint-disable-next-line promise/param-names
       closePromise: new Promise<void>((resolve2) => {
         remoteWsServer.on('close', () => {
