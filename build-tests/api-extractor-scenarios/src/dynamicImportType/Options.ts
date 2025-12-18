@@ -5,3 +5,5 @@ export interface Options {
   name: string;
   color: 'red' | 'blue';
 }
+
+export class OptionsClass {}
