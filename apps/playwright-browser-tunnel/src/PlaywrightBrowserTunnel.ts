@@ -395,7 +395,7 @@ export class PlaywrightTunnel {
 
   // ws1 is the tunnel websocket, ws2 is the browser server websocket
   private async _setupForwardingAsync(ws1: WebSocket, ws2: WebSocket): Promise<void> {
-    console.log('Setting up message forwarding between ws1 and ws2');
+    this._terminal.writeLine('Setting up message forwarding between ws1 and ws2');
     ws1.on('message', (data) => {
       if (ws2.readyState === WebSocket.OPEN) {
         ws2.send(data);
