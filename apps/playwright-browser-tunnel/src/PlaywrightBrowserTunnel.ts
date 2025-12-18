@@ -284,17 +284,38 @@ export class PlaywrightTunnel {
   }
 
   private async _waitForIncomingConnectionAsync(): Promise<WebSocket> {
-    this._terminal.writeLine(`Waiting for incoming WebSocket connection`);
+    this._terminal.writeLine('Waiting for incoming WebSocket connection');
+
     return new Promise<WebSocket>((resolve, reject) => {
       const server: WebSocketServer = new WebSocket.Server({ port: this._listenPort });
-      server.on('connection', (ws) => {
-        this._terminal.writeLine(`Incoming WebSocket connection established`);
+
+      const cleanup = (): void => {
         server.removeAllListeners();
-        resolve(ws);
+      };
+
+      server.once('connection', (ws) => {
+        this._terminal.writeLine('Incoming WebSocket connection established');
+
+        // Stop listening immediately so the port is released
+        cleanup();
+        server.close((closeError?: Error) => {
+          if (closeError) {
+            this._terminal.writeLine(
+              `Failed to close WebSocket server: ${
+                closeError instanceof Error ? closeError.message : closeError
+              }`
+            );
+          }
+          resolve(ws);
+        });
       });
-      server.on('error', (error) => {
+
+      server.once('error', (error) => {
         this._terminal.writeLine(`WebSocket server error: ${error instanceof Error ? error.message : error}`);
-        reject(error);
+
+        cleanup();
+        // Try to close (best-effort), then reject
+        server.close(() => reject(error));
       });
     });
   }
