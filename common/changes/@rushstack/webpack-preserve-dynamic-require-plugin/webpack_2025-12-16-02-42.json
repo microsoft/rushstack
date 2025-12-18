@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/webpack-preserve-dynamic-require-plugin"
+    }
+  ],
+  "packageName": "@rushstack/webpack-preserve-dynamic-require-plugin",
+  "email": "yashwanth195@users.noreply.github.com"
+}

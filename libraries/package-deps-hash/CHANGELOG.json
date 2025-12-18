@@ -2,6 +2,33 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "4.6.0",
+      "tag": "@rushstack/package-deps-hash_v4.6.0",
+      "date": "Fri, 12 Dec 2025 01:12:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Replace \"git ls-tree\" with \"git ls-files\" to improve performance. Identify symbolic links and return them separately in \"getDetailedRepoStateAsync\". Symbolic links will be omitted from the result returned by \"getRepoStateAsync\", as they are not \"files\"."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.5.7",
+      "tag": "@rushstack/package-deps-hash_v4.5.7",
+      "date": "Sat, 06 Dec 2025 01:12:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.19.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.5.6",
       "tag": "@rushstack/package-deps-hash_v4.5.6",
       "date": "Fri, 21 Nov 2025 16:13:56 GMT",

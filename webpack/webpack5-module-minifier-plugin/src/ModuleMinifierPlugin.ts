@@ -486,9 +486,9 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
                         ? new SourceMapSource(
                             minified, // Code
                             nameForMap, // File
-                            minifierMap!, // Base source map
+                            minifierMap ?? undefined, // Base source map
                             rawCode, // Source from before transform
-                            map, // Source Map from before transform
+                            map ?? undefined, // Source Map from before transform
                             true // Remove original source
                           )
                         : new RawSource(minified);

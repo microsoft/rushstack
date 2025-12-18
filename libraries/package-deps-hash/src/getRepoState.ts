@@ -27,17 +27,28 @@ const STANDARD_GIT_OPTIONS: readonly string[] = [
   'maintenance.auto=false'
 ];
 
+const OBJECTMODE_SUBMODULE: '160000' = '160000';
+const OBJECTMODE_SYMLINK: '120000' = '120000';
+const OBJECTMODE_FILE_NONEXECUTABLE: '100644' = '100644';
+const OBJECTMODE_FILE_EXECUTABLE: '100755' = '100755';
+
+// Note that `type` is a stub that is being ignored by the parser in favor of using `mode` to infer, since `%(objecttype)` requires git 2.51.0+
+// e.g. 10644 blob <hash>\t<path>
+const GIT_LSTREE_FORMAT: string = '%(objectmode) type %(objectname)%x09%(path)';
+
 interface IGitTreeState {
   files: Map<string, string>; // type "blob"
+  symlinks: Map<string, string>; // type "link"
   submodules: Map<string, string>; // type "commit"
 }
 
 /**
- * Parses the output of the "git ls-tree -r -z" command
+ * Parses the output of the "git ls-tree -r -z" command or of other commands that have been coerced to match its format.
  * @internal
  */
 export function parseGitLsTree(output: string): IGitTreeState {
   const files: Map<string, string> = new Map();
+  const symlinks: Map<string, string> = new Map();
   const submodules: Map<string, string> = new Map();
 
   // Parse the output
@@ -57,16 +68,21 @@ export function parseGitLsTree(output: string): IGitTreeState {
     // The newHash will be all zeros if the file is deleted, or a hash if it exists
     const hash: string = item.slice(tabIndex - 40, tabIndex);
 
-    const spaceIndex: number = item.lastIndexOf(' ', tabIndex - 42);
+    const mode: string = item.slice(0, item.indexOf(' '));
 
-    const type: string = item.slice(spaceIndex + 1, tabIndex - 41);
-
-    switch (type) {
-      case 'commit': {
+    switch (mode) {
+      case OBJECTMODE_SUBMODULE: {
+        // This is a submodule
         submodules.set(filePath, hash);
         break;
       }
-      case 'blob':
+      case OBJECTMODE_SYMLINK: {
+        // This is a symbolic link
+        symlinks.set(filePath, hash);
+        break;
+      }
+      case OBJECTMODE_FILE_NONEXECUTABLE:
+      case OBJECTMODE_FILE_EXECUTABLE:
       default: {
         files.set(filePath, hash);
         break;
@@ -79,6 +95,7 @@ export function parseGitLsTree(output: string): IGitTreeState {
 
   return {
     files,
+    symlinks,
     submodules
   };
 }
@@ -387,6 +404,10 @@ export interface IDetailedRepoState {
    */
   files: Map<string, string>;
   /**
+   * The Git file hashes for all symbolic links in the repository, including uncommitted changes.
+   */
+  symlinks: Map<string, string>;
+  /**
    * A boolean indicating whether the repository has submodules.
    */
   hasSubmodules: boolean;
@@ -413,15 +434,15 @@ export async function getDetailedRepoStateAsync(
   const statePromise: Promise<IGitTreeState> = spawnGitAsync(
     gitPath,
     STANDARD_GIT_OPTIONS.concat([
-      'ls-tree',
-      // Recursively expand trees
-      '-r',
+      'ls-files',
+      // Read from the index only
+      '--cached',
       // Use NUL as the separator
       '-z',
       // Specify the full path to files relative to the root
       '--full-name',
-      // As of last commit
-      'HEAD',
+      // Match the format of "git ls-tree". The %(objecttype) placeholder requires git 2.51.0+, so not using yet.
+      `--format=${GIT_LSTREE_FORMAT}`,
       '--',
       ...(filterPath ?? [])
     ]),
@@ -454,13 +475,14 @@ export async function getDetailedRepoStateAsync(
       }
     }
 
-    const [{ files }, locallyModified] = await Promise.all([statePromise, locallyModifiedPromise]);
+    const [{ files, symlinks }, locallyModified] = await Promise.all([statePromise, locallyModifiedPromise]);
 
     for (const [filePath, exists] of locallyModified) {
-      if (exists) {
+      if (exists && !symlinks.has(filePath)) {
         yield filePath;
       } else {
         files.delete(filePath);
+        symlinks.delete(filePath);
       }
     }
   }
@@ -471,7 +493,7 @@ export async function getDetailedRepoStateAsync(
     gitPath
   );
 
-  const [{ files, submodules }, locallyModifiedFiles] = await Promise.all([
+  const [{ files, symlinks, submodules }, locallyModifiedFiles] = await Promise.all([
     statePromise,
     locallyModifiedPromise
   ]);
@@ -502,7 +524,8 @@ export async function getDetailedRepoStateAsync(
   return {
     hasSubmodules,
     hasUncommittedChanges: locallyModifiedFiles.size > 0,
-    files
+    files,
+    symlinks
   };
 }
 

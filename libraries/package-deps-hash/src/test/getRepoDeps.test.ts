@@ -51,10 +51,27 @@ describe(parseGitLsTree.name, () => {
     const hash: string = '3451bccdc831cb43d7a70ed8e628dcf9c7f888c8';
 
     const output: string = `100644 blob ${hash}\t${filename}\x00`;
-    const { files } = parseGitLsTree(output);
+    const { files, symlinks, submodules } = parseGitLsTree(output);
+
+    expect(symlinks.size).toEqual(0); // Expect there to be exactly 0 symlinks
+    expect(submodules.size).toEqual(0); // Expect there to be exactly 0 submodules
 
     expect(files.size).toEqual(1); // Expect there to be exactly 1 change
     expect(files.get(filename)).toEqual(hash); // Expect the hash to be ${hash}
+  });
+
+  it('can handle a symlink', () => {
+    const filename: string = 'src/symlink';
+    const hash: string = '3451bccdc831cb43d7a70ed8e628dcf9c7f888c8';
+
+    const output: string = `120000 link ${hash}\t${filename}\x00`;
+    const { files, symlinks, submodules } = parseGitLsTree(output);
+
+    expect(files.size).toEqual(0); // Expect there to be exactly 0 files
+    expect(submodules.size).toEqual(0); // Expect there to be exactly 0 submodules
+
+    expect(symlinks.size).toEqual(1); // Expect there to be exactly 1 symlink
+    expect(symlinks.get(filename)).toEqual(hash); // Expect the hash to be ${hash}
   });
 
   it('can handle a submodule', () => {
@@ -78,14 +95,16 @@ describe(parseGitLsTree.name, () => {
     const filename3: string = 'submodule/src/index.ts';
     const hash3: string = 'fedcba9876543210fedcba9876543210fedcba98';
 
-    const output: string = `100644 blob ${hash1}\t${filename1}\x00100666 blob ${hash2}\t${filename2}\x00106666 commit ${hash3}\t${filename3}\0`;
-    const { files, submodules } = parseGitLsTree(output);
+    const output: string = `100644 blob ${hash1}\t${filename1}\x00100666 blob ${hash2}\t${filename2}\x00160000 commit ${hash3}\t${filename3}\0`;
+    const { files, symlinks, submodules } = parseGitLsTree(output);
 
-    expect(files.size).toEqual(2); // Expect there to be exactly 2 changes
+    expect(files.size).toEqual(2); // Expect there to be exactly 2 files
     expect(files.get(filename1)).toEqual(hash1); // Expect the hash to be ${hash1}
     expect(files.get(filename2)).toEqual(hash2); // Expect the hash to be ${hash2}
 
-    expect(submodules.size).toEqual(1); // Expect there to be exactly 1 submodule changes
+    expect(symlinks.size).toEqual(0); // Expect there to be exactly 0 symlink changes
+
+    expect(submodules.size).toEqual(1); // Expect there to be exactly 1 submodule
     expect(submodules.get(filename3)).toEqual(hash3); // Expect the hash to be ${hash3}
   });
 });

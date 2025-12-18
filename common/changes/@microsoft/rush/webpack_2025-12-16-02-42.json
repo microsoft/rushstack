@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "comment": "Add support for defining pnpm catalog config.",
+      "comment": "",
       "type": "none",
       "packageName": "@microsoft/rush"
     }
   ],
   "packageName": "@microsoft/rush",
-  "email": "aramissennyeydd@users.noreply.github.com"
+  "email": "yashwanth195@users.noreply.github.com"
 }

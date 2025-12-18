@@ -28,10 +28,6 @@ interface IResourceResolveData {
   relativePath?: string;
 }
 
-interface IWebpackModuleCreateData {
-  resourceResolveData?: IResourceResolveData;
-}
-
 /**
  * @beta
  * Data type for a package.json file. This is a superset of the full package.json file and includes additional fields
@@ -180,26 +176,27 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation, { normalModuleFactory }) => {
       const thirdPartyPackages: ThirdPartyPackageMap = new Map();
 
-      normalModuleFactory.hooks.module.tap(
-        PLUGIN_NAME,
-        (module, moduleCreateData: IWebpackModuleCreateData, resolveData) => {
-          const { resourceResolveData } = moduleCreateData;
-          const pkg: IPackageData | undefined = resourceResolveData?.descriptionFileData;
-          const filePath: string | undefined = resourceResolveData?.descriptionFileRoot;
+      normalModuleFactory.hooks.module.tap(PLUGIN_NAME, (module, moduleCreateData, resolveData) => {
+        /* moduleCreateData.resourceResolveData is typed as 'unknown' in Webpack's typings, so we cast it to our expected shape (IResourceResolveData)
+        to access its properties safely.*/
+        const resourceResolveData: IResourceResolveData | undefined = moduleCreateData.resourceResolveData as
+          | IResourceResolveData
+          | undefined;
+        const pkg: IPackageData | undefined = resourceResolveData?.descriptionFileData;
+        const filePath: string | undefined = resourceResolveData?.descriptionFileRoot;
 
-          if (
-            pkg &&
-            filePath &&
-            this._packageFilterFunction(pkg, filePath) &&
-            filePath?.includes('node_modules')
-          ) {
-            const key: PackageNameAndVersion = makePackageMapKeyForPackage(pkg);
-            thirdPartyPackages.set(key, { packageFolderPath: filePath, packageJsonData: pkg });
-          }
-
-          return module;
+        if (
+          pkg &&
+          filePath &&
+          this._packageFilterFunction(pkg, filePath) &&
+          filePath?.includes('node_modules')
+        ) {
+          const key: PackageNameAndVersion = makePackageMapKeyForPackage(pkg);
+          thirdPartyPackages.set(key, { packageFolderPath: filePath, packageJsonData: pkg });
         }
-      );
+
+        return module;
+      });
 
       compilation.hooks.processAssets.tapPromise(
         { name: PLUGIN_NAME, stage: Compilation.PROCESS_ASSETS_STAGE_REPORT },
@@ -328,7 +325,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
     const files: InputFileSystemReadDirResults = await LegacyAdapters.convertCallbackToPromise(
       inputFileSystem.readdir,
       modulePath,
-      { withFileTypes: true }
+      { withFileTypes: true, encoding: 'buffer' }
     );
 
     if (!files) {
@@ -336,9 +333,10 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
     }
 
     for (const file of files) {
-      if (file.isFile() && LICENSE_FILES_REGEXP.test(file.name)) {
+      const fileName: string = file.name.toString();
+      if (file.isFile() && LICENSE_FILES_REGEXP.test(fileName)) {
         // Grabbing the first license file if multiple are found
-        return path.join(modulePath, file.name);
+        return path.join(modulePath, fileName);
       }
     }
   }
