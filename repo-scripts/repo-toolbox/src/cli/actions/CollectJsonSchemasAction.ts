@@ -82,22 +82,26 @@ export class CollectJsonSchemasAction extends CommandLineAction {
           `${projectFolder}/temp/json-schemas`,
           ''
         );
-        await Async.forEachAsync(schemaFiles, async ({ absolutePath, relativePath, content }) => {
-          let contentByAbsolutePath: Map<string, string[]> | undefined =
-            contentByAbsolutePathByRelativePath.get(relativePath);
-          if (!contentByAbsolutePath) {
-            contentByAbsolutePath = new Map();
-            contentByAbsolutePathByRelativePath.set(relativePath, contentByAbsolutePath);
-          }
+        await Async.forEachAsync(
+          schemaFiles,
+          async ({ absolutePath, relativePath, content }) => {
+            let contentByAbsolutePath: Map<string, string[]> | undefined =
+              contentByAbsolutePathByRelativePath.get(relativePath);
+            if (!contentByAbsolutePath) {
+              contentByAbsolutePath = new Map();
+              contentByAbsolutePathByRelativePath.set(relativePath, contentByAbsolutePath);
+            }
 
-          let absolutePaths: string[] | undefined = contentByAbsolutePath.get(content);
-          if (!absolutePaths) {
-            absolutePaths = [];
-            contentByAbsolutePath.set(content, absolutePaths);
-          }
+            let absolutePaths: string[] | undefined = contentByAbsolutePath.get(content);
+            if (!absolutePaths) {
+              absolutePaths = [];
+              contentByAbsolutePath.set(content, absolutePaths);
+            }
 
-          absolutePaths.push(absolutePath);
-        }, { concurrency: 5 });
+            absolutePaths.push(absolutePath);
+          },
+          { concurrency: 5 }
+        );
       },
       { concurrency: 5 }
     );
