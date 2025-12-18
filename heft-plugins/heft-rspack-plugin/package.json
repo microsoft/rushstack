@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-rspack-plugin",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Heft plugin for Rspack",
   "repository": {
     "type": "git",
