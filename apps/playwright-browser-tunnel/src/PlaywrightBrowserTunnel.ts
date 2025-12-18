@@ -10,12 +10,20 @@ import semver from 'semver';
 import { TerminalProviderSeverity, TerminalStreamWritable, type ITerminal } from '@rushstack/terminal';
 import { Executable, FileSystem } from '@rushstack/node-core-library';
 
+/**
+ * Allowed Playwright browser names.
+ * @alpha
+ */
 export type BrowserNames = 'chromium' | 'firefox' | 'webkit';
 const validBrowserNames: Set<string> = new Set(['chromium', 'firefox', 'webkit']);
 function isValidBrowserName(browserName: string): browserName is BrowserNames {
   return validBrowserNames.has(browserName);
 }
 
+/**
+ * Status values reported by {@link PlaywrightTunnel}.
+ * @alpha
+ */
 export type TunnelStatus =
   | 'waiting-for-connection'
   | 'browser-server-running'
@@ -32,6 +40,10 @@ interface IHandshake {
 
 type ITunnelMode = 'poll-connection' | 'wait-for-incoming-connection';
 
+/**
+ * Options for configuring a {@link PlaywrightTunnel} instance.
+ * @alpha
+ */
 export type IPlaywrightTunnelOptions = {
   terminal: ITerminal;
   onStatusChange: (status: TunnelStatus) => void;
@@ -58,6 +70,10 @@ async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/**
+ * Hosts a Playwright browser server and forwards traffic over a WebSocket tunnel.
+ * @alpha
+ */
 export class PlaywrightTunnel {
   private readonly _terminal: ITerminal;
   private readonly _onStatusChange: (status: TunnelStatus) => void;

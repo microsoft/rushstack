@@ -4,10 +4,7 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
-import {
-  PlaywrightTunnel,
-  type TunnelStatus
-} from '@rushstack/playwright-browser-tunnel/lib/PlaywrightBrowserTunnel';
+import { PlaywrightTunnel, type TunnelStatus } from '@rushstack/playwright-browser-tunnel';
 import { Terminal, type ITerminal, type ITerminalProvider } from '@rushstack/terminal';
 
 import { runWorkspaceCommandAsync } from '@rushstack/vscode-shared/lib/runWorkspaceCommandAsync';

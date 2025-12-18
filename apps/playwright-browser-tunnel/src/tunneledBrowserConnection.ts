@@ -79,12 +79,20 @@ interface IHandshakeAck {
 
 const LISTEN_PORT: number = 3000;
 
+/**
+ * Disposable handle returned by {@link tunneledBrowserConnection}.
+ * @alpha
+ */
 export interface IDisposableTunneledBrowserConnection {
   remoteEndpoint: string;
   [Symbol.dispose]: () => void;
   closePromise: Promise<void>;
 }
 
+/**
+ * Creates a tunneled WebSocket endpoint that a local Playwright client can connect to.
+ * @alpha
+ */
 export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBrowserConnection> {
   // Server that remote peer (actual browser host) connects to
   const remoteWsServer: WebSocketServer = new WebSocketServer({ port: LISTEN_PORT });
@@ -242,11 +250,19 @@ export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBr
   });
 }
 
-interface IDisposableTunneledBrowser {
+/**
+ * Disposable handle returned by {@link tunneledBrowser}.
+ * @alpha
+ */
+export interface IDisposableTunneledBrowser {
   browser: Browser;
   [Symbol.asyncDispose]: () => Promise<void>;
 }
 
+/**
+ * Creates a Playwright Browser instance connected via a tunneled WebSocket connection.
+ * @alpha
+ */
 export async function tunneledBrowser(
   browserName: BrowserNames,
   launchOptions: LaunchOptions
