@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack-embedded-dependencies-plugin",
   "entries": [
     {
+      "version": "0.3.8",
+      "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.3.8",
+      "date": "Thu, 18 Dec 2025 01:13:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix support for newer webpack typings."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.7",
       "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.3.7",
       "date": "Sat, 06 Dec 2025 01:12:29 GMT",

@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-rspack-plugin",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/heft-rspack-plugin_v0.2.0",
+      "date": "Thu, 18 Dec 2025 01:13:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update Webpack dependency to `~5.103.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.2",
       "tag": "@rushstack/heft-rspack-plugin_v0.1.2",
       "date": "Sat, 06 Dec 2025 01:12:28 GMT",

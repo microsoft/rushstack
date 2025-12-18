@@ -2,6 +2,18 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "5.2.8",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v5.2.8",
+      "date": "Thu, 18 Dec 2025 01:13:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix support for newer webpack typings."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.2.7",
       "tag": "@rushstack/set-webpack-public-path-plugin_v5.2.7",
       "date": "Sat, 06 Dec 2025 01:12:28 GMT",
