@@ -10,7 +10,9 @@
  * @packageDocumentation
  */
 
+// eslint-disable-next-line no-restricted-syntax
 export * from './DocClass1';
+// eslint-disable-next-line no-restricted-syntax
 export * from './DocEnums';
 import type { IDocInterface1, IDocInterface3, SystemEvent } from './DocClass1';
 

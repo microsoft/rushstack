@@ -13,6 +13,6 @@
  * @packageDocumentation
  */
 
-export * from './CollatedTerminal';
-export * from './CollatedWriter';
-export * from './StreamCollator';
+export { CollatedTerminal } from './CollatedTerminal';
+export { CollatedWriter } from './CollatedWriter';
+export { StreamCollator, type IStreamCollatorOptions } from './StreamCollator';
