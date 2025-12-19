@@ -39,6 +39,10 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/playwright-browser-tunnel",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "@rushstack/problem-matcher",
       "allowedCategories": [ "libraries" ]
     },
