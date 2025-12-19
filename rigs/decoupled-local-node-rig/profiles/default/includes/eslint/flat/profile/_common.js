@@ -171,7 +171,16 @@ module.exports = {
           }
         ],
 
-        'import/no-duplicates': 'warn'
+        'import/no-duplicates': 'warn',
+
+        'no-restricted-syntax': [
+          'error',
+          {
+            // Forbid only bare `export * from '...'`
+            selector: 'ExportAllDeclaration[exported=null]',
+            message: "Use explicit named exports instead of `export * from '...'`."
+          }
+        ]
       }
     },
     {

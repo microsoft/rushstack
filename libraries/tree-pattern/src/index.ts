@@ -7,4 +7,4 @@
  * @packageDocumentation
  */
 
-export * from './TreePattern';
+export { type TreeNode, type ITreePatternCaptureSet, TreePattern } from './TreePattern';

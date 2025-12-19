@@ -13,9 +13,9 @@
  * @packageDocumentation
  */
 
-export * from './components/Button';
-export * from './components/ScrollArea';
-export * from './components/Tabs';
-export * from './components/Checkbox';
-export * from './components/Input';
-export * from './components/Text';
+export { Button, type IButtonProps } from './components/Button';
+export { ScrollArea, type IScrollAreaProps } from './components/ScrollArea';
+export { Tabs, type ITabsItem, type ITabsProps } from './components/Tabs';
+export { Checkbox, type ICheckboxProps } from './components/Checkbox';
+export { Input, type IInputProps } from './components/Input';
+export { Text, type TextType, type ITextProps } from './components/Text';
