@@ -24,7 +24,7 @@
         "webpack": {
           "taskDependencies": ["typescript"],
           "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-webpack4-plugin"
+            "pluginPackage": "@rushstack/heft-webpack5-plugin"
           }
         },
         "storybook": {
@@ -33,8 +33,8 @@
             "pluginPackage": "@rushstack/heft-storybook-plugin",
             "options": {
               "storykitPackageName": "heft-storybook-react-tutorial-storykit",
-              "cliPackageName": "@storybook/react",
-              "cliCallingConvention": "storybook6",
+              "cliPackageName": "storybook",
+              "cliCallingConvention": "storybook9",
               "staticBuildOutputFolder": "dist-storybook"
             }
           }
