@@ -1,6 +1,18 @@
 # Change Log - @rushstack/heft-lint-plugin
 
-This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+This log was last generated on Sat, 06 Dec 2025 01:12:28 GMT and should not be manually modified.
+
+## 1.1.10
+Sat, 06 Dec 2025 01:12:28 GMT
+
+_Version update only_
+
+## 1.1.9
+Wed, 03 Dec 2025 01:12:28 GMT
+
+### Patches
+
+- Stabilize the hash suffix in the linter cache file by using tsconfig path hash instead of file list hash
 
 ## 1.1.8
 Fri, 21 Nov 2025 16:13:56 GMT

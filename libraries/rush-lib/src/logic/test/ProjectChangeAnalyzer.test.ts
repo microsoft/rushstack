@@ -30,7 +30,8 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
       return {
         hasSubmodules: false,
         hasUncommittedChanges: false,
-        files: mockHashes
+        files: mockHashes,
+        symlinks: new Map()
       };
     },
     getRepoChangesAsync(): ReadonlyMap<string, string> {
@@ -41,6 +42,67 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
     },
     hashFilesAsync(rootDirectory: string, filePaths: Iterable<string>): ReadonlyMap<string, string> {
       return new Map(Array.from(filePaths, (filePath: string) => [filePath, filePath]));
+    },
+    getRepoChanges(): Map<string, IFileDiffStatus> {
+      return new Map<string, IFileDiffStatus>([
+        [
+          // Test subspace lockfile change detection
+          'common/config/subspaces/project-change-analyzer-test-subspace/pnpm-lock.yaml',
+          {
+            mode: 'modified',
+            newhash: 'newhash',
+            oldhash: 'oldhash',
+            status: 'M'
+          }
+        ],
+        [
+          // Test lockfile deletion detection
+          'common/config/subspaces/default/pnpm-lock.yaml',
+          {
+            mode: 'deleted',
+            newhash: '',
+            oldhash: 'oldhash',
+            status: 'D'
+          }
+        ]
+      ]);
+    }
+  };
+});
+
+const { Git: OriginalGit } = jest.requireActual('../Git');
+/** Mock Git to test `getChangedProjectsAsync` */
+jest.mock('../Git', () => {
+  return {
+    Git: class MockGit extends OriginalGit {
+      public async determineIfRefIsACommitAsync(ref: string): Promise<boolean> {
+        return true;
+      }
+      public async getMergeBaseAsync(ref1: string, ref2: string): Promise<string> {
+        return 'merge-base-sha';
+      }
+      public async getBlobContentAsync(opts: { blobSpec: string; repositoryRoot: string }): Promise<string> {
+        return '';
+      }
+    }
+  };
+});
+
+const OriginalPnpmShrinkwrapFile = jest.requireActual('../pnpm/PnpmShrinkwrapFile').PnpmShrinkwrapFile;
+jest.mock('../pnpm/PnpmShrinkwrapFile', () => {
+  return {
+    PnpmShrinkwrapFile: {
+      loadFromFile: (fullShrinkwrapPath: string): PnpmShrinkwrapFile => {
+        return OriginalPnpmShrinkwrapFile.loadFromString(_getMockedPnpmShrinkwrapFile());
+      },
+      loadFromString: (text: string): PnpmShrinkwrapFile => {
+        return OriginalPnpmShrinkwrapFile.loadFromString(
+          _getMockedPnpmShrinkwrapFile()
+            // Change dependencies version
+            .replace(/1\.0\.1/g, '1.0.0')
+            .replace(/foo_1_0_1/g, 'foo_1_0_0')
+        );
+      }
     }
   };
 });
@@ -55,7 +117,7 @@ jest.mock('../incremental/InputsSnapshot', () => {
 
 import { resolve } from 'node:path';
 
-import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
+import type { IDetailedRepoState, IFileDiffStatus } from '@rushstack/package-deps-hash';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
@@ -65,6 +127,7 @@ import type {
   GetInputsSnapshotAsyncFn,
   IInputsSnapshotParameters
 } from '../incremental/InputsSnapshot';
+import type { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 
 describe(ProjectChangeAnalyzer.name, () => {
   beforeEach(() => {
@@ -101,4 +164,76 @@ describe(ProjectChangeAnalyzer.name, () => {
       expect(mockInput.additionalHashes).toEqual(new Map());
     });
   });
+
+  describe(ProjectChangeAnalyzer.prototype.getChangedProjectsAsync.name, () => {
+    it('Subspaces detects external changes', async () => {
+      const rootDir: string = resolve(__dirname, 'repoWithSubspaces');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+        resolve(rootDir, 'rush.json')
+      );
+      const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+
+      const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
+      const terminal: Terminal = new Terminal(terminalProvider);
+
+      const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
+        enableFiltering: false,
+        includeExternalDependencies: true,
+        targetBranchName: 'main',
+        terminal
+      });
+
+      // a,b,c is included because of change modifier is not modified
+      // d is included because its dependency foo version changed in the subspace lockfile
+      ['a', 'b', 'c', 'd'].forEach((projectName) => {
+        expect(changedProjects.has(rushConfiguration.getProjectByName(projectName)!)).toBe(true);
+      });
+
+      // e depends on d via workspace:*, but its calculated lockfile (e.g. "e/.rush/temp/shrinkwrap-deps.json") didn't change.
+      // So it's not included. e will be included by `expandConsumers` if needed.
+      ['e', 'f'].forEach((projectName) => {
+        expect(changedProjects.has(rushConfiguration.getProjectByName(projectName)!)).toBe(false);
+      });
+    });
+  });
 });
+
+/**
+ * Create a fake pnpm-lock.yaml content matches "libraries/rush-lib/src/logic/test/repoWithSubspaces" test repo
+ */
+function _getMockedPnpmShrinkwrapFile(): string {
+  return `lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: false
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .: {}
+
+  ../../../d:
+    dependencies:
+      foo:
+        specifier: ~1.0.0
+        version: 1.0.1
+
+  ../../../e:
+    dependencies:
+      d:
+        specifier: workspace:*
+        version: link:../../../d
+
+  ../../../f:
+    dependencies:
+
+packages:
+
+  foo@1.0.1:
+    resolution: {integrity: 'foo_1_0_1'}
+
+snapshots:
+
+  foo@1.0.1: {}
+`;
+}

@@ -2,6 +2,29 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.164.0",
+      "tag": "@microsoft/rush_v5.164.0",
+      "date": "Tue, 16 Dec 2025 21:49:00 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Hash full shrinkwrap entry to detect sub-dependency resolution changes"
+          }
+        ],
+        "none": [
+          {
+            "comment": "Fix an issue where ProjectChangeAnalyzer checked the pnpm-lock.yaml file in the default subspace only, when it should consider all subspaces."
+          },
+          {
+            "comment": "Log a warning if Git-tracked symbolic links are encountered during repo state analysis."
+          },
+          {
+            "comment": "Add support for defining pnpm catalog config."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.163.0",
       "tag": "@microsoft/rush_v5.163.0",
       "date": "Tue, 25 Nov 2025 17:04:05 GMT",

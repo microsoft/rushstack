@@ -1,8 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-export * from './Constants';
-export * from './GenerateLicenseFileForAsset';
+export {
+  MODULE_WRAPPER_PREFIX,
+  MODULE_WRAPPER_SUFFIX,
+  CHUNK_MODULE_TOKEN,
+  CHUNK_MODULE_REGEX,
+  STAGE_BEFORE,
+  STAGE_AFTER
+} from './Constants';
+export { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset';
 export type {
   IAssetInfo,
   IAssetMap,
@@ -18,4 +25,4 @@ export type {
   IPostProcessFragmentContext,
   IRenderedModulePosition
 } from './ModuleMinifierPlugin.types';
-export * from './ModuleMinifierPlugin';
+export { ModuleMinifierPlugin } from './ModuleMinifierPlugin';

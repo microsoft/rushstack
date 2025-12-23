@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 21 Nov 2025 16:13:56 GMT and should not be manually modified.
+This log was last generated on Sat, 06 Dec 2025 01:12:28 GMT and should not be manually modified.
+
+## 5.19.1
+Sat, 06 Dec 2025 01:12:28 GMT
+
+### Patches
+
+- Replace fs-extra with node:fs in FileWriter
 
 ## 5.19.0
 Fri, 21 Nov 2025 16:13:56 GMT

@@ -10,7 +10,8 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
       return {
         hasSubmodules: false,
         hasUncommittedChanges: false,
-        files: new Map([['common/config/rush/npm-shrinkwrap.json', 'hash']])
+        files: new Map([['common/config/rush/npm-shrinkwrap.json', 'hash']]),
+        symlinks: new Map()
       };
     },
     getRepoChangesAsync(): ReadonlyMap<string, string> {

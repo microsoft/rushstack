@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack5-localization-plugin",
-  "version": "0.15.6",
+  "version": "0.15.7",
   "description": "This plugin facilitates localization with Webpack.",
   "main": "lib/index.js",
   "typings": "dist/webpack5-localization-plugin.d.ts",
@@ -30,7 +30,7 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "memfs": "4.12.0",
-    "webpack": "~5.98.0"
+    "webpack": "~5.103.0"
   },
   "peerDependenciesMeta": {
     "@types/node": {

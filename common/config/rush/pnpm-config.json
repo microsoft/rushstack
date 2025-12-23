@@ -212,7 +212,10 @@
     "@rushstack/eslint-config@4.4.1>@typescript-eslint/parser": "~8.46.0",
     "@rushstack/eslint-config@4.4.1>@typescript-eslint/typescript-estree": "~8.46.0",
     "@rushstack/eslint-plugin@0.20.0>@typescript-eslint/utils": "~8.46.0",
-    "@rushstack/heft-node-rig@2.10.1>eslint": "~9.37.0"
+    "@rushstack/heft-node-rig@2.10.1>eslint": "~9.37.0",
+
+    // Force @types/estree to 1.0.8 for webpack 5.103.0 compatibility
+    "@types/estree": "1.0.8"
   },
 
   /**

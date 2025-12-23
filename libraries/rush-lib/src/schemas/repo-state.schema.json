@@ -20,6 +20,10 @@
     "packageJsonInjectedDependenciesHash": {
       "description": "A hash of the injected dependencies in related package.json. This hash is used to determine whether or not the shrinkwrap needs to updated prior to install.",
       "type": "string"
+    },
+    "pnpmCatalogsHash": {
+      "description": "A hash of the PNPM catalog definitions for the repository. This hash is used to determine whether or not the catalog has been modified prior to install.",
+      "type": "string"
     }
   },
   "additionalProperties": false

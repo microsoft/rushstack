@@ -764,7 +764,7 @@ fi
 `
             : '';
 
-          const hookFileContent: string = `#!/bin/bash
+          const hookFileContent: string = `#!/usr/bin/env bash
 set -e
 SCRIPT_DIR="$( cd "$( dirname "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 SCRIPT_IMPLEMENTATION_PATH="$SCRIPT_DIR/${hookRelativePath}/${filename}"
