@@ -23,10 +23,11 @@ export function validate(
 ): void {
   // eslint-disable-next-line no-console
   console.log('Validating package manager shrinkwrap file.\n');
-  const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
-    rushConfiguration.packageManager,
-    subspace.getCommittedShrinkwrapFilePath(variant)
-  );
+  const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile({
+    packageManager: rushConfiguration.packageManager,
+    shrinkwrapFilePath: subspace.getCommittedShrinkwrapFilePath(variant),
+    subspaceHasNoProjects: subspace.getProjects().length === 0
+  });
 
   if (!shrinkwrapFile) {
     // eslint-disable-next-line no-console

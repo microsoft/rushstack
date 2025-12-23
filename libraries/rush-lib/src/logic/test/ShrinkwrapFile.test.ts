@@ -16,8 +16,12 @@ import { NpmShrinkwrapFile } from '../npm/NpmShrinkwrapFile';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 describe(NpmShrinkwrapFile.name, () => {
-  const filename: string = `${__dirname}/shrinkwrapFile/npm-shrinkwrap.json`;
-  const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('npm', filename)!;
+  const shrinkwrapFilePath: string = `${__dirname}/shrinkwrapFile/npm-shrinkwrap.json`;
+  const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile({
+    packageManager: 'npm',
+    shrinkwrapFilePath,
+    subspaceHasNoProjects: false
+  })!;
 
   it('verifies root-level dependency', () => {
     expect(shrinkwrapFile.hasCompatibleTopLevelDependency(new DependencySpecifier('q', '~1.5.0'))).toEqual(
@@ -113,42 +117,62 @@ describe(PnpmShrinkwrapFile.name, () => {
     }
 
     describe('V5.0 lockfile', () => {
-      const filename: string = path.resolve(
+      const shrinkwrapFilePath: string = path.resolve(
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/non-workspace-pnpm-lock-v5.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile({
+        packageManager: 'pnpm',
+        shrinkwrapFilePath,
+        subspaceHasNoProjects: false
+      })!;
 
       validateNonWorkspaceLockfile(shrinkwrapFile);
+      expect(shrinkwrapFile.isWorkspaceCompatible).toBe(false);
     });
 
     describe('V5.3 lockfile', () => {
-      const filename: string = path.resolve(
+      const shrinkwrapFilePath: string = path.resolve(
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/non-workspace-pnpm-lock-v5.3.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile({
+        packageManager: 'pnpm',
+        shrinkwrapFilePath,
+        subspaceHasNoProjects: false
+      })!;
 
       validateNonWorkspaceLockfile(shrinkwrapFile);
+      expect(shrinkwrapFile.isWorkspaceCompatible).toBe(false);
     });
 
     describe('V6.1 lockfile', () => {
-      const filename: string = path.resolve(
+      const shrinkwrapFilePath: string = path.resolve(
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/non-workspace-pnpm-lock-v6.1.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile({
+        packageManager: 'pnpm',
+        shrinkwrapFilePath,
+        subspaceHasNoProjects: false
+      })!;
 
       validateNonWorkspaceLockfile(shrinkwrapFile);
+      expect(shrinkwrapFile.isWorkspaceCompatible).toBe(false);
     });
 
     describe('V9 lockfile', () => {
-      const filename: string = path.resolve(
+      const shrinkwrapFilePath: string = path.resolve(
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/non-workspace-pnpm-lock-v9.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile({
+        packageManager: 'pnpm',
+        shrinkwrapFilePath,
+        subspaceHasNoProjects: false
+      })!;
       validateNonWorkspaceLockfile(shrinkwrapFile);
+      expect(shrinkwrapFile.isWorkspaceCompatible).toBe(false);
     });
   });
 
@@ -192,34 +216,65 @@ describe(PnpmShrinkwrapFile.name, () => {
     }
 
     describe('V5.3 lockfile', () => {
-      const filename: string = path.resolve(
+      const shrinkwrapFilePath: string = path.resolve(
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/workspace-pnpm-lock-v5.3.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile({
+        packageManager: 'pnpm',
+        shrinkwrapFilePath,
+        subspaceHasNoProjects: false
+      })!;
 
       validateWorkspaceLockfile(shrinkwrapFile);
+      expect(shrinkwrapFile.isWorkspaceCompatible).toBe(true);
     });
 
     describe('V6.1 lockfile', () => {
-      const filename: string = path.resolve(
+      const shrinkwrapFilePath: string = path.resolve(
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/workspace-pnpm-lock-v5.3.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile({
+        packageManager: 'pnpm',
+        shrinkwrapFilePath,
+        subspaceHasNoProjects: false
+      })!;
 
       validateWorkspaceLockfile(shrinkwrapFile);
+      expect(shrinkwrapFile.isWorkspaceCompatible).toBe(true);
     });
 
     describe('V9 lockfile', () => {
-      const filename: string = path.resolve(
+      const shrinkwrapFilePath: string = path.resolve(
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/workspace-pnpm-lock-v9.yaml'
       );
 
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile({
+        packageManager: 'pnpm',
+        shrinkwrapFilePath,
+        subspaceHasNoProjects: false
+      })!;
 
       validateWorkspaceLockfile(shrinkwrapFile);
+      expect(shrinkwrapFile.isWorkspaceCompatible).toBe(true);
+    });
+
+    describe('V9 lockfile with no projects', () => {
+      const shrinkwrapFilePath: string = path.resolve(
+        __dirname,
+        '../../../src/logic/test/shrinkwrapFile/workspace-pnpm-lock-no-projects-v9.yaml'
+      );
+
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile({
+        packageManager: 'pnpm',
+        shrinkwrapFilePath,
+        subspaceHasNoProjects: true
+      })!;
+
+      validateWorkspaceLockfile(shrinkwrapFile);
+      expect(shrinkwrapFile.isWorkspaceCompatible).toBe(true);
     });
   });
 });

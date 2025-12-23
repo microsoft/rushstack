@@ -259,14 +259,15 @@ export abstract class BaseInstallManager {
       ]);
 
       if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
-        const committedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilePath(variant);
-        const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
-          this.rushConfiguration.packageManager,
-          committedShrinkwrapFileName
-        );
+        const shrinkwrapFilePath: string = subspace.getCommittedShrinkwrapFilePath(variant);
+        const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile({
+          packageManager: this.rushConfiguration.packageManager,
+          shrinkwrapFilePath,
+          subspaceHasNoProjects: subspace.getProjects().length === 0
+        });
         shrinkwrapFile?.validateShrinkwrapAfterUpdate(this.rushConfiguration, subspace, this._terminal);
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
-        Utilities.syncFile(subspace.getTempShrinkwrapFilename(), committedShrinkwrapFileName);
+        Utilities.syncFile(subspace.getTempShrinkwrapFilename(), shrinkwrapFilePath);
       } else {
         // TODO: Validate whether the package manager updated it in a nontrivial way
       }
@@ -470,12 +471,13 @@ export abstract class BaseInstallManager {
 
     // (If it's a full update, then we ignore the shrinkwrap from Git since it will be overwritten)
     if (!this.options.fullUpgrade) {
-      const committedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilePath(variant);
+      const shrinkwrapFilePath: string = subspace.getCommittedShrinkwrapFilePath(variant);
       try {
-        shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
-          this.rushConfiguration.packageManager,
-          committedShrinkwrapFileName
-        );
+        shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile({
+          packageManager: this.rushConfiguration.packageManager,
+          shrinkwrapFilePath,
+          subspaceHasNoProjects: subspace.getProjects().length === 0
+        });
       } catch (ex) {
         terminal.writeLine();
         terminal.writeLine(

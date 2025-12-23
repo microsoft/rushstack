@@ -129,7 +129,11 @@ export interface IPnpmShrinkwrapYaml extends Lockfile {
   registry?: string;
 }
 
-export interface ILoadFromFileOptions {
+export interface ILoadFromStringOptions {
+  subspaceHasNoProjects: boolean;
+}
+
+export interface ILoadFromFileOptions extends ILoadFromStringOptions {
   withCaching?: boolean;
 }
 
@@ -323,7 +327,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private readonly _integrities: Map<string, Map<string, string>>;
   private _pnpmfileConfiguration: PnpmfileConfiguration | undefined;
 
-  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, hash: string) {
+  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, hash: string, subspaceHasNoProjects: boolean) {
     super();
     this.hash = hash;
     this._shrinkwrapJson = shrinkwrapJson;
@@ -351,11 +355,21 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     this.overrides = new Map(Object.entries(shrinkwrapJson.overrides || {}));
     this.packageExtensionsChecksum = shrinkwrapJson.packageExtensionsChecksum;
 
-    // Lockfile v9 always has "." in importers filed.
-    this.isWorkspaceCompatible =
-      this.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V9
-        ? this.importers.size > 1
-        : this.importers.size > 0;
+    let isWorkspaceCompatible: boolean;
+    const importerCount: number = this.importers.size;
+    if (this.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V9) {
+      // Lockfile v9 always has "." in importers filed.
+      if (subspaceHasNoProjects) {
+        // If there are no projects in this subspace, the "." importer will be the only importer
+        isWorkspaceCompatible = importerCount === 1;
+      } else {
+        isWorkspaceCompatible = importerCount > 1;
+      }
+    } else {
+      isWorkspaceCompatible = importerCount > 0;
+    }
+
+    this.isWorkspaceCompatible = isWorkspaceCompatible;
 
     this._integrities = new Map();
   }
@@ -387,11 +401,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   public static loadFromFile(
     shrinkwrapYamlFilePath: string,
-    options: ILoadFromFileOptions = {}
+    options: ILoadFromFileOptions
   ): PnpmShrinkwrapFile | undefined {
     try {
       const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilePath);
-      return PnpmShrinkwrapFile.loadFromString(shrinkwrapContent);
+      return PnpmShrinkwrapFile.loadFromString(shrinkwrapContent, options);
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
         return undefined; // file does not exist
@@ -400,13 +414,17 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
   }
 
-  public static loadFromString(shrinkwrapContent: string): PnpmShrinkwrapFile {
+  public static loadFromString(
+    shrinkwrapContent: string,
+    options: ILoadFromStringOptions
+  ): PnpmShrinkwrapFile {
     const hash: string = crypto.createHash('sha-256').update(shrinkwrapContent, 'utf8').digest('hex');
     const cached: PnpmShrinkwrapFile | undefined = cacheByLockfileHash.get(hash);
     if (cached) {
       return cached;
     }
 
+    const { subspaceHasNoProjects } = options;
     const shrinkwrapJson: IPnpmShrinkwrapYaml = yamlModule.load(shrinkwrapContent) as IPnpmShrinkwrapYaml;
     if ((shrinkwrapJson as LockfileFileV9).snapshots) {
       const lockfile: IPnpmShrinkwrapYaml | null = convertLockfileV9ToLockfileObject(
@@ -436,10 +454,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
           lockfile.dependencies[name] = PnpmShrinkwrapFile.getLockfileV9PackageId(name, versionSpecifier);
         }
       }
-      return new PnpmShrinkwrapFile(lockfile, hash);
+
+      return new PnpmShrinkwrapFile(lockfile, hash, subspaceHasNoProjects);
     }
 
-    return new PnpmShrinkwrapFile(shrinkwrapJson, hash);
+    return new PnpmShrinkwrapFile(shrinkwrapJson, hash, subspaceHasNoProjects);
   }
 
   public getShrinkwrapHash(experimentsConfig?: IExperimentsJson): string {
