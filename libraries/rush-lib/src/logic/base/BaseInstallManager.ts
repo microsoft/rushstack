@@ -10,7 +10,6 @@ import { readFile, unlink } from 'node:fs/promises';
 import * as semver from 'semver';
 import {
   type ILockfile,
-  type ILockfilePackage,
   type ILogMessageCallbackOptions,
   pnpmSyncGetJsonVersion,
   pnpmSyncPrepareAsync
@@ -59,7 +58,6 @@ import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfigura
 import type { Subspace } from '../../api/Subspace';
 import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
 import { FlagFile } from '../../api/FlagFile';
-import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
 import { HotlinkManager } from '../../utilities/HotlinkManager';
 
@@ -311,35 +309,34 @@ export abstract class BaseInstallManager {
           lockfileId: subspace.subspaceName,
           ensureFolderAsync: FileSystem.ensureFolderAsync.bind(FileSystem),
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          readPnpmLockfile: async (lockfilePath: string) => {
-            const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-              lockfilePath,
-              { withCaching: true }
+          readPnpmLockfile: async (lockfilePath: string, options): Promise<ILockfile | undefined> => {
+            const pnpmLockFolder: string = path.dirname(lockfilePath);
+
+            // TODO: Rework this to pre-parse out the version first, then load
+            // the relevant `@rushstack/rush-pnpm-kit-*` package.
+            const { lockfileFs: lockfileFsV9 } = await import('@rushstack/rush-pnpm-kit-v9');
+            const lockfileV9: ILockfile | null = (await lockfileFsV9.readWantedLockfile(
+              pnpmLockFolder,
+              options
+              // TODO: pnpm-sync-lib.d.ts was at some point generalized to support multiple lockfile formats,
+              // however its API still returns a single "ILockfile" that is incompatible with the newer interfaces
+            )) as ILockfile | null;
+
+            if (lockfileV9?.lockfileVersion.toString().startsWith('9')) {
+              return lockfileV9;
+            }
+
+            const { lockfileFs: lockfileFsV6 } = await import('@rushstack/rush-pnpm-kit-v8');
+            const lockfileV6: ILockfile | null = await lockfileFsV6.readWantedLockfile(
+              pnpmLockFolder,
+              options
             );
 
-            if (!wantedPnpmLockfile) {
-              return undefined;
-            } else {
-              const lockfilePackages: Record<string, ILockfilePackage> = Object.create(null);
-              for (const versionPath of wantedPnpmLockfile.packages.keys()) {
-                lockfilePackages[versionPath] = {
-                  dependencies: wantedPnpmLockfile.packages.get(versionPath)?.dependencies as Record<
-                    string,
-                    string
-                  >,
-                  optionalDependencies: wantedPnpmLockfile.packages.get(versionPath)
-                    ?.optionalDependencies as Record<string, string>
-                };
-              }
-
-              const result: ILockfile = {
-                lockfileVersion: wantedPnpmLockfile.shrinkwrapFileMajorVersion,
-                importers: Object.fromEntries(wantedPnpmLockfile.importers.entries()),
-                packages: lockfilePackages
-              };
-
-              return result;
+            if (lockfileV6?.lockfileVersion.toString().startsWith('6')) {
+              return lockfileV6;
             }
+
+            return undefined;
           },
           logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
             PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)

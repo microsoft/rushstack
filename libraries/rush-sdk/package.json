@@ -39,7 +39,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@pnpm/lockfile.types": "~1.0.3",
+    "@pnpm/lockfile.types-900": "npm:@pnpm/lockfile.types@~900.0.0",
     "@rushstack/credential-cache": "workspace:*",
     "@rushstack/lookup-by-path": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",

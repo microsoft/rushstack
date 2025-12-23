@@ -1539,6 +1539,24 @@
       "projectFolder": "rush-plugins/rush-mcp-docs-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/rush-pnpm-kit-v8",
+      "projectFolder": "libraries/rush-pnpm-kit-v8",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/rush-pnpm-kit-v9",
+      "projectFolder": "libraries/rush-pnpm-kit-v9",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/rush-pnpm-kit-v10",
+      "projectFolder": "libraries/rush-pnpm-kit-v10",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     }
   ]
 }

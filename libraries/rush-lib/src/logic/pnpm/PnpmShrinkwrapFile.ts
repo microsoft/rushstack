@@ -5,8 +5,6 @@ import * as path from 'node:path';
 import crypto from 'node:crypto';
 
 import * as semver from 'semver';
-import * as dependencyPathLockfilePreV9 from '@pnpm/dependency-path-lockfile-pre-v9';
-import * as dependencyPath from '@pnpm/dependency-path';
 import type {
   ProjectId,
   Lockfile,
@@ -14,7 +12,7 @@ import type {
   ProjectSnapshot,
   LockfileFileV9,
   ResolvedDependencies
-} from '@pnpm/lockfile.types';
+} from '@pnpm/lockfile.types-900';
 
 import {
   FileSystem,
@@ -46,6 +44,14 @@ import { CustomTipId, type CustomTipsConfiguration } from '../../api/CustomTipsC
 import { convertLockfileV9ToLockfileObject } from './PnpmShrinkWrapFileConverters';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
+const pnpmKitV8: typeof import('@rushstack/rush-pnpm-kit-v8') = Import.lazy(
+  '@rushstack/rush-pnpm-kit-v8',
+  require
+);
+const pnpmKitV9: typeof import('@rushstack/rush-pnpm-kit-v9') = Import.lazy(
+  '@rushstack/rush-pnpm-kit-v9',
+  require
+);
 
 export enum ShrinkwrapFileMajorVersion {
   V6 = 6,
@@ -145,7 +151,7 @@ export function parsePnpm9DependencyKey(
     return undefined;
   }
 
-  const { peersIndex } = dependencyPath.indexOfPeersSuffix(dependencyKey);
+  const { peersIndex } = pnpmKitV9.dependencyPath.indexOfPeersSuffix(dependencyKey);
   if (peersIndex !== -1) {
     // Remove peer suffix
     const key: string = dependencyKey.slice(0, peersIndex);
@@ -161,7 +167,8 @@ export function parsePnpm9DependencyKey(
   // Example: https://github.com/jonschlinkert/pad-left/tarball/2.1.0                           -> name=undefined         version=undefined
   // Example: pad-left@https://github.com/jonschlinkert/pad-left/tarball/2.1.0                  -> name=pad-left          nonSemverVersion=https://xxxx
   // Example: pad-left@https://codeload.github.com/jonschlinkert/pad-left/tar.gz/7798d648225aa5 -> name=pad-left          nonSemverVersion=https://xxxx
-  const dependency: dependencyPath.DependencyPath = dependencyPath.parse(dependencyKey);
+  const dependency: import('@rushstack/rush-pnpm-kit-v9').dependencyPath.DependencyPath =
+    pnpmKitV9.dependencyPath.parse(dependencyKey);
 
   const name: string = dependency.name ?? dependencyName;
   const version: string = dependency.version ?? dependency.nonSemverVersion ?? dependencyKey;
@@ -368,7 +375,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return /@file:/.test(version) ? version : `${name}@${version}`;
     }
 
-    return dependencyPath.removeSuffix(version).includes('@', 1) ? version : `${name}@${version}`;
+    return pnpmKitV9.dependencyPath.removeSuffix(version).includes('@', 1) ? version : `${name}@${version}`;
   }
 
   /**
@@ -568,7 +575,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _convertLockfileV6DepPathToV5DepPath(newDepPath: string): string {
     if (!newDepPath.includes('@', 2) || newDepPath.startsWith('file:')) return newDepPath;
     const index: number = newDepPath.indexOf('@', newDepPath.indexOf('/@') + 2);
-    if (newDepPath.includes('(') && index > dependencyPathLockfilePreV9.indexOfPeersSuffix(newDepPath))
+    if (newDepPath.includes('(') && index > pnpmKitV8.dependencyPath.indexOfPeersSuffix(newDepPath))
       return newDepPath;
     return `${newDepPath.substring(0, index)}/${newDepPath.substring(index + 1)}`;
   }
@@ -583,8 +590,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (this.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V6) {
       depPath = this._convertLockfileV6DepPathToV5DepPath(packagePath);
     }
-    const pkgInfo: ReturnType<typeof dependencyPathLockfilePreV9.parse> =
-      dependencyPathLockfilePreV9.parse(depPath);
+    const pkgInfo: ReturnType<typeof pnpmKitV8.dependencyPath.parse> =
+      pnpmKitV8.dependencyPath.parse(depPath);
     return this._getPackageId(pkgInfo.name as string, pkgInfo.version as string);
   }
 
@@ -688,7 +695,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       }
 
       if (this.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V9) {
-        const { version, nonSemverVersion } = dependencyPath.parse(value);
+        const { version, nonSemverVersion } = pnpmKitV9.dependencyPath.parse(value);
         value = version ?? nonSemverVersion ?? value;
       } else {
         let underscoreOrParenthesisIndex: number = value.indexOf('_');
