@@ -5,7 +5,8 @@ import type * as child_process from 'node:child_process';
 import { once } from 'node:events';
 import { Readable, pipeline } from 'node:stream';
 
-import { Executable, FileSystem, type IExecutableSpawnOptions } from '@rushstack/node-core-library';
+import { Executable, type IExecutableSpawnOptions } from '@rushstack/node-core-library/lib/Executable';
+import { FileSystem } from '@rushstack/node-core-library/lib/FileSystem';
 
 export interface IGitVersion {
   major: number;
@@ -15,7 +16,7 @@ export interface IGitVersion {
 
 const MINIMUM_GIT_VERSION: IGitVersion = {
   major: 2,
-  minor: 20,
+  minor: 35,
   patch: 0
 };
 
@@ -309,6 +310,8 @@ async function spawnGitAsync(
 
   const [status] = await once(proc, 'close');
   if (status !== 0) {
+    ensureGitMinimumVersion(gitPath);
+
     throw new Error(`git ${args[0]} exited with code ${status}:\n${stderr}`);
   }
 
