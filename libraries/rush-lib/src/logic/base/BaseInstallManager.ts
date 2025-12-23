@@ -312,6 +312,8 @@ export abstract class BaseInstallManager {
           readPnpmLockfile: async (lockfilePath: string, options): Promise<ILockfile | undefined> => {
             const pnpmLockFolder: string = path.dirname(lockfilePath);
 
+            // TODO: Rework this to pre-parse out the version first, then load
+            // the relevant `@rushstack/rush-pnpm-kit-*` package.
             const { lockfileFs: lockfileFsV9 } = await import('@rushstack/rush-pnpm-kit-v9');
             const lockfileV9: ILockfile | null = (await lockfileFsV9.readWantedLockfile(
               pnpmLockFolder,
