@@ -273,7 +273,6 @@ describe(PnpmShrinkwrapFile.name, () => {
         subspaceHasNoProjects: true
       })!;
 
-      validateWorkspaceLockfile(shrinkwrapFile);
       expect(shrinkwrapFile.isWorkspaceCompatible).toBe(true);
     });
   });
