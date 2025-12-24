@@ -88,7 +88,8 @@ export async function afterInstallAsync(
   const cacheFilePath: string = `${workspaceRoot}/resolver-cache.json`;
 
   const lockFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(lockFilePath, {
-    withCaching: true
+    withCaching: true,
+    subspaceHasNoProjects: subspace.getProjects().length === 0
   });
   if (!lockFile) {
     throw new Error(`Failed to load shrinkwrap file: ${lockFilePath}`);
@@ -192,7 +193,9 @@ export async function afterInstallAsync(
       } catch (error) {
         if (!context.optional) {
           throw new Error(
-            `Error reading index file for: "${context.descriptionFileRoot}" (${descriptionFileHash}): ${error.toString()}`
+            `Error reading index file for: "${
+              context.descriptionFileRoot
+            }" (${descriptionFileHash}): ${error.toString()}`
           );
         }
         return false;
