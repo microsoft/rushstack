@@ -302,6 +302,23 @@ export class ApiReportGenerator {
         break;
 
       case ts.SyntaxKind.ExportKeyword:
+        // Check if this export keyword is part of an ExportDeclaration inside a namespace
+        // (e.g., "export { Foo, Bar };" inside "declare namespace SDK { ... }")
+        // In that case, we must preserve the export keyword, otherwise the output is invalid TypeScript.
+        if (span.node.parent && ts.isExportDeclaration(span.node.parent)) {
+          const moduleBlock: ts.ModuleBlock | undefined = TypeScriptHelpers.findFirstParent(
+            span.node,
+            ts.SyntaxKind.ModuleBlock
+          );
+          if (moduleBlock) {
+            // This is an export declaration inside a namespace - preserve the export keyword
+            break;
+          }
+        }
+        // Otherwise, delete the export keyword -- we will re-add it below
+        span.modification.skipAll();
+        break;
+
       case ts.SyntaxKind.DefaultKeyword:
       case ts.SyntaxKind.DeclareKeyword:
         // Delete any explicit "export" or "declare" keywords -- we will re-add them below
