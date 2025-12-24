@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/rush-pnpm-kit-v10",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/rush-pnpm-kit-v10_v0.1.0",
+      "date": "Wed, 24 Dec 2025 01:12:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Set up the `@rushstack/rush-pnpm-kit-v10` package to bundle all pnpm v10 related packages together."
+          }
+        ]
+      }
+    }
+  ]
+}
