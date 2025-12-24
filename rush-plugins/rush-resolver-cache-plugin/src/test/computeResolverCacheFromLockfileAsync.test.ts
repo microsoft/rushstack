@@ -97,7 +97,8 @@ describe(computeResolverCacheFromLockfileAsync.name, () => {
       const { workspaceRoot, commonPrefixToTrim, lockfileName, afterExternalPackagesAsync } = testCase;
 
       const lockfile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-        `${collateralFolder}/${lockfileName}`
+        `${collateralFolder}/${lockfileName}`,
+        { subspaceHasNoProjects: false }
       );
       if (lockfile === undefined) {
         throw new Error(`Failed to load lockfile: ${lockfileName}`);
