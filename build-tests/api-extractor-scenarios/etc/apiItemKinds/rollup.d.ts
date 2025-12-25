@@ -36,7 +36,7 @@ export declare namespace n1 {
         export class SomeClass3 {
         }
     }
-        {};
+    export {};
 }
 
 /** @public */
