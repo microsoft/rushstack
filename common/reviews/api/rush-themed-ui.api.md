@@ -7,15 +7,15 @@
 import { default as React_2 } from 'react';
 
 // @public
-export const Button: ({ children, disabled, onClick }: IButtonProps) => JSX.Element;
+export const Button: ({ children, disabled, onClick }: IButtonProps) => React_2.ReactElement;
 
 // @public
-export const Checkbox: ({ label, isChecked, onChecked }: ICheckboxProps) => JSX.Element;
+export const Checkbox: ({ label, isChecked, onChecked }: ICheckboxProps) => React_2.ReactElement;
 
 // @public
 export interface IButtonProps {
     // (undocumented)
-    children: JSX.Element | string;
+    children: React_2.ReactElement | string;
     // (undocumented)
     disabled?: boolean;
     // (undocumented)
@@ -45,7 +45,7 @@ export interface IInputProps {
 }
 
 // @public
-export const Input: ({ value, placeholder, onChange, type }: IInputProps) => JSX.Element;
+export const Input: ({ value, placeholder, onChange, type }: IInputProps) => React_2.ReactElement;
 
 // @public
 export interface IScrollAreaProps {
@@ -72,7 +72,7 @@ export interface ITabsProps {
     // (undocumented)
     onChange?: (value: any) => void;
     // (undocumented)
-    renderChildren?: () => JSX.Element;
+    renderChildren?: () => React_2.ReactElement;
     // (undocumented)
     value: string;
 }
@@ -92,13 +92,13 @@ export interface ITextProps {
 }
 
 // @public
-export const ScrollArea: ({ children }: IScrollAreaProps) => JSX.Element;
+export const ScrollArea: ({ children }: IScrollAreaProps) => React_2.ReactElement;
 
 // @public
-export const Tabs: ({ items, def, value, onChange, renderChildren }: ITabsProps) => JSX.Element;
+export const Tabs: ({ items, def, value, onChange, renderChildren }: ITabsProps) => React_2.ReactElement;
 
 // @public
-const Text_2: ({ type, bold, children, className, size }: ITextProps) => JSX.Element;
+const Text_2: ({ type, bold, children, className, size }: ITextProps) => React_2.ReactElement;
 export { Text_2 as Text }
 
 // @public

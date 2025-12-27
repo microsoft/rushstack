@@ -9,7 +9,7 @@ import type { IHookFormProps } from './interface';
 
 export type IControlledTextFieldProps = ITextFieldProps & IHookFormProps<string>;
 
-export const ControlledTextField = (props: IControlledTextFieldProps): JSX.Element => {
+export const ControlledTextField = (props: IControlledTextFieldProps): React.ReactElement => {
   const { name, control, rules, defaultValue } = props;
   return (
     <Controller

@@ -11,7 +11,7 @@ import styles from './styles.scss';
  * @public
  */
 export interface IButtonProps {
-  children: JSX.Element | string;
+  children: React.ReactElement | string;
   disabled?: boolean;
   onClick: () => void;
 }
@@ -20,7 +20,7 @@ export interface IButtonProps {
  * A button UI component
  * @public
  */
-export const Button = ({ children, disabled = false, onClick }: IButtonProps): JSX.Element => {
+export const Button = ({ children, disabled = false, onClick }: IButtonProps): React.ReactElement => {
   return (
     <button disabled={disabled} className={styles.ButtonWrapper} onClick={onClick}>
       <Text type="span" size={14}>

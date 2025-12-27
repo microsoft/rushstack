@@ -39,7 +39,7 @@ enum Views {
   VERSIONS_VIEW
 }
 
-export const App = (): JSX.Element => {
+export const App = (): React.ReactElement => {
   const [selectedValue, setSelectedValue] = React.useState<TabValue>(Views.PROJECT_VIEW);
 
   const onTabSelect = (event: SelectTabEvent, data: SelectTabData): void => {

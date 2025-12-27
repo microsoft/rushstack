@@ -40,7 +40,7 @@ const formStyle: CSSProperties = {
   // width: '430px'
 };
 
-export const ParameterForm = (): JSX.Element => {
+export const ParameterForm = (): React.ReactElement => {
   const commandName: string = useAppSelector((state) => state.parameter.commandName);
   const parameters: ICommandLineParameter[] = useParameters();
   const filteredParameters: ICommandLineParameter[] = useFilteredParameters();

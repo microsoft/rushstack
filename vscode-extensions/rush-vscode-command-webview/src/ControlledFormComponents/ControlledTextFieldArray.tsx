@@ -20,7 +20,7 @@ const stackTokens: IStackTokens = {
   childrenGap: 6
 };
 
-export const ControlledTextFieldArray = (props: IControlledTextFieldArrayProps): JSX.Element => {
+export const ControlledTextFieldArray = (props: IControlledTextFieldArrayProps): React.ReactElement => {
   const { name, control, rules, defaultValue } = props;
   const { fields, remove, append } = useFieldArray({
     name,

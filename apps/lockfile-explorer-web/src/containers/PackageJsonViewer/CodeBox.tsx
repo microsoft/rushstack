@@ -59,7 +59,7 @@ export type PrismLanguage =
   | 'json'
   | 'webmanifest';
 
-export const CodeBox = (props: { code: string; language: PrismLanguage }): JSX.Element => {
+export const CodeBox = (props: { code: string; language: PrismLanguage }): React.ReactElement => {
   return (
     <Highlight theme={themes.vsLight} code={props.code} language={props.language}>
       {({ className, style, tokens, getLineProps, getTokenProps }) => (

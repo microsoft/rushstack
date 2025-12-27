@@ -27,7 +27,7 @@ export interface ITextProps {
  * A text box UI component
  * @public
  */
-export const Text = ({ type, bold = false, children, className, size }: ITextProps): JSX.Element => {
+export const Text = ({ type, bold = false, children, className, size }: ITextProps): React.ReactElement => {
   const generalStyles: { [key in string]: string | number } = {
     ['fontWeight']: bold ? 'bold' : 'normal',
     ...(size ? { fontSize: size } : {})

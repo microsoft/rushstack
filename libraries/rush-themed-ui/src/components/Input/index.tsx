@@ -20,7 +20,7 @@ export interface IInputProps {
  * A text input box UI component
  * @public
  */
-export const Input = ({ value, placeholder, onChange, type = 'text' }: IInputProps): JSX.Element => {
+export const Input = ({ value, placeholder, onChange, type = 'text' }: IInputProps): React.ReactElement => {
   return (
     <input
       type={type}

@@ -21,7 +21,7 @@ export interface IScrollAreaProps {
  * The height of the scroll area's parent must be fixed.
  * @public
  */
-export const ScrollArea = ({ children }: IScrollAreaProps): JSX.Element => (
+export const ScrollArea = ({ children }: IScrollAreaProps): React.ReactElement => (
   <RadixScrollArea.Root className={styles.ScrollAreaRoot}>
     <RadixScrollArea.Viewport className={styles.ScrollAreaViewport}>{children}</RadixScrollArea.Viewport>
     <RadixScrollArea.Scrollbar className={styles.ScrollAreaScrollbar} orientation="vertical">

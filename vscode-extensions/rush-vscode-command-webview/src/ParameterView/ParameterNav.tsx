@@ -23,7 +23,7 @@ const navStyle: CSSProperties = {
 
 const NAV_LABEL_PREFIX: string = 'parameter-nav-label-';
 
-export const ParameterNav = (): JSX.Element => {
+export const ParameterNav = (): React.ReactElement => {
   const parameters: ICommandLineParameter[] = useFilteredParameters();
   const currentParameterName: string = useCurrentParameterName();
   const userSelectdParameterName: string = useUserSelectedParameterName();

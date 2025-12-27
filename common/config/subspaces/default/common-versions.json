@@ -153,6 +153,11 @@
       "~5.0.0",
       // For pnpm kit v9, v10
       "~1001.0.0"
-    ]
+    ],
+    // These are used in heft-storybook-v6-react-tutorial-storykit and heft-storybook-v6-react-tutorial
+    "@types/react": ["17.0.74"],
+    "@types/react-dom": ["17.0.25"],
+    "react": ["~17.0.2"],
+    "react-dom": ["~17.0.2"]
   }
 }

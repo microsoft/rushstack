@@ -10,7 +10,7 @@ import type { IHookFormProps } from './interface';
 
 export type IControlledComboBoxProps = IComboBoxProps & IHookFormProps<string>;
 
-export const ControlledComboBox = (props: IControlledComboBoxProps): JSX.Element => {
+export const ControlledComboBox = (props: IControlledComboBoxProps): React.ReactElement => {
   const { name, control, rules, defaultValue } = props;
   const { errors } = useFormState({
     name,
@@ -18,7 +18,7 @@ export const ControlledComboBox = (props: IControlledComboBoxProps): JSX.Element
   });
   return (
     <div>
-      {<ErrorMessage message={props.multiSelect ? errors?.[name] : ''} />}
+      {<ErrorMessage message={props.multiSelect ? errors?.[name] : undefined} />}
       <Controller
         name={name}
         control={control}

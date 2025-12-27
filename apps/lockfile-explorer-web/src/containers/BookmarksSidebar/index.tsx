@@ -11,7 +11,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import type { LfxGraphEntry } from '../../packlets/lfx-shared';
 import { clearStackAndPush, removeBookmark } from '../../store/slices/entrySlice';
 
-export const BookmarksSidebar = (): JSX.Element => {
+export const BookmarksSidebar = (): React.ReactElement => {
   const bookmarks = useAppSelector((state) => state.entry.bookmarkedEntries);
   const dispatch = useAppDispatch();
 

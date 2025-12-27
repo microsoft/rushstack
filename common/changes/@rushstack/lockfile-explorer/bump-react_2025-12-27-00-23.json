@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lockfile-explorer",
+      "comment": "Bump React to v19.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/lockfile-explorer"
+}

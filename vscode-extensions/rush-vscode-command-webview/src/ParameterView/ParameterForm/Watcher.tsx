@@ -14,7 +14,7 @@ export interface IParameterFormWatcherProps {
   watch: UseFormWatch<FieldValues>;
 }
 
-export const ParameterFormWatcher = ({ watch }: IParameterFormWatcherProps): JSX.Element => {
+export const ParameterFormWatcher = ({ watch }: IParameterFormWatcherProps): React.ReactElement => {
   const dispatch: Dispatch<AnyAction> = useAppDispatch();
 
   useEffect((): (() => void) => {

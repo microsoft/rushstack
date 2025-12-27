@@ -10,7 +10,7 @@ import type { IHookFormProps } from './interface';
 
 export type IControlledToggleProps = IToggleProps & IHookFormProps<string>;
 
-export const ControlledToggle = (props: IControlledToggleProps): JSX.Element => {
+export const ControlledToggle = (props: IControlledToggleProps): React.ReactElement => {
   const { name, control, rules, defaultValue } = props;
   return (
     <Controller

@@ -13,18 +13,18 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {
-    "react": "~17.0.2",
-    "react-dom": "~17.0.2"
+    "react": "~19.2.3",
+    "react-dom": "~19.2.3"
   },
   "devDependencies": {
-    "@radix-ui/colors": "~0.1.8",
-    "@radix-ui/react-checkbox": "~1.0.1",
-    "@radix-ui/react-icons": "~1.1.1",
-    "@radix-ui/react-scroll-area": "~1.0.2",
-    "@radix-ui/react-tabs": "~1.0.1",
+    "@radix-ui/colors": "~3.0.0",
+    "@radix-ui/react-checkbox": "~1.3.3",
+    "@radix-ui/react-icons": "~1.3.2",
+    "@radix-ui/react-scroll-area": "~1.2.10",
+    "@radix-ui/react-tabs": "~1.1.13",
     "@rushstack/heft": "workspace:*",
-    "@types/react": "17.0.74",
-    "@types/react-dom": "17.0.25",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
     "eslint": "~9.37.0",
     "local-web-rig": "workspace:*"
   }

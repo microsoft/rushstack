@@ -26,14 +26,14 @@ export interface ITabsProps {
   value: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onChange?: (value: any) => void;
-  renderChildren?: () => JSX.Element;
+  renderChildren?: () => React.ReactElement;
 }
 
 /**
  * A tab control UI component
  * @public
  */
-export const Tabs = ({ items, def, value, onChange, renderChildren }: ITabsProps): JSX.Element => {
+export const Tabs = ({ items, def, value, onChange, renderChildren }: ITabsProps): React.ReactElement => {
   const getItemValue = (item: ITabsItem): string => (item.value === undefined ? item.header : item.value);
   return (
     <RadixTabs.Root

@@ -22,11 +22,11 @@ interface ILockfileEntryGroup {
   versions: LfxGraphEntry[];
 }
 
-const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element => {
+const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): React.ReactElement => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
   const activeFilters = useAppSelector((state) => state.entry.filters);
   const dispatch = useAppDispatch();
-  const fieldRef = useRef() as React.MutableRefObject<HTMLDivElement>;
+  const fieldRef = useRef<HTMLDivElement | null>(null);
   const clear = useCallback(
     (entry: LfxGraphEntry) => () => {
       dispatch(pushToStack(entry));
@@ -36,7 +36,7 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
 
   useEffect(() => {
     if (selectedEntry && selectedEntry.entryPackageName === group.entryName) {
-      fieldRef.current.scrollIntoView({
+      fieldRef.current?.scrollIntoView({
         behavior: 'smooth'
       });
     }
@@ -91,7 +91,7 @@ const multipleVersions = (entries: LfxGraphEntry[]): boolean => {
   return false;
 };
 
-export const LockfileViewer = (): JSX.Element | ReactNull => {
+export const LockfileViewer = (): React.ReactElement | ReactNull => {
   const dispatch = useAppDispatch();
   const [projectFilter, setProjectFilter] = useState('');
   const [packageFilter, setPackageFilter] = useState('');

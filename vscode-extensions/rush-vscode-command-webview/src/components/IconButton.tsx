@@ -18,6 +18,6 @@ const iconButtonStyles: IButtonProps['styles'] = {
   }
 };
 
-export const IconButton = (props: IButtonProps): JSX.Element => {
+export const IconButton = (props: IButtonProps): React.ReactElement => {
   return <FIconButton {...props} styles={iconButtonStyles} />;
 };
