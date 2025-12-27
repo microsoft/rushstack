@@ -11,11 +11,11 @@
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-storybook-plugin",
             "options": {
-              "storykitPackageName": "heft-storybook-react-tutorial-storykit",
-              "cliPackageName": "storybook",
-              "cliCallingConvention": "storybook9",
+              "storykitPackageName": "heft-storybook-v6-react-tutorial-storykit",
+              "cliPackageName": "@storybook/react",
+              "cliCallingConvention": "storybook6",
               "staticBuildOutputFolder": "dist",
-              "cwdPackageName": "heft-storybook-react-tutorial"
+              "cwdPackageName": "heft-storybook-v6-react-tutorial"
             }
           }
         }

@@ -1,7 +1,7 @@
-# heft-webpack-basic-tutorial
+# heft-storybook-v6-react-tutorial
 
 This is a copy of the
-[heft-storybook-react-tutorial](https://github.com/microsoft/rushstack-samples/tree/main/heft/heft-storybook-react-tutorial)
+[heft-storybook-v6-react-tutorial](https://github.com/microsoft/rushstack-samples/tree/main/heft/heft-storybook-v6-react-tutorial)
 tutorial project from the [rushstack-samples](https://github.com/microsoft/rushstack-samples) repo.
 
 The copy here serves as a regression test, by using `"workspace:*"` references to the local projects in this repo.

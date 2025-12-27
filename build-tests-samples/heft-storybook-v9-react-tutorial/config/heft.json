@@ -32,7 +32,7 @@
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-storybook-plugin",
             "options": {
-              "storykitPackageName": "heft-storybook-react-tutorial-storykit",
+              "storykitPackageName": "heft-storybook-v9-react-tutorial-storykit",
               "cliPackageName": "storybook",
               "cliCallingConvention": "storybook9",
               "staticBuildOutputFolder": "dist-storybook"

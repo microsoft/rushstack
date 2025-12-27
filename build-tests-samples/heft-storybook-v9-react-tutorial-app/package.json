@@ -1,5 +1,5 @@
 {
-  "name": "heft-storybook-react-tutorial-app",
+  "name": "heft-storybook-v9-react-tutorial-app",
   "description": "Building this project is a regression test for heft-storybook-plugin",
   "version": "1.0.0",
   "private": true,
@@ -9,11 +9,11 @@
     "_phase:test": ""
   },
   "dependencies": {
-    "heft-storybook-react-tutorial": "workspace: *"
+    "heft-storybook-v9-react-tutorial": "workspace: *"
   },
   "devDependencies": {
     "@rushstack/heft-storybook-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "heft-storybook-react-tutorial-storykit": "workspace:*"
+    "heft-storybook-v9-react-tutorial-storykit": "workspace:*"
   }
 }

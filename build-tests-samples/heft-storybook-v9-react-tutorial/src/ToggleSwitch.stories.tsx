@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { Meta, StoryObj } from 'heft-storybook-react-tutorial-storykit';
+import type { Meta, StoryObj } from 'heft-storybook-v9-react-tutorial-storykit';
 
 import { ToggleSwitch } from './ToggleSwitch';
 

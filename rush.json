@@ -717,20 +717,38 @@
       "shouldPublish": false
     },
     {
-      "packageName": "heft-storybook-react-tutorial",
-      "projectFolder": "build-tests-samples/heft-storybook-react-tutorial",
+      "packageName": "heft-storybook-v6-react-tutorial",
+      "projectFolder": "build-tests-samples/heft-storybook-v6-react-tutorial",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
     {
-      "packageName": "heft-storybook-react-tutorial-storykit",
-      "projectFolder": "build-tests-samples/heft-storybook-react-tutorial-storykit",
+      "packageName": "heft-storybook-v9-react-tutorial",
+      "projectFolder": "build-tests-samples/heft-storybook-v9-react-tutorial",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
     {
-      "packageName": "heft-storybook-react-tutorial-app",
-      "projectFolder": "build-tests-samples/heft-storybook-react-tutorial-app",
+      "packageName": "heft-storybook-v6-react-tutorial-storykit",
+      "projectFolder": "build-tests-samples/heft-storybook-v6-react-tutorial-storykit",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-storybook-v9-react-tutorial-storykit",
+      "projectFolder": "build-tests-samples/heft-storybook-v9-react-tutorial-storykit",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-storybook-v6-react-tutorial-app",
+      "projectFolder": "build-tests-samples/heft-storybook-v6-react-tutorial-app",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-storybook-v9-react-tutorial-app",
+      "projectFolder": "build-tests-samples/heft-storybook-v9-react-tutorial-app",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
