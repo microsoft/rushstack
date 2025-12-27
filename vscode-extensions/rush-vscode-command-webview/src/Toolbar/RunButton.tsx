@@ -9,7 +9,7 @@ import { sendMessageToExtension } from '../Message/toExtension';
 import { useAppSelector } from '../store/hooks';
 import { useParameterArgs } from '../store/slices/parameter';
 
-export const RunButton = (): JSX.Element => {
+export const RunButton = (): React.ReactElement => {
   const commandName: string = useAppSelector((state) => state.parameter.commandName);
   const formValidateAsync: (() => Promise<boolean>) | undefined = useAppSelector(
     (state) => state.ui.formValidateAsync

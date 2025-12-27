@@ -34,7 +34,7 @@ const stackTokens: IStackTokens = {
   padding: 10
 };
 
-export const ParameterView = (): JSX.Element => {
+export const ParameterView = (): React.ReactElement => {
   const { elementId, onScroll } = useScrollableElement();
   return (
     <Stack horizontal disableShrink styles={stackStyles} tokens={stackTokens}>

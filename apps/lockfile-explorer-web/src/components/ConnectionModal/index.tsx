@@ -10,7 +10,7 @@ import appStyles from '../../App.scss';
 import { checkAliveAsync } from '../../helpers/lfxApiClient';
 import type { ReactNull } from '../../types/ReactNull';
 
-export const ConnectionModal = (): JSX.Element | ReactNull => {
+export const ConnectionModal = (): React.ReactElement | ReactNull => {
   const [isAlive, setIsAlive] = useState(true);
   const [checking, setChecking] = useState(false);
   const [manualChecked, setManualChecked] = useState(false);

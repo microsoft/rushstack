@@ -8,7 +8,7 @@ import type { AnyAction, Dispatch } from '@reduxjs/toolkit';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { onChangeSearchText } from '../store/slices/parameter';
 
-export const SearchBar = (): JSX.Element => {
+export const SearchBar = (): React.ReactElement => {
   const searchText: string = useAppSelector((state) => state.parameter.searchText);
   const dispatch: Dispatch<AnyAction> = useAppDispatch();
   return (

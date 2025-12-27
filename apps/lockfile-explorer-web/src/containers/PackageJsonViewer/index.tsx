@@ -23,7 +23,7 @@ const PackageView: { [key: string]: string } = {
   PARSED_PACKAGE_JSON: 'PARSED_PACKAGE_JSON'
 };
 
-export const PackageJsonViewer = (): JSX.Element => {
+export const PackageJsonViewer = (): React.ReactElement => {
   const dispatch = useAppDispatch();
   const [packageJSON, setPackageJSON] = useState<IPackageJson | undefined>(undefined);
   const [parsedPackageJSON, setParsedPackageJSON] = useState<IPackageJson | undefined>(undefined);
@@ -76,7 +76,7 @@ export const PackageJsonViewer = (): JSX.Element => {
   }, [dispatch, selectedEntry]);
 
   const renderDep =
-    (name: boolean): ((dependencyDetails: [string, string]) => JSX.Element) =>
+    (name: boolean): ((dependencyDetails: [string, string]) => React.ReactElement) =>
     (dependencyDetails) => {
       const [dep, version] = dependencyDetails;
       if (specChanges.has(dep)) {
@@ -155,7 +155,7 @@ export const PackageJsonViewer = (): JSX.Element => {
       }
     };
 
-  const renderFile = (): JSX.Element | null => {
+  const renderFile = (): React.ReactElement | null => {
     switch (selection) {
       case PackageView.PACKAGE_JSON:
         if (!packageJSON)

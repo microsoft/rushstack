@@ -32,7 +32,7 @@ interface IInfluencerType {
   type: DependencyType;
 }
 
-export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
+export const LockfileEntryDetailsView = (): React.ReactElement | ReactNull => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
   const specChanges = useAppSelector((state) => state.workspace.specChanges);
   const dispatch = useAppDispatch();
@@ -67,12 +67,12 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   }, [selectedEntry]);
 
   const selectResolvedEntry = useCallback(
-    (dependencyToTrace) => () => {
+    (dependencyToTrace: LfxGraphDependency) => () => {
       if (inspectDependency && inspectDependency.entryId === dependencyToTrace.entryId) {
         if (dependencyToTrace.resolvedEntry) {
           dispatch(pushToStack(dependencyToTrace.resolvedEntry));
         } else {
-          logDiagnosticInfo('No resolved entry for dependency:', dependencyToTrace);
+          logDiagnosticInfo('No resolved entry for dependency:', dependencyToTrace.entryId);
         }
       } else if (selectedEntry) {
         // eslint-disable-next-line no-console
@@ -81,7 +81,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
 
         // Check if we need to calculate influencers.
         // If the current dependencyToTrace is a peer dependency then we do
-        if (dependencyToTrace.dependencyType !== LfxDependencyKind.Peer) {
+        if (dependencyToTrace.dependencyKind !== LfxDependencyKind.Peer) {
           return;
         }
 
@@ -153,14 +153,14 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   );
 
   const selectResolvedReferencer = useCallback(
-    (referrer) => () => {
+    (referrer: LfxGraphEntry) => () => {
       dispatch(pushToStack(referrer));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedEntry]
   );
 
-  const renderDependencyMetadata = (): JSX.Element | ReactNull => {
+  const renderDependencyMetadata = (): React.ReactElement | ReactNull => {
     if (!inspectDependency) {
       return ReactNull;
     }
@@ -202,7 +202,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     );
   };
 
-  const renderPeerDependencies = (): JSX.Element | ReactNull => {
+  const renderPeerDependencies = (): React.ReactElement | ReactNull => {
     if (!selectedEntry) return ReactNull;
     const peerDeps = selectedEntry.dependencies.filter((d) => d.dependencyKind === LfxDependencyKind.Peer);
     if (!peerDeps.length) {
