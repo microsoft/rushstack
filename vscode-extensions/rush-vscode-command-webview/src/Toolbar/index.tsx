@@ -35,7 +35,7 @@ const horizontalGapStackTokens: IStackTokens = {
   padding: 10
 };
 
-export const Toolbar = (): JSX.Element => {
+export const Toolbar = (): React.ReactElement => {
   const { isSticky } = useStickyToolbar();
   if (isSticky) {
     stackStyles.root = {

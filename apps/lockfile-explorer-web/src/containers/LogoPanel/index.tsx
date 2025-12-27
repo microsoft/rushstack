@@ -5,7 +5,7 @@ import React from 'react';
 
 import styles from './styles.scss';
 
-export const LogoPanel = (): JSX.Element => {
+export const LogoPanel = (): React.ReactElement => {
   // TODO: Add a mechanism to keep this in sync with the @rushstack/lockfile-explorer
   // package version.
   const appPackageVersion: string = window.appContext.appVersion;

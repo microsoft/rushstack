@@ -38,7 +38,7 @@ export const useScrollableElement = (): IUseScrollableElementReturn => {
   const currentParameterName: string = useCurrentParameterName();
   const userSelectedParameterName: string = useUserSelectedParameterName();
   const dispatch: Dispatch<AnyAction> = useAppDispatch();
-  const timeoutIdRef: MutableRefObject<ReturnType<typeof setTimeout> | undefined> = useRef();
+  const timeoutIdRef: MutableRefObject<ReturnType<typeof setTimeout> | undefined> = useRef(undefined);
   const userSelectionScrollingRef: MutableRefObject<boolean> = useRef(false);
 
   const deboucedScrollEnd: () => void = useCallback(() => {

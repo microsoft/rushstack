@@ -2,6 +2,18 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "2.0.9",
+      "tag": "@rushstack/lockfile-explorer_v2.0.9",
+      "date": "Wed, 24 Dec 2025 01:12:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Use pnpm dependency path implementation from `@rushstack/rush-pnpm-kit-v8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.8",
       "tag": "@rushstack/lockfile-explorer_v2.0.8",
       "date": "Sat, 06 Dec 2025 01:12:28 GMT",

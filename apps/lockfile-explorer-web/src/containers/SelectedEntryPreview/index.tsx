@@ -15,7 +15,7 @@ import {
   selectCurrentEntry
 } from '../../store/slices/entrySlice';
 
-export const SelectedEntryPreview = (): JSX.Element => {
+export const SelectedEntryPreview = (): React.ReactElement => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
   const isBookmarked = useAppSelector((state) =>
     selectedEntry ? state.entry.bookmarkedEntries.includes(selectedEntry) : false
@@ -39,7 +39,7 @@ export const SelectedEntryPreview = (): JSX.Element => {
     dispatch(forwardStack());
   }, [dispatch]);
 
-  const renderButtonRow = (): JSX.Element => {
+  const renderButtonRow = (): React.ReactElement => {
     return (
       <div className={styles.NavigationButtonRow}>
         <Button disabled={entryStack.length <= 1} onClick={pop}>

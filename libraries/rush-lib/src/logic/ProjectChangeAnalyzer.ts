@@ -167,8 +167,11 @@ export class ProjectChangeAnalyzer {
           }
 
           if (rushConfiguration.isPnpm) {
-            const currentShrinkwrap: PnpmShrinkwrapFile | undefined =
-              PnpmShrinkwrapFile.loadFromFile(fullShrinkwrapPath);
+            const subspaceHasNoProjects: boolean = subspace.getProjects().length === 0;
+            const currentShrinkwrap: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
+              fullShrinkwrapPath,
+              { subspaceHasNoProjects }
+            );
 
             if (!currentShrinkwrap) {
               throw new Error(`Unable to obtain current shrinkwrap file.`);
@@ -179,7 +182,9 @@ export class ProjectChangeAnalyzer {
               blobSpec: `${mergeCommit}:${relativeShrinkwrapFilePath}`,
               repositoryRoot: repoRoot
             });
-            const oldShrinkWrap: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromString(oldShrinkwrapText);
+            const oldShrinkWrap: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromString(oldShrinkwrapText, {
+              subspaceHasNoProjects
+            });
 
             for (const project of subspaceProjects) {
               if (

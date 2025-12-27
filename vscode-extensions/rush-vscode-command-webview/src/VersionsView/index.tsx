@@ -3,6 +3,6 @@
 
 import React from 'react';
 
-export const VersionsView = (): JSX.Element => {
+export const VersionsView = (): React.ReactElement => {
   return <div>Verrsions view...</div>;
 };

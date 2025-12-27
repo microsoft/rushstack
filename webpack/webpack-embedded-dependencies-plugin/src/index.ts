@@ -14,6 +14,12 @@
  */
 
 import EmbeddedDependenciesWebpackPlugin from './EmbeddedDependenciesWebpackPlugin';
-export * from './EmbeddedDependenciesWebpackPlugin';
+
+export type {
+  IPackageData,
+  IEmbeddedDependenciesWebpackPluginOptions,
+  LicenseFileGeneratorFunction,
+  LicenseFileName
+} from './EmbeddedDependenciesWebpackPlugin';
 
 export default EmbeddedDependenciesWebpackPlugin;

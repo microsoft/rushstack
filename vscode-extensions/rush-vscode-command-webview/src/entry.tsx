@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import * as ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 // import { ThemeProvider, PartialTheme } from '@fluentui/react';
 import { FluentProvider, teamsDarkTheme } from '@fluentui/react-components';
@@ -49,13 +49,12 @@ import { store } from './store';
 const $root: HTMLElement | null = document.getElementById('root');
 
 if ($root) {
-  ReactDOM.render(
+  ReactDOM.createRoot($root).render(
     <FluentProvider theme={teamsDarkTheme}>
       <Provider store={store}>
         <App />
       </Provider>
-    </FluentProvider>,
-    $root
+    </FluentProvider>
   );
 } else {
   // eslint-disable-next-line no-console

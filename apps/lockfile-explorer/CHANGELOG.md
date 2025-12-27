@@ -1,6 +1,13 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Sat, 06 Dec 2025 01:12:28 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Dec 2025 01:12:52 GMT and should not be manually modified.
+
+## 2.0.9
+Wed, 24 Dec 2025 01:12:52 GMT
+
+### Patches
+
+- Use pnpm dependency path implementation from `@rushstack/rush-pnpm-kit-v8`
 
 ## 2.0.8
 Sat, 06 Dec 2025 01:12:28 GMT

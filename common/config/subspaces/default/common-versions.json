@@ -148,9 +148,16 @@
       // This is used by the webpack 4 localization plugin tests
       "^4.1.16"
     ],
-    "@types/react": ["~19.2.7"],
-    "@types/react-dom": ["~19.2.3"],
-    "react": ["~19.2.1"],
-    "react-dom": ["~19.2.1"]
+    "@pnpm/logger": [
+      // For pnpm kit v8
+      "~5.0.0",
+      // For pnpm kit v9, v10
+      "~1001.0.0"
+    ],
+    // These are used in heft-storybook-v6-react-tutorial-storykit and heft-storybook-v6-react-tutorial
+    "@types/react": ["17.0.74"],
+    "@types/react-dom": ["17.0.25"],
+    "react": ["~17.0.2"],
+    "react-dom": ["~17.0.2"]
   }
 }

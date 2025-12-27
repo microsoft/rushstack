@@ -18,7 +18,7 @@ import { ConnectionModal } from './components/ConnectionModal';
 /**
  * This React component renders the application page.
  */
-export const App = (): JSX.Element => {
+export const App = (): React.ReactElement => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {

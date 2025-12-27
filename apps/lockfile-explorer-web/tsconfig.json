@@ -1,6 +1,8 @@
 {
   "extends": "./node_modules/local-web-rig/profiles/app/tsconfig-base.json",
   "compilerOptions": {
+    // prism-react-renderer uses old React types that don't exist in the newer versions. Specifically,
+    // the `JSX` namespace
     "skipLibCheck": true
   }
 }

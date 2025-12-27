@@ -21,7 +21,7 @@ export interface ICheckboxProps {
  * A checkbox UI component
  * @public
  */
-export const Checkbox = ({ label, isChecked, onChecked }: ICheckboxProps): JSX.Element => (
+export const Checkbox = ({ label, isChecked, onChecked }: ICheckboxProps): React.ReactElement => (
   <form>
     <div style={{ display: 'flex', alignItems: 'center' }}>
       <RadixCheckbox.Root
