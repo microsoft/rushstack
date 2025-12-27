@@ -3,14 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "description": "Storybook build dependencies for heft-storybook-v6-react-tutorial",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "lib-commonjs/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
-    "build": "",
-    "_phase:build": ""
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean"
   },
-  "devDependencies": {
+  "dependencies": {
     "@babel/core": "~7.20.0",
     "@storybook/addon-actions": "~6.4.18",
     "@storybook/addon-essentials": "~6.4.18",
@@ -34,5 +34,10 @@
     "terser-webpack-plugin": "~3.0.8",
     "typescript": "~5.8.2",
     "webpack": "~4.47.0"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-web-rig": "workspace:*"
   }
 }

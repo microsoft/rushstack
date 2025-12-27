@@ -3,14 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "description": "Storybook build dependencies for heft-storybook-v9-react-tutorial",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "lib-commonjs/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
-    "build": "",
-    "_phase:build": ""
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean"
   },
-  "devDependencies": {
+  "dependencies": {
     "@babel/core": "~7.20.0",
     "@storybook/cli": "~9.1.6",
     "@storybook/react": "~9.1.6",
@@ -31,5 +31,10 @@
     "webpack": "~5.103.0",
     "storybook": "~9.1.6",
     "@testing-library/dom": "~7.21.4"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-web-rig": "workspace:*"
   }
 }

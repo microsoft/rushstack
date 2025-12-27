@@ -852,7 +852,7 @@
     },
     {
       "name": "local-web-rig",
-      "allowedCategories": [ "libraries", "vscode-extensions" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "lodash",
