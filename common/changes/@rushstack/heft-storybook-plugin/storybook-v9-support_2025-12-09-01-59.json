@@ -2,12 +2,12 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-storybook-plugin",
-      "comment": "support storybook v9",
+      "comment": "Add support for Storybook v9",
       "type": "minor"
     },
     {
       "packageName": "@rushstack/heft-storybook-plugin",
-      "comment": "support serve mode with rspack",
+      "comment": "Add support for serve mode with RSPack",
       "type": "minor"
     }
   ],
