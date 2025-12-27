@@ -110,7 +110,7 @@ const namingConventionRuleOptions = [
     // A PascalCase method can arise somewhat legitimately in this way:
     //
     // class MyClass {
-    //    public static MyReactButton(props: IButtonProps): JSX.Element {
+    //    public static MyReactButton(props: IButtonProps): React.ReactElement {
     //      . . .
     //    }
     // }

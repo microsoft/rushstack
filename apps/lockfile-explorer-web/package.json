@@ -12,19 +12,19 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@reduxjs/toolkit": "~1.8.6",
+    "@reduxjs/toolkit": "~2.11.2",
     "@rushstack/rush-themed-ui": "workspace:*",
     "prism-react-renderer": "~2.4.1",
-    "react-dom": "~17.0.2",
-    "react-redux": "~8.0.4",
-    "react": "~17.0.2",
-    "redux": "~4.2.0",
+    "react-dom": "~19.2.3",
+    "react-redux": "~9.2.0",
+    "react": "~19.2.3",
+    "redux": "~5.0.1",
     "tslib": "~2.8.1"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@types/react": "17.0.74",
-    "@types/react-dom": "17.0.25",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
     "eslint": "~9.37.0",
     "local-web-rig": "workspace:*",
     "typescript": "5.8.2"

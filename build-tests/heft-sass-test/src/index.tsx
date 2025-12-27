@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import * as ReactDOM from 'react-dom/client';
 
 import { ExampleApp } from './ExampleApp';
 
-const rootDiv: HTMLElement = document.getElementById('root') as HTMLElement;
-ReactDOM.render(<ExampleApp />, rootDiv);
+const rootDiv: HTMLElement = document.getElementById('root')!;
+ReactDOM.createRoot(rootDiv).render(<ExampleApp />);
