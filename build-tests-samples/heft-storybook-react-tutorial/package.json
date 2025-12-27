@@ -12,8 +12,8 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "react-dom": "~19.2.1",
-    "react": "~19.2.1",
+    "react-dom": "~19.2.3",
+    "react": "~19.2.3",
     "tslib": "~2.8.1"
   },
   "devDependencies": {
@@ -29,8 +29,8 @@
     "@storybook/react": "~9.1.6",
     "@types/heft-jest": "1.0.1",
     "@types/node": "20.17.19",
-    "@types/react": "~19.2.7",
-    "@types/react-dom": "~19.2.3",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
     "@types/webpack-env": "1.18.8",
     "css-loader": "~5.2.7",
     "eslint": "~9.37.0",
