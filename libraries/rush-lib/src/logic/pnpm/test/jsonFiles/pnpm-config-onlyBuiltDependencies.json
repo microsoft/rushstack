@@ -1,0 +1,3 @@
+{
+  "globalOnlyBuiltDependencies": ["esbuild", "playwright", "@swc/core"]
+}

@@ -150,6 +150,15 @@
       }
     },
 
+    "globalOnlyBuiltDependencies": {
+      "description": "This field allows specifying which dependencies are permitted to run build scripts (preinstall, install, postinstall). In PNPM 10.x, build scripts are disabled by default for security. Use this allowlist to explicitly permit specific packages to run their build scripts.\n\n(SUPPORTED ONLY IN PNPM 10.1.0 AND NEWER)\n\nPNPM documentation: https://pnpm.io/settings#onlybuiltdependencies",
+      "type": "array",
+      "items": {
+        "description": "Specify package name of the dependency allowed to run build scripts",
+        "type": "string"
+      }
+    },
+
     "globalIgnoredOptionalDependencies": {
       "description": "This field allows you to skip the installation of specific optional dependencies. The listed packages will be treated as if they are not present in the dependency tree during installation, meaning they will not be installed even if required by other packages.\n\n(SUPPORTED ONLY IN PNPM 9.0.0 AND NEWER)\n\nPNPM documentation: https://pnpm.io/package_json#pnpmalloweddeprecatedversions",
       "type": "array",
