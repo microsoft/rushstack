@@ -139,7 +139,7 @@ export interface IDisposable {
 
 export type IExecuteCommandAndCaptureOutputOptions = Omit<
   IExecuteCommandOptions,
-  'suppressOutput' | 'onStdoutStreamChunk' | 'captureExitCodeAndSignal'
+  'suppressOutput' | 'onStdoutStreamChunk'
 >;
 
 interface ICreateEnvironmentForRushCommandPathOptions extends IEnvironmentPathOptions {
@@ -419,15 +419,25 @@ export class Utilities {
    * The current directory will be set to the specified workingDirectory.
    */
   public static async executeCommandAndCaptureOutputAsync(
+    options: IExecuteCommandAndCaptureOutputOptions & { captureExitCodeAndSignal?: false }
+  ): Promise<string>;
+  public static async executeCommandAndCaptureOutputAsync(
+    options: IExecuteCommandAndCaptureOutputOptions & { captureExitCodeAndSignal: true }
+  ): Promise<IWaitForExitResult<string>>;
+  public static async executeCommandAndCaptureOutputAsync(
     options: IExecuteCommandAndCaptureOutputOptions
-  ): Promise<string> {
-    const { stdout } = await Utilities._executeCommandInternalAsync({
+  ): Promise<string | IWaitForExitResult<string>> {
+    const result: IWaitForExitResult<string> = await Utilities._executeCommandInternalAsync({
       ...options,
       stdio: ['pipe', 'pipe', 'pipe'],
       captureOutput: true
     });
 
-    return stdout;
+    if (options.captureExitCodeAndSignal) {
+      return result;
+    } else {
+      return result.stdout;
+    }
   }
 
   /**

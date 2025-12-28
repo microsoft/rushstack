@@ -5,6 +5,30 @@ import * as semver from 'semver';
 
 import { Utilities } from './Utilities';
 
+async function runNpmCommandAndCaptureOutputAsync(
+  args: string[],
+  workingDirectory: string,
+  environment: { [key: string]: string | undefined }
+): Promise<string> {
+  const { stdout, stderr, signal, exitCode } = await Utilities.executeCommandAndCaptureOutputAsync({
+    command: 'npm',
+    args,
+    workingDirectory,
+    environment,
+    keepEnvironment: true,
+    shell: true,
+    captureExitCodeAndSignal: true
+  });
+
+  if (signal !== undefined) {
+    throw new Error(`The npm command was terminated by signal: ${signal}. Output: ${stdout} ${stderr}`);
+  } else if (exitCode !== 0) {
+    throw new Error(`The npm command failed with exit code: ${exitCode}. Output: ${stdout} ${stderr}`);
+  } else {
+    return stdout;
+  }
+}
+
 export class Npm {
   public static async getPublishedVersionsAsync(
     packageName: string,
@@ -14,14 +38,11 @@ export class Npm {
   ): Promise<string[]> {
     const versions: string[] = [];
     try {
-      const packageTime: string = await Utilities.executeCommandAndCaptureOutputAsync({
-        command: 'npm',
-        args: ['view', packageName, 'time', '--json', ...extraArgs],
+      const packageTime: string = await runNpmCommandAndCaptureOutputAsync(
+        ['view', packageName, 'time', '--json', ...extraArgs],
         workingDirectory,
-        environment,
-        keepEnvironment: true,
-        shell: true
-      });
+        environment
+      );
       if (packageTime && packageTime !== '') {
         Object.keys(JSON.parse(packageTime)).forEach((v) => {
           if (semver.valid(v)) {
@@ -32,14 +53,11 @@ export class Npm {
         // eslint-disable-next-line no-console
         console.log(`Package ${packageName} time value does not exist. Fall back to versions.`);
         // time property does not exist. It happens sometimes. Fall back to versions.
-        const packageVersions: string = await Utilities.executeCommandAndCaptureOutputAsync({
-          command: 'npm',
-          args: ['view', packageName, 'versions', '--json', ...extraArgs],
+        const packageVersions: string = await runNpmCommandAndCaptureOutputAsync(
+          ['view', packageName, 'versions', '--json', ...extraArgs],
           workingDirectory,
-          environment,
-          keepEnvironment: true,
-          shell: true
-        });
+          environment
+        );
         if (packageVersions && packageVersions.length > 0) {
           const parsedPackageVersions: string | string[] = JSON.parse(packageVersions);
           // NPM <= 6 always returns an array, NPM >= 7 returns a string if the package has only one version available
