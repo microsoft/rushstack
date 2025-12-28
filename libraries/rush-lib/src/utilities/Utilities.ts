@@ -643,11 +643,14 @@ export class Utilities {
     ) => TCommandResult,
     options: ILifecycleCommandOptions
   ): TCommandResult {
-    let shellCommand: string = process.env.comspec || 'cmd';
-    let commandFlags: string = '/d /s /c';
+    let shellCommand: string;
+    let commandFlags: string[];
     if (process.platform !== 'win32') {
       shellCommand = 'sh';
-      commandFlags = '-c';
+      commandFlags = ['-c'];
+    } else {
+      shellCommand = process.env.comspec || 'cmd';
+      commandFlags = ['/d', '/s', '/c'];
     }
 
     const environment: IEnvironment = Utilities._createEnvironmentForRushCommand({
@@ -676,7 +679,7 @@ export class Utilities {
       Object.assign(spawnOptions, SubprocessTerminator.RECOMMENDED_OPTIONS);
     }
 
-    return spawnFunction(shellCommand, [commandFlags, command], spawnOptions);
+    return spawnFunction(shellCommand, [...commandFlags, command], spawnOptions);
   }
 
   /**
