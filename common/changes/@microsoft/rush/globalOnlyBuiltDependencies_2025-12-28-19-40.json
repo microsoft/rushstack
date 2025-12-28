@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add globalOnlyBuiltDependencies support for PNPM 10.x to specify an allowlist of packages permitted to run build scripts",
-      "type": "minor"
+      "comment": "Add support for the `globalOnlyBuiltDependencies` PNPM 10.x option to specify an allowlist of packages permitted to run build scripts to `common/config/rush/pnpm-config.json`.",
+      "type": "none"
     }
   ],
   "packageName": "@microsoft/rush"
