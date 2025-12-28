@@ -8,7 +8,7 @@
     "start": "heft build-watch",
     "storybook": "heft build-watch --serve --storybook",
     "build-storybook": "heft build --storybook",
-    "_phase:build": "heft run --only build -- --clean --storybook",
+    "_phase:build": "node ./build",
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
