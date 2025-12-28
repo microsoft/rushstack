@@ -1,7 +1,9 @@
-const path = require('path');
+const { Import } = require('@rushstack/node-core-library');
 
 module.exports = {
   stories: ['../lib/**/*.stories.js'],
-  // naively referencing the name of the package causes storybook to fail to resolve it
-  framework: path.resolve(require.resolve('@storybook/react-webpack5/preset'), '..')
+  framework: Import.resolvePackage({
+    packageName: '@storybook/react-webpack5',
+    baseFolderPath: __dirname
+  })
 };

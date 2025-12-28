@@ -43,6 +43,7 @@
     "webpack": "~5.103.0",
     "storybook": "~9.1.6",
     "@testing-library/dom": "~7.21.4",
-    "@rushstack/module-minifier": "workspace:*"
+    "@rushstack/module-minifier": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*"
   }
 }
