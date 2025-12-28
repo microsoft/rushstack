@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add globalOnlyBuiltDependencies support for PNPM 10.x to specify an allowlist of packages permitted to run build scripts",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
