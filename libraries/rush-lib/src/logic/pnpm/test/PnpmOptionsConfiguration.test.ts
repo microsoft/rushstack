@@ -74,6 +74,19 @@ describe(PnpmOptionsConfiguration.name, () => {
     ]);
   });
 
+  it('loads onlyBuiltDependencies', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-onlyBuiltDependencies.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.globalOnlyBuiltDependencies)).toEqual([
+      'esbuild',
+      'canvas',
+      '@prisma/client'
+    ]);
+  });
+
   it('loads minimumReleaseAge', () => {
     const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
       `${__dirname}/jsonFiles/pnpm-config-minimumReleaseAge.json`,

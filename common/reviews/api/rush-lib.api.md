@@ -743,6 +743,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalCatalogs?: Record<string, Record<string, string>>;
     globalIgnoredOptionalDependencies?: string[];
     globalNeverBuiltDependencies?: string[];
+    globalOnlyBuiltDependencies?: string[];
     globalOverrides?: Record<string, string>;
     globalPackageExtensions?: Record<string, IPnpmPackageExtension>;
     globalPatchedDependencies?: Record<string, string>;
@@ -1155,6 +1156,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly globalCatalogs: Record<string, Record<string, string>> | undefined;
     readonly globalIgnoredOptionalDependencies: string[] | undefined;
     readonly globalNeverBuiltDependencies: string[] | undefined;
+    readonly globalOnlyBuiltDependencies: string[] | undefined;
     readonly globalOverrides: Record<string, string> | undefined;
     readonly globalPackageExtensions: Record<string, IPnpmPackageExtension> | undefined;
     get globalPatchedDependencies(): Record<string, string> | undefined;

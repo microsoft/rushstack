@@ -1,0 +1,3 @@
+{
+  "globalOnlyBuiltDependencies": ["esbuild", "canvas", "@prisma/client"]
+}
