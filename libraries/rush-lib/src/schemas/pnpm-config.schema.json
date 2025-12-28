@@ -154,7 +154,7 @@
       "description": "This field specifies an allowlist of dependencies that are permitted to run build scripts (preinstall, install, postinstall). In PNPM 10.x, build scripts are disabled by default for security. Use this setting to explicitly permit specific packages to run their build scripts. This is the inverse of \"globalNeverBuiltDependencies\".\n\n(SUPPORTED ONLY IN PNPM 10.1.0 AND NEWER)\n\nPNPM documentation: https://pnpm.io/package_json#pnpmonlybuiltdependencies",
       "type": "array",
       "items": {
-        "description": "Specify package name of the dependency allowed to run build scripts",
+        "description": "Specify package name of the dependency",
         "type": "string"
       }
     },
