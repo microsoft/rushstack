@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src",
+
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react",
+    "declaration": true,
+    "sourceMap": true,
+    "declarationMap": true,
+    "inlineSources": true,
+    "experimentalDecorators": true,
+    "strict": true,
+    "useUnknownInCatchVariables": false,
+    "esModuleInterop": true,
+    "noEmitOnError": false,
+    "allowUnreachableCode": false,
+    "importHelpers": true,
+
+    "types": ["heft-jest", "webpack-env"],
+
+    "module": "esnext",
+    "moduleResolution": "node",
+    "target": "es2020",
+    "lib": ["es2020", "scripthost", "dom"],
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "lib"]
+}

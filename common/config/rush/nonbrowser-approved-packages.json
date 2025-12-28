@@ -216,7 +216,7 @@
     },
     {
       "name": "@rushstack/heft-rspack-plugin",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/heft-sass-load-themed-styles-plugin",
@@ -455,12 +455,20 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@storybook/react-webpack5",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "@storybook/theming",
       "allowedCategories": [ "tests" ]
     },
     {
       "name": "@swc/core",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@testing-library/dom",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@tsconfig/node14",
@@ -723,15 +731,19 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "heft-storybook-react-tutorial",
+      "name": "heft-storybook-v6-react-tutorial",
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "heft-storybook-react-tutorial-storybook",
+      "name": "heft-storybook-v6-react-tutorial-storykit",
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "heft-storybook-react-tutorial-storykit",
+      "name": "heft-storybook-v9-react-tutorial",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "heft-storybook-v9-react-tutorial-storykit",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -840,7 +852,7 @@
     },
     {
       "name": "local-web-rig",
-      "allowedCategories": [ "libraries", "vscode-extensions" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "lodash",
@@ -981,6 +993,10 @@
     {
       "name": "ssri",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "storybook",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "strict-uri-encode",

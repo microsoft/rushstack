@@ -1,0 +1,15 @@
+// This file exists for caching purposes in the rushstack repo
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-project.schema.json",
+
+  "operationSettings": [
+    {
+      "operationName": "_phase:build",
+      "outputFolderNames": [".heft", "lib", "dist"]
+    },
+    {
+      "operationName": "_phase:test",
+      "outputFolderNames": ["coverage"]
+    }
+  ]
+}

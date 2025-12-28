@@ -1,0 +1,19 @@
+{
+  "name": "heft-storybook-v9-react-tutorial-app",
+  "description": "Building this project is a regression test for heft-storybook-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "heft build --clean --storybook",
+    "_phase:lite-build": "node ./build"
+  },
+  "dependencies": {
+    "heft-storybook-v9-react-tutorial": "workspace: *"
+  },
+  "devDependencies": {
+    "@rushstack/heft-storybook-plugin": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "heft-storybook-v9-react-tutorial-storykit": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*"
+  }
+}

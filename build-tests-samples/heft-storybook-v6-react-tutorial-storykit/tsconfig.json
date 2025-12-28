@@ -1,0 +1,7 @@
+{
+  "extends": "./node_modules/local-web-rig/profiles/library/tsconfig-base.json",
+  "compilerOptions": {
+    // The dependencies of this project have issues
+    "skipLibCheck": true
+  }
+}

@@ -1,0 +1,11 @@
+// This file exists for caching purposes in the rushstack repo
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-project.schema.json",
+
+  "operationSettings": [
+    {
+      "operationName": "_phase:lite-build",
+      "outputFolderNames": ["dist"]
+    }
+  ]
+}
