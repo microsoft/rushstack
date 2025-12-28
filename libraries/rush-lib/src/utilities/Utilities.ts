@@ -508,18 +508,6 @@ export class Utilities {
   }
 
   /**
-   * For strings passed to a shell command, this adds appropriate escaping
-   * to avoid misinterpretation of spaces or special characters.
-   *
-   * Example: 'hello there' --> '"hello there"'
-   */
-  public static escapeShellParameter(parameter: string): string {
-    // This approach is based on what NPM 7 now does:
-    // https://github.com/npm/run-script/blob/47a4d539fb07220e7215cc0e482683b76407ef9b/lib/run-script-pkg.js#L34
-    return JSON.stringify(parameter);
-  }
-
-  /**
    * Installs a package by name and version in the specified directory.
    */
   public static async installPackageInDirectoryAsync({
