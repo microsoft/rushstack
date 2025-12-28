@@ -830,13 +830,7 @@ export class Utilities {
     const escapedCommand: string =
       command.indexOf(' ') < 0 ? command : Utilities.escapeShellParameter(command);
 
-    const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
-
-    const childProcess: child_process.ChildProcess = child_process.spawn(
-      escapedCommand,
-      escapedArgs,
-      options
-    );
+    const childProcess: child_process.ChildProcess = child_process.spawn(escapedCommand, args, options);
 
     if (onStdoutStreamChunk) {
       const inspectStream: Transform = new Transform({
