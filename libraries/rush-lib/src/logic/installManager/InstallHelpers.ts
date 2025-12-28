@@ -31,6 +31,7 @@ interface ICommonPackageJson extends IPackageJson {
     packageExtensions?: typeof PnpmOptionsConfiguration.prototype.globalPackageExtensions;
     peerDependencyRules?: typeof PnpmOptionsConfiguration.prototype.globalPeerDependencyRules;
     neverBuiltDependencies?: typeof PnpmOptionsConfiguration.prototype.globalNeverBuiltDependencies;
+    onlyBuiltDependencies?: typeof PnpmOptionsConfiguration.prototype.globalOnlyBuiltDependencies;
     ignoredOptionalDependencies?: typeof PnpmOptionsConfiguration.prototype.globalIgnoredOptionalDependencies;
     allowedDeprecatedVersions?: typeof PnpmOptionsConfiguration.prototype.globalAllowedDeprecatedVersions;
     patchedDependencies?: typeof PnpmOptionsConfiguration.prototype.globalPatchedDependencies;
@@ -74,6 +75,24 @@ export class InstallHelpers {
 
       if (pnpmOptions.globalNeverBuiltDependencies) {
         commonPackageJson.pnpm.neverBuiltDependencies = pnpmOptions.globalNeverBuiltDependencies;
+      }
+
+      if (pnpmOptions.globalOnlyBuiltDependencies) {
+        if (
+          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.1.0')
+        ) {
+          terminal.writeWarningLine(
+            Colorize.yellow(
+              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+                `doesn't support the "globalOnlyBuiltDependencies" field in ` +
+                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+                'Remove this field or upgrade to pnpm 10.1.0 or newer.'
+            )
+          );
+        }
+
+        commonPackageJson.pnpm.onlyBuiltDependencies = pnpmOptions.globalOnlyBuiltDependencies;
       }
 
       if (pnpmOptions.globalIgnoredOptionalDependencies) {

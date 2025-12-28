@@ -23,11 +23,7 @@ const globEscape: (unescaped: string) => string = require('glob-escape'); // No 
  *      "default": {
  *        "react": "^18.0.0"
  *      }
- *    },
- *    "onlyBuiltDependencies": [
- *      "esbuild",
- *      "playwright"
- *    ]
+ *    }
  *  }
  */
 interface IPnpmWorkspaceYaml {
@@ -35,8 +31,6 @@ interface IPnpmWorkspaceYaml {
   packages: string[];
   /** Catalog definitions for centralized version management */
   catalogs?: Record<string, Record<string, string>>;
-  /** Allowlist of dependencies permitted to run build scripts (PNPM 10.1.0+) */
-  onlyBuiltDependencies?: string[];
 }
 
 export class PnpmWorkspaceFile extends BaseWorkspaceFile {
@@ -47,7 +41,6 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
 
   private _workspacePackages: Set<string>;
   private _catalogs: Record<string, Record<string, string>> | undefined;
-  private _onlyBuiltDependencies: string[] | undefined;
 
   /**
    * The PNPM workspace file is used to specify the location of workspaces relative to the root
@@ -61,7 +54,6 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     // If we need to support manual customization, that should be an additional parameter for "base file"
     this._workspacePackages = new Set<string>();
     this._catalogs = undefined;
-    this._onlyBuiltDependencies = undefined;
   }
 
   /**
@@ -70,15 +62,6 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
    */
   public setCatalogs(catalogs: Record<string, Record<string, string>> | undefined): void {
     this._catalogs = catalogs;
-  }
-
-  /**
-   * Sets the onlyBuiltDependencies list for the workspace.
-   * This specifies which dependencies are allowed to run build scripts in PNPM 10.1.0+.
-   * @param deps - An array of package names allowed to run build scripts
-   */
-  public setOnlyBuiltDependencies(deps: string[] | undefined): void {
-    this._onlyBuiltDependencies = deps;
   }
 
   /** @override */
@@ -104,10 +87,6 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
 
     if (this._catalogs && Object.keys(this._catalogs).length > 0) {
       workspaceYaml.catalogs = this._catalogs;
-    }
-
-    if (this._onlyBuiltDependencies && this._onlyBuiltDependencies.length > 0) {
-      workspaceYaml.onlyBuiltDependencies = this._onlyBuiltDependencies;
     }
 
     return yamlModule.dump(workspaceYaml, PNPM_SHRINKWRAP_YAML_FORMAT);

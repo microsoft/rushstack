@@ -67,6 +67,7 @@ describe('InstallHelpers', () => {
               }
             },
             neverBuiltDependencies: ['fsevents', 'level'],
+            onlyBuiltDependencies: ['esbuild', 'playwright'],
             pnpmFutureFeature: true
           }
         })
