@@ -53,7 +53,7 @@ export class Npm {
       }
     } catch (e) {
       const error: Error = e;
-      if (['E404', 'npm ERR! 404'].some((check) => error.message.indexOf(check))) {
+      if (['E404', 'npm ERR! 404'].some((check) => error.message.includes(check))) {
         // eslint-disable-next-line no-console
         console.log(`Package ${packageName} does not exist in the registry.`);
       } else {
