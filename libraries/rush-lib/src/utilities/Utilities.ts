@@ -817,23 +817,7 @@ export class Utilities {
       maxBuffer: 10 * 1024 * 1024 // Set default max buffer size to 10MB
     };
 
-    // This is needed since we specify shell=true below.
-    // NOTE: On Windows if we escape "NPM", the spawnSync() function runs something like this:
-    //   [ 'C:\\Windows\\system32\\cmd.exe', '/s', '/c', '""NPM" "install""' ]
-    //
-    // Due to a bug with Windows cmd.exe, the npm.cmd batch file's "%~dp0" variable will
-    // return the current working directory instead of the batch file's directory.
-    // The workaround is to not escape, npm, i.e. do this instead:
-    //   [ 'C:\\Windows\\system32\\cmd.exe', '/s', '/c', '"npm "install""' ]
-    //
-    // We will come up with a better solution for this when we promote executeCommand()
-    // into node-core-library, but for now this hack will unblock people:
-
-    // Only escape the command if it actually contains spaces:
-    const escapedCommand: string =
-      command.indexOf(' ') < 0 ? command : Utilities.escapeShellParameter(command);
-
-    const childProcess: child_process.ChildProcess = child_process.spawn(escapedCommand, args, options);
+    const childProcess: child_process.ChildProcess = child_process.spawn(command, args, options);
 
     if (onStdoutStreamChunk) {
       const inspectStream: Transform = new Transform({
