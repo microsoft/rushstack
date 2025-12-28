@@ -99,8 +99,8 @@ jobs:
         run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js update
         working-directory: repo-b
 
-      - name: Rush test (rush-lib)
-        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
+      - name: Rush retest (rush-lib)
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js retest --verbose --production --timeline
         working-directory: repo-b
 
       - name: Rush test (rush-lib) again to verify build cache hits
