@@ -28,7 +28,9 @@ describe(Npm.name, () => {
       "1.4.1": "2017-01-09T19:22:00.488Z",
       "2.4.0-alpha.1": "2017-03-30T18:37:27.757Z"
     }`;
-    stub.mockImplementationOnce(() => Promise.resolve(json));
+    stub.mockImplementationOnce(() =>
+      Promise.resolve({ stdout: json, stderr: '', signal: undefined, exitCode: 0 })
+    );
 
     const versions: string[] = await Npm.getPublishedVersionsAsync(packageName, __dirname, process.env);
 
@@ -50,8 +52,12 @@ describe(Npm.name, () => {
       "1.4.1",
       "2.4.0-alpha.1"
     ]`;
-    stub.mockImplementationOnce(() => Promise.resolve(''));
-    stub.mockImplementationOnce(() => Promise.resolve(json));
+    stub.mockImplementationOnce(() =>
+      Promise.resolve({ stdout: '', stderr: '', signal: undefined, exitCode: 0 })
+    );
+    stub.mockImplementationOnce(() =>
+      Promise.resolve({ stdout: json, stderr: '', signal: undefined, exitCode: 0 })
+    );
 
     const versions: string[] = await Npm.getPublishedVersionsAsync(packageName, __dirname, process.env);
 
