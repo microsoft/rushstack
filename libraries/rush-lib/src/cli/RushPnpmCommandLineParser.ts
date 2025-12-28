@@ -448,7 +448,8 @@ export class RushPnpmCommandLineParser {
         environment: pnpmEnvironmentMap.toObject(),
         keepEnvironment: true,
         onStdoutStreamChunk,
-        captureExitCodeAndSignal: true
+        captureExitCodeAndSignal: true,
+        shell: true
       });
 
       if (typeof exitCode === 'number') {

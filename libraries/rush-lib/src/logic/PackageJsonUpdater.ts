@@ -671,18 +671,19 @@ export class PackageJsonUpdater {
       } else {
         this._terminal.writeLine(`Querying registry for all versions of "${packageName}"...`);
 
-        let commandArgs: string[];
+        let args: string[];
         if (this._rushConfiguration.packageManager === 'yarn') {
-          commandArgs = ['info', packageName, 'versions', '--json'];
+          args = ['info', packageName, 'versions', '--json'];
         } else {
-          commandArgs = ['view', packageName, 'versions', '--json'];
+          args = ['view', packageName, 'versions', '--json'];
         }
 
-        const allVersions: string = await Utilities.executeCommandAndCaptureOutputAsync(
-          this._rushConfiguration.packageManagerToolFilename,
-          commandArgs,
-          this._rushConfiguration.commonTempFolder
-        );
+        const allVersions: string = await Utilities.executeCommandAndCaptureOutputAsync({
+          command: this._rushConfiguration.packageManagerToolFilename,
+          args,
+          workingDirectory: this._rushConfiguration.commonTempFolder,
+          shell: true
+        });
 
         let versionList: string[];
         if (this._rushConfiguration.packageManager === 'yarn') {
@@ -732,19 +733,20 @@ export class PackageJsonUpdater {
 
         this._terminal.writeLine(`Querying NPM registry for latest version of "${packageName}"...`);
 
-        let commandArgs: string[];
+        let args: string[];
         if (this._rushConfiguration.packageManager === 'yarn') {
-          commandArgs = ['info', packageName, 'dist-tags.latest', '--silent'];
+          args = ['info', packageName, 'dist-tags.latest', '--silent'];
         } else {
-          commandArgs = ['view', `${packageName}@latest`, 'version'];
+          args = ['view', `${packageName}@latest`, 'version'];
         }
 
         selectedVersion = (
-          await Utilities.executeCommandAndCaptureOutputAsync(
-            this._rushConfiguration.packageManagerToolFilename,
-            commandArgs,
-            this._rushConfiguration.commonTempFolder
-          )
+          await Utilities.executeCommandAndCaptureOutputAsync({
+            command: this._rushConfiguration.packageManagerToolFilename,
+            args,
+            workingDirectory: this._rushConfiguration.commonTempFolder,
+            shell: true
+          })
         ).trim();
       }
 

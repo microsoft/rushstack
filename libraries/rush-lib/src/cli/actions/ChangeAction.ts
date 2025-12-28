@@ -30,7 +30,6 @@ import {
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { Git } from '../../logic/Git';
 import { RushConstants } from '../../logic/RushConstants';
-import { Utilities } from '../../utilities/Utilities';
 
 const BULK_LONG_NAME: string = '--bulk';
 const BULK_MESSAGE_LONG_NAME: string = '--message';
@@ -310,11 +309,12 @@ export class ChangeAction extends BaseRushAction {
     }
     if (this._commitChangesFlagParameter.value || this._commitChangesMessageStringParameter.value) {
       if (changefiles && changefiles.length !== 0) {
-        await this._stageAndCommitGitChangesAsync(
+        await this._git.stageAndCommitGitChangesAsync(
           changefiles,
           this._commitChangesMessageStringParameter.value ||
             this.rushConfiguration.gitChangefilesCommitMessage ||
-            'Rush change'
+            'Rush change',
+          this.terminal
         );
       } else {
         this.terminal.writeWarningLine('Warning: No change files generated, nothing to commit.');
@@ -747,22 +747,5 @@ export class ChangeAction extends BaseRushAction {
   private _logNoChangeFileRequired(): void {
     // eslint-disable-next-line no-console
     console.log('No changes were detected to relevant packages on this branch. Nothing to do.');
-  }
-
-  private async _stageAndCommitGitChangesAsync(pattern: string[], message: string): Promise<void> {
-    try {
-      await Utilities.executeCommandAsync({
-        command: 'git',
-        args: ['add', ...pattern],
-        workingDirectory: this.rushConfiguration.changesFolder
-      });
-      await Utilities.executeCommandAsync({
-        command: 'git',
-        args: ['commit', ...pattern, '-m', message],
-        workingDirectory: this.rushConfiguration.changesFolder
-      });
-    } catch (error) {
-      this.terminal.writeErrorLine(`ERROR: Cannot stage and commit git changes ${(error as Error).message}`);
-    }
   }
 }

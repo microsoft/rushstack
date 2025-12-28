@@ -523,6 +523,28 @@ export class Git {
     return result;
   }
 
+  public async stageAndCommitGitChangesAsync(
+    pattern: string[],
+    message: string,
+    terminal: ITerminal
+  ): Promise<void> {
+    try {
+      const gitPath: string = this.getGitPathOrThrow();
+      await this._executeGitCommandAndCaptureOutputAsync(
+        gitPath,
+        ['add', ...pattern],
+        this._rushConfiguration.changesFolder
+      );
+      await this._executeGitCommandAndCaptureOutputAsync(
+        gitPath,
+        ['commit', ...pattern, '-m', message],
+        this._rushConfiguration.changesFolder
+      );
+    } catch (error) {
+      terminal.writeErrorLine(`ERROR: Cannot stage and commit git changes ${(error as Error).message}`);
+    }
+  }
+
   /**
    * Returns an object containing either the result of the `git config user.email`
    * command or an error.
@@ -604,10 +626,14 @@ export class Git {
   public async _executeGitCommandAndCaptureOutputAsync(
     gitPath: string,
     args: string[],
-    repositoryRoot: string = this._rushConfiguration.rushJsonFolder
+    workingDirectory: string = this._rushConfiguration.rushJsonFolder
   ): Promise<string> {
     try {
-      return await Utilities.executeCommandAndCaptureOutputAsync(gitPath, args, repositoryRoot);
+      return await Utilities.executeCommandAndCaptureOutputAsync({
+        command: gitPath,
+        args,
+        workingDirectory
+      });
     } catch (e) {
       ensureGitMinimumVersion(gitPath);
       throw e;

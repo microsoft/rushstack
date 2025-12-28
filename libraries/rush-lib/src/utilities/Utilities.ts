@@ -52,6 +52,12 @@ export interface IExecuteCommandOptions {
    */
   onStdoutStreamChunk?: (chunk: string) => string | void;
   captureExitCodeAndSignal?: boolean;
+  /**
+   * If true, the command will be executed inside a shell. Note that this is different from
+   * child_process.spawn's shell option. The command will be explicitly wrapped
+   * in a shell depending on the operating system.
+   */
+  shell?: boolean;
 }
 
 /**
@@ -131,6 +137,11 @@ export interface IDisposable {
   dispose(): void;
 }
 
+export type IExecuteCommandAndCaptureOutputOptions = Omit<
+  IExecuteCommandOptions,
+  'suppressOutput' | 'onStdoutStreamChunk' | 'captureExitCodeAndSignal'
+>;
+
 interface ICreateEnvironmentForRushCommandPathOptions extends IEnvironmentPathOptions {
   rushJsonFolder: string | undefined;
   projectRoot: string | undefined;
@@ -166,6 +177,11 @@ type IExecuteCommandInternalOptions = Omit<IExecuteCommandOptions, 'suppressOutp
   stdio: child_process.SpawnSyncOptions['stdio'];
   captureOutput: boolean;
 };
+
+interface ICommandAndArgs {
+  command: string;
+  args: string[];
+}
 
 export class Utilities {
   public static syncNpmrc: typeof syncNpmrc = syncNpmrc;
@@ -355,16 +371,20 @@ export class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
-  public static async executeCommandAsync({
-    command,
-    args,
-    workingDirectory,
-    suppressOutput,
-    onStdoutStreamChunk,
-    environment,
-    keepEnvironment,
-    captureExitCodeAndSignal
-  }: IExecuteCommandOptions): Promise<void | Pick<IWaitForExitResult, 'exitCode' | 'signal'>> {
+  public static async executeCommandAsync(
+    options: IExecuteCommandOptions
+  ): Promise<void | IWaitForExitResultWithoutOutput> {
+    const {
+      command,
+      args,
+      workingDirectory,
+      suppressOutput,
+      onStdoutStreamChunk,
+      environment,
+      keepEnvironment,
+      captureExitCodeAndSignal,
+      shell
+    } = options;
     const { exitCode, signal } = await Utilities._executeCommandInternalAsync({
       command,
       args,
@@ -385,7 +405,8 @@ export class Utilities {
       keepEnvironment,
       onStdoutStreamChunk,
       captureOutput: false,
-      captureExitCodeAndSignal
+      captureExitCodeAndSignal,
+      shell
     });
 
     if (captureExitCodeAndSignal) {
@@ -398,19 +419,11 @@ export class Utilities {
    * The current directory will be set to the specified workingDirectory.
    */
   public static async executeCommandAndCaptureOutputAsync(
-    command: string,
-    args: string[],
-    workingDirectory: string,
-    environment?: IEnvironment,
-    keepEnvironment: boolean = false
+    options: IExecuteCommandAndCaptureOutputOptions
   ): Promise<string> {
     const { stdout } = await Utilities._executeCommandInternalAsync({
-      command,
-      args,
-      workingDirectory,
+      ...options,
       stdio: ['pipe', 'pipe', 'pipe'],
-      environment,
-      keepEnvironment,
       captureOutput: true
     });
 
@@ -557,7 +570,8 @@ export class Utilities {
         args: ['install'],
         workingDirectory: directory,
         environment: Utilities._createEnvironmentForRushCommand({}),
-        suppressOutput
+        suppressOutput,
+        shell: true
       },
       maxInstallAttempts
     );
@@ -623,7 +637,7 @@ export class Utilities {
   }
 
   private static _executeLifecycleCommandInternal<TCommandResult>(
-    command: string,
+    commandAndArgs: string,
     spawnFunction: (
       command: string,
       args: string[],
@@ -631,16 +645,6 @@ export class Utilities {
     ) => TCommandResult,
     options: ILifecycleCommandOptions
   ): TCommandResult {
-    let shellCommand: string;
-    let commandFlags: string[];
-    if (process.platform !== 'win32') {
-      shellCommand = 'sh';
-      commandFlags = ['-c'];
-    } else {
-      shellCommand = process.env.comspec || 'cmd';
-      commandFlags = ['/d', '/s', '/c'];
-    }
-
     const {
       initCwd,
       initialEnvironment,
@@ -677,7 +681,8 @@ export class Utilities {
       Object.assign(spawnOptions, SubprocessTerminator.RECOMMENDED_OPTIONS);
     }
 
-    return spawnFunction(shellCommand, [...commandFlags, command], spawnOptions);
+    const { command, args } = Utilities._convertCommandAndArgsToShell(commandAndArgs);
+    return spawnFunction(command, args, spawnOptions);
   }
 
   /**
@@ -804,7 +809,8 @@ export class Utilities {
     keepEnvironment,
     onStdoutStreamChunk,
     captureOutput,
-    captureExitCodeAndSignal
+    captureExitCodeAndSignal,
+    shell
   }: IExecuteCommandInternalOptions): Promise<IWaitForExitResult<string> | IWaitForExitResultWithoutOutput> {
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
@@ -814,6 +820,10 @@ export class Utilities {
         : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment }),
       maxBuffer: 10 * 1024 * 1024 // Set default max buffer size to 10MB
     };
+
+    if (shell) {
+      ({ command, args } = Utilities._convertCommandAndArgsToShell({ command, args }));
+    }
 
     const childProcess: child_process.ChildProcess = child_process.spawn(command, args, options);
 
@@ -863,5 +873,32 @@ export class Utilities {
     if (status) {
       throw new Error(`The command failed with exit code ${status}\n${stderr}`);
     }
+  }
+
+  private static _convertCommandAndArgsToShell(command: string): ICommandAndArgs;
+  private static _convertCommandAndArgsToShell(options: ICommandAndArgs): ICommandAndArgs;
+  private static _convertCommandAndArgsToShell(options: ICommandAndArgs | string): ICommandAndArgs {
+    let shellCommand: string;
+    let commandFlags: string[];
+    if (process.platform !== 'win32') {
+      shellCommand = 'sh';
+      commandFlags = ['-c'];
+    } else {
+      shellCommand = process.env.comspec || 'cmd';
+      commandFlags = ['/d', '/s', '/c'];
+    }
+
+    let commandToRun: string;
+    if (typeof options === 'string') {
+      commandToRun = options;
+    } else {
+      const { command, args } = options;
+      commandToRun = [command, ...args].join(' ');
+    }
+
+    return {
+      command: shellCommand,
+      args: [...commandFlags, commandToRun]
+    };
   }
 }

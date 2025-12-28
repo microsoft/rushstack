@@ -33,11 +33,10 @@ describe(Npm.name, () => {
     const versions: string[] = await Npm.getPublishedVersionsAsync(packageName, __dirname, process.env);
 
     expect(stub).toHaveBeenCalledWith(
-      'npm',
-      `view ${packageName} time --json`.split(' '),
-      expect.anything(),
-      expect.anything(),
-      expect.anything()
+      expect.objectContaining({
+        command: 'npm',
+        args: `view ${packageName} time --json`.split(' ')
+      })
     );
 
     expect(versions).toHaveLength(4);
@@ -57,18 +56,16 @@ describe(Npm.name, () => {
     const versions: string[] = await Npm.getPublishedVersionsAsync(packageName, __dirname, process.env);
 
     expect(stub).toHaveBeenCalledWith(
-      'npm',
-      `view ${packageName} time --json`.split(' '),
-      expect.anything(),
-      expect.anything(),
-      expect.anything()
+      expect.objectContaining({
+        command: 'npm',
+        args: `view ${packageName} time --json`.split(' ')
+      })
     );
     expect(stub).toHaveBeenCalledWith(
-      'npm',
-      `view ${packageName} versions --json`.split(' '),
-      expect.anything(),
-      expect.anything(),
-      expect.anything()
+      expect.objectContaining({
+        command: 'npm',
+        args: `view ${packageName} versions --json`.split(' ')
+      })
     );
 
     expect(versions).toHaveLength(4);

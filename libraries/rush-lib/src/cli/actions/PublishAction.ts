@@ -473,14 +473,15 @@ export class PublishAction extends BaseRushAction {
       // If the auth token was specified via the command line, avoid printing it on the console
       const secretSubstring: string | undefined = this._npmAuthToken.value;
 
-      await PublishUtilities.execCommandAsync(
-        !!this._publish.value,
-        packageManagerToolFilename,
+      await PublishUtilities.execCommandAsync({
+        shouldExecute: this._publish.value,
+        command: packageManagerToolFilename,
         args,
-        packagePath,
-        env,
-        secretSubstring
-      );
+        workingDirectory: packagePath,
+        environment: env,
+        secretSubstring,
+        shell: true
+      });
     }
   }
 
@@ -522,13 +523,14 @@ export class PublishAction extends BaseRushAction {
     const args: string[] = ['pack'];
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
 
-    await PublishUtilities.execCommandAsync(
-      !!this._publish.value,
-      this.rushConfiguration.packageManagerToolFilename,
+    await PublishUtilities.execCommandAsync({
+      shouldExecute: this._publish.value,
+      command: this.rushConfiguration.packageManagerToolFilename,
       args,
-      project.publishFolder,
-      env
-    );
+      workingDirectory: project.publishFolder,
+      environment: env,
+      shell: true
+    });
 
     if (this._publish.value) {
       // Copy the tarball the release folder

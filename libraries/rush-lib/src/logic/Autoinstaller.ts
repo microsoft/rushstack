@@ -149,7 +149,8 @@ export class Autoinstaller {
           command: this._rushConfiguration.packageManagerToolFilename,
           args: ['install', '--frozen-lockfile'],
           workingDirectory: autoinstallerFullPath,
-          keepEnvironment: true
+          keepEnvironment: true,
+          shell: true
         });
 
         // Create file: ../common/autoinstallers/my-task/.rush/temp/last-install.flag
@@ -231,7 +232,8 @@ export class Autoinstaller {
       command: this._rushConfiguration.packageManagerToolFilename,
       args: ['install'],
       workingDirectory: this.folderFullPath,
-      keepEnvironment: true
+      keepEnvironment: true,
+      shell: true
     });
 
     this._logIfConsoleOutputIsNotRestricted();
@@ -242,7 +244,8 @@ export class Autoinstaller {
         command: this._rushConfiguration.packageManagerToolFilename,
         args: ['shrinkwrap'],
         workingDirectory: this.folderFullPath,
-        keepEnvironment: true
+        keepEnvironment: true,
+        shell: true
       });
       this._logIfConsoleOutputIsNotRestricted('"npm shrinkwrap" completed');
       this._logIfConsoleOutputIsNotRestricted();

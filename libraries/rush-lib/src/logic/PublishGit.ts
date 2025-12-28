@@ -20,23 +20,26 @@ export class PublishGit {
   }
 
   public async checkoutAsync(branchName: string | undefined, createBranch: boolean = false): Promise<void> {
-    const params: string[] = ['checkout'];
+    const args: string[] = ['checkout'];
     if (createBranch) {
-      params.push('-b');
+      args.push('-b');
     }
 
-    params.push(branchName || DUMMY_BRANCH_NAME);
+    args.push(branchName || DUMMY_BRANCH_NAME);
 
-    await PublishUtilities.execCommandAsync(!!this._targetBranch, this._gitPath, params);
+    await PublishUtilities.execCommandAsync({
+      shouldExecute: !!this._targetBranch,
+      command: this._gitPath,
+      args
+    });
   }
 
   public async mergeAsync(branchName: string, verify: boolean = false): Promise<void> {
-    await PublishUtilities.execCommandAsync(!!this._targetBranch, this._gitPath, [
-      'merge',
-      branchName,
-      '--no-edit',
-      ...(verify ? [] : ['--no-verify'])
-    ]);
+    await PublishUtilities.execCommandAsync({
+      shouldExecute: !!this._targetBranch,
+      command: this._gitPath,
+      args: ['merge', branchName, '--no-edit', ...(verify ? [] : ['--no-verify'])]
+    });
   }
 
   public async deleteBranchAsync(
@@ -48,46 +51,52 @@ export class PublishGit {
       branchName = DUMMY_BRANCH_NAME;
     }
 
-    await PublishUtilities.execCommandAsync(!!this._targetBranch, this._gitPath, [
-      'branch',
-      '-d',
-      branchName
-    ]);
+    await PublishUtilities.execCommandAsync({
+      shouldExecute: !!this._targetBranch,
+      command: this._gitPath,
+      args: ['branch', '-d', branchName]
+    });
     if (hasRemote) {
-      await PublishUtilities.execCommandAsync(!!this._targetBranch, this._gitPath, [
-        'push',
-        'origin',
-        '--delete',
-        branchName,
-        ...(verify ? [] : ['--no-verify'])
-      ]);
+      await PublishUtilities.execCommandAsync({
+        shouldExecute: !!this._targetBranch,
+        command: this._gitPath,
+        args: ['push', 'origin', '--delete', branchName, ...(verify ? [] : ['--no-verify'])]
+      });
     }
   }
 
   public async pullAsync(verify: boolean = false): Promise<void> {
-    const params: string[] = ['pull', 'origin'];
+    const args: string[] = ['pull', 'origin'];
     if (this._targetBranch) {
-      params.push(this._targetBranch);
+      args.push(this._targetBranch);
     }
     if (!verify) {
-      params.push('--no-verify');
+      args.push('--no-verify');
     }
 
-    await PublishUtilities.execCommandAsync(!!this._targetBranch, this._gitPath, params);
+    await PublishUtilities.execCommandAsync({
+      shouldExecute: !!this._targetBranch,
+      command: this._gitPath,
+      args
+    });
   }
 
   public async fetchAsync(): Promise<void> {
-    await PublishUtilities.execCommandAsync(!!this._targetBranch, this._gitPath, ['fetch', 'origin']);
+    await PublishUtilities.execCommandAsync({
+      shouldExecute: !!this._targetBranch,
+      command: this._gitPath,
+      args: ['fetch', 'origin']
+    });
   }
 
   public async addChangesAsync(pathspec?: string, workingDirectory?: string): Promise<void> {
     const files: string = pathspec ? pathspec : '.';
-    await PublishUtilities.execCommandAsync(
-      !!this._targetBranch,
-      this._gitPath,
-      ['add', files],
-      workingDirectory ? workingDirectory : process.cwd()
-    );
+    await PublishUtilities.execCommandAsync({
+      shouldExecute: !!this._targetBranch,
+      command: this._gitPath,
+      args: ['add', files],
+      workingDirectory
+    });
   }
 
   public async addTagAsync(
@@ -103,16 +112,20 @@ export class PublishGit {
       packageVersion,
       this._gitTagSeparator
     );
-    await PublishUtilities.execCommandAsync(!!this._targetBranch && shouldExecute, this._gitPath, [
-      'tag',
-      '-a',
-      preReleaseName ? `${tagName}-${preReleaseName}` : tagName,
-      '-m',
-      preReleaseName
-        ? `${packageName} v${packageVersion}-${preReleaseName}`
-        : `${packageName} v${packageVersion}`,
-      ...(commitId ? [commitId] : [])
-    ]);
+    await PublishUtilities.execCommandAsync({
+      shouldExecute: !!this._targetBranch && shouldExecute,
+      command: this._gitPath,
+      args: [
+        'tag',
+        '-a',
+        preReleaseName ? `${tagName}-${preReleaseName}` : tagName,
+        '-m',
+        preReleaseName
+          ? `${packageName} v${packageVersion}-${preReleaseName}`
+          : `${packageName} v${packageVersion}`,
+        ...(commitId ? [commitId] : [])
+      ]
+    });
   }
 
   public async hasTagAsync(packageConfig: RushConfigurationProject): Promise<boolean> {
@@ -122,25 +135,24 @@ export class PublishGit {
       this._gitTagSeparator
     );
     const tagOutput: string = (
-      await Utilities.executeCommandAndCaptureOutputAsync(
-        this._gitPath,
-        ['tag', '-l', tagName],
-        packageConfig.projectFolder,
-        PublishUtilities.getEnvArgs(),
-        true
-      )
+      await Utilities.executeCommandAndCaptureOutputAsync({
+        command: this._gitPath,
+        args: ['tag', '-l', tagName],
+        workingDirectory: packageConfig.projectFolder,
+        environment: PublishUtilities.getEnvArgs(),
+        keepEnvironment: true
+      })
     ).replace(/(\r\n|\n|\r)/gm, '');
 
     return tagOutput === tagName;
   }
 
   public async commitAsync(commitMessage: string, verify: boolean = false): Promise<void> {
-    await PublishUtilities.execCommandAsync(!!this._targetBranch, this._gitPath, [
-      'commit',
-      '-m',
-      commitMessage,
-      ...(verify ? [] : ['--no-verify'])
-    ]);
+    await PublishUtilities.execCommandAsync({
+      shouldExecute: !!this._targetBranch,
+      command: this._gitPath,
+      args: ['commit', '-m', commitMessage, ...(verify ? [] : ['--no-verify'])]
+    });
   }
 
   public async pushAsync(
@@ -148,12 +160,12 @@ export class PublishGit {
     verify: boolean = false,
     followTags: boolean = true
   ): Promise<void> {
-    await PublishUtilities.execCommandAsync(
-      !!this._targetBranch,
-      this._gitPath,
+    await PublishUtilities.execCommandAsync({
+      shouldExecute: !!this._targetBranch,
+      command: this._gitPath,
       // We append "--no-verify" to prevent Git hooks from running.  For example, people may
       // want to invoke "rush change -v" as a pre-push hook.
-      [
+      args: [
         'push',
         'origin',
         `HEAD:${branchName || DUMMY_BRANCH_NAME}`,
@@ -161,6 +173,6 @@ export class PublishGit {
         '--verbose',
         ...(verify ? [] : ['--no-verify'])
       ]
-    );
+    });
   }
 }

@@ -619,7 +619,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             workingDirectory: subspace.getSubspaceTempFolderPath(),
             environment: packageManagerEnv,
             suppressOutput: false,
-            onStdoutStreamChunk: onPnpmStdoutChunk
+            onStdoutStreamChunk: onPnpmStdoutChunk,
+            shell: true
           },
           this.options.maxInstallAttempts,
           () => {
