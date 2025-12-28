@@ -641,29 +641,39 @@ export class Utilities {
       commandFlags = ['/d', '/s', '/c'];
     }
 
+    const {
+      initCwd,
+      initialEnvironment,
+      environmentPathOptions,
+      rushConfiguration,
+      workingDirectory,
+      handleOutput,
+      ipc,
+      connectSubprocessTerminator
+    } = options;
     const environment: IEnvironment = Utilities._createEnvironmentForRushCommand({
-      initCwd: options.initCwd,
-      initialEnvironment: options.initialEnvironment,
+      initCwd,
+      initialEnvironment,
       pathOptions: {
-        ...options.environmentPathOptions,
-        rushJsonFolder: options.rushConfiguration?.rushJsonFolder,
-        projectRoot: options.workingDirectory,
-        commonTempFolder: options.rushConfiguration ? options.rushConfiguration.commonTempFolder : undefined
+        ...environmentPathOptions,
+        rushJsonFolder: rushConfiguration?.rushJsonFolder,
+        projectRoot: workingDirectory,
+        commonTempFolder: rushConfiguration ? rushConfiguration.commonTempFolder : undefined
       }
     });
 
-    const stdio: child_process.StdioOptions = options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2];
-    if (options.ipc) {
+    const stdio: child_process.StdioOptions = handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2];
+    if (ipc) {
       stdio.push('ipc');
     }
 
     const spawnOptions: child_process.SpawnOptions = {
-      cwd: options.workingDirectory,
+      cwd: workingDirectory,
       env: environment,
       stdio
     };
 
-    if (options.connectSubprocessTerminator) {
+    if (connectSubprocessTerminator) {
       Object.assign(spawnOptions, SubprocessTerminator.RECOMMENDED_OPTIONS);
     }
 

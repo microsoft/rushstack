@@ -143,7 +143,9 @@ export class RushXCommandLine {
     rushConfiguration: RushConfiguration | undefined,
     options: ILaunchOptions
   ): Promise<void> {
-    if (!rushxArguments.quiet) {
+    const { quiet, help, commandName, commandArgs } = rushxArguments;
+
+    if (!quiet) {
       RushStartupBanner.logStreamlinedBanner(Rush.version, options.isManaged);
     }
     // Are we in a Rush repo?
@@ -182,15 +184,15 @@ export class RushXCommandLine {
 
     const projectCommandSet: ProjectCommandSet = new ProjectCommandSet(packageJson);
 
-    if (rushxArguments.help) {
+    if (help) {
       RushXCommandLine._showUsage(packageJson, projectCommandSet);
       return;
     }
 
-    const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(rushxArguments.commandName);
+    const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(commandName);
 
     if (scriptBody === undefined) {
-      let errorMessage: string = `The command "${rushxArguments.commandName}" is not defined in the package.json file for this project.`;
+      let errorMessage: string = `The command "${commandName}" is not defined in the package.json file for this project.`;
 
       if (projectCommandSet.commandNames.length > 0) {
         errorMessage +=
@@ -203,12 +205,12 @@ export class RushXCommandLine {
 
     let commandWithArgs: string = scriptBody;
     if (rushxArguments.commandArgs.length > 0) {
-      commandWithArgs += ' ' + rushxArguments.commandArgs.join(' ');
+      commandWithArgs += ' ' + commandArgs.join(' ');
     }
 
-    if (!rushxArguments.quiet) {
+    if (!quiet) {
       // eslint-disable-next-line no-console
-      console.log(`> ${JSON.stringify(commandWithArgsForDisplay)}\n`);
+      console.log(`> ${JSON.stringify(commandWithArgs)}\n`);
     }
 
     const packageFolder: string = path.dirname(packageJsonFilePath);
