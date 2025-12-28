@@ -6,6 +6,6 @@ Object {
   "error": "",
   "output": "",
   "verbose": "",
-  "warning": "",
+  "warning": "Your version of pnpm (6.23.1) doesn't support the \\"globalOnlyBuiltDependencies\\" field in /home/runner/work/rushstack/rushstack/libraries/rush-lib/lib-commonjs/logic/test/pnpmConfig/common/config/rush/pnpm-config.json. Remove this field or upgrade to pnpm 10.1.0 or newer.[n]",
 }
 `;
