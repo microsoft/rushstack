@@ -202,18 +202,8 @@ export class RushXCommandLine {
     }
 
     let commandWithArgs: string = scriptBody;
-    let commandWithArgsForDisplay: string = scriptBody;
     if (rushxArguments.commandArgs.length > 0) {
-      // This approach is based on what NPM 7 now does:
-      // https://github.com/npm/run-script/blob/47a4d539fb07220e7215cc0e482683b76407ef9b/lib/run-script-pkg.js#L34
-      const escapedRemainingArgs: string[] = rushxArguments.commandArgs.map((x) =>
-        Utilities.escapeShellParameter(x)
-      );
-
-      commandWithArgs += ' ' + escapedRemainingArgs.join(' ');
-
-      // Display it nicely without the extra quotes
-      commandWithArgsForDisplay += ' ' + rushxArguments.commandArgs.join(' ');
+      commandWithArgs += ' ' + rushxArguments.commandArgs.join(' ');
     }
 
     if (!rushxArguments.quiet) {
@@ -258,10 +248,7 @@ export class RushXCommandLine {
     }
 
     if (exitCode > 0) {
-      throw new ProcessError(
-        `Failed calling ${commandWithArgsForDisplay}.  Exit code: ${exitCode}`,
-        exitCode
-      );
+      throw new ProcessError(`Failed calling ${commandWithArgs}.  Exit code: ${exitCode}`, exitCode);
     }
   }
 
