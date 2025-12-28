@@ -838,6 +838,9 @@ importers:
       '@rushstack/module-minifier':
         specifier: workspace:*
         version: link:../../libraries/module-minifier
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
       '@rushstack/webpack5-module-minifier-plugin':
         specifier: workspace:*
         version: link:../../webpack/webpack5-module-minifier-plugin
@@ -875,8 +878,8 @@ importers:
         specifier: workspace:*
         version: link:../heft-storybook-v9-react-tutorial-storykit
       html-webpack-plugin:
-        specifier: ~4.5.2
-        version: 4.5.2(webpack@5.103.0)
+        specifier: ~5.5.0
+        version: 5.5.4(webpack@5.103.0)
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -908,6 +911,9 @@ importers:
       '@rushstack/heft-storybook-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-storybook-plugin
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
       heft-storybook-v9-react-tutorial-storykit:
         specifier: workspace:*
         version: link:../heft-storybook-v9-react-tutorial-storykit
@@ -23592,24 +23598,6 @@ packages:
       tapable: 1.1.3
       util.promisify: 1.0.0
       webpack: 4.47.0
-
-  /html-webpack-plugin@4.5.2(webpack@5.103.0):
-    resolution: {integrity: sha512-q5oYdzjKUIPQVjOosjgvCHQOv9Ett9CYYHlgvJeXG0qQvdSojnBq4vAdQBwn1+yGveAwHCoe/rMR86ozX3+c2A==}
-    engines: {node: '>=6.9'}
-    peerDependencies:
-      webpack: ^4.0.0 || ^5.0.0 || ^4 || ^5
-    dependencies:
-      '@types/html-minifier-terser': 5.1.2
-      '@types/tapable': 1.0.6
-      '@types/webpack': 4.41.32
-      html-minifier-terser: 5.1.1
-      loader-utils: 1.4.2
-      lodash: 4.17.21
-      pretty-error: 2.1.2
-      tapable: 1.1.3
-      util.promisify: 1.0.0
-      webpack: 5.103.0
-    dev: true
 
   /html-webpack-plugin@5.5.4(webpack@5.103.0):
     resolution: {integrity: sha512-3wNSaVVxdxcu0jd4FpQFoICdqgxs4zIQQvj+2yQKFfBOnLETQ6X5CDWdeasuGlSsooFlMkEioWDTqBv1wvw5Iw==}
