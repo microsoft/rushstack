@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`OperationMetadataManager should fallback to the log file when chunked output isn't available 1`] = `
+exports[`OperationMetadataManager should fallback to the log file when chunked output isn't available 1`] = `Object {}`;
+
+exports[`OperationMetadataManager should fallback to the log file when chunked output isn't available 2`] = `
 Array [
   Object {
     "kind": "O",
@@ -9,10 +11,23 @@ Array [
 ]
 `;
 
-exports[`OperationMetadataManager should restore chunked stderr 1`] = `"chunk1[n]chunk2[n]"`;
+exports[`OperationMetadataManager should restore chunked stderr 1`] = `
+Object {
+  "error": "chunk1[n]chunk2[n]",
+}
+`;
 
-exports[`OperationMetadataManager should restore chunked stdout 1`] = `"chunk1[n]chunk2[n]"`;
+exports[`OperationMetadataManager should restore chunked stderr 2`] = `"chunk1[n]chunk2[n]"`;
 
-exports[`OperationMetadataManager should restore mixed chunked output 1`] = `"logged to stdout[n]"`;
+exports[`OperationMetadataManager should restore chunked stdout 1`] = `
+Object {
+  "log": "chunk1[n]chunk2[n]",
+}
+`;
 
-exports[`OperationMetadataManager should restore mixed chunked output 2`] = `"logged to stderr[n]"`;
+exports[`OperationMetadataManager should restore mixed chunked output 1`] = `
+Object {
+  "error": "logged to stderr[n]",
+  "log": "logged to stdout[n]",
+}
+`;

@@ -16,34 +16,7 @@ describe(parseResx.name, () => {
   });
 
   afterEach(() => {
-    const outputObject: Record<string, string> = {};
-
-    const output: string = terminalProvider.getOutput();
-    if (output) {
-      outputObject.output = output;
-    }
-
-    const verboseOutput: string = terminalProvider.getVerboseOutput();
-    if (verboseOutput) {
-      outputObject.verboseOutput = verboseOutput;
-    }
-
-    const errorOutput: string = terminalProvider.getErrorOutput();
-    if (errorOutput) {
-      outputObject.errorOutput = errorOutput;
-    }
-
-    const warningOutput: string = terminalProvider.getWarningOutput();
-    if (warningOutput) {
-      outputObject.warningOutput = warningOutput;
-    }
-
-    const debugOutput: string = terminalProvider.getDebugOutput();
-    if (debugOutput) {
-      outputObject.debugOutput = debugOutput;
-    }
-
-    expect(outputObject).toMatchSnapshot('terminal output');
+    expect(terminalProvider.getAllOutput(true)).toMatchSnapshot('terminal output');
   });
 
   async function testResxAsync(

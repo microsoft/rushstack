@@ -63,10 +63,7 @@ function validateConfiguration(rushProjectConfiguration: RushProjectConfiguratio
         terminal
       );
     } finally {
-      expect(terminalProvider.getOutput()).toMatchSnapshot('validation: terminal output');
-      expect(terminalProvider.getErrorOutput()).toMatchSnapshot('validation: terminal error');
-      expect(terminalProvider.getWarningOutput()).toMatchSnapshot('validation: terminal warning');
-      expect(terminalProvider.getVerboseOutput()).toMatchSnapshot('validation: terminal verbose');
+      expect(terminalProvider.getAllOutput(true)).toMatchSnapshot();
     }
   }
 }
@@ -86,16 +83,14 @@ function validateConfigurationWithParameters(
       );
 
       rushProjectConfiguration.validatePhaseConfiguration(
-        Array.from(rushProjectConfiguration.operationSettingsByOperationName.keys(),
+        Array.from(
+          rushProjectConfiguration.operationSettingsByOperationName.keys(),
           (phaseName) => ({ name: phaseName, associatedParameters: mockParameters }) as IPhase
         ),
         terminal
       );
     } finally {
-      expect(terminalProvider.getOutput()).toMatchSnapshot('validation: terminal output');
-      expect(terminalProvider.getErrorOutput()).toMatchSnapshot('validation: terminal error');
-      expect(terminalProvider.getWarningOutput()).toMatchSnapshot('validation: terminal warning');
-      expect(terminalProvider.getVerboseOutput()).toMatchSnapshot('validation: terminal verbose');
+      expect(terminalProvider.getAllOutput(true)).toMatchSnapshot();
     }
   }
 }

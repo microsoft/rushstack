@@ -99,8 +99,8 @@ describe(PrintUtilities.name, () => {
   describe(PrintUtilities.printMessageInBox.name, () => {
     function validateOutput(expectedWidth: number): void {
       const outputLines: string[] = terminalProvider
-        .getOutput({ normalizeSpecialCharacters: true })
-        .split('[n]');
+        .getOutput({ normalizeSpecialCharacters: false })
+        .split('\n');
       expect(outputLines).toMatchSnapshot();
 
       expect(outputLines.every((x) => x.length <= expectedWidth));

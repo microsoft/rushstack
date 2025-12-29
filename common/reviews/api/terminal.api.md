@@ -105,6 +105,20 @@ export class DiscardStdoutTransform extends TerminalTransform {
     protected onWriteChunk(chunk: ITerminalChunk): void;
 }
 
+// @beta (undocumented)
+export interface IAllStringBufferOutput {
+    // (undocumented)
+    debug: string;
+    // (undocumented)
+    error: string;
+    // (undocumented)
+    log: string;
+    // (undocumented)
+    verbose: string;
+    // (undocumented)
+    warning: string;
+}
+
 // @public
 export interface IAnsiEscapeConvertForTestsOptions {
     encodeNewlines?: boolean;
@@ -364,6 +378,9 @@ export class StdioWritable extends TerminalWritable {
 export class StringBufferTerminalProvider implements ITerminalProvider {
     constructor(supportsColor?: boolean);
     get eolCharacter(): string;
+    getAllOutput(sparse?: false, options?: IStringBufferOutputOptions): IAllStringBufferOutput;
+    // (undocumented)
+    getAllOutput(sparse: true, options?: IStringBufferOutputOptions): Partial<IAllStringBufferOutput>;
     getDebugOutput(options?: IStringBufferOutputOptions): string;
     getErrorOutput(options?: IStringBufferOutputOptions): string;
     getOutput(options?: IStringBufferOutputOptions): string;
@@ -371,7 +388,7 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     getVerbose(options?: IStringBufferOutputOptions): string;
     getVerboseOutput(options?: IStringBufferOutputOptions): string;
     getWarningOutput(options?: IStringBufferOutputOptions): string;
-    get supportsColor(): boolean;
+    readonly supportsColor: boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
 }
 

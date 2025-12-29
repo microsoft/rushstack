@@ -51,21 +51,7 @@ describe(CustomTipsConfiguration.name, () => {
 
       afterEach(() => {
         jest.restoreAllMocks();
-        const outputLines: string[] = [];
-
-        function appendOutputLines(output: string, kind: string): void {
-          outputLines.push(`--- ${kind} ---`);
-          outputLines.push(...output.split('[n]'));
-          outputLines.push('-'.repeat(kind.length + 8));
-        }
-
-        appendOutputLines(terminalProvider.getOutput(), 'normal output');
-        appendOutputLines(terminalProvider.getErrorOutput(), 'error output');
-        appendOutputLines(terminalProvider.getWarningOutput(), 'warning output');
-        appendOutputLines(terminalProvider.getVerboseOutput(), 'verbose output');
-        appendOutputLines(terminalProvider.getDebugOutput(), 'debug output');
-
-        expect(outputLines).toMatchSnapshot();
+        expect(terminalProvider.getAllOutput(true, { normalizeSpecialCharacters: false })).toMatchSnapshot();
       });
 
       const printFunctions = [

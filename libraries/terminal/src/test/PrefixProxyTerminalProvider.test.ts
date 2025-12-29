@@ -13,13 +13,7 @@ function runTestsForTerminalProvider(
   let baseProvider: StringBufferTerminalProvider;
 
   function verifyProvider(): void {
-    expect({
-      log: baseProvider.getOutput(),
-      warning: baseProvider.getWarningOutput(),
-      error: baseProvider.getErrorOutput(),
-      verbose: baseProvider.getVerboseOutput(),
-      debug: baseProvider.getDebugOutput()
-    }).toMatchSnapshot();
+    expect(baseProvider.getAllOutput(true)).toMatchSnapshot();
   }
 
   beforeEach(() => {
