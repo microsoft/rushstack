@@ -510,13 +510,13 @@ snapshots:
           write: spyTerminalWrite
         });
 
-        expect(
+        expect(() =>
           pnpmShrinkwrapFile.validateShrinkwrapAfterUpdate(
             project.rushConfiguration,
             project.rushConfiguration.defaultSubspace,
             terminal
           )
-        ).toBeUndefined();
+        ).not.toThrow();
         expect(spyTerminalWrite).not.toHaveBeenCalled();
       });
 
