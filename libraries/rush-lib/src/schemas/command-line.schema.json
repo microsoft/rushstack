@@ -100,6 +100,11 @@
               "title": "Disable build cache.",
               "description": "Disable build cache for this action. This may be useful if this command affects state outside of projects' own folders. If the build cache is not configured, this also disables the legacy skip detection logic.",
               "type": "boolean"
+            },
+            "allowRemainderArguments": {
+              "title": "Allow Remainder Arguments",
+              "description": "If true, this command will accept additional command-line arguments that appear after the \"--\" separator. Everything after \"--\" (not including the \"--\" itself) will be passed through to the shell command or npm script. Any unrecognized arguments before \"--\" will still cause an error. Example: \"rush my-command --known-flag value -- --arbitrary --args here\" will pass \"--arbitrary --args here\" to the script, but \"rush my-command --unknown-flag\" will fail with an error about the unrecognized parameter.",
+              "type": "boolean"
             }
           }
         },
@@ -121,7 +126,8 @@
             "incremental": { "$ref": "#/definitions/anything" },
             "allowWarningsInSuccessfulBuild": { "$ref": "#/definitions/anything" },
             "watchForChanges": { "$ref": "#/definitions/anything" },
-            "disableBuildCache": { "$ref": "#/definitions/anything" }
+            "disableBuildCache": { "$ref": "#/definitions/anything" },
+            "allowRemainderArguments": { "$ref": "#/definitions/anything" }
           }
         }
       ]
@@ -149,6 +155,11 @@
               "title": "Autoinstaller Name",
               "description": "If your \"shellCommand\" script depends on NPM packages, the recommended best practice is to make it into a regular Rush project that builds using your normal toolchain.  In cases where the command needs to work without first having to run \"rush build\", the recommended practice is to publish the project to an NPM registry and use common/scripts/install-run.js to launch it.\n\nAutoinstallers offer another possibility: They are folders under \"common/autoinstallers\" with a package.json file and shrinkwrap file. Rush will automatically invoke the package manager to install these dependencies before an associated command is invoked.  Autoinstallers have the advantage that they work even in a branch where \"rush install\" is broken, which makes them a good solution for Git hook scripts.  But they have the disadvantages of not being buildable projects, and of increasing the overall installation footprint for your monorepo.\n\nThe \"autoinstallerName\" setting must not contain a path and must be a valid NPM package name.\n\nFor example, the name \"my-task\" would map to \"common/autoinstallers/my-task/package.json\", and the \"common/autoinstallers/my-task/node_modules/.bin\" folder would be added to the shell PATH when invoking the \"shellCommand\".",
               "type": "string"
+            },
+            "allowRemainderArguments": {
+              "title": "Allow Remainder Arguments",
+              "description": "If true, this command will accept additional command-line arguments that appear after the \"--\" separator. Everything after \"--\" (not including the \"--\" itself) will be passed through to the shell command. Any unrecognized arguments before \"--\" will still cause an error. Example: \"rush my-command --known-flag value -- --arbitrary --args here\" will pass \"--arbitrary --args here\" to the script, but \"rush my-command --unknown-flag\" will fail with an error about the unrecognized parameter.",
+              "type": "boolean"
             }
           }
         },
@@ -163,7 +174,8 @@
             "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
 
             "shellCommand": { "$ref": "#/definitions/anything" },
-            "autoinstallerName": { "$ref": "#/definitions/anything" }
+            "autoinstallerName": { "$ref": "#/definitions/anything" },
+            "allowRemainderArguments": { "$ref": "#/definitions/anything" }
           }
         }
       ]
@@ -250,6 +262,11 @@
                   "type": "boolean"
                 }
               }
+            },
+            "allowRemainderArguments": {
+              "title": "Allow Remainder Arguments",
+              "description": "If true, this command will accept additional command-line arguments that appear after the \"--\" separator. Everything after \"--\" (not including the \"--\" itself) will be passed through to the phase scripts. Any unrecognized arguments before \"--\" will still cause an error. Example: \"rush my-command --known-flag value -- --arbitrary --args here\" will pass \"--arbitrary --args here\" to the phase scripts, but \"rush my-command --unknown-flag\" will fail with an error about the unrecognized parameter.",
+              "type": "boolean"
             }
           }
         },
@@ -268,7 +285,8 @@
             "incremental": { "$ref": "#/definitions/anything" },
             "phases": { "$ref": "#/definitions/anything" },
             "watchOptions": { "$ref": "#/definitions/anything" },
-            "installOptions": { "$ref": "#/definitions/anything" }
+            "installOptions": { "$ref": "#/definitions/anything" },
+            "allowRemainderArguments": { "$ref": "#/definitions/anything" }
           }
         }
       ]
