@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "[rush] fix disallowInsecureSha1 exemptPackageVersions not work with pnpm 9",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

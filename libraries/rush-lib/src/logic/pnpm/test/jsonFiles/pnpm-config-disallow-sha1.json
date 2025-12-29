@@ -1,0 +1,14 @@
+{
+  "pnpmLockfilePolicies": {
+    "disallowInsecureSha1": {
+      "enabled": true,
+      "exemptPackageVersions": {
+        "@some/sha1-pkg": ["1.4.3"],
+        "other-sha1-pkg": ["2.0.0"],
+        "fake-with-patch": ["1.0.0"],
+        "fake-with-peer": ["1.0.0"],
+        "fake": ["7.8.1"]
+      }
+    }
+  }
+}

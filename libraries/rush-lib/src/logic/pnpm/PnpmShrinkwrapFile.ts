@@ -605,6 +605,18 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * Example: "/@typescript-eslint/experimental-utils/5.9.1_eslint@8.6.0+typescript@4.4.4" --> "/@typescript-eslint/experimental-utils/5.9.1"
    */
   private _parseDependencyPath(packagePath: string): string {
+    /**
+     * For PNPM lockfile version 9 and above, use pnpmKitV9 to parse the dependency path.
+     * Example: "@some/pkg@1.0.0" --> "@some/pkg@1.0.0"
+     * Example: "@some/pkg@1.0.0(peer@2.0.0)" --> "@some/pkg@1.0.0"
+     * Example: "pkg@1.0.0(patch_hash)" --> "pkg@1.0.0"
+     */
+    if (this.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V9) {
+      const depPath: ReturnType<typeof pnpmKitV9.dependencyPath.parse> =
+        pnpmKitV9.dependencyPath.parse(packagePath);
+      return this._getPackageId(depPath.name as string, depPath.version as string);
+    }
+
     let depPath: string = packagePath;
     if (this.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V6) {
       depPath = this._convertLockfileV6DepPathToV5DepPath(packagePath);
