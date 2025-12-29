@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "[rush] fix disallowInsecureSha1 exemptPackageVersions not work with pnpm 9",
+      "comment": "Fix an issue where packages listed in the `pnpmLockfilePolicies.disallowInsecureSha1.exemptPackageVersions` `common/config/rush/pnpm-config.json` config file are not exempted in PNPM 9.",
       "type": "none"
     }
   ],
