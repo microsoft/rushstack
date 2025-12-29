@@ -2,6 +2,18 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "2.1.0",
+      "tag": "@rushstack/lockfile-explorer_v2.1.0",
+      "date": "Mon, 29 Dec 2025 16:12:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump React to v19."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.9",
       "tag": "@rushstack/lockfile-explorer_v2.0.9",
       "date": "Wed, 24 Dec 2025 01:12:52 GMT",

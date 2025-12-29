@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Sat, 06 Dec 2025 01:12:28 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Dec 2025 16:12:51 GMT and should not be manually modified.
+
+## 1.2.0
+Mon, 29 Dec 2025 16:12:51 GMT
+
+### Minor changes
+
+- Add support for Storybook v9
+- Add support for serve mode with RSPack
 
 ## 1.1.8
 Sat, 06 Dec 2025 01:12:28 GMT

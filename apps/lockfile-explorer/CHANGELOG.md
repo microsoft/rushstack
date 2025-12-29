@@ -1,6 +1,13 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Wed, 24 Dec 2025 01:12:52 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Dec 2025 16:12:51 GMT and should not be manually modified.
+
+## 2.1.0
+Mon, 29 Dec 2025 16:12:51 GMT
+
+### Minor changes
+
+- Bump React to v19.
 
 ## 2.0.9
 Wed, 24 Dec 2025 01:12:52 GMT

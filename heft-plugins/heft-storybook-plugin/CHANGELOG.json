@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "1.2.0",
+      "tag": "@rushstack/heft-storybook-plugin_v1.2.0",
+      "date": "Mon, 29 Dec 2025 16:12:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for Storybook v9"
+          },
+          {
+            "comment": "Add support for serve mode with RSPack"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.8",
       "tag": "@rushstack/heft-storybook-plugin_v1.1.8",
       "date": "Sat, 06 Dec 2025 01:12:28 GMT",
