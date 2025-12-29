@@ -13,6 +13,7 @@
     }
   },
   "globalNeverBuiltDependencies": ["fsevents", "level"],
+  "globalOnlyBuiltDependencies": ["esbuild", "playwright"],
   "globalCatalogs": {
     "default": {
       "react": "^18.0.0",
