@@ -9,10 +9,21 @@ Array [
 ]
 `;
 
-exports[`OperationMetadataManager should restore chunked stderr 1`] = `"chunk1[n]chunk2[n]"`;
+exports[`OperationMetadataManager should restore chunked stderr 1`] = `
+Object {
+  "error": "chunk1[n]chunk2[n]",
+}
+`;
 
-exports[`OperationMetadataManager should restore chunked stdout 1`] = `"chunk1[n]chunk2[n]"`;
+exports[`OperationMetadataManager should restore chunked stdout 1`] = `
+Object {
+  "log": "chunk1[n]chunk2[n]",
+}
+`;
 
-exports[`OperationMetadataManager should restore mixed chunked output 1`] = `"logged to stdout[n]"`;
-
-exports[`OperationMetadataManager should restore mixed chunked output 2`] = `"logged to stderr[n]"`;
+exports[`OperationMetadataManager should restore mixed chunked output 1`] = `
+Object {
+  "error": "logged to stderr[n]",
+  "log": "logged to stdout[n]",
+}
+`;

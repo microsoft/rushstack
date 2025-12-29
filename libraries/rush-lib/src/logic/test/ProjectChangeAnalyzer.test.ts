@@ -157,9 +157,7 @@ describe(ProjectChangeAnalyzer.name, () => {
       const snapshot: IInputsSnapshot | undefined = await snapshotProvider?.();
 
       expect(snapshot).toBe(mockSnapshotValue);
-      expect(terminalProvider.getErrorOutput()).toEqual('');
-      expect(terminalProvider.getWarningOutput()).toEqual('');
-
+      expect(terminalProvider.getAllOutput(true)).toEqual({});
       expect(mockSnapshot).toHaveBeenCalledTimes(1);
 
       const mockInput: IInputsSnapshotParameters = mockSnapshot.mock.calls[0][0];

@@ -93,11 +93,7 @@ exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project
 
 exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""packages""): Terminal Output 1`] = `
 Object {
-  "debug": "",
-  "error": "",
-  "output": "[n][green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
-  "verbose": "",
-  "warning": "",
+  "log": "[n][green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
 }
 `;
 
@@ -170,11 +166,7 @@ exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project
 
 exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""repo""): Terminal Output 1`] = `
 Object {
-  "debug": "",
-  "error": "",
-  "output": "[n][green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
-  "verbose": "",
-  "warning": "",
+  "log": "[n][green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
 }
 `;
 
@@ -273,20 +265,8 @@ exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project
 
 exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""workspacePackages""): Terminal Output 1`] = `
 Object {
-  "debug": "",
-  "error": "",
-  "output": "[n][green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
-  "verbose": "",
-  "warning": "",
+  "log": "[n][green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
 }
 `;
 
-exports[`ProjectImpactGraphGenerator validateAsync Reports if the project-impact-graph.yaml file is missing (repo: ""workspacePackages""): Terminal Output 1`] = `
-Object {
-  "debug": "",
-  "error": "",
-  "output": "",
-  "verbose": "",
-  "warning": "",
-}
-`;
+exports[`ProjectImpactGraphGenerator validateAsync Reports if the project-impact-graph.yaml file is missing (repo: ""workspacePackages""): Terminal Output 1`] = `Object {}`;

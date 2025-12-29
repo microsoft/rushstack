@@ -11,13 +11,7 @@ let terminal: Terminal;
 let provider: StringBufferTerminalProvider;
 
 function verifyProvider(): void {
-  expect({
-    log: provider.getOutput(),
-    warning: provider.getWarningOutput(),
-    error: provider.getErrorOutput(),
-    verbose: provider.getVerboseOutput(),
-    debug: provider.getDebugOutput()
-  }).toMatchSnapshot();
+  expect(provider.getAllOutput()).toMatchSnapshot();
 }
 
 async function writeAsync(writable: Writable, data: string): Promise<void> {

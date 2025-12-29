@@ -82,11 +82,7 @@ describe('StringValuesTypingsGenerator', () => {
       await generator.generateTypingsAsync(['test.ext']);
       expect(outputFs).toMatchSnapshot();
 
-      expect(terminalProvider.getOutput()).toEqual('');
-      expect(terminalProvider.getWarningOutput()).toEqual('');
-      expect(terminalProvider.getErrorOutput()).toEqual('');
-      expect(terminalProvider.getVerboseOutput()).toEqual('');
-      expect(terminalProvider.getDebugOutput()).toEqual('');
+      expect(terminalProvider.getAllOutput(true)).toEqual({});
     });
   }
 

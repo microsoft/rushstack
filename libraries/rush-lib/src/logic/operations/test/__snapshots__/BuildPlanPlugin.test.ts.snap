@@ -1,7 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BuildPlanPlugin build plan debugging should generate a build plan 1`] = `
-"Build Plan Depth (deepest dependency tree): 5
+Object {
+  "log": "Build Plan Depth (deepest dependency tree): 5
 Build Plan Width (maximum parallelism): 38
 Number of Nodes per Depth: 22, 38, 33, 11, 1
 Plan @ Depth 0 has 22 nodes and 0 dependents:
@@ -321,5 +322,6 @@ Cluster 11:
 - Operations: j (upstream-1-self-upstream)
 --------------------------------------------------
 ##################################################
-"
+",
+}
 `;

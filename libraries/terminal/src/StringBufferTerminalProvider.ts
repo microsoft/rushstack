@@ -20,6 +20,33 @@ export interface IStringBufferOutputOptions {
 }
 
 /**
+ * @beta
+ */
+export interface IAllStringBufferOutput {
+  log: string;
+  warning: string;
+  error: string;
+  verbose: string;
+  debug: string;
+}
+
+function _normalizeOutput(s: string, options: IStringBufferOutputOptions | undefined): string {
+  options = {
+    normalizeSpecialCharacters: true,
+
+    ...(options || {})
+  };
+
+  s = Text.convertToLf(s);
+
+  if (options.normalizeSpecialCharacters) {
+    return AnsiEscape.formatForTests(s, { encodeNewlines: true });
+  } else {
+    return s;
+  }
+}
+
+/**
  * Terminal provider that stores written data in buffers separated by severity.
  * This terminal provider is designed to be used when code that prints to a terminal
  * is being unit tested.
@@ -33,10 +60,13 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   private _warningBuffer: StringBuilder = new StringBuilder();
   private _errorBuffer: StringBuilder = new StringBuilder();
 
-  private _supportsColor: boolean;
+  /**
+   * {@inheritDoc ITerminalProvider.supportsColor}
+   */
+  public readonly supportsColor: boolean;
 
   public constructor(supportsColor: boolean = false) {
-    this._supportsColor = supportsColor;
+    this.supportsColor = supportsColor;
   }
 
   /**
@@ -80,17 +110,10 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   }
 
   /**
-   * {@inheritDoc ITerminalProvider.supportsColor}
-   */
-  public get supportsColor(): boolean {
-    return this._supportsColor;
-  }
-
-  /**
    * Get everything that has been written at log-level severity.
    */
   public getOutput(options?: IStringBufferOutputOptions): string {
-    return this._normalizeOutput(this._standardBuffer.toString(), options);
+    return _normalizeOutput(this._standardBuffer.toString(), options);
   }
 
   /**
@@ -104,43 +127,66 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
    * Get everything that has been written at verbose-level severity.
    */
   public getVerboseOutput(options?: IStringBufferOutputOptions): string {
-    return this._normalizeOutput(this._verboseBuffer.toString(), options);
+    return _normalizeOutput(this._verboseBuffer.toString(), options);
   }
 
   /**
    * Get everything that has been written at debug-level severity.
    */
   public getDebugOutput(options?: IStringBufferOutputOptions): string {
-    return this._normalizeOutput(this._debugBuffer.toString(), options);
+    return _normalizeOutput(this._debugBuffer.toString(), options);
   }
 
   /**
    * Get everything that has been written at error-level severity.
    */
   public getErrorOutput(options?: IStringBufferOutputOptions): string {
-    return this._normalizeOutput(this._errorBuffer.toString(), options);
+    return _normalizeOutput(this._errorBuffer.toString(), options);
   }
 
   /**
    * Get everything that has been written at warning-level severity.
    */
   public getWarningOutput(options?: IStringBufferOutputOptions): string {
-    return this._normalizeOutput(this._warningBuffer.toString(), options);
+    return _normalizeOutput(this._warningBuffer.toString(), options);
   }
 
-  private _normalizeOutput(s: string, options: IStringBufferOutputOptions | undefined): string {
-    options = {
-      normalizeSpecialCharacters: true,
+  /**
+   * Get everything that has been written at all severity levels.
+   */
+  public getAllOutput(sparse?: false, options?: IStringBufferOutputOptions): IAllStringBufferOutput;
+  public getAllOutput(sparse: true, options?: IStringBufferOutputOptions): Partial<IAllStringBufferOutput>;
+  public getAllOutput(
+    sparse: boolean | undefined,
+    options?: IStringBufferOutputOptions
+  ): Partial<IAllStringBufferOutput> {
+    const result: Partial<IAllStringBufferOutput> = {};
 
-      ...(options || {})
-    };
-
-    s = Text.convertToLf(s);
-
-    if (options.normalizeSpecialCharacters) {
-      return AnsiEscape.formatForTests(s, { encodeNewlines: true });
-    } else {
-      return s;
+    const log: string = this.getOutput(options);
+    if (!sparse || log) {
+      result.log = log;
     }
+
+    const warning: string = this.getWarningOutput(options);
+    if (!sparse || warning) {
+      result.warning = warning;
+    }
+
+    const error: string = this.getErrorOutput(options);
+    if (!sparse || error) {
+      result.error = error;
+    }
+
+    const verbose: string = this.getVerboseOutput(options);
+    if (!sparse || verbose) {
+      result.verbose = verbose;
+    }
+
+    const debug: string = this.getDebugOutput(options);
+    if (!sparse || debug) {
+      result.debug = debug;
+    }
+
+    return result;
   }
 }

@@ -2,7 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { JsonFile } from '@rushstack/node-core-library';
-import { PrintUtilities, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
+import {
+  type IAllStringBufferOutput,
+  PrintUtilities,
+  StringBufferTerminalProvider,
+  Terminal
+} from '@rushstack/terminal';
 
 import { CustomTipId, CustomTipsConfiguration, type ICustomTipsJson } from '../CustomTipsConfiguration';
 import { RushConfiguration } from '../RushConfiguration';
@@ -51,21 +56,14 @@ describe(CustomTipsConfiguration.name, () => {
 
       afterEach(() => {
         jest.restoreAllMocks();
-        const outputLines: string[] = [];
 
-        function appendOutputLines(output: string, kind: string): void {
-          outputLines.push(`--- ${kind} ---`);
-          outputLines.push(...output.split('[n]'));
-          outputLines.push('-'.repeat(kind.length + 8));
+        const terminalProviderOutput: Partial<IAllStringBufferOutput> = terminalProvider.getAllOutput(true);
+        const lineSplitTerminalProviderOutput: Partial<Record<keyof IAllStringBufferOutput, string[]>> = {};
+        for (const [key, output] of Object.entries(terminalProviderOutput)) {
+          lineSplitTerminalProviderOutput[key as keyof IAllStringBufferOutput] = output.split('[n]');
         }
 
-        appendOutputLines(terminalProvider.getOutput(), 'normal output');
-        appendOutputLines(terminalProvider.getErrorOutput(), 'error output');
-        appendOutputLines(terminalProvider.getWarningOutput(), 'warning output');
-        appendOutputLines(terminalProvider.getVerboseOutput(), 'verbose output');
-        appendOutputLines(terminalProvider.getDebugOutput(), 'debug output');
-
-        expect(outputLines).toMatchSnapshot();
+        expect(lineSplitTerminalProviderOutput).toMatchSnapshot();
       });
 
       const printFunctions = [
