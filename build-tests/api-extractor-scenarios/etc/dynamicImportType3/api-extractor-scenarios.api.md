@@ -4,8 +4,8 @@
 
 ```ts
 
-import { Lib1GenericType } from 'api-extractor-lib1-test';
-import { Lib1Interface } from 'api-extractor-lib1-test';
+import type { Lib1GenericType } from 'api-extractor-lib1-test';
+import type { Lib1Interface } from 'api-extractor-lib1-test';
 
 // @public (undocumented)
 export interface IExample {

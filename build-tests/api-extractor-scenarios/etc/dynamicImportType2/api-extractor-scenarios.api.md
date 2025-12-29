@@ -12,6 +12,12 @@ export interface IExample {
     dottedImportType: Lib1Namespace.Inner.X | undefined;
     // (undocumented)
     dottedImportType2: Lib1Namespace.Y | undefined;
+    // (undocumented)
+    localDottedImportType: LocalModule.LocalClass;
+    // (undocumented)
+    localDottedImportType2: LocalNS.LocalNSClass;
+    // (undocumented)
+    predefinedNamedImport: Lib1Namespace.Inner.X;
 }
 
 // (No @packageDocumentation comment for this package)

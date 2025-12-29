@@ -206,15 +206,13 @@ export class DeclarationReferenceGenerator {
     }
     if (followedSymbol.flags & ts.SymbolFlags.Alias) {
       followedSymbol = this._collector.typeChecker.getAliasedSymbol(followedSymbol);
-
-      // Without this logic, we end up following the symbol `ns` in `import * as ns from './file'` to
-      // the actual file `file.ts`. We don't want to do this, so revert to the original symbol.
-      if (followedSymbol.flags & ts.SymbolFlags.ValueModule) {
-        followedSymbol = symbol;
-      }
     }
 
-    if (DeclarationReferenceGenerator._isExternalModuleSymbol(followedSymbol)) {
+    const entity: CollectorEntity | undefined = this._collector.tryGetEntityForSymbol(followedSymbol);
+    if (
+      DeclarationReferenceGenerator._isExternalModuleSymbol(followedSymbol) &&
+      !(entity?.astEntity instanceof AstNamespaceImport) // skip local namespace import
+    ) {
       if (!includeModuleSymbols) {
         return undefined;
       }
@@ -232,7 +230,6 @@ export class DeclarationReferenceGenerator {
     }
 
     let localName: string = followedSymbol.name;
-    const entity: CollectorEntity | undefined = this._collector.tryGetEntityForSymbol(followedSymbol);
     if (entity?.nameForEmit) {
       localName = entity.nameForEmit;
     }
@@ -292,10 +289,8 @@ export class DeclarationReferenceGenerator {
         firstExportingConsumableParent &&
         firstExportingConsumableParent.astEntity instanceof AstNamespaceImport
       ) {
-        const parentSymbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(
-          firstExportingConsumableParent.astEntity.declaration,
-          this._collector.typeChecker
-        );
+        const parentSymbol: ts.Symbol | undefined =
+          firstExportingConsumableParent.astEntity.astModule.moduleSymbol;
         if (parentSymbol) {
           return this._symbolToDeclarationReference(
             parentSymbol,

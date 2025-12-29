@@ -274,6 +274,98 @@
                 "startIndex": 1,
                 "endIndex": 4
               }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-extractor-scenarios!IExample#localDottedImportType:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "localDottedImportType: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "import('./namespace-export')."
+                },
+                {
+                  "kind": "Reference",
+                  "text": "LocalModule.LocalClass",
+                  "canonicalReference": "api-extractor-scenarios!~LocalModule~LocalClass_2:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "localDottedImportType",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-extractor-scenarios!IExample#localDottedImportType2:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "localDottedImportType2: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "import('./namespace-export')."
+                },
+                {
+                  "kind": "Reference",
+                  "text": "LocalNS.LocalNSClass",
+                  "canonicalReference": "api-extractor-scenarios!~LocalNS.LocalNSClass:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "localDottedImportType2",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-extractor-scenarios!IExample#predefinedNamedImport:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "predefinedNamedImport: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Lib1Namespace.Inner.X",
+                  "canonicalReference": "api-extractor-lib1-test!Lib1Namespace.Inner.X:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "predefinedNamedImport",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
             }
           ],
           "extendsTokenRanges": []
