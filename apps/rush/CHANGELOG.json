@@ -2,6 +2,33 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.165.0",
+      "tag": "@microsoft/rush_v5.165.0",
+      "date": "Mon, 29 Dec 2025 22:43:14 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Forward the `parameterNamesToIgnore` `<project>/config/rush-project.json` property to child processes via a `RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES` environment variable"
+          },
+          {
+            "comment": "Fix an issue where `rush update` will error complaining that the shrinkwrap file hasn't been updated to support workspaces in a subspace with no projects."
+          },
+          {
+            "comment": "Fix an issue where packages listed in the `pnpmLockfilePolicies.disallowInsecureSha1.exemptPackageVersions` `common/config/rush/pnpm-config.json` config file are not exempted in PNPM 9."
+          },
+          {
+            "comment": "Add support for the `globalOnlyBuiltDependencies` PNPM 10.x option to specify an allowlist of packages permitted to run build scripts to `common/config/rush/pnpm-config.json`."
+          },
+          {
+            "comment": "Upgrade `pnpm-sync-lib` to v0.3.3 for pnpm v10 compatibility"
+          },
+          {
+            "comment": "Change the Git hook file shebangs to use `/usr/bin/env bash` instead of `/bin/bash` for greater platform compatability."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.164.0",
       "tag": "@microsoft/rush_v5.164.0",
       "date": "Tue, 16 Dec 2025 21:49:00 GMT",

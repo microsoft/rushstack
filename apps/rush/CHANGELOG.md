@@ -1,6 +1,18 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 16 Dec 2025 21:49:00 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Dec 2025 22:43:14 GMT and should not be manually modified.
+
+## 5.165.0
+Mon, 29 Dec 2025 22:43:14 GMT
+
+### Updates
+
+- Forward the `parameterNamesToIgnore` `<project>/config/rush-project.json` property to child processes via a `RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES` environment variable
+- Fix an issue where `rush update` will error complaining that the shrinkwrap file hasn't been updated to support workspaces in a subspace with no projects.
+- Fix an issue where packages listed in the `pnpmLockfilePolicies.disallowInsecureSha1.exemptPackageVersions` `common/config/rush/pnpm-config.json` config file are not exempted in PNPM 9.
+- Add support for the `globalOnlyBuiltDependencies` PNPM 10.x option to specify an allowlist of packages permitted to run build scripts to `common/config/rush/pnpm-config.json`.
+- Upgrade `pnpm-sync-lib` to v0.3.3 for pnpm v10 compatibility
+- Change the Git hook file shebangs to use `/usr/bin/env bash` instead of `/bin/bash` for greater platform compatability.
 
 ## 5.164.0
 Tue, 16 Dec 2025 21:49:00 GMT
