@@ -1,8 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`OperationMetadataManager should fallback to the log file when chunked output isn't available 1`] = `Object {}`;
-
-exports[`OperationMetadataManager should fallback to the log file when chunked output isn't available 2`] = `
+exports[`OperationMetadataManager should fallback to the log file when chunked output isn't available 1`] = `
 Array [
   Object {
     "kind": "O",
@@ -16,8 +14,6 @@ Object {
   "error": "chunk1[n]chunk2[n]",
 }
 `;
-
-exports[`OperationMetadataManager should restore chunked stderr 2`] = `"chunk1[n]chunk2[n]"`;
 
 exports[`OperationMetadataManager should restore chunked stdout 1`] = `
 Object {

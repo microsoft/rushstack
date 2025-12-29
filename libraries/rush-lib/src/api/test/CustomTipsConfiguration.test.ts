@@ -2,7 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { JsonFile } from '@rushstack/node-core-library';
-import { PrintUtilities, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
+import {
+  type IAllStringBufferOutput,
+  PrintUtilities,
+  StringBufferTerminalProvider,
+  Terminal
+} from '@rushstack/terminal';
 
 import { CustomTipId, CustomTipsConfiguration, type ICustomTipsJson } from '../CustomTipsConfiguration';
 import { RushConfiguration } from '../RushConfiguration';
@@ -51,7 +56,14 @@ describe(CustomTipsConfiguration.name, () => {
 
       afterEach(() => {
         jest.restoreAllMocks();
-        expect(terminalProvider.getAllOutput(true, { normalizeSpecialCharacters: false })).toMatchSnapshot();
+
+        const terminalProviderOutput: Partial<IAllStringBufferOutput> = terminalProvider.getAllOutput(true);
+        const lineSplitTerminalProviderOutput: Partial<Record<keyof IAllStringBufferOutput, string[]>> = {};
+        for (const [key, output] of Object.entries(terminalProviderOutput)) {
+          lineSplitTerminalProviderOutput[key as keyof IAllStringBufferOutput] = output.split('[n]');
+        }
+
+        expect(lineSplitTerminalProviderOutput).toMatchSnapshot();
       });
 
       const printFunctions = [
