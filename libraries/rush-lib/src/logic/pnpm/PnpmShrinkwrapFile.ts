@@ -605,6 +605,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * Example: "/@typescript-eslint/experimental-utils/5.9.1_eslint@8.6.0+typescript@4.4.4" --> "/@typescript-eslint/experimental-utils/5.9.1"
    */
   private _parseDependencyPath(packagePath: string): string {
+    let name: string | undefined;
+    let version: string | undefined;
+
     /**
      * For PNPM lockfile version 9 and above, use pnpmKitV9 to parse the dependency path.
      * Example: "@some/pkg@1.0.0" --> "@some/pkg@1.0.0"
@@ -612,18 +615,20 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
      * Example: "pkg@1.0.0(patch_hash)" --> "pkg@1.0.0"
      */
     if (this.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V9) {
-      const depPath: ReturnType<typeof pnpmKitV9.dependencyPath.parse> =
-        pnpmKitV9.dependencyPath.parse(packagePath);
-      return this._getPackageId(depPath.name as string, depPath.version as string);
+      ({ name, version } = pnpmKitV9.dependencyPath.parse(packagePath));
+    } else {
+      if (this.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V6) {
+        packagePath = this._convertLockfileV6DepPathToV5DepPath(packagePath);
+      }
+
+      ({ name, version } = pnpmKitV8.dependencyPath.parse(packagePath));
     }
 
-    let depPath: string = packagePath;
-    if (this.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V6) {
-      depPath = this._convertLockfileV6DepPathToV5DepPath(packagePath);
+    if (!name || !version) {
+      throw new InternalError(`Unable to parse package path: ${packagePath}`);
     }
-    const pkgInfo: ReturnType<typeof pnpmKitV8.dependencyPath.parse> =
-      pnpmKitV8.dependencyPath.parse(depPath);
-    return this._getPackageId(pkgInfo.name as string, pkgInfo.version as string);
+
+    return this._getPackageId(name, version);
   }
 
   /** @override */
