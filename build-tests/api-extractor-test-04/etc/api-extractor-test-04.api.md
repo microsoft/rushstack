@@ -42,15 +42,15 @@ export const enum ConstEnum {
 
 // @beta
 export namespace EntangledNamespace {
-    export namespace N2 {
+    namespace N2 {
         // @alpha
-        export class ClassX {
+        class ClassX {
             static a: string;
         }
     }
-    export namespace N3 {
+    namespace N3 {
         // @internal
-        export class _ClassY {
+        class _ClassY {
             b: EntangledNamespace.N2.ClassX;
             c(): typeof N2.ClassX.a;
         }

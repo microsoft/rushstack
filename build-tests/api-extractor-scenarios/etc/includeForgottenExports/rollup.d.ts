@@ -77,10 +77,10 @@ export declare function someFunction7(): AnotherDuplicateName_2;
 
 /** @public */
 export declare namespace SomeNamespace1 {
-    export class ForgottenExport3 {
+    class ForgottenExport3 {
     }
     export function someFunction3(): ForgottenExport3;
-        {};
+    export {};
 }
 
 export { }

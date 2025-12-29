@@ -28,11 +28,11 @@ export declare interface Lib1Interface {
 
 /** @public */
 export declare namespace Lib1Namespace {
-    export namespace Inner {
-        export class X {
+    namespace Inner {
+        class X {
         }
     }
-    export class Y {
+    class Y {
     }
 }
 
