@@ -6,6 +6,9 @@ import { PnpmShrinkwrapFile, parsePnpm9DependencyKey, parsePnpmDependencyKey } f
 import { RushConfiguration } from '../../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import type { Subspace } from '../../../api/Subspace';
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
+import { PnpmOptionsConfiguration } from '../PnpmOptionsConfiguration';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 
 const DEPENDENCY_NAME: string = 'dependency_name';
 const SCOPED_DEPENDENCY_NAME: string = '@scope/dependency_name';
@@ -482,6 +485,74 @@ snapshots:
             undefined
           )
         ).resolves.toBe(false);
+      });
+
+      it('sha1 integrity can be handled when disallowInsecureSha1', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v9/sha1-integrity.yaml`,
+          project.rushConfiguration.defaultSubspace
+        );
+
+        const defaultSubspace = project.rushConfiguration.defaultSubspace;
+
+        const mockPnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+          `${__dirname}/jsonFiles/pnpm-config-disallow-sha1.json`,
+          defaultSubspace.getSubspaceTempFolderPath()
+        );
+
+        jest.spyOn(defaultSubspace, 'getPnpmOptions').mockReturnValue(mockPnpmOptions);
+
+        const spyTerminalWrite = jest.fn();
+        const terminal = new Terminal({
+          eolCharacter: '\n',
+          supportsColor: false,
+          write: spyTerminalWrite
+        });
+
+        expect(() =>
+          pnpmShrinkwrapFile.validateShrinkwrapAfterUpdate(
+            project.rushConfiguration,
+            project.rushConfiguration.defaultSubspace,
+            terminal
+          )
+        ).not.toThrow();
+        expect(spyTerminalWrite).not.toHaveBeenCalled();
+      });
+
+      it('sha1 integrity can be handled when disallowInsecureSha1', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v9/sha1-integrity-non-exempted-package.yaml`,
+          project.rushConfiguration.defaultSubspace
+        );
+
+        const defaultSubspace = project.rushConfiguration.defaultSubspace;
+
+        const mockPnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+          `${__dirname}/jsonFiles/pnpm-config-disallow-sha1.json`,
+          defaultSubspace.getSubspaceTempFolderPath()
+        );
+
+        jest.spyOn(defaultSubspace, 'getPnpmOptions').mockReturnValue(mockPnpmOptions);
+
+        const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+        const terminal = new Terminal(terminalProvider);
+
+        expect(() =>
+          pnpmShrinkwrapFile.validateShrinkwrapAfterUpdate(
+            project.rushConfiguration,
+            project.rushConfiguration.defaultSubspace,
+            terminal
+          )
+        ).toThrowError(AlreadyReportedError);
+        expect({
+          log: terminalProvider.getOutput(),
+          warning: terminalProvider.getWarningOutput(),
+          error: terminalProvider.getErrorOutput(),
+          verbose: terminalProvider.getVerboseOutput(),
+          debug: terminalProvider.getDebugOutput()
+        }).toMatchSnapshot();
       });
     });
   });

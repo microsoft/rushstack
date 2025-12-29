@@ -1,0 +1,66 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+patchedDependencies:
+  fake-with-patch@1.0.0:
+    hash: tta6uuavpnftppsegagihriayy
+    path: patches/fake-with-patch@1.0.0.patch
+
+importers:
+  .:
+    dependencies:
+      '@some/sha1-pkg':
+        specifier: ^1.0.0
+        version: 1.4.3
+      other-sha1-pkg:
+        specifier: ~2.0.0
+        version: 2.0.0
+      fake-with-patch:
+        specifier: 1.0.0
+        version: 1.0.0
+      fake-with-peer:
+        specifier: 1.0.0
+        version: 1.0.0
+      fake-with-npm:
+        specifier: npm:fake@7.8.1
+        version: fake@7.8.1
+      fake-non-exempted:
+        specifier: 1.0.0
+        version: 1.0.0
+
+packages:
+  '@some/sha1-pkg@1.4.3':
+    resolution: { integrity: sha1-KQzv7h3EqVCA2u7BOFut5Vqbl5o= }
+
+  other-sha1-pkg@2.0.0:
+    resolution: { integrity: sha1-+5v5y5gkJ6x2+X1K3pZ5p8W7m4o= }
+
+  fake-with-patch@1.0.0:
+    resolution: { integrity: sha1-FAKEPATCHINTEGRITY1234567890= }
+
+  fake-with-peer@1.0.0:
+    resolution: { integrity: sha1-FAKEPEERINTEGRITY0987654321= }
+
+  fake@7.8.1:
+    resolution: { integrity: sha1-FAKEPEERINTEGRITY0987654321= }
+
+  fake-non-exempted@1.0.0:
+    resolution: { integrity: sha1-FAKEPEERINTEGRITY0987654321= }
+
+snapshots:
+  '@some/sha1-pkg@1.4.3': {}
+
+  other-sha1-pkg@2.0.0: {}
+
+  fake-with-patch@1.0.0(patch_hash=tta6uuavpnftppsegagihriayy): {}
+
+  fake-with-peer@1.0.0(@some/sha1-pkg@1.4.3):
+    transitivePeerDependencies:
+      - '@some/sha1-pkg'
+
+  fake@7.8.1: {}
+
+  fake-non-exempted@1.0.0: {}
