@@ -23,7 +23,7 @@ export function convertCommandAndArgsToShell(options: ICommandAndArgs | string):
 
   let commandToRun: string;
   if (typeof options === 'string') {
-    commandToRun = _escapeArgumentIfNeeded(options);
+    commandToRun = options;
   } else {
     const { command, args } = options;
     const normalizedCommand: string = _escapeArgumentIfNeeded(command);
