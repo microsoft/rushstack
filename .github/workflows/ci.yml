@@ -75,6 +75,14 @@ jobs:
         run: node common/scripts/install-run-rush.js retest --verbose --production
         working-directory: repo-a
 
+      - name: Ensure install-run works as expected
+        run: node libraries/rush-lib/dist/scripts/install-run @rushstack/heft heft -h
+        working-directory: repo-a
+
+      - name: Ensure install-run-rush works as expected
+        run: node libraries/rush-lib/dist/scripts/install-run-rush -h
+        working-directory: repo-a
+
       - name: Ensure repo README is up-to-date
         run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
         working-directory: repo-a
