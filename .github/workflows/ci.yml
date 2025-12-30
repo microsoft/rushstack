@@ -76,7 +76,7 @@ jobs:
         working-directory: repo-a
 
       - name: Ensure install-run works as expected
-        run: node libraries/rush-lib/dist/scripts/install-run @rushstack/heft heft -h
+        run: node libraries/rush-lib/dist/scripts/install-run @rushstack/lsbranch lsbranch -h
         working-directory: repo-a
 
       - name: Ensure install-run-rush works as expected
