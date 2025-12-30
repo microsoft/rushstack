@@ -24,6 +24,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { syncNpmrc } from './npmrcUtilities';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { RushConstants } from '../logic/RushConstants';
+import { convertCommandAndArgsToShell } from './executionUtilities';
 
 export type UNINITIALIZED = 'UNINITIALIZED';
 // eslint-disable-next-line @typescript-eslint/no-redeclare
@@ -177,11 +178,6 @@ type IExecuteCommandInternalOptions = Omit<IExecuteCommandOptions, 'suppressOutp
   stdio: child_process.SpawnSyncOptions['stdio'];
   captureOutput: boolean;
 };
-
-interface ICommandAndArgs {
-  command: string;
-  args: string[];
-}
 
 export class Utilities {
   public static syncNpmrc: typeof syncNpmrc = syncNpmrc;
@@ -691,7 +687,7 @@ export class Utilities {
       Object.assign(spawnOptions, SubprocessTerminator.RECOMMENDED_OPTIONS);
     }
 
-    const { command, args } = Utilities._convertCommandAndArgsToShell(commandAndArgs);
+    const { command, args } = convertCommandAndArgsToShell(commandAndArgs);
     return spawnFunction(command, args, spawnOptions);
   }
 
@@ -832,7 +828,7 @@ export class Utilities {
     };
 
     if (shell) {
-      ({ command, args } = Utilities._convertCommandAndArgsToShell({ command, args }));
+      ({ command, args } = convertCommandAndArgsToShell({ command, args }));
     }
 
     const childProcess: child_process.ChildProcess = child_process.spawn(command, args, options);
@@ -883,32 +879,5 @@ export class Utilities {
     if (status) {
       throw new Error(`The command failed with exit code ${status}\n${stderr}`);
     }
-  }
-
-  private static _convertCommandAndArgsToShell(command: string): ICommandAndArgs;
-  private static _convertCommandAndArgsToShell(options: ICommandAndArgs): ICommandAndArgs;
-  private static _convertCommandAndArgsToShell(options: ICommandAndArgs | string): ICommandAndArgs {
-    let shellCommand: string;
-    let commandFlags: string[];
-    if (process.platform !== 'win32') {
-      shellCommand = 'sh';
-      commandFlags = ['-c'];
-    } else {
-      shellCommand = process.env.comspec || 'cmd';
-      commandFlags = ['/d', '/s', '/c'];
-    }
-
-    let commandToRun: string;
-    if (typeof options === 'string') {
-      commandToRun = options;
-    } else {
-      const { command, args } = options;
-      commandToRun = [command, ...args].join(' ');
-    }
-
-    return {
-      command: shellCommand,
-      args: [...commandFlags, commandToRun]
-    };
   }
 }

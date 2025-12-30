@@ -11,6 +11,7 @@ import * as path from 'node:path';
 import type { IPackageJson } from '@rushstack/node-core-library';
 
 import { syncNpmrc, type ILogger } from '../utilities/npmrcUtilities';
+import { convertCommandAndArgsToShell } from '../utilities/executionUtilities';
 import type { RushConstants } from '../logic/RushConstants';
 
 export const RUSH_JSON_FILENAME: typeof RushConstants.rushJsonFilename = 'rush.json';
@@ -200,15 +201,14 @@ function _resolvePackageVersion(
         stdio: []
       };
       const platformNpmPath: string = _getPlatformPath(npmPath);
-      const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer | string> = childProcess.spawnSync(
-        platformNpmPath,
-        ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'],
-        spawnSyncOptions
-      );
 
-      if (npmVersionSpawnResult.status !== 0) {
-        throw new Error(`"npm view" returned error code ${npmVersionSpawnResult.status}`);
-      }
+      const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer | string> =
+        _runAsShellCommandAndConfirmSuccess(
+          platformNpmPath,
+          ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'],
+          spawnSyncOptions,
+          'npm view'
+        );
 
       const npmViewVersionOutput: string = npmVersionSpawnResult.stdout.toString();
       const parsedVersionOutput: string | string[] = JSON.parse(npmViewVersionOutput);
@@ -355,22 +355,21 @@ function _installPackage(
   packageInstallFolder: string,
   name: string,
   version: string,
-  command: 'install' | 'ci'
+  npmCommand: 'install' | 'ci'
 ): void {
   try {
     logger.info(`Installing ${name}...`);
     const npmPath: string = getNpmPath();
-    const platformNpmPath: string = _getPlatformPath(npmPath);
-    const result: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(platformNpmPath, [command], {
-      stdio: 'inherit',
-      cwd: packageInstallFolder,
-      env: process.env
-    });
-
-    if (result.status !== 0) {
-      throw new Error(`"npm ${command}" encountered an error`);
-    }
-
+    _runAsShellCommandAndConfirmSuccess(
+      npmPath,
+      [npmCommand],
+      {
+        stdio: 'inherit',
+        cwd: packageInstallFolder,
+        env: process.env
+      },
+      `npm ${npmCommand}`
+    );
     logger.info(`Successfully installed ${name}@${version}`);
   } catch (e) {
     throw new Error(`Unable to install package: ${e}`);
@@ -407,6 +406,40 @@ function _writeFlagFile(packageInstallFolder: string): void {
   } catch (e) {
     throw new Error(`Unable to create installed.flag file in ${packageInstallFolder}`);
   }
+}
+
+/**
+ * Run the specified command under the platform's shell and throw if it didn't succeed.
+ */
+function _runAsShellCommandAndConfirmSuccess(
+  command: string,
+  args: string[],
+  options: childProcess.SpawnSyncOptions,
+  commandNameForLogging: string
+): childProcess.SpawnSyncReturns<string | Buffer<ArrayBufferLike>> {
+  if (_isWindows()) {
+    ({ command, args } = convertCommandAndArgsToShell({ command, args }));
+  }
+
+  const result: childProcess.SpawnSyncReturns<string | Buffer<ArrayBufferLike>> = childProcess.spawnSync(
+    command,
+    args,
+    options
+  );
+
+  if (result.status !== 0) {
+    if (result.status === undefined) {
+      if (result.error) {
+        throw new Error(`"${commandNameForLogging}" failed: ${result.error.message.toString()}`);
+      } else {
+        throw new Error(`"${commandNameForLogging}" failed for an unknown reason`);
+      }
+    } else {
+      throw new Error(`"${commandNameForLogging}" returned error code ${result.status}`);
+    }
+  }
+
+  return result;
 }
 
 export function installAndRun(
@@ -456,12 +489,14 @@ export function installAndRun(
   const originalEnvPath: string = process.env.PATH || '';
   let result: childProcess.SpawnSyncReturns<Buffer>;
   try {
-    // `npm` bin stubs on Windows are `.cmd` files
-    // Node.js will not directly invoke a `.cmd` file unless `shell` is set to `true`
-    const platformBinPath: string = _getPlatformPath(binPath);
+    let command: string = binPath;
+    let args: string[] = packageBinArgs;
+    if (_isWindows()) {
+      ({ command, args } = convertCommandAndArgsToShell({ command, args }));
+    }
 
     process.env.PATH = [binFolderPath, originalEnvPath].join(path.delimiter);
-    result = childProcess.spawnSync(platformBinPath, packageBinArgs, {
+    result = childProcess.spawnSync(command, args, {
       stdio: 'inherit',
       windowsVerbatimArguments: false,
       cwd: process.cwd(),
@@ -501,7 +536,8 @@ function _run(): void {
     throw new Error('Unexpected exception: could not detect node path');
   }
 
-  if (path.basename(scriptPath).toLowerCase() !== 'install-run.js') {
+  const scriptFileName: string = path.basename(scriptPath).toLowerCase();
+  if (scriptFileName !== 'install-run.js' && scriptFileName !== 'install-run') {
     // If install-run.js wasn't directly invoked, don't execute the rest of this function. Return control
     // to the script that (presumably) imported this file
 
