@@ -496,8 +496,7 @@ function _resolvePackageVersion(logger, rushCommonFolder, { name, version }) {
             // if only a single version matches.
             const spawnSyncOptions = {
                 cwd: rushTempFolder,
-                stdio: [],
-                shell: _isWindows()
+                stdio: []
             };
             const platformNpmPath = _getPlatformPath(npmPath);
             const npmVersionSpawnResult = node_child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(platformNpmPath, ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'], spawnSyncOptions);
@@ -637,8 +636,7 @@ function _installPackage(logger, packageInstallFolder, name, version, command) {
         const result = node_child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(platformNpmPath, [command], {
             stdio: 'inherit',
             cwd: packageInstallFolder,
-            env: process.env,
-            shell: _isWindows()
+            env: process.env
         });
         if (result.status !== 0) {
             throw new Error(`"npm ${command}" encountered an error`);
@@ -715,7 +713,6 @@ function installAndRun(logger, packageName, packageVersion, packageBinName, pack
         result = node_child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(platformBinPath, packageBinArgs, {
             stdio: 'inherit',
             windowsVerbatimArguments: false,
-            shell: _isWindows(),
             cwd: process.cwd(),
             env: process.env
         });
