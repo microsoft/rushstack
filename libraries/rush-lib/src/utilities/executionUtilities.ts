@@ -29,10 +29,10 @@ export function convertCommandAndArgsToShell(
     commandToRun = options;
   } else {
     const { command, args } = options;
-    const normalizedCommand: string = _escapeArgumentIfNeeded(command, isWindows);
+    const normalizedCommand: string = escapeArgumentIfNeeded(command, isWindows);
     const normalizedArgs: string[] = [];
     for (const arg of args) {
-      normalizedArgs.push(_escapeArgumentIfNeeded(arg, isWindows));
+      normalizedArgs.push(escapeArgumentIfNeeded(arg, isWindows));
     }
 
     commandToRun = [normalizedCommand, ...normalizedArgs].join(' ');
@@ -44,7 +44,7 @@ export function convertCommandAndArgsToShell(
   };
 }
 
-function _escapeArgumentIfNeeded(command: string, isWindows: boolean): string {
+export function escapeArgumentIfNeeded(command: string, isWindows: boolean = IS_WINDOWS): string {
   if (command.includes(' ')) {
     if (isWindows) {
       // Windows: use double quotes and escape internal double quotes

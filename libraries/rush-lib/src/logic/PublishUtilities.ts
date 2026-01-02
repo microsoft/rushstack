@@ -42,7 +42,6 @@ export interface IExecCommandOptions {
   workingDirectory?: string;
   environment?: IEnvironment;
   secretSubstring?: string;
-  shell?: boolean;
 }
 
 interface IAddChangeOptions {
@@ -272,8 +271,7 @@ export class PublishUtilities {
       args = [],
       workingDirectory = process.cwd(),
       environment,
-      secretSubstring,
-      shell
+      secretSubstring
     } = options;
 
     let relativeDirectory: string = path.relative(process.cwd(), workingDirectory);
@@ -301,8 +299,7 @@ export class PublishUtilities {
         workingDirectory,
         environment,
         suppressOutput: false,
-        keepEnvironment: true,
-        shell
+        keepEnvironment: true
       });
     }
   }

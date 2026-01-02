@@ -23,7 +23,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { syncNpmrc } from './npmrcUtilities';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { RushConstants } from '../logic/RushConstants';
-import { convertCommandAndArgsToShell, IS_WINDOWS } from './executionUtilities';
+import { convertCommandAndArgsToShell, escapeArgumentIfNeeded, IS_WINDOWS } from './executionUtilities';
 
 export type UNINITIALIZED = 'UNINITIALIZED';
 // eslint-disable-next-line @typescript-eslint/no-redeclare
@@ -52,12 +52,6 @@ export interface IExecuteCommandOptions {
    */
   onStdoutStreamChunk?: (chunk: string) => string | void;
   captureExitCodeAndSignal?: boolean;
-  /**
-   * If true, the command will be executed inside a shell. Note that this is different from
-   * child_process.spawn's shell option. The command will be explicitly wrapped
-   * in a shell depending on the operating system.
-   */
-  shell?: boolean;
 }
 
 /**
@@ -376,8 +370,7 @@ export class Utilities {
       onStdoutStreamChunk,
       environment,
       keepEnvironment,
-      captureExitCodeAndSignal,
-      shell
+      captureExitCodeAndSignal
     } = options;
     const { exitCode, signal } = await Utilities._executeCommandInternalAsync({
       command,
@@ -399,8 +392,7 @@ export class Utilities {
       keepEnvironment,
       onStdoutStreamChunk,
       captureOutput: false,
-      captureExitCodeAndSignal,
-      shell
+      captureExitCodeAndSignal
     });
 
     if (captureExitCodeAndSignal) {
@@ -574,8 +566,7 @@ export class Utilities {
         args: ['install'],
         workingDirectory: directory,
         environment: Utilities._createEnvironmentForRushCommand({}),
-        suppressOutput,
-        shell: true
+        suppressOutput
       },
       maxInstallAttempts
     );
@@ -677,9 +668,9 @@ export class Utilities {
 
     const spawnOptions: child_process.SpawnOptions = {
       cwd: workingDirectory,
+      shell: IS_WINDOWS,
       env: environment,
-      stdio,
-      windowsVerbatimArguments: true
+      stdio
     };
 
     if (connectSubprocessTerminator) {
@@ -814,11 +805,11 @@ export class Utilities {
     keepEnvironment,
     onStdoutStreamChunk,
     captureOutput,
-    captureExitCodeAndSignal,
-    shell
+    captureExitCodeAndSignal
   }: IExecuteCommandInternalOptions): Promise<IWaitForExitResult<string> | IWaitForExitResultWithoutOutput> {
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
+      shell: true,
       stdio: stdio,
       env: keepEnvironment
         ? environment
@@ -826,12 +817,28 @@ export class Utilities {
       maxBuffer: 10 * 1024 * 1024 // Set default max buffer size to 10MB
     };
 
-    if (shell) {
-      ({ command, args } = convertCommandAndArgsToShell({ command, args }));
-      options.windowsVerbatimArguments = true;
-    }
+    // This is needed since we specify shell=true below.
+    // NOTE: On Windows if we escape "NPM", the spawnSync() function runs something like this:
+    //   [ 'C:\\Windows\\system32\\cmd.exe', '/s', '/c', '""NPM" "install""' ]
+    //
+    // Due to a bug with Windows cmd.exe, the npm.cmd batch file's "%~dp0" variable will
+    // return the current working directory instead of the batch file's directory.
+    // The workaround is to not escape, npm, i.e. do this instead:
+    //   [ 'C:\\Windows\\system32\\cmd.exe', '/s', '/c', '"npm "install""' ]
+    //
+    // We will come up with a better solution for this when we promote executeCommand()
+    // into node-core-library, but for now this hack will unblock people:
 
-    const childProcess: child_process.ChildProcess = child_process.spawn(command, args, options);
+    // Only escape the command if it actually contains spaces:
+    const escapedCommand: string = escapeArgumentIfNeeded(command);
+
+    const escapedArgs: string[] = args.map((x) => escapeArgumentIfNeeded(x));
+
+    const childProcess: child_process.ChildProcess = child_process.spawn(
+      escapedCommand,
+      escapedArgs,
+      options
+    );
 
     if (onStdoutStreamChunk) {
       const inspectStream: Transform = new Transform({

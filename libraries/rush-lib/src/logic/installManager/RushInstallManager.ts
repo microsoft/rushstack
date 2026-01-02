@@ -547,8 +547,7 @@ export class RushInstallManager extends BaseInstallManager {
               command: packageManagerFilename,
               args,
               workingDirectory: this.rushConfiguration.commonTempFolder,
-              environment: packageManagerEnv,
-              shell: true
+              environment: packageManagerEnv
             },
             this.options.maxInstallAttempts
           );
@@ -630,8 +629,7 @@ export class RushInstallManager extends BaseInstallManager {
         args: installArgs,
         workingDirectory: this.rushConfiguration.commonTempFolder,
         environment: packageManagerEnv,
-        suppressOutput: false,
-        shell: true
+        suppressOutput: false
       },
       this.options.maxInstallAttempts,
       () => {
@@ -657,8 +655,7 @@ export class RushInstallManager extends BaseInstallManager {
       await Utilities.executeCommandAsync({
         command: this.rushConfiguration.packageManagerToolFilename,
         args: npmArgs,
-        workingDirectory: this.rushConfiguration.commonTempFolder,
-        shell: true
+        workingDirectory: this.rushConfiguration.commonTempFolder
       });
       // eslint-disable-next-line no-console
       console.log('"npm shrinkwrap" completed\n');

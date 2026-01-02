@@ -11,7 +11,7 @@ import * as path from 'node:path';
 import type { IPackageJson } from '@rushstack/node-core-library';
 
 import { syncNpmrc, type ILogger } from '../utilities/npmrcUtilities';
-import { convertCommandAndArgsToShell, IS_WINDOWS } from '../utilities/executionUtilities';
+import { IS_WINDOWS } from '../utilities/executionUtilities';
 import type { RushConstants } from '../logic/RushConstants';
 
 export const RUSH_JSON_FILENAME: typeof RushConstants.rushJsonFilename = 'rush.json';
@@ -194,16 +194,15 @@ function _resolvePackageVersion(
       //
       // if only a single version matches.
 
-      const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer | string> =
-        _runNpmAsShellCommandAndConfirmSuccess(
-          ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'],
-          {
-            cwd: rushTempFolder,
-            stdio: [],
-            env: process.env
-          },
-          'npm view'
-        );
+      const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer | string> = _runNpmConfirmSuccess(
+        ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'],
+        {
+          cwd: rushTempFolder,
+          stdio: [],
+          env: process.env
+        },
+        'npm view'
+      );
 
       const npmViewVersionOutput: string = npmVersionSpawnResult.stdout.toString();
       const parsedVersionOutput: string | string[] = JSON.parse(npmViewVersionOutput);
@@ -354,7 +353,7 @@ function _installPackage(
 ): void {
   try {
     logger.info(`Installing ${name}...`);
-    _runNpmAsShellCommandAndConfirmSuccess(
+    _runNpmConfirmSuccess(
       [npmCommand],
       {
         stdio: 'inherit',
@@ -379,6 +378,13 @@ function _getBinPath(packageInstallFolder: string, binName: string): string {
 }
 
 /**
+ * Returns a cross-platform path - windows must enclose any path containing spaces within double quotes.
+ */
+function _getPlatformPath(platformPath: string): string {
+  return IS_WINDOWS && platformPath.includes(' ') ? `"${platformPath}"` : platformPath;
+}
+
+/**
  * Write a flag file to the package's install directory, signifying that the install was successful.
  */
 function _writeFlagFile(packageInstallFolder: string): void {
@@ -393,24 +399,19 @@ function _writeFlagFile(packageInstallFolder: string): void {
 /**
  * Run npm under the platform's shell and throw if it didn't succeed.
  */
-function _runNpmAsShellCommandAndConfirmSuccess(
+function _runNpmConfirmSuccess(
   args: string[],
   options: childProcess.SpawnSyncOptions,
   commandNameForLogging: string
 ): childProcess.SpawnSyncReturns<string | Buffer<ArrayBufferLike>> {
-  let command: string = getNpmPath();
-  let windowsVerbatimArguments: boolean | undefined;
-  if (IS_WINDOWS) {
-    ({ command, args } = convertCommandAndArgsToShell({ command, args }));
-    windowsVerbatimArguments = true;
-  }
+  const command: string = _getPlatformPath(getNpmPath());
 
   const result: childProcess.SpawnSyncReturns<string | Buffer<ArrayBufferLike>> = childProcess.spawnSync(
     command,
     args,
     {
       ...options,
-      windowsVerbatimArguments
+      shell: IS_WINDOWS
     }
   );
 
@@ -477,18 +478,15 @@ export function installAndRun(
   const originalEnvPath: string = process.env.PATH || '';
   let result: childProcess.SpawnSyncReturns<Buffer>;
   try {
-    let command: string = binPath;
-    let args: string[] = packageBinArgs;
-    let windowsVerbatimArguments: boolean | undefined;
-    if (IS_WINDOWS) {
-      ({ command, args } = convertCommandAndArgsToShell({ command, args }));
-      windowsVerbatimArguments = true;
-    }
+    // `npm` bin stubs on Windows are `.cmd` files
+    // Node.js will not directly invoke a `.cmd` file unless `shell` is set to `true`
+    const platformBinPath: string = _getPlatformPath(binPath);
 
     process.env.PATH = [binFolderPath, originalEnvPath].join(path.delimiter);
-    result = childProcess.spawnSync(command, args, {
+    result = childProcess.spawnSync(platformBinPath, packageBinArgs, {
       stdio: 'inherit',
-      windowsVerbatimArguments,
+      windowsVerbatimArguments: false,
+      shell: IS_WINDOWS,
       cwd: process.cwd(),
       env: process.env
     });

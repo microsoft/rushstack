@@ -681,8 +681,7 @@ export class PackageJsonUpdater {
         const allVersions: string = await Utilities.executeCommandAndCaptureOutputAsync({
           command: this._rushConfiguration.packageManagerToolFilename,
           args,
-          workingDirectory: this._rushConfiguration.commonTempFolder,
-          shell: true
+          workingDirectory: this._rushConfiguration.commonTempFolder
         });
 
         let versionList: string[];
@@ -744,8 +743,7 @@ export class PackageJsonUpdater {
           await Utilities.executeCommandAndCaptureOutputAsync({
             command: this._rushConfiguration.packageManagerToolFilename,
             args,
-            workingDirectory: this._rushConfiguration.commonTempFolder,
-            shell: true
+            workingDirectory: this._rushConfiguration.commonTempFolder
           })
         ).trim();
       }

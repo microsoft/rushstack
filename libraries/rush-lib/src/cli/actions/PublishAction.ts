@@ -480,8 +480,7 @@ export class PublishAction extends BaseRushAction {
         args,
         workingDirectory: packagePath,
         environment: env,
-        secretSubstring,
-        shell: true
+        secretSubstring
       });
     }
   }
@@ -529,8 +528,7 @@ export class PublishAction extends BaseRushAction {
       command: this.rushConfiguration.packageManagerToolFilename,
       args,
       workingDirectory: project.publishFolder,
-      environment: env,
-      shell: true
+      environment: env
     });
 
     if (this._publish.value) {

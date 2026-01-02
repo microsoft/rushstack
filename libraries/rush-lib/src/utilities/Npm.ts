@@ -16,7 +16,6 @@ async function runNpmCommandAndCaptureOutputAsync(
     workingDirectory,
     environment,
     keepEnvironment: true,
-    shell: true,
     captureExitCodeAndSignal: true
   });
 
