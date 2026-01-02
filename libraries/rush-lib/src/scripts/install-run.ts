@@ -405,8 +405,6 @@ function _runNpmAsShellCommandAndConfirmSuccess(
     windowsVerbatimArguments = true;
   }
 
-  console.log(`Executing command: ${JSON.stringify({ command, args })}`);
-
   const result: childProcess.SpawnSyncReturns<string | Buffer<ArrayBufferLike>> = childProcess.spawnSync(
     command,
     args,
