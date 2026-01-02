@@ -176,8 +176,6 @@ function _resolvePackageVersion(
         supportEnvVarFallbackSyntax: false
       });
 
-      const npmPath: string = getNpmPath();
-
       // This returns something that looks like:
       // ```
       // [
@@ -196,17 +194,13 @@ function _resolvePackageVersion(
       //
       // if only a single version matches.
 
-      const spawnSyncOptions: childProcess.SpawnSyncOptions = {
-        cwd: rushTempFolder,
-        stdio: []
-      };
-      const platformNpmPath: string = _getPlatformPath(npmPath);
-
       const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer | string> =
-        _runAsShellCommandAndConfirmSuccess(
-          platformNpmPath,
+        _runNpmAsShellCommandAndConfirmSuccess(
           ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'],
-          spawnSyncOptions,
+          {
+            cwd: rushTempFolder,
+            stdio: []
+          },
           'npm view'
         );
 
@@ -359,9 +353,7 @@ function _installPackage(
 ): void {
   try {
     logger.info(`Installing ${name}...`);
-    const npmPath: string = getNpmPath();
-    _runAsShellCommandAndConfirmSuccess(
-      npmPath,
+    _runNpmAsShellCommandAndConfirmSuccess(
       [npmCommand],
       {
         stdio: 'inherit',
@@ -386,13 +378,6 @@ function _getBinPath(packageInstallFolder: string, binName: string): string {
 }
 
 /**
- * Returns a cross-platform path - windows must enclose any path containing spaces within double quotes.
- */
-function _getPlatformPath(platformPath: string): string {
-  return IS_WINDOWS && platformPath.includes(' ') ? `"${platformPath}"` : platformPath;
-}
-
-/**
  * Write a flag file to the package's install directory, signifying that the install was successful.
  */
 function _writeFlagFile(packageInstallFolder: string): void {
@@ -407,12 +392,12 @@ function _writeFlagFile(packageInstallFolder: string): void {
 /**
  * Run the specified command under the platform's shell and throw if it didn't succeed.
  */
-function _runAsShellCommandAndConfirmSuccess(
-  command: string,
+function _runNpmAsShellCommandAndConfirmSuccess(
   args: string[],
   options: childProcess.SpawnSyncOptions,
   commandNameForLogging: string
 ): childProcess.SpawnSyncReturns<string | Buffer<ArrayBufferLike>> {
+  let command: string = getNpmPath();
   if (IS_WINDOWS) {
     ({ command, args } = convertCommandAndArgsToShell({ command, args }));
   }
@@ -475,8 +460,8 @@ export function installAndRun(
     });
 
     _createPackageJson(packageInstallFolder, packageName, packageVersion);
-    const command: 'install' | 'ci' = lockFilePath ? 'ci' : 'install';
-    _installPackage(logger, packageInstallFolder, packageName, packageVersion, command);
+    const installCommand: 'install' | 'ci' = lockFilePath ? 'ci' : 'install';
+    _installPackage(logger, packageInstallFolder, packageName, packageVersion, installCommand);
     _writeFlagFile(packageInstallFolder);
   }
 
