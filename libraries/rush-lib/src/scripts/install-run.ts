@@ -194,15 +194,14 @@ function _resolvePackageVersion(
       //
       // if only a single version matches.
 
-      const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer | string> =
-        _runNpmAsShellCommandAndConfirmSuccess(
-          ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'],
-          {
-            cwd: rushTempFolder,
-            stdio: []
-          },
-          'npm view'
-        );
+      const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer | string> = _runNpmAndConfirmSuccess(
+        ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'],
+        {
+          cwd: rushTempFolder,
+          stdio: []
+        },
+        'npm view'
+      );
 
       const npmViewVersionOutput: string = npmVersionSpawnResult.stdout.toString();
       const parsedVersionOutput: string | string[] = JSON.parse(npmViewVersionOutput);
@@ -353,7 +352,7 @@ function _installPackage(
 ): void {
   try {
     logger.info(`Installing ${name}...`);
-    _runNpmAsShellCommandAndConfirmSuccess(
+    _runNpmAndConfirmSuccess(
       [npmCommand],
       {
         stdio: 'inherit',
@@ -392,15 +391,12 @@ function _writeFlagFile(packageInstallFolder: string): void {
 /**
  * Run npm under the platform's shell and throw if it didn't succeed.
  */
-function _runNpmAsShellCommandAndConfirmSuccess(
+function _runNpmAndConfirmSuccess(
   args: string[],
   options: childProcess.SpawnSyncOptions,
   commandNameForLogging: string
 ): childProcess.SpawnSyncReturns<string | Buffer<ArrayBufferLike>> {
-  let command: string = getNpmPath();
-  if (IS_WINDOWS) {
-    ({ command, args } = convertCommandAndArgsToShell({ command, args }));
-  }
+  const command: string = getNpmPath();
 
   console.log(`Executing command: ${JSON.stringify({ command, args })}`);
 
