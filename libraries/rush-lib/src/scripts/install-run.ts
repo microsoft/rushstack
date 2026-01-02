@@ -536,7 +536,7 @@ function _run(): void {
   ]: string[] = process.argv;
 
   if (!nodePath) {
-    throw new Error('Unexpected exception: could not detect node path');
+    throw new Error('Could not detect node path');
   }
 
   const scriptFileName: string = path.basename(scriptPath).toLowerCase();
