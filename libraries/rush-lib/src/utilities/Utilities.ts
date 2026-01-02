@@ -823,12 +823,12 @@ export class Utilities {
       env: keepEnvironment
         ? environment
         : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment }),
-      maxBuffer: 10 * 1024 * 1024, // Set default max buffer size to 10MB
-      windowsVerbatimArguments: true
+      maxBuffer: 10 * 1024 * 1024 // Set default max buffer size to 10MB
     };
 
     if (shell) {
       ({ command, args } = convertCommandAndArgsToShell({ command, args }));
+      options.windowsVerbatimArguments = true;
     }
 
     const childProcess: child_process.ChildProcess = child_process.spawn(command, args, options);
