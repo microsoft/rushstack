@@ -390,7 +390,7 @@ function _writeFlagFile(packageInstallFolder: string): void {
 }
 
 /**
- * Run the specified command under the platform's shell and throw if it didn't succeed.
+ * Run npm under the platform's shell and throw if it didn't succeed.
  */
 function _runNpmAsShellCommandAndConfirmSuccess(
   args: string[],
