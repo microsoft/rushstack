@@ -35,7 +35,7 @@ export function convertCommandAndArgsToShell(
       normalizedArgs.push(_escapeArgumentIfNeeded(arg, isWindows));
     }
 
-    commandToRun = [normalizedCommand, ...args].join(' ');
+    commandToRun = [normalizedCommand, ...normalizedArgs].join(' ');
   }
 
   return {

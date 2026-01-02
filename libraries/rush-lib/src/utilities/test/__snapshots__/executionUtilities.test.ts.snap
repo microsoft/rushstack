@@ -26,7 +26,7 @@ exports[`convertCommandAndArgsToShell keeps unescaped args when wrapping a POSIX
 Object {
   "args": Array [
     "-c",
-    "\\"foo bar\\" baz qux --flag",
+    "\\"foo bar\\" \\"baz qux\\" --flag",
   ],
   "command": "sh",
 }
@@ -38,7 +38,7 @@ Object {
     "/d",
     "/s",
     "/c",
-    "\\"weird \\\"\\"cmd\\"\\"\\" space arg quote \\"arg\\"",
+    "\\"weird \\"\\"cmd\\"\\"\\" \\"space arg\\" \\"quote \\"\\"arg\\"\\"\\"",
   ],
   "command": "cmd.exe",
 }
