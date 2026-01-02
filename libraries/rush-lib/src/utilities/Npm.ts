@@ -43,7 +43,7 @@ export class Npm {
         workingDirectory,
         environment
       );
-      if (packageTime && packageTime !== '') {
+      if (packageTime) {
         Object.keys(JSON.parse(packageTime)).forEach((v) => {
           if (semver.valid(v)) {
             versions.push(v);
