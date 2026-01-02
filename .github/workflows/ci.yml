@@ -72,7 +72,7 @@ jobs:
       #   working-directory: repo-a
 
       - name: Build to Rush
-        run: node common/scripts/install-run-rush.js build --to @microsoft/rush
+        run: node common/scripts/install-run-rush.js build --to @microsoft/rush --production --verbose
         working-directory: repo-a
 
       - name: Ensure install-run works as expected
