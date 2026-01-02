@@ -421,6 +421,8 @@ function _runAsShellCommandAndConfirmSuccess(
     ({ command, args } = convertCommandAndArgsToShell({ command, args }));
   }
 
+  console.log(`Executing command: ${JSON.stringify({ command, args })}`);
+
   const result: childProcess.SpawnSyncReturns<string | Buffer<ArrayBufferLike>> = childProcess.spawnSync(
     command,
     args,
