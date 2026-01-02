@@ -408,7 +408,10 @@ function _runNpmAsShellCommandAndConfirmSuccess(
   const result: childProcess.SpawnSyncReturns<string | Buffer<ArrayBufferLike>> = childProcess.spawnSync(
     command,
     args,
-    options
+    {
+      ...options,
+      windowsVerbatimArguments: true
+    }
   );
 
   if (result.status !== 0) {
