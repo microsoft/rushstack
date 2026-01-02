@@ -428,6 +428,11 @@ function _runAsShellCommandAndConfirmSuccess(
   );
 
   if (result.status !== 0) {
+    const stdout: string = result.stdout?.toString() ?? '';
+    const stderr: string = result.stderr?.toString() ?? '';
+
+    console.log(`Error output from "${commandNameForLogging}":\n${stdout}\n${stderr}\n`);
+
     if (result.status === undefined) {
       if (result.error) {
         throw new Error(`"${commandNameForLogging}" failed: ${result.error.message.toString()}`);
