@@ -678,7 +678,8 @@ export class Utilities {
     const spawnOptions: child_process.SpawnOptions = {
       cwd: workingDirectory,
       env: environment,
-      stdio
+      stdio,
+      windowsVerbatimArguments: true
     };
 
     if (connectSubprocessTerminator) {
@@ -822,7 +823,8 @@ export class Utilities {
       env: keepEnvironment
         ? environment
         : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment }),
-      maxBuffer: 10 * 1024 * 1024 // Set default max buffer size to 10MB
+      maxBuffer: 10 * 1024 * 1024, // Set default max buffer size to 10MB
+      windowsVerbatimArguments: true
     };
 
     if (shell) {

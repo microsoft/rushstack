@@ -491,7 +491,7 @@ export function installAndRun(
     process.env.PATH = [binFolderPath, originalEnvPath].join(path.delimiter);
     result = childProcess.spawnSync(command, args, {
       stdio: 'inherit',
-      windowsVerbatimArguments: false,
+      windowsVerbatimArguments: true,
       cwd: process.cwd(),
       env: process.env
     });
