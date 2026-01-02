@@ -268,10 +268,10 @@ export class Autoinstaller {
 
     // Write the last-install.flag file so that a subsequent "rush install-autoinstaller"
     // will not perform a redundant install.
-    await this._createFlagsAsync();
+    await this._createFlagsAsync(packageJsonEditor.saveToObject());
   }
 
-  private async _createFlagsAsync(): Promise<void> {
+  private async _createFlagsAsync(packageJson: IPackageJson): Promise<void> {
     const autoinstallerFullPath: string = this.folderFullPath;
 
     // Example: .../common/autoinstallers/my-task/.rush/temp
@@ -280,9 +280,6 @@ export class Autoinstaller {
       RushConstants.projectRushFolderName,
       'temp'
     );
-
-    const packageJsonPath: string = path.join(autoinstallerFullPath, 'package.json');
-    const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
 
     const lastInstallFlag: LastInstallFlag = new LastInstallFlag(lastInstallFlagPath, {
       node: process.versions.node,
