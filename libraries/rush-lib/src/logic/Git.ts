@@ -532,12 +532,12 @@ export class Git {
       const gitPath: string = this.getGitPathOrThrow();
       await this._executeGitCommandAndCaptureOutputAsync(
         gitPath,
-        ['add', ...pattern],
+        ['add', '--', ...pattern],
         this._rushConfiguration.changesFolder
       );
       await this._executeGitCommandAndCaptureOutputAsync(
         gitPath,
-        ['commit', ...pattern, '-m', message],
+        ['commit', '-m', message, '--', ...pattern],
         this._rushConfiguration.changesFolder
       );
     } catch (error) {
