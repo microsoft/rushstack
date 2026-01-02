@@ -71,8 +71,8 @@ jobs:
       #   run: /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
       #   working-directory: repo-a
 
-      - name: Rush retest (install-run-rush)
-        run: node common/scripts/install-run-rush.js retest --verbose --production
+      - name: Build to Rush
+        run: node common/scripts/install-run-rush.js build --to @microsoft/rush
         working-directory: repo-a
 
       - name: Ensure install-run works as expected
