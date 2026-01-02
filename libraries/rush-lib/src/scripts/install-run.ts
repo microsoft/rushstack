@@ -417,7 +417,8 @@ function _runNpmAsShellCommandAndConfirmSuccess(
 
     console.log(`Error output from "${commandNameForLogging}":\n${stdout}\n${stderr}\n`);
 
-    if (result.status === undefined) {
+    if (!result.status) {
+      // Is status null or undefined?
       if (result.error) {
         throw new Error(`"${commandNameForLogging}" failed: ${result.error.message.toString()}`);
       } else {
