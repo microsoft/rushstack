@@ -11,7 +11,7 @@ import * as path from 'node:path';
 import type { IPackageJson } from '@rushstack/node-core-library';
 
 import { syncNpmrc, type ILogger } from '../utilities/npmrcUtilities';
-import { convertCommandAndArgsToShell } from '../utilities/executionUtilities';
+import { convertCommandAndArgsToShell, IS_WINDOWS } from '../utilities/executionUtilities';
 import type { RushConstants } from '../logic/RushConstants';
 
 export const RUSH_JSON_FILENAME: typeof RushConstants.rushJsonFilename = 'rush.json';
@@ -56,7 +56,7 @@ let _npmPath: string | undefined = undefined;
 export function getNpmPath(): string {
   if (!_npmPath) {
     try {
-      if (_isWindows()) {
+      if (IS_WINDOWS) {
         // We're on Windows
         const whereOutput: string = childProcess.execSync('where npm', { stdio: [] }).toString();
         const lines: string[] = whereOutput.split(os.EOL).filter((line) => !!line);
@@ -381,7 +381,7 @@ function _installPackage(
  */
 function _getBinPath(packageInstallFolder: string, binName: string): string {
   const binFolderPath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
-  const resolvedBinName: string = _isWindows() ? `${binName}.cmd` : binName;
+  const resolvedBinName: string = IS_WINDOWS ? `${binName}.cmd` : binName;
   return path.resolve(binFolderPath, resolvedBinName);
 }
 
@@ -389,11 +389,7 @@ function _getBinPath(packageInstallFolder: string, binName: string): string {
  * Returns a cross-platform path - windows must enclose any path containing spaces within double quotes.
  */
 function _getPlatformPath(platformPath: string): string {
-  return _isWindows() && platformPath.includes(' ') ? `"${platformPath}"` : platformPath;
-}
-
-function _isWindows(): boolean {
-  return os.platform() === 'win32';
+  return IS_WINDOWS && platformPath.includes(' ') ? `"${platformPath}"` : platformPath;
 }
 
 /**
@@ -417,7 +413,7 @@ function _runAsShellCommandAndConfirmSuccess(
   options: childProcess.SpawnSyncOptions,
   commandNameForLogging: string
 ): childProcess.SpawnSyncReturns<string | Buffer<ArrayBufferLike>> {
-  if (_isWindows()) {
+  if (IS_WINDOWS) {
     ({ command, args } = convertCommandAndArgsToShell({ command, args }));
   }
 
@@ -498,7 +494,7 @@ export function installAndRun(
   try {
     let command: string = binPath;
     let args: string[] = packageBinArgs;
-    if (_isWindows()) {
+    if (IS_WINDOWS) {
       ({ command, args } = convertCommandAndArgsToShell({ command, args }));
     }
 

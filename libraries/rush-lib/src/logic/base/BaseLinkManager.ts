@@ -18,6 +18,7 @@ import type { BasePackage } from './BasePackage';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { RushConstants } from '../RushConstants';
 import { FlagFile } from '../../api/FlagFile';
+import { IS_WINDOWS } from '../../utilities/executionUtilities';
 
 export enum SymlinkKind {
   File,
@@ -43,7 +44,7 @@ export abstract class BaseLinkManager {
     let relativePathForbidden: boolean = false;
     let linkFunctionAsync: (options: IBaseLinkManagerCreateSymlinkOptions) => Promise<void>;
 
-    if (process.platform === 'win32') {
+    if (IS_WINDOWS) {
       if (options.symlinkKind === SymlinkKind.Directory) {
         // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
         linkFunctionAsync = FileSystem.createSymbolicLinkJunctionAsync.bind(FileSystem);

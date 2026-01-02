@@ -6,7 +6,7 @@ export interface ICommandAndArgs {
   args: string[];
 }
 
-const IS_WINDOWS: boolean = process.platform === 'win32';
+export const IS_WINDOWS: boolean = process.platform === 'win32';
 
 export function convertCommandAndArgsToShell(command: string): ICommandAndArgs;
 export function convertCommandAndArgsToShell(options: ICommandAndArgs): ICommandAndArgs;

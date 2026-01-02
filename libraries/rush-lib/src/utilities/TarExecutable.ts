@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import os from 'node:os';
 import type { ChildProcess } from 'node:child_process';
 import events from 'node:events';
 
@@ -11,6 +10,7 @@ import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
+import { IS_WINDOWS } from './executionUtilities';
 
 export interface ITarOptionsBase {
   logFilePath: string;
@@ -175,7 +175,7 @@ export class TarExecutable {
   }
 
   private static async _tryFindTarExecutablePathAsync(): Promise<string | undefined> {
-    if (os.platform() === 'win32') {
+    if (IS_WINDOWS) {
       // If we're running on Windows, first try to use the OOB tar executable. If
       // we're running in the Git Bash, the tar executable on the PATH doesn't handle
       // Windows file paths correctly.

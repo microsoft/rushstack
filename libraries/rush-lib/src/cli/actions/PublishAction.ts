@@ -29,6 +29,7 @@ import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 import { Utilities } from '../../utilities/Utilities';
 import { Git } from '../../logic/Git';
 import { RushConstants } from '../../logic/RushConstants';
+import { IS_WINDOWS } from '../../utilities/executionUtilities';
 
 export class PublishAction extends BaseRushAction {
   private readonly _addCommitDetails: CommandLineFlagParameter;
@@ -599,7 +600,7 @@ export class PublishAction extends BaseRushAction {
   }
 
   private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {
-    const userHomeEnvVariable: string = process.platform === 'win32' ? 'USERPROFILE' : 'HOME';
+    const userHomeEnvVariable: string = IS_WINDOWS ? 'USERPROFILE' : 'HOME';
     let registry: string = '//registry.npmjs.org/';
 
     // Check if .npmrc file exists in "common\temp\publish-home"

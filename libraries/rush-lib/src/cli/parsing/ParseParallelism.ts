@@ -3,6 +3,8 @@
 
 import * as os from 'node:os';
 
+import { IS_WINDOWS } from '../../utilities/executionUtilities';
+
 /**
  * Parses a command line specification for desired parallelism.
  * Factored out to enable unit tests
@@ -39,7 +41,7 @@ export function parseParallelism(
   } else {
     // If an explicit parallelism number wasn't provided, then choose a sensible
     // default.
-    if (os.platform() === 'win32') {
+    if (IS_WINDOWS) {
       // On desktop Windows, some people have complained that their system becomes
       // sluggish if Rush is using all the CPU cores.  Leave one thread for
       // other operations. For CI environments, you can use the "max" argument to use all available cores.

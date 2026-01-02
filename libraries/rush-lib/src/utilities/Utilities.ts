@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'node:child_process';
-import * as os from 'node:os';
 import * as path from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { Transform } from 'node:stream';
@@ -24,7 +23,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { syncNpmrc } from './npmrcUtilities';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { RushConstants } from '../logic/RushConstants';
-import { convertCommandAndArgsToShell } from './executionUtilities';
+import { convertCommandAndArgsToShell, IS_WINDOWS } from './executionUtilities';
 
 export type UNINITIALIZED = 'UNINITIALIZED';
 // eslint-disable-next-line @typescript-eslint/no-redeclare
@@ -191,8 +190,7 @@ export class Utilities {
   public static getHomeFolder(): string {
     let homeFolder: string | undefined = Utilities._homeFolder;
     if (!homeFolder) {
-      const unresolvedUserFolder: string | undefined =
-        process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
+      const unresolvedUserFolder: string | undefined = process.env[IS_WINDOWS ? 'USERPROFILE' : 'HOME'];
       const dirError: string = "Unable to determine the current user's home directory";
       if (unresolvedUserFolder === undefined) {
         throw new Error(dirError);
@@ -713,7 +711,7 @@ export class Utilities {
     }
 
     for (const key of Object.getOwnPropertyNames(options.initialEnvironment)) {
-      const normalizedKey: string = os.platform() === 'win32' ? key.toUpperCase() : key;
+      const normalizedKey: string = IS_WINDOWS ? key.toUpperCase() : key;
 
       // If Rush itself was invoked inside a lifecycle script, this may be set and would interfere
       // with Rush's installations.  If we actually want it, we will set it explicitly below.
