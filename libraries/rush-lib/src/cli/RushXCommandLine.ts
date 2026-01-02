@@ -28,6 +28,7 @@ import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 import { PnpmSyncUtilities } from '../utilities/PnpmSyncUtilities';
 import { initializeDotEnv } from '../logic/dotenv';
+import { escapeArgumentIfNeeded } from '../utilities/executionUtilities';
 
 interface IRushXCommandLineArguments {
   /**
@@ -204,13 +205,18 @@ export class RushXCommandLine {
     }
 
     let commandWithArgs: string = scriptBody;
-    if (rushxArguments.commandArgs.length > 0) {
-      commandWithArgs += ' ' + commandArgs.join(' ');
+    let commandWithArgsForDisplay: string = scriptBody;
+    if (commandArgs.length > 0) {
+      const escapedRemainingArgs: string[] = commandArgs.map((x) => escapeArgumentIfNeeded(x));
+      commandWithArgs += ' ' + escapedRemainingArgs.join(' ');
+
+      // Display it nicely without the extra quotes
+      commandWithArgsForDisplay += ' ' + commandArgs.join(' ');
     }
 
     if (!quiet) {
       // eslint-disable-next-line no-console
-      console.log(`> ${JSON.stringify(commandWithArgs)}\n`);
+      console.log(`> ${JSON.stringify(commandWithArgsForDisplay)}\n`);
     }
 
     const packageFolder: string = path.dirname(packageJsonFilePath);
