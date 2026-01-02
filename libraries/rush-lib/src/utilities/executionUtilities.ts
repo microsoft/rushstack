@@ -8,12 +8,15 @@ export interface ICommandAndArgs {
 
 export const IS_WINDOWS: boolean = process.platform === 'win32';
 
-export function convertCommandAndArgsToShell(command: string): ICommandAndArgs;
-export function convertCommandAndArgsToShell(options: ICommandAndArgs): ICommandAndArgs;
-export function convertCommandAndArgsToShell(options: ICommandAndArgs | string): ICommandAndArgs {
+export function convertCommandAndArgsToShell(command: string, isWindows?: boolean): ICommandAndArgs;
+export function convertCommandAndArgsToShell(options: ICommandAndArgs, isWindows?: boolean): ICommandAndArgs;
+export function convertCommandAndArgsToShell(
+  options: ICommandAndArgs | string,
+  isWindows: boolean = IS_WINDOWS
+): ICommandAndArgs {
   let shellCommand: string;
   let commandFlags: string[];
-  if (IS_WINDOWS) {
+  if (isWindows) {
     shellCommand = process.env.comspec || 'cmd';
     commandFlags = ['/d', '/s', '/c'];
   } else {
@@ -26,10 +29,10 @@ export function convertCommandAndArgsToShell(options: ICommandAndArgs | string):
     commandToRun = options;
   } else {
     const { command, args } = options;
-    const normalizedCommand: string = _escapeArgumentIfNeeded(command);
+    const normalizedCommand: string = _escapeArgumentIfNeeded(command, isWindows);
     const normalizedArgs: string[] = [];
     for (const arg of args) {
-      normalizedArgs.push(_escapeArgumentIfNeeded(arg));
+      normalizedArgs.push(_escapeArgumentIfNeeded(arg, isWindows));
     }
 
     commandToRun = [normalizedCommand, ...args].join(' ');
@@ -41,9 +44,9 @@ export function convertCommandAndArgsToShell(options: ICommandAndArgs | string):
   };
 }
 
-function _escapeArgumentIfNeeded(command: string): string {
+function _escapeArgumentIfNeeded(command: string, isWindows: boolean): string {
   if (command.includes(' ')) {
-    if (IS_WINDOWS) {
+    if (isWindows) {
       // Windows: use double quotes and escape internal double quotes
       return `"${command.replace(/"/g, '""')}"`;
     } else {

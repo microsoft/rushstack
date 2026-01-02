@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`convertCommandAndArgsToShell builds a POSIX shell command from a string 1`] = `
+Object {
+  "args": Array [
+    "-c",
+    "npm test",
+  ],
+  "command": "sh",
+}
+`;
+
+exports[`convertCommandAndArgsToShell builds a Windows shell command from a string 1`] = `
+Object {
+  "args": Array [
+    "/d",
+    "/s",
+    "/c",
+    "npm test",
+  ],
+  "command": "cmd.exe",
+}
+`;
+
+exports[`convertCommandAndArgsToShell keeps unescaped args when wrapping a POSIX command object 1`] = `
+Object {
+  "args": Array [
+    "-c",
+    "\\"foo bar\\" baz qux --flag",
+  ],
+  "command": "sh",
+}
+`;
+
+exports[`convertCommandAndArgsToShell keeps unescaped args when wrapping a Windows command object 1`] = `
+Object {
+  "args": Array [
+    "/d",
+    "/s",
+    "/c",
+    "\\"weird \\\"\\"cmd\\"\\"\\" space arg quote \\"arg\\"",
+  ],
+  "command": "cmd.exe",
+}
+`;
