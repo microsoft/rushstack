@@ -399,8 +399,10 @@ function _runNpmAsShellCommandAndConfirmSuccess(
   commandNameForLogging: string
 ): childProcess.SpawnSyncReturns<string | Buffer<ArrayBufferLike>> {
   let command: string = getNpmPath();
+  let windowsVerbatimArguments: boolean | undefined;
   if (IS_WINDOWS) {
     ({ command, args } = convertCommandAndArgsToShell({ command, args }));
+    windowsVerbatimArguments = true;
   }
 
   console.log(`Executing command: ${JSON.stringify({ command, args })}`);
@@ -410,7 +412,7 @@ function _runNpmAsShellCommandAndConfirmSuccess(
     args,
     {
       ...options,
-      windowsVerbatimArguments: true
+      windowsVerbatimArguments
     }
   );
 
@@ -484,14 +486,16 @@ export function installAndRun(
   try {
     let command: string = binPath;
     let args: string[] = packageBinArgs;
+    let windowsVerbatimArguments: boolean | undefined;
     if (IS_WINDOWS) {
       ({ command, args } = convertCommandAndArgsToShell({ command, args }));
+      windowsVerbatimArguments = true;
     }
 
     process.env.PATH = [binFolderPath, originalEnvPath].join(path.delimiter);
     result = childProcess.spawnSync(command, args, {
       stdio: 'inherit',
-      windowsVerbatimArguments: true,
+      windowsVerbatimArguments,
       cwd: process.cwd(),
       env: process.env
     });
