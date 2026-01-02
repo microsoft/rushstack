@@ -199,7 +199,8 @@ function _resolvePackageVersion(
           ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'],
           {
             cwd: rushTempFolder,
-            stdio: []
+            stdio: [],
+            env: process.env
           },
           'npm view'
         );
