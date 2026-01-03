@@ -391,7 +391,7 @@ describe('Executable process list', () => {
     const currentProcessInfo: IProcessInfo | undefined = results.get(process.pid);
     expect(currentProcessInfo).toBeDefined();
     expect(currentProcessInfo?.parentProcessInfo?.processId).toEqual(process.ppid);
-    expect(currentProcessInfo?.processName.startsWith('node')).toBe(true);
+    expect(currentProcessInfo?.processName).toMatch(/node(\.exe)?$/i);
   });
 
   test('contains the current pid (async)', async () => {
@@ -399,7 +399,7 @@ describe('Executable process list', () => {
     const currentProcessInfo: IProcessInfo | undefined = results.get(process.pid);
     expect(currentProcessInfo).toBeDefined();
     expect(currentProcessInfo?.parentProcessInfo?.processId).toEqual(process.ppid);
-    expect(currentProcessInfo?.processName.startsWith('node')).toBe(true);
+    expect(currentProcessInfo?.processName).toMatch(/node(\.exe)?$/i);
   });
 
   test('parses win32 output', () => {
