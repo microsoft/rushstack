@@ -28,20 +28,48 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
 
 import './mockRushCommandLineParser';
 
+import type { SpawnOptions } from 'node:child_process';
 import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { ITelemetryData } from '../../logic/Telemetry';
-import { getCommandLineParserInstanceAsync } from './TestUtils';
+import { getCommandLineParserInstanceAsync, type SpawnMockArgs, type SpawnMockCall } from './TestUtils';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { IS_WINDOWS } from '../../utilities/executionUtilities';
 
-function pathEquals(actual: string, expected: string): void {
-  expect(Path.convertToSlashes(actual)).toEqual(Path.convertToSlashes(expected));
+// Ordinals into the `mock.calls` array referencing each of the arguments to `spawn`. Note that
+// the exact structure of these arguments differs between Windows and non-Windows platforms, so
+// we only reference the one that is common.
+const SPAWN_ARG_OPTIONS: number = 2;
+
+function spawnOptionEquals<TOption extends keyof SpawnOptions, TExepcted>(
+  spawnCall: SpawnMockCall,
+  optionName: TOption,
+  expected: TExepcted,
+  tweakActual: (actual: SpawnOptions[TOption]) => TExepcted = (x) => x as TExepcted
+): void {
+  const spawnOptions: SpawnOptions = spawnCall[SPAWN_ARG_OPTIONS] as SpawnOptions;
+  expect(spawnOptions).toEqual(expect.any(Object));
+  expect(tweakActual(spawnOptions[optionName])).toEqual(expected);
 }
 
-// Ordinals into the `mock.calls` array referencing each of the arguments to `spawn`
-const SPAWN_ARG_ARGS: number = 1;
-const SPAWN_ARG_OPTIONS: number = 2;
+function cwdOptionEquals(spawnCall: SpawnMockCall, expected: string): void {
+  spawnOptionEquals(spawnCall, 'cwd', Path.convertToSlashes(expected), (actual) =>
+    Path.convertToSlashes(String(actual))
+  );
+}
+
+jest.setTimeout(1000000);
+
+function expectSpawnToMatchRegexp(spawnCall: SpawnMockCall, expectedRegexp: RegExp): void {
+  if (IS_WINDOWS) {
+    // On Windows, the command is passed as a single string with the `shell: true` option
+    spawnOptionEquals(spawnCall, 'shell', true);
+    expect(spawnCall[0]).toMatch(expectedRegexp);
+  } else {
+    expect(spawnCall[1]).toEqual(expect.arrayContaining([expect.stringMatching(expectedRegexp)]));
+  }
+}
 
 describe('RushCommandLineParser', () => {
   describe('execute', () => {
@@ -69,21 +97,13 @@ describe('RushCommandLineParser', () => {
           // Use regex for task name in case spaces were prepended or appended to spawned command
           const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const firstSpawn: any[] = spawnMock.mock.calls[0];
-          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/a`);
+          const firstSpawn: SpawnMockArgs = spawnMock.mock.calls[0];
+          expectSpawnToMatchRegexp(firstSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(firstSpawn, `${repoPath}/a`);
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const secondSpawn: any[] = spawnMock.mock.calls[1];
-          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/b`);
+          const secondSpawn: SpawnMockArgs = spawnMock.mock.calls[1];
+          expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(secondSpawn, `${repoPath}/b`);
         });
       });
 
@@ -104,21 +124,13 @@ describe('RushCommandLineParser', () => {
           // Use regex for task name in case spaces were prepended or appended to spawned command
           const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const firstSpawn: any[] = spawnMock.mock.calls[0];
-          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/a`);
+          const firstSpawn: SpawnMockCall = spawnMock.mock.calls[0];
+          expectSpawnToMatchRegexp(firstSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(firstSpawn, `${repoPath}/a`);
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const secondSpawn: any[] = spawnMock.mock.calls[1];
-          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/b`);
+          const secondSpawn: SpawnMockCall = spawnMock.mock.calls[1];
+          expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(secondSpawn, `${repoPath}/b`);
         });
       });
     });
@@ -138,21 +150,13 @@ describe('RushCommandLineParser', () => {
           // Use regex for task name in case spaces were prepended or appended to spawned command
           const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const firstSpawn: any[] = spawnMock.mock.calls[0];
-          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/a`);
+          const firstSpawn: SpawnMockCall = spawnMock.mock.calls[0];
+          expectSpawnToMatchRegexp(firstSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(firstSpawn, `${repoPath}/a`);
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const secondSpawn: any[] = spawnMock.mock.calls[1];
-          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/b`);
+          const secondSpawn: SpawnMockCall = spawnMock.mock.calls[1];
+          expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(secondSpawn, `${repoPath}/b`);
         });
       });
 
@@ -173,21 +177,13 @@ describe('RushCommandLineParser', () => {
           // Use regex for task name in case spaces were prepended or appended to spawned command
           const expectedBuildTaskRegexp: RegExp = /fake_REbuild_task_but_works_with_mock/;
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const firstSpawn: any[] = spawnMock.mock.calls[0];
-          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/a`);
+          const firstSpawn: SpawnMockCall = spawnMock.mock.calls[0];
+          expectSpawnToMatchRegexp(firstSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(firstSpawn, `${repoPath}/a`);
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const secondSpawn: any[] = spawnMock.mock.calls[1];
-          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/b`);
+          const secondSpawn: SpawnMockCall = spawnMock.mock.calls[1];
+          expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(secondSpawn, `${repoPath}/b`);
         });
       });
     });
@@ -206,21 +202,13 @@ describe('RushCommandLineParser', () => {
           // Use regex for task name in case spaces were prepended or appended to spawned command
           const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const firstSpawn: any[] = spawnMock.mock.calls[0];
-          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/a`);
+          const firstSpawn: SpawnMockCall = spawnMock.mock.calls[0];
+          expectSpawnToMatchRegexp(firstSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(firstSpawn, `${repoPath}/a`);
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const secondSpawn: any[] = spawnMock.mock.calls[1];
-          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/b`);
+          const secondSpawn: SpawnMockCall = spawnMock.mock.calls[1];
+          expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(secondSpawn, `${repoPath}/b`);
         });
       });
 
@@ -241,21 +229,13 @@ describe('RushCommandLineParser', () => {
           // Use regex for task name in case spaces were prepended or appended to spawned command
           const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const firstSpawn: any[] = spawnMock.mock.calls[0];
-          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/a`);
+          const firstSpawn: SpawnMockCall = spawnMock.mock.calls[0];
+          expectSpawnToMatchRegexp(firstSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(firstSpawn, `${repoPath}/a`);
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const secondSpawn: any[] = spawnMock.mock.calls[1];
-          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/b`);
+          const secondSpawn: SpawnMockCall = spawnMock.mock.calls[1];
+          expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(secondSpawn, `${repoPath}/b`);
         });
       });
     });
@@ -348,21 +328,13 @@ describe('RushCommandLineParser', () => {
           // Use regex for task name in case spaces were prepended or appended to spawned command
           const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const firstSpawn: any[] = spawnMock.mock.calls[0];
-          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/a`);
+          const firstSpawn: SpawnMockCall = spawnMock.mock.calls[0];
+          expectSpawnToMatchRegexp(firstSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(firstSpawn, `${repoPath}/a`);
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const secondSpawn: any[] = spawnMock.mock.calls[1];
-          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/b`);
+          const secondSpawn: SpawnMockCall = spawnMock.mock.calls[1];
+          expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(secondSpawn, `${repoPath}/b`);
         });
       });
 
@@ -383,21 +355,13 @@ describe('RushCommandLineParser', () => {
           // Use regex for task name in case spaces were prepended or appended to spawned command
           const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const firstSpawn: any[] = spawnMock.mock.calls[0];
-          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/a`);
+          const firstSpawn: SpawnMockCall = spawnMock.mock.calls[0];
+          expectSpawnToMatchRegexp(firstSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(firstSpawn, `${repoPath}/a`);
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const secondSpawn: any[] = spawnMock.mock.calls[1];
-          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/b`);
+          const secondSpawn: SpawnMockCall = spawnMock.mock.calls[1];
+          expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(secondSpawn, `${repoPath}/b`);
         });
       });
     });
@@ -419,21 +383,13 @@ describe('RushCommandLineParser', () => {
           // Use regex for task name in case spaces were prepended or appended to spawned command
           const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const firstSpawn: any[] = spawnMock.mock.calls[0];
-          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/a`);
+          const firstSpawn: SpawnMockCall = spawnMock.mock.calls[0];
+          expectSpawnToMatchRegexp(firstSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(firstSpawn, `${repoPath}/a`);
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const secondSpawn: any[] = spawnMock.mock.calls[1];
-          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/b`);
+          const secondSpawn: SpawnMockCall = spawnMock.mock.calls[1];
+          expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(secondSpawn, `${repoPath}/b`);
         });
       });
 
@@ -454,21 +410,13 @@ describe('RushCommandLineParser', () => {
           // Use regex for task name in case spaces were prepended or appended to spawned command
           const expectedBuildTaskRegexp: RegExp = /fake_REbuild_task_but_works_with_mock/;
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const firstSpawn: any[] = spawnMock.mock.calls[0];
-          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/a`);
+          const firstSpawn: SpawnMockCall = spawnMock.mock.calls[0];
+          expectSpawnToMatchRegexp(firstSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(firstSpawn, `${repoPath}/a`);
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const secondSpawn: any[] = spawnMock.mock.calls[1];
-          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-          );
-          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/b`);
+          const secondSpawn: SpawnMockCall = spawnMock.mock.calls[1];
+          expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
+          cwdOptionEquals(secondSpawn, `${repoPath}/b`);
         });
       });
     });
