@@ -114,3 +114,32 @@ jobs:
       - name: Rush test (rush-lib) again to verify build cache hits
         run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
         working-directory: repo-b
+
+      - name: Clone another copy of the repo to test with Node 24
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          path: repo-c
+
+      - name: Switch to Node 24
+        uses: actions/setup-node@v3
+        with:
+          node-version: 24.x
+
+      - name: Git config user
+        run: |
+          git config --local user.name "Rushbot"
+          git config --local user.email "rushbot@users.noreply.github.com"
+        working-directory: repo-c
+
+      - name: Rush update (rush-lib)
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js update
+        working-directory: repo-c
+
+      - name: Rush retest (rush-lib)
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js retest --verbose --production --timeline
+        working-directory: repo-c
+
+      - name: Rush test (rush-lib) again to verify build cache hits
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
+        working-directory: repo-c
