@@ -1,48 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-export interface ICommandAndArgs {
-  command: string;
-  args: string[];
-}
-
 export const IS_WINDOWS: boolean = process.platform === 'win32';
-
-export function convertCommandAndArgsToShell(command: string, isWindows?: boolean): ICommandAndArgs;
-export function convertCommandAndArgsToShell(options: ICommandAndArgs, isWindows?: boolean): ICommandAndArgs;
-export function convertCommandAndArgsToShell(
-  options: ICommandAndArgs | string,
-  isWindows: boolean = IS_WINDOWS
-): ICommandAndArgs {
-  let shellCommand: string;
-  let commandFlags: string[];
-  if (isWindows) {
-    shellCommand = process.env.comspec || 'cmd';
-    commandFlags = ['/d', '/s', '/c'];
-  } else {
-    shellCommand = 'sh';
-    commandFlags = ['-c'];
-  }
-
-  let commandToRun: string;
-  if (typeof options === 'string') {
-    commandToRun = options;
-  } else {
-    const { command, args } = options;
-    const normalizedCommand: string = escapeArgumentIfNeeded(command, isWindows);
-    const normalizedArgs: string[] = [];
-    for (const arg of args) {
-      normalizedArgs.push(escapeArgumentIfNeeded(arg, isWindows));
-    }
-
-    commandToRun = [normalizedCommand, ...normalizedArgs].join(' ');
-  }
-
-  return {
-    command: shellCommand,
-    args: [...commandFlags, commandToRun]
-  };
-}
 
 export function escapeArgumentIfNeeded(command: string, isWindows: boolean = IS_WINDOWS): string {
   if (command.includes(' ')) {

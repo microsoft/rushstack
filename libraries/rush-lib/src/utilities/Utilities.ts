@@ -23,7 +23,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { syncNpmrc } from './npmrcUtilities';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { RushConstants } from '../logic/RushConstants';
-import { convertCommandAndArgsToShell, escapeArgumentIfNeeded, IS_WINDOWS } from './executionUtilities';
+import { escapeArgumentIfNeeded, IS_WINDOWS } from './executionUtilities';
 
 export type UNINITIALIZED = 'UNINITIALIZED';
 // eslint-disable-next-line @typescript-eslint/no-redeclare
@@ -171,6 +171,11 @@ type IExecuteCommandInternalOptions = Omit<IExecuteCommandOptions, 'suppressOutp
   stdio: child_process.SpawnSyncOptions['stdio'];
   captureOutput: boolean;
 };
+
+export interface ICommandAndArgs {
+  command: string;
+  args: string[];
+}
 
 export class Utilities {
   public static syncNpmrc: typeof syncNpmrc = syncNpmrc;
@@ -605,6 +610,43 @@ export class Utilities {
     }
   }
 
+  /** @internal */
+  public static _convertCommandAndArgsToShell(command: string, isWindows?: boolean): ICommandAndArgs;
+  public static _convertCommandAndArgsToShell(options: ICommandAndArgs, isWindows?: boolean): ICommandAndArgs;
+  public static _convertCommandAndArgsToShell(
+    options: ICommandAndArgs | string,
+    isWindows: boolean = IS_WINDOWS
+  ): ICommandAndArgs {
+    let shellCommand: string;
+    let commandFlags: string[];
+    if (isWindows) {
+      shellCommand = process.env.comspec || 'cmd';
+      commandFlags = ['/d', '/s', '/c'];
+    } else {
+      shellCommand = 'sh';
+      commandFlags = ['-c'];
+    }
+
+    let commandToRun: string;
+    if (typeof options === 'string') {
+      commandToRun = options;
+    } else {
+      const { command, args } = options;
+      const normalizedCommand: string = escapeArgumentIfNeeded(command, isWindows);
+      const normalizedArgs: string[] = [];
+      for (const arg of args) {
+        normalizedArgs.push(escapeArgumentIfNeeded(arg, isWindows));
+      }
+
+      commandToRun = [normalizedCommand, ...normalizedArgs].join(' ');
+    }
+
+    return {
+      command: shellCommand,
+      args: [...commandFlags, commandToRun]
+    };
+  }
+
   private static _executeLifecycleCommandInternal<TCommandResult>(
     commandAndArgs: string,
     spawnFunction: (
@@ -651,7 +693,7 @@ export class Utilities {
       Object.assign(spawnOptions, SubprocessTerminator.RECOMMENDED_OPTIONS);
     }
 
-    const { command, args } = convertCommandAndArgsToShell(commandAndArgs);
+    const { command, args } = Utilities._convertCommandAndArgsToShell(commandAndArgs);
     return spawnFunction(command, args, spawnOptions);
   }
 
