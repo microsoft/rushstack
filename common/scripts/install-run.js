@@ -24,33 +24,26 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   convertCommandAndArgsToShell: () => (/* binding */ convertCommandAndArgsToShell)
+/* harmony export */   IS_WINDOWS: () => (/* binding */ IS_WINDOWS),
+/* harmony export */   escapeArgumentIfNeeded: () => (/* binding */ escapeArgumentIfNeeded)
 /* harmony export */ });
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-function convertCommandAndArgsToShell(options) {
-    let shellCommand;
-    let commandFlags;
-    if (process.platform !== 'win32') {
-        shellCommand = 'sh';
-        commandFlags = ['-c'];
+const IS_WINDOWS = process.platform === 'win32';
+function escapeArgumentIfNeeded(command, isWindows = IS_WINDOWS) {
+    if (command.includes(' ')) {
+        if (isWindows) {
+            // Windows: use double quotes and escape internal double quotes
+            return `"${command.replace(/"/g, '""')}"`;
+        }
+        else {
+            // Unix: use JSON.stringify for proper escaping
+            return JSON.stringify(command);
+        }
     }
     else {
-        shellCommand = process.env.comspec || 'cmd';
-        commandFlags = ['/d', '/s', '/c'];
+        return command;
     }
-    let commandToRun;
-    if (typeof options === 'string') {
-        commandToRun = options;
-    }
-    else {
-        const { command, args } = options;
-        commandToRun = [command, ...args].join(' ');
-    }
-    return {
-        command: shellCommand,
-        args: [...commandFlags, commandToRun]
-    };
 }
 //# sourceMappingURL=executionUtilities.js.map
 
@@ -416,7 +409,7 @@ let _npmPath = undefined;
 function getNpmPath() {
     if (!_npmPath) {
         try {
-            if (_isWindows()) {
+            if (_utilities_executionUtilities__WEBPACK_IMPORTED_MODULE_5__.IS_WINDOWS) {
                 // We're on Windows
                 const whereOutput = node_child_process__WEBPACK_IMPORTED_MODULE_0__.execSync('where npm', { stdio: [] }).toString();
                 const lines = whereOutput.split(node_os__WEBPACK_IMPORTED_MODULE_2__.EOL).filter((line) => !!line);
@@ -518,7 +511,6 @@ function _resolvePackageVersion(logger, rushCommonFolder, { name, version }) {
                 logger,
                 supportEnvVarFallbackSyntax: false
             });
-            const npmPath = getNpmPath();
             // This returns something that looks like:
             // ```
             // [
@@ -536,12 +528,11 @@ function _resolvePackageVersion(logger, rushCommonFolder, { name, version }) {
             // ```
             //
             // if only a single version matches.
-            const spawnSyncOptions = {
+            const npmVersionSpawnResult = _runNpmConfirmSuccess(['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'], {
                 cwd: rushTempFolder,
-                stdio: []
-            };
-            const platformNpmPath = _getPlatformPath(npmPath);
-            const npmVersionSpawnResult = _runAsShellCommandAndConfirmSuccess(platformNpmPath, ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'], spawnSyncOptions, 'npm view');
+                stdio: [],
+                env: process.env
+            }, 'npm view');
             const npmViewVersionOutput = npmVersionSpawnResult.stdout.toString();
             const parsedVersionOutput = JSON.parse(npmViewVersionOutput);
             const versions = Array.isArray(parsedVersionOutput)
@@ -670,8 +661,7 @@ function _createPackageJson(packageInstallFolder, name, version) {
 function _installPackage(logger, packageInstallFolder, name, version, npmCommand) {
     try {
         logger.info(`Installing ${name}...`);
-        const npmPath = getNpmPath();
-        _runAsShellCommandAndConfirmSuccess(npmPath, [npmCommand], {
+        _runNpmConfirmSuccess([npmCommand], {
             stdio: 'inherit',
             cwd: packageInstallFolder,
             env: process.env
@@ -687,17 +677,13 @@ function _installPackage(logger, packageInstallFolder, name, version, npmCommand
  */
 function _getBinPath(packageInstallFolder, binName) {
     const binFolderPath = node_path__WEBPACK_IMPORTED_MODULE_3__.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
-    const resolvedBinName = _isWindows() ? `${binName}.cmd` : binName;
+    const resolvedBinName = _utilities_executionUtilities__WEBPACK_IMPORTED_MODULE_5__.IS_WINDOWS ? `${binName}.cmd` : binName;
     return node_path__WEBPACK_IMPORTED_MODULE_3__.resolve(binFolderPath, resolvedBinName);
 }
-/**
- * Returns a cross-platform path - windows must enclose any path containing spaces within double quotes.
- */
-function _getPlatformPath(platformPath) {
-    return _isWindows() && platformPath.includes(' ') ? `"${platformPath}"` : platformPath;
-}
-function _isWindows() {
-    return node_os__WEBPACK_IMPORTED_MODULE_2__.platform() === 'win32';
+function _buildShellCommand(command, args) {
+    const escapedCommand = (0,_utilities_executionUtilities__WEBPACK_IMPORTED_MODULE_5__.escapeArgumentIfNeeded)(command);
+    const escapedArgs = args.map((arg) => (0,_utilities_executionUtilities__WEBPACK_IMPORTED_MODULE_5__.escapeArgumentIfNeeded)(arg));
+    return [escapedCommand, ...escapedArgs].join(' ');
 }
 /**
  * Write a flag file to the package's install directory, signifying that the install was successful.
@@ -712,17 +698,29 @@ function _writeFlagFile(packageInstallFolder) {
     }
 }
 /**
- * Run the specified command under the platform's shell and throw if it didn't succeed.
+ * Run npm under the platform's shell and throw if it didn't succeed.
  */
-function _runAsShellCommandAndConfirmSuccess(command, args, options, commandNameForLogging) {
-    if (_isWindows()) {
-        ({ command, args } = (0,_utilities_executionUtilities__WEBPACK_IMPORTED_MODULE_5__.convertCommandAndArgsToShell)({ command, args }));
+function _runNpmConfirmSuccess(args, options, commandNameForLogging) {
+    const command = getNpmPath();
+    let result;
+    if (_utilities_executionUtilities__WEBPACK_IMPORTED_MODULE_5__.IS_WINDOWS) {
+        result = node_child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(_buildShellCommand(command, args), {
+            ...options,
+            shell: true,
+            windowsVerbatimArguments: false
+        });
     }
-    const result = node_child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(command, args, options);
+    else {
+        result = node_child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(command, args, options);
+    }
     if (result.status !== 0) {
-        if (result.status === undefined) {
+        if (!result.status) {
+            // Is status null or undefined?
             if (result.error) {
                 throw new Error(`"${commandNameForLogging}" failed: ${result.error.message.toString()}`);
+            }
+            else if (result.signal) {
+                throw new Error(`"${commandNameForLogging}" was terminated by signal: ${result.signal}`);
             }
             else {
                 throw new Error(`"${commandNameForLogging}" failed for an unknown reason`);
@@ -750,8 +748,8 @@ function installAndRun(logger, packageName, packageVersion, packageBinName, pack
             supportEnvVarFallbackSyntax: false
         });
         _createPackageJson(packageInstallFolder, packageName, packageVersion);
-        const command = lockFilePath ? 'ci' : 'install';
-        _installPackage(logger, packageInstallFolder, packageName, packageVersion, command);
+        const installCommand = lockFilePath ? 'ci' : 'install';
+        _installPackage(logger, packageInstallFolder, packageName, packageVersion, installCommand);
         _writeFlagFile(packageInstallFolder);
     }
     const statusMessage = `Invoking "${packageBinName} ${packageBinArgs.join(' ')}"`;
@@ -764,18 +762,24 @@ function installAndRun(logger, packageName, packageVersion, packageBinName, pack
     const originalEnvPath = process.env.PATH || '';
     let result;
     try {
-        let command = binPath;
-        let args = packageBinArgs;
-        if (_isWindows()) {
-            ({ command, args } = (0,_utilities_executionUtilities__WEBPACK_IMPORTED_MODULE_5__.convertCommandAndArgsToShell)({ command, args }));
-        }
         process.env.PATH = [binFolderPath, originalEnvPath].join(node_path__WEBPACK_IMPORTED_MODULE_3__.delimiter);
-        result = node_child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(command, args, {
+        const spawnOptions = {
             stdio: 'inherit',
-            windowsVerbatimArguments: false,
             cwd: process.cwd(),
             env: process.env
-        });
+        };
+        if (_utilities_executionUtilities__WEBPACK_IMPORTED_MODULE_5__.IS_WINDOWS) {
+            result = node_child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(_buildShellCommand(binPath, packageBinArgs), {
+                ...spawnOptions,
+                windowsVerbatimArguments: false,
+                // `npm` bin stubs on Windows are `.cmd` files
+                // Node.js will not directly invoke a `.cmd` file unless `shell` is set to `true`
+                shell: true
+            });
+        }
+        else {
+            result = node_child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(binPath, packageBinArgs, spawnOptions);
+        }
     }
     finally {
         process.env.PATH = originalEnvPath;
@@ -800,7 +804,7 @@ function runWithErrorAndStatusCode(logger, fn) {
 function _run() {
     const [nodePath /* Ex: /bin/node */, scriptPath /* /repo/common/scripts/install-run-rush.js */, rawPackageSpecifier /* qrcode@^1.2.0 */, packageBinName /* qrcode */, ...packageBinArgs /* [-f, myproject/lib] */] = process.argv;
     if (!nodePath) {
-        throw new Error('Unexpected exception: could not detect node path');
+        throw new Error('Could not detect node path');
     }
     const scriptFileName = node_path__WEBPACK_IMPORTED_MODULE_3__.basename(scriptPath).toLowerCase();
     if (scriptFileName !== 'install-run.js' && scriptFileName !== 'install-run') {
