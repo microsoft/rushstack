@@ -11,7 +11,7 @@ import * as path from 'node:path';
 import type { IPackageJson } from '@rushstack/node-core-library';
 
 import { syncNpmrc, type ILogger } from '../utilities/npmrcUtilities';
-import { IS_WINDOWS } from '../utilities/executionUtilities';
+import { escapeArgumentIfNeeded, IS_WINDOWS } from '../utilities/executionUtilities';
 import type { RushConstants } from '../logic/RushConstants';
 
 export const RUSH_JSON_FILENAME: typeof RushConstants.rushJsonFilename = 'rush.json';
@@ -377,11 +377,10 @@ function _getBinPath(packageInstallFolder: string, binName: string): string {
   return path.resolve(binFolderPath, resolvedBinName);
 }
 
-/**
- * Returns a cross-platform path - windows must enclose any path containing spaces within double quotes.
- */
-function _getPlatformPath(platformPath: string): string {
-  return IS_WINDOWS && platformPath.includes(' ') ? `"${platformPath}"` : platformPath;
+function _buildShellCommand(command: string, args: string[]): string {
+  const escapedCommand: string = escapeArgumentIfNeeded(command);
+  const escapedArgs: string[] = args.map((arg) => escapeArgumentIfNeeded(arg));
+  return [escapedCommand, ...escapedArgs].join(' ');
 }
 
 /**
@@ -403,17 +402,18 @@ function _runNpmConfirmSuccess(
   args: string[],
   options: childProcess.SpawnSyncOptions,
   commandNameForLogging: string
-): childProcess.SpawnSyncReturns<string | Buffer<ArrayBufferLike>> {
-  const command: string = _getPlatformPath(getNpmPath());
-
-  const result: childProcess.SpawnSyncReturns<string | Buffer<ArrayBufferLike>> = childProcess.spawnSync(
-    command,
-    args,
-    {
+): childProcess.SpawnSyncReturns<string | Buffer> {
+  const command: string = getNpmPath();
+  let result: childProcess.SpawnSyncReturns<string | Buffer>;
+  if (IS_WINDOWS) {
+    result = childProcess.spawnSync(_buildShellCommand(command, args), {
       ...options,
-      shell: IS_WINDOWS
-    }
-  );
+      shell: true,
+      windowsVerbatimArguments: false
+    });
+  } else {
+    result = childProcess.spawnSync(command, args, options);
+  }
 
   if (result.status !== 0) {
     if (!result.status) {
@@ -478,23 +478,30 @@ export function installAndRun(
   // Windows environment variables are case-insensitive.  Instead of using SpawnSyncOptions.env, we need to
   // assign via the process.env proxy to ensure that we append to the right PATH key.
   const originalEnvPath: string = process.env.PATH || '';
-  let result: childProcess.SpawnSyncReturns<Buffer>;
+  let result: childProcess.SpawnSyncReturns<string | Buffer>;
   try {
-    // `npm` bin stubs on Windows are `.cmd` files
-    // Node.js will not directly invoke a `.cmd` file unless `shell` is set to `true`
-    const platformBinPath: string = _getPlatformPath(binPath);
-
     process.env.PATH = [binFolderPath, originalEnvPath].join(path.delimiter);
-    result = childProcess.spawnSync(platformBinPath, packageBinArgs, {
+
+    const spawnOptions: childProcess.SpawnSyncOptions = {
       stdio: 'inherit',
-      windowsVerbatimArguments: false,
-      shell: IS_WINDOWS,
       cwd: process.cwd(),
       env: process.env
-    });
+    };
+    if (IS_WINDOWS) {
+      result = childProcess.spawnSync(_buildShellCommand(binPath, packageBinArgs), {
+        ...spawnOptions,
+        windowsVerbatimArguments: false,
+        // `npm` bin stubs on Windows are `.cmd` files
+        // Node.js will not directly invoke a `.cmd` file unless `shell` is set to `true`
+        shell: true
+      });
+    } else {
+      result = childProcess.spawnSync(binPath, packageBinArgs, spawnOptions);
+    }
   } finally {
     process.env.PATH = originalEnvPath;
   }
+
   if (result.status !== null) {
     return result.status;
   } else {

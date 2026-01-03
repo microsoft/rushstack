@@ -684,7 +684,6 @@ export class Utilities {
 
     const spawnOptions: child_process.SpawnOptions = {
       cwd: workingDirectory,
-      shell: IS_WINDOWS,
       env: environment,
       stdio
     };
@@ -694,7 +693,13 @@ export class Utilities {
     }
 
     const { command, args } = Utilities._convertCommandAndArgsToShell(commandAndArgs);
-    return spawnFunction(command, args, spawnOptions);
+
+    if (IS_WINDOWS) {
+      const shellCommand: string = [command, ...args].join(' ');
+      return spawnFunction(shellCommand, [], { ...spawnOptions, shell: true });
+    } else {
+      return spawnFunction(command, args, spawnOptions);
+    }
   }
 
   /**
@@ -823,7 +828,7 @@ export class Utilities {
     captureOutput,
     captureExitCodeAndSignal
   }: IExecuteCommandInternalOptions): Promise<IWaitForExitResult<string> | IWaitForExitResultWithoutOutput> {
-    const options: child_process.SpawnSyncOptions = {
+    const spawnOptions: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
       shell: true,
       stdio: stdio,
@@ -849,12 +854,9 @@ export class Utilities {
     const escapedCommand: string = escapeArgumentIfNeeded(command);
 
     const escapedArgs: string[] = args.map((x) => escapeArgumentIfNeeded(x));
+    const shellCommand: string = [escapedCommand, ...escapedArgs].join(' ');
 
-    const childProcess: child_process.ChildProcess = child_process.spawn(
-      escapedCommand,
-      escapedArgs,
-      options
-    );
+    const childProcess: child_process.ChildProcess = child_process.spawn(shellCommand, spawnOptions);
 
     if (onStdoutStreamChunk) {
       const inspectStream: Transform = new Transform({
