@@ -420,6 +420,8 @@ function _runNpmConfirmSuccess(
       // Is status null or undefined?
       if (result.error) {
         throw new Error(`"${commandNameForLogging}" failed: ${result.error.message.toString()}`);
+      } else if (result.signal) {
+        throw new Error(`"${commandNameForLogging}" was terminated by signal: ${result.signal}`);
       } else {
         throw new Error(`"${commandNameForLogging}" failed for an unknown reason`);
       }
