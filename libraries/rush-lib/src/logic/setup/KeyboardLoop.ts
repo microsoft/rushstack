@@ -7,6 +7,8 @@ import * as process from 'node:process';
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
+import { IS_WINDOWS } from '../../utilities/executionUtilities';
+
 // TODO: Integrate these into the AnsiEscape API in @rushstack/terminal
 // As part of that work we should generalize the "Colorize" API to support more general
 // terminal escapes, and simplify the interface for that API.
@@ -50,7 +52,7 @@ export class KeyboardLoop {
       return;
     }
 
-    if (process.platform === 'win32') {
+    if (IS_WINDOWS) {
       const shell: string = process.env.SHELL ?? '';
       if (shell.toUpperCase().endsWith('BASH.EXE')) {
         // Git Bash has a known problem where the Node.js TTY is lost when invoked via an NPM binary script.

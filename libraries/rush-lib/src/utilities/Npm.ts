@@ -5,23 +5,44 @@ import * as semver from 'semver';
 
 import { Utilities } from './Utilities';
 
+async function runNpmCommandAndCaptureOutputAsync(
+  args: string[],
+  workingDirectory: string,
+  environment: { [key: string]: string | undefined }
+): Promise<string> {
+  const { stdout, stderr, signal, exitCode } = await Utilities.executeCommandAndCaptureOutputAsync({
+    command: 'npm',
+    args,
+    workingDirectory,
+    environment,
+    keepEnvironment: true,
+    captureExitCodeAndSignal: true
+  });
+
+  if (signal !== undefined) {
+    throw new Error(`The npm command was terminated by signal: ${signal}. Output: ${stdout} ${stderr}`);
+  } else if (exitCode !== 0) {
+    throw new Error(`The npm command failed with exit code: ${exitCode}. Output: ${stdout} ${stderr}`);
+  } else {
+    return stdout;
+  }
+}
+
 export class Npm {
   public static async getPublishedVersionsAsync(
     packageName: string,
-    cwd: string,
-    env: { [key: string]: string | undefined },
+    workingDirectory: string,
+    environment: { [key: string]: string | undefined },
     extraArgs: string[] = []
   ): Promise<string[]> {
     const versions: string[] = [];
     try {
-      const packageTime: string = await Utilities.executeCommandAndCaptureOutputAsync(
-        'npm',
+      const packageTime: string = await runNpmCommandAndCaptureOutputAsync(
         ['view', packageName, 'time', '--json', ...extraArgs],
-        cwd,
-        env,
-        true
+        workingDirectory,
+        environment
       );
-      if (packageTime && packageTime !== '') {
+      if (packageTime) {
         Object.keys(JSON.parse(packageTime)).forEach((v) => {
           if (semver.valid(v)) {
             versions.push(v);
@@ -31,12 +52,10 @@ export class Npm {
         // eslint-disable-next-line no-console
         console.log(`Package ${packageName} time value does not exist. Fall back to versions.`);
         // time property does not exist. It happens sometimes. Fall back to versions.
-        const packageVersions: string = await Utilities.executeCommandAndCaptureOutputAsync(
-          'npm',
+        const packageVersions: string = await runNpmCommandAndCaptureOutputAsync(
           ['view', packageName, 'versions', '--json', ...extraArgs],
-          cwd,
-          env,
-          true
+          workingDirectory,
+          environment
         );
         if (packageVersions && packageVersions.length > 0) {
           const parsedPackageVersions: string | string[] = JSON.parse(packageVersions);
@@ -53,7 +72,7 @@ export class Npm {
       }
     } catch (e) {
       const error: Error = e;
-      if (['E404', 'npm ERR! 404'].some((check) => error.message.indexOf(check))) {
+      if (['E404', 'npm ERR! 404'].some((check) => error.message.includes(check))) {
         // eslint-disable-next-line no-console
         console.log(`Package ${packageName} does not exist in the registry.`);
       } else {

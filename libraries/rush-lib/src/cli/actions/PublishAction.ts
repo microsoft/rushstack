@@ -29,6 +29,7 @@ import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 import { Utilities } from '../../utilities/Utilities';
 import { Git } from '../../logic/Git';
 import { RushConstants } from '../../logic/RushConstants';
+import { IS_WINDOWS } from '../../utilities/executionUtilities';
 
 export class PublishAction extends BaseRushAction {
   private readonly _addCommitDetails: CommandLineFlagParameter;
@@ -473,14 +474,14 @@ export class PublishAction extends BaseRushAction {
       // If the auth token was specified via the command line, avoid printing it on the console
       const secretSubstring: string | undefined = this._npmAuthToken.value;
 
-      await PublishUtilities.execCommandAsync(
-        !!this._publish.value,
-        packageManagerToolFilename,
+      await PublishUtilities.execCommandAsync({
+        shouldExecute: this._publish.value,
+        command: packageManagerToolFilename,
         args,
-        packagePath,
-        env,
+        workingDirectory: packagePath,
+        environment: env,
         secretSubstring
-      );
+      });
     }
   }
 
@@ -522,13 +523,13 @@ export class PublishAction extends BaseRushAction {
     const args: string[] = ['pack'];
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
 
-    await PublishUtilities.execCommandAsync(
-      !!this._publish.value,
-      this.rushConfiguration.packageManagerToolFilename,
+    await PublishUtilities.execCommandAsync({
+      shouldExecute: this._publish.value,
+      command: this.rushConfiguration.packageManagerToolFilename,
       args,
-      project.publishFolder,
-      env
-    );
+      workingDirectory: project.publishFolder,
+      environment: env
+    });
 
     if (this._publish.value) {
       // Copy the tarball the release folder
@@ -597,7 +598,7 @@ export class PublishAction extends BaseRushAction {
   }
 
   private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {
-    const userHomeEnvVariable: string = process.platform === 'win32' ? 'USERPROFILE' : 'HOME';
+    const userHomeEnvVariable: string = IS_WINDOWS ? 'USERPROFILE' : 'HOME';
     let registry: string = '//registry.npmjs.org/';
 
     // Check if .npmrc file exists in "common\temp\publish-home"

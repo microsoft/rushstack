@@ -3,12 +3,12 @@
 
 import * as child_process from 'node:child_process';
 import * as fs from 'node:fs';
-import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { Text, Path, FileSystem, type FolderItem } from '@rushstack/node-core-library';
 
 import { Utilities } from './Utilities';
+import { IS_WINDOWS } from './executionUtilities';
 
 /**
  * For deleting large folders, AsyncRecycler is significantly faster than Utilities.dangerouslyDeletePath().
@@ -125,7 +125,7 @@ export class AsyncRecycler {
       stdio: 'ignore'
     };
 
-    if (os.platform() === 'win32') {
+    if (IS_WINDOWS) {
       // PowerShell.exe doesn't work with a detached console, so we need cmd.exe to create
       // the new console for us.
       command = 'cmd.exe';

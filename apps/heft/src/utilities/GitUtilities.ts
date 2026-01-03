@@ -9,7 +9,7 @@ import { default as ignore, type Ignore as IIgnoreMatcher } from 'ignore';
 
 import { Executable, FileSystem, InternalError, Path, Text } from '@rushstack/node-core-library';
 
-// Matches lines starting with "#" and whitepace lines
+// Matches lines starting with "#" and whitespace lines
 const GITIGNORE_IGNORABLE_LINE_REGEX: RegExp = /^(?:(?:#.*)|(?:\s+))$/;
 const UNINITIALIZED: 'UNINITIALIZED' = 'UNINITIALIZED';
 

@@ -15,6 +15,7 @@ import type {
 import type { Operation } from './Operation';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { IOperationRunner } from './IOperationRunner';
+import { IS_WINDOWS } from '../../utilities/executionUtilities';
 
 export const PLUGIN_NAME: 'ShellOperationRunnerPlugin' = 'ShellOperationRunnerPlugin';
 
@@ -224,7 +225,7 @@ export function formatCommand(rawCommand: string, customParameterValues: Readonl
     return '';
   } else {
     const fullCommand: string = `${rawCommand} ${customParameterValues.join(' ')}`;
-    return process.platform === 'win32' ? convertSlashesForWindows(fullCommand) : fullCommand;
+    return IS_WINDOWS ? convertSlashesForWindows(fullCommand) : fullCommand;
   }
 }
 

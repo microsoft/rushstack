@@ -28,6 +28,7 @@ import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 import { PnpmSyncUtilities } from '../utilities/PnpmSyncUtilities';
 import { initializeDotEnv } from '../logic/dotenv';
+import { escapeArgumentIfNeeded } from '../utilities/executionUtilities';
 
 interface IRushXCommandLineArguments {
   /**
@@ -143,7 +144,9 @@ export class RushXCommandLine {
     rushConfiguration: RushConfiguration | undefined,
     options: ILaunchOptions
   ): Promise<void> {
-    if (!rushxArguments.quiet) {
+    const { quiet, help, commandName, commandArgs } = rushxArguments;
+
+    if (!quiet) {
       RushStartupBanner.logStreamlinedBanner(Rush.version, options.isManaged);
     }
     // Are we in a Rush repo?
@@ -182,15 +185,15 @@ export class RushXCommandLine {
 
     const projectCommandSet: ProjectCommandSet = new ProjectCommandSet(packageJson);
 
-    if (rushxArguments.help) {
+    if (help) {
       RushXCommandLine._showUsage(packageJson, projectCommandSet);
       return;
     }
 
-    const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(rushxArguments.commandName);
+    const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(commandName);
 
     if (scriptBody === undefined) {
-      let errorMessage: string = `The command "${rushxArguments.commandName}" is not defined in the package.json file for this project.`;
+      let errorMessage: string = `The command "${commandName}" is not defined in the package.json file for this project.`;
 
       if (projectCommandSet.commandNames.length > 0) {
         errorMessage +=
@@ -203,20 +206,15 @@ export class RushXCommandLine {
 
     let commandWithArgs: string = scriptBody;
     let commandWithArgsForDisplay: string = scriptBody;
-    if (rushxArguments.commandArgs.length > 0) {
-      // This approach is based on what NPM 7 now does:
-      // https://github.com/npm/run-script/blob/47a4d539fb07220e7215cc0e482683b76407ef9b/lib/run-script-pkg.js#L34
-      const escapedRemainingArgs: string[] = rushxArguments.commandArgs.map((x) =>
-        Utilities.escapeShellParameter(x)
-      );
-
+    if (commandArgs.length > 0) {
+      const escapedRemainingArgs: string[] = commandArgs.map((x) => escapeArgumentIfNeeded(x));
       commandWithArgs += ' ' + escapedRemainingArgs.join(' ');
 
       // Display it nicely without the extra quotes
-      commandWithArgsForDisplay += ' ' + rushxArguments.commandArgs.join(' ');
+      commandWithArgsForDisplay += ' ' + commandArgs.join(' ');
     }
 
-    if (!rushxArguments.quiet) {
+    if (!quiet) {
       // eslint-disable-next-line no-console
       console.log(`> ${JSON.stringify(commandWithArgsForDisplay)}\n`);
     }
@@ -258,10 +256,7 @@ export class RushXCommandLine {
     }
 
     if (exitCode > 0) {
-      throw new ProcessError(
-        `Failed calling ${commandWithArgsForDisplay}.  Exit code: ${exitCode}`,
-        exitCode
-      );
+      throw new ProcessError(`Failed calling ${commandWithArgs}.  Exit code: ${exitCode}`, exitCode);
     }
   }
 

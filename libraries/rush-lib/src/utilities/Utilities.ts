@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'node:child_process';
-import * as os from 'node:os';
 import * as path from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { Transform } from 'node:stream';
@@ -24,6 +23,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { syncNpmrc } from './npmrcUtilities';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { RushConstants } from '../logic/RushConstants';
+import { escapeArgumentIfNeeded, IS_WINDOWS } from './executionUtilities';
 
 export type UNINITIALIZED = 'UNINITIALIZED';
 // eslint-disable-next-line @typescript-eslint/no-redeclare
@@ -131,6 +131,11 @@ export interface IDisposable {
   dispose(): void;
 }
 
+export type IExecuteCommandAndCaptureOutputOptions = Omit<
+  IExecuteCommandOptions,
+  'suppressOutput' | 'onStdoutStreamChunk'
+>;
+
 interface ICreateEnvironmentForRushCommandPathOptions extends IEnvironmentPathOptions {
   rushJsonFolder: string | undefined;
   projectRoot: string | undefined;
@@ -167,35 +172,13 @@ type IExecuteCommandInternalOptions = Omit<IExecuteCommandOptions, 'suppressOutp
   captureOutput: boolean;
 };
 
+export interface ICommandAndArgs {
+  command: string;
+  args: string[];
+}
+
 export class Utilities {
   public static syncNpmrc: typeof syncNpmrc = syncNpmrc;
-
-  private static _homeFolder: string | undefined;
-
-  /**
-   * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
-   * this looks something like "/home/username/"
-   */
-  public static getHomeFolder(): string {
-    let homeFolder: string | undefined = Utilities._homeFolder;
-    if (!homeFolder) {
-      const unresolvedUserFolder: string | undefined =
-        process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
-      const dirError: string = "Unable to determine the current user's home directory";
-      if (unresolvedUserFolder === undefined) {
-        throw new Error(dirError);
-      }
-
-      homeFolder = path.resolve(unresolvedUserFolder);
-      if (!FileSystem.exists(homeFolder)) {
-        throw new Error(dirError);
-      }
-
-      Utilities._homeFolder = homeFolder;
-    }
-
-    return homeFolder;
-  }
 
   /**
    * Node.js equivalent of performance.now().
@@ -355,16 +338,19 @@ export class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
-  public static async executeCommandAsync({
-    command,
-    args,
-    workingDirectory,
-    suppressOutput,
-    onStdoutStreamChunk,
-    environment,
-    keepEnvironment,
-    captureExitCodeAndSignal
-  }: IExecuteCommandOptions): Promise<void | Pick<IWaitForExitResult, 'exitCode' | 'signal'>> {
+  public static async executeCommandAsync(
+    options: IExecuteCommandOptions
+  ): Promise<void | IWaitForExitResultWithoutOutput> {
+    const {
+      command,
+      args,
+      workingDirectory,
+      suppressOutput,
+      onStdoutStreamChunk,
+      environment,
+      keepEnvironment,
+      captureExitCodeAndSignal
+    } = options;
     const { exitCode, signal } = await Utilities._executeCommandInternalAsync({
       command,
       args,
@@ -398,23 +384,25 @@ export class Utilities {
    * The current directory will be set to the specified workingDirectory.
    */
   public static async executeCommandAndCaptureOutputAsync(
-    command: string,
-    args: string[],
-    workingDirectory: string,
-    environment?: IEnvironment,
-    keepEnvironment: boolean = false
-  ): Promise<string> {
-    const { stdout } = await Utilities._executeCommandInternalAsync({
-      command,
-      args,
-      workingDirectory,
+    options: IExecuteCommandAndCaptureOutputOptions & { captureExitCodeAndSignal?: false }
+  ): Promise<string>;
+  public static async executeCommandAndCaptureOutputAsync(
+    options: IExecuteCommandAndCaptureOutputOptions & { captureExitCodeAndSignal: true }
+  ): Promise<IWaitForExitResult<string>>;
+  public static async executeCommandAndCaptureOutputAsync(
+    options: IExecuteCommandAndCaptureOutputOptions
+  ): Promise<string | IWaitForExitResult<string>> {
+    const result: IWaitForExitResult<string> = await Utilities._executeCommandInternalAsync({
+      ...options,
       stdio: ['pipe', 'pipe', 'pipe'],
-      environment,
-      keepEnvironment,
       captureOutput: true
     });
 
-    return stdout;
+    if (options.captureExitCodeAndSignal) {
+      return result;
+    } else {
+      return result.stdout;
+    }
   }
 
   /**
@@ -505,18 +493,6 @@ export class Utilities {
       SubprocessTerminator.killProcessTreeOnExit(child, SubprocessTerminator.RECOMMENDED_OPTIONS);
     }
     return child;
-  }
-
-  /**
-   * For strings passed to a shell command, this adds appropriate escaping
-   * to avoid misinterpretation of spaces or special characters.
-   *
-   * Example: 'hello there' --> '"hello there"'
-   */
-  public static escapeShellParameter(parameter: string): string {
-    // This approach is based on what NPM 7 now does:
-    // https://github.com/npm/run-script/blob/47a4d539fb07220e7215cc0e482683b76407ef9b/lib/run-script-pkg.js#L34
-    return JSON.stringify(parameter);
   }
 
   /**
@@ -634,8 +610,45 @@ export class Utilities {
     }
   }
 
+  /** @internal */
+  public static _convertCommandAndArgsToShell(command: string, isWindows?: boolean): ICommandAndArgs;
+  public static _convertCommandAndArgsToShell(options: ICommandAndArgs, isWindows?: boolean): ICommandAndArgs;
+  public static _convertCommandAndArgsToShell(
+    options: ICommandAndArgs | string,
+    isWindows: boolean = IS_WINDOWS
+  ): ICommandAndArgs {
+    let shellCommand: string;
+    let commandFlags: string[];
+    if (isWindows) {
+      shellCommand = process.env.comspec || 'cmd';
+      commandFlags = ['/d', '/s', '/c'];
+    } else {
+      shellCommand = 'sh';
+      commandFlags = ['-c'];
+    }
+
+    let commandToRun: string;
+    if (typeof options === 'string') {
+      commandToRun = options;
+    } else {
+      const { command, args } = options;
+      const normalizedCommand: string = escapeArgumentIfNeeded(command, isWindows);
+      const normalizedArgs: string[] = [];
+      for (const arg of args) {
+        normalizedArgs.push(escapeArgumentIfNeeded(arg, isWindows));
+      }
+
+      commandToRun = [normalizedCommand, ...normalizedArgs].join(' ');
+    }
+
+    return {
+      command: shellCommand,
+      args: [...commandFlags, commandToRun]
+    };
+  }
+
   private static _executeLifecycleCommandInternal<TCommandResult>(
-    command: string,
+    commandAndArgs: string,
     spawnFunction: (
       command: string,
       args: string[],
@@ -643,43 +656,45 @@ export class Utilities {
     ) => TCommandResult,
     options: ILifecycleCommandOptions
   ): TCommandResult {
-    let shellCommand: string = process.env.comspec || 'cmd';
-    let commandFlags: string = '/d /s /c';
-    let useShell: boolean = true;
-    if (process.platform !== 'win32') {
-      shellCommand = 'sh';
-      commandFlags = '-c';
-      useShell = false;
-    }
-
+    const {
+      initCwd,
+      initialEnvironment,
+      environmentPathOptions,
+      rushConfiguration,
+      workingDirectory,
+      handleOutput,
+      ipc,
+      connectSubprocessTerminator
+    } = options;
     const environment: IEnvironment = Utilities._createEnvironmentForRushCommand({
-      initCwd: options.initCwd,
-      initialEnvironment: options.initialEnvironment,
+      initCwd,
+      initialEnvironment,
       pathOptions: {
-        ...options.environmentPathOptions,
-        rushJsonFolder: options.rushConfiguration?.rushJsonFolder,
-        projectRoot: options.workingDirectory,
-        commonTempFolder: options.rushConfiguration ? options.rushConfiguration.commonTempFolder : undefined
+        ...environmentPathOptions,
+        rushJsonFolder: rushConfiguration?.rushJsonFolder,
+        projectRoot: workingDirectory,
+        commonTempFolder: rushConfiguration ? rushConfiguration.commonTempFolder : undefined
       }
     });
 
-    const stdio: child_process.StdioOptions = options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2];
-    if (options.ipc) {
+    const stdio: child_process.StdioOptions = handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2];
+    if (ipc) {
       stdio.push('ipc');
     }
 
     const spawnOptions: child_process.SpawnOptions = {
-      cwd: options.workingDirectory,
-      shell: useShell,
+      cwd: workingDirectory,
+      shell: IS_WINDOWS,
       env: environment,
       stdio
     };
 
-    if (options.connectSubprocessTerminator) {
+    if (connectSubprocessTerminator) {
       Object.assign(spawnOptions, SubprocessTerminator.RECOMMENDED_OPTIONS);
     }
 
-    return spawnFunction(shellCommand, [commandFlags, command], spawnOptions);
+    const { command, args } = Utilities._convertCommandAndArgsToShell(commandAndArgs);
+    return spawnFunction(command, args, spawnOptions);
   }
 
   /**
@@ -704,7 +719,7 @@ export class Utilities {
     }
 
     for (const key of Object.getOwnPropertyNames(options.initialEnvironment)) {
-      const normalizedKey: string = os.platform() === 'win32' ? key.toUpperCase() : key;
+      const normalizedKey: string = IS_WINDOWS ? key.toUpperCase() : key;
 
       // If Rush itself was invoked inside a lifecycle script, this may be set and would interfere
       // with Rush's installations.  If we actually want it, we will set it explicitly below.
@@ -831,10 +846,9 @@ export class Utilities {
     // into node-core-library, but for now this hack will unblock people:
 
     // Only escape the command if it actually contains spaces:
-    const escapedCommand: string =
-      command.indexOf(' ') < 0 ? command : Utilities.escapeShellParameter(command);
+    const escapedCommand: string = escapeArgumentIfNeeded(command);
 
-    const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
+    const escapedArgs: string[] = args.map((x) => escapeArgumentIfNeeded(x));
 
     const childProcess: child_process.ChildProcess = child_process.spawn(
       escapedCommand,

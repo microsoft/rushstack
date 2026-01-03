@@ -101,7 +101,11 @@ export async function validateAsync(
   let fancyEmail: string = Colorize.cyan(userEmail);
   try {
     const userName: string = (
-      await Utilities.executeCommandAndCaptureOutputAsync(git.gitPath!, ['config', 'user.name'], '.')
+      await Utilities.executeCommandAndCaptureOutputAsync({
+        command: git.gitPath!,
+        args: ['config', 'user.name'],
+        workingDirectory: '.'
+      })
     ).trim();
     if (userName) {
       fancyEmail = `${userName} <${fancyEmail}>`;

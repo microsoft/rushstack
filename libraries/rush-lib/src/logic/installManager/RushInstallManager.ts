@@ -545,7 +545,7 @@ export class RushInstallManager extends BaseInstallManager {
           await Utilities.executeCommandWithRetryAsync(
             {
               command: packageManagerFilename,
-              args: args,
+              args,
               workingDirectory: this.rushConfiguration.commonTempFolder,
               environment: packageManagerEnv
             },

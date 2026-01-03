@@ -28,6 +28,7 @@ import {
   normalizePnpmVersionSpecifier
 } from './PnpmShrinkwrapFile';
 import type { Subspace } from '../../api/Subspace';
+import { IS_WINDOWS } from '../../utilities/executionUtilities';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost
@@ -336,7 +337,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       // TODO Read virtual-store-dir-max-length from .npmrc
       const folderName: string = pnpmKitV10.dependencyPath.depPathToFilename(
         tempProjectDependencyKey,
-        process.platform === 'win32' ? 60 : 120
+        IS_WINDOWS ? 60 : 120
       );
       return path.join(
         this._rushConfiguration.commonTempFolder,

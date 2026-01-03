@@ -3,6 +3,25 @@
 
 import { type IDisposable, Utilities } from '../Utilities';
 
+function withComSpec<T>(value: string | undefined, callback: () => T): T {
+  const originalValue: string | undefined = process.env.comspec;
+  try {
+    if (value === undefined) {
+      delete process.env.comspec;
+    } else {
+      process.env.comspec = value;
+    }
+
+    return callback();
+  } finally {
+    if (originalValue === undefined) {
+      delete process.env.comspec;
+    } else {
+      process.env.comspec = originalValue;
+    }
+  }
+}
+
 describe(Utilities.name, () => {
   describe(Utilities.usingAsync.name, () => {
     let disposed: boolean;
@@ -56,6 +75,39 @@ describe(Utilities.name, () => {
       ).rejects.toMatchSnapshot();
 
       expect(disposed).toEqual(false);
+    });
+  });
+
+  describe(Utilities._convertCommandAndArgsToShell.name, () => {
+    it('builds a POSIX shell command from a string', () => {
+      const result = withComSpec(undefined, () => Utilities._convertCommandAndArgsToShell('npm test', false));
+
+      expect(result).toMatchSnapshot();
+    });
+
+    it('builds a Windows shell command from a string', () => {
+      const result = withComSpec('cmd.exe', () => Utilities._convertCommandAndArgsToShell('npm test', true));
+
+      expect(result).toMatchSnapshot();
+    });
+
+    it('keeps unescaped args when wrapping a POSIX command object', () => {
+      const result = withComSpec(undefined, () =>
+        Utilities._convertCommandAndArgsToShell({ command: 'foo bar', args: ['baz qux', '--flag'] }, false)
+      );
+
+      expect(result).toMatchSnapshot();
+    });
+
+    it('keeps unescaped args when wrapping a Windows command object', () => {
+      const result = withComSpec('cmd.exe', () =>
+        Utilities._convertCommandAndArgsToShell(
+          { command: 'weird "cmd"', args: ['space arg', 'quote "arg"'] },
+          true
+        )
+      );
+
+      expect(result).toMatchSnapshot();
     });
   });
 });

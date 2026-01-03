@@ -14,6 +14,7 @@ import { Git } from './Git';
 import type { IInputsSnapshot, GetInputsSnapshotAsyncFn } from './incremental/InputsSnapshot';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
+import { IS_WINDOWS } from '../utilities/executionUtilities';
 
 export interface IProjectWatcherOptions {
   abortSignal: AbortSignal;
@@ -186,7 +187,7 @@ export class ProjectWatcher {
 
     // Node 12 supports the "recursive" parameter to fs.watch only on win32 and OSX
     // https://nodejs.org/docs/latest-v12.x/api/fs.html#fs_caveats
-    const useNativeRecursiveWatch: boolean = os.platform() === 'win32' || os.platform() === 'darwin';
+    const useNativeRecursiveWatch: boolean = IS_WINDOWS || os.platform() === 'darwin';
 
     if (useNativeRecursiveWatch) {
       // Watch the root non-recursively

@@ -35,6 +35,15 @@ export interface IChangeRequests {
   versionPolicyChanges: Map<string, IVersionPolicyChangeInfo>;
 }
 
+export interface IExecCommandOptions {
+  shouldExecute: boolean;
+  command: string;
+  args?: string[];
+  workingDirectory?: string;
+  environment?: IEnvironment;
+  secretSubstring?: string;
+}
+
 interface IAddChangeOptions {
   change: IChangeInfo;
   changeFilePath?: string;
@@ -255,14 +264,16 @@ export class PublishUtilities {
    * @param secretSubstring -- if specified, a substring to be replaced by `<<SECRET>>` to avoid printing secrets
    * on the console
    */
-  public static async execCommandAsync(
-    shouldExecute: boolean,
-    command: string,
-    args: string[] = [],
-    workingDirectory: string = process.cwd(),
-    environment?: IEnvironment,
-    secretSubstring?: string
-  ): Promise<void> {
+  public static async execCommandAsync(options: IExecCommandOptions): Promise<void> {
+    const {
+      shouldExecute,
+      command,
+      args = [],
+      workingDirectory = process.cwd(),
+      environment,
+      secretSubstring
+    } = options;
+
     let relativeDirectory: string = path.relative(process.cwd(), workingDirectory);
 
     if (relativeDirectory) {

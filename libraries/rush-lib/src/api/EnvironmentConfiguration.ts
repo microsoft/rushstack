@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { trueCasePathSync } from 'true-case-path';
 
 import type { IEnvironment } from '../utilities/Utilities';
+import { IS_WINDOWS } from '../utilities/executionUtilities';
 
 /**
  * @beta
@@ -482,8 +482,7 @@ export class EnvironmentConfiguration {
       if (process.env.hasOwnProperty(envVarName) && envVarName.match(/^RUSH_/i)) {
         const value: string | undefined = process.env[envVarName];
         // Environment variables are only case-insensitive on Windows
-        const normalizedEnvVarName: string =
-          os.platform() === 'win32' ? envVarName.toUpperCase() : envVarName;
+        const normalizedEnvVarName: string = IS_WINDOWS ? envVarName.toUpperCase() : envVarName;
         switch (normalizedEnvVarName) {
           case EnvironmentVariableNames.RUSH_TEMP_FOLDER: {
             EnvironmentConfiguration._rushTempFolderOverride =

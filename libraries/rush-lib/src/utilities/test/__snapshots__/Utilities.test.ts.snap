@@ -1,5 +1,49 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Utilities _convertCommandAndArgsToShell builds a POSIX shell command from a string 1`] = `
+Object {
+  "args": Array [
+    "-c",
+    "npm test",
+  ],
+  "command": "sh",
+}
+`;
+
+exports[`Utilities _convertCommandAndArgsToShell builds a Windows shell command from a string 1`] = `
+Object {
+  "args": Array [
+    "/d",
+    "/s",
+    "/c",
+    "npm test",
+  ],
+  "command": "cmd.exe",
+}
+`;
+
+exports[`Utilities _convertCommandAndArgsToShell keeps unescaped args when wrapping a POSIX command object 1`] = `
+Object {
+  "args": Array [
+    "-c",
+    "\\"foo bar\\" \\"baz qux\\" --flag",
+  ],
+  "command": "sh",
+}
+`;
+
+exports[`Utilities _convertCommandAndArgsToShell keeps unescaped args when wrapping a Windows command object 1`] = `
+Object {
+  "args": Array [
+    "/d",
+    "/s",
+    "/c",
+    "\\"weird \\"\\"cmd\\"\\"\\" \\"space arg\\" \\"quote \\"\\"arg\\"\\"\\"",
+  ],
+  "command": "cmd.exe",
+}
+`;
+
 exports[`Utilities usingAsync Disposes correctly after the operation throws an exception 1`] = `[Error: operation threw]`;
 
 exports[`Utilities usingAsync Does not dispose if the construction throws an exception 1`] = `[Error: constructor threw]`;
