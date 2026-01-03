@@ -17,7 +17,7 @@ import { RushConstants } from './RushConstants';
  * LTS schedule: https://nodejs.org/en/about/releases/
  * LTS versions: https://nodejs.org/en/download/releases/
  */
-const UPCOMING_NODE_LTS_VERSION: number = 22;
+const UPCOMING_NODE_LTS_VERSION: number = 24;
 const nodeVersion: string = process.versions.node;
 const nodeMajorVersion: number = semver.major(nodeVersion);
 
