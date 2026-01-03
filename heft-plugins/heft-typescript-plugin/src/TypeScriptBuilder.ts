@@ -156,7 +156,9 @@ export class TypeScriptBuilder {
       const normalizedConfig: IEmitModuleKind[] =
         this._configuration.additionalModuleKindsToEmit?.map((emitKind) => ({
           ...emitKind,
-          outFolderName: path.relative(this._configuration.buildFolderPath, emitKind.outFolderName)
+          outFolderName: Path.convertToSlashes(
+            path.relative(this._configuration.buildFolderPath, emitKind.outFolderName)
+          )
         })) || [];
 
       configHash.update(JSON.stringify(normalizedConfig));
