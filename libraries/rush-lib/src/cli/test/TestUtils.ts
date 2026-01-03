@@ -7,12 +7,16 @@ import type { RushCommandLineParser as RushCommandLineParserType } from '../Rush
 import { FlagFile } from '../../api/FlagFile';
 import { RushConstants } from '../../logic/RushConstants';
 
+export type SpawnMockArgs = Parameters<typeof import('node:child_process').spawn>;
+export type SpawnMock = jest.Mock<ReturnType<typeof import('node:child_process').spawn>, SpawnMockArgs>;
+export type SpawnMockCall = SpawnMock['mock']['calls'][number];
+
 /**
  * Interface definition for a test instance for the RushCommandLineParser.
  */
 export interface IParserTestInstance {
   parser: RushCommandLineParserType;
-  spawnMock: jest.Mock;
+  spawnMock: SpawnMock;
   repoPath: string;
 }
 
