@@ -71,16 +71,8 @@ jobs:
       #   run: /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
       #   working-directory: repo-a
 
-      - name: Build to Rush
-        run: node common/scripts/install-run-rush.js build --to @microsoft/rush --production --verbose
-        working-directory: repo-a
-
-      - name: Ensure install-run works as expected
-        run: node libraries/rush-lib/dist/scripts/install-run lsbranch lsbranch -h
-        working-directory: repo-a
-
-      - name: Ensure install-run-rush works as expected
-        run: node libraries/rush-lib/dist/scripts/install-run-rush -h
+      - name: Rush retest (install-run-rush)
+        run: node common/scripts/install-run-rush.js retest --verbose --production
         working-directory: repo-a
 
       - name: Ensure repo README is up-to-date
@@ -107,8 +99,8 @@ jobs:
         run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js update
         working-directory: repo-b
 
-      - name: Rush retest (rush-lib)
-        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js retest --verbose --production --timeline
+      - name: Rush test (rush-lib)
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
         working-directory: repo-b
 
       - name: Rush test (rush-lib) again to verify build cache hits
