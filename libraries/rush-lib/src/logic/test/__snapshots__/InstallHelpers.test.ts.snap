@@ -1,11 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`InstallHelpers generateCommonPackageJson generates correct package json with pnpm configurations: Terminal Output 1`] = `
-Object {
-  "debug": "",
-  "error": "",
-  "output": "",
-  "verbose": "",
-  "warning": "",
-}
-`;
+exports[`InstallHelpers generateCommonPackageJson generates correct package json with pnpm configurations: Terminal Output 1`] = `Object {}`;

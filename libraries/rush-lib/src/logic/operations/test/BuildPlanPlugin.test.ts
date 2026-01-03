@@ -138,7 +138,9 @@ describe(BuildPlanPlugin.name, () => {
 
       await hooks.beforeExecuteOperations.promise(operationMap, context as IExecuteOperationsContext);
 
-      expect(stringBufferTerminalProvider.getOutput({ normalizeSpecialCharacters: false })).toMatchSnapshot();
+      expect(
+        stringBufferTerminalProvider.getAllOutput(true, { normalizeSpecialCharacters: false })
+      ).toMatchSnapshot();
     });
   });
 });

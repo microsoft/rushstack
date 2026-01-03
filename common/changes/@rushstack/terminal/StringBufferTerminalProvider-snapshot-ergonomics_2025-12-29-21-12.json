@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Add a `getAllOutput` function to `StringBufferTerminalProvider` that returns an object containing all output severities.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}
