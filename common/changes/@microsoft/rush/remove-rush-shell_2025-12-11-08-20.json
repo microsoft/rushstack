@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Remove use of the deprecated `shell: true` option in process spawn operations.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
