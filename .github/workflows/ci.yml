@@ -79,37 +79,37 @@ jobs:
       #   working-directory: repo-a
 
       - name: Rush retest (install-run-rush)
-        run: node common/scripts/install-run-rush.js retest --verbose --production --to node-core-library
+        run: node common/scripts/install-run-rush.js retest --verbose --production
         working-directory: repo-a
 
-      # - name: Ensure repo README is up-to-date
-      #   run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
-      #   working-directory: repo-a
+      - name: Ensure repo README is up-to-date
+        run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
+        working-directory: repo-a
 
-      # - name: Collect JSON schemas
-      #   run: node repo-scripts/repo-toolbox/lib/start.js collect-json-schemas --output-path ${GITHUB_WORKSPACE}/artifacts/json-schemas
-      #   working-directory: repo-a
+      - name: Collect JSON schemas
+        run: node repo-scripts/repo-toolbox/lib/start.js collect-json-schemas --output-path ${GITHUB_WORKSPACE}/artifacts/json-schemas
+        working-directory: repo-a
 
-      # - name: Clone another copy of the repo to test the build cache
-      #   uses: actions/checkout@v3
-      #   with:
-      #     fetch-depth: 1
-      #     path: repo-b
+      - name: Clone another copy of the repo to test the build cache
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          path: repo-b
 
-      # - name: Git config user
-      #   run: |
-      #     git config --local user.name "Rushbot"
-      #     git config --local user.email "rushbot@users.noreply.github.com"
-      #   working-directory: repo-b
+      - name: Git config user
+        run: |
+          git config --local user.name "Rushbot"
+          git config --local user.email "rushbot@users.noreply.github.com"
+        working-directory: repo-b
 
-      # - name: Rush update (rush-lib)
-      #   run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js update
-      #   working-directory: repo-b
+      - name: Rush update (rush-lib)
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js update
+        working-directory: repo-b
 
-      # - name: Rush test (rush-lib)
-      #   run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
-      #   working-directory: repo-b
+      - name: Rush test (rush-lib)
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
+        working-directory: repo-b
 
-      # - name: Rush test (rush-lib) again to verify build cache hits
-      #   run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
-      #   working-directory: repo-b
+      - name: Rush test (rush-lib) again to verify build cache hits
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
+        working-directory: repo-b

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
@@ -390,9 +389,6 @@ describe('Executable process list', () => {
   test('contains the current pid (sync)', () => {
     const results: ReadonlyMap<number, IProcessInfo> = Executable.getProcessInfoById();
     const currentProcessInfo: IProcessInfo | undefined = results.get(process.pid);
-    console.log('111111111111111111');
-    console.log(currentProcessInfo);
-    console.log('111111111111111111');
     expect(currentProcessInfo).toBeDefined();
     expect(currentProcessInfo?.parentProcessInfo?.processId).toEqual(process.ppid);
     expect(currentProcessInfo?.processName).toMatch(/node(\.exe)?$/i);
@@ -401,9 +397,6 @@ describe('Executable process list', () => {
   test('contains the current pid (async)', async () => {
     const results: ReadonlyMap<number, IProcessInfo> = await Executable.getProcessInfoByIdAsync();
     const currentProcessInfo: IProcessInfo | undefined = results.get(process.pid);
-    console.log('2222222222222222222');
-    console.log(currentProcessInfo);
-    console.log('2222222222222222222');
     expect(currentProcessInfo).toBeDefined();
     expect(currentProcessInfo?.parentProcessInfo?.processId).toEqual(process.ppid);
     expect(currentProcessInfo?.processName).toMatch(/node(\.exe)?$/i);
