@@ -153,11 +153,11 @@ export class TypeScriptBuilder {
       const configHash: crypto.Hash = crypto.createHash('sha1');
 
       // Relativize the outFolderName paths before hashing to ensure portability across different machines
-      const normalizedConfig: IEmitModuleKind[] | Record<string, never> =
+      const normalizedConfig: IEmitModuleKind[] =
         this._configuration.additionalModuleKindsToEmit?.map((emitKind) => ({
           ...emitKind,
           outFolderName: path.relative(this._configuration.buildFolderPath, emitKind.outFolderName)
-        })) || {};
+        })) || [];
 
       configHash.update(JSON.stringify(normalizedConfig));
       const serializedConfigHash: string = configHash.digest('base64url').slice(0, 8);
