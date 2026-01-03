@@ -90,7 +90,7 @@ export class PublishGit {
   }
 
   public async addChangesAsync(pathspec?: string, workingDirectory?: string): Promise<void> {
-    const files: string = pathspec ? pathspec : '.';
+    const files: string = pathspec || '.';
     await PublishUtilities.execCommandAsync({
       shouldExecute: !!this._targetBranch,
       command: this._gitPath,
