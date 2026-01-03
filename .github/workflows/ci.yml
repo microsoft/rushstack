@@ -71,8 +71,8 @@ jobs:
       #   run: /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
       #   working-directory: repo-a
 
-      - name: Build to Rush
-        run: node common/scripts/install-run-rush.js build --to @microsoft/rush --production --verbose
+      - name: Build to Rush and repo-toolbox
+        run: node common/scripts/install-run-rush.js build --to @microsoft/rush --production --verbose --to repo-toolbox
         working-directory: repo-a
 
       - name: Ensure install-run works as expected
