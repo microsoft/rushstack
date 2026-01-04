@@ -6,8 +6,7 @@ import {
   type IOutputChunk,
   PrintUtilities,
   StringBufferTerminalProvider,
-  Terminal,
-  type TerminalProviderSeverityName
+  Terminal
 } from '@rushstack/terminal';
 
 import { CustomTipId, CustomTipsConfiguration, type ICustomTipsJson } from '../CustomTipsConfiguration';
