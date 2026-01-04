@@ -392,6 +392,9 @@ export class StdioWritable extends TerminalWritable {
 export class StringBufferTerminalProvider implements ITerminalProvider {
     constructor(supportsColor?: boolean);
     get eolCharacter(): string;
+    getAllOutput(sparse?: false, options?: IStringBufferOutputOptions): IAllStringBufferOutput;
+    // (undocumented)
+    getAllOutput(sparse: true, options?: IStringBufferOutputOptions): Partial<IAllStringBufferOutput>;
     getAllOutputAsChunks(options?: IStringBufferOutputChunksOptions & {
         severityAsNames?: false;
         asFlat?: false;
@@ -411,9 +414,6 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
         severityAsNames: true;
         asFlat: true;
     }): `[${string}] ${string}`[];
-    getAllOutput(sparse?: false, options?: IStringBufferOutputOptions): IAllStringBufferOutput;
-    // (undocumented)
-    getAllOutput(sparse: true, options?: IStringBufferOutputOptions): Partial<IAllStringBufferOutput>;
     getDebugOutput(options?: IStringBufferOutputOptions): string;
     getErrorOutput(options?: IStringBufferOutputOptions): string;
     getOutput(options?: IStringBufferOutputOptions): string;
