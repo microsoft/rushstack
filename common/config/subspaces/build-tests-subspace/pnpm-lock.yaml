@@ -14,7 +14,7 @@ overrides:
   '@rushstack/heft-node-rig@2.10.1>eslint': ~9.37.0
   '@types/estree': 1.0.8
 
-packageExtensionsChecksum: sha256-qjn/HRH9R4OxVxwDAcOjy8Osbrbi380H1YeORku66mM=
+packageExtensionsChecksum: sha256-crhmA/4gvKB9f99VTiVxZgLTnYwwdLLlWvY0GNKUg34=
 
 pnpmfileChecksum: sha256-La8sfCMI7irxJPTW6u4mJb4vNiyLrXeEbKaXv5G3dL0=
 
