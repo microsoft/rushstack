@@ -152,6 +152,14 @@ export interface INormalizeNewlinesTextRewriterOptions {
 }
 
 // @beta (undocumented)
+export interface IOutputChunk<TSeverity extends TerminalProviderSeverity | TerminalProviderSeverityName> {
+    // (undocumented)
+    severity: TSeverity;
+    // (undocumented)
+    text: string;
+}
+
+// @beta (undocumented)
 export type IPrefixProxyTerminalProviderOptions = IStaticPrefixProxyTerminalProviderOptions | IDynamicPrefixProxyTerminalProviderOptions;
 
 // @beta (undocumented)
@@ -193,8 +201,14 @@ export interface IStdioSummarizerOptions extends ITerminalWritableOptions {
 }
 
 // @beta (undocumented)
+export interface IStringBufferOutputChunksOptions extends IStringBufferOutputOptions {
+    asFlat?: boolean;
+    severityAsNames?: boolean;
+}
+
+// @beta (undocumented)
 export interface IStringBufferOutputOptions {
-    normalizeSpecialCharacters: boolean;
+    normalizeSpecialCharacters?: boolean;
 }
 
 // @beta (undocumented)
@@ -378,6 +392,25 @@ export class StdioWritable extends TerminalWritable {
 export class StringBufferTerminalProvider implements ITerminalProvider {
     constructor(supportsColor?: boolean);
     get eolCharacter(): string;
+    getAllOutputAsChunks(options?: IStringBufferOutputChunksOptions & {
+        severityAsNames?: false;
+        asFlat?: false;
+    }): IOutputChunk<TerminalProviderSeverity>[];
+    // (undocumented)
+    getAllOutputAsChunks(options: IStringBufferOutputChunksOptions & {
+        severityAsNames: true;
+        asFlat?: false;
+    }): IOutputChunk<TerminalProviderSeverityName>[];
+    // (undocumented)
+    getAllOutputAsChunks(options?: IStringBufferOutputChunksOptions & {
+        severityAsNames?: false;
+        asFlat: true;
+    }): `[${TerminalProviderSeverity}] ${string}`[];
+    // (undocumented)
+    getAllOutputAsChunks(options: IStringBufferOutputChunksOptions & {
+        severityAsNames: true;
+        asFlat: true;
+    }): `[${string}] ${string}`[];
     getAllOutput(sparse?: false, options?: IStringBufferOutputOptions): IAllStringBufferOutput;
     // (undocumented)
     getAllOutput(sparse: true, options?: IStringBufferOutputOptions): Partial<IAllStringBufferOutput>;
@@ -389,7 +422,7 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     getVerboseOutput(options?: IStringBufferOutputOptions): string;
     getWarningOutput(options?: IStringBufferOutputOptions): string;
     readonly supportsColor: boolean;
-    write(data: string, severity: TerminalProviderSeverity): void;
+    write(text: string, severity: TerminalProviderSeverity): void;
 }
 
 // @beta
@@ -428,6 +461,9 @@ export enum TerminalProviderSeverity {
     // (undocumented)
     warning = 1
 }
+
+// @beta (undocumented)
+export type TerminalProviderSeverityName = keyof typeof TerminalProviderSeverity;
 
 // @beta
 export class TerminalStreamWritable extends Writable {

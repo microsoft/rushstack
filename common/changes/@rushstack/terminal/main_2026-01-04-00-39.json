@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Add a `getAllOutputAsChunks` function to `StringBufferTerminalProvider` that returns an array of chunks that were written to the terminal provider.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}

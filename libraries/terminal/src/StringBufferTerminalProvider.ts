@@ -16,7 +16,22 @@ export interface IStringBufferOutputOptions {
    *
    * This option defaults to `true`
    */
-  normalizeSpecialCharacters: boolean;
+  normalizeSpecialCharacters?: boolean;
+}
+
+/**
+ * @beta
+ */
+export interface IStringBufferOutputChunksOptions extends IStringBufferOutputOptions {
+  /**
+   * If true, the severity levels will be represented as names instead of as enum values.
+   */
+  severityAsNames?: boolean;
+
+  /**
+   * If true, the output chunks will be returned as a flat array of prefixed strings of an array of objects.
+   */
+  asFlat?: boolean;
 }
 
 /**
@@ -28,6 +43,19 @@ export interface IAllStringBufferOutput {
   error: string;
   verbose: string;
   debug: string;
+}
+
+/**
+ * @beta
+ */
+export type TerminalProviderSeverityName = keyof typeof TerminalProviderSeverity;
+
+/**
+ * @beta
+ */
+export interface IOutputChunk<TSeverity extends TerminalProviderSeverity | TerminalProviderSeverityName> {
+  text: string;
+  severity: TSeverity;
 }
 
 function _normalizeOutput(s: string, options: IStringBufferOutputOptions | undefined): string {
@@ -46,6 +74,10 @@ function _normalizeOutput(s: string, options: IStringBufferOutputOptions | undef
   }
 }
 
+const LONGEST_SEVERITY_NAME_LENGTH: number = Math.max(
+  ...Object.keys(TerminalProviderSeverity).map(({ length }) => length)
+);
+
 /**
  * Terminal provider that stores written data in buffers separated by severity.
  * This terminal provider is designed to be used when code that prints to a terminal
@@ -59,6 +91,7 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   private _debugBuffer: StringBuilder = new StringBuilder();
   private _warningBuffer: StringBuilder = new StringBuilder();
   private _errorBuffer: StringBuilder = new StringBuilder();
+  private _allOutputChunks: IOutputChunk<TerminalProviderSeverity>[] = [];
 
   /**
    * {@inheritDoc ITerminalProvider.supportsColor}
@@ -72,31 +105,33 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   /**
    * {@inheritDoc ITerminalProvider.write}
    */
-  public write(data: string, severity: TerminalProviderSeverity): void {
+  public write(text: string, severity: TerminalProviderSeverity): void {
+    this._allOutputChunks.push({ text, severity });
+
     switch (severity) {
       case TerminalProviderSeverity.warning: {
-        this._warningBuffer.append(data);
+        this._warningBuffer.append(text);
         break;
       }
 
       case TerminalProviderSeverity.error: {
-        this._errorBuffer.append(data);
+        this._errorBuffer.append(text);
         break;
       }
 
       case TerminalProviderSeverity.verbose: {
-        this._verboseBuffer.append(data);
+        this._verboseBuffer.append(text);
         break;
       }
 
       case TerminalProviderSeverity.debug: {
-        this._debugBuffer.append(data);
+        this._debugBuffer.append(text);
         break;
       }
 
       case TerminalProviderSeverity.log:
       default: {
-        this._standardBuffer.append(data);
+        this._standardBuffer.append(text);
         break;
       }
     }
@@ -188,5 +223,61 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     }
 
     return result;
+  }
+
+  /**
+   * Get everything that has been written as an array of output chunks, preserving order.
+   */
+  public getAllOutputAsChunks(
+    options?: IStringBufferOutputChunksOptions & { severityAsNames?: false; asFlat?: false }
+  ): IOutputChunk<TerminalProviderSeverity>[];
+  public getAllOutputAsChunks(
+    options: IStringBufferOutputChunksOptions & { severityAsNames: true; asFlat?: false }
+  ): IOutputChunk<TerminalProviderSeverityName>[];
+  public getAllOutputAsChunks(
+    options?: IStringBufferOutputChunksOptions & { severityAsNames?: false; asFlat: true }
+  ): `[${TerminalProviderSeverity}] ${string}`[];
+  public getAllOutputAsChunks(
+    options: IStringBufferOutputChunksOptions & { severityAsNames: true; asFlat: true }
+  ): `[${string}] ${string}`[];
+  public getAllOutputAsChunks(
+    options: IStringBufferOutputChunksOptions = {}
+  ): IOutputChunk<TerminalProviderSeverity | TerminalProviderSeverityName>[] | string[] {
+    const { asFlat, severityAsNames } = options;
+
+    function getNormalizedSeverity(
+      rawSeverity: TerminalProviderSeverity
+    ): TerminalProviderSeverity | TerminalProviderSeverityName {
+      if (severityAsNames) {
+        return TerminalProviderSeverity[rawSeverity] as TerminalProviderSeverityName;
+      } else {
+        return rawSeverity;
+      }
+    }
+
+    if (asFlat) {
+      return this._allOutputChunks.map(({ text: rawText, severity: rawSeverity }) => {
+        const severity: TerminalProviderSeverity | `${string}${TerminalProviderSeverityName}` =
+          getNormalizedSeverity(rawSeverity);
+        const text: string = _normalizeOutput(rawText, options);
+
+        const paddedSeverity: TerminalProviderSeverity | string = severityAsNames
+          ? (severity as TerminalProviderSeverityName).padStart(LONGEST_SEVERITY_NAME_LENGTH, ' ')
+          : severity;
+
+        return `[${paddedSeverity}] ${text}`;
+      });
+    } else {
+      return this._allOutputChunks.map(({ text: rawText, severity: rawSeverity }) => {
+        const severity: TerminalProviderSeverity | TerminalProviderSeverityName =
+          getNormalizedSeverity(rawSeverity);
+        const text: string = _normalizeOutput(rawText, options);
+
+        return {
+          text,
+          severity
+        };
+      });
+    }
   }
 }
