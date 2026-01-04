@@ -25,8 +25,7 @@ async function runTestForExampleRepoAsync(
   expect(
     terminalProvider.getAllOutputAsChunks({
       normalizeSpecialCharacters: true,
-      asFlat: true,
-      severityAsNames: true
+      asFlat: true
     })
   ).toMatchSnapshot('Terminal Output');
 }

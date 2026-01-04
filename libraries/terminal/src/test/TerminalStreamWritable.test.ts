@@ -12,7 +12,7 @@ let provider: StringBufferTerminalProvider;
 
 function verifyProvider(): void {
   expect(provider.getAllOutput()).toMatchSnapshot('output');
-  expect(provider.getAllOutputAsChunks({ severityAsNames: true })).toMatchSnapshot('output as chunks');
+  expect(provider.getAllOutputAsChunks()).toMatchSnapshot('output as chunks');
 }
 
 async function writeAsync(writable: Writable, data: string): Promise<void> {

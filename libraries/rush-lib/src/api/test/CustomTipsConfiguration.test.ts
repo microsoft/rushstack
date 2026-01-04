@@ -58,10 +58,7 @@ describe(CustomTipsConfiguration.name, () => {
       afterEach(() => {
         jest.restoreAllMocks();
 
-        const terminalProviderOutput: IOutputChunk<TerminalProviderSeverityName>[] =
-          terminalProvider.getAllOutputAsChunks({
-            severityAsNames: true
-          });
+        const terminalProviderOutput: IOutputChunk[] = terminalProvider.getAllOutputAsChunks();
         const lineSplitTerminalProviderOutput: string[] = [];
         for (const { text, severity } of terminalProviderOutput) {
           const lines: string[] = text.split('[n]');

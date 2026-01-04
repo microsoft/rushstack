@@ -141,8 +141,7 @@ describe(BuildPlanPlugin.name, () => {
       expect(
         stringBufferTerminalProvider.getAllOutputAsChunks({
           normalizeSpecialCharacters: false,
-          asFlat: true,
-          severityAsNames: true
+          asFlat: true
         })
       ).toMatchSnapshot();
     });

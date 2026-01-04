@@ -26,7 +26,7 @@ describe('ConfigurationFile', () => {
   });
 
   afterEach(() => {
-    expect(terminalProvider.getAllOutputAsChunks({ asFlat: true, severityAsNames: true })).toMatchSnapshot();
+    expect(terminalProvider.getAllOutputAsChunks({ asFlat: true })).toMatchSnapshot();
   });
 
   describe('A simple config file', () => {
