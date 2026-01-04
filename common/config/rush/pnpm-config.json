@@ -210,7 +210,11 @@
     "@types/estree": "1.0.8",
 
     // The React 17 types depend on a specific version of the scheduler types
-    "@types/react@17.0.74>@types/scheduler": "0.16.8"
+    "@types/react@17.0.74>@types/scheduler": "0.16.8",
+
+    // Newer versions of `cheerio` have a dependency on `undici`, which does not support Node 18.
+    // Remove when we drop support for Node 18
+    "@vscode/vsce>cheerio": "1.0.0-rc.12"
   },
 
   /**

@@ -15,6 +15,7 @@ jobs:
           # When Node 18 is removed, remove the special cases in
           # - build-tests-samples/heft-storybook-v9-react-tutorial/build.js
           # - build-tests-samples/heft-storybook-v9-react-tutorial-app/build.js
+          # - The "globalOverrides" entry for "@vscode/vsce>cheerio" in common/config/rush/pnpm-config.json
           - NodeVersion: 18.20.x
             NodeVersionDisplayName: 18
             OS: ubuntu-latest
