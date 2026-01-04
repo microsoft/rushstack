@@ -1,402 +1,377 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CustomTipsConfiguration formatting (a long message with an indented line) _showErrorTip prints an expected message 1`] = `
-Object {
-  "error": Array [
-    "[red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-    "[red]|[default]",
-    "[red]| [default]Lorem ipsum dolor sit amet, consectetur",
-    "[red]| [default]adipiscing elit, sed do eiusmod tempor",
-    "[red]| [default]incididunt ut labore et dolore magna aliqua. Ut",
-    "[red]| [default]enim ad minim veniam, quis nostrud exercitation",
-    "[red]| [default]ullamco laboris nisi ut aliquip ex ea commodo",
-    "[red]| [default]consequat. Duis aute irure dolor in",
-    "[red]| [default]reprehenderit in voluptate velit esse cillum",
-    "[red]| [default]dolore eu fugiat nulla pariatur. Excepteur sint",
-    "[red]| [default]occaecat cupidatat non proident, sunt in culpa",
-    "[red]| [default]qui officia deserunt mollit anim id est laborum.",
-    "[red]| [default]  Lorem ipsum dolor sit amet, consectetur",
-    "[red]| [default]  adipiscing elit, sed do eiusmod tempor",
-    "[red]| [default]  incididunt ut labore et dolore magna aliqua. Ut",
-    "[red]| [default]  enim ad minim veniam, quis nostrud exercitation",
-    "[red]| [default]  ullamco laboris nisi ut aliquip ex ea commodo",
-    "[red]| [default]  consequat. Duis aute irure dolor in",
-    "[red]| [default]  reprehenderit in voluptate velit esse cillum",
-    "[red]| [default]  dolore eu fugiat nulla pariatur. Excepteur sint",
-    "[red]| [default]  occaecat cupidatat non proident, sunt in culpa",
-    "[red]| [default]  qui officia deserunt mollit anim id est laborum.",
-    "",
-  ],
-  "log": Array [
-    "",
-    "",
-  ],
-}
+Array [
+  "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
+  "[error] ",
+  "[error] [red]|[default]",
+  "[error] ",
+  "[error] [red]| [default]Lorem ipsum dolor sit amet, consectetur",
+  "[error] [red]| [default]adipiscing elit, sed do eiusmod tempor",
+  "[error] [red]| [default]incididunt ut labore et dolore magna aliqua. Ut",
+  "[error] [red]| [default]enim ad minim veniam, quis nostrud exercitation",
+  "[error] [red]| [default]ullamco laboris nisi ut aliquip ex ea commodo",
+  "[error] [red]| [default]consequat. Duis aute irure dolor in",
+  "[error] [red]| [default]reprehenderit in voluptate velit esse cillum",
+  "[error] [red]| [default]dolore eu fugiat nulla pariatur. Excepteur sint",
+  "[error] [red]| [default]occaecat cupidatat non proident, sunt in culpa",
+  "[error] [red]| [default]qui officia deserunt mollit anim id est laborum.",
+  "[error] [red]| [default]  Lorem ipsum dolor sit amet, consectetur",
+  "[error] [red]| [default]  adipiscing elit, sed do eiusmod tempor",
+  "[error] [red]| [default]  incididunt ut labore et dolore magna aliqua. Ut",
+  "[error] [red]| [default]  enim ad minim veniam, quis nostrud exercitation",
+  "[error] [red]| [default]  ullamco laboris nisi ut aliquip ex ea commodo",
+  "[error] [red]| [default]  consequat. Duis aute irure dolor in",
+  "[error] [red]| [default]  reprehenderit in voluptate velit esse cillum",
+  "[error] [red]| [default]  dolore eu fugiat nulla pariatur. Excepteur sint",
+  "[error] [red]| [default]  occaecat cupidatat non proident, sunt in culpa",
+  "[error] [red]| [default]  qui officia deserunt mollit anim id est laborum.",
+  "[error] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a long message with an indented line) _showInfoTip prints an expected message 1`] = `
-Object {
-  "log": Array [
-    "| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)",
-    "|",
-    "| Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
-    "| sed do eiusmod tempor incididunt ut labore et dolore magna",
-    "| aliqua. Ut enim ad minim veniam, quis nostrud exercitation",
-    "| ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    "| Duis aute irure dolor in reprehenderit in voluptate velit",
-    "| esse cillum dolore eu fugiat nulla pariatur. Excepteur",
-    "| sint occaecat cupidatat non proident, sunt in culpa qui",
-    "| officia deserunt mollit anim id est laborum.",
-    "|   Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
-    "|   sed do eiusmod tempor incididunt ut labore et dolore magna",
-    "|   aliqua. Ut enim ad minim veniam, quis nostrud exercitation",
-    "|   ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    "|   Duis aute irure dolor in reprehenderit in voluptate velit",
-    "|   esse cillum dolore eu fugiat nulla pariatur. Excepteur",
-    "|   sint occaecat cupidatat non proident, sunt in culpa qui",
-    "|   officia deserunt mollit anim id est laborum.",
-    "",
-    "",
-  ],
-}
+Array [
+  "[log] | Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)",
+  "[log] ",
+  "[log] |",
+  "[log] ",
+  "[log] | Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
+  "[log] | sed do eiusmod tempor incididunt ut labore et dolore magna",
+  "[log] | aliqua. Ut enim ad minim veniam, quis nostrud exercitation",
+  "[log] | ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+  "[log] | Duis aute irure dolor in reprehenderit in voluptate velit",
+  "[log] | esse cillum dolore eu fugiat nulla pariatur. Excepteur",
+  "[log] | sint occaecat cupidatat non proident, sunt in culpa qui",
+  "[log] | officia deserunt mollit anim id est laborum.",
+  "[log] |   Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
+  "[log] |   sed do eiusmod tempor incididunt ut labore et dolore magna",
+  "[log] |   aliqua. Ut enim ad minim veniam, quis nostrud exercitation",
+  "[log] |   ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+  "[log] |   Duis aute irure dolor in reprehenderit in voluptate velit",
+  "[log] |   esse cillum dolore eu fugiat nulla pariatur. Excepteur",
+  "[log] |   sint occaecat cupidatat non proident, sunt in culpa qui",
+  "[log] |   officia deserunt mollit anim id est laborum.",
+  "[log] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a long message with an indented line) _showTip prints an expected message 1`] = `
-Object {
-  "error": Array [
-    "[red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-    "[red]|[default]",
-    "[red]| [default]Lorem ipsum dolor sit amet, consectetur",
-    "[red]| [default]adipiscing elit, sed do eiusmod tempor",
-    "[red]| [default]incididunt ut labore et dolore magna aliqua. Ut",
-    "[red]| [default]enim ad minim veniam, quis nostrud exercitation",
-    "[red]| [default]ullamco laboris nisi ut aliquip ex ea commodo",
-    "[red]| [default]consequat. Duis aute irure dolor in",
-    "[red]| [default]reprehenderit in voluptate velit esse cillum",
-    "[red]| [default]dolore eu fugiat nulla pariatur. Excepteur sint",
-    "[red]| [default]occaecat cupidatat non proident, sunt in culpa",
-    "[red]| [default]qui officia deserunt mollit anim id est laborum.",
-    "[red]| [default]  Lorem ipsum dolor sit amet, consectetur",
-    "[red]| [default]  adipiscing elit, sed do eiusmod tempor",
-    "[red]| [default]  incididunt ut labore et dolore magna aliqua. Ut",
-    "[red]| [default]  enim ad minim veniam, quis nostrud exercitation",
-    "[red]| [default]  ullamco laboris nisi ut aliquip ex ea commodo",
-    "[red]| [default]  consequat. Duis aute irure dolor in",
-    "[red]| [default]  reprehenderit in voluptate velit esse cillum",
-    "[red]| [default]  dolore eu fugiat nulla pariatur. Excepteur sint",
-    "[red]| [default]  occaecat cupidatat non proident, sunt in culpa",
-    "[red]| [default]  qui officia deserunt mollit anim id est laborum.",
-    "",
-  ],
-  "log": Array [
-    "",
-    "",
-  ],
-}
+Array [
+  "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
+  "[error] ",
+  "[error] [red]|[default]",
+  "[error] ",
+  "[error] [red]| [default]Lorem ipsum dolor sit amet, consectetur",
+  "[error] [red]| [default]adipiscing elit, sed do eiusmod tempor",
+  "[error] [red]| [default]incididunt ut labore et dolore magna aliqua. Ut",
+  "[error] [red]| [default]enim ad minim veniam, quis nostrud exercitation",
+  "[error] [red]| [default]ullamco laboris nisi ut aliquip ex ea commodo",
+  "[error] [red]| [default]consequat. Duis aute irure dolor in",
+  "[error] [red]| [default]reprehenderit in voluptate velit esse cillum",
+  "[error] [red]| [default]dolore eu fugiat nulla pariatur. Excepteur sint",
+  "[error] [red]| [default]occaecat cupidatat non proident, sunt in culpa",
+  "[error] [red]| [default]qui officia deserunt mollit anim id est laborum.",
+  "[error] [red]| [default]  Lorem ipsum dolor sit amet, consectetur",
+  "[error] [red]| [default]  adipiscing elit, sed do eiusmod tempor",
+  "[error] [red]| [default]  incididunt ut labore et dolore magna aliqua. Ut",
+  "[error] [red]| [default]  enim ad minim veniam, quis nostrud exercitation",
+  "[error] [red]| [default]  ullamco laboris nisi ut aliquip ex ea commodo",
+  "[error] [red]| [default]  consequat. Duis aute irure dolor in",
+  "[error] [red]| [default]  reprehenderit in voluptate velit esse cillum",
+  "[error] [red]| [default]  dolore eu fugiat nulla pariatur. Excepteur sint",
+  "[error] [red]| [default]  occaecat cupidatat non proident, sunt in culpa",
+  "[error] [red]| [default]  qui officia deserunt mollit anim id est laborum.",
+  "[error] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a long message with an indented line) _showWarningTip prints an expected message 1`] = `
-Object {
-  "log": Array [
-    "",
-    "",
-  ],
-  "warning": Array [
-    "[yellow]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-    "[yellow]|[default]",
-    "[yellow]| [default]Lorem ipsum dolor sit amet, consectetur",
-    "[yellow]| [default]adipiscing elit, sed do eiusmod tempor",
-    "[yellow]| [default]incididunt ut labore et dolore magna aliqua. Ut",
-    "[yellow]| [default]enim ad minim veniam, quis nostrud exercitation",
-    "[yellow]| [default]ullamco laboris nisi ut aliquip ex ea commodo",
-    "[yellow]| [default]consequat. Duis aute irure dolor in",
-    "[yellow]| [default]reprehenderit in voluptate velit esse cillum",
-    "[yellow]| [default]dolore eu fugiat nulla pariatur. Excepteur sint",
-    "[yellow]| [default]occaecat cupidatat non proident, sunt in culpa",
-    "[yellow]| [default]qui officia deserunt mollit anim id est laborum.",
-    "[yellow]| [default]  Lorem ipsum dolor sit amet, consectetur",
-    "[yellow]| [default]  adipiscing elit, sed do eiusmod tempor",
-    "[yellow]| [default]  incididunt ut labore et dolore magna aliqua. Ut",
-    "[yellow]| [default]  enim ad minim veniam, quis nostrud exercitation",
-    "[yellow]| [default]  ullamco laboris nisi ut aliquip ex ea commodo",
-    "[yellow]| [default]  consequat. Duis aute irure dolor in",
-    "[yellow]| [default]  reprehenderit in voluptate velit esse cillum",
-    "[yellow]| [default]  dolore eu fugiat nulla pariatur. Excepteur sint",
-    "[yellow]| [default]  occaecat cupidatat non proident, sunt in culpa",
-    "[yellow]| [default]  qui officia deserunt mollit anim id est laborum.",
-    "",
-  ],
-}
+Array [
+  "[warning] [yellow]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
+  "[warning] ",
+  "[warning] [yellow]|[default]",
+  "[warning] ",
+  "[warning] [yellow]| [default]Lorem ipsum dolor sit amet, consectetur",
+  "[warning] [yellow]| [default]adipiscing elit, sed do eiusmod tempor",
+  "[warning] [yellow]| [default]incididunt ut labore et dolore magna aliqua. Ut",
+  "[warning] [yellow]| [default]enim ad minim veniam, quis nostrud exercitation",
+  "[warning] [yellow]| [default]ullamco laboris nisi ut aliquip ex ea commodo",
+  "[warning] [yellow]| [default]consequat. Duis aute irure dolor in",
+  "[warning] [yellow]| [default]reprehenderit in voluptate velit esse cillum",
+  "[warning] [yellow]| [default]dolore eu fugiat nulla pariatur. Excepteur sint",
+  "[warning] [yellow]| [default]occaecat cupidatat non proident, sunt in culpa",
+  "[warning] [yellow]| [default]qui officia deserunt mollit anim id est laborum.",
+  "[warning] [yellow]| [default]  Lorem ipsum dolor sit amet, consectetur",
+  "[warning] [yellow]| [default]  adipiscing elit, sed do eiusmod tempor",
+  "[warning] [yellow]| [default]  incididunt ut labore et dolore magna aliqua. Ut",
+  "[warning] [yellow]| [default]  enim ad minim veniam, quis nostrud exercitation",
+  "[warning] [yellow]| [default]  ullamco laboris nisi ut aliquip ex ea commodo",
+  "[warning] [yellow]| [default]  consequat. Duis aute irure dolor in",
+  "[warning] [yellow]| [default]  reprehenderit in voluptate velit esse cillum",
+  "[warning] [yellow]| [default]  dolore eu fugiat nulla pariatur. Excepteur sint",
+  "[warning] [yellow]| [default]  occaecat cupidatat non proident, sunt in culpa",
+  "[warning] [yellow]| [default]  qui officia deserunt mollit anim id est laborum.",
+  "[warning] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a long message) _showErrorTip prints an expected message 1`] = `
-Object {
-  "error": Array [
-    "[red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-    "[red]|[default]",
-    "[red]| [default]Lorem ipsum dolor sit amet, consectetur",
-    "[red]| [default]adipiscing elit, sed do eiusmod tempor",
-    "[red]| [default]incididunt ut labore et dolore magna aliqua. Ut",
-    "[red]| [default]enim ad minim veniam, quis nostrud exercitation",
-    "[red]| [default]ullamco laboris nisi ut aliquip ex ea commodo",
-    "[red]| [default]consequat. Duis aute irure dolor in",
-    "[red]| [default]reprehenderit in voluptate velit esse cillum",
-    "[red]| [default]dolore eu fugiat nulla pariatur. Excepteur sint",
-    "[red]| [default]occaecat cupidatat non proident, sunt in culpa",
-    "[red]| [default]qui officia deserunt mollit anim id est laborum.",
-    "",
-  ],
-  "log": Array [
-    "",
-    "",
-  ],
-}
+Array [
+  "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
+  "[error] ",
+  "[error] [red]|[default]",
+  "[error] ",
+  "[error] [red]| [default]Lorem ipsum dolor sit amet, consectetur",
+  "[error] [red]| [default]adipiscing elit, sed do eiusmod tempor",
+  "[error] [red]| [default]incididunt ut labore et dolore magna aliqua. Ut",
+  "[error] [red]| [default]enim ad minim veniam, quis nostrud exercitation",
+  "[error] [red]| [default]ullamco laboris nisi ut aliquip ex ea commodo",
+  "[error] [red]| [default]consequat. Duis aute irure dolor in",
+  "[error] [red]| [default]reprehenderit in voluptate velit esse cillum",
+  "[error] [red]| [default]dolore eu fugiat nulla pariatur. Excepteur sint",
+  "[error] [red]| [default]occaecat cupidatat non proident, sunt in culpa",
+  "[error] [red]| [default]qui officia deserunt mollit anim id est laborum.",
+  "[error] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a long message) _showInfoTip prints an expected message 1`] = `
-Object {
-  "log": Array [
-    "| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)",
-    "|",
-    "| Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
-    "| sed do eiusmod tempor incididunt ut labore et dolore magna",
-    "| aliqua. Ut enim ad minim veniam, quis nostrud exercitation",
-    "| ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    "| Duis aute irure dolor in reprehenderit in voluptate velit",
-    "| esse cillum dolore eu fugiat nulla pariatur. Excepteur",
-    "| sint occaecat cupidatat non proident, sunt in culpa qui",
-    "| officia deserunt mollit anim id est laborum.",
-    "",
-    "",
-  ],
-}
+Array [
+  "[log] | Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)",
+  "[log] ",
+  "[log] |",
+  "[log] ",
+  "[log] | Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
+  "[log] | sed do eiusmod tempor incididunt ut labore et dolore magna",
+  "[log] | aliqua. Ut enim ad minim veniam, quis nostrud exercitation",
+  "[log] | ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+  "[log] | Duis aute irure dolor in reprehenderit in voluptate velit",
+  "[log] | esse cillum dolore eu fugiat nulla pariatur. Excepteur",
+  "[log] | sint occaecat cupidatat non proident, sunt in culpa qui",
+  "[log] | officia deserunt mollit anim id est laborum.",
+  "[log] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a long message) _showTip prints an expected message 1`] = `
-Object {
-  "error": Array [
-    "[red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-    "[red]|[default]",
-    "[red]| [default]Lorem ipsum dolor sit amet, consectetur",
-    "[red]| [default]adipiscing elit, sed do eiusmod tempor",
-    "[red]| [default]incididunt ut labore et dolore magna aliqua. Ut",
-    "[red]| [default]enim ad minim veniam, quis nostrud exercitation",
-    "[red]| [default]ullamco laboris nisi ut aliquip ex ea commodo",
-    "[red]| [default]consequat. Duis aute irure dolor in",
-    "[red]| [default]reprehenderit in voluptate velit esse cillum",
-    "[red]| [default]dolore eu fugiat nulla pariatur. Excepteur sint",
-    "[red]| [default]occaecat cupidatat non proident, sunt in culpa",
-    "[red]| [default]qui officia deserunt mollit anim id est laborum.",
-    "",
-  ],
-  "log": Array [
-    "",
-    "",
-  ],
-}
+Array [
+  "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
+  "[error] ",
+  "[error] [red]|[default]",
+  "[error] ",
+  "[error] [red]| [default]Lorem ipsum dolor sit amet, consectetur",
+  "[error] [red]| [default]adipiscing elit, sed do eiusmod tempor",
+  "[error] [red]| [default]incididunt ut labore et dolore magna aliqua. Ut",
+  "[error] [red]| [default]enim ad minim veniam, quis nostrud exercitation",
+  "[error] [red]| [default]ullamco laboris nisi ut aliquip ex ea commodo",
+  "[error] [red]| [default]consequat. Duis aute irure dolor in",
+  "[error] [red]| [default]reprehenderit in voluptate velit esse cillum",
+  "[error] [red]| [default]dolore eu fugiat nulla pariatur. Excepteur sint",
+  "[error] [red]| [default]occaecat cupidatat non proident, sunt in culpa",
+  "[error] [red]| [default]qui officia deserunt mollit anim id est laborum.",
+  "[error] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a long message) _showWarningTip prints an expected message 1`] = `
-Object {
-  "log": Array [
-    "",
-    "",
-  ],
-  "warning": Array [
-    "[yellow]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-    "[yellow]|[default]",
-    "[yellow]| [default]Lorem ipsum dolor sit amet, consectetur",
-    "[yellow]| [default]adipiscing elit, sed do eiusmod tempor",
-    "[yellow]| [default]incididunt ut labore et dolore magna aliqua. Ut",
-    "[yellow]| [default]enim ad minim veniam, quis nostrud exercitation",
-    "[yellow]| [default]ullamco laboris nisi ut aliquip ex ea commodo",
-    "[yellow]| [default]consequat. Duis aute irure dolor in",
-    "[yellow]| [default]reprehenderit in voluptate velit esse cillum",
-    "[yellow]| [default]dolore eu fugiat nulla pariatur. Excepteur sint",
-    "[yellow]| [default]occaecat cupidatat non proident, sunt in culpa",
-    "[yellow]| [default]qui officia deserunt mollit anim id est laborum.",
-    "",
-  ],
-}
+Array [
+  "[warning] [yellow]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
+  "[warning] ",
+  "[warning] [yellow]|[default]",
+  "[warning] ",
+  "[warning] [yellow]| [default]Lorem ipsum dolor sit amet, consectetur",
+  "[warning] [yellow]| [default]adipiscing elit, sed do eiusmod tempor",
+  "[warning] [yellow]| [default]incididunt ut labore et dolore magna aliqua. Ut",
+  "[warning] [yellow]| [default]enim ad minim veniam, quis nostrud exercitation",
+  "[warning] [yellow]| [default]ullamco laboris nisi ut aliquip ex ea commodo",
+  "[warning] [yellow]| [default]consequat. Duis aute irure dolor in",
+  "[warning] [yellow]| [default]reprehenderit in voluptate velit esse cillum",
+  "[warning] [yellow]| [default]dolore eu fugiat nulla pariatur. Excepteur sint",
+  "[warning] [yellow]| [default]occaecat cupidatat non proident, sunt in culpa",
+  "[warning] [yellow]| [default]qui officia deserunt mollit anim id est laborum.",
+  "[warning] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a message with an indented line) _showErrorTip prints an expected message 1`] = `
-Object {
-  "error": Array [
-    "[red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-    "[red]|[default]",
-    "[red]| [default]This is a test",
-    "[red]| [default]  This is a test",
-    "",
-  ],
-  "log": Array [
-    "",
-    "",
-  ],
-}
+Array [
+  "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
+  "[error] ",
+  "[error] [red]|[default]",
+  "[error] ",
+  "[error] [red]| [default]This is a test",
+  "[error] [red]| [default]  This is a test",
+  "[error] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a message with an indented line) _showInfoTip prints an expected message 1`] = `
-Object {
-  "log": Array [
-    "| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)",
-    "|",
-    "| This is a test",
-    "|   This is a test",
-    "",
-    "",
-  ],
-}
+Array [
+  "[log] | Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)",
+  "[log] ",
+  "[log] |",
+  "[log] ",
+  "[log] | This is a test",
+  "[log] |   This is a test",
+  "[log] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a message with an indented line) _showTip prints an expected message 1`] = `
-Object {
-  "error": Array [
-    "[red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-    "[red]|[default]",
-    "[red]| [default]This is a test",
-    "[red]| [default]  This is a test",
-    "",
-  ],
-  "log": Array [
-    "",
-    "",
-  ],
-}
+Array [
+  "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
+  "[error] ",
+  "[error] [red]|[default]",
+  "[error] ",
+  "[error] [red]| [default]This is a test",
+  "[error] [red]| [default]  This is a test",
+  "[error] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a message with an indented line) _showWarningTip prints an expected message 1`] = `
-Object {
-  "log": Array [
-    "",
-    "",
-  ],
-  "warning": Array [
-    "[yellow]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-    "[yellow]|[default]",
-    "[yellow]| [default]This is a test",
-    "[yellow]| [default]  This is a test",
-    "",
-  ],
-}
+Array [
+  "[warning] [yellow]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
+  "[warning] ",
+  "[warning] [yellow]|[default]",
+  "[warning] ",
+  "[warning] [yellow]| [default]This is a test",
+  "[warning] [yellow]| [default]  This is a test",
+  "[warning] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a message with newlines) _showErrorTip prints an expected message 1`] = `
-Object {
-  "error": Array [
-    "[red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-    "[red]|[default]",
-    "[red]| [default]This is a test",
-    "[red]| [default]This is a test",
-    "",
-  ],
-  "log": Array [
-    "",
-    "",
-  ],
-}
+Array [
+  "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
+  "[error] ",
+  "[error] [red]|[default]",
+  "[error] ",
+  "[error] [red]| [default]This is a test",
+  "[error] [red]| [default]This is a test",
+  "[error] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a message with newlines) _showInfoTip prints an expected message 1`] = `
-Object {
-  "log": Array [
-    "| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)",
-    "|",
-    "| This is a test",
-    "| This is a test",
-    "",
-    "",
-  ],
-}
+Array [
+  "[log] | Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)",
+  "[log] ",
+  "[log] |",
+  "[log] ",
+  "[log] | This is a test",
+  "[log] | This is a test",
+  "[log] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a message with newlines) _showTip prints an expected message 1`] = `
-Object {
-  "error": Array [
-    "[red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-    "[red]|[default]",
-    "[red]| [default]This is a test",
-    "[red]| [default]This is a test",
-    "",
-  ],
-  "log": Array [
-    "",
-    "",
-  ],
-}
+Array [
+  "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
+  "[error] ",
+  "[error] [red]|[default]",
+  "[error] ",
+  "[error] [red]| [default]This is a test",
+  "[error] [red]| [default]This is a test",
+  "[error] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a message with newlines) _showWarningTip prints an expected message 1`] = `
-Object {
-  "log": Array [
-    "",
-    "",
-  ],
-  "warning": Array [
-    "[yellow]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-    "[yellow]|[default]",
-    "[yellow]| [default]This is a test",
-    "[yellow]| [default]This is a test",
-    "",
-  ],
-}
+Array [
+  "[warning] [yellow]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
+  "[warning] ",
+  "[warning] [yellow]|[default]",
+  "[warning] ",
+  "[warning] [yellow]| [default]This is a test",
+  "[warning] [yellow]| [default]This is a test",
+  "[warning] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a short message) _showErrorTip prints an expected message 1`] = `
-Object {
-  "error": Array [
-    "[red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-    "[red]|[default]",
-    "[red]| [default]This is a test",
-    "",
-  ],
-  "log": Array [
-    "",
-    "",
-  ],
-}
+Array [
+  "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
+  "[error] ",
+  "[error] [red]|[default]",
+  "[error] ",
+  "[error] [red]| [default]This is a test",
+  "[error] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a short message) _showInfoTip prints an expected message 1`] = `
-Object {
-  "log": Array [
-    "| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)",
-    "|",
-    "| This is a test",
-    "",
-    "",
-  ],
-}
+Array [
+  "[log] | Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)",
+  "[log] ",
+  "[log] |",
+  "[log] ",
+  "[log] | This is a test",
+  "[log] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a short message) _showTip prints an expected message 1`] = `
-Object {
-  "error": Array [
-    "[red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-    "[red]|[default]",
-    "[red]| [default]This is a test",
-    "",
-  ],
-  "log": Array [
-    "",
-    "",
-  ],
-}
+Array [
+  "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
+  "[error] ",
+  "[error] [red]|[default]",
+  "[error] ",
+  "[error] [red]| [default]This is a test",
+  "[error] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration formatting (a short message) _showWarningTip prints an expected message 1`] = `
-Object {
-  "log": Array [
-    "",
-    "",
-  ],
-  "warning": Array [
-    "[yellow]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-    "[yellow]|[default]",
-    "[yellow]| [default]This is a test",
-    "",
-  ],
-}
+Array [
+  "[warning] [yellow]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
+  "[warning] ",
+  "[warning] [yellow]|[default]",
+  "[warning] ",
+  "[warning] [yellow]| [default]This is a test",
+  "[warning] ",
+  "[log] ",
+  "[log] ",
+]
 `;
 
 exports[`CustomTipsConfiguration loads the config file (custom-tips.json) 1`] = `

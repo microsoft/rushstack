@@ -25,9 +25,13 @@ describe('InstallHelpers', () => {
     });
 
     afterEach(() => {
-      expect(terminalProvider.getAllOutput(true, { normalizeSpecialCharacters: true })).toMatchSnapshot(
-        'Terminal Output'
-      );
+      expect(
+        terminalProvider.getAllOutputAsChunks({
+          normalizeSpecialCharacters: true,
+          asFlat: true,
+          severityAsNames: true
+        })
+      ).toMatchSnapshot('Terminal Output');
       mockJsonFileSave.mockClear();
     });
 

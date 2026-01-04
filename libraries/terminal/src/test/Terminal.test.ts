@@ -10,7 +10,8 @@ describe(Terminal.name, () => {
   let provider: StringBufferTerminalProvider;
 
   function verifyProvider(): void {
-    expect(provider.getAllOutput()).toMatchSnapshot();
+    expect(provider.getAllOutput()).toMatchSnapshot('output');
+    expect(provider.getAllOutputAsChunks({ asFlat: true })).toMatchSnapshot('output as chunks');
   }
 
   describe('01 color enabled', () => {

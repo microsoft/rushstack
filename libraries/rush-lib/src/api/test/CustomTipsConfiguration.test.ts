@@ -3,10 +3,11 @@
 
 import { JsonFile } from '@rushstack/node-core-library';
 import {
-  type IAllStringBufferOutput,
+  type IOutputChunk,
   PrintUtilities,
   StringBufferTerminalProvider,
-  Terminal
+  Terminal,
+  type TerminalProviderSeverityName
 } from '@rushstack/terminal';
 
 import { CustomTipId, CustomTipsConfiguration, type ICustomTipsJson } from '../CustomTipsConfiguration';
@@ -57,10 +58,16 @@ describe(CustomTipsConfiguration.name, () => {
       afterEach(() => {
         jest.restoreAllMocks();
 
-        const terminalProviderOutput: Partial<IAllStringBufferOutput> = terminalProvider.getAllOutput(true);
-        const lineSplitTerminalProviderOutput: Partial<Record<keyof IAllStringBufferOutput, string[]>> = {};
-        for (const [key, output] of Object.entries(terminalProviderOutput)) {
-          lineSplitTerminalProviderOutput[key as keyof IAllStringBufferOutput] = output.split('[n]');
+        const terminalProviderOutput: IOutputChunk<TerminalProviderSeverityName>[] =
+          terminalProvider.getAllOutputAsChunks({
+            severityAsNames: true
+          });
+        const lineSplitTerminalProviderOutput: string[] = [];
+        for (const { text, severity } of terminalProviderOutput) {
+          const lines: string[] = text.split('[n]');
+          for (const line of lines) {
+            lineSplitTerminalProviderOutput.push(`[${severity}] ${line}`);
+          }
         }
 
         expect(lineSplitTerminalProviderOutput).toMatchSnapshot();

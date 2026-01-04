@@ -22,9 +22,13 @@ async function runTestForExampleRepoAsync(
   const generator: ProjectImpactGraphGenerator = new ProjectImpactGraphGenerator(terminal, rushConfiguration);
   await testFn(generator);
 
-  expect(terminalProvider.getAllOutput(true, { normalizeSpecialCharacters: true })).toMatchSnapshot(
-    'Terminal Output'
-  );
+  expect(
+    terminalProvider.getAllOutputAsChunks({
+      normalizeSpecialCharacters: true,
+      asFlat: true,
+      severityAsNames: true
+    })
+  ).toMatchSnapshot('Terminal Output');
 }
 
 describe(ProjectImpactGraphGenerator.name, () => {

@@ -16,7 +16,9 @@ describe(parseResx.name, () => {
   });
 
   afterEach(() => {
-    expect(terminalProvider.getAllOutput(true)).toMatchSnapshot('terminal output');
+    expect(terminalProvider.getAllOutputAsChunks({ asFlat: true, severityAsNames: true })).toMatchSnapshot(
+      'terminal output'
+    );
   });
 
   async function testResxAsync(
