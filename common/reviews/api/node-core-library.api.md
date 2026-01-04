@@ -620,6 +620,7 @@ export interface IProblemPattern {
 // @public
 export interface IProcessInfo {
     childProcessInfos: IProcessInfo[];
+    commandLine?: string;
     parentProcessInfo: IProcessInfo | undefined;
     processId: number;
     processName: string;
