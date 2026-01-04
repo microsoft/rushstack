@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-typescript-plugin",
+      "comment": "Fix TypeScript build cache hash computation to use relative paths with normalized separators for portability across machines and platforms",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-typescript-plugin",
+  "email": "copilot@github.com"
+}
