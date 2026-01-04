@@ -390,6 +390,13 @@
       }
     },
 
+    "sass-embedded": {
+      "dependencies": {
+        // The types reference this package, which is a devDependency
+        "source-map-js": "^1.0.2"
+      }
+    },
+
     "scss-parser": {
       "dependencies": {
         "lodash": "~4.17.15"
