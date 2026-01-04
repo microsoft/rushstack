@@ -152,9 +152,9 @@ export interface INormalizeNewlinesTextRewriterOptions {
 }
 
 // @beta (undocumented)
-export interface IOutputChunk<TSeverity extends TerminalProviderSeverity | TerminalProviderSeverityName> {
+export interface IOutputChunk {
     // (undocumented)
-    severity: TSeverity;
+    severity: TerminalProviderSeverityName;
     // (undocumented)
     text: string;
 }
@@ -203,7 +203,6 @@ export interface IStdioSummarizerOptions extends ITerminalWritableOptions {
 // @beta (undocumented)
 export interface IStringBufferOutputChunksOptions extends IStringBufferOutputOptions {
     asFlat?: boolean;
-    severityAsNames?: boolean;
 }
 
 // @beta (undocumented)
@@ -396,22 +395,10 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     // (undocumented)
     getAllOutput(sparse: true, options?: IStringBufferOutputOptions): Partial<IAllStringBufferOutput>;
     getAllOutputAsChunks(options?: IStringBufferOutputChunksOptions & {
-        severityAsNames?: false;
         asFlat?: false;
-    }): IOutputChunk<TerminalProviderSeverity>[];
+    }): IOutputChunk[];
     // (undocumented)
     getAllOutputAsChunks(options: IStringBufferOutputChunksOptions & {
-        severityAsNames: true;
-        asFlat?: false;
-    }): IOutputChunk<TerminalProviderSeverityName>[];
-    // (undocumented)
-    getAllOutputAsChunks(options?: IStringBufferOutputChunksOptions & {
-        severityAsNames?: false;
-        asFlat: true;
-    }): `[${TerminalProviderSeverity}] ${string}`[];
-    // (undocumented)
-    getAllOutputAsChunks(options: IStringBufferOutputChunksOptions & {
-        severityAsNames: true;
         asFlat: true;
     }): `[${string}] ${string}`[];
     getDebugOutput(options?: IStringBufferOutputOptions): string;
