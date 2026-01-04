@@ -13,8 +13,9 @@ overrides:
   '@rushstack/eslint-plugin@0.20.0>@typescript-eslint/utils': ~8.46.0
   '@rushstack/heft-node-rig@2.10.1>eslint': ~9.37.0
   '@types/estree': 1.0.8
+  '@types/react@17.0.74>@types/scheduler': 0.16.8
 
-packageExtensionsChecksum: sha256-crhmA/4gvKB9f99VTiVxZgLTnYwwdLLlWvY0GNKUg34=
+packageExtensionsChecksum: sha256-8fXYR9X9qRA57SZJJSADz6C9KMP6QQYYut4DHyehah0=
 
 pnpmfileChecksum: sha256-La8sfCMI7irxJPTW6u4mJb4vNiyLrXeEbKaXv5G3dL0=
 
@@ -9926,8 +9927,8 @@ packages:
   '@types/retry@0.12.2':
     resolution: {integrity: sha512-XISRgDJ2Tc5q4TRqvgJtzsRkFYNJzZrhTdtMoGVBttwzzQJkPnS3WWTFc7kuDRoPtPakl+T+OfdEUjYJj7Jbow==}
 
-  '@types/scheduler@0.26.0':
-    resolution: {integrity: sha512-WFHp9YUJQ6CKshqoC37iOlHnQSmxNc795UhB26CyBBttrN9svdIrUjl/NjnNmfcwtncN0h/0PPAFWv9ovP8mLA==}
+  '@types/scheduler@0.16.8':
+    resolution: {integrity: sha512-WZLiwShhwLRmeV6zH+GkbOFT6Z6VklCItrDioxUnv+u4Ll+8vKeFySoFyK/0ctcRpOmwAicELfmys1sDc/Rw+A==}
 
   '@types/semver@7.5.0':
     resolution: {integrity: sha512-G8hZ6XJiHnuhQKR7ZmysCeJWE08o8T0AXtk5darsCaTVsYZhhgUrq53jizaR2FvsoeCwJhlmwTjkXBY5Pn/ZHw==}
@@ -20315,9 +20316,13 @@ snapshots:
 
   '@emotion/unitless@0.7.5': {}
 
-  '@emotion/utils@0.11.3': {}
+  '@emotion/utils@0.11.3':
+    dependencies:
+      '@emotion/sheet': 0.9.4
 
-  '@emotion/utils@1.4.2': {}
+  '@emotion/utils@1.4.2':
+    dependencies:
+      '@emotion/sheet': 0.9.4
 
   '@emotion/weak-memoize@0.2.5': {}
 
@@ -25751,7 +25756,7 @@ snapshots:
   '@types/react@17.0.74':
     dependencies:
       '@types/prop-types': 15.7.15
-      '@types/scheduler': 0.26.0
+      '@types/scheduler': 0.16.8
       csstype: 3.2.3
 
   '@types/react@19.2.7':
@@ -25770,7 +25775,7 @@ snapshots:
 
   '@types/retry@0.12.2': {}
 
-  '@types/scheduler@0.26.0': {}
+  '@types/scheduler@0.16.8': {}
 
   '@types/semver@7.5.0': {}
 
