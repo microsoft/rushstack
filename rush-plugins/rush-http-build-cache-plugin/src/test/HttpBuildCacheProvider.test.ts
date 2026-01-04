@@ -69,14 +69,8 @@ describe('HttpBuildCacheProvider', () => {
       expect(terminalBuffer.getAllOutputAsChunks({ asFlat: true, severityAsNames: true }))
         .toMatchInlineSnapshot(`
 Array [
-  Object {
-    "severity": 4,
-    "text": "[http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown bytes[n]",
-  },
-  Object {
-    "severity": 1,
-    "text": "Error getting cache entry: Error: Credentials for https://buildcache.example.acme.com/ have not been provided.[n]In CI, verify that RUSH_BUILD_CACHE_CREDENTIAL contains a valid Authorization header value.[n][n]For local developers, run:[n][n]    rush update-cloud-credentials --interactive[n][n]",
-  },
+  "[  debug] [http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown bytes[n]",
+  "[warning] Error getting cache entry: Error: Credentials for https://buildcache.example.acme.com/ have not been provided.[n]In CI, verify that RUSH_BUILD_CACHE_CREDENTIAL contains a valid Authorization header value.[n][n]For local developers, run:[n][n]    rush update-cloud-credentials --interactive[n][n]",
 ]
 `);
     });
@@ -133,22 +127,10 @@ Array [
       expect(terminalBuffer.getAllOutputAsChunks({ asFlat: true, severityAsNames: true }))
         .toMatchInlineSnapshot(`
 Array [
-  Object {
-    "severity": 4,
-    "text": "[http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown bytes[n]",
-  },
-  Object {
-    "severity": 4,
-    "text": "[http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown bytes[n]",
-  },
-  Object {
-    "severity": 4,
-    "text": "[http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown bytes[n]",
-  },
-  Object {
-    "severity": 1,
-    "text": "Could not get cache entry: HTTP 504: BadGateway[n]",
-  },
+  "[  debug] [http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown bytes[n]",
+  "[  debug] [http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown bytes[n]",
+  "[  debug] [http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown bytes[n]",
+  "[warning] Could not get cache entry: HTTP 504: BadGateway[n]",
 ]
 `);
     });

@@ -136,7 +136,7 @@ describe(OperationMetadataManager.name, () => {
       errorLogPath: '/path/to/errorLog'
     });
 
-    expect(mockTerminalProvider.getAllOutputAsChunks({ asFlat: true, severityAsNames: true })).toEqual({});
+    expect(mockTerminalProvider.getAllOutput()).toEqual({});
     expect(mockClose).toHaveBeenCalledTimes(1);
     expect(mockWritable.chunks).toMatchSnapshot();
   });
