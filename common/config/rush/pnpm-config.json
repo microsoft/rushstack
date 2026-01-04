@@ -215,7 +215,10 @@
     "@rushstack/heft-node-rig@2.10.1>eslint": "~9.37.0",
 
     // Force @types/estree to 1.0.8 for webpack 5.103.0 compatibility
-    "@types/estree": "1.0.8"
+    "@types/estree": "1.0.8",
+
+    // The React 17 types depend on a specific version of the scheduler types
+    "@types/react@17.0.74>@types/scheduler": "0.16.8"
   },
 
   /**
@@ -276,6 +279,12 @@
     "@emotion/theming": {
       "peerDependencies": {
         "@types/react": ">=16"
+      }
+    },
+
+    "@emotion/utils": {
+      "dependencies": {
+        "@emotion/sheet": "^0.9.4"
       }
     },
 
