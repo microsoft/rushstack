@@ -17,7 +17,7 @@ import type {
   IExtendedSolutionBuilder,
   ITypeScriptNodeSystem
 } from './internalTypings/TypeScriptInternals';
-import type { ITypeScriptConfigurationJson } from './TypeScriptPlugin';
+import type { ITypeScriptConfigurationJson, IEmitModuleKind } from './TypeScriptPlugin';
 import type { PerformanceMeasurer } from './Performance';
 import type {
   ICachedEmitModuleKind,
@@ -152,12 +152,17 @@ export class TypeScriptBuilder {
       // We only need to hash our additional Heft configuration.
       const configHash: crypto.Hash = crypto.createHash('sha1');
 
-      configHash.update(JSON.stringify(this._configuration.additionalModuleKindsToEmit || {}));
-      const serializedConfigHash: string = configHash
-        .digest('base64')
-        .slice(0, 8)
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_');
+      // Relativize the outFolderName paths before hashing to ensure portability across different machines
+      const normalizedConfig: IEmitModuleKind[] =
+        this._configuration.additionalModuleKindsToEmit?.map((emitKind) => ({
+          ...emitKind,
+          outFolderName: Path.convertToSlashes(
+            path.relative(this._configuration.buildFolderPath, emitKind.outFolderName)
+          )
+        })) || [];
+
+      configHash.update(JSON.stringify(normalizedConfig));
+      const serializedConfigHash: string = configHash.digest('base64url').slice(0, 8);
 
       // This conversion is theoretically redundant, but it is here to make absolutely sure that the path is formatted
       // using only '/' as the directory separator so that incremental builds don't break on Windows.
