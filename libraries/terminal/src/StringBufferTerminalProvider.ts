@@ -69,7 +69,10 @@ function _normalizeOutput(s: string, options: IStringBufferOutputOptions | undef
   }
 }
 
-const LONGEST_SEVERITY_NAME_LENGTH: number = Object.keys(TerminalProviderSeverity).reduce((max: number, k: string) => Math.max(max, k.length), 0);
+const LONGEST_SEVERITY_NAME_LENGTH: number = Object.keys(TerminalProviderSeverity).reduce(
+  (max: number, k: string) => Math.max(max, k.length),
+  0
+);
 
 /**
  * Terminal provider that stores written data in buffers separated by severity.
