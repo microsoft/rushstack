@@ -2,6 +2,27 @@
   "name": "@rushstack/heft-rspack-plugin",
   "entries": [
     {
+      "version": "0.2.1",
+      "tag": "@rushstack/heft-rspack-plugin_v0.2.1",
+      "date": "Mon, 05 Jan 2026 16:12:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.6.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.20.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.7` to `1.1.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@rushstack/heft-rspack-plugin_v0.2.0",
       "date": "Thu, 18 Dec 2025 01:13:04 GMT",

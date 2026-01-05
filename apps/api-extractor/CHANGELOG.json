@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.55.3",
+      "tag": "@microsoft/api-extractor_v7.55.3",
+      "date": "Mon, 05 Jan 2026 16:12:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.20.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.1.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.55.2",
       "tag": "@microsoft/api-extractor_v7.55.2",
       "date": "Sat, 06 Dec 2025 01:12:28 GMT",
