@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/npm-check-fork",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A fork of npm-check.",
   "repository": {
     "type": "git",
