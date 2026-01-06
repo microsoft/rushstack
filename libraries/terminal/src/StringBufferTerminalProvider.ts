@@ -53,22 +53,24 @@ export interface IOutputChunk {
   severity: TerminalProviderSeverityName;
 }
 
-function _normalizeOptions(
-  options: IStringBufferOutputOptions | undefined
-): Required<IStringBufferOutputOptions> {
+function _normalizeOptions<TOptions extends IStringBufferOutputOptions>(
+  options: TOptions
+): TOptions & Required<IStringBufferOutputOptions> {
   return {
     normalizeSpecialCharacters: true,
-
-    ...(options || {})
+    ...options
   };
 }
 
 function _normalizeOutput(s: string, options: IStringBufferOutputOptions | undefined): string {
-  const normalizedOptions: Required<IStringBufferOutputOptions> = _normalizeOptions(options);
+  const { normalizeSpecialCharacters } = _normalizeOptions(options ?? {});
+  return _normalizeOutputInner(s, normalizeSpecialCharacters);
+}
 
+function _normalizeOutputInner(s: string, normalizeSpecialCharacters: boolean): string {
   s = Text.convertToLf(s);
 
-  if (normalizedOptions.normalizeSpecialCharacters) {
+  if (normalizeSpecialCharacters) {
     return AnsiEscape.formatForTests(s, { encodeNewlines: true });
   } else {
     return s;
@@ -249,8 +251,8 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     options: IStringBufferOutputChunksOptions & { asLines: true }
   ): `[${string}] ${string}`[];
   public getAllOutputAsChunks(options: IStringBufferOutputChunksOptions = {}): IOutputChunk[] | string[] {
-    if (options.asLines) {
-      const normalizedOptions: Required<IStringBufferOutputOptions> = _normalizeOptions(options);
+    const { asLines, normalizeSpecialCharacters } = _normalizeOptions(options);
+    if (asLines) {
       const lines: `[${string}] ${string}`[] = [];
 
       for (const { text: rawText, severity: rawSeverity } of this._allOutputChunks) {
@@ -274,12 +276,11 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
           const hasNewlineAfter: boolean = i < rawLines.length - 1;
 
           // If the original output had a newline after this line, preserve it as the special token
-          // (e.g. "[-n-]") when normalization is enabled.
-          const shouldIncludeNewlineToken: boolean =
-            normalizedOptions.normalizeSpecialCharacters && hasNewlineAfter;
+          // (e.g. "[n]") when normalization is enabled.
+          const shouldIncludeNewlineToken: boolean = normalizeSpecialCharacters && hasNewlineAfter;
           const lineText: string = shouldIncludeNewlineToken ? `${rawLines[i]}\n` : rawLines[i];
 
-          const text: string = _normalizeOutput(lineText, options);
+          const text: string = _normalizeOutputInner(lineText, normalizeSpecialCharacters);
           lines.push(`[${severity}] ${text}`);
         }
       }
@@ -287,7 +288,7 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
       return lines;
     } else {
       return this._allOutputChunks.map(({ text: rawText, severity }) => {
-        const text: string = _normalizeOutput(rawText, options);
+        const text: string = _normalizeOutputInner(rawText, normalizeSpecialCharacters);
         return {
           text,
           severity
