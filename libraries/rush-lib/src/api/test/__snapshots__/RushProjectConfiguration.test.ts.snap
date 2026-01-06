@@ -10,7 +10,7 @@ exports[`RushProjectConfiguration getCacheDisabledReason Indicates if tracked fi
 
 exports[`RushProjectConfiguration getCacheDisabledReason returns reason if the operation is runnable 1`] = `"Caching has been disabled for this project's \\"_phase:a\\" command."`;
 
-exports[`RushProjectConfiguration operationSettingsByOperationName allows outputFolderNames to be inside subfolders 1`] = `Object {}`;
+exports[`RushProjectConfiguration operationSettingsByOperationName allows outputFolderNames to be inside subfolders 1`] = `Array []`;
 
 exports[`RushProjectConfiguration operationSettingsByOperationName allows outputFolderNames to be inside subfolders 2`] = `
 Map {
@@ -31,12 +31,12 @@ Map {
 `;
 
 exports[`RushProjectConfiguration operationSettingsByOperationName does not allow one outputFolderName to be under another 1`] = `
-Object {
-  "error": "The project \\"test-project-d\\" has a \\"config/rush-project.json\\" configuration that defines two operations in the same command whose \\"outputFolderNames\\" would overlap. Operations outputs in the same command must be disjoint so that they can be independently cached. The \\"a/b\\" path overlaps between these operations: \\"_phase:b\\", \\"_phase:a\\"[n]",
-}
+Array [
+  "[  error] The project \\"test-project-d\\" has a \\"config/rush-project.json\\" configuration that defines two operations in the same command whose \\"outputFolderNames\\" would overlap. Operations outputs in the same command must be disjoint so that they can be independently cached. The \\"a/b\\" path overlaps between these operations: \\"_phase:b\\", \\"_phase:a\\"[n]",
+]
 `;
 
-exports[`RushProjectConfiguration operationSettingsByOperationName loads a rush-project.json config that extends another config file 1`] = `Object {}`;
+exports[`RushProjectConfiguration operationSettingsByOperationName loads a rush-project.json config that extends another config file 1`] = `Array []`;
 
 exports[`RushProjectConfiguration operationSettingsByOperationName loads a rush-project.json config that extends another config file 2`] = `
 Map {
@@ -59,19 +59,19 @@ Map {
 exports[`RushProjectConfiguration operationSettingsByOperationName throws an error when loading a rush-project.json config that lists an operation twice 1`] = `"The operation \\"_phase:a\\" occurs multiple times in the \\"operationSettings\\" array in \\"<testFolder>/config/rush-project.json\\"."`;
 
 exports[`RushProjectConfiguration operationSettingsByOperationName validates mix of existent and nonexistent parameters 1`] = `
-Object {
-  "error": "The project \\"test-project-g\\" has a \\"config/rush-project.json\\" configuration that specifies invalid parameter(s) in \\"parameterNamesToIgnore\\" for operation \\"_phase:build\\": --nonexistent-param. Valid parameters for this operation are: --production, --verbose.[n]",
-}
+Array [
+  "[  error] The project \\"test-project-g\\" has a \\"config/rush-project.json\\" configuration that specifies invalid parameter(s) in \\"parameterNamesToIgnore\\" for operation \\"_phase:build\\": --nonexistent-param. Valid parameters for this operation are: --production, --verbose.[n]",
+]
 `;
 
 exports[`RushProjectConfiguration operationSettingsByOperationName validates nonexistent parameters when operation has valid parameters 1`] = `
-Object {
-  "error": "The project \\"test-project-f\\" has a \\"config/rush-project.json\\" configuration that specifies invalid parameter(s) in \\"parameterNamesToIgnore\\" for operation \\"_phase:build\\": --nonexistent-param, --another-nonexistent. Valid parameters for this operation are: --production, --verbose.[n]",
-}
+Array [
+  "[  error] The project \\"test-project-f\\" has a \\"config/rush-project.json\\" configuration that specifies invalid parameter(s) in \\"parameterNamesToIgnore\\" for operation \\"_phase:build\\": --nonexistent-param, --another-nonexistent. Valid parameters for this operation are: --production, --verbose.[n]",
+]
 `;
 
 exports[`RushProjectConfiguration operationSettingsByOperationName validates that parameters in parameterNamesToIgnore exist for the operation 1`] = `
-Object {
-  "error": "The project \\"test-project-e\\" has a \\"config/rush-project.json\\" configuration that specifies invalid parameter(s) in \\"parameterNamesToIgnore\\" for operation \\"_phase:build\\": --invalid-parameter, --another-invalid, -malformed-parameter. Valid parameters for this operation are: (none).[n]",
-}
+Array [
+  "[  error] The project \\"test-project-e\\" has a \\"config/rush-project.json\\" configuration that specifies invalid parameter(s) in \\"parameterNamesToIgnore\\" for operation \\"_phase:build\\": --invalid-parameter, --another-invalid, -malformed-parameter. Valid parameters for this operation are: (none).[n]",
+]
 `;

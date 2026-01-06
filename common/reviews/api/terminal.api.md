@@ -152,6 +152,14 @@ export interface INormalizeNewlinesTextRewriterOptions {
 }
 
 // @beta (undocumented)
+export interface IOutputChunk {
+    // (undocumented)
+    severity: TerminalProviderSeverityName;
+    // (undocumented)
+    text: string;
+}
+
+// @beta (undocumented)
 export type IPrefixProxyTerminalProviderOptions = IStaticPrefixProxyTerminalProviderOptions | IDynamicPrefixProxyTerminalProviderOptions;
 
 // @beta (undocumented)
@@ -193,8 +201,13 @@ export interface IStdioSummarizerOptions extends ITerminalWritableOptions {
 }
 
 // @beta (undocumented)
+export interface IStringBufferOutputChunksOptions extends IStringBufferOutputOptions {
+    asLines?: boolean;
+}
+
+// @beta (undocumented)
 export interface IStringBufferOutputOptions {
-    normalizeSpecialCharacters: boolean;
+    normalizeSpecialCharacters?: boolean;
 }
 
 // @beta (undocumented)
@@ -381,6 +394,13 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     getAllOutput(sparse?: false, options?: IStringBufferOutputOptions): IAllStringBufferOutput;
     // (undocumented)
     getAllOutput(sparse: true, options?: IStringBufferOutputOptions): Partial<IAllStringBufferOutput>;
+    getAllOutputAsChunks(options?: IStringBufferOutputChunksOptions & {
+        asLines?: false;
+    }): IOutputChunk[];
+    // (undocumented)
+    getAllOutputAsChunks(options: IStringBufferOutputChunksOptions & {
+        asLines: true;
+    }): `[${string}] ${string}`[];
     getDebugOutput(options?: IStringBufferOutputOptions): string;
     getErrorOutput(options?: IStringBufferOutputOptions): string;
     getOutput(options?: IStringBufferOutputOptions): string;
@@ -389,7 +409,7 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     getVerboseOutput(options?: IStringBufferOutputOptions): string;
     getWarningOutput(options?: IStringBufferOutputOptions): string;
     readonly supportsColor: boolean;
-    write(data: string, severity: TerminalProviderSeverity): void;
+    write(text: string, severity: TerminalProviderSeverity): void;
 }
 
 // @beta
@@ -428,6 +448,9 @@ export enum TerminalProviderSeverity {
     // (undocumented)
     warning = 1
 }
+
+// @beta (undocumented)
+export type TerminalProviderSeverityName = keyof typeof TerminalProviderSeverity;
 
 // @beta
 export class TerminalStreamWritable extends Writable {

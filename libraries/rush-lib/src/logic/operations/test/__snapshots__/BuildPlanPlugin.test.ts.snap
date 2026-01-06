@@ -1,327 +1,326 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BuildPlanPlugin build plan debugging should generate a build plan 1`] = `
-Object {
-  "log": "Build Plan Depth (deepest dependency tree): 5
-Build Plan Width (maximum parallelism): 38
-Number of Nodes per Depth: 22, 38, 33, 11, 1
-Plan @ Depth 0 has 22 nodes and 0 dependents:
-- a (no-deps)
-- b (no-deps)
-- c (no-deps)
-- d (no-deps)
-- e (no-deps)
-- f (no-deps)
-- g (no-deps)
-- h (no-deps)
-- a (upstream-1)
-- a (upstream-2)
-- a (upstream-1-self-upstream)
-- i (no-deps)
-- j (no-deps)
-- i (upstream-1)
-- j (upstream-1)
-- i (upstream-2)
-- j (upstream-2)
-- a (upstream-3)
-- i (upstream-3)
-- j (upstream-3)
-- i (upstream-1-self-upstream)
-- j (upstream-1-self-upstream)
-Plan @ Depth 1 has 38 nodes and 22 dependents:
-- a (upstream-self)
-- b (upstream-1)
-- f (upstream-1)
-- g (upstream-1)
-- h (upstream-1)
-- b (upstream-self)
-- c (upstream-1)
-- d (upstream-1)
-- c (upstream-self)
-- e (upstream-1)
-- d (upstream-self)
-- e (upstream-self)
-- f (upstream-self)
-- g (upstream-self)
-- h (upstream-self)
-- b (upstream-2)
-- f (upstream-2)
-- g (upstream-2)
-- h (upstream-2)
-- a (upstream-1-self)
-- b (upstream-3)
-- f (upstream-3)
-- g (upstream-3)
-- h (upstream-3)
-- a (upstream-2-self)
-- b (complex)
-- f (complex)
-- g (complex)
-- h (complex)
-- i (upstream-self)
-- j (upstream-self)
-- i (upstream-1-self)
-- j (upstream-1-self)
-- i (upstream-2-self)
-- j (upstream-2-self)
-- a (complex)
-- i (complex)
-- j (complex)
-Plan @ Depth 2 has 33 nodes and 60 dependents:
-- b (upstream-self)
-- f (upstream-self)
-- h (upstream-self)
-- g (upstream-self)
-- c (upstream-2)
-- d (upstream-2)
-- b (upstream-1-self)
-- f (upstream-1-self)
-- g (upstream-1-self)
-- f (upstream-2)
-- h (upstream-1-self)
-- c (upstream-self)
-- d (upstream-self)
-- e (upstream-2)
-- c (upstream-1-self)
-- d (upstream-1-self)
-- e (upstream-self)
-- e (upstream-1-self)
-- c (upstream-3)
-- d (upstream-3)
-- b (upstream-2-self)
-- f (upstream-2-self)
-- g (upstream-2-self)
-- f (upstream-3)
-- h (upstream-2-self)
-- b (upstream-1-self-upstream)
-- f (upstream-1-self-upstream)
-- g (upstream-1-self-upstream)
-- h (upstream-1-self-upstream)
-- b (complex)
-- f (complex)
-- g (complex)
-- h (complex)
-Plan @ Depth 3 has 11 nodes and 93 dependents:
-- e (upstream-3)
-- c (upstream-2-self)
-- d (upstream-2-self)
-- c (upstream-1-self-upstream)
-- d (upstream-1-self-upstream)
-- f (upstream-1-self-upstream)
-- e (upstream-2-self)
-- e (upstream-1-self-upstream)
-- c (complex)
-- d (complex)
-- f (complex)
-Plan @ Depth 4 has 1 nodes and 104 dependents:
-- e (complex)
-##################################################
-                  a (no-deps): (0)
-                  b (no-deps): (0)
-                  c (no-deps): (0)
-                  d (no-deps): (0)
-                  e (no-deps): (0)
-                  f (no-deps): (0)
-                  g (no-deps): (0)
-                  h (no-deps): (0)
-               a (upstream-1): (0)
-               a (upstream-2): (0)
- a (upstream-1-self-upstream): (0)
-                  i (no-deps): (1)
-                  j (no-deps): (2)
-               i (upstream-1): (3)
-               j (upstream-1): (4)
-               i (upstream-2): (5)
-               j (upstream-2): (6)
-               a (upstream-3): (7)
-               i (upstream-3): (8)
-               j (upstream-3): (9)
- i (upstream-1-self-upstream): (10)
- j (upstream-1-self-upstream): (11)
-            a (upstream-self): -(0)
-               b (upstream-1): -(0)
-               c (upstream-1): -(0)
-               d (upstream-1): -(0)
-               e (upstream-1): -(0)
-               f (upstream-1): -(0)
-               g (upstream-1): -(0)
-               h (upstream-1): -(0)
-               b (upstream-2): -(0)
-               g (upstream-2): -(0)
-               h (upstream-2): -(0)
-               b (upstream-3): -(0)
-               g (upstream-3): -(0)
-               h (upstream-3): -(0)
-          a (upstream-1-self): -(0)
-          a (upstream-2-self): -(0)
-            i (upstream-self): -(1)
-            j (upstream-self): -(2)
-          i (upstream-1-self): -(3)
-          j (upstream-1-self): -(4)
-          i (upstream-2-self): -(5)
-          j (upstream-2-self): -(6)
-                  a (complex): -(7)
-                  i (complex): -(8)
-                  j (complex): -(9)
-            b (upstream-self): --(0)
-            f (upstream-self): --(0)
-            h (upstream-self): --(0)
-            g (upstream-self): --(0)
-               c (upstream-2): --(0)
-               d (upstream-2): --(0)
-               e (upstream-2): --(0)
-               f (upstream-2): --(0)
-               c (upstream-3): --(0)
-               d (upstream-3): --(0)
-               f (upstream-3): --(0)
-          b (upstream-1-self): --(0)
-          c (upstream-1-self): --(0)
-          d (upstream-1-self): --(0)
-          e (upstream-1-self): --(0)
-          f (upstream-1-self): --(0)
-          g (upstream-1-self): --(0)
-          h (upstream-1-self): --(0)
-          b (upstream-2-self): --(0)
-          g (upstream-2-self): --(0)
-          h (upstream-2-self): --(0)
- b (upstream-1-self-upstream): --(0)
- g (upstream-1-self-upstream): --(0)
- h (upstream-1-self-upstream): --(0)
-                  b (complex): --(0)
-                  g (complex): --(0)
-                  h (complex): --(0)
-            c (upstream-self): ---(0)
-            d (upstream-self): ---(0)
-               e (upstream-3): ---(0)
-          c (upstream-2-self): ---(0)
-          d (upstream-2-self): ---(0)
-          e (upstream-2-self): ---(0)
-          f (upstream-2-self): ---(0)
- c (upstream-1-self-upstream): ---(0)
- d (upstream-1-self-upstream): ---(0)
- e (upstream-1-self-upstream): ---(0)
- f (upstream-1-self-upstream): ---(0)
-                  c (complex): ---(0)
-                  d (complex): ---(0)
-                  f (complex): ---(0)
-            e (upstream-self): ----(0)
-                  e (complex): ----(0)
-##################################################
-Cluster 0:
-- Dependencies: none
-- Clustered by: 
-  - (a (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (b (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (a (upstream-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (c (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (b (upstream-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (d (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (e (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (c (upstream-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (f (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (h (upstream-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (h (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (g (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (a (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (b (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (c (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (h (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (a (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (b (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (c (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (h (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (d (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (e (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (f (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (g (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (d (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (e (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (f (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (g (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (a (upstream-1-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (b (upstream-1-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (c (upstream-1-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (h (upstream-1-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (b (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (a (upstream-1-self-upstream)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (a (upstream-2-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (c (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (b (upstream-1-self-upstream)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (b (upstream-2-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (d (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (e (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (c (upstream-1-self-upstream)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (c (upstream-2-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (f (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (h (upstream-1-self-upstream)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (h (upstream-2-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (g (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-  - (h (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-- Operations: a (no-deps), b (no-deps), c (no-deps), d (no-deps), e (no-deps), f (no-deps), g (no-deps), h (no-deps), a (upstream-self), b (upstream-self), c (upstream-self), d (upstream-self), e (upstream-self), f (upstream-self), h (upstream-self), g (upstream-self), a (upstream-1), b (upstream-1), c (upstream-1), d (upstream-1), e (upstream-1), f (upstream-1), g (upstream-1), h (upstream-1), a (upstream-2), b (upstream-2), c (upstream-2), d (upstream-2), e (upstream-2), f (upstream-2), g (upstream-2), h (upstream-2), b (upstream-3), c (upstream-3), d (upstream-3), e (upstream-3), f (upstream-3), g (upstream-3), h (upstream-3), a (upstream-1-self), b (upstream-1-self), c (upstream-1-self), d (upstream-1-self), e (upstream-1-self), f (upstream-1-self), g (upstream-1-self), h (upstream-1-self), a (upstream-2-self), b (upstream-2-self), c (upstream-2-self), d (upstream-2-self), e (upstream-2-self), f (upstream-2-self), g (upstream-2-self), h (upstream-2-self), a (upstream-1-self-upstream), b (upstream-1-self-upstream), c (upstream-1-self-upstream), d (upstream-1-self-upstream), e (upstream-1-self-upstream), f (upstream-1-self-upstream), g (upstream-1-self-upstream), h (upstream-1-self-upstream), b (complex), c (complex), d (complex), e (complex), f (complex), g (complex), h (complex)
---------------------------------------------------
-Cluster 1:
-- Dependencies: none
-- Clustered by: 
-  - (i (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-- Operations: i (no-deps), i (upstream-self)
---------------------------------------------------
-Cluster 2:
-- Dependencies: none
-- Clustered by: 
-  - (j (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-- Operations: j (no-deps), j (upstream-self)
---------------------------------------------------
-Cluster 3:
-- Dependencies: none
-- Clustered by: 
-  - (i (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-- Operations: i (upstream-1), i (upstream-1-self)
---------------------------------------------------
-Cluster 4:
-- Dependencies: none
-- Clustered by: 
-  - (j (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-- Operations: j (upstream-1), j (upstream-1-self)
---------------------------------------------------
-Cluster 5:
-- Dependencies: none
-- Clustered by: 
-  - (i (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-- Operations: i (upstream-2), i (upstream-2-self)
---------------------------------------------------
-Cluster 6:
-- Dependencies: none
-- Clustered by: 
-  - (j (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-- Operations: j (upstream-2), j (upstream-2-self)
---------------------------------------------------
-Cluster 7:
-- Dependencies: none
-- Clustered by: 
-  - (a (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-- Operations: a (upstream-3), a (complex)
---------------------------------------------------
-Cluster 8:
-- Dependencies: none
-- Clustered by: 
-  - (i (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-- Operations: i (upstream-3), i (complex)
---------------------------------------------------
-Cluster 9:
-- Dependencies: none
-- Clustered by: 
-  - (j (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"
-- Operations: j (upstream-3), j (complex)
---------------------------------------------------
-Cluster 10:
-- Dependencies: none
-- Operations: i (upstream-1-self-upstream)
---------------------------------------------------
-Cluster 11:
-- Dependencies: none
-- Operations: j (upstream-1-self-upstream)
---------------------------------------------------
-##################################################
-",
-}
+Array [
+  "[    log] Build Plan Depth (deepest dependency tree): 5",
+  "[    log] Build Plan Width (maximum parallelism): 38",
+  "[    log] Number of Nodes per Depth: 22, 38, 33, 11, 1",
+  "[    log] Plan @ Depth 0 has 22 nodes and 0 dependents:",
+  "[    log] - a (no-deps)",
+  "[    log] - b (no-deps)",
+  "[    log] - c (no-deps)",
+  "[    log] - d (no-deps)",
+  "[    log] - e (no-deps)",
+  "[    log] - f (no-deps)",
+  "[    log] - g (no-deps)",
+  "[    log] - h (no-deps)",
+  "[    log] - a (upstream-1)",
+  "[    log] - a (upstream-2)",
+  "[    log] - a (upstream-1-self-upstream)",
+  "[    log] - i (no-deps)",
+  "[    log] - j (no-deps)",
+  "[    log] - i (upstream-1)",
+  "[    log] - j (upstream-1)",
+  "[    log] - i (upstream-2)",
+  "[    log] - j (upstream-2)",
+  "[    log] - a (upstream-3)",
+  "[    log] - i (upstream-3)",
+  "[    log] - j (upstream-3)",
+  "[    log] - i (upstream-1-self-upstream)",
+  "[    log] - j (upstream-1-self-upstream)",
+  "[    log] Plan @ Depth 1 has 38 nodes and 22 dependents:",
+  "[    log] - a (upstream-self)",
+  "[    log] - b (upstream-1)",
+  "[    log] - f (upstream-1)",
+  "[    log] - g (upstream-1)",
+  "[    log] - h (upstream-1)",
+  "[    log] - b (upstream-self)",
+  "[    log] - c (upstream-1)",
+  "[    log] - d (upstream-1)",
+  "[    log] - c (upstream-self)",
+  "[    log] - e (upstream-1)",
+  "[    log] - d (upstream-self)",
+  "[    log] - e (upstream-self)",
+  "[    log] - f (upstream-self)",
+  "[    log] - g (upstream-self)",
+  "[    log] - h (upstream-self)",
+  "[    log] - b (upstream-2)",
+  "[    log] - f (upstream-2)",
+  "[    log] - g (upstream-2)",
+  "[    log] - h (upstream-2)",
+  "[    log] - a (upstream-1-self)",
+  "[    log] - b (upstream-3)",
+  "[    log] - f (upstream-3)",
+  "[    log] - g (upstream-3)",
+  "[    log] - h (upstream-3)",
+  "[    log] - a (upstream-2-self)",
+  "[    log] - b (complex)",
+  "[    log] - f (complex)",
+  "[    log] - g (complex)",
+  "[    log] - h (complex)",
+  "[    log] - i (upstream-self)",
+  "[    log] - j (upstream-self)",
+  "[    log] - i (upstream-1-self)",
+  "[    log] - j (upstream-1-self)",
+  "[    log] - i (upstream-2-self)",
+  "[    log] - j (upstream-2-self)",
+  "[    log] - a (complex)",
+  "[    log] - i (complex)",
+  "[    log] - j (complex)",
+  "[    log] Plan @ Depth 2 has 33 nodes and 60 dependents:",
+  "[    log] - b (upstream-self)",
+  "[    log] - f (upstream-self)",
+  "[    log] - h (upstream-self)",
+  "[    log] - g (upstream-self)",
+  "[    log] - c (upstream-2)",
+  "[    log] - d (upstream-2)",
+  "[    log] - b (upstream-1-self)",
+  "[    log] - f (upstream-1-self)",
+  "[    log] - g (upstream-1-self)",
+  "[    log] - f (upstream-2)",
+  "[    log] - h (upstream-1-self)",
+  "[    log] - c (upstream-self)",
+  "[    log] - d (upstream-self)",
+  "[    log] - e (upstream-2)",
+  "[    log] - c (upstream-1-self)",
+  "[    log] - d (upstream-1-self)",
+  "[    log] - e (upstream-self)",
+  "[    log] - e (upstream-1-self)",
+  "[    log] - c (upstream-3)",
+  "[    log] - d (upstream-3)",
+  "[    log] - b (upstream-2-self)",
+  "[    log] - f (upstream-2-self)",
+  "[    log] - g (upstream-2-self)",
+  "[    log] - f (upstream-3)",
+  "[    log] - h (upstream-2-self)",
+  "[    log] - b (upstream-1-self-upstream)",
+  "[    log] - f (upstream-1-self-upstream)",
+  "[    log] - g (upstream-1-self-upstream)",
+  "[    log] - h (upstream-1-self-upstream)",
+  "[    log] - b (complex)",
+  "[    log] - f (complex)",
+  "[    log] - g (complex)",
+  "[    log] - h (complex)",
+  "[    log] Plan @ Depth 3 has 11 nodes and 93 dependents:",
+  "[    log] - e (upstream-3)",
+  "[    log] - c (upstream-2-self)",
+  "[    log] - d (upstream-2-self)",
+  "[    log] - c (upstream-1-self-upstream)",
+  "[    log] - d (upstream-1-self-upstream)",
+  "[    log] - f (upstream-1-self-upstream)",
+  "[    log] - e (upstream-2-self)",
+  "[    log] - e (upstream-1-self-upstream)",
+  "[    log] - c (complex)",
+  "[    log] - d (complex)",
+  "[    log] - f (complex)",
+  "[    log] Plan @ Depth 4 has 1 nodes and 104 dependents:",
+  "[    log] - e (complex)",
+  "[    log] ##################################################",
+  "[    log]                   a (no-deps): (0)",
+  "[    log]                   b (no-deps): (0)",
+  "[    log]                   c (no-deps): (0)",
+  "[    log]                   d (no-deps): (0)",
+  "[    log]                   e (no-deps): (0)",
+  "[    log]                   f (no-deps): (0)",
+  "[    log]                   g (no-deps): (0)",
+  "[    log]                   h (no-deps): (0)",
+  "[    log]                a (upstream-1): (0)",
+  "[    log]                a (upstream-2): (0)",
+  "[    log]  a (upstream-1-self-upstream): (0)",
+  "[    log]                   i (no-deps): (1)",
+  "[    log]                   j (no-deps): (2)",
+  "[    log]                i (upstream-1): (3)",
+  "[    log]                j (upstream-1): (4)",
+  "[    log]                i (upstream-2): (5)",
+  "[    log]                j (upstream-2): (6)",
+  "[    log]                a (upstream-3): (7)",
+  "[    log]                i (upstream-3): (8)",
+  "[    log]                j (upstream-3): (9)",
+  "[    log]  i (upstream-1-self-upstream): (10)",
+  "[    log]  j (upstream-1-self-upstream): (11)",
+  "[    log]             a (upstream-self): -(0)",
+  "[    log]                b (upstream-1): -(0)",
+  "[    log]                c (upstream-1): -(0)",
+  "[    log]                d (upstream-1): -(0)",
+  "[    log]                e (upstream-1): -(0)",
+  "[    log]                f (upstream-1): -(0)",
+  "[    log]                g (upstream-1): -(0)",
+  "[    log]                h (upstream-1): -(0)",
+  "[    log]                b (upstream-2): -(0)",
+  "[    log]                g (upstream-2): -(0)",
+  "[    log]                h (upstream-2): -(0)",
+  "[    log]                b (upstream-3): -(0)",
+  "[    log]                g (upstream-3): -(0)",
+  "[    log]                h (upstream-3): -(0)",
+  "[    log]           a (upstream-1-self): -(0)",
+  "[    log]           a (upstream-2-self): -(0)",
+  "[    log]             i (upstream-self): -(1)",
+  "[    log]             j (upstream-self): -(2)",
+  "[    log]           i (upstream-1-self): -(3)",
+  "[    log]           j (upstream-1-self): -(4)",
+  "[    log]           i (upstream-2-self): -(5)",
+  "[    log]           j (upstream-2-self): -(6)",
+  "[    log]                   a (complex): -(7)",
+  "[    log]                   i (complex): -(8)",
+  "[    log]                   j (complex): -(9)",
+  "[    log]             b (upstream-self): --(0)",
+  "[    log]             f (upstream-self): --(0)",
+  "[    log]             h (upstream-self): --(0)",
+  "[    log]             g (upstream-self): --(0)",
+  "[    log]                c (upstream-2): --(0)",
+  "[    log]                d (upstream-2): --(0)",
+  "[    log]                e (upstream-2): --(0)",
+  "[    log]                f (upstream-2): --(0)",
+  "[    log]                c (upstream-3): --(0)",
+  "[    log]                d (upstream-3): --(0)",
+  "[    log]                f (upstream-3): --(0)",
+  "[    log]           b (upstream-1-self): --(0)",
+  "[    log]           c (upstream-1-self): --(0)",
+  "[    log]           d (upstream-1-self): --(0)",
+  "[    log]           e (upstream-1-self): --(0)",
+  "[    log]           f (upstream-1-self): --(0)",
+  "[    log]           g (upstream-1-self): --(0)",
+  "[    log]           h (upstream-1-self): --(0)",
+  "[    log]           b (upstream-2-self): --(0)",
+  "[    log]           g (upstream-2-self): --(0)",
+  "[    log]           h (upstream-2-self): --(0)",
+  "[    log]  b (upstream-1-self-upstream): --(0)",
+  "[    log]  g (upstream-1-self-upstream): --(0)",
+  "[    log]  h (upstream-1-self-upstream): --(0)",
+  "[    log]                   b (complex): --(0)",
+  "[    log]                   g (complex): --(0)",
+  "[    log]                   h (complex): --(0)",
+  "[    log]             c (upstream-self): ---(0)",
+  "[    log]             d (upstream-self): ---(0)",
+  "[    log]                e (upstream-3): ---(0)",
+  "[    log]           c (upstream-2-self): ---(0)",
+  "[    log]           d (upstream-2-self): ---(0)",
+  "[    log]           e (upstream-2-self): ---(0)",
+  "[    log]           f (upstream-2-self): ---(0)",
+  "[    log]  c (upstream-1-self-upstream): ---(0)",
+  "[    log]  d (upstream-1-self-upstream): ---(0)",
+  "[    log]  e (upstream-1-self-upstream): ---(0)",
+  "[    log]  f (upstream-1-self-upstream): ---(0)",
+  "[    log]                   c (complex): ---(0)",
+  "[    log]                   d (complex): ---(0)",
+  "[    log]                   f (complex): ---(0)",
+  "[    log]             e (upstream-self): ----(0)",
+  "[    log]                   e (complex): ----(0)",
+  "[    log] ##################################################",
+  "[    log] Cluster 0:",
+  "[    log] - Dependencies: none",
+  "[    log] - Clustered by: ",
+  "[    log]   - (a (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (b (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (a (upstream-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (c (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (b (upstream-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (d (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (e (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (c (upstream-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (f (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (h (upstream-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (h (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (g (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (a (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (b (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (c (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (h (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (a (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (b (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (c (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (h (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (d (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (e (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (f (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (g (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (d (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (e (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (f (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (g (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (a (upstream-1-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (b (upstream-1-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (c (upstream-1-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (h (upstream-1-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (b (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (a (upstream-1-self-upstream)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (a (upstream-2-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (c (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (b (upstream-1-self-upstream)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (b (upstream-2-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (d (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (e (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (c (upstream-1-self-upstream)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (c (upstream-2-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (f (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (h (upstream-1-self-upstream)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (h (upstream-2-self)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (g (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log]   - (h (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log] - Operations: a (no-deps), b (no-deps), c (no-deps), d (no-deps), e (no-deps), f (no-deps), g (no-deps), h (no-deps), a (upstream-self), b (upstream-self), c (upstream-self), d (upstream-self), e (upstream-self), f (upstream-self), h (upstream-self), g (upstream-self), a (upstream-1), b (upstream-1), c (upstream-1), d (upstream-1), e (upstream-1), f (upstream-1), g (upstream-1), h (upstream-1), a (upstream-2), b (upstream-2), c (upstream-2), d (upstream-2), e (upstream-2), f (upstream-2), g (upstream-2), h (upstream-2), b (upstream-3), c (upstream-3), d (upstream-3), e (upstream-3), f (upstream-3), g (upstream-3), h (upstream-3), a (upstream-1-self), b (upstream-1-self), c (upstream-1-self), d (upstream-1-self), e (upstream-1-self), f (upstream-1-self), g (upstream-1-self), h (upstream-1-self), a (upstream-2-self), b (upstream-2-self), c (upstream-2-self), d (upstream-2-self), e (upstream-2-self), f (upstream-2-self), g (upstream-2-self), h (upstream-2-self), a (upstream-1-self-upstream), b (upstream-1-self-upstream), c (upstream-1-self-upstream), d (upstream-1-self-upstream), e (upstream-1-self-upstream), f (upstream-1-self-upstream), g (upstream-1-self-upstream), h (upstream-1-self-upstream), b (complex), c (complex), d (complex), e (complex), f (complex), g (complex), h (complex)",
+  "[    log] --------------------------------------------------",
+  "[    log] Cluster 1:",
+  "[    log] - Dependencies: none",
+  "[    log] - Clustered by: ",
+  "[    log]   - (i (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log] - Operations: i (no-deps), i (upstream-self)",
+  "[    log] --------------------------------------------------",
+  "[    log] Cluster 2:",
+  "[    log] - Dependencies: none",
+  "[    log] - Clustered by: ",
+  "[    log]   - (j (no-deps)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log] - Operations: j (no-deps), j (upstream-self)",
+  "[    log] --------------------------------------------------",
+  "[    log] Cluster 3:",
+  "[    log] - Dependencies: none",
+  "[    log] - Clustered by: ",
+  "[    log]   - (i (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log] - Operations: i (upstream-1), i (upstream-1-self)",
+  "[    log] --------------------------------------------------",
+  "[    log] Cluster 4:",
+  "[    log] - Dependencies: none",
+  "[    log] - Clustered by: ",
+  "[    log]   - (j (upstream-1)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log] - Operations: j (upstream-1), j (upstream-1-self)",
+  "[    log] --------------------------------------------------",
+  "[    log] Cluster 5:",
+  "[    log] - Dependencies: none",
+  "[    log] - Clustered by: ",
+  "[    log]   - (i (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log] - Operations: i (upstream-2), i (upstream-2-self)",
+  "[    log] --------------------------------------------------",
+  "[    log] Cluster 6:",
+  "[    log] - Dependencies: none",
+  "[    log] - Clustered by: ",
+  "[    log]   - (j (upstream-2)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log] - Operations: j (upstream-2), j (upstream-2-self)",
+  "[    log] --------------------------------------------------",
+  "[    log] Cluster 7:",
+  "[    log] - Dependencies: none",
+  "[    log] - Clustered by: ",
+  "[    log]   - (a (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log] - Operations: a (upstream-3), a (complex)",
+  "[    log] --------------------------------------------------",
+  "[    log] Cluster 8:",
+  "[    log] - Dependencies: none",
+  "[    log] - Clustered by: ",
+  "[    log]   - (i (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log] - Operations: i (upstream-3), i (complex)",
+  "[    log] --------------------------------------------------",
+  "[    log] Cluster 9:",
+  "[    log] - Dependencies: none",
+  "[    log] - Clustered by: ",
+  "[    log]   - (j (upstream-3)) \\"Project does not have a rush-project.json configuration file, or one provided by a rig, so it does not support caching.\\"",
+  "[    log] - Operations: j (upstream-3), j (complex)",
+  "[    log] --------------------------------------------------",
+  "[    log] Cluster 10:",
+  "[    log] - Dependencies: none",
+  "[    log] - Operations: i (upstream-1-self-upstream)",
+  "[    log] --------------------------------------------------",
+  "[    log] Cluster 11:",
+  "[    log] - Dependencies: none",
+  "[    log] - Operations: j (upstream-1-self-upstream)",
+  "[    log] --------------------------------------------------",
+  "[    log] ##################################################",
+]
 `;

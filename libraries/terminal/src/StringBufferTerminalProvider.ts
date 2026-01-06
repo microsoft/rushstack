@@ -16,7 +16,17 @@ export interface IStringBufferOutputOptions {
    *
    * This option defaults to `true`
    */
-  normalizeSpecialCharacters: boolean;
+  normalizeSpecialCharacters?: boolean;
+}
+
+/**
+ * @beta
+ */
+export interface IStringBufferOutputChunksOptions extends IStringBufferOutputOptions {
+  /**
+   * If true, the output will be returned as an array of lines prefixed with severity tokens.
+   */
+  asLines?: boolean;
 }
 
 /**
@@ -30,21 +40,47 @@ export interface IAllStringBufferOutput {
   debug: string;
 }
 
-function _normalizeOutput(s: string, options: IStringBufferOutputOptions | undefined): string {
-  options = {
+/**
+ * @beta
+ */
+export type TerminalProviderSeverityName = keyof typeof TerminalProviderSeverity;
+
+/**
+ * @beta
+ */
+export interface IOutputChunk {
+  text: string;
+  severity: TerminalProviderSeverityName;
+}
+
+function _normalizeOptions<TOptions extends IStringBufferOutputOptions>(
+  options: TOptions
+): TOptions & Required<IStringBufferOutputOptions> {
+  return {
     normalizeSpecialCharacters: true,
-
-    ...(options || {})
+    ...options
   };
+}
 
+function _normalizeOutput(s: string, options: IStringBufferOutputOptions | undefined): string {
+  const { normalizeSpecialCharacters } = _normalizeOptions(options ?? {});
+  return _normalizeOutputInner(s, normalizeSpecialCharacters);
+}
+
+function _normalizeOutputInner(s: string, normalizeSpecialCharacters: boolean): string {
   s = Text.convertToLf(s);
 
-  if (options.normalizeSpecialCharacters) {
+  if (normalizeSpecialCharacters) {
     return AnsiEscape.formatForTests(s, { encodeNewlines: true });
   } else {
     return s;
   }
 }
+
+const LONGEST_SEVERITY_NAME_LENGTH: number = Object.keys(TerminalProviderSeverity).reduce(
+  (max: number, k: string) => Math.max(max, k.length),
+  0
+);
 
 /**
  * Terminal provider that stores written data in buffers separated by severity.
@@ -59,6 +95,7 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   private _debugBuffer: StringBuilder = new StringBuilder();
   private _warningBuffer: StringBuilder = new StringBuilder();
   private _errorBuffer: StringBuilder = new StringBuilder();
+  private _allOutputChunks: IOutputChunk[] = [];
 
   /**
    * {@inheritDoc ITerminalProvider.supportsColor}
@@ -72,31 +109,45 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   /**
    * {@inheritDoc ITerminalProvider.write}
    */
-  public write(data: string, severity: TerminalProviderSeverity): void {
+  public write(text: string, severity: TerminalProviderSeverity): void {
+    const severityName: TerminalProviderSeverityName = TerminalProviderSeverity[
+      severity
+    ] as TerminalProviderSeverityName;
+
+    const lastChunk: IOutputChunk | undefined = this._allOutputChunks[this._allOutputChunks.length - 1];
+    if (lastChunk && lastChunk.severity === severityName) {
+      lastChunk.text += text;
+    } else {
+      this._allOutputChunks.push({
+        text,
+        severity: severityName
+      });
+    }
+
     switch (severity) {
       case TerminalProviderSeverity.warning: {
-        this._warningBuffer.append(data);
+        this._warningBuffer.append(text);
         break;
       }
 
       case TerminalProviderSeverity.error: {
-        this._errorBuffer.append(data);
+        this._errorBuffer.append(text);
         break;
       }
 
       case TerminalProviderSeverity.verbose: {
-        this._verboseBuffer.append(data);
+        this._verboseBuffer.append(text);
         break;
       }
 
       case TerminalProviderSeverity.debug: {
-        this._debugBuffer.append(data);
+        this._debugBuffer.append(text);
         break;
       }
 
       case TerminalProviderSeverity.log:
       default: {
-        this._standardBuffer.append(data);
+        this._standardBuffer.append(text);
         break;
       }
     }
@@ -188,5 +239,61 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     }
 
     return result;
+  }
+
+  /**
+   * Get everything that has been written as an array of output chunks, preserving order.
+   */
+  public getAllOutputAsChunks(
+    options?: IStringBufferOutputChunksOptions & { asLines?: false }
+  ): IOutputChunk[];
+  public getAllOutputAsChunks(
+    options: IStringBufferOutputChunksOptions & { asLines: true }
+  ): `[${string}] ${string}`[];
+  public getAllOutputAsChunks(options: IStringBufferOutputChunksOptions = {}): IOutputChunk[] | string[] {
+    const { asLines, normalizeSpecialCharacters } = _normalizeOptions(options);
+    if (asLines) {
+      const lines: `[${string}] ${string}`[] = [];
+
+      for (const { text: rawText, severity: rawSeverity } of this._allOutputChunks) {
+        const severity: string = (rawSeverity as TerminalProviderSeverityName).padStart(
+          LONGEST_SEVERITY_NAME_LENGTH,
+          ' '
+        );
+
+        const lfText: string = Text.convertToLf(rawText);
+        const rawLines: string[] = lfText.split('\n');
+
+        // Emit one entry per logical line.
+        for (let i: number = 0; i < rawLines.length; i++) {
+          const isLast: boolean = i === rawLines.length - 1;
+          const isFinalTrailingEmpty: boolean = isLast && rawLines[i] === '';
+
+          if (isFinalTrailingEmpty) {
+            continue;
+          }
+
+          const hasNewlineAfter: boolean = i < rawLines.length - 1;
+
+          // If the original output had a newline after this line, preserve it as the special token
+          // (e.g. "[n]") when normalization is enabled.
+          const shouldIncludeNewlineToken: boolean = normalizeSpecialCharacters && hasNewlineAfter;
+          const lineText: string = shouldIncludeNewlineToken ? `${rawLines[i]}\n` : rawLines[i];
+
+          const text: string = _normalizeOutputInner(lineText, normalizeSpecialCharacters);
+          lines.push(`[${severity}] ${text}`);
+        }
+      }
+
+      return lines;
+    } else {
+      return this._allOutputChunks.map(({ text: rawText, severity }) => {
+        const text: string = _normalizeOutputInner(rawText, normalizeSpecialCharacters);
+        return {
+          text,
+          severity
+        };
+      });
+    }
   }
 }

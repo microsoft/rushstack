@@ -92,9 +92,10 @@ projects:
 exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""packages""): Output file path 1`] = `"<REPO_ROOT>/project-impact-graph.yaml"`;
 
 exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""packages""): Terminal Output 1`] = `
-Object {
-  "log": "[n][green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
-}
+Array [
+  "[    log] [n]",
+  "[    log] [green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
+]
 `;
 
 exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""repo""): Output file data 1`] = `
@@ -165,9 +166,10 @@ projects:
 exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""repo""): Output file path 1`] = `"<REPO_ROOT>/project-impact-graph.yaml"`;
 
 exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""repo""): Terminal Output 1`] = `
-Object {
-  "log": "[n][green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
-}
+Array [
+  "[    log] [n]",
+  "[    log] [green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
+]
 `;
 
 exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""workspacePackages""): Output file data 1`] = `
@@ -264,9 +266,10 @@ projects:
 exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""workspacePackages""): Output file path 1`] = `"<REPO_ROOT>/project-impact-graph.yaml"`;
 
 exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""workspacePackages""): Terminal Output 1`] = `
-Object {
-  "log": "[n][green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
-}
+Array [
+  "[    log] [n]",
+  "[    log] [green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
+]
 `;
 
-exports[`ProjectImpactGraphGenerator validateAsync Reports if the project-impact-graph.yaml file is missing (repo: ""workspacePackages""): Terminal Output 1`] = `Object {}`;
+exports[`ProjectImpactGraphGenerator validateAsync Reports if the project-impact-graph.yaml file is missing (repo: ""workspacePackages""): Terminal Output 1`] = `Array []`;

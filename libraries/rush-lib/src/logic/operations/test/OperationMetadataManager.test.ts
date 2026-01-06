@@ -63,7 +63,7 @@ describe(OperationMetadataManager.name, () => {
       errorLogPath: '/path/to/errorLog'
     });
 
-    expect(mockTerminalProvider.getAllOutput(true)).toMatchSnapshot();
+    expect(mockTerminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
     expect(mockTerminalProvider.getWarningOutput()).toBeFalsy();
   });
 
@@ -87,7 +87,7 @@ describe(OperationMetadataManager.name, () => {
       errorLogPath: '/path/to/errorLog'
     });
 
-    expect(mockTerminalProvider.getAllOutput(true)).toMatchSnapshot();
+    expect(mockTerminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
   });
 
   it('should restore mixed chunked output', async () => {
@@ -109,7 +109,7 @@ describe(OperationMetadataManager.name, () => {
       terminalProvider: mockTerminalProvider,
       errorLogPath: '/path/to/errorLog'
     });
-    expect(mockTerminalProvider.getAllOutput(true)).toMatchSnapshot();
+    expect(mockTerminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
   });
 
   it("should fallback to the log file when chunked output isn't available", async () => {
