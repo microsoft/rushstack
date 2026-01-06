@@ -53,16 +53,22 @@ export interface IOutputChunk {
   severity: TerminalProviderSeverityName;
 }
 
-function _normalizeOutput(s: string, options: IStringBufferOutputOptions | undefined): string {
-  options = {
+function _normalizeOptions(
+  options: IStringBufferOutputOptions | undefined
+): Required<IStringBufferOutputOptions> {
+  return {
     normalizeSpecialCharacters: true,
 
     ...(options || {})
   };
+}
+
+function _normalizeOutput(s: string, options: IStringBufferOutputOptions | undefined): string {
+  const normalizedOptions: Required<IStringBufferOutputOptions> = _normalizeOptions(options);
 
   s = Text.convertToLf(s);
 
-  if (options.normalizeSpecialCharacters) {
+  if (normalizedOptions.normalizeSpecialCharacters) {
     return AnsiEscape.formatForTests(s, { encodeNewlines: true });
   } else {
     return s;
@@ -244,6 +250,7 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   ): `[${string}] ${string}`[];
   public getAllOutputAsChunks(options: IStringBufferOutputChunksOptions = {}): IOutputChunk[] | string[] {
     if (options.asLines) {
+      const normalizedOptions: Required<IStringBufferOutputOptions> = _normalizeOptions(options);
       const lines: `[${string}] ${string}`[] = [];
 
       for (const { text: rawText, severity: rawSeverity } of this._allOutputChunks) {
@@ -264,7 +271,14 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
             continue;
           }
 
-          const lineText: string = rawLines[i];
+          const hasNewlineAfter: boolean = i < rawLines.length - 1;
+
+          // If the original output had a newline after this line, preserve it as the special token
+          // (e.g. "[-n-]") when normalization is enabled.
+          const shouldIncludeNewlineToken: boolean =
+            normalizedOptions.normalizeSpecialCharacters && hasNewlineAfter;
+          const lineText: string = shouldIncludeNewlineToken ? `${rawLines[i]}\n` : rawLines[i];
+
           const text: string = _normalizeOutput(lineText, options);
           lines.push(`[${severity}] ${text}`);
         }
