@@ -8,8 +8,8 @@ Object {
 
 exports[`PrefixProxyTerminalProvider With a dynamic prefix write writes a message with newlines: output as chunks 1`] = `
 Array [
-  "[    log] [prefix (0)] message 1",
-  "[    log] [prefix (1)] message 2",
+  "[    log] [prefix (0)] message 1[n]",
+  "[    log] [prefix (1)] message 2[n]",
   "[    log] [prefix (2)] message 3",
 ]
 `;
@@ -22,8 +22,8 @@ Object {
 
 exports[`PrefixProxyTerminalProvider With a dynamic prefix write writes a message with provider newlines: output as chunks 1`] = `
 Array [
-  "[    log] [prefix (0)] message 1",
-  "[    log] [prefix (1)] message 2",
+  "[    log] [prefix (0)] message 1[n]",
+  "[    log] [prefix (1)] message 2[n]",
   "[    log] [prefix (2)] message 3",
 ]
 `;
@@ -48,9 +48,9 @@ Object {
 
 exports[`PrefixProxyTerminalProvider With a dynamic prefix write writes a mix of messages with and without newlines: output as chunks 1`] = `
 Array [
-  "[    log] [prefix (0)] message 1message 2",
-  "[    log] [prefix (1)] message 3",
-  "[    log] [prefix (2)] message 4message 5",
+  "[    log] [prefix (0)] message 1message 2[n]",
+  "[    log] [prefix (1)] message 3[n]",
+  "[    log] [prefix (2)] message 4message 5[n]",
   "[    log] [prefix (3)] message 6",
 ]
 `;
@@ -75,9 +75,9 @@ Object {
 
 exports[`PrefixProxyTerminalProvider With a dynamic prefix writeLine writes a message line with newlines: output as chunks 1`] = `
 Array [
-  "[    log] [prefix (0)] message 1",
-  "[    log] [prefix (1)] message 2",
-  "[    log] [prefix (2)] message 3",
+  "[    log] [prefix (0)] message 1[n]",
+  "[    log] [prefix (1)] message 2[n]",
+  "[    log] [prefix (2)] message 3[n]",
 ]
 `;
 
@@ -89,9 +89,9 @@ Object {
 
 exports[`PrefixProxyTerminalProvider With a dynamic prefix writeLine writes a message line with provider newlines: output as chunks 1`] = `
 Array [
-  "[    log] [prefix (0)] message 1",
-  "[    log] [prefix (1)] message 2",
-  "[    log] [prefix (2)] message 3",
+  "[    log] [prefix (0)] message 1[n]",
+  "[    log] [prefix (1)] message 2[n]",
+  "[    log] [prefix (2)] message 3[n]",
 ]
 `;
 
@@ -103,7 +103,7 @@ Object {
 
 exports[`PrefixProxyTerminalProvider With a dynamic prefix writeLine writes a message line: output as chunks 1`] = `
 Array [
-  "[    log] [prefix (0)] test message",
+  "[    log] [prefix (0)] test message[n]",
 ]
 `;
 
@@ -115,13 +115,13 @@ Object {
 
 exports[`PrefixProxyTerminalProvider With a dynamic prefix writeLine writes a mix of message lines with and without newlines: output as chunks 1`] = `
 Array [
-  "[    log] [prefix (0)] message 1",
-  "[    log] [prefix (1)] message 2",
-  "[    log] [prefix (2)] message 3",
-  "[    log] [prefix (3)] ",
-  "[    log] [prefix (4)] message 4",
-  "[    log] [prefix (5)] message 5",
-  "[    log] [prefix (6)] message 6",
+  "[    log] [prefix (0)] message 1[n]",
+  "[    log] [prefix (1)] message 2[n]",
+  "[    log] [prefix (2)] message 3[n]",
+  "[    log] [prefix (3)] [n]",
+  "[    log] [prefix (4)] message 4[n]",
+  "[    log] [prefix (5)] message 5[n]",
+  "[    log] [prefix (6)] message 6[n]",
 ]
 `;
 
@@ -133,8 +133,8 @@ Object {
 
 exports[`PrefixProxyTerminalProvider With a static prefix write writes a message with newlines: output as chunks 1`] = `
 Array [
-  "[    log] [prefix] message 1",
-  "[    log] [prefix] message 2",
+  "[    log] [prefix] message 1[n]",
+  "[    log] [prefix] message 2[n]",
   "[    log] [prefix] message 3",
 ]
 `;
@@ -147,8 +147,8 @@ Object {
 
 exports[`PrefixProxyTerminalProvider With a static prefix write writes a message with provider newlines: output as chunks 1`] = `
 Array [
-  "[    log] [prefix] message 1",
-  "[    log] [prefix] message 2",
+  "[    log] [prefix] message 1[n]",
+  "[    log] [prefix] message 2[n]",
   "[    log] [prefix] message 3",
 ]
 `;
@@ -173,9 +173,9 @@ Object {
 
 exports[`PrefixProxyTerminalProvider With a static prefix write writes a mix of messages with and without newlines: output as chunks 1`] = `
 Array [
-  "[    log] [prefix] message 1message 2",
-  "[    log] [prefix] message 3",
-  "[    log] [prefix] message 4message 5",
+  "[    log] [prefix] message 1message 2[n]",
+  "[    log] [prefix] message 3[n]",
+  "[    log] [prefix] message 4message 5[n]",
   "[    log] [prefix] message 6",
 ]
 `;
@@ -200,9 +200,9 @@ Object {
 
 exports[`PrefixProxyTerminalProvider With a static prefix writeLine writes a message line with newlines: output as chunks 1`] = `
 Array [
-  "[    log] [prefix] message 1",
-  "[    log] [prefix] message 2",
-  "[    log] [prefix] message 3",
+  "[    log] [prefix] message 1[n]",
+  "[    log] [prefix] message 2[n]",
+  "[    log] [prefix] message 3[n]",
 ]
 `;
 
@@ -214,9 +214,9 @@ Object {
 
 exports[`PrefixProxyTerminalProvider With a static prefix writeLine writes a message line with provider newlines: output as chunks 1`] = `
 Array [
-  "[    log] [prefix] message 1",
-  "[    log] [prefix] message 2",
-  "[    log] [prefix] message 3",
+  "[    log] [prefix] message 1[n]",
+  "[    log] [prefix] message 2[n]",
+  "[    log] [prefix] message 3[n]",
 ]
 `;
 
@@ -228,7 +228,7 @@ Object {
 
 exports[`PrefixProxyTerminalProvider With a static prefix writeLine writes a message line: output as chunks 1`] = `
 Array [
-  "[    log] [prefix] test message",
+  "[    log] [prefix] test message[n]",
 ]
 `;
 
@@ -240,12 +240,12 @@ Object {
 
 exports[`PrefixProxyTerminalProvider With a static prefix writeLine writes a mix of message lines with and without newlines: output as chunks 1`] = `
 Array [
-  "[    log] [prefix] message 1",
-  "[    log] [prefix] message 2",
-  "[    log] [prefix] message 3",
-  "[    log] [prefix] ",
-  "[    log] [prefix] message 4",
-  "[    log] [prefix] message 5",
-  "[    log] [prefix] message 6",
+  "[    log] [prefix] message 1[n]",
+  "[    log] [prefix] message 2[n]",
+  "[    log] [prefix] message 3[n]",
+  "[    log] [prefix] [n]",
+  "[    log] [prefix] message 4[n]",
+  "[    log] [prefix] message 5[n]",
+  "[    log] [prefix] message 6[n]",
 ]
 `;

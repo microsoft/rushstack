@@ -93,8 +93,8 @@ exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project
 
 exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""packages""): Terminal Output 1`] = `
 Array [
-  "[    log] ",
-  "[    log] [green]Generate project impact graph successfully. (1.50 seconds)[default]",
+  "[    log] [n]",
+  "[    log] [green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
 ]
 `;
 
@@ -167,8 +167,8 @@ exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project
 
 exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""repo""): Terminal Output 1`] = `
 Array [
-  "[    log] ",
-  "[    log] [green]Generate project impact graph successfully. (1.50 seconds)[default]",
+  "[    log] [n]",
+  "[    log] [green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
 ]
 `;
 
@@ -267,8 +267,8 @@ exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project
 
 exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""workspacePackages""): Terminal Output 1`] = `
 Array [
-  "[    log] ",
-  "[    log] [green]Generate project impact graph successfully. (1.50 seconds)[default]",
+  "[    log] [n]",
+  "[    log] [green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
 ]
 `;
 

@@ -4,54 +4,54 @@ exports[`OperationExecutionManager constructor throws if a dependency is not in 
 
 exports[`OperationExecutionManager executeAsync single pass blocks on failure 1`] = `
 Array [
-  "[verbose] Executing a maximum of 1 simultaneous tasks...",
+  "[verbose] Executing a maximum of 1 simultaneous tasks...[n]",
 ]
 `;
 
 exports[`OperationExecutionManager executeAsync single pass does not track noops 1`] = `
 Array [
-  "[verbose] Executing a maximum of 1 simultaneous tasks...",
+  "[verbose] Executing a maximum of 1 simultaneous tasks...[n]",
 ]
 `;
 
 exports[`OperationExecutionManager executeAsync single pass executes in order 1`] = `
 Array [
-  "[verbose] Executing a maximum of 1 simultaneous tasks...",
+  "[verbose] Executing a maximum of 1 simultaneous tasks...[n]",
 ]
 `;
 
 exports[`OperationExecutionManager executeAsync single pass handles empty input 1`] = `
 Array [
-  "[verbose] Executing a maximum of 0 simultaneous tasks...",
+  "[verbose] Executing a maximum of 0 simultaneous tasks...[n]",
 ]
 `;
 
 exports[`OperationExecutionManager executeAsync single pass handles trivial input 1`] = `
 Array [
-  "[verbose] Executing a maximum of 1 simultaneous tasks...",
+  "[verbose] Executing a maximum of 1 simultaneous tasks...[n]",
 ]
 `;
 
 exports[`OperationExecutionManager executeAsync single pass respects concurrency 1`] = `
 Array [
-  "[verbose] Executing a maximum of 2 simultaneous tasks...",
+  "[verbose] Executing a maximum of 2 simultaneous tasks...[n]",
 ]
 `;
 
 exports[`OperationExecutionManager executeAsync single pass respects priority order 1`] = `
 Array [
-  "[verbose] Executing a maximum of 1 simultaneous tasks...",
+  "[verbose] Executing a maximum of 1 simultaneous tasks...[n]",
 ]
 `;
 
 exports[`OperationExecutionManager executeAsync watch mode executes in order: first 1`] = `
 Array [
-  "[verbose] Executing a maximum of 1 simultaneous tasks...",
+  "[verbose] Executing a maximum of 1 simultaneous tasks...[n]",
 ]
 `;
 
 exports[`OperationExecutionManager executeAsync watch mode executes in order: second 1`] = `
 Array [
-  "[verbose] Executing a maximum of 1 simultaneous tasks...",
+  "[verbose] Executing a maximum of 1 simultaneous tasks...[n]",
 ]
 `;
