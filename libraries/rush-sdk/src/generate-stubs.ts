@@ -3,7 +3,9 @@
 
 import * as path from 'node:path';
 
-import { FileSystem, Import, Path } from '@rushstack/node-core-library';
+import { initSync, parse } from 'cjs-module-lexer';
+
+import { Encoding, FileSystem, Import, Path } from '@rushstack/node-core-library';
 
 function generateLibFilesRecursively(options: {
   parentSourcePath: string;
@@ -14,6 +16,10 @@ function generateLibFilesRecursively(options: {
   for (const folderItem of FileSystem.readFolderItems(options.parentSourcePath)) {
     const sourcePath: string = path.join(options.parentSourcePath, folderItem.name);
     const targetPath: string = path.join(options.parentTargetPath, folderItem.name);
+    const commonjsPath: string = path.join(
+      options.parentSourcePath.replace('/rush-lib/lib', '/rush-lib/lib-commonjs'),
+      folderItem.name
+    );
 
     if (folderItem.isDirectory()) {
       // create destination folder
@@ -36,11 +42,17 @@ function generateLibFilesRecursively(options: {
         const shimPathLiteral: string = JSON.stringify(Path.convertToSlashes(shimPath));
         const srcImportPathLiteral: string = JSON.stringify(srcImportPath);
 
+        const sourceCode: string = FileSystem.readFile(commonjsPath, { encoding: Encoding.Utf8 });
+        const exportedNames: string[] = extractNamedExports(sourceCode);
+        const namedExportsPlaceholder: string = exportedNames.length
+          ? `${exportedNames.map((name) => `exports.${name}`).join(' = ')} = undefined;\n\n`
+          : '';
+
         FileSystem.writeFile(
           targetPath,
           // Example:
           // module.exports = require("../../../lib-shim/index")._rushSdk_loadInternalModule("logic/policy/GitEmailPolicy");
-          `module.exports = require(${shimPathLiteral})._rushSdk_loadInternalModule(${srcImportPathLiteral});`
+          `${namedExportsPlaceholder}module.exports = require(${shimPathLiteral})._rushSdk_loadInternalModule(${srcImportPathLiteral});`
         );
       }
     }
@@ -58,6 +70,7 @@ export async function runAsync(): Promise<void> {
   const stubsTargetPath: string = path.resolve(__dirname, '../lib');
   // eslint-disable-next-line no-console
   console.log('generate-stubs: Generating stub files under: ' + stubsTargetPath);
+  initSync();
   generateLibFilesRecursively({
     parentSourcePath: path.join(rushLibFolder, 'lib'),
     parentTargetPath: stubsTargetPath,
@@ -66,4 +79,9 @@ export async function runAsync(): Promise<void> {
   });
   // eslint-disable-next-line no-console
   console.log('generate-stubs: Completed successfully.');
+}
+
+export function extractNamedExports(source: string): string[] {
+  const { exports, reexports } = parse(source);
+  return [...exports, ...reexports].filter((d) => d !== '__esModule');
 }

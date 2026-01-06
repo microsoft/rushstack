@@ -1,9 +1,9 @@
 {
   "extends": "local-node-rig/profiles/default/config/jest.config.json",
 
-  "roots": ["<rootDir>/lib-shim"],
+  "roots": ["<rootDir>/lib-commonjs"],
 
-  "testMatch": ["<rootDir>/lib-shim/**/*.test.js"],
+  "testMatch": ["<rootDir>/lib-commonjs/**/*.test.js"],
 
   "collectCoverageFrom": [
     "lib-shim/**/*.js",

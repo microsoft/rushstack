@@ -3,11 +3,19 @@
 
 const { PackageJsonLookup } = require('@rushstack/node-core-library');
 const { PreserveDynamicRequireWebpackPlugin } = require('@rushstack/webpack-preserve-dynamic-require-plugin');
+const { BannerPlugin } = require('webpack');
 
 module.exports = () => {
   const packageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
 
   const externalDependencyNames = new Set([...Object.keys(packageJson.dependencies || {})]);
+
+  // Get all export specifiers by require rush-lib
+  const rushLib = require('@microsoft/rush-lib');
+  const exportSpecifiers = Object.keys(rushLib);
+  const bannerCodeForLibShim = exportSpecifiers.length
+    ? exportSpecifiers.map((name) => `exports.${name}`).join(' = ') + ' = undefined;\n\n'
+    : '';
 
   // Explicitly exclude @microsoft/rush-lib
   externalDependencyNames.delete('@microsoft/rush-lib');
@@ -41,7 +49,10 @@ module.exports = () => {
       innerGraph: true
     },
     target: 'node',
-    plugins: [new PreserveDynamicRequireWebpackPlugin()],
+    plugins: [
+      new BannerPlugin({ raw: true, banner: bannerCodeForLibShim }),
+      new PreserveDynamicRequireWebpackPlugin()
+    ],
     externals: [
       ({ request }, callback) => {
         let packageName;

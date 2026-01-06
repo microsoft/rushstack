@@ -56,6 +56,7 @@
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/semver": "7.5.0",
     "@types/webpack-env": "1.18.8",
+    "cjs-module-lexer": "2.1.0",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "webpack": "~5.103.0"

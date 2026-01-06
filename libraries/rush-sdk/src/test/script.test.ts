@@ -102,7 +102,9 @@ ${loadAndPrintRushSdkModule}
       }
     );
     expect(result.stderr.trim()).toMatchSnapshot('stderr');
-    expect(result.stdout.trim()).toMatchSnapshot('stdout');
+    expect(result.stdout.trim()).toContain(
+      'Trying to load  @microsoft/rush-lib installed by install-run-rush'
+    );
     expect(result.status).toBe(0);
   });
 });

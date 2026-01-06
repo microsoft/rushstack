@@ -59,6 +59,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "cjs-module-lexer",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "dependency-path",
       "allowedCategories": [ "libraries" ]
     },
