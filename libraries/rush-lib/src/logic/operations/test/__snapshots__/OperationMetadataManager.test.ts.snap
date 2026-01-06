@@ -11,21 +11,21 @@ Array [
 
 exports[`OperationMetadataManager should restore chunked stderr 1`] = `
 Array [
-  "[  error] chunk1[n]",
-  "[  error] chunk2[n]",
+  "[  error] chunk1",
+  "[  error] chunk2",
 ]
 `;
 
 exports[`OperationMetadataManager should restore chunked stdout 1`] = `
 Array [
-  "[    log] chunk1[n]",
-  "[    log] chunk2[n]",
+  "[    log] chunk1",
+  "[    log] chunk2",
 ]
 `;
 
 exports[`OperationMetadataManager should restore mixed chunked output 1`] = `
 Array [
-  "[    log] logged to stdout[n]",
-  "[  error] logged to stderr[n]",
+  "[    log] logged to stdout",
+  "[  error] logged to stderr",
 ]
 `;

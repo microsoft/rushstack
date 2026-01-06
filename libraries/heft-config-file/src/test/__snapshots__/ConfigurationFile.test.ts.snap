@@ -176,7 +176,7 @@ exports[`ConfigurationFile error cases Throws an error when a requested file doe
 
 exports[`ConfigurationFile error cases Throws an error when a requested file doesn't exist 2`] = `
 Array [
-  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/folderThatDoesntExist/config.json\\" not found.[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/folderThatDoesntExist/config.json\\" not found.",
 ]
 `;
 
@@ -184,7 +184,7 @@ exports[`ConfigurationFile error cases Throws an error when a requested file doe
 
 exports[`ConfigurationFile error cases Throws an error when a requested file doesn't exist async 2`] = `
 Array [
-  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/folderThatDoesntExist/config.json\\" not found.[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/folderThatDoesntExist/config.json\\" not found.",
 ]
 `;
 
@@ -192,7 +192,7 @@ exports[`ConfigurationFile error cases Throws an error when an "extends" propert
 
 exports[`ConfigurationFile error cases Throws an error when an "extends" property points to a file that cannot be resolved 2`] = `
 Array [
-  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/extendsNotExist/config2.json\\" not found.[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/extendsNotExist/config2.json\\" not found.",
 ]
 `;
 
@@ -200,7 +200,7 @@ exports[`ConfigurationFile error cases Throws an error when an "extends" propert
 
 exports[`ConfigurationFile error cases Throws an error when an "extends" property points to a file that cannot be resolved async 2`] = `
 Array [
-  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/extendsNotExist/config2.json\\" not found.[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/extendsNotExist/config2.json\\" not found.",
 ]
 `;
 
@@ -218,13 +218,13 @@ exports[`ConfigurationFile error cases Throws an error when there is a circular 
 
 exports[`ConfigurationFile error cases returns undefined when the file doesn't exist for tryLoadConfigurationFileForProject 1`] = `
 Array [
-  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.",
 ]
 `;
 
 exports[`ConfigurationFile error cases returns undefined when the file doesn't exist for tryLoadConfigurationFileForProjectAsync 1`] = `
 Array [
-  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.",
 ]
 `;
 
@@ -232,7 +232,7 @@ exports[`ConfigurationFile error cases throws an error when the file doesn't exi
 
 exports[`ConfigurationFile error cases throws an error when the file doesn't exist 2`] = `
 Array [
-  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.",
 ]
 `;
 
@@ -240,31 +240,31 @@ exports[`ConfigurationFile error cases throws an error when the file doesn't exi
 
 exports[`ConfigurationFile error cases throws an error when the file doesn't exist async 2`] = `
 Array [
-  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.",
 ]
 `;
 
 exports[`ConfigurationFile loading a rig correctly loads a config file inside a rig 1`] = `
 Array [
-  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").",
 ]
 `;
 
 exports[`ConfigurationFile loading a rig correctly loads a config file inside a rig async 1`] = `
 Array [
-  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").",
 ]
 `;
 
 exports[`ConfigurationFile loading a rig correctly loads a config file inside a rig via tryLoadConfigurationFileForProject 1`] = `
 Array [
-  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").",
 ]
 `;
 
 exports[`ConfigurationFile loading a rig correctly loads a config file inside a rig via tryLoadConfigurationFileForProjectAsync 1`] = `
 Array [
-  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").",
 ]
 `;
 
@@ -272,9 +272,9 @@ exports[`ConfigurationFile loading a rig throws an error when a config file does
 
 exports[`ConfigurationFile loading a rig throws an error when a config file doesn't exist in a project referencing a rig, which also doesn't have the file 2`] = `
 Array [
-  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
-  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default/config/notExist.json\\" not found.[n]",
-  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" not found.[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").",
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default/config/notExist.json\\" not found.",
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" not found.",
 ]
 `;
 
@@ -282,8 +282,8 @@ exports[`ConfigurationFile loading a rig throws an error when a config file does
 
 exports[`ConfigurationFile loading a rig throws an error when a config file doesn't exist in a project referencing a rig, which also doesn't have the file async 2`] = `
 Array [
-  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
-  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default/config/notExist.json\\" not found.[n]",
-  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" not found.[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").",
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default/config/notExist.json\\" not found.",
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" not found.",
 ]
 `;

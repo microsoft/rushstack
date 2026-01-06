@@ -24,9 +24,9 @@ export interface IStringBufferOutputOptions {
  */
 export interface IStringBufferOutputChunksOptions extends IStringBufferOutputOptions {
   /**
-   * If true, the output chunks will be returned as a flat array of prefixed strings of an array of objects.
+   * If true, the output will be returned as an array of lines prefixed with severity tokens.
    */
-  asFlat?: boolean;
+  asLines?: boolean;
 }
 
 /**
@@ -102,10 +102,19 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
    * {@inheritDoc ITerminalProvider.write}
    */
   public write(text: string, severity: TerminalProviderSeverity): void {
-    this._allOutputChunks.push({
-      text,
-      severity: TerminalProviderSeverity[severity] as TerminalProviderSeverityName
-    });
+    const severityName: TerminalProviderSeverityName = TerminalProviderSeverity[
+      severity
+    ] as TerminalProviderSeverityName;
+
+    const lastChunk: IOutputChunk | undefined = this._allOutputChunks[this._allOutputChunks.length - 1];
+    if (lastChunk && lastChunk.severity === severityName) {
+      lastChunk.text += text;
+    } else {
+      this._allOutputChunks.push({
+        text,
+        severity: severityName
+      });
+    }
 
     switch (severity) {
       case TerminalProviderSeverity.warning: {
@@ -228,21 +237,40 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
    * Get everything that has been written as an array of output chunks, preserving order.
    */
   public getAllOutputAsChunks(
-    options?: IStringBufferOutputChunksOptions & { asFlat?: false }
+    options?: IStringBufferOutputChunksOptions & { asLines?: false }
   ): IOutputChunk[];
   public getAllOutputAsChunks(
-    options: IStringBufferOutputChunksOptions & { asFlat: true }
+    options: IStringBufferOutputChunksOptions & { asLines: true }
   ): `[${string}] ${string}`[];
   public getAllOutputAsChunks(options: IStringBufferOutputChunksOptions = {}): IOutputChunk[] | string[] {
-    if (options.asFlat) {
-      return this._allOutputChunks.map(({ text: rawText, severity: rawSeverity }) => {
-        const text: string = _normalizeOutput(rawText, options);
-        const severity: TerminalProviderSeverity | string = (
-          rawSeverity as TerminalProviderSeverityName
-        ).padStart(LONGEST_SEVERITY_NAME_LENGTH, ' ');
+    if (options.asLines) {
+      const lines: `[${string}] ${string}`[] = [];
 
-        return `[${severity}] ${text}`;
-      });
+      for (const { text: rawText, severity: rawSeverity } of this._allOutputChunks) {
+        const severity: string = (rawSeverity as TerminalProviderSeverityName).padStart(
+          LONGEST_SEVERITY_NAME_LENGTH,
+          ' '
+        );
+
+        const lfText: string = Text.convertToLf(rawText);
+        const rawLines: string[] = lfText.split('\n');
+
+        // Emit one entry per logical line.
+        for (let i: number = 0; i < rawLines.length; i++) {
+          const isLast: boolean = i === rawLines.length - 1;
+          const isFinalTrailingEmpty: boolean = isLast && rawLines[i] === '';
+
+          if (isFinalTrailingEmpty) {
+            continue;
+          }
+
+          const lineText: string = rawLines[i];
+          const text: string = _normalizeOutput(lineText, options);
+          lines.push(`[${severity}] ${text}`);
+        }
+      }
+
+      return lines;
     } else {
       return this._allOutputChunks.map(({ text: rawText, severity }) => {
         const text: string = _normalizeOutput(rawText, options);

@@ -2,6 +2,7 @@
 
 exports[`PnpmShrinkwrapFile Check is workspace project modified pnpm lockfile major version 9 sha1 integrity can be handled when disallowInsecureSha1 1`] = `
 Array [
-  "[  error] Error: An integrity field with \\"sha1\\" was detected in the pnpm-lock.yaml file located in subspace default; this conflicts with the \\"disallowInsecureSha1\\" policy from pnpm-config.json.[n][n]",
+  "[  error] Error: An integrity field with \\"sha1\\" was detected in the pnpm-lock.yaml file located in subspace default; this conflicts with the \\"disallowInsecureSha1\\" policy from pnpm-config.json.",
+  "[  error] ",
 ]
 `;

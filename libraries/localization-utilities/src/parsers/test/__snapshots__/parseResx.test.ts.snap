@@ -35,7 +35,7 @@ Object {
 
 exports[`parseResx fails to parse a RESX file with a duplicate string: terminal output 1`] = `
 Array [
-  "[  error] test.resx(6,45): Duplicate string value \\"stringA\\"[n]",
+  "[  error] test.resx(6,45): Duplicate string value \\"stringA\\"",
 ]
 `;
 
@@ -50,7 +50,7 @@ Object {
 
 exports[`parseResx ignoreMissingResxComments when set to false, warns on a missing comment: terminal output 1`] = `
 Array [
-  "[warning] test.resx(3,59): Missing string comment in <data> element[n]",
+  "[warning] test.resx(3,59): Missing string comment in <data> element",
 ]
 `;
 
@@ -113,7 +113,7 @@ Object {
 
 exports[`parseResx prints an error on invalid XML: terminal output 1`] = `
 Array [
-  "[  error] test.resx(3,41): Found unexpected non-empty text node in RESX <data> element[n]",
+  "[  error] test.resx(3,41): Found unexpected non-empty text node in RESX <data> element",
 ]
 `;
 

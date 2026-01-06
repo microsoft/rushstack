@@ -202,7 +202,7 @@ export interface IStdioSummarizerOptions extends ITerminalWritableOptions {
 
 // @beta (undocumented)
 export interface IStringBufferOutputChunksOptions extends IStringBufferOutputOptions {
-    asFlat?: boolean;
+    asLines?: boolean;
 }
 
 // @beta (undocumented)
@@ -395,11 +395,11 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     // (undocumented)
     getAllOutput(sparse: true, options?: IStringBufferOutputOptions): Partial<IAllStringBufferOutput>;
     getAllOutputAsChunks(options?: IStringBufferOutputChunksOptions & {
-        asFlat?: false;
+        asLines?: false;
     }): IOutputChunk[];
     // (undocumented)
     getAllOutputAsChunks(options: IStringBufferOutputChunksOptions & {
-        asFlat: true;
+        asLines: true;
     }): `[${string}] ${string}`[];
     getDebugOutput(options?: IStringBufferOutputOptions): string;
     getErrorOutput(options?: IStringBufferOutputOptions): string;

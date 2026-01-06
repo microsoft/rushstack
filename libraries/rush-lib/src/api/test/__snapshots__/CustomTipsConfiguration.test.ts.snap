@@ -3,9 +3,7 @@
 exports[`CustomTipsConfiguration formatting (a long message with an indented line) _showErrorTip prints an expected message 1`] = `
 Array [
   "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-  "[error] ",
   "[error] [red]|[default]",
-  "[error] ",
   "[error] [red]| [default]Lorem ipsum dolor sit amet, consectetur",
   "[error] [red]| [default]adipiscing elit, sed do eiusmod tempor",
   "[error] [red]| [default]incididunt ut labore et dolore magna aliqua. Ut",
@@ -35,9 +33,7 @@ Array [
 exports[`CustomTipsConfiguration formatting (a long message with an indented line) _showInfoTip prints an expected message 1`] = `
 Array [
   "[log] | Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)",
-  "[log] ",
   "[log] |",
-  "[log] ",
   "[log] | Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
   "[log] | sed do eiusmod tempor incididunt ut labore et dolore magna",
   "[log] | aliqua. Ut enim ad minim veniam, quis nostrud exercitation",
@@ -56,16 +52,13 @@ Array [
   "[log] |   officia deserunt mollit anim id est laborum.",
   "[log] ",
   "[log] ",
-  "[log] ",
 ]
 `;
 
 exports[`CustomTipsConfiguration formatting (a long message with an indented line) _showTip prints an expected message 1`] = `
 Array [
   "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-  "[error] ",
   "[error] [red]|[default]",
-  "[error] ",
   "[error] [red]| [default]Lorem ipsum dolor sit amet, consectetur",
   "[error] [red]| [default]adipiscing elit, sed do eiusmod tempor",
   "[error] [red]| [default]incididunt ut labore et dolore magna aliqua. Ut",
@@ -95,9 +88,7 @@ Array [
 exports[`CustomTipsConfiguration formatting (a long message with an indented line) _showWarningTip prints an expected message 1`] = `
 Array [
   "[warning] [yellow]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-  "[warning] ",
   "[warning] [yellow]|[default]",
-  "[warning] ",
   "[warning] [yellow]| [default]Lorem ipsum dolor sit amet, consectetur",
   "[warning] [yellow]| [default]adipiscing elit, sed do eiusmod tempor",
   "[warning] [yellow]| [default]incididunt ut labore et dolore magna aliqua. Ut",
@@ -127,9 +118,7 @@ Array [
 exports[`CustomTipsConfiguration formatting (a long message) _showErrorTip prints an expected message 1`] = `
 Array [
   "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-  "[error] ",
   "[error] [red]|[default]",
-  "[error] ",
   "[error] [red]| [default]Lorem ipsum dolor sit amet, consectetur",
   "[error] [red]| [default]adipiscing elit, sed do eiusmod tempor",
   "[error] [red]| [default]incididunt ut labore et dolore magna aliqua. Ut",
@@ -149,9 +138,7 @@ Array [
 exports[`CustomTipsConfiguration formatting (a long message) _showInfoTip prints an expected message 1`] = `
 Array [
   "[log] | Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)",
-  "[log] ",
   "[log] |",
-  "[log] ",
   "[log] | Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
   "[log] | sed do eiusmod tempor incididunt ut labore et dolore magna",
   "[log] | aliqua. Ut enim ad minim veniam, quis nostrud exercitation",
@@ -162,16 +149,13 @@ Array [
   "[log] | officia deserunt mollit anim id est laborum.",
   "[log] ",
   "[log] ",
-  "[log] ",
 ]
 `;
 
 exports[`CustomTipsConfiguration formatting (a long message) _showTip prints an expected message 1`] = `
 Array [
   "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-  "[error] ",
   "[error] [red]|[default]",
-  "[error] ",
   "[error] [red]| [default]Lorem ipsum dolor sit amet, consectetur",
   "[error] [red]| [default]adipiscing elit, sed do eiusmod tempor",
   "[error] [red]| [default]incididunt ut labore et dolore magna aliqua. Ut",
@@ -191,9 +175,7 @@ Array [
 exports[`CustomTipsConfiguration formatting (a long message) _showWarningTip prints an expected message 1`] = `
 Array [
   "[warning] [yellow]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-  "[warning] ",
   "[warning] [yellow]|[default]",
-  "[warning] ",
   "[warning] [yellow]| [default]Lorem ipsum dolor sit amet, consectetur",
   "[warning] [yellow]| [default]adipiscing elit, sed do eiusmod tempor",
   "[warning] [yellow]| [default]incididunt ut labore et dolore magna aliqua. Ut",
@@ -213,9 +195,7 @@ Array [
 exports[`CustomTipsConfiguration formatting (a message with an indented line) _showErrorTip prints an expected message 1`] = `
 Array [
   "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-  "[error] ",
   "[error] [red]|[default]",
-  "[error] ",
   "[error] [red]| [default]This is a test",
   "[error] [red]| [default]  This is a test",
   "[error] ",
@@ -227,12 +207,9 @@ Array [
 exports[`CustomTipsConfiguration formatting (a message with an indented line) _showInfoTip prints an expected message 1`] = `
 Array [
   "[log] | Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)",
-  "[log] ",
   "[log] |",
-  "[log] ",
   "[log] | This is a test",
   "[log] |   This is a test",
-  "[log] ",
   "[log] ",
   "[log] ",
 ]
@@ -241,9 +218,7 @@ Array [
 exports[`CustomTipsConfiguration formatting (a message with an indented line) _showTip prints an expected message 1`] = `
 Array [
   "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-  "[error] ",
   "[error] [red]|[default]",
-  "[error] ",
   "[error] [red]| [default]This is a test",
   "[error] [red]| [default]  This is a test",
   "[error] ",
@@ -255,9 +230,7 @@ Array [
 exports[`CustomTipsConfiguration formatting (a message with an indented line) _showWarningTip prints an expected message 1`] = `
 Array [
   "[warning] [yellow]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-  "[warning] ",
   "[warning] [yellow]|[default]",
-  "[warning] ",
   "[warning] [yellow]| [default]This is a test",
   "[warning] [yellow]| [default]  This is a test",
   "[warning] ",
@@ -269,9 +242,7 @@ Array [
 exports[`CustomTipsConfiguration formatting (a message with newlines) _showErrorTip prints an expected message 1`] = `
 Array [
   "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-  "[error] ",
   "[error] [red]|[default]",
-  "[error] ",
   "[error] [red]| [default]This is a test",
   "[error] [red]| [default]This is a test",
   "[error] ",
@@ -283,12 +254,9 @@ Array [
 exports[`CustomTipsConfiguration formatting (a message with newlines) _showInfoTip prints an expected message 1`] = `
 Array [
   "[log] | Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)",
-  "[log] ",
   "[log] |",
-  "[log] ",
   "[log] | This is a test",
   "[log] | This is a test",
-  "[log] ",
   "[log] ",
   "[log] ",
 ]
@@ -297,9 +265,7 @@ Array [
 exports[`CustomTipsConfiguration formatting (a message with newlines) _showTip prints an expected message 1`] = `
 Array [
   "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-  "[error] ",
   "[error] [red]|[default]",
-  "[error] ",
   "[error] [red]| [default]This is a test",
   "[error] [red]| [default]This is a test",
   "[error] ",
@@ -311,9 +277,7 @@ Array [
 exports[`CustomTipsConfiguration formatting (a message with newlines) _showWarningTip prints an expected message 1`] = `
 Array [
   "[warning] [yellow]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-  "[warning] ",
   "[warning] [yellow]|[default]",
-  "[warning] ",
   "[warning] [yellow]| [default]This is a test",
   "[warning] [yellow]| [default]This is a test",
   "[warning] ",
@@ -325,9 +289,7 @@ Array [
 exports[`CustomTipsConfiguration formatting (a short message) _showErrorTip prints an expected message 1`] = `
 Array [
   "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-  "[error] ",
   "[error] [red]|[default]",
-  "[error] ",
   "[error] [red]| [default]This is a test",
   "[error] ",
   "[log] ",
@@ -338,11 +300,8 @@ Array [
 exports[`CustomTipsConfiguration formatting (a short message) _showInfoTip prints an expected message 1`] = `
 Array [
   "[log] | Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)",
-  "[log] ",
   "[log] |",
-  "[log] ",
   "[log] | This is a test",
-  "[log] ",
   "[log] ",
   "[log] ",
 ]
@@ -351,9 +310,7 @@ Array [
 exports[`CustomTipsConfiguration formatting (a short message) _showTip prints an expected message 1`] = `
 Array [
   "[error] [red]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-  "[error] ",
   "[error] [red]|[default]",
-  "[error] ",
   "[error] [red]| [default]This is a test",
   "[error] ",
   "[log] ",
@@ -364,9 +321,7 @@ Array [
 exports[`CustomTipsConfiguration formatting (a short message) _showWarningTip prints an expected message 1`] = `
 Array [
   "[warning] [yellow]| Custom Tip (TIP_PNPM_INVALID_NODE_VERSION)[default]",
-  "[warning] ",
   "[warning] [yellow]|[default]",
-  "[warning] ",
   "[warning] [yellow]| [default]This is a test",
   "[warning] ",
   "[log] ",

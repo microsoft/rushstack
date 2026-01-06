@@ -546,7 +546,7 @@ snapshots:
             terminal
           )
         ).toThrowError(AlreadyReportedError);
-        expect(terminalProvider.getAllOutputAsChunks({ asFlat: true })).toMatchSnapshot();
+        expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
       });
     });
   });
