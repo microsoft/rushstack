@@ -6,6 +6,7 @@ import { AlreadyExistsBehavior, FileSystem, PackageJsonLookup } from '@rushstack
 import type { RushCommandLineParser as RushCommandLineParserType } from '../RushCommandLineParser';
 import { FlagFile } from '../../api/FlagFile';
 import { RushConstants } from '../../logic/RushConstants';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 export type SpawnMockArgs = Parameters<typeof import('node:child_process').spawn>;
 export type SpawnMock = jest.Mock<ReturnType<typeof import('node:child_process').spawn>, SpawnMockArgs>;
@@ -35,6 +36,23 @@ export interface IChildProcessModuleMock {
   __setSpawnMockConfig(config?: ISpawnMockConfig): void;
 
   spawn: jest.Mock;
+}
+
+const DEFAULT_RUSH_ENV_VARS_TO_CLEAR: ReadonlyArray<string> = [
+  'RUSH_BUILD_CACHE_OVERRIDE_JSON',
+  'RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH',
+  'RUSH_BUILD_CACHE_CREDENTIAL',
+  'RUSH_BUILD_CACHE_ENABLED',
+  'RUSH_BUILD_CACHE_WRITE_ALLOWED'
+];
+
+export interface IWithEnvironmentConfigIsolationOptions {
+  envVarNamesToClear?: ReadonlyArray<string>;
+  silenceStderrWrite?: boolean;
+}
+
+export interface IEnvironmentConfigIsolation {
+  restore(): void;
 }
 
 /**
@@ -100,5 +118,83 @@ export async function getCommandLineParserInstanceAsync(
     parser,
     spawnMock,
     repoPath
+  };
+}
+
+/**
+ * Clears Rush-related environment variables and resets EnvironmentConfiguration for deterministic tests.
+ *
+ * Notes:
+ * - EnvironmentConfiguration caches some values, so we also stub the build-cache override getters.
+ * - Rush treats any stderr output during `rush test` as a warning, which fails the command; some
+ *   tests intentionally simulate failures and may need stderr silenced.
+ */
+export function isolateEnvironmentConfigurationForTests(
+  options: IWithEnvironmentConfigIsolationOptions = {}
+): IEnvironmentConfigIsolation {
+  const envVarNamesToClear: ReadonlyArray<string> =
+    options.envVarNamesToClear ?? DEFAULT_RUSH_ENV_VARS_TO_CLEAR;
+
+  const savedProcessEnv: Record<string, string | undefined> = {};
+  for (const envVarName of envVarNamesToClear) {
+    savedProcessEnv[envVarName] = process.env[envVarName];
+    delete process.env[envVarName];
+  }
+
+  EnvironmentConfiguration.reset();
+
+  const restoreFns: Array<() => void> = [];
+
+  restoreFns.push(() => {
+    for (const envVarName of envVarNamesToClear) {
+      const oldValue: string | undefined = savedProcessEnv[envVarName];
+      if (oldValue === undefined) {
+        delete process.env[envVarName];
+      } else {
+        process.env[envVarName] = oldValue;
+      }
+    }
+  });
+
+  if (options.silenceStderrWrite) {
+    type StderrWrite = typeof process.stderr.write;
+    const silentWrite: unknown = (
+      chunk: string | Uint8Array,
+      encoding?: BufferEncoding | ((err?: Error | null) => void),
+      cb?: (err?: Error | null) => void
+    ): boolean => {
+      if (typeof encoding === 'function') {
+        encoding(null);
+      } else {
+        cb?.(null);
+      }
+      return true;
+    };
+
+    const writeSpy: jest.SpyInstance<ReturnType<StderrWrite>, Parameters<StderrWrite>> = jest
+      .spyOn(process.stderr, 'write')
+      .mockImplementation(silentWrite as StderrWrite);
+
+    restoreFns.push(() => writeSpy.mockRestore());
+  }
+
+  // EnvironmentConfiguration.reset() does not clear cached values for these fields.
+  const overrideJsonFilePathSpy: jest.SpyInstance<string | undefined, []> = jest
+    .spyOn(EnvironmentConfiguration, 'buildCacheOverrideJsonFilePath', 'get')
+    .mockReturnValue(undefined);
+  const overrideJsonSpy: jest.SpyInstance<string | undefined, []> = jest
+    .spyOn(EnvironmentConfiguration, 'buildCacheOverrideJson', 'get')
+    .mockReturnValue(undefined);
+
+  restoreFns.push(() => overrideJsonFilePathSpy.mockRestore());
+  restoreFns.push(() => overrideJsonSpy.mockRestore());
+  restoreFns.push(() => EnvironmentConfiguration.reset());
+
+  return {
+    restore: () => {
+      for (let i: number = restoreFns.length - 1; i >= 0; i--) {
+        restoreFns[i]();
+      }
+    }
   };
 }
