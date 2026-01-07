@@ -86,7 +86,7 @@ export namespace SomeNamespace1 {
     }
     // (undocumented)
     export function someFunction3(): ForgottenExport3;
-        {};
+    export {};
 }
 
 // (No @packageDocumentation comment for this package)

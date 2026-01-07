@@ -14,9 +14,9 @@ export declare namespace n1 {
             export type SomeType3 = number;
             export function someFunction3(): n2.n3.SomeType3;
         }
-            {};
+        export {};
     }
-        {};
+    export {};
 }
 
 /** @public */

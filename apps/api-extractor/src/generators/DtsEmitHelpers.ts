@@ -12,6 +12,7 @@ import type { Collector } from '../collector/Collector';
 import type { Span } from '../analyzer/Span';
 import type { IndentedWriter } from './IndentedWriter';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
+import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 
 /**
  * Some common code shared between DtsRollupGenerator and ApiReportGenerator.
@@ -170,5 +171,23 @@ export class DtsEmitHelpers {
         span.modification.prefix = `${referencedEntity.nameForEmit}${typeArgumentsText}${separatorAfter}`;
       }
     }
+  }
+
+  /**
+   * Checks if an export keyword is part of an ExportDeclaration inside a namespace
+   * (e.g., "export { Foo, Bar };" inside "declare namespace SDK { ... }").
+   * In that case, the export keyword must be preserved, otherwise the output is invalid TypeScript.
+   */
+  public static isExportKeywordInNamespaceExportDeclaration(node: ts.Node): boolean {
+    if (node.parent && ts.isExportDeclaration(node.parent)) {
+      const moduleBlock: ts.ModuleBlock | undefined = TypeScriptHelpers.findFirstParent(
+        node,
+        ts.SyntaxKind.ModuleBlock
+      );
+      if (moduleBlock) {
+        return true;
+      }
+    }
+    return false;
   }
 }

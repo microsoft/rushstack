@@ -80,7 +80,7 @@ export declare namespace SomeNamespace1 {
     export class ForgottenExport3 {
     }
     export function someFunction3(): ForgottenExport3;
-        {};
+    export {};
 }
 
 export { }
