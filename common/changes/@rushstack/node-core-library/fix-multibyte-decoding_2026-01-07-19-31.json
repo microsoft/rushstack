@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix incorrect decoding of multi-byte UTF-8 characters in Executable.waitForExitAsync and getProcessInfoByIdAsync by explicitly setting stream encoding before attaching handlers",
+      "type": "patch",
+      "packageName": "@rushstack/node-core-library"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "copilot@github.com"
+}
