@@ -1,6 +1,11 @@
 # Change Log - @rushstack/npm-check-fork
 
-This log was last generated on Mon, 05 Jan 2026 16:12:50 GMT and should not be manually modified.
+This log was last generated on Wed, 07 Jan 2026 01:12:25 GMT and should not be manually modified.
+
+## 0.1.8
+Wed, 07 Jan 2026 01:12:25 GMT
+
+_Version update only_
 
 ## 0.1.7
 Mon, 05 Jan 2026 16:12:50 GMT

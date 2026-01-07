@@ -1,6 +1,13 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Mon, 05 Jan 2026 16:12:49 GMT and should not be manually modified.
+This log was last generated on Wed, 07 Jan 2026 01:12:24 GMT and should not be manually modified.
+
+## 0.21.0
+Wed, 07 Jan 2026 01:12:24 GMT
+
+### Minor changes
+
+- Add a `getAllOutputAsChunks` function to `StringBufferTerminalProvider` that returns an array of chunks that were written to the terminal provider.
 
 ## 0.20.0
 Mon, 05 Jan 2026 16:12:49 GMT

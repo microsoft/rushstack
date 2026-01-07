@@ -2,6 +2,18 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.21.0",
+      "tag": "@rushstack/terminal_v0.21.0",
+      "date": "Wed, 07 Jan 2026 01:12:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `getAllOutputAsChunks` function to `StringBufferTerminalProvider` that returns an array of chunks that were written to the terminal provider."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.20.0",
       "tag": "@rushstack/terminal_v0.20.0",
       "date": "Mon, 05 Jan 2026 16:12:49 GMT",

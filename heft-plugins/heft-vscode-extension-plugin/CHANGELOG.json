@@ -2,6 +2,27 @@
   "name": "@rushstack/heft-vscode-extension-plugin",
   "entries": [
     {
+      "version": "1.0.17",
+      "tag": "@rushstack/heft-vscode-extension-plugin_v1.0.17",
+      "date": "Wed, 07 Jan 2026 01:12:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.21.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.8` to `1.1.9`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.16",
       "tag": "@rushstack/heft-vscode-extension-plugin_v1.0.16",
       "date": "Mon, 05 Jan 2026 16:12:49 GMT",
