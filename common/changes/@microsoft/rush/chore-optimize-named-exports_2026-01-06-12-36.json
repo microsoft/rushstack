@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Chore: add named exports to support for `@rushstack/rush-sdk` used via ESM named import.",
+      "comment": "Add named exports to support named imports to `@rushstack/rush-sdk`.",
       "type": "none"
     }
   ],
