@@ -2,6 +2,18 @@
   "name": "@rushstack/credential-cache",
   "entries": [
     {
+      "version": "0.1.7",
+      "tag": "@rushstack/credential-cache_v0.1.7",
+      "date": "Thu, 08 Jan 2026 01:12:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.6",
       "tag": "@rushstack/credential-cache_v0.1.6",
       "date": "Wed, 07 Jan 2026 01:12:24 GMT",

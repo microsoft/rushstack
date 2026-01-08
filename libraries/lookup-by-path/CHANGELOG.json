@@ -2,6 +2,18 @@
   "name": "@rushstack/lookup-by-path",
   "entries": [
     {
+      "version": "0.8.12",
+      "tag": "@rushstack/lookup-by-path_v0.8.12",
+      "date": "Thu, 08 Jan 2026 01:12:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.11",
       "tag": "@rushstack/lookup-by-path_v0.8.11",
       "date": "Wed, 07 Jan 2026 01:12:25 GMT",

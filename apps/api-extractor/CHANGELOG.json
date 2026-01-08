@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.55.5",
+      "tag": "@microsoft/api-extractor_v7.55.5",
+      "date": "Thu, 08 Jan 2026 01:12:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix missing 'export' keyword for namespace re-exports that produced invalid TypeScript output"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.55.4",
       "tag": "@microsoft/api-extractor_v7.55.4",
       "date": "Wed, 07 Jan 2026 01:12:24 GMT",
