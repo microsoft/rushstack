@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/debug-certificate-manager",
-  "version": "1.6.9",
+  "version": "1.6.10",
   "description": "Cross-platform functionality to create debug ssl certificates.",
   "main": "lib/index.js",
   "typings": "dist/debug-certificate-manager.d.ts",
