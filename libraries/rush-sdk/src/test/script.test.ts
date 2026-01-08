@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import { Executable } from '@rushstack/node-core-library';
+import { Executable, User } from '@rushstack/node-core-library';
 
 const rushSdkPath: string = path.join(__dirname, '../../lib-shim/index.js');
 const sandboxRepoPath: string = `${__dirname}/sandbox`;
@@ -101,10 +101,12 @@ ${loadAndPrintRushSdkModule}
         }
       }
     );
+
+    const userRushSdkFolder = path.join(User.getHomeFolder(), '.rush');
     expect(result.stderr.trim()).toMatchSnapshot('stderr');
-    expect(result.stdout.trim()).toContain(
-      'Trying to load  @microsoft/rush-lib installed by install-run-rush'
-    );
+    expect(
+      result.stdout.trim().replace(new RegExp(userRushSdkFolder, 'g'), '<RUSH_GLOBAL_FOLDER>')
+    ).toMatchSnapshot('stdout');
     expect(result.status).toBe(0);
   });
 });
