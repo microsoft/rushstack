@@ -19,7 +19,7 @@ async function runNpmCommandAndCaptureOutputAsync(
     captureExitCodeAndSignal: true
   });
 
-  if (signal !== undefined) {
+  if (signal) {
     throw new Error(`The npm command was terminated by signal: ${signal}. Output: ${stdout} ${stderr}`);
   } else if (exitCode !== 0) {
     throw new Error(`The npm command failed with exit code: ${exitCode}. Output: ${stdout} ${stderr}`);
