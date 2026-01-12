@@ -2,6 +2,30 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.19.7",
+      "tag": "@rushstack/heft-config-file_v0.19.7",
+      "date": "Wed, 07 Jan 2026 01:12:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.21.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.19.6",
+      "tag": "@rushstack/heft-config-file_v0.19.6",
+      "date": "Mon, 05 Jan 2026 16:12:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.20.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.19.5",
       "tag": "@rushstack/heft-config-file_v0.19.5",
       "date": "Sat, 06 Dec 2025 01:12:29 GMT",

@@ -2,6 +2,84 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "1.2.3",
+      "tag": "@rushstack/heft-storybook-plugin_v1.2.3",
+      "date": "Thu, 08 Jan 2026 01:12:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `1.1.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.2.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-rspack-plugin\" to `0.2.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.9` to `1.1.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.2",
+      "tag": "@rushstack/heft-storybook-plugin_v1.2.2",
+      "date": "Wed, 07 Jan 2026 01:12:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.21.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `1.1.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.2.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-rspack-plugin\" to `0.2.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.8` to `1.1.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.1",
+      "tag": "@rushstack/heft-storybook-plugin_v1.2.1",
+      "date": "Mon, 05 Jan 2026 16:12:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.20.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `1.1.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.2.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-rspack-plugin\" to `0.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.7` to `1.1.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.0",
       "tag": "@rushstack/heft-storybook-plugin_v1.2.0",
       "date": "Mon, 29 Dec 2025 16:12:51 GMT",

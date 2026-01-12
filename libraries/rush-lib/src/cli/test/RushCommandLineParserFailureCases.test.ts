@@ -13,12 +13,15 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
       return {
         hasSubmodules: false,
         hasUncommittedChanges: false,
-        files: new Map(),
+        files: new Map([['common/config/rush/npm-shrinkwrap.json', 'hash']]),
         symlinks: new Map()
       };
     },
     getRepoChangesAsync(): ReadonlyMap<string, string> {
       return new Map();
+    },
+    hashFilesAsync(rootDirectory: string, filePaths: Iterable<string>): Promise<ReadonlyMap<string, string>> {
+      return Promise.resolve(new Map(Array.from(filePaths, (filePath: string) => [filePath, filePath])));
     }
   };
 });
@@ -28,11 +31,19 @@ import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { ITelemetryData } from '../../logic/Telemetry';
 import { getCommandLineParserInstanceAsync, setSpawnMock } from './TestUtils';
+import { isolateEnvironmentConfigurationForTests, type IEnvironmentConfigIsolation } from './TestUtils';
 
 describe('RushCommandLineParserFailureCases', () => {
   describe('execute', () => {
+    let _envIsolation: IEnvironmentConfigIsolation;
+
+    beforeEach(() => {
+      _envIsolation = isolateEnvironmentConfigurationForTests({ silenceStderrWrite: true });
+    });
+
     afterEach(() => {
-      jest.clearAllMocks();
+      _envIsolation.restore();
+      jest.restoreAllMocks();
     });
 
     describe('in repo plugin custom flushTelemetry', () => {

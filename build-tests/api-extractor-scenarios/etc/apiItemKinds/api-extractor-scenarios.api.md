@@ -51,7 +51,7 @@ export namespace n1 {
     // (undocumented)
     export class SomeClass2 extends SomeClass1 {
     }
-        {};
+    export {};
 }
 
 // @public (undocumented)

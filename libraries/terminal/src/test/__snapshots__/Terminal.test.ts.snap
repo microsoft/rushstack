@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 01 writes a single message 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -10,7 +10,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 02 writes multiple messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[    log] test message",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -20,7 +26,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 03 writes a message with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[    log] message 1message 2",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -30,7 +42,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[    log] [green]message 1[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -40,7 +58,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[    log] [green]message 1[default][red]message 2[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -50,7 +74,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[    log] message 1[green]message 2[default]message 3[red]message 4[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -60,7 +90,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 01 writes a single message 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[    log] message 1[green]message 2[default]message 3[red]message 4[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -70,7 +106,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 02 writes multiple messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[    log] test message[n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -80,7 +122,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 03 writes a message with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[    log] message 1message 2[n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -90,7 +138,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[    log] [green]message 1[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -100,7 +154,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[    log] [green]message 1[default][red]message 2[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -110,7 +170,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[    log] message 1[green]message 2[default]message 3[red]message 4[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -120,7 +186,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 01 writes a single message 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 02 writeLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[    log] message 1[green]message 2[default]message 3[red]message 4[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -130,7 +202,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 02 writes multiple messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[warning] [yellow]test message[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -140,7 +218,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 03 writes a message with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[warning] [yellow]message 1[default][yellow]message 2[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -150,7 +234,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[warning] [yellow]message 1[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -160,7 +250,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[warning] [yellow]message 1[default][yellow]message 2[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -170,7 +266,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[warning] [yellow]message 1[default][yellow]message 2[default][yellow]message 3[default][yellow]message 4[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -180,7 +282,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 03 writeWarning 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[warning] message 1[green]message 2[default]message 3[red]message 4[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -190,7 +298,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[warning] [yellow]test message[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -200,7 +314,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[warning] [yellow]message 1[default][yellow]message 2[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -210,7 +330,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[warning] [yellow]message 1[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -220,7 +346,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[warning] [yellow]message 1[default][yellow]message 2[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -230,7 +362,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[warning] [yellow]message 1[default][yellow]message 2[default][yellow]message 3[default][yellow]message 4[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -240,7 +378,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 01 writes a single message 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 04 writeWarningLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[warning] message 1[green]message 2[default]message 3[red]message 4[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "[red]test message[default]",
@@ -250,7 +394,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 02 writes multiple messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[  error] [red]test message[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "[red]message 1[default][red]message 2[default]",
@@ -260,7 +410,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 03 writes a message with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[  error] [red]message 1[default][red]message 2[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "[red]message 1[default]",
@@ -270,7 +426,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[  error] [red]message 1[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "[red]message 1[default][red]message 2[default]",
@@ -280,7 +442,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[  error] [red]message 1[default][red]message 2[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "[red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default]",
@@ -290,7 +458,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[  error] [red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "message 1[green]message 2[default]message 3[red]message 4[default]",
@@ -300,7 +474,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 05 writeError 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[  error] message 1[green]message 2[default]message 3[red]message 4[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "[red]test message[default][n]",
@@ -310,7 +490,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[  error] [red]test message[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "[red]message 1[default][red]message 2[default][n]",
@@ -320,7 +506,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[  error] [red]message 1[default][red]message 2[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "[red]message 1[default][n]",
@@ -330,7 +522,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[  error] [red]message 1[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "[red]message 1[default][red]message 2[default][n]",
@@ -340,7 +538,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[  error] [red]message 1[default][red]message 2[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "[red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default][n]",
@@ -350,7 +554,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[  error] [red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "message 1[green]message 2[default]message 3[red]message 4[default][n]",
@@ -360,7 +570,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 01 writes a single message 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 06 writeErrorLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[  error] message 1[green]message 2[default]message 3[red]message 4[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -370,7 +586,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 02 writes multiple messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[verbose] test message",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -380,7 +602,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 03 writes a message with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[verbose] message 1message 2",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -390,7 +618,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[verbose] [green]message 1[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -400,7 +634,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[verbose] [green]message 1[default][red]message 2[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -410,7 +650,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[verbose] message 1[green]message 2[default]message 3[red]message 4[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -420,7 +666,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 07 writeVerbose 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[verbose] message 1[green]message 2[default]message 3[red]message 4[default]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -430,7 +682,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[verbose] test message[n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -440,7 +698,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[verbose] message 1message 2[n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -450,7 +714,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[verbose] [green]message 1[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -460,7 +730,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[verbose] [green]message 1[default][red]message 2[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -470,7 +746,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[verbose] message 1[green]message 2[default]message 3[red]message 4[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -480,7 +762,13 @@ Object {
 }
 `;
 
-exports[`Terminal 01 color enabled 05 writes to multiple streams 1`] = `
+exports[`Terminal 01 color enabled 01 basic terminal functions 08 writeVerboseLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[verbose] message 1[green]message 2[default]message 3[red]message 4[default][n]",
+]
+`;
+
+exports[`Terminal 01 color enabled 05 writes to multiple streams: output 1`] = `
 Object {
   "debug": "",
   "error": "[red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default][red]test message[default][n][red]message 1[default][red]message 2[default][red]message 1[default][red]message 2[default][n][red]message 1[default][red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default][n][red]message 1[default][n][red]test message[default][red]message 1[default][red]message 2[default][n][red]message 1[default][red]message 2[default]",
@@ -490,7 +778,47 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 01 writes a single message 1`] = `
+exports[`Terminal 01 color enabled 05 writes to multiple streams: output as chunks 1`] = `
+Array [
+  "[    log] message 1[green]message 2[default]message 3[red]message 4[default]",
+  "[warning] [yellow]message 1[default][yellow]message 2[default][n]",
+  "[verbose] test message[green]message 1[default]",
+  "[    log] [green]message 1[default][n]",
+  "[  error] [red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default][red]test message[default][n]",
+  "[verbose] message 1[green]message 2[default]message 3[red]message 4[default][n]",
+  "[verbose] test message[n]",
+  "[warning] [yellow]message 1[default][yellow]message 2[default][yellow]message 1[default][yellow]message 2[default][yellow]message 3[default][yellow]message 4[default]",
+  "[  error] [red]message 1[default][red]message 2[default]",
+  "[    log] [green]message 1[default]",
+  "[verbose] message 1[green]message 2[default]message 3[red]message 4[default]",
+  "[  error] [red]message 1[default][red]message 2[default][n]",
+  "[    log] [green]message 1[default][red]message 2[default]",
+  "[verbose] message 1message 2[green]message 1[default][n]",
+  "[    log] [green]message 1[default][red]message 2[default][n]",
+  "[  error] [red]message 1[default]",
+  "[warning] [yellow]message 1[default][yellow]message 2[default][yellow]message 3[default][yellow]message 4[default][n]",
+  "[    log] test message",
+  "[warning] [yellow]test message[default][n]",
+  "[verbose] [green]message 1[default][red]message 2[default][n]",
+  "[verbose] message 1message 2[n]",
+  "[  error] [red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default][n]",
+  "[    log] message 1[green]message 2[default]message 3[red]message 4[default][n]",
+  "[warning] [yellow]message 1[default][yellow]message 2[default]",
+  "[  error] [red]message 1[default][n]",
+  "[    log] message 1message 2",
+  "[verbose] [green]message 1[default][red]message 2[default]",
+  "[warning] [yellow]message 1[default]",
+  "[    log] test message[n]",
+  "[  error] [red]test message[default]",
+  "[    log] message 1message 2[n]",
+  "[  error] [red]message 1[default][red]message 2[default][n]",
+  "[  error] [red]message 1[default][red]message 2[default]",
+  "[warning] [yellow]message 1[default][yellow]message 2[default][n]",
+  "[warning] [yellow]message 1[default][n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -500,7 +828,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 02 writes multiple messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[    log] test message",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -510,7 +844,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 03 writes a message with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[    log] message 1message 2",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -520,7 +860,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[    log] message 1",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -530,7 +876,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[    log] message 1message 2",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -540,7 +892,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[    log] message 1message 2message 3message 4",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -550,7 +908,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 01 writes a single message 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 01 write 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[    log] message 1message 2message 3message 4",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -560,7 +924,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 02 writes multiple messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[    log] test message[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -570,7 +940,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 03 writes a message with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[    log] message 1message 2[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -580,7 +956,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[    log] message 1[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -590,7 +972,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[    log] message 1message 2[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -600,7 +988,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[    log] message 1message 2message 3message 4[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -610,7 +1004,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 01 writes a single message 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 02 writeLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[    log] message 1message 2message 3message 4[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -620,7 +1020,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 02 writes multiple messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[warning] test message",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -630,7 +1036,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 03 writes a message with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[warning] message 1message 2",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -640,7 +1052,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[warning] message 1",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -650,7 +1068,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[warning] message 1message 2",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -660,7 +1084,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[warning] message 1message 2message 3message 4",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -670,7 +1100,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 03 writeWarning 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[warning] message 1message 2message 3message 4",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -680,7 +1116,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[warning] test message[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -690,7 +1132,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[warning] message 1message 2[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -700,7 +1148,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[warning] message 1[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -710,7 +1164,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[warning] message 1message 2[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -720,7 +1180,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[warning] message 1message 2message 3message 4[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -730,7 +1196,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 01 writes a single message 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 04 writeWarningLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[warning] message 1message 2message 3message 4[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "test message",
@@ -740,7 +1212,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 02 writes multiple messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[  error] test message",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "message 1message 2",
@@ -750,7 +1228,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 03 writes a message with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[  error] message 1message 2",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "message 1",
@@ -760,7 +1244,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[  error] message 1",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "message 1message 2",
@@ -770,7 +1260,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[  error] message 1message 2",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "message 1message 2message 3message 4",
@@ -780,7 +1276,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[  error] message 1message 2message 3message 4",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "message 1message 2message 3message 4",
@@ -790,7 +1292,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 05 writeError 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[  error] message 1message 2message 3message 4",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "test message[n]",
@@ -800,7 +1308,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[  error] test message[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "message 1message 2[n]",
@@ -810,7 +1324,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[  error] message 1message 2[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "message 1[n]",
@@ -820,7 +1340,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[  error] message 1[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "message 1message 2[n]",
@@ -830,7 +1356,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[  error] message 1message 2[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "message 1message 2message 3message 4[n]",
@@ -840,7 +1372,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[  error] message 1message 2message 3message 4[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "message 1message 2message 3message 4[n]",
@@ -850,7 +1388,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 01 writes a single message 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 06 writeErrorLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[  error] message 1message 2message 3message 4[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -860,7 +1404,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 02 writes multiple messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[verbose] test message",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -870,7 +1420,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 03 writes a message with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[verbose] message 1message 2",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -880,7 +1436,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[verbose] message 1",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -890,7 +1452,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[verbose] message 1message 2",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -900,7 +1468,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[verbose] message 1message 2message 3message 4",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -910,7 +1484,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 07 writeVerbose 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[verbose] message 1message 2message 3message 4",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -920,7 +1500,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[verbose] test message[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -930,7 +1516,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[verbose] message 1message 2[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -940,7 +1532,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[verbose] message 1[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -950,7 +1548,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[verbose] message 1message 2[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -960,7 +1564,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[verbose] message 1message 2message 3message 4[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -970,7 +1580,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 01 writes a single message 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 08 writeVerboseLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[verbose] message 1message 2message 3message 4[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 01 writes a single message: output 1`] = `
 Object {
   "debug": "test message",
   "error": "",
@@ -980,7 +1596,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 02 writes multiple messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[  debug] test message",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "message 1message 2",
   "error": "",
@@ -990,7 +1612,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 03 writes a message with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[  debug] message 1message 2",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "message 1",
   "error": "",
@@ -1000,7 +1628,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[  debug] message 1",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "message 1message 2",
   "error": "",
@@ -1010,7 +1644,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[  debug] message 1message 2",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "message 1message 2message 3message 4",
   "error": "",
@@ -1020,7 +1660,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[  debug] message 1message 2message 3message 4",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "message 1message 2message 3message 4",
   "error": "",
@@ -1030,7 +1676,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 01 writes a single message 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 09 writeDebug 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[  debug] message 1message 2message 3message 4",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 01 writes a single message: output 1`] = `
 Object {
   "debug": "test message[n]",
   "error": "",
@@ -1040,7 +1692,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 02 writes multiple messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 01 writes a single message: output as chunks 1`] = `
+Array [
+  "[  debug] test message[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 02 writes multiple messages: output 1`] = `
 Object {
   "debug": "message 1message 2[n]",
   "error": "",
@@ -1050,7 +1708,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 03 writes a message with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 02 writes multiple messages: output as chunks 1`] = `
+Array [
+  "[  debug] message 1message 2[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 03 writes a message with colors: output 1`] = `
 Object {
   "debug": "message 1[n]",
   "error": "",
@@ -1060,7 +1724,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 04 writes a multiple messages with colors 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 03 writes a message with colors: output as chunks 1`] = `
+Array [
+  "[  debug] message 1[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 04 writes a multiple messages with colors: output 1`] = `
 Object {
   "debug": "message 1message 2[n]",
   "error": "",
@@ -1070,7 +1740,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 04 writes a multiple messages with colors: output as chunks 1`] = `
+Array [
+  "[  debug] message 1message 2[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 05 writes a messages with colors interspersed with non-colored messages: output 1`] = `
 Object {
   "debug": "message 1message 2message 3message 4[n]",
   "error": "",
@@ -1080,7 +1756,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 05 writes a messages with colors interspersed with non-colored messages: output as chunks 1`] = `
+Array [
+  "[  debug] message 1message 2message 3message 4[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output 1`] = `
 Object {
   "debug": "message 1message 2message 3message 4[n]",
   "error": "",
@@ -1090,7 +1772,13 @@ Object {
 }
 `;
 
-exports[`Terminal 02 color disabled 05 writes to multiple streams 1`] = `
+exports[`Terminal 02 color disabled 01 basic terminal functions 10 writeDebugLine 06 writes a messages with colors interspersed with non-colored messages with color overriding disabled: output as chunks 1`] = `
+Array [
+  "[  debug] message 1message 2message 3message 4[n]",
+]
+`;
+
+exports[`Terminal 02 color disabled 05 writes to multiple streams: output 1`] = `
 Object {
   "debug": "",
   "error": "message 1message 2message 3message 4test message[n]message 1message 2message 1message 2[n]message 1message 1message 2message 3message 4[n]message 1[n]test messagemessage 1message 2[n]message 1message 2",
@@ -1098,4 +1786,44 @@ Object {
   "verbose": "test messagemessage 1message 1message 2message 3message 4[n]test message[n]message 1message 2message 3message 4message 1message 2message 1[n]message 1message 2[n]message 1message 2[n]message 1message 2",
   "warning": "message 1message 2[n]message 1message 2message 1message 2message 3message 4message 1message 2message 3message 4[n]test message[n]message 1message 2message 1message 1message 2[n]message 1[n]",
 }
+`;
+
+exports[`Terminal 02 color disabled 05 writes to multiple streams: output as chunks 1`] = `
+Array [
+  "[    log] message 1message 2message 3message 4",
+  "[warning] message 1message 2[n]",
+  "[verbose] test messagemessage 1",
+  "[    log] message 1[n]",
+  "[  error] message 1message 2message 3message 4test message[n]",
+  "[verbose] message 1message 2message 3message 4[n]",
+  "[verbose] test message[n]",
+  "[warning] message 1message 2message 1message 2message 3message 4",
+  "[  error] message 1message 2",
+  "[    log] message 1",
+  "[verbose] message 1message 2message 3message 4",
+  "[  error] message 1message 2[n]",
+  "[    log] message 1message 2",
+  "[verbose] message 1message 2message 1[n]",
+  "[    log] message 1message 2[n]",
+  "[  error] message 1",
+  "[warning] message 1message 2message 3message 4[n]",
+  "[    log] test message",
+  "[warning] test message[n]",
+  "[verbose] message 1message 2[n]",
+  "[verbose] message 1message 2[n]",
+  "[  error] message 1message 2message 3message 4[n]",
+  "[    log] message 1message 2message 3message 4[n]",
+  "[warning] message 1message 2",
+  "[  error] message 1[n]",
+  "[    log] message 1message 2",
+  "[verbose] message 1message 2",
+  "[warning] message 1",
+  "[    log] test message[n]",
+  "[  error] test message",
+  "[    log] message 1message 2[n]",
+  "[  error] message 1message 2[n]",
+  "[  error] message 1message 2",
+  "[warning] message 1message 2[n]",
+  "[warning] message 1[n]",
+]
 `;

@@ -2,6 +2,48 @@
   "name": "@rushstack/stream-collator",
   "entries": [
     {
+      "version": "4.1.122",
+      "tag": "@rushstack/stream-collator_v4.1.122",
+      "date": "Thu, 08 Jan 2026 01:12:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.121",
+      "tag": "@rushstack/stream-collator_v4.1.121",
+      "date": "Wed, 07 Jan 2026 01:12:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.21.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.120",
+      "tag": "@rushstack/stream-collator_v4.1.120",
+      "date": "Mon, 05 Jan 2026 16:12:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.20.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.119",
       "tag": "@rushstack/stream-collator_v4.1.119",
       "date": "Sat, 06 Dec 2025 01:12:28 GMT",

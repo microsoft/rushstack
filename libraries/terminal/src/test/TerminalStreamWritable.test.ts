@@ -11,7 +11,8 @@ let terminal: Terminal;
 let provider: StringBufferTerminalProvider;
 
 function verifyProvider(): void {
-  expect(provider.getAllOutput()).toMatchSnapshot();
+  expect(provider.getAllOutput()).toMatchSnapshot('output');
+  expect(provider.getAllOutputAsChunks()).toMatchSnapshot('output as chunks');
 }
 
 async function writeAsync(writable: Writable, data: string): Promise<void> {

@@ -1,6 +1,23 @@
 # Change Log - @rushstack/heft-typescript-plugin
 
-This log was last generated on Sat, 06 Dec 2025 01:12:28 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Jan 2026 01:12:30 GMT and should not be manually modified.
+
+## 1.1.10
+Thu, 08 Jan 2026 01:12:30 GMT
+
+_Version update only_
+
+## 1.1.9
+Wed, 07 Jan 2026 01:12:25 GMT
+
+_Version update only_
+
+## 1.1.8
+Mon, 05 Jan 2026 16:12:49 GMT
+
+### Patches
+
+- Fix TypeScript build cache hash computation to use relative paths with normalized separators for portability across machines and platforms
 
 ## 1.1.7
 Sat, 06 Dec 2025 01:12:28 GMT

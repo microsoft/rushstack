@@ -2,6 +2,51 @@
   "name": "@rushstack/module-minifier",
   "entries": [
     {
+      "version": "0.8.10",
+      "tag": "@rushstack/module-minifier_v0.8.10",
+      "date": "Thu, 08 Jan 2026 01:12:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.6.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.9",
+      "tag": "@rushstack/module-minifier_v0.8.9",
+      "date": "Wed, 07 Jan 2026 01:12:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.6.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.8",
+      "tag": "@rushstack/module-minifier_v0.8.8",
+      "date": "Mon, 05 Jan 2026 16:12:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.6.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.7",
       "tag": "@rushstack/module-minifier_v0.8.7",
       "date": "Sat, 06 Dec 2025 01:12:28 GMT",

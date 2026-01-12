@@ -2,6 +2,69 @@
   "name": "@rushstack/heft-dev-cert-plugin",
   "entries": [
     {
+      "version": "1.0.11",
+      "tag": "@rushstack/heft-dev-cert-plugin_v1.0.11",
+      "date": "Thu, 08 Jan 2026 01:12:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.6.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.55.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.9` to `1.1.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.10",
+      "tag": "@rushstack/heft-dev-cert-plugin_v1.0.10",
+      "date": "Wed, 07 Jan 2026 01:12:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.6.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.55.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.8` to `1.1.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.9",
+      "tag": "@rushstack/heft-dev-cert-plugin_v1.0.9",
+      "date": "Mon, 05 Jan 2026 16:12:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.6.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.55.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.7` to `1.1.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.8",
       "tag": "@rushstack/heft-dev-cert-plugin_v1.0.8",
       "date": "Sat, 06 Dec 2025 01:12:28 GMT",

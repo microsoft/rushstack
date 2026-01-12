@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TerminalStreamWritable writes a debug message 1`] = `
+exports[`TerminalStreamWritable writes a debug message: output 1`] = `
 Object {
   "debug": "test message",
   "error": "",
@@ -10,7 +10,16 @@ Object {
 }
 `;
 
-exports[`TerminalStreamWritable writes a message 1`] = `
+exports[`TerminalStreamWritable writes a debug message: output as chunks 1`] = `
+Array [
+  Object {
+    "severity": "debug",
+    "text": "test message",
+  },
+]
+`;
+
+exports[`TerminalStreamWritable writes a message: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -20,7 +29,16 @@ Object {
 }
 `;
 
-exports[`TerminalStreamWritable writes a verbose message 1`] = `
+exports[`TerminalStreamWritable writes a message: output as chunks 1`] = `
+Array [
+  Object {
+    "severity": "log",
+    "text": "test message",
+  },
+]
+`;
+
+exports[`TerminalStreamWritable writes a verbose message: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -30,7 +48,16 @@ Object {
 }
 `;
 
-exports[`TerminalStreamWritable writes a warning message 1`] = `
+exports[`TerminalStreamWritable writes a verbose message: output as chunks 1`] = `
+Array [
+  Object {
+    "severity": "verbose",
+    "text": "test message",
+  },
+]
+`;
+
+exports[`TerminalStreamWritable writes a warning message: output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -40,7 +67,16 @@ Object {
 }
 `;
 
-exports[`TerminalStreamWritable writes an error message 1`] = `
+exports[`TerminalStreamWritable writes a warning message: output as chunks 1`] = `
+Array [
+  Object {
+    "severity": "warning",
+    "text": "[yellow]test message[default]",
+  },
+]
+`;
+
+exports[`TerminalStreamWritable writes an error message: output 1`] = `
 Object {
   "debug": "",
   "error": "[red]test message[default]",
@@ -48,4 +84,13 @@ Object {
   "verbose": "",
   "warning": "",
 }
+`;
+
+exports[`TerminalStreamWritable writes an error message: output as chunks 1`] = `
+Array [
+  Object {
+    "severity": "error",
+    "text": "[red]test message[default]",
+  },
+]
 `;

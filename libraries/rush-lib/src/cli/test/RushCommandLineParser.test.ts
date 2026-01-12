@@ -20,8 +20,8 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
     getGitHashForFiles(filePaths: Iterable<string>): ReadonlyMap<string, string> {
       return new Map(Array.from(filePaths, (filePath: string) => [filePath, filePath]));
     },
-    hashFilesAsync(rootDirectory: string, filePaths: Iterable<string>): ReadonlyMap<string, string> {
-      return new Map(Array.from(filePaths, (filePath: string) => [filePath, filePath]));
+    hashFilesAsync(rootDirectory: string, filePaths: Iterable<string>): Promise<ReadonlyMap<string, string>> {
+      return Promise.resolve(new Map(Array.from(filePaths, (filePath: string) => [filePath, filePath])));
     }
   };
 });
@@ -33,8 +33,13 @@ import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { ITelemetryData } from '../../logic/Telemetry';
-import { getCommandLineParserInstanceAsync, type SpawnMockArgs, type SpawnMockCall } from './TestUtils';
-import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import {
+  getCommandLineParserInstanceAsync,
+  type SpawnMockArgs,
+  type SpawnMockCall,
+  isolateEnvironmentConfigurationForTests,
+  type IEnvironmentConfigIsolation
+} from './TestUtils';
 import { IS_WINDOWS } from '../../utilities/executionUtilities';
 
 // Ordinals into the `mock.calls` array referencing each of the arguments to `spawn`. Note that
@@ -73,13 +78,15 @@ function expectSpawnToMatchRegexp(spawnCall: SpawnMockCall, expectedRegexp: RegE
 
 describe('RushCommandLineParser', () => {
   describe('execute', () => {
+    let _envIsolation: IEnvironmentConfigIsolation;
+
+    beforeEach(() => {
+      _envIsolation = isolateEnvironmentConfigurationForTests();
+    });
+
     afterEach(() => {
       jest.clearAllMocks();
-      EnvironmentConfiguration.reset();
-      jest
-        .spyOn(EnvironmentConfiguration, 'buildCacheOverrideJsonFilePath', 'get')
-        .mockReturnValue(undefined);
-      jest.spyOn(EnvironmentConfiguration, 'buildCacheOverrideJson', 'get').mockReturnValue(undefined);
+      _envIsolation.restore();
     });
 
     describe('in basic repo', () => {

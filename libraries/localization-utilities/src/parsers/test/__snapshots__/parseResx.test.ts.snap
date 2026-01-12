@@ -22,7 +22,7 @@ Array [
 ]
 `;
 
-exports[`parseResx correctly ignores a string: terminal output 1`] = `Object {}`;
+exports[`parseResx correctly ignores a string: terminal output 1`] = `Array []`;
 
 exports[`parseResx fails to parse a RESX file with a duplicate string: Loc file 1`] = `
 Object {
@@ -34,9 +34,9 @@ Object {
 `;
 
 exports[`parseResx fails to parse a RESX file with a duplicate string: terminal output 1`] = `
-Object {
-  "error": "test.resx(6,45): Duplicate string value \\"stringA\\"[n]",
-}
+Array [
+  "[  error] test.resx(6,45): Duplicate string value \\"stringA\\"[n]",
+]
 `;
 
 exports[`parseResx ignoreMissingResxComments when set to false, warns on a missing comment: Loc file 1`] = `
@@ -49,9 +49,9 @@ Object {
 `;
 
 exports[`parseResx ignoreMissingResxComments when set to false, warns on a missing comment: terminal output 1`] = `
-Object {
-  "warning": "test.resx(3,59): Missing string comment in <data> element[n]",
-}
+Array [
+  "[warning] test.resx(3,59): Missing string comment in <data> element[n]",
+]
 `;
 
 exports[`parseResx ignoreMissingResxComments when set to true, ignores a missing comment: Loc file 1`] = `
@@ -63,7 +63,7 @@ Object {
 }
 `;
 
-exports[`parseResx ignoreMissingResxComments when set to true, ignores a missing comment: terminal output 1`] = `Object {}`;
+exports[`parseResx ignoreMissingResxComments when set to true, ignores a missing comment: terminal output 1`] = `Array []`;
 
 exports[`parseResx ignoreMissingResxComments when set to undefined, warns on a missing comment: Loc file 1`] = `
 Object {
@@ -74,7 +74,7 @@ Object {
 }
 `;
 
-exports[`parseResx ignoreMissingResxComments when set to undefined, warns on a missing comment: terminal output 1`] = `Object {}`;
+exports[`parseResx ignoreMissingResxComments when set to undefined, warns on a missing comment: terminal output 1`] = `Array []`;
 
 exports[`parseResx parses a valid file with a schema: Loc file 1`] = `
 Object {
@@ -89,7 +89,7 @@ Object {
 }
 `;
 
-exports[`parseResx parses a valid file with a schema: terminal output 1`] = `Object {}`;
+exports[`parseResx parses a valid file with a schema: terminal output 1`] = `Array []`;
 
 exports[`parseResx parses a valid file with quotemarks: Loc file 1`] = `
 Object {
@@ -100,7 +100,7 @@ Object {
 }
 `;
 
-exports[`parseResx parses a valid file with quotemarks: terminal output 1`] = `Object {}`;
+exports[`parseResx parses a valid file with quotemarks: terminal output 1`] = `Array []`;
 
 exports[`parseResx prints an error on invalid XML: Loc file 1`] = `
 Object {
@@ -112,9 +112,9 @@ Object {
 `;
 
 exports[`parseResx prints an error on invalid XML: terminal output 1`] = `
-Object {
-  "error": "test.resx(3,41): Found unexpected non-empty text node in RESX <data> element[n]",
-}
+Array [
+  "[  error] test.resx(3,41): Found unexpected non-empty text node in RESX <data> element[n]",
+]
 `;
 
 exports[`parseResx resxNewlineNormalization when set to CrLf, normalizes to CrLf: Loc file 1`] = `
@@ -128,7 +128,7 @@ Object {
 }
 `;
 
-exports[`parseResx resxNewlineNormalization when set to CrLf, normalizes to CrLf: terminal output 1`] = `Object {}`;
+exports[`parseResx resxNewlineNormalization when set to CrLf, normalizes to CrLf: terminal output 1`] = `Array []`;
 
 exports[`parseResx resxNewlineNormalization when set to Lf, normalizes to Lf: Loc file 1`] = `
 Object {
@@ -141,4 +141,4 @@ Object {
 }
 `;
 
-exports[`parseResx resxNewlineNormalization when set to Lf, normalizes to Lf: terminal output 1`] = `Object {}`;
+exports[`parseResx resxNewlineNormalization when set to Lf, normalizes to Lf: terminal output 1`] = `Array []`;

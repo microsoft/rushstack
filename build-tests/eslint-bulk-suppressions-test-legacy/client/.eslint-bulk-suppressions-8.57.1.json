@@ -1,0 +1,139 @@
+{
+  "suppressions": [
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "prefer-const"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".ExampleClass",
+      "rule": "@typescript-eslint/ban-types"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".ExampleClass",
+      "rule": "@typescript-eslint/explicit-member-accessibility"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".ExampleClass.exampleMethod",
+      "rule": "@typescript-eslint/explicit-function-return-type"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".ExampleClass.exampleMethod",
+      "rule": "@typescript-eslint/explicit-member-accessibility"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".ExampleClass.exampleMethod",
+      "rule": "@typescript-eslint/typedef"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".ExampleClass.exampleMethod",
+      "rule": "no-var"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleAnonymousClass",
+      "rule": "@typescript-eslint/explicit-member-accessibility"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleAnonymousClass",
+      "rule": "@typescript-eslint/typedef"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleAnonymousClass",
+      "rule": "no-useless-concat"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleAnonymousClass.constructor",
+      "rule": "@typescript-eslint/explicit-member-accessibility"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleAnonymousClass.exampleSetGet",
+      "rule": "@typescript-eslint/ban-types"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleAnonymousClass.exampleSetGet",
+      "rule": "@typescript-eslint/explicit-function-return-type"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleAnonymousClass.exampleSetGet",
+      "rule": "@typescript-eslint/explicit-member-accessibility"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleArrowFunction",
+      "rule": "@typescript-eslint/explicit-function-return-type"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleArrowFunction",
+      "rule": "@typescript-eslint/typedef"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleArrowFunction",
+      "rule": "dot-notation"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleArrowFunction",
+      "rule": "no-empty"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleArrowFunction",
+      "rule": "no-unused-expressions"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleFunction",
+      "rule": "@typescript-eslint/ban-types"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleFunction",
+      "rule": "@typescript-eslint/explicit-function-return-type"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleFunction",
+      "rule": "no-empty-pattern"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleFunction",
+      "rule": "no-extra-boolean-cast"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleObject",
+      "rule": "@typescript-eslint/typedef"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".x",
+      "rule": "@typescript-eslint/explicit-function-return-type"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".y",
+      "rule": "@typescript-eslint/explicit-function-return-type"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".z",
+      "rule": "@typescript-eslint/explicit-function-return-type"
+    }
+  ]
+}

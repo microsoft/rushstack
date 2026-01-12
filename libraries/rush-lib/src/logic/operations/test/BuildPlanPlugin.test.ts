@@ -139,7 +139,10 @@ describe(BuildPlanPlugin.name, () => {
       await hooks.beforeExecuteOperations.promise(operationMap, context as IExecuteOperationsContext);
 
       expect(
-        stringBufferTerminalProvider.getAllOutput(true, { normalizeSpecialCharacters: false })
+        stringBufferTerminalProvider.getAllOutputAsChunks({
+          normalizeSpecialCharacters: false,
+          asLines: true
+        })
       ).toMatchSnapshot();
     });
   });

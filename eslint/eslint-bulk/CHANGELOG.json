@@ -2,6 +2,42 @@
   "name": "@rushstack/eslint-bulk",
   "entries": [
     {
+      "version": "0.4.11",
+      "tag": "@rushstack/eslint-bulk_v0.4.11",
+      "date": "Thu, 08 Jan 2026 01:12:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.10",
+      "tag": "@rushstack/eslint-bulk_v0.4.10",
+      "date": "Wed, 07 Jan 2026 01:12:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.9",
+      "tag": "@rushstack/eslint-bulk_v0.4.9",
+      "date": "Mon, 05 Jan 2026 16:12:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.8",
       "tag": "@rushstack/eslint-bulk_v0.4.8",
       "date": "Sat, 06 Dec 2025 01:12:28 GMT",

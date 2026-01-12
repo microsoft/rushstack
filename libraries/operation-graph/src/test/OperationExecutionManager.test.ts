@@ -68,7 +68,7 @@ describe(OperationExecutionManager.name, () => {
         });
 
         expect(result).toBe(OperationStatus.NoOp);
-        expect(terminalProvider.getAllOutput(true)).toMatchSnapshot();
+        expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
       });
 
       it('handles trivial input', async () => {
@@ -87,7 +87,7 @@ describe(OperationExecutionManager.name, () => {
         });
 
         expect(result).toBe(OperationStatus.Success);
-        expect(terminalProvider.getAllOutput(true)).toMatchSnapshot();
+        expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
 
         expect(operation.state?.status).toBe(OperationStatus.NoOp);
       });
@@ -135,7 +135,7 @@ describe(OperationExecutionManager.name, () => {
         });
 
         expect(result).toBe(OperationStatus.Success);
-        expect(terminalProvider.getAllOutput(true)).toMatchSnapshot();
+        expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
 
         expect(runAlpha).toHaveBeenCalledTimes(1);
         expect(runBeta).toHaveBeenCalledTimes(1);
@@ -187,7 +187,7 @@ describe(OperationExecutionManager.name, () => {
         });
 
         expect(result).toBe(OperationStatus.Failure);
-        expect(terminalProvider.getAllOutput(true)).toMatchSnapshot();
+        expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
         expect(runAlpha).toHaveBeenCalledTimes(1);
         expect(runBeta).toHaveBeenCalledTimes(0);
 
@@ -218,7 +218,7 @@ describe(OperationExecutionManager.name, () => {
         });
 
         expect(result).toBe(OperationStatus.NoOp);
-        expect(terminalProvider.getAllOutput(true)).toMatchSnapshot();
+        expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
       });
 
       it('respects priority order', async () => {
@@ -271,7 +271,7 @@ describe(OperationExecutionManager.name, () => {
         expect(executed).toEqual([beta, alpha]);
 
         expect(result).toBe(OperationStatus.Success);
-        expect(terminalProvider.getAllOutput(true)).toMatchSnapshot();
+        expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
 
         expect(runAlpha).toHaveBeenCalledTimes(1);
         expect(runBeta).toHaveBeenCalledTimes(1);
@@ -324,7 +324,7 @@ describe(OperationExecutionManager.name, () => {
         });
 
         expect(result).toBe(OperationStatus.Success);
-        expect(terminalProvider.getAllOutput(true)).toMatchSnapshot();
+        expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
 
         expect(run).toHaveBeenCalledTimes(2);
 
@@ -391,7 +391,7 @@ describe(OperationExecutionManager.name, () => {
         expect(betaRequestRun).toBeDefined();
 
         expect(result1).toBe(OperationStatus.Success);
-        expect(terminalProvider1.getAllOutput(true)).toMatchSnapshot('first');
+        expect(terminalProvider1.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot('first');
 
         expect(runAlpha).toHaveBeenCalledTimes(1);
         expect(runBeta).toHaveBeenCalledTimes(1);
@@ -423,7 +423,7 @@ describe(OperationExecutionManager.name, () => {
         });
 
         expect(result2).toBe(OperationStatus.Success);
-        expect(terminalProvider2.getAllOutput(true)).toMatchSnapshot('second');
+        expect(terminalProvider2.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot('second');
 
         expect(runAlpha).toHaveBeenCalledTimes(2);
         expect(runBeta).toHaveBeenCalledTimes(2);

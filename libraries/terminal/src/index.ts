@@ -40,7 +40,10 @@ export { ConsoleTerminalProvider, type IConsoleTerminalProviderOptions } from '.
 export {
   StringBufferTerminalProvider,
   type IStringBufferOutputOptions,
-  type IAllStringBufferOutput
+  type IAllStringBufferOutput,
+  type IOutputChunk,
+  type IStringBufferOutputChunksOptions,
+  type TerminalProviderSeverityName
 } from './StringBufferTerminalProvider';
 export {
   PrefixProxyTerminalProvider,

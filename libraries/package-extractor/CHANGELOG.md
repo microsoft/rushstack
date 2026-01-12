@@ -1,6 +1,21 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Sat, 06 Dec 2025 01:12:28 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Jan 2026 01:12:30 GMT and should not be manually modified.
+
+## 0.11.11
+Thu, 08 Jan 2026 01:12:30 GMT
+
+_Version update only_
+
+## 0.11.10
+Wed, 07 Jan 2026 01:12:25 GMT
+
+_Version update only_
+
+## 0.11.9
+Mon, 05 Jan 2026 16:12:49 GMT
+
+_Version update only_
 
 ## 0.11.8
 Sat, 06 Dec 2025 01:12:28 GMT

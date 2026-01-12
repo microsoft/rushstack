@@ -1,128 +1,128 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ConfigurationFile A complex config file Can get the original $schema property value 1`] = `Object {}`;
+exports[`ConfigurationFile A complex config file Can get the original $schema property value 1`] = `Array []`;
 
-exports[`ConfigurationFile A complex config file Correctly loads a complex config file (Deprecated PathResolutionMethod.NodeResolve) 1`] = `Object {}`;
+exports[`ConfigurationFile A complex config file Correctly loads a complex config file (Deprecated PathResolutionMethod.NodeResolve) 1`] = `Array []`;
 
-exports[`ConfigurationFile A complex config file Correctly loads a complex config file 1`] = `Object {}`;
+exports[`ConfigurationFile A complex config file Correctly loads a complex config file 1`] = `Array []`;
 
-exports[`ConfigurationFile A complex config file Correctly loads a complex config file async (Deprecated PathResolutionMethod.NodeResolve) 1`] = `Object {}`;
+exports[`ConfigurationFile A complex config file Correctly loads a complex config file async (Deprecated PathResolutionMethod.NodeResolve) 1`] = `Array []`;
 
-exports[`ConfigurationFile A complex config file Correctly loads a complex config file async 1`] = `Object {}`;
+exports[`ConfigurationFile A complex config file Correctly loads a complex config file async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file containing an array and an object Correctly loads the config file 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file containing an array and an object Correctly loads the config file 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file containing an array and an object Correctly loads the config file async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file containing an array and an object Correctly loads the config file async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file containing an array and an object Correctly resolves paths relative to the config file 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file containing an array and an object Correctly resolves paths relative to the config file 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file containing an array and an object Correctly resolves paths relative to the config file async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file containing an array and an object Correctly resolves paths relative to the config file async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file containing an array and an object Correctly resolves paths relative to the project root 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file containing an array and an object Correctly resolves paths relative to the project root 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file containing an array and an object Correctly resolves paths relative to the project root async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file containing an array and an object Correctly resolves paths relative to the project root async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "append" and "merge" in config meta 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "append" and "merge" in config meta 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "append" and "merge" in config meta async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "append" and "merge" in config meta async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "custom" in config meta 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "custom" in config meta 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "custom" in config meta async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "custom" in config meta async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "replace" in config meta 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "replace" in config meta 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "replace" in config meta async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "replace" in config meta async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with default config meta 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with default config meta 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with default config meta async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with default config meta async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with modified merge behaviors for arrays and objects 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with modified merge behaviors for arrays and objects 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with modified merge behaviors for arrays and objects async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with modified merge behaviors for arrays and objects async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with "extends" Correctly resolves paths relative to the config file 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with "extends" Correctly resolves paths relative to the config file 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with "extends" Correctly resolves paths relative to the config file async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with "extends" Correctly resolves paths relative to the config file async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema object Correctly loads the config file 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema object Correctly loads the config file 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema object Correctly loads the config file async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema object Correctly loads the config file async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema object Correctly resolves paths relative to the config file 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema object Correctly resolves paths relative to the config file 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema object Correctly resolves paths relative to the config file async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema object Correctly resolves paths relative to the config file async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema object Correctly resolves paths relative to the project root 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema object Correctly resolves paths relative to the project root 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema object Correctly resolves paths relative to the project root async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema object Correctly resolves paths relative to the project root async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema object The NonProjectConfigurationFile version works correctly 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema object The NonProjectConfigurationFile version works correctly 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema object The NonProjectConfigurationFile version works correctly async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema object The NonProjectConfigurationFile version works correctly async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema path Correctly loads the config file 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema path Correctly loads the config file 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema path Correctly loads the config file async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema path Correctly loads the config file async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema path Correctly resolves paths relative to the config file 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema path Correctly resolves paths relative to the config file 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema path Correctly resolves paths relative to the config file async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema path Correctly resolves paths relative to the config file async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema path Correctly resolves paths relative to the project root 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema path Correctly resolves paths relative to the project root 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema path Correctly resolves paths relative to the project root async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema path Correctly resolves paths relative to the project root async 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema path The NonProjectConfigurationFile version works correctly 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema path The NonProjectConfigurationFile version works correctly 1`] = `Array []`;
 
-exports[`ConfigurationFile A simple config file with a JSON schema path The NonProjectConfigurationFile version works correctly async 1`] = `Object {}`;
+exports[`ConfigurationFile A simple config file with a JSON schema path The NonProjectConfigurationFile version works correctly async 1`] = `Array []`;
 
-exports[`ConfigurationFile a complex file with inheritance type annotations Correctly loads a complex config file with a single inheritance type annotation 1`] = `Object {}`;
+exports[`ConfigurationFile a complex file with inheritance type annotations Correctly loads a complex config file with a single inheritance type annotation 1`] = `Array []`;
 
-exports[`ConfigurationFile a complex file with inheritance type annotations Correctly loads a complex config file with inheritance type annotations 1`] = `Object {}`;
+exports[`ConfigurationFile a complex file with inheritance type annotations Correctly loads a complex config file with inheritance type annotations 1`] = `Array []`;
 
-exports[`ConfigurationFile a complex file with inheritance type annotations Correctly loads a complex config file with inheritance type annotations async 1`] = `Object {}`;
+exports[`ConfigurationFile a complex file with inheritance type annotations Correctly loads a complex config file with inheritance type annotations async 1`] = `Array []`;
 
 exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when a keyed object uses the 'append' inheritance type 1`] = `"Issue in processing configuration file property \\"c\\". Property is not an array, but the inheritance type is set as \\"append\\""`;
 
-exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when a keyed object uses the 'append' inheritance type 2`] = `Object {}`;
+exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when a keyed object uses the 'append' inheritance type 2`] = `Array []`;
 
 exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when a keyed object uses the 'append' inheritance type async 1`] = `"Issue in processing configuration file property \\"c\\". Property is not an array, but the inheritance type is set as \\"append\\""`;
 
-exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when a keyed object uses the 'append' inheritance type async 2`] = `Object {}`;
+exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when a keyed object uses the 'append' inheritance type async 2`] = `Array []`;
 
 exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when a non-object property uses an inheritance type 1`] = `"Issue in processing configuration file property \\"$l.inheritanceType\\". An inheritance type was provided for a property that is not a keyed object or array."`;
 
-exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when a non-object property uses an inheritance type 2`] = `Object {}`;
+exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when a non-object property uses an inheritance type 2`] = `Array []`;
 
 exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when a non-object property uses an inheritance type async 1`] = `"Issue in processing configuration file property \\"$l.inheritanceType\\". An inheritance type was provided for a property that is not a keyed object or array."`;
 
-exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when a non-object property uses an inheritance type async 2`] = `Object {}`;
+exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when a non-object property uses an inheritance type async 2`] = `Array []`;
 
 exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an array uses the 'merge' inheritance type 1`] = `"Issue in processing configuration file property \\"a\\". Property is not a keyed object, but the inheritance type is set as \\"merge\\""`;
 
-exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an array uses the 'merge' inheritance type 2`] = `Object {}`;
+exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an array uses the 'merge' inheritance type 2`] = `Array []`;
 
 exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an array uses the 'merge' inheritance type async 1`] = `"Issue in processing configuration file property \\"a\\". Property is not a keyed object, but the inheritance type is set as \\"merge\\""`;
 
-exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an array uses the 'merge' inheritance type async 2`] = `Object {}`;
+exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an array uses the 'merge' inheritance type async 2`] = `Array []`;
 
 exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an inheritance type is specified for an unspecified property 1`] = `"Issue in processing configuration file property \\"$c.inheritanceType\\". An inheritance type was provided but no matching property was found in the parent."`;
 
-exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an inheritance type is specified for an unspecified property 2`] = `Object {}`;
+exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an inheritance type is specified for an unspecified property 2`] = `Array []`;
 
 exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an inheritance type is specified for an unspecified property async 1`] = `"Issue in processing configuration file property \\"$c.inheritanceType\\". An inheritance type was provided but no matching property was found in the parent."`;
 
-exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an inheritance type is specified for an unspecified property async 2`] = `Object {}`;
+exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an inheritance type is specified for an unspecified property async 2`] = `Array []`;
 
 exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an unsupported inheritance type is specified 1`] = `"Issue in processing configuration file property \\"$a.inheritanceType\\". An unsupported inheritance type was provided: \\"custom\\""`;
 
-exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an unsupported inheritance type is specified 2`] = `Object {}`;
+exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an unsupported inheritance type is specified 2`] = `Array []`;
 
 exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an unsupported inheritance type is specified async 1`] = `"Issue in processing configuration file property \\"$a.inheritanceType\\". An unsupported inheritance type was provided: \\"custom\\""`;
 
-exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an unsupported inheritance type is specified async 2`] = `Object {}`;
+exports[`ConfigurationFile a complex file with inheritance type annotations throws an error when an unsupported inheritance type is specified async 2`] = `Array []`;
 
 exports[`ConfigurationFile error cases Throws an error for a file that doesn't match its schema 1`] = `
 "Resolved configuration object does not match schema: Error: JSON validation failed:
@@ -132,7 +132,7 @@ Error: #/filePaths
        must be array"
 `;
 
-exports[`ConfigurationFile error cases Throws an error for a file that doesn't match its schema 2`] = `Object {}`;
+exports[`ConfigurationFile error cases Throws an error for a file that doesn't match its schema 2`] = `Array []`;
 
 exports[`ConfigurationFile error cases Throws an error for a file that doesn't match its schema async 1`] = `
 "Resolved configuration object does not match schema: Error: JSON validation failed:
@@ -142,7 +142,7 @@ Error: #/filePaths
        must be array"
 `;
 
-exports[`ConfigurationFile error cases Throws an error for a file that doesn't match its schema async 2`] = `Object {}`;
+exports[`ConfigurationFile error cases Throws an error for a file that doesn't match its schema async 2`] = `Array []`;
 
 exports[`ConfigurationFile error cases Throws an error when a combined config file doesn't match the schema 1`] = `
 "Resolved configuration object does not match schema: Error: JSON validation failed:
@@ -156,7 +156,7 @@ Error: #
        must match exactly one schema in oneOf"
 `;
 
-exports[`ConfigurationFile error cases Throws an error when a combined config file doesn't match the schema 2`] = `Object {}`;
+exports[`ConfigurationFile error cases Throws an error when a combined config file doesn't match the schema 2`] = `Array []`;
 
 exports[`ConfigurationFile error cases Throws an error when a combined config file doesn't match the schema async 1`] = `
 "Resolved configuration object does not match schema: Error: JSON validation failed:
@@ -170,116 +170,120 @@ Error: #
        must match exactly one schema in oneOf"
 `;
 
-exports[`ConfigurationFile error cases Throws an error when a combined config file doesn't match the schema async 2`] = `Object {}`;
+exports[`ConfigurationFile error cases Throws an error when a combined config file doesn't match the schema async 2`] = `Array []`;
 
 exports[`ConfigurationFile error cases Throws an error when a requested file doesn't exist 1`] = `"File does not exist: <project root>/lib/test/errorCases/folderThatDoesntExist/config.json"`;
 
 exports[`ConfigurationFile error cases Throws an error when a requested file doesn't exist 2`] = `
-Object {
-  "debug": "Configuration file \\"<project root>/lib/test/errorCases/folderThatDoesntExist/config.json\\" not found.[n]",
-}
+Array [
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/folderThatDoesntExist/config.json\\" not found.[n]",
+]
 `;
 
 exports[`ConfigurationFile error cases Throws an error when a requested file doesn't exist async 1`] = `"File does not exist: <project root>/lib/test/errorCases/folderThatDoesntExist/config.json"`;
 
 exports[`ConfigurationFile error cases Throws an error when a requested file doesn't exist async 2`] = `
-Object {
-  "debug": "Configuration file \\"<project root>/lib/test/errorCases/folderThatDoesntExist/config.json\\" not found.[n]",
-}
+Array [
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/folderThatDoesntExist/config.json\\" not found.[n]",
+]
 `;
 
 exports[`ConfigurationFile error cases Throws an error when an "extends" property points to a file that cannot be resolved 1`] = `"In file \\"<project root>/lib/test/errorCases/extendsNotExist/config.json\\", file referenced in \\"extends\\" property (\\"./config2.json\\") cannot be resolved."`;
 
 exports[`ConfigurationFile error cases Throws an error when an "extends" property points to a file that cannot be resolved 2`] = `
-Object {
-  "debug": "Configuration file \\"<project root>/lib/test/errorCases/extendsNotExist/config2.json\\" not found.[n]",
-}
+Array [
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/extendsNotExist/config2.json\\" not found.[n]",
+]
 `;
 
 exports[`ConfigurationFile error cases Throws an error when an "extends" property points to a file that cannot be resolved async 1`] = `"In file \\"<project root>/lib/test/errorCases/extendsNotExist/config.json\\", file referenced in \\"extends\\" property (\\"./config2.json\\") cannot be resolved."`;
 
 exports[`ConfigurationFile error cases Throws an error when an "extends" property points to a file that cannot be resolved async 2`] = `
-Object {
-  "debug": "Configuration file \\"<project root>/lib/test/errorCases/extendsNotExist/config2.json\\" not found.[n]",
-}
+Array [
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/extendsNotExist/config2.json\\" not found.[n]",
+]
 `;
 
-exports[`ConfigurationFile error cases Throws an error when the file isn't valid JSON 1`] = `Object {}`;
+exports[`ConfigurationFile error cases Throws an error when the file isn't valid JSON 1`] = `Array []`;
 
-exports[`ConfigurationFile error cases Throws an error when the file isn't valid JSON async 1`] = `Object {}`;
+exports[`ConfigurationFile error cases Throws an error when the file isn't valid JSON async 1`] = `Array []`;
 
 exports[`ConfigurationFile error cases Throws an error when there is a circular reference in "extends" properties 1`] = `"A loop has been detected in the \\"extends\\" properties of configuration file at \\"<project root>/lib/test/errorCases/circularReference/config1.json\\"."`;
 
-exports[`ConfigurationFile error cases Throws an error when there is a circular reference in "extends" properties 2`] = `Object {}`;
+exports[`ConfigurationFile error cases Throws an error when there is a circular reference in "extends" properties 2`] = `Array []`;
 
 exports[`ConfigurationFile error cases Throws an error when there is a circular reference in "extends" properties async 1`] = `"A loop has been detected in the \\"extends\\" properties of configuration file at \\"<project root>/lib/test/errorCases/circularReference/config1.json\\"."`;
 
-exports[`ConfigurationFile error cases Throws an error when there is a circular reference in "extends" properties async 2`] = `Object {}`;
+exports[`ConfigurationFile error cases Throws an error when there is a circular reference in "extends" properties async 2`] = `Array []`;
 
 exports[`ConfigurationFile error cases returns undefined when the file doesn't exist for tryLoadConfigurationFileForProject 1`] = `
-Object {
-  "debug": "Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.[n]",
-}
+Array [
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.[n]",
+]
 `;
 
 exports[`ConfigurationFile error cases returns undefined when the file doesn't exist for tryLoadConfigurationFileForProjectAsync 1`] = `
-Object {
-  "debug": "Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.[n]",
-}
+Array [
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.[n]",
+]
 `;
 
 exports[`ConfigurationFile error cases throws an error when the file doesn't exist 1`] = `"File does not exist: <project root>/lib/test/errorCases/invalidType/notExist.json"`;
 
 exports[`ConfigurationFile error cases throws an error when the file doesn't exist 2`] = `
-Object {
-  "debug": "Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.[n]",
-}
+Array [
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.[n]",
+]
 `;
 
 exports[`ConfigurationFile error cases throws an error when the file doesn't exist async 1`] = `"File does not exist: <project root>/lib/test/errorCases/invalidType/notExist.json"`;
 
 exports[`ConfigurationFile error cases throws an error when the file doesn't exist async 2`] = `
-Object {
-  "debug": "Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.[n]",
-}
+Array [
+  "[  debug] Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.[n]",
+]
 `;
 
 exports[`ConfigurationFile loading a rig correctly loads a config file inside a rig 1`] = `
-Object {
-  "debug": "Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
-}
+Array [
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
+]
 `;
 
 exports[`ConfigurationFile loading a rig correctly loads a config file inside a rig async 1`] = `
-Object {
-  "debug": "Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
-}
+Array [
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
+]
 `;
 
 exports[`ConfigurationFile loading a rig correctly loads a config file inside a rig via tryLoadConfigurationFileForProject 1`] = `
-Object {
-  "debug": "Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
-}
+Array [
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
+]
 `;
 
 exports[`ConfigurationFile loading a rig correctly loads a config file inside a rig via tryLoadConfigurationFileForProjectAsync 1`] = `
-Object {
-  "debug": "Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
-}
+Array [
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
+]
 `;
 
 exports[`ConfigurationFile loading a rig throws an error when a config file doesn't exist in a project referencing a rig, which also doesn't have the file 1`] = `"File does not exist: <project root>/lib/test/project-referencing-rig/config/notExist.json"`;
 
 exports[`ConfigurationFile loading a rig throws an error when a config file doesn't exist in a project referencing a rig, which also doesn't have the file 2`] = `
-Object {
-  "debug": "Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]Configuration file \\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default/config/notExist.json\\" not found.[n]Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" not found.[n]",
-}
+Array [
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default/config/notExist.json\\" not found.[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" not found.[n]",
+]
 `;
 
 exports[`ConfigurationFile loading a rig throws an error when a config file doesn't exist in a project referencing a rig, which also doesn't have the file async 1`] = `"File does not exist: <project root>/lib/test/project-referencing-rig/config/notExist.json"`;
 
 exports[`ConfigurationFile loading a rig throws an error when a config file doesn't exist in a project referencing a rig, which also doesn't have the file async 2`] = `
-Object {
-  "debug": "Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]Configuration file \\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default/config/notExist.json\\" not found.[n]Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" not found.[n]",
-}
+Array [
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" does not exist. Attempting to load via rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\").[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default/config/notExist.json\\" not found.[n]",
+  "[  debug] Configuration file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" not found.[n]",
+]
 `;

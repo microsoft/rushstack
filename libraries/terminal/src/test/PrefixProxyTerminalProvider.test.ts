@@ -13,7 +13,8 @@ function runTestsForTerminalProvider(
   let baseProvider: StringBufferTerminalProvider;
 
   function verifyProvider(): void {
-    expect(baseProvider.getAllOutput(true)).toMatchSnapshot();
+    expect(baseProvider.getAllOutput(true)).toMatchSnapshot('output');
+    expect(baseProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot('output as chunks');
   }
 
   beforeEach(() => {

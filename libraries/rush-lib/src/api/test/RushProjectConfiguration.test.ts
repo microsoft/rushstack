@@ -63,7 +63,7 @@ function validateConfiguration(rushProjectConfiguration: RushProjectConfiguratio
         terminal
       );
     } finally {
-      expect(terminalProvider.getAllOutput(true)).toMatchSnapshot();
+      expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
     }
   }
 }
@@ -90,7 +90,7 @@ function validateConfigurationWithParameters(
         terminal
       );
     } finally {
-      expect(terminalProvider.getAllOutput(true)).toMatchSnapshot();
+      expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
     }
   }
 }

@@ -302,6 +302,14 @@ export class ApiReportGenerator {
         break;
 
       case ts.SyntaxKind.ExportKeyword:
+        if (DtsEmitHelpers.isExportKeywordInNamespaceExportDeclaration(span.node)) {
+          // This is an export declaration inside a namespace - preserve the export keyword
+          break;
+        }
+        // Otherwise, delete the export keyword -- we will re-add it below
+        span.modification.skipAll();
+        break;
+
       case ts.SyntaxKind.DefaultKeyword:
       case ts.SyntaxKind.DeclareKeyword:
         // Delete any explicit "export" or "declare" keywords -- we will re-add them below
