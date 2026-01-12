@@ -635,25 +635,25 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
-    {
-      "packageName": "eslint-bulk-suppressions-test",
-      "projectFolder": "build-tests/eslint-bulk-suppressions-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
+    // {
+    //   "packageName": "eslint-bulk-suppressions-test",
+    //   "projectFolder": "build-tests/eslint-bulk-suppressions-test",
+    //   "reviewCategory": "tests",
+    //   "shouldPublish": false
+    // },
     {
       "packageName": "eslint-bulk-suppressions-test-flat",
       "projectFolder": "build-tests/eslint-bulk-suppressions-test-flat",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
-    {
-      "packageName": "eslint-bulk-suppressions-test-legacy",
-      "projectFolder": "build-tests/eslint-bulk-suppressions-test-legacy",
-      "reviewCategory": "tests",
-      "shouldPublish": false,
-      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
-    },
+    // {
+    //   "packageName": "eslint-bulk-suppressions-test-legacy",
+    //   "projectFolder": "build-tests/eslint-bulk-suppressions-test-legacy",
+    //   "reviewCategory": "tests",
+    //   "shouldPublish": false,
+    //   "cyclicDependencyProjects": ["@rushstack/eslint-config"]
+    // },
     {
       "packageName": "package-extractor-test-01",
       "projectFolder": "build-tests/package-extractor-test-01",
