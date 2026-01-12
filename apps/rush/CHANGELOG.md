@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 29 Dec 2025 22:43:14 GMT and should not be manually modified.
+This log was last generated on Mon, 12 Jan 2026 23:39:06 GMT and should not be manually modified.
+
+## 5.166.0
+Mon, 12 Jan 2026 23:39:06 GMT
+
+### Updates
+
+- Add support for Node 24 and bump the `rush init` template to default to Node 24.
+- Remove use of the deprecated `shell: true` option in process spawn operations.
 
 ## 5.165.0
 Mon, 29 Dec 2025 22:43:14 GMT

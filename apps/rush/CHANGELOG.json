@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.166.0",
+      "tag": "@microsoft/rush_v5.166.0",
+      "date": "Mon, 12 Jan 2026 23:39:06 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for Node 24 and bump the `rush init` template to default to Node 24."
+          },
+          {
+            "comment": "Remove use of the deprecated `shell: true` option in process spawn operations."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.165.0",
       "tag": "@microsoft/rush_v5.165.0",
       "date": "Mon, 29 Dec 2025 22:43:14 GMT",
