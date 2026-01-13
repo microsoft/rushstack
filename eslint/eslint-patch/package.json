@@ -38,6 +38,6 @@
     "eslint-8": "npm:eslint@~8.57.0",
     "eslint-9": "npm:eslint@~9.25.1",
     "eslint": "~9.37.0",
-    "typescript": "~5.8.2"
+    "typescript": "~5.9.3"
   }
 }

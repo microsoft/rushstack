@@ -20,7 +20,7 @@
   "dependencies": {
     "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "typescript": "~5.8.2",
+    "typescript": "~5.9.3",
     "@rushstack/lookup-by-path": "workspace:*"
   },
   "devDependencies": {

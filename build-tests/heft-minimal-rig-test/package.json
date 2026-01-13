@@ -9,7 +9,7 @@
     "_phase:build": ""
   },
   "dependencies": {
-    "typescript": "~5.8.2",
+    "typescript": "~5.9.3",
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/heft-api-extractor-plugin": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",

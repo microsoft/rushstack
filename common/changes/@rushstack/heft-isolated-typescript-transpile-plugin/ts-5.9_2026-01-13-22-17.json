@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-isolated-typescript-transpile-plugin",
+      "comment": "Add Node20",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-isolated-typescript-transpile-plugin"
+}

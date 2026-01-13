@@ -20,6 +20,6 @@
     "eslint": "~9.37.0",
     "local-eslint-config": "workspace:*",
     "tslint": "~5.20.1",
-    "typescript": "~5.8.2"
+    "typescript": "~5.9.3"
   }
 }

@@ -13,7 +13,7 @@
     "@rushstack/heft": "workspace:*",
     "eslint": "~9.25.1",
     "local-node-rig": "workspace:*",
-    "typescript": "~5.8.2"
+    "typescript": "~5.9.3"
   },
   "dependenciesMeta": {
     "@rushstack/heft": {
