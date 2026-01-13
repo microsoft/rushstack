@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "Update TypeScript dependency to 5.9",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig"
+}

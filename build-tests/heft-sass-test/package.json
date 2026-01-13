@@ -33,7 +33,7 @@
     "react-dom": "~19.2.3",
     "react": "~19.2.3",
     "style-loader": "~2.0.0",
-    "typescript": "~5.8.2",
+    "typescript": "~5.9.3",
     "webpack": "~4.47.0"
   },
   "dependencies": {

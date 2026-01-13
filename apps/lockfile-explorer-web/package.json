@@ -27,6 +27,6 @@
     "@types/react-dom": "19.2.3",
     "eslint": "~9.37.0",
     "local-web-rig": "workspace:*",
-    "typescript": "5.8.2"
+    "typescript": "5.9.3"
   }
 }

@@ -18,6 +18,6 @@
     "@types/node": "20.17.19",
     "eslint": "~9.37.0",
     "local-eslint-config": "workspace:*",
-    "typescript": "~5.8.2"
+    "typescript": "~5.9.3"
   }
 }

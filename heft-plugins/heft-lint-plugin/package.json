@@ -34,7 +34,7 @@
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0",
     "eslint-8": "npm:eslint@~8.57.0",
-    "typescript": "~5.8.2",
+    "typescript": "~5.9.3",
     "tslint": "~5.20.1"
   }
 }

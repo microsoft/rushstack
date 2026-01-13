@@ -16,7 +16,7 @@
     "@types/webpack-env": "1.18.8",
     "eslint": "~9.25.1",
     "html-webpack-plugin": "~5.5.0",
-    "typescript": "~5.8.2",
+    "typescript": "~5.9.3",
     "webpack": "~5.103.0"
   }
 }

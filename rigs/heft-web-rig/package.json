@@ -39,7 +39,7 @@
     "source-map-loader": "~3.0.1",
     "style-loader": "~3.3.1",
     "terser-webpack-plugin": "~5.3.1",
-    "typescript": "~5.8.2",
+    "typescript": "~5.9.3",
     "url-loader": "~4.1.1",
     "webpack-bundle-analyzer": "~4.5.0",
     "webpack-merge": "~5.8.0",

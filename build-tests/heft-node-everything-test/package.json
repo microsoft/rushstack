@@ -27,6 +27,6 @@
     "heft-example-plugin-02": "workspace:*",
     "local-eslint-config": "workspace:*",
     "tslint": "~5.20.1",
-    "typescript": "~5.8.2"
+    "typescript": "~5.9.3"
   }
 }
