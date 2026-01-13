@@ -135,6 +135,11 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
       tsCommandLineParameter.appendToArgList(customParameterValues);
     }
 
+    // Add remainder arguments if they exist
+    if (this.remainder) {
+      this.remainder.appendToArgList(customParameterValues);
+    }
+
     for (let i: number = 0; i < customParameterValues.length; i++) {
       let customParameterValue: string = customParameterValues[i];
       customParameterValue = customParameterValue.replace(/"/g, '\\"');

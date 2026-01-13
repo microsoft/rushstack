@@ -93,9 +93,7 @@ Optional scoping arguments:
 `;
 
 exports[`CommandLineParser throws on missing positional arg divider with unknown positional args 1`] = `
-"usage: example scoped-action [-h] [--verbose] [--scope SCOPE] ...
-
-example scoped-action: error: Unrecognized arguments: bar.
+"example scoped-action --scope foo --: error: Unrecognized arguments: bar.
 "
 `;
 
