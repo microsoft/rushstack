@@ -9,6 +9,7 @@ import { type AddressInfo, WebSocketServer, WebSocket } from 'ws';
 import playwrightPackageJson from 'playwright-core/package.json';
 
 import type { BrowserName } from './PlaywrightBrowserTunnel';
+import { type ITerminal, Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
 
 const { version: playwrightVersion } = playwrightPackageJson;
 
@@ -21,8 +22,10 @@ class HttpServer {
   private readonly _server: http.Server;
   private readonly _wsServer: WebSocketServer; // local proxy websocket server accepting browser clients
   private _listeningPort: number | undefined;
+  private _logger: ITerminal;
 
-  public constructor() {
+  public constructor(logger: ITerminal) {
+    this._logger = logger;
     // We'll create an HTTP server and attach a WebSocketServer in noServer mode so we can
     // manually parse the URL and extract query parameters before upgrading.
     this._server = http.createServer();
@@ -43,7 +46,7 @@ class HttpServer {
       this._server.listen(0, '127.0.0.1', () => {
         this._listeningPort = (this._server.address() as AddressInfo).port;
         // This MUST be printed to terminal so VS Code can auto-port forward
-        console.log(`Local proxy HttpServer listening at ws://127.0.0.1:${this._listeningPort}`);
+        this._logger.writeLine(`Local proxy HttpServer listening at ws://127.0.0.1:${this._listeningPort}`);
         resolve();
       });
     });
@@ -60,7 +63,7 @@ class HttpServer {
     return this._wsServer;
   }
 
-  public dispose(): void {
+  public [Symbol.dispose](): void {
     this._wsServer.close();
     this._server.close();
   }
@@ -103,13 +106,15 @@ export interface IDisposableTunneledBrowserConnection {
  * Creates a tunneled WebSocket endpoint that a local Playwright client can connect to.
  * @beta
  */
-export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBrowserConnection> {
+export async function tunneledBrowserConnection(
+  logger: ITerminal
+): Promise<IDisposableTunneledBrowserConnection> {
   // Server that remote peer (actual browser host) connects to
   const remoteWsServer: WebSocketServer = new WebSocketServer({ port: LISTEN_PORT });
   // Local HTTP + WebSocket server where the playwright client will connect providing params
-  const httpServer: HttpServer = new HttpServer();
+  const httpServer: HttpServer = new HttpServer(logger);
   await httpServer.listen();
-  console.log(`Remote WebSocket server listening on ws://localhost:${LISTEN_PORT}`);
+  logger.writeLine(`Remote WebSocket server listening on ws://localhost:${LISTEN_PORT}`);
 
   const localProxyWs: WebSocketServer = httpServer.wsServer;
   const localProxyWsEndpoint: string = httpServer.endpoint;
@@ -128,7 +133,7 @@ export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBr
         launchOptions,
         playwrightVersion
       };
-      console.log(`Sending handshake to remote: ${JSON.stringify(handshake)}`);
+      logger.writeLine(`Sending handshake to remote: ${JSON.stringify(handshake)}`);
       handshakeSent = true;
       remoteSocket.send(JSON.stringify(handshake));
     }
@@ -140,13 +145,13 @@ export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBr
     });
 
     remoteWsServer.on('close', () => {
-      console.log('Remote WebSocket server closed');
+      logger.writeLine('Remote WebSocket server closed');
     });
 
     const bufferedLocalMessages: Array<Buffer | ArrayBuffer | Buffer[] | string> = [];
 
     remoteWsServer.on('connection', (ws) => {
-      console.log('Remote websocket connected');
+      logger.writeLine('Remote websocket connected');
       remoteSocket = ws;
       handshakeAck = false;
       maybeSendHandshake();
@@ -157,7 +162,7 @@ export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBr
             const receivedHandshake: IHandshakeAck = JSON.parse(message.toString());
             if (receivedHandshake.action === 'handshakeAck') {
               handshakeAck = true;
-              console.log('Received handshakeAck from remote');
+              logger.writeLine('Received handshakeAck from remote');
             } else {
               console.error('Invalid handshake ack message');
               ws.close();
@@ -181,7 +186,7 @@ export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBr
               }
               const m: Buffer | ArrayBuffer | Buffer[] | string | undefined = bufferedLocalMessages.shift();
               if (m !== undefined) {
-                console.log(`Flushing buffered local message to remote: ${m}`);
+                logger.writeLine(`Flushing buffered local message to remote: ${m}`);
                 activeRemote.send(m);
               }
             }
@@ -196,7 +201,7 @@ export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBr
         }
       });
 
-      ws.on('close', () => console.log('Remote websocket closed'));
+      ws.on('close', () => logger.writeLine('Remote websocket closed'));
       ws.on('error', (err) => console.error(`Remote websocket error: ${err}`));
     });
 
@@ -205,7 +210,7 @@ export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBr
         const urlString: string | undefined = request?.url;
         if (urlString) {
           const parsed: URL = new URL(urlString, 'http://localhost');
-          console.log(`Local client connected with query params: ${parsed.searchParams.toString()}`);
+          logger.writeLine(`Local client connected with query params: ${parsed.searchParams.toString()}`);
           const bName: string | null = parsed.searchParams.get('browser');
           if (bName && ['chromium', 'firefox', 'webkit'].includes(bName)) {
             browserName = bName as BrowserName;
@@ -242,7 +247,7 @@ export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBr
           bufferedLocalMessages.push(message);
         }
       });
-      localWs.on('close', () => console.log('Local client websocket closed'));
+      localWs.on('close', () => logger.writeLine('Local client websocket closed'));
       localWs.on('error', (err) => console.error(`Local client websocket error: ${err}`));
     });
 
@@ -293,10 +298,17 @@ export interface IDisposableTunneledBrowser {
  */
 export async function tunneledBrowser(
   browserName: BrowserName,
-  launchOptions: LaunchOptions
+  launchOptions: LaunchOptions,
+  logger?: ITerminal
 ): Promise<IDisposableTunneledBrowser> {
   // Establish the tunnel first (remoteEndpoint here refers to local proxy endpoint for connect())
-  using connection: IDisposableTunneledBrowserConnection = await tunneledBrowserConnection();
+
+  if (!logger) {
+    const terminalProvider: ConsoleTerminalProvider = new ConsoleTerminalProvider();
+    logger = new Terminal(terminalProvider);
+  }
+
+  using connection: IDisposableTunneledBrowserConnection = await tunneledBrowserConnection(logger);
   const { remoteEndpoint } = connection;
   // Append query params for browser and launchOptions
   const urlObj: URL = new URL(remoteEndpoint);
@@ -304,12 +316,12 @@ export async function tunneledBrowser(
   urlObj.searchParams.set('launchOptions', JSON.stringify(launchOptions || {}));
   const connectEndpoint: string = urlObj.toString();
   const browser: Browser = await playwright[browserName].connect(connectEndpoint);
-  console.log(`Connected to remote browser at ${connectEndpoint}`);
+  logger.writeLine(`Connected to remote browser at ${connectEndpoint}`);
 
   return {
     browser,
     async [Symbol.asyncDispose]() {
-      console.log('Disposing browser');
+      logger.writeLine('Disposing browser');
       await browser.close();
     }
   };
