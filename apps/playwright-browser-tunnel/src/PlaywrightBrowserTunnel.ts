@@ -4,7 +4,7 @@
 import type { ChildProcess } from 'node:child_process';
 
 import type { BrowserServer, BrowserType, LaunchOptions } from 'playwright-core';
-import { RawData, WebSocket, type WebSocketServer } from 'ws';
+import { type RawData, WebSocket, type WebSocketServer } from 'ws';
 import semver from 'semver';
 
 import { TerminalProviderSeverity, TerminalStreamWritable, type ITerminal } from '@rushstack/terminal';
@@ -14,9 +14,9 @@ import { Executable, FileSystem } from '@rushstack/node-core-library';
  * Allowed Playwright browser names.
  * @beta
  */
-export type BrowserNames = 'chromium' | 'firefox' | 'webkit';
+export type BrowserName = 'chromium' | 'firefox' | 'webkit';
 const validBrowserNames: Set<string> = new Set(['chromium', 'firefox', 'webkit']);
-function isValidBrowserName(browserName: string): browserName is BrowserNames {
+function isValidBrowserName(browserName: string): browserName is BrowserName {
   return validBrowserNames.has(browserName);
 }
 
@@ -33,7 +33,7 @@ export type TunnelStatus =
 
 interface IHandshake {
   action: 'handshake';
-  browserName: BrowserNames;
+  browserName: BrowserName;
   launchOptions: LaunchOptions;
   playwrightVersion: semver.SemVer;
 }

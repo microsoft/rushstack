@@ -8,9 +8,9 @@ import type { Browser, LaunchOptions } from 'playwright-core';
 import { type AddressInfo, WebSocketServer, WebSocket } from 'ws';
 import playwrightPackageJson from 'playwright-core/package.json';
 
-const { version: playwrightVersion } = playwrightPackageJson;
+import type { BrowserName } from './PlaywrightBrowserTunnel';
 
-export type BrowserNames = 'chromium' | 'firefox' | 'webkit';
+const { version: playwrightVersion } = playwrightPackageJson;
 
 /**
  * This HttpServer is used for the localProxyWs WebSocketServer.
@@ -68,7 +68,7 @@ class HttpServer {
 
 interface IHandshake {
   action: 'handshake';
-  browserName: BrowserNames;
+  browserName: BrowserName;
   launchOptions: LaunchOptions;
   playwrightVersion: string;
 }
@@ -84,8 +84,18 @@ const LISTEN_PORT: number = 3000;
  * @beta
  */
 export interface IDisposableTunneledBrowserConnection {
+  /**
+   * The WebSocket endpoint URL that the local Playwright client should connect to.
+   */
   remoteEndpoint: string;
+  /**
+   * Dispose method that closes the WebSocket servers.
+   * Called automatically when using `using` syntax.
+   */
   [Symbol.dispose]: () => void;
+  /**
+   * Promise that resolves when the remote WebSocket server closes.
+   */
   closePromise: Promise<void>;
 }
 
@@ -104,7 +114,7 @@ export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBr
   const localProxyWs: WebSocketServer = httpServer.wsServer;
   const localProxyWsEndpoint: string = httpServer.endpoint;
 
-  let browserName: BrowserNames | undefined;
+  let browserName: BrowserName | undefined;
   let launchOptions: LaunchOptions | undefined;
   let remoteSocket: WebSocket | undefined;
   let handshakeAck: boolean = false;
@@ -198,7 +208,7 @@ export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBr
           console.log(`Local client connected with query params: ${parsed.searchParams.toString()}`);
           const bName: string | null = parsed.searchParams.get('browser');
           if (bName && ['chromium', 'firefox', 'webkit'].includes(bName)) {
-            browserName = bName as BrowserNames;
+            browserName = bName as BrowserName;
           }
           const launchOptionsParam: string | null = parsed.searchParams.get('launchOptions');
           if (launchOptionsParam) {
@@ -266,7 +276,14 @@ export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBr
  * @beta
  */
 export interface IDisposableTunneledBrowser {
+  /**
+   * The connected Playwright Browser instance.
+   */
   browser: Browser;
+  /**
+   * Async dispose method that closes the browser connection.
+   * Called automatically when using `await using` syntax.
+   */
   [Symbol.asyncDispose]: () => Promise<void>;
 }
 
@@ -275,7 +292,7 @@ export interface IDisposableTunneledBrowser {
  * @beta
  */
 export async function tunneledBrowser(
-  browserName: BrowserNames,
+  browserName: BrowserName,
   launchOptions: LaunchOptions
 ): Promise<IDisposableTunneledBrowser> {
   // Establish the tunnel first (remoteEndpoint here refers to local proxy endpoint for connect())

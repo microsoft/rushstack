@@ -8,23 +8,26 @@ import type { Browser } from 'playwright-core';
 import { ITerminal } from '@rushstack/terminal';
 import type { LaunchOptions } from 'playwright-core';
 
-// @alpha
-export type BrowserNames = 'chromium' | 'firefox' | 'webkit';
+// @beta
+export type BrowserName = 'chromium' | 'firefox' | 'webkit';
 
-// @alpha
+// @beta
 export function extensionIsInstalled(): Promise<boolean>;
 
-// @alpha
+// @beta
+export interface IDisposableTunneledBrowser {
+    [Symbol.asyncDispose]: () => Promise<void>;
+    browser: Browser;
+}
+
+// @beta
 export interface IDisposableTunneledBrowserConnection {
-    // (undocumented)
     [Symbol.dispose]: () => void;
-    // (undocumented)
     closePromise: Promise<void>;
-    // (undocumented)
     remoteEndpoint: string;
 }
 
-// @alpha
+// @beta
 export type IPlaywrightTunnelOptions = {
     terminal: ITerminal;
     onStatusChange: (status: TunnelStatus) => void;
@@ -37,7 +40,7 @@ export type IPlaywrightTunnelOptions = {
     listenPort: number;
 });
 
-// @alpha
+// @beta
 export class PlaywrightTunnel {
     // (undocumented)
     [Symbol.asyncDispose](): Promise<void>;
@@ -58,18 +61,13 @@ export class PlaywrightTunnel {
     waitForCloseAsync(): Promise<void>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "BrowserNames_2" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "IDisposableTunneledBrowser" needs to be exported by the entry point index.d.ts
-//
-// @alpha
-export function tunneledBrowser(browserName: BrowserNames_2, launchOptions: LaunchOptions): Promise<IDisposableTunneledBrowser>;
+// @beta
+export function tunneledBrowser(browserName: BrowserName, launchOptions: LaunchOptions): Promise<IDisposableTunneledBrowser>;
 
-// @alpha
+// @beta
 export function tunneledBrowserConnection(): Promise<IDisposableTunneledBrowserConnection>;
 
-// @alpha
+// @beta
 export type TunnelStatus = 'waiting-for-connection' | 'browser-server-running' | 'stopped' | 'setting-up-browser-server' | 'error';
-
-// (No @packageDocumentation comment for this package)
 
 ```
