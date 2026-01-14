@@ -81,7 +81,7 @@ const LISTEN_PORT: number = 3000;
 
 /**
  * Disposable handle returned by {@link tunneledBrowserConnection}.
- * @alpha
+ * @beta
  */
 export interface IDisposableTunneledBrowserConnection {
   remoteEndpoint: string;
@@ -91,7 +91,7 @@ export interface IDisposableTunneledBrowserConnection {
 
 /**
  * Creates a tunneled WebSocket endpoint that a local Playwright client can connect to.
- * @alpha
+ * @beta
  */
 export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBrowserConnection> {
   // Server that remote peer (actual browser host) connects to
@@ -263,7 +263,7 @@ export async function tunneledBrowserConnection(): Promise<IDisposableTunneledBr
 
 /**
  * Disposable handle returned by {@link tunneledBrowser}.
- * @alpha
+ * @beta
  */
 export interface IDisposableTunneledBrowser {
   browser: Browser;
@@ -272,7 +272,7 @@ export interface IDisposableTunneledBrowser {
 
 /**
  * Creates a Playwright Browser instance connected via a tunneled WebSocket connection.
- * @alpha
+ * @beta
  */
 export async function tunneledBrowser(
   browserName: BrowserNames,

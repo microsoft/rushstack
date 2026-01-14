@@ -35,9 +35,6 @@ if (!(await extensionIsInstalled())) {
 }
 ```
 
-## Status
-
-This package’s API surface is currently tagged as `@alpha`.
 
 ## Requirements
 

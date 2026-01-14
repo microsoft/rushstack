@@ -6,7 +6,7 @@ import { FileSystem } from '@rushstack/node-core-library';
 /**
  * Helper to determine if the Playwright on Codespaces extension is installed. This check's for the
  * existence of a well-known file in the OS temp directory.
- * @alpha
+ * @beta
  */
 export async function extensionIsInstalled(): Promise<boolean> {
   // Read file from os.tempdir() + '/.playwright-codespaces-extension-installed'

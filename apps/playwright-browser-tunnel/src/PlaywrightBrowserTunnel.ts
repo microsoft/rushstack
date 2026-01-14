@@ -12,7 +12,7 @@ import { Executable, FileSystem } from '@rushstack/node-core-library';
 
 /**
  * Allowed Playwright browser names.
- * @alpha
+ * @beta
  */
 export type BrowserNames = 'chromium' | 'firefox' | 'webkit';
 const validBrowserNames: Set<string> = new Set(['chromium', 'firefox', 'webkit']);
@@ -22,7 +22,7 @@ function isValidBrowserName(browserName: string): browserName is BrowserNames {
 
 /**
  * Status values reported by {@link PlaywrightTunnel}.
- * @alpha
+ * @beta
  */
 export type TunnelStatus =
   | 'waiting-for-connection'
@@ -42,7 +42,7 @@ type ITunnelMode = 'poll-connection' | 'wait-for-incoming-connection';
 
 /**
  * Options for configuring a {@link PlaywrightTunnel} instance.
- * @alpha
+ * @beta
  */
 export type IPlaywrightTunnelOptions = {
   terminal: ITerminal;
@@ -72,7 +72,7 @@ async function sleep(ms: number): Promise<void> {
 
 /**
  * Hosts a Playwright browser server and forwards traffic over a WebSocket tunnel.
- * @alpha
+ * @beta
  */
 export class PlaywrightTunnel {
   private readonly _terminal: ITerminal;
