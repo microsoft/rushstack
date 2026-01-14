@@ -195,42 +195,103 @@
       "members": [
         {
           "kind": "Namespace",
-          "canonicalReference": "api-extractor-scenarios!ns:namespace",
+          "canonicalReference": "api-extractor-scenarios!Text:namespace",
           "docComment": "",
           "excerptTokens": [],
-          "fileUrlPath": "src/exportImportStarAs2/index.ts",
+          "fileUrlPath": "src/moduleNamespaceComment/index.ts",
           "releaseTag": "None",
-          "name": "ns",
+          "name": "Text",
           "preserveMemberOrder": false,
           "members": [
             {
               "kind": "Function",
-              "canonicalReference": "api-extractor-scenarios!ns.exportedApi:function(1)",
-              "docComment": "/**\n * @public\n */\n",
+              "canonicalReference": "api-extractor-scenarios!Text.convertToCrLf:function(1)",
+              "docComment": "/**\n * Convert line endings to `\\r\\n`\n *\n * @public\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "export declare function exportedApi(): "
+                  "text": "export declare function convertToCrLf(input: "
                 },
                 {
-                  "kind": "Reference",
-                  "text": "forgottenNs.ForgottenClass",
-                  "canonicalReference": "api-extractor-scenarios!~ForgottenClass:class"
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
                 },
                 {
                   "kind": "Content",
                   "text": ";"
                 }
               ],
-              "fileUrlPath": "src/exportImportStarAs2/ns.ts",
+              "fileUrlPath": "src/moduleNamespaceComment/Text.ts",
               "returnTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
+                "startIndex": 3,
+                "endIndex": 4
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
-              "parameters": [],
-              "name": "exportedApi"
+              "parameters": [
+                {
+                  "parameterName": "input",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  },
+                  "isOptional": false
+                }
+              ],
+              "name": "convertToCrLf"
+            },
+            {
+              "kind": "Function",
+              "canonicalReference": "api-extractor-scenarios!Text.convertToLf:function(1)",
+              "docComment": "/**\n * Convert line endings to `\\n`\n *\n * @public\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "export declare function convertToLf(input: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "fileUrlPath": "src/moduleNamespaceComment/Text.ts",
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "input",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  },
+                  "isOptional": false
+                }
+              ],
+              "name": "convertToLf"
             }
           ]
         }
