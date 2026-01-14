@@ -10,6 +10,7 @@ import { Terminal, type ITerminal, type ITerminalProvider } from '@rushstack/ter
 import { runWorkspaceCommandAsync } from '@rushstack/vscode-shared/lib/runWorkspaceCommandAsync';
 import { VScodeOutputChannelTerminalProvider } from '@rushstack/vscode-shared/lib/VScodeOutputChannelTerminalProvider';
 import packageJson from '../package.json';
+import { getNormalizedErrorString } from './utils/getNormalizedErrorString';
 
 const EXTENSION_DISPLAY_NAME: string = 'Playwright on Codespaces';
 const COMMAND_SHOW_LOG: string = 'playwright-tunnel.showLog';
@@ -182,7 +183,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
       outputChannel.appendLine('Tunnel start initiated.');
     } catch (error) {
-      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      const errorMessage: string = getNormalizedErrorString(error);
       outputChannel.appendLine(`Failed to start tunnel: ${errorMessage}`);
       updateStatusBar('error');
       void vscode.window.showErrorMessage(`Failed to start Playwright tunnel: ${errorMessage}`);
@@ -207,7 +208,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       outputChannel.appendLine('Tunnel stopped.');
       void vscode.window.showInformationMessage('Playwright tunnel stopped.');
     } catch (error) {
-      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      const errorMessage: string = getNormalizedErrorString(error);
       outputChannel.appendLine(`Failed to stop tunnel: ${errorMessage}`);
       void vscode.window.showErrorMessage(`Failed to stop Playwright tunnel: ${errorMessage}`);
     }
