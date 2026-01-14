@@ -43,7 +43,7 @@ async function writeExtensionInstalledFile(terminal: ITerminal): Promise<void> {
         fileUri = vscode.Uri.from({
           scheme: workspaceFolder.uri.scheme,
           authority: workspaceFolder.uri.authority,
-          path: path.posix.join(tempDir, '.playwright-codespaces-extension-installed.txt')
+          path: `${tempDir}/playwright-codespaces-extension-installed.txt`
         });
       } else {
         // Fallback if no workspace folder
