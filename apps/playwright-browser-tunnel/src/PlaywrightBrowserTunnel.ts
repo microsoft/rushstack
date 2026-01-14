@@ -4,7 +4,7 @@
 import type { ChildProcess } from 'node:child_process';
 
 import type { BrowserServer, BrowserType, LaunchOptions } from 'playwright-core';
-import { WebSocket, type WebSocketServer } from 'ws';
+import { RawData, WebSocket, type WebSocketServer } from 'ws';
 import semver from 'semver';
 
 import { TerminalProviderSeverity, TerminalStreamWritable, type ITerminal } from '@rushstack/terminal';
@@ -472,23 +472,23 @@ export class PlaywrightTunnel {
       handshake = undefined;
     });
 
-    ws.onerror = (error) => {
+    ws.on('error', (error) => {
       this._terminal.writeLine(`WebSocket error occurred: ${error instanceof Error ? error.message : error}`);
-    };
+    });
 
-    ws.onclose = async () => {
+    ws.on('close', async () => {
       this._initWsPromise = undefined;
       this.status = 'stopped';
       this._terminal.writeLine('WebSocket connection closed');
       await browserServer?.close();
-    };
+    });
 
     return new Promise<WebSocket>((resolve, reject) => {
-      ws.onmessage = async (event) => {
+      const onMessageHandler = async (data: RawData): Promise<void> => {
         const terminal: ITerminal = this._terminal;
         if (!handshake) {
           try {
-            const rawHandshake: unknown = JSON.parse(event.data.toString());
+            const rawHandshake: unknown = JSON.parse(data.toString());
             terminal.writeLine(`Received handshake: ${JSON.stringify(handshake)}`);
             handshake = this._validateHandshake(rawHandshake);
 
@@ -501,24 +501,33 @@ export class PlaywrightTunnel {
             this.status = 'browser-server-running';
 
             // send ack so that the counterpart also knows to start forwarding messages
-            await sleep(2000);
+            await sleep(1000);
             ws.send(JSON.stringify({ action: 'handshakeAck' }));
             await this._setupForwardingAsync(ws, client);
+
+            // Clean up message handler after successful handshake
+            ws.off('message', onMessageHandler);
             resolve(ws);
           } catch (error) {
             terminal.writeLine(`Error processing handshake: ${error}`);
             this.status = 'error';
+
+            // Cleanup and close connection on error
+            ws.off('message', onMessageHandler);
             ws.close();
+            reject(error);
             return;
           }
         } else {
           if (!client) {
             terminal.writeLine('Browser WebSocket client is not initialized.');
+            ws.off('message', onMessageHandler);
             ws.close();
             return;
           }
         }
       };
+      ws.on('message', onMessageHandler);
     });
   }
 }
