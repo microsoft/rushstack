@@ -222,7 +222,7 @@ export class PlaywrightTunnel {
       })
     );
 
-    await Executable.waitForExitAsync(cp);
+    await Executable.waitForExitAsync(cp, { throwOnNonZeroExitCode: true, throwOnSignal: true });
   }
 
   private async _installPlaywrightCoreAsync({
