@@ -25,12 +25,12 @@ Some remote test fixtures want to detect whether the **Playwright on Codespaces*
 
 The extension writes a marker file named `.playwright-codespaces-extension-installed.txt` into the remote environment’s `os.tmpdir()` using VS Code’s remote filesystem APIs.
 
-On the remote side, `extensionIsInstalled()` checks for that marker file and returns `true` if it exists:
+On the remote side, `isExtensionInstalledAsync()` checks for that marker file and returns `true` if it exists:
 
 ```ts
-import { extensionIsInstalled } from '@rushstack/playwright-browser-tunnel';
+import { isExtensionInstalledAsync } from '@rushstack/playwright-browser-tunnel';
 
-if (!(await extensionIsInstalled())) {
+if (!(await isExtensionInstalledAsync())) {
 	throw new Error('Playwright on Codespaces extension is not installed/active in this environment');
 }
 ```
@@ -52,7 +52,7 @@ From [src/index.ts](src/index.ts):
 - `tunneledBrowserConnection()` (function)
 - `tunneledBrowser()` (function)
 - `IDisposableTunneledBrowserConnection` (type)
-- `extensionIsInstalled()` (function)
+- `isExtensionInstalledAsync()` (function)
 
 ## Usage
 

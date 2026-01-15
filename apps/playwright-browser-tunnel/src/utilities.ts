@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { tmpdir } from 'node:os';
+
 import { FileSystem } from '@rushstack/node-core-library';
 
 /**
@@ -8,9 +10,9 @@ import { FileSystem } from '@rushstack/node-core-library';
  * existence of a well-known file in the OS temp directory.
  * @beta
  */
-export async function extensionIsInstalled(): Promise<boolean> {
+export async function isExtensionInstalledAsync(): Promise<boolean> {
   // Read file from os.tempdir() + '/.playwright-codespaces-extension-installed'
-  const tempDir: string = (await import('node:os')).tmpdir();
+  const tempDir: string = tmpdir();
 
   const extensionInstalledFilePath: string = `${tempDir}/.playwright-codespaces-extension-installed.txt`;
   const doesExist: boolean = FileSystem.exists(extensionInstalledFilePath);
