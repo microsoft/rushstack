@@ -295,6 +295,10 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/playwright-browser-tunnel",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "@rushstack/real-node-module-path",
       "allowedCategories": [ "libraries" ]
     },
