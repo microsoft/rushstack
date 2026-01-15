@@ -238,7 +238,7 @@ export class PlaywrightTunnel {
         this._terminal.writeLine(`WebSocket connection opened`);
         resolve(ws);
       });
-      ws.on('error', (error) => {
+      ws.once('error', (error) => {
         reject(error);
       });
     });
