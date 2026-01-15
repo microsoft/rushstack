@@ -211,9 +211,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
       // Start the tunnel (don't await - it runs continuously)
       void newTunnel.startAsync().catch((error: Error) => {
-        outputChannel.appendLine(`Tunnel error: ${error.message}`);
+        outputChannel.appendLine(`Tunnel error: ${getNormalizedErrorString(error)}`);
         updateStatusBar('error');
-        void vscode.window.showErrorMessage(`Playwright tunnel error: ${error.message}`);
+        void vscode.window.showErrorMessage(`Playwright tunnel error: ${getNormalizedErrorString(error)}`);
       });
 
       // Assign to the module-level variable after starting
@@ -319,8 +319,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }
   );
 
-  // Auto-start the tunnel on activation
-  void handleStartTunnel();
+  // Auto-start the tunnel on activation if configured
+  const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('playwright-tunnel');
+  const autoStart: boolean = config.get<boolean>('autoStart', false);
+  if (autoStart) {
+    void handleStartTunnel(true);
+  }
 }
 
 export function deactivate(): void {}

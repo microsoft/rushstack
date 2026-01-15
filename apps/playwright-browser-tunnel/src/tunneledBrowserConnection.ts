@@ -87,7 +87,7 @@ export async function tunneledBrowserConnection(
 
   return new Promise((resolve) => {
     remoteWsServer.on('error', (error) => {
-      console.error(`Remote WebSocket server error: ${error}`);
+      logger.writeErrorLine(`Remote WebSocket server error: ${error}`);
     });
 
     remoteWsServer.on('close', () => {
@@ -110,12 +110,12 @@ export async function tunneledBrowserConnection(
               handshakeAck = true;
               logger.writeLine('Received handshakeAck from remote');
             } else {
-              console.error('Invalid handshake ack message');
+              logger.writeErrorLine('Invalid handshake ack message');
               ws.close();
               return;
             }
           } catch (e) {
-            console.error(`Failed parsing handshake ack: ${e}`);
+            logger.writeErrorLine(`Failed parsing handshake ack: ${e}`);
             ws.close();
             return;
           }
@@ -123,17 +123,13 @@ export async function tunneledBrowserConnection(
           if (handshakeAck) {
             // Flush any buffered local messages now that tunnel is active
             const activeRemote: WebSocket | undefined = remoteSocket;
-            for (;;) {
-              if (!activeRemote || activeRemote.readyState !== WebSocket.OPEN) {
-                break;
-              }
-              if (bufferedLocalMessages.length === 0) {
-                break;
-              }
-              const m: Buffer | ArrayBuffer | Buffer[] | string | undefined = bufferedLocalMessages.shift();
-              if (m !== undefined) {
-                logger.writeLine(`Flushing buffered local message to remote: ${m}`);
-                activeRemote.send(m);
+            if (activeRemote && activeRemote.readyState === WebSocket.OPEN) {
+              while (bufferedLocalMessages.length > 0) {
+                const m: Buffer | ArrayBuffer | Buffer[] | string | undefined = bufferedLocalMessages.shift();
+                if (m !== undefined) {
+                  logger.writeLine(`Flushing buffered local message to remote: ${m}`);
+                  activeRemote.send(m);
+                }
               }
             }
           }
@@ -148,7 +144,7 @@ export async function tunneledBrowserConnection(
       });
 
       ws.on('close', () => logger.writeLine('Remote websocket closed'));
-      ws.on('error', (err) => console.error(`Remote websocket error: ${err}`));
+      ws.on('error', (err) => logger.writeErrorLine(`Remote websocket error: ${err}`));
     });
 
     localProxyWs.on('connection', (localWs, request) => {
@@ -166,17 +162,17 @@ export async function tunneledBrowserConnection(
             try {
               launchOptions = JSON.parse(launchOptionsParam);
             } catch (e) {
-              console.error('Invalid launchOptions JSON provided');
+              logger.writeErrorLine('Invalid launchOptions JSON provided');
             }
           }
         }
       } catch (e) {
-        console.error(`Error parsing local connection query params: ${e}`);
+        logger.writeErrorLine(`Error parsing local connection query params: ${e}`);
       }
 
       if (!browserName) {
         const supportedBrowsersString: string = Array.from(SUPPORTED_BROWSER_NAMES).join('|');
-        console.error(`browser query param required (${supportedBrowsersString})`);
+        logger.writeErrorLine(`browser query param required (${supportedBrowsersString})`);
         localWs.close();
         return;
       }
@@ -187,7 +183,7 @@ export async function tunneledBrowserConnection(
       maybeSendHandshake();
 
       localWs.on('message', (message) => {
-        if (handshakeAck && remoteSocket && remoteSocket.readyState === WebSocket.OPEN) {
+        if (handshakeAck && remoteSocket?.readyState === WebSocket.OPEN) {
           remoteSocket.send(message);
         } else {
           // Buffer until handshakeAck to avoid losing early protocol messages from Playwright
@@ -195,7 +191,7 @@ export async function tunneledBrowserConnection(
         }
       });
       localWs.on('close', () => logger.writeLine('Local client websocket closed'));
-      localWs.on('error', (err) => console.error(`Local client websocket error: ${err}`));
+      localWs.on('error', (err) => logger.writeErrorLine(`Local client websocket error: ${err}`));
     });
 
     // Resolve immediately so caller can initiate local connection with query params (handshake completes later)
@@ -208,14 +204,14 @@ export async function tunneledBrowserConnection(
           // ignore errors during remote WebSocket server shutdown
         }
         try {
-          localProxyWs.close();
+          httpServer[Symbol.dispose]();
         } catch {
-          // ignore errors during local proxy WebSocket server shutdown
+          // ignore errors during HTTP/WebSocket server shutdown
         }
       },
       // eslint-disable-next-line promise/param-names
       closePromise: new Promise<void>((resolve2) => {
-        remoteWsServer.on('close', () => {
+        remoteWsServer.once('close', () => {
           resolve2();
         });
       })

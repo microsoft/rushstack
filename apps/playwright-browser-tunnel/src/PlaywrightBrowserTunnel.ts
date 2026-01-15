@@ -462,13 +462,13 @@ export class PlaywrightTunnel {
       await browserServer?.close();
     });
 
-    return new Promise<WebSocket>((resolve, reject) => {
+    return await new Promise<WebSocket>((resolve, reject) => {
       const onMessageHandler = async (data: RawData): Promise<void> => {
         const terminal: ITerminal = this._terminal;
         if (!handshake) {
           try {
             const rawHandshake: unknown = JSON.parse(data.toString());
-            terminal.writeLine(`Received handshake: ${JSON.stringify(handshake)}`);
+            terminal.writeDebugLine(`Received handshake: ${JSON.stringify(handshake)}`);
             handshake = this._validateHandshake(rawHandshake);
 
             this.status = 'setting-up-browser-server';
@@ -479,7 +479,17 @@ export class PlaywrightTunnel {
 
             this.status = 'browser-server-running';
 
-            // send ack so that the counterpart also knows to start forwarding messages
+            // Send ack so that the counterpart also knows to start forwarding messages.
+            // NOTE: The 1-second delay is an intentional workaround. In the current
+            // protocol, the remote tunnel endpoint does not expose an explicit "ready"
+            // signal for when it has finished initializing its own forwarding logic
+            // after receiving the initial handshake. Empirically, introducing this
+            // delay avoids races where early messages could be dropped or mishandled
+            // if they arrive before the remote side is fully ready.
+            //
+            // A future improvement would be to replace this delay with a deterministic
+            // synchronization mechanism (e.g. an explicit "ready" message or event)
+            // instead of relying on a fixed timeout.
             await sleep(1000);
             ws.send(JSON.stringify({ action: 'handshakeAck' }));
             await this._setupForwardingAsync(ws, client);
