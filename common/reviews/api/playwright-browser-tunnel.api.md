@@ -12,9 +12,6 @@ import type { LaunchOptions } from 'playwright-core';
 export type BrowserName = 'chromium' | 'firefox' | 'webkit';
 
 // @beta
-export function extensionIsInstalled(): Promise<boolean>;
-
-// @beta
 export interface IDisposableTunneledBrowser {
     [Symbol.asyncDispose]: () => Promise<void>;
     browser: Browser;
@@ -41,6 +38,9 @@ export type IPlaywrightTunnelOptions = {
 });
 
 // @beta
+export function isExtensionInstalledAsync(): Promise<boolean>;
+
+// @beta
 export class PlaywrightTunnel {
     // (undocumented)
     [Symbol.asyncDispose](): Promise<void>;
@@ -62,10 +62,10 @@ export class PlaywrightTunnel {
 }
 
 // @beta
-export function tunneledBrowser(browserName: BrowserName, launchOptions: LaunchOptions): Promise<IDisposableTunneledBrowser>;
+export function tunneledBrowser(browserName: BrowserName, launchOptions: LaunchOptions, logger?: ITerminal): Promise<IDisposableTunneledBrowser>;
 
 // @beta
-export function tunneledBrowserConnection(): Promise<IDisposableTunneledBrowserConnection>;
+export function tunneledBrowserConnection(logger: ITerminal): Promise<IDisposableTunneledBrowserConnection>;
 
 // @beta
 export type TunnelStatus = 'waiting-for-connection' | 'browser-server-running' | 'stopped' | 'setting-up-browser-server' | 'error';

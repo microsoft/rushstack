@@ -8,8 +8,9 @@ import type { Browser, LaunchOptions } from 'playwright-core';
 import { type AddressInfo, WebSocketServer, WebSocket } from 'ws';
 import playwrightPackageJson from 'playwright-core/package.json';
 
-import type { BrowserName } from './PlaywrightBrowserTunnel';
 import { type ITerminal, Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
+
+import type { BrowserName } from './PlaywrightBrowserTunnel';
 
 const { version: playwrightVersion } = playwrightPackageJson;
 

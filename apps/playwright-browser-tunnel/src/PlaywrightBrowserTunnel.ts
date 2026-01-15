@@ -38,7 +38,7 @@ interface IHandshake {
   playwrightVersion: semver.SemVer;
 }
 
-type ITunnelMode = 'poll-connection' | 'wait-for-incoming-connection';
+type TunnelMode = 'poll-connection' | 'wait-for-incoming-connection';
 
 /**
  * Options for configuring a {@link PlaywrightTunnel} instance.
@@ -82,7 +82,7 @@ export class PlaywrightTunnel {
   private _initWsPromise?: Promise<WebSocket>;
   private _keepRunning: boolean = false;
   private _ws?: WebSocket;
-  private _mode: ITunnelMode;
+  private _mode: TunnelMode;
   private readonly _wsEndpoint?: string;
   private readonly _listenPort?: number;
   private readonly _tmpPath: string;
