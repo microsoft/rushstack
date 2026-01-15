@@ -59,8 +59,6 @@ export class PlaywrightTunnel {
     // (undocumented)
     stopAsync(): Promise<void>;
     // (undocumented)
-    uninstallPlaywrightBrowsersAsync(): Promise<void>;
-    // (undocumented)
     waitForCloseAsync(): Promise<void>;
 }
 

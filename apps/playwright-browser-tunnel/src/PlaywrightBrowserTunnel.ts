@@ -171,28 +171,8 @@ export class PlaywrightTunnel {
     }
   }
 
-  // TODO: This is not used but we should use this in a vscode command to perform cleanup.
-  public async uninstallPlaywrightBrowsersAsync(): Promise<void> {
-    try {
-      const playwrightVersion: semver.SemVer | null = semver.coerce('latest');
-      if (!playwrightVersion) {
-        throw new Error('Failed to parse semver');
-      }
-      await this._installPlaywrightCoreAsync({ playwrightVersion });
-      this._terminal.writeLine(`Uninstalling browsers`);
-      await this._runCommandAsync('node', [
-        `node_modules/playwright-core-${playwrightVersion}/cli.js`,
-        'uninstall',
-        '--all'
-      ]);
-    } catch (error) {
-      this._terminal.writeLine(
-        `Failed to uninstall browsers: ${error instanceof Error ? error.message : error}`
-      );
-    }
-
-    await this.cleanTempFilesAsync();
-  }
+  // TODO: We should implement an uninstall command to remove installed Playwright browsers
+  // public async uninstallPlaywrightBrowsersAsync(): Promise<void> {}
 
   private async _runCommandAsync(command: string, args: string[]): Promise<void> {
     const tmpPath: string = this._tmpPath;
