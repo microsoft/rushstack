@@ -13,6 +13,8 @@ import { HttpServer } from './HttpServer';
 
 const { version: playwrightVersion } = playwrightPackageJson;
 
+const SUPPORTED_BROWSER_NAMES: Set<string> = new Set(['chromium', 'firefox', 'webkit']);
+
 interface IHandshake {
   action: 'handshake';
   browserName: BrowserName;
@@ -156,7 +158,7 @@ export async function tunneledBrowserConnection(
           const parsed: URL = new URL(urlString, 'http://localhost');
           logger.writeLine(`Local client connected with query params: ${parsed.searchParams.toString()}`);
           const bName: string | null = parsed.searchParams.get('browser');
-          if (bName && ['chromium', 'firefox', 'webkit'].includes(bName)) {
+          if (bName && SUPPORTED_BROWSER_NAMES.has(bName)) {
             browserName = bName as BrowserName;
           }
           const launchOptionsParam: string | null = parsed.searchParams.get('launchOptions');
@@ -173,7 +175,8 @@ export async function tunneledBrowserConnection(
       }
 
       if (!browserName) {
-        console.error('browser query param required (chromium|firefox|webkit)');
+        const supportedBrowsersString: string = Array.from(SUPPORTED_BROWSER_NAMES).join('|');
+        console.error(`browser query param required (${supportedBrowsersString})`);
         localWs.close();
         return;
       }

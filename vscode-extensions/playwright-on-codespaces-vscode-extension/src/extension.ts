@@ -4,7 +4,11 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
-import { PlaywrightTunnel, type TunnelStatus } from '@rushstack/playwright-browser-tunnel';
+import {
+  PlaywrightTunnel,
+  type TunnelStatus,
+  EXTENSION_INSTALLED_FILENAME
+} from '@rushstack/playwright-browser-tunnel';
 import { Terminal, type ITerminal, type ITerminalProvider } from '@rushstack/terminal';
 
 import { runWorkspaceCommandAsync } from '@rushstack/vscode-shared/lib/runWorkspaceCommandAsync';
@@ -43,15 +47,12 @@ async function writeExtensionInstalledFile(terminal: ITerminal): Promise<void> {
         fileUri = vscode.Uri.from({
           scheme: workspaceFolder.uri.scheme,
           authority: workspaceFolder.uri.authority,
-          path: `${tempDir}/playwright-codespaces-extension-installed.txt`
+          path: `${tempDir}/${EXTENSION_INSTALLED_FILENAME}`
         });
       } else {
         // Fallback if no workspace folder
         fileUri = vscode.Uri.parse(
-          `vscode-remote://${vscode.env.remoteName}${path.posix.join(
-            tempDir,
-            '.playwright-codespaces-extension-installed.txt'
-          )}`
+          `vscode-remote://${vscode.env.remoteName}${path.posix.join(tempDir, EXTENSION_INSTALLED_FILENAME)}`
         );
       }
 

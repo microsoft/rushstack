@@ -6,6 +6,9 @@ import http from 'node:http';
 import { WebSocketServer, type WebSocket, type AddressInfo } from 'ws';
 
 import type { ITerminal } from '@rushstack/terminal';
+
+const LOCALHOST_IP: string = '127.0.0.1';
+
 /**
  * This HttpServer is used for the localProxyWs WebSocketServer.
  * The purpose is to parse the query params and path for the websocket url to get the
@@ -34,10 +37,12 @@ export class HttpServer {
 
   public listen(): Promise<void> {
     return new Promise((resolve) => {
-      this._server.listen(0, '127.0.0.1', () => {
+      this._server.listen(0, LOCALHOST_IP, () => {
         this._listeningPort = (this._server.address() as AddressInfo).port;
         // This MUST be printed to terminal so VS Code can auto-port forward
-        this._logger.writeLine(`Local proxy HttpServer listening at ws://127.0.0.1:${this._listeningPort}`);
+        this._logger.writeLine(
+          `Local proxy HttpServer listening at ws://${LOCALHOST_IP}:${this._listeningPort}`
+        );
         resolve();
       });
     });
@@ -47,7 +52,7 @@ export class HttpServer {
     if (this._listeningPort === undefined) {
       throw new Error('HttpServer not listening yet');
     }
-    return `ws://127.0.0.1:${this._listeningPort}`;
+    return `ws://${LOCALHOST_IP}:${this._listeningPort}`;
   }
 
   public get wsServer(): WebSocketServer {

@@ -12,6 +12,9 @@ import type { LaunchOptions } from 'playwright-core';
 export type BrowserName = 'chromium' | 'firefox' | 'webkit';
 
 // @beta
+export const EXTENSION_INSTALLED_FILENAME: string;
+
+// @beta
 export interface IDisposableTunneledBrowser {
     [Symbol.asyncDispose]: () => Promise<void>;
     browser: Browser;
