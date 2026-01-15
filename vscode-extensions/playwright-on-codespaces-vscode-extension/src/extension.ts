@@ -150,10 +150,44 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     );
   }
 
-  async function handleStartTunnel(): Promise<void> {
-    if (tunnel && currentStatus !== 'stopped' && currentStatus !== 'error') {
+  async function handleStartTunnel(isAutoStart: boolean = false): Promise<void> {
+    // Store current tunnel reference to avoid race conditions
+    const existingTunnel: PlaywrightTunnel | undefined = tunnel;
+    if (existingTunnel && currentStatus !== 'stopped' && currentStatus !== 'error') {
       outputChannel.appendLine('Tunnel is already running or starting.');
       void vscode.window.showInformationMessage('Playwright tunnel is already running.');
+      return;
+    }
+
+    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('playwright-tunnel');
+    const shouldAutoStart: boolean = config.get<boolean>('autoStart', false);
+
+    // If this is a manual start and autoStart is not enabled, prompt the user
+    if (!isAutoStart && !shouldAutoStart) {
+      const response: string | undefined = await vscode.window.showInformationMessage(
+        'Would you like to automatically start the Playwright tunnel when this extension activates?',
+        'Always Auto-Start',
+        'Just This Once',
+        'Cancel'
+      );
+
+      if (response === 'Cancel') {
+        outputChannel.appendLine('Tunnel start cancelled by user.');
+        return;
+      }
+
+      if (response === 'Always Auto-Start') {
+        await config.update('autoStart', true, vscode.ConfigurationTarget.Global);
+        outputChannel.appendLine('Auto-start preference saved: enabled.');
+        void vscode.window.showInformationMessage(
+          'Playwright tunnel will now start automatically. You can change this in settings.'
+        );
+      }
+    }
+
+    // If this is an auto-start but the setting is disabled, don't start
+    if (isAutoStart && !shouldAutoStart) {
+      outputChannel.appendLine('Auto-start is disabled. Tunnel not started.');
       return;
     }
 
@@ -163,7 +197,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       outputChannel.appendLine(`Starting Playwright tunnel`);
       outputChannel.appendLine(`Using temp path: ${tmpPath}`);
 
-      tunnel = new PlaywrightTunnel({
+      const newTunnel: PlaywrightTunnel = new PlaywrightTunnel({
         mode: 'poll-connection',
         wsEndpoint: 'ws://127.0.0.1:3000',
         terminal,
@@ -175,11 +209,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       });
 
       // Start the tunnel (don't await - it runs continuously)
-      void tunnel.startAsync().catch((error: Error) => {
+      void newTunnel.startAsync().catch((error: Error) => {
         outputChannel.appendLine(`Tunnel error: ${error.message}`);
         updateStatusBar('error');
         void vscode.window.showErrorMessage(`Playwright tunnel error: ${error.message}`);
       });
+
+      // Assign to the module-level variable after starting
+      // Disabling this since we are capturing the initial state and not reading
+      // from `tunnel` after any await.
+      // eslint-disable-next-line require-atomic-updates
+      tunnel = newTunnel;
 
       outputChannel.appendLine('Tunnel start initiated.');
     } catch (error) {

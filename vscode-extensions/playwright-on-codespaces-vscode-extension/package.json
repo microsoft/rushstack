@@ -70,8 +70,8 @@
       "properties": {
         "playwright-tunnel.autoStart": {
           "type": "boolean",
-          "default": true,
-          "description": "Automatically start tunnel when Playwright projects are detected"
+          "default": false,
+          "description": "Automatically start the Playwright browser tunnel when the extension activates"
         },
         "playwright-tunnel.tunnelPort": {
           "type": "number",
