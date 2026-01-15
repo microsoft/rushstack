@@ -7,6 +7,11 @@ import { WebSocketServer, type WebSocket, type AddressInfo } from 'ws';
 
 import type { ITerminal } from '@rushstack/terminal';
 
+const upgradeRequests: WeakMap<WebSocket, http.IncomingMessage> = new WeakMap<
+  WebSocket,
+  http.IncomingMessage
+>();
+
 /**
  * This HttpServer is used for the localProxyWs WebSocketServer.
  * The purpose is to parse the query params and path for the websocket url to get the
@@ -29,7 +34,7 @@ export class HttpServer {
       // Accept all upgrades on the root path. We parse query string for browserName + launchOptions.
       this._wsServer.handleUpgrade(request, socket, head, (ws: WebSocket) => {
         // Store the request on the websocket instance in a typed field for retrieval in connection handler
-        (ws as WebSocket & { upgradeRequest?: http.IncomingMessage }).upgradeRequest = request;
+        upgradeRequests.set(ws, request);
         this._wsServer.emit('connection', ws, request);
       });
     });
