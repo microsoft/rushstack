@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { ChildProcess } from 'node:child_process';
+import { once } from 'node:events';
 
 import type { BrowserServer, BrowserType, LaunchOptions } from 'playwright-core';
 import { type RawData, WebSocket, type WebSocketServer } from 'ws';
@@ -122,15 +123,13 @@ export class PlaywrightTunnel {
 
   public async waitForCloseAsync(): Promise<void> {
     const terminal: ITerminal = this._terminal;
-    await new Promise<void>((resolve) => {
-      void this._initWsPromise?.then((ws) => {
-        ws.on('close', () => {
-          terminal.writeLine('WebSocket connection closed. resolving init promise.');
-          this._initWsPromise = undefined;
-          resolve();
-        });
-      });
-    });
+    const initWsPromise: Promise<WebSocket> | undefined = this._initWsPromise;
+    if (initWsPromise) {
+      const ws: WebSocket = await initWsPromise;
+      await once(ws, 'close');
+      terminal.writeLine('WebSocket connection closed. resolving init promise.');
+      this._initWsPromise = undefined;
+    }
   }
 
   public async startAsync(options: { keepRunning?: boolean } = {}): Promise<void> {
