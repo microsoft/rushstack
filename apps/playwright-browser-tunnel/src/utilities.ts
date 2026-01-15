@@ -26,3 +26,17 @@ export async function isExtensionInstalledAsync(): Promise<boolean> {
   // check if file exists
   return doesExist;
 }
+
+/**
+ * Normalizes an error to a string for logging purposes.
+ * @beta
+ */
+export function getNormalizedErrorString(error: unknown): string {
+  if (error instanceof Error) {
+    if (error.stack) {
+      return error.stack;
+    }
+    return error.message;
+  }
+  return String(error);
+}

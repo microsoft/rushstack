@@ -11,6 +11,8 @@ import semver from 'semver';
 import { TerminalProviderSeverity, TerminalStreamWritable, type ITerminal } from '@rushstack/terminal';
 import { Executable, FileSystem } from '@rushstack/node-core-library';
 
+import { getNormalizedErrorString } from './utilities';
+
 /**
  * Allowed Playwright browser names.
  * @beta
@@ -165,9 +167,7 @@ export class PlaywrightTunnel {
       await FileSystem.ensureEmptyFolderAsync(tmpPath);
       this._terminal.writeLine(`Temporary files cleaned up.`);
     } catch (error) {
-      this._terminal.writeLine(
-        `Failed to clean up temporary files: ${error instanceof Error ? error.message : error}`
-      );
+      this._terminal.writeLine(`Failed to clean up temporary files: ${getNormalizedErrorString(error)}`);
     }
   }
 
@@ -227,12 +227,12 @@ export class PlaywrightTunnel {
     ]);
   }
 
-  private _tryConnectAsync(): Promise<WebSocket> {
+  private async _tryConnectAsync(): Promise<WebSocket> {
     const wsEndpoint: string | undefined = this._wsEndpoint;
     if (!wsEndpoint) {
       return Promise.reject(new Error('WebSocket endpoint is not defined'));
     }
-    return new Promise<WebSocket>((resolve, reject) => {
+    return await new Promise<WebSocket>((resolve, reject) => {
       const ws: WebSocket = new WebSocket(wsEndpoint);
       ws.on('open', () => {
         this._terminal.writeLine(`WebSocket connection opened`);
@@ -290,7 +290,7 @@ export class PlaywrightTunnel {
       });
 
       server.once('error', (error) => {
-        this._terminal.writeLine(`WebSocket server error: ${error instanceof Error ? error.message : error}`);
+        this._terminal.writeLine(`WebSocket server error: ${getNormalizedErrorString(error)}`);
 
         cleanup();
         // Try to close (best-effort), then reject
@@ -411,22 +411,22 @@ export class PlaywrightTunnel {
       }
     });
 
-    ws1.on('close', () => {
+    ws1.once('close', () => {
       if (ws2.readyState === WebSocket.OPEN) {
         ws2.close();
       }
     });
-    ws2.on('close', () => {
+    ws2.once('close', () => {
       if (ws1.readyState === WebSocket.OPEN) {
         ws1.close();
       }
     });
 
-    ws1.on('error', (error) => {
-      this._terminal.writeLine(`WebSocket error: ${error instanceof Error ? error.message : error}`);
+    ws1.once('error', (error) => {
+      this._terminal.writeLine(`WebSocket error: ${getNormalizedErrorString(error)}`);
     });
-    ws2.on('error', (error) => {
-      this._terminal.writeLine(`WebSocket error: ${error instanceof Error ? error.message : error}`);
+    ws2.once('error', (error) => {
+      this._terminal.writeLine(`WebSocket error: ${getNormalizedErrorString(error)}`);
     });
   }
 
@@ -452,7 +452,7 @@ export class PlaywrightTunnel {
     });
 
     ws.on('error', (error) => {
-      this._terminal.writeLine(`WebSocket error occurred: ${error instanceof Error ? error.message : error}`);
+      this._terminal.writeLine(`WebSocket error occurred: ${getNormalizedErrorString(error)}`);
     });
 
     ws.on('close', async () => {

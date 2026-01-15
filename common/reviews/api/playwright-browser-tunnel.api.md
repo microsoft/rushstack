@@ -15,6 +15,9 @@ export type BrowserName = 'chromium' | 'firefox' | 'webkit';
 export const EXTENSION_INSTALLED_FILENAME: string;
 
 // @beta
+export function getNormalizedErrorString(error: unknown): string;
+
+// @beta
 export interface IDisposableTunneledBrowser {
     [Symbol.asyncDispose]: () => Promise<void>;
     browser: Browser;

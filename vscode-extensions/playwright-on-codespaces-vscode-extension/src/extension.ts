@@ -7,14 +7,14 @@ import * as vscode from 'vscode';
 import {
   PlaywrightTunnel,
   type TunnelStatus,
-  EXTENSION_INSTALLED_FILENAME
+  EXTENSION_INSTALLED_FILENAME,
+  getNormalizedErrorString
 } from '@rushstack/playwright-browser-tunnel';
 import { Terminal, type ITerminal, type ITerminalProvider } from '@rushstack/terminal';
 
 import { runWorkspaceCommandAsync } from '@rushstack/vscode-shared/lib/runWorkspaceCommandAsync';
 import { VScodeOutputChannelTerminalProvider } from '@rushstack/vscode-shared/lib/VScodeOutputChannelTerminalProvider';
 import packageJson from '../package.json';
-import { getNormalizedErrorString } from './utils/getNormalizedErrorString';
 
 const EXTENSION_DISPLAY_NAME: string = 'Playwright on Codespaces';
 const COMMAND_SHOW_LOG: string = 'playwright-tunnel.showLog';

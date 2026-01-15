@@ -24,4 +24,8 @@ export type {
   IDisposableTunneledBrowserConnection,
   IDisposableTunneledBrowser
 } from './tunneledBrowserConnection';
-export { isExtensionInstalledAsync, EXTENSION_INSTALLED_FILENAME } from './utilities';
+export {
+  isExtensionInstalledAsync,
+  EXTENSION_INSTALLED_FILENAME,
+  getNormalizedErrorString
+} from './utilities';
