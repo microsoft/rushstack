@@ -102,10 +102,11 @@ ${loadAndPrintRushSdkModule}
       }
     );
 
-    const userRushSdkFolder = path.join(User.getHomeFolder(), '.rush');
+    const nodeVersion = process.version;
+    const userRushSdkFolder = path.join(User.getHomeFolder(), '.rush', `node-${nodeVersion}`, 'rush-5.57.0');
     expect(result.stderr.trim()).toMatchSnapshot('stderr');
     expect(
-      result.stdout.trim().replace(new RegExp(userRushSdkFolder, 'g'), '<RUSH_GLOBAL_FOLDER>')
+      result.stdout.replace(new RegExp(userRushSdkFolder.replace(/\\/g, '\\\\'), 'g'), '<RUSH_GLOBAL_FOLDER>')
     ).toMatchSnapshot('stdout');
     expect(result.status).toBe(0);
   });

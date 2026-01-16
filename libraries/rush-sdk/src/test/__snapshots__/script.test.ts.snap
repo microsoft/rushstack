@@ -79,15 +79,16 @@ exports[`@rushstack/rush-sdk Should load via install-run (for standalone tools):
 
 exports[`@rushstack/rush-sdk Should load via install-run (for standalone tools): stdout 1`] = `
 "Try to load @microsoft/rush-lib from rush global folder
-The expected global rush installed folder is \\"<RUSH_GLOBAL_FOLDER>/node-v22.20.0/rush-5.57.0\\"
-Failed to load @microsoft/rush-lib from rush global folder: File does not exist: <RUSH_GLOBAL_FOLDER>/node-v22.20.0/rush-5.57.0
-ENOENT: no such file or directory, lstat '<RUSH_GLOBAL_FOLDER>/node-v22.20.0/rush-5.57.0'
+The expected global rush installed folder is \\"<RUSH_GLOBAL_FOLDER>\\"
+Failed to load @microsoft/rush-lib from rush global folder: File does not exist: <RUSH_GLOBAL_FOLDER>
+ENOENT: no such file or directory, lstat '<RUSH_GLOBAL_FOLDER>'
 Trying to load  @microsoft/rush-lib installed by install-run-rush
 Loaded @microsoft/rush-lib installed by install-run-rush
 [
   '_rushSdk_loadInternalModule',
   'foo'
-]"
+]
+"
 `;
 
 exports[`@rushstack/rush-sdk Should load via process.env._RUSH_LIB_PATH (for child processes): stderr 1`] = `""`;
