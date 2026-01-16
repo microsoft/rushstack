@@ -263,9 +263,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
               `No launch options are currently allowed.\n\nAllowlist file: ${allowlistPath}`
             );
           } else {
-            const message: string =
-              `Currently allowed launch options:\n\n${allowlist.allowedOptions.map((opt) => `• ${opt}`).join('\n')}\n\n` +
-              `Allowlist file: ${allowlistPath}`;
+            const message: string = `Currently allowed launch options:\n\n${allowlist.allowedOptions
+              .map((opt) => `• ${opt}`)
+              .join('\n')}\n\nAllowlist file: ${allowlistPath}`;
             void vscode.window.showInformationMessage(message);
           }
           break;
@@ -278,7 +278,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }
   }
 
-  async function handleStartTunnel(isAutoStart: boolean = false): Promise<void> {
+  async function handleStartTunnelAsync(isAutoStart: boolean = false): Promise<void> {
     // Store current tunnel reference to avoid race conditions
     const existingTunnel: PlaywrightTunnel | undefined = tunnel;
     if (existingTunnel && currentStatus !== 'stopped' && currentStatus !== 'error') {
@@ -421,7 +421,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }
   }
 
-  async function handleStopTunnel(): Promise<void> {
+  async function handleStopTunnelAsync(): Promise<void> {
     const currentTunnel: PlaywrightTunnel | undefined = tunnel;
     if (!currentTunnel) {
       outputChannel.appendLine('No tunnel instance to stop.');
@@ -480,10 +480,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     if (selected) {
       switch (selected.action) {
         case 'start':
-          await handleStartTunnel();
+          await handleStartTunnelAsync();
           break;
         case 'stop':
-          await handleStopTunnel();
+          await handleStopTunnelAsync();
           break;
         case 'manageAllowlist':
           await handleManageAllowlist();
@@ -500,8 +500,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     statusBarItem,
     vscode.commands.registerCommand(COMMAND_SHOW_LOG, handleShowLog),
     vscode.commands.registerCommand(COMMAND_SHOW_SETTINGS, handleShowSettings),
-    vscode.commands.registerCommand(COMMAND_START_TUNNEL, handleStartTunnel),
-    vscode.commands.registerCommand(COMMAND_STOP_TUNNEL, handleStopTunnel),
+    vscode.commands.registerCommand(COMMAND_START_TUNNEL, handleStartTunnelAsync),
+    vscode.commands.registerCommand(COMMAND_STOP_TUNNEL, handleStopTunnelAsync),
     vscode.commands.registerCommand(COMMAND_SHOW_MENU, handleShowMenu),
     vscode.commands.registerCommand(COMMAND_MANAGE_ALLOWLIST, handleManageAllowlist),
     // Cleanup tunnel on deactivate
@@ -522,7 +522,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('playwright-tunnel');
   const autoStart: boolean = config.get<boolean>('autoStart', false);
   if (autoStart) {
-    void handleStartTunnel(true);
+    void handleStartTunnelAsync(true);
   }
 }
 
