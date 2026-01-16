@@ -104,7 +104,7 @@ export class PlaywrightTunnel {
   private readonly _playwrightInstallPath: string;
 
   public constructor(options: IPlaywrightTunnelOptions) {
-    const { mode, terminal, onStatusChange, playwrightInstallPath: tmpPath, onBeforeLaunch } = options;
+    const { mode, terminal, onStatusChange, playwrightInstallPath, onBeforeLaunch } = options;
 
     if (mode === 'poll-connection') {
       if (!options.wsEndpoint) {
@@ -124,7 +124,7 @@ export class PlaywrightTunnel {
     this._terminal = terminal;
     this._onStatusChange = onStatusChange;
     this._onBeforeLaunch = onBeforeLaunch;
-    this._playwrightInstallPath = tmpPath;
+    this._playwrightInstallPath = playwrightInstallPath;
   }
 
   public get status(): TunnelStatus {
