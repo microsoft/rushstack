@@ -4,10 +4,15 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+
 import {
   PlaywrightTunnel,
   type TunnelStatus,
+  type IHandshake,
   EXTENSION_INSTALLED_FILENAME,
+  DENIED_LAUNCH_OPTIONS,
+  LaunchOptionsValidator,
+  type ILaunchOptionsAllowlist,
   getNormalizedErrorString
 } from '@rushstack/playwright-browser-tunnel';
 import { Terminal, type ITerminal, type ITerminalProvider } from '@rushstack/terminal';
@@ -22,6 +27,7 @@ const COMMAND_SHOW_SETTINGS: string = 'playwright-tunnel.showSettings';
 const COMMAND_START_TUNNEL: string = 'playwright-tunnel.start';
 const COMMAND_STOP_TUNNEL: string = 'playwright-tunnel.stop';
 const COMMAND_SHOW_MENU: string = 'playwright-tunnel.showMenu';
+const COMMAND_MANAGE_ALLOWLIST: string = 'playwright-tunnel.manageAllowlist';
 const VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS: string = 'workbench.action.openSettings';
 const EXTENSION_ID: string = `${packageJson.publisher}.${packageJson.name}`;
 const VSCODE_SETTINGS_EXTENSION_FILTER: string = `@ext:${EXTENSION_ID}`;
@@ -151,6 +157,127 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     );
   }
 
+  async function handleManageAllowlist(): Promise<void> {
+    try {
+      const allowlist: ILaunchOptionsAllowlist = await LaunchOptionsValidator.readAllowlistAsync();
+      const allowlistPath: string = LaunchOptionsValidator.getAllowlistFilePath();
+
+      interface IAllowlistQuickPickItem extends vscode.QuickPickItem {
+        action: 'add' | 'remove' | 'clear' | 'view';
+      }
+
+      const items: IAllowlistQuickPickItem[] = [
+        {
+          label: '$(add) Add Option to Allowlist',
+          description: 'Allow a specific launch option',
+          action: 'add'
+        },
+        {
+          label: '$(remove) Remove Option from Allowlist',
+          description: 'Revoke permission for a launch option',
+          action: 'remove'
+        },
+        {
+          label: '$(clear-all) Clear All Allowlist',
+          description: 'Remove all allowed options',
+          action: 'clear'
+        },
+        {
+          label: '$(eye) View Current Allowlist',
+          description: `Currently ${allowlist.allowedOptions.length} option(s) allowed`,
+          action: 'view'
+        }
+      ];
+
+      const selected: IAllowlistQuickPickItem | undefined = await vscode.window.showQuickPick(items, {
+        placeHolder: 'Manage Launch Options Allowlist'
+      });
+
+      if (!selected) {
+        return;
+      }
+
+      switch (selected.action) {
+        case 'add': {
+          const deniedOptions: string[] = Array.from(DENIED_LAUNCH_OPTIONS);
+          const optionToAdd: string | undefined = await vscode.window.showQuickPick(deniedOptions, {
+            placeHolder: 'Select a launch option to allow',
+            ignoreFocusOut: true
+          });
+
+          if (optionToAdd) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await LaunchOptionsValidator.addToAllowlistAsync(optionToAdd as any);
+            outputChannel.appendLine(`Added '${optionToAdd}' to allowlist.`);
+            void vscode.window.showInformationMessage(
+              `'${optionToAdd}' has been added to the allowlist at:\n${allowlistPath}`
+            );
+          }
+          break;
+        }
+
+        case 'remove': {
+          if (allowlist.allowedOptions.length === 0) {
+            void vscode.window.showInformationMessage('Allowlist is empty. Nothing to remove.');
+            return;
+          }
+
+          const optionToRemove: string | undefined = await vscode.window.showQuickPick(
+            allowlist.allowedOptions,
+            {
+              placeHolder: 'Select a launch option to remove from allowlist',
+              ignoreFocusOut: true
+            }
+          );
+
+          if (optionToRemove) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await LaunchOptionsValidator.removeFromAllowlistAsync(optionToRemove as any);
+            outputChannel.appendLine(`Removed '${optionToRemove}' from allowlist.`);
+            void vscode.window.showInformationMessage(
+              `'${optionToRemove}' has been removed from the allowlist.`
+            );
+          }
+          break;
+        }
+
+        case 'clear': {
+          const confirmation: string | undefined = await vscode.window.showWarningMessage(
+            'Are you sure you want to clear all allowed launch options?',
+            { modal: true },
+            'Yes, Clear All',
+            'Cancel'
+          );
+
+          if (confirmation === 'Yes, Clear All') {
+            await LaunchOptionsValidator.clearAllowlistAsync();
+            outputChannel.appendLine('Cleared all options from allowlist.');
+            void vscode.window.showInformationMessage('Allowlist has been cleared.');
+          }
+          break;
+        }
+
+        case 'view': {
+          if (allowlist.allowedOptions.length === 0) {
+            void vscode.window.showInformationMessage(
+              `No launch options are currently allowed.\n\nAllowlist file: ${allowlistPath}`
+            );
+          } else {
+            const message: string =
+              `Currently allowed launch options:\n\n${allowlist.allowedOptions.map((opt) => `• ${opt}`).join('\n')}\n\n` +
+              `Allowlist file: ${allowlistPath}`;
+            void vscode.window.showInformationMessage(message);
+          }
+          break;
+        }
+      }
+    } catch (error) {
+      const errorMessage: string = getNormalizedErrorString(error);
+      outputChannel.appendLine(`Failed to manage allowlist: ${errorMessage}`);
+      void vscode.window.showErrorMessage(`Failed to manage allowlist: ${errorMessage}`);
+    }
+  }
+
   async function handleStartTunnel(isAutoStart: boolean = false): Promise<void> {
     // Store current tunnel reference to avoid race conditions
     const existingTunnel: PlaywrightTunnel | undefined = tunnel;
@@ -194,9 +321,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
     try {
       const tmpPath: string = getTmpPath();
+      const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('playwright-tunnel');
+      const promptBeforeLaunch: boolean = config.get<boolean>('promptBeforeLaunch', true);
 
       outputChannel.appendLine(`Starting Playwright tunnel`);
       outputChannel.appendLine(`Using temp path: ${tmpPath}`);
+      outputChannel.appendLine(`Prompt before launch: ${promptBeforeLaunch}`);
 
       const newTunnel: PlaywrightTunnel = new PlaywrightTunnel({
         mode: 'poll-connection',
@@ -206,7 +336,67 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         onStatusChange: (status: TunnelStatus) => {
           outputChannel.appendLine(`Tunnel status changed: ${status}`);
           updateStatusBar(status);
-        }
+        },
+        ...(promptBeforeLaunch
+          ? {
+              onBeforeLaunch: async (handshake: IHandshake) => {
+                // Build a summary of the launch options, excluding 'headless' since we always enforce headless: false
+                const launchOptionKeys: string[] = Object.keys(handshake.launchOptions).filter(
+                  (key) => key !== 'headless'
+                );
+                const deniedKeys: string[] = launchOptionKeys.filter((key) =>
+                  DENIED_LAUNCH_OPTIONS.has(key as keyof typeof handshake.launchOptions)
+                );
+
+                let message: string = `Playwright is requesting to launch ${handshake.browserName} with the following options:\n\n`;
+
+                if (launchOptionKeys.length === 0) {
+                  message += 'No launch options specified (using defaults).\n\n';
+                  message += 'Note: headless mode is always disabled for headed browser testing.\n\n';
+                } else {
+                  // Create a copy without the headless property for display
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                  const { headless, ...displayOptions } = handshake.launchOptions;
+                  message += `Launch options: ${JSON.stringify(displayOptions, null, 2)}\n\n`;
+                  message += 'Note: headless mode is always disabled for headed browser testing.\n\n';
+
+                  if (deniedKeys.length > 0) {
+                    message += `⚠️ WARNING: The following options are restricted for security and will be filtered:\n`;
+                    message += deniedKeys.map((key) => `  • ${key}`).join('\n');
+                    message += '\n\nTo allow these options, you can add them to your local allowlist.\n\n';
+                  }
+                }
+
+                message += 'Do you want to proceed?';
+
+                const response: string | undefined = await vscode.window.showWarningMessage(
+                  message,
+                  { modal: true },
+                  'Allow',
+                  'Deny',
+                  "Don't Ask Again"
+                );
+
+                if (response === 'Allow') {
+                  outputChannel.appendLine('User approved browser launch.');
+                  return true;
+                } else if (response === "Don't Ask Again") {
+                  // Save preference to disable prompts
+                  const config: vscode.WorkspaceConfiguration =
+                    vscode.workspace.getConfiguration('playwright-tunnel');
+                  await config.update('promptBeforeLaunch', false, vscode.ConfigurationTarget.Global);
+                  outputChannel.appendLine('Prompt disabled. Browser launch approved.');
+                  void vscode.window.showInformationMessage(
+                    'Launch prompts have been disabled. You can re-enable them in settings.'
+                  );
+                  return true;
+                } else {
+                  outputChannel.appendLine('User denied browser launch.');
+                  return false;
+                }
+              }
+            }
+          : {})
       });
 
       // Start the tunnel (don't await - it runs continuously)
@@ -257,7 +447,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   async function handleShowMenu(): Promise<void> {
     interface IQuickPickItem extends vscode.QuickPickItem {
-      action: 'start' | 'stop' | 'showLog';
+      action: 'start' | 'stop' | 'showLog' | 'manageAllowlist';
     }
 
     const items: IQuickPickItem[] = [
@@ -270,6 +460,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         label: '$(debug-stop) Stop Tunnel',
         description: 'Stop the Playwright browser tunnel',
         action: 'stop'
+      },
+      {
+        label: '$(shield) Manage Allowlist',
+        description: 'Configure allowed launch options',
+        action: 'manageAllowlist'
       },
       {
         label: '$(output) Show Logs',
@@ -290,6 +485,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         case 'stop':
           await handleStopTunnel();
           break;
+        case 'manageAllowlist':
+          await handleManageAllowlist();
+          break;
         case 'showLog':
           handleShowLog();
           break;
@@ -305,6 +503,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     vscode.commands.registerCommand(COMMAND_START_TUNNEL, handleStartTunnel),
     vscode.commands.registerCommand(COMMAND_STOP_TUNNEL, handleStopTunnel),
     vscode.commands.registerCommand(COMMAND_SHOW_MENU, handleShowMenu),
+    vscode.commands.registerCommand(COMMAND_MANAGE_ALLOWLIST, handleManageAllowlist),
     // Cleanup tunnel on deactivate
     {
       dispose: () => {

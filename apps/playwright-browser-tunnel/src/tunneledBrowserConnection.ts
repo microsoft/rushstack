@@ -79,7 +79,16 @@ export async function tunneledBrowserConnection(
         launchOptions,
         playwrightVersion
       };
-      logger.writeLine(`Sending handshake to remote: ${JSON.stringify(handshake)}`);
+      // Log handshake without 'headless' to avoid confusion (tunnel enforces headless: false)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { headless, ...logOptions } = launchOptions;
+      const logHandshake: Omit<IHandshake, 'launchOptions'> & {
+        launchOptions: Omit<LaunchOptions, 'headless'>;
+      } = {
+        ...handshake,
+        launchOptions: logOptions
+      };
+      logger.writeLine(`Sending handshake to remote: ${JSON.stringify(logHandshake)}`);
       handshakeSent = true;
       remoteSocket.send(JSON.stringify(handshake));
     }

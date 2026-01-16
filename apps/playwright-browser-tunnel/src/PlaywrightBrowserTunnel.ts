@@ -12,6 +12,7 @@ import { TerminalProviderSeverity, TerminalStreamWritable, type ITerminal } from
 import { Executable, FileSystem } from '@rushstack/node-core-library';
 
 import { getNormalizedErrorString } from './utilities';
+import { LaunchOptionsValidator, type ILaunchOptionsValidationResult } from './LaunchOptionsValidator';
 
 /**
  * Allowed Playwright browser names.
@@ -34,7 +35,11 @@ export type TunnelStatus =
   | 'setting-up-browser-server'
   | 'error';
 
-interface IHandshake {
+/**
+ * Handshake data exchanged during the initial WebSocket connection.
+ * @beta
+ */
+export interface IHandshake {
   action: 'handshake';
   browserName: BrowserName;
   launchOptions: LaunchOptions;
@@ -51,6 +56,13 @@ export type IPlaywrightTunnelOptions = {
   terminal: ITerminal;
   onStatusChange: (status: TunnelStatus) => void;
   tmpPath: string;
+  /**
+   * Optional callback invoked before launching the browser server.
+   * Receives the handshake data including launch options.
+   * If the callback returns false, the browser server launch will be aborted.
+   * This allows the client to prompt the user for approval before starting.
+   */
+  onBeforeLaunch?: (handshake: IHandshake) => Promise<boolean> | boolean;
 } & (
   | {
       mode: 'poll-connection';
@@ -80,6 +92,7 @@ async function sleep(ms: number): Promise<void> {
 export class PlaywrightTunnel {
   private readonly _terminal: ITerminal;
   private readonly _onStatusChange: (status: TunnelStatus) => void;
+  private readonly _onBeforeLaunch?: (handshake: IHandshake) => Promise<boolean> | boolean;
   private readonly _playwrightBrowsersInstalled: Set<string> = new Set();
   private _status: TunnelStatus = 'stopped';
   private _initWsPromise?: Promise<WebSocket>;
@@ -91,7 +104,7 @@ export class PlaywrightTunnel {
   private readonly _tmpPath: string;
 
   public constructor(options: IPlaywrightTunnelOptions) {
-    const { mode, terminal, onStatusChange, tmpPath } = options;
+    const { mode, terminal, onStatusChange, tmpPath, onBeforeLaunch } = options;
 
     if (mode === 'poll-connection') {
       if (!options.wsEndpoint) {
@@ -110,6 +123,7 @@ export class PlaywrightTunnel {
     this._mode = mode;
     this._terminal = terminal;
     this._onStatusChange = onStatusChange;
+    this._onBeforeLaunch = onBeforeLaunch;
     this._tmpPath = tmpPath;
   }
 
@@ -326,6 +340,33 @@ export class PlaywrightTunnel {
     launchOptions
   }: Pick<IHandshake, 'playwrightVersion' | 'browserName' | 'launchOptions'>): Promise<IBrowserServerProxy> {
     const terminal: ITerminal = this._terminal;
+
+    // Validate launch options against security allowlist
+    terminal.writeLine('Validating launch options against security allowlist...');
+    const validationResult: ILaunchOptionsValidationResult =
+      await LaunchOptionsValidator.validateLaunchOptionsAsync(launchOptions, terminal);
+
+    if (!validationResult.isValid) {
+      terminal.writeWarningLine(
+        `Some launch options were denied: ${validationResult.deniedOptions.join(', ')}`
+      );
+      terminal.writeWarningLine(`Using filtered launch options. Denied options have been removed.`);
+    }
+
+    // Use filtered options and ensure headless: false for headed tests in codespaces
+    // This is critical for the extension's purpose - enabling headed Playwright tests remotely
+    const safeOptions: LaunchOptions = {
+      ...validationResult.filteredOptions,
+      headless: false
+    };
+
+    // Log the validated options, excluding 'headless' since it's always false for this extension
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { headless, ...logOptions } = safeOptions;
+    terminal.writeLine(
+      `Launch options after validation: ${JSON.stringify(logOptions)} (headless: false enforced)`
+    );
+
     const playwright: typeof import('playwright-core') = await this._setupPlaywrightAsync({
       playwrightVersion,
       browserName
@@ -334,14 +375,11 @@ export class PlaywrightTunnel {
     const { chromium, firefox, webkit } = playwright;
     const browsers: Record<ISupportedBrowsers, BrowserType> = { chromium, firefox, webkit };
 
-    const browserServer: BrowserServer = await browsers[browserName].launchServer({
-      ...launchOptions,
-      headless: false
-    });
+    const browserServer: BrowserServer = await browsers[browserName].launchServer(safeOptions);
 
     if (!browserServer) {
       throw new Error(
-        `Failed to launch browser server for ${browserName} with options: ${JSON.stringify(launchOptions)}`
+        `Failed to launch browser server for ${browserName} with options: ${JSON.stringify(safeOptions)}`
       );
     }
 
@@ -470,6 +508,20 @@ export class PlaywrightTunnel {
             const rawHandshake: unknown = JSON.parse(data.toString());
             terminal.writeDebugLine(`Received handshake: ${JSON.stringify(handshake)}`);
             handshake = this._validateHandshake(rawHandshake);
+
+            // Call the onBeforeLaunch callback if provided
+            if (this._onBeforeLaunch) {
+              terminal.writeLine('Requesting user approval before launching browser server...');
+              const shouldProceed: boolean = await this._onBeforeLaunch(handshake);
+              if (!shouldProceed) {
+                terminal.writeLine('Browser server launch cancelled by user.');
+                ws.off('message', onMessageHandler);
+                ws.close();
+                reject(new Error('Browser server launch cancelled by user'));
+                return;
+              }
+              terminal.writeLine('User approved browser server launch.');
+            }
 
             this.status = 'setting-up-browser-server';
             const browserServerProxy: IBrowserServerProxy =

@@ -50,6 +50,11 @@
         "category": "Playwright"
       },
       {
+        "command": "playwright-tunnel.manageAllowlist",
+        "title": "Manage Launch Options Allowlist",
+        "category": "Playwright on Codespaces"
+      },
+      {
         "command": "playwright-tunnel.showLog",
         "title": "Show Log",
         "category": "Playwright on Codespaces"
@@ -71,7 +76,12 @@
         "playwright-tunnel.autoStart": {
           "type": "boolean",
           "default": false,
-          "description": "Automatically start the Playwright browser tunnel when the extension activates"
+          "description": "Automatically start the Playwright browser tunnel when the extension activates. For security, this is disabled by default."
+        },
+        "playwright-tunnel.promptBeforeLaunch": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a confirmation prompt before launching the browser server with the requested launch options. This helps protect against potentially malicious launch options from compromised environments."
         },
         "playwright-tunnel.tunnelPort": {
           "type": "number",

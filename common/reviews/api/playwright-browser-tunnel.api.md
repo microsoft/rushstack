@@ -7,9 +7,13 @@
 import type { Browser } from 'playwright-core';
 import { ITerminal } from '@rushstack/terminal';
 import type { LaunchOptions } from 'playwright-core';
+import semver from 'semver';
 
 // @beta
 export type BrowserName = 'chromium' | 'firefox' | 'webkit';
+
+// @beta
+export const DENIED_LAUNCH_OPTIONS: ReadonlySet<keyof LaunchOptions>;
 
 // @beta
 export const EXTENSION_INSTALLED_FILENAME: string;
@@ -31,10 +35,37 @@ export interface IDisposableTunneledBrowserConnection {
 }
 
 // @beta
+export interface IHandshake {
+    // (undocumented)
+    action: 'handshake';
+    // (undocumented)
+    browserName: BrowserName;
+    // (undocumented)
+    launchOptions: LaunchOptions;
+    // (undocumented)
+    playwrightVersion: semver.SemVer;
+}
+
+// @beta
+export interface ILaunchOptionsAllowlist {
+    allowedOptions: string[];
+    version: number;
+}
+
+// @beta
+export interface ILaunchOptionsValidationResult {
+    deniedOptions: Array<keyof LaunchOptions>;
+    filteredOptions: LaunchOptions;
+    isValid: boolean;
+    warnings: string[];
+}
+
+// @beta
 export type IPlaywrightTunnelOptions = {
     terminal: ITerminal;
     onStatusChange: (status: TunnelStatus) => void;
     tmpPath: string;
+    onBeforeLaunch?: (handshake: IHandshake) => Promise<boolean> | boolean;
 } & ({
     mode: 'poll-connection';
     wsEndpoint: string;
@@ -45,6 +76,21 @@ export type IPlaywrightTunnelOptions = {
 
 // @beta
 export function isExtensionInstalledAsync(): Promise<boolean>;
+
+// @beta
+export const LAUNCH_OPTIONS_ALLOWLIST_FILENAME: string;
+
+// @beta
+export class LaunchOptionsValidator {
+    static addToAllowlistAsync(option: keyof LaunchOptions): Promise<void>;
+    static clearAllowlistAsync(): Promise<void>;
+    static getAllowlistFilePath(): string;
+    static getDeniedOptionsDescription(): string;
+    static readAllowlistAsync(): Promise<ILaunchOptionsAllowlist>;
+    static removeFromAllowlistAsync(option: keyof LaunchOptions): Promise<void>;
+    static validateLaunchOptionsAsync(launchOptions: LaunchOptions, terminal?: ITerminal): Promise<ILaunchOptionsValidationResult>;
+    static writeAllowlistAsync(allowlist: ILaunchOptionsAllowlist): Promise<void>;
+}
 
 // @beta
 export class PlaywrightTunnel {
