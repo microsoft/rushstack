@@ -18,20 +18,6 @@ function createConfig({ production, webpack }) {
     outputPath: path.resolve(__dirname, 'dist', 'vsix', 'unpacked')
   });
 
-  if (config.resolve === undefined) {
-    config.resolve = {};
-  }
-
-  if (config.resolve.fallback === undefined) {
-    config.resolve.fallback = {};
-  }
-
-  // `ws` module depends on `bufferutil` and `utf-8-validate`
-  Object.assign(config.resolve.fallback, {
-    bufferutil: require.resolve('bufferutil/'),
-    'utf-8-validate': require.resolve('utf-8-validate/')
-  });
-
   return config;
 }
 
