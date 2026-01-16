@@ -15,7 +15,7 @@ function createConfig({ production, webpack }) {
     entry: {
       extension: './lib/extension.js'
     },
-    outputPath: path.resolve(__dirname, 'dist', 'vsix', 'unpacked')
+    outputPath: `${__dirname}/dist/vsix/unpacked`
   });
 
   if (config.resolve === undefined) {
