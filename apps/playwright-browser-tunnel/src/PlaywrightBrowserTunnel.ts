@@ -55,7 +55,7 @@ type TunnelMode = 'poll-connection' | 'wait-for-incoming-connection';
 export type IPlaywrightTunnelOptions = {
   terminal: ITerminal;
   onStatusChange: (status: TunnelStatus) => void;
-  tmpPath: string;
+  playwrightInstallPath: string;
   /**
    * Optional callback invoked before launching the browser server.
    * Receives the handshake data including launch options.
@@ -101,10 +101,10 @@ export class PlaywrightTunnel {
   private _mode: TunnelMode;
   private readonly _wsEndpoint?: string;
   private readonly _listenPort?: number;
-  private readonly _tmpPath: string;
+  private readonly _playwrightInstallPath: string;
 
   public constructor(options: IPlaywrightTunnelOptions) {
-    const { mode, terminal, onStatusChange, tmpPath, onBeforeLaunch } = options;
+    const { mode, terminal, onStatusChange, playwrightInstallPath: tmpPath, onBeforeLaunch } = options;
 
     if (mode === 'poll-connection') {
       if (!options.wsEndpoint) {
@@ -124,7 +124,7 @@ export class PlaywrightTunnel {
     this._terminal = terminal;
     this._onStatusChange = onStatusChange;
     this._onBeforeLaunch = onBeforeLaunch;
-    this._tmpPath = tmpPath;
+    this._playwrightInstallPath = tmpPath;
   }
 
   public get status(): TunnelStatus {
@@ -175,7 +175,7 @@ export class PlaywrightTunnel {
   }
 
   public async cleanTempFilesAsync(): Promise<void> {
-    const tmpPath: string = this._tmpPath;
+    const tmpPath: string = this._playwrightInstallPath;
     this._terminal.writeLine(`Cleaning up temporary files in ${tmpPath}`);
     try {
       await FileSystem.ensureEmptyFolderAsync(tmpPath);
@@ -189,7 +189,7 @@ export class PlaywrightTunnel {
   // public async uninstallPlaywrightBrowsersAsync(): Promise<void> {}
 
   private async _runCommandAsync(command: string, args: string[]): Promise<void> {
-    const tmpPath: string = this._tmpPath;
+    const tmpPath: string = this._playwrightInstallPath;
     await FileSystem.ensureFolderAsync(tmpPath);
     this._terminal.writeLine(`Running command: ${command} ${args.join(' ')} in ${tmpPath}`);
 
@@ -331,7 +331,7 @@ export class PlaywrightTunnel {
     }
 
     this._terminal.writeLine(`Using playwright-core version ${playwrightVersion} for browser server`);
-    return require(`${this._tmpPath}/node_modules/playwright-core-${playwrightVersion}`);
+    return require(`${this._playwrightInstallPath}/node_modules/playwright-core-${playwrightVersion}`);
   }
 
   private async _getPlaywrightBrowserServerProxyAsync({

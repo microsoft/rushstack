@@ -64,7 +64,7 @@ export interface ILaunchOptionsValidationResult {
 export type IPlaywrightTunnelOptions = {
     terminal: ITerminal;
     onStatusChange: (status: TunnelStatus) => void;
-    tmpPath: string;
+    playwrightInstallPath: string;
     onBeforeLaunch?: (handshake: IHandshake) => Promise<boolean> | boolean;
 } & ({
     mode: 'poll-connection';

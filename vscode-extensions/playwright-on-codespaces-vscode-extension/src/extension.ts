@@ -332,7 +332,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         mode: 'poll-connection',
         wsEndpoint: 'ws://127.0.0.1:3000',
         terminal,
-        tmpPath,
+        playwrightInstallPath: tmpPath,
         onStatusChange: (status: TunnelStatus) => {
           outputChannel.appendLine(`Tunnel status changed: ${status}`);
           updateStatusBar(status);
