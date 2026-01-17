@@ -138,7 +138,7 @@ if (sdkContext.rushLibModule === undefined) {
       terminal.writeVerboseLine(`Try to load ${RUSH_LIB_NAME} from rush global folder`);
       const rushGlobalFolder: RushGlobalFolder = new RushGlobalFolder();
       // The path needs to keep align with the logic inside RushVersionSelector
-      const expectedGlobalRushInstalledFolder: string = `${rushGlobalFolder.nodeSpecificPath}/rush-${rushVersion}`;
+      const expectedGlobalRushInstalledFolder: string = `${rushGlobalFolder.nodeSpecificPath}${path.sep}rush-${rushVersion}`;
       terminal.writeVerboseLine(
         `The expected global rush installed folder is "${expectedGlobalRushInstalledFolder}"`
       );

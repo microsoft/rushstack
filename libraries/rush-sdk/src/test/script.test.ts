@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import { Executable } from '@rushstack/node-core-library';
+import { Executable, User } from '@rushstack/node-core-library';
 
 const rushSdkPath: string = path.join(__dirname, '../../lib-shim/index.js');
 const sandboxRepoPath: string = `${__dirname}/sandbox`;
@@ -101,8 +101,13 @@ ${loadAndPrintRushSdkModule}
         }
       }
     );
+
+    const nodeVersion = process.version;
+    const userRushSdkFolder = path.join(User.getHomeFolder(), '.rush', `node-${nodeVersion}`, 'rush-5.57.0');
     expect(result.stderr.trim()).toMatchSnapshot('stderr');
-    expect(result.stdout.trim()).toMatchSnapshot('stdout');
+    expect(
+      result.stdout.replace(new RegExp(userRushSdkFolder.replace(/\\/g, '\\\\'), 'g'), '<RUSH_GLOBAL_FOLDER>')
+    ).toMatchSnapshot('stdout');
     expect(result.status).toBe(0);
   });
 });

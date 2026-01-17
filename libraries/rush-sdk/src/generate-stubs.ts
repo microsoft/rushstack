@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import { FileSystem, Import, Path } from '@rushstack/node-core-library';
+import { Encoding, FileSystem, Import, Path } from '@rushstack/node-core-library';
 
 function generateLibFilesRecursively(options: {
   parentSourcePath: string;
@@ -14,6 +14,7 @@ function generateLibFilesRecursively(options: {
   for (const folderItem of FileSystem.readFolderItems(options.parentSourcePath)) {
     const sourcePath: string = path.join(options.parentSourcePath, folderItem.name);
     const targetPath: string = path.join(options.parentTargetPath, folderItem.name);
+    const commonjsPath: string = path.join(options.parentSourcePath, folderItem.name);
 
     if (folderItem.isDirectory()) {
       // create destination folder
@@ -36,11 +37,18 @@ function generateLibFilesRecursively(options: {
         const shimPathLiteral: string = JSON.stringify(Path.convertToSlashes(shimPath));
         const srcImportPathLiteral: string = JSON.stringify(srcImportPath);
 
+        // Since the DeepImportsPlugin has already generated the named exports placeholder code, we reuse it here
+        const rushLibCommonjsCode: string = FileSystem.readFile(commonjsPath, { encoding: Encoding.Utf8 });
+        let namedExportsPlaceholder: string = rushLibCommonjsCode.match(/exports\..* = void 0;/)?.[0] || '';
+        if (namedExportsPlaceholder) {
+          namedExportsPlaceholder += '\n\n';
+        }
+
         FileSystem.writeFile(
           targetPath,
           // Example:
           // module.exports = require("../../../lib-shim/index")._rushSdk_loadInternalModule("logic/policy/GitEmailPolicy");
-          `module.exports = require(${shimPathLiteral})._rushSdk_loadInternalModule(${srcImportPathLiteral});`
+          `${namedExportsPlaceholder}module.exports = require(${shimPathLiteral})._rushSdk_loadInternalModule(${srcImportPathLiteral});`
         );
       }
     }

@@ -3,13 +3,21 @@
 
 import path from 'node:path';
 
-import { DllPlugin, type Compiler, WebpackError, type Chunk, type NormalModule } from 'webpack';
+import {
+  DllPlugin,
+  type Compiler,
+  WebpackError,
+  type Chunk,
+  type NormalModule,
+  type ModuleGraph
+} from 'webpack';
 
 import { Async, FileSystem, LegacyAdapters, Path } from '@rushstack/node-core-library';
 
 const PLUGIN_NAME: 'DeepImportsPlugin' = 'DeepImportsPlugin';
 
 type DllPluginOptions = DllPlugin['options'];
+type IExportsInfo = ReturnType<ModuleGraph['getExportsInfo']>;
 
 /**
  * @public
@@ -147,6 +155,7 @@ export class DeepImportsPlugin extends DllPlugin {
           libPathWithoutExtension: string;
           moduleId: string | number | null;
           secondaryChunkId: string | undefined;
+          exportsInfo: IExportsInfo;
         }
 
         const pathsToIgnoreWithoutExtension: Set<string> = this._pathsToIgnoreWithoutExtensions;
@@ -170,7 +179,8 @@ export class DeepImportsPlugin extends DllPlugin {
                       libModules.push({
                         libPathWithoutExtension: relativePathWithoutExtension,
                         moduleId: compilation.chunkGraph.getModuleId(runtimeChunkModule),
-                        secondaryChunkId
+                        secondaryChunkId,
+                        exportsInfo: compilation.moduleGraph.getExportsInfo(runtimeChunkModule) // Record exportsInfo to generate named exports placeholder code
                       });
 
                       encounteredLibPaths.add(relativePathWithoutExtension);
@@ -233,7 +243,7 @@ export class DeepImportsPlugin extends DllPlugin {
 
           await Async.forEachAsync(
             libModules,
-            async ({ libPathWithoutExtension, moduleId, secondaryChunkId }) => {
+            async ({ libPathWithoutExtension, moduleId, secondaryChunkId, exportsInfo }) => {
               const depth: number = countSlashes(libPathWithoutExtension);
               const requirePath: string = '../'.repeat(depth) + libOutFolderRelativeOutputPath;
               let moduleText: string;
@@ -247,6 +257,15 @@ export class DeepImportsPlugin extends DllPlugin {
               } else {
                 moduleText = [
                   `module.exports = require(${JSON.stringify(requirePath)})(${JSON.stringify(moduleId)});`
+                ].join('\n');
+              }
+
+              const providedExports: null | true | string[] = exportsInfo.getProvidedExports();
+              if (Array.isArray(providedExports) && providedExports.length > 0) {
+                moduleText = [
+                  `${providedExports.map((exportName) => `exports.${exportName}`).join(' = ')} = void 0;`,
+                  '',
+                  moduleText
                 ].join('\n');
               }
 
