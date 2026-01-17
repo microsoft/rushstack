@@ -7,9 +7,11 @@ describe('@rushstack/rush-sdk named exports check', () => {
   it('Should import named exports correctly (lib-shim)', () => {
     const result = Executable.spawnSync('node', [
       '-e',
+      // Do not use top level await here because it is not supported in Node.js < 20.20
       `
-const { RushConfiguration } = await import('@rushstack/rush-sdk');
+import('@rushstack/rush-sdk').then(({ RushConfiguration }) => {
 console.log(typeof RushConfiguration.loadFromConfigurationFile);
+    });
 `
     ]);
     expect(result.stdout.trim()).toEqual('function');
@@ -20,8 +22,9 @@ console.log(typeof RushConfiguration.loadFromConfigurationFile);
     const result = Executable.spawnSync('node', [
       '-e',
       `
-const { RushConfiguration } = await import('@rushstack/rush-sdk/lib/api/RushConfiguration');
+import('@rushstack/rush-sdk/lib/api/RushConfiguration').then(({ RushConfiguration }) => {
 console.log(typeof RushConfiguration.loadFromConfigurationFile);
+    });
 `
     ]);
     expect(result.stdout.trim()).toEqual('function');
