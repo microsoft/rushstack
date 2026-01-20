@@ -3,7 +3,7 @@
 
 import playwright from 'playwright-core';
 import type { Browser, LaunchOptions } from 'playwright-core';
-import { WebSocketServer, WebSocket } from 'ws';
+import { WebSocketServer, WebSocket, type RawData } from 'ws';
 import playwrightPackageJson from 'playwright-core/package.json';
 
 import { type ITerminal, Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
@@ -103,7 +103,7 @@ export async function tunneledBrowserConnection(
       logger.writeLine('Remote WebSocket server closed');
     });
 
-    const bufferedLocalMessages: Array<Buffer | ArrayBuffer | Buffer[] | string> = [];
+    const bufferedLocalMessages: Array<RawData> = [];
 
     remoteWsServer.on('connection', (ws) => {
       logger.writeLine('Remote websocket connected');
