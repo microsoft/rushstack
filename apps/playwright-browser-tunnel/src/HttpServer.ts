@@ -7,7 +7,7 @@ import { WebSocketServer, type WebSocket, type AddressInfo } from 'ws';
 
 import type { ITerminal } from '@rushstack/terminal';
 
-const LOCALHOST_IP: string = '127.0.0.1';
+const LOCALHOST: string = 'localhost';
 
 /**
  * This HttpServer is used for the localProxyWs WebSocketServer.
@@ -37,7 +37,7 @@ export class HttpServer {
 
   public listen(): Promise<void> {
     return new Promise((resolve) => {
-      this._server.listen(0, LOCALHOST_IP, () => {
+      this._server.listen(0, LOCALHOST, () => {
         const addressInfo = this._server.address() as AddressInfo;
         // Handle IPv6 addresses with proper formatting
         const address: string =
