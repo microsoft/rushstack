@@ -11,6 +11,17 @@ import type { ITerminal } from '@rushstack/terminal';
 const LOCALHOST: string = 'localhost';
 
 /**
+ * Formats an address info object into a WebSocket-compatible address string.
+ * IPv6 addresses are formatted with brackets: [address]:port
+ * IPv4 addresses are formatted as: address:port
+ */
+function formatAddress(addressInfo: AddressInfo): string {
+  return addressInfo.family === 'IPv6'
+    ? `[${addressInfo.address}]:${addressInfo.port}`
+    : `${addressInfo.address}:${addressInfo.port}`;
+}
+
+/**
  * This HttpServer is used for the localProxyWs WebSocketServer.
  * The purpose is to parse the query params and path for the websocket url to get the
  * browserName and launchOptions.
@@ -38,16 +49,19 @@ export class HttpServer {
 
   public listen(): Promise<void> {
     return new Promise((resolve) => {
+      // Bind to 'localhost' which resolves to IPv4 (127.0.0.1) or IPv6 (::1)
+      // depending on system configuration and DNS resolution
       this._server.listen(0, LOCALHOST, () => {
         const addressInfo = this._server.address();
-        if (!addressInfo || typeof addressInfo === 'string') {
-          throw new Error('Failed to get server address');
+        if (!addressInfo) {
+          throw new Error('Server address is null - server may not be bound properly');
         }
-        // Handle IPv6 addresses with proper formatting
-        const formattedAddress: string =
-          addressInfo.family === 'IPv6'
-            ? `[${addressInfo.address}]:${addressInfo.port}`
-            : `${addressInfo.address}:${addressInfo.port}`;
+        if (typeof addressInfo === 'string') {
+          throw new Error(
+            `Server address is a pipe/socket path (${addressInfo}), expected an IP address`
+          );
+        }
+        const formattedAddress: string = formatAddress(addressInfo);
         this._listeningAddress = formattedAddress;
         // This MUST be printed to terminal so VS Code can auto-port forward
         this._logger.writeLine(`Local proxy HttpServer listening at ws://${formattedAddress}`);
