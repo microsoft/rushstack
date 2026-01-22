@@ -39,9 +39,13 @@ export class HttpServer {
     return new Promise((resolve) => {
       this._server.listen(0, LOCALHOST, () => {
         const addressInfo = this._server.address() as AddressInfo;
+        if (!addressInfo) {
+          throw new Error('Failed to get server address');
+        }
         // Handle IPv6 addresses with proper formatting
+        // AddressInfo.family can be 'IPv6' (string) or 6 (number)
         const formattedAddress: string =
-          addressInfo.family === 'IPv6'
+          addressInfo.family === 'IPv6' || addressInfo.family === 6
             ? `[${addressInfo.address}]:${addressInfo.port}`
             : `${addressInfo.address}:${addressInfo.port}`;
         this._listeningAddress = formattedAddress;
