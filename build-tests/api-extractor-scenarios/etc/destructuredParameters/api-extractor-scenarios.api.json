@@ -195,7 +195,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function testArray([x, y]: "
+              "text": "export declare function testArray(list: "
             },
             {
               "kind": "Content",
@@ -231,7 +231,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "[x, y]",
+              "parameterName": "list",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -256,7 +256,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function testNameConflict([x, y]: "
+              "text": "export declare function testNameConflict(list2: "
             },
             {
               "kind": "Content",
@@ -292,7 +292,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "[x, y]",
+              "parameterName": "list2",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -317,7 +317,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function testNameConflict2({ x }: "
+              "text": "export declare function testNameConflict2(anonymous: "
             },
             {
               "kind": "Content",
@@ -325,7 +325,7 @@
             },
             {
               "kind": "Content",
-              "text": ", { y }: "
+              "text": ", anonymous3: "
             },
             {
               "kind": "Content",
@@ -361,7 +361,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ x }",
+              "parameterName": "anonymous",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -369,7 +369,7 @@
               "isOptional": false
             },
             {
-              "parameterName": "{ y }",
+              "parameterName": "anonymous3",
               "parameterTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
@@ -402,7 +402,7 @@
             },
             {
               "kind": "Content",
-              "text": ", { x, y }: "
+              "text": ", options: "
             },
             {
               "kind": "Content",
@@ -438,7 +438,7 @@
               "isOptional": false
             },
             {
-              "parameterName": "{ x, y }",
+              "parameterName": "options",
               "parameterTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
@@ -455,7 +455,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function testObjects({ x }: "
+              "text": "export declare function testObjects(anonymous: "
             },
             {
               "kind": "Content",
@@ -463,7 +463,7 @@
             },
             {
               "kind": "Content",
-              "text": ", { y }: "
+              "text": ", anonymous2: "
             },
             {
               "kind": "Content",
@@ -491,7 +491,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ x }",
+              "parameterName": "anonymous",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -499,7 +499,7 @@
               "isOptional": false
             },
             {
-              "parameterName": "{ y }",
+              "parameterName": "anonymous2",
               "parameterTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
@@ -516,7 +516,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function testObjectWithComments({ x, // slash P3\ny }: "
+              "text": "export declare function testObjectWithComments(options: "
             },
             {
               "kind": "Content",
@@ -544,7 +544,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ x, // slash P3\ny }",
+              "parameterName": "options",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2

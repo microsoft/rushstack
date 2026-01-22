@@ -1162,18 +1162,91 @@ export class ApiModelGenerator {
     parameterNodes: ts.NodeArray<ts.ParameterDeclaration>
   ): IApiParameterOptions[] {
     const parameters: IApiParameterOptions[] = [];
+
+    let destructuredCount: number = 0;
     for (const parameter of parameterNodes) {
-      const parameterTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-      if (parameter.type) {
-        nodeTransforms.push({ node: parameter.type, captureTokenRange: parameterTypeTokenRange });
+      if (ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)) {
+        ++destructuredCount;
+      }
+    }
+
+    if (destructuredCount > 0) {
+      const alreadyUsedNames: string[] = [];
+
+      for (const parameter of parameterNodes) {
+        if (!(ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name))) {
+          alreadyUsedNames.push(parameter.name.getText().trim());
+        }
       }
 
-      parameters.push({
-        parameterName: parameter.name.getText().trim(),
-        parameterTypeTokenRange,
-        isOptional: this._collector.typeChecker.isOptionalParameter(parameter)
-      });
+      for (const parameter of parameterNodes) {
+        const parameterTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
+        if (parameter.type) {
+          nodeTransforms.push({ node: parameter.type, captureTokenRange: parameterTypeTokenRange });
+        }
+
+        let parameterName: string = '';
+
+        // If there is only one destructured parameter:
+        //
+        //      function f(x: number, { y, z }: { y: string, z: string})
+        // ---> function f(x: number, options: { y: string, z: string})
+        //
+        //      function f(x: number, [a, b]: [number, number])
+        // ---> function f(x: number, list: [number, number])
+        //
+        // If there are multiple destructured parameters:
+        //
+        //      function f({ y, z }: { y: string, z: string},  b: boolean, [a, b]: [number, number])
+        // ---> function f(anonymous: { y: string, z: string}, b: boolean, anonymous2: [number, number])
+
+        if (destructuredCount === 1) {
+          if (ts.isObjectBindingPattern(parameter.name)) {
+            parameterName = 'options';
+          } else if (ts.isArrayBindingPattern(parameter.name)) {
+            parameterName = 'list';
+          }
+        } else {
+          if (ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)) {
+            parameterName = 'anonymous';
+          }
+        }
+
+        if (parameterName === '') {
+          parameterName = parameter.name.getText().trim();
+        } else {
+          let candidateName: string = parameterName;
+          let counter: number = 2;
+          while (alreadyUsedNames.includes(candidateName)) {
+            candidateName = `${parameterName}${counter++}`;
+          }
+          parameterName = candidateName;
+
+          // Replace the subexpression like "{ y, z }" with the synthesized parameter name
+          nodeTransforms.push({ node: parameter.name, replacementText: parameterName });
+        }
+        alreadyUsedNames.push(parameterName);
+
+        parameters.push({
+          parameterName,
+          parameterTypeTokenRange,
+          isOptional: this._collector.typeChecker.isOptionalParameter(parameter)
+        });
+      }
+    } else {
+      for (const parameter of parameterNodes) {
+        const parameterTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
+        if (parameter.type) {
+          nodeTransforms.push({ node: parameter.type, captureTokenRange: parameterTypeTokenRange });
+        }
+        parameters.push({
+          parameterName: parameter.name.getText().trim(),
+          parameterTypeTokenRange,
+          isOptional: this._collector.typeChecker.isOptionalParameter(parameter)
+        });
+      }
     }
+
     return parameters;
   }
 
