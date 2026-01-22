@@ -17,7 +17,7 @@ const LOCALHOST_IP: string = '127.0.0.1';
 export class HttpServer {
   private readonly _server: http.Server;
   private readonly _wsServer: WebSocketServer; // local proxy websocket server accepting browser clients
-  private _listeningPort: number | undefined;
+  private _listeningAddress: string | undefined;
   private _logger: ITerminal;
 
   public constructor(logger: ITerminal) {
@@ -38,21 +38,25 @@ export class HttpServer {
   public listen(): Promise<void> {
     return new Promise((resolve) => {
       this._server.listen(0, LOCALHOST_IP, () => {
-        this._listeningPort = (this._server.address() as AddressInfo).port;
+        const addressInfo = this._server.address() as AddressInfo;
+        // Handle IPv6 addresses with proper formatting
+        const address: string =
+          addressInfo.family === 'IPv6'
+            ? `[${addressInfo.address}]:${addressInfo.port}`
+            : `${addressInfo.address}:${addressInfo.port}`;
+        this._listeningAddress = address;
         // This MUST be printed to terminal so VS Code can auto-port forward
-        this._logger.writeLine(
-          `Local proxy HttpServer listening at ws://${LOCALHOST_IP}:${this._listeningPort}`
-        );
+        this._logger.writeLine(`Local proxy HttpServer listening at ws://${address}`);
         resolve();
       });
     });
   }
 
   public get endpoint(): string {
-    if (this._listeningPort === undefined) {
+    if (this._listeningAddress === undefined) {
       throw new Error('HttpServer not listening yet');
     }
-    return `ws://${LOCALHOST_IP}:${this._listeningPort}`;
+    return `ws://${this._listeningAddress}`;
   }
 
   public get wsServer(): WebSocketServer {
