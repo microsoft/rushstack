@@ -41,7 +41,7 @@ import { Path } from '@rushstack/node-core-library';
 import type { Collector } from '../collector/Collector';
 import type { ISourceLocation } from '../collector/SourceMapper';
 import type { AstDeclaration } from '../analyzer/AstDeclaration';
-import { ExcerptBuilder, type IExcerptBuilderNodeToCapture } from './ExcerptBuilder';
+import { ExcerptBuilder, type IExcerptBuilderNodeTransform } from './ExcerptBuilder';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
 import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
@@ -319,22 +319,24 @@ export class ApiModelGenerator {
       const callSignature: ts.CallSignatureDeclaration =
         astDeclaration.declaration as ts.CallSignatureDeclaration;
 
-      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+      const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-      nodesToCapture.push({ node: callSignature.type, tokenRange: returnTypeTokenRange });
+      if (callSignature.type) {
+        nodeTransforms.push({ node: callSignature.type, captureTokenRange: returnTypeTokenRange });
+      }
 
       const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
-        nodesToCapture,
+        nodeTransforms,
         callSignature.typeParameters
       );
 
       const parameters: IApiParameterOptions[] = this._captureParameters(
-        nodesToCapture,
+        nodeTransforms,
         callSignature.parameters
       );
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -368,14 +370,14 @@ export class ApiModelGenerator {
       const constructorDeclaration: ts.ConstructorDeclaration =
         astDeclaration.declaration as ts.ConstructorDeclaration;
 
-      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+      const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
       const parameters: IApiParameterOptions[] = this._captureParameters(
-        nodesToCapture,
+        nodeTransforms,
         constructorDeclaration.parameters
       );
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -405,10 +407,10 @@ export class ApiModelGenerator {
     if (apiClass === undefined) {
       const classDeclaration: ts.ClassDeclaration = astDeclaration.declaration as ts.ClassDeclaration;
 
-      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+      const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
       const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
-        nodesToCapture,
+        nodeTransforms,
         classDeclaration.typeParameters
       );
 
@@ -419,18 +421,18 @@ export class ApiModelGenerator {
         if (heritageClause.token === ts.SyntaxKind.ExtendsKeyword) {
           extendsTokenRange = ExcerptBuilder.createEmptyTokenRange();
           if (heritageClause.types.length > 0) {
-            nodesToCapture.push({ node: heritageClause.types[0], tokenRange: extendsTokenRange });
+            nodeTransforms.push({ node: heritageClause.types[0], captureTokenRange: extendsTokenRange });
           }
         } else if (heritageClause.token === ts.SyntaxKind.ImplementsKeyword) {
           for (const heritageType of heritageClause.types) {
             const implementsTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
             implementsTokenRanges.push(implementsTokenRange);
-            nodesToCapture.push({ node: heritageType, tokenRange: implementsTokenRange });
+            nodeTransforms.push({ node: heritageType, captureTokenRange: implementsTokenRange });
           }
         }
       }
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -476,22 +478,24 @@ export class ApiModelGenerator {
       const constructSignature: ts.ConstructSignatureDeclaration =
         astDeclaration.declaration as ts.ConstructSignatureDeclaration;
 
-      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+      const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-      nodesToCapture.push({ node: constructSignature.type, tokenRange: returnTypeTokenRange });
+      if (constructSignature.type) {
+        nodeTransforms.push({ node: constructSignature.type, captureTokenRange: returnTypeTokenRange });
+      }
 
       const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
-        nodesToCapture,
+        nodeTransforms,
         constructSignature.typeParameters
       );
 
       const parameters: IApiParameterOptions[] = this._captureParameters(
-        nodesToCapture,
+        nodeTransforms,
         constructSignature.parameters
       );
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -556,15 +560,15 @@ export class ApiModelGenerator {
     if (apiEnumMember === undefined) {
       const enumMember: ts.EnumMember = astDeclaration.declaration as ts.EnumMember;
 
-      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+      const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
       let initializerTokenRange: IExcerptTokenRange | undefined = undefined;
       if (enumMember.initializer) {
         initializerTokenRange = ExcerptBuilder.createEmptyTokenRange();
-        nodesToCapture.push({ node: enumMember.initializer, tokenRange: initializerTokenRange });
+        nodeTransforms.push({ node: enumMember.initializer, captureTokenRange: initializerTokenRange });
       }
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -599,22 +603,24 @@ export class ApiModelGenerator {
       const functionDeclaration: ts.FunctionDeclaration =
         altFunctionDeclaration ?? (astDeclaration.declaration as ts.FunctionDeclaration);
 
-      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+      const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-      nodesToCapture.push({ node: functionDeclaration.type, tokenRange: returnTypeTokenRange });
+      if (functionDeclaration.type) {
+        nodeTransforms.push({ node: functionDeclaration.type, captureTokenRange: returnTypeTokenRange });
+      }
 
       const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
-        nodesToCapture,
+        nodeTransforms,
         functionDeclaration.typeParameters
       );
 
       const parameters: IApiParameterOptions[] = this._captureParameters(
-        nodesToCapture,
+        nodeTransforms,
         functionDeclaration.parameters
       );
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -650,17 +656,17 @@ export class ApiModelGenerator {
       const indexSignature: ts.IndexSignatureDeclaration =
         astDeclaration.declaration as ts.IndexSignatureDeclaration;
 
-      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+      const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-      nodesToCapture.push({ node: indexSignature.type, tokenRange: returnTypeTokenRange });
+      nodeTransforms.push({ node: indexSignature.type, captureTokenRange: returnTypeTokenRange });
 
       const parameters: IApiParameterOptions[] = this._captureParameters(
-        nodesToCapture,
+        nodeTransforms,
         indexSignature.parameters
       );
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -694,10 +700,10 @@ export class ApiModelGenerator {
       const interfaceDeclaration: ts.InterfaceDeclaration =
         astDeclaration.declaration as ts.InterfaceDeclaration;
 
-      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+      const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
       const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
-        nodesToCapture,
+        nodeTransforms,
         interfaceDeclaration.typeParameters
       );
 
@@ -708,12 +714,12 @@ export class ApiModelGenerator {
           for (const heritageType of heritageClause.types) {
             const extendsTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
             extendsTokenRanges.push(extendsTokenRange);
-            nodesToCapture.push({ node: heritageType, tokenRange: extendsTokenRange });
+            nodeTransforms.push({ node: heritageType, captureTokenRange: extendsTokenRange });
           }
         }
       }
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -750,22 +756,24 @@ export class ApiModelGenerator {
     if (apiMethod === undefined) {
       const methodDeclaration: ts.MethodDeclaration = astDeclaration.declaration as ts.MethodDeclaration;
 
-      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+      const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-      nodesToCapture.push({ node: methodDeclaration.type, tokenRange: returnTypeTokenRange });
+      if (methodDeclaration.type) {
+        nodeTransforms.push({ node: methodDeclaration.type, captureTokenRange: returnTypeTokenRange });
+      }
 
       const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
-        nodesToCapture,
+        nodeTransforms,
         methodDeclaration.typeParameters
       );
 
       const parameters: IApiParameterOptions[] = this._captureParameters(
-        nodesToCapture,
+        nodeTransforms,
         methodDeclaration.parameters
       );
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -813,22 +821,24 @@ export class ApiModelGenerator {
     if (apiMethodSignature === undefined) {
       const methodSignature: ts.MethodSignature = astDeclaration.declaration as ts.MethodSignature;
 
-      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+      const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-      nodesToCapture.push({ node: methodSignature.type, tokenRange: returnTypeTokenRange });
+      if (methodSignature.type) {
+        nodeTransforms.push({ node: methodSignature.type, captureTokenRange: returnTypeTokenRange });
+      }
 
       const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
-        nodesToCapture,
+        nodeTransforms,
         methodSignature.typeParameters
       );
 
       const parameters: IApiParameterOptions[] = this._captureParameters(
-        nodesToCapture,
+        nodeTransforms,
         methodSignature.parameters
       );
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -894,7 +904,7 @@ export class ApiModelGenerator {
 
     if (apiProperty === undefined) {
       const declaration: ts.Declaration = astDeclaration.declaration;
-      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+      const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
       const propertyTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       let propertyTypeNode: ts.TypeNode | undefined;
@@ -908,15 +918,17 @@ export class ApiModelGenerator {
         propertyTypeNode = declaration.parameters[0].type;
       }
 
-      nodesToCapture.push({ node: propertyTypeNode, tokenRange: propertyTypeTokenRange });
+      if (propertyTypeNode) {
+        nodeTransforms.push({ node: propertyTypeNode, captureTokenRange: propertyTypeTokenRange });
+      }
 
       let initializerTokenRange: IExcerptTokenRange | undefined = undefined;
       if (ts.isPropertyDeclaration(declaration) && declaration.initializer) {
         initializerTokenRange = ExcerptBuilder.createEmptyTokenRange();
-        nodesToCapture.push({ node: declaration.initializer, tokenRange: initializerTokenRange });
+        nodeTransforms.push({ node: declaration.initializer, captureTokenRange: initializerTokenRange });
       }
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -962,12 +974,14 @@ export class ApiModelGenerator {
     if (apiPropertySignature === undefined) {
       const propertySignature: ts.PropertySignature = astDeclaration.declaration as ts.PropertySignature;
 
-      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+      const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
       const propertyTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-      nodesToCapture.push({ node: propertySignature.type, tokenRange: propertyTypeTokenRange });
+      if (propertySignature.type) {
+        nodeTransforms.push({ node: propertySignature.type, captureTokenRange: propertyTypeTokenRange });
+      }
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -1007,17 +1021,17 @@ export class ApiModelGenerator {
       const typeAliasDeclaration: ts.TypeAliasDeclaration =
         astDeclaration.declaration as ts.TypeAliasDeclaration;
 
-      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+      const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
       const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
-        nodesToCapture,
+        nodeTransforms,
         typeAliasDeclaration.typeParameters
       );
 
       const typeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-      nodesToCapture.push({ node: typeAliasDeclaration.type, tokenRange: typeTokenRange });
+      nodeTransforms.push({ node: typeAliasDeclaration.type, captureTokenRange: typeTokenRange });
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -1049,18 +1063,23 @@ export class ApiModelGenerator {
       const variableDeclaration: ts.VariableDeclaration =
         astDeclaration.declaration as ts.VariableDeclaration;
 
-      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+      const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
       const variableTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-      nodesToCapture.push({ node: variableDeclaration.type, tokenRange: variableTypeTokenRange });
+      if (variableDeclaration.type) {
+        nodeTransforms.push({ node: variableDeclaration.type, captureTokenRange: variableTypeTokenRange });
+      }
 
       let initializerTokenRange: IExcerptTokenRange | undefined = undefined;
       if (variableDeclaration.initializer) {
         initializerTokenRange = ExcerptBuilder.createEmptyTokenRange();
-        nodesToCapture.push({ node: variableDeclaration.initializer, tokenRange: initializerTokenRange });
+        nodeTransforms.push({
+          node: variableDeclaration.initializer,
+          captureTokenRange: initializerTokenRange
+        });
       }
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -1084,16 +1103,16 @@ export class ApiModelGenerator {
   }
 
   /**
-   * @param nodesToCapture - A list of child nodes whose token ranges we want to capture
+   * @param nodeTransforms - A list of child nodes whose token ranges we want to capture
    */
   private _buildExcerptTokens(
     astDeclaration: AstDeclaration,
-    nodesToCapture: IExcerptBuilderNodeToCapture[]
+    nodeTransforms: IExcerptBuilderNodeTransform[]
   ): IExcerptToken[] {
     const excerptTokens: IExcerptToken[] = [];
 
     // Build the main declaration
-    ExcerptBuilder.addDeclaration(excerptTokens, astDeclaration, nodesToCapture, this._referenceGenerator);
+    ExcerptBuilder.addDeclaration(excerptTokens, astDeclaration, nodeTransforms, this._referenceGenerator);
 
     const declarationMetadata: DeclarationMetadata = this._collector.fetchDeclarationMetadata(astDeclaration);
 
@@ -1103,7 +1122,7 @@ export class ApiModelGenerator {
       ExcerptBuilder.addDeclaration(
         excerptTokens,
         ancillaryDeclaration,
-        nodesToCapture,
+        nodeTransforms,
         this._referenceGenerator
       );
     }
@@ -1112,17 +1131,21 @@ export class ApiModelGenerator {
   }
 
   private _captureTypeParameters(
-    nodesToCapture: IExcerptBuilderNodeToCapture[],
+    nodeTransforms: IExcerptBuilderNodeTransform[],
     typeParameterNodes: ts.NodeArray<ts.TypeParameterDeclaration> | undefined
   ): IApiTypeParameterOptions[] {
     const typeParameters: IApiTypeParameterOptions[] = [];
     if (typeParameterNodes) {
       for (const typeParameter of typeParameterNodes) {
         const constraintTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-        nodesToCapture.push({ node: typeParameter.constraint, tokenRange: constraintTokenRange });
+        if (typeParameter.constraint) {
+          nodeTransforms.push({ node: typeParameter.constraint, captureTokenRange: constraintTokenRange });
+        }
 
         const defaultTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-        nodesToCapture.push({ node: typeParameter.default, tokenRange: defaultTypeTokenRange });
+        if (typeParameter.default) {
+          nodeTransforms.push({ node: typeParameter.default, captureTokenRange: defaultTypeTokenRange });
+        }
 
         typeParameters.push({
           typeParameterName: typeParameter.name.getText().trim(),
@@ -1135,13 +1158,16 @@ export class ApiModelGenerator {
   }
 
   private _captureParameters(
-    nodesToCapture: IExcerptBuilderNodeToCapture[],
+    nodeTransforms: IExcerptBuilderNodeTransform[],
     parameterNodes: ts.NodeArray<ts.ParameterDeclaration>
   ): IApiParameterOptions[] {
     const parameters: IApiParameterOptions[] = [];
     for (const parameter of parameterNodes) {
       const parameterTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-      nodesToCapture.push({ node: parameter.type, tokenRange: parameterTypeTokenRange });
+      if (parameter.type) {
+        nodeTransforms.push({ node: parameter.type, captureTokenRange: parameterTypeTokenRange });
+      }
+
       parameters.push({
         parameterName: parameter.name.getText().trim(),
         parameterTypeTokenRange,
