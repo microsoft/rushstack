@@ -39,8 +39,8 @@ export class HttpServer {
   public listen(): Promise<void> {
     return new Promise((resolve) => {
       this._server.listen(0, LOCALHOST, () => {
-        const addressInfo = this._server.address() as AddressInfo;
-        if (!addressInfo) {
+        const addressInfo = this._server.address();
+        if (!addressInfo || typeof addressInfo === 'string') {
           throw new Error('Failed to get server address');
         }
         // Handle IPv6 addresses with proper formatting
