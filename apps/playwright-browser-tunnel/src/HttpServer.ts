@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import http from 'node:http';
+import type { AddressInfo } from 'node:net';
 
-import { WebSocketServer, type WebSocket, type AddressInfo } from 'ws';
+import { WebSocketServer, type WebSocket } from 'ws';
 
 import type { ITerminal } from '@rushstack/terminal';
 
@@ -43,9 +44,8 @@ export class HttpServer {
           throw new Error('Failed to get server address');
         }
         // Handle IPv6 addresses with proper formatting
-        // AddressInfo.family can be 'IPv6' (string) or 6 (number)
         const formattedAddress: string =
-          addressInfo.family === 'IPv6' || addressInfo.family === 6
+          addressInfo.family === 'IPv6'
             ? `[${addressInfo.address}]:${addressInfo.port}`
             : `${addressInfo.address}:${addressInfo.port}`;
         this._listeningAddress = formattedAddress;
