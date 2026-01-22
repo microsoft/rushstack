@@ -40,13 +40,13 @@ export class HttpServer {
       this._server.listen(0, LOCALHOST, () => {
         const addressInfo = this._server.address() as AddressInfo;
         // Handle IPv6 addresses with proper formatting
-        const address: string =
+        const formattedAddress: string =
           addressInfo.family === 'IPv6'
             ? `[${addressInfo.address}]:${addressInfo.port}`
             : `${addressInfo.address}:${addressInfo.port}`;
-        this._listeningAddress = address;
+        this._listeningAddress = formattedAddress;
         // This MUST be printed to terminal so VS Code can auto-port forward
-        this._logger.writeLine(`Local proxy HttpServer listening at ws://${address}`);
+        this._logger.writeLine(`Local proxy HttpServer listening at ws://${formattedAddress}`);
         resolve();
       });
     });
