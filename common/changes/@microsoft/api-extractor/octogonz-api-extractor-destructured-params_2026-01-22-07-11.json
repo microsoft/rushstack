@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Fix an issue where destructured parameters produced an incorrect parameter name",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}
