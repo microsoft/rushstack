@@ -1,0 +1,162 @@
+[
+  {
+    "category": "refactor",
+    "description": "Create INpmRegistryPackageResponse and INpmRegistryVersionMetadata type definitions",
+    "steps": [
+      "Open libraries/npm-check-fork/src/interfaces/INpmCheckRegistry.ts",
+      "Add INpmRegistryPackageResponse interface with name, dist-tags, versions, and time fields",
+      "Add INpmRegistryVersionMetadata interface with name, version, homepage, bugs, and repository fields",
+      "Ensure types align with npm registry API documentation",
+      "Run rush build to verify type definitions compile correctly"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create NpmRegistryClient class with fetchPackageMetadataAsync method",
+    "steps": [
+      "Create new file libraries/npm-check-fork/src/NpmRegistryClient.ts",
+      "Define INpmRegistryClientOptions interface with registryUrl and userAgent options",
+      "Define INpmRegistryClientResult interface with data and error fields",
+      "Implement NpmRegistryClient constructor with default registry URL and user agent",
+      "Implement _buildPackageUrl private method to handle scoped package URL encoding",
+      "Implement fetchPackageMetadataAsync method using WebClient from rush-lib",
+      "Handle 404 responses with 'Package not found' error",
+      "Handle other HTTP errors with status code in error message",
+      "Handle network errors with error message",
+      "Export NpmRegistryClient class and related interfaces"
+    ],
+    "passes": true
+  },
+  {
+    "category": "refactor",
+    "description": "Update GetLatestFromRegistry.ts to use NpmRegistryClient instead of package-json",
+    "steps": [
+      "Open libraries/npm-check-fork/src/GetLatestFromRegistry.ts",
+      "Remove import of package-json",
+      "Remove import of throat",
+      "Add import for NpmRegistryClient",
+      "Add import for Async from @rushstack/node-core-library",
+      "Create module-level _registryClient variable and getRegistryClient() function",
+      "Update getNpmInfo function to use NpmRegistryClient.fetchPackageMetadataAsync",
+      "Preserve existing version sorting logic using lodash and semver",
+      "Preserve existing homepage extraction using bestGuessHomepage",
+      "Ensure INpmRegistryInfo return type remains unchanged"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Add getNpmInfoBatch function for concurrent package fetching",
+    "steps": [
+      "Open libraries/npm-check-fork/src/GetLatestFromRegistry.ts",
+      "Add getNpmInfoBatch function signature with packageNames array and optional concurrency parameter",
+      "Implement using Async.forEachAsync with concurrency option",
+      "Default concurrency to os.cpus().length (matching original throat behavior)",
+      "Return Map<string, INpmRegistryInfo> with results",
+      "Export getNpmInfoBatch function"
+    ],
+    "passes": false
+  },
+  {
+    "category": "refactor",
+    "description": "Update package.json to add required dependencies",
+    "steps": [
+      "Open libraries/npm-check-fork/package.json",
+      "Add @rushstack/node-core-library as workspace:* dependency if not present",
+      "Add @rushstack/rush-lib as workspace:* dependency (check if runtime or devDependency)",
+      "Run rush update to install dependencies"
+    ],
+    "passes": false
+  },
+  {
+    "category": "refactor",
+    "description": "Remove package-json and throat dependencies from package.json",
+    "steps": [
+      "Open libraries/npm-check-fork/package.json",
+      "Remove package-json from dependencies",
+      "Remove throat from dependencies",
+      "Run rush update to update lockfile",
+      "Verify no other files import package-json or throat"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Create unit tests for NpmRegistryClient",
+    "steps": [
+      "Create new file libraries/npm-check-fork/src/test/NpmRegistryClient.test.ts",
+      "Add test for successful metadata fetch with mocked WebClient",
+      "Add test for 404 handling (package not found)",
+      "Add test for network error handling",
+      "Add test for scoped package URL encoding (@scope/name -> @scope%2Fname)",
+      "Add test for custom registry URL option",
+      "Add test for default user agent header"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Update existing GetLatestFromRegistry tests to mock NpmRegistryClient",
+    "steps": [
+      "Open libraries/npm-check-fork/src/test/GetLatestFromRegistry.test.ts (or create if not exists)",
+      "Remove mocks for package-json module",
+      "Add mocks for NpmRegistryClient.fetchPackageMetadataAsync",
+      "Verify existing test cases still pass with new mocking approach",
+      "Add test for getNpmInfoBatch function",
+      "Add test verifying concurrency limiting behavior"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Verify BestGuessHomepage continues to work with new data shape",
+    "steps": [
+      "Review libraries/npm-check-fork/src/BestGuessHomepage.ts",
+      "Ensure INpmCheckRegistryData interface is compatible with INpmRegistryPackageResponse",
+      "Verify homepage extraction from versions[latest].homepage works",
+      "Verify fallback to bugs.url works",
+      "Verify fallback to repository.url works",
+      "Run existing BestGuessHomepage tests"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Run rush build and rush test to verify implementation",
+    "steps": [
+      "Run rush build --to @rushstack/npm-check-fork",
+      "Verify no TypeScript compilation errors",
+      "Run rush test --to @rushstack/npm-check-fork",
+      "Verify all unit tests pass",
+      "Check for any deprecation warnings or linting errors"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Integration test: Verify rush upgrade-interactive works correctly",
+    "steps": [
+      "Build full rush-lib with rush build --to rush",
+      "Run rush upgrade-interactive in a test project",
+      "Verify packages are fetched from npm registry correctly",
+      "Verify scoped packages display correctly",
+      "Verify version information is accurate",
+      "Verify homepage links are correct"
+    ],
+    "passes": false
+  },
+  {
+    "category": "refactor",
+    "description": "Update CHANGELOG.md with dependency replacement changes",
+    "steps": [
+      "Open libraries/npm-check-fork/CHANGELOG.md",
+      "Add entry under next version section",
+      "Document removal of package-json dependency",
+      "Document removal of throat dependency",
+      "Document internal refactoring to use WebClient and Async.forEachAsync",
+      "Note that no public API changes were made"
+    ],
+    "passes": false
+  }
+]
