@@ -1,0 +1,57 @@
+# Development Progress Log
+# npm-check-fork Dependency Replacement: package-json and throat
+
+Created: 2026-01-23
+Last Updated: 2026-01-23
+
+---
+
+## Progress Notes
+
+### 2026-01-23 - Feature 1: Type Definitions (COMPLETE)
+
+**Task:** Create INpmRegistryPackageResponse and INpmRegistryVersionMetadata type definitions
+
+**Changes Made:**
+- Added `INpmRegistryVersionMetadata` interface extending `INpmCheckPackageVersion` with `name` and `version` fields
+- Added `INpmRegistryPackageResponse` interface with `name`, `dist-tags`, `versions`, and `time` fields
+- Added JSDoc documentation with links to npm registry API documentation
+- Ensured backward compatibility: `INpmRegistryVersionMetadata` extends existing `INpmCheckPackageVersion`
+
+**File Modified:** `libraries/npm-check-fork/src/interfaces/INpmCheckRegistry.ts`
+
+**Verification:** `rush build --to @rushstack/npm-check-fork` passed successfully (9.73s)
+
+### 2026-01-23 - Feature 2: NpmRegistryClient Class (COMPLETE)
+
+**Task:** Create NpmRegistryClient class with fetchPackageMetadataAsync method
+
+**Changes Made:**
+- Created `libraries/npm-check-fork/src/NpmRegistryClient.ts` with full implementation
+- Defined `INpmRegistryClientOptions` interface with `registryUrl`, `userAgent`, and `timeoutMs` options
+- Defined `INpmRegistryClientResult` interface with `data` and `error` fields
+- Implemented `NpmRegistryClient` constructor with sensible defaults:
+  - Default registry URL: `https://registry.npmjs.org`
+  - Default user agent: `npm-check-fork node/{version} {platform} {arch}`
+  - Default timeout: 30000ms
+- Implemented `_buildPackageUrl` private method for scoped package URL encoding (@scope/name -> @scope%2Fname)
+- Implemented `fetchPackageMetadataAsync` using Node.js built-in `https`/`http` modules (not WebClient from rush-lib since it's internal)
+- Added support for gzip and deflate response decompression
+- Proper error handling:
+  - 404 responses return `{ error: 'Package not found' }`
+  - Other HTTP errors return `{ error: 'HTTP error {status}: {message}' }`
+  - Network errors return `{ error: 'Network error: {message}' }`
+  - Timeout errors return `{ error: 'Request timed out after {ms}ms' }`
+- Updated `index.ts` to export `NpmRegistryClient`, `INpmRegistryClientOptions`, `INpmRegistryClientResult`, and registry types
+
+**Files Created:**
+- `libraries/npm-check-fork/src/NpmRegistryClient.ts`
+
+**Files Modified:**
+- `libraries/npm-check-fork/src/index.ts` (added exports)
+
+**Verification:** `rush build --to @rushstack/npm-check-fork` passed successfully (25.43s)
+
+**Notes:**
+- Used Node.js built-in `https` module instead of WebClient from rush-lib because WebClient is an internal utility (not exported in the public API)
+- This implementation is self-contained and doesn't require adding rush-lib as a dependency
