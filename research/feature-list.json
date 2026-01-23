@@ -93,7 +93,7 @@
       "Add test for custom registry URL option",
       "Add test for default user agent header"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

@@ -1,24 +1,28 @@
 // Mock the NpmRegistryClient before imports
 jest.mock('../NpmRegistryClient');
 
-import getNpmInfo from '../GetLatestFromRegistry';
-import { NpmRegistryClient } from '../NpmRegistryClient';
 import type { INpmRegistryInfo, INpmRegistryPackageResponse } from '../interfaces/INpmCheckRegistry';
 
-const MockedNpmRegistryClient = NpmRegistryClient as jest.MockedClass<typeof NpmRegistryClient>;
-
 describe('getNpmInfo', () => {
+  let getNpmInfo: (packageName: string) => Promise<INpmRegistryInfo>;
   let mockFetchPackageMetadataAsync: jest.Mock;
 
   beforeEach(() => {
+    jest.resetModules();
     jest.clearAllMocks();
+
+    // Re-require to get fresh module instances
     mockFetchPackageMetadataAsync = jest.fn();
-    MockedNpmRegistryClient.mockImplementation(
-      () =>
-        ({
-          fetchPackageMetadataAsync: mockFetchPackageMetadataAsync
-        }) as unknown as NpmRegistryClient
-    );
+
+    // Set up the mock implementation before importing getNpmInfo
+    const mockNpmRegistryClient = jest.requireMock('../NpmRegistryClient');
+    mockNpmRegistryClient.NpmRegistryClient.mockImplementation(() => ({
+      fetchPackageMetadataAsync: mockFetchPackageMetadataAsync
+    }));
+
+    // Import the module under test
+    const module = jest.requireActual('../GetLatestFromRegistry');
+    getNpmInfo = module.default;
   });
 
   it('returns registry info with homepage', async () => {
