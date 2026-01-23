@@ -119,7 +119,7 @@
       "Verify fallback to repository.url works",
       "Run existing BestGuessHomepage tests"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -131,7 +131,7 @@
       "Verify all unit tests pass",
       "Check for any deprecation warnings or linting errors"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -144,7 +144,7 @@
       "Verify version information is accurate",
       "Verify homepage links are correct"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "refactor",
@@ -157,6 +157,6 @@
       "Document internal refactoring to use WebClient and Async.forEachAsync",
       "Note that no public API changes were made"
     ],
-    "passes": false
+    "passes": true
   }
 ]
