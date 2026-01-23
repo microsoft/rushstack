@@ -94,3 +94,40 @@ Last Updated: 2026-01-23
 **Notes:**
 - Used simple batch processing instead of `Async.forEachAsync` to avoid adding dependencies
 - Function processes packages in batches of `concurrency` size using `Promise.all`
+
+### 2026-01-23 - Feature 5: Add Required Dependencies (SKIPPED/OBSOLETE)
+
+**Task:** Update package.json to add required dependencies
+
+**Status:** OBSOLETE - Not needed since implementation uses Node.js built-ins instead of rush-lib/node-core-library
+
+### 2026-01-23 - Feature 6: Remove Old Dependencies (COMPLETE)
+
+**Task:** Remove package-json and throat dependencies from package.json
+
+**Changes Made:**
+- Removed `package-json` from dependencies
+- Removed `throat` from dependencies
+- Ran `rush update` to update lockfile
+- Updated test file to mock NpmRegistryClient instead of package-json
+
+**Files Modified:**
+- `libraries/npm-check-fork/package.json`
+- `libraries/npm-check-fork/src/tests/GetLatestFromRegistry.test.ts`
+- `common/config/subspaces/default/pnpm-lock.yaml`
+
+**Verification:** `rush build --to @rushstack/npm-check-fork` passed successfully
+
+### 2026-01-23 - Feature 8: Update GetLatestFromRegistry Tests (COMPLETE)
+
+**Task:** Update existing GetLatestFromRegistry tests to mock NpmRegistryClient
+
+**Changes Made:**
+- Removed mock of `package-json`
+- Added mock of `NpmRegistryClient`
+- Updated test data to use `INpmRegistryPackageResponse` interface
+- Fixed jest.mock placement to satisfy lint rule (must come before imports)
+
+**File Modified:** `libraries/npm-check-fork/src/tests/GetLatestFromRegistry.test.ts`
+
+**Verification:** `rush build --to @rushstack/npm-check-fork` passed successfully
