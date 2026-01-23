@@ -339,19 +339,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
           updateStatusBar(status);
         },
         onBeforeLaunch: async (handshake: IHandshake) => {
-          // Check the setting dynamically each time so that "Don't Ask Again" takes effect immediately
-          const currentConfig: vscode.WorkspaceConfiguration =
-            vscode.workspace.getConfiguration('playwright-tunnel');
-          const shouldPrompt: boolean = currentConfig.get<boolean>('promptBeforeLaunch', true);
-
           // Validate launch options against the allowlist
           const validationResult: ILaunchOptionsValidationResult =
             await LaunchOptionsValidator.validateLaunchOptionsAsync(handshake.launchOptions);
 
-          // Build a summary of the launch options, excluding 'headless' since we always enforce headless: false
-          const launchOptionKeys: string[] = Object.keys(handshake.launchOptions).filter(
-            (key) => key !== 'headless'
-          );
           // Filter out 'headless' from denied options since we handle it separately
           const deniedKeys: string[] = validationResult.deniedOptions.filter((key) => key !== 'headless');
 
@@ -366,7 +357,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
               message += `Launch options: ${JSON.stringify(displayOptions, null, 2)}\n\n`;
             }
 
-            message += `⚠️ The following options are not in your allowlist and will be filtered:\n`;
+            message += `The following options are not in your allowlist and will be filtered:\n`;
             message += deniedKeys.map((key) => `  • ${key}`).join('\n');
             message += '\n\nWould you like to add these options to your allowlist?';
 
@@ -401,46 +392,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             }
           }
 
-          // No denied options - check if we should prompt at all
-          if (!shouldPrompt) {
-            outputChannel.appendLine('Prompt disabled. Browser launch auto-approved.');
-            return true;
-          }
-
-          let message: string = `Playwright is requesting to launch ${handshake.browserName}.\n\n`;
-
-          if (launchOptionKeys.length === 0) {
-            message += 'No launch options specified (using defaults).';
-          } else {
-            // Create a copy without the headless property for display
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { headless, ...displayOptions } = handshake.launchOptions;
-            message += `Launch options: ${JSON.stringify(displayOptions, null, 2)}`;
-          }
-
-          const response: string | undefined = await vscode.window.showInformationMessage(
-            message,
-            { modal: true },
-            'Allow',
-            'Deny',
-            "Don't Ask Again"
-          );
-
-          if (response === 'Allow') {
-            outputChannel.appendLine('User approved browser launch.');
-            return true;
-          } else if (response === "Don't Ask Again") {
-            // Save preference to disable prompts
-            await currentConfig.update('promptBeforeLaunch', false, vscode.ConfigurationTarget.Global);
-            outputChannel.appendLine('Prompt disabled. Browser launch approved.');
-            void vscode.window.showInformationMessage(
-              'Launch prompts have been disabled. You can re-enable them in settings.'
-            );
-            return true;
-          } else {
-            outputChannel.appendLine('User denied browser launch.');
-            return false;
-          }
+          return true;
         }
       });
 
