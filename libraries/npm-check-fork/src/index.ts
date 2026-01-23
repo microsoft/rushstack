@@ -11,3 +11,4 @@ export type {
   INpmRegistryPackageResponse,
   INpmRegistryVersionMetadata
 } from './interfaces/INpmCheckRegistry';
+export { getNpmInfoBatch } from './GetLatestFromRegistry';

@@ -56,7 +56,7 @@
       "Return Map<string, INpmRegistryInfo> with results",
       "Export getNpmInfoBatch function"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "refactor",

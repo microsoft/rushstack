@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import os from 'node:os';
+
 import _ from 'lodash';
 import semver from 'semver';
 
@@ -65,4 +67,32 @@ export default async function getNpmInfo(packageName: string): Promise<INpmRegis
     versions: sortedVersions,
     homepage: bestGuessHomepage(registryData) || ''
   };
+}
+
+/**
+ * Fetches package information for multiple packages concurrently.
+ *
+ * @param packageNames - Array of package names to fetch
+ * @param concurrency - Maximum number of concurrent requests (defaults to CPU count)
+ * @returns A promise that resolves to a Map of package name to registry info
+ */
+export async function getNpmInfoBatch(
+  packageNames: string[],
+  concurrency: number = os.cpus().length
+): Promise<Map<string, INpmRegistryInfo>> {
+  const results: Map<string, INpmRegistryInfo> = new Map();
+
+  // Process packages in batches to limit concurrency
+  for (let i: number = 0; i < packageNames.length; i += concurrency) {
+    const batch: string[] = packageNames.slice(i, i + concurrency);
+    const batchResults: INpmRegistryInfo[] = await Promise.all(
+      batch.map((packageName: string) => getNpmInfo(packageName))
+    );
+
+    batch.forEach((packageName: string, index: number) => {
+      results.set(packageName, batchResults[index]);
+    });
+  }
+
+  return results;
 }
