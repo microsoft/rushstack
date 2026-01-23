@@ -67,7 +67,7 @@
       "Add @rushstack/rush-lib as workspace:* dependency (check if runtime or devDependency)",
       "Run rush update to install dependencies"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "refactor",
@@ -79,7 +79,7 @@
       "Run rush update to update lockfile",
       "Verify no other files import package-json or throat"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -106,7 +106,7 @@
       "Add test for getNpmInfoBatch function",
       "Add test verifying concurrency limiting behavior"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
