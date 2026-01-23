@@ -261,16 +261,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         }
 
         case 'view': {
-          if (allowlist.allowedOptions.length === 0) {
-            void vscode.window.showInformationMessage(
-              `No launch options are currently allowed.\n\nAllowlist file: ${allowlistPath}`
-            );
-          } else {
-            const message: string = `Currently allowed launch options:\n\n${allowlist.allowedOptions
-              .map((opt) => `• ${opt}`)
-              .join('\n')}\n\nAllowlist file: ${allowlistPath}`;
-            void vscode.window.showInformationMessage(message);
-          }
+          // just open the allowlist file in an editor (separate editor preferred because this will always be a local file)
+          await vscode.window.showTextDocument(vscode.Uri.file(allowlistPath));
           break;
         }
       }
@@ -358,7 +350,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             }
 
             message += `The following options are not in your allowlist and will be filtered:\n`;
-            message += deniedKeys.map((key) => `  • ${key}`).join('\n');
+            message += deniedKeys.map((key) => `  - ${key}`).join('\n');
             message += '\n\nWould you like to add these options to your allowlist?';
 
             const response: string | undefined = await vscode.window.showWarningMessage(
@@ -366,29 +358,39 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
               { modal: true },
               'Add to Allowlist',
               'Continue Without',
-              'Cancel'
+              'Configure Allowlist'
             );
 
-            if (response === 'Add to Allowlist') {
-              // Add all denied options to the allowlist
-              for (const option of deniedKeys) {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                await LaunchOptionsValidator.addToAllowlistAsync(option as any);
-                outputChannel.appendLine(`Added '${option}' to allowlist.`);
+            switch (response) {
+              case 'Add to Allowlist': {
+                // Add all denied options to the allowlist
+                for (const option of deniedKeys) {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  await LaunchOptionsValidator.addToAllowlistAsync(option as any);
+                  outputChannel.appendLine(`Added '${option}' to allowlist.`);
+                }
+                void vscode.window.showInformationMessage(
+                  `Added ${deniedKeys.length} option(s) to allowlist: ${deniedKeys.join(', ')}`
+                );
+                outputChannel.appendLine('User added denied options to allowlist. Browser launch approved.');
+                return true;
               }
-              void vscode.window.showInformationMessage(
-                `Added ${deniedKeys.length} option(s) to allowlist: ${deniedKeys.join(', ')}`
-              );
-              outputChannel.appendLine('User added denied options to allowlist. Browser launch approved.');
-              return true;
-            } else if (response === 'Continue Without') {
-              outputChannel.appendLine(
-                `User approved browser launch. Denied options will be filtered: ${deniedKeys.join(', ')}`
-              );
-              return true;
-            } else {
-              outputChannel.appendLine('User denied browser launch.');
-              return false;
+              case 'Continue Without': {
+                outputChannel.appendLine(
+                  `User approved browser launch. Denied options will be filtered: ${deniedKeys.join(', ')}`
+                );
+                return true;
+              }
+              case 'Configure Allowlist': {
+                outputChannel.appendLine('User chose to configure allowlist and cancel browser launch.');
+                await handleManageAllowlist();
+                return false;
+              }
+              // "Cancel" or closed dialog
+              default: {
+                outputChannel.appendLine('User canceled browser launch.');
+                return false;
+              }
             }
           }
 
