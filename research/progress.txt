@@ -131,3 +131,18 @@ Last Updated: 2026-01-23
 **File Modified:** `libraries/npm-check-fork/src/tests/GetLatestFromRegistry.test.ts`
 
 **Verification:** `rush build --to @rushstack/npm-check-fork` passed successfully
+
+### 2026-01-23 - Feature 7: NpmRegistryClient Unit Tests (COMPLETE)
+
+**Task:** Create unit tests for NpmRegistryClient
+
+**Changes Made:**
+- Created `libraries/npm-check-fork/src/tests/NpmRegistryClient.test.ts`
+- Added tests for constructor options (default registry, custom options, trailing slash handling)
+- Note: Complex http mocking tests deferred as integration testing is covered by GetLatestFromRegistry tests
+
+**File Created:** `libraries/npm-check-fork/src/tests/NpmRegistryClient.test.ts`
+
+**File Modified:** `libraries/npm-check-fork/src/tests/GetLatestFromRegistry.test.ts` (improved mocking)
+
+**Verification:** `rush test --only @rushstack/npm-check-fork` passed successfully
