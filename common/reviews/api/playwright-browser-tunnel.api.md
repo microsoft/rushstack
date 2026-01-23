@@ -16,9 +16,6 @@ export type BrowserName = 'chromium' | 'firefox' | 'webkit';
 export function createTunneledBrowserAsync(browserName: BrowserName, launchOptions: LaunchOptions, logger?: ITerminal, port?: number): Promise<IDisposableTunneledBrowser>;
 
 // @beta
-export const DENIED_LAUNCH_OPTIONS: ReadonlySet<keyof LaunchOptions>;
-
-// @beta
 export const EXTENSION_INSTALLED_FILENAME: string;
 
 // @beta
@@ -87,8 +84,8 @@ export const LAUNCH_OPTIONS_ALLOWLIST_FILENAME: string;
 export class LaunchOptionsValidator {
     static addToAllowlistAsync(option: keyof LaunchOptions): Promise<void>;
     static clearAllowlistAsync(): Promise<void>;
+    static getAllowlistDescription(): string;
     static getAllowlistFilePath(): string;
-    static getDeniedOptionsDescription(): string;
     static readAllowlistAsync(): Promise<ILaunchOptionsAllowlist>;
     static removeFromAllowlistAsync(option: keyof LaunchOptions): Promise<void>;
     static validateLaunchOptionsAsync(launchOptions: LaunchOptions, terminal?: ITerminal): Promise<ILaunchOptionsValidationResult>;

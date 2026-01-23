@@ -17,23 +17,6 @@ import type { ITerminal } from '@rushstack/terminal';
 export const LAUNCH_OPTIONS_ALLOWLIST_FILENAME: string = '.playwright-launch-options-allowlist.json';
 
 /**
- * Launch option properties that are automatically denied by default for security reasons.
- * These options can potentially be abused for remote code execution from a compromised environment.
- *
- * Note: 'headless' is intentionally NOT in this list. The tunnel always enforces headless: false
- * to enable headed browser tests in remote environments, which is the primary purpose of this extension.
- *
- * @beta
- */
-export const DENIED_LAUNCH_OPTIONS: ReadonlySet<keyof LaunchOptions> = new Set([
-  'args',
-  'executablePath',
-  'downloadsPath',
-  'firefoxUserPrefs',
-  'ignoreDefaultArgs'
-]);
-
-/**
  * Interface for the allowlist configuration stored in the user's local file system.
  * @beta
  */
@@ -154,7 +137,7 @@ export class LaunchOptionsValidator {
 
   /**
    * Validates launch options against the security allowlist.
-   * Automatically denies dangerous options unless explicitly allowed by the user.
+   * All launch options are denied by default unless explicitly allowed by the user.
    *
    * @param launchOptions - The launch options to validate
    * @param terminal - Optional terminal for logging warnings
@@ -169,32 +152,32 @@ export class LaunchOptionsValidator {
 
     const deniedOptions: Array<keyof LaunchOptions> = [];
     const warnings: string[] = [];
-    const filteredOptions: LaunchOptions = { ...launchOptions };
+    const filteredOptions: LaunchOptions = {};
 
-    // Check each denied option
-    for (const deniedOption of DENIED_LAUNCH_OPTIONS) {
-      if (deniedOption in launchOptions) {
-        // Check if it's in the allowlist
-        if (!allowedOptionsSet.has(deniedOption)) {
-          // Remove the option from the filtered result
-          delete filteredOptions[deniedOption];
-          deniedOptions.push(deniedOption);
+    // Check each provided launch option - deny all unless explicitly allowed
+    for (const key of Object.keys(launchOptions) as Array<keyof LaunchOptions>) {
+      if (allowedOptionsSet.has(key)) {
+        // Option is in the user's allowlist - permit it
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (filteredOptions as any)[key] = launchOptions[key];
 
-          const warning: string =
-            `Launch option '${deniedOption}' was denied for security reasons. ` +
-            `To allow this option, add it to your local allowlist at: ${this.getAllowlistFilePath()}`;
-          warnings.push(warning);
+        if (terminal) {
+          terminal.writeWarningLine(
+            `Launch option '${key}' is allowed by user allowlist. ` +
+              `Value: ${JSON.stringify(launchOptions[key])}`
+          );
+        }
+      } else {
+        // Option is not in allowlist - deny it
+        deniedOptions.push(key);
 
-          if (terminal) {
-            terminal.writeWarningLine(warning);
-          }
-        } else {
-          if (terminal) {
-            terminal.writeWarningLine(
-              `Launch option '${deniedOption}' is allowed by user allowlist. ` +
-                `Value: ${JSON.stringify(launchOptions[deniedOption])}`
-            );
-          }
+        const warning: string =
+          `Launch option '${key}' was denied (not in allowlist). ` +
+          `To allow this option, add it to your local allowlist at: ${this.getAllowlistFilePath()}`;
+        warnings.push(warning);
+
+        if (terminal) {
+          terminal.writeWarningLine(warning);
         }
       }
     }
@@ -239,14 +222,13 @@ export class LaunchOptionsValidator {
   }
 
   /**
-   * Gets a human-readable description of denied launch options.
+   * Gets a human-readable description of the allowlist security model.
    */
-  public static getDeniedOptionsDescription(): string {
-    const options: string[] = Array.from(DENIED_LAUNCH_OPTIONS);
+  public static getAllowlistDescription(): string {
     return (
-      `The following launch options are denied by default for security:\n` +
-      options.map((opt) => `  - ${opt}`).join('\n') +
-      `\n\nThese options can potentially be abused for remote code execution from a compromised environment.`
+      `All launch options are denied by default for security.\n` +
+      `Only options explicitly added to your allowlist will be permitted.\n\n` +
+      `Allowlist location: ${this.getAllowlistFilePath()}`
     );
   }
 }

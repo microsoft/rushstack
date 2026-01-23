@@ -34,9 +34,5 @@ export {
   EXTENSION_INSTALLED_FILENAME,
   getNormalizedErrorString
 } from './utilities';
-export {
-  LaunchOptionsValidator,
-  LAUNCH_OPTIONS_ALLOWLIST_FILENAME,
-  DENIED_LAUNCH_OPTIONS
-} from './LaunchOptionsValidator';
+export { LaunchOptionsValidator, LAUNCH_OPTIONS_ALLOWLIST_FILENAME } from './LaunchOptionsValidator';
 export type { ILaunchOptionsAllowlist, ILaunchOptionsValidationResult } from './LaunchOptionsValidator';

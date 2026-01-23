@@ -10,9 +10,9 @@ import {
   type TunnelStatus,
   type IHandshake,
   EXTENSION_INSTALLED_FILENAME,
-  DENIED_LAUNCH_OPTIONS,
   LaunchOptionsValidator,
   type ILaunchOptionsAllowlist,
+  type ILaunchOptionsValidationResult,
   getNormalizedErrorString
 } from '@rushstack/playwright-browser-tunnel';
 import { Terminal, type ITerminal, type ITerminalProvider } from '@rushstack/terminal';
@@ -199,18 +199,21 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
       switch (selected.action) {
         case 'add': {
-          const deniedOptions: string[] = Array.from(DENIED_LAUNCH_OPTIONS);
-          const optionToAdd: string | undefined = await vscode.window.showQuickPick(deniedOptions, {
-            placeHolder: 'Select a launch option to allow',
+          const optionToAdd: string | undefined = await vscode.window.showInputBox({
+            placeHolder: 'e.g., args, executablePath, channel',
+            prompt:
+              'Enter the name of a Playwright launch option to allow. ' +
+              'All options are denied by default for security.',
             ignoreFocusOut: true
           });
 
-          if (optionToAdd) {
+          if (optionToAdd && optionToAdd.trim()) {
+            const trimmedOption: string = optionToAdd.trim();
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await LaunchOptionsValidator.addToAllowlistAsync(optionToAdd as any);
-            outputChannel.appendLine(`Added '${optionToAdd}' to allowlist.`);
+            await LaunchOptionsValidator.addToAllowlistAsync(trimmedOption as any);
+            outputChannel.appendLine(`Added '${trimmedOption}' to allowlist.`);
             void vscode.window.showInformationMessage(
-              `'${optionToAdd}' has been added to the allowlist at:\n${allowlistPath}`
+              `'${trimmedOption}' has been added to the allowlist at:\n${allowlistPath}`
             );
           }
           break;
@@ -341,34 +344,78 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             vscode.workspace.getConfiguration('playwright-tunnel');
           const shouldPrompt: boolean = currentConfig.get<boolean>('promptBeforeLaunch', true);
 
-          if (!shouldPrompt) {
-            outputChannel.appendLine('Prompt disabled. Browser launch auto-approved.');
-            return true;
-          }
+          // Validate launch options against the allowlist
+          const validationResult: ILaunchOptionsValidationResult =
+            await LaunchOptionsValidator.validateLaunchOptionsAsync(handshake.launchOptions);
 
           // Build a summary of the launch options, excluding 'headless' since we always enforce headless: false
           const launchOptionKeys: string[] = Object.keys(handshake.launchOptions).filter(
             (key) => key !== 'headless'
           );
-          const deniedKeys: string[] = launchOptionKeys.filter((key) =>
-            DENIED_LAUNCH_OPTIONS.has(key as keyof typeof handshake.launchOptions)
-          );
+          // Filter out 'headless' from denied options since we handle it separately
+          const deniedKeys: string[] = validationResult.deniedOptions.filter((key) => key !== 'headless');
 
-          let message: string = `Playwright is requesting to launch ${handshake.browserName} with the following options:\n\n`;
+          // If there are denied options, always prompt to give user the chance to add to allowlist
+          if (deniedKeys.length > 0) {
+            let message: string = `Playwright is requesting to launch ${handshake.browserName}.\n\n`;
+
+            // Create a copy without the headless property for display
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { headless, ...displayOptions } = handshake.launchOptions;
+            if (Object.keys(displayOptions).length > 0) {
+              message += `Launch options: ${JSON.stringify(displayOptions, null, 2)}\n\n`;
+            }
+
+            message += `⚠️ The following options are not in your allowlist and will be filtered:\n`;
+            message += deniedKeys.map((key) => `  • ${key}`).join('\n');
+            message += '\n\nWould you like to add these options to your allowlist?';
+
+            const response: string | undefined = await vscode.window.showWarningMessage(
+              message,
+              { modal: true },
+              'Add to Allowlist',
+              'Continue Without',
+              'Cancel'
+            );
+
+            if (response === 'Add to Allowlist') {
+              // Add all denied options to the allowlist
+              for (const option of deniedKeys) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                await LaunchOptionsValidator.addToAllowlistAsync(option as any);
+                outputChannel.appendLine(`Added '${option}' to allowlist.`);
+              }
+              void vscode.window.showInformationMessage(
+                `Added ${deniedKeys.length} option(s) to allowlist: ${deniedKeys.join(', ')}`
+              );
+              outputChannel.appendLine('User added denied options to allowlist. Browser launch approved.');
+              return true;
+            } else if (response === 'Continue Without') {
+              outputChannel.appendLine(
+                `User approved browser launch. Denied options will be filtered: ${deniedKeys.join(', ')}`
+              );
+              return true;
+            } else {
+              outputChannel.appendLine('User denied browser launch.');
+              return false;
+            }
+          }
+
+          // No denied options - check if we should prompt at all
+          if (!shouldPrompt) {
+            outputChannel.appendLine('Prompt disabled. Browser launch auto-approved.');
+            return true;
+          }
+
+          let message: string = `Playwright is requesting to launch ${handshake.browserName}.\n\n`;
 
           if (launchOptionKeys.length === 0) {
-            message += 'No launch options specified (using defaults).\n\n';
+            message += 'No launch options specified (using defaults).';
           } else {
             // Create a copy without the headless property for display
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { headless, ...displayOptions } = handshake.launchOptions;
-            message += `Launch options: ${JSON.stringify(displayOptions, null, 2)}\n\n`;
-
-            if (deniedKeys.length > 0) {
-              message += `⚠️ WARNING: The following options are restricted for security and will be filtered:\n`;
-              message += deniedKeys.map((key) => `  • ${key}`).join('\n');
-              message += '\n\nTo allow these options, you can add them to your local allowlist.\n\n';
-            }
+            message += `Launch options: ${JSON.stringify(displayOptions, null, 2)}`;
           }
 
           const response: string | undefined = await vscode.window.showInformationMessage(
