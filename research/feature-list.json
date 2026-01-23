@@ -43,7 +43,7 @@
       "Preserve existing homepage extraction using bestGuessHomepage",
       "Ensure INpmRegistryInfo return type remains unchanged"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

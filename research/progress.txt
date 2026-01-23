@@ -55,3 +55,21 @@ Last Updated: 2026-01-23
 **Notes:**
 - Used Node.js built-in `https` module instead of WebClient from rush-lib because WebClient is an internal utility (not exported in the public API)
 - This implementation is self-contained and doesn't require adding rush-lib as a dependency
+
+### 2026-01-23 - Feature 3: Update GetLatestFromRegistry.ts (COMPLETE)
+
+**Task:** Update GetLatestFromRegistry.ts to use NpmRegistryClient instead of package-json
+
+**Changes Made:**
+- Removed imports: `os`, `package-json`, `throat`
+- Added imports: `NpmRegistryClient`, `INpmRegistryClientResult`, `INpmRegistryPackageResponse`
+- Created module-level `_registryClient` variable with lazy initialization via `getRegistryClient()`
+- Rewrote `getNpmInfo` function to use `NpmRegistryClient.fetchPackageMetadataAsync`
+- Preserved existing version sorting logic using lodash and semver
+- Preserved existing homepage extraction using `bestGuessHomepage`
+- Added explicit type annotations to satisfy ESLint rules
+- Cast `INpmRegistryPackageResponse` to `INpmCheckRegistryData` for `bestGuessHomepage` compatibility
+
+**File Modified:** `libraries/npm-check-fork/src/GetLatestFromRegistry.ts`
+
+**Verification:** `rush build --to @rushstack/npm-check-fork` passed successfully (24.24s)
