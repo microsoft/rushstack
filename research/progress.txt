@@ -73,3 +73,24 @@ Last Updated: 2026-01-23
 **File Modified:** `libraries/npm-check-fork/src/GetLatestFromRegistry.ts`
 
 **Verification:** `rush build --to @rushstack/npm-check-fork` passed successfully (24.24s)
+
+### 2026-01-23 - Feature 4: getNpmInfoBatch Function (COMPLETE)
+
+**Task:** Add getNpmInfoBatch function for concurrent package fetching
+
+**Changes Made:**
+- Added `getNpmInfoBatch` function to `GetLatestFromRegistry.ts`
+- Function signature: `getNpmInfoBatch(packageNames: string[], concurrency?: number): Promise<Map<string, INpmRegistryInfo>>`
+- Default concurrency: `os.cpus().length` (matching original throat behavior)
+- Implementation uses batch processing with `Promise.all` for concurrency limiting
+- Exported `getNpmInfoBatch` from `index.ts`
+
+**Files Modified:**
+- `libraries/npm-check-fork/src/GetLatestFromRegistry.ts`
+- `libraries/npm-check-fork/src/index.ts`
+
+**Verification:** `rush build --to @rushstack/npm-check-fork` passed successfully (21.40s)
+
+**Notes:**
+- Used simple batch processing instead of `Async.forEachAsync` to avoid adding dependencies
+- Function processes packages in batches of `concurrency` size using `Promise.all`
