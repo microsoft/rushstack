@@ -12,6 +12,7 @@ import {
   type ICertificate
 } from '@rushstack/debug-certificate-manager';
 
+import { runWorkspaceCommandAsync } from '@rushstack/vscode-shared/lib/runWorkspaceCommandAsync';
 import { VScodeOutputChannelTerminalProvider } from '@rushstack/vscode-shared/lib/VScodeOutputChannelTerminalProvider';
 import { getCertificateManager } from './certificates';
 import { getConfig } from './config';
@@ -25,7 +26,6 @@ import {
   VSCODE_SETTINGS_EXTENSION_ID_FILTER,
   VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS
 } from './constants';
-import { runWorkspaceCommandAsync } from './terminal';
 
 export function activate(context: vscode.ExtensionContext): void {
   const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel(EXTENSION_DISPLAY_NAME);

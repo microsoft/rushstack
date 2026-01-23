@@ -321,6 +321,55 @@ importers:
         specifier: 5.8.2
         version: 5.8.2
 
+  ../../../apps/playwright-browser-tunnel:
+    dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
+      '@rushstack/ts-command-line':
+        specifier: workspace:*
+        version: link:../../libraries/ts-command-line
+      playwright:
+        specifier: 1.56.1
+        version: 1.56.1
+      semver:
+        specifier: ~7.5.4
+        version: 7.5.4
+      string-argv:
+        specifier: ~0.3.1
+        version: 0.3.2
+      ws:
+        specifier: ~8.14.1
+        version: 8.14.2
+    devDependencies:
+      '@playwright/test':
+        specifier: ~1.56.1
+        version: 1.56.1
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../heft
+      '@types/node':
+        specifier: 20.17.19
+        version: 20.17.19
+      '@types/semver':
+        specifier: 7.5.0
+        version: 7.5.0
+      '@types/ws':
+        specifier: 8.5.5
+        version: 8.5.5
+      eslint:
+        specifier: ~9.37.0
+        version: 9.37.0
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+      playwright-core:
+        specifier: ~1.56.1
+        version: 1.56.1
+
   ../../../apps/rundown:
     dependencies:
       '@rushstack/node-core-library':
@@ -5125,6 +5174,46 @@ importers:
         specifier: 1.18.8
         version: 1.18.8
 
+  ../../../vscode-extensions/playwright-on-codespaces-vscode-extension:
+    dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@rushstack/playwright-browser-tunnel':
+        specifier: workspace:*
+        version: link:../../apps/playwright-browser-tunnel
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
+      '@rushstack/vscode-shared':
+        specifier: workspace:*
+        version: link:../vscode-shared
+      playwright-core:
+        specifier: ~1.56.1
+        version: 1.56.1
+      tslib:
+        specifier: ~2.8.1
+        version: 2.8.1
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/heft-node-rig':
+        specifier: workspace:*
+        version: link:../../rigs/heft-node-rig
+      '@rushstack/heft-vscode-extension-rig':
+        specifier: workspace:*
+        version: link:../../rigs/heft-vscode-extension-rig
+      '@types/node':
+        specifier: 20.17.19
+        version: 20.17.19
+      '@types/vscode':
+        specifier: 1.103.0
+        version: 1.103.0
+      '@types/webpack-env':
+        specifier: 1.18.8
+        version: 1.18.8
+
   ../../../vscode-extensions/rush-vscode-command-webview:
     dependencies:
       '@fluentui/react':
@@ -8120,6 +8209,11 @@ packages:
     resolution: {integrity: sha512-1SUf/Cg2GzGDyaf15aR9St9TWlb+XvbZXWpDx8YKs7MLzMH/BCeopv+y9vzrzgkfykCGuWOlSu3mZhj2+FQcrg==}
     engines: {node: '>=10'}
     deprecated: This functionality has been moved to @npmcli/fs
+
+  '@playwright/test@1.56.1':
+    resolution: {integrity: sha512-vSMYtL/zOcFpvJCW71Q/OEGQb7KYBPAdKh35WNSkaZA75JlAO8ED8UN6GUNTm3drWomcbcqRPFqQbLae8yBTdg==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   '@pmmmwh/react-refresh-webpack-plugin@0.5.17':
     resolution: {integrity: sha512-tXDyE1/jzFsHXjhRZQ3hMl0IVhYe5qula43LDWIhVfjp9G/nT5OQY5AORVOrkEGAUltBJOfOWeETbmhm6kHhuQ==}
@@ -15578,6 +15672,16 @@ packages:
     resolution: {integrity: sha512-nDywThFk1i4BQK4twPQ6TA4RT8bDY96yeuCVBWL3ePARCiEKDRSrNGbFIgUJpLp+XeIR65v8ra7WuJOFUBtkMA==}
     engines: {node: '>=8'}
 
+  playwright-core@1.56.1:
+    resolution: {integrity: sha512-hutraynyn31F+Bifme+Ps9Vq59hKuUCz7H1kDOcBs+2oGguKkWTU50bBWrtz34OUWmIwpBTWDxaRPXrIXkgvmQ==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.56.1:
+    resolution: {integrity: sha512-aFi5B0WovBHTEvpM3DzXTUaeN6eN0qWnTkKx4NQaH4Wvcmc153PdaY2UBdSYKaGYw+UyWXSVyxDUg5DoPEttjw==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   pnp-webpack-plugin@1.6.4:
     resolution: {integrity: sha512-7Wjy+9E3WwLOEL30D+m8TSTF7qJJUJLONBnwQp0518siuMxUQUbgZwssaFX+QKlZkjHZcw/IpZCt/H0srrntSg==}
     engines: {node: '>=6'}
@@ -22579,6 +22683,10 @@ snapshots:
     dependencies:
       mkdirp: 1.0.4
       rimraf: 3.0.2
+
+  '@playwright/test@1.56.1':
+    dependencies:
+      playwright: 1.56.1
 
   '@pmmmwh/react-refresh-webpack-plugin@0.5.17(@types/webpack@4.41.32)(react-refresh@0.11.0)(type-fest@2.19.0)(webpack-dev-server@5.2.2(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1)(webpack@4.47.0)':
     dependencies:
@@ -33498,6 +33606,14 @@ snapshots:
   pkg-up@3.1.0:
     dependencies:
       find-up: 3.0.0
+
+  playwright-core@1.56.1: {}
+
+  playwright@1.56.1:
+    dependencies:
+      playwright-core: 1.56.1
+    optionalDependencies:
+      fsevents: 2.3.2
 
   pnp-webpack-plugin@1.6.4(typescript@5.8.2):
     dependencies:
