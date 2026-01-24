@@ -8,6 +8,7 @@ import * as process from 'node:process';
 import * as zlib from 'node:zlib';
 
 import type { INpmRegistryPackageResponse } from './interfaces/INpmCheckRegistry';
+import packageJson from '../package.json';
 
 /**
  * Options for configuring the NpmRegistryClient.
@@ -70,7 +71,8 @@ export class NpmRegistryClient {
     // trim trailing slash if one was provided
     this._registryUrl = (options?.registryUrl ?? DEFAULT_REGISTRY_URL).replace(/\/$/, '');
     this._userAgent =
-      options?.userAgent ?? `npm-check-fork node/${process.version} ${os.platform()} ${os.arch()}`;
+      options?.userAgent ??
+      `npm-check-fork/${packageJson.version} node/${process.version} ${os.platform()} ${os.arch()}`;
     this._timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   }
 
