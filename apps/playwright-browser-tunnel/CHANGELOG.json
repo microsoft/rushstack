@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/playwright-browser-tunnel",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/playwright-browser-tunnel_v0.1.0",
+      "date": "Sat, 24 Jan 2026 01:13:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce CLI based tool to launch a remote browser provider for Playwright."
+          }
+        ]
+      }
+    }
+  ]
+}
