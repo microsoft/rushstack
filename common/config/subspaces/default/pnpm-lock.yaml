@@ -3857,6 +3857,9 @@ importers:
 
   ../../../libraries/npm-check-fork:
     dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../node-core-library
       giturl:
         specifier: ^2.0.0
         version: 2.0.0

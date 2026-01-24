@@ -67,6 +67,7 @@ export class NpmRegistryClient {
   private readonly _timeoutMs: number;
 
   public constructor(options?: INpmRegistryClientOptions) {
+    // trim trailing slash if one was provided
     this._registryUrl = (options?.registryUrl ?? DEFAULT_REGISTRY_URL).replace(/\/$/, '');
     this._userAgent =
       options?.userAgent ?? `npm-check-fork node/${process.version} ${os.platform()} ${os.arch()}`;
@@ -128,6 +129,8 @@ export class NpmRegistryClient {
         }
       };
 
+      // TODO: Extract WebClient from rush-lib so that we can use it here
+      // instead of this reimplementation of HTTP request logic.
       const request: http.ClientRequest = requestModule.request(
         requestOptions,
         (response: http.IncomingMessage) => {
@@ -164,10 +167,14 @@ export class NpmRegistryClient {
               }
 
               const data: INpmRegistryPackageResponse = JSON.parse(buffer.toString('utf8'));
+
+              // Successfully retrieved and parsed data
               resolve({ data });
             } catch (parseError) {
               resolve({
-                error: `Failed to parse response: ${parseError instanceof Error ? parseError.message : String(parseError)}`
+                error: `Failed to parse response: ${
+                  parseError instanceof Error ? parseError.message : String(parseError)
+                }`
               });
             }
           });

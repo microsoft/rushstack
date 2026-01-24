@@ -6,6 +6,8 @@ import os from 'node:os';
 import _ from 'lodash';
 import semver from 'semver';
 
+import { Async } from '@rushstack/node-core-library';
+
 import bestGuessHomepage from './BestGuessHomepage';
 import { NpmRegistryClient, type INpmRegistryClientResult } from './NpmRegistryClient';
 import type {
@@ -82,17 +84,14 @@ export async function getNpmInfoBatch(
 ): Promise<Map<string, INpmRegistryInfo>> {
   const results: Map<string, INpmRegistryInfo> = new Map();
 
-  // Process packages in batches to limit concurrency
-  for (let i: number = 0; i < packageNames.length; i += concurrency) {
-    const batch: string[] = packageNames.slice(i, i + concurrency);
-    const batchResults: INpmRegistryInfo[] = await Promise.all(
-      batch.map((packageName: string) => getNpmInfo(packageName))
-    );
-
-    batch.forEach((packageName: string, index: number) => {
-      results.set(packageName, batchResults[index]);
-    });
-  }
+  // TODO: Refactor createPackageSummary to use this batch function to reduce registry requests
+  await Async.forEachAsync(
+    packageNames,
+    async (packageName: string) => {
+      results.set(packageName, await getNpmInfo(packageName));
+    },
+    { concurrency }
+  );
 
   return results;
 }
