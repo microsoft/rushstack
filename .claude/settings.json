@@ -1,0 +1,21 @@
+{
+  "env": {
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  },
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "enableAllProjectMcpServers": true,
+  "extraKnownMarketplaces": {
+    "atomic-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "flora131/atomic"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "ralph@atomic-plugins": true
+  }
+}
