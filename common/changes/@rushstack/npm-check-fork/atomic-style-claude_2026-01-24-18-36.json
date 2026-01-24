@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/npm-check-fork",
+      "comment": "Remove dependencies on throat and package-json",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/npm-check-fork"
+}
