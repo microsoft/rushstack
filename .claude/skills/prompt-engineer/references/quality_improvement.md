@@ -129,7 +129,7 @@ Each example illustrates how precise specifications and contextual grounding pro
 ### Core Strategies
 
 **1. Harmlessness Screening**
-Pre-screen user inputs using a lightweight model like Claude Haiku for content moderation. Have the model evaluate whether submitted content "refers to harmful, illegal, or explicit activities" and respond with Y or N accordingly.
+Pre-screen user inputs using Claude Opus for content moderation. Have the model evaluate whether submitted content "refers to harmful, illegal, or explicit activities" and respond with Y or N accordingly.
 
 Example:
 ```

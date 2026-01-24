@@ -1,162 +1,399 @@
 [
   {
     "category": "refactor",
-    "description": "Create INpmRegistryPackageResponse and INpmRegistryVersionMetadata type definitions",
+    "description": "Set up Ink and React dependencies in rush-lib package.json",
     "steps": [
-      "Open libraries/npm-check-fork/src/interfaces/INpmCheckRegistry.ts",
-      "Add INpmRegistryPackageResponse interface with name, dist-tags, versions, and time fields",
-      "Add INpmRegistryVersionMetadata interface with name, version, homepage, bugs, and repository fields",
-      "Ensure types align with npm registry API documentation",
-      "Run rush build to verify type definitions compile correctly"
+      "Add ink ~5.2.0 to dependencies in libraries/rush-lib/package.json",
+      "Add ink-select-input ~6.0.0 to dependencies",
+      "Add ink-text-input ~6.0.0 to dependencies",
+      "Add react ~18.2.0 to dependencies",
+      "Add @types/react ~18.2.0 to devDependencies",
+      "Run rush update to install new dependencies",
+      "Verify dependencies are correctly installed"
     ],
-    "passes": true
-  },
-  {
-    "category": "functional",
-    "description": "Create NpmRegistryClient class with fetchPackageMetadataAsync method",
-    "steps": [
-      "Create new file libraries/npm-check-fork/src/NpmRegistryClient.ts",
-      "Define INpmRegistryClientOptions interface with registryUrl and userAgent options",
-      "Define INpmRegistryClientResult interface with data and error fields",
-      "Implement NpmRegistryClient constructor with default registry URL and user agent",
-      "Implement _buildPackageUrl private method to handle scoped package URL encoding",
-      "Implement fetchPackageMetadataAsync method using WebClient from rush-lib",
-      "Handle 404 responses with 'Package not found' error",
-      "Handle other HTTP errors with status code in error message",
-      "Handle network errors with error message",
-      "Export NpmRegistryClient class and related interfaces"
-    ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "refactor",
-    "description": "Update GetLatestFromRegistry.ts to use NpmRegistryClient instead of package-json",
+    "description": "Create terminal capability detection utilities",
     "steps": [
-      "Open libraries/npm-check-fork/src/GetLatestFromRegistry.ts",
-      "Remove import of package-json",
-      "Remove import of throat",
-      "Add import for NpmRegistryClient",
-      "Add import for Async from @rushstack/node-core-library",
-      "Create module-level _registryClient variable and getRegistryClient() function",
-      "Update getNpmInfo function to use NpmRegistryClient.fetchPackageMetadataAsync",
-      "Preserve existing version sorting logic using lodash and semver",
-      "Preserve existing homepage extraction using bestGuessHomepage",
-      "Ensure INpmRegistryInfo return type remains unchanged"
+      "Create new file src/utilities/terminal/TerminalCapabilities.ts",
+      "Implement ITerminalCapabilities interface with display, interaction, and size properties",
+      "Implement detectCapabilities() function to detect terminal features",
+      "Implement detectUnicodeSupport() helper function",
+      "Implement determineRenderingTier() function returning rich/standard/basic/non-interactive",
+      "Export all interfaces and functions",
+      "Write unit tests for capability detection"
     ],
-    "passes": true
-  },
-  {
-    "category": "functional",
-    "description": "Add getNpmInfoBatch function for concurrent package fetching",
-    "steps": [
-      "Open libraries/npm-check-fork/src/GetLatestFromRegistry.ts",
-      "Add getNpmInfoBatch function signature with packageNames array and optional concurrency parameter",
-      "Implement using Async.forEachAsync with concurrency option",
-      "Default concurrency to os.cpus().length (matching original throat behavior)",
-      "Return Map<string, INpmRegistryInfo> with results",
-      "Export getNpmInfoBatch function"
-    ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "refactor",
-    "description": "Update package.json to add required dependencies",
+    "description": "Create symbol sets and color schemes for rendering tiers",
     "steps": [
-      "Open libraries/npm-check-fork/package.json",
-      "Add @rushstack/node-core-library as workspace:* dependency if not present",
-      "Add @rushstack/rush-lib as workspace:* dependency (check if runtime or devDependency)",
-      "Run rush update to install dependencies"
+      "Create new file src/utilities/terminal/TerminalSymbols.ts",
+      "Define ISymbolSet interface with bullet, checkbox, focus, arrow, and border properties",
+      "Define IColorScheme interface with minor, major, nonSemver, selected, focused, dimmed, error",
+      "Implement SYMBOL_SETS constant with rich, standard, basic, and non-interactive variants",
+      "Implement COLOR_SCHEMES constant with appropriate colors for each tier",
+      "Export symbol set selection helper functions",
+      "Write unit tests for symbol set selection"
     ],
-    "passes": true
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement core type definitions for package upgrade UI",
+    "steps": [
+      "Create new file src/utilities/upgrade/UpgradeTypes.ts",
+      "Define UpdateCategory type as 'minor' | 'major' | 'nonSemver'",
+      "Define IPackage interface with id, name, currentVersion, newVersion, category, url, description",
+      "Define ICategoryInfo interface with label, description, symbol, color",
+      "Implement getCategoryInfo() helper function",
+      "Define IUpgradeUIState interface for state management",
+      "Export all types and helper functions"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement TitleBar component",
+    "steps": [
+      "Create new file src/utilities/upgrade/components/TitleBar.tsx",
+      "Import React, Box, and Text from ink",
+      "Define ITitleBarProps interface with title property",
+      "Implement TitleBar component with green background and window controls",
+      "Display >_ prefix before title text",
+      "Add window control symbols on right side",
+      "Export TitleBar component"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement ControlBar component with search input",
+    "steps": [
+      "Create new file src/utilities/upgrade/components/ControlBar.tsx",
+      "Import React, Box, Text from ink and TextInput from ink-text-input",
+      "Define IControlBarProps interface with searchTerm, onSearchChange, selectedCount, onClear",
+      "Implement command prompt label display",
+      "Implement search input with placeholder",
+      "Implement legend showing minor/major/non-semver symbols with colors",
+      "Implement selection counter with clear option",
+      "Export ControlBar component"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement PackageCard component",
+    "steps": [
+      "Create new file src/utilities/upgrade/components/PackageCard.tsx",
+      "Import React, Box, Text from ink",
+      "Define IPackageCardProps interface with pkg, isSelected, isFocused, onToggle, onFocus, onBlur",
+      "Implement checkbox display with selected/unselected states",
+      "Implement package name display with cyan color",
+      "Implement version transition display (current -> new)",
+      "Add border styling based on selection and focus state",
+      "Export PackageCard component"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement CategoryColumn component",
+    "steps": [
+      "Create new file src/utilities/upgrade/components/CategoryColumn.tsx",
+      "Import React, Box, Text from ink",
+      "Import PackageCard component",
+      "Define ICategoryColumnProps interface with category, packages, selectedCount, etc.",
+      "Implement category header with symbol, label, count, and 'all' link",
+      "Implement horizontal layout for package cards",
+      "Wire up onToggle, onSelectAll, and onFocus callbacks",
+      "Export CategoryColumn component"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement ActionBar component",
+    "steps": [
+      "Create new file src/utilities/upgrade/components/ActionBar.tsx",
+      "Import React, Box, Text from ink",
+      "Define IActionBarProps interface with selectedCount, onCancel, onUpgrade",
+      "Implement keyboard shortcut hints (SPACE select, ENTER upgrade, ESC cancel)",
+      "Implement Cancel button with gray styling",
+      "Implement Upgrade button with green styling when packages selected",
+      "Show package count in Upgrade button when applicable",
+      "Export ActionBar component"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement SuccessMessage component",
+    "steps": [
+      "Create new file src/utilities/upgrade/components/SuccessMessage.tsx",
+      "Import React, Box, Text from ink",
+      "Define ISuccessMessageProps interface with count property",
+      "Implement success checkmark display",
+      "Implement upgraded packages count message with proper pluralization",
+      "Add green border and styling",
+      "Export SuccessMessage component"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement TerminalUpgrade root component with state management",
+    "steps": [
+      "Create new file src/utilities/upgrade/components/TerminalUpgrade.tsx",
+      "Import React, useState, useMemo, useInput from ink",
+      "Import all sub-components (TitleBar, ControlBar, CategoryColumn, ActionBar, SuccessMessage)",
+      "Define ITerminalUpgradeProps interface with packages, onSubmit, onCancel",
+      "Implement selectedPackages state with Set<string>",
+      "Implement searchTerm state for filtering",
+      "Implement focusedPackageId state for keyboard navigation",
+      "Implement showSuccess state for completion feedback",
+      "Implement togglePackage function",
+      "Implement selectAllInCategory function",
+      "Implement clearSelection function",
+      "Implement handleUpgrade function",
+      "Implement filteredPackages derived state with useMemo",
+      "Implement groupedPackages derived state with useMemo",
+      "Implement useInput hook for keyboard controls",
+      "Render complete component hierarchy",
+      "Export TerminalUpgrade component"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement keyboard navigation with vim-style keys",
+    "steps": [
+      "Extend useInput handler in TerminalUpgrade component",
+      "Implement SPACE key for toggle selection",
+      "Implement ENTER key for upgrade action",
+      "Implement ESC key for cancel action",
+      "Implement arrow keys (up/down) for vertical navigation",
+      "Implement arrow keys (left/right) for column navigation",
+      "Implement vim keys (h/j/k/l) as alternatives to arrows",
+      "Implement '/' key to focus search input",
+      "Implement 'a' key for select all in current column",
+      "Implement 'A' key for select all packages",
+      "Implement 'n' key for deselect all in current column",
+      "Implement 'N' key for deselect all packages",
+      "Implement '1', '2', '3' keys for column jump",
+      "Implement 'g' key for go to first package",
+      "Implement 'G' key for go to last package",
+      "Write unit tests for keyboard navigation"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement real-time search filtering",
+    "steps": [
+      "Ensure ControlBar passes search term changes to parent",
+      "Implement filteredPackages useMemo hook in TerminalUpgrade",
+      "Filter packages by name.toLowerCase().includes(searchTerm.toLowerCase())",
+      "Update groupedPackages to use filteredPackages",
+      "Ensure CategoryColumn renders filtered packages",
+      "Handle empty filter results gracefully",
+      "Write unit tests for search filtering"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement responsive layout based on terminal width",
+    "steps": [
+      "Import useStdout hook from ink",
+      "Implement getLayoutMode function returning 'wide'/'medium'/'narrow'",
+      "Use columns >= 120 for wide (three columns side-by-side)",
+      "Use columns 80-119 for medium (two columns, third wraps)",
+      "Use columns < 80 for narrow (single column)",
+      "Apply flexDirection based on layout mode in TerminalUpgrade",
+      "Add flexWrap for medium layout",
+      "Write tests for different terminal widths"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement non-interactive fallback for CI environments",
+    "steps": [
+      "Detect non-interactive environment in upgradeInteractive function",
+      "Check caps.isInteractive from detectCapabilities()",
+      "When non-interactive, log error message to console.error",
+      "Print list of packages available for upgrade grouped by category",
+      "Print guidance for non-interactive upgrade command",
+      "Throw error with 'Interactive terminal required' message",
+      "Write tests for non-interactive fallback"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement screen reader accessibility support",
+    "steps": [
+      "Create useAnnounce hook for accessibility announcements",
+      "Check RUSH_ACCESSIBLE environment variable",
+      "Write announcements to stderr with bell character",
+      "Add announcements to selection toggle actions",
+      "Add announcements to navigation actions",
+      "Add announcements to upgrade/cancel completion",
+      "Document RUSH_ACCESSIBLE environment variable"
+    ],
+    "passes": false
   },
   {
     "category": "refactor",
-    "description": "Remove package-json and throat dependencies from package.json",
+    "description": "Integrate new UI with existing upgradeInteractive API",
     "steps": [
-      "Open libraries/npm-check-fork/package.json",
-      "Remove package-json from dependencies",
-      "Remove throat from dependencies",
-      "Run rush update to update lockfile",
-      "Verify no other files import package-json or throat"
+      "Open src/utilities/InteractiveUpgradeUI.ts",
+      "Import render from ink",
+      "Import TerminalUpgrade component",
+      "Keep existing IDepsToUpgradeAnswers interface unchanged",
+      "Keep existing upgradeInteractive function signature unchanged",
+      "Replace inquirer implementation with Ink render",
+      "Wrap render in Promise for async/await compatibility",
+      "Handle unmount on submit/cancel",
+      "Convert INpmCheckPackageSummary to IPackage format",
+      "Return IDepsToUpgradeAnswers on completion"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "functional",
-    "description": "Create unit tests for NpmRegistryClient",
+    "description": "Implement feature flag for gradual rollout",
     "steps": [
-      "Create new file libraries/npm-check-fork/src/test/NpmRegistryClient.test.ts",
-      "Add test for successful metadata fetch with mocked WebClient",
-      "Add test for 404 handling (package not found)",
-      "Add test for network error handling",
-      "Add test for scoped package URL encoding (@scope/name -> @scope%2Fname)",
-      "Add test for custom registry URL option",
-      "Add test for default user agent header"
+      "Check for RUSH_EXPERIMENT_INK_UI environment variable",
+      "If flag is not set, use existing inquirer implementation",
+      "If flag is set to '1' or 'true', use new Ink implementation",
+      "Log which implementation is being used in debug mode",
+      "Document feature flag in README or CHANGELOG"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "functional",
-    "description": "Update existing GetLatestFromRegistry tests to mock NpmRegistryClient",
+    "category": "ui",
+    "description": "Style package cards with proper color coding",
     "steps": [
-      "Open libraries/npm-check-fork/src/test/GetLatestFromRegistry.test.ts (or create if not exists)",
-      "Remove mocks for package-json module",
-      "Add mocks for NpmRegistryClient.fetchPackageMetadataAsync",
-      "Verify existing test cases still pass with new mocking approach",
-      "Add test for getNpmInfoBatch function",
-      "Add test verifying concurrency limiting behavior"
+      "Apply cyan color for minor update symbols and text",
+      "Apply yellow color for major update symbols and text",
+      "Apply magenta color for non-semver update symbols and text",
+      "Apply green color for selected items",
+      "Apply gray/dim color for unselected items",
+      "Apply cyan highlight for focused items",
+      "Ensure colors degrade appropriately based on rendering tier"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "functional",
-    "description": "Verify BestGuessHomepage continues to work with new data shape",
+    "category": "ui",
+    "description": "Implement terminal window frame styling",
     "steps": [
-      "Review libraries/npm-check-fork/src/BestGuessHomepage.ts",
-      "Ensure INpmCheckRegistryData interface is compatible with INpmRegistryPackageResponse",
-      "Verify homepage extraction from versions[latest].homepage works",
-      "Verify fallback to bugs.url works",
-      "Verify fallback to repository.url works",
-      "Run existing BestGuessHomepage tests"
+      "Add outer Box with borderStyle='single' and borderColor='green'",
+      "Implement TitleBar with green background",
+      "Add window control symbols in TitleBar",
+      "Ensure proper padding throughout layout",
+      "Style section separators between control bar, content, and action bar"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "functional",
-    "description": "Run rush build and rush test to verify implementation",
+    "category": "performance",
+    "description": "Optimize rendering performance for large package lists",
     "steps": [
-      "Run rush build --to @rushstack/npm-check-fork",
-      "Verify no TypeScript compilation errors",
-      "Run rush test --to @rushstack/npm-check-fork",
-      "Verify all unit tests pass",
-      "Check for any deprecation warnings or linting errors"
+      "Use useMemo for filteredPackages to avoid re-computation",
+      "Use useMemo for groupedPackages to avoid re-computation",
+      "Use useMemo for selectedCountByCategory",
+      "Ensure PackageCard only re-renders when its props change",
+      "Consider virtualization for lists with 100+ packages",
+      "Profile render times and ensure <16ms for 60fps"
     ],
-    "passes": true
-  },
-  {
-    "category": "functional",
-    "description": "Integration test: Verify rush upgrade-interactive works correctly",
-    "steps": [
-      "Build full rush-lib with rush build --to rush",
-      "Run rush upgrade-interactive in a test project",
-      "Verify packages are fetched from npm registry correctly",
-      "Verify scoped packages display correctly",
-      "Verify version information is accurate",
-      "Verify homepage links are correct"
-    ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "refactor",
-    "description": "Update CHANGELOG.md with dependency replacement changes",
+    "description": "Write unit tests for all components",
     "steps": [
-      "Open libraries/npm-check-fork/CHANGELOG.md",
-      "Add entry under next version section",
-      "Document removal of package-json dependency",
-      "Document removal of throat dependency",
-      "Document internal refactoring to use WebClient and Async.forEachAsync",
-      "Note that no public API changes were made"
+      "Install ink-testing-library as devDependency",
+      "Create test file for TitleBar component",
+      "Create test file for ControlBar component",
+      "Create test file for PackageCard component",
+      "Create test file for CategoryColumn component",
+      "Create test file for ActionBar component",
+      "Create test file for SuccessMessage component",
+      "Create test file for TerminalUpgrade component",
+      "Test keyboard input handling",
+      "Test state transitions",
+      "Achieve >80% code coverage"
     ],
-    "passes": true
+    "passes": false
+  },
+  {
+    "category": "refactor",
+    "description": "Write integration tests for full upgrade flow",
+    "steps": [
+      "Create integration test file for upgradeInteractive function",
+      "Test with mock package data (5-10 packages)",
+      "Test package selection via keyboard",
+      "Test search filtering",
+      "Test select all functionality",
+      "Test clear selection functionality",
+      "Test upgrade submission",
+      "Test cancel action",
+      "Test with empty package list",
+      "Test with single package",
+      "Test with 100+ packages for performance"
+    ],
+    "passes": false
+  },
+  {
+    "category": "refactor",
+    "description": "Manual testing across terminal emulators",
+    "steps": [
+      "Test in Windows Terminal (Rich tier)",
+      "Test in VS Code integrated terminal (Rich tier)",
+      "Test in iTerm2 on macOS (Rich tier)",
+      "Test in GNOME Terminal on Linux (Rich tier)",
+      "Test in macOS Terminal.app (Standard tier)",
+      "Test in Git Bash/MinTTY (Standard tier)",
+      "Test in Windows CMD (Basic tier)",
+      "Test in GitHub Actions CI (Non-interactive)",
+      "Document any issues or workarounds needed"
+    ],
+    "passes": false
+  },
+  {
+    "category": "refactor",
+    "description": "Remove old inquirer implementation after migration",
+    "steps": [
+      "Remove feature flag check once new UI is stable",
+      "Remove old inquirer-based code from InteractiveUpgradeUI.ts",
+      "Move inquirer to devDependencies if still needed for ChangeAction",
+      "Remove cli-table dependency from package.json",
+      "Remove rxjs if no longer needed",
+      "Run rush update to clean up dependencies",
+      "Verify all tests still pass",
+      "Update CHANGELOG with migration notes"
+    ],
+    "passes": false
+  },
+  {
+    "category": "refactor",
+    "description": "Document new terminal UI implementation",
+    "steps": [
+      "Update InteractiveUpgradeUI.ts with JSDoc comments",
+      "Document component architecture in code comments",
+      "Document keyboard shortcuts in ActionBar",
+      "Add API documentation for exported interfaces",
+      "Update rush upgrade-interactive help text if needed",
+      "Document terminal compatibility matrix",
+      "Document environment variable overrides (FORCE_COLOR, NO_COLOR, RUSH_ACCESSIBLE)"
+    ],
+    "passes": false
   }
 ]
