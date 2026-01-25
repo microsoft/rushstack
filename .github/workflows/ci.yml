@@ -47,7 +47,7 @@ jobs:
           mkdir -p $HOME/.rush-user
           @{ buildCacheFolder = Join-Path ${{ github.workspace }} rush-cache } | ConvertTo-Json > $HOME/.rush-user/settings.json
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
           path: repo-a
@@ -58,7 +58,7 @@ jobs:
           git config --local user.email "rushbot@users.noreply.github.com"
         working-directory: repo-a
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.NodeVersion }}
 
@@ -88,7 +88,7 @@ jobs:
         working-directory: repo-a
 
       - name: Clone another copy of the repo to test the build cache
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: repo-b
