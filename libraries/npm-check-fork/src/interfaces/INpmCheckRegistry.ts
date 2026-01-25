@@ -47,8 +47,8 @@ export interface INpmRegistryVersionMetadata extends INpmCheckPackageVersion {
  *
  * @remarks
  * This interface represents the full response from the npm registry when
- * fetching package metadata. It extends INpmCheckRegistryData to maintain
- * compatibility with existing code like bestGuessHomepage.
+ * fetching package metadata. It is structurally compatible with INpmCheckRegistryData
+ * to maintain compatibility with existing code like bestGuessHomepage.
  *
  * @see https://github.com/npm/registry/blob/main/docs/responses/package-metadata.md
  */
