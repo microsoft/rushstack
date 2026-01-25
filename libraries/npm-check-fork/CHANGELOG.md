@@ -2,12 +2,6 @@
 
 This log was last generated on Thu, 08 Jan 2026 01:12:30 GMT and should not be manually modified.
 
-## 0.1.10
-
-### Patches
-
-- Remove `package-json` and `throat` dependencies, replacing with internal `NpmRegistryClient` implementation using Node.js built-in http/https modules. No public API changes.
-
 ## 0.1.9
 Thu, 08 Jan 2026 01:12:30 GMT
 
@@ -59,3 +53,4 @@ Sat, 18 Oct 2025 00:06:19 GMT
 ### Minor changes
 
 - Initial fork of npm-check
+
