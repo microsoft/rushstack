@@ -124,6 +124,7 @@ export function trimNpmrcFileLines(
   // Trim out lines that reference environment variables that aren't defined
   for (let line of npmrcFileLines) {
     let lineShouldBeTrimmed: boolean = false;
+    let trimReason: string = '';
 
     //remove spaces before or after key and value
     line = line
@@ -146,6 +147,7 @@ export function trimNpmrcFileLines(
 
           if (!isRegistryScoped && NPM_INCOMPATIBLE_PROPERTIES.has(propertyName)) {
             lineShouldBeTrimmed = true;
+            trimReason = 'NPM_INCOMPATIBLE_PROPERTY';
           }
         }
       }
@@ -187,6 +189,7 @@ export function trimNpmrcFileLines(
             if (!env[environmentVariableName] && !fallback) {
               // No, so trim this line
               lineShouldBeTrimmed = true;
+              trimReason = 'MISSING_ENVIRONMENT_VARIABLE';
               break;
             }
           }
@@ -195,9 +198,16 @@ export function trimNpmrcFileLines(
     }
 
     if (lineShouldBeTrimmed) {
-      // Example output:
-      // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
-      resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
+      // Comment out the line with appropriate reason
+      if (trimReason === 'NPM_INCOMPATIBLE_PROPERTY') {
+        // Example output:
+        // "; UNSUPPORTED BY NPM: email=test@example.com"
+        resultLines.push('; UNSUPPORTED BY NPM: ' + line);
+      } else {
+        // Example output:
+        // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
+        resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
+      }
     } else {
       resultLines.push(line);
     }

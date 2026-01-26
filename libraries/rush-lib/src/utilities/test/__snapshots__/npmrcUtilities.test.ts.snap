@@ -11,18 +11,18 @@ Array [
 exports[`npmrcUtilities trimNpmrcFileLines With npm-incompatible properties filtering filters out deprecated npm properties 1`] = `
 Array [
   "registry=https://registry.npmjs.org/",
-  "; MISSING ENVIRONMENT VARIABLE: email=test@example.com",
-  "; MISSING ENVIRONMENT VARIABLE: publish-branch=main",
+  "; UNSUPPORTED BY NPM: email=test@example.com",
+  "; UNSUPPORTED BY NPM: publish-branch=main",
 ]
 `;
 
 exports[`npmrcUtilities trimNpmrcFileLines With npm-incompatible properties filtering filters out pnpm-specific hoisting properties 1`] = `
 Array [
   "registry=https://registry.npmjs.org/",
-  "; MISSING ENVIRONMENT VARIABLE: hoist=false",
-  "; MISSING ENVIRONMENT VARIABLE: hoist-pattern[]=*eslint*",
-  "; MISSING ENVIRONMENT VARIABLE: public-hoist-pattern[]=",
-  "; MISSING ENVIRONMENT VARIABLE: shamefully-hoist=true",
+  "; UNSUPPORTED BY NPM: hoist=false",
+  "; UNSUPPORTED BY NPM: hoist-pattern[]=*eslint*",
+  "; UNSUPPORTED BY NPM: public-hoist-pattern[]=",
+  "; UNSUPPORTED BY NPM: shamefully-hoist=true",
   "always-auth=false",
 ]
 `;
@@ -32,7 +32,7 @@ Array [
   "registry=https://registry.npmjs.org/",
   "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}",
   "//my-registry.com/:_authToken=\${MY_TOKEN}",
-  "; MISSING ENVIRONMENT VARIABLE: email=test@example.com",
+  "; UNSUPPORTED BY NPM: email=test@example.com",
 ]
 `;
 
@@ -41,7 +41,7 @@ Array [
   "registry=https://registry.npmjs.org/",
   "//registry.npmjs.org/:always-auth=true",
   "//my-registry.com/:_authToken=\${MY_TOKEN}",
-  "; MISSING ENVIRONMENT VARIABLE: hoist=false",
+  "; UNSUPPORTED BY NPM: hoist=false",
 ]
 `;
 
@@ -52,8 +52,8 @@ Array [
   "strict-ssl=true",
   "save-exact=true",
   "package-lock=true",
-  "; MISSING ENVIRONMENT VARIABLE: hoist=false",
-  "; MISSING ENVIRONMENT VARIABLE: email=test@example.com",
+  "; UNSUPPORTED BY NPM: hoist=false",
+  "; UNSUPPORTED BY NPM: email=test@example.com",
 ]
 `;
 
