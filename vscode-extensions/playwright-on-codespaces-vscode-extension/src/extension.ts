@@ -5,16 +5,21 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 
-import {
-  PlaywrightTunnel,
-  type TunnelStatus,
-  type IHandshake,
-  EXTENSION_INSTALLED_FILENAME,
-  LaunchOptionsValidator,
-  type ILaunchOptionsAllowlist,
-  type ILaunchOptionsValidationResult,
-  getNormalizedErrorString
+import type {
+  TunnelStatus,
+  IHandshake,
+  ILaunchOptionsAllowlist,
+  ILaunchOptionsValidationResult
 } from '@rushstack/playwright-browser-tunnel';
+
+import { PlaywrightTunnel } from '@rushstack/playwright-browser-tunnel/lib/PlaywrightBrowserTunnel';
+
+import {
+  EXTENSION_INSTALLED_FILENAME,
+  getNormalizedErrorString
+} from '@rushstack/playwright-browser-tunnel/lib/utilities';
+import { LaunchOptionsValidator } from '@rushstack/playwright-browser-tunnel/lib/LaunchOptionsValidator';
+
 import { Terminal, type ITerminal, type ITerminalProvider } from '@rushstack/terminal';
 
 import { runWorkspaceCommandAsync } from '@rushstack/vscode-shared/lib/runWorkspaceCommandAsync';
