@@ -512,7 +512,7 @@ export class Utilities {
     maxInstallAttempts,
     suppressOutput,
     directory,
-    filterNpmIncompatibleProperties
+    filterNpmIncompatibleProperties = false
   }: IInstallPackageInDirectoryOptions): Promise<void> {
     directory = path.resolve(directory);
     const directoryExists: boolean = await FileSystem.existsAsync(directory);
@@ -541,7 +541,7 @@ export class Utilities {
         supportEnvVarFallbackSyntax: false,
         // Filter out npm-incompatible properties only when the .npmrc is configured for
         // a different package manager (pnpm/yarn) but npm is being used to install.
-        filterNpmIncompatibleProperties: filterNpmIncompatibleProperties || false
+        filterNpmIncompatibleProperties
       });
     }
 
