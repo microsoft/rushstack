@@ -1,0 +1,21 @@
+{
+  "name": "rush-package-manager-integration-test",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Integration tests for Rush package managers with tar 7.x",
+  "license": "MIT",
+  "scripts": {
+    "_phase:build": "heft build --clean",
+    "build": "heft build --clean",
+    "test": "node lib/runTests.js"
+  },
+  "devDependencies": {
+    "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@types/node": "20.17.19",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*",
+    "typescript": "~5.8.2"
+  }
+}

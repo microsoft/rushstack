@@ -1059,6 +1059,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-package-manager-integration-test",
+      "projectFolder": "build-tests/rush-package-manager-integration-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "rush-redis-cobuild-plugin-integration-test",
       "projectFolder": "build-tests/rush-redis-cobuild-plugin-integration-test",
       "reviewCategory": "tests",

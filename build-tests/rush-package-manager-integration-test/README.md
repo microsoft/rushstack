@@ -12,7 +12,9 @@ These tests ensure the tar 7.x upgrade works correctly with these workflows.
 
 ## Tests
 
-### test-npm-mode.sh
+The test suite is written in TypeScript using `@rushstack/node-core-library` for cross-platform compatibility.
+
+### testNpmMode.ts
 Tests Rush npm mode by:
 - Initializing a Rush repo with `npmVersion` configured
 - Creating two projects with dependencies
@@ -20,7 +22,7 @@ Tests Rush npm mode by:
 - Running `rush install` (extracts tarballs)
 - Running `rush build` (verifies everything works end-to-end)
 
-### test-yarn-mode.sh
+### testYarnMode.ts
 Tests Rush yarn mode by:
 - Initializing a Rush repo with `yarnVersion` configured
 - Creating two projects with dependencies
@@ -32,23 +34,25 @@ Tests Rush yarn mode by:
 
 Before running these tests:
 1. Build Rush locally: `rush build --to rush`
-2. Ensure you have Node.js 18+ installed
+2. Build this test project: `rush build --to rush-package-manager-integration-test`
+3. Ensure you have Node.js 18+ installed
 
 ## Running the Tests
 
-### Run all tests:
 ```bash
+# Build the test project first
 cd build-tests/rush-package-manager-integration-test
-./run-all-tests.sh
+rush build
+
+# Run all tests
+npm run test
 ```
 
-### Run individual tests:
+Or from the root of the repo:
 ```bash
-# Test npm mode
-./test-npm-mode.sh
-
-# Test yarn mode
-./test-yarn-mode.sh
+rush build --to rush-package-manager-integration-test
+cd build-tests/rush-package-manager-integration-test
+npm run test
 ```
 
 ## What Gets Tested
@@ -69,6 +73,14 @@ Each test creates a temporary Rush repository in the `temp/` directory:
 
 These directories are cleaned up at the start of each test run.
 
+## Implementation
+
+The tests use:
+- **TypeScript** for type safety and better IDE support
+- **@rushstack/node-core-library** for cross-platform file operations and process execution
+- **TestHelper class** to encapsulate common test operations
+- Modular test functions that can be run independently or together
+
 ## Related Code
 
 The tar library is used in:
@@ -79,6 +91,7 @@ The tar library is used in:
 
 If tests fail:
 1. Check that Rush built successfully: `rush build --to rush`
-2. Verify Node.js version: `node --version` (should be 18+)
-3. Look for error messages in the test output
-4. Inspect the temp test repo: `ls -la temp/npm-test-repo/common/temp/projects/`
+2. Check that the test project built: `rush build --to rush-package-manager-integration-test`
+3. Verify Node.js version: `node --version` (should be 18+)
+4. Look for error messages in the test output
+5. Inspect the temp test repo: `ls -la temp/npm-test-repo/common/temp/projects/`
