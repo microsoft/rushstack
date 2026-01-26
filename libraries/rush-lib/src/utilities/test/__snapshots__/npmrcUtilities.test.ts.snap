@@ -1,5 +1,62 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`npmrcUtilities trimNpmrcFileLines With npm-incompatible properties filtering does not filter when filterNpmIncompatibleProperties is false 1`] = `
+Array [
+  "registry=https://registry.npmjs.org/",
+  "email=test@example.com",
+  "hoist=false",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With npm-incompatible properties filtering filters out deprecated npm properties 1`] = `
+Array [
+  "registry=https://registry.npmjs.org/",
+  "; MISSING ENVIRONMENT VARIABLE: email=test@example.com",
+  "; MISSING ENVIRONMENT VARIABLE: publish-branch=main",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With npm-incompatible properties filtering filters out pnpm-specific hoisting properties 1`] = `
+Array [
+  "registry=https://registry.npmjs.org/",
+  "; MISSING ENVIRONMENT VARIABLE: hoist=false",
+  "; MISSING ENVIRONMENT VARIABLE: hoist-pattern[]=*eslint*",
+  "; MISSING ENVIRONMENT VARIABLE: public-hoist-pattern[]=",
+  "; MISSING ENVIRONMENT VARIABLE: shamefully-hoist=true",
+  "always-auth=false",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With npm-incompatible properties filtering preserves registry-scoped auth tokens 1`] = `
+Array [
+  "registry=https://registry.npmjs.org/",
+  "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}",
+  "//my-registry.com/:_authToken=\${MY_TOKEN}",
+  "; MISSING ENVIRONMENT VARIABLE: email=test@example.com",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With npm-incompatible properties filtering preserves registry-scoped configurations 1`] = `
+Array [
+  "registry=https://registry.npmjs.org/",
+  "//registry.npmjs.org/:always-auth=true",
+  "//my-registry.com/:_authToken=\${MY_TOKEN}",
+  "; MISSING ENVIRONMENT VARIABLE: hoist=false",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With npm-incompatible properties filtering preserves standard npm properties 1`] = `
+Array [
+  "registry=https://registry.npmjs.org/",
+  "always-auth=false",
+  "strict-ssl=true",
+  "save-exact=true",
+  "package-lock=true",
+  "; MISSING ENVIRONMENT VARIABLE: hoist=false",
+  "; MISSING ENVIRONMENT VARIABLE: email=test@example.com",
+]
+`;
+
 exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a a variable without a fallback 1`] = `
 Array [
   "; MISSING ENVIRONMENT VARIABLE: var1=\${foo}",
