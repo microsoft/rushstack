@@ -24,3 +24,9 @@ steps:
 
   - script: 'node common/scripts/install-run-rush.js retest --verbose --production ${{ parameters.BuildParameters }}'
     displayName: 'Rush retest (install-run-rush)'
+
+  - script: |
+      node apps/rush/lib/start-dev.js build --to rush-package-manager-integration-test
+      cd build-tests/rush-package-manager-integration-test
+      npm run test
+    displayName: 'Run package manager integration tests'

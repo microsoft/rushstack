@@ -18,16 +18,16 @@ The test suite is written in TypeScript using `@rushstack/node-core-library` for
 Tests Rush npm mode by:
 - Initializing a Rush repo with `npmVersion` configured
 - Creating two projects with dependencies
-- Running `rush update` (creates tarballs)
-- Running `rush install` (extracts tarballs)
+- Running `rush update`
+- Running `rush install`
 - Running `rush build` (verifies everything works end-to-end)
 
 ### testYarnMode.ts
 Tests Rush yarn mode by:
 - Initializing a Rush repo with `yarnVersion` configured
 - Creating two projects with dependencies
-- Running `rush update` (creates tarballs)
-- Running `rush install` (extracts tarballs)
+- Running `rush update`
+- Running `rush install`
 - Running `rush build` (verifies everything works end-to-end)
 
 ## Prerequisites

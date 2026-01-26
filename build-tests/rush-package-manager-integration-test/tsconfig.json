@@ -1,6 +1,3 @@
 {
-  "extends": "local-node-rig/profiles/default/tsconfig-base.json",
-  "compilerOptions": {
-    "types": ["node"]
-  }
+  "extends": "local-node-rig/profiles/default/tsconfig-base.json"
 }

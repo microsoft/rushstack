@@ -15,6 +15,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@microsoft/rush",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@radix-ui/colors",
       "allowedCategories": [ "libraries" ]
     },

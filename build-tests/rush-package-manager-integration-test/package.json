@@ -10,6 +10,7 @@
     "test": "node lib/runTests.js"
   },
   "devDependencies": {
+    "@microsoft/rush": "workspace:*",
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",

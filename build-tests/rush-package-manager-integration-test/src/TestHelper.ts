@@ -11,16 +11,13 @@ import type { ITerminal } from '@rushstack/terminal';
  * Helper class for running integration tests with Rush package managers
  */
 export class TestHelper {
-  public readonly rushstackRoot: string;
   private readonly _rushBinPath: string;
   private readonly _terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
     this._terminal = terminal;
-    // Resolve rushstack root and rush bin path
-    this.rushstackRoot = path.resolve(__dirname, '../../..');
-    // Use the locally built rush from apps/rush
-    this._rushBinPath = path.join(this.rushstackRoot, 'apps/rush/lib/start.js');
+    // Resolve rush bin path from @microsoft/rush dependency
+    this._rushBinPath = require.resolve('@microsoft/rush/lib/start-dev');
   }
 
   /**
