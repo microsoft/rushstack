@@ -609,24 +609,24 @@ export class WorkspaceInstallManager extends BaseInstallManager {
                   tipIDsToBePrinted.add(tipId);
                 }
               }
-              
+
               // Replace `pnpm approve-builds` with `rush-pnpm approve-builds` when running
               // `rush install` or `rush update` to instruct users to use the correct command
-              const modifiedChunk = chunk.replace(
+              const modifiedChunk: string = chunk.replace(
                 /pnpm approve-builds/g,
                 `rush-pnpm --subspace ${subspace.subspaceName} approve-builds`
               );
-              
+
               // Return modified chunk if it was changed, otherwise return void to keep original
               return modifiedChunk !== chunk ? modifiedChunk : undefined;
             }
           : (chunk: string): string | void => {
               // Even when no tips are registered, we still need to rewrite the approve-builds command
-              const modifiedChunk = chunk.replace(
+              const modifiedChunk: string = chunk.replace(
                 /pnpm approve-builds/g,
                 `rush-pnpm --subspace ${subspace.subspaceName} approve-builds`
               );
-              
+
               // Return modified chunk if it was changed, otherwise return void to keep original
               return modifiedChunk !== chunk ? modifiedChunk : undefined;
             };
