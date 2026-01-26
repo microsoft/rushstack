@@ -93,6 +93,7 @@ const NPM_INCOMPATIBLE_PROPERTIES: Set<string> = new Set([
 /**
  * Regular expression to extract property names from .npmrc lines.
  * Matches everything before '=', '[', or whitespace to capture the property name.
+ * Note: The 'g' flag is intentionally omitted since we only need the first match.
  * Examples:
  *   "registry=https://..." -> matches "registry"
  *   "hoist-pattern[]=..." -> matches "hoist-pattern"
