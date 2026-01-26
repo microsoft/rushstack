@@ -57,18 +57,6 @@ Array [
 ]
 `;
 
-exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a a variable without a fallback 1`] = `
-Array [
-  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo}",
-]
-`;
-
-exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a a variable without a fallback 2`] = `
-Array [
-  "var1=\${foo}",
-]
-`;
-
 exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a variable with a fallback 1`] = `
 Array [
   "var1=\${foo-fallback_value}",
@@ -114,6 +102,18 @@ Array [
 exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a variable with a fallback 8`] = `
 Array [
   "var1=\${foo:-fallback_value}-\${bar-fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a variable without a fallback 1`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a variable without a fallback 2`] = `
+Array [
+  "var1=\${foo}",
 ]
 `;
 
@@ -169,18 +169,6 @@ Array [
 ]
 `;
 
-exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a a variable without a fallback 1`] = `
-Array [
-  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo}",
-]
-`;
-
-exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a a variable without a fallback 2`] = `
-Array [
-  "var1=\${foo}",
-]
-`;
-
 exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a variable with a fallback 1`] = `
 Array [
   "; MISSING ENVIRONMENT VARIABLE: var1=\${foo-fallback_value}",
@@ -226,6 +214,18 @@ Array [
 exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a variable with a fallback 8`] = `
 Array [
   "; MISSING ENVIRONMENT VARIABLE: var1=\${foo:-fallback_value}-\${bar-fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a variable without a fallback 1`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a variable without a fallback 2`] = `
+Array [
+  "var1=\${foo}",
 ]
 `;
 

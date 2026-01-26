@@ -9,7 +9,7 @@ describe('npmrcUtilities', () => {
       expect(trimNpmrcFileLines([], {}, supportEnvVarFallbackSyntax)).toEqual([]);
     });
 
-    it('supports a a variable without a fallback', () => {
+    it('supports a variable without a fallback', () => {
       expect(trimNpmrcFileLines(['var1=${foo}'], {}, supportEnvVarFallbackSyntax)).toMatchSnapshot();
       expect(
         trimNpmrcFileLines(['var1=${foo}'], { foo: 'test' }, supportEnvVarFallbackSyntax)

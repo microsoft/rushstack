@@ -326,7 +326,11 @@ export function isVariableSetInNpmrcFile(
     return false;
   }
 
-  const trimmedNpmrcFile: string = _trimNpmrcFile({ sourceNpmrcPath, supportEnvVarFallbackSyntax });
+  const trimmedNpmrcFile: string = _trimNpmrcFile({
+    sourceNpmrcPath,
+    supportEnvVarFallbackSyntax,
+    filterNpmIncompatibleProperties: false
+  });
 
   const variableKeyRegExp: RegExp = new RegExp(`^${variableKey}=`, 'm');
   return trimmedNpmrcFile.match(variableKeyRegExp) !== null;
