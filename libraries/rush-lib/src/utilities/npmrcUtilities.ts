@@ -63,7 +63,7 @@ function _trimNpmrcFile(
     npmrcFileLines,
     process.env,
     supportEnvVarFallbackSyntax,
-    filterNpmIncompatibleProperties || false
+    filterNpmIncompatibleProperties
   );
 
   const combinedNpmrc: string = resultLines.join('\n');
@@ -89,6 +89,15 @@ const NPM_INCOMPATIBLE_PROPERTIES: Set<string> = new Set([
   'email',
   'publish-branch'
 ]);
+
+/**
+ * Regular expression to extract property names from .npmrc lines.
+ * Matches everything before '=', '[', or whitespace to capture the property name.
+ * Examples:
+ *   "registry=https://..." -> matches "registry"
+ *   "hoist-pattern[]=..." -> matches "hoist-pattern"
+ */
+const PROPERTY_NAME_REGEX: RegExp = /^([^=\[\s]+)/;
 
 /**
  *
@@ -127,7 +136,7 @@ export function trimNpmrcFileLines(
       // Check if this is a property that npm doesn't understand
       if (filterNpmIncompatibleProperties) {
         // Extract the property name (everything before the '=' or '[')
-        const match: RegExpMatchArray | null = line.match(/^([^=\[\s]+)/);
+        const match: RegExpMatchArray | null = line.match(PROPERTY_NAME_REGEX);
         if (match) {
           const propertyName: string = match[1];
 
