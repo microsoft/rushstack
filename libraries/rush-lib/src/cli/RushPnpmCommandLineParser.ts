@@ -574,7 +574,7 @@ export class RushPnpmCommandLineParser {
 
         // Example: "C:\MyRepo\common\temp\package.json"
         const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
-        const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
+        const commonPackageJson: JsonObject = await JsonFile.loadAsync(commonPackageJsonFilename);
         const newGlobalOnlyBuiltDependencies: string[] | undefined =
           commonPackageJson?.pnpm?.onlyBuiltDependencies;
         const pnpmOptions: PnpmOptionsConfiguration | undefined = this._subspace.getPnpmOptions();
