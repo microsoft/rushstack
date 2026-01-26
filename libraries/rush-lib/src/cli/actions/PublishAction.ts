@@ -594,9 +594,9 @@ export class PublishAction extends BaseRushAction {
       targetNpmrcFolder: this._targetNpmrcPublishFolder,
       useNpmrcPublish: true,
       supportEnvVarFallbackSyntax,
-      // Filter out npm-incompatible properties when using npm or yarn to publish.
-      // Don't filter for pnpm since it understands pnpm-specific properties.
-      filterNpmIncompatibleProperties: this.rushConfiguration.packageManager !== 'pnpm'
+      // Always filter npm-incompatible properties when publishing.
+      // The .npmrc-publish file may contain pnpm-specific properties even in npm repos.
+      filterNpmIncompatibleProperties: true
     });
   }
 
