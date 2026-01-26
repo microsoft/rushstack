@@ -20,7 +20,6 @@ function createConfig({ production, webpack }) {
 
   // Mark problematic modules as externals to avoid webpack bundling issues
   const externals = /** @type {Record<string, string>} */ (config.externals || {});
-  externals['playwright-core'] = 'commonjs playwright-core';
   externals['bufferutil'] = 'commonjs bufferutil';
   externals['utf-8-validate'] = 'commonjs utf-8-validate';
   config.externals = externals;
