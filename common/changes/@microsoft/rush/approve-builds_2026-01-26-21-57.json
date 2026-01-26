@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for `rush-pnpm approve-builds` command to persist `globalOnlyBuiltDependencies` in pnpm-config.json",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
