@@ -96,7 +96,7 @@ const NPM_INCOMPATIBLE_PROPERTIES: Set<string> = new Set([
  * @param env The environment variables object
  * @param supportEnvVarFallbackSyntax Whether to support fallback values in the form of `${VAR_NAME:-fallback}`
  * @param filterNpmIncompatibleProperties Whether to filter out properties that npm doesn't understand
- * @returns
+ * @returns An array of processed npmrc file lines with undefined environment variables and npm-incompatible properties commented out
  */
 export function trimNpmrcFileLines(
   npmrcFileLines: string[],
@@ -127,14 +127,14 @@ export function trimNpmrcFileLines(
       // Check if this is a property that npm doesn't understand
       if (filterNpmIncompatibleProperties) {
         // Extract the property name (everything before the '=' or '[')
-        const match: RegExpMatchArray | null = line.match(/^([^=\[]+)/);
+        const match: RegExpMatchArray | null = line.match(/^([^=\[\s]+)/);
         if (match) {
-          const propertyName: string = match[1].trim();
-          
+          const propertyName: string = match[1];
+
           // Never filter registry-scoped properties (auth tokens, etc.)
           // These start with "//" like "//registry.npmjs.org/:_authToken"
           const isRegistryScoped: boolean = propertyName.startsWith('//');
-          
+
           if (!isRegistryScoped && NPM_INCOMPATIBLE_PROPERTIES.has(propertyName)) {
             lineShouldBeTrimmed = true;
           }
