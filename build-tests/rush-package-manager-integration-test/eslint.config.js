@@ -11,10 +11,6 @@ module.exports = [
       parserOptions: {
         tsconfigRootDir: __dirname
       }
-    },
-    rules: {
-      // Allow console.log in test scripts
-      'no-console': 'off'
     }
   }
 ];

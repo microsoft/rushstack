@@ -3,30 +3,33 @@
 
 import * as path from 'node:path';
 
+import type { ITerminal } from '@rushstack/terminal';
+
 import { TestHelper } from './TestHelper';
 
 /**
  * Integration test for Rush npm mode with tar 7.x
  * This test verifies that temp project tarballs work correctly with npm package manager
  */
-export async function testNpmModeAsync(): Promise<void> {
-  const helper: TestHelper = new TestHelper();
-  const testRepoPath: string = path.join(__dirname, '../temp/npm-test-repo');
+export async function testNpmModeAsync(terminal: ITerminal): Promise<void> {
+  const helper: TestHelper = new TestHelper(terminal);
+  // Use system temp directory to avoid rush init detecting parent rush.json
+  const testRepoPath: string = path.join('/tmp', 'rush-package-manager-test', 'npm-test-repo');
 
-  console.log('==========================================');
-  console.log('Rush NPM Mode Integration Test');
-  console.log('==========================================');
-  console.log('');
-  console.log('This test verifies that tar 7.x changes work correctly with npm package manager');
-  console.log('by creating temp project tarballs and extracting them during rush install.');
-  console.log('');
+  terminal.writeLine('==========================================');
+  terminal.writeLine('Rush NPM Mode Integration Test');
+  terminal.writeLine('==========================================');
+  terminal.writeLine('');
+  terminal.writeLine('This test verifies that tar 7.x changes work correctly with npm package manager');
+  terminal.writeLine('by creating temp project tarballs and extracting them during rush install.');
+  terminal.writeLine('');
 
-  // Create test repository
-  await helper.createTestRepoAsync(testRepoPath, 'npm', '8.19.4');
+  // Create test repository with npm 6.14.15 (the version from rush init template)
+  await helper.createTestRepoAsync(testRepoPath, 'npm', '6.14.15');
 
   // Create project A (dependency)
-  console.log('Creating test-project-a...');
-  helper.createTestProject(
+  terminal.writeLine('Creating test-project-a...');
+  await helper.createTestProjectAsync(
     testRepoPath,
     'test-project-a',
     '1.0.0',
@@ -35,8 +38,8 @@ export async function testNpmModeAsync(): Promise<void> {
   );
 
   // Create project B (depends on A)
-  console.log('Creating test-project-b...');
-  helper.createTestProject(
+  terminal.writeLine('Creating test-project-b...');
+  await helper.createTestProjectAsync(
     testRepoPath,
     'test-project-b',
     '1.0.0',
@@ -47,43 +50,43 @@ export async function testNpmModeAsync(): Promise<void> {
     `node -e "const a = require('test-project-a'); require('fs').mkdirSync('lib', {recursive: true}); require('fs').writeFileSync('lib/index.js', 'module.exports = { test: () => \\"Using: \\" + require(\\'test-project-a\\').greet() };');"`
   );
 
-  // Run rush update (creates temp project tarballs using tar.create)
-  console.log('');
-  console.log("Running 'rush update' (creates temp project tarballs using tar 7.x)...");
+  // Run rush update (creates and extracts temp project tarballs)
+  terminal.writeLine('');
+  terminal.writeLine("Running 'rush update' (creates and extracts temp project tarballs using tar 7.x)...");
   await helper.executeRushAsync(['update'], testRepoPath);
 
   // Verify temp project tarballs were created
-  helper.verifyTempTarballs(testRepoPath, ['test-project-a', 'test-project-b']);
+  await helper.verifyTempTarballsAsync(testRepoPath, ['test-project-a', 'test-project-b']);
 
-  // Run rush install (extracts temp project tarballs using tar.extract)
-  console.log('');
-  console.log("Running 'rush install' (extracts temp project tarballs using tar 7.x)...");
+  // Run rush install (extracts temp project tarballs)
+  terminal.writeLine('');
+  terminal.writeLine("Running 'rush install' (extracts temp project tarballs using tar 7.x)...");
   await helper.executeRushAsync(['install'], testRepoPath);
 
   // Verify node_modules were populated correctly
-  helper.verifyDependencies(testRepoPath, 'test-project-a', ['lodash']);
-  helper.verifyDependencies(testRepoPath, 'test-project-b', ['test-project-a']);
+  await helper.verifyDependenciesAsync(testRepoPath, 'test-project-a', ['lodash']);
+  await helper.verifyDependenciesAsync(testRepoPath, 'test-project-b', ['test-project-a']);
 
   // Run rush build
-  console.log('');
-  console.log("Running 'rush build'...");
+  terminal.writeLine('');
+  terminal.writeLine("Running 'rush build'...");
   await helper.executeRushAsync(['build'], testRepoPath);
 
   // Verify build outputs
-  helper.verifyBuildOutputs(testRepoPath, ['test-project-a', 'test-project-b']);
+  await helper.verifyBuildOutputsAsync(testRepoPath, ['test-project-a', 'test-project-b']);
 
   // Test that the built code actually works
   await helper.testBuiltCodeAsync(testRepoPath, 'test-project-b');
 
-  console.log('');
-  console.log('==========================================');
-  console.log('✓ NPM Mode Integration Test PASSED');
-  console.log('==========================================');
-  console.log('');
-  console.log('The tar 7.x changes work correctly with npm mode:');
-  console.log('  - Temp project tarballs created successfully');
-  console.log('  - Tarballs extracted correctly during install');
-  console.log('  - Dependencies linked properly');
-  console.log('  - Build completed successfully');
-  console.log('');
+  terminal.writeLine('');
+  terminal.writeLine('==========================================');
+  terminal.writeLine('✓ NPM Mode Integration Test PASSED');
+  terminal.writeLine('==========================================');
+  terminal.writeLine('');
+  terminal.writeLine('The tar 7.x changes work correctly with npm mode:');
+  terminal.writeLine('  - Temp project tarballs created successfully');
+  terminal.writeLine('  - Tarballs extracted correctly during install');
+  terminal.writeLine('  - Dependencies linked properly');
+  terminal.writeLine('  - Build completed successfully');
+  terminal.writeLine('');
 }

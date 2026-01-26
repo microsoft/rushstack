@@ -67,9 +67,9 @@ These integration tests verify:
 
 ## Test Output
 
-Each test creates a temporary Rush repository in the `temp/` directory:
-- `temp/npm-test-repo/` - npm mode test repository
-- `temp/yarn-test-repo/` - yarn mode test repository
+Each test creates a temporary Rush repository in `/tmp/rush-package-manager-test/`:
+- `/tmp/rush-package-manager-test/npm-test-repo/` - npm mode test repository
+- `/tmp/rush-package-manager-test/yarn-test-repo/` - yarn mode test repository
 
 These directories are cleaned up at the start of each test run.
 

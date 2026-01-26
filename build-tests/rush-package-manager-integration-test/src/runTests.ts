@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
+
 import { testNpmModeAsync } from './testNpmMode';
 import { testYarnModeAsync } from './testYarnMode';
 
@@ -8,84 +10,88 @@ import { testYarnModeAsync } from './testYarnMode';
  * Main test runner that executes all package manager integration tests
  */
 async function runTestsAsync(): Promise<void> {
-  console.log('==========================================');
-  console.log('Rush Package Manager Integration Tests');
-  console.log('==========================================');
-  console.log('');
-  console.log('These tests verify that the tar 7.x upgrade works correctly');
-  console.log('with different Rush package managers (npm, yarn).');
-  console.log('');
-  console.log('Tests will:');
-  console.log('  1. Create Rush repos using locally-built Rush');
-  console.log('  2. Add projects with dependencies');
-  console.log('  3. Run rush update (creates temp tarballs)');
-  console.log('  4. Run rush install (extracts tarballs)');
-  console.log('  5. Run rush build (end-to-end verification)');
-  console.log('');
+  const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+
+  terminal.writeLine('==========================================');
+  terminal.writeLine('Rush Package Manager Integration Tests');
+  terminal.writeLine('==========================================');
+  terminal.writeLine('');
+  terminal.writeLine('These tests verify that the tar 7.x upgrade works correctly');
+  terminal.writeLine('with different Rush package managers (npm, yarn).');
+  terminal.writeLine('');
+  terminal.writeLine('Tests will:');
+  terminal.writeLine('  1. Create Rush repos using locally-built Rush');
+  terminal.writeLine('  2. Add projects with dependencies');
+  terminal.writeLine('  3. Run rush update (creates and extracts temp tarballs)');
+  terminal.writeLine('  4. Run rush install (extracts tarballs)');
+  terminal.writeLine('  5. Run rush build (end-to-end verification)');
+  terminal.writeLine('');
 
   let testsPassed: number = 0;
   let testsFailed: number = 0;
   const failedTests: string[] = [];
 
   // Run npm mode test
-  console.log('==========================================');
-  console.log('Running NPM mode test...');
-  console.log('==========================================');
+  terminal.writeLine('==========================================');
+  terminal.writeLine('Running NPM mode test...');
+  terminal.writeLine('==========================================');
   try {
-    await testNpmModeAsync();
+    await testNpmModeAsync(terminal);
     testsPassed++;
   } catch (error) {
     testsFailed++;
     failedTests.push('NPM mode');
-    console.error('⚠️  NPM mode test FAILED');
-    console.error(error);
+    terminal.writeErrorLine('⚠️  NPM mode test FAILED');
+    terminal.writeErrorLine(String(error));
   }
 
   // Run yarn mode test
-  console.log('==========================================');
-  console.log('Running Yarn mode test...');
-  console.log('==========================================');
+  terminal.writeLine('==========================================');
+  terminal.writeLine('Running Yarn mode test...');
+  terminal.writeLine('==========================================');
   try {
-    await testYarnModeAsync();
+    await testYarnModeAsync(terminal);
     testsPassed++;
   } catch (error) {
     testsFailed++;
     failedTests.push('Yarn mode');
-    console.error('⚠️  Yarn mode test FAILED');
-    console.error(error);
+    terminal.writeErrorLine('⚠️  Yarn mode test FAILED');
+    terminal.writeErrorLine(String(error));
   }
 
   // Print summary
-  console.log('==========================================');
-  console.log('Test Summary');
-  console.log('==========================================');
-  console.log('');
-  console.log(`Tests passed: ${testsPassed}`);
-  console.log(`Tests failed: ${testsFailed}`);
-  console.log('');
+  terminal.writeLine('==========================================');
+  terminal.writeLine('Test Summary');
+  terminal.writeLine('==========================================');
+  terminal.writeLine('');
+  terminal.writeLine(`Tests passed: ${testsPassed}`);
+  terminal.writeLine(`Tests failed: ${testsFailed}`);
+  terminal.writeLine('');
 
   if (testsFailed > 0) {
-    console.log('Failed tests:');
+    terminal.writeLine('Failed tests:');
     for (const test of failedTests) {
-      console.log(`  - ${test}`);
+      terminal.writeLine(`  - ${test}`);
     }
-    console.log('');
-    console.log('❌ Some tests failed');
+    terminal.writeLine('');
+    terminal.writeLine('❌ Some tests failed');
     process.exit(1);
   } else {
-    console.log('✅ All tests passed!');
-    console.log('');
-    console.log('The tar 7.x upgrade is working correctly with:');
-    console.log('  - NPM package manager');
-    console.log('  - Yarn package manager');
-    console.log('');
+    terminal.writeLine('✅ All tests passed!');
+    terminal.writeLine('');
+    terminal.writeLine('The tar 7.x upgrade is working correctly with:');
+    terminal.writeLine('  - NPM package manager');
+    terminal.writeLine('  - Yarn package manager');
+    terminal.writeLine('');
     process.exit(0);
   }
 }
 
 // Run tests and handle errors
 runTestsAsync().catch((error) => {
+  // eslint-disable-next-line no-console
   console.error('Fatal error running tests:');
+  // eslint-disable-next-line no-console
   console.error(error);
   process.exit(1);
 });
