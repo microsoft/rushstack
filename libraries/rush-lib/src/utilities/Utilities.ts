@@ -531,7 +531,10 @@ export class Utilities {
       Utilities.syncNpmrc({
         sourceNpmrcFolder: commonRushConfigFolder,
         targetNpmrcFolder: directory,
-        supportEnvVarFallbackSyntax: false
+        supportEnvVarFallbackSyntax: false,
+        // Filter out npm-incompatible properties when using npm to install packages
+        // to avoid warnings about unknown config properties
+        filterNpmIncompatibleProperties: true
       });
     }
 

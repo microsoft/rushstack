@@ -593,7 +593,9 @@ export class PublishAction extends BaseRushAction {
       sourceNpmrcFolder: this.rushConfiguration.commonRushConfigFolder,
       targetNpmrcFolder: this._targetNpmrcPublishFolder,
       useNpmrcPublish: true,
-      supportEnvVarFallbackSyntax
+      supportEnvVarFallbackSyntax,
+      // Filter out npm-incompatible properties when using npm to publish
+      filterNpmIncompatibleProperties: true
     });
   }
 

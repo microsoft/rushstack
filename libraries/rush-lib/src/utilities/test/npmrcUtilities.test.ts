@@ -92,5 +92,101 @@ describe('npmrcUtilities', () => {
   describe(trimNpmrcFileLines.name, () => {
     describe('With support for env var fallback syntax', () => runTests(true));
     describe('Without support for env var fallback syntax', () => runTests(false));
+
+    describe('With npm-incompatible properties filtering', () => {
+      const supportEnvVarFallbackSyntax = false;
+      const filterNpmIncompatibleProperties = true;
+
+      it('filters out pnpm-specific hoisting properties', () => {
+        expect(
+          trimNpmrcFileLines(
+            [
+              'registry=https://registry.npmjs.org/',
+              'hoist=false',
+              'hoist-pattern[]=*eslint*',
+              'public-hoist-pattern[]=',
+              'shamefully-hoist=true',
+              'always-auth=false'
+            ],
+            {},
+            supportEnvVarFallbackSyntax,
+            filterNpmIncompatibleProperties
+          )
+        ).toMatchSnapshot();
+      });
+
+      it('filters out deprecated npm properties', () => {
+        expect(
+          trimNpmrcFileLines(
+            ['registry=https://registry.npmjs.org/', 'email=test@example.com', 'publish-branch=main'],
+            {},
+            supportEnvVarFallbackSyntax,
+            filterNpmIncompatibleProperties
+          )
+        ).toMatchSnapshot();
+      });
+
+      it('preserves registry-scoped auth tokens', () => {
+        expect(
+          trimNpmrcFileLines(
+            [
+              'registry=https://registry.npmjs.org/',
+              '//registry.npmjs.org/:_authToken=${NPM_TOKEN}',
+              '//my-registry.com/:_authToken=${MY_TOKEN}',
+              'email=test@example.com'
+            ],
+            { NPM_TOKEN: 'abc123', MY_TOKEN: 'xyz789' },
+            supportEnvVarFallbackSyntax,
+            filterNpmIncompatibleProperties
+          )
+        ).toMatchSnapshot();
+      });
+
+      it('preserves registry-scoped configurations', () => {
+        expect(
+          trimNpmrcFileLines(
+            [
+              'registry=https://registry.npmjs.org/',
+              '//registry.npmjs.org/:always-auth=true',
+              '//my-registry.com/:_authToken=${MY_TOKEN}',
+              'hoist=false'
+            ],
+            { MY_TOKEN: 'xyz789' },
+            supportEnvVarFallbackSyntax,
+            filterNpmIncompatibleProperties
+          )
+        ).toMatchSnapshot();
+      });
+
+      it('does not filter when filterNpmIncompatibleProperties is false', () => {
+        expect(
+          trimNpmrcFileLines(
+            ['registry=https://registry.npmjs.org/', 'email=test@example.com', 'hoist=false'],
+            {},
+            supportEnvVarFallbackSyntax,
+            false
+          )
+        ).toMatchSnapshot();
+      });
+
+      it('preserves standard npm properties', () => {
+        expect(
+          trimNpmrcFileLines(
+            [
+              'registry=https://registry.npmjs.org/',
+              'always-auth=false',
+              'strict-ssl=true',
+              'save-exact=true',
+              'package-lock=true',
+              'hoist=false',
+              'email=test@example.com'
+            ],
+            {},
+            supportEnvVarFallbackSyntax,
+            filterNpmIncompatibleProperties
+          )
+        ).toMatchSnapshot();
+      });
+    });
   });
 });

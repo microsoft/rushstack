@@ -173,7 +173,9 @@ function _resolvePackageVersion(
         sourceNpmrcFolder,
         targetNpmrcFolder: rushTempFolder,
         logger,
-        supportEnvVarFallbackSyntax: false
+        supportEnvVarFallbackSyntax: false,
+        // Filter out npm-incompatible properties when using npm
+        filterNpmIncompatibleProperties: true
       });
 
       // This returns something that looks like:
@@ -459,7 +461,9 @@ export function installAndRun(
       sourceNpmrcFolder,
       targetNpmrcFolder: packageInstallFolder,
       logger,
-      supportEnvVarFallbackSyntax: false
+      supportEnvVarFallbackSyntax: false,
+      // Filter out npm-incompatible properties when using npm
+      filterNpmIncompatibleProperties: true
     });
 
     _createPackageJson(packageInstallFolder, packageName, packageVersion);
