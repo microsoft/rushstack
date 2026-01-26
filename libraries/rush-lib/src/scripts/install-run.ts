@@ -124,6 +124,23 @@ function _getRushTempFolder(rushCommonFolder: string): string {
   }
 }
 
+/**
+ * Check if the Rush repository is configured to use npm as the package manager.
+ * Returns true if the repo uses npm, false for pnpm or yarn.
+ */
+function _isRepoUsingNpm(rushJsonFolder: string): boolean {
+  try {
+    const rushJsonPath: string = path.join(rushJsonFolder, RUSH_JSON_FILENAME);
+    const rushJsonContent: string = fs.readFileSync(rushJsonPath, 'utf-8');
+    const rushJson: { packageManager?: string } = JSON.parse(rushJsonContent);
+    // If packageManager is not specified or is 'npm', return true
+    return !rushJson.packageManager || rushJson.packageManager === 'npm';
+  } catch (e) {
+    // If we can't read rush.json, assume npm (conservative default)
+    return true;
+  }
+}
+
 export interface IPackageSpecifier {
   name: string;
   version: string | undefined;
@@ -168,14 +185,16 @@ function _resolvePackageVersion(
     try {
       const rushTempFolder: string = _getRushTempFolder(rushCommonFolder);
       const sourceNpmrcFolder: string = path.join(rushCommonFolder, 'config', 'rush');
+      const rushJsonFolder: string = findRushJsonFolder();
 
       syncNpmrc({
         sourceNpmrcFolder,
         targetNpmrcFolder: rushTempFolder,
         logger,
         supportEnvVarFallbackSyntax: false,
-        // Filter out npm-incompatible properties when using npm
-        filterNpmIncompatibleProperties: true
+        // Only filter npm-incompatible properties when the repo uses pnpm or yarn.
+        // If the repo uses npm, the .npmrc is already configured for npm, so don't filter.
+        filterNpmIncompatibleProperties: !_isRepoUsingNpm(rushJsonFolder)
       });
 
       // This returns something that looks like:
@@ -462,8 +481,9 @@ export function installAndRun(
       targetNpmrcFolder: packageInstallFolder,
       logger,
       supportEnvVarFallbackSyntax: false,
-      // Filter out npm-incompatible properties when using npm
-      filterNpmIncompatibleProperties: true
+      // Only filter npm-incompatible properties when the repo uses pnpm or yarn.
+      // If the repo uses npm, the .npmrc is already configured for npm, so don't filter.
+      filterNpmIncompatibleProperties: !_isRepoUsingNpm(rushJsonFolder)
     });
 
     _createPackageJson(packageInstallFolder, packageName, packageVersion);

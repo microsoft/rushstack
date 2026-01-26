@@ -65,6 +65,12 @@ export interface IInstallPackageInDirectoryOptions {
   maxInstallAttempts: number;
   commonRushConfigFolder: string | undefined;
   suppressOutput?: boolean;
+  /**
+   * Whether to filter npm-incompatible properties from .npmrc.
+   * This should be true when the .npmrc is configured for a different package manager (pnpm/yarn)
+   * but npm is being used to install packages.
+   */
+  filterNpmIncompatibleProperties?: boolean;
 }
 
 export interface ILifecycleCommandOptions {
@@ -505,7 +511,8 @@ export class Utilities {
     commonRushConfigFolder,
     maxInstallAttempts,
     suppressOutput,
-    directory
+    directory,
+    filterNpmIncompatibleProperties
   }: IInstallPackageInDirectoryOptions): Promise<void> {
     directory = path.resolve(directory);
     const directoryExists: boolean = await FileSystem.existsAsync(directory);
@@ -532,9 +539,9 @@ export class Utilities {
         sourceNpmrcFolder: commonRushConfigFolder,
         targetNpmrcFolder: directory,
         supportEnvVarFallbackSyntax: false,
-        // Filter out npm-incompatible properties when using npm to install packages
-        // to avoid warnings about unknown config properties
-        filterNpmIncompatibleProperties: true
+        // Filter out npm-incompatible properties only when the .npmrc is configured for
+        // a different package manager (pnpm/yarn) but npm is being used to install.
+        filterNpmIncompatibleProperties: filterNpmIncompatibleProperties || false
       });
     }
 
