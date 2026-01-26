@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-lib",
+      "comment": "Upgrade tar dependency from 6.2.1 to 7.5.6 to fix security vulnerability GHSA-8qq5-rm4j-mr97",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush-lib",
+  "email": "copilot@github.com"
+}
