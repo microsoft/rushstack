@@ -359,6 +359,36 @@ export class RushPnpmCommandLineParser {
           }
           break;
         }
+        case 'approve-builds': {
+          const semver: typeof import('semver') = await import('semver');
+          /**
+           * The "approve-builds" command was introduced in pnpm version 10.1.0
+           * to approve packages for running build scripts when onlyBuiltDependencies is used
+           */
+          if (semver.lt(this._rushConfiguration.packageManagerToolVersion, '10.1.0')) {
+            this._terminal.writeErrorLine(
+              PrintUtilities.wrapWords(
+                `Error: The "pnpm approve-builds" command is added after pnpm@10.1.0.` +
+                  ` Please update "pnpmVersion" >= 10.1.0 in ${RushConstants.rushJsonFilename} file and run "rush update" to use this command.`
+              ) + '\n'
+            );
+            throw new AlreadyReportedError();
+          }
+          const pnpmOptionsJsonFilename: string = path.join(
+            this._rushConfiguration.commonRushConfigFolder,
+            RushConstants.pnpmConfigFilename
+          );
+          if (this._rushConfiguration.rushConfigurationJson.pnpmOptions) {
+            this._terminal.writeErrorLine(
+              PrintUtilities.wrapWords(
+                `Error: The "pnpm approve-builds" command is incompatible with specifying "pnpmOptions" in ${RushConstants.rushJsonFilename} file.` +
+                  ` Please move the content of "pnpmOptions" in ${RushConstants.rushJsonFilename} file to ${pnpmOptionsJsonFilename}`
+              ) + '\n'
+            );
+            throw new AlreadyReportedError();
+          }
+          break;
+        }
 
         // Known safe
         case 'audit':
@@ -527,6 +557,39 @@ export class RushPnpmCommandLineParser {
           this._terminal.writeWarningLine(
             `Rush refreshed the ${RushConstants.pnpmConfigFilename}, shrinkwrap file and patch files under the ` +
               `"${commonTempPnpmPatchesFolder}" folder.\n` +
+              '  Please commit this change to Git.'
+          );
+        }
+        break;
+      }
+      case 'approve-builds': {
+        if (this._subspace.getPnpmOptions() === undefined) {
+          const subspaceConfigFolder: string = this._subspace.getSubspaceConfigFolderPath();
+          this._terminal.writeErrorLine(
+            `The "rush-pnpm approve-builds" command cannot proceed without a pnpm-config.json file.` +
+              `  Create one in this folder: ${subspaceConfigFolder}`
+          );
+          break;
+        }
+
+        // Example: "C:\MyRepo\common\temp\package.json"
+        const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
+        const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
+        const newGlobalOnlyBuiltDependencies: string[] | undefined =
+          commonPackageJson?.pnpm?.onlyBuiltDependencies;
+        const pnpmOptions: PnpmOptionsConfiguration | undefined = this._subspace.getPnpmOptions();
+        const currentGlobalOnlyBuiltDependencies: string[] | undefined =
+          pnpmOptions?.globalOnlyBuiltDependencies;
+
+        if (!Objects.areDeepEqual(currentGlobalOnlyBuiltDependencies, newGlobalOnlyBuiltDependencies)) {
+          // Update onlyBuiltDependencies to pnpm configuration file
+          pnpmOptions?.updateGlobalOnlyBuiltDependencies(newGlobalOnlyBuiltDependencies);
+
+          // Rerun installation to update
+          await this._doRushUpdateAsync();
+
+          this._terminal.writeWarningLine(
+            `Rush refreshed the ${RushConstants.pnpmConfigFilename} and shrinkwrap file.\n` +
               '  Please commit this change to Git.'
           );
         }
