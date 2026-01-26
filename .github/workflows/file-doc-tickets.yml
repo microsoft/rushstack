@@ -76,7 +76,7 @@ jobs:
           fi
       - name: File ticket
         if: ${{ env.FILE_TICKET == '1' }}
-        uses: peter-evans/create-issue-from-file@af31b99c72f9e91877aea8a2d96fd613beafac84 # @v4 (locked)
+        uses: peter-evans/create-issue-from-file@fca9117c27cdc29c6c4db3b86c48e4115a786710  # v6.0.0
         with:
           repository: microsoft/rushstack-websites
           token: '${{ secrets.RUSHSTACK_WEBSITES_PR_TOKEN }}'
