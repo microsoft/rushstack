@@ -600,17 +600,28 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         }
       }
 
-      const onPnpmStdoutChunk: ((chunk: string) => void) | undefined =
-        pnpmTips.length > 0
-          ? (chunk: string): void => {
-              // Iterate over the supported custom tip metadata and try to match the chunk.
-              for (const { isMatch, tipId } of pnpmTips) {
-                if (isMatch?.(chunk)) {
-                  tipIDsToBePrinted.add(tipId);
-                }
-              }
+      const onPnpmStdoutChunk: ((chunk: string) => string | void) | undefined = (
+        chunk: string
+      ): string | void => {
+        // Iterate over the supported custom tip metadata and try to match the chunk.
+        if (pnpmTips.length > 0) {
+          for (const { isMatch, tipId } of pnpmTips) {
+            if (isMatch?.(chunk)) {
+              tipIDsToBePrinted.add(tipId);
             }
-          : undefined;
+          }
+        }
+
+        // Replace `pnpm approve-builds` with `rush-pnpm approve-builds` when running
+        // `rush install` or `rush update` to instruct users to use the correct command
+        const modifiedChunk: string = chunk.replace(
+          /pnpm approve-builds/g,
+          `rush-pnpm --subspace ${subspace.subspaceName} approve-builds`
+        );
+
+        // Return modified chunk if it was changed, otherwise return void to keep original
+        return modifiedChunk !== chunk ? modifiedChunk : undefined;
+      };
       try {
         await Utilities.executeCommandWithRetryAsync(
           {
