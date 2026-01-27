@@ -79,6 +79,10 @@ jobs:
         run: node common/scripts/install-run-rush.js retest --verbose --production
         working-directory: repo-a
 
+      - name: Run package manager integration tests
+        run: npm run test
+        working-directory: repo-a/build-tests/rush-package-manager-integration-test
+
       - name: Ensure repo README is up-to-date
         run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
         working-directory: repo-a

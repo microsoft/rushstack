@@ -66,7 +66,7 @@
     "ssri": "~8.0.0",
     "strict-uri-encode": "~2.0.0",
     "tapable": "2.2.1",
-    "tar": "~6.2.1",
+    "tar": "~7.5.6",
     "true-case-path": "~2.2.1"
   },
   "devDependencies": {
@@ -85,7 +85,6 @@
     "@types/semver": "7.5.0",
     "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
-    "@types/tar": "6.1.6",
     "@types/webpack-env": "1.18.8",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
