@@ -3857,21 +3857,18 @@ importers:
 
   ../../../libraries/npm-check-fork:
     dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../node-core-library
       giturl:
         specifier: ^2.0.0
         version: 2.0.0
       lodash:
         specifier: ~4.17.15
         version: 4.17.23
-      package-json:
-        specifier: ^7
-        version: 7.0.0
       semver:
         specifier: ~7.5.4
         version: 7.5.4
-      throat:
-        specifier: ^6.0.2
-        version: 6.0.2
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -17720,9 +17717,6 @@ packages:
     engines: {node: '>=10.18'}
     peerDependencies:
       tslib: ^2
-
-  throat@6.0.2:
-    resolution: {integrity: sha512-WKexMoJj3vEuK0yFEapj8y64V0A6xcuPuK9Gt1d0R+dzCSJc0lHqQytAbSB4cDAK0dWh4T0E2ETkoLE2WZ41OQ==}
 
   throttle-debounce@3.0.1:
     resolution: {integrity: sha512-dTEWWNu6JmeVXY0ZYoPuH5cRIwc0MeGbJwah9KUNYSJwommQpCzTySTpEe8Gs1J23aeWEuAobe4Ag7EHVt/LOg==}
@@ -36284,8 +36278,6 @@ snapshots:
   thingies@2.5.0(tslib@2.8.1):
     dependencies:
       tslib: 2.8.1
-
-  throat@6.0.2: {}
 
   throttle-debounce@3.0.1: {}
 
