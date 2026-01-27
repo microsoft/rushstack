@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Thu, 08 Jan 2026 01:12:30 GMT and should not be manually modified.
+This log was last generated on Tue, 27 Jan 2026 16:13:30 GMT and should not be manually modified.
+
+## 0.11.12
+Tue, 27 Jan 2026 16:13:30 GMT
+
+### Patches
+
+- Upgrade npm-packlist from ~2.1.2 to ~5.1.3 to remove deprecated glob@7 and inflight dependencies
 
 ## 0.11.11
 Thu, 08 Jan 2026 01:12:30 GMT

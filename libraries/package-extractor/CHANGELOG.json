@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.11.12",
+      "tag": "@rushstack/package-extractor_v0.11.12",
+      "date": "Tue, 27 Jan 2026 16:13:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade npm-packlist from ~2.1.2 to ~5.1.3 to remove deprecated glob@7 and inflight dependencies"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.11",
       "tag": "@rushstack/package-extractor_v0.11.11",
       "date": "Thu, 08 Jan 2026 01:12:30 GMT",
