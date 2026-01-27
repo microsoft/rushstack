@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as os from 'node:os';
 import * as path from 'node:path';
 
 import type { ITerminal } from '@rushstack/terminal';
@@ -14,7 +15,7 @@ import { TestHelper } from './TestHelper';
 export async function testYarnModeAsync(terminal: ITerminal): Promise<void> {
   const helper: TestHelper = new TestHelper(terminal);
   // Use system temp directory to avoid rush init detecting parent rush.json
-  const testRepoPath: string = path.join('/tmp', 'rush-package-manager-test', 'yarn-test-repo');
+  const testRepoPath: string = path.join(os.tmpdir(), 'rush-package-manager-test', 'yarn-test-repo');
 
   terminal.writeLine('==========================================');
   terminal.writeLine('Rush Yarn Mode Integration Test');
