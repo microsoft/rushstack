@@ -30,6 +30,7 @@ function _trimNpmrcFile(
     | 'linesToPrepend'
     | 'supportEnvVarFallbackSyntax'
     | 'filterNpmIncompatibleProperties'
+    | 'env'
   >
 ): string {
   const {
@@ -37,7 +38,8 @@ function _trimNpmrcFile(
     linesToPrepend,
     linesToAppend,
     supportEnvVarFallbackSyntax,
-    filterNpmIncompatibleProperties
+    filterNpmIncompatibleProperties,
+    env = process.env
   } = options;
   const combinedNpmrcFromCache: string | undefined = _combinedNpmrcMap.get(sourceNpmrcPath);
   if (combinedNpmrcFromCache !== undefined) {
@@ -61,7 +63,7 @@ function _trimNpmrcFile(
 
   const resultLines: string[] = trimNpmrcFileLines(
     npmrcFileLines,
-    process.env,
+    env,
     supportEnvVarFallbackSyntax,
     filterNpmIncompatibleProperties
   );
@@ -109,6 +111,15 @@ const NPM_INCOMPATIBLE_REGISTRY_SCOPED_PROPERTIES: Set<string> = new Set([
  *   "hoist-pattern[]=..." -> matches "hoist-pattern"
  */
 const PROPERTY_NAME_REGEX: RegExp = /^([^=\[\s]+)/;
+
+/**
+ * Regular expression to extract environment variable names and optional fallback values.
+ * Matches patterns like:
+ *   nameString                 -> group 1: nameString,    group 2: undefined
+ *   nameString-fallbackString  -> group 1: nameString,    group 2: fallbackString
+ *   nameString:-fallbackString -> group 1: nameString,    group 2: fallbackString
+ */
+const ENV_VAR_WITH_FALLBACK_REGEX: RegExp = /^(?<name>[^:-]+)(?::?-(?<fallback>.+))?$/;
 
 /**
  *
@@ -188,7 +199,7 @@ export function trimNpmrcFileLines(
              * ${nameString-fallbackString}   -> name-fallbackString
              * ${nameString:-fallbackString}  -> name:-fallbackString
              */
-            const nameWithFallback: string = token.substring(2, token.length - 1);
+            const nameWithFallback: string = token.slice(2, -1);
 
             let environmentVariableName: string;
             let fallback: string | undefined;
@@ -201,10 +212,9 @@ export function trimNpmrcFileLines(
                * nameString-fallbackString  ->  nameString    fallbackString
                * nameString:-fallbackString ->  nameString    fallbackString
                */
-              const matched: string[] | null = nameWithFallback.match(/^([^:-]+)(?:\:?-(.+))?$/);
-              // matched: [originStr, variableName, fallback]
-              environmentVariableName = matched?.[1] ?? nameWithFallback;
-              fallback = matched?.[2];
+              const matched: RegExpMatchArray | null = nameWithFallback.match(ENV_VAR_WITH_FALLBACK_REGEX);
+              environmentVariableName = matched?.groups?.name ?? nameWithFallback;
+              fallback = matched?.groups?.fallback;
             } else {
               environmentVariableName = nameWithFallback;
             }
@@ -262,6 +272,7 @@ interface INpmrcTrimOptions {
   linesToAppend?: string[];
   supportEnvVarFallbackSyntax: boolean;
   filterNpmIncompatibleProperties?: boolean;
+  env?: NodeJS.ProcessEnv;
 }
 
 function _copyAndTrimNpmrcFile(options: INpmrcTrimOptions): string {
@@ -295,6 +306,7 @@ export interface ISyncNpmrcOptions {
   linesToAppend?: string[];
   createIfMissing?: boolean;
   filterNpmIncompatibleProperties?: boolean;
+  env?: NodeJS.ProcessEnv;
 }
 
 export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
