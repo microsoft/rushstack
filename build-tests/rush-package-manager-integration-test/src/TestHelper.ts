@@ -177,10 +177,13 @@ export class TestHelper {
     this._terminal.writeLine('\nTesting built code...');
     const projectLib: string = path.join(testRepoPath, 'projects', projectName, 'lib/index.js');
 
+    // Use forward slashes for require() path on all platforms
+    const projectLibPosix: string = projectLib.split(path.sep).join(path.posix.sep);
+
     // Use Executable.spawnSync to capture output
     const result: string = Executable.spawnSync(
       process.argv0,
-      ['-e', `const b = require('${projectLib}'); console.log(b.test());`],
+      ['-e', `const b = require('${projectLibPosix}'); console.log(b.test());`],
       {
         currentWorkingDirectory: testRepoPath
       }
