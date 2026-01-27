@@ -25,10 +25,22 @@ const _combinedNpmrcMap: Map<string, string> = new Map();
 function _trimNpmrcFile(
   options: Pick<
     INpmrcTrimOptions,
-    'sourceNpmrcPath' | 'linesToAppend' | 'linesToPrepend' | 'supportEnvVarFallbackSyntax'
+    | 'sourceNpmrcPath'
+    | 'linesToAppend'
+    | 'linesToPrepend'
+    | 'supportEnvVarFallbackSyntax'
+    | 'filterNpmIncompatibleProperties'
+    | 'env'
   >
 ): string {
-  const { sourceNpmrcPath, linesToPrepend, linesToAppend, supportEnvVarFallbackSyntax } = options;
+  const {
+    sourceNpmrcPath,
+    linesToPrepend,
+    linesToAppend,
+    supportEnvVarFallbackSyntax,
+    filterNpmIncompatibleProperties,
+    env = process.env
+  } = options;
   const combinedNpmrcFromCache: string | undefined = _combinedNpmrcMap.get(sourceNpmrcPath);
   if (combinedNpmrcFromCache !== undefined) {
     return combinedNpmrcFromCache;
@@ -49,7 +61,12 @@ function _trimNpmrcFile(
 
   npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
 
-  const resultLines: string[] = trimNpmrcFileLines(npmrcFileLines, process.env, supportEnvVarFallbackSyntax);
+  const resultLines: string[] = trimNpmrcFileLines(
+    npmrcFileLines,
+    env,
+    supportEnvVarFallbackSyntax,
+    filterNpmIncompatibleProperties
+  );
 
   const combinedNpmrc: string = resultLines.join('\n');
 
@@ -60,16 +77,63 @@ function _trimNpmrcFile(
 }
 
 /**
+ * List of npmrc properties that are not supported by npm but may be present in the config.
+ * These include pnpm-specific properties and deprecated npm properties.
+ */
+const NPM_INCOMPATIBLE_PROPERTIES: Set<string> = new Set([
+  // pnpm-specific hoisting configuration
+  'hoist',
+  'hoist-pattern',
+  'public-hoist-pattern',
+  'shamefully-hoist',
+  // Deprecated or unknown npm properties that cause warnings
+  'email',
+  'publish-branch'
+]);
+
+/**
+ * List of registry-scoped npmrc property suffixes that are pnpm-specific.
+ * These are properties like "//registry.example.com/:tokenHelper" where "tokenHelper"
+ * is the suffix after the last colon.
+ */
+const NPM_INCOMPATIBLE_REGISTRY_SCOPED_PROPERTIES: Set<string> = new Set([
+  // pnpm-specific token helper properties
+  'tokenHelper',
+  'urlTokenHelper'
+]);
+
+/**
+ * Regular expression to extract property names from .npmrc lines.
+ * Matches everything before '=', '[', or whitespace to capture the property name.
+ * Note: The 'g' flag is intentionally omitted since we only need the first match.
+ * Examples:
+ *   "registry=https://..." -> matches "registry"
+ *   "hoist-pattern[]=..." -> matches "hoist-pattern"
+ */
+const PROPERTY_NAME_REGEX: RegExp = /^([^=\[\s]+)/;
+
+/**
+ * Regular expression to extract environment variable names and optional fallback values.
+ * Matches patterns like:
+ *   nameString                 -> group 1: nameString,    group 2: undefined
+ *   nameString-fallbackString  -> group 1: nameString,    group 2: fallbackString
+ *   nameString:-fallbackString -> group 1: nameString,    group 2: fallbackString
+ */
+const ENV_VAR_WITH_FALLBACK_REGEX: RegExp = /^(?<name>[^:-]+)(?::?-(?<fallback>.+))?$/;
+
+/**
  *
  * @param npmrcFileLines The npmrc file's lines
  * @param env The environment variables object
  * @param supportEnvVarFallbackSyntax Whether to support fallback values in the form of `${VAR_NAME:-fallback}`
- * @returns
+ * @param filterNpmIncompatibleProperties Whether to filter out properties that npm doesn't understand
+ * @returns An array of processed npmrc file lines with undefined environment variables and npm-incompatible properties commented out
  */
 export function trimNpmrcFileLines(
   npmrcFileLines: string[],
   env: NodeJS.ProcessEnv,
-  supportEnvVarFallbackSyntax: boolean
+  supportEnvVarFallbackSyntax: boolean,
+  filterNpmIncompatibleProperties: boolean = false
 ): string[] {
   const resultLines: string[] = [];
 
@@ -82,6 +146,7 @@ export function trimNpmrcFileLines(
   // Trim out lines that reference environment variables that aren't defined
   for (let line of npmrcFileLines) {
     let lineShouldBeTrimmed: boolean = false;
+    let trimReason: string = '';
 
     //remove spaces before or after key and value
     line = line
@@ -91,51 +156,92 @@ export function trimNpmrcFileLines(
 
     // Ignore comment lines
     if (!commentRegExp.test(line)) {
-      const environmentVariables: string[] | null = line.match(expansionRegExp);
-      if (environmentVariables) {
-        for (const token of environmentVariables) {
-          /**
-           * Remove the leading "${" and the trailing "}" from the token
-           *
-           * ${nameString}                  -> nameString
-           * ${nameString-fallbackString}   -> name-fallbackString
-           * ${nameString:-fallbackString}  -> name:-fallbackString
-           */
-          const nameWithFallback: string = token.substring(2, token.length - 1);
+      // Check if this is a property that npm doesn't understand
+      if (filterNpmIncompatibleProperties) {
+        // Extract the property name (everything before the '=' or '[')
+        const match: RegExpMatchArray | null = line.match(PROPERTY_NAME_REGEX);
+        if (match) {
+          const propertyName: string = match[1];
 
-          let environmentVariableName: string;
-          let fallback: string | undefined;
-          if (supportEnvVarFallbackSyntax) {
-            /**
-             * Get the environment variable name and fallback value.
-             *
-             *                                name          fallback
-             * nameString                 ->  nameString    undefined
-             * nameString-fallbackString  ->  nameString    fallbackString
-             * nameString:-fallbackString ->  nameString    fallbackString
-             */
-            const matched: string[] | null = nameWithFallback.match(/^([^:-]+)(?:\:?-(.+))?$/);
-            // matched: [originStr, variableName, fallback]
-            environmentVariableName = matched?.[1] ?? nameWithFallback;
-            fallback = matched?.[2];
+          // Check if this is a registry-scoped property (starts with "//" like "//registry.npmjs.org/:_authToken")
+          const isRegistryScoped: boolean = propertyName.startsWith('//');
+
+          if (isRegistryScoped) {
+            // For registry-scoped properties, check if the suffix (after the last colon) is npm-incompatible
+            // Example: "//registry.example.com/:tokenHelper" -> suffix is "tokenHelper"
+            const lastColonIndex: number = propertyName.lastIndexOf(':');
+            if (lastColonIndex !== -1) {
+              const registryPropertySuffix: string = propertyName.substring(lastColonIndex + 1);
+              if (NPM_INCOMPATIBLE_REGISTRY_SCOPED_PROPERTIES.has(registryPropertySuffix)) {
+                lineShouldBeTrimmed = true;
+                trimReason = 'NPM_INCOMPATIBLE_PROPERTY';
+              }
+            }
           } else {
-            environmentVariableName = nameWithFallback;
+            // For non-registry-scoped properties, check the full property name
+            if (NPM_INCOMPATIBLE_PROPERTIES.has(propertyName)) {
+              lineShouldBeTrimmed = true;
+              trimReason = 'NPM_INCOMPATIBLE_PROPERTY';
+            }
           }
+        }
+      }
 
-          // Is the environment variable and fallback value defined.
-          if (!env[environmentVariableName] && !fallback) {
-            // No, so trim this line
-            lineShouldBeTrimmed = true;
-            break;
+      // Check for undefined environment variables
+      if (!lineShouldBeTrimmed) {
+        const environmentVariables: string[] | null = line.match(expansionRegExp);
+        if (environmentVariables) {
+          for (const token of environmentVariables) {
+            /**
+             * Remove the leading "${" and the trailing "}" from the token
+             *
+             * ${nameString}                  -> nameString
+             * ${nameString-fallbackString}   -> name-fallbackString
+             * ${nameString:-fallbackString}  -> name:-fallbackString
+             */
+            const nameWithFallback: string = token.slice(2, -1);
+
+            let environmentVariableName: string;
+            let fallback: string | undefined;
+            if (supportEnvVarFallbackSyntax) {
+              /**
+               * Get the environment variable name and fallback value.
+               *
+               *                                name          fallback
+               * nameString                 ->  nameString    undefined
+               * nameString-fallbackString  ->  nameString    fallbackString
+               * nameString:-fallbackString ->  nameString    fallbackString
+               */
+              const matched: RegExpMatchArray | null = nameWithFallback.match(ENV_VAR_WITH_FALLBACK_REGEX);
+              environmentVariableName = matched?.groups?.name ?? nameWithFallback;
+              fallback = matched?.groups?.fallback;
+            } else {
+              environmentVariableName = nameWithFallback;
+            }
+
+            // Is the environment variable and fallback value defined.
+            if (!env[environmentVariableName] && !fallback) {
+              // No, so trim this line
+              lineShouldBeTrimmed = true;
+              trimReason = 'MISSING_ENVIRONMENT_VARIABLE';
+              break;
+            }
           }
         }
       }
     }
 
     if (lineShouldBeTrimmed) {
-      // Example output:
-      // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
-      resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
+      // Comment out the line with appropriate reason
+      if (trimReason === 'NPM_INCOMPATIBLE_PROPERTY') {
+        // Example output:
+        // "; UNSUPPORTED BY NPM: email=test@example.com"
+        resultLines.push('; UNSUPPORTED BY NPM: ' + line);
+      } else {
+        // Example output:
+        // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
+        resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
+      }
     } else {
       resultLines.push(line);
     }
@@ -165,6 +271,8 @@ interface INpmrcTrimOptions {
   linesToPrepend?: string[];
   linesToAppend?: string[];
   supportEnvVarFallbackSyntax: boolean;
+  filterNpmIncompatibleProperties?: boolean;
+  env?: NodeJS.ProcessEnv;
 }
 
 function _copyAndTrimNpmrcFile(options: INpmrcTrimOptions): string {
@@ -197,6 +305,8 @@ export interface ISyncNpmrcOptions {
   linesToPrepend?: string[];
   linesToAppend?: string[];
   createIfMissing?: boolean;
+  filterNpmIncompatibleProperties?: boolean;
+  env?: NodeJS.ProcessEnv;
 }
 
 export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
@@ -252,7 +362,11 @@ export function isVariableSetInNpmrcFile(
     return false;
   }
 
-  const trimmedNpmrcFile: string = _trimNpmrcFile({ sourceNpmrcPath, supportEnvVarFallbackSyntax });
+  const trimmedNpmrcFile: string = _trimNpmrcFile({
+    sourceNpmrcPath,
+    supportEnvVarFallbackSyntax,
+    filterNpmIncompatibleProperties: false
+  });
 
   const variableKeyRegExp: RegExp = new RegExp(`^${variableKey}=`, 'm');
   return trimmedNpmrcFile.match(variableKeyRegExp) !== null;
