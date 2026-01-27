@@ -34,7 +34,7 @@ export async function testNpmModeAsync(terminal: ITerminal): Promise<void> {
     'test-project-a',
     '1.0.0',
     { lodash: '^4.17.21' },
-    `node -e "require('fs').mkdirSync('lib', {recursive: true}); require('fs').writeFileSync('lib/index.js', 'module.exports = { greet: () => \\"Hello from A\\" };');"`
+    `node -e "const fs = require('fs'); fs.mkdirSync('lib', {recursive: true}); fs.writeFileSync('lib/index.js', 'module.exports = { greet: () => \\"Hello from A\\" };');"`
   );
 
   // Create project B (depends on A)
@@ -47,7 +47,7 @@ export async function testNpmModeAsync(terminal: ITerminal): Promise<void> {
       'test-project-a': '1.0.0',
       moment: '^2.29.4'
     },
-    `node -e "const a = require('test-project-a'); require('fs').mkdirSync('lib', {recursive: true}); require('fs').writeFileSync('lib/index.js', 'module.exports = { test: () => \\"Using: \\" + require(\\'test-project-a\\').greet() };');"`
+    `node -e "const a = require('test-project-a'), fs = require('fs'); fs.mkdirSync('lib', {recursive: true}); fs.writeFileSync('lib/index.js', 'module.exports = { test: () => \\"Using: \\" + require(\\'test-project-a\\').greet() };');"`
   );
 
   // Run rush update (creates and extracts temp project tarballs)

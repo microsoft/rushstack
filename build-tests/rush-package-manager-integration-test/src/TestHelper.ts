@@ -48,15 +48,9 @@ export class TestHelper {
     packageManagerType: 'npm' | 'yarn',
     packageManagerVersion: string
   ): Promise<void> {
-    // Clean up previous test run
-    if (await FileSystem.existsAsync(testRepoPath)) {
-      this._terminal.writeLine('Cleaning up previous test run...');
-      await FileSystem.deleteFolderAsync(testRepoPath);
-    }
-
-    // Create test repo directory
+    // Clean up previous test run and create empty test repo directory
     this._terminal.writeLine(`Creating test repository at ${testRepoPath}...`);
-    await FileSystem.ensureFolderAsync(testRepoPath);
+    await FileSystem.ensureEmptyFolderAsync(testRepoPath);
 
     // Initialize Rush repo
     this._terminal.writeLine('Initializing Rush repo...');
@@ -145,12 +139,26 @@ export class TestHelper {
     expectedDependencies: string[]
   ): Promise<void> {
     this._terminal.writeLine('\nVerifying node_modules structure...');
-    const projectNodeModules: string = path.join(testRepoPath, 'projects', projectName, 'node_modules');
+    const projectPath: string = path.join(testRepoPath, 'projects', projectName);
+    const projectNodeModules: string = path.join(projectPath, 'node_modules');
 
     for (const dep of expectedDependencies) {
       const depPath: string = path.join(projectNodeModules, dep);
       if (!(await FileSystem.existsAsync(depPath))) {
         throw new Error(`ERROR: ${dep} not found in ${projectName}!`);
+      }
+
+      // Verify symlinks resolve correctly for local dependencies
+      if (dep.startsWith('test-project-')) {
+        const depRealPath: string = await FileSystem.getRealPathAsync(depPath);
+        const expectedRealPath: string = path.join(testRepoPath, 'projects', dep);
+        if (depRealPath !== expectedRealPath) {
+          throw new Error(
+            `ERROR: Symlink for ${dep} does not resolve correctly!\n` +
+              `Expected: ${expectedRealPath}\n` +
+              `Actual: ${depRealPath}`
+          );
+        }
       }
     }
     this._terminal.writeLine('✓ Dependencies installed correctly');
