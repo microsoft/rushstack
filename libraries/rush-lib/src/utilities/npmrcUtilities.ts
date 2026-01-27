@@ -77,7 +77,6 @@ function _trimNpmrcFile(
 /**
  * List of npmrc properties that are not supported by npm but may be present in the config.
  * These include pnpm-specific properties and deprecated npm properties.
- * Registry-scoped properties (starting with "//") are never filtered as they contain auth tokens.
  */
 const NPM_INCOMPATIBLE_PROPERTIES: Set<string> = new Set([
   // pnpm-specific hoisting configuration
@@ -88,6 +87,17 @@ const NPM_INCOMPATIBLE_PROPERTIES: Set<string> = new Set([
   // Deprecated or unknown npm properties that cause warnings
   'email',
   'publish-branch'
+]);
+
+/**
+ * List of registry-scoped npmrc property suffixes that are pnpm-specific.
+ * These are properties like "//registry.example.com/:tokenHelper" where "tokenHelper"
+ * is the suffix after the last colon.
+ */
+const NPM_INCOMPATIBLE_REGISTRY_SCOPED_PROPERTIES: Set<string> = new Set([
+  // pnpm-specific token helper properties
+  'tokenHelper',
+  'urlTokenHelper'
 ]);
 
 /**
@@ -142,13 +152,26 @@ export function trimNpmrcFileLines(
         if (match) {
           const propertyName: string = match[1];
 
-          // Never filter registry-scoped properties (auth tokens, etc.)
-          // These start with "//" like "//registry.npmjs.org/:_authToken"
+          // Check if this is a registry-scoped property (starts with "//" like "//registry.npmjs.org/:_authToken")
           const isRegistryScoped: boolean = propertyName.startsWith('//');
 
-          if (!isRegistryScoped && NPM_INCOMPATIBLE_PROPERTIES.has(propertyName)) {
-            lineShouldBeTrimmed = true;
-            trimReason = 'NPM_INCOMPATIBLE_PROPERTY';
+          if (isRegistryScoped) {
+            // For registry-scoped properties, check if the suffix (after the last colon) is npm-incompatible
+            // Example: "//registry.example.com/:tokenHelper" -> suffix is "tokenHelper"
+            const lastColonIndex: number = propertyName.lastIndexOf(':');
+            if (lastColonIndex !== -1) {
+              const registryPropertySuffix: string = propertyName.substring(lastColonIndex + 1);
+              if (NPM_INCOMPATIBLE_REGISTRY_SCOPED_PROPERTIES.has(registryPropertySuffix)) {
+                lineShouldBeTrimmed = true;
+                trimReason = 'NPM_INCOMPATIBLE_PROPERTY';
+              }
+            }
+          } else {
+            // For non-registry-scoped properties, check the full property name
+            if (NPM_INCOMPATIBLE_PROPERTIES.has(propertyName)) {
+              lineShouldBeTrimmed = true;
+              trimReason = 'NPM_INCOMPATIBLE_PROPERTY';
+            }
           }
         }
       }

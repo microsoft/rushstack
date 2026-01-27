@@ -27,6 +27,16 @@ Array [
 ]
 `;
 
+exports[`npmrcUtilities trimNpmrcFileLines With npm-incompatible properties filtering filters out pnpm-specific registry-scoped properties 1`] = `
+Array [
+  "registry=https://registry.npmjs.org/",
+  "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}",
+  "; UNSUPPORTED BY NPM: //my-registry.com/:tokenHelper=/path/to/helper",
+  "; UNSUPPORTED BY NPM: //other-registry.com/:urlTokenHelper=/path/to/url-helper",
+  "//registry.npmjs.org/:always-auth=true",
+]
+`;
+
 exports[`npmrcUtilities trimNpmrcFileLines With npm-incompatible properties filtering preserves registry-scoped auth tokens 1`] = `
 Array [
   "registry=https://registry.npmjs.org/",

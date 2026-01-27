@@ -187,6 +187,23 @@ describe('npmrcUtilities', () => {
           )
         ).toMatchSnapshot();
       });
+
+      it('filters out pnpm-specific registry-scoped properties', () => {
+        expect(
+          trimNpmrcFileLines(
+            [
+              'registry=https://registry.npmjs.org/',
+              '//registry.npmjs.org/:_authToken=${NPM_TOKEN}',
+              '//my-registry.com/:tokenHelper=/path/to/helper',
+              '//other-registry.com/:urlTokenHelper=/path/to/url-helper',
+              '//registry.npmjs.org/:always-auth=true'
+            ],
+            { NPM_TOKEN: 'abc123' },
+            supportEnvVarFallbackSyntax,
+            filterNpmIncompatibleProperties
+          )
+        ).toMatchSnapshot();
+      });
     });
   });
 });
