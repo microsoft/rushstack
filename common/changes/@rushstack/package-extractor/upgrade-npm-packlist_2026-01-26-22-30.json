@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-extractor",
+      "comment": "Upgrade npm-packlist from ~2.1.2 to ~5.1.3 to remove deprecated glob@7 and inflight dependencies",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor"
+}
