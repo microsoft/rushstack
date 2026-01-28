@@ -65,13 +65,13 @@ export function someFunction5(): SomeEnum.A;
 export function someFunction6(): typeof SomeClass1.staticProp;
 
 // @public
-export function someFunction7({ then: then2 }: Promise<void>): typeof Date.prototype.getDate;
+export function someFunction7(input: Promise<void>): typeof Date.prototype.getDate;
 
 // @public
-export function someFunction8({ prop: prop2 }: Lib2Class): void;
+export function someFunction8(input: Lib2Class): void;
 
 // @public
-export function someFunction9({ prop: prop2 }: SomeInterface1): void;
+export function someFunction9(input: SomeInterface1): void;
 
 // @public (undocumented)
 export interface SomeInterface1 {

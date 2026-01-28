@@ -694,6 +694,14 @@
           "overloadIndex": 1,
           "parameters": [
             {
+              "parameterName": "{ then: then2 }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
               "parameterName": "input",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
@@ -740,6 +748,14 @@
           "overloadIndex": 1,
           "parameters": [
             {
+              "parameterName": "{ prop: prop2 }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
               "parameterName": "input",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
@@ -785,6 +801,14 @@
           "releaseTag": "Public",
           "overloadIndex": 1,
           "parameters": [
+            {
+              "parameterName": "{ prop: prop2 }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
             {
               "parameterName": "input",
               "parameterTypeTokenRange": {

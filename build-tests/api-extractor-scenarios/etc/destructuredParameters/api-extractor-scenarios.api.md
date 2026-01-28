@@ -5,34 +5,33 @@
 ```ts
 
 // @public (undocumented)
-export function testArray([x, y]: [number, number], last: string): void;
+export function testArray(input: [number, number], last: string): void;
 
 // @public (undocumented)
-export function testNameConflict([x, y]: [number, number], input: boolean): void;
+export function testNameConflict(input2: [number, number], input: boolean): void;
 
 // @public (undocumented)
-export function testNameConflict2({ x }: {
+export function testNameConflict2(input: {
     x: number;
-}, { y }: {
+}, input3: {
     y: number;
 }, input2: string): void;
 
 // @public (undocumented)
-export function testObject(first: string, { x, y }: {
+export function testObject(first: string, input: {
     x: number;
     y: number;
 }): void;
 
 // @public (undocumented)
-export function testObjects({ x }: {
+export function testObjects(input: {
     x: number;
-}, { y }: {
+}, input2: {
     y: number;
 }): void;
 
 // @public (undocumented)
-export function testObjectWithComments({ x, // slash P3
-    y }: {
+export function testObjectWithComments(input: {
     x: number;
     y: number;
 }): void;

@@ -51,6 +51,7 @@ import type { AstEntity } from '../analyzer/AstEntity';
 import type { AstModule } from '../analyzer/AstModule';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import type { ExtractorConfig } from '../api/ExtractorConfig';
+import { DtsEmitHelpers } from './DtsEmitHelpers';
 
 interface IProcessAstEntityContext {
   name: string;
@@ -1163,78 +1164,25 @@ export class ApiModelGenerator {
   ): IApiParameterOptions[] {
     const parameters: IApiParameterOptions[] = [];
 
-    let destructuredCount: number = 0;
-    for (const parameter of parameterNodes) {
-      if (ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)) {
-        ++destructuredCount;
-      }
-    }
-
-    if (destructuredCount > 0) {
-      const alreadyUsedNames: string[] = [];
-
-      for (const parameter of parameterNodes) {
-        if (!(ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name))) {
-          alreadyUsedNames.push(parameter.name.getText().trim());
-        }
-      }
-
-      for (const parameter of parameterNodes) {
+    DtsEmitHelpers.forEachParameterToNormalize(
+      parameterNodes,
+      (parameter: ts.ParameterDeclaration, syntheticName: string | undefined): void => {
         const parameterTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
         if (parameter.type) {
           nodeTransforms.push({ node: parameter.type, captureTokenRange: parameterTypeTokenRange });
         }
+        parameters.push({
+          parameterName: syntheticName ?? parameter.name.getText().trim(),
+          parameterTypeTokenRange,
+          isOptional: this._collector.typeChecker.isOptionalParameter(parameter)
+        });
 
-        let parameterName: string = '';
-
-        if (ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)) {
-          // Examples:
-          //
-          //      function f({ y, z }: { y: string, z: string })
-          // ---> function f(input: { y: string, z: string })
-          //
-          //      function f(x: number, [a, b]: [number, number])
-          // ---> function f(x: number, input: [number, number])
-          //
-          // Example of a naming collision:
-          //
-          //      function f({ a }: { a: string }, { b }: { b: string }, input2: string)
-          // ---> function f(input: { a: string }, input3: { b: string }, input2: string)
-
-          const baseName: string = 'input';
-          let candidateName: string = baseName;
-          let counter: number = 2;
-          while (alreadyUsedNames.includes(candidateName)) {
-            candidateName = `${baseName}${counter++}`;
-          }
-          parameterName = candidateName;
-
+        if (syntheticName !== undefined) {
           // Replace the subexpression like "{ y, z }" with the synthesized parameter name
-          nodeTransforms.push({ node: parameter.name, replacementText: parameterName });
-        } else {
-          parameterName = parameter.name.getText().trim();
+          nodeTransforms.push({ node: parameter.name, replacementText: syntheticName });
         }
-        alreadyUsedNames.push(parameterName);
-
-        parameters.push({
-          parameterName,
-          parameterTypeTokenRange,
-          isOptional: this._collector.typeChecker.isOptionalParameter(parameter)
-        });
       }
-    } else {
-      for (const parameter of parameterNodes) {
-        const parameterTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-        if (parameter.type) {
-          nodeTransforms.push({ node: parameter.type, captureTokenRange: parameterTypeTokenRange });
-        }
-        parameters.push({
-          parameterName: parameter.name.getText().trim(),
-          parameterTypeTokenRange,
-          isOptional: this._collector.typeChecker.isOptionalParameter(parameter)
-        });
-      }
-    }
+    );
 
     return parameters;
   }

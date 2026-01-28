@@ -231,6 +231,14 @@
           "overloadIndex": 1,
           "parameters": [
             {
+              "parameterName": "[x, y]",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
               "parameterName": "input",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
@@ -291,6 +299,14 @@
           "releaseTag": "Public",
           "overloadIndex": 1,
           "parameters": [
+            {
+              "parameterName": "[x, y]",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
             {
               "parameterName": "input2",
               "parameterTypeTokenRange": {
@@ -360,6 +376,14 @@
           "releaseTag": "Public",
           "overloadIndex": 1,
           "parameters": [
+            {
+              "parameterName": "{ x }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
             {
               "parameterName": "input",
               "parameterTypeTokenRange": {
@@ -438,6 +462,14 @@
               "isOptional": false
             },
             {
+              "parameterName": "{ x, y }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
               "parameterName": "input",
               "parameterTypeTokenRange": {
                 "startIndex": 3,
@@ -491,6 +523,14 @@
           "overloadIndex": 1,
           "parameters": [
             {
+              "parameterName": "{ x }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
               "parameterName": "input",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
@@ -543,6 +583,14 @@
           "releaseTag": "Public",
           "overloadIndex": 1,
           "parameters": [
+            {
+              "parameterName": "{ x, // slash P3\ny }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
             {
               "parameterName": "input",
               "parameterTypeTokenRange": {
