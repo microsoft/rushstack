@@ -11,10 +11,10 @@ export function testArray([x, y]: [number, number], last: string): void {}
 export function testObjects({ x }: { x: number }, { y }: { y: number }): void {}
 
 /** @public */
-export function testNameConflict([x, y]: [number, number], list: boolean): void {}
+export function testNameConflict([x, y]: [number, number], input: boolean): void {}
 
 /** @public */
-export function testNameConflict2({ x }: { x: number }, { y }: { y: number }, anonymous2: string): void {}
+export function testNameConflict2({ x }: { x: number }, { y }: { y: number }, input2: string): void {}
 
 /** @public */
 export function testObjectWithComments(

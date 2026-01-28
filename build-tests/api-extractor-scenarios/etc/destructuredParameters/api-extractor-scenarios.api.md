@@ -8,14 +8,14 @@
 export function testArray([x, y]: [number, number], last: string): void;
 
 // @public (undocumented)
-export function testNameConflict([x, y]: [number, number], list: boolean): void;
+export function testNameConflict([x, y]: [number, number], input: boolean): void;
 
 // @public (undocumented)
 export function testNameConflict2({ x }: {
     x: number;
 }, { y }: {
     y: number;
-}, anonymous2: string): void;
+}, input2: string): void;
 
 // @public (undocumented)
 export function testObject(first: string, { x, y }: {

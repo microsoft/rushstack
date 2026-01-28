@@ -1187,43 +1187,32 @@ export class ApiModelGenerator {
 
         let parameterName: string = '';
 
-        // If there is only one destructured parameter:
-        //
-        //      function f(x: number, { y, z }: { y: string, z: string})
-        // ---> function f(x: number, options: { y: string, z: string})
-        //
-        //      function f(x: number, [a, b]: [number, number])
-        // ---> function f(x: number, list: [number, number])
-        //
-        // If there are multiple destructured parameters:
-        //
-        //      function f({ y, z }: { y: string, z: string},  b: boolean, [a, b]: [number, number])
-        // ---> function f(anonymous: { y: string, z: string}, b: boolean, anonymous2: [number, number])
+        if (ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)) {
+          // Examples:
+          //
+          //      function f({ y, z }: { y: string, z: string })
+          // ---> function f(input: { y: string, z: string })
+          //
+          //      function f(x: number, [a, b]: [number, number])
+          // ---> function f(x: number, input: [number, number])
+          //
+          // Example of a naming collision:
+          //
+          //      function f({ a }: { a: string }, { b }: { b: string }, input2: string)
+          // ---> function f(input: { a: string }, input3: { b: string }, input2: string)
 
-        if (destructuredCount === 1) {
-          if (ts.isObjectBindingPattern(parameter.name)) {
-            parameterName = 'options';
-          } else if (ts.isArrayBindingPattern(parameter.name)) {
-            parameterName = 'list';
-          }
-        } else {
-          if (ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)) {
-            parameterName = 'anonymous';
-          }
-        }
-
-        if (parameterName === '') {
-          parameterName = parameter.name.getText().trim();
-        } else {
-          let candidateName: string = parameterName;
+          const baseName: string = 'input';
+          let candidateName: string = baseName;
           let counter: number = 2;
           while (alreadyUsedNames.includes(candidateName)) {
-            candidateName = `${parameterName}${counter++}`;
+            candidateName = `${baseName}${counter++}`;
           }
           parameterName = candidateName;
 
           // Replace the subexpression like "{ y, z }" with the synthesized parameter name
           nodeTransforms.push({ node: parameter.name, replacementText: parameterName });
+        } else {
+          parameterName = parameter.name.getText().trim();
         }
         alreadyUsedNames.push(parameterName);
 

@@ -2,14 +2,14 @@
 export declare function testArray([x, y]: [number, number], last: string): void;
 
 /** @public */
-export declare function testNameConflict([x, y]: [number, number], list: boolean): void;
+export declare function testNameConflict([x, y]: [number, number], input: boolean): void;
 
 /** @public */
 export declare function testNameConflict2({ x }: {
     x: number;
 }, { y }: {
     y: number;
-}, anonymous2: string): void;
+}, input2: string): void;
 
 /** @public */
 export declare function testObject(first: string, { x, y }: {

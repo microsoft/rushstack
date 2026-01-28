@@ -656,7 +656,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function someFunction7(options: "
+              "text": "export declare function someFunction7(input: "
             },
             {
               "kind": "Reference",
@@ -694,7 +694,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "options",
+              "parameterName": "input",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 3
@@ -711,7 +711,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function someFunction8(options: "
+              "text": "export declare function someFunction8(input: "
             },
             {
               "kind": "Reference",
@@ -740,7 +740,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "options",
+              "parameterName": "input",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -757,7 +757,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function someFunction9(options: "
+              "text": "export declare function someFunction9(input: "
             },
             {
               "kind": "Reference",
@@ -786,7 +786,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "options",
+              "parameterName": "input",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2

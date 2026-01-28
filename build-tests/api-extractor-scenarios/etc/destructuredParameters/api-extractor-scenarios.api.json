@@ -195,7 +195,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function testArray(list: "
+              "text": "export declare function testArray(input: "
             },
             {
               "kind": "Content",
@@ -231,7 +231,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "list",
+              "parameterName": "input",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -256,7 +256,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function testNameConflict(list2: "
+              "text": "export declare function testNameConflict(input2: "
             },
             {
               "kind": "Content",
@@ -264,7 +264,7 @@
             },
             {
               "kind": "Content",
-              "text": ", list: "
+              "text": ", input: "
             },
             {
               "kind": "Content",
@@ -292,7 +292,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "list2",
+              "parameterName": "input2",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -300,7 +300,7 @@
               "isOptional": false
             },
             {
-              "parameterName": "list",
+              "parameterName": "input",
               "parameterTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
@@ -317,7 +317,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function testNameConflict2(anonymous: "
+              "text": "export declare function testNameConflict2(input: "
             },
             {
               "kind": "Content",
@@ -325,7 +325,7 @@
             },
             {
               "kind": "Content",
-              "text": ", anonymous3: "
+              "text": ", input3: "
             },
             {
               "kind": "Content",
@@ -333,7 +333,7 @@
             },
             {
               "kind": "Content",
-              "text": ", anonymous2: "
+              "text": ", input2: "
             },
             {
               "kind": "Content",
@@ -361,7 +361,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "anonymous",
+              "parameterName": "input",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -369,7 +369,7 @@
               "isOptional": false
             },
             {
-              "parameterName": "anonymous3",
+              "parameterName": "input3",
               "parameterTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
@@ -377,7 +377,7 @@
               "isOptional": false
             },
             {
-              "parameterName": "anonymous2",
+              "parameterName": "input2",
               "parameterTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
@@ -402,7 +402,7 @@
             },
             {
               "kind": "Content",
-              "text": ", options: "
+              "text": ", input: "
             },
             {
               "kind": "Content",
@@ -438,7 +438,7 @@
               "isOptional": false
             },
             {
-              "parameterName": "options",
+              "parameterName": "input",
               "parameterTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
@@ -455,7 +455,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function testObjects(anonymous: "
+              "text": "export declare function testObjects(input: "
             },
             {
               "kind": "Content",
@@ -463,7 +463,7 @@
             },
             {
               "kind": "Content",
-              "text": ", anonymous2: "
+              "text": ", input2: "
             },
             {
               "kind": "Content",
@@ -491,7 +491,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "anonymous",
+              "parameterName": "input",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -499,7 +499,7 @@
               "isOptional": false
             },
             {
-              "parameterName": "anonymous2",
+              "parameterName": "input2",
               "parameterTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
@@ -516,7 +516,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function testObjectWithComments(options: "
+              "text": "export declare function testObjectWithComments(input: "
             },
             {
               "kind": "Content",
@@ -544,7 +544,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "options",
+              "parameterName": "input",
               "parameterTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
