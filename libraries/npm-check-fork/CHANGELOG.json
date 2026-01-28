@@ -2,6 +2,18 @@
   "name": "@rushstack/npm-check-fork",
   "entries": [
     {
+      "version": "0.1.10",
+      "tag": "@rushstack/npm-check-fork_v0.1.10",
+      "date": "Wed, 28 Jan 2026 01:15:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove dependencies on throat and package-json"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.9",
       "tag": "@rushstack/npm-check-fork_v0.1.9",
       "date": "Thu, 08 Jan 2026 01:12:30 GMT",
