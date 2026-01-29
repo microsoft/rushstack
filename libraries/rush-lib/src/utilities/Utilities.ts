@@ -687,7 +687,7 @@ export class Utilities {
       }
     });
 
-    const stdio: child_process.StdioOptions = handleOutput ? [0, 'pipe', 'pipe'] : [0, 1, 2];
+    const stdio: child_process.StdioOptions = handleOutput ? ['ignore', 'pipe', 'pipe'] : [0, 1, 2];
     if (ipc) {
       stdio.push('ipc');
     }
