@@ -7,10 +7,10 @@
 import { default as React_2 } from 'react';
 
 // @public
-export const Button: ({ children, disabled, onClick }: IButtonProps) => React_2.ReactElement;
+export const Button: (input: IButtonProps) => React_2.ReactElement;
 
 // @public
-export const Checkbox: ({ label, isChecked, onChecked }: ICheckboxProps) => React_2.ReactElement;
+export const Checkbox: (input: ICheckboxProps) => React_2.ReactElement;
 
 // @public
 export interface IButtonProps {
@@ -45,7 +45,7 @@ export interface IInputProps {
 }
 
 // @public
-export const Input: ({ value, placeholder, onChange, type }: IInputProps) => React_2.ReactElement;
+export const Input: (input: IInputProps) => React_2.ReactElement;
 
 // @public
 export interface IScrollAreaProps {
@@ -92,13 +92,13 @@ export interface ITextProps {
 }
 
 // @public
-export const ScrollArea: ({ children }: IScrollAreaProps) => React_2.ReactElement;
+export const ScrollArea: (input: IScrollAreaProps) => React_2.ReactElement;
 
 // @public
-export const Tabs: ({ items, def, value, onChange, renderChildren }: ITabsProps) => React_2.ReactElement;
+export const Tabs: (input: ITabsProps) => React_2.ReactElement;
 
 // @public
-const Text_2: ({ type, bold, children, className, size }: ITextProps) => React_2.ReactElement;
+const Text_2: (input: ITextProps) => React_2.ReactElement;
 export { Text_2 as Text }
 
 // @public
