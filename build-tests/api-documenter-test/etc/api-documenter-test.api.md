@@ -133,7 +133,7 @@ export interface IDocInterface3 {
 
 // @public
 export interface IDocInterface4 {
-    Context: ({ children }: {
+    Context: (input: {
         children: string;
     }) => boolean;
     generic: Generic<number>;
