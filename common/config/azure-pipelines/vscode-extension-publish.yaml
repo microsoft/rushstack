@@ -63,9 +63,6 @@ extends:
               - template: /common/config/azure-pipelines/templates/install-node.yaml@self
 
               - template: /common/config/azure-pipelines/templates/build.yaml@self
-                parameters:
-                  BuildParameters: >
-                    --to tag:vsix
 
               - ${{ if parameters.shouldPublish }}:
                   - task: AzureCLI@2
