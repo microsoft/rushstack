@@ -5189,7 +5189,7 @@ importers:
         specifier: 1.18.8
         version: 1.18.8
 
-  ../../../vscode-extensions/playwright-on-codespaces-vscode-extension:
+  ../../../vscode-extensions/playwright-local-browser-server-vscode-extension:
     dependencies:
       '@rushstack/node-core-library':
         specifier: workspace:*
