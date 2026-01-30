@@ -17,6 +17,11 @@ parameters:
         vsixPath: 'extension.vsix'
         manifestPath: 'extension.signature.manifest'
         projectPath: '$(Build.SourcesDirectory)/vscode-extensions/debug-certificate-manager-vscode-extension'
+      - key: 'playwright-local-browser-server-vscode-extension'
+        projectRelativeAssetsDir: dist/vsix
+        vsixPath: 'extension.vsix'
+        manifestPath: 'extension.signature.manifest'
+        projectPath: '$(Build.SourcesDirectory)/vscode-extensions/playwright-local-browser-server-vscode-extension'
       - key: 'rush-vscode-extension'
         projectRelativeAssetsDir: dist/vsix
         vsixPath: 'extension.vsix'
