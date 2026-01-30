@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/playwright-browser-tunnel",
+      "comment": "Update marker file names to reflect Copilot rebranding",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/playwright-browser-tunnel"
+}
