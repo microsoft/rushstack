@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-mcp-docs-plugin",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "Docs plugin for @rushstack/mcp-server",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
