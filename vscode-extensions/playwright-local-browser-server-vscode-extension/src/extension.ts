@@ -27,12 +27,12 @@ import { VScodeOutputChannelTerminalProvider } from '@rushstack/vscode-shared/li
 import packageJson from '../package.json';
 
 const EXTENSION_DISPLAY_NAME: string = 'Playwright Local Browser Server';
-const COMMAND_SHOW_LOG: string = 'playwright-tunnel.showLog';
-const COMMAND_SHOW_SETTINGS: string = 'playwright-tunnel.showSettings';
-const COMMAND_START_TUNNEL: string = 'playwright-tunnel.start';
-const COMMAND_STOP_TUNNEL: string = 'playwright-tunnel.stop';
-const COMMAND_SHOW_MENU: string = 'playwright-tunnel.showMenu';
-const COMMAND_MANAGE_ALLOWLIST: string = 'playwright-tunnel.manageAllowlist';
+const COMMAND_SHOW_LOG: string = 'playwright-local-browser-server.showLog';
+const COMMAND_SHOW_SETTINGS: string = 'playwright-local-browser-server.showSettings';
+const COMMAND_START_TUNNEL: string = 'playwright-local-browser-server.start';
+const COMMAND_STOP_TUNNEL: string = 'playwright-local-browser-server.stop';
+const COMMAND_SHOW_MENU: string = 'playwright-local-browser-server.showMenu';
+const COMMAND_MANAGE_ALLOWLIST: string = 'playwright-local-browser-server.manageAllowlist';
 const VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS: string = 'workbench.action.openSettings';
 const EXTENSION_ID: string = `${packageJson.publisher}.${packageJson.name}`;
 const VSCODE_SETTINGS_EXTENSION_FILTER: string = `@ext:${EXTENSION_ID}`;
@@ -287,7 +287,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       return;
     }
 
-    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('playwright-tunnel');
+    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(
+      'playwright-local-browser-server'
+    );
     const shouldAutoStart: boolean = config.get<boolean>('autoStart', false);
     const tunnelPort: number = config.get<number>('tunnelPort', 3000);
 
@@ -523,7 +525,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   );
 
   // Auto-start the tunnel on activation if configured
-  const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('playwright-tunnel');
+  const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(
+    'playwright-local-browser-server'
+  );
   const autoStart: boolean = config.get<boolean>('autoStart', false);
   if (autoStart) {
     void handleStartTunnelAsync(true);
