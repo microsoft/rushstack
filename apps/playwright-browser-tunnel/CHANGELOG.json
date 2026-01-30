@@ -2,6 +2,18 @@
   "name": "@rushstack/playwright-browser-tunnel",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/playwright-browser-tunnel_v0.2.0",
+      "date": "Fri, 30 Jan 2026 22:38:36 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update marker file names to reflect Copilot rebranding"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.1",
       "tag": "@rushstack/playwright-browser-tunnel_v0.1.1",
       "date": "Fri, 30 Jan 2026 01:16:13 GMT",
