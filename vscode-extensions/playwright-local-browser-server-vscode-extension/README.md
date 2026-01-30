@@ -133,7 +133,7 @@ This extension contributes the following commands:
 
 ## Settings
 
-- `playwright-tunnel.autoStart` (default: `true`) — automatically starts the tunnel when the extension activates.
+- `playwright-tunnel.autoStart` (default: `false`) — automatically starts the tunnel when the extension activates.
 - `playwright-tunnel.tunnelPort` (default: `3000`) — port used by the remote tunnel server.
 
 ## Notes

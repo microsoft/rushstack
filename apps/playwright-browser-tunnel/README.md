@@ -21,7 +21,7 @@ The extension provides a UI wrapper around this library (start/stop commands, st
 
 ### Detecting whether the VS Code extension is present
 
-Some remote test fixtures want to detect whether the **Playwright on Codespaces** extension is installed/active (for example, to skip local-browser-only scenarios when the extension isn’t available).
+Some remote test fixtures want to detect whether the **Playwright Local Browser Server** extension is installed/active (for example, to skip local-browser-only scenarios when the extension isn’t available).
 
 The extension writes a marker file named `.playwright-local-browser-server-extension-installed.txt` into the remote environment’s `os.tmpdir()` using VS Code’s remote filesystem APIs.
 

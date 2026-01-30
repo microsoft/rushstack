@@ -75,7 +75,7 @@ async function writeExtensionInstalledFileAsync(terminal: ITerminal): Promise<vo
       // that the extension is installed on codespaces so that the test fixture verifies.
       await vscode.workspace.fs.writeFile(
         fileUri,
-        Buffer.from('This is a test file created by the Playwright on Codespaces extension.\n', 'utf8')
+        Buffer.from('This is a test file created by the Playwright Local Browser Server extension.\n', 'utf8')
       );
       terminal.writeLine(`Test file written to temp directory.`);
     }
