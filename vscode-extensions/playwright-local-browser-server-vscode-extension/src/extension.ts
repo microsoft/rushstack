@@ -26,13 +26,13 @@ import { runWorkspaceCommandAsync } from '@rushstack/vscode-shared/lib/runWorksp
 import { VScodeOutputChannelTerminalProvider } from '@rushstack/vscode-shared/lib/VScodeOutputChannelTerminalProvider';
 import packageJson from '../package.json';
 
-const EXTENSION_DISPLAY_NAME: string = 'Playwright on Codespaces';
-const COMMAND_SHOW_LOG: string = 'playwright-tunnel.showLog';
-const COMMAND_SHOW_SETTINGS: string = 'playwright-tunnel.showSettings';
-const COMMAND_START_TUNNEL: string = 'playwright-tunnel.start';
-const COMMAND_STOP_TUNNEL: string = 'playwright-tunnel.stop';
-const COMMAND_SHOW_MENU: string = 'playwright-tunnel.showMenu';
-const COMMAND_MANAGE_ALLOWLIST: string = 'playwright-tunnel.manageAllowlist';
+const EXTENSION_DISPLAY_NAME: string = 'Playwright Local Browser Server';
+const COMMAND_SHOW_LOG: string = 'playwright-local-browser-server.showLog';
+const COMMAND_SHOW_SETTINGS: string = 'playwright-local-browser-server.showSettings';
+const COMMAND_START_TUNNEL: string = 'playwright-local-browser-server.start';
+const COMMAND_STOP_TUNNEL: string = 'playwright-local-browser-server.stop';
+const COMMAND_SHOW_MENU: string = 'playwright-local-browser-server.showMenu';
+const COMMAND_MANAGE_ALLOWLIST: string = 'playwright-local-browser-server.manageAllowlist';
 const VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS: string = 'workbench.action.openSettings';
 const EXTENSION_ID: string = `${packageJson.publisher}.${packageJson.name}`;
 const VSCODE_SETTINGS_EXTENSION_FILTER: string = `@ext:${EXTENSION_ID}`;
@@ -45,7 +45,7 @@ async function writeExtensionInstalledFileAsync(terminal: ITerminal): Promise<vo
 
     if (vscode.env.remoteName) {
       tempDir = await runWorkspaceCommandAsync({
-        terminalOptions: { name: 'playwright-on-codespaces', hideFromUser: true },
+        terminalOptions: { name: 'playwright-local-browser-server', hideFromUser: true },
         commandLine: `node -p "require('node:os').tmpdir()"`,
         terminal
       });
@@ -72,10 +72,10 @@ async function writeExtensionInstalledFileAsync(terminal: ITerminal): Promise<vo
 
       // TODO: Can we have this be a JSON file which the test fixture writes OS-designated port number to
       // so that the browser-tunnel can pick it up here? For now this file just serves as a marker
-      // that the extension is installed on codespaces so that the test fixture verifies.
+      // that the extension is installed on codespaces/vs code remotes so that the test fixture verifies.
       await vscode.workspace.fs.writeFile(
         fileUri,
-        Buffer.from('This is a test file created by the Playwright on Codespaces extension.\n', 'utf8')
+        Buffer.from('This is a test file created by the Playwright Local Browser Server extension.\n', 'utf8')
       );
       terminal.writeLine(`Test file written to temp directory.`);
     }
@@ -287,9 +287,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       return;
     }
 
-    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('playwright-tunnel');
+    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(
+      'playwright-local-browser-server'
+    );
     const shouldAutoStart: boolean = config.get<boolean>('autoStart', false);
-    const tunnelPort: number = config.get<number>('tunnelPort', 3000);
+    const tunnelPort: number = config.get<number>('tunnelPort', 56767);
 
     // If this is a manual start and autoStart is not enabled, prompt the user
     if (!isAutoStart && !shouldAutoStart) {
@@ -523,7 +525,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   );
 
   // Auto-start the tunnel on activation if configured
-  const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('playwright-tunnel');
+  const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(
+    'playwright-local-browser-server'
+  );
   const autoStart: boolean = config.get<boolean>('autoStart', false);
   if (autoStart) {
     void handleStartTunnelAsync(true);

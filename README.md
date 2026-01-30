@@ -234,7 +234,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/rigs/local-web-rig](./rigs/local-web-rig/) | A rig package for Web projects that build using Heft inside the RushStack repository. |
 | [/rush-plugins/rush-litewatch-plugin](./rush-plugins/rush-litewatch-plugin/) | An experimental alternative approach for multi-project watch mode |
 | [/vscode-extensions/debug-certificate-manager-vscode-extension](./vscode-extensions/debug-certificate-manager-vscode-extension/) | VS Code extension to manage debug TLS certificates and sync them to the VS Code workspace. Works with VS Code remote development (Codespaces, SSH, Dev Containers, WSL, VS Code Tunnels). |
-| [/vscode-extensions/playwright-on-codespaces-vscode-extension](./vscode-extensions/playwright-on-codespaces-vscode-extension/) | VS Code extension to enable Playwright testing in GitHub Codespaces. |
+| [/vscode-extensions/playwright-local-browser-server-vscode-extension](./vscode-extensions/playwright-local-browser-server-vscode-extension/) | VS Code extension to enable Playwright testing in remote VS Code environments (such as Codespaces, Dev Containers, VS Code Tunnels) while launching and driving the actual browser process on your local machine. |
 | [/vscode-extensions/rush-vscode-command-webview](./vscode-extensions/rush-vscode-command-webview/) | Part of the Rush Stack VSCode extension, provides a UI for invoking Rush commands |
 | [/vscode-extensions/rush-vscode-extension](./vscode-extensions/rush-vscode-extension/) | Enhanced experience for monorepos that use the Rush Stack toolchain |
 | [/vscode-extensions/vscode-shared](./vscode-extensions/vscode-shared/) |  |

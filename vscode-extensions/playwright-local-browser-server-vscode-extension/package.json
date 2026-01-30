@@ -1,17 +1,17 @@
 {
-  "name": "playwright-on-codespaces",
+  "name": "playwright-local-browser-server",
   "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "vscode-extensions/playwright-on-codespaces-vscode-extension"
+    "directory": "vscode-extensions/playwright-local-browser-server-vscode-extension"
   },
   "license": "MIT",
   "publisher": "ms-RushStack",
   "preview": true,
-  "displayName": "Playwright on Codespaces",
-  "description": "VS Code extension to enable Playwright testing in GitHub Codespaces.",
-  "homepage": "https://github.com/microsoft/rushstack/tree/main/vscode-extensions/playwright-on-codespaces-vscode-extension",
+  "displayName": "Playwright Local Browser Server",
+  "description": "VS Code extension to enable Playwright testing in remote VS Code environments (such as Codespaces, Dev Containers, VS Code Tunnels) while launching and driving the actual browser process on your local machine.",
+  "homepage": "https://github.com/microsoft/rushstack/tree/main/vscode-extensions/playwright-local-browser-server-vscode-extension",
   "icon": "assets/extension-icon.png",
   "extensionKind": [
     "ui"
@@ -40,52 +40,52 @@
   "contributes": {
     "commands": [
       {
-        "command": "playwright-tunnel.start",
+        "command": "playwright-local-browser-server.start",
         "title": "Start Playwright Browser Tunnel",
         "category": "Playwright"
       },
       {
-        "command": "playwright-tunnel.stop",
+        "command": "playwright-local-browser-server.stop",
         "title": "Stop Playwright Browser Tunnel",
         "category": "Playwright"
       },
       {
-        "command": "playwright-tunnel.manageAllowlist",
+        "command": "playwright-local-browser-server.manageAllowlist",
         "title": "Manage Launch Options Allowlist",
-        "category": "Playwright on Codespaces"
+        "category": "Playwright Local Browser Server"
       },
       {
-        "command": "playwright-tunnel.showLog",
+        "command": "playwright-local-browser-server.showLog",
         "title": "Show Log",
-        "category": "Playwright on Codespaces"
+        "category": "Playwright Local Browser Server"
       },
       {
-        "command": "playwright-tunnel.showSettings",
+        "command": "playwright-local-browser-server.showSettings",
         "title": "Show Settings",
-        "category": "Playwright on Codespaces"
+        "category": "Playwright Local Browser Server"
       },
       {
-        "command": "playwright-tunnel.showMenu",
+        "command": "playwright-local-browser-server.showMenu",
         "title": "Show Tunnel Menu",
-        "category": "Playwright on Codespaces"
+        "category": "Playwright Local Browser Server"
       }
     ],
     "configuration": {
       "title": "Playwright Browser Tunnel",
       "properties": {
-        "playwright-tunnel.autoStart": {
+        "playwright-local-browser-server.autoStart": {
           "type": "boolean",
           "default": false,
           "description": "Automatically start the Playwright browser tunnel when the extension activates. For security, this is disabled by default."
         },
-        "playwright-tunnel.promptBeforeLaunch": {
+        "playwright-local-browser-server.promptBeforeLaunch": {
           "type": "boolean",
           "default": true,
           "description": "Show a confirmation prompt before launching the browser server with the requested launch options. This helps protect against potentially malicious launch options from compromised environments."
         },
-        "playwright-tunnel.tunnelPort": {
+        "playwright-local-browser-server.tunnelPort": {
           "type": "number",
-          "default": 3000,
+          "default": 56767,
           "description": "Port for the browser tunnel server"
         }
       }

@@ -1,4 +1,4 @@
-# Playwright on Codespaces VS Code Extension
+# Playwright Local Browser Server VS Code Extension
 
 Enables running Playwright tests in a remote VS Code environment (such as GitHub Codespaces) while launching and driving the actual browser process on your local machine.
 
@@ -6,7 +6,7 @@ This extension is a UI wrapper around the tunneling/runtime library [`@rushstack
 
 ## How it works
 
-- Remote side (Codespace): your Playwright test fixture starts a WebSocket **tunnel server** on a well-known port (default `3000`) and a small local HTTP endpoint used by the Playwright client.
+- Remote side (Codespace): your Playwright test fixture starts a WebSocket **tunnel server** on a well-known port (default `56767`) and a small local HTTP endpoint used by the Playwright client.
 - Local side (your VS Code UI machine): this extension starts a `PlaywrightTunnel` in `poll-connection` mode and connects to the forwarded tunnel port.
 - After a handshake (browser type, launch options, Playwright version), the extension installs the requested Playwright/browser as needed, launches a local `browserServer`, and begins bidirectional forwarding.
 
@@ -42,7 +42,7 @@ export const test = base.extend({
 
 ## How `extensionIsInstalled()` works with this extension
 
-To help remote test code detect whether this extension is installed/active, the extension writes a marker file named `.playwright-codespaces-extension-installed.txt` into the remote environment’s `os.tmpdir()` when VS Code is connected to a remote workspace.
+To help remote test code detect whether this extension is installed/active, the extension writes a marker file named `.playwright-local-browser-server-extension-installed.txt` into the remote environment’s `os.tmpdir()` when VS Code is connected to a remote workspace.
 
 On the test (remote) side, you can call `extensionIsInstalled()` from `@rushstack/playwright-browser-tunnel`, which simply checks for that marker file:
 
@@ -51,7 +51,7 @@ import { extensionIsInstalled } from '@rushstack/playwright-browser-tunnel';
 
 if (!(await extensionIsInstalled())) {
 	throw new Error(
-		'Playwright on Codespaces VS Code extension not detected. Install/enable it and ensure VS Code is connected to the remote workspace.'
+		'Playwright Local Browser Server VS Code extension not detected. Install/enable it and ensure VS Code is connected to the remote workspace.'
 	);
 }
 ```
@@ -125,18 +125,20 @@ sequenceDiagram
 
 This extension contributes the following commands:
 
-- **Playwright: Start Playwright Browser Tunnel** (`playwright-tunnel.start`)
-- **Playwright: Stop Playwright Browser Tunnel** (`playwright-tunnel.stop`)
-- **Playwright on Codespaces: Show Log** (`playwright-tunnel.showLog`)
-- **Playwright on Codespaces: Show Settings** (`playwright-tunnel.showSettings`)
-- **Playwright on Codespaces: Show Tunnel Menu** (`playwright-tunnel.showMenu`) — status bar menu
+- **Playwright: Start Playwright Browser Tunnel** (`playwright-local-browser-server.start`)
+- **Playwright: Stop Playwright Browser Tunnel** (`playwright-local-browser-server.stop`)
+- **Playwright Local Browser Server: Manage Launch Options Allowlist** (`playwright-local-browser-server.manageAllowlist`)
+- **Playwright Local Browser Server: Show Log** (`playwright-local-browser-server.showLog`)
+- **Playwright Local Browser Server: Show Settings** (`playwright-local-browser-server.showSettings`)
+- **Playwright Local Browser Server: Show Tunnel Menu** (`playwright-local-browser-server.showMenu`) — status bar menu
 
 ## Settings
 
-- `playwright-tunnel.autoStart` (default: `true`) — automatically starts the tunnel when the extension activates.
-- `playwright-tunnel.tunnelPort` (default: `3000`) — port used by the remote tunnel server.
+- `playwright-local-browser-server.autoStart` (default: `false`) — automatically starts the tunnel when the extension activates.
+- `playwright-local-browser-server.promptBeforeLaunch` (default: `true`) — show a confirmation prompt before launching the browser server with the requested launch options. This helps protect against potentially malicious launch options from compromised environments.
+- `playwright-local-browser-server.tunnelPort` (default: `56767`) — port used by the remote tunnel server.
 
 ## Notes
 
-- The extension currently connects to `ws://127.0.0.1:3000` on the local machine. In Codespaces, make sure the remote port is forwarded so it is reachable as `localhost` from your VS Code UI environment.
+- The extension currently connects to `ws://127.0.0.1:56767` on the local machine. In Codespaces, make sure the remote port is forwarded so it is reachable as `localhost` from your VS Code UI environment.
 - For the underlying API and examples, see [`@rushstack/playwright-browser-tunnel`](../../apps/playwright-browser-tunnel).
