@@ -1478,8 +1478,8 @@
       "tags": ["vsix"]
     },
     {
-      "packageName": "playwright-on-codespaces",
-      "projectFolder": "vscode-extensions/playwright-on-codespaces-vscode-extension",
+      "packageName": "playwright-local-browser-server",
+      "projectFolder": "vscode-extensions/playwright-local-browser-server-vscode-extension",
       "reviewCategory": "vscode-extensions",
       "tags": ["vsix"]
     },

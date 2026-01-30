@@ -5,9 +5,9 @@ Run a Playwright browser server in one environment and drive it from another env
 
 This package is intended for remote development / CI scenarios (for example: Codespaces, devcontainers, or a separate “browser host” machine) where you want tests to run “here” but the actual browser process to run “there”.
 
-## Relationship to the Playwright on Codespaces VS Code extension
+## Relationship to the Playwright Local Browser Server VS Code extension
 
-This package is the core tunneling/runtime layer used by the **Playwright on Codespaces** VS Code extension (located at [vscode-extensions/playwright-on-codespaces-vscode-extension](../../vscode-extensions/playwright-on-codespaces-vscode-extension)).
+This package is the core tunneling/runtime layer used by the **Playwright Local Browser Server** VS Code extension (located at [vscode-extensions/playwright-local-browser-server-vscode-extension](../../vscode-extensions/playwright-local-browser-server-vscode-extension)).
 
 In a typical Codespaces workflow:
 
@@ -23,7 +23,7 @@ The extension provides a UI wrapper around this library (start/stop commands, st
 
 Some remote test fixtures want to detect whether the **Playwright on Codespaces** extension is installed/active (for example, to skip local-browser-only scenarios when the extension isn’t available).
 
-The extension writes a marker file named `.playwright-codespaces-extension-installed.txt` into the remote environment’s `os.tmpdir()` using VS Code’s remote filesystem APIs.
+The extension writes a marker file named `.playwright-local-browser-server-extension-installed.txt` into the remote environment’s `os.tmpdir()` using VS Code’s remote filesystem APIs.
 
 On the remote side, `isExtensionInstalledAsync()` checks for that marker file and returns `true` if it exists:
 
@@ -31,7 +31,7 @@ On the remote side, `isExtensionInstalledAsync()` checks for that marker file an
 import { isExtensionInstalledAsync } from '@rushstack/playwright-browser-tunnel';
 
 if (!(await isExtensionInstalledAsync())) {
-	throw new Error('Playwright on Codespaces extension is not installed/active in this environment');
+	throw new Error('Playwright Local Browser Server extension is not installed/active in this environment');
 }
 ```
 

@@ -6,18 +6,18 @@ import { tmpdir } from 'node:os';
 import { FileSystem } from '@rushstack/node-core-library';
 
 /**
- * The filename used to indicate that the Playwright on Codespaces extension is installed.
+ * The filename used to indicate that the Playwright Local Browser Server extension is installed.
  * @beta
  */
-export const EXTENSION_INSTALLED_FILENAME: string = '.playwright-codespaces-extension-installed.txt';
+export const EXTENSION_INSTALLED_FILENAME: string = '.playwright-local-browser-server-extension-installed.txt';
 
 /**
- * Helper to determine if the Playwright on Codespaces extension is installed. This check's for the
+ * Helper to determine if the Playwright Local Browser Server extension is installed. This check's for the
  * existence of a well-known file in the OS temp directory.
  * @beta
  */
 export async function isExtensionInstalledAsync(): Promise<boolean> {
-  // Read file from os.tempdir() + '/.playwright-codespaces-extension-installed'
+  // Read file from os.tempdir() + '/.playwright-local-browser-server-extension-installed'
   const tempDir: string = tmpdir();
 
   const extensionInstalledFilePath: string = `${tempDir}/${EXTENSION_INSTALLED_FILENAME}`;

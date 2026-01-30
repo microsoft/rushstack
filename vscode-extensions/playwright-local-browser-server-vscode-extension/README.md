@@ -1,4 +1,4 @@
-# Playwright on Codespaces VS Code Extension
+# Playwright Local Browser Server VS Code Extension
 
 Enables running Playwright tests in a remote VS Code environment (such as GitHub Codespaces) while launching and driving the actual browser process on your local machine.
 
@@ -42,7 +42,7 @@ export const test = base.extend({
 
 ## How `extensionIsInstalled()` works with this extension
 
-To help remote test code detect whether this extension is installed/active, the extension writes a marker file named `.playwright-codespaces-extension-installed.txt` into the remote environment’s `os.tmpdir()` when VS Code is connected to a remote workspace.
+To help remote test code detect whether this extension is installed/active, the extension writes a marker file named `.playwright-local-browser-server-extension-installed.txt` into the remote environment’s `os.tmpdir()` when VS Code is connected to a remote workspace.
 
 On the test (remote) side, you can call `extensionIsInstalled()` from `@rushstack/playwright-browser-tunnel`, which simply checks for that marker file:
 
@@ -51,7 +51,7 @@ import { extensionIsInstalled } from '@rushstack/playwright-browser-tunnel';
 
 if (!(await extensionIsInstalled())) {
 	throw new Error(
-		'Playwright on Codespaces VS Code extension not detected. Install/enable it and ensure VS Code is connected to the remote workspace.'
+		'Playwright Local Browser Server VS Code extension not detected. Install/enable it and ensure VS Code is connected to the remote workspace.'
 	);
 }
 ```
@@ -127,9 +127,9 @@ This extension contributes the following commands:
 
 - **Playwright: Start Playwright Browser Tunnel** (`playwright-tunnel.start`)
 - **Playwright: Stop Playwright Browser Tunnel** (`playwright-tunnel.stop`)
-- **Playwright on Codespaces: Show Log** (`playwright-tunnel.showLog`)
-- **Playwright on Codespaces: Show Settings** (`playwright-tunnel.showSettings`)
-- **Playwright on Codespaces: Show Tunnel Menu** (`playwright-tunnel.showMenu`) — status bar menu
+- **Playwright Local Browser Server: Show Log** (`playwright-tunnel.showLog`)
+- **Playwright Local Browser Server: Show Settings** (`playwright-tunnel.showSettings`)
+- **Playwright Local Browser Server: Show Tunnel Menu** (`playwright-tunnel.showMenu`) — status bar menu
 
 ## Settings
 

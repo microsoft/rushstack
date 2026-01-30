@@ -1,17 +1,17 @@
 {
-  "name": "playwright-on-codespaces",
+  "name": "playwright-local-browser-server",
   "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "vscode-extensions/playwright-on-codespaces-vscode-extension"
+    "directory": "vscode-extensions/playwright-local-browser-server-vscode-extension"
   },
   "license": "MIT",
   "publisher": "ms-RushStack",
   "preview": true,
-  "displayName": "Playwright on Codespaces",
-  "description": "VS Code extension to enable Playwright testing in GitHub Codespaces.",
-  "homepage": "https://github.com/microsoft/rushstack/tree/main/vscode-extensions/playwright-on-codespaces-vscode-extension",
+  "displayName": "Playwright Local Browser Server",
+  "description": "VS Code extension to enable Playwright testing in remote VS Code environments (such as GitHub Codespaces) while launching and driving the actual browser process on your local machine.",
+  "homepage": "https://github.com/microsoft/rushstack/tree/main/vscode-extensions/playwright-local-browser-server-vscode-extension",
   "icon": "assets/extension-icon.png",
   "extensionKind": [
     "ui"
@@ -52,22 +52,22 @@
       {
         "command": "playwright-tunnel.manageAllowlist",
         "title": "Manage Launch Options Allowlist",
-        "category": "Playwright on Codespaces"
+        "category": "Playwright Local Browser Server"
       },
       {
         "command": "playwright-tunnel.showLog",
         "title": "Show Log",
-        "category": "Playwright on Codespaces"
+        "category": "Playwright Local Browser Server"
       },
       {
         "command": "playwright-tunnel.showSettings",
         "title": "Show Settings",
-        "category": "Playwright on Codespaces"
+        "category": "Playwright Local Browser Server"
       },
       {
         "command": "playwright-tunnel.showMenu",
         "title": "Show Tunnel Menu",
-        "category": "Playwright on Codespaces"
+        "category": "Playwright Local Browser Server"
       }
     ],
     "configuration": {

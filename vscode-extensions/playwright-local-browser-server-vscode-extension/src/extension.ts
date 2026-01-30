@@ -26,7 +26,7 @@ import { runWorkspaceCommandAsync } from '@rushstack/vscode-shared/lib/runWorksp
 import { VScodeOutputChannelTerminalProvider } from '@rushstack/vscode-shared/lib/VScodeOutputChannelTerminalProvider';
 import packageJson from '../package.json';
 
-const EXTENSION_DISPLAY_NAME: string = 'Playwright on Codespaces';
+const EXTENSION_DISPLAY_NAME: string = 'Playwright Local Browser Server';
 const COMMAND_SHOW_LOG: string = 'playwright-tunnel.showLog';
 const COMMAND_SHOW_SETTINGS: string = 'playwright-tunnel.showSettings';
 const COMMAND_START_TUNNEL: string = 'playwright-tunnel.start';
@@ -45,7 +45,7 @@ async function writeExtensionInstalledFileAsync(terminal: ITerminal): Promise<vo
 
     if (vscode.env.remoteName) {
       tempDir = await runWorkspaceCommandAsync({
-        terminalOptions: { name: 'playwright-on-codespaces', hideFromUser: true },
+        terminalOptions: { name: 'playwright-local-browser-server', hideFromUser: true },
         commandLine: `node -p "require('node:os').tmpdir()"`,
         terminal
       });
