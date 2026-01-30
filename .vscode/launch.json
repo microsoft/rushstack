@@ -119,16 +119,16 @@
 			]
 		},
 		{
-			"name": "Launch Playwright on Codespaces VS Code Extension",
+			"name": "Launch Playwright Local Browser Server VS Code Extension",
 			"type": "extensionHost",
 			"request": "launch",
-			"cwd": "${workspaceFolder}/vscode-extensions/playwright-on-codespaces-vscode-extension/dist/vsix/unpacked",
+			"cwd": "${workspaceFolder}/vscode-extensions/playwright-local-browser-server-vscode-extension/dist/vsix/unpacked",
 			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}/vscode-extensions/playwright-on-codespaces-vscode-extension/dist/vsix/unpacked"
+				"--extensionDevelopmentPath=${workspaceFolder}/vscode-extensions/playwright-local-browser-server-vscode-extension/dist/vsix/unpacked"
 			],
 			"sourceMaps": true,
 			"outFiles": [
-        "${workspaceFolder}/vscode-extensions/playwright-on-codespaces-vscode-extension/**/*.js"
+        "${workspaceFolder}/vscode-extensions/playwright-local-browser-server-vscode-extension/**/*.js"
 			]
 		}
 	]

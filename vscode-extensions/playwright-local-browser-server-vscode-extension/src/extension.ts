@@ -72,7 +72,7 @@ async function writeExtensionInstalledFileAsync(terminal: ITerminal): Promise<vo
 
       // TODO: Can we have this be a JSON file which the test fixture writes OS-designated port number to
       // so that the browser-tunnel can pick it up here? For now this file just serves as a marker
-      // that the extension is installed on codespaces so that the test fixture verifies.
+      // that the extension is installed on codespaces/vs code remotes so that the test fixture verifies.
       await vscode.workspace.fs.writeFile(
         fileUri,
         Buffer.from('This is a test file created by the Playwright Local Browser Server extension.\n', 'utf8')
