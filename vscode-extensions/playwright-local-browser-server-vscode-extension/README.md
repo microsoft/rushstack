@@ -125,18 +125,18 @@ sequenceDiagram
 
 This extension contributes the following commands:
 
-- **Playwright: Start Playwright Browser Tunnel** (`playwright-tunnel.start`)
-- **Playwright: Stop Playwright Browser Tunnel** (`playwright-tunnel.stop`)
-- **Playwright Local Browser Server: Manage Launch Options Allowlist** (`playwright-tunnel.manageAllowlist`)
-- **Playwright Local Browser Server: Show Log** (`playwright-tunnel.showLog`)
-- **Playwright Local Browser Server: Show Settings** (`playwright-tunnel.showSettings`)
-- **Playwright Local Browser Server: Show Tunnel Menu** (`playwright-tunnel.showMenu`) — status bar menu
+- **Playwright: Start Playwright Browser Tunnel** (`playwright-local-browser-server.start`)
+- **Playwright: Stop Playwright Browser Tunnel** (`playwright-local-browser-server.stop`)
+- **Playwright Local Browser Server: Manage Launch Options Allowlist** (`playwright-local-browser-server.manageAllowlist`)
+- **Playwright Local Browser Server: Show Log** (`playwright-local-browser-server.showLog`)
+- **Playwright Local Browser Server: Show Settings** (`playwright-local-browser-server.showSettings`)
+- **Playwright Local Browser Server: Show Tunnel Menu** (`playwright-local-browser-server.showMenu`) — status bar menu
 
 ## Settings
 
-- `playwright-tunnel.autoStart` (default: `false`) — automatically starts the tunnel when the extension activates.
-- `playwright-tunnel.promptBeforeLaunch` (default: `true`) — show a confirmation prompt before launching the browser server with the requested launch options. This helps protect against potentially malicious launch options from compromised environments.
-- `playwright-tunnel.tunnelPort` (default: `3000`) — port used by the remote tunnel server.
+- `playwright-local-browser-server.autoStart` (default: `false`) — automatically starts the tunnel when the extension activates.
+- `playwright-local-browser-server.promptBeforeLaunch` (default: `true`) — show a confirmation prompt before launching the browser server with the requested launch options. This helps protect against potentially malicious launch options from compromised environments.
+- `playwright-local-browser-server.tunnelPort` (default: `3000`) — port used by the remote tunnel server.
 
 ## Notes
 
