@@ -12,9 +12,9 @@ This package is the core tunneling/runtime layer used by the **Playwright Local 
 In a typical Codespaces workflow:
 
 - Your **tests** run inside the Codespace and call `tunneledBrowserConnection()`.
-- `tunneledBrowserConnection()` starts a WebSocket server (by default on port `3000`) that a browser host can attach to.
-- The VS Code extension runs on the **UI side** and starts a `PlaywrightTunnel` which connects to `ws://127.0.0.1:3000`.
-	- In Codespaces, this works when port `3000` is forwarded to your local machine (VS Code port forwarding makes the remote port reachable as `localhost:3000`).
+- `tunneledBrowserConnection()` starts a WebSocket server (by default on port `56767`) that a browser host can attach to.
+- The VS Code extension runs on the **UI side** and starts a `PlaywrightTunnel` which connects to `ws://127.0.0.1:56767`.
+	- In Codespaces, this works when port `56767` is forwarded to your local machine (VS Code port forwarding makes the remote port reachable as `localhost:56767`).
 - Once connected, the extension hosts the actual Playwright browser process locally, while your tests continue to run remotely.
 
 The extension provides a UI wrapper around this library (start/stop commands, status bar state, and logs), while `@rushstack/playwright-browser-tunnel` provides the underlying protocol forwarding and browser lifecycle management.
@@ -76,7 +76,7 @@ const terminal = new Terminal(terminalProvider);
 
 const tunnel = new PlaywrightTunnel({
 	mode: 'wait-for-incoming-connection',
-	listenPort: 3000,
+	listenPort: 56767,
 	tmpPath: path.join(os.tmpdir(), 'playwright-browser-tunnel'),
 	terminal,
 	onStatusChange: (status) => terminal.writeLine(`status: ${status}`)
@@ -97,7 +97,7 @@ Use `tunneledBrowserConnection()` in the environment where your tests run.
 
 It starts:
 
-- a **remote** WebSocket server (port `3000`) that the browser host connects to
+- a **remote** WebSocket server (port `56767`) that the browser host connects to
 - a **local** WebSocket endpoint (random port) that your Playwright client connects to
 
 ```ts

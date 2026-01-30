@@ -6,7 +6,7 @@ This extension is a UI wrapper around the tunneling/runtime library [`@rushstack
 
 ## How it works
 
-- Remote side (Codespace): your Playwright test fixture starts a WebSocket **tunnel server** on a well-known port (default `3000`) and a small local HTTP endpoint used by the Playwright client.
+- Remote side (Codespace): your Playwright test fixture starts a WebSocket **tunnel server** on a well-known port (default `56767`) and a small local HTTP endpoint used by the Playwright client.
 - Local side (your VS Code UI machine): this extension starts a `PlaywrightTunnel` in `poll-connection` mode and connects to the forwarded tunnel port.
 - After a handshake (browser type, launch options, Playwright version), the extension installs the requested Playwright/browser as needed, launches a local `browserServer`, and begins bidirectional forwarding.
 
@@ -136,9 +136,9 @@ This extension contributes the following commands:
 
 - `playwright-local-browser-server.autoStart` (default: `false`) — automatically starts the tunnel when the extension activates.
 - `playwright-local-browser-server.promptBeforeLaunch` (default: `true`) — show a confirmation prompt before launching the browser server with the requested launch options. This helps protect against potentially malicious launch options from compromised environments.
-- `playwright-local-browser-server.tunnelPort` (default: `3000`) — port used by the remote tunnel server.
+- `playwright-local-browser-server.tunnelPort` (default: `56767`) — port used by the remote tunnel server.
 
 ## Notes
 
-- The extension currently connects to `ws://127.0.0.1:3000` on the local machine. In Codespaces, make sure the remote port is forwarded so it is reachable as `localhost` from your VS Code UI environment.
+- The extension currently connects to `ws://127.0.0.1:56767` on the local machine. In Codespaces, make sure the remote port is forwarded so it is reachable as `localhost` from your VS Code UI environment.
 - For the underlying API and examples, see [`@rushstack/playwright-browser-tunnel`](../../apps/playwright-browser-tunnel).

@@ -85,7 +85,7 @@
         },
         "playwright-local-browser-server.tunnelPort": {
           "type": "number",
-          "default": 3000,
+          "default": 56767,
           "description": "Port for the browser tunnel server"
         }
       }

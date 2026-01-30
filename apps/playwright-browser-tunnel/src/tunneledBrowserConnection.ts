@@ -26,7 +26,7 @@ interface IHandshakeAck {
   action: 'handshakeAck';
 }
 
-const DEFAULT_LISTEN_PORT: number = 3000;
+const DEFAULT_LISTEN_PORT: number = 56767;
 
 /**
  * Disposable handle returned by {@link tunneledBrowserConnection}.

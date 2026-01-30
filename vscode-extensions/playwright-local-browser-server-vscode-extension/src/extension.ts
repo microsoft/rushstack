@@ -291,7 +291,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       'playwright-local-browser-server'
     );
     const shouldAutoStart: boolean = config.get<boolean>('autoStart', false);
-    const tunnelPort: number = config.get<number>('tunnelPort', 3000);
+    const tunnelPort: number = config.get<number>('tunnelPort', 56767);
 
     // If this is a manual start and autoStart is not enabled, prompt the user
     if (!isAutoStart && !shouldAutoStart) {
