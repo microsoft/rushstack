@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-bulk",
   "entries": [
     {
+      "version": "0.4.12",
+      "tag": "@rushstack/eslint-bulk_v0.4.12",
+      "date": "Fri, 30 Jan 2026 01:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.11",
       "tag": "@rushstack/eslint-bulk_v0.4.11",
       "date": "Thu, 08 Jan 2026 01:12:30 GMT",

@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.56.0",
+      "tag": "@microsoft/api-extractor_v7.56.0",
+      "date": "Fri, 30 Jan 2026 01:16:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue where destructured parameters produced an incorrect parameter name"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.55.5",
       "tag": "@microsoft/api-extractor_v7.55.5",
       "date": "Thu, 08 Jan 2026 01:12:30 GMT",

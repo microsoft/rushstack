@@ -1,6 +1,11 @@
 # Change Log - @rushstack/credential-cache
 
-This log was last generated on Thu, 08 Jan 2026 01:12:30 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Jan 2026 01:16:13 GMT and should not be manually modified.
+
+## 0.1.8
+Fri, 30 Jan 2026 01:16:13 GMT
+
+_Version update only_
 
 ## 0.1.7
 Thu, 08 Jan 2026 01:12:30 GMT

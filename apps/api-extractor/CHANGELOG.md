@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 08 Jan 2026 01:12:30 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Jan 2026 01:16:12 GMT and should not be manually modified.
+
+## 7.56.0
+Fri, 30 Jan 2026 01:16:12 GMT
+
+### Minor changes
+
+- Fix an issue where destructured parameters produced an incorrect parameter name
 
 ## 7.55.5
 Thu, 08 Jan 2026 01:12:30 GMT
