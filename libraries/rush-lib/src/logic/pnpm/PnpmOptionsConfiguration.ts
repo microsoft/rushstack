@@ -517,7 +517,12 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
       terminal,
       jsonFilePath
     );
-    pnpmConfigJson.$schema = pnpmOptionsConfigFile.getSchemaPropertyOriginalValue(pnpmConfigJson);
+    const schemaValue: string | undefined =
+      pnpmOptionsConfigFile.getSchemaPropertyOriginalValue(pnpmConfigJson);
+    // Only set $schema if it has a defined value, since JsonFile.save() will fail if any property is undefined
+    if (schemaValue !== undefined) {
+      pnpmConfigJson.$schema = schemaValue;
+    }
     return new PnpmOptionsConfiguration(pnpmConfigJson || {}, commonTempFolder, jsonFilePath);
   }
 
@@ -534,7 +539,11 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    */
   public updateGlobalPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void {
     this._globalPatchedDependencies = patchedDependencies;
-    this._json.globalPatchedDependencies = patchedDependencies;
+    if (patchedDependencies === undefined) {
+      delete this._json.globalPatchedDependencies;
+    } else {
+      this._json.globalPatchedDependencies = patchedDependencies;
+    }
     if (this.jsonFilename) {
       JsonFile.save(this._json, this.jsonFilename, { updateExistingFile: true });
     }
@@ -544,7 +553,25 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * Updates globalOnlyBuiltDependencies field of the PNPM options in the common/config/rush/pnpm-config.json file.
    */
   public updateGlobalOnlyBuiltDependencies(onlyBuiltDependencies: string[] | undefined): void {
-    this._json.globalOnlyBuiltDependencies = onlyBuiltDependencies;
+    if (onlyBuiltDependencies === undefined) {
+      delete this._json.globalOnlyBuiltDependencies;
+    } else {
+      this._json.globalOnlyBuiltDependencies = onlyBuiltDependencies;
+    }
+    if (this.jsonFilename) {
+      JsonFile.save(this._json, this.jsonFilename, { updateExistingFile: true });
+    }
+  }
+
+  /**
+   * Updates globalCatalogs field of the PNPM options in the common/config/rush/pnpm-config.json file.
+   */
+  public updateGlobalCatalogs(catalogs: Record<string, Record<string, string>> | undefined): void {
+    if (catalogs === undefined) {
+      delete this._json.globalCatalogs;
+    } else {
+      this._json.globalCatalogs = catalogs;
+    }
     if (this.jsonFilename) {
       JsonFile.save(this._json, this.jsonFilename, { updateExistingFile: true });
     }
