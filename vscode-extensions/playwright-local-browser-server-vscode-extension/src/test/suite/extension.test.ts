@@ -5,19 +5,18 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 
 suite('Playwright Local Browser Server Extension Test Suite', () => {
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   vscode.window.showInformationMessage('Start all tests.');
 
   test('Extension should be present', () => {
     const extensionId: string = 'ms-RushStack.playwright-local-browser-server';
-    const extension: vscode.Extension<unknown> | undefined =
-      vscode.extensions.getExtension(extensionId);
+    const extension: vscode.Extension<unknown> | undefined = vscode.extensions.getExtension(extensionId);
     assert.ok(extension, `Extension ${extensionId} should be installed`);
   });
 
   test('Extension should activate', async () => {
     const extensionId: string = 'ms-RushStack.playwright-local-browser-server';
-    const extension: vscode.Extension<unknown> | undefined =
-      vscode.extensions.getExtension(extensionId);
+    const extension: vscode.Extension<unknown> | undefined = vscode.extensions.getExtension(extensionId);
     assert.ok(extension, 'Extension should be installed');
 
     await extension.activate();
@@ -37,10 +36,7 @@ suite('Playwright Local Browser Server Extension Test Suite', () => {
     commands.forEach((commandId) => {
       test(`Command '${commandId}' should be registered`, async () => {
         const allCommands: string[] = await vscode.commands.getCommands(true);
-        assert.ok(
-          allCommands.includes(commandId),
-          `Command '${commandId}' should be registered`
-        );
+        assert.ok(allCommands.includes(commandId), `Command '${commandId}' should be registered`);
       });
     });
   });
@@ -49,8 +45,7 @@ suite('Playwright Local Browser Server Extension Test Suite', () => {
     suiteSetup(async () => {
       // Ensure extension is activated before testing command execution
       const extensionId: string = 'ms-RushStack.playwright-local-browser-server';
-      const extension: vscode.Extension<unknown> | undefined =
-        vscode.extensions.getExtension(extensionId);
+      const extension: vscode.Extension<unknown> | undefined = vscode.extensions.getExtension(extensionId);
       if (extension && !extension.isActive) {
         await extension.activate();
       }
@@ -78,12 +73,10 @@ suite('Playwright Local Browser Server Extension Test Suite', () => {
     test('All commands in package.json should be registered', async () => {
       // Get the extension's package.json
       const extensionId: string = 'ms-RushStack.playwright-local-browser-server';
-      const extension: vscode.Extension<unknown> | undefined =
-        vscode.extensions.getExtension(extensionId);
+      const extension: vscode.Extension<unknown> | undefined = vscode.extensions.getExtension(extensionId);
       assert.ok(extension, 'Extension should be installed');
 
-      const packageJson: { contributes?: { commands?: Array<{ command: string }> } } =
-        extension.packageJSON;
+      const packageJson: { contributes?: { commands?: Array<{ command: string }> } } = extension.packageJSON;
       const contributedCommands: string[] =
         packageJson.contributes?.commands?.map((cmd: { command: string }) => cmd.command) || [];
 
