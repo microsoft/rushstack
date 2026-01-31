@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 import { PnpmOptionsConfiguration } from '../PnpmOptionsConfiguration';
 import { TestUtilities } from '@rushstack/heft-config-file';
 
@@ -119,6 +120,221 @@ describe(PnpmOptionsConfiguration.name, () => {
       backend: {
         express: '^4.18.0',
         fastify: '^4.26.0'
+      }
+    });
+  });
+
+  describe('updateGlobalCatalogs', () => {
+    it('updates and saves globalCatalogs to pnpm-config.json', () => {
+      const testConfigPath: string = path.join(__dirname, 'temp', 'pnpm-config-update-test.json');
+
+      const tempDir: string = path.dirname(testConfigPath);
+      FileSystem.ensureFolder(tempDir);
+
+      try {
+        const initialConfig = {
+          globalCatalogs: {
+            default: {
+              react: '^18.0.0'
+            }
+          }
+        };
+        JsonFile.save(initialConfig, testConfigPath, { ensureFolderExists: true });
+
+        const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+          testConfigPath,
+          fakeCommonTempFolder
+        );
+
+        const updatedCatalogs = {
+          default: {
+            react: '^18.2.0',
+            'react-dom': '^18.2.0'
+          },
+          frontend: {
+            vue: '^3.4.0'
+          }
+        };
+        pnpmConfiguration.updateGlobalCatalogs(updatedCatalogs);
+
+        const reloadedConfig: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+          testConfigPath,
+          fakeCommonTempFolder
+        );
+
+        expect(TestUtilities.stripAnnotations(reloadedConfig.globalCatalogs)).toEqual(updatedCatalogs);
+      } finally {
+        // Clean up
+        if (FileSystem.exists(testConfigPath)) {
+          FileSystem.deleteFile(testConfigPath);
+        }
+      }
+    });
+
+    it('handles undefined catalogs', () => {
+      const testConfigPath: string = path.join(__dirname, 'temp', 'pnpm-config-undefined-test.json');
+
+      const tempDir: string = path.dirname(testConfigPath);
+      FileSystem.ensureFolder(tempDir);
+
+      try {
+        const initialConfig = {
+          globalCatalogs: {
+            default: {
+              react: '^18.0.0'
+            }
+          }
+        };
+        JsonFile.save(initialConfig, testConfigPath, { ensureFolderExists: true });
+
+        const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+          testConfigPath,
+          fakeCommonTempFolder
+        );
+
+        pnpmConfiguration.updateGlobalCatalogs(undefined);
+
+        const reloadedConfig: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+          testConfigPath,
+          fakeCommonTempFolder
+        );
+
+        expect(reloadedConfig.globalCatalogs).toBeUndefined();
+      } finally {
+        if (FileSystem.exists(testConfigPath)) {
+          FileSystem.deleteFile(testConfigPath);
+        }
+      }
+    });
+  });
+
+  describe('$schema handling', () => {
+    it('does not fail when $schema is undefined', () => {
+      const testConfigPath: string = path.join(__dirname, 'temp', 'pnpm-config-no-schema.json');
+
+      const tempDir: string = path.dirname(testConfigPath);
+      FileSystem.ensureFolder(tempDir);
+
+      try {
+        const configWithoutSchema = {
+          globalCatalogs: {
+            default: {
+              react: '^18.0.0'
+            }
+          }
+        };
+        JsonFile.save(configWithoutSchema, testConfigPath, { ensureFolderExists: true });
+
+        const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+          testConfigPath,
+          fakeCommonTempFolder
+        );
+
+        const updatedCatalogs = {
+          default: {
+            react: '^18.2.0'
+          }
+        };
+
+        expect(() => {
+          pnpmConfiguration.updateGlobalCatalogs(updatedCatalogs);
+        }).not.toThrow();
+
+        const reloadedConfig: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+          testConfigPath,
+          fakeCommonTempFolder
+        );
+
+        expect(TestUtilities.stripAnnotations(reloadedConfig.globalCatalogs)).toEqual(updatedCatalogs);
+      } finally {
+        if (FileSystem.exists(testConfigPath)) {
+          FileSystem.deleteFile(testConfigPath);
+        }
+      }
+    });
+
+    it('preserves $schema when it exists', () => {
+      const testConfigPath: string = path.join(__dirname, 'temp', 'pnpm-config-with-schema.json');
+
+      const tempDir: string = path.dirname(testConfigPath);
+      FileSystem.ensureFolder(tempDir);
+
+      try {
+        // Create config with $schema
+        const configWithSchema = {
+          $schema: 'https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json',
+          globalCatalogs: {
+            default: {
+              react: '^18.0.0'
+            }
+          }
+        };
+        JsonFile.save(configWithSchema, testConfigPath, { ensureFolderExists: true });
+
+        const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+          testConfigPath,
+          fakeCommonTempFolder
+        );
+
+        const updatedCatalogs = {
+          default: {
+            react: '^18.2.0'
+          }
+        };
+        pnpmConfiguration.updateGlobalCatalogs(updatedCatalogs);
+
+        const savedConfig = JsonFile.load(testConfigPath);
+        expect(savedConfig.$schema).toBe(
+          'https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json'
+        );
+      } finally {
+        if (FileSystem.exists(testConfigPath)) {
+          FileSystem.deleteFile(testConfigPath);
+        }
+      }
+    });
+
+    it('handles undefined in updateGlobalOnlyBuiltDependencies', () => {
+      const testConfigPath: string = path.join(__dirname, 'temp', 'pnpm-config-undefined-test.json');
+      const tempDir: string = path.dirname(testConfigPath);
+      FileSystem.ensureFolder(tempDir);
+
+      try {
+        const initialConfig = {
+          $schema: 'https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json',
+          globalOnlyBuiltDependencies: ['node-gyp', 'esbuild']
+        };
+        JsonFile.save(initialConfig, testConfigPath, { ensureFolderExists: true });
+
+        const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+          testConfigPath,
+          fakeCommonTempFolder
+        );
+
+        expect(TestUtilities.stripAnnotations(pnpmConfiguration.globalOnlyBuiltDependencies)).toEqual([
+          'node-gyp',
+          'esbuild'
+        ]);
+
+        expect(() => {
+          pnpmConfiguration.updateGlobalOnlyBuiltDependencies(undefined);
+        }).not.toThrow();
+
+        const reloadedConfig: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+          testConfigPath,
+          fakeCommonTempFolder
+        );
+        expect(reloadedConfig.globalOnlyBuiltDependencies).toBeUndefined();
+
+        const savedConfigJson = JsonFile.load(testConfigPath);
+        expect(savedConfigJson.$schema).toBe(
+          'https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json'
+        );
+        expect(savedConfigJson.globalOnlyBuiltDependencies).toBeUndefined();
+      } finally {
+        if (FileSystem.exists(testConfigPath)) {
+          FileSystem.deleteFile(testConfigPath);
+        }
       }
     });
   });
