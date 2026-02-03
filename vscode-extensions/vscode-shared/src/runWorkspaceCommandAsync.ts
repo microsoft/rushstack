@@ -5,15 +5,51 @@ import { ITerminal } from '@rushstack/terminal';
 import * as vscode from 'vscode';
 import { stripVTControlCharacters } from 'node:util';
 
+/**
+ * Options for extracting a specific value from the command output using markers.
+ * When provided, the command will be wrapped with the specified markers, and only
+ * the content between them will be returned. This is useful for extracting specific
+ * values from shell output that may contain additional noise.
+ */
+export interface IOutputMarkerOptions {
+  /**
+   * The expression to evaluate and wrap with markers. This will be inserted between
+   * the prefix and suffix markers in the command output.
+   */
+  expression: string;
+  /**
+   * The prefix marker used to identify the start of the desired output.
+   */
+  prefix: string;
+  /**
+   * The suffix marker used to identify the end of the desired output.
+   */
+  suffix: string;
+}
+
 export async function runWorkspaceCommandAsync({
   terminalOptions,
   commandLine,
-  terminal
+  terminal,
+  outputMarker
 }: {
   terminalOptions: vscode.TerminalOptions;
   commandLine: string;
   terminal: ITerminal;
+  /**
+   * Optional marker options for extracting specific output. When provided, the
+   * commandLine is constructed as: `node -p "'${prefix}' + ${expression} + '${suffix}'"`
+   * and the returned output will be only the content between the markers.
+   */
+  outputMarker?: IOutputMarkerOptions;
 }): Promise<string> {
+  // If outputMarker is provided, construct the command with markers
+  let effectiveCommandLine: string;
+  if (outputMarker) {
+    effectiveCommandLine = `node -p "'${outputMarker.prefix}' + ${outputMarker.expression} + '${outputMarker.suffix}'"`;
+  } else {
+    effectiveCommandLine = commandLine;
+  }
   const vsTerminal: vscode.Terminal = vscode.window.createTerminal(terminalOptions);
 
   // wait for shell to bootup and vs code shell integration to kick-in
@@ -66,15 +102,29 @@ export async function runWorkspaceCommandAsync({
         startExecutionDisposable.dispose();
 
         if (event.exitCode === 0) {
-          resolve(outputStream);
+          // If outputMarker was provided, extract the content between markers
+          if (outputMarker) {
+            const startIndex: number = outputStream.lastIndexOf(outputMarker.prefix);
+            const endIndex: number = outputStream.lastIndexOf(outputMarker.suffix);
+            if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+              const extractedOutput: string = outputStream
+                .substring(startIndex + outputMarker.prefix.length, endIndex)
+                .trim();
+              resolve(extractedOutput);
+            } else {
+              reject(new Error('Failed to parse output from command: markers not found'));
+            }
+          } else {
+            resolve(outputStream);
+          }
         } else {
           reject(outputStream);
         }
       }
     );
 
-    shellIntegration.executeCommand(commandLine);
-    terminal.writeLine(`Executing command: ${commandLine}`);
+    shellIntegration.executeCommand(effectiveCommandLine);
+    terminal.writeLine(`Executing command: ${effectiveCommandLine}`);
   }).finally(() => {
     vsTerminal.dispose();
   });

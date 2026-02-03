@@ -207,23 +207,17 @@ export function activate(context: vscode.ExtensionContext): void {
         let homeDir: string;
 
         if (vscode.env.remoteName) {
-          const markerPrefix: string = '<<<HOMEDIR_START>>>';
-          const markerSuffix: string = '<<<HOMEDIR_END>>>';
-          const output: string = await runWorkspaceCommandAsync({
+          homeDir = await runWorkspaceCommandAsync({
             terminalOptions: { name: 'debug-certificate-manager', hideFromUser: true },
-            // Wrapping the desired node output in markers to trim uninteresting shell output.
-            commandLine: `node -p "'${markerPrefix}' + require('os').homedir() + '${markerSuffix}'"`,
-            terminal
+            commandLine: '',
+            terminal,
+            outputMarker: {
+              expression: "require('os').homedir()",
+              prefix: '<<<HOMEDIR_START>>>',
+              suffix: '<<<HOMEDIR_END>>>'
+            }
           });
-          terminal.writeLine(`Running command to resolve home directory: ${output}`);
-
-          const startIndex: number = output.lastIndexOf(markerPrefix);
-          const endIndex: number = output.lastIndexOf(markerSuffix);
-          if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-            homeDir = output.substring(startIndex + markerPrefix.length, endIndex).trim();
-          } else {
-            throw new Error('Failed to parse home directory from command output');
-          }
+          terminal.writeLine(`Running command to resolve home directory: ${homeDir}`);
         } else {
           homeDir = require('os').homedir();
         }

@@ -45,21 +45,16 @@ async function writeExtensionInstalledFileAsync(terminal: ITerminal): Promise<vo
     let tempDir: string;
 
     if (vscode.env.remoteName) {
-      const markerPrefix: string = '<<<TEMPDIR_START>>>';
-      const markerSuffix: string = '<<<TEMPDIR_END>>>';
-      const output: string = await runWorkspaceCommandAsync({
+      tempDir = await runWorkspaceCommandAsync({
         terminalOptions: { name: 'playwright-local-browser-server', hideFromUser: true },
-        commandLine: `node -p "'${markerPrefix}' + require('node:os').tmpdir() + '${markerSuffix}'"`,
-        terminal
+        commandLine: '',
+        terminal,
+        outputMarker: {
+          expression: "require('node:os').tmpdir()",
+          prefix: '<<<TEMPDIR_START>>>',
+          suffix: '<<<TEMPDIR_END>>>'
+        }
       });
-
-      const startIndex: number = output.indexOf(markerPrefix);
-      const endIndex: number = output.indexOf(markerSuffix);
-      if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-        tempDir = output.substring(startIndex + markerPrefix.length, endIndex).trim();
-      } else {
-        throw new Error('Failed to parse temp directory from command output');
-      }
 
       // For remote environments, use the vscode-remote scheme
       // The workspace folder should have the correct scheme already
