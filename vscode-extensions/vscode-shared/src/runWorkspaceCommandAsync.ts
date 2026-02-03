@@ -104,8 +104,8 @@ export async function runWorkspaceCommandAsync({
         if (event.exitCode === 0) {
           // If outputMarker was provided, extract the content between markers
           if (outputMarker) {
-            const startIndex: number = outputStream.lastIndexOf(outputMarker.prefix);
-            const endIndex: number = outputStream.lastIndexOf(outputMarker.suffix);
+            const startIndex: number = outputStream.indexOf(outputMarker.prefix);
+            const endIndex: number = outputStream.indexOf(outputMarker.suffix);
             if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
               const extractedOutput: string = outputStream
                 .substring(startIndex + outputMarker.prefix.length, endIndex)
