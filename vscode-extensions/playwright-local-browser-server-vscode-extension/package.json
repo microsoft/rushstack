@@ -34,6 +34,8 @@
     "build": "heft build --clean",
     "build:watch": "heft build-watch",
     "start": "heft start",
+    "pretest": "npm run build",
+    "test": "node ./lib/test/runTest.js",
     "_phase:build": "heft run --only build -- --clean",
     "_phase:test": ""
   },
@@ -106,8 +108,13 @@
     "@rushstack/heft-vscode-extension-rig": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@types/glob": "7.1.1",
+    "@types/mocha": "10.0.6",
     "@types/node": "20.17.19",
     "@types/vscode": "1.103.0",
-    "@types/webpack-env": "1.18.8"
+    "@types/webpack-env": "1.18.8",
+    "@vscode/test-electron": "^1.6.2",
+    "glob": "~7.0.5",
+    "mocha": "^10.1.0"
   }
 }
