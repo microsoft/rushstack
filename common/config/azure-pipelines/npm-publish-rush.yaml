@@ -1,3 +1,9 @@
+parameters:
+  - name: publishToNpmFeed
+    displayName: 'Publish to npm feed'
+    type: boolean
+    default: true
+
 variables:
   - name: FORCE_COLOR
     value: 1
@@ -32,6 +38,9 @@ extends:
                 - output: pipelineArtifact
                   targetPath: $(Build.ArtifactStagingDirectory)/json-schemas
                   artifactName: json-schemas
+                - output: pipelineArtifact
+                  targetPath: $(Build.ArtifactStagingDirectory)/packages
+                  artifactName: packages
             steps:
               - checkout: self
                 persistCredentials: true
@@ -53,14 +62,18 @@ extends:
               - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
                 displayName: 'Prepublish workaround for rush-lib'
 
+              - template: /common/config/azure-pipelines/templates/pack.yaml@self
+
               - template: /common/config/azure-pipelines/templates/publish.yaml@self
                 parameters:
                   VersionPolicyName: noRush
                   BranchName: $(SourceBranch)
+                condition: eq('${{ parameters.publishToNpmFeed }}', 'true')
 
               - template: /common/config/azure-pipelines/templates/publish.yaml@self
                 parameters:
                   VersionPolicyName: rush
                   BranchName: $(SourceBranch)
+                condition: eq('${{ parameters.publishToNpmFeed }}', 'true')
 
               - template: /common/config/azure-pipelines/templates/post-publish.yaml@self
