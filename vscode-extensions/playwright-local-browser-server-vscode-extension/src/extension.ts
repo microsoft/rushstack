@@ -40,15 +40,26 @@ const VSCODE_SETTINGS_EXTENSION_FILTER: string = `@ext:${EXTENSION_ID}`;
 async function writeExtensionInstalledFileAsync(terminal: ITerminal): Promise<void> {
   try {
     // If on a remote environment, write a file to os.tempdir() using workspace fs
-    let tempDir: string;
+
     let fileUri: vscode.Uri;
+    let tempDir: string;
 
     if (vscode.env.remoteName) {
-      tempDir = await runWorkspaceCommandAsync({
+      const markerPrefix: string = '<<<TEMPDIR_START>>>';
+      const markerSuffix: string = '<<<TEMPDIR_END>>>';
+      const output: string = await runWorkspaceCommandAsync({
         terminalOptions: { name: 'playwright-local-browser-server', hideFromUser: true },
-        commandLine: `node -p "require('node:os').tmpdir()"`,
+        commandLine: `node -p "'${markerPrefix}' + require('node:os').tmpdir() + '${markerSuffix}'"`,
         terminal
       });
+
+      const startIndex: number = output.indexOf(markerPrefix);
+      const endIndex: number = output.indexOf(markerSuffix);
+      if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+        tempDir = output.substring(startIndex + markerPrefix.length, endIndex).trim();
+      } else {
+        throw new Error('Failed to parse temp directory from command output');
+      }
 
       // For remote environments, use the vscode-remote scheme
       // The workspace folder should have the correct scheme already
