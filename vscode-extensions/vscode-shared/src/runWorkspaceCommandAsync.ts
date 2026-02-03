@@ -7,16 +7,11 @@ import { stripVTControlCharacters } from 'node:util';
 
 /**
  * Options for extracting a specific value from the command output using markers.
- * When provided, the command will be wrapped with the specified markers, and only
- * the content between them will be returned. This is useful for extracting specific
+ * When provided, the function will search for the markers in the command output and
+ * return only the content between them. This is useful for extracting specific
  * values from shell output that may contain additional noise.
  */
 export interface IOutputMarkerOptions {
-  /**
-   * The expression to evaluate and wrap with markers. This will be inserted between
-   * the prefix and suffix markers in the command output.
-   */
-  expression: string;
   /**
    * The prefix marker used to identify the start of the desired output.
    */
@@ -37,19 +32,11 @@ export async function runWorkspaceCommandAsync({
   commandLine: string;
   terminal: ITerminal;
   /**
-   * Optional marker options for extracting specific output. When provided, the
-   * commandLine is constructed as: `node -p "'${prefix}' + ${expression} + '${suffix}'"`
-   * and the returned output will be only the content between the markers.
+   * Optional marker options for extracting specific output from the command result.
+   * When provided, the returned output will be only the content between the markers.
    */
   outputMarker?: IOutputMarkerOptions;
 }): Promise<string> {
-  // If outputMarker is provided, construct the command with markers
-  let effectiveCommandLine: string;
-  if (outputMarker) {
-    effectiveCommandLine = `node -p "'${outputMarker.prefix}' + ${outputMarker.expression} + '${outputMarker.suffix}'"`;
-  } else {
-    effectiveCommandLine = commandLine;
-  }
   const vsTerminal: vscode.Terminal = vscode.window.createTerminal(terminalOptions);
 
   // wait for shell to bootup and vs code shell integration to kick-in
@@ -123,8 +110,8 @@ export async function runWorkspaceCommandAsync({
       }
     );
 
-    shellIntegration.executeCommand(effectiveCommandLine);
-    terminal.writeLine(`Executing command: ${effectiveCommandLine}`);
+    shellIntegration.executeCommand(commandLine);
+    terminal.writeLine(`Executing command: ${commandLine}`);
   }).finally(() => {
     vsTerminal.dispose();
   });

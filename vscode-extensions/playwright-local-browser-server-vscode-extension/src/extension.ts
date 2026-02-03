@@ -45,14 +45,15 @@ async function writeExtensionInstalledFileAsync(terminal: ITerminal): Promise<vo
     let tempDir: string;
 
     if (vscode.env.remoteName) {
+      const markerPrefix: string = '<<<TEMPDIR_START>>>';
+      const markerSuffix: string = '<<<TEMPDIR_END>>>';
       tempDir = await runWorkspaceCommandAsync({
         terminalOptions: { name: 'playwright-local-browser-server', hideFromUser: true },
-        commandLine: '',
+        commandLine: `node -p "'${markerPrefix}' + require('node:os').tmpdir() + '${markerSuffix}'"`,
         terminal,
         outputMarker: {
-          expression: "require('node:os').tmpdir()",
-          prefix: '<<<TEMPDIR_START>>>',
-          suffix: '<<<TEMPDIR_END>>>'
+          prefix: markerPrefix,
+          suffix: markerSuffix
         }
       });
 

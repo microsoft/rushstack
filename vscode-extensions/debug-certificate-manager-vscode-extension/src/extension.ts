@@ -207,14 +207,15 @@ export function activate(context: vscode.ExtensionContext): void {
         let homeDir: string;
 
         if (vscode.env.remoteName) {
+          const markerPrefix: string = '<<<HOMEDIR_START>>>';
+          const markerSuffix: string = '<<<HOMEDIR_END>>>';
           homeDir = await runWorkspaceCommandAsync({
             terminalOptions: { name: 'debug-certificate-manager', hideFromUser: true },
-            commandLine: '',
+            commandLine: `node -p "'${markerPrefix}' + require('os').homedir() + '${markerSuffix}'"`,
             terminal,
             outputMarker: {
-              expression: "require('os').homedir()",
-              prefix: '<<<HOMEDIR_START>>>',
-              suffix: '<<<HOMEDIR_END>>>'
+              prefix: markerPrefix,
+              suffix: markerSuffix
             }
           });
           terminal.writeLine(`Running command to resolve home directory: ${homeDir}`);
