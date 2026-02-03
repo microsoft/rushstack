@@ -129,7 +129,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         statusBarItem.backgroundColor = undefined;
         break;
       case 'waiting-for-connection':
-        statusBarItem.text = '$(sync~spin) Playwright Tunnel';
+        statusBarItem.text = '$(radio-tower) Playwright Tunnel';
         statusBarItem.tooltip = 'Playwright Tunnel: Waiting for connection...';
         statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
         break;
