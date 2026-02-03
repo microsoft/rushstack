@@ -42,6 +42,7 @@ async function writeExtensionInstalledFileAsync(terminal: ITerminal): Promise<vo
     // If on a remote environment, write a file to os.tempdir() using workspace fs
 
     let fileUri: vscode.Uri;
+    let tempDir: string;
 
     if (vscode.env.remoteName) {
       const markerPrefix: string = '<<<TEMPDIR_START>>>';
@@ -52,10 +53,13 @@ async function writeExtensionInstalledFileAsync(terminal: ITerminal): Promise<vo
         terminal
       });
 
-      const tempDir: string = output.slice(
-        output.indexOf(markerPrefix) + markerPrefix.length,
-        output.indexOf(markerSuffix)
-      );
+      const startIndex: number = output.indexOf(markerPrefix);
+      const endIndex: number = output.indexOf(markerSuffix);
+      if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+        tempDir = output.substring(startIndex + markerPrefix.length, endIndex).trim();
+      } else {
+        throw new Error('Failed to parse temp directory from command output');
+      }
 
       // For remote environments, use the vscode-remote scheme
       // The workspace folder should have the correct scheme already
