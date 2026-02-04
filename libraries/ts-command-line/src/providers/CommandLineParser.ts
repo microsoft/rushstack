@@ -48,13 +48,13 @@ export interface ICommandLineParserOptions {
  * The "argparse" library is a relatively advanced command-line parser with features such
  * as word-wrapping and intelligible error messages (that are lacking in other similar
  * libraries such as commander, yargs, and nomnom).  Unfortunately, its ruby-inspired API
- * is awkward to use.  The abstract base classes CommandLineParser and CommandLineAction
+ * is awkward to use.  The base classes CommandLineParser and CommandLineAction
  * provide a wrapper for "argparse" that makes defining and consuming arguments quick
  * and simple, and enforces that appropriate documentation is provided for each parameter.
  *
  * @public
  */
-export abstract class CommandLineParser extends CommandLineParameterProvider {
+export class CommandLineParser extends CommandLineParameterProvider {
   /**
    * Reports which CommandLineAction was specified on the command line.
    * @remarks
@@ -65,7 +65,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   private readonly _argumentParser: argparse.ArgumentParser;
   private _actionsSubParser: argparse.SubParser | undefined;
   private readonly _options: ICommandLineParserOptions;
-  private readonly _actions: CommandLineAction[];
   private readonly _actionsByName: Map<string, CommandLineAction>;
   private _executed: boolean = false;
   private _tabCompleteActionWasAdded: boolean = false;
@@ -74,7 +73,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     super();
 
     this._options = options;
-    this._actions = [];
     this._actionsByName = new Map<string, CommandLineAction>();
 
     const { toolFilename, toolDescription, toolEpilog } = options;
@@ -95,7 +93,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * Returns the list of actions that were defined for this CommandLineParser object.
    */
   public get actions(): ReadonlyArray<CommandLineAction> {
-    return this._actions;
+    return Array.from(this._actionsByName.values());
   }
 
   /**
@@ -110,7 +108,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     }
 
     action._buildParser(this._actionsSubParser);
-    this._actions.push(action);
     this._actionsByName.set(action.actionName, action);
   }
 
@@ -314,7 +311,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       ...state,
       parentParameterNames: updatedParentParameterNames
     };
-    for (const action of this._actions) {
+    for (const action of this._actionsByName.values()) {
       action._registerDefinedParameters(parentState);
     }
   }
