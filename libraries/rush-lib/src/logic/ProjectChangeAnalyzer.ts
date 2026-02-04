@@ -5,7 +5,7 @@ import * as path from 'node:path';
 
 import ignore, { type Ignore } from 'ignore';
 
-import type { IReadonlyLookupByPath, LookupByPath } from '@rushstack/lookup-by-path';
+import type { IReadonlyLookupByPath, LookupByPath, IPrefixMatch } from '@rushstack/lookup-by-path';
 import { Path, FileSystem, Async, AlreadyReportedError, Sort } from '@rushstack/node-core-library';
 import {
   getRepoChanges,
@@ -127,39 +127,46 @@ export class ProjectChangeAnalyzer {
       project: RushConfigurationProject,
       projectChanges: Map<string, IFileDiffStatus>
     ): Promise<void> => {
-      if (projectChanges.size > 0) {
-        // Check for version-only changes if excludeVersionOnlyChanges is enabled
-        if (excludeVersionOnlyChanges) {
-          // Filter out package.json with version-only changes, CHANGELOG.md, and CHANGELOG.json
-          const filteredProjectChanges: Map<string, IFileDiffStatus> = new Map();
+      // Early return if no changes
+      if (projectChanges.size === 0) {
+        return;
+      }
 
-          for (const [filePath, diffStatus] of projectChanges) {
-            const fileName: string = path.basename(filePath);
+      // If excludeVersionOnlyChanges is not enabled, add the project
+      if (!excludeVersionOnlyChanges) {
+        changedProjects.add(project);
+        return;
+      }
 
-            // Skip CHANGELOG.md and CHANGELOG.json files
-            if (fileName === 'CHANGELOG.md' || fileName === 'CHANGELOG.json') {
-              continue;
-            }
-
-            // Check if this is package.json with version-only changes
-            if (fileName === 'package.json') {
-              const isVersionOnlyChange: boolean = await this._isVersionOnlyChangeAsync(diffStatus, repoRoot);
-              if (isVersionOnlyChange) {
-                continue; // Skip version-only package.json changes
-              }
-            }
-
-            // Add all other changes to filtered list
-            filteredProjectChanges.set(filePath, diffStatus);
-          }
-
-          // Only add project if there are non-excluded changes
-          if (filteredProjectChanges.size > 0) {
-            changedProjects.add(project);
-          }
-        } else {
+      // Filter out package.json with version-only changes, CHANGELOG.md, and CHANGELOG.json
+      for (const [filePath, diffStatus] of projectChanges) {
+        // Use lookup to find the project-relative path
+        const match: IPrefixMatch<RushConfigurationProject> | undefined =
+          lookup.findLongestPrefixMatch(filePath);
+        if (!match) {
+          // File is outside any project, consider it a change
           changedProjects.add(project);
+          return;
         }
+
+        const projectRelativePath: string = filePath.slice(match.index);
+
+        // Skip CHANGELOG.md and CHANGELOG.json files at project root
+        if (projectRelativePath === '/CHANGELOG.md' || projectRelativePath === '/CHANGELOG.json') {
+          continue;
+        }
+
+        // Check if this is package.json at project root with version-only changes
+        if (projectRelativePath === '/package.json') {
+          const isVersionOnlyChange: boolean = await this._isVersionOnlyChangeAsync(diffStatus, repoRoot);
+          if (isVersionOnlyChange) {
+            continue; // Skip version-only package.json changes
+          }
+        }
+
+        // Found a non-excluded change, add the project
+        changedProjects.add(project);
+        return;
       }
     };
 
