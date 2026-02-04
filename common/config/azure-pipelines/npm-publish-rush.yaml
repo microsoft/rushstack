@@ -70,7 +70,6 @@ extends:
                       VersionPolicyName: noRush
                       BranchName: $(SourceBranch)
 
-              - ${{ if eq(parameters.publishToNpmFeed, true) }}:
                   - template: /common/config/azure-pipelines/templates/publish.yaml@self
                     parameters:
                       VersionPolicyName: rush
