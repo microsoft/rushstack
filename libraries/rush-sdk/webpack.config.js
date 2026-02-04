@@ -8,7 +8,7 @@ const { BannerPlugin } = require('webpack');
 module.exports = () => {
   const packageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
 
-  const externalDependencyNames = new Set([...Object.keys(packageJson.dependencies || {})]);
+  const externalDependencyNames = new Set(Object.keys(packageJson.dependencies || {}));
 
   // Get all export specifiers by require rush-lib
   const rushLib = require('@microsoft/rush-lib');
