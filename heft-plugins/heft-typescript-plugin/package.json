@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-typescript-plugin",
-  "version": "1.1.12",
+  "version": "1.1.13",
   "description": "Heft plugin for TypeScript",
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "1.1.12"
+    "@rushstack/heft": "1.1.13"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
