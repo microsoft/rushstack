@@ -23,6 +23,8 @@ const mockHashes: Map<string, string> = new Map([
 ]);
 
 // Allow customizing repo changes for different test scenarios
+// Using 'let' here because we need to reassign this in beforeEach and individual tests
+// to set up different mock scenarios for each test case
 let mockRepoChanges: Map<string, IFileDiffStatus> = new Map();
 
 jest.mock(`@rushstack/package-deps-hash`, () => {

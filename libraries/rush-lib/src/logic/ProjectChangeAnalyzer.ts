@@ -461,8 +461,13 @@ export class ProjectChangeAnalyzer {
       const currentPackageJsonContent: string = await FileSystem.readFileAsync(currentPackageJsonPath);
 
       // Parse both versions
-      const oldPackageJson: { version?: string } = JSON.parse(oldPackageJsonContent);
-      const currentPackageJson: { version?: string } = JSON.parse(currentPackageJsonContent);
+      const oldPackageJson: Record<string, unknown> = JSON.parse(oldPackageJsonContent);
+      const currentPackageJson: Record<string, unknown> = JSON.parse(currentPackageJsonContent);
+
+      // Ensure both have a version field
+      if (!oldPackageJson.version || !currentPackageJson.version) {
+        return false;
+      }
 
       // Create copies without the version field for comparison
       const oldPackageJsonWithoutVersion: Record<string, unknown> = { ...oldPackageJson };
