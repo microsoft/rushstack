@@ -22,10 +22,8 @@ const mockHashes: Map<string, string> = new Map([
   ['rush.json', 'hash18']
 ]);
 
-// Allow customizing repo changes for different test scenarios
-// Using 'let' here because we need to reassign this in beforeEach and individual tests
-// to set up different mock scenarios for each test case
-let mockRepoChanges: Map<string, IFileDiffStatus> = new Map();
+// Mock function for customizing repo changes in each test
+const mockGetRepoChanges = jest.fn<Map<string, IFileDiffStatus>, []>();
 
 jest.mock(`@rushstack/package-deps-hash`, () => {
   return {
@@ -50,15 +48,15 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
       return new Map(Array.from(filePaths, (filePath: string) => [filePath, filePath]));
     },
     getRepoChanges(): Map<string, IFileDiffStatus> {
-      return mockRepoChanges;
+      return mockGetRepoChanges();
     }
   };
 });
 
 const { Git: OriginalGit } = jest.requireActual('../Git');
 
-// Store mock package.json contents for testing excludeVersionOnlyChanges
-const mockPackageJsonContents: Map<string, string> = new Map();
+// Mock function for getBlobContentAsync to be customized in each test
+const mockGetBlobContentAsync = jest.fn<Promise<string>, [{ blobSpec: string; repositoryRoot: string }]>();
 
 /** Mock Git to test `getChangedProjectsAsync` */
 jest.mock('../Git', () => {
@@ -71,9 +69,7 @@ jest.mock('../Git', () => {
         return 'merge-base-sha';
       }
       public async getBlobContentAsync(opts: { blobSpec: string; repositoryRoot: string }): Promise<string> {
-        // Check if we have a mock for this blob spec
-        const content = mockPackageJsonContents.get(opts.blobSpec);
-        return content || '';
+        return mockGetBlobContentAsync(opts);
       }
     }
   };
@@ -130,8 +126,8 @@ import type {
 describe(ProjectChangeAnalyzer.name, () => {
   beforeEach(() => {
     mockSnapshot.mockClear();
-    mockPackageJsonContents.clear();
-    mockRepoChanges = new Map();
+    mockGetBlobContentAsync.mockClear();
+    mockGetRepoChanges.mockClear();
   });
 
   describe(ProjectChangeAnalyzer.prototype._tryGetSnapshotProviderAsync.name, () => {
@@ -166,28 +162,30 @@ describe(ProjectChangeAnalyzer.name, () => {
   describe(ProjectChangeAnalyzer.prototype.getChangedProjectsAsync.name, () => {
     it('Subspaces detects external changes', async () => {
       // Set up mock repo changes for this test
-      mockRepoChanges = new Map<string, IFileDiffStatus>([
-        [
-          // Test subspace lockfile change detection
-          'common/config/subspaces/project-change-analyzer-test-subspace/pnpm-lock.yaml',
-          {
-            mode: 'modified',
-            newhash: 'newhash',
-            oldhash: 'oldhash',
-            status: 'M'
-          }
-        ],
-        [
-          // Test lockfile deletion detection
-          'common/config/subspaces/default/pnpm-lock.yaml',
-          {
-            mode: 'deleted',
-            newhash: '',
-            oldhash: 'oldhash',
-            status: 'D'
-          }
-        ]
-      ]);
+      mockGetRepoChanges.mockReturnValue(
+        new Map<string, IFileDiffStatus>([
+          [
+            // Test subspace lockfile change detection
+            'common/config/subspaces/project-change-analyzer-test-subspace/pnpm-lock.yaml',
+            {
+              mode: 'modified',
+              newhash: 'newhash',
+              oldhash: 'oldhash',
+              status: 'M'
+            }
+          ],
+          [
+            // Test lockfile deletion detection
+            'common/config/subspaces/default/pnpm-lock.yaml',
+            {
+              mode: 'deleted',
+              newhash: '',
+              oldhash: 'oldhash',
+              status: 'D'
+            }
+          ]
+        ])
+      );
 
       const rootDir: string = resolve(__dirname, 'repoWithSubspaces');
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
@@ -252,20 +250,22 @@ describe(ProjectChangeAnalyzer.name, () => {
       );
 
       // Set up mock repo changes - only package.json changed for project 'a'
-      mockRepoChanges = new Map<string, IFileDiffStatus>([
-        [
-          'a/package.json',
-          {
-            mode: 'modified',
-            newhash: 'newhash1',
-            oldhash: 'oldhash1',
-            status: 'M'
-          }
-        ]
-      ]);
+      mockGetRepoChanges.mockReturnValue(
+        new Map<string, IFileDiffStatus>([
+          [
+            'a/package.json',
+            {
+              mode: 'modified',
+              newhash: 'newhash1',
+              oldhash: 'oldhash1',
+              status: 'M'
+            }
+          ]
+        ])
+      );
 
       // Mock the blob content to return old package.json
-      mockPackageJsonContents.set('oldhash1', oldPackageJsonContent);
+      mockGetBlobContentAsync.mockResolvedValue(oldPackageJsonContent);
 
       // Mock FileSystem.readFileAsync to return new package.json
       const FileSystem = require('@rushstack/node-core-library').FileSystem;
@@ -338,20 +338,22 @@ describe(ProjectChangeAnalyzer.name, () => {
       );
 
       // Set up mock repo changes - only package.json changed for project 'b'
-      mockRepoChanges = new Map<string, IFileDiffStatus>([
-        [
-          'b/package.json',
-          {
-            mode: 'modified',
-            newhash: 'newhash2',
-            oldhash: 'oldhash2',
-            status: 'M'
-          }
-        ]
-      ]);
+      mockGetRepoChanges.mockReturnValue(
+        new Map<string, IFileDiffStatus>([
+          [
+            'b/package.json',
+            {
+              mode: 'modified',
+              newhash: 'newhash2',
+              oldhash: 'oldhash2',
+              status: 'M'
+            }
+          ]
+        ])
+      );
 
       // Mock the blob content to return old package.json
-      mockPackageJsonContents.set('oldhash2', oldPackageJsonContent);
+      mockGetBlobContentAsync.mockResolvedValue(oldPackageJsonContent);
 
       // Mock FileSystem.readFileAsync to return new package.json
       const FileSystem = require('@rushstack/node-core-library').FileSystem;
