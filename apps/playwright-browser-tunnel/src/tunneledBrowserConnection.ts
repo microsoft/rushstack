@@ -10,6 +10,7 @@ import { type ITerminal, Terminal, ConsoleTerminalProvider } from '@rushstack/te
 
 import type { BrowserName } from './PlaywrightBrowserTunnel';
 import { HttpServer } from './HttpServer';
+import { getNormalizedErrorString, getWebSocketCloseReason, getWebSocketReadyStateString } from './utilities';
 
 const { version: playwrightVersion } = playwrightPackageJson;
 
@@ -153,8 +154,21 @@ export async function tunneledBrowserConnection(
         }
       });
 
-      ws.on('close', () => logger.writeLine('Remote websocket closed'));
-      ws.on('error', (err) => logger.writeErrorLine(`Remote websocket error: ${err}`));
+      ws.on('close', (code: number, reason: Buffer) => {
+        const reasonStr: string = reason.toString() || 'no reason provided';
+        const codeDescription: string = getWebSocketCloseReason(code);
+        logger.writeDebugLine(
+          `Remote websocket closed - code: ${code} (${codeDescription}), reason: ${reasonStr}`
+        );
+        logger.writeDebugLine(
+          `  Connection state at close: handshakeSent=${handshakeSent}, handshakeAck=${handshakeAck}`
+        );
+        logger.writeDebugLine(`  Buffered messages pending: ${bufferedLocalMessages.length}`);
+      });
+      ws.on('error', (err: Error) => {
+        logger.writeErrorLine(`Remote websocket error: ${getNormalizedErrorString(err)}`);
+        logger.writeErrorLine(`  Socket readyState: ${getWebSocketReadyStateString(ws.readyState)}`);
+      });
     });
 
     localProxyWs.on('connection', (localWs, request) => {
@@ -200,8 +214,20 @@ export async function tunneledBrowserConnection(
           bufferedLocalMessages.push(message);
         }
       });
-      localWs.on('close', () => logger.writeLine('Local client websocket closed'));
-      localWs.on('error', (err) => logger.writeErrorLine(`Local client websocket error: ${err}`));
+      localWs.on('close', (code: number, reason: Buffer) => {
+        const reasonStr: string = reason.toString() || 'no reason provided';
+        const codeDescription: string = getWebSocketCloseReason(code);
+        logger.writeDebugLine(
+          `Local client websocket closed - code: ${code} (${codeDescription}), reason: ${reasonStr}`
+        );
+        logger.writeDebugLine(
+          `  Remote socket state: ${remoteSocket ? getWebSocketReadyStateString(remoteSocket.readyState) : 'undefined'}`
+        );
+        logger.writeDebugLine(`  handshakeAck: ${handshakeAck}`);
+      });
+      localWs.on('error', (err: Error) => {
+        logger.writeErrorLine(`Local client websocket error: ${getNormalizedErrorString(err)}`);
+      });
     });
 
     // Resolve immediately so caller can initiate local connection with query params (handshake completes later)
