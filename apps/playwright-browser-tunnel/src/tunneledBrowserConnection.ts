@@ -10,7 +10,12 @@ import { type ITerminal, Terminal, ConsoleTerminalProvider } from '@rushstack/te
 
 import type { BrowserName } from './PlaywrightBrowserTunnel';
 import { HttpServer } from './HttpServer';
-import { getNormalizedErrorString, getWebSocketCloseReason, getWebSocketReadyStateString } from './utilities';
+import {
+  getNormalizedErrorString,
+  getWebSocketCloseReason,
+  getWebSocketReadyStateString,
+  WebSocketCloseCode
+} from './utilities';
 
 const { version: playwrightVersion } = playwrightPackageJson;
 
@@ -122,12 +127,12 @@ export async function tunneledBrowserConnection(
               logger.writeLine('Received handshakeAck from remote');
             } else {
               logger.writeErrorLine('Invalid handshake ack message');
-              ws.close();
+              ws.close(WebSocketCloseCode.PROTOCOL_ERROR, 'Invalid handshake ack');
               return;
             }
           } catch (e) {
             logger.writeErrorLine(`Failed parsing handshake ack: ${e}`);
-            ws.close();
+            ws.close(WebSocketCloseCode.PROTOCOL_ERROR, 'Failed parsing handshake');
             return;
           }
           // Resolve only once local proxy available and handshake acknowledged
@@ -197,7 +202,7 @@ export async function tunneledBrowserConnection(
       if (!browserName) {
         const supportedBrowsersString: string = Array.from(SUPPORTED_BROWSER_NAMES).join('|');
         logger.writeErrorLine(`browser query param required (${supportedBrowsersString})`);
-        localWs.close();
+        localWs.close(WebSocketCloseCode.PROTOCOL_ERROR, 'Missing browser param');
         return;
       }
       if (!launchOptions) {

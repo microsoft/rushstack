@@ -11,7 +11,12 @@ import semver from 'semver';
 import { TerminalProviderSeverity, TerminalStreamWritable, type ITerminal } from '@rushstack/terminal';
 import { Executable, FileSystem, Async } from '@rushstack/node-core-library';
 
-import { getNormalizedErrorString, getWebSocketCloseReason, getWebSocketReadyStateString } from './utilities';
+import {
+  getNormalizedErrorString,
+  getWebSocketCloseReason,
+  getWebSocketReadyStateString,
+  WebSocketCloseCode
+} from './utilities';
 import { LaunchOptionsValidator, type ILaunchOptionsValidationResult } from './LaunchOptionsValidator';
 
 /**
@@ -170,7 +175,7 @@ export class PlaywrightTunnel {
       this._pollInterval = undefined;
     }
     await this._initWsPromise?.finally(() => {
-      this._ws?.close();
+      this._ws?.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Tunnel stopped');
     });
   }
 
@@ -485,7 +490,7 @@ export class PlaywrightTunnel {
       );
       if (ws2.readyState === WebSocket.OPEN) {
         this._terminal.writeLine('  Closing ws2 (browser) in response');
-        ws2.close();
+        ws2.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Tunnel closed');
       }
     });
     ws2.once('close', (code: number, reason: Buffer) => {
@@ -499,7 +504,7 @@ export class PlaywrightTunnel {
       );
       if (ws1.readyState === WebSocket.OPEN) {
         this._terminal.writeLine('  Closing ws1 (tunnel) in response');
-        ws1.close();
+        ws1.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Browser closed');
       }
     });
 
@@ -572,7 +577,7 @@ export class PlaywrightTunnel {
               if (!shouldProceed) {
                 terminal.writeLine('Browser server launch cancelled by user.');
                 ws.off('message', onMessageHandler);
-                ws.close();
+                ws.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Launch cancelled by user');
                 reject(new Error('Browser server launch cancelled by user'));
                 return;
               }
@@ -626,7 +631,7 @@ export class PlaywrightTunnel {
 
             // Cleanup and close connection on error
             ws.off('message', onMessageHandler);
-            ws.close();
+            ws.close(WebSocketCloseCode.INTERNAL_ERROR, 'Handshake error');
             reject(error);
             return;
           }
@@ -634,7 +639,7 @@ export class PlaywrightTunnel {
           if (!client) {
             terminal.writeLine('Browser WebSocket client is not initialized.');
             ws.off('message', onMessageHandler);
-            ws.close();
+            ws.close(WebSocketCloseCode.INTERNAL_ERROR, 'Browser client not initialized');
             return;
           }
         }
