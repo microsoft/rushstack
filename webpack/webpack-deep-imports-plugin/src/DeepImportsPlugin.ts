@@ -262,11 +262,7 @@ export class DeepImportsPlugin extends DllPlugin {
 
               const providedExports: null | true | string[] = exportsInfo.getProvidedExports();
               if (Array.isArray(providedExports) && providedExports.length > 0) {
-                moduleText = [
-                  `${providedExports.map((exportName) => `exports.${exportName}`).join(' = ')} = void 0;`,
-                  '',
-                  moduleText
-                ].join('\n');
+                moduleText = `${providedExports.map((exportName) => `exports.${exportName}`).join(' = ')} = void 0;\n\n` + moduleText;
               }
 
               compilation.emitAsset(
