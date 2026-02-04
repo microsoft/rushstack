@@ -2,7 +2,40 @@
 
 Enables running Playwright tests in a remote VS Code environment (such as GitHub Codespaces) while launching and driving the actual browser process on your local machine.
 
-This extension is a UI wrapper around the tunneling/runtime library [`@rushstack/playwright-browser-tunnel`](../../apps/playwright-browser-tunnel). It starts/stops the local browser host process and forwards Playwright’s WebSocket traffic between the remote test runner and your local browser.
+This extension is a UI wrapper around the tunneling/runtime library [`@rushstack/playwright-browser-tunnel`](../../apps/playwright-browser-tunnel). It starts/stops the local browser host process and forwards Playwright's WebSocket traffic between the remote test runner and your local browser.
+
+## Getting Started
+
+Before running your Playwright tests in a remote environment, you must first start the browser tunnel:
+
+1. Open the VS Code **Command Palette** (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS)
+2. Search for and run **"Playwright: Start Playwright Browser Tunnel"**
+3. The tunnel will begin polling for connections from your remote environment
+4. Now you can run your Playwright tests in the remote workspace
+
+To stop the tunnel, open the Command Palette and run **"Playwright: Stop Playwright Browser Tunnel"**.
+
+### Requirements
+
+This extension requires VS Code's terminal shell integration to be enabled. Ensure the following setting is enabled in your VS Code settings:
+
+```json
+"terminal.integrated.shellIntegration.enabled": true
+```
+
+This is typically enabled by default, but if you have explicitly disabled it, the extension will not work correctly.
+
+### Auto-starting the tunnel
+
+If you want the browser tunnel to start automatically when VS Code opens, you can add the following to your workspace settings (`.vscode/settings.json`):
+
+```json
+{
+  "playwright-local-browser-server.autoStart": true
+}
+```
+
+> **Security note:** Auto-start is disabled by default because the tunnel allows a remote environment to launch browser processes on your local machine. Only enable auto-start for workspaces you trust.
 
 ## How it works
 
