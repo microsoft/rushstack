@@ -131,43 +131,49 @@ export class ProjectChangeAnalyzer {
           );
 
           if (filteredChanges.size > 0) {
+            // Check for version-only changes if excludeVersionOnlyChanges is enabled
+            if (excludeVersionOnlyChanges && filteredChanges.size === 1) {
+              const packageJsonPath: string = Path.convertToSlashes(
+                path.relative(repoRoot, path.join(project.projectFolder, 'package.json'))
+              );
+              const diffStatus: IFileDiffStatus | undefined = filteredChanges.get(packageJsonPath);
+              if (diffStatus) {
+                const isVersionOnlyChange: boolean = await this._isVersionOnlyChangeAsync(
+                  diffStatus,
+                  repoRoot
+                );
+                if (isVersionOnlyChange) {
+                  return; // Skip adding this project
+                }
+              }
+            }
             changedProjects.add(project);
           }
         },
         { concurrency: 10 }
       );
     } else {
-      for (const [project, projectChanges] of changesByProject) {
-        if (projectChanges.size > 0) {
-          changedProjects.add(project);
-        }
-      }
-    }
-
-    // Check for version-only changes if excludeVersionOnlyChanges is enabled
-    if (excludeVersionOnlyChanges) {
-      const projectsToCheck: RushConfigurationProject[] = Array.from(changedProjects);
       await Async.forEachAsync(
-        projectsToCheck,
-        async (project) => {
-          const projectChanges: Map<string, IFileDiffStatus> | undefined = changesByProject.get(project);
-          if (projectChanges && projectChanges.size === 1) {
-            // Check if the only change is to package.json
-            const packageJsonPath: string = Path.convertToSlashes(
-              path.relative(repoRoot, path.join(project.projectFolder, 'package.json'))
-            );
-            const diffStatus: IFileDiffStatus | undefined = projectChanges.get(packageJsonPath);
-            if (diffStatus) {
-              const isVersionOnlyChange: boolean = await this._isVersionOnlyChangeAsync(
-                project,
-                packageJsonPath,
-                diffStatus,
-                repoRoot
+        changesByProject,
+        async ([project, projectChanges]) => {
+          if (projectChanges.size > 0) {
+            // Check for version-only changes if excludeVersionOnlyChanges is enabled
+            if (excludeVersionOnlyChanges && projectChanges.size === 1) {
+              const packageJsonPath: string = Path.convertToSlashes(
+                path.relative(repoRoot, path.join(project.projectFolder, 'package.json'))
               );
-              if (isVersionOnlyChange) {
-                changedProjects.delete(project);
+              const diffStatus: IFileDiffStatus | undefined = projectChanges.get(packageJsonPath);
+              if (diffStatus) {
+                const isVersionOnlyChange: boolean = await this._isVersionOnlyChangeAsync(
+                  diffStatus,
+                  repoRoot
+                );
+                if (isVersionOnlyChange) {
+                  return; // Skip adding this project
+                }
               }
             }
+            changedProjects.add(project);
           }
         },
         { concurrency: 10 }
@@ -256,7 +262,12 @@ export class ProjectChangeAnalyzer {
       });
     }
 
-    return changedProjects;
+    // Sort the set by projectRelativeFolder to avoid race conditions in the results
+    const sortedChangedProjects: RushConfigurationProject[] = Array.from(changedProjects).sort((a, b) =>
+      a.projectRelativeFolder.localeCompare(b.projectRelativeFolder)
+    );
+
+    return new Set(sortedChangedProjects);
   }
 
   protected getChangesByProject(
@@ -443,22 +454,24 @@ export class ProjectChangeAnalyzer {
    * Checks if the only change to a package.json file is to the "version" field.
    * @internal
    */
-  private async _isVersionOnlyChangeAsync(
-    project: RushConfigurationProject,
-    packageJsonPath: string,
-    diffStatus: IFileDiffStatus,
-    repoRoot: string
-  ): Promise<boolean> {
+  private async _isVersionOnlyChangeAsync(diffStatus: IFileDiffStatus, repoRoot: string): Promise<boolean> {
     try {
+      // Only check modified files, not additions or deletions
+      if (diffStatus.status !== 'M') {
+        return false;
+      }
+
       // Get the old version of package.json from Git using the blob id from IFileDiffStatus
       const oldPackageJsonContent: string = await this._git.getBlobContentAsync({
         blobSpec: diffStatus.oldhash,
         repositoryRoot: repoRoot
       });
 
-      // Get the current version of package.json
-      const currentPackageJsonPath: string = path.join(repoRoot, packageJsonPath);
-      const currentPackageJsonContent: string = await FileSystem.readFileAsync(currentPackageJsonPath);
+      // Get the current version of package.json from Git (staged/committed version, not working tree)
+      const currentPackageJsonContent: string = await this._git.getBlobContentAsync({
+        blobSpec: diffStatus.newhash,
+        repositoryRoot: repoRoot
+      });
 
       // Parse both versions
       const oldPackageJson: Record<string, unknown> = JSON.parse(oldPackageJsonContent);
@@ -469,19 +482,12 @@ export class ProjectChangeAnalyzer {
         return false;
       }
 
-      // Create copies without the version field for comparison
-      const oldPackageJsonWithoutVersion: Record<string, unknown> = { ...oldPackageJson };
-      const currentPackageJsonWithoutVersion: Record<string, unknown> = { ...currentPackageJson };
-      delete oldPackageJsonWithoutVersion.version;
-      delete currentPackageJsonWithoutVersion.version;
+      // Remove the version field from both (no need to clone, these are fresh objects from JSON.parse)
+      oldPackageJson.version = undefined;
+      currentPackageJson.version = undefined;
 
-      // Check if the only difference is the version field
-      const oldVersionlessJson: string = JSON.stringify(oldPackageJsonWithoutVersion, null, 2);
-      const currentVersionlessJson: string = JSON.stringify(currentPackageJsonWithoutVersion, null, 2);
-
-      return (
-        oldVersionlessJson === currentVersionlessJson && oldPackageJson.version !== currentPackageJson.version
-      );
+      // Compare the objects without the version field
+      return JSON.stringify(oldPackageJson) === JSON.stringify(currentPackageJson);
     } catch (error) {
       // If we can't read the file or parse it, assume it's not a version-only change
       return false;

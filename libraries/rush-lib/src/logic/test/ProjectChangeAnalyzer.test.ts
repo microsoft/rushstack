@@ -264,17 +264,14 @@ describe(ProjectChangeAnalyzer.name, () => {
         ])
       );
 
-      // Mock the blob content to return old package.json
-      mockGetBlobContentAsync.mockResolvedValue(oldPackageJsonContent);
-
-      // Mock FileSystem.readFileAsync to return new package.json
-      const FileSystem = require('@rushstack/node-core-library').FileSystem;
-      const originalReadFileAsync = FileSystem.readFileAsync;
-      FileSystem.readFileAsync = jest.fn().mockImplementation((filePath: string) => {
-        if (filePath.endsWith('a/package.json')) {
+      // Mock the blob content to return different versions based on the hash
+      mockGetBlobContentAsync.mockImplementation((opts: { blobSpec: string; repositoryRoot: string }) => {
+        if (opts.blobSpec === 'oldhash1') {
+          return Promise.resolve(oldPackageJsonContent);
+        } else if (opts.blobSpec === 'newhash1') {
           return Promise.resolve(newPackageJsonContent);
         }
-        return originalReadFileAsync(filePath);
+        return Promise.resolve('');
       });
 
       const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
@@ -299,9 +296,6 @@ describe(ProjectChangeAnalyzer.name, () => {
         excludeVersionOnlyChanges: true
       });
       expect(changedProjectsWithExclude.has(rushConfiguration.getProjectByName('a')!)).toBe(false);
-
-      // Restore original function
-      FileSystem.readFileAsync = originalReadFileAsync;
     });
 
     it('excludeVersionOnlyChanges does not exclude projects with non-version changes', async () => {
@@ -352,17 +346,14 @@ describe(ProjectChangeAnalyzer.name, () => {
         ])
       );
 
-      // Mock the blob content to return old package.json
-      mockGetBlobContentAsync.mockResolvedValue(oldPackageJsonContent);
-
-      // Mock FileSystem.readFileAsync to return new package.json
-      const FileSystem = require('@rushstack/node-core-library').FileSystem;
-      const originalReadFileAsync = FileSystem.readFileAsync;
-      FileSystem.readFileAsync = jest.fn().mockImplementation((filePath: string) => {
-        if (filePath.endsWith('b/package.json')) {
+      // Mock the blob content to return different versions based on the hash
+      mockGetBlobContentAsync.mockImplementation((opts: { blobSpec: string; repositoryRoot: string }) => {
+        if (opts.blobSpec === 'oldhash2') {
+          return Promise.resolve(oldPackageJsonContent);
+        } else if (opts.blobSpec === 'newhash2') {
           return Promise.resolve(newPackageJsonContent);
         }
-        return originalReadFileAsync(filePath);
+        return Promise.resolve('');
       });
 
       const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
@@ -378,9 +369,6 @@ describe(ProjectChangeAnalyzer.name, () => {
         excludeVersionOnlyChanges: true
       });
       expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(true);
-
-      // Restore original function
-      FileSystem.readFileAsync = originalReadFileAsync;
     });
   });
 });
