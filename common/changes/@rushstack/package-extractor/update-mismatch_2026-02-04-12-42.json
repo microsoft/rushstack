@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update minimatch dependency from 10.0.3 to 10.1.2",
+      "type": "patch",
+      "packageName": "@rushstack/package-extractor"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor",
+  "email": "example@users.noreply.github.com"
+}
