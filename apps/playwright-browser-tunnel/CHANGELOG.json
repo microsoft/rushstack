@@ -2,6 +2,23 @@
   "name": "@rushstack/playwright-browser-tunnel",
   "entries": [
     {
+      "version": "0.2.2",
+      "tag": "@rushstack/playwright-browser-tunnel_v0.2.2",
+      "date": "Wed, 04 Feb 2026 20:42:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add advanced logging and websocket close codes"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.1",
       "tag": "@rushstack/playwright-browser-tunnel_v0.2.1",
       "date": "Wed, 04 Feb 2026 16:13:27 GMT",

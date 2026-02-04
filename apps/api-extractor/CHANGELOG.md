@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 04 Feb 2026 16:13:27 GMT and should not be manually modified.
+This log was last generated on Wed, 04 Feb 2026 20:42:47 GMT and should not be manually modified.
+
+## 7.56.2
+Wed, 04 Feb 2026 20:42:47 GMT
+
+### Patches
+
+- Update minimatch dependency from 10.0.3 to 10.1.2
 
 ## 7.56.1
 Wed, 04 Feb 2026 16:13:27 GMT

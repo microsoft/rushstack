@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Wed, 04 Feb 2026 16:13:27 GMT and should not be manually modified.
+This log was last generated on Wed, 04 Feb 2026 20:42:47 GMT and should not be manually modified.
+
+## 0.11.15
+Wed, 04 Feb 2026 20:42:47 GMT
+
+### Patches
+
+- Update minimatch dependency from 10.0.3 to 10.1.2
 
 ## 0.11.14
 Wed, 04 Feb 2026 16:13:27 GMT

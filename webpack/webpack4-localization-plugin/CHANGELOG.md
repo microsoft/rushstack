@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack4-localization-plugin
 
-This log was last generated on Wed, 04 Feb 2026 16:13:27 GMT and should not be manually modified.
+This log was last generated on Wed, 04 Feb 2026 20:42:47 GMT and should not be manually modified.
+
+## 0.19.13
+Wed, 04 Feb 2026 20:42:47 GMT
+
+### Patches
+
+- Update minimatch dependency from 10.0.3 to 10.1.2
 
 ## 0.19.12
 Wed, 04 Feb 2026 16:13:27 GMT
