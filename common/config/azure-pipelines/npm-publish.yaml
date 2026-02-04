@@ -31,6 +31,7 @@ extends:
               name: publish-rushstack
               os: linux
             templateContext:
+              outputParentDirectory: $(Build.ArtifactStagingDirectory)
               outputs:
                 - output: pipelineArtifact
                   targetPath: $(Build.ArtifactStagingDirectory)/published-versions
