@@ -6,7 +6,7 @@ import * as path from 'node:path';
 import ignore, { type Ignore } from 'ignore';
 
 import type { IReadonlyLookupByPath, LookupByPath } from '@rushstack/lookup-by-path';
-import { Path, FileSystem, Async, AlreadyReportedError } from '@rushstack/node-core-library';
+import { Path, FileSystem, Async, AlreadyReportedError, Sort } from '@rushstack/node-core-library';
 import {
   getRepoChanges,
   getRepoRoot,
@@ -118,6 +118,30 @@ export class ProjectChangeAnalyzer {
     > = this.getChangesByProject(lookup, changedFiles);
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
+
+    // Helper function to check and add project to changedProjects
+    const checkAndAddProject = async (
+      project: RushConfigurationProject,
+      projectChanges: Map<string, IFileDiffStatus>
+    ): Promise<void> => {
+      if (projectChanges.size > 0) {
+        // Check for version-only changes if excludeVersionOnlyChanges is enabled
+        if (excludeVersionOnlyChanges && projectChanges.size === 1) {
+          const packageJsonPath: string = Path.convertToSlashes(
+            path.relative(repoRoot, path.join(project.projectFolder, 'package.json'))
+          );
+          const diffStatus: IFileDiffStatus | undefined = projectChanges.get(packageJsonPath);
+          if (diffStatus) {
+            const isVersionOnlyChange: boolean = await this._isVersionOnlyChangeAsync(diffStatus, repoRoot);
+            if (isVersionOnlyChange) {
+              return; // Skip adding this project
+            }
+          }
+        }
+        changedProjects.add(project);
+      }
+    };
+
     if (enableFiltering) {
       // Reading rush-project.json may be problematic if, e.g. rush install has not yet occurred and rigs are in use
       await Async.forEachAsync(
@@ -130,25 +154,7 @@ export class ProjectChangeAnalyzer {
             terminal
           );
 
-          if (filteredChanges.size > 0) {
-            // Check for version-only changes if excludeVersionOnlyChanges is enabled
-            if (excludeVersionOnlyChanges && filteredChanges.size === 1) {
-              const packageJsonPath: string = Path.convertToSlashes(
-                path.relative(repoRoot, path.join(project.projectFolder, 'package.json'))
-              );
-              const diffStatus: IFileDiffStatus | undefined = filteredChanges.get(packageJsonPath);
-              if (diffStatus) {
-                const isVersionOnlyChange: boolean = await this._isVersionOnlyChangeAsync(
-                  diffStatus,
-                  repoRoot
-                );
-                if (isVersionOnlyChange) {
-                  return; // Skip adding this project
-                }
-              }
-            }
-            changedProjects.add(project);
-          }
+          await checkAndAddProject(project, filteredChanges);
         },
         { concurrency: 10 }
       );
@@ -156,25 +162,7 @@ export class ProjectChangeAnalyzer {
       await Async.forEachAsync(
         changesByProject,
         async ([project, projectChanges]) => {
-          if (projectChanges.size > 0) {
-            // Check for version-only changes if excludeVersionOnlyChanges is enabled
-            if (excludeVersionOnlyChanges && projectChanges.size === 1) {
-              const packageJsonPath: string = Path.convertToSlashes(
-                path.relative(repoRoot, path.join(project.projectFolder, 'package.json'))
-              );
-              const diffStatus: IFileDiffStatus | undefined = projectChanges.get(packageJsonPath);
-              if (diffStatus) {
-                const isVersionOnlyChange: boolean = await this._isVersionOnlyChangeAsync(
-                  diffStatus,
-                  repoRoot
-                );
-                if (isVersionOnlyChange) {
-                  return; // Skip adding this project
-                }
-              }
-            }
-            changedProjects.add(project);
-          }
+          await checkAndAddProject(project, projectChanges);
         },
         { concurrency: 10 }
       );
@@ -263,9 +251,8 @@ export class ProjectChangeAnalyzer {
     }
 
     // Sort the set by projectRelativeFolder to avoid race conditions in the results
-    const sortedChangedProjects: RushConfigurationProject[] = Array.from(changedProjects).sort((a, b) =>
-      a.projectRelativeFolder.localeCompare(b.projectRelativeFolder)
-    );
+    const sortedChangedProjects: RushConfigurationProject[] = Array.from(changedProjects);
+    Sort.sortBy(sortedChangedProjects, (project) => project.projectRelativeFolder);
 
     return new Set(sortedChangedProjects);
   }
@@ -473,21 +460,7 @@ export class ProjectChangeAnalyzer {
         repositoryRoot: repoRoot
       });
 
-      // Parse both versions
-      const oldPackageJson: Record<string, unknown> = JSON.parse(oldPackageJsonContent);
-      const currentPackageJson: Record<string, unknown> = JSON.parse(currentPackageJsonContent);
-
-      // Ensure both have a version field
-      if (!oldPackageJson.version || !currentPackageJson.version) {
-        return false;
-      }
-
-      // Remove the version field from both (no need to clone, these are fresh objects from JSON.parse)
-      oldPackageJson.version = undefined;
-      currentPackageJson.version = undefined;
-
-      // Compare the objects without the version field
-      return JSON.stringify(oldPackageJson) === JSON.stringify(currentPackageJson);
+      return isPackageJsonVersionOnlyChange(oldPackageJsonContent, currentPackageJsonContent);
     } catch (error) {
       // If we can't read the file or parse it, assume it's not a version-only change
       return false;
@@ -611,4 +584,37 @@ async function getAdditionalFilesFromRushProjectConfigurationAsync(
   });
 
   return additionalFilesFromRushProjectConfiguration;
+}
+
+/**
+ * Compares two package.json file contents and determines if the only difference is the "version" field.
+ * @param oldPackageJsonContent - The old package.json content as a string
+ * @param newPackageJsonContent - The new package.json content as a string
+ * @returns true if the only difference is the version field, false otherwise
+ * @public
+ */
+export function isPackageJsonVersionOnlyChange(
+  oldPackageJsonContent: string,
+  newPackageJsonContent: string
+): boolean {
+  try {
+    // Parse both versions
+    const oldPackageJson: Record<string, unknown> = JSON.parse(oldPackageJsonContent);
+    const newPackageJson: Record<string, unknown> = JSON.parse(newPackageJsonContent);
+
+    // Ensure both have a version field
+    if (!oldPackageJson.version || !newPackageJson.version) {
+      return false;
+    }
+
+    // Remove the version field from both (no need to clone, these are fresh objects from JSON.parse)
+    oldPackageJson.version = undefined;
+    newPackageJson.version = undefined;
+
+    // Compare the objects without the version field
+    return JSON.stringify(oldPackageJson) === JSON.stringify(newPackageJson);
+  } catch (error) {
+    // If we can't parse the JSON, assume it's not a version-only change
+    return false;
+  }
 }
