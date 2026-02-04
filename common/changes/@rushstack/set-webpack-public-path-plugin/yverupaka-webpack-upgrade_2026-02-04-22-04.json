@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/set-webpack-public-path-plugin",
+      "comment": "Upgraded webpack version to 5.104.1",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/set-webpack-public-path-plugin"
+}

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Upgraded webpack version to 5.104.1",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

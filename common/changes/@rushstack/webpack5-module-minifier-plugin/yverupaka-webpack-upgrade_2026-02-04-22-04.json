@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack5-module-minifier-plugin",
+      "comment": "Upgraded webpack version to 5.104.1",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-module-minifier-plugin"
+}

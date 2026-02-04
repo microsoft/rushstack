@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "Upgraded webpack version to 5.104.1",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig"
+}
