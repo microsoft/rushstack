@@ -459,6 +459,130 @@ describe(ProjectChangeAnalyzer.name, () => {
       });
       expect(changedProjects.has(rushConfiguration.getProjectByName('c')!)).toBe(true);
     });
+
+    it('excludeVersionOnlyChanges ignores CHANGELOG.md and CHANGELOG.json files', async () => {
+      const rootDir: string = resolve(__dirname, 'repo');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+        resolve(rootDir, 'rush.json')
+      );
+
+      // Mock package.json with only version change
+      const oldPackageJsonContent = JSON.stringify({
+        name: 'd',
+        version: '1.0.0',
+        description: 'Test package'
+      });
+
+      const newPackageJsonContent = JSON.stringify({
+        name: 'd',
+        version: '1.0.1',
+        description: 'Test package'
+      });
+
+      // Set up mock repo changes - package.json (version only), CHANGELOG.md, and CHANGELOG.json changed
+      mockGetRepoChanges.mockReturnValue(
+        new Map<string, IFileDiffStatus>([
+          [
+            'd/package.json',
+            {
+              mode: 'modified',
+              newhash: 'newhash4',
+              oldhash: 'oldhash4',
+              status: 'M'
+            }
+          ],
+          [
+            'd/CHANGELOG.md',
+            {
+              mode: 'modified',
+              newhash: 'newhash5',
+              oldhash: 'oldhash5',
+              status: 'M'
+            }
+          ],
+          [
+            'd/CHANGELOG.json',
+            {
+              mode: 'modified',
+              newhash: 'newhash6',
+              oldhash: 'oldhash6',
+              status: 'M'
+            }
+          ]
+        ])
+      );
+
+      // Mock the blob content to return different versions based on the hash
+      mockGetBlobContentAsync.mockImplementation((opts: { blobSpec: string; repositoryRoot: string }) => {
+        if (opts.blobSpec === 'oldhash4') {
+          return Promise.resolve(oldPackageJsonContent);
+        } else if (opts.blobSpec === 'newhash4') {
+          return Promise.resolve(newPackageJsonContent);
+        }
+        return Promise.resolve('');
+      });
+
+      const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+      const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
+      const terminal: Terminal = new Terminal(terminalProvider);
+
+      // Test with excludeVersionOnlyChanges - project should NOT be detected as changed
+      // because only version-only package.json and CHANGELOG files changed
+      const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
+        enableFiltering: false,
+        includeExternalDependencies: false,
+        targetBranchName: 'main',
+        terminal,
+        excludeVersionOnlyChanges: true
+      });
+      expect(changedProjects.has(rushConfiguration.getProjectByName('d')!)).toBe(false);
+    });
+
+    it('excludeVersionOnlyChanges does not ignore projects with CHANGELOG and other substantive changes', async () => {
+      const rootDir: string = resolve(__dirname, 'repo');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+        resolve(rootDir, 'rush.json')
+      );
+
+      // Set up mock repo changes - CHANGELOG.md and src file changed
+      mockGetRepoChanges.mockReturnValue(
+        new Map<string, IFileDiffStatus>([
+          [
+            'e/CHANGELOG.md',
+            {
+              mode: 'modified',
+              newhash: 'newhash7',
+              oldhash: 'oldhash7',
+              status: 'M'
+            }
+          ],
+          [
+            'e/src/index.ts',
+            {
+              mode: 'modified',
+              newhash: 'newhash8',
+              oldhash: 'oldhash8',
+              status: 'M'
+            }
+          ]
+        ])
+      );
+
+      const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+      const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
+      const terminal: Terminal = new Terminal(terminalProvider);
+
+      // Test with excludeVersionOnlyChanges - project should be detected as changed
+      // because there's a substantive change in addition to CHANGELOG
+      const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
+        enableFiltering: false,
+        includeExternalDependencies: false,
+        targetBranchName: 'main',
+        terminal,
+        excludeVersionOnlyChanges: true
+      });
+      expect(changedProjects.has(rushConfiguration.getProjectByName('e')!)).toBe(true);
+    });
   });
 
   describe('isPackageJsonVersionOnlyChange', () => {

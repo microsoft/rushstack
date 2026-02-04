@@ -52,9 +52,12 @@ export interface IGetChangedProjectsOptions {
   enableFiltering: boolean;
 
   /**
-   * If set to `true`, for each project, if the only change to the project is to its `package.json`,
-   * diffs the file against the base version to see if the only change is to the value of the "version" field,
-   * and if it is, ignores the change to the project.
+   * If set to `true`, excludes projects where the only changes are:
+   * - A version-only change to `package.json` (only the "version" field differs)
+   * - Changes to `CHANGELOG.md` and/or `CHANGELOG.json` files
+   *
+   * This prevents `rush version --bump` from triggering `rush change --verify` to request change files
+   * for the version bumps and changelog updates it creates.
    */
   excludeVersionOnlyChanges?: boolean;
 }
@@ -126,19 +129,37 @@ export class ProjectChangeAnalyzer {
     ): Promise<void> => {
       if (projectChanges.size > 0) {
         // Check for version-only changes if excludeVersionOnlyChanges is enabled
-        if (excludeVersionOnlyChanges && projectChanges.size === 1) {
-          const packageJsonPath: string = Path.convertToSlashes(
-            path.relative(repoRoot, path.join(project.projectFolder, 'package.json'))
-          );
-          const diffStatus: IFileDiffStatus | undefined = projectChanges.get(packageJsonPath);
-          if (diffStatus) {
-            const isVersionOnlyChange: boolean = await this._isVersionOnlyChangeAsync(diffStatus, repoRoot);
-            if (isVersionOnlyChange) {
-              return; // Skip adding this project
+        if (excludeVersionOnlyChanges) {
+          // Filter out package.json with version-only changes, CHANGELOG.md, and CHANGELOG.json
+          const filteredProjectChanges: Map<string, IFileDiffStatus> = new Map();
+
+          for (const [filePath, diffStatus] of projectChanges) {
+            const fileName: string = path.basename(filePath);
+
+            // Skip CHANGELOG.md and CHANGELOG.json files
+            if (fileName === 'CHANGELOG.md' || fileName === 'CHANGELOG.json') {
+              continue;
             }
+
+            // Check if this is package.json with version-only changes
+            if (fileName === 'package.json') {
+              const isVersionOnlyChange: boolean = await this._isVersionOnlyChangeAsync(diffStatus, repoRoot);
+              if (isVersionOnlyChange) {
+                continue; // Skip version-only package.json changes
+              }
+            }
+
+            // Add all other changes to filtered list
+            filteredProjectChanges.set(filePath, diffStatus);
           }
+
+          // Only add project if there are non-excluded changes
+          if (filteredProjectChanges.size > 0) {
+            changedProjects.add(project);
+          }
+        } else {
+          changedProjects.add(project);
         }
-        changedProjects.add(project);
       }
     };
 
