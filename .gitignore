@@ -134,3 +134,6 @@ dist-storybook/
 playwright-report/
 test-results/
 
+# Claude Code local configuration
+.claude/*.local.json
+
