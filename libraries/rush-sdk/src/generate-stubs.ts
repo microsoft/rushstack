@@ -38,7 +38,7 @@ function generateLibFilesRecursively(options: {
         const srcImportPathLiteral: string = JSON.stringify(srcImportPath);
 
         // Since the DeepImportsPlugin has already generated the named exports placeholder code, we reuse it here
-        const rushLibCommonjsCode: string = FileSystem.readFile(commonjsPath, { encoding: Encoding.Utf8 });
+        const rushLibCommonjsCode: string = FileSystem.readFile(commonjsPath);
         let namedExportsPlaceholder: string = rushLibCommonjsCode.match(/exports\..* = void 0;/)?.[0] || '';
         if (namedExportsPlaceholder) {
           namedExportsPlaceholder += '\n\n';
