@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-vscode-extension-plugin",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "Heft plugin for building vscode extensions.",
   "repository": {
     "type": "git",
@@ -18,7 +18,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "peerDependencies": {
-    "@rushstack/heft": "^1.1.11"
+    "@rushstack/heft": "^1.1.12"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
