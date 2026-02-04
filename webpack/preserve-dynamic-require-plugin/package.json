@@ -22,7 +22,7 @@
     "@rushstack/heft": "workspace:*",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
-    "webpack": "~5.103.0"
+    "webpack": "~5.104.1"
   },
   "sideEffects": false
 }
