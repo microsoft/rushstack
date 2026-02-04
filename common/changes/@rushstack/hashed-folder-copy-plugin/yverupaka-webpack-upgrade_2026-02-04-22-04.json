@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/hashed-folder-copy-plugin",
-      "comment": "Upgraded webpack version to 5.104.1",
+      "comment": "",
       "type": "none"
     }
   ],
