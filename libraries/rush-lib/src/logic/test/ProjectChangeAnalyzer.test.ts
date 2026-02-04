@@ -21,6 +21,10 @@ const mockHashes: Map<string, string> = new Map([
   ['j/package.json', 'hash17'],
   ['rush.json', 'hash18']
 ]);
+
+// Allow customizing repo changes for different test scenarios
+let mockRepoChanges: Map<string, IFileDiffStatus> = new Map();
+
 jest.mock(`@rushstack/package-deps-hash`, () => {
   return {
     getRepoRoot(dir: string): string {
@@ -44,33 +48,16 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
       return new Map(Array.from(filePaths, (filePath: string) => [filePath, filePath]));
     },
     getRepoChanges(): Map<string, IFileDiffStatus> {
-      return new Map<string, IFileDiffStatus>([
-        [
-          // Test subspace lockfile change detection
-          'common/config/subspaces/project-change-analyzer-test-subspace/pnpm-lock.yaml',
-          {
-            mode: 'modified',
-            newhash: 'newhash',
-            oldhash: 'oldhash',
-            status: 'M'
-          }
-        ],
-        [
-          // Test lockfile deletion detection
-          'common/config/subspaces/default/pnpm-lock.yaml',
-          {
-            mode: 'deleted',
-            newhash: '',
-            oldhash: 'oldhash',
-            status: 'D'
-          }
-        ]
-      ]);
+      return mockRepoChanges;
     }
   };
 });
 
 const { Git: OriginalGit } = jest.requireActual('../Git');
+
+// Store mock package.json contents for testing excludeVersionOnlyChanges
+const mockPackageJsonContents: Map<string, string> = new Map();
+
 /** Mock Git to test `getChangedProjectsAsync` */
 jest.mock('../Git', () => {
   return {
@@ -82,7 +69,9 @@ jest.mock('../Git', () => {
         return 'merge-base-sha';
       }
       public async getBlobContentAsync(opts: { blobSpec: string; repositoryRoot: string }): Promise<string> {
-        return '';
+        // Check if we have a mock for this blob spec
+        const content = mockPackageJsonContents.get(opts.blobSpec);
+        return content || '';
       }
     }
   };
@@ -139,6 +128,8 @@ import type {
 describe(ProjectChangeAnalyzer.name, () => {
   beforeEach(() => {
     mockSnapshot.mockClear();
+    mockPackageJsonContents.clear();
+    mockRepoChanges = new Map();
   });
 
   describe(ProjectChangeAnalyzer.prototype._tryGetSnapshotProviderAsync.name, () => {
@@ -172,6 +163,30 @@ describe(ProjectChangeAnalyzer.name, () => {
 
   describe(ProjectChangeAnalyzer.prototype.getChangedProjectsAsync.name, () => {
     it('Subspaces detects external changes', async () => {
+      // Set up mock repo changes for this test
+      mockRepoChanges = new Map<string, IFileDiffStatus>([
+        [
+          // Test subspace lockfile change detection
+          'common/config/subspaces/project-change-analyzer-test-subspace/pnpm-lock.yaml',
+          {
+            mode: 'modified',
+            newhash: 'newhash',
+            oldhash: 'oldhash',
+            status: 'M'
+          }
+        ],
+        [
+          // Test lockfile deletion detection
+          'common/config/subspaces/default/pnpm-lock.yaml',
+          {
+            mode: 'deleted',
+            newhash: '',
+            oldhash: 'oldhash',
+            status: 'D'
+          }
+        ]
+      ]);
+
       const rootDir: string = resolve(__dirname, 'repoWithSubspaces');
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
         resolve(rootDir, 'rush.json')
@@ -199,6 +214,169 @@ describe(ProjectChangeAnalyzer.name, () => {
       ['e', 'f'].forEach((projectName) => {
         expect(changedProjects.has(rushConfiguration.getProjectByName(projectName)!)).toBe(false);
       });
+    });
+
+    it('excludeVersionOnlyChanges excludes projects with only version field changes', async () => {
+      const rootDir: string = resolve(__dirname, 'repo');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+        resolve(rootDir, 'rush.json')
+      );
+
+      // Mock package.json with only version change
+      const oldPackageJsonContent = JSON.stringify(
+        {
+          name: 'a',
+          version: '1.0.0',
+          description: 'Test package',
+          dependencies: {
+            b: '1.0.0'
+          }
+        },
+        null,
+        2
+      );
+
+      const newPackageJsonContent = JSON.stringify(
+        {
+          name: 'a',
+          version: '1.0.1',
+          description: 'Test package',
+          dependencies: {
+            b: '1.0.0'
+          }
+        },
+        null,
+        2
+      );
+
+      // Set up mock repo changes - only package.json changed for project 'a'
+      mockRepoChanges = new Map<string, IFileDiffStatus>([
+        [
+          'a/package.json',
+          {
+            mode: 'modified',
+            newhash: 'newhash1',
+            oldhash: 'oldhash1',
+            status: 'M'
+          }
+        ]
+      ]);
+
+      // Mock the blob content to return old package.json
+      mockPackageJsonContents.set('oldhash1', oldPackageJsonContent);
+
+      // Mock FileSystem.readFileAsync to return new package.json
+      const FileSystem = require('@rushstack/node-core-library').FileSystem;
+      const originalReadFileAsync = FileSystem.readFileAsync;
+      FileSystem.readFileAsync = jest.fn().mockImplementation((filePath: string) => {
+        if (filePath.endsWith('a/package.json')) {
+          return Promise.resolve(newPackageJsonContent);
+        }
+        return originalReadFileAsync(filePath);
+      });
+
+      const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+      const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
+      const terminal: Terminal = new Terminal(terminalProvider);
+
+      // Test without excludeVersionOnlyChanges - project should be detected as changed
+      const changedProjectsWithoutExclude = await projectChangeAnalyzer.getChangedProjectsAsync({
+        enableFiltering: false,
+        includeExternalDependencies: false,
+        targetBranchName: 'main',
+        terminal
+      });
+      expect(changedProjectsWithoutExclude.has(rushConfiguration.getProjectByName('a')!)).toBe(true);
+
+      // Test with excludeVersionOnlyChanges - project should NOT be detected as changed
+      const changedProjectsWithExclude = await projectChangeAnalyzer.getChangedProjectsAsync({
+        enableFiltering: false,
+        includeExternalDependencies: false,
+        targetBranchName: 'main',
+        terminal,
+        excludeVersionOnlyChanges: true
+      });
+      expect(changedProjectsWithExclude.has(rushConfiguration.getProjectByName('a')!)).toBe(false);
+
+      // Restore original function
+      FileSystem.readFileAsync = originalReadFileAsync;
+    });
+
+    it('excludeVersionOnlyChanges does not exclude projects with non-version changes', async () => {
+      const rootDir: string = resolve(__dirname, 'repo');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+        resolve(rootDir, 'rush.json')
+      );
+
+      // Mock package.json with version AND dependency change
+      const oldPackageJsonContent = JSON.stringify(
+        {
+          name: 'b',
+          version: '1.0.0',
+          description: 'Test package',
+          dependencies: {
+            a: '1.0.0'
+          }
+        },
+        null,
+        2
+      );
+
+      const newPackageJsonContent = JSON.stringify(
+        {
+          name: 'b',
+          version: '1.0.1',
+          description: 'Test package',
+          dependencies: {
+            a: '1.0.1' // Dependency version also changed
+          }
+        },
+        null,
+        2
+      );
+
+      // Set up mock repo changes - only package.json changed for project 'b'
+      mockRepoChanges = new Map<string, IFileDiffStatus>([
+        [
+          'b/package.json',
+          {
+            mode: 'modified',
+            newhash: 'newhash2',
+            oldhash: 'oldhash2',
+            status: 'M'
+          }
+        ]
+      ]);
+
+      // Mock the blob content to return old package.json
+      mockPackageJsonContents.set('oldhash2', oldPackageJsonContent);
+
+      // Mock FileSystem.readFileAsync to return new package.json
+      const FileSystem = require('@rushstack/node-core-library').FileSystem;
+      const originalReadFileAsync = FileSystem.readFileAsync;
+      FileSystem.readFileAsync = jest.fn().mockImplementation((filePath: string) => {
+        if (filePath.endsWith('b/package.json')) {
+          return Promise.resolve(newPackageJsonContent);
+        }
+        return originalReadFileAsync(filePath);
+      });
+
+      const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+      const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
+      const terminal: Terminal = new Terminal(terminalProvider);
+
+      // Test with excludeVersionOnlyChanges - project should still be detected as changed
+      const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
+        enableFiltering: false,
+        includeExternalDependencies: false,
+        targetBranchName: 'main',
+        terminal,
+        excludeVersionOnlyChanges: true
+      });
+      expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(true);
+
+      // Restore original function
+      FileSystem.readFileAsync = originalReadFileAsync;
     });
   });
 });
