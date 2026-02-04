@@ -1,24 +1,24 @@
-.github/CODEOWNERS @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @patmill
-common/autoinstallers/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @patmill
-common/config/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @patmill
+.github/CODEOWNERS @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+common/autoinstallers/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+common/config/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
 
-common/reviews/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+common/reviews/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
 
-apps/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
-build-tests/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
-build-tests-samples/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
-eslint/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
-heft-plugins/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
-libraries/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
-repo-scripts/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
-rigs/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
-rush-plugins/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
-stack/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
-tutorials/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
-webpack/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @TheLarkInn
-rush.json @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
-.gitattributes @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
-.gitignore @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
-README.md @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+apps/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+build-tests/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+build-tests-samples/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+eslint/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+heft-plugins/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+libraries/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+repo-scripts/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+rigs/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+rush-plugins/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+stack/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+tutorials/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+webpack/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @TheLarkInn @jxanthony
+rush.json @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+.gitattributes @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+.gitignore @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
+README.md @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony
 
-libraries/load-themed-styles/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @dzearing
+libraries/load-themed-styles/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @dzearing
