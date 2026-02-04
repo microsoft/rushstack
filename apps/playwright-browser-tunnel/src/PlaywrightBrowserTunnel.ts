@@ -11,7 +11,12 @@ import semver from 'semver';
 import { TerminalProviderSeverity, TerminalStreamWritable, type ITerminal } from '@rushstack/terminal';
 import { Executable, FileSystem, Async } from '@rushstack/node-core-library';
 
-import { getNormalizedErrorString } from './utilities';
+import {
+  getNormalizedErrorString,
+  getWebSocketCloseReason,
+  getWebSocketReadyStateString,
+  WebSocketCloseCode
+} from './utilities';
 import { LaunchOptionsValidator, type ILaunchOptionsValidationResult } from './LaunchOptionsValidator';
 
 /**
@@ -170,7 +175,7 @@ export class PlaywrightTunnel {
       this._pollInterval = undefined;
     }
     await this._initWsPromise?.finally(() => {
-      this._ws?.close();
+      this._ws?.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Tunnel stopped');
     });
   }
 
@@ -448,37 +453,68 @@ export class PlaywrightTunnel {
   // ws1 is the tunnel websocket, ws2 is the browser server websocket
   private async _setupForwardingAsync(ws1: WebSocket, ws2: WebSocket): Promise<void> {
     this._terminal.writeLine('Setting up message forwarding between ws1 and ws2');
+    this._terminal.writeLine(`  ws1 (tunnel) readyState: ${getWebSocketReadyStateString(ws1.readyState)}`);
+    this._terminal.writeLine(`  ws2 (browser) readyState: ${getWebSocketReadyStateString(ws2.readyState)}`);
+
+    const messageCount: { ws1ToWs2: number; ws2ToWs1: number } = { ws1ToWs2: 0, ws2ToWs1: 0 };
+
     ws1.on('message', (data) => {
+      messageCount.ws1ToWs2++;
       if (ws2.readyState === WebSocket.OPEN) {
         ws2.send(data);
       } else {
-        this._terminal.writeLine('ws2 is not open. Dropping message.');
+        this._terminal.writeLine(
+          `ws2 not open (state: ${getWebSocketReadyStateString(ws2.readyState)}). Dropping message #${messageCount.ws1ToWs2}`
+        );
       }
     });
     ws2.on('message', (data) => {
+      messageCount.ws2ToWs1++;
       if (ws1.readyState === WebSocket.OPEN) {
         ws1.send(data);
       } else {
-        this._terminal.writeLine('ws1 is not open. Dropping message.');
+        this._terminal.writeLine(
+          `ws1 not open (state: ${getWebSocketReadyStateString(ws1.readyState)}). Dropping message #${messageCount.ws2ToWs1}`
+        );
       }
     });
 
-    ws1.once('close', () => {
+    ws1.once('close', (code: number, reason: Buffer) => {
+      const reasonStr: string = reason.toString() || 'no reason provided';
+      const codeDescription: string = getWebSocketCloseReason(code);
+      this._terminal.writeLine(
+        `ws1 (tunnel) closed - code: ${code} (${codeDescription}), reason: ${reasonStr}`
+      );
+      this._terminal.writeLine(
+        `  Messages forwarded: ws1->ws2: ${messageCount.ws1ToWs2}, ws2->ws1: ${messageCount.ws2ToWs1}`
+      );
       if (ws2.readyState === WebSocket.OPEN) {
-        ws2.close();
+        this._terminal.writeLine('  Closing ws2 (browser) in response');
+        ws2.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Tunnel closed');
       }
     });
-    ws2.once('close', () => {
+    ws2.once('close', (code: number, reason: Buffer) => {
+      const reasonStr: string = reason.toString() || 'no reason provided';
+      const codeDescription: string = getWebSocketCloseReason(code);
+      this._terminal.writeLine(
+        `ws2 (browser) closed - code: ${code} (${codeDescription}), reason: ${reasonStr}`
+      );
+      this._terminal.writeLine(
+        `  Messages forwarded: ws1->ws2: ${messageCount.ws1ToWs2}, ws2->ws1: ${messageCount.ws2ToWs1}`
+      );
       if (ws1.readyState === WebSocket.OPEN) {
-        ws1.close();
+        this._terminal.writeLine('  Closing ws1 (tunnel) in response');
+        ws1.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Browser closed');
       }
     });
 
     ws1.once('error', (error) => {
-      this._terminal.writeLine(`WebSocket error: ${getNormalizedErrorString(error)}`);
+      this._terminal.writeErrorLine(`ws1 (tunnel) WebSocket error: ${getNormalizedErrorString(error)}`);
+      this._terminal.writeErrorLine(`  ws1 readyState: ${getWebSocketReadyStateString(ws1.readyState)}`);
     });
     ws2.once('error', (error) => {
-      this._terminal.writeLine(`WebSocket error: ${getNormalizedErrorString(error)}`);
+      this._terminal.writeErrorLine(`ws2 (browser) WebSocket error: ${getNormalizedErrorString(error)}`);
+      this._terminal.writeErrorLine(`  ws2 readyState: ${getWebSocketReadyStateString(ws2.readyState)}`);
     });
   }
 
@@ -507,11 +543,21 @@ export class PlaywrightTunnel {
       this._terminal.writeLine(`WebSocket error occurred: ${getNormalizedErrorString(error)}`);
     });
 
-    ws.on('close', async () => {
+    ws.on('close', async (code: number, reason: Buffer) => {
+      const reasonStr: string = reason.toString() || 'no reason provided';
+      const codeDescription: string = getWebSocketCloseReason(code);
       this._initWsPromise = undefined;
       this.status = 'stopped';
-      this._terminal.writeLine('WebSocket connection closed');
-      await browserServer?.close();
+      this._terminal.writeLine(
+        `WebSocket connection closed - code: ${code} (${codeDescription}), reason: ${reasonStr}`
+      );
+      this._terminal.writeLine(`  handshake received: ${handshake !== undefined}`);
+      this._terminal.writeLine(`  browserServer active: ${browserServer !== undefined}`);
+      if (browserServer) {
+        this._terminal.writeLine('  Closing browser server...');
+        await browserServer.close();
+        this._terminal.writeLine('  Browser server closed');
+      }
     });
 
     return await new Promise<WebSocket>((resolve, reject) => {
@@ -531,7 +577,7 @@ export class PlaywrightTunnel {
               if (!shouldProceed) {
                 terminal.writeLine('Browser server launch cancelled by user.');
                 ws.off('message', onMessageHandler);
-                ws.close();
+                ws.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Launch cancelled by user');
                 reject(new Error('Browser server launch cancelled by user'));
                 return;
               }
@@ -543,6 +589,20 @@ export class PlaywrightTunnel {
               await this._getPlaywrightBrowserServerProxyAsync(handshake);
             client = browserServerProxy.client;
             browserServer = browserServerProxy.browserServer;
+
+            // Monitor browser server process for crashes
+            const browserProcess: ChildProcess | null = browserServer.process();
+            if (browserProcess) {
+              browserProcess.on('exit', (code: number | null, signal: string | null) => {
+                terminal.writeErrorLine(`Browser server process exited - code: ${code}, signal: ${signal}`);
+              });
+              browserProcess.on('error', (err: Error) => {
+                terminal.writeErrorLine(`Browser server process error: ${getNormalizedErrorString(err)}`);
+              });
+              terminal.writeDebugLine(`Browser server process started with PID: ${browserProcess.pid}`);
+            } else {
+              terminal.writeDebugLine('Warning: Browser server process handle not available for monitoring');
+            }
 
             this.status = 'browser-server-running';
 
@@ -571,7 +631,7 @@ export class PlaywrightTunnel {
 
             // Cleanup and close connection on error
             ws.off('message', onMessageHandler);
-            ws.close();
+            ws.close(WebSocketCloseCode.INTERNAL_ERROR, 'Handshake error');
             reject(error);
             return;
           }
@@ -579,7 +639,7 @@ export class PlaywrightTunnel {
           if (!client) {
             terminal.writeLine('Browser WebSocket client is not initialized.');
             ws.off('message', onMessageHandler);
-            ws.close();
+            ws.close(WebSocketCloseCode.INTERNAL_ERROR, 'Browser client not initialized');
             return;
           }
         }
