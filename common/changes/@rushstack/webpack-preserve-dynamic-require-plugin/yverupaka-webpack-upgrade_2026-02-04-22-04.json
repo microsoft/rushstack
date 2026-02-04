@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/webpack-preserve-dynamic-require-plugin",
-      "comment": "Upgraded webpack version to 5.104.1",
+      "comment": "",
       "type": "none"
     }
   ],
