@@ -64,16 +64,16 @@ extends:
 
               - template: /common/config/azure-pipelines/templates/pack.yaml@self
 
-              - template: /common/config/azure-pipelines/templates/publish.yaml@self
-                parameters:
-                  VersionPolicyName: noRush
-                  BranchName: $(SourceBranch)
-                condition: eq('${{ parameters.publishToNpmFeed }}', 'true')
+              - ${{ if eq(parameters.publishToNpmFeed, true) }}:
+                  - template: /common/config/azure-pipelines/templates/publish.yaml@self
+                    parameters:
+                      VersionPolicyName: noRush
+                      BranchName: $(SourceBranch)
 
-              - template: /common/config/azure-pipelines/templates/publish.yaml@self
-                parameters:
-                  VersionPolicyName: rush
-                  BranchName: $(SourceBranch)
-                condition: eq('${{ parameters.publishToNpmFeed }}', 'true')
+              - ${{ if eq(parameters.publishToNpmFeed, true) }}:
+                  - template: /common/config/azure-pipelines/templates/publish.yaml@self
+                    parameters:
+                      VersionPolicyName: rush
+                      BranchName: $(SourceBranch)
 
               - template: /common/config/azure-pipelines/templates/post-publish.yaml@self
