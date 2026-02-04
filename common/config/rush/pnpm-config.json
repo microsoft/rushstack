@@ -214,7 +214,10 @@
 
     // Newer versions of `cheerio` have a dependency on `undici`, which does not support Node 18.
     // Remove when we drop support for Node 18
-    "@vscode/vsce>cheerio": "1.0.0-rc.12"
+    "@vscode/vsce>cheerio": "1.0.0-rc.12",
+
+    // `loader-utils@2.0.0` has a vulnerability
+    "loader-utils@^2.0.0": "2.0.4"
   },
 
   /**

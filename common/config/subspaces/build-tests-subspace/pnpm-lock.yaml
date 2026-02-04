@@ -9,6 +9,7 @@ overrides:
   '@types/estree': 1.0.8
   '@types/react@17.0.74>@types/scheduler': 0.16.8
   '@vscode/vsce>cheerio': 1.0.0-rc.12
+  loader-utils@^2.0.0: 2.0.4
 
 packageExtensionsChecksum: sha256-8fXYR9X9qRA57SZJJSADz6C9KMP6QQYYut4DHyehah0=
 
