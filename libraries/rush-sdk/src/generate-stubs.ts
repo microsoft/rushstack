@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import { Encoding, FileSystem, Import, Path } from '@rushstack/node-core-library';
+import { FileSystem, Import, Path } from '@rushstack/node-core-library';
 
 function generateLibFilesRecursively(options: {
   parentSourcePath: string;

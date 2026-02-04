@@ -7,6 +7,7 @@ import { Executable, User } from '@rushstack/node-core-library';
 const rushSdkPath: string = path.join(__dirname, '../../lib-shim/index.js');
 const sandboxRepoPath: string = `${__dirname}/sandbox`;
 const mockPackageFolder: string = `${sandboxRepoPath}/mock-package`;
+const mockRushJsonPath: string = `${sandboxRepoPath}/rush.json`;
 const mockRushLibPath: string = `${__dirname}/fixture/mock-rush-lib.js`;
 
 const coreLibPath: string = require.resolve('@rushstack/node-core-library');
@@ -103,7 +104,12 @@ ${loadAndPrintRushSdkModule}
     );
 
     const nodeVersion = process.version;
-    const userRushSdkFolder = path.join(User.getHomeFolder(), '.rush', `node-${nodeVersion}`, 'rush-5.57.0');
+    const userRushSdkFolder = path.join(
+      User.getHomeFolder(),
+      '.rush',
+      `node-${nodeVersion}`,
+      'rush-' + require(mockRushJsonPath).rushVersion
+    );
     expect(result.stderr.trim()).toMatchSnapshot('stderr');
     expect(
       result.stdout.replace(new RegExp(userRushSdkFolder.replace(/\\/g, '\\\\'), 'g'), '<RUSH_GLOBAL_FOLDER>')

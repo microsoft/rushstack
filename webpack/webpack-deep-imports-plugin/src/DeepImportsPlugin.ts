@@ -3,14 +3,7 @@
 
 import path from 'node:path';
 
-import {
-  DllPlugin,
-  type Compiler,
-  WebpackError,
-  type Chunk,
-  type NormalModule,
-  type ModuleGraph
-} from 'webpack';
+import { DllPlugin, type Compiler, type Chunk, type NormalModule, type ModuleGraph } from 'webpack';
 
 import { Async, FileSystem, LegacyAdapters, Path } from '@rushstack/node-core-library';
 
@@ -129,6 +122,8 @@ export class DeepImportsPlugin extends DllPlugin {
 
   public apply(compiler: Compiler): void {
     super.apply(compiler);
+
+    const { WebpackError } = compiler.webpack;
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
       compilation.hooks.processAssets.tapPromise(PLUGIN_NAME, async () => {
@@ -262,7 +257,9 @@ export class DeepImportsPlugin extends DllPlugin {
 
               const providedExports: null | true | string[] = exportsInfo.getProvidedExports();
               if (Array.isArray(providedExports) && providedExports.length > 0) {
-                moduleText = `${providedExports.map((exportName) => `exports.${exportName}`).join(' = ')} = void 0;\n\n` + moduleText;
+                moduleText =
+                  `${providedExports.map((exportName) => `exports.${exportName}`).join(' = ')} = void 0;\n\n` +
+                  moduleText;
               }
 
               compilation.emitAsset(
