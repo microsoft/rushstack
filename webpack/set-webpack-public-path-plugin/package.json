@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/set-webpack-public-path-plugin",
-  "version": "5.2.11",
+  "version": "5.2.14",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "lib/index.js",
   "typings": "dist/set-webpack-public-path-plugin.d.ts",
@@ -33,6 +33,6 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "memfs": "4.12.0",
-    "webpack": "~5.103.0"
+    "webpack": "~5.105.0"
   }
 }

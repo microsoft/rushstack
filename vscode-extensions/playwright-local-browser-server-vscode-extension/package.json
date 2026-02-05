@@ -1,0 +1,113 @@
+{
+  "name": "playwright-local-browser-server",
+  "version": "0.1.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "vscode-extensions/playwright-local-browser-server-vscode-extension"
+  },
+  "license": "MIT",
+  "publisher": "ms-RushStack",
+  "preview": true,
+  "displayName": "Playwright Local Browser Server",
+  "description": "VS Code extension to enable Playwright testing in remote VS Code environments (such as Codespaces, Dev Containers, VS Code Tunnels) while launching and driving the actual browser process on your local machine.",
+  "homepage": "https://github.com/microsoft/rushstack/tree/main/vscode-extensions/playwright-local-browser-server-vscode-extension",
+  "icon": "assets/extension-icon.png",
+  "extensionKind": [
+    "ui"
+  ],
+  "enabledApiProposals": [],
+  "categories": [
+    "Other",
+    "Testing"
+  ],
+  "keywords": [],
+  "galleryBanner": {
+    "color": "#f0f0f0",
+    "theme": "light"
+  },
+  "engines": {
+    "vscode": "^1.103.0"
+  },
+  "main": "./extension.js",
+  "scripts": {
+    "build": "heft build --clean",
+    "build:watch": "heft build-watch",
+    "start": "heft start",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": ""
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "playwright-local-browser-server.start",
+        "title": "Start Playwright Browser Tunnel",
+        "category": "Playwright"
+      },
+      {
+        "command": "playwright-local-browser-server.stop",
+        "title": "Stop Playwright Browser Tunnel",
+        "category": "Playwright"
+      },
+      {
+        "command": "playwright-local-browser-server.manageAllowlist",
+        "title": "Manage Launch Options Allowlist",
+        "category": "Playwright Local Browser Server"
+      },
+      {
+        "command": "playwright-local-browser-server.showLog",
+        "title": "Show Log",
+        "category": "Playwright Local Browser Server"
+      },
+      {
+        "command": "playwright-local-browser-server.showSettings",
+        "title": "Show Settings",
+        "category": "Playwright Local Browser Server"
+      },
+      {
+        "command": "playwright-local-browser-server.showMenu",
+        "title": "Show Tunnel Menu",
+        "category": "Playwright Local Browser Server"
+      }
+    ],
+    "configuration": {
+      "title": "Playwright Browser Tunnel",
+      "properties": {
+        "playwright-local-browser-server.autoStart": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically start the Playwright browser tunnel when the extension activates. For security, this is disabled by default."
+        },
+        "playwright-local-browser-server.promptBeforeLaunch": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a confirmation prompt before launching the browser server with the requested launch options. This helps protect against potentially malicious launch options from compromised environments."
+        },
+        "playwright-local-browser-server.tunnelPort": {
+          "type": "number",
+          "default": 56767,
+          "description": "Port for the browser tunnel server"
+        }
+      }
+    }
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "dependencies": {
+    "@rushstack/playwright-browser-tunnel": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
+    "@rushstack/vscode-shared": "workspace:*",
+    "playwright-core": "~1.56.1",
+    "tslib": "~2.8.1"
+  },
+  "devDependencies": {
+    "@rushstack/heft-vscode-extension-rig": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/node": "20.17.19",
+    "@types/vscode": "1.103.0",
+    "@types/webpack-env": "1.18.8"
+  }
+}

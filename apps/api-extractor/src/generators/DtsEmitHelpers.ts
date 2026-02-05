@@ -190,4 +190,106 @@ export class DtsEmitHelpers {
     }
     return false;
   }
+
+  /**
+   * Given an array that includes some parameter nodes, this returns an array of the same length;
+   * elements that are not undefined correspond to a parameter that should be renamed.
+   */
+  public static forEachParameterToNormalize(
+    nodes: ArrayLike<ts.Node>,
+    action: (parameter: ts.ParameterDeclaration, syntheticName: string | undefined) => void
+  ): void {
+    let actionIndex: number = 0;
+
+    // Optimistically assume that no parameters need to be normalized
+    for (actionIndex = 0; actionIndex < nodes.length; ++actionIndex) {
+      const parameter: ts.Node = nodes[actionIndex];
+      if (!ts.isParameter(parameter)) {
+        continue;
+      }
+      action(parameter, undefined);
+      if (ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)) {
+        // Our optimistic assumption was not true; we'll need to stop and calculate alreadyUsedNames
+        break;
+      }
+    }
+
+    if (actionIndex === nodes.length) {
+      // Our optimistic assumption was true
+      return;
+    }
+
+    // First, calculate alreadyUsedNames
+    const alreadyUsedNames: string[] = [];
+
+    for (let index: number = 0; index < nodes.length; ++index) {
+      const parameter: ts.Node = nodes[index];
+      if (!ts.isParameter(parameter)) {
+        continue;
+      }
+
+      if (!(ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name))) {
+        alreadyUsedNames.push(parameter.name.text.trim());
+      }
+    }
+
+    // Now continue with the rest of the actions
+    for (; actionIndex < nodes.length; ++actionIndex) {
+      const parameter: ts.Node = nodes[actionIndex];
+      if (!ts.isParameter(parameter)) {
+        continue;
+      }
+
+      if (ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)) {
+        // Examples:
+        //
+        //      function f({ y, z }: { y: string, z: string })
+        // ---> function f(input: { y: string, z: string })
+        //
+        //      function f(x: number, [a, b]: [number, number])
+        // ---> function f(x: number, input: [number, number])
+        //
+        // Example of a naming collision:
+        //
+        //      function f({ a }: { a: string }, { b }: { b: string }, input2: string)
+        // ---> function f(input: { a: string }, input3: { b: string }, input2: string)
+        const baseName: string = 'input';
+        let counter: number = 2;
+
+        let syntheticName: string = baseName;
+        while (alreadyUsedNames.includes(syntheticName)) {
+          syntheticName = `${baseName}${counter++}`;
+        }
+        alreadyUsedNames.push(syntheticName);
+
+        action(parameter, syntheticName);
+      } else {
+        action(parameter, undefined);
+      }
+    }
+  }
+
+  public static normalizeParameterNames(signatureSpan: Span): void {
+    const syntheticNamesByNode: Map<ts.Node, string> = new Map();
+
+    DtsEmitHelpers.forEachParameterToNormalize(
+      signatureSpan.node.getChildren(),
+      (parameter: ts.ParameterDeclaration, syntheticName: string | undefined): void => {
+        if (syntheticName !== undefined) {
+          syntheticNamesByNode.set(parameter.name, syntheticName);
+        }
+      }
+    );
+
+    if (syntheticNamesByNode.size > 0) {
+      signatureSpan.forEach((childSpan: Span): void => {
+        const syntheticName: string | undefined = syntheticNamesByNode.get(childSpan.node);
+        if (syntheticName !== undefined) {
+          childSpan.modification.prefix = syntheticName;
+          childSpan.modification.suffix = '';
+          childSpan.modification.omitChildren = true;
+        }
+      });
+    }
+  }
 }

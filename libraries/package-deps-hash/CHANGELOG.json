@@ -2,6 +2,42 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "4.6.7",
+      "tag": "@rushstack/package-deps-hash_v4.6.7",
+      "date": "Wed, 04 Feb 2026 20:42:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.6.6",
+      "tag": "@rushstack/package-deps-hash_v4.6.6",
+      "date": "Wed, 04 Feb 2026 16:13:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.6.5",
+      "tag": "@rushstack/package-deps-hash_v4.6.5",
+      "date": "Fri, 30 Jan 2026 01:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.6.4",
       "tag": "@rushstack/package-deps-hash_v4.6.4",
       "date": "Thu, 08 Jan 2026 01:12:30 GMT",

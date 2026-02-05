@@ -1003,11 +1003,11 @@ export class _OperationMetadataManager {
     readonly logFilenameIdentifier: string;
     get metadataFolderPath(): string;
     // (undocumented)
-    saveAsync({ durationInSeconds, cobuildContextId, cobuildRunnerId, logPath, errorLogPath, logChunksPath }: _IOperationMetadata): Promise<void>;
+    saveAsync(input: _IOperationMetadata): Promise<void>;
     // (undocumented)
     readonly stateFile: _OperationStateFile;
     // (undocumented)
-    tryRestoreAsync({ terminal, terminalProvider, errorLogPath, cobuildContextId, cobuildRunnerId }: {
+    tryRestoreAsync(input: {
         terminalProvider: ITerminalProvider;
         terminal: ITerminal;
         errorLogPath: string;
@@ -1176,6 +1176,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly resolutionMode: PnpmResolutionMode | undefined;
     readonly strictPeerDependencies: boolean;
     readonly unsupportedPackageJsonSettings: unknown | undefined;
+    updateGlobalOnlyBuiltDependencies(onlyBuiltDependencies: string[] | undefined): void;
     updateGlobalPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void;
     readonly useWorkspaces: boolean;
 }

@@ -2,6 +2,42 @@
   "name": "@rushstack/rush-pnpm-kit-v9",
   "entries": [
     {
+      "version": "0.1.6",
+      "tag": "@rushstack/rush-pnpm-kit-v9_v0.1.6",
+      "date": "Wed, 04 Feb 2026 20:42:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.5",
+      "tag": "@rushstack/rush-pnpm-kit-v9_v0.1.5",
+      "date": "Wed, 04 Feb 2026 16:13:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.4",
+      "tag": "@rushstack/rush-pnpm-kit-v9_v0.1.4",
+      "date": "Fri, 30 Jan 2026 01:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.3",
       "tag": "@rushstack/rush-pnpm-kit-v9_v0.1.3",
       "date": "Thu, 08 Jan 2026 01:12:30 GMT",

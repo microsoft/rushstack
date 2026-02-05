@@ -2,6 +2,60 @@
   "name": "@rushstack/heft-vscode-extension-plugin",
   "entries": [
     {
+      "version": "1.0.21",
+      "tag": "@rushstack/heft-vscode-extension-plugin_v1.0.21",
+      "date": "Wed, 04 Feb 2026 20:42:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.12` to `1.1.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.20",
+      "tag": "@rushstack/heft-vscode-extension-plugin_v1.0.20",
+      "date": "Wed, 04 Feb 2026 16:13:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.11` to `1.1.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.19",
+      "tag": "@rushstack/heft-vscode-extension-plugin_v1.0.19",
+      "date": "Fri, 30 Jan 2026 01:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.10` to `1.1.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.18",
       "tag": "@rushstack/heft-vscode-extension-plugin_v1.0.18",
       "date": "Thu, 08 Jan 2026 01:12:30 GMT",

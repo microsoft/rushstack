@@ -2,6 +2,60 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "1.1.16",
+      "tag": "@rushstack/heft-lint-plugin_v1.1.16",
+      "date": "Wed, 04 Feb 2026 20:42:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `1.1.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `1.1.12` to `1.1.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.15",
+      "tag": "@rushstack/heft-lint-plugin_v1.1.15",
+      "date": "Wed, 04 Feb 2026 16:13:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `1.1.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `1.1.11` to `1.1.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.14",
+      "tag": "@rushstack/heft-lint-plugin_v1.1.14",
+      "date": "Fri, 30 Jan 2026 01:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `1.1.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `1.1.10` to `1.1.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.13",
       "tag": "@rushstack/heft-lint-plugin_v1.1.13",
       "date": "Thu, 08 Jan 2026 01:12:30 GMT",

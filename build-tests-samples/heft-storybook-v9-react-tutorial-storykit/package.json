@@ -28,7 +28,7 @@
     "style-loader": "~2.0.0",
     "terser-webpack-plugin": "~3.0.8",
     "typescript": "~5.8.2",
-    "webpack": "~5.103.0",
+    "webpack": "~5.105.0",
     "storybook": "~9.1.6",
     "@testing-library/dom": "~7.21.4"
   },

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/zipsync",
-  "version": "0.2.10",
+  "version": "0.2.13",
   "description": "CLI tool for creating and extracting ZIP archives with intelligent filesystem synchronization",
   "repository": {
     "type": "git",

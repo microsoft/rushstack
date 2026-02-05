@@ -20,7 +20,7 @@ module.exports = {
       }
     ]
   },
-  target: ['web', 'es2020'],
+  target: ['web', 'es5'],
   resolve: {
     extensions: ['.js', '.json']
   },
@@ -41,7 +41,7 @@ module.exports = {
       new ModuleMinifierPlugin({
         minifier: new WorkerPoolMinifier({
           terserOptions: {
-            ecma: 2020,
+            ecma: 5,
             mangle: true
           },
           verbose: true

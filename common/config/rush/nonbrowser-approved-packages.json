@@ -63,6 +63,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@microsoft/rush",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@microsoft/rush-lib",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
@@ -88,6 +92,10 @@
     },
     {
       "name": "@nodelib/fs.stat",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@playwright/test",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -297,6 +305,10 @@
     {
       "name": "@rushstack/package-extractor",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/playwright-browser-tunnel",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "@rushstack/real-node-module-path",
@@ -921,6 +933,14 @@
     {
       "name": "package-json",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "playwright",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "playwright-core",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "pnpm-sync-lib",

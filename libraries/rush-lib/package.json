@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-lib",
-  "version": "5.166.0",
+  "version": "5.167.0",
   "description": "A library for writing scripts that interact with the Rush tool",
   "repository": {
     "type": "git",
@@ -66,7 +66,7 @@
     "ssri": "~8.0.0",
     "strict-uri-encode": "~2.0.0",
     "tapable": "2.2.1",
-    "tar": "~6.2.1",
+    "tar": "~7.5.6",
     "true-case-path": "~2.2.1"
   },
   "devDependencies": {
@@ -85,11 +85,10 @@
     "@types/semver": "7.5.0",
     "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
-    "@types/tar": "6.1.6",
     "@types/webpack-env": "1.18.8",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
-    "webpack": "~5.103.0"
+    "webpack": "~5.105.0"
   },
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",

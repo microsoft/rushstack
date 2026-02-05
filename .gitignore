@@ -99,6 +99,7 @@ jspm_packages/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/debug-certificate-manager.json
+!.vscode/mcp.json
 
 # Rush temporary files
 common/deploy/
@@ -128,3 +129,11 @@ dist-storybook/
 
 # VS Code test runner files
 .vscode-test/
+
+# Playwright test outputs
+playwright-report/
+test-results/
+
+# Claude Code local configuration
+.claude/*.local.json
+

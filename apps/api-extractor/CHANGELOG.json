@@ -2,6 +2,42 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.56.2",
+      "tag": "@microsoft/api-extractor_v7.56.2",
+      "date": "Wed, 04 Feb 2026 20:42:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update minimatch dependency from 10.0.3 to 10.1.2"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.56.1",
+      "tag": "@microsoft/api-extractor_v7.56.1",
+      "date": "Wed, 04 Feb 2026 16:13:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.56.0",
+      "tag": "@microsoft/api-extractor_v7.56.0",
+      "date": "Fri, 30 Jan 2026 01:16:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue where destructured parameters produced an incorrect parameter name"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.55.5",
       "tag": "@microsoft/api-extractor_v7.55.5",
       "date": "Thu, 08 Jan 2026 01:12:30 GMT",

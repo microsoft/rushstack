@@ -8,6 +8,7 @@ const { WorkerPoolMinifier } = require('@rushstack/module-minifier');
 function generateConfiguration(mode, outputFolderName) {
   return {
     mode: mode,
+    target: ['web', 'es5'],
     entry: {
       'test-bundle': `${__dirname}/lib/index.js`
     },
@@ -27,7 +28,11 @@ function generateConfiguration(mode, outputFolderName) {
     optimization: {
       minimizer: [
         new ModuleMinifierPlugin({
-          minifier: new WorkerPoolMinifier(),
+          minifier: new WorkerPoolMinifier({
+            terserOptions: {
+              ecma: 5
+            }
+          }),
           useSourceMap: true
         })
       ]

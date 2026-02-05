@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/lockfile-explorer",
-  "version": "2.1.3",
+  "version": "2.1.6",
   "description": "Rush Lockfile Explorer: The UI for solving version conflicts quickly in a large monorepo",
   "keywords": [
     "conflict",

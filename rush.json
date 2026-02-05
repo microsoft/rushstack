@@ -467,6 +467,12 @@
       "reviewCategory": "libraries"
     },
     {
+      "packageName": "@rushstack/playwright-browser-tunnel",
+      "projectFolder": "apps/playwright-browser-tunnel",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/rush-themed-ui",
       "projectFolder": "libraries/rush-themed-ui",
       "reviewCategory": "libraries"
@@ -1053,6 +1059,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-package-manager-integration-test",
+      "projectFolder": "build-tests/rush-package-manager-integration-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "rush-redis-cobuild-plugin-integration-test",
       "projectFolder": "build-tests/rush-redis-cobuild-plugin-integration-test",
       "reviewCategory": "tests",
@@ -1462,6 +1474,12 @@
     {
       "packageName": "debug-certificate-manager",
       "projectFolder": "vscode-extensions/debug-certificate-manager-vscode-extension",
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"]
+    },
+    {
+      "packageName": "playwright-local-browser-server",
+      "projectFolder": "vscode-extensions/playwright-local-browser-server-vscode-extension",
       "reviewCategory": "vscode-extensions",
       "tags": ["vsix"]
     },

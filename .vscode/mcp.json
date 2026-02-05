@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "playwright": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/apps/playwright-browser-tunnel/lib/PlaywrightMcpBrowserTunnelClientCommandLine.js"
+      ]
+    }
+  },
+  "inputs": []
+}

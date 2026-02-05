@@ -1,6 +1,13 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Wed, 07 Jan 2026 01:12:25 GMT and should not be manually modified.
+This log was last generated on Wed, 04 Feb 2026 16:13:27 GMT and should not be manually modified.
+
+## 5.2.0
+Wed, 04 Feb 2026 16:13:27 GMT
+
+### Minor changes
+
+- Remove `abstract` modifier from `CommandLineParser` class to allow direct instantiation. Remove redundant `_actions` array field.
 
 ## 5.1.7
 Wed, 07 Jan 2026 01:12:25 GMT

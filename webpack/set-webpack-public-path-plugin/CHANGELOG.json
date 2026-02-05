@@ -2,6 +2,51 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "5.2.14",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v5.2.14",
+      "date": "Wed, 04 Feb 2026 20:42:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.5.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.2.13",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v5.2.13",
+      "date": "Wed, 04 Feb 2026 16:13:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.5.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.2.12",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v5.2.12",
+      "date": "Fri, 30 Jan 2026 01:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.5.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.2.11",
       "tag": "@rushstack/set-webpack-public-path-plugin_v5.2.11",
       "date": "Thu, 08 Jan 2026 01:12:30 GMT",
