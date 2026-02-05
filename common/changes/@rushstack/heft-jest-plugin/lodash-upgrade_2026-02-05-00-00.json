@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrade `lodash` dependency from `~4.17.15` to `~4.17.23`.",
+      "type": "patch",
+      "packageName": "@rushstack/heft-jest-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin"
+}

@@ -19,13 +19,13 @@
   },
   "dependencies": {
     "giturl": "^2.0.0",
-    "lodash": "~4.17.15",
+    "lodash": "~4.17.23",
     "semver": "~7.5.4",
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@types/lodash": "4.14.116",
+    "@types/lodash": "4.17.23",
     "@types/semver": "7.5.0",
     "local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
