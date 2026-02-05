@@ -1611,6 +1611,7 @@ export class SubspacesConfiguration {
     readonly preventSelectingAllSubspaces: boolean;
     static requireValidSubspaceName(subspaceName: string, splitWorkspaceCompatibility?: boolean): void;
     readonly splitWorkspaceCompatibility: boolean;
+    readonly subspaceInitAssetsFolder?: string;
     readonly subspaceJsonFilePath: string;
     readonly subspaceNames: ReadonlySet<string>;
     // (undocumented)
