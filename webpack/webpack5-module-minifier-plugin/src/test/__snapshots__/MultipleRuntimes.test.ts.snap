@@ -3,9 +3,26 @@
 exports[`ModuleMinifierPlugin Handles multiple runtimes (mock): Content 1`] = `
 Object {
   "/release/async-1.js": "/*! For license information please see async-1.js.LICENSE.txt */
-// Begin Asset Hash=9714a09e075b61f6e5a35a3722ef23b7bfc9c43542120424eb25511db354f5f6
+// Begin Asset Hash=a1688ad69c48f410b100af6ce42e782e0cdf03d253fe97f335a0f2a4532940f6
 \\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[527],{
+
+/***/ 923
+
+// Begin Module Hash=cff8175a0574af55cbc63c329b94bbe9a3b655c33d316f21fc148a7a16c7a239
+
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   async1: () => (/* binding */ async1)
+/* harmony export */ });
+// @license BAR
+function async1() { console.log('async-1'); }
+
+/***/ }
+
+// End Module
+,
 
 /***/ 541
 
@@ -24,29 +41,12 @@ Object {
 /***/ }
 
 // End Module
-,
-
-/***/ 923
-
-// Begin Module Hash=cff8175a0574af55cbc63c329b94bbe9a3b655c33d316f21fc148a7a16c7a239
-
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   async1: () => (/* binding */ async1)
-/* harmony export */ });
-// @license BAR
-function async1() { console.log('async-1'); }
-
-/***/ }
-
-// End Module
 
 
 }]);
 // End Asset",
-  "/release/async-1.js.LICENSE.txt": "// @license MIT
-// @license BAR
+  "/release/async-1.js.LICENSE.txt": "// @license BAR
+// @license MIT
 ",
   "/release/async-2.js": "/*! For license information please see async-2.js.LICENSE.txt */
 // Begin Asset Hash=c989959df0b37ccd032e5971a2f21fb94c30ce647806238af544420acab206c2
@@ -610,13 +610,13 @@ Object {
     },
     "async-1.js" => Object {
       "positionByModuleId": Map {
-        541 => Object {
-          "charLength": 486,
-          "charOffset": 241,
-        },
         923 => Object {
           "charLength": 395,
-          "charOffset": 741,
+          "charOffset": 241,
+        },
+        541 => Object {
+          "charLength": 486,
+          "charOffset": 650,
         },
       },
     },
@@ -667,7 +667,7 @@ Array [
     "message": "Unexpected token punc «{», expected punc «,»",
   },
   Object {
-    "message": "Unexpected token name «__WEBPACK_CHUNK_MODULE__e9b51a8d04b67d47826b5a8e432e98a6f0a3bdb8f91960b6b38ca0b9c4605acf», expected punc «,»",
+    "message": "Unexpected token name «__WEBPACK_CHUNK_MODULE__cff8175a0574af55cbc63c329b94bbe9a3b655c33d316f21fc148a7a16c7a239», expected punc «,»",
   },
   Object {
     "message": "Unexpected token name «__WEBPACK_CHUNK_MODULE__d8feb285437db6618631b5f45ab2c916568525d13ea8c83ec66a12519fee0be1», expected punc «,»",

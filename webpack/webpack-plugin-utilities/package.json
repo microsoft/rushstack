@@ -35,6 +35,6 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "@types/tapable": "1.0.6",
-    "webpack": "~5.104.1"
+    "webpack": "~5.105.0"
   }
 }
