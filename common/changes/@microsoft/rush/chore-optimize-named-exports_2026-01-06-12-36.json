@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add named exports to support named imports to `@rushstack/rush-sdk`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
