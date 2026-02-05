@@ -4,8 +4,8 @@
 import { Executable } from '@rushstack/node-core-library';
 
 describe('@rushstack/rush-sdk named exports check', () => {
-  it('Should import named exports correctly (lib-shim)', () => {
-    const result = Executable.spawnSync('node', [
+  it('Should import named exports correctly (lib-shim)', async () => {
+    const childProcess = Executable.spawn(process.argv0, [
       '-e',
       // Do not use top level await here because it is not supported in Node.js < 20.20
       `
@@ -14,20 +14,30 @@ console.log(typeof RushConfiguration.loadFromConfigurationFile);
     });
 `
     ]);
-    expect(result.stdout.trim()).toEqual('function');
-    expect(result.status).toBe(0);
+    const { stdout, exitCode, signal } = await Executable.waitForExitAsync(childProcess, {
+      encoding: 'utf8'
+    });
+
+    expect(stdout.trim()).toEqual('function');
+    expect(exitCode).toBe(0);
+    expect(signal).toBeNull();
   });
 
-  it('Should import named exports correctly (lib)', () => {
-    const result = Executable.spawnSync('node', [
+  it('Should import named exports correctly (lib)', async () => {
+    const childProcess = Executable.spawn(process.argv0, [
       '-e',
       `
-import('@rushstack/rush-sdk/lib/api/RushConfiguration').then(({ RushConfiguration }) => {
-console.log(typeof RushConfiguration.loadFromConfigurationFile);
+import('@rushstack/rush-sdk/lib/utilities/NullTerminalProvider').then(({ NullTerminalProvider }) => {
+console.log(NullTerminalProvider.name);
     });
 `
     ]);
-    expect(result.stdout.trim()).toEqual('function');
-    expect(result.status).toBe(0);
+    const { stdout, exitCode, signal } = await Executable.waitForExitAsync(childProcess, {
+      encoding: 'utf8'
+    });
+
+    expect(stdout.trim()).toEqual('NullTerminalProvider');
+    expect(exitCode).toBe(0);
+    expect(signal).toBeNull();
   });
 });
