@@ -39,7 +39,7 @@
     "eslint": "~9.37.0",
     "html-webpack-plugin": "~5.5.0",
     "local-web-rig": "workspace:*",
-    "webpack": "~5.104.1",
+    "webpack": "~5.105.0",
     "webpack-bundle-analyzer": "~4.5.0"
   }
 }

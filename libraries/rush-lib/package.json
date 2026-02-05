@@ -88,7 +88,7 @@
     "@types/webpack-env": "1.18.8",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
-    "webpack": "~5.104.1"
+    "webpack": "~5.105.0"
   },
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",

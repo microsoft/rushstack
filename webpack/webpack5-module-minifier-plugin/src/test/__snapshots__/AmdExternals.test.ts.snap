@@ -34,23 +34,23 @@ function foo() { bar__WEBPACK_IMPORTED_MODULE_0___default().a(); baz__WEBPACK_IM
 // End Asset",
   "/release/async.js.LICENSE.txt": "// @license MIT
 ",
-  "/release/main.js": "// Begin Asset Hash=52496744d928782ebb773ed47b98f5ee139818e86efddab97192c00b21878fb0
+  "/release/main.js": "// Begin Asset Hash=3fdeb2974ad0a9b80a409188038c9e4bea5bb9bbca571254cf7342def65318fa
 define([\\"bar\\",\\"baz\\"], (__WEBPACK_EXTERNAL_MODULE__885__, __WEBPACK_EXTERNAL_MODULE__653__) => { return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
-
-/***/ 653
-(module) {
-
-\\"use strict\\";
-module.exports = __WEBPACK_EXTERNAL_MODULE__653__;
-
-/***/ },
 
 /***/ 885
 (module) {
 
 \\"use strict\\";
 module.exports = __WEBPACK_EXTERNAL_MODULE__885__;
+
+/***/ },
+
+/***/ 653
+(module) {
+
+\\"use strict\\";
+module.exports = __WEBPACK_EXTERNAL_MODULE__653__;
 
 /***/ }
 
