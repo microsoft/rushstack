@@ -255,17 +255,19 @@ export class DeepImportsPlugin extends DllPlugin {
                 ].join('\n');
               }
 
-              const providedExports: null | true | string[] = exportsInfo.getProvidedExports();
-              if (Array.isArray(providedExports) && providedExports.length > 0) {
-                moduleText =
-                  `${providedExports.map((exportName) => `exports.${exportName}`).join(' = ')} = void 0;\n\n` +
-                  moduleText;
-              }
-
               compilation.emitAsset(
                 `${outputPathRelativeLibOutFolder}/${libPathWithoutExtension}${JS_EXTENSION}`,
                 new compiler.webpack.sources.RawSource(moduleText)
               );
+
+              const providedExports: null | true | string[] = exportsInfo.getProvidedExports();
+              if (Array.isArray(providedExports) && providedExports.length > 0) {
+                const exportsJson: string = JSON.stringify({ moduleExports: providedExports }, undefined, 2);
+                compilation.emitAsset(
+                  `${outputPathRelativeLibOutFolder}/${libPathWithoutExtension}.exports.json`,
+                  new compiler.webpack.sources.RawSource(exportsJson)
+                );
+              }
 
               if (resolvedDtsFilesInputFolderName) {
                 const dtsFilePath: string = path.join(
