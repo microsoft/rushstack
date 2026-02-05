@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 12 Jan 2026 23:39:06 GMT and should not be manually modified.
+This log was last generated on Thu, 05 Feb 2026 00:24:16 GMT and should not be manually modified.
+
+## 5.167.0
+Thu, 05 Feb 2026 00:24:16 GMT
+
+### Updates
+
+- Add support for `rush-pnpm approve-builds` command to persist `globalOnlyBuiltDependencies` in pnpm-config.json
+- Filter npm-incompatible properties from .npmrc when npm is used with a configuration intended for pnpm or yarn, to eliminate spurious warnings during package manager installation.
+- Fix a longstanding issue where a package.json script could hang on Windows if it accessed STDIN under certain circumstances
+- Upgrade tar dependency from 6.2.1 to 7.5.6 to fix security vulnerability GHSA-8qq5-rm4j-mr97
 
 ## 5.166.0
 Mon, 12 Jan 2026 23:39:06 GMT
