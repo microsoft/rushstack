@@ -1,16 +1,16 @@
 {
   "name": "heft-node-everything-test",
-  "description": "Building this project tests every task and config file for Heft when targeting the Node.js runtime",
   "version": "1.0.0",
   "private": true,
-  "main": "lib/index.js",
+  "description": "Building this project tests every task and config file for Heft when targeting the Node.js runtime",
   "license": "MIT",
+  "main": "lib/index.js",
   "scripts": {
-    "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
     "_phase:build:incremental": "heft run --only build --",
     "_phase:test": "heft run --only test -- --clean",
-    "_phase:test:incremental": "heft run --only test --"
+    "_phase:test:incremental": "heft run --only test --",
+    "build": "heft build --clean"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",

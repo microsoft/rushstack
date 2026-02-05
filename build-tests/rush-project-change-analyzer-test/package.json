@@ -1,13 +1,13 @@
 {
   "name": "rush-project-change-analyzer-test",
-  "description": "This is an example project that uses rush-lib's ProjectChangeAnalyzer to ",
   "version": "1.0.0",
   "private": true,
+  "description": "This is an example project that uses rush-lib's ProjectChangeAnalyzer to ",
   "scripts": {
-    "build": "heft build --clean",
-    "start": "heft build-watch",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "start": "heft build-watch"
   },
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",

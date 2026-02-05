@@ -2,18 +2,18 @@
   "name": "@rushstack/localization-utilities",
   "version": "0.14.13",
   "description": "This plugin contains some useful functions for localization.",
-  "main": "lib/index.js",
-  "typings": "dist/localization-utilities.d.ts",
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/localization-utilities"
   },
+  "license": "MIT",
+  "main": "lib/index.js",
+  "typings": "dist/localization-utilities.d.ts",
   "scripts": {
-    "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",

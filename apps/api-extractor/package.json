@@ -19,27 +19,27 @@
     "alpha",
     "beta"
   ],
+  "homepage": "https://api-extractor.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "apps/api-extractor"
   },
-  "homepage": "https://api-extractor.com",
+  "license": "MIT",
   "main": "lib/index.js",
   "typings": "dist/rollup.d.ts",
   "bin": {
     "api-extractor": "./bin/api-extractor"
   },
-  "license": "MIT",
   "scripts": {
-    "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean"
   },
   "dependencies": {
     "@microsoft/api-extractor-model": "workspace:*",
-    "@microsoft/tsdoc-config": "~0.18.0",
     "@microsoft/tsdoc": "~0.16.0",
+    "@microsoft/tsdoc-config": "~0.18.0",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rig-package": "workspace:*",
     "@rushstack/terminal": "workspace:*",

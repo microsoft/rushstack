@@ -2,28 +2,28 @@
   "name": "@rushstack/rush-mcp-docs-plugin",
   "version": "0.2.13",
   "description": "Docs plugin for @rushstack/mcp-server",
+  "homepage": "https://rushjs.io",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
     "type": "git",
     "directory": "rush-plugins/rush-mcp-docs-plugin"
   },
-  "homepage": "https://rushjs.io",
+  "license": "MIT",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "license": "MIT",
   "scripts": {
-    "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean"
   },
   "dependencies": {
-    "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/mcp-server": "workspace:*"
+    "@rushstack/mcp-server": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "eslint": "~9.37.0",
-    "local-node-rig": "workspace:*",
-    "local-eslint-config": "workspace:*"
+    "local-eslint-config": "workspace:*",
+    "local-node-rig": "workspace:*"
   }
 }

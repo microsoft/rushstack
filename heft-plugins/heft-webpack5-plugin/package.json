@@ -2,24 +2,20 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "version": "1.2.13",
   "description": "Heft plugin for Webpack 5",
+  "homepage": "https://rushstack.io/pages/heft/overview/",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "heft-plugins/heft-webpack5-plugin"
   },
-  "homepage": "https://rushstack.io/pages/heft/overview/",
+  "license": "MIT",
   "main": "lib/index.js",
   "types": "dist/heft-webpack5-plugin.d.ts",
-  "license": "MIT",
   "scripts": {
-    "build": "heft build --clean",
-    "start": "heft test --clean --watch",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
-  },
-  "peerDependencies": {
-    "@rushstack/heft": "^1.1.13",
-    "webpack": "^5.82.1"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "start": "heft test --clean --watch"
   },
   "dependencies": {
     "@rushstack/debug-certificate-manager": "workspace:*",
@@ -36,5 +32,9 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "webpack": "~5.105.0"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "^1.1.13",
+    "webpack": "^5.82.1"
   }
 }

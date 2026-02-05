@@ -2,8 +2,12 @@
   "name": "@rushstack/hashed-folder-copy-plugin",
   "version": "1.2.13",
   "description": "Webpack plugin for copying a folder to the output directory with a hash in the folder name.",
-  "typings": "dist/hashed-folder-copy-plugin.d.ts",
-  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "webpack/hashed-folder-copy-plugin"
+  },
+  "license": "MIT",
   "exports": {
     ".": {
       "types": "./dist/hashed-folder-copy-plugin.d.ts",
@@ -18,6 +22,7 @@
     },
     "./package.json": "./package.json"
   },
+  "main": "lib/index.js",
   "typesVersions": {
     "*": {
       ".": [
@@ -28,19 +33,11 @@
       ]
     }
   },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "webpack/hashed-folder-copy-plugin"
-  },
+  "typings": "dist/hashed-folder-copy-plugin.d.ts",
   "scripts": {
-    "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
-  },
-  "peerDependencies": {
-    "webpack": "^5.68.0"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
@@ -53,5 +50,8 @@
     "local-node-rig": "workspace:*",
     "memfs": "4.12.0",
     "webpack": "~5.105.0"
+  },
+  "peerDependencies": {
+    "webpack": "^5.68.0"
   }
 }

@@ -2,22 +2,18 @@
   "name": "@rushstack/webpack5-localization-plugin",
   "version": "0.15.13",
   "description": "This plugin facilitates localization with Webpack.",
-  "main": "lib/index.js",
-  "typings": "dist/webpack5-localization-plugin.d.ts",
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "webpack/webpack5-localization-plugin"
   },
+  "license": "MIT",
+  "main": "lib/index.js",
+  "typings": "dist/webpack5-localization-plugin.d.ts",
   "scripts": {
-    "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
-  },
-  "peerDependencies": {
-    "webpack": "^5.68.0",
-    "@types/node": "*"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean"
   },
   "dependencies": {
     "@rushstack/localization-utilities": "workspace:*",
@@ -31,6 +27,10 @@
     "local-node-rig": "workspace:*",
     "memfs": "4.12.0",
     "webpack": "~5.105.0"
+  },
+  "peerDependencies": {
+    "@types/node": "*",
+    "webpack": "^5.68.0"
   },
   "peerDependenciesMeta": {
     "@types/node": {

@@ -1,16 +1,16 @@
 {
   "name": "@rushstack/rush-themed-ui",
-  "description": "Rush Component Library: a set of themed components for rush projects",
   "version": "0.0.0",
   "private": true,
+  "description": "Rush Component Library: a set of themed components for rush projects",
   "license": "MIT",
   "module": "dist/rush-themed-ui.js",
   "types": "dist/rush-themed-ui.d.ts",
   "scripts": {
+    "_phase:build": "heft run --only build -- --clean",
     "build": "heft test --clean",
     "start": "heft build --watch",
-    "test": "heft test",
-    "_phase:build": "heft run --only build -- --clean"
+    "test": "heft test"
   },
   "dependencies": {
     "react": "~19.2.3",

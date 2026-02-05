@@ -12,29 +12,24 @@
     "monorepo",
     "package.json"
   ],
-  "preferGlobal": true,
+  "homepage": "https://rushjs.io",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "apps/rush"
   },
-  "engines": {
-    "node": ">=5.6.0"
-  },
-  "engineStrict": true,
-  "homepage": "https://rushjs.io",
-  "scripts": {
-    "build": "heft build --clean",
-    "start": "node lib/start-dev-docs.js",
-    "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
-  },
+  "license": "MIT",
   "bin": {
     "rush": "./bin/rush",
     "rush-pnpm": "./bin/rush-pnpm",
     "rushx": "./bin/rushx"
   },
-  "license": "MIT",
+  "scripts": {
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "start": "node lib/start-dev-docs.js"
+  },
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
@@ -43,12 +38,17 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
-    "local-node-rig": "workspace:*",
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
     "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:*",
     "@rushstack/rush-http-build-cache-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/semver": "7.5.0"
-  }
+    "@types/semver": "7.5.0",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
+  },
+  "engines": {
+    "node": ">=5.6.0"
+  },
+  "engineStrict": true,
+  "preferGlobal": true
 }

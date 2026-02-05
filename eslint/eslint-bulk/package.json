@@ -2,22 +2,6 @@
   "name": "@rushstack/eslint-bulk",
   "version": "0.4.14",
   "description": "Roll out new ESLint rules in a large monorepo without cluttering up your code with \"eslint-ignore-next-line\"",
-  "main": "index.js",
-  "license": "MIT",
-  "repository": {
-    "url": "https://github.com/microsoft/rushstack.git",
-    "type": "git",
-    "directory": "eslint/eslint-bulk"
-  },
-  "homepage": "https://rushstack.io",
-  "bin": {
-    "eslint-bulk": "./bin/eslint-bulk"
-  },
-  "scripts": {
-    "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean",
-    "start": "node ./lib/start.js"
-  },
   "keywords": [
     "eslintrc",
     "eslint",
@@ -30,6 +14,22 @@
     "monkey",
     "patch"
   ],
+  "homepage": "https://rushstack.io",
+  "repository": {
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "eslint/eslint-bulk"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "bin": {
+    "eslint-bulk": "./bin/eslint-bulk"
+  },
+  "scripts": {
+    "_phase:build": "heft run --only build -- --clean",
+    "build": "heft build --clean",
+    "start": "node ./lib/start.js"
+  },
   "devDependencies": {
     "@rushstack/eslint-patch": "workspace:*",
     "@rushstack/heft": "workspace:*",

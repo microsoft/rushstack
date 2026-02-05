@@ -1,12 +1,12 @@
 {
   "name": "localization-plugin-test-02",
-  "description": "Building this project exercises @microsoft/localization-plugin. This tests that the loader works correctly with the exportAsDefault option unset.",
   "version": "0.1.0",
   "private": true,
+  "description": "Building this project exercises @microsoft/localization-plugin. This tests that the loader works correctly with the exportAsDefault option unset.",
   "scripts": {
+    "_phase:build": "heft run --only build -- --clean",
     "build": "heft build --clean",
-    "start": "heft start",
-    "_phase:build": "heft run --only build -- --clean"
+    "start": "heft start"
   },
   "dependencies": {
     "@rushstack/heft": "workspace:*",
@@ -19,8 +19,8 @@
     "@types/webpack-env": "1.18.8",
     "eslint": "~9.37.0",
     "html-webpack-plugin": "~4.5.2",
-    "lodash": "~4.17.15",
     "local-node-rig": "workspace:*",
+    "lodash": "~4.17.15",
     "webpack": "~4.47.0",
     "webpack-bundle-analyzer": "~4.5.0",
     "webpack-dev-server": "~4.9.3"

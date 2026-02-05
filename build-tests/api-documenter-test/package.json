@@ -1,15 +1,15 @@
 {
   "name": "api-documenter-test",
-  "description": "Building this project is a regression test for api-documenter",
   "version": "1.0.0",
   "private": true,
+  "description": "Building this project is a regression test for api-documenter",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "build": "heft build --clean",
-    "test": "heft test",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "test": "heft test"
   },
   "devDependencies": {
     "@microsoft/api-documenter": "workspace:*",

@@ -1,16 +1,16 @@
 {
   "name": "heft-serverless-stack-tutorial",
-  "description": "(Copy of sample project) Building this project is a regression test for Heft",
   "version": "0.1.0",
   "private": true,
+  "description": "(Copy of sample project) Building this project is a regression test for Heft",
   "scripts": {
-    "test": "heft test --clean",
-    "start": "heft build-watch --sst",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean",
     "build": "heft build --clean",
     "deploy": "sst deploy",
     "remove": "sst remove",
-    "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "start": "heft build-watch --sst",
+    "test": "heft test --clean"
   },
   "devDependencies": {
     "@aws-sdk/client-sso-oidc": "^3.567.0",

@@ -2,23 +2,20 @@
   "name": "@rushstack/heft-sass-plugin",
   "version": "1.1.13",
   "description": "Heft plugin for SASS",
+  "homepage": "https://rushstack.io/pages/heft/overview/",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "heft-plugins/heft-sass-plugin"
   },
-  "homepage": "https://rushstack.io/pages/heft/overview/",
   "license": "MIT",
-  "scripts": {
-    "build": "heft build --clean",
-    "start": "heft test --clean --watch",
-    "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
-  },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "peerDependencies": {
-    "@rushstack/heft": "^1.1.13"
+  "scripts": {
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "start": "heft test --clean --watch"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
@@ -33,5 +30,8 @@
     "@rushstack/heft": "workspace:*",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "^1.1.13"
   }
 }

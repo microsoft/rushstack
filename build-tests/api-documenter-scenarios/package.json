@@ -1,12 +1,12 @@
 {
   "name": "api-documenter-scenarios",
-  "description": "Building this project is a regression test for api-documenter",
   "version": "1.0.0",
   "private": true,
+  "description": "Building this project is a regression test for api-documenter",
   "typings": "dist/internal/some-fake-file.d.ts",
   "scripts": {
-    "build": "heft build --clean",
-    "_phase:build": "heft build --clean"
+    "_phase:build": "heft build --clean",
+    "build": "heft build --clean"
   },
   "devDependencies": {
     "@microsoft/api-documenter": "workspace:*",

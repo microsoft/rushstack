@@ -1,21 +1,21 @@
 {
   "name": "run-scenarios-helpers",
-  "description": "Helpers for the *-scenarios test projects.",
   "version": "1.0.0",
   "private": true,
+  "description": "Helpers for the *-scenarios test projects.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "build": "heft build --clean",
-    "_phase:build": "heft build --clean"
+    "_phase:build": "heft build --clean",
+    "build": "heft build --clean"
+  },
+  "dependencies": {
+    "@microsoft/api-extractor": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
-  },
-  "dependencies": {
-    "@microsoft/api-extractor": "workspace:*",
-    "@rushstack/node-core-library": "workspace:*"
   }
 }

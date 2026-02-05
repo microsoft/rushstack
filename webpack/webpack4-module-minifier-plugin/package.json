@@ -2,39 +2,21 @@
   "name": "@rushstack/webpack4-module-minifier-plugin",
   "version": "0.14.13",
   "description": "This plugin splits minification of webpack compilations into smaller units.",
-  "main": "lib/index.js",
-  "typings": "dist/webpack4-module-minifier-plugin.d.ts",
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "webpack/webpack4-module-minifier-plugin"
   },
-  "engines": {
-    "node": ">=10.17.1"
-  },
+  "license": "MIT",
+  "sideEffects": [
+    "./lib/OverrideWebpackIdentifierAllocation"
+  ],
+  "main": "lib/index.js",
+  "typings": "dist/webpack4-module-minifier-plugin.d.ts",
   "scripts": {
-    "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
-  },
-  "peerDependencies": {
-    "@types/webpack": "*",
-    "@types/webpack-sources": "*",
-    "webpack": "^4.31.0",
-    "webpack-sources": "~1.4.3",
-    "@types/node": "*"
-  },
-  "peerDependenciesMeta": {
-    "@types/webpack": {
-      "optional": true
-    },
-    "@types/webpack-sources": {
-      "optional": true
-    },
-    "@types/node": {
-      "optional": true
-    }
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean"
   },
   "dependencies": {
     "@rushstack/module-minifier": "workspace:*",
@@ -45,14 +27,32 @@
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@types/node": "20.17.19",
-    "@types/webpack-sources": "1.4.2",
     "@types/webpack": "4.41.32",
+    "@types/webpack-sources": "1.4.2",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
-    "webpack-sources": "~1.4.3",
-    "webpack": "~4.47.0"
+    "webpack": "~4.47.0",
+    "webpack-sources": "~1.4.3"
   },
-  "sideEffects": [
-    "./lib/OverrideWebpackIdentifierAllocation"
-  ]
+  "peerDependencies": {
+    "@types/node": "*",
+    "@types/webpack": "*",
+    "@types/webpack-sources": "*",
+    "webpack": "^4.31.0",
+    "webpack-sources": "~1.4.3"
+  },
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    },
+    "@types/webpack": {
+      "optional": true
+    },
+    "@types/webpack-sources": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=10.17.1"
+  }
 }

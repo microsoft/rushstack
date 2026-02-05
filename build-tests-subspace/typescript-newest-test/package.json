@@ -1,13 +1,13 @@
 {
   "name": "typescript-newest-test",
-  "description": "Building this project tests Heft with the newest supported TypeScript compiler version",
   "version": "1.0.0",
   "private": true,
-  "main": "lib/index.js",
+  "description": "Building this project tests Heft with the newest supported TypeScript compiler version",
   "license": "MIT",
+  "main": "lib/index.js",
   "scripts": {
-    "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean"
+    "_phase:build": "heft run --only build -- --clean",
+    "build": "heft build --clean"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",

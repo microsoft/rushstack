@@ -2,25 +2,19 @@
   "name": "@rushstack/webpack-workspace-resolve-plugin",
   "version": "0.5.13",
   "description": "This plugin leverages workspace-level metadata to greatly accelerate module resolution.",
-  "main": "lib/index.js",
-  "typings": "dist/webpack-workspace-resolve-plugin.d.ts",
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "webpack/webpack-workspace-resolve-plugin"
   },
-  "engines": {
-    "node": ">=18.19.0"
-  },
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "lib/index.js",
+  "typings": "dist/webpack-workspace-resolve-plugin.d.ts",
   "scripts": {
-    "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
-  },
-  "peerDependencies": {
-    "webpack": "^5.68.0",
-    "@types/node": "*"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean"
   },
   "dependencies": {
     "@rushstack/lookup-by-path": "workspace:*"
@@ -33,10 +27,16 @@
     "memfs": "4.12.0",
     "webpack": "~5.105.0"
   },
-  "sideEffects": false,
+  "peerDependencies": {
+    "@types/node": "*",
+    "webpack": "^5.68.0"
+  },
   "peerDependenciesMeta": {
     "@types/node": {
       "optional": true
     }
+  },
+  "engines": {
+    "node": ">=18.19.0"
   }
 }

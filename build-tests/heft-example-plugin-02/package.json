@@ -1,22 +1,14 @@
 {
   "name": "heft-example-plugin-02",
-  "description": "This is an example heft plugin that taps the hooks exposed from heft-example-plugin-01",
   "version": "1.0.0",
   "private": true,
+  "description": "This is an example heft plugin that taps the hooks exposed from heft-example-plugin-01",
   "main": "./lib/index.js",
   "typings": "./lib/index.d.ts",
   "scripts": {
+    "_phase:build": "heft run --only build -- --clean",
     "build": "heft build --clean",
-    "start": "heft build-watch",
-    "_phase:build": "heft run --only build -- --clean"
-  },
-  "peerDependencies": {
-    "heft-example-plugin-01": "workspace:*"
-  },
-  "peerDependenciesMeta": {
-    "heft-example-plugin-01": {
-      "optional": true
-    }
+    "start": "heft build-watch"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
@@ -27,5 +19,13 @@
     "heft-example-plugin-01": "workspace:*",
     "local-eslint-config": "workspace:*",
     "typescript": "~5.8.2"
+  },
+  "peerDependencies": {
+    "heft-example-plugin-01": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "heft-example-plugin-01": {
+      "optional": true
+    }
   }
 }

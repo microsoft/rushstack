@@ -2,18 +2,18 @@
   "name": "@rushstack/loader-raw-script",
   "version": "1.5.13",
   "description": "",
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "webpack/loader-raw-script"
   },
+  "license": "MIT",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "scripts": {
-    "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean"
   },
   "dependencies": {
     "loader-utils": "1.4.2"

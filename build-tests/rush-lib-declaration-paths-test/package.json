@@ -1,11 +1,11 @@
 {
   "name": "rush-lib-declaration-paths-test",
-  "description": "This project ensures all of the paths in rush-lib/lib/... have imports that resolve correctly. If this project builds, all `lib/**/*.d.ts` files in the `@microsoft/rush-lib` package are valid.",
   "version": "1.0.0",
   "private": true,
+  "description": "This project ensures all of the paths in rush-lib/lib/... have imports that resolve correctly. If this project builds, all `lib/**/*.d.ts` files in the `@microsoft/rush-lib` package are valid.",
   "scripts": {
-    "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean"
+    "_phase:build": "heft run --only build -- --clean",
+    "build": "heft build --clean"
   },
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*"

@@ -2,18 +2,20 @@
   "name": "@microsoft/rush-lib",
   "version": "5.167.0",
   "description": "A library for writing scripts that interact with the Rush tool",
+  "homepage": "https://rushjs.io",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/rush-lib"
   },
-  "engines": {
-    "node": ">=5.6.0"
-  },
-  "engineStrict": true,
-  "homepage": "https://rushjs.io",
+  "license": "MIT",
+  "sideEffects": [
+    "lib-esnext/start-pnpm.js",
+    "lib-esnext/start.js",
+    "lib-esnext/startx.js",
+    "lib-esnext/utilities/SetRushLibPath.js"
+  ],
   "main": "lib/index.js",
-  "typings": "dist/rush-lib.d.ts",
   "typesVersions": {
     "*": {
       "lib-esnext/*": [
@@ -21,13 +23,13 @@
       ]
     }
   },
+  "typings": "dist/rush-lib.d.ts",
   "scripts": {
-    "build": "heft build --clean",
-    "test": "heft test --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "test": "heft test --clean"
   },
-  "license": "MIT",
   "dependencies": {
     "@pnpm/link-bins": "~5.3.7",
     "@rushstack/credential-cache": "workspace:*",
@@ -71,8 +73,8 @@
   },
   "devDependencies": {
     "@pnpm/lockfile.types-900": "npm:@pnpm/lockfile.types@~900.0.0",
-    "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/operation-graph": "workspace:*",
     "@rushstack/webpack-deep-imports-plugin": "workspace:*",
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
@@ -90,15 +92,13 @@
     "local-node-rig": "workspace:*",
     "webpack": "~5.105.0"
   },
+  "engines": {
+    "node": ">=5.6.0"
+  },
+  "engineStrict": true,
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
     "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:*",
     "@rushstack/rush-http-build-cache-plugin": "workspace:*"
-  },
-  "sideEffects": [
-    "lib-esnext/start-pnpm.js",
-    "lib-esnext/start.js",
-    "lib-esnext/startx.js",
-    "lib-esnext/utilities/SetRushLibPath.js"
-  ]
+  }
 }

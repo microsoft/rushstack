@@ -2,24 +2,20 @@
   "name": "@rushstack/rundown",
   "version": "1.2.13",
   "description": "Detect load time regressions by running an app, tracing require() calls, and generating a deterministic report",
+  "homepage": "https://rushstack.io",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "apps/rundown"
   },
-  "engines": {
-    "node": ">=10.0.0"
-  },
-  "engineStrict": true,
-  "homepage": "https://rushstack.io",
-  "scripts": {
-    "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean"
-  },
+  "license": "MIT",
   "bin": {
     "rundown": "./bin/rundown"
   },
-  "license": "MIT",
+  "scripts": {
+    "_phase:build": "heft run --only build -- --clean",
+    "build": "heft build --clean"
+  },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
@@ -29,5 +25,9 @@
     "@rushstack/heft": "workspace:*",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
-  }
+  },
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "engineStrict": true
 }
