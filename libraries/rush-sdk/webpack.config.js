@@ -3,6 +3,7 @@
 
 const { PackageJsonLookup, Import } = require('@rushstack/node-core-library');
 const { PreserveDynamicRequireWebpackPlugin } = require('@rushstack/webpack-preserve-dynamic-require-plugin');
+const {} = require('webpack');
 
 module.exports = ({ webpack: { BannerPlugin } }) => {
   const packageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
@@ -16,10 +17,10 @@ module.exports = ({ webpack: { BannerPlugin } }) => {
     useNodeJSResolver: true
   });
   const { moduleExports: exportSpecifiers } = require(`${rushLibFolder}/lib/index.exports.json`);
-  let bannerCodeForLibShim =
-    '// Hinting of exported names to allow importing from ES modules\n' +
-    exportSpecifiers.map((name) => `exports.${name}`).join(' = ') +
-    ' = undefined;\n\n';
+  // Assign named exports after the bundle to ensure they're properly exposed for ESM imports
+  const footerCodeForLibShim = exportSpecifiers
+    .map((name) => `exports.${name} = module.exports.${name};`)
+    .join('\n');
 
   // Explicitly exclude @microsoft/rush-lib
   externalDependencyNames.delete('@microsoft/rush-lib');
@@ -54,7 +55,12 @@ module.exports = ({ webpack: { BannerPlugin } }) => {
     },
     target: 'node',
     plugins: [
-      new BannerPlugin({ raw: true, banner: bannerCodeForLibShim }),
+      new BannerPlugin({
+        raw: true,
+        footer: true,
+        include: /index\.js$/,
+        banner: footerCodeForLibShim
+      }),
       new PreserveDynamicRequireWebpackPlugin()
     ],
     externals: [
