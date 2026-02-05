@@ -13,6 +13,13 @@ const nodeImportResolverPath = require.resolve('eslint-import-resolver-node');
 module.exports = {
   localCommonConfig: [
     {
+      files: ['**/package.json'],
+      plugins: {
+        '@rushstack': rushstackEslintPlugin
+      },
+      processor: '@rushstack/sort-package-json'
+    },
+    {
       files: ['**/*.ts', '**/*.tsx'],
       plugins: {
         '@rushstack': rushstackEslintPlugin,

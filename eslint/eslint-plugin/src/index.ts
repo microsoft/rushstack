@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { TSESLint } from '@typescript-eslint/utils';
+import type { Linter } from 'eslint';
 
 import { hoistJestMock } from './hoist-jest-mock';
 import { noBackslashImportsRule } from './no-backslash-imports';
@@ -14,9 +15,11 @@ import { normalizedImportsRule } from './normalized-imports';
 import { typedefVar } from './typedef-var';
 import { importRequiresChunkNameRule } from './import-requires-chunk-name';
 import { pairReactDomRenderUnmountRule } from './pair-react-dom-render-unmount';
+import { sortPackageJsonProcessor } from './sort-package-json';
 
 interface IPlugin {
   rules: { [ruleName: string]: TSESLint.RuleModule<string, unknown[]> };
+  processors: { [processorName: string]: Linter.Processor };
 }
 
 const plugin: IPlugin = {
@@ -53,6 +56,10 @@ const plugin: IPlugin = {
 
     // Full name: "@rushstack/pair-react-dom-render-unmount"
     'pair-react-dom-render-unmount': pairReactDomRenderUnmountRule
+  },
+
+  processors: {
+    'sort-package-json': sortPackageJsonProcessor
   }
 };
 
