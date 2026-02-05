@@ -192,7 +192,7 @@ exports[`CommandLineHelp prints the help for each action: build 1`] = `
                   [--from-version-policy VERSION_POLICY_NAME] [-v]
                   [--include-phase-deps] [-c] [--ignore-hooks]
                   [--node-diagnostic-dir DIRECTORY] [--debug-build-cache-ids]
-                  [-s] [-m]
+                  [--show-existing-failure-logs] [-s] [-m]
                   
 
 This command is similar to \\"rush rebuild\\", except that \\"rush build\\" performs 
@@ -334,6 +334,12 @@ Optional arguments:
                         Logs information about the components of the build 
                         cache ids for individual operations. This is useful 
                         for debugging the incremental build logic.
+  --show-existing-failure-logs
+                        Skips execution of operations and instead displays 
+                        any existing failure logs for the selected projects. 
+                        This is useful for reviewing failures from a previous 
+                        run without re-executing the operations. Operations 
+                        without existing failure logs will be silenced.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 
@@ -488,6 +494,7 @@ exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
                            [--include-phase-deps] [--ignore-hooks]
                            [--node-diagnostic-dir DIRECTORY]
                            [--debug-build-cache-ids]
+                           [--show-existing-failure-logs]
                            [--locale {en-us,fr-fr,es-es,zh-cn}]
                            
 
@@ -612,6 +619,12 @@ Optional arguments:
                         Logs information about the components of the build 
                         cache ids for individual operations. This is useful 
                         for debugging the incremental build logic.
+  --show-existing-failure-logs
+                        Skips execution of operations and instead displays 
+                        any existing failure logs for the selected projects. 
+                        This is useful for reviewing failures from a previous 
+                        run without re-executing the operations. Operations 
+                        without existing failure logs will be silenced.
   --locale {en-us,fr-fr,es-es,zh-cn}
                         Selects a single instead of the default locale 
                         (en-us) for non-ship builds or all locales for ship 
@@ -1129,7 +1142,8 @@ exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
                     [--from-version-policy VERSION_POLICY_NAME] [-v]
                     [--include-phase-deps] [--ignore-hooks]
                     [--node-diagnostic-dir DIRECTORY]
-                    [--debug-build-cache-ids] [-s] [-m]
+                    [--debug-build-cache-ids] [--show-existing-failure-logs]
+                    [-s] [-m]
                     
 
 This command assumes that the package.json file for each project contains a 
@@ -1259,6 +1273,12 @@ Optional arguments:
                         Logs information about the components of the build 
                         cache ids for individual operations. This is useful 
                         for debugging the incremental build logic.
+  --show-existing-failure-logs
+                        Skips execution of operations and instead displays 
+                        any existing failure logs for the selected projects. 
+                        This is useful for reviewing failures from a previous 
+                        run without re-executing the operations. Operations 
+                        without existing failure logs will be silenced.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 
