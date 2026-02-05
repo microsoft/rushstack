@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "1.2.8",
+      "tag": "@rushstack/heft-storybook-plugin_v1.2.8",
+      "date": "Thu, 05 Feb 2026 01:54:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-rspack-plugin\" to `0.2.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.7",
       "tag": "@rushstack/heft-storybook-plugin_v1.2.7",
       "date": "Thu, 05 Feb 2026 00:23:59 GMT",
