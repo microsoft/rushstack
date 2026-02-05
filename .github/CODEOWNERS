@@ -7,14 +7,14 @@ common/reviews/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxan
 apps/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha
 build-tests/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha
 build-tests-samples/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha
+build-tests-subspace/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha
 eslint/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha
 heft-plugins/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha
 libraries/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha
 repo-scripts/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha
 rigs/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha
 rush-plugins/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha
-stack/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha
-tutorials/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha
+vscode-extensions/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha
 webpack/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha @TheLarkInn
 rush.json @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha
 .gitattributes @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @jxanthony @bmiddha
