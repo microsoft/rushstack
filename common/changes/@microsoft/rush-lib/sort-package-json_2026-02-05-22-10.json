@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-lib",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush-lib"
+}

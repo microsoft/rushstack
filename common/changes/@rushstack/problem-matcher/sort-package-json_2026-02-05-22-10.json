@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/problem-matcher",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/problem-matcher"
+}

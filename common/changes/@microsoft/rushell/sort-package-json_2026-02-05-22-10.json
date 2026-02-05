@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rushell",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rushell"
+}

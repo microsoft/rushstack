@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/zipsync",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/zipsync"
+}
