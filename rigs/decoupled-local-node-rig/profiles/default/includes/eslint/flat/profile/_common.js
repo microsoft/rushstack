@@ -7,6 +7,8 @@ const rushstackEslintPlugin = require('@rushstack/eslint-plugin');
 const typescriptEslintPlugin = require('@typescript-eslint/eslint-plugin');
 const importEslintPlugin = require('eslint-plugin-import');
 const headersEslintPlugin = require('eslint-plugin-headers');
+const packageJsonPlugin = require('eslint-plugin-package-json');
+const jsoncParser = require('jsonc-eslint-parser');
 
 const nodeImportResolverPath = require.resolve('eslint-import-resolver-node');
 
@@ -14,10 +16,16 @@ module.exports = {
   localCommonConfig: [
     {
       files: ['**/package.json'],
-      plugins: {
-        '@rushstack': rushstackEslintPlugin
+      languageOptions: {
+        parser: jsoncParser
       },
-      processor: '@rushstack/sort-package-json'
+      plugins: {
+        'package-json': packageJsonPlugin
+      },
+      rules: {
+        'package-json/order-properties': 'warn',
+        'package-json/sort-collections': 'warn'
+      }
     },
     {
       files: ['**/*.ts', '**/*.tsx'],
