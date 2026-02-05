@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-plugin-manifest.schema.json",
+  "plugins": [
+    {
+      "pluginName": "rush-operation-resource-plugin",
+      "description": "Rush plugin that enables resource constraints on specific operations",
+      "entryPoint": "lib/index.js",
+      "optionsSchema": "lib/schemas/plugin-config.schema.json"
+    }
+  ]
+}
