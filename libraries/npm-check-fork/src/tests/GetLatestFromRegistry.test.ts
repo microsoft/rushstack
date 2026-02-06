@@ -79,4 +79,31 @@ describe('getNpmInfo', () => {
     const result: INpmRegistryInfo = await getNpmInfo('test-package');
     expect(result).toHaveProperty('homepage', '');
   });
+
+  it('filters out versions exceeding CRAZY_HIGH_SEMVER threshold', async () => {
+    const mockData: INpmRegistryPackageResponse = {
+      name: 'test-package',
+      versions: {
+        '1.0.0': {
+          name: 'test-package',
+          version: '1.0.0'
+        },
+        '2.0.0': {
+          name: 'test-package',
+          version: '2.0.0'
+        },
+        '9000.0.0': {
+          name: 'test-package',
+          version: '9000.0.0'
+        }
+      },
+      'dist-tags': { latest: '2.0.0', next: '2.0.0' }
+    };
+    mockFetchPackageMetadataAsync.mockResolvedValue({ data: mockData });
+
+    const result: INpmRegistryInfo = await getNpmInfo('test-package');
+    // Versions exceeding 8000.0.0 should be filtered out
+    expect(result.versions).toEqual(['1.0.0', '2.0.0']);
+    expect(result.versions).not.toContain('9000.0.0');
+  });
 });

@@ -49,7 +49,7 @@ export default async function getNpmInfo(packageName: string): Promise<INpmRegis
   const CRAZY_HIGH_SEMVER: string = '8000.0.0';
   const sortedVersions: string[] = _(rawData.versions)
     .keys()
-    .remove(_.partial(semver.gt, CRAZY_HIGH_SEMVER))
+    .remove((version: string) => semver.gt(CRAZY_HIGH_SEMVER, version))
     .sort(semver.compare)
     .valueOf();
 
