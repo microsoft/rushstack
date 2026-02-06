@@ -38,13 +38,13 @@
     "jest-config": "~29.5.0",
     "jest-resolve": "~29.5.0",
     "jest-snapshot": "~29.5.0",
-    "lodash": "~4.17.15",
+    "lodash": "~4.17.23",
     "punycode": "~2.3.1"
   },
   "devDependencies": {
     "@jest/types": "29.5.0",
     "@rushstack/heft": "workspace:*",
-    "@types/lodash": "4.14.116",
+    "@types/lodash": "4.17.23",
     "@types/node": "20.17.19",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0",
