@@ -180,4 +180,47 @@ describe(PnpmWorkspaceFile.name, () => {
       expect(content).toMatchSnapshot();
     });
   });
+
+  describe('loadCatalogsFromFile', () => {
+    it('returns undefined for non-existent file', () => {
+      const nonExistentFile: string = path.join(tempDir, 'non-existent.yaml');
+      const catalogs = PnpmWorkspaceFile.loadCatalogsFromFile(nonExistentFile);
+      expect(catalogs).toBeUndefined();
+    });
+
+    it('returns undefined when file has no catalogs', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const catalogs = PnpmWorkspaceFile.loadCatalogsFromFile(workspaceFilePath);
+      expect(catalogs).toBeUndefined();
+    });
+
+    it('loads catalogs from existing file', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.setCatalogs({
+        default: {
+          react: '^18.0.0',
+          typescript: '~5.3.0'
+        },
+        frontend: {
+          vue: '^3.4.0'
+        }
+      });
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const catalogs = PnpmWorkspaceFile.loadCatalogsFromFile(workspaceFilePath);
+      expect(catalogs).toEqual({
+        default: {
+          react: '^18.0.0',
+          typescript: '~5.3.0'
+        },
+        frontend: {
+          vue: '^3.4.0'
+        }
+      });
+    });
+  });
 });
