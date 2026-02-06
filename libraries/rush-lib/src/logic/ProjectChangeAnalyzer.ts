@@ -144,7 +144,7 @@ export class ProjectChangeAnalyzer {
         const match: IPrefixMatch<RushConfigurationProject> | undefined =
           lookup.findLongestPrefixMatch(filePath);
         if (!match) {
-          // File is outside any project, consider it a change
+          // This should be unreachable as projectChanges contains files where match.value === project
           changedProjects.add(project);
           return;
         }
@@ -626,9 +626,9 @@ export function isPackageJsonVersionOnlyChange(
   newPackageJsonContent: string
 ): boolean {
   try {
-    // Parse both versions
-    const oldPackageJson: Record<string, unknown> = JSON.parse(oldPackageJsonContent);
-    const newPackageJson: Record<string, unknown> = JSON.parse(newPackageJsonContent);
+    // Parse both versions - use specific type since we only care about version field
+    const oldPackageJson: { version?: string } = JSON.parse(oldPackageJsonContent);
+    const newPackageJson: { version?: string } = JSON.parse(newPackageJsonContent);
 
     // Ensure both have a version field
     if (!oldPackageJson.version || !newPackageJson.version) {
