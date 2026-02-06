@@ -2,23 +2,23 @@
   "name": "@microsoft/api-documenter",
   "version": "7.28.8",
   "description": "Read JSON files from api-extractor, generate documentation pages",
+  "homepage": "https://api-extractor.com/",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "apps/api-documenter"
   },
-  "homepage": "https://api-extractor.com/",
   "license": "MIT",
-  "scripts": {
-    "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
-  },
+  "main": "lib/index.js",
+  "typings": "dist/rollup.d.ts",
   "bin": {
     "api-documenter": "./bin/api-documenter"
   },
-  "main": "lib/index.js",
-  "typings": "dist/rollup.d.ts",
+  "scripts": {
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean"
+  },
   "dependencies": {
     "@microsoft/api-extractor-model": "workspace:*",
     "@microsoft/tsdoc": "~0.16.0",

@@ -5,9 +5,9 @@
   "description": "A minimal example project that imports APIs from @rushstack/rush-lib",
   "license": "MIT",
   "scripts": {
+    "_phase:build": "heft run --only build -- --clean",
     "build": "heft build --clean",
-    "start": "node lib/start.js",
-    "_phase:build": "heft run --only build -- --clean"
+    "start": "node lib/start.js"
   },
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",

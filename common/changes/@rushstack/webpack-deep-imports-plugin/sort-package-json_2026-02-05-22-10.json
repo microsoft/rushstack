@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack-deep-imports-plugin",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/webpack-deep-imports-plugin"
+}

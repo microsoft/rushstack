@@ -1,13 +1,13 @@
 {
   "name": "heft-jest-preset-test",
-  "description": "This project illustrates configuring a Jest preset in a minimal Heft project",
   "version": "1.0.0",
   "private": true,
+  "description": "This project illustrates configuring a Jest preset in a minimal Heft project",
   "scripts": {
-    "build": "heft build --clean",
-    "start": "heft test-watch",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean && node ./config/verify-coverage.js"
+    "_phase:test": "heft run --only test -- --clean && node ./config/verify-coverage.js",
+    "build": "heft build --clean",
+    "start": "heft test-watch"
   },
   "devDependencies": {
     "@jest/types": "29.5.0",

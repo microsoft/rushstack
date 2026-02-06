@@ -1,15 +1,18 @@
 {
   "name": "heft-fastify-test",
-  "description": "This project tests Heft support for the Fastify framework for Node.js services",
   "version": "1.0.0",
   "private": true,
-  "main": "lib/index.js",
+  "description": "This project tests Heft support for the Fastify framework for Node.js services",
   "license": "MIT",
+  "main": "lib/index.js",
   "scripts": {
+    "_phase:build": "heft run --only build -- --clean",
     "build": "heft build --clean",
-    "start": "heft build-watch --serve",
     "serve": "node lib/start.js",
-    "_phase:build": "heft run --only build -- --clean"
+    "start": "heft build-watch --serve"
+  },
+  "dependencies": {
+    "fastify": "~3.16.1"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
@@ -20,8 +23,5 @@
     "eslint": "~9.37.0",
     "local-eslint-config": "workspace:*",
     "typescript": "~5.8.2"
-  },
-  "dependencies": {
-    "fastify": "~3.16.1"
   }
 }

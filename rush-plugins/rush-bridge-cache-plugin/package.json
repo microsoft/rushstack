@@ -2,25 +2,25 @@
   "name": "@rushstack/rush-bridge-cache-plugin",
   "version": "5.167.0",
   "description": "Rush plugin that provides a --set-cache-only command flag to populate the cache from content on disk.",
-  "license": "MIT",
-  "main": "lib/index.js",
+  "homepage": "https://rushjs.io",
   "repository": {
     "url": "https://github.com/microsoft/rushstack",
     "type": "git",
     "directory": "rush-plugins/rush-bridge-cache-plugin"
   },
-  "homepage": "https://rushjs.io",
+  "license": "MIT",
+  "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
+    "_phase:build": "heft run --only build -- --clean",
     "build": "heft test --clean",
-    "start": "heft test --clean --watch",
-    "_phase:build": "heft run --only build -- --clean"
+    "start": "heft test --clean --watch"
   },
   "dependencies": {
-    "@rushstack/ts-command-line": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
-    "@rushstack/terminal": "workspace:*"
+    "@rushstack/terminal": "workspace:*",
+    "@rushstack/ts-command-line": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",

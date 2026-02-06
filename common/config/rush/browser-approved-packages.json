@@ -63,6 +63,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "eslint-plugin-package-json",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jsonc-eslint-parser",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "office-ui-fabric-core",
       "allowedCategories": [ "libraries" ]
     },

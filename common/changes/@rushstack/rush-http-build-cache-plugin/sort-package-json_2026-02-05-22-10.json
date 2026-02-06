@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-http-build-cache-plugin",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-http-build-cache-plugin"
+}

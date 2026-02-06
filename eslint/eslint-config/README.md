@@ -265,6 +265,30 @@ module.exports = {
 ```
 
 
+#### `@rushstack/eslint-config/mixins/sort-package-json`
+
+This mixin enforces a standardized ordering of properties and alphabetically sorted dependency collections
+in `package.json` files.  It leverages the
+[eslint-plugin-package-json](https://www.npmjs.com/package/eslint-plugin-package-json) plugin, which provides
+autofixable rules for both property ordering (`order-properties`) and collection sorting (`sort-collections`).
+
+Add the mixin to your `"extends"` field like this:
+
+**.eslintrc.js**
+```ts
+// This is a workaround for https://github.com/eslint/eslint/issues/3458
+require('@rushstack/eslint-config/patch/modern-module-resolution');
+
+module.exports = {
+  extends: [
+    "@rushstack/eslint-config/profile/node",
+    "@rushstack/eslint-config/mixins/sort-package-json" // <----
+  ],
+  parserOptions: { tsconfigRootDir: __dirname }
+};
+```
+
+
 ## Links
 
 - [CHANGELOG.md](

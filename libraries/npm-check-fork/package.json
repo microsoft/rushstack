@@ -2,32 +2,32 @@
   "name": "@rushstack/npm-check-fork",
   "version": "0.1.13",
   "description": "A fork of npm-check.",
+  "homepage": "https://github.com/dylang/npm-check",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/npm-check-fork"
   },
-  "homepage": "https://github.com/dylang/npm-check",
+  "license": "MIT",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
-  "license": "MIT",
   "scripts": {
-    "build": "heft build --clean",
-    "test": "heft test --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "test": "heft test --clean"
   },
   "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
     "giturl": "^2.0.0",
     "lodash": "~4.17.15",
-    "semver": "~7.5.4",
-    "@rushstack/node-core-library": "workspace:*"
+    "semver": "~7.5.4"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@types/lodash": "4.14.116",
     "@types/semver": "7.5.0",
-    "local-node-rig": "workspace:*",
-    "eslint": "~9.37.0"
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
   }
 }

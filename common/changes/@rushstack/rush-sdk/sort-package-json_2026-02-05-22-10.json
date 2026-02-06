@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-sdk",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-sdk"
+}

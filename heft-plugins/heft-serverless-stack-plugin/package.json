@@ -9,13 +9,10 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "heft build --clean",
-    "start": "heft test --clean --watch",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
-  },
-  "peerDependencies": {
-    "@rushstack/heft": "^1.1.13"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "start": "heft test --clean --watch"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*"
@@ -26,5 +23,8 @@
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "^1.1.13"
   }
 }

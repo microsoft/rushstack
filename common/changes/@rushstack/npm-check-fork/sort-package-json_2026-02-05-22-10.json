@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/npm-check-fork",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/npm-check-fork"
+}

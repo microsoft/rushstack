@@ -2,34 +2,17 @@
   "name": "@rushstack/webpack4-localization-plugin",
   "version": "0.19.13",
   "description": "This plugin facilitates localization with Webpack.",
-  "main": "lib/index.js",
-  "typings": "dist/webpack4-localization-plugin.d.ts",
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "webpack/webpack4-localization-plugin"
   },
+  "license": "MIT",
+  "main": "lib/index.js",
+  "typings": "dist/webpack4-localization-plugin.d.ts",
   "scripts": {
-    "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean"
-  },
-  "peerDependencies": {
-    "@rushstack/set-webpack-public-path-plugin": "^4.1.16",
-    "@types/webpack": "^4.39.0",
-    "webpack": "^4.31.0",
-    "@types/node": "*"
-  },
-  "peerDependenciesMeta": {
-    "@rushstack/set-webpack-public-path-plugin": {
-      "optional": true
-    },
-    "@types/webpack": {
-      "optional": true
-    },
-    "@types/node": {
-      "optional": true
-    }
+    "_phase:build": "heft run --only build -- --clean",
+    "build": "heft build --clean"
   },
   "dependencies": {
     "@rushstack/localization-utilities": "workspace:*",
@@ -48,5 +31,22 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "webpack": "~4.47.0"
+  },
+  "peerDependencies": {
+    "@rushstack/set-webpack-public-path-plugin": "^4.1.16",
+    "@types/node": "*",
+    "@types/webpack": "^4.39.0",
+    "webpack": "^4.31.0"
+  },
+  "peerDependenciesMeta": {
+    "@rushstack/set-webpack-public-path-plugin": {
+      "optional": true
+    },
+    "@types/node": {
+      "optional": true
+    },
+    "@types/webpack": {
+      "optional": true
+    }
   }
 }

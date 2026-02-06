@@ -23,9 +23,11 @@
     "eslint-plugin-headers": "~1.2.1",
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-jsdoc": "50.6.11",
+    "eslint-plugin-package-json": "~0.88.2",
     "eslint-plugin-react-hooks": "5.2.0",
     "eslint": "~9.37.0",
     "jest-junit": "12.3.0",
+    "jsonc-eslint-parser": "~2.4.0",
     "typescript": "~5.8.2",
     "eslint-import-resolver-node": "0.3.9"
   }

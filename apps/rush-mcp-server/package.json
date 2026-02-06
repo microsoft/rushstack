@@ -9,39 +9,39 @@
     "monorepo",
     "server"
   ],
-  "main": "lib/index.js",
-  "typings": "dist/mcp-server.d.ts",
+  "homepage": "https://rushstack.io",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "apps/rush-mcp-server"
   },
-  "engines": {
-    "node": ">=10.0.0"
-  },
-  "engineStrict": true,
-  "homepage": "https://rushstack.io",
-  "scripts": {
-    "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean"
-  },
+  "license": "MIT",
+  "main": "lib/index.js",
+  "typings": "dist/mcp-server.d.ts",
   "bin": {
     "mcp-server": "./bin/mcp-server"
   },
-  "license": "MIT",
+  "scripts": {
+    "_phase:build": "heft run --only build -- --clean",
+    "build": "heft build --clean"
+  },
   "dependencies": {
-    "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/terminal": "workspace:*",
-    "@rushstack/rush-sdk": "workspace:*",
-    "@rushstack/ts-command-line": "workspace:*",
     "@modelcontextprotocol/sdk": "~1.10.2",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rush-sdk": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
+    "@rushstack/ts-command-line": "workspace:*",
     "zod": "~3.25.76"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
+    "@types/node": "20.17.19",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
-    "typescript": "~5.8.2",
-    "@types/node": "20.17.19"
-  }
+    "typescript": "~5.8.2"
+  },
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "engineStrict": true
 }

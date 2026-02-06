@@ -7,15 +7,15 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "apps/cpu-profile-summarizer"
   },
+  "license": "MIT",
   "bin": {
     "cpu-profile-summarizer": "./bin/cpu-profile-summarizer"
   },
-  "license": "MIT",
   "scripts": {
-    "start": "node lib/start",
-    "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "start": "node lib/start"
   },
   "dependencies": {
     "@rushstack/ts-command-line": "workspace:*",

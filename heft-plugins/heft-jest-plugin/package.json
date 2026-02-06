@@ -2,31 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "version": "1.1.13",
   "description": "Heft plugin for Jest",
+  "homepage": "https://rushstack.io/pages/heft/overview/",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "heft-plugins/heft-jest-plugin"
   },
-  "homepage": "https://rushstack.io/pages/heft/overview/",
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean",
-    "start": "heft build-watch",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
-  },
-  "peerDependencies": {
-    "@rushstack/heft": "^1.1.13",
-    "jest-environment-jsdom": "^29.5.0",
-    "jest-environment-node": "^29.5.0"
-  },
-  "peerDependenciesMeta": {
-    "jest-environment-jsdom": {
-      "optional": true
-    },
-    "jest-environment-node": {
-      "optional": true
-    }
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft test --clean",
+    "start": "heft build-watch"
   },
   "dependencies": {
     "@jest/core": "~29.5.0",
@@ -51,5 +38,18 @@
     "jest-environment-jsdom": "~29.5.0",
     "jest-environment-node": "~29.5.0",
     "jest-watch-select-projects": "2.0.0"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "^1.1.13",
+    "jest-environment-jsdom": "^29.5.0",
+    "jest-environment-node": "^29.5.0"
+  },
+  "peerDependenciesMeta": {
+    "jest-environment-jsdom": {
+      "optional": true
+    },
+    "jest-environment-node": {
+      "optional": true
+    }
   }
 }

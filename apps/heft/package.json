@@ -12,26 +12,23 @@
     "compiler",
     "incremental"
   ],
+  "homepage": "https://rushstack.io/pages/heft/overview/",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "apps/heft"
   },
-  "engines": {
-    "node": ">=10.13.0"
-  },
-  "homepage": "https://rushstack.io/pages/heft/overview/",
+  "license": "MIT",
   "main": "lib/index.js",
   "types": "dist/heft.d.ts",
   "bin": {
     "heft": "./bin/heft"
   },
-  "license": "MIT",
   "scripts": {
-    "build": "heft build --clean",
-    "start": "heft build-watch --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "start": "heft build-watch --clean"
   },
   "dependencies": {
     "@rushstack/heft-config-file": "workspace:*",
@@ -53,5 +50,8 @@
     "@types/watchpack": "2.4.0",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
+  },
+  "engines": {
+    "node": ">=10.13.0"
   }
 }

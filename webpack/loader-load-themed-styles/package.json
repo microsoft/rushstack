@@ -2,27 +2,18 @@
   "name": "@microsoft/loader-load-themed-styles",
   "version": "2.1.124",
   "description": "This simple loader wraps the loading of CSS in script equivalent to `require('load-themed-styles').loadStyles( /* css text */ )`. It is designed to be a replacement for style-loader.",
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "webpack/loader-load-themed-styles"
   },
+  "license": "MIT",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "scripts": {
-    "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
-  },
-  "peerDependenciesMeta": {
-    "@types/webpack": {
-      "optional": true
-    }
-  },
-  "peerDependencies": {
-    "@types/webpack": "^4",
-    "@microsoft/load-themed-styles": "^2.1.28"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean"
   },
   "dependencies": {
     "loader-utils": "1.4.2"
@@ -34,5 +25,14 @@
     "@types/webpack": "4.41.32",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
+  },
+  "peerDependencies": {
+    "@microsoft/load-themed-styles": "^2.1.28",
+    "@types/webpack": "^4"
+  },
+  "peerDependenciesMeta": {
+    "@types/webpack": {
+      "optional": true
+    }
   }
 }

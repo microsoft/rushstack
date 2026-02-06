@@ -2,18 +2,38 @@
   "name": "@rushstack/rush-serve-plugin",
   "version": "5.167.0",
   "description": "A Rush plugin that hooks into a rush action and serves output folders from all projects in the repository.",
-  "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
     "type": "git",
     "directory": "rush-plugins/rush-serve-plugin"
   },
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "require": "./lib/index.js",
+      "types": "./dist/rush-serve-plugin.d.ts"
+    },
+    "./api": {
+      "types": "./lib/api.types.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
   "main": "lib-commonjs/index.js",
   "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "dist/rush-serve-plugin.d.ts"
+      ],
+      "api": [
+        "lib/api.types.d.ts"
+      ]
+    }
+  },
   "scripts": {
-    "build": "heft test --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft test --clean"
   },
   "dependencies": {
     "@rushstack/debug-certificate-manager": "workspace:*",
@@ -31,31 +51,11 @@
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "eslint": "~9.37.0",
-    "local-node-rig": "workspace:*",
     "@types/compression": "~1.7.2",
     "@types/cors": "~2.8.12",
     "@types/express": "4.17.21",
-    "@types/ws": "8.5.5"
-  },
-  "exports": {
-    ".": {
-      "require": "./lib/index.js",
-      "types": "./dist/rush-serve-plugin.d.ts"
-    },
-    "./api": {
-      "types": "./lib/api.types.d.ts"
-    },
-    "./package.json": "./package.json"
-  },
-  "typesVersions": {
-    "*": {
-      ".": [
-        "dist/rush-serve-plugin.d.ts"
-      ],
-      "api": [
-        "lib/api.types.d.ts"
-      ]
-    }
+    "@types/ws": "8.5.5",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
   }
 }

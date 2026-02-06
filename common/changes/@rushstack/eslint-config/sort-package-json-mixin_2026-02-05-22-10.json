@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-config",
+      "comment": "Add a new \"sort-package-json\" mixin that uses eslint-plugin-package-json to enforce consistent property ordering and sorted collections in package.json files.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-config"
+}

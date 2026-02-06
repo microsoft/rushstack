@@ -2,18 +2,32 @@
   "name": "@rushstack/rush-resolver-cache-plugin",
   "version": "5.167.0",
   "description": "A Rush plugin that generates a resolver cache file after successful install.",
-  "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
     "type": "git",
     "directory": "rush-plugins/rush-resolver-cache-plugin"
   },
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "require": "./lib/index.js",
+      "types": "./dist/rush-resolver-cache-plugin.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
   "main": "lib-commonjs/index.js",
   "types": "dist/rush-resolver-cache-plugin.d.ts",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "dist/rush-resolver-cache-plugin.d.ts"
+      ]
+    }
+  },
   "scripts": {
-    "build": "heft test --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft test --clean"
   },
   "dependencies": {
     "@rushstack/rush-sdk": "workspace:*"
@@ -27,19 +41,5 @@
     "@types/webpack-env": "1.18.8",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
-  },
-  "exports": {
-    ".": {
-      "require": "./lib/index.js",
-      "types": "./dist/rush-resolver-cache-plugin.d.ts"
-    },
-    "./package.json": "./package.json"
-  },
-  "typesVersions": {
-    "*": {
-      ".": [
-        "dist/rush-resolver-cache-plugin.d.ts"
-      ]
-    }
   }
 }

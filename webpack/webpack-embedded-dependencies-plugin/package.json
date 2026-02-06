@@ -2,22 +2,30 @@
   "name": "@rushstack/webpack-embedded-dependencies-plugin",
   "version": "0.3.14",
   "description": "This plugin analyzes bundled dependencies from Node Modules for use with Component Governance and License Scanning.",
-  "main": "lib/index.js",
-  "typings": "dist/webpack-embedded-dependencies-plugin.d.ts",
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "webpack/webpack-embedded-dependencies-plugin"
   },
+  "license": "MIT",
+  "main": "lib/index.js",
+  "typings": "dist/webpack-embedded-dependencies-plugin.d.ts",
   "scripts": {
-    "build": "heft build --clean",
-    "test": "heft run --only test",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "test": "heft run --only test"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/webpack-plugin-utilities": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*",
+    "memfs": "4.12.0",
+    "webpack": "~5.105.0"
   },
   "peerDependencies": {
     "webpack": "^5.35.1"
@@ -26,13 +34,5 @@
     "webpack": {
       "optional": true
     }
-  },
-  "devDependencies": {
-    "@rushstack/webpack-plugin-utilities": "workspace:*",
-    "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
-    "local-node-rig": "workspace:*",
-    "webpack": "~5.105.0",
-    "memfs": "4.12.0"
   }
 }

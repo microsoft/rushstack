@@ -1,13 +1,13 @@
 {
   "name": "heft-typescript-composite-test",
-  "description": "Building this project tests behavior of Heft when the tsconfig.json file uses project references.",
   "version": "1.0.0",
   "private": true,
+  "description": "Building this project tests behavior of Heft when the tsconfig.json file uses project references.",
   "scripts": {
-    "build": "heft build --clean",
-    "start": "heft build-watch",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "start": "heft build-watch"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",

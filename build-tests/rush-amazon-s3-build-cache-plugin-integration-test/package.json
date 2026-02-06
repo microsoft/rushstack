@@ -1,12 +1,12 @@
 {
   "name": "rush-amazon-s3-build-cache-plugin-integration-test",
-  "description": "Tests connecting to an amazon S3 endpoint",
   "version": "1.0.0",
   "private": true,
+  "description": "Tests connecting to an amazon S3 endpoint",
   "license": "MIT",
   "scripts": {
-    "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
+    "build": "heft build --clean",
     "read-s3-object": "node ./lib/readObject.js",
     "start-proxy-server": "node ./lib/startProxyServer.js"
   },

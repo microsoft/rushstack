@@ -2,21 +2,18 @@
   "name": "@rushstack/heft-sass-load-themed-styles-plugin",
   "version": "1.1.13",
   "description": "Heft plugin that connects to heft-sass-plugin and replaces load-themed-styles theme expressions with standard CSS variables",
+  "homepage": "https://rushstack.io/pages/heft/overview/",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "heft-plugins/heft-sass-load-themed-styles-plugin"
   },
-  "homepage": "https://rushstack.io/pages/heft/overview/",
   "license": "MIT",
   "scripts": {
-    "build": "heft build --clean",
-    "start": "heft test --clean --watch",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
-  },
-  "peerDependencies": {
-    "@rushstack/heft": "^1.1.13"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "start": "heft test --clean --watch"
   },
   "dependencies": {
     "@microsoft/load-themed-styles": "workspace:*"
@@ -24,7 +21,10 @@
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-sass-plugin": "workspace:*",
-    "local-node-rig": "workspace:*",
-    "eslint": "~9.37.0"
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "^1.1.13"
   }
 }

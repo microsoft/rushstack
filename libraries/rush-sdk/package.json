@@ -2,29 +2,29 @@
   "name": "@rushstack/rush-sdk",
   "version": "5.167.0",
   "description": "An API for interacting with the Rush engine",
+  "homepage": "https://rushjs.io",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "apps/rush-sdk"
   },
-  "homepage": "https://rushjs.io",
-  "main": "lib-shim/index.js",
-  "typings": "dist/rush-lib.d.ts",
+  "license": "MIT",
   "exports": {
     ".": {
       "types": "./dist/rush-lib.d.ts",
       "default": "./lib-shim/index.js"
     },
-    "./loader": {
-      "types": "./dist/loader.d.ts",
-      "default": "./lib-shim/loader.js"
-    },
     "./lib/*": {
       "types": "./lib/*.d.ts",
       "default": "./lib/*.js"
     },
+    "./loader": {
+      "types": "./dist/loader.d.ts",
+      "default": "./lib-shim/loader.js"
+    },
     "./package.json": "./package.json"
   },
+  "main": "lib-shim/index.js",
   "typesVersions": {
     "*": {
       "loader": [
@@ -32,12 +32,12 @@
       ]
     }
   },
+  "typings": "dist/rush-lib.d.ts",
   "scripts": {
-    "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean"
   },
-  "license": "MIT",
   "dependencies": {
     "@pnpm/lockfile.types-900": "npm:@pnpm/lockfile.types@~900.0.0",
     "@rushstack/credential-cache": "workspace:*",

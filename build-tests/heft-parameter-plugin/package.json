@@ -1,13 +1,16 @@
 {
   "name": "heft-parameter-plugin",
-  "description": "This project contains a Heft plugin that adds a custom parameter to built-in actions",
   "version": "1.0.0",
   "private": true,
-  "main": "lib/index.js",
+  "description": "This project contains a Heft plugin that adds a custom parameter to built-in actions",
   "license": "MIT",
+  "main": "lib/index.js",
   "scripts": {
-    "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean"
+    "_phase:build": "heft run --only build -- --clean",
+    "build": "heft build --clean"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
@@ -17,8 +20,5 @@
     "eslint": "~9.37.0",
     "local-eslint-config": "workspace:*",
     "typescript": "~5.8.2"
-  },
-  "dependencies": {
-    "@rushstack/node-core-library": "workspace:*"
   }
 }

@@ -1,42 +1,42 @@
 {
   "name": "heft-sass-test",
-  "description": "This project illustrates a minimal tutorial Heft project targeting the web browser runtime",
   "version": "1.0.0",
   "private": true,
+  "description": "This project illustrates a minimal tutorial Heft project targeting the web browser runtime",
   "scripts": {
-    "build": "heft build --clean",
-    "start": "heft build-watch --serve",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "start": "heft build-watch --serve"
+  },
+  "dependencies": {
+    "buttono": "~1.0.2"
   },
   "devDependencies": {
-    "local-eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
-    "@rushstack/heft-sass-plugin": "workspace:*",
     "@rushstack/heft-sass-load-themed-styles-plugin": "workspace:*",
+    "@rushstack/heft-sass-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft-webpack4-plugin": "workspace:*",
-    "@rushstack/heft": "workspace:*",
     "@rushstack/webpack4-module-minifier-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "20.17.19",
-    "@types/react-dom": "19.2.3",
     "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
     "@types/webpack-env": "1.18.8",
     "autoprefixer": "~10.4.2",
     "css-loader": "~5.2.7",
     "eslint": "~9.37.0",
     "html-webpack-plugin": "~4.5.2",
-    "postcss-loader": "~4.1.0",
+    "local-eslint-config": "workspace:*",
     "postcss": "~8.4.6",
-    "react-dom": "~19.2.3",
+    "postcss-loader": "~4.1.0",
     "react": "~19.2.3",
+    "react-dom": "~19.2.3",
     "style-loader": "~2.0.0",
     "typescript": "~5.8.2",
     "webpack": "~4.47.0"
-  },
-  "dependencies": {
-    "buttono": "~1.0.2"
   }
 }

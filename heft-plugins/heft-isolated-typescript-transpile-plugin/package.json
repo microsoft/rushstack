@@ -2,30 +2,20 @@
   "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
   "version": "1.1.13",
   "description": "Heft plugin for transpiling TypeScript with SWC",
+  "homepage": "https://rushstack.io/pages/heft/overview/",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "heft-plugins/heft-isolated-typescript-transpile-plugin"
   },
-  "homepage": "https://rushstack.io/pages/heft/overview/",
   "license": "MIT",
   "main": "lib/index.js",
   "types": "dist/heft-isolated-typescript-transpile-plugin.d.ts",
   "scripts": {
-    "build": "heft build --clean",
-    "start": "heft test --clean --watch",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
-  },
-  "peerDependencies": {
-    "@rushstack/heft": "^1.1.13",
-    "@rushstack/heft-typescript-plugin": "workspace:^"
-  },
-  "devDependencies": {
-    "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-typescript-plugin": "workspace:*",
-    "eslint": "~9.37.0",
-    "local-node-rig": "workspace:*"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "start": "heft test --clean --watch"
   },
   "dependencies": {
     "@rushstack/lookup-by-path": "workspace:*",
@@ -33,5 +23,15 @@
     "@swc/core": "1.7.10",
     "@types/tapable": "1.0.6",
     "tapable": "1.1.3"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "^1.1.13",
+    "@rushstack/heft-typescript-plugin": "workspace:^"
   }
 }

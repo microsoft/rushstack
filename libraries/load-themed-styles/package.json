@@ -2,26 +2,13 @@
   "name": "@microsoft/load-themed-styles",
   "version": "2.1.28",
   "description": "Loads themed styles.",
-  "license": "MIT",
+  "keywords": [],
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
     "type": "git",
     "directory": "libraries/load-themed-styles"
   },
-  "scripts": {
-    "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
-  },
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "lib-dts/index.d.ts",
-  "keywords": [],
-  "devDependencies": {
-    "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
-    "local-web-rig": "workspace:*"
-  },
+  "license": "MIT",
   "exports": {
     ".": {
       "require": "./lib-commonjs/index.js",
@@ -35,11 +22,24 @@
     },
     "./package.json": "./package.json"
   },
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
   "typesVersions": {
     "*": {
       "lib/*": [
         "lib-dts/*"
       ]
     }
+  },
+  "typings": "lib-dts/index.d.ts",
+  "scripts": {
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-web-rig": "workspace:*"
   }
 }

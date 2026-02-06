@@ -7,15 +7,15 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/rushell"
   },
+  "license": "MIT",
   "main": "lib/index.js",
   "typings": "dist/rushell.d.ts",
   "scripts": {
-    "build": "heft build --clean",
-    "start": "heft test --watch",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "start": "heft test --watch"
   },
-  "license": "MIT",
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*"
   },

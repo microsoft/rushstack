@@ -1,29 +1,29 @@
 {
   "name": "heft-rspack-everything-test",
-  "description": "Building this project tests every task and config file for Heft when targeting the web browser runtime using Rspack",
   "version": "1.0.0",
   "private": true,
+  "description": "Building this project tests every task and config file for Heft when targeting the web browser runtime using Rspack",
   "scripts": {
-    "build": "heft build --clean",
-    "start": "heft build-watch",
-    "serve": "heft build-watch --serve",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "serve": "heft build-watch --serve",
+    "start": "heft build-watch"
   },
   "devDependencies": {
+    "@rspack/core": "~1.6.0-beta.0",
+    "@rushstack/heft": "workspace:*",
     "@rushstack/heft-dev-cert-plugin": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
-    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft-rspack-plugin": "workspace:*",
-    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "20.17.19",
     "eslint": "~9.37.0",
     "local-eslint-config": "workspace:*",
-    "typescript": "~5.8.2",
-    "@rspack/core": "~1.6.0-beta.0"
+    "typescript": "~5.8.2"
   }
 }
