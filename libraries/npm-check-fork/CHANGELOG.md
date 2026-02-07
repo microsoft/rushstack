@@ -1,6 +1,13 @@
 # Change Log - @rushstack/npm-check-fork
 
-This log was last generated on Wed, 04 Feb 2026 20:42:47 GMT and should not be manually modified.
+This log was last generated on Sat, 07 Feb 2026 01:13:26 GMT and should not be manually modified.
+
+## 0.1.14
+Sat, 07 Feb 2026 01:13:26 GMT
+
+### Patches
+
+- Upgrade `lodash` dependency from `~4.17.15` to `~4.17.23`.
 
 ## 0.1.13
 Wed, 04 Feb 2026 20:42:47 GMT

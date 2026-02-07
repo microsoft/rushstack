@@ -2,6 +2,24 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "1.1.14",
+      "tag": "@rushstack/heft-sass-plugin_v1.1.14",
+      "date": "Sat, 07 Feb 2026 01:13:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.56.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.13` to `1.1.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.13",
       "tag": "@rushstack/heft-sass-plugin_v1.1.13",
       "date": "Wed, 04 Feb 2026 20:42:47 GMT",

@@ -1,6 +1,11 @@
 # Change Log - @rushstack/heft-rspack-plugin
 
-This log was last generated on Thu, 05 Feb 2026 01:54:04 GMT and should not be manually modified.
+This log was last generated on Sat, 07 Feb 2026 01:13:26 GMT and should not be manually modified.
+
+## 0.2.9
+Sat, 07 Feb 2026 01:13:26 GMT
+
+_Version update only_
 
 ## 0.2.8
 Thu, 05 Feb 2026 01:54:04 GMT

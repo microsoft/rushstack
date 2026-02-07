@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 04 Feb 2026 20:42:47 GMT and should not be manually modified.
+This log was last generated on Sat, 07 Feb 2026 01:13:26 GMT and should not be manually modified.
+
+## 7.56.3
+Sat, 07 Feb 2026 01:13:26 GMT
+
+### Patches
+
+- Upgrade `lodash` dependency from `~4.17.15` to `~4.17.23`.
 
 ## 7.56.2
 Wed, 04 Feb 2026 20:42:47 GMT
