@@ -1,6 +1,6 @@
 {
   "name": "playwright-local-browser-server",
-  "version": "0.1.2",
+  "version": "0.1.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
