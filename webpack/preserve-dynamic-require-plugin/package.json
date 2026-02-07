@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
-  "version": "0.11.124",
+  "version": "0.11.125",
   "description": "This plugin tells webpack to leave dynamic calls to \"require\" as-is instead of trying to bundle them.",
   "main": "lib/index.js",
   "typings": "dist/webpack-preserve-dynamic-require-plugin.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-rspack-plugin",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Heft plugin for Rspack",
   "repository": {
     "type": "git",
@@ -18,7 +18,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^1.1.13",
+    "@rushstack/heft": "^1.1.14",
     "@rspack/core": "^1.6.0-beta.0"
   },
   "dependencies": {
