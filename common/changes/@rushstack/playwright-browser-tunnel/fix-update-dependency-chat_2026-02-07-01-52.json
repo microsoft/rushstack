@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/playwright-browser-tunnel",
+      "comment": "Update dependency chart to not always require playwright",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/playwright-browser-tunnel"
+}
