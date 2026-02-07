@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix `rush change --verify` to ignore version-only changes in package.json files and changes to CHANGELOG.md and CHANGELOG.json files, preventing false positives after `rush version --bump` updates package versions and changelogs.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "copilot@github.com"
+}

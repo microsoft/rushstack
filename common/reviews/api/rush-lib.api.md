@@ -497,6 +497,7 @@ export interface IGenerateCacheEntryIdOptions {
 // @beta (undocumented)
 export interface IGetChangedProjectsOptions {
     enableFiltering: boolean;
+    excludeVersionOnlyChanges?: boolean;
     includeExternalDependencies: boolean;
     // (undocumented)
     shouldFetch?: boolean;
