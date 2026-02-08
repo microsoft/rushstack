@@ -1,6 +1,6 @@
 ---
 name: rushstack-best-practices
-description: Use this skill when working with a Rush monorepo repository
+description: Provides best practices and guidance for working with Rush monorepos. Use when the user is working in a Rush-based repository, asks about Rush commands (install, update, build, rebuild), needs help with project selection, dependency management, build caching, subspace configuration, or troubleshooting Rush-specific issues.
 license: MIT
 metadata:
   author: rushstack
