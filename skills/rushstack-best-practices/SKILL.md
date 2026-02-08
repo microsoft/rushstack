@@ -1,6 +1,6 @@
 ---
 name: rushstack-best-practices
-description: Best practices for working with Rush monorepos. Automatically load this skill when the repository is a Rush monorepo (indicated by rush.json in the root) to ensure proper command usage, dependency management, and build optimization.
+description: Use this skill when working with a Rush monorepo repository
 license: MIT
 metadata:
   author: rushstack
@@ -10,6 +10,15 @@ metadata:
 # Rushstack Best Practices
 
 This skill provides essential best practices for working with Rush monorepos. Following these guidelines ensures efficient dependency management, optimal build performance, and proper command usage.
+
+## Important Guidelines
+
+**When encountering unclear issues or questions:**
+
+1. **Never make assumptions** - If unsure about Rush behavior, configuration, or commands
+2. **Search official resources first** - Check documentation and existing issues before guessing
+3. **Provide accurate information** - Base responses on verified sources, not assumptions
+4. **Ask for clarification** - When the problem description is ambiguous or incomplete
 
 ## Core Principles
 
@@ -201,6 +210,33 @@ Configure in `<project>/config/rush-project.json`:
 - Multiple teams with different dependency needs
 - Conflicting version requirements
 - Need for faster dependency operations
+
+## Official Resources
+
+### Documentation & References
+
+**Official Websites:**
+- [RushStack.io](https://rushstack.io/) - Main documentation site
+- [Rush.js.io](https://rushjs.io/) - Rush build orchestrator documentation
+- [Heft.rushstack.io](https://heft.rushstack.io/) - Heft build tool documentation
+- [API Extractor](https://api-extractor.com/) - API documentation and rollups
+
+**Search Existing Issues:**
+- Before creating new issues, search [rush-stack-builds issues](https://github.com/microsoft/rushstack/issues)
+
+### When to Search vs. Ask
+
+**Search these resources first when:**
+- Encountering error messages
+- Unsure about configuration options
+- Looking for examples or tutorials
+- Need to understand Rush behavior
+
+**Ask the user for clarification when:**
+- The specific use case is unclear
+- Multiple approaches are possible
+- Context is missing to provide accurate guidance
+- The issue might be environment-specific
 
 ## Detailed References
 
