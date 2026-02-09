@@ -1,34 +1,13 @@
 {
-  "env": {
-    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
-  },
-  "includeCoAuthoredBy": false,
-  "permissions": {
-    "defaultMode": "bypassPermissions"
-  },
-  "enableAllProjectMcpServers": true,
   "extraKnownMarketplaces": {
-    "atomic-plugins": {
+    "local-rushstack-plugins": {
       "source": {
-        "source": "github",
-        "repo": "flora131/atomic"
+        "source": "directory",
+        "path": "./claude-plugins"
       }
     }
   },
   "enabledPlugins": {
-    "ralph@atomic-plugins": true
-  },
-  "hooks": {
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node --experimental-strip-types .claude/hooks/telemetry-stop.ts",
-            "timeout": 30
-          }
-        ]
-      }
-    ]
+    "atomic@local-rushstack-plugins": true
   }
 }
