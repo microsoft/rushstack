@@ -1237,7 +1237,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     for (const [key, value] of this.overrides) {
       // For nested dependency selectors (contain '>'), extract the dependency portion after '>'.
       // For example: "bar@1>foo@2" -> dependency selector is "foo@2"
-      const depSelector: string = key.includes('>') ? key.substring(key.indexOf('>') + 1) : key;
+      const isNested: boolean = key.includes('>');
+      const depSelector: string = isNested ? key.substring(key.indexOf('>') + 1) : key;
 
       // Parse the package name and version range from the selector.
       // Handle scoped packages (@scope/pkg@range) by finding the '@' after the scope prefix.
@@ -1247,7 +1248,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       if (atIndex === -1) {
         // No version selector; for non-nested keys this was already handled by exact match above.
         // For nested keys (e.g. "consumer>webpack"), check if the dependency name matches.
-        if (key.includes('>') && depSelector === name) {
+        if (isNested && depSelector === name) {
           return value;
         }
         continue;
