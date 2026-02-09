@@ -1,0 +1,8 @@
+{
+  "extends": "./node_modules/@rushstack/heft-node-rig/profiles/default/tsconfig-base.json",
+  "compilerOptions": {
+    "lib": ["DOM"],
+    "skipLibCheck": true,
+    "resolveJsonModule": true
+  }
+}
