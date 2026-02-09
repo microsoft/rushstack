@@ -30,10 +30,10 @@ export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
         operations: Set<Operation>,
         context: ICreateOperationsContext
       ): Set<Operation> {
-        const { rushConfiguration, isInitial } = context;
+        const { rushConfiguration, isInitial, remainderArgs } = context;
 
         const getCustomParameterValues: (operation: Operation) => ICustomParameterValuesForOperation =
-          getCustomParameterValuesByOperation();
+          getCustomParameterValuesByOperation(remainderArgs);
 
         for (const operation of operations) {
           const { associatedPhase: phase, associatedProject: project } = operation;
@@ -139,11 +139,17 @@ export interface ICustomParameterValuesForOperation {
 /**
  * Helper function to collect all parameter arguments for a phase
  */
-function collectPhaseParameterArguments(phase: IPhase): string[] {
+function collectPhaseParameterArguments(phase: IPhase, remainderArgs?: ReadonlyArray<string>): string[] {
   const customParameterList: string[] = [];
   for (const tsCommandLineParameter of phase.associatedParameters) {
     tsCommandLineParameter.appendToArgList(customParameterList);
   }
+
+  // Add remainder arguments if they exist
+  if (remainderArgs && remainderArgs.length > 0) {
+    customParameterList.push(...remainderArgs);
+  }
+
   return customParameterList;
 }
 
@@ -170,11 +176,12 @@ export function getCustomParameterValuesByPhase(): (phase: IPhase) => ReadonlyAr
 /**
  * Gets custom parameter values for an operation, filtering out any parameters that should be ignored
  * based on the operation's settings.
+ * @param remainderArgs - Optional remainder arguments to append to parameter values
  * @returns A function that returns the filtered custom parameter values and ignored parameter values for a given operation
  */
-export function getCustomParameterValuesByOperation(): (
-  operation: Operation
-) => ICustomParameterValuesForOperation {
+export function getCustomParameterValuesByOperation(
+  remainderArgs?: ReadonlyArray<string>
+): (operation: Operation) => ICustomParameterValuesForOperation {
   const customParametersByPhase: Map<IPhase, string[]> = new Map();
 
   function getCustomParameterValuesForOp(operation: Operation): ICustomParameterValuesForOperation {
@@ -186,7 +193,7 @@ export function getCustomParameterValuesByOperation(): (
       // No filtering needed - use the cached parameter list for efficiency
       let customParameterList: string[] | undefined = customParametersByPhase.get(phase);
       if (!customParameterList) {
-        customParameterList = collectPhaseParameterArguments(phase);
+        customParameterList = collectPhaseParameterArguments(phase, remainderArgs);
         customParametersByPhase.set(phase, customParameterList);
       }
 
@@ -209,6 +216,11 @@ export function getCustomParameterValuesByOperation(): (
       tsCommandLineParameter.appendToArgList(
         ignoreSet.has(parameterLongName) ? ignoredParameterValues : filteredParameterValues
       );
+    }
+
+    // Add remainder arguments to the filtered values (they can't be ignored individually)
+    if (remainderArgs && remainderArgs.length > 0) {
+      filteredParameterValues.push(...remainderArgs);
     }
 
     return {
