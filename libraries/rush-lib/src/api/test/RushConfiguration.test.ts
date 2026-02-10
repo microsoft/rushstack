@@ -307,6 +307,49 @@ describe(RushConfiguration.name, () => {
     );
   });
 
+  describe('publishTarget schema validation', () => {
+    it('accepts publishTarget omitted (backward compatible)', () => {
+      // rush-pnpm.json has no publishTarget on any project - already tested by "can load repo/rush-pnpm.json"
+      const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm.json');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+      expect(rushConfiguration.projects).toHaveLength(3);
+    });
+
+    it('accepts publishTarget as a string', () => {
+      const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-publishtarget-string.json');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+      expect(rushConfiguration.projects).toHaveLength(1);
+    });
+
+    it('accepts publishTarget as an array of strings', () => {
+      const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-publishtarget-array.json');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+      expect(rushConfiguration.projects).toHaveLength(1);
+    });
+
+    it('rejects publishTarget as an empty array', () => {
+      const rushFilename: string = path.resolve(
+        __dirname,
+        'repo',
+        'rush-pnpm-publishtarget-empty-array.json'
+      );
+      expect(() => {
+        RushConfiguration.loadFromConfigurationFile(rushFilename);
+      }).toThrow();
+    });
+
+    it('rejects publishTarget with non-string items', () => {
+      const rushFilename: string = path.resolve(
+        __dirname,
+        'repo',
+        'rush-pnpm-publishtarget-invalid-type.json'
+      );
+      expect(() => {
+        RushConfiguration.loadFromConfigurationFile(rushFilename);
+      }).toThrow();
+    });
+  });
+
   describe(RushConfigurationProject.name, () => {
     it('correctly updates the packageJson property after the packageJson is edited by packageJsonEditor', async () => {
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
