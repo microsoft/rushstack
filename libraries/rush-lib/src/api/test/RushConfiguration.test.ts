@@ -375,6 +375,41 @@ describe(RushConfiguration.name, () => {
       const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1')!;
       expect(project1.publishTargets).toEqual(['vsix']);
     });
+
+    it('rejects publishTarget "none" with lockstep version policy', () => {
+      const rushFilename: string = path.resolve(
+        __dirname,
+        'repo',
+        'rush-pnpm-publishtarget-none-lockstep.json'
+      );
+      expect(() => {
+        const config: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+        void config.projects; // Force lazy project initialization which triggers validation
+      }).toThrow(/incompatible with lockstep version policies/);
+    });
+
+    it('allows publishTarget "none" with individual version policy', () => {
+      const rushFilename: string = path.resolve(
+        __dirname,
+        'repo',
+        'rush-pnpm-publishtarget-none-individual.json'
+      );
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+      const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1')!;
+      expect(project1.publishTargets).toEqual(['none']);
+    });
+
+    it('rejects shouldPublish:true with private:true when publishTarget includes "npm"', () => {
+      const rushFilename: string = path.resolve(
+        __dirname,
+        'repo',
+        'rush-pnpm-publishtarget-npm-private.json'
+      );
+      expect(() => {
+        const config: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+        void config.projects; // Force lazy project initialization which triggers validation
+      }).toThrow(/specifies "shouldPublish": true.*publishTarget including "npm".*"private": true/);
+    });
   });
 
   describe(RushConfigurationProject.name, () => {
