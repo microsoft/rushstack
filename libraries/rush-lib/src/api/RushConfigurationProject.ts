@@ -27,6 +27,7 @@ export interface IRushConfigurationProjectJson {
   cyclicDependencyProjects?: string[];
   versionPolicyName?: string;
   shouldPublish?: boolean;
+  publishTarget?: string | string[];
   skipRushCheck?: boolean;
   publishFolder?: string;
   tags?: string[];
