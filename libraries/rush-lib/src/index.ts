@@ -183,6 +183,14 @@ export type {
   ICobuildCompletedState
 } from './logic/cobuild/ICobuildLockProvider';
 
+export type {
+  IPublishProvider,
+  IPublishProjectInfo,
+  IPublishProviderPublishOptions,
+  IPublishProviderCheckExistsOptions,
+  PublishProviderFactory
+} from './pluginFramework/IPublishProvider';
+
 export type { ITelemetryData, ITelemetryMachineInfo, ITelemetryOperationResult } from './logic/Telemetry';
 
 export type { IStopwatchResult } from './utilities/Stopwatch';

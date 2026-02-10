@@ -799,6 +799,39 @@ export type _IProjectBuildCacheOptions = _IOperationBuildCacheOptions & {
     phaseName: string;
 };
 
+// @public
+export interface IPublishProjectInfo {
+    // Warning: (ae-forgotten-export) The symbol "ChangeType" needs to be exported by the entry point index.d.ts
+    readonly changeType: ChangeType;
+    readonly newVersion: string;
+    readonly previousVersion: string;
+    readonly project: RushConfigurationProject;
+    readonly providerConfig: Record<string, unknown> | undefined;
+}
+
+// @public
+export interface IPublishProvider {
+    checkExistsAsync(options: IPublishProviderCheckExistsOptions): Promise<boolean>;
+    readonly providerName: string;
+    publishAsync(options: IPublishProviderPublishOptions): Promise<void>;
+}
+
+// @public
+export interface IPublishProviderCheckExistsOptions {
+    readonly project: RushConfigurationProject;
+    readonly providerConfig: Record<string, unknown> | undefined;
+    readonly version: string;
+}
+
+// @public
+export interface IPublishProviderPublishOptions {
+    readonly dryRun: boolean;
+    // Warning: (ae-incompatible-release-tags) The symbol "logger" is marked as @public, but its signature references "ILogger" which is marked as @beta
+    readonly logger: ILogger;
+    readonly projects: ReadonlyArray<IPublishProjectInfo>;
+    readonly tag: string | undefined;
+}
+
 // @beta
 export interface IRushCommand {
     readonly actionName: string;
@@ -1201,6 +1234,9 @@ export class ProjectChangeAnalyzer {
     // @internal
     _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal, projectSelection?: ReadonlySet<RushConfigurationProject>): Promise<GetInputsSnapshotAsyncFn | undefined>;
 }
+
+// @public
+export type PublishProviderFactory = () => Promise<IPublishProvider>;
 
 // @public
 export class RepoStateFile {
