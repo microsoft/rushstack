@@ -1573,11 +1573,15 @@ export class RushSession {
     // (undocumented)
     getLogger(name: string): ILogger;
     // (undocumented)
+    getPublishProviderFactory(publishTargetName: string): PublishProviderFactory | undefined;
+    // (undocumented)
     readonly hooks: RushLifecycleHooks;
     // (undocumented)
     registerCloudBuildCacheProviderFactory(cacheProviderName: string, factory: CloudBuildCacheProviderFactory): void;
     // (undocumented)
     registerCobuildLockProviderFactory(cobuildLockProviderName: string, factory: CobuildLockProviderFactory): void;
+    // (undocumented)
+    registerPublishProviderFactory(publishTargetName: string, factory: PublishProviderFactory): void;
     // (undocumented)
     get terminalProvider(): ITerminalProvider;
 }
