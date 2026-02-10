@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Configuration for Rush project publishing.",
+  "description": "For use with the Rush tool, this file provides per-project configuration for publish providers. It is loaded from config/publish.json and supports rig resolution. See http://rushjs.io for details.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "providers": {
+      "description": "An object whose keys are publish target names (e.g. 'npm', 'vsix') and whose values are provider-specific configuration objects. Each provider plugin defines the shape of its own configuration section.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      }
+    }
+  }
+}
