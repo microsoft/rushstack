@@ -1434,6 +1434,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "@rushstack/rush-npm-publish-plugin",
+      "projectFolder": "rush-plugins/rush-npm-publish-plugin",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
       "packageName": "@rushstack/rush-redis-cobuild-plugin",
       "projectFolder": "rush-plugins/rush-redis-cobuild-plugin",
       "reviewCategory": "libraries",
