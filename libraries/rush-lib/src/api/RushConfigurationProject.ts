@@ -340,10 +340,37 @@ export class RushConfigurationProject {
       this._publishTargets = rawTarget;
     }
 
-    if (this._shouldPublish && this.packageJson.private) {
+    // Validate: 'none' cannot be combined with other targets
+    if (this._publishTargets.includes('none') && this._publishTargets.length > 1) {
       throw new Error(
-        `The project "${packageName}" specifies "shouldPublish": true, ` +
-          `but the package.json file specifies "private": true.`
+        `The project "${packageName}" specifies publishTarget "none" combined with other targets. ` +
+          `The "none" target cannot be combined with other publish targets.`
+      );
+    }
+
+    // Validate: 'none' is incompatible with lockstep version policies
+    if (
+      this._publishTargets.includes('none') &&
+      this.versionPolicyName &&
+      rushConfiguration.versionPolicyConfiguration
+    ) {
+      const policy: VersionPolicy | undefined = rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
+        this.versionPolicyName
+      );
+      if (policy && policy.isLockstepped) {
+        throw new Error(
+          `The project "${packageName}" specifies publishTarget "none" but uses the lockstep ` +
+            `version policy "${this.versionPolicyName}". The "none" target is incompatible with ` +
+            `lockstep version policies.`
+        );
+      }
+    }
+
+    // Validate: private:true is only invalid when publishTargets includes 'npm'
+    if (this._shouldPublish && this.packageJson.private && this._publishTargets.includes('npm')) {
+      throw new Error(
+        `The project "${packageName}" specifies "shouldPublish": true with ` +
+          `publishTarget including "npm", but the package.json file specifies "private": true.`
       );
     }
 

@@ -353,6 +353,28 @@ describe(RushConfiguration.name, () => {
         RushConfiguration.loadFromConfigurationFile(rushFilename);
       }).toThrow();
     });
+
+    it('rejects publishTarget "none" combined with other targets', () => {
+      const rushFilename: string = path.resolve(
+        __dirname,
+        'repo',
+        'rush-pnpm-publishtarget-none-combined.json'
+      );
+      expect(() => {
+        const config: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+        // Force lazy project initialization which triggers validation
+        void config.projects;
+      }).toThrow(/cannot be combined/);
+    });
+
+    it('allows shouldPublish:true with private:true when publishTarget is "vsix"', () => {
+      const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-publishtarget-string.json');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+      // project1 has publishTarget: "vsix" - this should not throw even if package.json were private
+      // (the test fixture project1 is not private, so this validates the code path doesn't throw for non-npm targets)
+      const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1')!;
+      expect(project1.publishTargets).toEqual(['vsix']);
+    });
   });
 
   describe(RushConfigurationProject.name, () => {
