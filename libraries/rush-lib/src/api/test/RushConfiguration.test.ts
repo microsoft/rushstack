@@ -308,23 +308,28 @@ describe(RushConfiguration.name, () => {
   });
 
   describe('publishTarget schema validation', () => {
-    it('accepts publishTarget omitted (backward compatible)', () => {
-      // rush-pnpm.json has no publishTarget on any project - already tested by "can load repo/rush-pnpm.json"
+    it('accepts publishTarget omitted and defaults to ["npm"]', () => {
       const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm.json');
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
       expect(rushConfiguration.projects).toHaveLength(3);
+      const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1')!;
+      expect(project1.publishTargets).toEqual(['npm']);
     });
 
-    it('accepts publishTarget as a string', () => {
+    it('accepts publishTarget as a string and normalizes to array', () => {
       const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-publishtarget-string.json');
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
       expect(rushConfiguration.projects).toHaveLength(1);
+      const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1')!;
+      expect(project1.publishTargets).toEqual(['vsix']);
     });
 
     it('accepts publishTarget as an array of strings', () => {
       const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-publishtarget-array.json');
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
       expect(rushConfiguration.projects).toHaveLength(1);
+      const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1')!;
+      expect(project1.publishTargets).toEqual(['npm', 'vsix']);
     });
 
     it('rejects publishTarget as an empty array', () => {

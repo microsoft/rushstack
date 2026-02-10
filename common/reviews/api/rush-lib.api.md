@@ -1389,6 +1389,7 @@ export class RushConfigurationProject {
     readonly projectRushConfigFolder: string;
     readonly projectRushTempFolder: string;
     readonly publishFolder: string;
+    get publishTargets(): ReadonlyArray<string>;
     readonly reviewCategory: string | undefined;
     readonly rushConfiguration: RushConfiguration;
     get shouldPublish(): boolean;

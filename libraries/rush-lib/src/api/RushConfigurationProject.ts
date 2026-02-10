@@ -68,6 +68,7 @@ export interface IRushConfigurationProjectOptions {
  */
 export class RushConfigurationProject {
   private readonly _shouldPublish: boolean;
+  private readonly _publishTargets: ReadonlyArray<string>;
 
   private _versionPolicy: VersionPolicy | undefined = undefined;
   private _dependencyProjects: Set<RushConfigurationProject> | undefined = undefined;
@@ -329,6 +330,16 @@ export class RushConfigurationProject {
     this.skipRushCheck = !!projectJson.skipRushCheck;
     this.versionPolicyName = projectJson.versionPolicyName;
 
+    // Normalize publishTarget: string -> [string], undefined -> ['npm']
+    const rawTarget: string | string[] | undefined = projectJson.publishTarget;
+    if (rawTarget === undefined) {
+      this._publishTargets = ['npm'];
+    } else if (typeof rawTarget === 'string') {
+      this._publishTargets = [rawTarget];
+    } else {
+      this._publishTargets = rawTarget;
+    }
+
     if (this._shouldPublish && this.packageJson.private) {
       throw new Error(
         `The project "${packageName}" specifies "shouldPublish": true, ` +
@@ -481,6 +492,21 @@ export class RushConfigurationProject {
    */
   public get shouldPublish(): boolean {
     return this._shouldPublish || !!this.versionPolicyName;
+  }
+
+  /**
+   * Specifies the publish targets for this project. Determines which publish
+   * provider plugins handle publishing during `rush publish`.
+   *
+   * @remarks
+   * Common values: `'npm'`, `'vsix'`, `'none'`.
+   * When the array contains `'none'`, the project participates in versioning
+   * but is not published by any provider.
+   * When omitted in rush.json, defaults to `['npm']` for backward compatibility.
+   * A string value is normalized to a single-element array.
+   */
+  public get publishTargets(): ReadonlyArray<string> {
+    return this._publishTargets;
   }
 
   /**
