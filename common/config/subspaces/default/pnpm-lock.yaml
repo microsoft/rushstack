@@ -420,6 +420,9 @@ importers:
       '@rushstack/rush-http-build-cache-plugin':
         specifier: workspace:*
         version: link:../../rush-plugins/rush-http-build-cache-plugin
+      '@rushstack/rush-npm-publish-plugin':
+        specifier: workspace:*
+        version: link:../../rush-plugins/rush-npm-publish-plugin
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1

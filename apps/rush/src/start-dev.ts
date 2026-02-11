@@ -31,6 +31,7 @@ includePlugin('rush-azure-storage-build-cache-plugin');
 includePlugin('rush-http-build-cache-plugin');
 // Including this here so that developers can reuse it without installing the plugin a second time
 includePlugin('rush-azure-interactive-auth-plugin', '@rushstack/rush-azure-storage-build-cache-plugin');
+includePlugin('rush-npm-publish-plugin');
 
 const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 RushCommandSelector.execute(currentPackageVersion, rushLib, {

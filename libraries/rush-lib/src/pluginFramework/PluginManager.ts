@@ -88,6 +88,7 @@ export class PluginManager {
       'rush-azure-interactive-auth-plugin',
       '@rushstack/rush-azure-storage-build-cache-plugin'
     );
+    tryAddBuiltInPlugin('rush-npm-publish-plugin');
 
     this._builtInPluginLoaders = builtInPluginConfigurations.map((pluginConfiguration) => {
       return new BuiltInPluginLoader({
