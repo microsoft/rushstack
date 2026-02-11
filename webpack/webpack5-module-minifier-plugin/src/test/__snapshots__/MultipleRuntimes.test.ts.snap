@@ -3,14 +3,11 @@
 exports[`ModuleMinifierPlugin Handles multiple runtimes (mock): Content 1`] = `
 Object {
   "/release/async-1.js": "/*! For license information please see async-1.js.LICENSE.txt */
-// Begin Asset Hash=a1688ad69c48f410b100af6ce42e782e0cdf03d253fe97f335a0f2a4532940f6
+// Begin Asset Hash=69b04c1d29fa46faf36d042bbe433bfe80bf6de89433dda1e91248932b0bdaaf
 \\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[527],{
 
 /***/ 923
-
-// Begin Module Hash=cff8175a0574af55cbc63c329b94bbe9a3b655c33d316f21fc148a7a16c7a239
-
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -20,14 +17,9 @@ Object {
 function async1() { console.log('async-1'); }
 
 /***/ }
-
-// End Module
 ,
 
 /***/ 541
-
-// Begin Module Hash=e9b51a8d04b67d47826b5a8e432e98a6f0a3bdb8f91960b6b38ca0b9c4605acf
-
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -40,8 +32,6 @@ function async1() { console.log('async-1'); }
 
 /***/ }
 
-// End Module
-
 
 }]);
 // End Asset",
@@ -49,14 +39,11 @@ function async1() { console.log('async-1'); }
 // @license MIT
 ",
   "/release/async-2.js": "/*! For license information please see async-2.js.LICENSE.txt */
-// Begin Asset Hash=c989959df0b37ccd032e5971a2f21fb94c30ce647806238af544420acab206c2
+// Begin Asset Hash=d8c163257b9c0ffa0929f47ce896d7edbb1412dc70ce4327c3fc9e2d7a028e92
 \\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[324],{
 
 /***/ 454
-
-// Begin Module Hash=d8feb285437db6618631b5f45ab2c916568525d13ea8c83ec66a12519fee0be1
-
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -66,14 +53,9 @@ function async1() { console.log('async-1'); }
 function a2() { console.log('async-2'); }
 
 /***/ }
-
-// End Module
 ,
 
 /***/ 541
-
-// Begin Module Hash=1be277bc6acc5381ce17192820f2a88d34051c50e80f442c316ba197caff8799
-
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -85,8 +67,6 @@ function a2() { console.log('async-2'); }
 
 
 /***/ }
-
-// End Module
 
 
 }]);
@@ -611,38 +591,38 @@ Object {
     "async-1.js" => Object {
       "positionByModuleId": Map {
         923 => Object {
-          "charLength": 395,
+          "charLength": 292,
           "charOffset": 241,
         },
         541 => Object {
-          "charLength": 486,
-          "charOffset": 650,
+          "charLength": 383,
+          "charOffset": 547,
         },
       },
     },
     "async-2.js" => Object {
       "positionByModuleId": Map {
         454 => Object {
-          "charLength": 383,
+          "charLength": 280,
           "charOffset": 241,
         },
         541 => Object {
-          "charLength": 478,
-          "charOffset": 638,
+          "charLength": 375,
+          "charOffset": 535,
         },
       },
     },
   },
   "byModule": Map {
     923 => Map {
-      527 => 395,
+      527 => 292,
     },
     541 => Map {
-      527 => 486,
-      324 => 478,
+      527 => 383,
+      324 => 375,
     },
     454 => Map {
-      324 => 383,
+      324 => 280,
     },
   },
 }
@@ -655,22 +635,10 @@ exports[`ModuleMinifierPlugin Handles multiple runtimes (terser): Content 1`] = 
 exports[`ModuleMinifierPlugin Handles multiple runtimes (terser): Errors 1`] = `
 Array [
   Object {
-    "message": "Unexpected token punc «{», expected punc «,»",
+    "message": "Unexpected token name «__WEBPACK_CHUNK_MODULE__c3587d3a82556f8e3f1b0b4d1fcbdefd62eedc2f1c5708b0a824a504bef85276», expected punc «,»",
   },
   Object {
-    "message": "Unexpected token punc «{», expected punc «,»",
-  },
-  Object {
-    "message": "Unexpected token punc «{», expected punc «,»",
-  },
-  Object {
-    "message": "Unexpected token punc «{», expected punc «,»",
-  },
-  Object {
-    "message": "Unexpected token name «__WEBPACK_CHUNK_MODULE__cff8175a0574af55cbc63c329b94bbe9a3b655c33d316f21fc148a7a16c7a239», expected punc «,»",
-  },
-  Object {
-    "message": "Unexpected token name «__WEBPACK_CHUNK_MODULE__d8feb285437db6618631b5f45ab2c916568525d13ea8c83ec66a12519fee0be1», expected punc «,»",
+    "message": "Unexpected token name «__WEBPACK_CHUNK_MODULE__bf7c8493af96fc819aeda647ea3306127d1b5c0239a14cb225810a4644dfe910», expected punc «,»",
   },
 ]
 `;

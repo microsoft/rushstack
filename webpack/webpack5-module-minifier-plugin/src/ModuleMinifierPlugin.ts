@@ -132,21 +132,33 @@ function isLicenseComment(comment: Comment): boolean {
  * Detects if the module code uses ECMAScript method shorthand format.
  * Shorthand format would appear when webpack emits object methods without function keyword
  * For example: `id(params) { body }` instead of `id: function(params) { body }`
- * However, at the module level, we receive just the function part, so we need to detect
- * if it lacks both 'function' keyword and '=>' arrow syntax.
  *
- * Note: Currently this is a conservative check. Method shorthand format is not yet widely used by webpack.
- * This function will return false for now to maintain backward compatibility.
+ * Following the problem statement's recommendation: inspect the rendered code prior to the first `{`
+ * and look for either a `=>` or `function(`. If neither are encountered, assume object shorthand format.
  *
  * @param code - The module source code to check
  * @returns true if the code is in method shorthand format
  */
 function isMethodShorthandFormat(code: string): boolean {
-  // TODO: Implement actual detection when webpack starts emitting method shorthand
-  // For now, return false to maintain backward compatibility
-  // The current webpack format `(params) { body }` is wrapped with colon in object literals
-  // When webpack switches to true method shorthand `id(params) { body }`, we'll need to detect it
-  return false;
+  // Find the position of the first opening brace
+  const firstBraceIndex: number = code.indexOf('{');
+  if (firstBraceIndex === -1) {
+    // No brace found, not a function format
+    return false;
+  }
+
+  // Get the code before the first brace
+  const beforeBrace: string = code.slice(0, firstBraceIndex);
+
+  // Check if it contains '=>' or 'function('
+  // If it does, it's a regular arrow function or function expression, not shorthand
+  if (beforeBrace.includes('=>') || beforeBrace.includes('function(') || beforeBrace.includes('function (')) {
+    return false;
+  }
+
+  // If neither '=>' nor 'function(' are found, assume object shorthand format
+  // This handles the case where webpack emits: (params) { body } without function keyword
+  return true;
 }
 
 /**
@@ -427,19 +439,32 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
                     const isShorthandModule: boolean = moduleShorthandFormat.get(hash) || false;
                     if (isShorthandModule) {
                       // For shorthand format, we wrapped it as: __MINIFY_MODULE__({\n__DEFAULT_ID__(args) {...}\n});
-                      // After minification, we need to extract just the function: (args) {...}
-                      // The minifier will output something like: __MINIFY_MODULE__({__DEFAULT_ID__(args){...}});
+                      // After minification, it becomes: __MINIFY_MODULE__({__DEFAULT_ID__(args){...}});
+                      // We need to extract just: (args){...}
 
-                      // Find and remove the wrapper prefix
-                      const shorthandPrefixEnd: number = minified.indexOf('__DEFAULT_ID__');
+                      // Strategy: Find and remove the prefix up to and including '__DEFAULT_ID__'
+                      const defaultIdStr: string = '__DEFAULT_ID__';
+                      const shorthandPrefixEnd: number = minified.indexOf(defaultIdStr);
                       if (shorthandPrefixEnd >= 0) {
-                        unwrapped.replace(0, shorthandPrefixEnd + '__DEFAULT_ID__'.length - 1, '');
-                        // Find and remove the wrapper suffix from the end
-                        unwrapped.replace(len - MODULE_WRAPPER_SHORTHAND_SUFFIX.length, len - 1, '');
+                        // Remove from start up to and including '__DEFAULT_ID__'
+                        unwrapped.replace(0, shorthandPrefixEnd + defaultIdStr.length - 1, '');
+                        // Remove the suffix from the end
+                        // The suffix is '});' after minification (newline removed)
+                        // Look for '});' from the end
+                        const minifiedSuffix: string = '});';
+                        if (minified.endsWith(minifiedSuffix)) {
+                          unwrapped.replace(len - minifiedSuffix.length, len - 1, '');
+                        } else if (minified.endsWith(MODULE_WRAPPER_SHORTHAND_SUFFIX)) {
+                          // In case minifier keeps the newline
+                          unwrapped.replace(len - MODULE_WRAPPER_SHORTHAND_SUFFIX.length, len - 1, '');
+                        } else {
+                          // Fallback: try to find the closing
+                          unwrapped.replace(len - 3, len - 1, '');
+                        }
                       } else {
-                        // Fallback if the pattern is not found
+                        // Fallback: If __DEFAULT_ID__ is not found (shouldn't happen), remove by length
                         unwrapped.replace(0, MODULE_WRAPPER_SHORTHAND_PREFIX.length - 1, '');
-                        unwrapped.replace(len - MODULE_WRAPPER_SHORTHAND_SUFFIX.length, len - 1, '');
+                        unwrapped.replace(len - 3, len - 1, ''); // Remove '});'
                       }
                     } else {
                       // Regular format
