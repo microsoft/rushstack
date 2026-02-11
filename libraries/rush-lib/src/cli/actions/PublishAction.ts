@@ -3,8 +3,6 @@
 
 import * as path from 'node:path';
 
-import * as semver from 'semver';
-
 import type {
   CommandLineFlagParameter,
   CommandLineStringParameter,
@@ -17,7 +15,6 @@ import { Colorize, ConsoleTerminalProvider, Terminal } from '@rushstack/terminal
 import { type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
 import { type IPublishJson, PUBLISH_CONFIGURATION_FILE } from '../../api/PublishConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { Npm } from '../../utilities/Npm';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { PublishUtilities } from '../../logic/PublishUtilities';
 import { ChangelogGenerator } from '../../logic/ChangelogGenerator';
@@ -26,12 +23,13 @@ import { ChangeManager } from '../../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import * as PolicyValidator from '../../logic/policy/PolicyValidator';
+import type { IPublishProvider } from '../../pluginFramework/IPublishProvider';
+import { Logger } from '../../pluginFramework/logging/Logger';
 import type { VersionPolicy } from '../../api/VersionPolicy';
 import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 import { Utilities } from '../../utilities/Utilities';
 import { Git } from '../../logic/Git';
 import { RushConstants } from '../../logic/RushConstants';
-import { IS_WINDOWS } from '../../utilities/executionUtilities';
 
 export class PublishAction extends BaseRushAction {
   private readonly _addCommitDetails: CommandLineFlagParameter;
@@ -58,8 +56,8 @@ export class PublishAction extends BaseRushAction {
   private _prereleaseToken!: PrereleaseToken;
   private _hotfixTagOverride!: string;
   private _targetNpmrcPublishFolder!: string;
-  private _targetNpmrcPublishPath!: string;
   private readonly _publishConfigCache: Map<string, IPublishJson | undefined> = new Map();
+  private readonly _providerCache: Map<string, IPublishProvider> = new Map();
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -230,9 +228,6 @@ export class PublishAction extends BaseRushAction {
     // Example: "common\temp\publish-home"
     this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
 
-    // Example: "common\temp\publish-home\.npmrc"
-    this._targetNpmrcPublishPath = path.join(this._targetNpmrcPublishFolder, '.npmrc');
-
     const allPackages: ReadonlyMap<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
 
     if (this._regenerateChangelogs.value) {
@@ -324,17 +319,12 @@ export class PublishAction extends BaseRushAction {
           }
         }
 
-        // npm publish the things that need publishing.
+        // Publish projects via their registered publish providers.
         for (const change of orderedChanges) {
           if (change.changeType && change.changeType > ChangeType.dependency) {
             const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);
             if (project) {
-              if (!(await this._packageExistsAsync(project))) {
-                await this._npmPublishAsync(change.packageName, project.publishFolder);
-              } else {
-                // eslint-disable-next-line no-console
-                console.log(`Skip ${change.packageName}. Package exists.`);
-              }
+              await this._publishProjectViaProvidersAsync(project);
             } else {
               // eslint-disable-next-line no-console
               console.log(`Skip ${change.packageName}. Failed to find its project.`);
@@ -405,13 +395,14 @@ export class PublishAction extends BaseRushAction {
           // packs to tarball instead of publishing to NPM repository
           await this._npmPackAsync(packageName, packageConfig);
           await applyTagAsync(this._applyGitTagsOnPack.value);
-        } else if (this._force.value || !(await this._packageExistsAsync(packageConfig))) {
-          // Publish to npm repository
-          await this._npmPublishAsync(packageName, packageConfig.publishFolder);
-          await applyTagAsync(true);
         } else {
-          // eslint-disable-next-line no-console
-          console.log(`Skip ${packageName}. Not updated.`);
+          const published: boolean = await this._publishProjectViaProvidersAsync(packageConfig);
+          if (published) {
+            await applyTagAsync(true);
+          } else {
+            // eslint-disable-next-line no-console
+            console.log(`Skip ${packageName}. Not updated.`);
+          }
         }
       }
     }
@@ -439,87 +430,57 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private async _npmPublishAsync(packageName: string, packagePath: string): Promise<void> {
-    const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
-    const args: string[] = ['publish'];
+  /**
+   * Publish a project to all of its registered publish targets.
+   * Returns true if at least one target was published.
+   */
+  private async _publishProjectViaProvidersAsync(project: RushConfigurationProject): Promise<boolean> {
+    let published: boolean = false;
+    const version: string = project.packageJsonEditor.version;
+    const tag: string | undefined = this._npmTag.value || this._hotfixTagOverride || undefined;
+    const dryRun: boolean = !this._publish.value;
+    const logger: Logger = new Logger({
+      loggerName: 'publish',
+      terminalProvider: new ConsoleTerminalProvider({ verboseEnabled: false }),
+      getShouldPrintStacks: () => false
+    });
 
-    if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
-      this._addSharedNpmConfig(env, args);
-
-      if (this._npmTag.value) {
-        args.push(`--tag`, this._npmTag.value);
-      } else if (this._hotfixTagOverride) {
-        args.push(`--tag`, this._hotfixTagOverride);
+    for (const target of project.publishTargets) {
+      if (target === 'none') {
+        continue;
       }
 
-      if (this._force.value) {
-        args.push(`--force`);
+      const provider: IPublishProvider = await this._getProviderAsync(target, project.packageName);
+      const providerConfig: Record<string, unknown> | undefined = await this._getProviderConfigAsync(
+        project,
+        target
+      );
+
+      // Check if the version already exists at this target
+      if (!this._force.value && (await provider.checkExistsAsync({ project, version, providerConfig }))) {
+        // eslint-disable-next-line no-console
+        console.log(`Skip ${project.packageName}@${version} for target "${target}". Already exists.`);
+        continue;
       }
 
-      if (this._npmAccessLevel.value) {
-        args.push(`--access`, this._npmAccessLevel.value);
-      }
-
-      if (this.rushConfiguration.isPnpm) {
-        // PNPM 4.11.0 introduced a feature that may interrupt publishing and prompt the user for input.
-        // See this issue for details: https://github.com/microsoft/rushstack/issues/1940
-        args.push('--no-git-checks');
-      }
-
-      // TODO: Yarn's "publish" command line is fairly different from NPM and PNPM.  The right thing to do here
-      // would be to remap our options to the Yarn equivalents.  But until we get around to that, we'll simply invoke
-      // whatever NPM binary happens to be installed in the global path.
-      const packageManagerToolFilename: string =
-        this.rushConfiguration.packageManager === 'yarn'
-          ? 'npm'
-          : this.rushConfiguration.packageManagerToolFilename;
-
-      // If the auth token was specified via the command line, avoid printing it on the console
-      const secretSubstring: string | undefined = this._npmAuthToken.value;
-
-      await PublishUtilities.execCommandAsync({
-        shouldExecute: this._publish.value,
-        command: packageManagerToolFilename,
-        args,
-        workingDirectory: packagePath,
-        environment: env,
-        secretSubstring
+      await provider.publishAsync({
+        projects: [
+          {
+            project,
+            newVersion: version,
+            previousVersion: version,
+            changeType: ChangeType.none,
+            providerConfig
+          }
+        ],
+        tag,
+        dryRun,
+        logger
       });
-    }
-  }
-
-  private async _packageExistsAsync(packageConfig: RushConfigurationProject): Promise<boolean> {
-    const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
-    const args: string[] = [];
-    this._addSharedNpmConfig(env, args);
-
-    const publishedVersions: string[] = await Npm.getPublishedVersionsAsync(
-      packageConfig.packageName,
-      packageConfig.publishFolder,
-      env,
-      args
-    );
-
-    const packageVersion: string = packageConfig.packageJsonEditor.version;
-
-    // SemVer supports an obscure (and generally deprecated) feature where "build metadata" can be
-    // appended to a version.  For example if our version is "1.2.3-beta.4+extra567", then "+extra567" is the
-    // build metadata part.  The suffix has no effect on version comparisons and is mostly ignored by
-    // the NPM registry.  Importantly, the queried version number will not include it, so we need to discard
-    // it before comparing against the list of already published versions.
-    const parsedVersion: semver.SemVer | null = semver.parse(packageVersion);
-    if (!parsedVersion) {
-      throw new Error(`The package "${packageConfig.packageName}" has an invalid "version" value`);
+      published = true;
     }
 
-    // For example, normalize "1.2.3-beta.4+extra567" -->"1.2.3-beta.4".
-    //
-    // This is redundant in the current API, but might change in the future:
-    // https://github.com/npm/node-semver/issues/264
-    parsedVersion.build = [];
-    const normalizedVersion: string = parsedVersion.format();
-
-    return publishedVersions.indexOf(normalizedVersion) >= 0;
+    return published;
   }
 
   private async _npmPackAsync(packageName: string, project: RushConfigurationProject): Promise<void> {
@@ -616,6 +577,57 @@ export class PublishAction extends BaseRushAction {
     return publishJson;
   }
 
+  /**
+   * Get or create a publish provider for the given target name.
+   */
+  private async _getProviderAsync(targetName: string, packageName: string): Promise<IPublishProvider> {
+    let provider: IPublishProvider | undefined = this._providerCache.get(targetName);
+    if (!provider) {
+      const factory: (() => Promise<IPublishProvider>) | undefined =
+        this.rushSession.getPublishProviderFactory(targetName);
+      if (!factory) {
+        throw new Error(
+          `No publish provider registered for target "${targetName}". ` +
+            `Project "${packageName}" has publishTarget including "${targetName}" ` +
+            `but no plugin has registered a provider for it.`
+        );
+      }
+      provider = await factory();
+      this._providerCache.set(targetName, provider);
+    }
+    return provider;
+  }
+
+  /**
+   * Get the provider config for a project+target, merging CLI flag overrides for npm.
+   */
+  private async _getProviderConfigAsync(
+    project: RushConfigurationProject,
+    targetName: string
+  ): Promise<Record<string, unknown> | undefined> {
+    const publishJson: IPublishJson | undefined = await this._loadPublishConfigAsync(project);
+    const baseConfig: Record<string, unknown> | undefined = publishJson?.providers?.[targetName];
+
+    // For npm target, merge CLI flag overrides on top of config/publish.json values
+    if (targetName === 'npm') {
+      const cliOverrides: Record<string, unknown> = {};
+      if (this._registryUrl.value) {
+        cliOverrides.registryUrl = this._registryUrl.value;
+      }
+      if (this._npmAuthToken.value) {
+        cliOverrides.npmAuthToken = this._npmAuthToken.value;
+      }
+      if (this._npmAccessLevel.value) {
+        cliOverrides.access = this._npmAccessLevel.value;
+      }
+      if (Object.keys(cliOverrides).length > 0) {
+        return { ...baseConfig, ...cliOverrides };
+      }
+    }
+
+    return baseConfig;
+  }
+
   private _addNpmPublishHome(supportEnvVarFallbackSyntax: boolean): void {
     // Create "common\temp\publish-home" folder, if it doesn't exist
     Utilities.createFolderWithRetry(this._targetNpmrcPublishFolder);
@@ -627,27 +639,5 @@ export class PublishAction extends BaseRushAction {
       useNpmrcPublish: true,
       supportEnvVarFallbackSyntax
     });
-  }
-
-  private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {
-    const userHomeEnvVariable: string = IS_WINDOWS ? 'USERPROFILE' : 'HOME';
-    let registry: string = '//registry.npmjs.org/';
-
-    // Check if .npmrc file exists in "common\temp\publish-home"
-    if (FileSystem.exists(this._targetNpmrcPublishPath)) {
-      // Redirect userHomeEnvVariable, NPM will use config in "common\temp\publish-home\.npmrc"
-      env[userHomeEnvVariable] = this._targetNpmrcPublishFolder;
-    }
-
-    // Check if registryUrl and token are specified via command-line
-    if (this._registryUrl.value) {
-      const registryUrl: string = this._registryUrl.value;
-      env['npm_config_registry'] = registryUrl; // eslint-disable-line dot-notation
-      registry = registryUrl.substring(registryUrl.indexOf('//'));
-    }
-
-    if (this._npmAuthToken.value) {
-      args.push(`--${registry}:_authToken=${this._npmAuthToken.value}`);
-    }
   }
 }
