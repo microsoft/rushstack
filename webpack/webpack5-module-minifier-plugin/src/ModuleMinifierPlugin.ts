@@ -29,6 +29,8 @@ import {
   CHUNK_MODULE_TOKEN,
   MODULE_WRAPPER_PREFIX,
   MODULE_WRAPPER_SUFFIX,
+  MODULE_WRAPPER_SHORTHAND_PREFIX,
+  MODULE_WRAPPER_SHORTHAND_SUFFIX,
   STAGE_BEFORE,
   STAGE_AFTER
 } from './Constants';
@@ -74,6 +76,7 @@ interface IOptionsForHash extends Omit<IModuleMinifierPluginOptions, 'minifier'>
 interface ISourceCacheEntry {
   source: sources.Source;
   hash: string;
+  isShorthand: boolean;
 }
 
 const compilationMetadataMap: WeakMap<Compilation, IModuleMinifierPluginStats> = new WeakMap();
@@ -123,6 +126,27 @@ function isMinificationResultError(
 
 function isLicenseComment(comment: Comment): boolean {
   return LICENSE_COMMENT_REGEX.test(comment.value);
+}
+
+/**
+ * Detects if the module code uses ECMAScript method shorthand format.
+ * Shorthand format would appear when webpack emits object methods without function keyword
+ * For example: `id(params) { body }` instead of `id: function(params) { body }`
+ * However, at the module level, we receive just the function part, so we need to detect
+ * if it lacks both 'function' keyword and '=>' arrow syntax.
+ *
+ * Note: Currently this is a conservative check. Method shorthand format is not yet widely used by webpack.
+ * This function will return false for now to maintain backward compatibility.
+ *
+ * @param code - The module source code to check
+ * @returns true if the code is in method shorthand format
+ */
+function isMethodShorthandFormat(code: string): boolean {
+  // TODO: Implement actual detection when webpack starts emitting method shorthand
+  // For now, return false to maintain backward compatibility
+  // The current webpack format `(params) { body }` is wrapped with colon in object literals
+  // When webpack switches to true method shorthand `id(params) { body }`, we'll need to detect it
+  return false;
 }
 
 /**
@@ -219,6 +243,12 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
        * Set of local module ids that have been processed.
        */
       const submittedModules: Set<string | number> = new Set();
+
+      /**
+       * Map to track which modules use ECMAScript method shorthand format.
+       * Key is the module hash, value is true if shorthand format is used.
+       */
+      const moduleShorthandFormat: Map<string, boolean> = new Map();
 
       /**
        * The text and comments of all minified modules.
@@ -333,12 +363,16 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
             return cachedResult.source;
           }
 
+          // Get the source code to check its format
+          const sourceCode: string = source.source().toString();
+
+          // Detect if this is ECMAScript method shorthand format
+          const isShorthand: boolean = isMethodShorthandFormat(sourceCode);
+
           // If this module is wrapped in a factory, need to add boilerplate so that the minifier keeps the function
-          const wrapped: sources.Source = new ConcatSource(
-            MODULE_WRAPPER_PREFIX + '\n',
-            source,
-            '\n' + MODULE_WRAPPER_SUFFIX
-          );
+          const wrapped: sources.Source = isShorthand
+            ? new ConcatSource(MODULE_WRAPPER_SHORTHAND_PREFIX, source, MODULE_WRAPPER_SHORTHAND_SUFFIX)
+            : new ConcatSource(MODULE_WRAPPER_PREFIX + '\n', source, '\n' + MODULE_WRAPPER_SUFFIX);
 
           const nameForMap: string = `(modules)/${id}`;
 
@@ -354,6 +388,9 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
           metadata.hashByChunk.set(chunkRenderContext.chunk, hash);
           if (!submittedModules.has(hash)) {
             submittedModules.add(hash);
+
+            // Track whether this module uses shorthand format
+            moduleShorthandFormat.set(hash, isShorthand);
 
             ++pendingMinificationRequests;
 
@@ -386,8 +423,29 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
                     const len: number = minified.length;
 
                     // Trim off the boilerplate used to preserve the factory
-                    unwrapped.replace(0, MODULE_WRAPPER_PREFIX.length - 1, '');
-                    unwrapped.replace(len - MODULE_WRAPPER_SUFFIX.length, len - 1, '');
+                    // Use different logic for shorthand vs regular format
+                    const isShorthandModule: boolean = moduleShorthandFormat.get(hash) || false;
+                    if (isShorthandModule) {
+                      // For shorthand format, we wrapped it as: __MINIFY_MODULE__({\n__DEFAULT_ID__(args) {...}\n});
+                      // After minification, we need to extract just the function: (args) {...}
+                      // The minifier will output something like: __MINIFY_MODULE__({__DEFAULT_ID__(args){...}});
+
+                      // Find and remove the wrapper prefix
+                      const shorthandPrefixEnd: number = minified.indexOf('__DEFAULT_ID__');
+                      if (shorthandPrefixEnd >= 0) {
+                        unwrapped.replace(0, shorthandPrefixEnd + '__DEFAULT_ID__'.length - 1, '');
+                        // Find and remove the wrapper suffix from the end
+                        unwrapped.replace(len - MODULE_WRAPPER_SHORTHAND_SUFFIX.length, len - 1, '');
+                      } else {
+                        // Fallback if the pattern is not found
+                        unwrapped.replace(0, MODULE_WRAPPER_SHORTHAND_PREFIX.length - 1, '');
+                        unwrapped.replace(len - MODULE_WRAPPER_SHORTHAND_SUFFIX.length, len - 1, '');
+                      }
+                    } else {
+                      // Regular format
+                      unwrapped.replace(0, MODULE_WRAPPER_PREFIX.length - 1, '');
+                      unwrapped.replace(len - MODULE_WRAPPER_SUFFIX.length, len - 1, '');
+                    }
 
                     const withIds: sources.Source = postProcessCode(unwrapped, {
                       compilation,
@@ -417,7 +475,8 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
           const result: sources.Source = new RawSource(`${CHUNK_MODULE_TOKEN}${hash}`);
           sourceCache.set(source, {
             hash,
-            source: result
+            source: result,
+            isShorthand
           });
 
           // Return an expression to replace later

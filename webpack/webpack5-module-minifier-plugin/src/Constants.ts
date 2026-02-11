@@ -15,6 +15,22 @@ export const MODULE_WRAPPER_PREFIX: '__MINIFY_MODULE__(' = '__MINIFY_MODULE__(';
 export const MODULE_WRAPPER_SUFFIX: ');' = ');';
 
 /**
+ * Prefix to wrap ECMAScript method shorthand `(module, __webpack_exports__, __webpack_require__) { ... }` so that the minifier doesn't delete it.
+ * Used when webpack emits modules using shorthand syntax.
+ * Public because alternate Minifier implementations may wish to know about it.
+ * @public
+ */
+export const MODULE_WRAPPER_SHORTHAND_PREFIX: '__MINIFY_MODULE__({\n__DEFAULT_ID__' =
+  '__MINIFY_MODULE__({\n__DEFAULT_ID__';
+/**
+ * Suffix to wrap ECMAScript method shorthand `(module, __webpack_exports__, __webpack_require__) { ... }` so that the minifier doesn't delete it.
+ * Used when webpack emits modules using shorthand syntax.
+ * Public because alternate Minifier implementations may wish to know about it.
+ * @public
+ */
+export const MODULE_WRAPPER_SHORTHAND_SUFFIX: '\n});' = '\n});';
+
+/**
  * Token preceding a module id in the emitted asset so the minifier can operate on the Webpack runtime or chunk boilerplate in isolation
  * @public
  */

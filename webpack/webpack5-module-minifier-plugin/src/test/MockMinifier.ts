@@ -8,7 +8,12 @@ import type {
   IMinifierConnection
 } from '@rushstack/module-minifier';
 
-import { MODULE_WRAPPER_PREFIX, MODULE_WRAPPER_SUFFIX } from '../Constants';
+import {
+  MODULE_WRAPPER_PREFIX,
+  MODULE_WRAPPER_SUFFIX,
+  MODULE_WRAPPER_SHORTHAND_PREFIX,
+  MODULE_WRAPPER_SHORTHAND_SUFFIX
+} from '../Constants';
 
 export class MockMinifier implements IModuleMinifier {
   public readonly requests: Map<string, string> = new Map();
@@ -24,12 +29,25 @@ export class MockMinifier implements IModuleMinifier {
     this.requests.set(hash, code);
 
     const isModule: boolean = code.startsWith(MODULE_WRAPPER_PREFIX);
-    const processedCode: string = isModule
-      ? `${MODULE_WRAPPER_PREFIX}\n// Begin Module Hash=${hash}\n${code.slice(
-          MODULE_WRAPPER_PREFIX.length,
-          -MODULE_WRAPPER_SUFFIX.length
-        )}\n// End Module${MODULE_WRAPPER_SUFFIX}`
-      : `// Begin Asset Hash=${hash}\n${code}\n// End Asset`;
+    const isShorthandModule: boolean = code.startsWith(MODULE_WRAPPER_SHORTHAND_PREFIX);
+
+    let processedCode: string;
+    if (isShorthandModule) {
+      // Handle shorthand format
+      processedCode = `${MODULE_WRAPPER_SHORTHAND_PREFIX}// Begin Module Hash=${hash}\n${code.slice(
+        MODULE_WRAPPER_SHORTHAND_PREFIX.length,
+        -MODULE_WRAPPER_SHORTHAND_SUFFIX.length
+      )}\n// End Module${MODULE_WRAPPER_SHORTHAND_SUFFIX}`;
+    } else if (isModule) {
+      // Handle regular format
+      processedCode = `${MODULE_WRAPPER_PREFIX}\n// Begin Module Hash=${hash}\n${code.slice(
+        MODULE_WRAPPER_PREFIX.length,
+        -MODULE_WRAPPER_SUFFIX.length
+      )}\n// End Module${MODULE_WRAPPER_SUFFIX}`;
+    } else {
+      // Handle asset format
+      processedCode = `// Begin Asset Hash=${hash}\n${code}\n// End Asset`;
+    }
 
     callback({
       hash,
