@@ -317,7 +317,7 @@ describe(RushConfiguration.name, () => {
     });
 
     it('accepts publishTarget as a string and normalizes to array', () => {
-      const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-publishtarget-string.json');
+      const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-publishtarget-string.json');
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
       expect(rushConfiguration.projects).toHaveLength(1);
       const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1')!;
@@ -325,7 +325,7 @@ describe(RushConfiguration.name, () => {
     });
 
     it('accepts publishTarget as an array of strings', () => {
-      const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-publishtarget-array.json');
+      const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-publishtarget-array.json');
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
       expect(rushConfiguration.projects).toHaveLength(1);
       const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1')!;
@@ -336,7 +336,7 @@ describe(RushConfiguration.name, () => {
       const rushFilename: string = path.resolve(
         __dirname,
         'repo',
-        'rush-pnpm-publishtarget-empty-array.json'
+        'rush-publishtarget-empty-array.json'
       );
       expect(() => {
         RushConfiguration.loadFromConfigurationFile(rushFilename);
@@ -347,7 +347,7 @@ describe(RushConfiguration.name, () => {
       const rushFilename: string = path.resolve(
         __dirname,
         'repo',
-        'rush-pnpm-publishtarget-invalid-type.json'
+        'rush-publishtarget-invalid-type.json'
       );
       expect(() => {
         RushConfiguration.loadFromConfigurationFile(rushFilename);
@@ -358,7 +358,7 @@ describe(RushConfiguration.name, () => {
       const rushFilename: string = path.resolve(
         __dirname,
         'repo',
-        'rush-pnpm-publishtarget-none-combined.json'
+        'rush-publishtarget-none-combined.json'
       );
       expect(() => {
         const config: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
@@ -368,7 +368,7 @@ describe(RushConfiguration.name, () => {
     });
 
     it('allows shouldPublish:true with private:true when publishTarget is "vsix"', () => {
-      const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-publishtarget-string.json');
+      const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-publishtarget-string.json');
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
       // project1 has publishTarget: "vsix" - this should not throw even if package.json were private
       // (the test fixture project1 is not private, so this validates the code path doesn't throw for non-npm targets)
@@ -380,7 +380,7 @@ describe(RushConfiguration.name, () => {
       const rushFilename: string = path.resolve(
         __dirname,
         'repo',
-        'rush-pnpm-publishtarget-none-lockstep.json'
+        'rush-publishtarget-none-lockstep.json'
       );
       expect(() => {
         const config: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
@@ -392,7 +392,7 @@ describe(RushConfiguration.name, () => {
       const rushFilename: string = path.resolve(
         __dirname,
         'repo',
-        'rush-pnpm-publishtarget-none-individual.json'
+        'rush-publishtarget-none-individual.json'
       );
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
       const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1')!;
@@ -403,7 +403,7 @@ describe(RushConfiguration.name, () => {
       const rushFilename: string = path.resolve(
         __dirname,
         'repo',
-        'rush-pnpm-publishtarget-npm-private.json'
+        'rush-publishtarget-npm-private.json'
       );
       expect(() => {
         const config: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
