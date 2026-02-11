@@ -11,9 +11,11 @@ import type {
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
 import { FileSystem } from '@rushstack/node-core-library';
-import { Colorize } from '@rushstack/terminal';
+import { RigConfig } from '@rushstack/rig-package';
+import { Colorize, ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
+import { type IPublishJson, PUBLISH_CONFIGURATION_FILE } from '../../api/PublishConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Npm } from '../../utilities/Npm';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
@@ -57,6 +59,7 @@ export class PublishAction extends BaseRushAction {
   private _hotfixTagOverride!: string;
   private _targetNpmrcPublishFolder!: string;
   private _targetNpmrcPublishPath!: string;
+  private readonly _publishConfigCache: Map<string, IPublishJson | undefined> = new Map();
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -582,6 +585,35 @@ export class PublishAction extends BaseRushAction {
         }
       }
     }
+  }
+
+  /**
+   * Load and cache the riggable config/publish.json for a given project.
+   */
+  private async _loadPublishConfigAsync(
+    project: RushConfigurationProject
+  ): Promise<IPublishJson | undefined> {
+    const cached: IPublishJson | undefined | null = this._publishConfigCache.get(project.packageName);
+    if (cached !== undefined) {
+      // Cached result: null means we tried loading but the file doesn't exist
+      return cached ?? undefined;
+    }
+
+    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: false }));
+    const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
+      projectFolderPath: project.projectFolder
+    });
+
+    const publishJson: IPublishJson | undefined =
+      await PUBLISH_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+        terminal,
+        project.projectFolder,
+        rigConfig
+      );
+
+    // Store null for "not found" to distinguish from "not yet loaded"
+    this._publishConfigCache.set(project.packageName, publishJson ?? undefined);
+    return publishJson;
   }
 
   private _addNpmPublishHome(supportEnvVarFallbackSyntax: boolean): void {
