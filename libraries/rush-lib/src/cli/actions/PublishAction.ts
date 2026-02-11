@@ -23,6 +23,7 @@ import { ChangeManager } from '../../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import * as PolicyValidator from '../../logic/policy/PolicyValidator';
+import type { IPublishCommand } from '../../pluginFramework/RushLifeCycle';
 import type { IPublishProvider } from '../../pluginFramework/IPublishProvider';
 import { Logger } from '../../pluginFramework/logging/Logger';
 import type { VersionPolicy } from '../../api/VersionPolicy';
@@ -241,6 +242,18 @@ export class PublishAction extends BaseRushAction {
 
     this._addNpmPublishHome(this.rushConfiguration.isPnpm);
 
+    const dryRun: boolean = !this._publish.value;
+    const publishCommand: IPublishCommand = {
+      actionName: this.actionName,
+      dryRun
+    };
+
+    const { hooks: sessionHooks } = this.rushSession;
+
+    if (sessionHooks.beforePublish.isUsed()) {
+      await sessionHooks.beforePublish.promise(publishCommand);
+    }
+
     const git: Git = new Git(this.rushConfiguration);
     const publishGit: PublishGit = new PublishGit(git, this._targetBranch.value);
     if (this._includeAll.value) {
@@ -252,6 +265,10 @@ export class PublishAction extends BaseRushAction {
         this._partialPrerelease.value
       );
       await this._publishChangesAsync(git, publishGit, allPackages);
+    }
+
+    if (sessionHooks.afterPublish.isUsed()) {
+      await sessionHooks.afterPublish.promise(publishCommand);
     }
 
     // eslint-disable-next-line no-console

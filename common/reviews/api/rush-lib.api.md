@@ -799,6 +799,11 @@ export type _IProjectBuildCacheOptions = _IOperationBuildCacheOptions & {
     phaseName: string;
 };
 
+// @beta
+export interface IPublishCommand extends IRushCommand {
+    readonly dryRun: boolean;
+}
+
 // @public
 export interface IPublishProjectInfo {
     // Warning: (ae-forgotten-export) The symbol "ChangeType" needs to be exported by the entry point index.d.ts
@@ -1529,11 +1534,13 @@ export class RushLifecycleHooks {
     subspace: Subspace,
     variant: string | undefined
     ]>;
+    readonly afterPublish: AsyncSeriesHook<[command: IPublishCommand]>;
     readonly beforeInstall: AsyncSeriesHook<[
     command: IGlobalCommand,
     subspace: Subspace,
     variant: string | undefined
     ]>;
+    readonly beforePublish: AsyncSeriesHook<[command: IPublishCommand]>;
     readonly flushTelemetry: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]>;
     readonly initialize: AsyncSeriesHook<IRushCommand>;
     readonly runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand>;

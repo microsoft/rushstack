@@ -162,6 +162,7 @@ export {
   type IRushCommand,
   type IGlobalCommand,
   type IPhasedCommand,
+  type IPublishCommand,
   RushLifecycleHooks
 } from './pluginFramework/RushLifeCycle';
 
