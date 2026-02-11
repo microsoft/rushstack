@@ -1475,25 +1475,33 @@
       "packageName": "rushstack",
       "projectFolder": "vscode-extensions/rush-vscode-extension",
       "reviewCategory": "vscode-extensions",
-      "tags": ["vsix"]
+      "tags": ["vsix"],
+      "shouldPublish": true,
+      "publishTarget": ["vsix"]
     },
     {
       "packageName": "@rushstack/rush-vscode-command-webview",
       "projectFolder": "vscode-extensions/rush-vscode-command-webview",
       "reviewCategory": "vscode-extensions",
-      "tags": ["vsix"]
+      "tags": ["vsix"],
+      "shouldPublish": true,
+      "publishTarget": ["vsix"]
     },
     {
       "packageName": "debug-certificate-manager",
       "projectFolder": "vscode-extensions/debug-certificate-manager-vscode-extension",
       "reviewCategory": "vscode-extensions",
-      "tags": ["vsix"]
+      "tags": ["vsix"],
+      "shouldPublish": true,
+      "publishTarget": ["vsix"]
     },
     {
       "packageName": "playwright-local-browser-server",
       "projectFolder": "vscode-extensions/playwright-local-browser-server-vscode-extension",
       "reviewCategory": "vscode-extensions",
-      "tags": ["vsix"]
+      "tags": ["vsix"],
+      "shouldPublish": true,
+      "publishTarget": ["vsix"]
     },
 
     // "webpack" folder (alphabetical order)
