@@ -9,5 +9,6 @@ packageJson.dependencies['@rushstack/rush-amazon-s3-build-cache-plugin'] = packa
 packageJson.dependencies['@rushstack/rush-azure-storage-build-cache-plugin'] = packageJson.version;
 packageJson.dependencies['@rushstack/rush-http-build-cache-plugin'] = packageJson.version;
 packageJson.dependencies['@rushstack/rush-npm-publish-plugin'] = packageJson.version;
+packageJson.dependencies['@rushstack/rush-vscode-publish-plugin'] = packageJson.version;
 
 JsonFile.save(packageJson, packageJsonPath, { updateExistingFile: true });

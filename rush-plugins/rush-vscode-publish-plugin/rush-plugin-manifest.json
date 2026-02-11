@@ -1,0 +1,10 @@
+{
+  "plugins": [
+    {
+      "pluginName": "rush-vscode-publish-plugin",
+      "description": "Provides the 'vsix' publish target for publishing VSIX packages to the VS Code Marketplace.",
+      "entryPoint": "lib/RushVscodePublishPlugin.js",
+      "associatedCommands": ["publish"]
+    }
+  ]
+}

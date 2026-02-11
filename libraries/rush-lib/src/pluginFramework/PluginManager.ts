@@ -89,6 +89,7 @@ export class PluginManager {
       '@rushstack/rush-azure-storage-build-cache-plugin'
     );
     tryAddBuiltInPlugin('rush-npm-publish-plugin');
+    tryAddBuiltInPlugin('rush-vscode-publish-plugin');
 
     this._builtInPluginLoaders = builtInPluginConfigurations.map((pluginConfiguration) => {
       return new BuiltInPluginLoader({

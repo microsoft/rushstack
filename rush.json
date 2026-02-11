@@ -1463,6 +1463,12 @@
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },
+    {
+      "packageName": "@rushstack/rush-vscode-publish-plugin",
+      "projectFolder": "rush-plugins/rush-vscode-publish-plugin",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
 
     // "vscode-extensions" folder (alphabetical order)
     {
