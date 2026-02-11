@@ -412,6 +412,54 @@ describe(RushConfiguration.name, () => {
     });
   });
 
+  describe('VS Code extension project configuration', () => {
+    interface IRushJsonProjectEntry {
+      packageName: string;
+      projectFolder: string;
+      shouldPublish?: boolean;
+      publishTarget?: string | string[];
+      [key: string]: unknown;
+    }
+
+    interface IRushJson {
+      projects: IRushJsonProjectEntry[];
+      [key: string]: unknown;
+    }
+
+    it('verifies 4 VS Code extensions have shouldPublish and publishTarget: ["vsix"]', () => {
+      // Load the real rush.json from the repo root
+      const rushJsonPath: string = path.resolve(__dirname, '../../../../../rush.json');
+      const rushJson: IRushJson = JsonFile.load(rushJsonPath) as IRushJson;
+
+      const vsixProjectNames: string[] = [
+        'rushstack',
+        '@rushstack/rush-vscode-command-webview',
+        'debug-certificate-manager',
+        'playwright-local-browser-server'
+      ];
+
+      for (const projectName of vsixProjectNames) {
+        const entry: IRushJsonProjectEntry | undefined = rushJson.projects.find(
+          (p: IRushJsonProjectEntry) => p.packageName === projectName
+        );
+        expect(entry).toBeDefined();
+        expect(entry!.shouldPublish).toBe(true);
+        expect(entry!.publishTarget).toEqual(['vsix']);
+      }
+    });
+
+    it('verifies @rushstack/vscode-shared is NOT configured to publish', () => {
+      const rushJsonPath: string = path.resolve(__dirname, '../../../../../rush.json');
+      const rushJson: IRushJson = JsonFile.load(rushJsonPath) as IRushJson;
+
+      const vscodeShared: IRushJsonProjectEntry | undefined = rushJson.projects.find(
+        (p: IRushJsonProjectEntry) => p.packageName === '@rushstack/vscode-shared'
+      );
+      expect(vscodeShared).toBeDefined();
+      expect(vscodeShared!.shouldPublish).toBe(false);
+    });
+  });
+
   describe(RushConfigurationProject.name, () => {
     it('correctly updates the packageJson property after the packageJson is edited by packageJsonEditor', async () => {
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
