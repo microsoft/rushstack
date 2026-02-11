@@ -458,6 +458,60 @@ describe(RushConfiguration.name, () => {
       expect(vscodeShared).toBeDefined();
       expect(vscodeShared!.shouldPublish).toBe(false);
     });
+
+    it('verifies VS Code extensions are eligible for version bumping (no lockstep policy)', () => {
+      const rushJsonPath: string = path.resolve(__dirname, '../../../../../rush.json');
+      const rushJson: IRushJson = JsonFile.load(rushJsonPath) as IRushJson;
+
+      const vsixProjectNames: string[] = [
+        'rushstack',
+        '@rushstack/rush-vscode-command-webview',
+        'debug-certificate-manager',
+        'playwright-local-browser-server'
+      ];
+
+      for (const projectName of vsixProjectNames) {
+        const entry: IRushJsonProjectEntry | undefined = rushJson.projects.find(
+          (p: IRushJsonProjectEntry) => p.packageName === projectName
+        );
+        expect(entry).toBeDefined();
+        // shouldPublish must be true for rush version --bump to process the project
+        expect(entry!.shouldPublish).toBe(true);
+        // Must not have a lockstep version policy with publishTarget 'none'
+        // (no versionPolicyName means individual versioning, which is compatible with vsix)
+        expect(entry!.publishTarget).toEqual(['vsix']);
+        // Extensions should not have a lockstep version policy
+        // (they use individual versioning for independent VSIX releases)
+        expect(entry!.versionPolicyName).toBeUndefined();
+      }
+    });
+
+    it('verifies publish dispatch path: vsix projects do not include npm target', () => {
+      const rushJsonPath: string = path.resolve(__dirname, '../../../../../rush.json');
+      const rushJson: IRushJson = JsonFile.load(rushJsonPath) as IRushJson;
+
+      const vsixProjectNames: string[] = [
+        'rushstack',
+        '@rushstack/rush-vscode-command-webview',
+        'debug-certificate-manager',
+        'playwright-local-browser-server'
+      ];
+
+      for (const projectName of vsixProjectNames) {
+        const entry: IRushJsonProjectEntry | undefined = rushJson.projects.find(
+          (p: IRushJsonProjectEntry) => p.packageName === projectName
+        );
+        expect(entry).toBeDefined();
+        const targets: string[] = Array.isArray(entry!.publishTarget)
+          ? entry!.publishTarget
+          : [entry!.publishTarget!];
+        // VSIX projects must only have 'vsix' target (not 'npm')
+        // This ensures rush publish dispatches to VsixPublishProvider, not NpmPublishProvider
+        expect(targets).toEqual(['vsix']);
+        expect(targets).not.toContain('npm');
+        expect(targets).not.toContain('none');
+      }
+    });
   });
 
   describe(RushConfigurationProject.name, () => {
