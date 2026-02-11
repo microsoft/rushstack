@@ -1,58 +1,29 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import playwright from 'playwright-core';
-import type { Browser, LaunchOptions } from 'playwright-core';
-import { WebSocketServer, WebSocket, type RawData } from 'ws';
+import type { LaunchOptions } from 'playwright-core';
 import playwrightPackageJson from 'playwright-core/package.json';
+import type { RawData } from 'ws';
+import { WebSocket, WebSocketServer } from 'ws';
 
-import { type ITerminal, Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
+import type { ITerminal } from '@rushstack/terminal';
 
-import type { BrowserName } from './PlaywrightBrowserTunnel';
-import { HttpServer } from './HttpServer';
+import { HttpServer } from '../HttpServer';
+import type { BrowserName } from '../PlaywrightBrowserTunnel';
 import {
   getNormalizedErrorString,
   getWebSocketCloseReason,
   getWebSocketReadyStateString,
   WebSocketCloseCode
-} from './utilities';
+} from '../utilities';
+import type {
+  IDisposableTunneledBrowserConnection,
+  IHandshake,
+  IHandshakeAck
+} from './ITunneledBrowserConnection';
+import { DEFAULT_LISTEN_PORT, SUPPORTED_BROWSER_NAMES } from './constants';
 
 const { version: playwrightVersion } = playwrightPackageJson;
-
-const SUPPORTED_BROWSER_NAMES: Set<string> = new Set(['chromium', 'firefox', 'webkit']);
-
-interface IHandshake {
-  action: 'handshake';
-  browserName: BrowserName;
-  launchOptions: LaunchOptions;
-  playwrightVersion: string;
-}
-
-interface IHandshakeAck {
-  action: 'handshakeAck';
-}
-
-const DEFAULT_LISTEN_PORT: number = 56767;
-
-/**
- * Disposable handle returned by {@link tunneledBrowserConnection}.
- * @beta
- */
-export interface IDisposableTunneledBrowserConnection {
-  /**
-   * The WebSocket endpoint URL that the local Playwright client should connect to.
-   */
-  remoteEndpoint: string;
-  /**
-   * Dispose method that closes the WebSocket servers.
-   * Called automatically when using `using` syntax.
-   */
-  [Symbol.dispose]: () => void;
-  /**
-   * Promise that resolves when the remote WebSocket server closes.
-   */
-  closePromise: Promise<void>;
-}
 
 /**
  * Creates a tunneled WebSocket endpoint that a local Playwright client can connect to.
@@ -258,58 +229,4 @@ export async function tunneledBrowserConnection(
       })
     });
   });
-}
-
-/**
- * Disposable handle returned by {@link createTunneledBrowserAsync}.
- * @beta
- */
-export interface IDisposableTunneledBrowser {
-  /**
-   * The connected Playwright Browser instance.
-   */
-  browser: Browser;
-  /**
-   * Async dispose method that closes the browser connection.
-   * Called automatically when using `await using` syntax.
-   */
-  [Symbol.asyncDispose]: () => Promise<void>;
-}
-
-/**
- * Creates a Playwright Browser instance connected via a tunneled WebSocket connection.
- * @beta
- */
-export async function createTunneledBrowserAsync(
-  browserName: BrowserName,
-  launchOptions: LaunchOptions,
-  logger?: ITerminal,
-  port: number = DEFAULT_LISTEN_PORT
-): Promise<IDisposableTunneledBrowser> {
-  // Establish the tunnel first (remoteEndpoint here refers to local proxy endpoint for connect())
-
-  if (!logger) {
-    const terminalProvider: ConsoleTerminalProvider = new ConsoleTerminalProvider();
-    logger = new Terminal(terminalProvider);
-  }
-
-  const connection: IDisposableTunneledBrowserConnection = await tunneledBrowserConnection(logger, port);
-  const { remoteEndpoint } = connection;
-  // Append query params for browser and launchOptions
-  const urlObj: URL = new URL(remoteEndpoint);
-  urlObj.searchParams.set('browser', browserName);
-  urlObj.searchParams.set('launchOptions', JSON.stringify(launchOptions || {}));
-  const connectEndpoint: string = urlObj.toString();
-  const browser: Browser = await playwright[browserName].connect(connectEndpoint);
-  logger.writeLine(`Connected to remote browser at ${connectEndpoint}`);
-
-  return {
-    browser,
-    async [Symbol.asyncDispose]() {
-      logger.writeLine('Disposing browser');
-      await browser.close();
-      // Dispose the tunnel connection after browser is closed
-      connection[Symbol.dispose]();
-    }
-  };
 }
