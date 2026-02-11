@@ -17,6 +17,7 @@ export const MODULE_WRAPPER_SUFFIX: ');' = ');';
 /**
  * Prefix to wrap ECMAScript method shorthand `(module, __webpack_exports__, __webpack_require__) { ... }` so that the minifier doesn't delete it.
  * Used when webpack emits modules using shorthand syntax.
+ * Combined with the suffix, creates: `__MINIFY_MODULE__({__DEFAULT_ID__(params){body}});`
  * Public because alternate Minifier implementations may wish to know about it.
  * @public
  */
@@ -25,6 +26,7 @@ export const MODULE_WRAPPER_SHORTHAND_PREFIX: '__MINIFY_MODULE__({\n__DEFAULT_ID
 /**
  * Suffix to wrap ECMAScript method shorthand `(module, __webpack_exports__, __webpack_require__) { ... }` so that the minifier doesn't delete it.
  * Used when webpack emits modules using shorthand syntax.
+ * Combined with the prefix, creates: `__MINIFY_MODULE__({__DEFAULT_ID__(params){body}});`
  * Public because alternate Minifier implementations may wish to know about it.
  * @public
  */

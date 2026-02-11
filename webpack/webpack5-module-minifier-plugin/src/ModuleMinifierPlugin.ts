@@ -152,7 +152,8 @@ function isMethodShorthandFormat(code: string): boolean {
 
   // Check if it contains '=>' or 'function('
   // If it does, it's a regular arrow function or function expression, not shorthand
-  if (beforeBrace.includes('=>') || beforeBrace.includes('function(') || beforeBrace.includes('function (')) {
+  // Use a simple check that handles common whitespace variations
+  if (beforeBrace.includes('=>') || /function\s*\(/.test(beforeBrace)) {
     return false;
   }
 
@@ -449,8 +450,7 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
                         // Remove from start up to and including '__DEFAULT_ID__'
                         unwrapped.replace(0, shorthandPrefixEnd + defaultIdStr.length - 1, '');
                         // Remove the suffix from the end
-                        // The suffix is '});' after minification (newline removed)
-                        // Look for '});' from the end
+                        // After minification, the suffix is typically '});' (3 characters, newline removed)
                         const minifiedSuffix: string = '});';
                         if (minified.endsWith(minifiedSuffix)) {
                           unwrapped.replace(len - minifiedSuffix.length, len - 1, '');
@@ -458,13 +458,14 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
                           // In case minifier keeps the newline
                           unwrapped.replace(len - MODULE_WRAPPER_SHORTHAND_SUFFIX.length, len - 1, '');
                         } else {
-                          // Fallback: try to find the closing
-                          unwrapped.replace(len - 3, len - 1, '');
+                          // Fallback: assume '});' suffix
+                          unwrapped.replace(len - minifiedSuffix.length, len - 1, '');
                         }
                       } else {
                         // Fallback: If __DEFAULT_ID__ is not found (shouldn't happen), remove by length
+                        const minifiedSuffix: string = '});';
                         unwrapped.replace(0, MODULE_WRAPPER_SHORTHAND_PREFIX.length - 1, '');
-                        unwrapped.replace(len - 3, len - 1, ''); // Remove '});'
+                        unwrapped.replace(len - minifiedSuffix.length, len - 1, '');
                       }
                     } else {
                       // Regular format
