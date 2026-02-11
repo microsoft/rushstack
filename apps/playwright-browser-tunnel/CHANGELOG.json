@@ -2,6 +2,18 @@
   "name": "@rushstack/playwright-browser-tunnel",
   "entries": [
     {
+      "version": "0.2.4",
+      "tag": "@rushstack/playwright-browser-tunnel_v0.2.4",
+      "date": "Wed, 11 Feb 2026 23:14:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update module layout to isolate code that does not depend on Playwright."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.3",
       "tag": "@rushstack/playwright-browser-tunnel_v0.2.3",
       "date": "Sat, 07 Feb 2026 01:13:26 GMT",
