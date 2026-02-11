@@ -103,6 +103,22 @@ export class ChangeManager {
     static createEmptyChangeFiles(rushConfiguration: RushConfiguration, projectName: string, emailAddress: string): string | undefined;
 }
 
+// @beta
+export enum ChangeType {
+    // (undocumented)
+    dependency = 1,
+    // (undocumented)
+    hotfix = 2,
+    // (undocumented)
+    major = 5,
+    // (undocumented)
+    minor = 4,
+    // (undocumented)
+    none = 0,
+    // (undocumented)
+    patch = 3
+}
+
 // Warning: (ae-forgotten-export) The symbol "IBuildCacheJson" needs to be exported by the entry point index.d.ts
 //
 // @beta (undocumented)
@@ -804,9 +820,8 @@ export interface IPublishCommand extends IRushCommand {
     readonly dryRun: boolean;
 }
 
-// @public
+// @beta
 export interface IPublishProjectInfo {
-    // Warning: (ae-forgotten-export) The symbol "ChangeType" needs to be exported by the entry point index.d.ts
     readonly changeType: ChangeType;
     readonly newVersion: string;
     readonly previousVersion: string;
@@ -814,24 +829,23 @@ export interface IPublishProjectInfo {
     readonly providerConfig: Record<string, unknown> | undefined;
 }
 
-// @public
+// @beta
 export interface IPublishProvider {
     checkExistsAsync(options: IPublishProviderCheckExistsOptions): Promise<boolean>;
     readonly providerName: string;
     publishAsync(options: IPublishProviderPublishOptions): Promise<void>;
 }
 
-// @public
+// @beta
 export interface IPublishProviderCheckExistsOptions {
     readonly project: RushConfigurationProject;
     readonly providerConfig: Record<string, unknown> | undefined;
     readonly version: string;
 }
 
-// @public
+// @beta
 export interface IPublishProviderPublishOptions {
     readonly dryRun: boolean;
-    // Warning: (ae-incompatible-release-tags) The symbol "logger" is marked as @public, but its signature references "ILogger" which is marked as @beta
     readonly logger: ILogger;
     readonly projects: ReadonlyArray<IPublishProjectInfo>;
     readonly tag: string | undefined;
@@ -1240,7 +1254,7 @@ export class ProjectChangeAnalyzer {
     _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal, projectSelection?: ReadonlySet<RushConfigurationProject>): Promise<GetInputsSnapshotAsyncFn | undefined>;
 }
 
-// @public
+// @beta
 export type PublishProviderFactory = () => Promise<IPublishProvider>;
 
 // @public

@@ -12,6 +12,7 @@ export interface IChangeFile {
 
 /**
  * Represents all of the types of change requests.
+ * @beta
  */
 export enum ChangeType {
   none = 0,

@@ -104,6 +104,8 @@ export { EventHooks, Event } from './api/EventHooks';
 
 export { ChangeManager } from './api/ChangeManager';
 
+export { ChangeType } from './api/ChangeManagement';
+
 export { FlagFile as _FlagFile } from './api/FlagFile';
 
 export {

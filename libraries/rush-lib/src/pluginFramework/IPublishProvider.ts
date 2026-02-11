@@ -7,7 +7,7 @@ import type { ILogger } from './logging/Logger';
 
 /**
  * Information about a single project to be published by a publish provider.
- * @public
+ * @beta
  */
 export interface IPublishProjectInfo {
   /**
@@ -39,7 +39,7 @@ export interface IPublishProjectInfo {
 
 /**
  * Options passed to {@link IPublishProvider.publishAsync}.
- * @public
+ * @beta
  */
 export interface IPublishProviderPublishOptions {
   /**
@@ -66,7 +66,7 @@ export interface IPublishProviderPublishOptions {
 
 /**
  * Options passed to {@link IPublishProvider.checkExistsAsync}.
- * @public
+ * @beta
  */
 export interface IPublishProviderCheckExistsOptions {
   /**
@@ -93,7 +93,7 @@ export interface IPublishProviderCheckExistsOptions {
  * Plugins implement this interface and register a factory via
  * {@link RushSession.registerPublishProviderFactory}.
  *
- * @public
+ * @beta
  */
 export interface IPublishProvider {
   /**
@@ -120,6 +120,6 @@ export interface IPublishProvider {
  * Publish provider plugins register a factory of this type via
  * {@link RushSession.registerPublishProviderFactory}.
  *
- * @public
+ * @beta
  */
 export type PublishProviderFactory = () => Promise<IPublishProvider>;
