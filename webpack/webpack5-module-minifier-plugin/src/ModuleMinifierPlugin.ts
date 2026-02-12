@@ -140,10 +140,26 @@ function isLicenseComment(comment: Comment): boolean {
  * @returns true if the code is in method shorthand format
  */
 function isMethodShorthandFormat(code: string): boolean {
-  // Method shorthand detection is not currently needed as webpack doesn't emit true method shorthand yet
-  // Webpack emits either function expressions or arrow functions, both of which should use regular wrapping
-  // This function is kept for future compatibility when webpack adds method shorthand support
-  return false;
+  // Find the position of the first opening brace
+  const firstBraceIndex: number = code.indexOf('{');
+  if (firstBraceIndex === -1) {
+    // No brace found, not a function format
+    return false;
+  }
+
+  // Get the code before the first brace
+  const beforeBrace: string = code.slice(0, firstBraceIndex);
+
+  // Check if it contains '=>' or 'function('
+  // If it does, it's a regular arrow function or function expression, not shorthand
+  // Use a simple check that handles common whitespace variations
+  if (beforeBrace.includes('=>') || /function\s*\(/.test(beforeBrace)) {
+    return false;
+  }
+
+  // If neither '=>' nor 'function(' are found, assume method shorthand format
+  // This handles the case where webpack emits: (__params__) { body } without function keyword
+  return true;
 }
 
 /**
@@ -499,68 +515,100 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
 
             // Verify that this is a JS asset
             if (isJSAsset.test(assetName)) {
-              ++pendingMinificationRequests;
+              // Check if asset contains module tokens (which would make it invalid for minification)
+              const assetSource: string = asset.source().toString();
+              const hasTokens: boolean = assetSource.includes(CHUNK_MODULE_TOKEN);
 
-              const { source: wrappedCodeRaw, map } = useSourceMaps
-                ? asset.sourceAndMap()
-                : {
-                    source: asset.source(),
-                    map: undefined
-                  };
+              if (hasTokens) {
+                // Asset contains tokens - don't try to minify it, just store for rehydration
+                minifiedAssets.set(assetName, {
+                  source: postProcessCode(new ReplaceSource(asset), {
+                    compilation,
+                    module: undefined,
+                    loggingName: assetName
+                  }),
+                  chunk,
+                  fileName: assetName,
+                  renderInfo: new Map(),
+                  type: 'javascript'
+                });
+              } else {
+                // Asset doesn't have tokens - safe to minify
+                ++pendingMinificationRequests;
 
-              const rawCode: string = wrappedCodeRaw.toString();
-              const nameForMap: string = `(chunks)/${assetName}`;
+                const { source: wrappedCodeRaw, map } = useSourceMaps
+                  ? asset.sourceAndMap()
+                  : {
+                      source: asset.source(),
+                      map: undefined
+                    };
 
-              const hash: string = hashCodeFragment(rawCode);
+                const rawCode: string = wrappedCodeRaw.toString();
+                const nameForMap: string = `(chunks)/${assetName}`;
 
-              minifier.minify(
-                {
-                  hash,
-                  code: rawCode,
-                  nameForMap: useSourceMaps ? nameForMap : undefined,
-                  externals: undefined
-                },
-                (result: IModuleMinificationResult) => {
-                  if (isMinificationResultError(result)) {
-                    compilation.errors.push(result.error as WebpackError);
-                    // eslint-disable-next-line no-console
-                    console.error(result.error);
-                  } else {
-                    try {
-                      const { code: minified, map: minifierMap } = result;
+                const hash: string = hashCodeFragment(rawCode);
 
-                      const rawOutput: sources.Source = useSourceMaps
-                        ? new SourceMapSource(
-                            minified, // Code
-                            nameForMap, // File
-                            minifierMap ?? undefined, // Base source map
-                            rawCode, // Source from before transform
-                            map ?? undefined, // Source Map from before transform
-                            true // Remove original source
-                          )
-                        : new RawSource(minified);
-
-                      const withIds: sources.Source = postProcessCode(new ReplaceSource(rawOutput), {
-                        compilation,
-                        module: undefined,
-                        loggingName: assetName
-                      });
-
+                minifier.minify(
+                  {
+                    hash,
+                    code: rawCode,
+                    nameForMap: useSourceMaps ? nameForMap : undefined,
+                    externals: undefined
+                  },
+                  (result: IModuleMinificationResult) => {
+                    if (isMinificationResultError(result)) {
+                      compilation.errors.push(result.error as WebpackError);
+                      // eslint-disable-next-line no-console
+                      console.error(result.error);
+                      // Store unminified asset as fallback
                       minifiedAssets.set(assetName, {
-                        source: new CachedSource(withIds),
+                        source: postProcessCode(new ReplaceSource(asset), {
+                          compilation,
+                          module: undefined,
+                          loggingName: assetName
+                        }),
                         chunk,
                         fileName: assetName,
                         renderInfo: new Map(),
                         type: 'javascript'
                       });
-                    } catch (err) {
-                      compilation.errors.push(err);
-                    }
-                  }
+                    } else {
+                      try {
+                        const { code: minified, map: minifierMap } = result;
 
-                  onFileMinified();
-                }
-              );
+                        const rawOutput: sources.Source = useSourceMaps
+                          ? new SourceMapSource(
+                              minified, // Code
+                              nameForMap, // File
+                              minifierMap ?? undefined, // Base source map
+                              rawCode, // Source from before transform
+                              map ?? undefined, // Source Map from before transform
+                              true // Remove original source
+                            )
+                          : new RawSource(minified);
+
+                        const withIds: sources.Source = postProcessCode(new ReplaceSource(rawOutput), {
+                          compilation,
+                          module: undefined,
+                          loggingName: assetName
+                        });
+
+                        minifiedAssets.set(assetName, {
+                          source: new CachedSource(withIds),
+                          chunk,
+                          fileName: assetName,
+                          renderInfo: new Map(),
+                          type: 'javascript'
+                        });
+                      } catch (err) {
+                        compilation.errors.push(err);
+                      }
+                    }
+
+                    onFileMinified();
+                  }
+                );
+              }
             } else {
               // This isn't a JS asset. Don't try to minify the asset wrapper, though if it contains modules, those might still get replaced with minified versions.
               minifiedAssets.set(assetName, {
