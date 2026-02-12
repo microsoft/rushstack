@@ -39,11 +39,11 @@ export const MODULE_WRAPPER_SHORTHAND_SUFFIX: '});' = '});';
 export const CHUNK_MODULE_TOKEN: '__WEBPACK_CHUNK_MODULE__' = '__WEBPACK_CHUNK_MODULE__';
 
 /**
- * RegExp for replacing chunk module placeholders with property access format
- * Matches both bracket and dot notation after minification
+ * RegExp for replacing chunk module placeholders
+ * Matches the void expression format
  * @public
  */
-export const CHUNK_MODULE_REGEX: RegExp = new RegExp('this\\.?__WEBPACK_CHUNK_MODULE__([A-Za-z0-9$_]+)', 'g');
+export const CHUNK_MODULE_REGEX: RegExp = /\(\)\{void "__WEBPACK_CHUNK_MODULE__([A-Za-z0-9$_]+)"\}/g;
 
 /**
  * Stage # to use when this should be the first tap in the hook

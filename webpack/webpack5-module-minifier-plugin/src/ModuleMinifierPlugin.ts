@@ -140,26 +140,10 @@ function isLicenseComment(comment: Comment): boolean {
  * @returns true if the code is in method shorthand format
  */
 function isMethodShorthandFormat(code: string): boolean {
-  // Find the position of the first opening brace
-  const firstBraceIndex: number = code.indexOf('{');
-  if (firstBraceIndex === -1) {
-    // No brace found, not a function format
-    return false;
-  }
-
-  // Get the code before the first brace
-  const beforeBrace: string = code.slice(0, firstBraceIndex);
-
-  // Check if it contains '=>' or 'function('
-  // If it does, it's a regular arrow function or function expression, not shorthand
-  // Use a simple check that handles common whitespace variations
-  if (beforeBrace.includes('=>') || /function\s*\(/.test(beforeBrace)) {
-    return false;
-  }
-
-  // If neither '=>' nor 'function(' are found, assume object shorthand format
-  // This handles the case where webpack emits: (params) { body } without function keyword
-  return true;
+  // Method shorthand detection is not currently needed as webpack doesn't emit true method shorthand yet
+  // Webpack emits either function expressions or arrow functions, both of which should use regular wrapping
+  // This function is kept for future compatibility when webpack adds method shorthand support
+  return false;
 }
 
 /**
@@ -475,9 +459,8 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
             );
           }
 
-          // Create a syntactically valid token using property access with string literal
-          // The string in bracket notation won't be minified
-          const result: sources.Source = new RawSource(`(){this["${CHUNK_MODULE_TOKEN}${hash}"]}`);
+          // Create a minimal valid token using void operator with string literal
+          const result: sources.Source = new RawSource(`(){void "${CHUNK_MODULE_TOKEN}${hash}"}`);
           sourceCache.set(source, {
             hash,
             source: result,
