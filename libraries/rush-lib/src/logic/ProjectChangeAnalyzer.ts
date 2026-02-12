@@ -172,7 +172,7 @@ export class ProjectChangeAnalyzer {
 
           // Found a non-excluded change
           changedProjects.add(project);
-          return;
+          break;
         }
       },
       { concurrency: 10 }
@@ -507,17 +507,17 @@ async function isVersionOnlyChangeAsync(
       return false;
     }
 
-    // Get the old version of package.json from Git using the blob id from IFileDiffStatus
-    const oldPackageJsonContent: string = await git.getBlobContentAsync({
-      blobSpec: diffStatus.oldhash,
-      repositoryRoot: repoRoot
-    });
-
-    // Get the current version of package.json from Git (staged/committed version, not working tree)
-    const currentPackageJsonContent: string = await git.getBlobContentAsync({
-      blobSpec: diffStatus.newhash,
-      repositoryRoot: repoRoot
-    });
+    // Get both versions of package.json from Git in parallel
+    const [oldPackageJsonContent, currentPackageJsonContent] = await Promise.all([
+      git.getBlobContentAsync({
+        blobSpec: diffStatus.oldhash,
+        repositoryRoot: repoRoot
+      }),
+      git.getBlobContentAsync({
+        blobSpec: diffStatus.newhash,
+        repositoryRoot: repoRoot
+      })
+    ]);
 
     return isPackageJsonVersionOnlyChange(oldPackageJsonContent, currentPackageJsonContent);
   } catch (error) {
@@ -604,7 +604,6 @@ async function getAdditionalFilesFromRushProjectConfigurationAsync(
  * @param oldPackageJsonContent - The old package.json content as a string
  * @param newPackageJsonContent - The new package.json content as a string
  * @returns true if the only difference is the version field, false otherwise
- * @public
  */
 export function isPackageJsonVersionOnlyChange(
   oldPackageJsonContent: string,
