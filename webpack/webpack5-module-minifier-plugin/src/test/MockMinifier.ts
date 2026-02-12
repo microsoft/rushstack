@@ -31,25 +31,29 @@ export class MockMinifier implements IModuleMinifier {
     const isModule: boolean = code.startsWith(MODULE_WRAPPER_PREFIX);
     const isShorthandModule: boolean = code.startsWith(MODULE_WRAPPER_SHORTHAND_PREFIX);
 
-    let processedCode: string;
-    if (isShorthandModule) {
-      // Handle shorthand format
-      // Add comment markers similar to regular format
-      const innerCode: string = code.slice(
-        MODULE_WRAPPER_SHORTHAND_PREFIX.length,
-        -MODULE_WRAPPER_SHORTHAND_SUFFIX.length
-      );
-      processedCode = `${MODULE_WRAPPER_SHORTHAND_PREFIX}\n// Begin Module Hash=${hash}\n${innerCode}\n// End Module\n${MODULE_WRAPPER_SHORTHAND_SUFFIX}`;
-    } else if (isModule) {
-      // Handle regular format
-      processedCode = `${MODULE_WRAPPER_PREFIX}\n// Begin Module Hash=${hash}\n${code.slice(
-        MODULE_WRAPPER_PREFIX.length,
-        -MODULE_WRAPPER_SUFFIX.length
-      )}\n// End Module${MODULE_WRAPPER_SUFFIX}`;
-    } else {
-      // Handle asset format
-      processedCode = `// Begin Asset Hash=${hash}\n${code}\n// End Asset`;
-    }
+    // Use local function to ensure processedCode is always initialized (strictNullChecks compliant)
+    const getProcessedCode = (): string => {
+      if (isShorthandModule) {
+        // Handle shorthand format
+        // Add comment markers similar to regular format
+        const innerCode: string = code.slice(
+          MODULE_WRAPPER_SHORTHAND_PREFIX.length,
+          -MODULE_WRAPPER_SHORTHAND_SUFFIX.length
+        );
+        return `${MODULE_WRAPPER_SHORTHAND_PREFIX}\n// Begin Module Hash=${hash}\n${innerCode}\n// End Module\n${MODULE_WRAPPER_SHORTHAND_SUFFIX}`;
+      } else if (isModule) {
+        // Handle regular format
+        return `${MODULE_WRAPPER_PREFIX}\n// Begin Module Hash=${hash}\n${code.slice(
+          MODULE_WRAPPER_PREFIX.length,
+          -MODULE_WRAPPER_SUFFIX.length
+        )}\n// End Module${MODULE_WRAPPER_SUFFIX}`;
+      } else {
+        // Handle asset format
+        return `// Begin Asset Hash=${hash}\n${code}\n// End Asset`;
+      }
+    };
+
+    const processedCode: string = getProcessedCode();
 
     callback({
       hash,

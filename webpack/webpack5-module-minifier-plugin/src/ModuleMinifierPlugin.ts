@@ -147,7 +147,7 @@ const FUNCTION_KEYWORD_REGEX: RegExp = /function\s*\(/;
 function isMethodShorthandFormat(code: string): boolean {
   // Find the position of the first opening brace
   const firstBraceIndex: number = code.indexOf('{');
-  if (firstBraceIndex === -1) {
+  if (firstBraceIndex < 0) {
     // No brace found, not a function format
     return false;
   }
