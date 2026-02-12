@@ -918,7 +918,7 @@ importers:
         version: 1.18.8
       css-loader:
         specifier: ~5.2.7
-        version: 5.2.7(webpack@5.105.0)
+        version: 5.2.7(webpack@5.105.2)
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
@@ -927,25 +927,25 @@ importers:
         version: link:../heft-storybook-v9-react-tutorial-storykit
       html-webpack-plugin:
         specifier: ~5.5.0
-        version: 5.5.4(webpack@5.105.0)
+        version: 5.5.4(webpack@5.105.2)
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
       source-map-loader:
         specifier: ~1.1.3
-        version: 1.1.3(webpack@5.105.0)
+        version: 1.1.3(webpack@5.105.2)
       storybook:
         specifier: ~9.1.6
         version: 9.1.17(@testing-library/dom@7.21.8)(prettier@3.8.1)
       style-loader:
         specifier: ~2.0.0
-        version: 2.0.0(webpack@5.105.0)
+        version: 2.0.0(webpack@5.105.2)
       typescript:
         specifier: ~5.8.2
         version: 5.8.2
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../build-tests-samples/heft-storybook-v9-react-tutorial-app:
     dependencies:
@@ -1000,10 +1000,10 @@ importers:
         version: 1.18.8
       babel-loader:
         specifier: ~8.2.3
-        version: 8.2.5(@babel/core@7.20.12)(webpack@5.105.0)
+        version: 8.2.5(@babel/core@7.20.12)(webpack@5.105.2)
       css-loader:
         specifier: ~5.2.7
-        version: 5.2.7(webpack@5.105.0)
+        version: 5.2.7(webpack@5.105.2)
       jest:
         specifier: ~29.3.1
         version: 29.3.1(@types/node@20.17.19)
@@ -1018,16 +1018,16 @@ importers:
         version: 9.1.17(@testing-library/dom@7.21.8)(prettier@3.8.1)
       style-loader:
         specifier: ~2.0.0
-        version: 2.0.0(webpack@5.105.0)
+        version: 2.0.0(webpack@5.105.2)
       terser-webpack-plugin:
         specifier: ~3.0.8
-        version: 3.0.8(webpack@5.105.0)
+        version: 3.0.8(webpack@5.105.2)
       typescript:
         specifier: ~5.8.2
         version: 5.8.2
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -1151,28 +1151,28 @@ importers:
         version: 1.18.8
       css-loader:
         specifier: ~6.6.0
-        version: 6.6.0(webpack@5.105.0)
+        version: 6.6.0(webpack@5.105.2)
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
       html-webpack-plugin:
         specifier: ~5.5.0
-        version: 5.5.4(webpack@5.105.0)
+        version: 5.5.4(webpack@5.105.2)
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
       source-map-loader:
         specifier: ~3.0.1
-        version: 3.0.2(webpack@5.105.0)
+        version: 3.0.2(webpack@5.105.2)
       style-loader:
         specifier: ~3.3.1
-        version: 3.3.4(webpack@5.105.0)
+        version: 3.3.4(webpack@5.105.2)
       typescript:
         specifier: ~5.8.2
         version: 5.8.2
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../build-tests-samples/packlets-tutorial:
     devDependencies:
@@ -1664,13 +1664,13 @@ importers:
         version: 1.18.8
       html-webpack-plugin:
         specifier: ~5.5.0
-        version: 5.5.4(webpack@5.105.0)
+        version: 5.5.4(webpack@5.105.2)
       typescript:
         specifier: ~5.8.2
         version: 5.8.2
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
       webpack-bundle-analyzer:
         specifier: ~4.5.0
         version: 4.5.0
@@ -2490,13 +2490,13 @@ importers:
         version: 9.37.0
       html-webpack-plugin:
         specifier: ~5.5.0
-        version: 5.5.4(webpack@5.105.0)
+        version: 5.5.4(webpack@5.105.2)
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
       source-map-loader:
         specifier: ~3.0.1
-        version: 3.0.2(webpack@5.105.0)
+        version: 3.0.2(webpack@5.105.2)
       tslint:
         specifier: ~5.20.1
         version: 5.20.1(typescript@5.8.2)
@@ -2504,8 +2504,8 @@ importers:
         specifier: ~5.8.2
         version: 5.8.2
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../build-tests/localization-plugin-test-01:
     dependencies:
@@ -2869,13 +2869,13 @@ importers:
         version: 8.57.1
       html-webpack-plugin:
         specifier: ~5.5.0
-        version: 5.5.4(webpack@5.105.0)
+        version: 5.5.4(webpack@5.105.2)
       typescript:
         specifier: ~5.8.2
         version: 5.8.2
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../eslint/eslint-bulk:
     devDependencies:
@@ -3340,7 +3340,7 @@ importers:
     dependencies:
       '@rspack/dev-server':
         specifier: ^1.1.4
-        version: 1.2.1(@rspack/core@1.6.8(@swc/helpers@0.5.18))(@types/webpack@4.41.32)(webpack@5.105.0)
+        version: 1.2.1(@rspack/core@1.6.8(@swc/helpers@0.5.18))(@types/webpack@4.41.32)(webpack@5.105.2)
       '@rushstack/debug-certificate-manager':
         specifier: workspace:*
         version: link:../../libraries/debug-certificate-manager
@@ -3354,8 +3354,8 @@ importers:
         specifier: 2.4.0
         version: 2.4.0
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
     devDependencies:
       '@rspack/core':
         specifier: ~1.6.0-beta.0
@@ -3603,7 +3603,7 @@ importers:
         version: 2.4.0
       webpack-dev-server:
         specifier: ^5.1.0
-        version: 5.2.3(@types/webpack@4.41.32)(webpack@5.105.0)
+        version: 5.2.3(@types/webpack@4.41.32)(webpack@5.105.2)
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -3621,8 +3621,8 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../libraries/api-extractor-model:
     dependencies:
@@ -3977,8 +3977,8 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../libraries/problem-matcher:
     devDependencies:
@@ -4192,8 +4192,8 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../libraries/rush-pnpm-kit-v10:
     dependencies:
@@ -4307,8 +4307,8 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../libraries/rush-themed-ui:
     dependencies:
@@ -4720,52 +4720,52 @@ importers:
         version: 10.4.23(postcss@8.4.49)
       css-loader:
         specifier: ~6.6.0
-        version: 6.6.0(webpack@5.105.0)
+        version: 6.6.0(webpack@5.105.2)
       css-minimizer-webpack-plugin:
         specifier: ~3.4.1
-        version: 3.4.1(webpack@5.105.0)
+        version: 3.4.1(webpack@5.105.2)
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
       html-webpack-plugin:
         specifier: ~5.5.0
-        version: 5.5.4(webpack@5.105.0)
+        version: 5.5.4(webpack@5.105.2)
       jest-environment-jsdom:
         specifier: ~29.5.0
         version: 29.5.0
       mini-css-extract-plugin:
         specifier: ~2.5.3
-        version: 2.5.3(webpack@5.105.0)
+        version: 2.5.3(webpack@5.105.2)
       postcss:
         specifier: ~8.4.6
         version: 8.4.49
       postcss-loader:
         specifier: ~6.2.1
-        version: 6.2.1(postcss@8.4.49)(webpack@5.105.0)
+        version: 6.2.1(postcss@8.4.49)(webpack@5.105.2)
       sass:
         specifier: ~1.49.7
         version: 1.49.11
       sass-loader:
         specifier: ~12.4.0
-        version: 12.4.0(sass@1.49.11)(webpack@5.105.0)
+        version: 12.4.0(sass@1.49.11)(webpack@5.105.2)
       source-map-loader:
         specifier: ~3.0.1
-        version: 3.0.2(webpack@5.105.0)
+        version: 3.0.2(webpack@5.105.2)
       style-loader:
         specifier: ~3.3.1
-        version: 3.3.4(webpack@5.105.0)
+        version: 3.3.4(webpack@5.105.2)
       terser-webpack-plugin:
         specifier: ~5.3.1
-        version: 5.3.16(webpack@5.105.0)
+        version: 5.3.16(webpack@5.105.2)
       typescript:
         specifier: ~5.8.2
         version: 5.8.2
       url-loader:
         specifier: ~4.1.1
-        version: 4.1.1(file-loader@6.2.0(webpack@5.105.0))(webpack@5.105.0)
+        version: 4.1.1(file-loader@6.2.0(webpack@5.105.2))(webpack@5.105.2)
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
       webpack-bundle-analyzer:
         specifier: ~4.5.0
         version: 4.5.0
@@ -5286,13 +5286,13 @@ importers:
         version: 9.37.0
       html-webpack-plugin:
         specifier: ~5.5.0
-        version: 5.5.4(webpack@5.105.0)
+        version: 5.5.4(webpack@5.105.2)
       local-web-rig:
         specifier: workspace:*
         version: link:../../rigs/local-web-rig
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
       webpack-bundle-analyzer:
         specifier: ~4.5.0
         version: 4.5.0
@@ -5396,8 +5396,8 @@ importers:
         specifier: 4.12.0
         version: 4.12.0
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../webpack/loader-load-themed-styles:
     dependencies:
@@ -5452,8 +5452,8 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../webpack/set-webpack-public-path-plugin:
     dependencies:
@@ -5480,8 +5480,8 @@ importers:
         specifier: 4.12.0
         version: 4.12.0
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../webpack/webpack-deep-imports-plugin:
     dependencies:
@@ -5499,8 +5499,8 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../webpack/webpack-embedded-dependencies-plugin:
     dependencies:
@@ -5524,8 +5524,8 @@ importers:
         specifier: 4.12.0
         version: 4.12.0
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../webpack/webpack-plugin-utilities:
     dependencies:
@@ -5549,8 +5549,8 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../webpack/webpack-workspace-resolve-plugin:
     dependencies:
@@ -5574,8 +5574,8 @@ importers:
         specifier: 4.12.0
         version: 4.12.0
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../webpack/webpack4-localization-plugin:
     dependencies:
@@ -5676,7 +5676,7 @@ importers:
         version: link:../../libraries/node-core-library
       css-loader:
         specifier: ~6.6.0
-        version: 6.6.0(webpack@5.105.0)
+        version: 6.6.0(webpack@5.105.2)
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
@@ -5687,8 +5687,8 @@ importers:
         specifier: 4.12.0
         version: 4.12.0
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../webpack/webpack5-localization-plugin:
     dependencies:
@@ -5718,8 +5718,8 @@ importers:
         specifier: 4.12.0
         version: 4.12.0
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
   ../../../webpack/webpack5-module-minifier-plugin:
     dependencies:
@@ -5755,8 +5755,8 @@ importers:
         specifier: 4.12.0
         version: 4.12.0
       webpack:
-        specifier: ~5.105.0
-        version: 5.105.0
+        specifier: ~5.105.2
+        version: 5.105.2
 
 packages:
 
@@ -18424,8 +18424,8 @@ packages:
       webpack-command:
         optional: true
 
-  webpack@5.105.0:
-    resolution: {integrity: sha512-gX/dMkRQc7QOMzgTe6KsYFM7DxeIONQSui1s0n/0xht36HvrgbxtM1xBlgx596NbpHuQU8P7QpKwrZYwUX48nw==}
+  webpack@5.105.2:
+    resolution: {integrity: sha512-dRXm0a2qcHPUBEzVk8uph0xWSjV/xZxenQQbLwnwP7caQCYpqG1qddwlyEkIDkYn0K8tvmcrZ+bOrzoQ3HxCDw==}
     engines: {node: '>=10.13.0'}
     hasBin: true
     peerDependencies:
@@ -23656,7 +23656,7 @@ snapshots:
     optionalDependencies:
       '@swc/helpers': 0.5.18
 
-  '@rspack/dev-server@1.2.1(@rspack/core@1.6.8(@swc/helpers@0.5.18))(@types/webpack@4.41.32)(webpack@5.105.0)':
+  '@rspack/dev-server@1.2.1(@rspack/core@1.6.8(@swc/helpers@0.5.18))(@types/webpack@4.41.32)(webpack@5.105.2)':
     dependencies:
       '@rspack/core': 1.6.8(@swc/helpers@0.5.18)
       '@types/bonjour': 3.5.13
@@ -23685,7 +23685,7 @@ snapshots:
       serve-index: 1.9.2
       sockjs: 0.3.24
       spdy: 4.0.2
-      webpack-dev-middleware: 7.4.5(@types/webpack@4.41.32)(webpack@5.105.0)
+      webpack-dev-middleware: 7.4.5(@types/webpack@4.41.32)(webpack@5.105.2)
       ws: 8.19.0
     transitivePeerDependencies:
       - '@types/webpack'
@@ -25059,17 +25059,17 @@ snapshots:
       '@storybook/core-webpack': 9.1.17(storybook@9.1.17(@testing-library/dom@7.21.8)(prettier@3.8.1))
       case-sensitive-paths-webpack-plugin: 2.4.0
       cjs-module-lexer: 1.4.3
-      css-loader: 6.11.0(@rspack/core@1.6.8(@swc/helpers@0.5.18))(webpack@5.105.0)
+      css-loader: 6.11.0(@rspack/core@1.6.8(@swc/helpers@0.5.18))(webpack@5.105.2)
       es-module-lexer: 1.7.0
-      fork-ts-checker-webpack-plugin: 8.0.0(typescript@5.8.2)(webpack@5.105.0)
-      html-webpack-plugin: 5.5.4(webpack@5.105.0)
+      fork-ts-checker-webpack-plugin: 8.0.0(typescript@5.8.2)(webpack@5.105.2)
+      html-webpack-plugin: 5.5.4(webpack@5.105.2)
       magic-string: 0.30.21
       storybook: 9.1.17(@testing-library/dom@7.21.8)(prettier@3.8.1)
-      style-loader: 3.3.4(webpack@5.105.0)
-      terser-webpack-plugin: 5.3.16(webpack@5.105.0)
+      style-loader: 3.3.4(webpack@5.105.2)
+      terser-webpack-plugin: 5.3.16(webpack@5.105.2)
       ts-dedent: 2.2.0
-      webpack: 5.105.0
-      webpack-dev-middleware: 6.1.3(@types/webpack@4.41.32)(webpack@5.105.0)
+      webpack: 5.105.2
+      webpack-dev-middleware: 6.1.3(@types/webpack@4.41.32)(webpack@5.105.2)
       webpack-hot-middleware: 2.26.1
       webpack-virtual-modules: 0.6.2
     optionalDependencies:
@@ -25546,7 +25546,7 @@ snapshots:
   '@storybook/preset-react-webpack@9.1.17(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(storybook@9.1.17(@testing-library/dom@7.21.8)(prettier@3.8.1))(typescript@5.8.2)':
     dependencies:
       '@storybook/core-webpack': 9.1.17(storybook@9.1.17(@testing-library/dom@7.21.8)(prettier@3.8.1))
-      '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.0c3f3b7.0(typescript@5.8.2)(webpack@5.105.0)
+      '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.0c3f3b7.0(typescript@5.8.2)(webpack@5.105.2)
       '@types/semver': 7.5.0
       find-up: 7.0.0
       magic-string: 0.30.21
@@ -25557,7 +25557,7 @@ snapshots:
       semver: 7.5.4
       storybook: 9.1.17(@testing-library/dom@7.21.8)(prettier@3.8.1)
       tsconfig-paths: 4.2.0
-      webpack: 5.105.0
+      webpack: 5.105.2
     optionalDependencies:
       typescript: 5.8.2
     transitivePeerDependencies:
@@ -25605,7 +25605,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@storybook/react-docgen-typescript-plugin@1.0.6--canary.9.0c3f3b7.0(typescript@5.8.2)(webpack@5.105.0)':
+  '@storybook/react-docgen-typescript-plugin@1.0.6--canary.9.0c3f3b7.0(typescript@5.8.2)(webpack@5.105.2)':
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       endent: 2.1.0
@@ -25615,7 +25615,7 @@ snapshots:
       react-docgen-typescript: 2.4.0(typescript@5.8.2)
       tslib: 2.8.1
       typescript: 5.8.2
-      webpack: 5.105.0
+      webpack: 5.105.2
     transitivePeerDependencies:
       - supports-color
 
@@ -27715,14 +27715,14 @@ snapshots:
       schema-utils: 2.7.1
       webpack: 4.47.0
 
-  babel-loader@8.2.5(@babel/core@7.20.12)(webpack@5.105.0):
+  babel-loader@8.2.5(@babel/core@7.20.12)(webpack@5.105.2):
     dependencies:
       '@babel/core': 7.20.12
       find-cache-dir: 3.3.2
       loader-utils: 2.0.4
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 5.105.0
+      webpack: 5.105.2
 
   babel-plugin-add-react-displayname@0.0.5: {}
 
@@ -28802,7 +28802,7 @@ snapshots:
       semver: 7.5.4
       webpack: 4.47.0
 
-  css-loader@5.2.7(webpack@5.105.0):
+  css-loader@5.2.7(webpack@5.105.2):
     dependencies:
       icss-utils: 5.1.0(postcss@8.4.49)
       loader-utils: 2.0.4
@@ -28814,9 +28814,9 @@ snapshots:
       postcss-value-parser: 4.2.0
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 5.105.0
+      webpack: 5.105.2
 
-  css-loader@6.11.0(@rspack/core@1.6.8(@swc/helpers@0.5.18))(webpack@5.105.0):
+  css-loader@6.11.0(@rspack/core@1.6.8(@swc/helpers@0.5.18))(webpack@5.105.2):
     dependencies:
       icss-utils: 5.1.0(postcss@8.4.49)
       postcss: 8.4.49
@@ -28828,9 +28828,9 @@ snapshots:
       semver: 7.5.4
     optionalDependencies:
       '@rspack/core': 1.6.8(@swc/helpers@0.5.18)
-      webpack: 5.105.0
+      webpack: 5.105.2
 
-  css-loader@6.6.0(webpack@5.105.0):
+  css-loader@6.6.0(webpack@5.105.2):
     dependencies:
       icss-utils: 5.1.0(postcss@8.4.49)
       postcss: 8.4.49
@@ -28840,9 +28840,9 @@ snapshots:
       postcss-modules-values: 4.0.0(postcss@8.4.49)
       postcss-value-parser: 4.2.0
       semver: 7.5.4
-      webpack: 5.105.0
+      webpack: 5.105.2
 
-  css-minimizer-webpack-plugin@3.4.1(webpack@5.105.0):
+  css-minimizer-webpack-plugin@3.4.1(webpack@5.105.2):
     dependencies:
       cssnano: 5.1.15(postcss@8.4.49)
       jest-worker: 27.5.1
@@ -28850,7 +28850,7 @@ snapshots:
       schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       source-map: 0.6.1
-      webpack: 5.105.0
+      webpack: 5.105.2
 
   css-select@4.3.0:
     dependencies:
@@ -30696,11 +30696,11 @@ snapshots:
       schema-utils: 3.3.0
       webpack: 4.47.0
 
-  file-loader@6.2.0(webpack@5.105.0):
+  file-loader@6.2.0(webpack@5.105.2):
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
-      webpack: 5.105.0
+      webpack: 5.105.2
     optional: true
 
   file-system-cache@1.1.0:
@@ -30874,7 +30874,7 @@ snapshots:
     optionalDependencies:
       eslint: 9.37.0
 
-  fork-ts-checker-webpack-plugin@8.0.0(typescript@5.8.2)(webpack@5.105.0):
+  fork-ts-checker-webpack-plugin@8.0.0(typescript@5.8.2)(webpack@5.105.2):
     dependencies:
       '@babel/code-frame': 7.28.6
       chalk: 4.1.2
@@ -30889,7 +30889,7 @@ snapshots:
       semver: 7.5.4
       tapable: 2.3.0
       typescript: 5.8.2
-      webpack: 5.105.0
+      webpack: 5.105.2
 
   form-data@4.0.5:
     dependencies:
@@ -31450,14 +31450,14 @@ snapshots:
       util.promisify: 1.0.0
       webpack: 4.47.0
 
-  html-webpack-plugin@5.5.4(webpack@5.105.0):
+  html-webpack-plugin@5.5.4(webpack@5.105.2):
     dependencies:
       '@types/html-minifier-terser': 6.1.0
       html-minifier-terser: 6.1.0
       lodash: 4.17.23
       pretty-error: 4.0.0
       tapable: 2.3.0
-      webpack: 5.105.0
+      webpack: 5.105.2
 
   htmlparser2@6.1.0:
     dependencies:
@@ -33248,10 +33248,10 @@ snapshots:
 
   min-indent@1.0.1: {}
 
-  mini-css-extract-plugin@2.5.3(webpack@5.105.0):
+  mini-css-extract-plugin@2.5.3(webpack@5.105.2):
     dependencies:
       schema-utils: 4.3.3
-      webpack: 5.105.0
+      webpack: 5.105.2
 
   minimalistic-assert@1.0.1: {}
 
@@ -34142,13 +34142,13 @@ snapshots:
       semver: 7.5.4
       webpack: 4.47.0
 
-  postcss-loader@6.2.1(postcss@8.4.49)(webpack@5.105.0):
+  postcss-loader@6.2.1(postcss@8.4.49)(webpack@5.105.2):
     dependencies:
       cosmiconfig: 7.1.0
       klona: 2.0.6
       postcss: 8.4.49
       semver: 7.5.4
-      webpack: 5.105.0
+      webpack: 5.105.2
 
   postcss-merge-longhand@5.1.7(postcss@8.4.49):
     dependencies:
@@ -35283,11 +35283,11 @@ snapshots:
       sass-embedded-win32-ia32: 1.85.1
       sass-embedded-win32-x64: 1.85.1
 
-  sass-loader@12.4.0(sass@1.49.11)(webpack@5.105.0):
+  sass-loader@12.4.0(sass@1.49.11)(webpack@5.105.2):
     dependencies:
       klona: 2.0.6
       neo-async: 2.6.2
-      webpack: 5.105.0
+      webpack: 5.105.2
     optionalDependencies:
       sass: 1.49.11
 
@@ -35699,22 +35699,22 @@ snapshots:
       webpack: 4.47.0
       whatwg-mimetype: 2.3.0
 
-  source-map-loader@1.1.3(webpack@5.105.0):
+  source-map-loader@1.1.3(webpack@5.105.2):
     dependencies:
       abab: 2.0.6
       iconv-lite: 0.6.3
       loader-utils: 2.0.4
       schema-utils: 3.3.0
       source-map: 0.6.1
-      webpack: 5.105.0
+      webpack: 5.105.2
       whatwg-mimetype: 2.3.0
 
-  source-map-loader@3.0.2(webpack@5.105.0):
+  source-map-loader@3.0.2(webpack@5.105.2):
     dependencies:
       abab: 2.0.6
       iconv-lite: 0.6.3
       source-map-js: 1.2.1
-      webpack: 5.105.0
+      webpack: 5.105.2
 
   source-map-resolve@0.5.3:
     dependencies:
@@ -36042,15 +36042,15 @@ snapshots:
       schema-utils: 3.3.0
       webpack: 4.47.0
 
-  style-loader@2.0.0(webpack@5.105.0):
+  style-loader@2.0.0(webpack@5.105.2):
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
-      webpack: 5.105.0
+      webpack: 5.105.2
 
-  style-loader@3.3.4(webpack@5.105.0):
+  style-loader@3.3.4(webpack@5.105.2):
     dependencies:
-      webpack: 5.105.0
+      webpack: 5.105.2
 
   style-to-object@0.3.0:
     dependencies:
@@ -36210,7 +36210,7 @@ snapshots:
       webpack: 4.47.0
       webpack-sources: 1.4.3
 
-  terser-webpack-plugin@3.0.8(webpack@5.105.0):
+  terser-webpack-plugin@3.0.8(webpack@5.105.2):
     dependencies:
       cacache: 15.3.0
       find-cache-dir: 3.3.2
@@ -36220,7 +36220,7 @@ snapshots:
       serialize-javascript: 4.0.0
       source-map: 0.6.1
       terser: 4.8.1
-      webpack: 5.105.0
+      webpack: 5.105.2
       webpack-sources: 1.4.3
 
   terser-webpack-plugin@4.2.3(webpack@4.47.0):
@@ -36236,14 +36236,14 @@ snapshots:
       webpack: 4.47.0
       webpack-sources: 1.4.3
 
-  terser-webpack-plugin@5.3.16(webpack@5.105.0):
+  terser-webpack-plugin@5.3.16(webpack@5.105.2):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       terser: 5.46.0
-      webpack: 5.105.0
+      webpack: 5.105.2
 
   terser@4.8.1:
     dependencies:
@@ -36772,14 +36772,14 @@ snapshots:
     optionalDependencies:
       file-loader: 6.2.0(webpack@4.47.0)
 
-  url-loader@4.1.1(file-loader@6.2.0(webpack@5.105.0))(webpack@5.105.0):
+  url-loader@4.1.1(file-loader@6.2.0(webpack@5.105.2))(webpack@5.105.2):
     dependencies:
       loader-utils: 2.0.4
       mime-types: 2.1.35
       schema-utils: 3.3.0
-      webpack: 5.105.0
+      webpack: 5.105.2
     optionalDependencies:
-      file-loader: 6.2.0(webpack@5.105.0)
+      file-loader: 6.2.0(webpack@5.105.2)
 
   url-parse@1.5.10:
     dependencies:
@@ -36981,7 +36981,7 @@ snapshots:
     optionalDependencies:
       '@types/webpack': 4.41.32
 
-  webpack-dev-middleware@6.1.3(@types/webpack@4.41.32)(webpack@5.105.0):
+  webpack-dev-middleware@6.1.3(@types/webpack@4.41.32)(webpack@5.105.2):
     dependencies:
       colorette: 2.0.20
       memfs: 3.5.3
@@ -36990,7 +36990,7 @@ snapshots:
       schema-utils: 4.3.3
     optionalDependencies:
       '@types/webpack': 4.41.32
-      webpack: 5.105.0
+      webpack: 5.105.2
 
   webpack-dev-middleware@7.4.5(@types/webpack@4.41.32)(webpack@4.47.0):
     dependencies:
@@ -37005,7 +37005,7 @@ snapshots:
       webpack: 4.47.0
     optional: true
 
-  webpack-dev-middleware@7.4.5(@types/webpack@4.41.32)(webpack@5.105.0):
+  webpack-dev-middleware@7.4.5(@types/webpack@4.41.32)(webpack@5.105.2):
     dependencies:
       colorette: 2.0.20
       memfs: 4.56.10
@@ -37015,7 +37015,7 @@ snapshots:
       schema-utils: 4.3.3
     optionalDependencies:
       '@types/webpack': 4.41.32
-      webpack: 5.105.0
+      webpack: 5.105.2
 
   webpack-dev-server@4.9.3(@types/webpack@4.41.32)(webpack@4.47.0):
     dependencies:
@@ -37100,7 +37100,7 @@ snapshots:
       - utf-8-validate
     optional: true
 
-  webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@5.105.0):
+  webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@5.105.2):
     dependencies:
       '@types/bonjour': 3.5.13
       '@types/connect-history-api-fallback': 1.5.4
@@ -37129,11 +37129,11 @@ snapshots:
       serve-index: 1.9.2
       sockjs: 0.3.24
       spdy: 4.0.2
-      webpack-dev-middleware: 7.4.5(@types/webpack@4.41.32)(webpack@5.105.0)
+      webpack-dev-middleware: 7.4.5(@types/webpack@4.41.32)(webpack@5.105.2)
       ws: 8.19.0
     optionalDependencies:
       '@types/webpack': 4.41.32
-      webpack: 5.105.0
+      webpack: 5.105.2
     transitivePeerDependencies:
       - bufferutil
       - debug
@@ -37199,7 +37199,7 @@ snapshots:
       watchpack: 1.7.5
       webpack-sources: 1.4.3
 
-  webpack@5.105.0:
+  webpack@5.105.2:
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.8
@@ -37223,7 +37223,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 4.3.3
       tapable: 2.3.0
-      terser-webpack-plugin: 5.3.16(webpack@5.105.0)
+      terser-webpack-plugin: 5.3.16(webpack@5.105.2)
       watchpack: 2.5.1
       webpack-sources: 3.3.3
     transitivePeerDependencies:
