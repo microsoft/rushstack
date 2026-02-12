@@ -475,7 +475,9 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
             );
           }
 
-          const result: sources.Source = new RawSource(`${CHUNK_MODULE_TOKEN}${hash}`);
+          // Create a syntactically valid token using property access with string literal
+          // The string in bracket notation won't be minified
+          const result: sources.Source = new RawSource(`(){this["${CHUNK_MODULE_TOKEN}${hash}"]}`);
           sourceCache.set(source, {
             hash,
             source: result,
