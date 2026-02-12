@@ -3,7 +3,7 @@
 exports[`ModuleMinifierPlugin Handles multiple runtimes (mock): Content 1`] = `
 Object {
   "/release/async-1.js": "/*! For license information please see async-1.js.LICENSE.txt */
-// Begin Asset Hash=69b04c1d29fa46faf36d042bbe433bfe80bf6de89433dda1e91248932b0bdaaf
+// Begin Asset Hash=b53e0a088f83c5d7fc7ba3ca806e0471adea1460f448a26004ed99835ccffac3
 \\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[527],{
 
@@ -39,7 +39,7 @@ function async1() { console.log('async-1'); }
 // @license MIT
 ",
   "/release/async-2.js": "/*! For license information please see async-2.js.LICENSE.txt */
-// Begin Asset Hash=d8c163257b9c0ffa0929f47ce896d7edbb1412dc70ce4327c3fc9e2d7a028e92
+// Begin Asset Hash=2e943d5dc5a407a894b565d54ceeb3f554742f52442d698c22b8795be4d4694c
 \\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[324],{
 
@@ -635,10 +635,10 @@ exports[`ModuleMinifierPlugin Handles multiple runtimes (terser): Content 1`] = 
 exports[`ModuleMinifierPlugin Handles multiple runtimes (terser): Errors 1`] = `
 Array [
   Object {
-    "message": "Unexpected token name «__WEBPACK_CHUNK_MODULE__c3587d3a82556f8e3f1b0b4d1fcbdefd62eedc2f1c5708b0a824a504bef85276», expected punc «,»",
+    "message": "Unexpected token name «__WEBPACK_CHUNK_MODULE__522ee27cac2edf706f26b73b1e5ec4bc44feefe1107c5e303f671547dff3b8d1», expected punc «,»",
   },
   Object {
-    "message": "Unexpected token name «__WEBPACK_CHUNK_MODULE__bf7c8493af96fc819aeda647ea3306127d1b5c0239a14cb225810a4644dfe910», expected punc «,»",
+    "message": "Unexpected token name «__WEBPACK_CHUNK_MODULE__9fa9db01a39f213b0bad42889493581d8a3cc9d76f3b77543aa34e2cfc6622ed», expected punc «,»",
   },
 ]
 `;

@@ -3,7 +3,7 @@
 exports[`ModuleMinifierPlugin Handles AMD externals (mock): Content 1`] = `
 Object {
   "/release/async.js": "/*! For license information please see async.js.LICENSE.txt */
-// Begin Asset Hash=68ab9ab7e0ab87d08307091bb1e31e56e04b12fc882535d275e7d4c9402a5d8b
+// Begin Asset Hash=cfb7f7d353fd9d01c51f613f9235ad90b50fe78f746b088cf52a92517a5fc458
 \\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[157],{
 
@@ -344,7 +344,7 @@ exports[`ModuleMinifierPlugin Handles AMD externals (terser): Content 1`] = `Obj
 exports[`ModuleMinifierPlugin Handles AMD externals (terser): Errors 1`] = `
 Array [
   Object {
-    "message": "Unexpected token name «__WEBPACK_CHUNK_MODULE__54d801f652de2ab1c87a646d9bc448cff4235f0d68b5519fdb388f0c0c0af447», expected punc «,»",
+    "message": "Unexpected token name «__WEBPACK_CHUNK_MODULE__aa928190bac95603578bbc24c65647633e6305dc69d46edaf07d710fc69da78d», expected punc «,»",
   },
 ]
 `;

@@ -111,10 +111,10 @@ export interface IRenderedModulePosition {
 export const MODULE_WRAPPER_PREFIX: '__MINIFY_MODULE__(';
 
 // @public
-export const MODULE_WRAPPER_SHORTHAND_PREFIX: '__MINIFY_MODULE__({\n__DEFAULT_ID__';
+export const MODULE_WRAPPER_SHORTHAND_PREFIX: '__MINIFY_MODULE__({__DEFAULT_ID__';
 
 // @public
-export const MODULE_WRAPPER_SHORTHAND_SUFFIX: '\n});';
+export const MODULE_WRAPPER_SHORTHAND_SUFFIX: '});';
 
 // @public
 export const MODULE_WRAPPER_SUFFIX: ');';

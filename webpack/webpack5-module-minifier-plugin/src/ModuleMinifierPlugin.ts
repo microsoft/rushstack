@@ -258,10 +258,9 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
       const submittedModules: Set<string | number> = new Set();
 
       /**
-       * Map to track which modules use ECMAScript method shorthand format.
-       * Key is the module hash, value is true if shorthand format is used.
+       * Set of module hashes that use ECMAScript method shorthand format.
        */
-      const moduleShorthandFormat: Map<string, boolean> = new Map();
+      const moduleShorthandFormat: Set<string> = new Set();
 
       /**
        * The text and comments of all minified modules.
@@ -403,7 +402,9 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
             submittedModules.add(hash);
 
             // Track whether this module uses shorthand format
-            moduleShorthandFormat.set(hash, isShorthand);
+            if (isShorthand) {
+              moduleShorthandFormat.add(hash);
+            }
 
             ++pendingMinificationRequests;
 
@@ -436,39 +437,15 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
                     const len: number = minified.length;
 
                     // Trim off the boilerplate used to preserve the factory
-                    // Use different logic for shorthand vs regular format
-                    const isShorthandModule: boolean = moduleShorthandFormat.get(hash) || false;
+                    // Use different prefix/suffix lengths for shorthand vs regular format
+                    const isShorthandModule: boolean = moduleShorthandFormat.has(hash);
                     if (isShorthandModule) {
-                      // For shorthand format, we wrapped it as: __MINIFY_MODULE__({\n__DEFAULT_ID__(args) {...}\n});
-                      // After minification, it becomes: __MINIFY_MODULE__({__DEFAULT_ID__(args){...}});
-                      // We need to extract just: (args){...}
-
-                      // Strategy: Find and remove the prefix up to and including '__DEFAULT_ID__'
-                      const defaultIdStr: string = '__DEFAULT_ID__';
-                      const shorthandPrefixEnd: number = minified.indexOf(defaultIdStr);
-                      if (shorthandPrefixEnd >= 0) {
-                        // Remove from start up to and including '__DEFAULT_ID__'
-                        unwrapped.replace(0, shorthandPrefixEnd + defaultIdStr.length - 1, '');
-                        // Remove the suffix from the end
-                        // After minification, the suffix is typically '});' (3 characters, newline removed)
-                        const minifiedSuffix: string = '});';
-                        if (minified.endsWith(minifiedSuffix)) {
-                          unwrapped.replace(len - minifiedSuffix.length, len - 1, '');
-                        } else if (minified.endsWith(MODULE_WRAPPER_SHORTHAND_SUFFIX)) {
-                          // In case minifier keeps the newline
-                          unwrapped.replace(len - MODULE_WRAPPER_SHORTHAND_SUFFIX.length, len - 1, '');
-                        } else {
-                          // Fallback: assume '});' suffix
-                          unwrapped.replace(len - minifiedSuffix.length, len - 1, '');
-                        }
-                      } else {
-                        // Fallback: If __DEFAULT_ID__ is not found (shouldn't happen), remove by length
-                        const minifiedSuffix: string = '});';
-                        unwrapped.replace(0, MODULE_WRAPPER_SHORTHAND_PREFIX.length - 1, '');
-                        unwrapped.replace(len - minifiedSuffix.length, len - 1, '');
-                      }
+                      // For shorthand format: __MINIFY_MODULE__({__DEFAULT_ID__(args){...}});
+                      // Remove prefix and suffix by their lengths
+                      unwrapped.replace(0, MODULE_WRAPPER_SHORTHAND_PREFIX.length - 1, '');
+                      unwrapped.replace(len - MODULE_WRAPPER_SHORTHAND_SUFFIX.length, len - 1, '');
                     } else {
-                      // Regular format
+                      // Regular format: __MINIFY_MODULE__((args){...});
                       unwrapped.replace(0, MODULE_WRAPPER_PREFIX.length - 1, '');
                       unwrapped.replace(len - MODULE_WRAPPER_SUFFIX.length, len - 1, '');
                     }
