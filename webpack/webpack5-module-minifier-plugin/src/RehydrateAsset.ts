@@ -46,7 +46,8 @@ export function rehydrateAsset(
   // RegExp.exec uses null or an array as the return type, explicitly
   let match: RegExpExecArray | null = null;
   while ((match = CHUNK_MODULE_REGEX.exec(assetCode))) {
-    const hash: string = match[1];
+    const leadingColon: string = match[1]; // Captured ':' or empty string
+    const hash: string = match[2]; // The module hash
 
     const moduleSource: IModuleInfo | undefined = moduleMap.get(hash);
     if (moduleSource === undefined) {
@@ -66,6 +67,15 @@ export function rehydrateAsset(
     lastStart = CHUNK_MODULE_REGEX.lastIndex;
 
     if (moduleSource) {
+      // Check if this module was in shorthand format
+      const isShorthand: boolean = moduleSource.isShorthand === true;
+
+      // For shorthand format, omit the colon. For regular format, keep it.
+      if (!isShorthand && leadingColon) {
+        source.add(leadingColon);
+        charOffset += leadingColon.length;
+      }
+
       const charLength: number = moduleSource.source.source().length;
 
       if (emitRenderInfo) {
@@ -78,6 +88,12 @@ export function rehydrateAsset(
       source.add(moduleSource.source);
       charOffset += charLength;
     } else {
+      // Keep the colon if present for error module
+      if (leadingColon) {
+        source.add(leadingColon);
+        charOffset += leadingColon.length;
+      }
+
       const errorModule: string = `()=>{throw new Error(\`Missing module with hash "${hash}"\`)}`;
 
       source.add(errorModule);

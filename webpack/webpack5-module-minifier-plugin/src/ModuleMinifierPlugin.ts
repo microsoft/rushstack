@@ -29,6 +29,8 @@ import {
   CHUNK_MODULE_TOKEN,
   MODULE_WRAPPER_PREFIX,
   MODULE_WRAPPER_SUFFIX,
+  MODULE_WRAPPER_SHORTHAND_PREFIX,
+  MODULE_WRAPPER_SHORTHAND_SUFFIX,
   STAGE_BEFORE,
   STAGE_AFTER
 } from './Constants';
@@ -74,6 +76,7 @@ interface IOptionsForHash extends Omit<IModuleMinifierPluginOptions, 'minifier'>
 interface ISourceCacheEntry {
   source: sources.Source;
   hash: string;
+  isShorthand: boolean;
 }
 
 const compilationMetadataMap: WeakMap<Compilation, IModuleMinifierPluginStats> = new WeakMap();
@@ -123,6 +126,46 @@ function isMinificationResultError(
 
 function isLicenseComment(comment: Comment): boolean {
   return LICENSE_COMMENT_REGEX.test(comment.value);
+}
+
+/**
+ * RegExp for detecting function keyword with optional whitespace
+ */
+const FUNCTION_KEYWORD_REGEX: RegExp = /function\s*\(/;
+
+/**
+ * Detects if the module code uses ECMAScript method shorthand format.
+ * Shorthand format would appear when webpack emits object methods without function keyword
+ * For example: `id(params) { body }` instead of `id: function(params) { body }`
+ *
+ * Following the problem statement's recommendation: inspect the rendered code prior to the first `{`
+ * and look for either a `=>` or `function(`. If neither are encountered, assume object shorthand format.
+ *
+ * @param code - The module source code to check
+ * @returns true if the code is in method shorthand format
+ */
+function isMethodShorthandFormat(code: string): boolean {
+  // Find the position of the first opening brace
+  const firstBraceIndex: number = code.indexOf('{');
+  if (firstBraceIndex < 0) {
+    // No brace found, not a function format
+    return false;
+  }
+
+  // Get the code before the first brace
+  const beforeBrace: string = code.slice(0, firstBraceIndex);
+
+  // Check if it contains '=>' or 'function('
+  // If it does, it's a regular arrow function or function expression, not shorthand
+  // Use a simple check that handles common whitespace variations
+  if (beforeBrace.includes('=>') || FUNCTION_KEYWORD_REGEX.test(beforeBrace)) {
+    return false;
+  }
+
+  // If neither '=>' nor 'function(' are found, assume object method shorthand format
+  // ECMAScript method shorthand is used in object literals: { methodName(params){body} }
+  // Webpack emits this as just (params){body} which only works in the object literal context
+  return true;
 }
 
 /**
@@ -333,12 +376,16 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
             return cachedResult.source;
           }
 
+          // Get the source code to check its format
+          const sourceCode: string = source.source().toString();
+
+          // Detect if this is ECMAScript method shorthand format
+          const isShorthand: boolean = isMethodShorthandFormat(sourceCode);
+
           // If this module is wrapped in a factory, need to add boilerplate so that the minifier keeps the function
-          const wrapped: sources.Source = new ConcatSource(
-            MODULE_WRAPPER_PREFIX + '\n',
-            source,
-            '\n' + MODULE_WRAPPER_SUFFIX
-          );
+          const wrapped: sources.Source = isShorthand
+            ? new ConcatSource(MODULE_WRAPPER_SHORTHAND_PREFIX, source, MODULE_WRAPPER_SHORTHAND_SUFFIX)
+            : new ConcatSource(MODULE_WRAPPER_PREFIX + '\n', source, '\n' + MODULE_WRAPPER_SUFFIX);
 
           const nameForMap: string = `(modules)/${id}`;
 
@@ -386,8 +433,18 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
                     const len: number = minified.length;
 
                     // Trim off the boilerplate used to preserve the factory
-                    unwrapped.replace(0, MODULE_WRAPPER_PREFIX.length - 1, '');
-                    unwrapped.replace(len - MODULE_WRAPPER_SUFFIX.length, len - 1, '');
+                    // Use different prefix/suffix lengths for shorthand vs regular format
+                    // Capture isShorthand from closure instead of looking it up
+                    if (isShorthand) {
+                      // For shorthand format: __MINIFY_MODULE__({__DEFAULT_ID__(args){...}});
+                      // Remove prefix and suffix by their lengths
+                      unwrapped.replace(0, MODULE_WRAPPER_SHORTHAND_PREFIX.length - 1, '');
+                      unwrapped.replace(len - MODULE_WRAPPER_SHORTHAND_SUFFIX.length, len - 1, '');
+                    } else {
+                      // Regular format: __MINIFY_MODULE__(function(args){...}); or __MINIFY_MODULE__((args)=>{...});
+                      unwrapped.replace(0, MODULE_WRAPPER_PREFIX.length - 1, '');
+                      unwrapped.replace(len - MODULE_WRAPPER_SUFFIX.length, len - 1, '');
+                    }
 
                     const withIds: sources.Source = postProcessCode(unwrapped, {
                       compilation,
@@ -402,7 +459,8 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
                     minifiedModules.set(hash, {
                       source: cached,
                       module: mod,
-                      id
+                      id,
+                      isShorthand
                     });
                   } catch (err) {
                     compilation.errors.push(err);
@@ -414,10 +472,15 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
             );
           }
 
-          const result: sources.Source = new RawSource(`${CHUNK_MODULE_TOKEN}${hash}`);
+          // Create token with optional ':' prefix for shorthand modules
+          // For non-shorthand: __WEBPACK_CHUNK_MODULE__hash (becomes "id":__WEBPACK_CHUNK_MODULE__hash in object)
+          // For shorthand: :__WEBPACK_CHUNK_MODULE__hash (becomes "id"__WEBPACK_CHUNK_MODULE__hash, ':' makes it valid property assignment)
+          const tokenPrefix: string = isShorthand ? ':' : '';
+          const result: sources.Source = new RawSource(`${tokenPrefix}${CHUNK_MODULE_TOKEN}${hash}`);
           sourceCache.set(source, {
             hash,
-            source: result
+            source: result,
+            isShorthand
           });
 
           // Return an expression to replace later

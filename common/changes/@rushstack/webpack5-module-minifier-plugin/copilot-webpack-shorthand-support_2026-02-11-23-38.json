@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack5-module-minifier-plugin",
+      "comment": "Add support for webpack's ECMAScript method shorthand format. The plugin now detects when modules are emitted using method shorthand syntax (without 'function' keyword or arrow syntax) and wraps them appropriately for minification.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-module-minifier-plugin"
+}

@@ -3,14 +3,13 @@
 exports[`ModuleMinifierPlugin Handles AMD externals (mock): Content 1`] = `
 Object {
   "/release/async.js": "/*! For license information please see async.js.LICENSE.txt */
-// Begin Asset Hash=655b529b81e93f7a1183b61fa3b1dbbe25467d6bd138d4f910613108a606277c
+// Begin Asset Hash=2b90e947f1aba7d9ab9f0b62e1ede9281ad8fb42f6ede6f7b4213d5d1356ab8e
 \\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[157],{
 
 /***/ 541
 
-// Begin Module Hash=48b8804731aa35805afdba31bf24a39136ebfd93f6be0f3e353452a94e9b5818
-
+// Begin Module Hash=aa928190bac95603578bbc24c65647633e6305dc69d46edaf07d710fc69da78d
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -26,8 +25,8 @@ Object {
 function foo() { bar__WEBPACK_IMPORTED_MODULE_0___default().a(); baz__WEBPACK_IMPORTED_MODULE_1___default().b(); }console.log(\\"Test character lengths: ﻿￯\\")
 
 /***/ }
-
 // End Module
+
 
 
 }]);
@@ -328,7 +327,7 @@ Object {
     "async.js" => Object {
       "positionByModuleId": Map {
         541 => Object {
-          "charLength": 949,
+          "charLength": 948,
           "charOffset": 239,
         },
       },
@@ -336,7 +335,7 @@ Object {
   },
   "byModule": Map {
     541 => Map {
-      157 => 953,
+      157 => 952,
     },
   },
 }
@@ -344,23 +343,39 @@ Object {
 
 exports[`ModuleMinifierPlugin Handles AMD externals (mock): Warnings 1`] = `Array []`;
 
-exports[`ModuleMinifierPlugin Handles AMD externals (terser): Content 1`] = `Object {}`;
-
-exports[`ModuleMinifierPlugin Handles AMD externals (terser): Errors 1`] = `
-Array [
-  Object {
-    "message": "Unexpected token punc «{», expected punc «,»",
-  },
-  Object {
-    "message": "Unexpected token name «__WEBPACK_CHUNK_MODULE__48b8804731aa35805afdba31bf24a39136ebfd93f6be0f3e353452a94e9b5818», expected punc «,»",
-  },
-]
+exports[`ModuleMinifierPlugin Handles AMD externals (terser): Content 1`] = `
+Object {
+  "/release/async.js": "/*! For license information please see async.js.LICENSE.txt */
+\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[157],{541(e,t,n){n.d(t,{foo:()=>s});var a=n(885),i=n.n(a),r=n(653),o=n.n(r);function s(){i().a(),o().b()}console.log(\\"Test character lengths: \\\\ufeff￯\\")}
+}]);",
+  "/release/async.js.LICENSE.txt": "// @license MIT
+",
+  "/release/main.js": "define([\\"bar\\",\\"baz\\"],(e,t)=>(()=>{var n,a={885(t){\\"use strict\\";t.exports=e},653(e){\\"use strict\\";e.exports=t}},i={};function r(e){var t=i[e];if(void 0!==t)return t.exports;var n=i[e]={exports:{}};return a[e](n,n.exports,r),n.exports}r.m=a,r.n=e=>{var t=e&&e.__esModule?()=>e.default:()=>e;return r.d(t,{a:t}),t},r.d=(e,t)=>{for(var n in t)r.o(t,n)&&!r.o(e,n)&&Object.defineProperty(e,n,{enumerable:!0,get:t[n]})},r.f={},r.e=e=>Promise.all(Object.keys(r.f).reduce((t,n)=>(r.f[n](e,t),t),[])),r.u=e=>\\"async.js\\",r.g=function(){if(\\"object\\"==typeof globalThis)return globalThis;try{return this||new Function(\\"return this\\")()}catch(e){if(\\"object\\"==typeof window)return window}}(),r.o=(e,t)=>Object.prototype.hasOwnProperty.call(e,t),n={},r.l=(e,t,a,i)=>{if(n[e])n[e].push(t);else{var o,s;if(void 0!==a)for(var c=document.getElementsByTagName(\\"script\\"),d=0;d<c.length;d++){var l=c[d];if(l.getAttribute(\\"src\\")==e){o=l;break}}o||(s=!0,(o=document.createElement(\\"script\\")).charset=\\"utf-8\\",r.nc&&o.setAttribute(\\"nonce\\",r.nc),o.src=e),n[e]=[t];var u=(t,a)=>{o.onerror=o.onload=null,clearTimeout(f);var i=n[e];if(delete n[e],o.parentNode&&o.parentNode.removeChild(o),i&&i.forEach(e=>e(a)),t)return t(a)},f=setTimeout(u.bind(null,void 0,{type:\\"timeout\\",target:o}),12e4);o.onerror=u.bind(null,o.onerror),o.onload=u.bind(null,o.onload),s&&document.head.appendChild(o)}},(()=>{var e;r.g.importScripts&&(e=r.g.location+\\"\\");var t=r.g.document;if(!e&&t&&(t.currentScript&&\\"SCRIPT\\"===t.currentScript.tagName.toUpperCase()&&(e=t.currentScript.src),!e)){var n=t.getElementsByTagName(\\"script\\");if(n.length)for(var a=n.length-1;a>-1&&(!e||!/^http(s?):/.test(e));)e=n[a--].src}if(!e)throw new Error(\\"Automatic publicPath is not supported in this browser\\");e=e.replace(/^blob:/,\\"\\").replace(/#.*$/,\\"\\").replace(/\\\\?.*$/,\\"\\").replace(/\\\\/[^\\\\/]+$/,\\"/\\"),r.p=e})(),(()=>{var e={792:0};r.f.j=(t,n)=>{var a=r.o(e,t)?e[t]:void 0;if(0!==a)if(a)n.push(a[2]);else{var i=new Promise((n,i)=>a=e[t]=[n,i]);n.push(a[2]=i);var o=r.p+r.u(t),s=new Error;r.l(o,n=>{if(r.o(e,t)&&(0!==(a=e[t])&&(e[t]=void 0),a)){var i=n&&(\\"load\\"===n.type?\\"missing\\":n.type),o=n&&n.target&&n.target.src;s.message=\\"Loading chunk \\"+t+\\" failed.\\\\n(\\"+i+\\": \\"+o+\\")\\",s.name=\\"ChunkLoadError\\",s.type=i,s.request=o,a[1](s)}},\\"chunk-\\"+t,t)}};var t=(t,n)=>{var a,i,[o,s,c]=n,d=0;if(o.some(t=>0!==e[t])){for(a in s)r.o(s,a)&&(r.m[a]=s[a]);if(c)c(r)}for(t&&t(n);d<o.length;d++)i=o[d],r.o(e,i)&&e[i]&&e[i][0](),e[i]=0},n=self.webpackChunk=self.webpackChunk||[];n.forEach(t.bind(null,0)),n.push=t.bind(null,n.push.bind(n))})();return console.log(\\"Do stuff\\"),r.e(157).then(r.bind(r,541)).then(e=>e.foo()),{}})());",
+}
 `;
+
+exports[`ModuleMinifierPlugin Handles AMD externals (terser): Errors 1`] = `Array []`;
 
 exports[`ModuleMinifierPlugin Handles AMD externals (terser): Metadata 1`] = `
 Object {
-  "byAssetFilename": Map {},
-  "byModule": Map {},
+  "byAssetFilename": Map {
+    "main.js" => Object {
+      "positionByModuleId": Map {},
+    },
+    "async.js" => Object {
+      "positionByModuleId": Map {
+        541 => Object {
+          "charLength": 143,
+          "charOffset": 134,
+        },
+      },
+    },
+  },
+  "byModule": Map {
+    541 => Map {
+      157 => 145,
+    },
+  },
 }
 `;
 
