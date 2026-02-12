@@ -10,7 +10,7 @@ jest.mock('node:child_process', () => {
   };
 });
 
-// Mock FileSystem.exists
+// Mock FileSystem.exists and FileSystem.move
 jest.mock('@rushstack/node-core-library', () => {
   const actual: typeof import('@rushstack/node-core-library') = jest.requireActual(
     '@rushstack/node-core-library'
@@ -19,7 +19,8 @@ jest.mock('@rushstack/node-core-library', () => {
     ...actual,
     FileSystem: {
       ...actual.FileSystem,
-      exists: jest.fn().mockReturnValue(false)
+      exists: jest.fn().mockReturnValue(false),
+      move: jest.fn()
     }
   };
 });
@@ -30,6 +31,7 @@ import * as childProcess from 'node:child_process';
 import { FileSystem } from '@rushstack/node-core-library';
 import type {
   IPublishProviderPublishOptions,
+  IPublishProviderPackOptions,
   IPublishProviderCheckExistsOptions,
   IPublishProjectInfo
 } from '@rushstack/rush-sdk';
@@ -62,6 +64,9 @@ function createMockSpawnProcess(exitCode: number = 0, stdoutData?: string): IMoc
 interface IMockProject {
   packageName: string;
   publishFolder: string;
+  packageJson: {
+    version: string;
+  };
   rushConfiguration: {
     packageManager: string;
     packageManagerToolFilename: string;
@@ -73,6 +78,9 @@ function createMockProject(overrides?: Partial<IMockProject>): IMockProject {
   return {
     packageName: '@scope/test-package',
     publishFolder: '/fake/project/folder',
+    packageJson: {
+      version: '1.0.0'
+    },
     rushConfiguration: {
       packageManager: 'pnpm',
       packageManagerToolFilename: '/fake/pnpm',
@@ -389,6 +397,144 @@ describe(NpmPublishProvider.name, () => {
 
       const result: boolean = await provider.checkExistsAsync(options);
       expect(result).toBe(true);
+    });
+  });
+
+  describe('packAsync', () => {
+    it('calls spawn with pack args and moves tarball to release folder', async () => {
+      const mockProject: IMockProject = createMockProject();
+      const mockLogger: IMockLogger = createMockLogger();
+
+      (childProcess.spawn as jest.Mock).mockReturnValue(createMockSpawnProcess(0));
+
+      const options: IPublishProviderPackOptions = {
+        projects: [
+          {
+            project: mockProject,
+            newVersion: '1.0.0',
+            previousVersion: '0.9.0',
+            changeType: 2,
+            providerConfig: undefined
+          } as unknown as IPublishProjectInfo
+        ],
+        releaseFolder: '/fake/release',
+        dryRun: false,
+        logger: mockLogger
+      } as unknown as IPublishProviderPackOptions;
+
+      await provider.packAsync(options);
+
+      expect(childProcess.spawn).toHaveBeenCalledTimes(1);
+      const spawnArgs: unknown[] = (childProcess.spawn as jest.Mock).mock.calls[0];
+      expect(spawnArgs[0]).toBe('/fake/pnpm');
+      expect(spawnArgs[1]).toEqual(['pack']);
+      expect((spawnArgs[2] as Record<string, unknown>).cwd).toBe('/fake/project/folder');
+
+      // Verify tarball move - scoped package removes @ and replaces /
+      expect(FileSystem.move).toHaveBeenCalledWith({
+        sourcePath: '/fake/project/folder/scope-test-package-1.0.0.tgz',
+        destinationPath: '/fake/release/scope-test-package-1.0.0.tgz',
+        overwrite: true
+      });
+    });
+
+    it('calculates tarball name for unscoped packages', async () => {
+      const mockProject: IMockProject = createMockProject({
+        packageName: 'simple-package'
+      });
+      const mockLogger: IMockLogger = createMockLogger();
+
+      (childProcess.spawn as jest.Mock).mockReturnValue(createMockSpawnProcess(0));
+
+      const options: IPublishProviderPackOptions = {
+        projects: [
+          {
+            project: mockProject,
+            newVersion: '2.0.0',
+            previousVersion: '1.0.0',
+            changeType: 2,
+            providerConfig: undefined
+          } as unknown as IPublishProjectInfo
+        ],
+        releaseFolder: '/fake/release',
+        dryRun: false,
+        logger: mockLogger
+      } as unknown as IPublishProviderPackOptions;
+
+      await provider.packAsync(options);
+
+      expect(FileSystem.move).toHaveBeenCalledWith({
+        sourcePath: '/fake/project/folder/simple-package-1.0.0.tgz',
+        destinationPath: '/fake/release/simple-package-1.0.0.tgz',
+        overwrite: true
+      });
+    });
+
+    it('adds v prefix for yarn package manager', async () => {
+      const mockProject: IMockProject = createMockProject({
+        rushConfiguration: {
+          packageManager: 'yarn',
+          packageManagerToolFilename: '/fake/yarn',
+          commonTempFolder: '/fake/common/temp'
+        }
+      });
+      const mockLogger: IMockLogger = createMockLogger();
+
+      (childProcess.spawn as jest.Mock).mockReturnValue(createMockSpawnProcess(0));
+
+      const options: IPublishProviderPackOptions = {
+        projects: [
+          {
+            project: mockProject,
+            newVersion: '1.0.0',
+            previousVersion: '0.9.0',
+            changeType: 2,
+            providerConfig: undefined
+          } as unknown as IPublishProjectInfo
+        ],
+        releaseFolder: '/fake/release',
+        dryRun: false,
+        logger: mockLogger
+      } as unknown as IPublishProviderPackOptions;
+
+      await provider.packAsync(options);
+
+      // yarn uses /fake/yarn for packing (not 'npm' like publishing)
+      const spawnArgs: unknown[] = (childProcess.spawn as jest.Mock).mock.calls[0];
+      expect(spawnArgs[0]).toBe('/fake/yarn');
+
+      // yarn tarball names have v prefix
+      expect(FileSystem.move).toHaveBeenCalledWith({
+        sourcePath: '/fake/project/folder/scope-test-package-v1.0.0.tgz',
+        destinationPath: '/fake/release/scope-test-package-v1.0.0.tgz',
+        overwrite: true
+      });
+    });
+
+    it('logs dry run message without spawning or moving files', async () => {
+      const mockProject: IMockProject = createMockProject();
+      const mockLogger: IMockLogger = createMockLogger();
+
+      const options: IPublishProviderPackOptions = {
+        projects: [
+          {
+            project: mockProject,
+            newVersion: '1.0.0',
+            previousVersion: '0.9.0',
+            changeType: 2,
+            providerConfig: undefined
+          } as unknown as IPublishProjectInfo
+        ],
+        releaseFolder: '/fake/release',
+        dryRun: true,
+        logger: mockLogger
+      } as unknown as IPublishProviderPackOptions;
+
+      await provider.packAsync(options);
+
+      expect(childProcess.spawn).not.toHaveBeenCalled();
+      expect(FileSystem.move).not.toHaveBeenCalled();
+      expect(mockLogger.terminal.writeLine).toHaveBeenCalledWith(expect.stringContaining('[DRY RUN]'));
     });
   });
 

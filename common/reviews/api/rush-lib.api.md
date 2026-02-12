@@ -832,6 +832,7 @@ export interface IPublishProjectInfo {
 // @beta
 export interface IPublishProvider {
     checkExistsAsync(options: IPublishProviderCheckExistsOptions): Promise<boolean>;
+    packAsync(options: IPublishProviderPackOptions): Promise<void>;
     readonly providerName: string;
     publishAsync(options: IPublishProviderPublishOptions): Promise<void>;
 }
@@ -841,6 +842,14 @@ export interface IPublishProviderCheckExistsOptions {
     readonly project: RushConfigurationProject;
     readonly providerConfig: Record<string, unknown> | undefined;
     readonly version: string;
+}
+
+// @beta
+export interface IPublishProviderPackOptions {
+    readonly dryRun: boolean;
+    readonly logger: ILogger;
+    readonly projects: ReadonlyArray<IPublishProjectInfo>;
+    readonly releaseFolder: string;
 }
 
 // @beta

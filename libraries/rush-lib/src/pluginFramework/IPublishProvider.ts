@@ -86,6 +86,36 @@ export interface IPublishProviderCheckExistsOptions {
 }
 
 /**
+ * Options passed to {@link IPublishProvider.packAsync}.
+ * @beta
+ */
+export interface IPublishProviderPackOptions {
+  /**
+   * The set of projects to pack.
+   */
+  readonly projects: ReadonlyArray<IPublishProjectInfo>;
+
+  /**
+   * The folder where packed artifacts should be placed.
+   * Corresponds to the `--release-folder` CLI parameter.
+   * When not specified, a default location is used
+   * (e.g., `<commonTempFolder>/artifacts/packages`).
+   */
+  readonly releaseFolder: string;
+
+  /**
+   * If true, the provider should perform all steps except the actual pack,
+   * logging what would have been done.
+   */
+  readonly dryRun: boolean;
+
+  /**
+   * A logger instance for reporting progress and errors.
+   */
+  readonly logger: ILogger;
+}
+
+/**
  * Interface for publish providers that handle publishing packages to a specific target
  * (e.g. npm registry, VS Code Marketplace).
  *
@@ -105,6 +135,16 @@ export interface IPublishProvider {
    * Publishes the specified projects to this provider's target.
    */
   publishAsync(options: IPublishProviderPublishOptions): Promise<void>;
+
+  /**
+   * Packs the specified projects into distributable artifacts for this provider's target.
+   * Each provider defines what "packing" means for its artifact type:
+   * - npm: runs `<packageManager> pack` to produce a `.tgz` tarball
+   * - vsix: runs `vsce package` to produce a `.vsix` file
+   *
+   * Artifacts are written to the `releaseFolder` specified in options.
+   */
+  packAsync(options: IPublishProviderPackOptions): Promise<void>;
 
   /**
    * Checks whether a specific version of a project already exists at the publish target.

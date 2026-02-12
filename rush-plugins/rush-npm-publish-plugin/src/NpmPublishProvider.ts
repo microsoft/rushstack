@@ -11,6 +11,7 @@ import { FileSystem } from '@rushstack/node-core-library';
 import type {
   IPublishProvider,
   IPublishProviderPublishOptions,
+  IPublishProviderPackOptions,
   IPublishProviderCheckExistsOptions,
   IPublishProjectInfo
 } from '@rushstack/rush-sdk';
@@ -138,6 +139,58 @@ export class NpmPublishProvider implements IPublishProvider {
     const normalizedVersion: string = parsedVersion.format();
 
     return publishedVersions.indexOf(normalizedVersion) >= 0;
+  }
+
+  public async packAsync(options: IPublishProviderPackOptions): Promise<void> {
+    const { projects, releaseFolder, dryRun, logger } = options;
+
+    for (const projectInfo of projects) {
+      const { project, newVersion } = projectInfo;
+      const packageName: string = project.packageName;
+      const publishFolder: string = project.publishFolder;
+
+      logger.terminal.writeLine(`Packing ${packageName}@${newVersion} as npm tarball...`);
+
+      const args: string[] = ['pack'];
+      const env: Record<string, string | undefined> = { ...process.env };
+      const packageManagerToolFilename: string = project.rushConfiguration.packageManagerToolFilename;
+
+      if (dryRun) {
+        logger.terminal.writeLine(
+          `  [DRY RUN] Would execute: ${packageManagerToolFilename} ${args.join(' ')}`
+        );
+        logger.terminal.writeLine(`  Working directory: ${publishFolder}`);
+      } else {
+        await this._executeCommandAsync(packageManagerToolFilename, args, publishFolder, env);
+
+        // Move the tarball to the release folder
+        const tarballName: string = this._calculateTarballName(project);
+        const tarballPath: string = path.join(publishFolder, tarballName);
+
+        FileSystem.move({
+          sourcePath: tarballPath,
+          destinationPath: path.join(releaseFolder, tarballName),
+          overwrite: true
+        });
+
+        logger.terminal.writeLine(`  Packed ${packageName}@${newVersion} to ${tarballName}`);
+      }
+    }
+  }
+
+  /**
+   * Calculate the tarball filename using npm's naming convention.
+   */
+  private _calculateTarballName(project: IPublishProjectInfo['project']): string {
+    const packageName: string = project.packageName;
+    const name: string =
+      packageName[0] === '@' ? packageName.substring(1).replace(/\//g, '-') : packageName;
+
+    if (project.rushConfiguration.packageManager === 'yarn') {
+      return `${name}-v${project.packageJson.version}.tgz`;
+    } else {
+      return `${name}-${project.packageJson.version}.tgz`;
+    }
   }
 
   /**

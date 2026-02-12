@@ -7,6 +7,7 @@ import * as path from 'node:path';
 import type {
   IPublishProvider,
   IPublishProviderPublishOptions,
+  IPublishProviderPackOptions,
   IPublishProviderCheckExistsOptions
 } from '@rushstack/rush-sdk';
 
@@ -66,6 +67,34 @@ export class VsixPublishProvider implements IPublishProvider {
       } else {
         await this._executeVsceAsync(args, publishFolder);
         logger.terminal.writeLine(`  Successfully published ${packageName}@${newVersion} to Marketplace`);
+      }
+    }
+  }
+
+  public async packAsync(options: IPublishProviderPackOptions): Promise<void> {
+    const { projects, releaseFolder, dryRun, logger } = options;
+
+    for (const projectInfo of projects) {
+      const { project, newVersion } = projectInfo;
+
+      const packageName: string = project.packageName;
+      const publishFolder: string = project.publishFolder;
+
+      // Determine the output VSIX filename
+      const vsixFileName: string = `${packageName.replace(/[/@]/g, '-')}-${newVersion}.vsix`;
+      const outputPath: string = path.join(releaseFolder, vsixFileName);
+
+      logger.terminal.writeLine(`Packing ${packageName}@${newVersion} as VSIX...`);
+
+      // vsce package --out <path>
+      const args: string[] = ['package', '--no-dependencies', '--out', outputPath];
+
+      if (dryRun) {
+        logger.terminal.writeLine(`  [DRY RUN] Would execute: vsce ${args.join(' ')}`);
+        logger.terminal.writeLine(`  Working directory: ${publishFolder}`);
+      } else {
+        await this._executeVsceAsync(args, publishFolder);
+        logger.terminal.writeLine(`  Packed ${packageName}@${newVersion} to ${vsixFileName}`);
       }
     }
   }

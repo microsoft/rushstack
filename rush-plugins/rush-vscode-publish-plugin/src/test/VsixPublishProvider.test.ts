@@ -14,6 +14,7 @@ import * as childProcess from 'node:child_process';
 
 import type {
   IPublishProviderPublishOptions,
+  IPublishProviderPackOptions,
   IPublishProviderCheckExistsOptions,
   IPublishProjectInfo
 } from '@rushstack/rush-sdk';
@@ -78,6 +79,92 @@ describe(VsixPublishProvider.name, () => {
   describe('providerName', () => {
     it('returns "vsix"', () => {
       expect(provider.providerName).toBe('vsix');
+    });
+  });
+
+  describe('packAsync', () => {
+    it('calls vsce package with correct output path', async () => {
+      const mockLogger: IMockLogger = createMockLogger();
+      (childProcess.spawn as jest.Mock).mockReturnValue(createMockSpawnProcess(0));
+
+      const options: IPublishProviderPackOptions = {
+        projects: [
+          {
+            project: createMockProject(),
+            newVersion: '1.2.3',
+            previousVersion: '1.2.2',
+            changeType: 2,
+            providerConfig: undefined
+          } as unknown as IPublishProjectInfo
+        ],
+        releaseFolder: '/fake/release',
+        dryRun: false,
+        logger: mockLogger
+      } as unknown as IPublishProviderPackOptions;
+
+      await provider.packAsync(options);
+
+      expect(childProcess.spawn).toHaveBeenCalledTimes(1);
+      const spawnArgs: unknown[] = (childProcess.spawn as jest.Mock).mock.calls[0];
+      const command: string = spawnArgs[0] as string;
+      const args: string[] = spawnArgs[1] as string[];
+
+      expect(command).toBe('vsce');
+      expect(args).toContain('package');
+      expect(args).toContain('--no-dependencies');
+      expect(args).toContain('--out');
+      // @scope/test-extension -> -scope-test-extension-1.2.3.vsix
+      expect(args).toContain('/fake/release/-scope-test-extension-1.2.3.vsix');
+    });
+
+    it('produces correctly named VSIX file for unscoped package', async () => {
+      const mockLogger: IMockLogger = createMockLogger();
+      (childProcess.spawn as jest.Mock).mockReturnValue(createMockSpawnProcess(0));
+
+      const options: IPublishProviderPackOptions = {
+        projects: [
+          {
+            project: createMockProject({ packageName: 'my-vscode-ext' }),
+            newVersion: '2.0.0',
+            previousVersion: '1.0.0',
+            changeType: 2,
+            providerConfig: undefined
+          } as unknown as IPublishProjectInfo
+        ],
+        releaseFolder: '/fake/release',
+        dryRun: false,
+        logger: mockLogger
+      } as unknown as IPublishProviderPackOptions;
+
+      await provider.packAsync(options);
+
+      const spawnArgs: unknown[] = (childProcess.spawn as jest.Mock).mock.calls[0];
+      const args: string[] = spawnArgs[1] as string[];
+      expect(args).toContain('/fake/release/my-vscode-ext-2.0.0.vsix');
+    });
+
+    it('logs dry run message without spawning', async () => {
+      const mockLogger: IMockLogger = createMockLogger();
+
+      const options: IPublishProviderPackOptions = {
+        projects: [
+          {
+            project: createMockProject(),
+            newVersion: '1.0.0',
+            previousVersion: '0.9.0',
+            changeType: 2,
+            providerConfig: undefined
+          } as unknown as IPublishProjectInfo
+        ],
+        releaseFolder: '/fake/release',
+        dryRun: true,
+        logger: mockLogger
+      } as unknown as IPublishProviderPackOptions;
+
+      await provider.packAsync(options);
+
+      expect(childProcess.spawn).not.toHaveBeenCalled();
+      expect(mockLogger.terminal.writeLine).toHaveBeenCalledWith(expect.stringContaining('[DRY RUN]'));
     });
   });
 

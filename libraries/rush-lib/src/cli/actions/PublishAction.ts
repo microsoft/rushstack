@@ -16,7 +16,6 @@ import { type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
 import { type IPublishJson, PUBLISH_CONFIGURATION_FILE } from '../../api/PublishConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { PublishUtilities } from '../../logic/PublishUtilities';
 import { ChangelogGenerator } from '../../logic/ChangelogGenerator';
 import { PrereleaseToken } from '../../logic/PrereleaseToken';
 import { ChangeManager } from '../../logic/ChangeManager';
@@ -409,8 +408,8 @@ export class PublishAction extends BaseRushAction {
         };
 
         if (this._pack.value) {
-          // packs to tarball instead of publishing to NPM repository
-          await this._npmPackAsync(packageName, packageConfig);
+          // packs to distributable artifacts via publish providers
+          await this._packProjectViaProvidersAsync(packageConfig);
           await applyTagAsync(this._applyGitTagsOnPack.value);
         } else {
           const published: boolean = await this._publishProjectViaProvidersAsync(packageConfig);
@@ -500,45 +499,57 @@ export class PublishAction extends BaseRushAction {
     return published;
   }
 
-  private async _npmPackAsync(packageName: string, project: RushConfigurationProject): Promise<void> {
-    const args: string[] = ['pack'];
-    const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
-
-    await PublishUtilities.execCommandAsync({
-      shouldExecute: this._publish.value,
-      command: this.rushConfiguration.packageManagerToolFilename,
-      args,
-      workingDirectory: project.publishFolder,
-      environment: env
+  /**
+   * Pack a project via all of its registered publish targets.
+   * Returns true if at least one target produced an artifact.
+   */
+  private async _packProjectViaProvidersAsync(project: RushConfigurationProject): Promise<boolean> {
+    let packed: boolean = false;
+    const version: string = project.packageJsonEditor.version;
+    const dryRun: boolean = !this._publish.value;
+    const logger: Logger = new Logger({
+      loggerName: 'publish',
+      terminalProvider: new ConsoleTerminalProvider({ verboseEnabled: false }),
+      getShouldPrintStacks: () => false
     });
 
-    if (this._publish.value) {
-      // Copy the tarball the release folder
-      const tarballName: string = this._calculateTarballName(project);
-      const tarballPath: string = path.join(project.publishFolder, tarballName);
-      const destFolder: string = this._releaseFolder.value
-        ? this._releaseFolder.value
-        : path.join(this.rushConfiguration.commonTempFolder, 'artifacts', 'packages');
+    // Determine the release folder
+    const releaseFolder: string = this._releaseFolder.value
+      ? this._releaseFolder.value
+      : path.join(this.rushConfiguration.commonTempFolder, 'artifacts', 'packages');
 
-      FileSystem.move({
-        sourcePath: tarballPath,
-        destinationPath: path.join(destFolder, tarballName),
-        overwrite: true
+    // Ensure the release folder exists
+    FileSystem.ensureFolder(releaseFolder);
+
+    for (const target of project.publishTargets) {
+      if (target === 'none') {
+        continue;
+      }
+
+      const provider: IPublishProvider = await this._getProviderAsync(target, project.packageName);
+      const providerConfig: Record<string, unknown> | undefined = await this._getProviderConfigAsync(
+        project,
+        target
+      );
+
+      await provider.packAsync({
+        projects: [
+          {
+            project,
+            newVersion: version,
+            previousVersion: version,
+            changeType: ChangeType.none,
+            providerConfig
+          }
+        ],
+        releaseFolder,
+        dryRun,
+        logger
       });
+      packed = true;
     }
-  }
 
-  private _calculateTarballName(project: RushConfigurationProject): string {
-    // Same logic as how npm forms the tarball name
-    const packageName: string = project.packageName;
-    const name: string = packageName[0] === '@' ? packageName.substr(1).replace(/\//g, '-') : packageName;
-
-    if (this.rushConfiguration.packageManager === 'yarn') {
-      // yarn tarballs have a "v" before the version number
-      return `${name}-v${project.packageJson.version}.tgz`;
-    } else {
-      return `${name}-${project.packageJson.version}.tgz`;
-    }
+    return packed;
   }
 
   private _setDependenciesBeforePublish(): void {

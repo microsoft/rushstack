@@ -190,6 +190,7 @@ export type {
   IPublishProvider,
   IPublishProjectInfo,
   IPublishProviderPublishOptions,
+  IPublishProviderPackOptions,
   IPublishProviderCheckExistsOptions,
   PublishProviderFactory
 } from './pluginFramework/IPublishProvider';

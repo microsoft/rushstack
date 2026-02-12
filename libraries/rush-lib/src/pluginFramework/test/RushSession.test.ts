@@ -17,6 +17,7 @@ function createMockFactory(providerName: string): PublishProviderFactory {
   return async () => ({
     providerName,
     publishAsync: async () => {},
+    packAsync: async () => {},
     checkExistsAsync: async () => false
   });
 }
