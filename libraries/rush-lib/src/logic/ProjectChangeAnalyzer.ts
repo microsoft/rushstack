@@ -122,54 +122,6 @@ export class ProjectChangeAnalyzer {
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
 
-    // Helper function to check and add project to changedProjects
-    const checkAndAddProject = async (
-      project: RushConfigurationProject,
-      projectChanges: Map<string, IFileDiffStatus>
-    ): Promise<void> => {
-      // Early return if no changes
-      if (projectChanges.size === 0) {
-        return;
-      }
-
-      // If excludeVersionOnlyChanges is not enabled, add the project
-      if (!excludeVersionOnlyChanges) {
-        changedProjects.add(project);
-        return;
-      }
-
-      // Filter out package.json with version-only changes, CHANGELOG.md, and CHANGELOG.json
-      for (const [filePath, diffStatus] of projectChanges) {
-        // Use lookup to find the project-relative path
-        const match: IPrefixMatch<RushConfigurationProject> | undefined =
-          lookup.findLongestPrefixMatch(filePath);
-        if (!match) {
-          // This should be unreachable as projectChanges contains files where match.value === project
-          changedProjects.add(project);
-          return;
-        }
-
-        const projectRelativePath: string = filePath.slice(match.index);
-
-        // Skip CHANGELOG.md and CHANGELOG.json files at project root
-        if (projectRelativePath === '/CHANGELOG.md' || projectRelativePath === '/CHANGELOG.json') {
-          continue;
-        }
-
-        // Check if this is package.json at project root with version-only changes
-        if (projectRelativePath === '/package.json') {
-          const isVersionOnlyChange: boolean = await this._isVersionOnlyChangeAsync(diffStatus, repoRoot);
-          if (isVersionOnlyChange) {
-            continue; // Skip version-only package.json changes
-          }
-        }
-
-        // Found a non-excluded change, add the project
-        changedProjects.add(project);
-        return;
-      }
-    };
-
     if (enableFiltering) {
       // Reading rush-project.json may be problematic if, e.g. rush install has not yet occurred and rigs are in use
       await Async.forEachAsync(
@@ -182,7 +134,15 @@ export class ProjectChangeAnalyzer {
             terminal
           );
 
-          await checkAndAddProject(project, filteredChanges);
+          await checkAndAddProjectAsync(
+            project,
+            filteredChanges,
+            excludeVersionOnlyChanges,
+            lookup,
+            repoRoot,
+            this._git,
+            changedProjects
+          );
         },
         { concurrency: 10 }
       );
@@ -190,7 +150,15 @@ export class ProjectChangeAnalyzer {
       await Async.forEachAsync(
         changesByProject,
         async ([project, projectChanges]) => {
-          await checkAndAddProject(project, projectChanges);
+          await checkAndAddProjectAsync(
+            project,
+            projectChanges,
+            excludeVersionOnlyChanges,
+            lookup,
+            repoRoot,
+            this._git,
+            changedProjects
+          );
         },
         { concurrency: 10 }
       );
@@ -466,36 +434,6 @@ export class ProjectChangeAnalyzer {
   }
 
   /**
-   * Checks if the only change to a package.json file is to the "version" field.
-   * @internal
-   */
-  private async _isVersionOnlyChangeAsync(diffStatus: IFileDiffStatus, repoRoot: string): Promise<boolean> {
-    try {
-      // Only check modified files, not additions or deletions
-      if (diffStatus.status !== 'M') {
-        return false;
-      }
-
-      // Get the old version of package.json from Git using the blob id from IFileDiffStatus
-      const oldPackageJsonContent: string = await this._git.getBlobContentAsync({
-        blobSpec: diffStatus.oldhash,
-        repositoryRoot: repoRoot
-      });
-
-      // Get the current version of package.json from Git (staged/committed version, not working tree)
-      const currentPackageJsonContent: string = await this._git.getBlobContentAsync({
-        blobSpec: diffStatus.newhash,
-        repositoryRoot: repoRoot
-      });
-
-      return isPackageJsonVersionOnlyChange(oldPackageJsonContent, currentPackageJsonContent);
-    } catch (error) {
-      // If we can't read the file or parse it, assume it's not a version-only change
-      return false;
-    }
-  }
-
-  /**
    * @internal
    */
   public async _filterProjectDataAsync<T>(
@@ -538,6 +476,94 @@ export class ProjectChangeAnalyzer {
       ignoreMatcher.add(incrementalBuildIgnoredGlobs as string[]);
       return ignoreMatcher;
     }
+  }
+}
+
+/**
+ * Helper function to check if a project should be added to the changed projects set,
+ * optionally filtering out version-only and changelog changes.
+ */
+async function checkAndAddProjectAsync(
+  project: RushConfigurationProject,
+  projectChanges: Map<string, IFileDiffStatus>,
+  excludeVersionOnlyChanges: boolean | undefined,
+  lookup: LookupByPath<RushConfigurationProject>,
+  repoRoot: string,
+  git: Git,
+  changedProjects: Set<RushConfigurationProject>
+): Promise<void> {
+  // Early return if no changes
+  if (projectChanges.size === 0) {
+    return;
+  }
+
+  // If excludeVersionOnlyChanges is not enabled, add the project
+  if (!excludeVersionOnlyChanges) {
+    changedProjects.add(project);
+    return;
+  }
+
+  // Filter out package.json with version-only changes, CHANGELOG.md, and CHANGELOG.json
+  for (const [filePath, diffStatus] of projectChanges) {
+    // Use lookup to find the project-relative path
+    const match: IPrefixMatch<RushConfigurationProject> | undefined = lookup.findLongestPrefixMatch(filePath);
+    if (!match) {
+      // This should be unreachable as projectChanges contains files where match.value === project
+      changedProjects.add(project);
+      return;
+    }
+
+    const projectRelativePath: string = filePath.slice(match.index);
+
+    // Skip CHANGELOG.md and CHANGELOG.json files at project root
+    if (projectRelativePath === '/CHANGELOG.md' || projectRelativePath === '/CHANGELOG.json') {
+      continue;
+    }
+
+    // Check if this is package.json at project root with version-only changes
+    if (projectRelativePath === '/package.json') {
+      const isVersionOnlyChange: boolean = await isVersionOnlyChangeHelperAsync(diffStatus, repoRoot, git);
+      if (isVersionOnlyChange) {
+        continue; // Skip version-only package.json changes
+      }
+    }
+
+    // Found a non-excluded change, add the project
+    changedProjects.add(project);
+    return;
+  }
+}
+
+/**
+ * Helper function to check if a diff represents a version-only change to package.json.
+ */
+async function isVersionOnlyChangeHelperAsync(
+  diffStatus: IFileDiffStatus,
+  repoRoot: string,
+  git: Git
+): Promise<boolean> {
+  try {
+    // Only check modified files, not additions or deletions
+    if (diffStatus.status !== 'M') {
+      return false;
+    }
+
+    // Get the old version of package.json from Git using the blob id from IFileDiffStatus
+    const oldPackageJsonContent: string = await git.getBlobContentAsync({
+      blobSpec: diffStatus.oldhash,
+      repositoryRoot: repoRoot
+    });
+
+    // Get the current version of package.json from Git (staged/committed version, not working tree)
+    const currentPackageJsonContent: string = await git.getBlobContentAsync({
+      blobSpec: diffStatus.newhash,
+      repositoryRoot: repoRoot
+    });
+
+    return isPackageJsonVersionOnlyChange(oldPackageJsonContent, currentPackageJsonContent);
+  } catch (error) {
+    // If we can't read the file or parse it, assume it's not a version-only change
+    return false;
   }
 }
 
