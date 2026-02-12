@@ -127,49 +127,57 @@ export class ProjectChangeAnalyzer {
       return await isVersionOnlyChangeAsync(diffStatus, repoRoot, this._git);
     };
 
-    if (enableFiltering) {
-      // Reading rush-project.json may be problematic if, e.g. rush install has not yet occurred and rigs are in use
-      await Async.forEachAsync(
-        changesByProject,
-        async ([project, projectChanges]) => {
-          const filteredChanges: Map<string, IFileDiffStatus> = await this._filterProjectDataAsync(
-            project,
-            projectChanges,
-            repoRoot,
-            terminal
-          );
+    await Async.forEachAsync(
+      changesByProject,
+      async ([project, projectChanges]) => {
+        const filteredChanges: Map<string, IFileDiffStatus> = enableFiltering
+          ? await this._filterProjectDataAsync(project, projectChanges, repoRoot, terminal)
+          : projectChanges;
 
-          const shouldInclude: boolean = await shouldIncludeProjectAsync(
-            project,
-            filteredChanges,
-            excludeVersionOnlyChanges,
-            lookup,
-            isDiffVersionOnlyChange
-          );
-          if (shouldInclude) {
+        // Skip if no changes
+        if (filteredChanges.size === 0) {
+          return;
+        }
+
+        // If excludeVersionOnlyChanges is not enabled, include the project
+        if (!excludeVersionOnlyChanges) {
+          changedProjects.add(project);
+          return;
+        }
+
+        // Filter out package.json with version-only changes, CHANGELOG.md, and CHANGELOG.json
+        for (const [filePath, diffStatus] of filteredChanges) {
+          // Use lookup to find the project-relative path
+          const match: IPrefixMatch<RushConfigurationProject> | undefined =
+            lookup.findLongestPrefixMatch(filePath);
+          if (!match) {
+            // This should be unreachable as projectChanges contains files where match.value === project
             changedProjects.add(project);
+            return;
           }
-        },
-        { concurrency: 10 }
-      );
-    } else {
-      await Async.forEachAsync(
-        changesByProject,
-        async ([project, projectChanges]) => {
-          const shouldInclude: boolean = await shouldIncludeProjectAsync(
-            project,
-            projectChanges,
-            excludeVersionOnlyChanges,
-            lookup,
-            isDiffVersionOnlyChange
-          );
-          if (shouldInclude) {
-            changedProjects.add(project);
+
+          const projectRelativePath: string = filePath.slice(match.index);
+
+          // Skip CHANGELOG.md and CHANGELOG.json files at project root
+          if (projectRelativePath === '/CHANGELOG.md' || projectRelativePath === '/CHANGELOG.json') {
+            continue;
           }
-        },
-        { concurrency: 10 }
-      );
-    }
+
+          // Check if this is package.json at project root with version-only changes
+          if (projectRelativePath === '/package.json') {
+            const isVersionOnlyChange: boolean = await isDiffVersionOnlyChange(diffStatus);
+            if (isVersionOnlyChange) {
+              continue; // Skip version-only package.json changes
+            }
+          }
+
+          // Found a non-excluded change
+          changedProjects.add(project);
+          return;
+        }
+      },
+      { concurrency: 10 }
+    );
 
     // External dependency changes are not allowed to be filtered, so add these after filtering
     if (includeExternalDependencies) {
@@ -484,59 +492,6 @@ export class ProjectChangeAnalyzer {
       return ignoreMatcher;
     }
   }
-}
-
-/**
- * Checks if a project should be considered changed, optionally filtering out version-only and changelog changes.
- * @returns true if the project has substantive changes, false if changes should be excluded
- */
-async function shouldIncludeProjectAsync(
-  project: RushConfigurationProject,
-  projectChanges: Map<string, IFileDiffStatus>,
-  excludeVersionOnlyChanges: boolean | undefined,
-  lookup: LookupByPath<RushConfigurationProject>,
-  isDiffVersionOnlyChange: (diffStatus: IFileDiffStatus) => Promise<boolean>
-): Promise<boolean> {
-  // No changes means don't include
-  if (projectChanges.size === 0) {
-    return false;
-  }
-
-  // If excludeVersionOnlyChanges is not enabled, include the project
-  if (!excludeVersionOnlyChanges) {
-    return true;
-  }
-
-  // Filter out package.json with version-only changes, CHANGELOG.md, and CHANGELOG.json
-  for (const [filePath, diffStatus] of projectChanges) {
-    // Use lookup to find the project-relative path
-    const match: IPrefixMatch<RushConfigurationProject> | undefined = lookup.findLongestPrefixMatch(filePath);
-    if (!match) {
-      // This should be unreachable as projectChanges contains files where match.value === project
-      return true;
-    }
-
-    const projectRelativePath: string = filePath.slice(match.index);
-
-    // Skip CHANGELOG.md and CHANGELOG.json files at project root
-    if (projectRelativePath === '/CHANGELOG.md' || projectRelativePath === '/CHANGELOG.json') {
-      continue;
-    }
-
-    // Check if this is package.json at project root with version-only changes
-    if (projectRelativePath === '/package.json') {
-      const isVersionOnlyChange: boolean = await isDiffVersionOnlyChange(diffStatus);
-      if (isVersionOnlyChange) {
-        continue; // Skip version-only package.json changes
-      }
-    }
-
-    // Found a non-excluded change
-    return true;
-  }
-
-  // All changes were excluded
-  return false;
 }
 
 /**
