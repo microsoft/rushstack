@@ -122,11 +122,6 @@ export class ProjectChangeAnalyzer {
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
 
-    // Arrow function that references this._git for version-only change checking
-    const isDiffVersionOnlyChange = async (diffStatus: IFileDiffStatus): Promise<boolean> => {
-      return await isVersionOnlyChangeAsync(diffStatus, repoRoot, this._git);
-    };
-
     await Async.forEachAsync(
       changesByProject,
       async ([project, projectChanges]) => {
@@ -165,7 +160,11 @@ export class ProjectChangeAnalyzer {
 
           // Check if this is package.json at project root with version-only changes
           if (projectRelativePath === '/package.json') {
-            const isVersionOnlyChange: boolean = await isDiffVersionOnlyChange(diffStatus);
+            const isVersionOnlyChange: boolean = await isVersionOnlyChangeAsync(
+              diffStatus,
+              repoRoot,
+              this._git
+            );
             if (isVersionOnlyChange) {
               continue; // Skip version-only package.json changes
             }
