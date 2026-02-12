@@ -34,16 +34,12 @@ export class MockMinifier implements IModuleMinifier {
     let processedCode: string;
     if (isShorthandModule) {
       // Handle shorthand format
-      // Input: __MINIFY_MODULE__({\n__DEFAULT_ID__(args) {...}\n});
-      // We need to preserve the object method shorthand structure
-      // Extract the function part: (args) {...}
+      // Add comment markers similar to regular format
       const innerCode: string = code.slice(
         MODULE_WRAPPER_SHORTHAND_PREFIX.length,
         -MODULE_WRAPPER_SHORTHAND_SUFFIX.length
       );
-      // The mock minifier keeps the structure but removes whitespace and adds comments inside the function body
-      // Output: __MINIFY_MODULE__({__DEFAULT_ID__(args){/* comments */.../* comments */}});
-      processedCode = `__MINIFY_MODULE__({__DEFAULT_ID__${innerCode}});`;
+      processedCode = `${MODULE_WRAPPER_SHORTHAND_PREFIX}\n// Begin Module Hash=${hash}\n${innerCode}\n// End Module\n${MODULE_WRAPPER_SHORTHAND_SUFFIX}`;
     } else if (isModule) {
       // Handle regular format
       processedCode = `${MODULE_WRAPPER_PREFIX}\n// Begin Module Hash=${hash}\n${code.slice(

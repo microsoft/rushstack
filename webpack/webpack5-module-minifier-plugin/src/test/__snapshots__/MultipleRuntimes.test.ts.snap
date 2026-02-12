@@ -7,6 +7,8 @@ Object {
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[527],{
 
 /***/ 923
+
+// Begin Module Hash=522ee27cac2edf706f26b73b1e5ec4bc44feefe1107c5e303f671547dff3b8d1
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16,9 +18,13 @@ Object {
 function async1() { console.log('async-1'); }
 
 /***/ }
+// End Module
+
 ,
 
 /***/ 541
+
+// Begin Module Hash=14a0bb00c5013f9feddec4295e04895cfcfa3097bb63589ab295671d5160d6d7
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -30,6 +36,8 @@ function async1() { console.log('async-1'); }
 
 
 /***/ }
+// End Module
+
 
 
 }]);",
@@ -41,6 +49,8 @@ function async1() { console.log('async-1'); }
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[324],{
 
 /***/ 454
+
+// Begin Module Hash=9fa9db01a39f213b0bad42889493581d8a3cc9d76f3b77543aa34e2cfc6622ed
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -50,9 +60,13 @@ function async1() { console.log('async-1'); }
 function a2() { console.log('async-2'); }
 
 /***/ }
+// End Module
+
 ,
 
 /***/ 541
+
+// Begin Module Hash=3fec3b0c7ee16396d8ef12681a9752d11a86a589b744cebb7451ad0a1b16a50b
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -64,6 +78,8 @@ function a2() { console.log('async-2'); }
 
 
 /***/ }
+// End Module
+
 
 
 }]);",
@@ -587,38 +603,38 @@ Object {
     "async-1.js" => Object {
       "positionByModuleId": Map {
         923 => Object {
-          "charLength": 292,
+          "charLength": 394,
           "charOffset": 156,
         },
         541 => Object {
-          "charLength": 383,
-          "charOffset": 462,
+          "charLength": 485,
+          "charOffset": 564,
         },
       },
     },
     "async-2.js" => Object {
       "positionByModuleId": Map {
         454 => Object {
-          "charLength": 280,
+          "charLength": 382,
           "charOffset": 156,
         },
         541 => Object {
-          "charLength": 375,
-          "charOffset": 450,
+          "charLength": 477,
+          "charOffset": 552,
         },
       },
     },
   },
   "byModule": Map {
     923 => Map {
-      527 => 292,
+      527 => 394,
     },
     541 => Map {
-      527 => 383,
-      324 => 375,
+      527 => 485,
+      324 => 477,
     },
     454 => Map {
-      324 => 280,
+      324 => 382,
     },
   },
 }

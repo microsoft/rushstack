@@ -7,6 +7,8 @@ Object {
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[157],{
 
 /***/ 541
+
+// Begin Module Hash=aa928190bac95603578bbc24c65647633e6305dc69d46edaf07d710fc69da78d
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -22,6 +24,8 @@ Object {
 function foo() { bar__WEBPACK_IMPORTED_MODULE_0___default().a(); baz__WEBPACK_IMPORTED_MODULE_1___default().b(); }console.log(\\"Test character lengths: ﻿￯\\")
 
 /***/ }
+// End Module
+
 
 
 }]);",
@@ -321,7 +325,7 @@ Object {
     "async.js" => Object {
       "positionByModuleId": Map {
         541 => Object {
-          "charLength": 846,
+          "charLength": 948,
           "charOffset": 154,
         },
       },
@@ -329,7 +333,7 @@ Object {
   },
   "byModule": Map {
     541 => Map {
-      157 => 850,
+      157 => 952,
     },
   },
 }
