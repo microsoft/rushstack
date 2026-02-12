@@ -39,10 +39,14 @@ export const CHUNK_MODULE_TOKEN: '__WEBPACK_CHUNK_MODULE__' = '__WEBPACK_CHUNK_M
 
 /**
  * RegExp for replacing chunk module placeholders
- * Matches the void expression format
+ * Handles three possible representations:
+ * - `"id":__WEBPACK_CHUNK_MODULE__HASH__` (methodShorthand: false, object)
+ * - `__WEBPACK_CHUNK_MODULE__HASH__` (array syntax)
+ * - `"id"__WEBPACK_CHUNK_MODULE__HASH__` (methodShorthand: true, object)
+ * Captures optional leading `:` to handle transition between formats
  * @public
  */
-export const CHUNK_MODULE_REGEX: RegExp = /\(\)\{void "__WEBPACK_CHUNK_MODULE__([A-Za-z0-9$_]+)"\}/g;
+export const CHUNK_MODULE_REGEX: RegExp = /(:?)\(\)\{void "__WEBPACK_CHUNK_MODULE__([A-Za-z0-9$_]+)"\}/g;
 
 /**
  * Stage # to use when this should be the first tap in the hook

@@ -129,6 +129,11 @@ function isLicenseComment(comment: Comment): boolean {
 }
 
 /**
+ * RegExp for detecting function keyword with optional whitespace
+ */
+const FUNCTION_KEYWORD_REGEX: RegExp = /function\s*\(/;
+
+/**
  * Detects if the module code uses ECMAScript method shorthand format.
  * Shorthand format would appear when webpack emits object methods without function keyword
  * For example: `id(params) { body }` instead of `id: function(params) { body }`
@@ -153,7 +158,7 @@ function isMethodShorthandFormat(code: string): boolean {
   // Check if it contains '=>' or 'function('
   // If it does, it's a regular arrow function or function expression, not shorthand
   // Use a simple check that handles common whitespace variations
-  if (beforeBrace.includes('=>') || /function\s*\(/.test(beforeBrace)) {
+  if (beforeBrace.includes('=>') || FUNCTION_KEYWORD_REGEX.test(beforeBrace)) {
     return false;
   }
 
@@ -464,7 +469,8 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
                     minifiedModules.set(hash, {
                       source: cached,
                       module: mod,
-                      id
+                      id,
+                      isShorthand: moduleShorthandFormat.has(hash)
                     });
                   } catch (err) {
                     compilation.errors.push(err);

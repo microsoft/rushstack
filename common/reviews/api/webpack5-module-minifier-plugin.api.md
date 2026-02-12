@@ -59,6 +59,7 @@ export interface IFactoryMeta {
 // @public
 export interface IModuleInfo {
     id: string | number;
+    isShorthand?: boolean;
     module: Module;
     source: sources.Source;
 }
