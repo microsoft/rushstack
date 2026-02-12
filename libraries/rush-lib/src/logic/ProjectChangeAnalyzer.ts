@@ -122,6 +122,11 @@ export class ProjectChangeAnalyzer {
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
 
+    // Arrow function that references this._git for version-only change checking
+    const isDiffVersionOnlyChange = async (diffStatus: IFileDiffStatus): Promise<boolean> => {
+      return await isVersionOnlyChangeAsync(diffStatus, repoRoot, this._git);
+    };
+
     if (enableFiltering) {
       // Reading rush-project.json may be problematic if, e.g. rush install has not yet occurred and rigs are in use
       await Async.forEachAsync(
@@ -134,15 +139,16 @@ export class ProjectChangeAnalyzer {
             terminal
           );
 
-          await checkAndAddProjectAsync(
+          const shouldInclude: boolean = await shouldIncludeProjectAsync(
             project,
             filteredChanges,
             excludeVersionOnlyChanges,
             lookup,
-            repoRoot,
-            this._git,
-            changedProjects
+            isDiffVersionOnlyChange
           );
+          if (shouldInclude) {
+            changedProjects.add(project);
+          }
         },
         { concurrency: 10 }
       );
@@ -150,15 +156,16 @@ export class ProjectChangeAnalyzer {
       await Async.forEachAsync(
         changesByProject,
         async ([project, projectChanges]) => {
-          await checkAndAddProjectAsync(
+          const shouldInclude: boolean = await shouldIncludeProjectAsync(
             project,
             projectChanges,
             excludeVersionOnlyChanges,
             lookup,
-            repoRoot,
-            this._git,
-            changedProjects
+            isDiffVersionOnlyChange
           );
+          if (shouldInclude) {
+            changedProjects.add(project);
+          }
         },
         { concurrency: 10 }
       );
@@ -480,27 +487,24 @@ export class ProjectChangeAnalyzer {
 }
 
 /**
- * Helper function to check if a project should be added to the changed projects set,
- * optionally filtering out version-only and changelog changes.
+ * Checks if a project should be considered changed, optionally filtering out version-only and changelog changes.
+ * @returns true if the project has substantive changes, false if changes should be excluded
  */
-async function checkAndAddProjectAsync(
+async function shouldIncludeProjectAsync(
   project: RushConfigurationProject,
   projectChanges: Map<string, IFileDiffStatus>,
   excludeVersionOnlyChanges: boolean | undefined,
   lookup: LookupByPath<RushConfigurationProject>,
-  repoRoot: string,
-  git: Git,
-  changedProjects: Set<RushConfigurationProject>
-): Promise<void> {
-  // Early return if no changes
+  isDiffVersionOnlyChange: (diffStatus: IFileDiffStatus) => Promise<boolean>
+): Promise<boolean> {
+  // No changes means don't include
   if (projectChanges.size === 0) {
-    return;
+    return false;
   }
 
-  // If excludeVersionOnlyChanges is not enabled, add the project
+  // If excludeVersionOnlyChanges is not enabled, include the project
   if (!excludeVersionOnlyChanges) {
-    changedProjects.add(project);
-    return;
+    return true;
   }
 
   // Filter out package.json with version-only changes, CHANGELOG.md, and CHANGELOG.json
@@ -509,8 +513,7 @@ async function checkAndAddProjectAsync(
     const match: IPrefixMatch<RushConfigurationProject> | undefined = lookup.findLongestPrefixMatch(filePath);
     if (!match) {
       // This should be unreachable as projectChanges contains files where match.value === project
-      changedProjects.add(project);
-      return;
+      return true;
     }
 
     const projectRelativePath: string = filePath.slice(match.index);
@@ -522,22 +525,24 @@ async function checkAndAddProjectAsync(
 
     // Check if this is package.json at project root with version-only changes
     if (projectRelativePath === '/package.json') {
-      const isVersionOnlyChange: boolean = await isVersionOnlyChangeHelperAsync(diffStatus, repoRoot, git);
+      const isVersionOnlyChange: boolean = await isDiffVersionOnlyChange(diffStatus);
       if (isVersionOnlyChange) {
         continue; // Skip version-only package.json changes
       }
     }
 
-    // Found a non-excluded change, add the project
-    changedProjects.add(project);
-    return;
+    // Found a non-excluded change
+    return true;
   }
+
+  // All changes were excluded
+  return false;
 }
 
 /**
- * Helper function to check if a diff represents a version-only change to package.json.
+ * Checks if a diff represents a version-only change to package.json.
  */
-async function isVersionOnlyChangeHelperAsync(
+async function isVersionOnlyChangeAsync(
   diffStatus: IFileDiffStatus,
   repoRoot: string,
   git: Git
