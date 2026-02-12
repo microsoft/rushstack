@@ -3,6 +3,7 @@
 exports[`ModuleMinifierPlugin Handles multiple runtimes (mock): Content 1`] = `
 Object {
   "/release/async-1.js": "/*! For license information please see async-1.js.LICENSE.txt */
+// Begin Asset Hash=085012829ea4cae1a903bd58aaadebd847ce0c282dc4eebe4c2d3e3be29033fa
 \\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[527],{
 
@@ -40,11 +41,13 @@ function async1() { console.log('async-1'); }
 
 
 
-}]);",
+}]);
+// End Asset",
   "/release/async-1.js.LICENSE.txt": "// @license BAR
 // @license MIT
 ",
   "/release/async-2.js": "/*! For license information please see async-2.js.LICENSE.txt */
+// Begin Asset Hash=8b416dc2fd2e47bba393fe80905d8387a2191ab33a079e6a9f31cef8099e7fb7
 \\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[324],{
 
@@ -82,7 +85,8 @@ function a2() { console.log('async-2'); }
 
 
 
-}]);",
+}]);
+// End Asset",
   "/release/async-2.js.LICENSE.txt": "// @license BAZ
 // @license MIT
 ",
@@ -604,11 +608,11 @@ Object {
       "positionByModuleId": Map {
         923 => Object {
           "charLength": 394,
-          "charOffset": 156,
+          "charOffset": 241,
         },
         541 => Object {
           "charLength": 485,
-          "charOffset": 564,
+          "charOffset": 649,
         },
       },
     },
@@ -616,11 +620,11 @@ Object {
       "positionByModuleId": Map {
         454 => Object {
           "charLength": 382,
-          "charOffset": 156,
+          "charOffset": 241,
         },
         541 => Object {
           "charLength": 477,
-          "charOffset": 552,
+          "charOffset": 637,
         },
       },
     },
@@ -645,33 +649,15 @@ exports[`ModuleMinifierPlugin Handles multiple runtimes (mock): Warnings 1`] = `
 exports[`ModuleMinifierPlugin Handles multiple runtimes (terser): Content 1`] = `
 Object {
   "/release/async-1.js": "/*! For license information please see async-1.js.LICENSE.txt */
-\\"use strict\\";
-(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[527],{
-
-/***/ 923
-(e,t,n){function a(){console.log(\\"async-1\\")}n.d(t,{async1:()=>a})}
-,
-
-/***/ 541
-(e,t,n){n.d(t,{async1:()=>a.async1});var a=n(923)}
-
-
+\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[527],{923(e,t,n){function a(){console.log(\\"async-1\\")}n.d(t,{async1:()=>a})}
+,541(e,t,n){n.d(t,{async1:()=>a.async1});var a=n(923)}
 }]);",
   "/release/async-1.js.LICENSE.txt": "// @license BAR
 // @license MIT
 ",
   "/release/async-2.js": "/*! For license information please see async-2.js.LICENSE.txt */
-\\"use strict\\";
-(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[324],{
-
-/***/ 454
-(e,t,n){function a(){console.log(\\"async-2\\")}n.d(t,{a2:()=>a})}
-,
-
-/***/ 541
-(e,t,n){n.d(t,{a2:()=>a.a2});var a=n(454)}
-
-
+\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[324],{454(e,t,n){function a(){console.log(\\"async-2\\")}n.d(t,{a2:()=>a})}
+,541(e,t,n){n.d(t,{a2:()=>a.a2});var a=n(454)}
 }]);",
   "/release/async-2.js.LICENSE.txt": "// @license BAZ
 // @license MIT
@@ -686,15 +672,21 @@ exports[`ModuleMinifierPlugin Handles multiple runtimes (terser): Errors 1`] = `
 exports[`ModuleMinifierPlugin Handles multiple runtimes (terser): Metadata 1`] = `
 Object {
   "byAssetFilename": Map {
+    "entry1.js" => Object {
+      "positionByModuleId": Map {},
+    },
+    "entry2.js" => Object {
+      "positionByModuleId": Map {},
+    },
     "async-1.js" => Object {
       "positionByModuleId": Map {
         923 => Object {
           "charLength": 66,
-          "charOffset": 156,
+          "charOffset": 136,
         },
         541 => Object {
           "charLength": 50,
-          "charOffset": 236,
+          "charOffset": 207,
         },
       },
     },
@@ -702,19 +694,13 @@ Object {
       "positionByModuleId": Map {
         454 => Object {
           "charLength": 62,
-          "charOffset": 156,
+          "charOffset": 136,
         },
         541 => Object {
           "charLength": 42,
-          "charOffset": 232,
+          "charOffset": 203,
         },
       },
-    },
-    "entry1.js" => Object {
-      "positionByModuleId": Map {},
-    },
-    "entry2.js" => Object {
-      "positionByModuleId": Map {},
     },
   },
   "byModule": Map {

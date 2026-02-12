@@ -3,6 +3,7 @@
 exports[`ModuleMinifierPlugin Handles AMD externals (mock): Content 1`] = `
 Object {
   "/release/async.js": "/*! For license information please see async.js.LICENSE.txt */
+// Begin Asset Hash=2b90e947f1aba7d9ab9f0b62e1ede9281ad8fb42f6ede6f7b4213d5d1356ab8e
 \\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[157],{
 
@@ -28,7 +29,8 @@ function foo() { bar__WEBPACK_IMPORTED_MODULE_0___default().a(); baz__WEBPACK_IM
 
 
 
-}]);",
+}]);
+// End Asset",
   "/release/async.js.LICENSE.txt": "// @license MIT
 ",
   "/release/main.js": "// Begin Asset Hash=3fdeb2974ad0a9b80a409188038c9e4bea5bb9bbca571254cf7342def65318fa
@@ -326,7 +328,7 @@ Object {
       "positionByModuleId": Map {
         541 => Object {
           "charLength": 948,
-          "charOffset": 154,
+          "charOffset": 239,
         },
       },
     },
@@ -344,13 +346,7 @@ exports[`ModuleMinifierPlugin Handles AMD externals (mock): Warnings 1`] = `Arra
 exports[`ModuleMinifierPlugin Handles AMD externals (terser): Content 1`] = `
 Object {
   "/release/async.js": "/*! For license information please see async.js.LICENSE.txt */
-\\"use strict\\";
-(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[157],{
-
-/***/ 541
-(e,t,n){n.d(t,{foo:()=>s});var a=n(885),i=n.n(a),r=n(653),o=n.n(r);function s(){i().a(),o().b()}console.log(\\"Test character lengths: \\\\ufeff￯\\")}
-
-
+\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[157],{541(e,t,n){n.d(t,{foo:()=>s});var a=n(885),i=n.n(a),r=n(653),o=n.n(r);function s(){i().a(),o().b()}console.log(\\"Test character lengths: \\\\ufeff￯\\")}
 }]);",
   "/release/async.js.LICENSE.txt": "// @license MIT
 ",
@@ -363,16 +359,16 @@ exports[`ModuleMinifierPlugin Handles AMD externals (terser): Errors 1`] = `Arra
 exports[`ModuleMinifierPlugin Handles AMD externals (terser): Metadata 1`] = `
 Object {
   "byAssetFilename": Map {
+    "main.js" => Object {
+      "positionByModuleId": Map {},
+    },
     "async.js" => Object {
       "positionByModuleId": Map {
         541 => Object {
           "charLength": 143,
-          "charOffset": 154,
+          "charOffset": 134,
         },
       },
-    },
-    "main.js" => Object {
-      "positionByModuleId": Map {},
     },
   },
   "byModule": Map {

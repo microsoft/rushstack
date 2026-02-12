@@ -264,11 +264,6 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
       const submittedModules: Set<string | number> = new Set();
 
       /**
-       * Set of module hashes that use ECMAScript method shorthand format.
-       */
-      const moduleShorthandFormat: Set<string> = new Set();
-
-      /**
        * The text and comments of all minified modules.
        */
       const minifiedModules: IModuleMap = new Map();
@@ -407,11 +402,6 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
           if (!submittedModules.has(hash)) {
             submittedModules.add(hash);
 
-            // Track whether this module uses shorthand format
-            if (isShorthand) {
-              moduleShorthandFormat.add(hash);
-            }
-
             ++pendingMinificationRequests;
 
             minifier.minify(
@@ -444,14 +434,14 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
 
                     // Trim off the boilerplate used to preserve the factory
                     // Use different prefix/suffix lengths for shorthand vs regular format
-                    const isShorthandModule: boolean = moduleShorthandFormat.has(hash);
-                    if (isShorthandModule) {
+                    // Capture isShorthand from closure instead of looking it up
+                    if (isShorthand) {
                       // For shorthand format: __MINIFY_MODULE__({__DEFAULT_ID__(args){...}});
                       // Remove prefix and suffix by their lengths
                       unwrapped.replace(0, MODULE_WRAPPER_SHORTHAND_PREFIX.length - 1, '');
                       unwrapped.replace(len - MODULE_WRAPPER_SHORTHAND_SUFFIX.length, len - 1, '');
                     } else {
-                      // Regular format: __MINIFY_MODULE__((args){...});
+                      // Regular format: __MINIFY_MODULE__(function(args){...}); or __MINIFY_MODULE__((args)=>{...});
                       unwrapped.replace(0, MODULE_WRAPPER_PREFIX.length - 1, '');
                       unwrapped.replace(len - MODULE_WRAPPER_SUFFIX.length, len - 1, '');
                     }
@@ -470,7 +460,7 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
                       source: cached,
                       module: mod,
                       id,
-                      isShorthand: moduleShorthandFormat.has(hash)
+                      isShorthand
                     });
                   } catch (err) {
                     compilation.errors.push(err);
@@ -482,10 +472,11 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
             );
           }
 
-          // Create a minimal valid token using void operator with string literal
-          // The void operator prevents minifiers from optimizing away the expression
-          // while keeping the token string intact for regex matching during rehydration
-          const result: sources.Source = new RawSource(`(){void "${CHUNK_MODULE_TOKEN}${hash}"}`);
+          // Create token with optional ':' prefix for shorthand modules
+          // For non-shorthand: __WEBPACK_CHUNK_MODULE__hash (becomes "id":__WEBPACK_CHUNK_MODULE__hash in object)
+          // For shorthand: :__WEBPACK_CHUNK_MODULE__hash (becomes "id"__WEBPACK_CHUNK_MODULE__hash, ':' makes it valid property assignment)
+          const tokenPrefix: string = isShorthand ? ':' : '';
+          const result: sources.Source = new RawSource(`${tokenPrefix}${CHUNK_MODULE_TOKEN}${hash}`);
           sourceCache.set(source, {
             hash,
             source: result,
@@ -524,100 +515,68 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
 
             // Verify that this is a JS asset
             if (isJSAsset.test(assetName)) {
-              // Check if asset contains module tokens (which would make it invalid for minification)
-              const assetSource: string = asset.source().toString();
-              const hasTokens: boolean = assetSource.includes(CHUNK_MODULE_TOKEN);
+              ++pendingMinificationRequests;
 
-              if (hasTokens) {
-                // Asset contains tokens - don't try to minify it, just store for rehydration
-                minifiedAssets.set(assetName, {
-                  source: postProcessCode(new ReplaceSource(asset), {
-                    compilation,
-                    module: undefined,
-                    loggingName: assetName
-                  }),
-                  chunk,
-                  fileName: assetName,
-                  renderInfo: new Map(),
-                  type: 'javascript'
-                });
-              } else {
-                // Asset doesn't have tokens - safe to minify
-                ++pendingMinificationRequests;
+              const { source: wrappedCodeRaw, map } = useSourceMaps
+                ? asset.sourceAndMap()
+                : {
+                    source: asset.source(),
+                    map: undefined
+                  };
 
-                const { source: wrappedCodeRaw, map } = useSourceMaps
-                  ? asset.sourceAndMap()
-                  : {
-                      source: asset.source(),
-                      map: undefined
-                    };
+              const rawCode: string = wrappedCodeRaw.toString();
+              const nameForMap: string = `(chunks)/${assetName}`;
 
-                const rawCode: string = wrappedCodeRaw.toString();
-                const nameForMap: string = `(chunks)/${assetName}`;
+              const hash: string = hashCodeFragment(rawCode);
 
-                const hash: string = hashCodeFragment(rawCode);
+              minifier.minify(
+                {
+                  hash,
+                  code: rawCode,
+                  nameForMap: useSourceMaps ? nameForMap : undefined,
+                  externals: undefined
+                },
+                (result: IModuleMinificationResult) => {
+                  if (isMinificationResultError(result)) {
+                    compilation.errors.push(result.error as WebpackError);
+                    // eslint-disable-next-line no-console
+                    console.error(result.error);
+                  } else {
+                    try {
+                      const { code: minified, map: minifierMap } = result;
 
-                minifier.minify(
-                  {
-                    hash,
-                    code: rawCode,
-                    nameForMap: useSourceMaps ? nameForMap : undefined,
-                    externals: undefined
-                  },
-                  (result: IModuleMinificationResult) => {
-                    if (isMinificationResultError(result)) {
-                      compilation.errors.push(result.error as WebpackError);
-                      // eslint-disable-next-line no-console
-                      console.error(result.error);
-                      // Store unminified asset as fallback
+                      const rawOutput: sources.Source = useSourceMaps
+                        ? new SourceMapSource(
+                            minified, // Code
+                            nameForMap, // File
+                            minifierMap ?? undefined, // Base source map
+                            rawCode, // Source from before transform
+                            map ?? undefined, // Source Map from before transform
+                            true // Remove original source
+                          )
+                        : new RawSource(minified);
+
+                      const withIds: sources.Source = postProcessCode(new ReplaceSource(rawOutput), {
+                        compilation,
+                        module: undefined,
+                        loggingName: assetName
+                      });
+
                       minifiedAssets.set(assetName, {
-                        source: postProcessCode(new ReplaceSource(asset), {
-                          compilation,
-                          module: undefined,
-                          loggingName: assetName
-                        }),
+                        source: new CachedSource(withIds),
                         chunk,
                         fileName: assetName,
                         renderInfo: new Map(),
                         type: 'javascript'
                       });
-                    } else {
-                      try {
-                        const { code: minified, map: minifierMap } = result;
-
-                        const rawOutput: sources.Source = useSourceMaps
-                          ? new SourceMapSource(
-                              minified, // Code
-                              nameForMap, // File
-                              minifierMap ?? undefined, // Base source map
-                              rawCode, // Source from before transform
-                              map ?? undefined, // Source Map from before transform
-                              true // Remove original source
-                            )
-                          : new RawSource(minified);
-
-                        const withIds: sources.Source = postProcessCode(new ReplaceSource(rawOutput), {
-                          compilation,
-                          module: undefined,
-                          loggingName: assetName
-                        });
-
-                        minifiedAssets.set(assetName, {
-                          source: new CachedSource(withIds),
-                          chunk,
-                          fileName: assetName,
-                          renderInfo: new Map(),
-                          type: 'javascript'
-                        });
-                      } catch (err) {
-                        compilation.errors.push(err);
-                      }
+                    } catch (err) {
+                      compilation.errors.push(err);
                     }
-
-                    onFileMinified();
                   }
-                );
-              }
+
+                  onFileMinified();
+                }
+              );
             } else {
               // This isn't a JS asset. Don't try to minify the asset wrapper, though if it contains modules, those might still get replaced with minified versions.
               minifiedAssets.set(assetName, {
