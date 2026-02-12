@@ -157,8 +157,9 @@ function isMethodShorthandFormat(code: string): boolean {
     return false;
   }
 
-  // If neither '=>' nor 'function(' are found, assume method shorthand format
-  // This handles the case where webpack emits: (__params__) { body } without function keyword
+  // If neither '=>' nor 'function(' are found, assume object method shorthand format
+  // ECMAScript method shorthand is used in object literals: { methodName(params){body} }
+  // Webpack emits this as just (params){body} which only works in the object literal context
   return true;
 }
 
@@ -476,6 +477,8 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
           }
 
           // Create a minimal valid token using void operator with string literal
+          // The void operator prevents minifiers from optimizing away the expression
+          // while keeping the token string intact for regex matching during rehydration
           const result: sources.Source = new RawSource(`(){void "${CHUNK_MODULE_TOKEN}${hash}"}`);
           sourceCache.set(source, {
             hash,

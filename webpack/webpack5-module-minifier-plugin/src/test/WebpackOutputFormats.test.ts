@@ -65,8 +65,7 @@ describe('WebpackOutputFormats', () => {
     // Capture what was sent to the minifier
     const requests: Array<[string, string]> = Array.from(mockMinifier.requests.entries());
     // Just check that modules have the expected wrapper
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const [_hash, code] of requests) {
+    for (const [, code] of requests) {
       if (code.includes('__MINIFY_MODULE__')) {
         expect(code).toMatch(/^__MINIFY_MODULE__\(/);
         expect(code).toMatch(/\);$/);
@@ -133,8 +132,7 @@ describe('WebpackOutputFormats', () => {
     // Capture what was sent to the minifier
     const requests: Array<[string, string]> = Array.from(mockMinifier.requests.entries());
     // Just check that modules have the expected wrapper
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const [_hash, code] of requests) {
+    for (const [, code] of requests) {
       if (code.includes('__MINIFY_MODULE__')) {
         expect(code).toMatch(/^__MINIFY_MODULE__\(/);
         expect(code).toMatch(/\);$/);
