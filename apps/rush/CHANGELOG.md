@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 05 Feb 2026 00:24:16 GMT and should not be manually modified.
+This log was last generated on Thu, 12 Feb 2026 23:01:10 GMT and should not be manually modified.
+
+## 5.168.0
+Thu, 12 Feb 2026 23:01:10 GMT
+
+### Updates
+
+- Add named exports to support named imports to `@rushstack/rush-sdk`.
+- Fix `rush change --verify` to ignore version-only changes in package.json files and changes to CHANGELOG.md and CHANGELOG.json files, preventing false positives after `rush version --bump` updates package versions and changelogs.
 
 ## 5.167.0
 Thu, 05 Feb 2026 00:24:16 GMT
