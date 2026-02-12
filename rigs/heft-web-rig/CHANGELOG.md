@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Sat, 07 Feb 2026 01:13:26 GMT and should not be manually modified.
+This log was last generated on Thu, 12 Feb 2026 23:00:53 GMT and should not be manually modified.
+
+## 1.3.0
+Thu, 12 Feb 2026 23:00:53 GMT
+
+### Minor changes
+
+- Bump the `webpack` dependency to `~5.105.2`.
 
 ## 1.2.9
 Sat, 07 Feb 2026 01:13:26 GMT

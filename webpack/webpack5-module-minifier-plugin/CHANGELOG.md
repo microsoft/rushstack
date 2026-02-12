@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack5-module-minifier-plugin
 
-This log was last generated on Sat, 07 Feb 2026 01:13:26 GMT and should not be manually modified.
+This log was last generated on Thu, 12 Feb 2026 23:00:53 GMT and should not be manually modified.
+
+## 5.7.0
+Thu, 12 Feb 2026 23:00:53 GMT
+
+### Minor changes
+
+- Add support for webpack's ECMAScript method shorthand format. The plugin now detects when modules are emitted using method shorthand syntax (without 'function' keyword or arrow syntax) and wraps them appropriately for minification.
 
 ## 5.6.14
 Sat, 07 Feb 2026 01:13:26 GMT
