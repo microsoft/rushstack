@@ -137,3 +137,6 @@ test-results/
 # Claude Code local configuration
 .claude/*.local.json
 
+# Atomic Workflow plugin artifacts
+specs/
+research/

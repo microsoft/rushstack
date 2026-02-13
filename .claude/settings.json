@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "local-rushstack-plugins": {
+      "source": {
+        "source": "directory",
+        "path": "./claude-plugins"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "atomic@local-rushstack-plugins": true
+  }
+}
