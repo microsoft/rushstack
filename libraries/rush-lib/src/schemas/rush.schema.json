@@ -292,6 +292,17 @@
             "description": "A flag indicating that changes to this project will be published to npm, which affects the Rush change and publish workflows.",
             "type": "boolean"
           },
+          "publishTarget": {
+            "description": "Specifies the publish targets for this project. Determines which publish provider plugins handle publishing. Each entry maps to a registered publish provider. Common values: 'npm', 'vsix', 'none'. When set to ['none'], the project participates in versioning but is not published by any provider. When omitted, defaults to ['npm'] for backward compatibility.",
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "array",
+                "items": { "type": "string" },
+                "minItems": 1
+              }
+            ]
+          },
           "skipRushCheck": {
             "description": "If true, then this project will be ignored by the \"rush check\" command.  The default value is false.",
             "type": "boolean"

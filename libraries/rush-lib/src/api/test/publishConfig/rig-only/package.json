@@ -1,0 +1,7 @@
+{
+  "name": "rig-only-test",
+  "version": "1.0.0",
+  "dependencies": {
+    "test-publish-rig": "1.0.0"
+  }
+}

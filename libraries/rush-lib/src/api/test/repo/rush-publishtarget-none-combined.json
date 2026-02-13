@@ -1,0 +1,19 @@
+{
+  "pnpmVersion": "6.0.0",
+  "rushVersion": "5.46.1",
+  "projectFolderMinDepth": 1,
+  "projectFolderMaxDepth": 99,
+
+  "repository": {
+    "url": "someFakeUrl"
+  },
+
+  "projects": [
+    {
+      "packageName": "project1",
+      "projectFolder": "project1",
+      "shouldPublish": true,
+      "publishTarget": ["npm", "none"]
+    }
+  ]
+}

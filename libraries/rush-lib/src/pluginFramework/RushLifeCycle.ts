@@ -46,6 +46,17 @@ export interface IPhasedCommand extends IRushCommand {
 }
 
 /**
+ * Information about the currently executing publish command provided to plugins.
+ * @beta
+ */
+export interface IPublishCommand extends IRushCommand {
+  /**
+   * Whether the publish command is running in dry-run mode (--publish flag was NOT provided).
+   */
+  readonly dryRun: boolean;
+}
+
+/**
  * Hooks into the lifecycle of the Rush process invocation that plugins may tap into.
  *
  * @beta
@@ -103,6 +114,24 @@ export class RushLifecycleHooks {
   public readonly afterInstall: AsyncSeriesHook<
     [command: IRushCommand, subspace: Subspace, variant: string | undefined]
   > = new AsyncSeriesHook(['command', 'subspace', 'variant'], 'afterInstall');
+
+  /**
+   * The hook to run before the publish command begins dispatching to providers.
+   * Plugins can use this for setup, authentication, or validation.
+   */
+  public readonly beforePublish: AsyncSeriesHook<[command: IPublishCommand]> = new AsyncSeriesHook(
+    ['command'],
+    'beforePublish'
+  );
+
+  /**
+   * The hook to run after all publish providers have completed.
+   * Plugins can use this for cleanup or reporting.
+   */
+  public readonly afterPublish: AsyncSeriesHook<[command: IPublishCommand]> = new AsyncSeriesHook(
+    ['command'],
+    'afterPublish'
+  );
 
   /**
    * A hook to allow plugins to hook custom logic to process telemetry data.

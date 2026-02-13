@@ -1,0 +1,7 @@
+{
+  "providers": {
+    "vsix": {
+      "vsixPathPattern": "dist/custom/my-ext.vsix"
+    }
+  }
+}

@@ -1434,6 +1434,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "@rushstack/rush-npm-publish-plugin",
+      "projectFolder": "rush-plugins/rush-npm-publish-plugin",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
       "packageName": "@rushstack/rush-redis-cobuild-plugin",
       "projectFolder": "rush-plugins/rush-redis-cobuild-plugin",
       "reviewCategory": "libraries",
@@ -1457,31 +1463,45 @@
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },
+    {
+      "packageName": "@rushstack/rush-vscode-publish-plugin",
+      "projectFolder": "rush-plugins/rush-vscode-publish-plugin",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
 
     // "vscode-extensions" folder (alphabetical order)
     {
       "packageName": "rushstack",
       "projectFolder": "vscode-extensions/rush-vscode-extension",
       "reviewCategory": "vscode-extensions",
-      "tags": ["vsix"]
+      "tags": ["vsix"],
+      "shouldPublish": true,
+      "publishTarget": ["vsix"]
     },
     {
       "packageName": "@rushstack/rush-vscode-command-webview",
       "projectFolder": "vscode-extensions/rush-vscode-command-webview",
       "reviewCategory": "vscode-extensions",
-      "tags": ["vsix"]
+      "tags": ["vsix"],
+      "shouldPublish": true,
+      "publishTarget": ["vsix"]
     },
     {
       "packageName": "debug-certificate-manager",
       "projectFolder": "vscode-extensions/debug-certificate-manager-vscode-extension",
       "reviewCategory": "vscode-extensions",
-      "tags": ["vsix"]
+      "tags": ["vsix"],
+      "shouldPublish": true,
+      "publishTarget": ["vsix"]
     },
     {
       "packageName": "playwright-local-browser-server",
       "projectFolder": "vscode-extensions/playwright-local-browser-server-vscode-extension",
       "reviewCategory": "vscode-extensions",
-      "tags": ["vsix"]
+      "tags": ["vsix"],
+      "shouldPublish": true,
+      "publishTarget": ["vsix"]
     },
 
     // "webpack" folder (alphabetical order)

@@ -93,7 +93,8 @@
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
     "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:*",
-    "@rushstack/rush-http-build-cache-plugin": "workspace:*"
+    "@rushstack/rush-http-build-cache-plugin": "workspace:*",
+    "@rushstack/rush-npm-publish-plugin": "workspace:*"
   },
   "sideEffects": [
     "lib-esnext/start-pnpm.js",

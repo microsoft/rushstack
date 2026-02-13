@@ -10,6 +10,7 @@ import type { IBuildCacheJson } from '../api/BuildCacheConfiguration';
 import type { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider';
 import type { ICobuildJson } from '../api/CobuildConfiguration';
 import type { ICobuildLockProvider } from '../logic/cobuild/ICobuildLockProvider';
+import type { PublishProviderFactory } from './IPublishProvider';
 
 /**
  * @beta
@@ -40,6 +41,7 @@ export class RushSession {
   private readonly _options: IRushSessionOptions;
   private readonly _cloudBuildCacheProviderFactories: Map<string, CloudBuildCacheProviderFactory> = new Map();
   private readonly _cobuildLockProviderFactories: Map<string, CobuildLockProviderFactory> = new Map();
+  private readonly _publishProviderFactories: Map<string, PublishProviderFactory> = new Map();
 
   public readonly hooks: RushLifecycleHooks;
 
@@ -100,5 +102,16 @@ export class RushSession {
     cobuildLockProviderName: string
   ): CobuildLockProviderFactory | undefined {
     return this._cobuildLockProviderFactories.get(cobuildLockProviderName);
+  }
+
+  public registerPublishProviderFactory(publishTargetName: string, factory: PublishProviderFactory): void {
+    if (this._publishProviderFactories.has(publishTargetName)) {
+      throw new Error(`A publish provider factory for "${publishTargetName}" has already been registered`);
+    }
+    this._publishProviderFactories.set(publishTargetName, factory);
+  }
+
+  public getPublishProviderFactory(publishTargetName: string): PublishProviderFactory | undefined {
+    return this._publishProviderFactories.get(publishTargetName);
   }
 }

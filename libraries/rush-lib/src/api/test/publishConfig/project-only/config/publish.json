@@ -1,0 +1,7 @@
+{
+  "providers": {
+    "npm": {
+      "registryUrl": "https://registry.npmjs.org"
+    }
+  }
+}

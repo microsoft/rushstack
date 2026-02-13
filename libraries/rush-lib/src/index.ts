@@ -104,6 +104,8 @@ export { EventHooks, Event } from './api/EventHooks';
 
 export { ChangeManager } from './api/ChangeManager';
 
+export { ChangeType } from './api/ChangeManagement';
+
 export { FlagFile as _FlagFile } from './api/FlagFile';
 
 export {
@@ -162,6 +164,7 @@ export {
   type IRushCommand,
   type IGlobalCommand,
   type IPhasedCommand,
+  type IPublishCommand,
   RushLifecycleHooks
 } from './pluginFramework/RushLifeCycle';
 
@@ -182,6 +185,15 @@ export type {
   ICobuildContext,
   ICobuildCompletedState
 } from './logic/cobuild/ICobuildLockProvider';
+
+export type {
+  IPublishProvider,
+  IPublishProjectInfo,
+  IPublishProviderPublishOptions,
+  IPublishProviderPackOptions,
+  IPublishProviderCheckExistsOptions,
+  PublishProviderFactory
+} from './pluginFramework/IPublishProvider';
 
 export type { ITelemetryData, ITelemetryMachineInfo, ITelemetryOperationResult } from './logic/Telemetry';
 
