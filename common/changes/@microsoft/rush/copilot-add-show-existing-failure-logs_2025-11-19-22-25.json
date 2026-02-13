@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add \"--show-existing-failure-logs\" parameter to phased commands that skips execution and replays existing failure logs from previous runs. This is useful when performing sweeping changes (e.g., TypeScript upgrades) to quickly review which projects failed without re-running expensive builds.",
+      "type": "minor",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "198982749+Copilot@users.noreply.github.com"
+}
