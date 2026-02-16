@@ -119,19 +119,20 @@ export class OperationBuildCache {
     executionResult: IOperationExecutionResult,
     options: IOperationBuildCacheOptions
   ): OperationBuildCache {
+    const { buildCacheConfiguration, terminal, filterAppleDoubleFiles } = options;
     const outputFolders: string[] = [...(executionResult.operation.settings?.outputFolderNames ?? [])];
     if (executionResult.metadataFolderPath) {
       outputFolders.push(executionResult.metadataFolderPath);
     }
 
     const buildCacheOptions: IProjectBuildCacheOptions = {
-      buildCacheConfiguration: options.buildCacheConfiguration,
-      terminal: options.terminal,
+      buildCacheConfiguration,
+      terminal,
       project: executionResult.operation.associatedProject,
       phaseName: executionResult.operation.associatedPhase.name,
       projectOutputFolderNames: outputFolders,
       operationStateHash: executionResult.getStateHash(),
-      filterAppleDoubleFiles: options.filterAppleDoubleFiles
+      filterAppleDoubleFiles
     };
     const cacheId: string | undefined = OperationBuildCache._getCacheId(buildCacheOptions);
     return new OperationBuildCache(cacheId, buildCacheOptions);
