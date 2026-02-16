@@ -79,21 +79,19 @@ export interface ICacheableOperationPluginOptions {
   filterAppleDoubleFiles: boolean;
 }
 
-interface ITryGetOperationBuildCacheOptions {
+interface ITryGetOperationBuildCacheOptionsBase<TRecord> {
   buildCacheContext: IOperationBuildCacheContext;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
   terminal: ITerminal;
-  record: OperationExecutionRecord;
   filterAppleDoubleFiles: boolean;
+  record: TRecord;
 }
 
-interface ITryGetLogOnlyOperationBuildCacheOptions {
-  buildCacheContext: IOperationBuildCacheContext;
-  buildCacheConfiguration: BuildCacheConfiguration | undefined;
+type ITryGetOperationBuildCacheOptions = ITryGetOperationBuildCacheOptionsBase<OperationExecutionRecord>;
+
+interface ITryGetLogOnlyOperationBuildCacheOptions
+  extends ITryGetOperationBuildCacheOptionsBase<IOperationRunnerContext & IOperationExecutionResult> {
   cobuildConfiguration: CobuildConfiguration;
-  record: IOperationRunnerContext & IOperationExecutionResult;
-  terminal: ITerminal;
-  filterAppleDoubleFiles: boolean;
 }
 
 export class CacheableOperationPlugin implements IPhasedCommandPlugin {
