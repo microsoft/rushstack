@@ -27,6 +27,11 @@ export interface IOperationBuildCacheOptions {
    * The terminal to use for logging.
    */
   terminal: ITerminal;
+  /**
+   * If true, omit AppleDouble (`._*`) files from cache archives when running on macOS
+   * and a companion file exists in the same directory.
+   */
+  filterAppleDoubleFiles: boolean;
 }
 
 /**
@@ -69,6 +74,7 @@ export class OperationBuildCache {
   private readonly _cacheWriteEnabled: boolean;
   private readonly _projectOutputFolderNames: ReadonlyArray<string>;
   private readonly _cacheId: string | undefined;
+  private readonly _filterAppleDoubleFiles: boolean;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
     const {
@@ -79,7 +85,8 @@ export class OperationBuildCache {
         cacheWriteEnabled
       },
       project,
-      projectOutputFolderNames
+      projectOutputFolderNames,
+      filterAppleDoubleFiles
     } = options;
     this._project = project;
     this._localBuildCacheProvider = localCacheProvider;
@@ -88,6 +95,7 @@ export class OperationBuildCache {
     this._cacheWriteEnabled = cacheWriteEnabled;
     this._projectOutputFolderNames = projectOutputFolderNames || [];
     this._cacheId = cacheId;
+    this._filterAppleDoubleFiles = filterAppleDoubleFiles && process.platform === 'darwin';
   }
 
   private static _tryGetTarUtility(terminal: ITerminal): Promise<TarExecutable | undefined> {
@@ -111,17 +119,20 @@ export class OperationBuildCache {
     executionResult: IOperationExecutionResult,
     options: IOperationBuildCacheOptions
   ): OperationBuildCache {
+    const { buildCacheConfiguration, terminal, filterAppleDoubleFiles } = options;
     const outputFolders: string[] = [...(executionResult.operation.settings?.outputFolderNames ?? [])];
     if (executionResult.metadataFolderPath) {
       outputFolders.push(executionResult.metadataFolderPath);
     }
+
     const buildCacheOptions: IProjectBuildCacheOptions = {
-      buildCacheConfiguration: options.buildCacheConfiguration,
-      terminal: options.terminal,
+      buildCacheConfiguration,
+      terminal,
       project: executionResult.operation.associatedProject,
       phaseName: executionResult.operation.associatedPhase.name,
       projectOutputFolderNames: outputFolders,
-      operationStateHash: executionResult.getStateHash()
+      operationStateHash: executionResult.getStateHash(),
+      filterAppleDoubleFiles
     };
     const cacheId: string | undefined = OperationBuildCache._getCacheId(buildCacheOptions);
     return new OperationBuildCache(cacheId, buildCacheOptions);
@@ -341,11 +352,20 @@ export class OperationBuildCache {
     const filteredOutputFolderNames: string[] = [];
 
     let hasSymbolicLinks: boolean = false;
+    const filterAppleDoubleFiles: boolean = this._filterAppleDoubleFiles;
 
     // Adds child directories to the queue, files to the path list, and bails on symlinks
     function processChildren(relativePath: string, diskPath: string, children: FolderItem[]): void {
+      // When filtering AppleDouble files, build a set of sibling names so we can check
+      // whether a companion file exists for each ._X file.
+      let childNameSet: Set<string> | undefined;
+      if (filterAppleDoubleFiles) {
+        childNameSet = new Set<string>(children.map(({ name }) => name));
+      }
+
       for (const child of children) {
-        const childRelativePath: string = `${relativePath}/${child.name}`;
+        const childName: string = child.name;
+        const childRelativePath: string = `${relativePath}/${childName}`;
         if (child.isSymbolicLink()) {
           terminal.writeError(
             `Unable to include "${childRelativePath}" in build cache. It is a symbolic link.`
@@ -354,6 +374,15 @@ export class OperationBuildCache {
         } else if (child.isDirectory()) {
           queue.push([childRelativePath, `${diskPath}/${child.name}`]);
         } else {
+          // Check for macOS AppleDouble files (._X pattern) that have a companion file
+          if (childNameSet && childName.length > 2 && childName.startsWith('._')) {
+            const companionName: string = childName.substring(2);
+            if (childNameSet.has(companionName)) {
+              terminal.writeVerboseLine(`Omitting AppleDouble file "${childRelativePath}" from build cache.`);
+              continue;
+            }
+          }
+
           outputFilePaths.push(childRelativePath);
         }
       }

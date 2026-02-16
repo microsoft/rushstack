@@ -82,7 +82,14 @@ export class BridgeCachePlugin implements IRushPlugin {
           recordByOperation: Map<Operation, IOperationExecutionResult>,
           context: IExecuteOperationsContext
         ): Promise<void> => {
-          const { buildCacheConfiguration } = context;
+          const {
+            buildCacheConfiguration,
+            rushConfiguration: {
+              experimentsConfiguration: {
+                configuration: { omitAppleDoubleFilesFromBuildCache }
+              }
+            }
+          } = context;
           const { terminal } = logger;
 
           if (cacheAction === undefined) {
@@ -111,7 +118,8 @@ export class BridgeCachePlugin implements IRushPlugin {
                 operationExecutionResult,
                 {
                   buildCacheConfiguration,
-                  terminal
+                  terminal,
+                  filterAppleDoubleFiles: !!omitAppleDoubleFilesFromBuildCache
                 }
               );
 

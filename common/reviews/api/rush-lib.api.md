@@ -471,6 +471,7 @@ export interface IExperimentsJson {
     forbidPhantomResolvableNodeModulesFolders?: boolean;
     generateProjectImpactGraphDuringRushUpdate?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
+    omitAppleDoubleFilesFromBuildCache?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     printEventHooksOutputToConsole?: boolean;
     rushAlerts?: boolean;
@@ -583,6 +584,7 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 // @internal (undocumented)
 export interface _IOperationBuildCacheOptions {
     buildCacheConfiguration: BuildCacheConfiguration;
+    filterAppleDoubleFiles: boolean;
     terminal: ITerminal;
 }
 

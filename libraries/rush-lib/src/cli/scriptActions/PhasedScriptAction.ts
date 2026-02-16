@@ -508,7 +508,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
                 .buildCacheWithAllowWarningsInSuccessfulBuild,
             buildCacheConfiguration,
             cobuildConfiguration,
-            terminal
+            terminal,
+            filterAppleDoubleFiles:
+              !!this.rushConfiguration.experimentsConfiguration.configuration
+                .omitAppleDoubleFilesFromBuildCache
           }).apply(this.hooks);
 
           if (this._debugBuildCacheIdsParameter.value) {
