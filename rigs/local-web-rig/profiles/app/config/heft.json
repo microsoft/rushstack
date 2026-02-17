@@ -16,6 +16,9 @@
           }
         }
       }
+    },
+    "test": {
+      "cleanFiles": [{ "includeGlobs": ["coverage"] }]
     }
   }
 }

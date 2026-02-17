@@ -56,10 +56,7 @@
         "lint": {
           "taskDependencies": ["typescript"],
           "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-lint-plugin",
-            "options": {
-              "sarifLogPath": "temp/build/lint/lint.sarif"
-            }
+            "pluginPackage": "@rushstack/heft-lint-plugin"
           }
         },
         "api-extractor": {
@@ -79,7 +76,6 @@
 
     "test": {
       "phaseDependencies": ["build"],
-      "cleanFiles": [{ "includeGlobs": ["coverage"] }],
       "tasksByName": {
         "jest": {
           "taskPlugin": {
