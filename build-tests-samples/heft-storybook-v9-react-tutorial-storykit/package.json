@@ -3,9 +3,29 @@
   "version": "0.0.0",
   "private": true,
   "description": "Storybook build dependencies for heft-storybook-v9-react-tutorial",
-  "main": "lib-commonjs/index.js",
-  "module": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./lib-dts/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "types": "./lib-dts/index.d.ts"
+    },
+    "./lib/*": {
+      "require": "./lib-commonjs/*",
+      "import": "./lib-esm/*",
+      "types": "./lib-dts/*"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean"

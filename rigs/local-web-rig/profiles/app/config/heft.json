@@ -5,6 +5,8 @@
 
   "phasesByName": {
     "build": {
+      "cleanFiles": [{ "includeGlobs": ["lib-esm"] }],
+
       "tasksByName": {
         "lint": {
           "taskPlugin": {
