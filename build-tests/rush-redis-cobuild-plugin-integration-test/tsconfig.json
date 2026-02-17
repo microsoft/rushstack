@@ -23,6 +23,5 @@
     "lib": ["es2017", "DOM"]
   },
 
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "lib"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

@@ -1,7 +1,7 @@
 {
   "$schema": "http://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "outDir": "lib-commonjs",
+    "outDir": "lib-esm",
     "declarationDir": "lib-dts",
     "rootDir": "src",
 
@@ -20,6 +20,5 @@
     "lib": ["es5"]
   },
 
-  "include": ["client/**/*.ts", "client/**/*.tsx", "server/**/*.ts", "server/**/*.tsx"],
-  "exclude": ["node_modules", "lib"]
+  "include": ["client/**/*.ts", "client/**/*.tsx", "server/**/*.ts", "server/**/*.tsx"]
 }

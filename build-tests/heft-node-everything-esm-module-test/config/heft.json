@@ -6,7 +6,7 @@
 
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-esnext", "lib-umd"] }],
+      "cleanFiles": [{ "includeGlobs": ["dist", "lib-commonjs", "lib", "lib-esm", "lib-esnext", "lib-umd"] }],
 
       "tasksByName": {
         "typescript": {
