@@ -191,8 +191,8 @@ export class ProjectChangeAnalyzer {
       );
 
       if (changedFiles.has(pnpmConfigRelativePath)) {
-        const currentCatalogs: Record<string, Record<string, string>> =
-          rushConfiguration.pnpmOptions.globalCatalogs;
+        const currentCatalogs: Record<string, Record<string, string>> = rushConfiguration.pnpmOptions
+          .globalCatalogs;
 
         // Determine which catalog names have changed
         let changedCatalogNames: Set<string>;
@@ -202,8 +202,7 @@ export class ProjectChangeAnalyzer {
             repositoryRoot: repoRoot
           });
           const oldPnpmConfig: IPnpmOptionsJson = JSON.parse(oldPnpmConfigText);
-          const oldCatalogs: Record<string, Record<string, string>> =
-            oldPnpmConfig.globalCatalogs ?? {};
+          const oldCatalogs: Record<string, Record<string, string>> = oldPnpmConfig.globalCatalogs ?? {};
 
           changedCatalogNames = new Set<string>();
 
@@ -265,16 +264,13 @@ export class ProjectChangeAnalyzer {
             }
           }
 
-          // Mark projects using changed catalogs (and their direct consumers) as changed
+          // Mark projects using changed catalogs as changed
           for (const catalogName of changedCatalogNames) {
             const affectedProjects: Set<RushConfigurationProject> | undefined =
               catalogToProjects.get(catalogName);
             if (affectedProjects) {
               for (const project of affectedProjects) {
                 changedProjects.add(project);
-                for (const consumer of project.consumingProjects) {
-                  changedProjects.add(consumer);
-                }
               }
             }
           }
