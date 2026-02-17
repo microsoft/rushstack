@@ -202,7 +202,7 @@
               "text": "number"
             }
           ],
-          "fileUrlPath": "lib/excerptTokens/index.d.ts",
+          "fileUrlPath": "lib-dts/excerptTokens/index.d.ts",
           "isReadonly": false,
           "releaseTag": "Public",
           "name": "MY_CONSTANT",
@@ -221,7 +221,7 @@
               "text": "export class MyClass "
             }
           ],
-          "fileUrlPath": "lib/excerptTokens/index.d.ts",
+          "fileUrlPath": "lib-dts/excerptTokens/index.d.ts",
           "releaseTag": "Public",
           "isAbstract": false,
           "name": "MyClass",

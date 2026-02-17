@@ -33,7 +33,8 @@ export async function runScenariosAsync(
   const scenariosWithCustomCompilerOptions: string[] = [];
 
   const scenarioFolderNames: string[] = [];
-  const folderItems: FolderItem[] = await FileSystem.readFolderItemsAsync(libFolderPath);
+  const libDtsFolderPath: string = `${buildFolderPath}/lib-dts`;
+  const folderItems: FolderItem[] = await FileSystem.readFolderItemsAsync(libDtsFolderPath);
   for (const folderItem of folderItems) {
     if (folderItem.isDirectory()) {
       scenarioFolderNames.push(folderItem.name);

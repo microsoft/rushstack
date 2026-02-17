@@ -1,15 +1,15 @@
 {
   "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json",
   "coverageDirectory": "<rootDir>/coverage",
-  "reporters": ["default", "../lib-commonjs/test/customJestReporter.cjs"],
-  "testMatch": ["<rootDir>/lib-commonjs/**/*.test.cjs"],
+  "reporters": ["default", "../lib/test/customJestReporter.cjs"],
+  "testMatch": ["<rootDir>/lib/**/*.test.cjs"],
   "collectCoverageFrom": [
-    "lib-commonjs/**/*.cjs",
-    "!lib-commonjs/**/*.d.ts",
-    "!lib-commonjs/**/*.test.cjs",
-    "!lib-commonjs/**/test/**",
-    "!lib-commonjs/**/__tests__/**",
-    "!lib-commonjs/**/__fixtures__/**",
-    "!lib-commonjs/**/__mocks__/**"
+    "lib/**/*.cjs",
+    "!lib/**/*.d.ts",
+    "!lib/**/*.test.cjs",
+    "!lib/**/test/**",
+    "!lib/**/__tests__/**",
+    "!lib/**/__fixtures__/**",
+    "!lib/**/__mocks__/**"
   ]
 }
