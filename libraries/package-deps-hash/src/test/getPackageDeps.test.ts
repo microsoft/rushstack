@@ -8,7 +8,9 @@ import { getPackageDeps, parseGitLsTree, parseGitFilename } from '../getPackageD
 
 import { FileSystem, FileConstants } from '@rushstack/node-core-library';
 
-const SOURCE_PATH: string = path.join(__dirname).replace(path.join('lib', 'test'), path.join('src', 'test'));
+const SOURCE_PATH: string = path
+  .join(__dirname)
+  .replace(path.join('lib-commonjs', 'test'), path.join('src', 'test'));
 
 const TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'testProject');
 const NESTED_TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'nestedTestProject');

@@ -25,6 +25,11 @@ module.exports = ({ webpack: { BannerPlugin } }) => {
   // Explicitly exclude @microsoft/rush-lib
   externalDependencyNames.delete('@microsoft/rush-lib');
 
+  // Resolve rush-lib deep imports to the intermediate ESM source rather than the
+  // DeepImportsPlugin stubs (which load from the dist/ webpack bundle). This avoids
+  // embedding a nested webpack runtime that expects a separate commons.js chunk.
+  const rushLibLibAlias = `${rushLibFolder}/lib-intermediate-esm`;
+
   return {
     context: __dirname,
     mode: 'development', // So the output isn't minified
@@ -63,6 +68,11 @@ module.exports = ({ webpack: { BannerPlugin } }) => {
       }),
       new PreserveDynamicRequireWebpackPlugin()
     ],
+    resolve: {
+      alias: {
+        '@microsoft/rush-lib/lib': rushLibLibAlias
+      }
+    },
     externals: [
       ({ request }, callback) => {
         let packageName;

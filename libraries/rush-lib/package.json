@@ -12,7 +12,7 @@
   },
   "engineStrict": true,
   "homepage": "https://rushjs.io",
-  "main": "./lib/index.js",
+  "main": "./lib-commonjs/index.js",
   "types": "./dist/rush-lib.d.ts",
   "exports": {
     ".": {
