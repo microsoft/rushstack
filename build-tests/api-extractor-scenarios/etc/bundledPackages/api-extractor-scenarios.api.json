@@ -304,7 +304,7 @@
               "text": " "
             }
           ],
-          "fileUrlPath": "../api-extractor-lib1-test/lib/index.d.ts",
+          "fileUrlPath": "../api-extractor-lib1-test/lib-dts/index.d.ts",
           "releaseTag": "Public",
           "isAbstract": false,
           "name": "Lib1Class",

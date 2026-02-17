@@ -31,7 +31,7 @@ module.exports = {
       '// See LICENSE in the project root for license information.',
       ''
     ];
-    for await (const dtsPath of collectDtsPaths(`${rushLibPath}/lib`, '@microsoft/rush-lib/lib')) {
+    for await (const dtsPath of collectDtsPaths(`${rushLibPath}/lib-dts`, '@microsoft/rush-lib/lib-dts')) {
       indexFileLines.push(`import '${dtsPath}';`);
     }
 

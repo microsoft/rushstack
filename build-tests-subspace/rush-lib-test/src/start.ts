@@ -8,7 +8,7 @@ console.log('rush-lib-test loading Rush configuration...');
 // Important: Since we're calling an internal API, we need to use the unbundled .d.ts files
 // instead of the normal .d.ts rollup
 // eslint-disable-next-line import/order
-import { RushConfiguration } from '@microsoft/rush-lib/lib/';
+import { RushConfiguration } from '@microsoft/rush-lib/lib/index';
 
 const config: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
 console.log(config.commonFolder);
