@@ -119,7 +119,7 @@ export class BridgeCachePlugin implements IRushPlugin {
                 {
                   buildCacheConfiguration,
                   terminal,
-                  filterAppleDoubleFiles: !!omitAppleDoubleFilesFromBuildCache
+                  excludeAppleDoubleFiles: !!omitAppleDoubleFilesFromBuildCache
                 }
               );
 
