@@ -585,47 +585,40 @@ describe(ProjectChangeAnalyzer.name, () => {
     });
 
     describe('catalog change detection', () => {
-      it('detects projects using a changed catalog entry', async () => {
-        const rootDir: string = resolve(__dirname, 'repoWithCatalogs');
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-          resolve(rootDir, 'rush.json')
+      function getCatalogRushConfiguration(): RushConfiguration {
+        return RushConfiguration.loadFromConfigurationFile(
+          resolve(__dirname, 'repoWithCatalogs', 'rush.json')
         );
+      }
 
-        // pnpm-config.json changed
+      function mockPnpmConfigChanged(): void {
         mockGetRepoChanges.mockReturnValue(
           new Map<string, IFileDiffStatus>([
             [
               'common/config/rush/pnpm-config.json',
-              {
-                mode: 'modified',
-                newhash: 'newhash',
-                oldhash: 'oldhash',
-                status: 'M'
-              }
+              { mode: 'modified', newhash: 'newhash', oldhash: 'oldhash', status: 'M' }
             ]
           ])
         );
+      }
 
-        // Old config had react ^17.0.0, now it's ^18.0.0
+      function mockOldCatalogs(catalogs: Record<string, Record<string, string>>): void {
         mockGetBlobContentAsync.mockImplementation(() => {
-          return Promise.resolve(
-            JSON.stringify({
-              globalCatalogs: {
-                default: {
-                  react: '^17.0.0',
-                  lodash: '^4.17.21'
-                },
-                tools: {
-                  typescript: '~5.3.0'
-                }
-              }
-            })
-          );
+          return Promise.resolve(JSON.stringify({ globalCatalogs: catalogs }));
+        });
+      }
+
+      it('detects change to default catalog', async () => {
+        const rushConfiguration: RushConfiguration = getCatalogRushConfiguration();
+        mockPnpmConfigChanged();
+        // react version bumped in the default catalog
+        mockOldCatalogs({
+          default: { react: '^17.0.0', lodash: '^4.17.21' },
+          tools: { typescript: '~5.3.0' }
         });
 
         const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
-        const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
-        const terminal: Terminal = new Terminal(terminalProvider);
+        const terminal: Terminal = new Terminal(new StringBufferTerminalProvider(true));
 
         const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
           enableFiltering: false,
@@ -634,96 +627,73 @@ describe(ProjectChangeAnalyzer.name, () => {
           terminal
         });
 
-        // Project 'a' uses catalog:default (react changed)
+        // 'a' uses "catalog:" (default) for react and lodash
         expect(changedProjects.has(rushConfiguration.getProjectByName('a')!)).toBe(true);
-      });
-
-      it('does not detect projects using an unchanged catalog', async () => {
-        const rootDir: string = resolve(__dirname, 'repoWithCatalogs');
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-          resolve(rootDir, 'rush.json')
-        );
-
-        // pnpm-config.json changed
-        mockGetRepoChanges.mockReturnValue(
-          new Map<string, IFileDiffStatus>([
-            [
-              'common/config/rush/pnpm-config.json',
-              {
-                mode: 'modified',
-                newhash: 'newhash',
-                oldhash: 'oldhash',
-                status: 'M'
-              }
-            ]
-          ])
-        );
-
-        // Only the tools catalog changed (typescript version), default catalog is identical
-        mockGetBlobContentAsync.mockImplementation(() => {
-          return Promise.resolve(
-            JSON.stringify({
-              globalCatalogs: {
-                default: {
-                  react: '^18.0.0',
-                  lodash: '^4.17.21'
-                },
-                tools: {
-                  typescript: '~5.2.0'
-                }
-              }
-            })
-          );
-        });
-
-        const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
-        const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
-        const terminal: Terminal = new Terminal(terminalProvider);
-
-        const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
-          enableFiltering: false,
-          includeExternalDependencies: false,
-          targetBranchName: 'main',
-          terminal
-        });
-
-        // Project 'b' uses catalog:tools (typescript changed)
-        expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(true);
-        // Project 'a' uses catalog:default (unchanged)
-        expect(changedProjects.has(rushConfiguration.getProjectByName('a')!)).toBe(false);
-        // Project 'c' has no catalog deps
+        // 'b' uses "catalog:tools" only — tools catalog is unchanged
+        expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(false);
+        // 'c' has no catalog deps
         expect(changedProjects.has(rushConfiguration.getProjectByName('c')!)).toBe(false);
       });
 
-      it('treats all catalogs as changed when old pnpm-config.json does not exist', async () => {
-        const rootDir: string = resolve(__dirname, 'repoWithCatalogs');
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-          resolve(rootDir, 'rush.json')
-        );
+      it('detects change to named catalog', async () => {
+        const rushConfiguration: RushConfiguration = getCatalogRushConfiguration();
+        mockPnpmConfigChanged();
+        // typescript version bumped in the tools catalog
+        mockOldCatalogs({
+          default: { react: '^18.0.0', lodash: '^4.17.21' },
+          tools: { typescript: '~5.2.0' }
+        });
 
-        // pnpm-config.json was newly created
-        mockGetRepoChanges.mockReturnValue(
-          new Map<string, IFileDiffStatus>([
-            [
-              'common/config/rush/pnpm-config.json',
-              {
-                mode: 'added',
-                newhash: 'newhash',
-                oldhash: '',
-                status: 'A'
-              }
-            ]
-          ])
-        );
+        const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+        const terminal: Terminal = new Terminal(new StringBufferTerminalProvider(true));
 
-        // Simulate file not existing in old commit
+        const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
+          enableFiltering: false,
+          includeExternalDependencies: false,
+          targetBranchName: 'main',
+          terminal
+        });
+
+        // 'b' uses "catalog:tools" for typescript
+        expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(true);
+        // 'a' uses "catalog:" (default) — default catalog is unchanged
+        expect(changedProjects.has(rushConfiguration.getProjectByName('a')!)).toBe(false);
+        // 'c' has no catalog deps
+        expect(changedProjects.has(rushConfiguration.getProjectByName('c')!)).toBe(false);
+      });
+
+      it('no changes when catalogs are unchanged', async () => {
+        const rushConfiguration: RushConfiguration = getCatalogRushConfiguration();
+        mockPnpmConfigChanged();
+        // Old catalogs are identical to current
+        mockOldCatalogs({
+          default: { react: '^18.0.0', lodash: '^4.17.21' },
+          tools: { typescript: '~5.3.0' }
+        });
+
+        const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+        const terminal: Terminal = new Terminal(new StringBufferTerminalProvider(true));
+
+        const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
+          enableFiltering: false,
+          includeExternalDependencies: false,
+          targetBranchName: 'main',
+          terminal
+        });
+
+        expect(changedProjects.size).toBe(0);
+      });
+
+      it('all catalog-using projects marked as changed when no old catalog existed', async () => {
+        const rushConfiguration: RushConfiguration = getCatalogRushConfiguration();
+        mockPnpmConfigChanged();
+        // Old file did not exist in git
         mockGetBlobContentAsync.mockImplementation(() => {
           return Promise.reject(new Error('fatal: path not found'));
         });
 
         const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
-        const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
-        const terminal: Terminal = new Terminal(terminalProvider);
+        const terminal: Terminal = new Terminal(new StringBufferTerminalProvider(true));
 
         const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
           enableFiltering: false,
@@ -732,49 +702,11 @@ describe(ProjectChangeAnalyzer.name, () => {
           terminal
         });
 
-        // All catalog-using projects should be detected
+        // 'a' uses catalog:default, 'b' uses catalog:tools — both detected
         expect(changedProjects.has(rushConfiguration.getProjectByName('a')!)).toBe(true);
         expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(true);
-        // Project 'c' has no catalog deps, still not detected
+        // 'c' has no catalog deps
         expect(changedProjects.has(rushConfiguration.getProjectByName('c')!)).toBe(false);
-      });
-
-      it('does not detect additional projects when pnpm-config.json is not changed', async () => {
-        const rootDir: string = resolve(__dirname, 'repoWithCatalogs');
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-          resolve(rootDir, 'rush.json')
-        );
-
-        // Only a source file changed, not pnpm-config.json
-        mockGetRepoChanges.mockReturnValue(
-          new Map<string, IFileDiffStatus>([
-            [
-              'c/src/index.ts',
-              {
-                mode: 'modified',
-                newhash: 'newhash',
-                oldhash: 'oldhash',
-                status: 'M'
-              }
-            ]
-          ])
-        );
-
-        const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
-        const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
-        const terminal: Terminal = new Terminal(terminalProvider);
-
-        const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
-          enableFiltering: false,
-          includeExternalDependencies: false,
-          targetBranchName: 'main',
-          terminal
-        });
-
-        // Only project 'c' should be detected (direct file change)
-        expect(changedProjects.has(rushConfiguration.getProjectByName('c')!)).toBe(true);
-        expect(changedProjects.has(rushConfiguration.getProjectByName('a')!)).toBe(false);
-        expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(false);
       });
     });
   });
