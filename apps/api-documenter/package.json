@@ -17,8 +17,29 @@
   "bin": {
     "api-documenter": "./bin/api-documenter"
   },
-  "main": "lib/index.js",
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
   "typings": "dist/rollup.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js",
+      "types": "./dist/rollup.d.ts"
+    },
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "dependencies": {
     "@microsoft/api-extractor-model": "workspace:*",
     "@microsoft/tsdoc": "~0.16.0",

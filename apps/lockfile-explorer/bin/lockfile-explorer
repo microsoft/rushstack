@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require('../lib/start-explorer.js');
+require('../lib-commonjs/start-explorer.js');

@@ -7,8 +7,29 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/rushell"
   },
-  "main": "lib/index.js",
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
   "typings": "dist/rushell.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js",
+      "types": "./dist/rushell.d.ts"
+    },
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "scripts": {
     "build": "heft build --clean",
     "start": "heft test --watch",

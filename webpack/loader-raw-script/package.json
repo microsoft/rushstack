@@ -2,8 +2,30 @@
   "name": "@rushstack/loader-raw-script",
   "version": "1.5.14",
   "description": "",
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
+  "types": "./lib/index.d.ts",
+  "typings": "lib-dts/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js",
+      "types": "./lib-dts/index.d.ts"
+    },
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "repository": {
     "type": "git",

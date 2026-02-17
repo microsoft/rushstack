@@ -2,8 +2,29 @@
   "name": "@rushstack/debug-certificate-manager",
   "version": "1.6.14",
   "description": "Cross-platform functionality to create debug ssl certificates.",
-  "main": "lib/index.js",
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
   "typings": "dist/debug-certificate-manager.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js",
+      "types": "./dist/debug-certificate-manager.d.ts"
+    },
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",

@@ -3,14 +3,36 @@
   "version": "5.168.0",
   "description": "Rush plugin that provides a --set-cache-only command flag to populate the cache from content on disk.",
   "license": "MIT",
-  "main": "lib/index.js",
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
   "repository": {
     "url": "https://github.com/microsoft/rushstack",
     "type": "git",
     "directory": "rush-plugins/rush-bridge-cache-plugin"
   },
   "homepage": "https://rushjs.io",
-  "types": "lib/index.d.ts",
+  "types": "./lib/index.d.ts",
+  "typings": "lib-dts/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js",
+      "types": "./lib-dts/index.d.ts"
+    },
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "scripts": {
     "build": "heft test --clean",
     "start": "heft test --clean --watch",

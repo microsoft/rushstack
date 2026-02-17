@@ -4,7 +4,7 @@
   "taskPlugins": [
     {
       "pluginName": "sass-load-themed-styles-plugin",
-      "entryPoint": "./lib/SassLoadThemedStylesPlugin.js"
+      "entryPoint": "./lib-commonjs/SassLoadThemedStylesPlugin.js"
     }
   ]
 }

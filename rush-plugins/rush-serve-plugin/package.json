@@ -9,6 +9,7 @@
     "directory": "rush-plugins/rush-serve-plugin"
   },
   "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "heft test --clean",
@@ -40,11 +41,17 @@
   },
   "exports": {
     ".": {
-      "require": "./lib/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js",
       "types": "./dist/rush-serve-plugin.d.ts"
     },
     "./api": {
-      "types": "./lib/api.types.d.ts"
+      "types": "./lib-dts/api.types.d.ts"
+    },
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
     },
     "./package.json": "./package.json"
   },
@@ -54,7 +61,10 @@
         "dist/rush-serve-plugin.d.ts"
       ],
       "api": [
-        "lib/api.types.d.ts"
+        "lib-dts/api.types.d.ts"
+      ],
+      "lib/*": [
+        "lib-dts/*"
       ]
     }
   }

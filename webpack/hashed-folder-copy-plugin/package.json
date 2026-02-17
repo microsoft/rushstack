@@ -3,18 +3,21 @@
   "version": "1.2.14",
   "description": "Webpack plugin for copying a folder to the output directory with a hash in the folder name.",
   "typings": "dist/hashed-folder-copy-plugin.d.ts",
-  "main": "lib/index.js",
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
   "exports": {
     ".": {
+      "import": "./lib-esm/index.js",
       "types": "./dist/hashed-folder-copy-plugin.d.ts",
-      "default": "./lib/index.js"
+      "require": "./lib-commonjs/index.js"
     },
     "./ambientTypes": {
       "types": "./dist/ambientTypes.d.ts"
     },
     "./lib/*": {
-      "types": "./lib/*.d.ts",
-      "default": "./lib/*.js"
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
     },
     "./package.json": "./package.json"
   },
@@ -25,6 +28,9 @@
       ],
       "ambientTypes": [
         "./dist/ambientTypes.d.ts"
+      ],
+      "lib/*": [
+        "lib-dts/*"
       ]
     }
   },

@@ -2,7 +2,7 @@
 
 const webpack = require('webpack');
 const { PreserveDynamicRequireWebpackPlugin } = require('@rushstack/webpack-preserve-dynamic-require-plugin');
-const { CREATE_LINKS_SCRIPT_FILENAME, SCRIPTS_FOLDER_PATH } = require('./lib/PathConstants');
+const { CREATE_LINKS_SCRIPT_FILENAME, SCRIPTS_FOLDER_PATH } = require('./lib-commonjs/PathConstants');
 
 module.exports = () => {
   return {

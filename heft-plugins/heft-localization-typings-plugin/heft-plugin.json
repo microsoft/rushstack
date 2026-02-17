@@ -4,8 +4,8 @@
   "taskPlugins": [
     {
       "pluginName": "localization-typings-plugin",
-      "entryPoint": "./lib/LocalizationTypingsPlugin",
-      "optionsSchema": "./lib/schemas/heft-localization-typings-plugin.schema.json"
+      "entryPoint": "./lib-commonjs/LocalizationTypingsPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/heft-localization-typings-plugin.schema.json"
     }
   ]
 }

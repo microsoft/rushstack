@@ -4,8 +4,8 @@
   "taskPlugins": [
     {
       "pluginName": "webpack4-plugin",
-      "entryPoint": "./lib/Webpack4Plugin",
-      "optionsSchema": "./lib/schemas/heft-webpack4-plugin.schema.json",
+      "entryPoint": "./lib-commonjs/Webpack4Plugin",
+      "optionsSchema": "./lib-commonjs/schemas/heft-webpack4-plugin.schema.json",
 
       "parameterScope": "webpack4",
       "parameters": [
