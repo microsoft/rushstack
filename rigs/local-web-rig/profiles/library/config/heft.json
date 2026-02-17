@@ -5,7 +5,7 @@
 
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["lib-esm"] }],
+      "cleanFiles": [{ "includeGlobs": ["lib-dts", "lib-esm"] }],
 
       "tasksByName": {
         "lint": {
