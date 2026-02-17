@@ -55,9 +55,9 @@
   // jest-string-mock-transform returns the filename, where Webpack would return a URL
   // When using the heft-jest-plugin, these will be replaced with the resolved module location
   "transform": {
-    "\\.(css|sass|scss)$": "../node_modules/@rushstack/heft-jest-plugin/lib/exports/jest-identity-mock-transform.js",
+    "\\.(css|sass|scss)$": "@rushstack/heft-jest-plugin/lib-commonjs/exports/jest-identity-mock-transform.js",
 
-    "\\.(aac|eot|gif|jpeg|jpg|m4a|mp3|mp4|oga|otf|png|svg|ttf|wav|webm|webp|woff|woff2)$": "../node_modules/@rushstack/heft-jest-plugin/lib/exports/jest-string-mock-transform.js"
+    "\\.(aac|eot|gif|jpeg|jpg|m4a|mp3|mp4|oga|otf|png|svg|ttf|wav|webm|webp|woff|woff2)$": "@rushstack/heft-jest-plugin/lib-commonjs/exports/jest-string-mock-transform.js"
   },
 
   // The modulePathIgnorePatterns below accepts these sorts of paths:
@@ -70,8 +70,8 @@
   "moduleFileExtensions": ["cjs", "js", "json", "node"],
 
   // When using the heft-jest-plugin, these will be replaced with the resolved module location
-  "setupFiles": ["../node_modules/@rushstack/heft-jest-plugin/lib/exports/jest-global-setup.js"],
+  "setupFiles": ["@rushstack/heft-jest-plugin/lib-commonjs/exports/jest-global-setup.js"],
 
   // When using the heft-jest-plugin, these will be replaced with the resolved module location
-  "resolver": "../node_modules/@rushstack/heft-jest-plugin/lib/exports/jest-improved-resolver.js"
+  "resolver": "@rushstack/heft-jest-plugin/lib-commonjs/exports/jest-improved-resolver.js"
 }
