@@ -5,6 +5,8 @@
 
   "phasesByName": {
     "build": {
+      "cleanFiles": [{ "includeGlobs": ["lib-esnext"] }],
+
       "tasksByName": {
         "lint": {
           "taskPlugin": {
