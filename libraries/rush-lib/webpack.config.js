@@ -42,6 +42,18 @@ module.exports = () => {
         }),
         ...extraPlugins
       ],
+      module: {
+        rules: [
+          {
+            // These files have side effects (e.g. setting process.env variables) that must not
+            // be tree-shaken, even though they are only imported for their side effects.
+            // The package.json "sideEffects" field references the shipped folder names (lib-commonjs,
+            // lib-esm), but webpack reads from the intermediate build folders (lib-intermediate-esm).
+            test: /[\\/](SetRushLibPath|start|startx|start-pnpm)\.js$/,
+            sideEffects: true
+          }
+        ]
+      },
       externals: [
         ({ request }, callback) => {
           let packageName;
