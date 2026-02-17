@@ -180,142 +180,42 @@ export class ProjectChangeAnalyzer {
       { concurrency: 10 }
     );
 
-    // Detect changes to pnpm catalog entries in pnpm-config.json per subspace
-    if (rushConfiguration.isPnpm) {
-      const catalogSubspaces: Iterable<Subspace> = rushConfiguration.subspacesFeatureEnabled
-        ? rushConfiguration.subspaces
-        : [rushConfiguration.defaultSubspace];
+    // Detect per-subspace changes: catalog entries in pnpm-config.json and external dependency lockfiles
+    const subspaces: Iterable<Subspace> = rushConfiguration.subspacesFeatureEnabled
+      ? rushConfiguration.subspaces
+      : [rushConfiguration.defaultSubspace];
 
-      await Async.forEachAsync(catalogSubspaces, async (subspace: Subspace) => {
-        const pnpmOptions: PnpmOptionsConfiguration | undefined = subspace.getPnpmOptions();
-        const currentCatalogs: Record<string, Record<string, string>> | undefined =
-          pnpmOptions?.globalCatalogs;
-        if (!currentCatalogs) {
-          return;
-        }
+    const variantToUse: string | undefined = includeExternalDependencies
+      ? (variant ?? (await this._rushConfiguration.getCurrentlyInstalledVariantAsync()))
+      : undefined;
 
-        const pnpmConfigRelativePath: string = Path.convertToSlashes(
-          path.relative(repoRoot, subspace.getPnpmConfigFilePath())
+    await Async.forEachAsync(subspaces, async (subspace: Subspace) => {
+      const subspaceProjects: RushConfigurationProject[] = subspace.getProjects();
+
+      // Detect changes to pnpm catalog entries in pnpm-config.json
+      if (rushConfiguration.isPnpm) {
+        await this._detectCatalogChangesAsync(
+          subspace,
+          rushConfiguration,
+          changedFiles,
+          mergeCommit,
+          repoRoot,
+          terminal,
+          changedProjects
         );
+      }
 
-        if (!changedFiles.has(pnpmConfigRelativePath)) {
-          return;
-        }
+      // External dependency changes are not allowed to be filtered, so add these after filtering
+      if (includeExternalDependencies) {
+        // Even though changing the installed version of a nested dependency merits a change file,
+        // ignore lockfile changes for `rush change` for the moment
 
-        // Determine which catalog names have changed
-        let changedCatalogNames: Set<string>;
-        try {
-          const oldPnpmConfigText: string = await this._git.getBlobContentAsync({
-            blobSpec: `${mergeCommit}:${pnpmConfigRelativePath}`,
-            repositoryRoot: repoRoot
-          });
-          const oldPnpmConfig: IPnpmOptionsJson = JSON.parse(oldPnpmConfigText);
-          const oldCatalogs: Record<string, Record<string, string>> = oldPnpmConfig.globalCatalogs ?? {};
-
-          changedCatalogNames = new Set<string>();
-
-          // Check current catalogs for new or modified entries
-          for (const [catalogName, packages] of Object.entries(currentCatalogs)) {
-            const oldPackages: Record<string, string> | undefined = oldCatalogs[catalogName];
-            if (!oldPackages) {
-              changedCatalogNames.add(catalogName);
-              continue;
-            }
-            for (const [pkgName, version] of Object.entries(packages)) {
-              if (oldPackages[pkgName] !== version) {
-                changedCatalogNames.add(catalogName);
-                break;
-              }
-            }
-          }
-
-          // Check for catalogs that were removed
-          for (const catalogName of Object.keys(oldCatalogs)) {
-            if (!(catalogName in currentCatalogs)) {
-              changedCatalogNames.add(catalogName);
-            }
-          }
-        } catch {
-          // Old file didn't exist or was unparseable — treat all current catalogs as changed
-          changedCatalogNames = new Set<string>(Object.keys(currentCatalogs));
-          if (rushConfiguration.subspacesFeatureEnabled) {
-            terminal.writeLine(
-              `"${subspace.subspaceName}" subspace pnpm-config.json was created or unparseable. Assuming all projects are affected.`
-            );
-          } else {
-            terminal.writeLine(
-              `pnpm-config.json was created or unparseable. Assuming all projects are affected.`
-            );
-          }
-        }
-
-        if (changedCatalogNames.size > 0) {
-          // Build a map of catalogName → Set<RushConfigurationProject> for this subspace's projects
-          const subspaceProjects: RushConfigurationProject[] = subspace.getProjects();
-          const catalogToProjects: Map<string, Set<RushConfigurationProject>> = new Map();
-          for (const project of subspaceProjects) {
-            const { dependencies, devDependencies, optionalDependencies } = project.packageJson;
-            const allDeps: Record<string, string>[] = [
-              dependencies ?? {},
-              devDependencies ?? {},
-              optionalDependencies ?? {}
-            ];
-
-            for (const deps of allDeps) {
-              for (const [depName, depVersion] of Object.entries(deps)) {
-                const specifier: DependencySpecifier = DependencySpecifier.parseWithCache(
-                  depName,
-                  depVersion
-                );
-                if (specifier.specifierType === DependencySpecifierType.Catalog) {
-                  // versionSpecifier holds the catalog name (empty string for "catalog:")
-                  const catalogName: string = specifier.versionSpecifier || 'default';
-                  let projectSet: Set<RushConfigurationProject> | undefined =
-                    catalogToProjects.get(catalogName);
-                  if (!projectSet) {
-                    projectSet = new Set();
-                    catalogToProjects.set(catalogName, projectSet);
-                  }
-                  projectSet.add(project);
-                }
-              }
-            }
-          }
-
-          // Mark projects using changed catalogs as changed
-          for (const catalogName of changedCatalogNames) {
-            const affectedProjects: Set<RushConfigurationProject> | undefined =
-              catalogToProjects.get(catalogName);
-            if (affectedProjects) {
-              for (const project of affectedProjects) {
-                changedProjects.add(project);
-              }
-            }
-          }
-        }
-      });
-    }
-
-    // External dependency changes are not allowed to be filtered, so add these after filtering
-    if (includeExternalDependencies) {
-      // Even though changing the installed version of a nested dependency merits a change file,
-      // ignore lockfile changes for `rush change` for the moment
-
-      const subspaces: Iterable<Subspace> = rushConfiguration.subspacesFeatureEnabled
-        ? rushConfiguration.subspaces
-        : [rushConfiguration.defaultSubspace];
-
-      const variantToUse: string | undefined =
-        variant ?? (await this._rushConfiguration.getCurrentlyInstalledVariantAsync());
-
-      await Async.forEachAsync(subspaces, async (subspace: Subspace) => {
         const fullShrinkwrapPath: string = subspace.getCommittedShrinkwrapFilePath(variantToUse);
 
         const relativeShrinkwrapFilePath: string = Path.convertToSlashes(
           path.relative(repoRoot, fullShrinkwrapPath)
         );
         const shrinkwrapStatus: IFileDiffStatus | undefined = changedFiles.get(relativeShrinkwrapFilePath);
-        const subspaceProjects: RushConfigurationProject[] = subspace.getProjects();
 
         if (shrinkwrapStatus) {
           if (shrinkwrapStatus.status !== 'M') {
@@ -333,7 +233,7 @@ export class ProjectChangeAnalyzer {
           }
 
           if (rushConfiguration.isPnpm) {
-            const subspaceHasNoProjects: boolean = subspace.getProjects().length === 0;
+            const subspaceHasNoProjects: boolean = subspaceProjects.length === 0;
             const currentShrinkwrap: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
               fullShrinkwrapPath,
               { subspaceHasNoProjects }
@@ -371,12 +271,12 @@ export class ProjectChangeAnalyzer {
                 `Lockfile has changed and lockfile content comparison is only supported for pnpm. Assuming all projects are affected.`
               );
             }
-            subspace.getProjects().forEach((project) => changedProjects.add(project));
+            subspaceProjects.forEach((project) => changedProjects.add(project));
             return;
           }
         }
-      });
-    }
+      }
+    });
 
     // Sort the set by projectRelativeFolder to avoid race conditions in the results
     const sortedChangedProjects: RushConfigurationProject[] = Array.from(changedProjects);
@@ -607,6 +507,122 @@ export class ProjectChangeAnalyzer {
       const ignoreMatcher: Ignore = ignore();
       ignoreMatcher.add(incrementalBuildIgnoredGlobs as string[]);
       return ignoreMatcher;
+    }
+  }
+
+  /**
+   * Detects changes to pnpm catalog entries in a subspace's pnpm-config.json and marks
+   * affected projects as changed.
+   */
+  private async _detectCatalogChangesAsync(
+    subspace: Subspace,
+    rushConfiguration: RushConfiguration,
+    changedFiles: Map<string, IFileDiffStatus>,
+    mergeCommit: string,
+    repoRoot: string,
+    terminal: ITerminal,
+    changedProjects: Set<RushConfigurationProject>
+  ): Promise<void> {
+    const pnpmOptions: PnpmOptionsConfiguration | undefined = subspace.getPnpmOptions();
+    const currentCatalogs: Record<string, Record<string, string>> | undefined = pnpmOptions?.globalCatalogs;
+    if (!currentCatalogs) {
+      return;
+    }
+
+    const pnpmConfigRelativePath: string = Path.convertToSlashes(
+      path.relative(repoRoot, subspace.getPnpmConfigFilePath())
+    );
+
+    if (!changedFiles.has(pnpmConfigRelativePath)) {
+      return;
+    }
+
+    // Determine which catalog names have changed
+    let changedCatalogNames: Set<string>;
+    try {
+      const oldPnpmConfigText: string = await this._git.getBlobContentAsync({
+        blobSpec: `${mergeCommit}:${pnpmConfigRelativePath}`,
+        repositoryRoot: repoRoot
+      });
+      const oldPnpmConfig: IPnpmOptionsJson = JSON.parse(oldPnpmConfigText);
+      const oldCatalogs: Record<string, Record<string, string>> = oldPnpmConfig.globalCatalogs ?? {};
+
+      changedCatalogNames = new Set<string>();
+
+      // Check current catalogs for new or modified entries
+      for (const [catalogName, packages] of Object.entries(currentCatalogs)) {
+        const oldPackages: Record<string, string> | undefined = oldCatalogs[catalogName];
+        if (!oldPackages) {
+          changedCatalogNames.add(catalogName);
+          continue;
+        }
+        for (const [pkgName, version] of Object.entries(packages)) {
+          if (oldPackages[pkgName] !== version) {
+            changedCatalogNames.add(catalogName);
+            break;
+          }
+        }
+      }
+
+      // Check for catalogs that were removed
+      for (const catalogName of Object.keys(oldCatalogs)) {
+        if (!(catalogName in currentCatalogs)) {
+          changedCatalogNames.add(catalogName);
+        }
+      }
+    } catch {
+      // Old file didn't exist or was unparseable — treat all current catalogs as changed
+      changedCatalogNames = new Set<string>(Object.keys(currentCatalogs));
+      if (rushConfiguration.subspacesFeatureEnabled) {
+        terminal.writeLine(
+          `"${subspace.subspaceName}" subspace pnpm-config.json was created or unparseable. Assuming all projects are affected.`
+        );
+      } else {
+        terminal.writeLine(
+          `pnpm-config.json was created or unparseable. Assuming all projects are affected.`
+        );
+      }
+    }
+
+    if (changedCatalogNames.size > 0) {
+      // Build a map of catalogName → Set<RushConfigurationProject> for this subspace's projects
+      const subspaceProjects: RushConfigurationProject[] = subspace.getProjects();
+      const catalogToProjects: Map<string, Set<RushConfigurationProject>> = new Map();
+      for (const project of subspaceProjects) {
+        const { dependencies, devDependencies, optionalDependencies } = project.packageJson;
+        const allDeps: Record<string, string>[] = [
+          dependencies ?? {},
+          devDependencies ?? {},
+          optionalDependencies ?? {}
+        ];
+
+        for (const deps of allDeps) {
+          for (const [depName, depVersion] of Object.entries(deps)) {
+            const specifier: DependencySpecifier = DependencySpecifier.parseWithCache(depName, depVersion);
+            if (specifier.specifierType === DependencySpecifierType.Catalog) {
+              // versionSpecifier holds the catalog name (empty string for "catalog:")
+              const catalogName: string = specifier.versionSpecifier || 'default';
+              let projectSet: Set<RushConfigurationProject> | undefined = catalogToProjects.get(catalogName);
+              if (!projectSet) {
+                projectSet = new Set();
+                catalogToProjects.set(catalogName, projectSet);
+              }
+              projectSet.add(project);
+            }
+          }
+        }
+      }
+
+      // Mark projects using changed catalogs as changed
+      for (const catalogName of changedCatalogNames) {
+        const affectedProjects: Set<RushConfigurationProject> | undefined =
+          catalogToProjects.get(catalogName);
+        if (affectedProjects) {
+          for (const project of affectedProjects) {
+            changedProjects.add(project);
+          }
+        }
+      }
     }
   }
 }
