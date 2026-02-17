@@ -20,8 +20,8 @@
       "default": "./lib-shim/loader.js"
     },
     "./lib/*": {
-      "types": "./lib-commonjs/*.d.ts",
-      "default": "./lib-dts/*.js"
+      "types": "./lib-dts/*.d.ts",
+      "default": "./lib-commonjs/*.js"
     },
     "./package.json": "./package.json"
   },
