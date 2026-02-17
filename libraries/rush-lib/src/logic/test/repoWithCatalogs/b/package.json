@@ -1,0 +1,11 @@
+{
+  "name": "b",
+  "version": "1.0.0",
+  "description": "Project B depends on A and uses tools catalog",
+  "dependencies": {
+    "a": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "catalog:tools"
+  }
+}

@@ -23,6 +23,9 @@ import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { Git } from './Git';
+import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
+import { RushConstants } from './RushConstants';
+import type { IPnpmOptionsJson } from './pnpm/PnpmOptionsConfiguration';
 import {
   type IInputsSnapshotProjectMetadata,
   type IInputsSnapshot,
@@ -177,6 +180,107 @@ export class ProjectChangeAnalyzer {
       },
       { concurrency: 10 }
     );
+
+    // Detect changes to pnpm catalog entries in pnpm-config.json
+    if (rushConfiguration.isPnpm && rushConfiguration.pnpmOptions.globalCatalogs) {
+      const pnpmConfigRelativePath: string = Path.convertToSlashes(
+        path.relative(
+          repoRoot,
+          path.join(rushConfiguration.commonRushConfigFolder, RushConstants.pnpmConfigFilename)
+        )
+      );
+
+      if (changedFiles.has(pnpmConfigRelativePath)) {
+        const currentCatalogs: Record<string, Record<string, string>> =
+          rushConfiguration.pnpmOptions.globalCatalogs;
+
+        // Determine which catalog names have changed
+        let changedCatalogNames: Set<string>;
+        try {
+          const oldPnpmConfigText: string = await this._git.getBlobContentAsync({
+            blobSpec: `${mergeCommit}:${pnpmConfigRelativePath}`,
+            repositoryRoot: repoRoot
+          });
+          const oldPnpmConfig: IPnpmOptionsJson = JSON.parse(oldPnpmConfigText);
+          const oldCatalogs: Record<string, Record<string, string>> =
+            oldPnpmConfig.globalCatalogs ?? {};
+
+          changedCatalogNames = new Set<string>();
+
+          // Check current catalogs for new or modified entries
+          for (const [catalogName, packages] of Object.entries(currentCatalogs)) {
+            const oldPackages: Record<string, string> | undefined = oldCatalogs[catalogName];
+            if (!oldPackages) {
+              changedCatalogNames.add(catalogName);
+              continue;
+            }
+            for (const [pkgName, version] of Object.entries(packages)) {
+              if (oldPackages[pkgName] !== version) {
+                changedCatalogNames.add(catalogName);
+                break;
+              }
+            }
+          }
+
+          // Check for catalogs that were removed
+          for (const catalogName of Object.keys(oldCatalogs)) {
+            if (!(catalogName in currentCatalogs)) {
+              changedCatalogNames.add(catalogName);
+            }
+          }
+        } catch {
+          // Old file didn't exist or was unparseable — treat all current catalogs as changed
+          changedCatalogNames = new Set<string>(Object.keys(currentCatalogs));
+        }
+
+        if (changedCatalogNames.size > 0) {
+          // Build a map of catalogName → Set<RushConfigurationProject>
+          const catalogToProjects: Map<string, Set<RushConfigurationProject>> = new Map();
+          for (const project of rushConfiguration.projects) {
+            const { dependencies, devDependencies, optionalDependencies } = project.packageJson;
+            const allDeps: Record<string, string>[] = [
+              dependencies ?? {},
+              devDependencies ?? {},
+              optionalDependencies ?? {}
+            ];
+
+            for (const deps of allDeps) {
+              for (const [depName, depVersion] of Object.entries(deps)) {
+                const specifier: DependencySpecifier = DependencySpecifier.parseWithCache(
+                  depName,
+                  depVersion
+                );
+                if (specifier.specifierType === DependencySpecifierType.Catalog) {
+                  // versionSpecifier holds the catalog name (empty string for "catalog:")
+                  const catalogName: string = specifier.versionSpecifier || 'default';
+                  let projectSet: Set<RushConfigurationProject> | undefined =
+                    catalogToProjects.get(catalogName);
+                  if (!projectSet) {
+                    projectSet = new Set();
+                    catalogToProjects.set(catalogName, projectSet);
+                  }
+                  projectSet.add(project);
+                }
+              }
+            }
+          }
+
+          // Mark projects using changed catalogs (and their direct consumers) as changed
+          for (const catalogName of changedCatalogNames) {
+            const affectedProjects: Set<RushConfigurationProject> | undefined =
+              catalogToProjects.get(catalogName);
+            if (affectedProjects) {
+              for (const project of affectedProjects) {
+                changedProjects.add(project);
+                for (const consumer of project.consumingProjects) {
+                  changedProjects.add(consumer);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
 
     // External dependency changes are not allowed to be filtered, so add these after filtering
     if (includeExternalDependencies) {

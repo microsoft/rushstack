@@ -1,0 +1,9 @@
+{
+  "name": "a",
+  "version": "1.0.0",
+  "description": "Project A uses default catalog",
+  "dependencies": {
+    "react": "catalog:",
+    "lodash": "catalog:"
+  }
+}
