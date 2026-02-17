@@ -1,10 +1,21 @@
 {
   "extends": "@rushstack/heft-node-rig/profiles/default/config/jest.config.json",
 
+  "testMatch": ["<rootDir>/lib-commonjs/**/*.test.js"],
+
   // Enable code coverage for Jest
   "collectCoverage": true,
   "coverageDirectory": "<rootDir>/coverage",
   "coverageReporters": ["cobertura", "html"],
+  "collectCoverageFrom": [
+    "lib-commonjs/**/*.js",
+    "!lib-commonjs/**/*.d.ts",
+    "!lib-commonjs/**/*.test.js",
+    "!lib-commonjs/**/test/**",
+    "!lib-commonjs/**/__tests__/**",
+    "!lib-commonjs/**/__fixtures__/**",
+    "!lib-commonjs/**/__mocks__/**"
+  ],
 
   // Use v8 coverage provider to avoid Babel
   "coverageProvider": "v8",
