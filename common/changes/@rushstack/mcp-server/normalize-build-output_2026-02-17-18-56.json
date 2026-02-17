@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `\"exports\"` field in `package.json`.",
+      "type": "minor",
+      "packageName": "@rushstack/mcp-server"
+    }
+  ],
+  "packageName": "@rushstack/mcp-server",
+  "email": "iclanton@users.noreply.github.com"
+}
