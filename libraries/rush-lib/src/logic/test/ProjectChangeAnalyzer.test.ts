@@ -709,6 +709,158 @@ describe(ProjectChangeAnalyzer.name, () => {
         expect(changedProjects.has(rushConfiguration.getProjectByName('c')!)).toBe(false);
       });
     });
+
+    describe('subspace catalog change detection', () => {
+      function getSubspaceCatalogRushConfiguration(): RushConfiguration {
+        return RushConfiguration.loadFromConfigurationFile(
+          resolve(__dirname, 'repoWithSubspacesCatalogs', 'rush.json')
+        );
+      }
+
+      it('detects change to default catalog in subspace', async () => {
+        const rushConfiguration: RushConfiguration = getSubspaceCatalogRushConfiguration();
+
+        // Only the subspace pnpm-config.json changed
+        mockGetRepoChanges.mockReturnValue(
+          new Map<string, IFileDiffStatus>([
+            [
+              'common/config/subspaces/project-change-analyzer-test-subspace/pnpm-config.json',
+              { mode: 'modified', newhash: 'newhash', oldhash: 'oldhash', status: 'M' }
+            ]
+          ])
+        );
+
+        // foo version bumped in the default catalog
+        mockGetBlobContentAsync.mockImplementation(() => {
+          return Promise.resolve(
+            JSON.stringify({
+              globalCatalogs: { default: { foo: '~1.0.0' }, tools: { typescript: '~5.3.0' } }
+            })
+          );
+        });
+
+        const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+        const terminal: Terminal = new Terminal(new StringBufferTerminalProvider(true));
+
+        const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
+          enableFiltering: false,
+          includeExternalDependencies: false,
+          targetBranchName: 'main',
+          terminal
+        });
+
+        // 'd' uses "catalog:" (default) for foo — should be detected
+        expect(changedProjects.has(rushConfiguration.getProjectByName('d')!)).toBe(true);
+        // 'e' uses "catalog:tools" only — tools catalog is unchanged
+        expect(changedProjects.has(rushConfiguration.getProjectByName('e')!)).toBe(false);
+        // 'f' has no catalog deps
+        expect(changedProjects.has(rushConfiguration.getProjectByName('f')!)).toBe(false);
+        // default subspace projects should not be affected
+        expect(changedProjects.has(rushConfiguration.getProjectByName('a')!)).toBe(false);
+        expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(false);
+        expect(changedProjects.has(rushConfiguration.getProjectByName('c')!)).toBe(false);
+      });
+
+      it('detects change to named catalog in subspace', async () => {
+        const rushConfiguration: RushConfiguration = getSubspaceCatalogRushConfiguration();
+
+        // Only the subspace pnpm-config.json changed
+        mockGetRepoChanges.mockReturnValue(
+          new Map<string, IFileDiffStatus>([
+            [
+              'common/config/subspaces/project-change-analyzer-test-subspace/pnpm-config.json',
+              { mode: 'modified', newhash: 'newhash', oldhash: 'oldhash', status: 'M' }
+            ]
+          ])
+        );
+
+        // typescript version bumped in the tools catalog
+        mockGetBlobContentAsync.mockImplementation(() => {
+          return Promise.resolve(
+            JSON.stringify({
+              globalCatalogs: { default: { foo: '~2.0.0' }, tools: { typescript: '~5.2.0' } }
+            })
+          );
+        });
+
+        const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+        const terminal: Terminal = new Terminal(new StringBufferTerminalProvider(true));
+
+        const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
+          enableFiltering: false,
+          includeExternalDependencies: false,
+          targetBranchName: 'main',
+          terminal
+        });
+
+        // 'e' uses "catalog:tools" for typescript — should be detected
+        expect(changedProjects.has(rushConfiguration.getProjectByName('e')!)).toBe(true);
+        // 'd' uses "catalog:" (default) — default catalog is unchanged
+        expect(changedProjects.has(rushConfiguration.getProjectByName('d')!)).toBe(false);
+        // 'f' has no catalog deps
+        expect(changedProjects.has(rushConfiguration.getProjectByName('f')!)).toBe(false);
+        // default subspace projects should not be affected
+        expect(changedProjects.has(rushConfiguration.getProjectByName('a')!)).toBe(false);
+      });
+
+      it('detects changes when multiple subspace pnpm-configs have catalog changes', async () => {
+        const rushConfiguration: RushConfiguration = getSubspaceCatalogRushConfiguration();
+
+        // Both the default subspace and named subspace pnpm-config.json files changed
+        mockGetRepoChanges.mockReturnValue(
+          new Map<string, IFileDiffStatus>([
+            [
+              'common/config/subspaces/default/pnpm-config.json',
+              { mode: 'modified', newhash: 'newhash1', oldhash: 'oldhash1', status: 'M' }
+            ],
+            [
+              'common/config/subspaces/project-change-analyzer-test-subspace/pnpm-config.json',
+              { mode: 'modified', newhash: 'newhash2', oldhash: 'oldhash2', status: 'M' }
+            ]
+          ])
+        );
+
+        // Return old catalogs based on which config is being read
+        mockGetBlobContentAsync.mockImplementation((opts: { blobSpec: string; repositoryRoot: string }) => {
+          if (opts.blobSpec.includes('default/pnpm-config.json')) {
+            // react version bumped in the default subspace
+            return Promise.resolve(JSON.stringify({ globalCatalogs: { default: { react: '^17.0.0' } } }));
+          }
+          if (opts.blobSpec.includes('project-change-analyzer-test-subspace/pnpm-config.json')) {
+            // foo version bumped in the named subspace
+            return Promise.resolve(
+              JSON.stringify({
+                globalCatalogs: { default: { foo: '~1.0.0' }, tools: { typescript: '~5.3.0' } }
+              })
+            );
+          }
+          return Promise.resolve('{}');
+        });
+
+        const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+        const terminal: Terminal = new Terminal(new StringBufferTerminalProvider(true));
+
+        const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
+          enableFiltering: false,
+          includeExternalDependencies: false,
+          targetBranchName: 'main',
+          terminal
+        });
+
+        // 'a' uses "catalog:" (default) for react in the default subspace — should be detected
+        expect(changedProjects.has(rushConfiguration.getProjectByName('a')!)).toBe(true);
+        // 'd' uses "catalog:" (default) for foo in the named subspace — should be detected
+        expect(changedProjects.has(rushConfiguration.getProjectByName('d')!)).toBe(true);
+        // 'b' has no catalog deps in default subspace
+        expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(false);
+        // 'c' has no catalog deps in default subspace
+        expect(changedProjects.has(rushConfiguration.getProjectByName('c')!)).toBe(false);
+        // 'e' uses "catalog:tools" — tools catalog is unchanged in the named subspace
+        expect(changedProjects.has(rushConfiguration.getProjectByName('e')!)).toBe(false);
+        // 'f' has no catalog deps
+        expect(changedProjects.has(rushConfiguration.getProjectByName('f')!)).toBe(false);
+      });
+    });
   });
 
   describe('isPackageJsonVersionOnlyChange', () => {

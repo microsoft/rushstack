@@ -1,0 +1,8 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json",
+  "globalCatalogs": {
+    "default": {
+      "react": "^18.0.0"
+    }
+  }
+}
