@@ -8,6 +8,7 @@
     "type": "git",
     "directory": "libraries/load-themed-styles"
   },
+  "keywords": [],
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
@@ -16,12 +17,6 @@
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
   "types": "./lib-dts/index.d.ts",
-  "keywords": [],
-  "devDependencies": {
-    "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
-    "local-web-rig": "workspace:*"
-  },
   "exports": {
     ".": {
       "require": "./lib-commonjs/index.js",
@@ -41,5 +36,10 @@
         "lib-dts/*"
       ]
     }
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-web-rig": "workspace:*"
   }
 }
