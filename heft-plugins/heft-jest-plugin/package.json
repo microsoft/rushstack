@@ -51,5 +51,20 @@
     "jest-environment-jsdom": "~29.5.0",
     "jest-environment-node": "~29.5.0",
     "jest-watch-select-projects": "2.0.0"
+  },
+  "exports": {
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
   }
 }

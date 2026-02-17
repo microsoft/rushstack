@@ -21,5 +21,20 @@
     "webpack": "~4.47.0",
     "webpack-bundle-analyzer": "~4.5.0",
     "webpack-dev-server": "~4.9.3"
+  },
+  "exports": {
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
   }
 }

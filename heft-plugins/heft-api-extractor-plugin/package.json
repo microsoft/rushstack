@@ -28,5 +28,20 @@
     "@types/semver": "7.5.0",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
+  },
+  "exports": {
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
   }
 }

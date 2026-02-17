@@ -14,5 +14,29 @@
     "@rushstack/mcp-server": "workspace:*",
     "local-node-rig": "workspace:*",
     "local-eslint-config": "workspace:*"
+  },
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
+  "types": "./lib/index.d.ts",
+  "typings": "lib-dts/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js",
+      "types": "./lib-dts/index.d.ts"
+    },
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
   }
 }

@@ -2,7 +2,21 @@
   "name": "@rushstack/eslint-bulk",
   "version": "0.4.15",
   "description": "Roll out new ESLint rules in a large monorepo without cluttering up your code with \"eslint-ignore-next-line\"",
-  "main": "index.js",
+  "exports": {
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
@@ -16,7 +30,7 @@
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "start": "node ./lib/start.js"
+    "start": "node ./lib-commonjs/start.js"
   },
   "keywords": [
     "eslintrc",
