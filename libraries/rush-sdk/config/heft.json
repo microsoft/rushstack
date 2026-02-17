@@ -9,7 +9,16 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["lib-shim", "lib-esnext"] }],
+      "cleanFiles": [
+        {
+          "includeGlobs": [
+            "lib-shim",
+            "lib-intermediate-commonjs",
+            "lib-intermediate-esm",
+            "lib-intermediate-dts"
+          ]
+        }
+      ],
 
       "tasksByName": {
         "copy-rush-lib-types": {
@@ -45,7 +54,7 @@
             "pluginPackage": "@rushstack/heft",
             "pluginName": "run-script-plugin",
             "options": {
-              "scriptPath": "./lib-commonjs/generate-stubs.js"
+              "scriptPath": "./lib-intermediate-commonjs/generate-stubs.js"
             }
           }
         }

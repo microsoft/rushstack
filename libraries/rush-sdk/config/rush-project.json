@@ -4,7 +4,12 @@
   "operationSettings": [
     {
       "operationName": "_phase:build",
-      "outputFolderNames": ["lib-shim"]
+      "outputFolderNames": [
+        "lib-shim",
+        "lib-intermediate-commonjs",
+        "lib-intermediate-esm",
+        "lib-intermediate-dts"
+      ]
     }
   ]
 }

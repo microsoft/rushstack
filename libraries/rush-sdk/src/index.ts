@@ -12,7 +12,7 @@ import {
   Executable
 } from '@rushstack/node-core-library';
 import { Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
-import { RushGlobalFolder } from '@microsoft/rush-lib/lib-esnext/api/RushGlobalFolder';
+import { RushGlobalFolder } from '@microsoft/rush-lib/lib/api/RushGlobalFolder';
 
 import {
   RUSH_LIB_NAME,

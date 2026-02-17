@@ -4,7 +4,7 @@ const webpack = require('webpack');
 const { PackageJsonLookup } = require('@rushstack/node-core-library');
 const { PreserveDynamicRequireWebpackPlugin } = require('@rushstack/webpack-preserve-dynamic-require-plugin');
 const { DeepImportsPlugin } = require('@rushstack/webpack-deep-imports-plugin');
-const PathConstants = require('./lib-commonjs/utilities/PathConstants');
+const PathConstants = require('./lib-intermediate-commonjs/utilities/PathConstants');
 
 const SCRIPT_ENTRY_OPTIONS = {
   filename: `${PathConstants.scriptsFolderName}/[name]`
@@ -75,10 +75,10 @@ module.exports = () => {
   const configurations = [
     generateConfiguration(
       {
-        'rush-lib': `${__dirname}/lib-esnext/index.js`,
-        start: `${__dirname}/lib-esnext/start.js`,
-        startx: `${__dirname}/lib-esnext/startx.js`,
-        'start-pnpm': `${__dirname}/lib-esnext/start-pnpm.js`
+        'rush-lib': `${__dirname}/lib-intermediate-esm/index.js`,
+        start: `${__dirname}/lib-intermediate-esm/start.js`,
+        startx: `${__dirname}/lib-intermediate-esm/startx.js`,
+        'start-pnpm': `${__dirname}/lib-intermediate-esm/start-pnpm.js`
       },
       [
         new DeepImportsPlugin({
@@ -86,10 +86,10 @@ module.exports = () => {
           // it needs to specify a template for the manifest filename.
           // Otherwise webpack will throw an error about multiple writes to the same manifest file.
           path: `${__dirname}/temp/build/webpack-dll/[name].json`,
-          inFolderName: 'lib-esnext',
-          outFolderName: 'lib',
+          inFolderName: 'lib-intermediate-esm',
+          outFolderName: 'lib-commonjs',
           pathsToIgnore: ['utilities/prompts/SearchListPrompt.js'],
-          dTsFilesInputFolderName: 'lib-commonjs'
+          dTsFilesInputFolderName: 'lib-dts'
         })
       ],
       {
@@ -106,27 +106,27 @@ module.exports = () => {
     ),
     generateConfiguration({
       [PathConstants.pnpmfileShimFilename]: {
-        import: `${__dirname}/lib-esnext/logic/pnpm/PnpmfileShim.js`,
+        import: `${__dirname}/lib-intermediate-esm/logic/pnpm/PnpmfileShim.js`,
         ...SCRIPT_ENTRY_OPTIONS
       },
       [PathConstants.subspacePnpmfileShimFilename]: {
-        import: `${__dirname}/lib-esnext/logic/pnpm/SubspaceGlobalPnpmfileShim.js`,
+        import: `${__dirname}/lib-intermediate-esm/logic/pnpm/SubspaceGlobalPnpmfileShim.js`,
         ...SCRIPT_ENTRY_OPTIONS
       },
       [PathConstants.installRunScriptFilename]: {
-        import: `${__dirname}/lib-esnext/scripts/install-run.js`,
+        import: `${__dirname}/lib-intermediate-esm/scripts/install-run.js`,
         ...SCRIPT_ENTRY_OPTIONS
       },
       [PathConstants.installRunRushScriptFilename]: {
-        import: `${__dirname}/lib-esnext/scripts/install-run-rush.js`,
+        import: `${__dirname}/lib-intermediate-esm/scripts/install-run-rush.js`,
         ...SCRIPT_ENTRY_OPTIONS
       },
       [PathConstants.installRunRushxScriptFilename]: {
-        import: `${__dirname}/lib-esnext/scripts/install-run-rushx.js`,
+        import: `${__dirname}/lib-intermediate-esm/scripts/install-run-rushx.js`,
         ...SCRIPT_ENTRY_OPTIONS
       },
       [PathConstants.installRunRushPnpmScriptFilename]: {
-        import: `${__dirname}/lib-esnext/scripts/install-run-rush-pnpm.js`,
+        import: `${__dirname}/lib-intermediate-esm/scripts/install-run-rush-pnpm.js`,
         ...SCRIPT_ENTRY_OPTIONS
       }
     })

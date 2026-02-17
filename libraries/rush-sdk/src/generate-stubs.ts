@@ -8,7 +8,8 @@ import { Async, FileSystem, type FolderItem, Import, JsonFile, Path } from '@rus
 
 interface IGenerateOptions {
   parentSourcePath: string;
-  parentTargetPath: string;
+  parentCjsTargetPath: string;
+  parentDtsTargetPath: string;
   parentSrcImportPathWithSlash: string;
   libShimIndexPath: string;
 }
@@ -22,21 +23,29 @@ interface IFileTask {
 }
 
 async function* collectFileTasksAsync(options: IGenerateOptions): AsyncGenerator<IFileTask> {
-  const { parentSourcePath, parentTargetPath, parentSrcImportPathWithSlash, libShimIndexPath } = options;
+  const {
+    parentSourcePath,
+    parentCjsTargetPath,
+    parentDtsTargetPath,
+    parentSrcImportPathWithSlash,
+    libShimIndexPath
+  } = options;
   const folderItems: FolderItem[] = await FileSystem.readFolderItemsAsync(options.parentSourcePath);
 
   for (const folderItem of folderItems) {
     const itemName: string = folderItem.name;
     const sourcePath: string = `${parentSourcePath}/${itemName}`;
-    const targetPath: string = `${parentTargetPath}/${itemName}`;
+    const cjsTargetPath: string = `${parentCjsTargetPath}/${itemName}`;
+    const dtsTargetPath: string = `${parentDtsTargetPath}/${itemName}`;
 
     if (folderItem.isDirectory()) {
       // Ensure destination folder exists
-      await FileSystem.ensureFolderAsync(targetPath);
+      await FileSystem.ensureFolderAsync(cjsTargetPath);
       // Recursively yield tasks from subdirectory
       yield* collectFileTasksAsync({
         parentSourcePath: sourcePath,
-        parentTargetPath: targetPath,
+        parentCjsTargetPath: cjsTargetPath,
+        parentDtsTargetPath: dtsTargetPath,
         parentSrcImportPathWithSlash: parentSrcImportPathWithSlash + itemName + '/',
         libShimIndexPath
       });
@@ -44,17 +53,17 @@ async function* collectFileTasksAsync(options: IGenerateOptions): AsyncGenerator
       yield {
         type: 'dts',
         sourcePath,
-        targetPath
+        targetPath: dtsTargetPath
       };
     } else if (folderItem.name.endsWith('.js')) {
       const srcImportPath: string = parentSrcImportPathWithSlash + path.parse(folderItem.name).name;
-      const shimPath: string = path.relative(parentTargetPath, libShimIndexPath);
+      const shimPath: string = path.relative(parentCjsTargetPath, libShimIndexPath);
       const shimPathLiteral: string = JSON.stringify(Path.convertToSlashes(shimPath));
 
       yield {
         type: 'js',
         sourcePath,
-        targetPath,
+        targetPath: cjsTargetPath,
         srcImportPath,
         shimPathLiteral
       };
@@ -116,16 +125,20 @@ export async function runAsync(options: IRunScriptOptions): Promise<void> {
     useNodeJSResolver: true
   });
 
-  const stubsTargetPath: string = `${buildFolderPath}/lib`;
-  terminal.writeLine('generate-stubs: Generating stub files under: ' + stubsTargetPath);
+  const cjsStubsTargetPath: string = `${buildFolderPath}/lib-commonjs`;
+  const dtsStubsTargetPath: string = `${buildFolderPath}/lib-dts`;
+  terminal.writeLine(
+    `generate-stubs: Generating stub files under ${cjsStubsTargetPath} and ${dtsStubsTargetPath}`
+  );
 
   // Ensure the target folder exists
-  await FileSystem.ensureFolderAsync(stubsTargetPath);
+  await FileSystem.ensureFolderAsync(cjsStubsTargetPath);
 
   // Collect and process file tasks in parallel with controlled concurrency
   const tasks: AsyncGenerator<IFileTask> = collectFileTasksAsync({
-    parentSourcePath: `${rushLibFolder}/lib`,
-    parentTargetPath: stubsTargetPath,
+    parentSourcePath: `${rushLibFolder}/lib-commonjs`,
+    parentCjsTargetPath: cjsStubsTargetPath,
+    parentDtsTargetPath: dtsStubsTargetPath,
     parentSrcImportPathWithSlash: '',
     libShimIndexPath: `${buildFolderPath}/lib-shim/index.js`
   });

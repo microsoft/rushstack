@@ -16,7 +16,7 @@ module.exports = ({ webpack: { BannerPlugin } }) => {
     packageName: '@microsoft/rush-lib',
     useNodeJSResolver: true
   });
-  const { moduleExports: exportSpecifiers } = require(`${rushLibFolder}/lib/index.exports.json`);
+  const { moduleExports: exportSpecifiers } = require(`${rushLibFolder}/lib-commonjs/index.exports.json`);
   // Assign named exports after the bundle to ensure they're properly exposed for ESM imports
   const footerCodeForLibShim = exportSpecifiers
     .map((name) => `exports.${name} = module.exports.${name};`)
@@ -31,8 +31,8 @@ module.exports = ({ webpack: { BannerPlugin } }) => {
     devtool: 'source-map',
     entry: {
       // Using CommonJS due to access of module.parent
-      index: `${__dirname}/lib-commonjs/index.js`,
-      loader: `${__dirname}/lib-commonjs/loader.js`
+      index: `${__dirname}/lib-intermediate-commonjs/index.js`,
+      loader: `${__dirname}/lib-intermediate-commonjs/loader.js`
     },
     output: {
       path: `${__dirname}/lib-shim`,

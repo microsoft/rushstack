@@ -30,5 +30,6 @@
 # ---------------------------------------------------------------------------
 # DO NOT MODIFY ABOVE THIS LINE!  Add any project-specific overrides below.
 # ---------------------------------------------------------------------------
-/lib-commonjs/**
-/lib-esnext/**
+
+# Exclude intermediate build outputs (not shipped)
+/lib-intermediate-*/**
