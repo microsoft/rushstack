@@ -3,7 +3,7 @@
   "description": "This project tests Heft support for the Fastify framework for Node.js services",
   "version": "1.0.0",
   "private": true,
-  "main": "lib/index.js",
+  "main": "./lib/index.js",
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",

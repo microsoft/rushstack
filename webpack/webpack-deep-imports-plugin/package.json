@@ -2,9 +2,9 @@
   "name": "@rushstack/webpack-deep-imports-plugin",
   "version": "0.0.0",
   "description": "This plugin creates a bundle and commonJS files in a 'lib' folder mirroring modules in another 'lib' folder.",
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/webpack-deep-imports-plugin.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/webpack-deep-imports-plugin.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

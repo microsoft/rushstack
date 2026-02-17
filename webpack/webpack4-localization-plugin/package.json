@@ -2,9 +2,9 @@
   "name": "@rushstack/webpack4-localization-plugin",
   "version": "0.19.14",
   "description": "This plugin facilitates localization with Webpack.",
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/webpack4-localization-plugin.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/webpack4-localization-plugin.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

@@ -7,9 +7,9 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/rushell"
   },
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/rushell.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/rushell.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

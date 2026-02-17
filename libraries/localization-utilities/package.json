@@ -2,9 +2,9 @@
   "name": "@rushstack/localization-utilities",
   "version": "0.14.14",
   "description": "This plugin contains some useful functions for localization.",
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/localization-utilities.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/localization-utilities.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
-  "module": "dist/rush-themed-ui.js",
-  "types": "dist/rush-themed-ui.d.ts",
+  "module": "./dist/rush-themed-ui.js",
+  "types": "./dist/rush-themed-ui.d.ts",
   "scripts": {
     "build": "heft test --clean",
     "start": "heft build --watch",

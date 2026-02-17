@@ -3,9 +3,9 @@
   "version": "0.1.7",
   "description": "rush pnpm kit v10",
   "license": "MIT",
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/rush-pnpm-kit-v10.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/rush-pnpm-kit-v10.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

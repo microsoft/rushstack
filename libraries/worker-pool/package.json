@@ -2,9 +2,9 @@
   "name": "@rushstack/worker-pool",
   "version": "0.6.14",
   "description": "Lightweight worker pool using NodeJS worker_threads",
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/worker-pool.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/worker-pool.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

@@ -8,9 +8,9 @@
     "directory": "libraries/api-extractor-model"
   },
   "homepage": "https://api-extractor.com",
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/rollup.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/rollup.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

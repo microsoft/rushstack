@@ -2,9 +2,9 @@
   "name": "@rushstack/module-minifier",
   "version": "0.8.14",
   "description": "Wrapper for terser to support bulk parallel minification.",
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/module-minifier.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/module-minifier.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

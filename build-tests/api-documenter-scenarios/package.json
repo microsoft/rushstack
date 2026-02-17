@@ -3,7 +3,7 @@
   "description": "Building this project is a regression test for api-documenter",
   "version": "1.0.0",
   "private": true,
-  "typings": "dist/internal/some-fake-file.d.ts",
+  "types": "./dist/internal/some-fake-file.d.ts",
   "exports": {
     "./lib/*": {
       "import": "./lib-esm/*.js",

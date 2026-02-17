@@ -7,9 +7,9 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/ts-command-line"
   },
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/ts-command-line.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/ts-command-line.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

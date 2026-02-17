@@ -2,9 +2,9 @@
   "name": "@rushstack/credential-cache",
   "version": "0.1.11",
   "description": "Cross-platform functionality to manage cached credentials.",
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/credential-cache.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/credential-cache.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

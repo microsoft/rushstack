@@ -3,9 +3,9 @@
   "description": "Building this project is a regression test for api-extractor",
   "version": "1.0.0",
   "private": true,
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/api-extractor-test-04.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/api-extractor-test-04.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

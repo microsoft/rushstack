@@ -2,9 +2,9 @@
   "name": "@rushstack/problem-matcher",
   "version": "0.1.1",
   "description": "A library for parsing VS Code style problem matchers",
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/problem-matcher.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/problem-matcher.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

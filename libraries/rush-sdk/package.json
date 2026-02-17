@@ -8,8 +8,8 @@
     "directory": "apps/rush-sdk"
   },
   "homepage": "https://rushjs.io",
-  "main": "lib-shim/index.js",
-  "typings": "dist/rush-lib.d.ts",
+  "main": "./lib-shim/index.js",
+  "types": "./dist/rush-lib.d.ts",
   "exports": {
     ".": {
       "types": "./dist/rush-lib.d.ts",

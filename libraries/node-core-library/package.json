@@ -2,9 +2,9 @@
   "name": "@rushstack/node-core-library",
   "version": "5.19.1",
   "description": "Core libraries that every NodeJS toolchain project should use",
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/node-core-library.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/node-core-library.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

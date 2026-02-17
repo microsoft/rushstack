@@ -2,9 +2,9 @@
   "name": "@rushstack/webpack-plugin-utilities",
   "version": "0.5.14",
   "description": "This plugin sets the webpack public path at runtime.",
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/webpack-plugin-utilities.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/webpack-plugin-utilities.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

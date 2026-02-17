@@ -7,9 +7,9 @@
     "typings",
     "generate"
   ],
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/typings-generator.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/typings-generator.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

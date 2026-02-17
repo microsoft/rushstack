@@ -2,9 +2,9 @@
   "name": "@rushstack/rig-package",
   "version": "0.6.0",
   "description": "A system for sharing tool configurations between projects without duplicating config files.",
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/rig-package.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/rig-package.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

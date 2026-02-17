@@ -11,9 +11,9 @@
     "node": ">=10.13.0"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "types": "dist/heft-config-file.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/heft-config-file.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

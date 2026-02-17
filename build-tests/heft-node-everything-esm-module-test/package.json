@@ -3,7 +3,7 @@
   "description": "Building this project tests every task and config file for Heft when targeting the Node.js runtime when configured to use ESM module support",
   "version": "1.0.0",
   "private": true,
-  "main": "lib/index.js",
+  "main": "./lib/index.js",
   "type": "module",
   "license": "MIT",
   "scripts": {

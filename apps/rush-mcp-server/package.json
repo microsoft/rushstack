@@ -9,9 +9,9 @@
     "monorepo",
     "server"
   ],
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/mcp-server.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/mcp-server.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

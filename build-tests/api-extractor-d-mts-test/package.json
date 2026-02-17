@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "types": "dist/api-extractor-d-mts-test.d.mts",
+  "types": "./dist/api-extractor-d-mts-test.d.mts",
   "exports": {
     "./lib/*": {
       "import": "./lib-esm/*.js",

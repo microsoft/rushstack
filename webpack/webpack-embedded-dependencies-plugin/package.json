@@ -2,9 +2,9 @@
   "name": "@rushstack/webpack-embedded-dependencies-plugin",
   "version": "0.3.15",
   "description": "This plugin analyzes bundled dependencies from Node Modules for use with Component Governance and License Scanning.",
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "dist/webpack-embedded-dependencies-plugin.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/webpack-embedded-dependencies-plugin.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",

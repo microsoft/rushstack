@@ -8,10 +8,9 @@
     "directory": "heft-plugins/heft-webpack4-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "types": "./lib/index.d.ts",
-  "typings": "lib-dts/index.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./lib-dts/index.d.ts",
   "exports": {
     ".": {
       "import": "./lib-esm/index.js",
