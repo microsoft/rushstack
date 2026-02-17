@@ -18,8 +18,8 @@
       "require": "./lib-commonjs/custom-config-package-names.js"
     },
     "./eslint-bulk-suppressions": {
-      "import": "./lib-esm/eslint-bulk-suppressions.js",
-      "require": "./lib-commonjs/eslint-bulk-suppressions.js"
+      "import": "./lib-esm/eslint-bulk-suppressions/index.js",
+      "require": "./lib-commonjs/eslint-bulk-suppressions/index.js"
     },
     "./lib/*": {
       "import": "./lib-esm/*.js",

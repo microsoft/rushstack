@@ -10,7 +10,7 @@ function generateConfiguration(mode, outputFolderName) {
     mode: mode,
     target: ['web', 'es5'],
     entry: {
-      'test-bundle': `${__dirname}/lib/index.js`
+      'test-bundle': `${__dirname}/lib-esm/index.js`
     },
     output: {
       path: `${__dirname}/${outputFolderName}`,

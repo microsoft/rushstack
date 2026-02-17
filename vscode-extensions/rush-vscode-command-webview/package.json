@@ -10,6 +10,7 @@
   },
   "license": "MIT",
   "main": "./lib-esm/index.js",
+  "types": "./lib-dts/index.d.ts",
   "scripts": {
     "_phase:build": "heft build --clean",
     "_phase:test": "",

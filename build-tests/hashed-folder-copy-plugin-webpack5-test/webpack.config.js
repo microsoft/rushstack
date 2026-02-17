@@ -11,7 +11,7 @@ function generateConfiguration(mode, outputFolderName) {
   return {
     mode: mode,
     entry: {
-      test: path.join(__dirname, 'lib', 'index.js')
+      test: path.join(__dirname, 'lib-esm', 'index.js')
     },
     output: {
       path: path.join(__dirname, outputFolderName),

@@ -3,8 +3,8 @@
   "description": "This is an example heft plugin for testing the lifecycle hooks",
   "version": "1.0.0",
   "private": true,
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "types": "./lib-commonjs/index.d.ts",
   "scripts": {
     "build": "heft build --clean",
     "start": "heft build-watch",

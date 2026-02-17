@@ -9,7 +9,7 @@ const {
 } = require('@rushstack/eslint-patch/lib/eslint-bulk-suppressions/constants');
 
 const eslintBulkStartPath = Import.resolveModule({
-  modulePath: '@rushstack/eslint-bulk/lib/start',
+  modulePath: '@rushstack/eslint-bulk/lib-commonjs/start',
   baseFolderPath: __dirname
 });
 

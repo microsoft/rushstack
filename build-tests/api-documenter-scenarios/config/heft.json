@@ -12,7 +12,7 @@
             "pluginPackage": "@rushstack/heft",
             "pluginName": "run-script-plugin",
             "options": {
-              "scriptPath": "./lib/runScenarios.js"
+              "scriptPath": "./lib-commonjs/runScenarios.js"
             }
           }
         }

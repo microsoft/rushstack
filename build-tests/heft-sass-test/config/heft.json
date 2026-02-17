@@ -7,7 +7,7 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-commonjs", "lib-css", "temp"] }],
+      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-commonjs", "lib-css", "lib-esm", "temp"] }],
 
       "tasksByName": {
         "set-browserslist-ignore-old-data-env-var": {

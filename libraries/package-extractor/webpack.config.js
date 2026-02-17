@@ -11,7 +11,7 @@ module.exports = () => {
     devtool: 'source-map',
     entry: {
       [CREATE_LINKS_SCRIPT_FILENAME]: {
-        import: `${__dirname}/lib-esnext/scripts/createLinks/start.js`,
+        import: `${__dirname}/lib-esm/scripts/createLinks/start.js`,
         filename: `[name]`
       }
     },

@@ -39,7 +39,7 @@
             "pluginPackage": "@rushstack/heft",
             "pluginName": "run-script-plugin",
             "options": {
-              "scriptPath": "./lib/test-metadata.js"
+              "scriptPath": "./lib-commonjs/test-metadata.js"
             }
           }
         }
