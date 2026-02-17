@@ -9,7 +9,7 @@
     "directory": "vscode-extensions/rush-vscode-command-webview"
   },
   "license": "MIT",
-  "main": "./lib/index.js",
+  "main": "./lib-esm/index.js",
   "scripts": {
     "_phase:build": "heft build --clean",
     "_phase:test": "",

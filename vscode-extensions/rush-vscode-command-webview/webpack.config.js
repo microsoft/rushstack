@@ -16,7 +16,7 @@ function createWebpackConfig({ production }) {
       }
     },
     entry: {
-      ['bundle']: path.join(__dirname, 'lib', 'entry.js')
+      bundle: path.join(__dirname, 'lib-esm', 'entry.js')
     },
     output: {
       path: path.join(__dirname, 'dist'),
