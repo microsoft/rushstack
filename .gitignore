@@ -136,4 +136,4 @@ test-results/
 
 # Claude Code local configuration
 .claude/*.local.json
-
+**/tmpclaude-*-cwd
