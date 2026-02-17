@@ -584,7 +584,7 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 // @internal (undocumented)
 export interface _IOperationBuildCacheOptions {
     buildCacheConfiguration: BuildCacheConfiguration;
-    filterAppleDoubleFiles: boolean;
+    excludeAppleDoubleFiles: boolean;
     terminal: ITerminal;
 }
 

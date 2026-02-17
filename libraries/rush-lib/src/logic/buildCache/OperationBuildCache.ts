@@ -31,7 +31,7 @@ export interface IOperationBuildCacheOptions {
    * If true, omit AppleDouble (`._*`) files from cache archives when running on macOS
    * and a companion file exists in the same directory.
    */
-  filterAppleDoubleFiles: boolean;
+  excludeAppleDoubleFiles: boolean;
 }
 
 /**
@@ -74,7 +74,7 @@ export class OperationBuildCache {
   private readonly _cacheWriteEnabled: boolean;
   private readonly _projectOutputFolderNames: ReadonlyArray<string>;
   private readonly _cacheId: string | undefined;
-  private readonly _filterAppleDoubleFiles: boolean;
+  private readonly _excludeAppleDoubleFiles: boolean;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
     const {
@@ -86,7 +86,7 @@ export class OperationBuildCache {
       },
       project,
       projectOutputFolderNames,
-      filterAppleDoubleFiles
+      excludeAppleDoubleFiles
     } = options;
     this._project = project;
     this._localBuildCacheProvider = localCacheProvider;
@@ -95,7 +95,7 @@ export class OperationBuildCache {
     this._cacheWriteEnabled = cacheWriteEnabled;
     this._projectOutputFolderNames = projectOutputFolderNames || [];
     this._cacheId = cacheId;
-    this._filterAppleDoubleFiles = filterAppleDoubleFiles && process.platform === 'darwin';
+    this._excludeAppleDoubleFiles = excludeAppleDoubleFiles && process.platform === 'darwin';
   }
 
   private static _tryGetTarUtility(terminal: ITerminal): Promise<TarExecutable | undefined> {
@@ -119,7 +119,7 @@ export class OperationBuildCache {
     executionResult: IOperationExecutionResult,
     options: IOperationBuildCacheOptions
   ): OperationBuildCache {
-    const { buildCacheConfiguration, terminal, filterAppleDoubleFiles } = options;
+    const { buildCacheConfiguration, terminal, excludeAppleDoubleFiles } = options;
     const outputFolders: string[] = [...(executionResult.operation.settings?.outputFolderNames ?? [])];
     if (executionResult.metadataFolderPath) {
       outputFolders.push(executionResult.metadataFolderPath);
@@ -132,7 +132,7 @@ export class OperationBuildCache {
       phaseName: executionResult.operation.associatedPhase.name,
       projectOutputFolderNames: outputFolders,
       operationStateHash: executionResult.getStateHash(),
-      filterAppleDoubleFiles
+      excludeAppleDoubleFiles
     };
     const cacheId: string | undefined = OperationBuildCache._getCacheId(buildCacheOptions);
     return new OperationBuildCache(cacheId, buildCacheOptions);
@@ -352,14 +352,14 @@ export class OperationBuildCache {
     const filteredOutputFolderNames: string[] = [];
 
     let hasSymbolicLinks: boolean = false;
-    const filterAppleDoubleFiles: boolean = this._filterAppleDoubleFiles;
+    const excludeAppleDoubleFiles: boolean = this._excludeAppleDoubleFiles;
 
     // Adds child directories to the queue, files to the path list, and bails on symlinks
     function processChildren(relativePath: string, diskPath: string, children: FolderItem[]): void {
-      // When filtering AppleDouble files, build a set of sibling names so we can check
+      // When excluding AppleDouble files, build a set of sibling names so we can check
       // whether a companion file exists for each ._X file.
       let childNameSet: Set<string> | undefined;
-      if (filterAppleDoubleFiles) {
+      if (excludeAppleDoubleFiles) {
         childNameSet = new Set<string>(children.map(({ name }) => name));
       }
 

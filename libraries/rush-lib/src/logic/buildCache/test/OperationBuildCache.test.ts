@@ -15,7 +15,7 @@ interface ITestOptions {
   enabled: boolean;
   writeAllowed: boolean;
   trackedProjectFiles: string[] | undefined;
-  filterAppleDoubleFiles: boolean;
+  excludeAppleDoubleFiles: boolean;
 }
 
 function createFolderItem(name: string, type: 'file' | 'directory' | 'symlink'): FolderItem {
@@ -59,7 +59,7 @@ describe(OperationBuildCache.name, () => {
       operationStateHash: '1926f30e8ed24cb47be89aea39e7efd70fcda075',
       terminal,
       phaseName: 'build',
-      filterAppleDoubleFiles: !!options.filterAppleDoubleFiles
+      excludeAppleDoubleFiles: !!options.excludeAppleDoubleFiles
     });
 
     return subject;
@@ -74,7 +74,7 @@ describe(OperationBuildCache.name, () => {
     });
   });
 
-  describe('AppleDouble file filtering', () => {
+  describe('AppleDouble file exclusion', () => {
     const originalPlatform: NodeJS.Platform = process.platform;
 
     afterEach(() => {
@@ -85,7 +85,7 @@ describe(OperationBuildCache.name, () => {
     it('omits AppleDouble files with companions when enabled on macOS', async () => {
       Object.defineProperty(process, 'platform', { value: 'darwin' });
 
-      const subject: OperationBuildCache = prepareSubject({ filterAppleDoubleFiles: true });
+      const subject: OperationBuildCache = prepareSubject({ excludeAppleDoubleFiles: true });
 
       jest
         .spyOn(FileSystem, 'readFolderItemsAsync')
@@ -111,7 +111,7 @@ describe(OperationBuildCache.name, () => {
     it('keeps AppleDouble files without companion files', async () => {
       Object.defineProperty(process, 'platform', { value: 'darwin' });
 
-      const subject: OperationBuildCache = prepareSubject({ filterAppleDoubleFiles: true });
+      const subject: OperationBuildCache = prepareSubject({ excludeAppleDoubleFiles: true });
 
       jest
         .spyOn(FileSystem, 'readFolderItemsAsync')
@@ -127,10 +127,10 @@ describe(OperationBuildCache.name, () => {
       expect(result!.outputFilePaths).toEqual(['dist/._orphan.txt', 'dist/other.js']);
     });
 
-    it('does not filter AppleDouble files when the experiment is disabled', async () => {
+    it('does not exclude AppleDouble files when the experiment is disabled', async () => {
       Object.defineProperty(process, 'platform', { value: 'darwin' });
 
-      const subject: OperationBuildCache = prepareSubject({ filterAppleDoubleFiles: false });
+      const subject: OperationBuildCache = prepareSubject({ excludeAppleDoubleFiles: false });
 
       jest
         .spyOn(FileSystem, 'readFolderItemsAsync')
@@ -146,10 +146,10 @@ describe(OperationBuildCache.name, () => {
       expect(result!.outputFilePaths).toEqual(['dist/._foo.txt', 'dist/foo.txt']);
     });
 
-    it('does not filter AppleDouble files on non-macOS platforms', async () => {
+    it('does not exclude AppleDouble files on non-macOS platforms', async () => {
       Object.defineProperty(process, 'platform', { value: 'win32' });
 
-      const subject: OperationBuildCache = prepareSubject({ filterAppleDoubleFiles: true });
+      const subject: OperationBuildCache = prepareSubject({ excludeAppleDoubleFiles: true });
 
       jest
         .spyOn(FileSystem, 'readFolderItemsAsync')
@@ -165,10 +165,10 @@ describe(OperationBuildCache.name, () => {
       expect(result!.outputFilePaths).toEqual(['dist/._foo.txt', 'dist/foo.txt']);
     });
 
-    it('does not filter files named exactly "._"', async () => {
+    it('does not exclude files named exactly "._"', async () => {
       Object.defineProperty(process, 'platform', { value: 'darwin' });
 
-      const subject: OperationBuildCache = prepareSubject({ filterAppleDoubleFiles: true });
+      const subject: OperationBuildCache = prepareSubject({ excludeAppleDoubleFiles: true });
 
       jest
         .spyOn(FileSystem, 'readFolderItemsAsync')
@@ -184,10 +184,10 @@ describe(OperationBuildCache.name, () => {
       expect(result!.outputFilePaths).toEqual(['dist/._', 'dist/other.txt']);
     });
 
-    it('filters AppleDouble files in nested directories', async () => {
+    it('excludes AppleDouble files in nested directories', async () => {
       Object.defineProperty(process, 'platform', { value: 'darwin' });
 
-      const subject: OperationBuildCache = prepareSubject({ filterAppleDoubleFiles: true });
+      const subject: OperationBuildCache = prepareSubject({ excludeAppleDoubleFiles: true });
 
       // First call returns the top-level dist/ contents with a subdirectory
       // Second call returns the subdirectory contents
