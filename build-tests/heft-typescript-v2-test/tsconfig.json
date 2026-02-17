@@ -3,6 +3,7 @@
 
   "compilerOptions": {
     "outDir": "lib-commonjs",
+    "declarationDir": "lib-dts",
     "rootDir": "src",
 
     "forceConsistentCasingInFileNames": true,

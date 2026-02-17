@@ -4,7 +4,7 @@
   "compilerOptions": {
     "outDir": "lib-esm",
     "declarationDir": "lib-dts",
-    "rootDir": "src",
+    "rootDirs": ["client", "server"],
 
     "forceConsistentCasingInFileNames": true,
     "declaration": true,

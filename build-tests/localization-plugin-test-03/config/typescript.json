@@ -1,0 +1,4 @@
+{
+  // This project uses ts-loader
+  "additionalModuleKindsToEmit": []
+}
