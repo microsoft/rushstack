@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "add pnpm global catalog detection to rush change",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
