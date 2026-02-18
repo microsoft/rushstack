@@ -8,14 +8,14 @@
   "types": "./lib-dts/index.d.ts",
   "exports": {
     ".": {
-      "require": "./lib-commonjs/index.js",
+      "types": "./lib-dts/index.d.ts",
       "import": "./lib-esm/index.js",
-      "types": "./lib-dts/index.d.ts"
+      "require": "./lib-commonjs/index.js"
     },
     "./lib/*": {
-      "require": "./lib-commonjs/*",
+      "types": "./lib-dts/*",
       "import": "./lib-esm/*",
-      "types": "./lib-dts/*"
+      "require": "./lib-commonjs/*"
     },
     "./package.json": "./package.json"
   },

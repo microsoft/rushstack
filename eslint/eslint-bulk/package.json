@@ -4,9 +4,9 @@
   "description": "Roll out new ESLint rules in a large monorepo without cluttering up your code with \"eslint-ignore-next-line\"",
   "exports": {
     "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
       "import": "./lib-esm/*.js",
-      "require": "./lib-commonjs/*.js",
-      "types": "./lib-dts/*.d.ts"
+      "require": "./lib-commonjs/*.js"
     },
     "./package.json": "./package.json"
   },

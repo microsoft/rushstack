@@ -31,14 +31,14 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/rush-resolver-cache-plugin.d.ts",
       "import": "./lib-esm/index.js",
-      "require": "./lib-commonjs/index.js",
-      "types": "./dist/rush-resolver-cache-plugin.d.ts"
+      "require": "./lib-commonjs/index.js"
     },
     "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
       "import": "./lib-esm/*.js",
-      "require": "./lib-commonjs/*.js",
-      "types": "./lib-dts/*.d.ts"
+      "require": "./lib-commonjs/*.js"
     },
     "./rush-plugin-manifest.json": "./rush-plugin-manifest.json",
     "./package.json": "./package.json"

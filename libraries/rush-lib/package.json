@@ -16,13 +16,13 @@
   "types": "./dist/rush-lib.d.ts",
   "exports": {
     ".": {
-      "require": "./lib-commonjs/index.js",
-      "types": "./dist/rush-lib.d.ts"
+      "types": "./dist/rush-lib.d.ts",
+      "require": "./lib-commonjs/index.js"
     },
     "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
     "./lib/*": {
-      "require": "./lib-commonjs/*.js",
-      "types": "./lib-dts/*.d.ts"
+      "types": "./lib-dts/*.d.ts",
+      "require": "./lib-commonjs/*.js"
     },
     "./package.json": "./package.json"
   },

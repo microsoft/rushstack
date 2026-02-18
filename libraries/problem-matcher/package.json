@@ -7,14 +7,14 @@
   "types": "./dist/problem-matcher.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/problem-matcher.d.ts",
       "import": "./lib-esm/index.js",
-      "require": "./lib-commonjs/index.js",
-      "types": "./dist/problem-matcher.d.ts"
+      "require": "./lib-commonjs/index.js"
     },
     "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
       "import": "./lib-esm/*.js",
-      "require": "./lib-commonjs/*.js",
-      "types": "./lib-dts/*.d.ts"
+      "require": "./lib-commonjs/*.js"
     },
     "./package.json": "./package.json"
   },

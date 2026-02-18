@@ -32,9 +32,9 @@
   "exports": {
     "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
     "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
       "import": "./lib-esm/*.js",
-      "require": "./lib-commonjs/*.js",
-      "types": "./lib-dts/*.d.ts"
+      "require": "./lib-commonjs/*.js"
     },
     "./heft-plugin.json": "./heft-plugin.json",
     "./package.json": "./package.json"

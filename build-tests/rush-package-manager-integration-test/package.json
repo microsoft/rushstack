@@ -7,7 +7,7 @@
   "scripts": {
     "_phase:build": "heft build --clean",
     "build": "heft build --clean",
-    "test": "node lib/runTests.js"
+    "test": "node lib-commonjs/runTests.js"
   },
   "devDependencies": {
     "@microsoft/rush": "workspace:*",
@@ -19,9 +19,9 @@
   },
   "exports": {
     "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
       "import": "./lib-esm/*.js",
-      "require": "./lib-commonjs/*.js",
-      "types": "./lib-dts/*.d.ts"
+      "require": "./lib-commonjs/*.js"
     },
     "./package.json": "./package.json"
   },

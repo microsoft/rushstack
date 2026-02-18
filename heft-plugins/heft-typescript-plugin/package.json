@@ -13,15 +13,15 @@
   "types": "./dist/heft-typescript-plugin.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/heft-typescript-plugin.d.ts",
       "import": "./lib-esm/index.js",
-      "require": "./lib-commonjs/index.js",
-      "types": "./dist/heft-typescript-plugin.d.ts"
+      "require": "./lib-commonjs/index.js"
     },
     "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
     "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
       "import": "./lib-esm/*.js",
-      "require": "./lib-commonjs/*.js",
-      "types": "./lib-dts/*.d.ts"
+      "require": "./lib-commonjs/*.js"
     },
     "./heft-plugin.json": "./heft-plugin.json",
     "./package.json": "./package.json"

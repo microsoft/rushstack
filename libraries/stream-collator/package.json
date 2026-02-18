@@ -12,14 +12,14 @@
   "types": "./dist/stream-collator.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/stream-collator.d.ts",
       "import": "./lib-esm/index.js",
-      "require": "./lib-commonjs/index.js",
-      "types": "./dist/stream-collator.d.ts"
+      "require": "./lib-commonjs/index.js"
     },
     "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
       "import": "./lib-esm/*.js",
-      "require": "./lib-commonjs/*.js",
-      "types": "./lib-dts/*.d.ts"
+      "require": "./lib-commonjs/*.js"
     },
     "./package.json": "./package.json"
   },
