@@ -44,7 +44,7 @@ export async function runScenariosAsync(
   await Async.forEachAsync(
     scenarioFolderNames,
     async (scenarioFolderName) => {
-      const entryPoint: string = `${buildFolderPath}/lib-dts/${scenarioFolderName}/index.d.ts`;
+      const entryPoint: string = `${libDtsFolderPath}/${scenarioFolderName}/index.d.ts`;
       entryPoints.push(entryPoint);
 
       const overridesPath: string = `${buildFolderPath}/src/${scenarioFolderName}/config/api-extractor-overrides.json`;
