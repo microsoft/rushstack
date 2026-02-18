@@ -5,7 +5,7 @@ import * as path from 'node:path';
 
 import * as semver from 'semver';
 
-import { LockFile } from '@rushstack/node-core-library';
+import { LockFile, Import } from '@rushstack/node-core-library';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
 import { _FlagFile, _RushGlobalFolder, type ILaunchOptions } from '@microsoft/rush-lib';
 
@@ -44,7 +44,7 @@ export class RushVersionSelector {
 
       console.log(`Trying to acquire lock for ${resourceName}`);
 
-      const lock: LockFile = await LockFile.acquire(expectedRushPath, resourceName);
+      const lock: LockFile = await LockFile.acquireAsync(expectedRushPath, resourceName);
       installIsValid = await installMarker.isValidAsync();
       if (installIsValid) {
         console.log('Another process performed the installation.');
@@ -85,10 +85,15 @@ export class RushVersionSelector {
       RushCommandSelector.failIfNotInvokedAsRush(version);
       require(path.join(expectedRushPath, 'node_modules', '@microsoft', 'rush', 'lib', 'start'));
     } else {
+      // Explicitly resolve the entry point for rush-lib, rather than using a simple require, because
+      // newer versions of rush-lib use the package.json `exports` field, which maps
+      // `lib/index` to `lib-commonjs/index.js`
+      const rushLibEntrypoint: string = await Import.resolveModuleAsync({
+        modulePath: '@microsoft/rush-lib/lib/index',
+        baseFolderPath: expectedRushPath
+      });
+      const rushCliEntrypoint: typeof import('@microsoft/rush-lib') = require(rushLibEntrypoint);
       // For newer rush-lib, RushCommandSelector can test whether "rushx" is supported or not
-      const rushCliEntrypoint: {} = require(
-        path.join(expectedRushPath, 'node_modules', '@microsoft', 'rush-lib', 'lib', 'index')
-      );
       RushCommandSelector.execute(this._currentPackageVersion, rushCliEntrypoint, executeOptions);
     }
   }

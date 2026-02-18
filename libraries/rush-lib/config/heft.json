@@ -58,6 +58,23 @@
           }
         },
 
+        "copy-legacy-compatibility-index-js": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "src/legacy-compatibility",
+                  "destinationFolders": ["lib"],
+                  "includeGlobs": ["*"]
+                }
+              ]
+            }
+          }
+        },
+
         "webpack": {
           "taskDependencies": ["typescript"],
           "taskPlugin": {
