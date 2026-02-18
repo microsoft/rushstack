@@ -48,6 +48,7 @@ to produce type declarations that can be imported alongside the schema at build 
 | `srcFolder`          | `string`   | `"src"`              | Source directory to scan for `*.schema.json` files.                              |
 | `generatedTsFolders` | `string[]` | `["temp/schemas-ts"]`| Output directories for the generated `.d.ts` files.                             |
 | `formatWithPrettier` | `boolean`  | `false`              | When `true`, format generated typings with [prettier](https://prettier.io/). Requires `prettier` as an installed dependency. |
+| `includeSchemaMetadata` | `boolean` | `false`           | When `true`, keep the `$schema` property in the generated typings. By default it is stripped so it does not appear as a field in the emitted types. |
 
 ## Vendor extension: `x-tsdoc-release-tag`
 
