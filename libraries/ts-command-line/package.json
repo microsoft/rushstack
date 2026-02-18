@@ -47,5 +47,6 @@
     "@rushstack/node-core-library": "workspace:*",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
-  }
+  },
+  "sideEffects": false
 }

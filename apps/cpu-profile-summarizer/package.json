@@ -40,5 +40,9 @@
         "lib-dts/*"
       ]
     }
-  }
+  },
+  "sideEffects": [
+    "lib-commonjs/start.js",
+    "lib-esm/start.js"
+  ]
 }

@@ -66,5 +66,6 @@
         "lib-dts/*"
       ]
     }
-  }
+  },
+  "sideEffects": false
 }

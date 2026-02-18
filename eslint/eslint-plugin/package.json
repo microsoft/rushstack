@@ -61,5 +61,6 @@
     "eslint": "~9.37.0",
     "typescript": "~5.8.2",
     "@typescript-eslint/types": "~8.46.0"
-  }
+  },
+  "sideEffects": false
 }

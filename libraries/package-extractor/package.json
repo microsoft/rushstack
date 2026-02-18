@@ -58,5 +58,6 @@
     "eslint": "~9.37.0",
     "webpack": "~5.105.2",
     "@types/semver": "7.5.0"
-  }
+  },
+  "sideEffects": false
 }

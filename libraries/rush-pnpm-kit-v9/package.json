@@ -40,5 +40,6 @@
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*"
-  }
+  },
+  "sideEffects": false
 }

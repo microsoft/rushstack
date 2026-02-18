@@ -28,5 +28,6 @@
     "eslint": "~9.37.0",
     "local-web-rig": "workspace:*",
     "typescript": "5.8.2"
-  }
+  },
+  "sideEffects": false
 }

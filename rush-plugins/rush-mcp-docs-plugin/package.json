@@ -46,5 +46,6 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "local-eslint-config": "workspace:*"
-  }
+  },
+  "sideEffects": false
 }

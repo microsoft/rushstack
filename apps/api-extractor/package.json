@@ -81,5 +81,9 @@
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0",
     "local-eslint-config": "workspace:*"
-  }
+  },
+  "sideEffects": [
+    "lib-commonjs/start.js",
+    "lib-esm/start.js"
+  ]
 }

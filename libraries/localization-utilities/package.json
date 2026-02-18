@@ -48,5 +48,6 @@
     "@types/xmldoc": "1.1.4",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
-  }
+  },
+  "sideEffects": false
 }

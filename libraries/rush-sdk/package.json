@@ -62,5 +62,6 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "webpack": "~5.105.2"
-  }
+  },
+  "sideEffects": false
 }

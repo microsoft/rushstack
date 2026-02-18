@@ -54,5 +54,6 @@
     "@types/node": {
       "optional": true
     }
-  }
+  },
+  "sideEffects": false
 }

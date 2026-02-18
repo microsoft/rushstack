@@ -62,5 +62,6 @@
   },
   "peerDependencies": {
     "playwright-core": "~1.56.1"
-  }
+  },
+  "sideEffects": false
 }

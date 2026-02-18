@@ -57,5 +57,6 @@
     "local-node-rig": "workspace:*",
     "@types/tapable": "1.0.6",
     "webpack": "~5.105.2"
-  }
+  },
+  "sideEffects": false
 }

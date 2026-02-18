@@ -27,5 +27,6 @@
     "@types/react-dom": "19.2.3",
     "eslint": "~9.37.0",
     "local-web-rig": "workspace:*"
-  }
+  },
+  "sideEffects": false
 }

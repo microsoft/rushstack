@@ -54,5 +54,6 @@
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0",
     "typescript": "~5.8.2"
-  }
+  },
+  "sideEffects": false
 }

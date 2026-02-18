@@ -54,5 +54,6 @@
     "@swc/core": "1.7.10",
     "@types/tapable": "1.0.6",
     "tapable": "1.1.3"
-  }
+  },
+  "sideEffects": false
 }

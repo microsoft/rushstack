@@ -55,5 +55,6 @@
     "local-node-rig": "workspace:*",
     "webpack": "~5.105.2",
     "memfs": "4.12.0"
-  }
+  },
+  "sideEffects": false
 }

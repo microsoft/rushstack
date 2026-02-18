@@ -88,5 +88,11 @@
         "lib-dts/*"
       ]
     }
-  }
+  },
+  "sideEffects": [
+    "lib-commonjs/start-explorer.js",
+    "lib-commonjs/start-lint.js",
+    "lib-esm/start-explorer.js",
+    "lib-esm/start-lint.js"
+  ]
 }

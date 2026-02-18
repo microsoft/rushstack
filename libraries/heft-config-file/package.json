@@ -53,5 +53,6 @@
     "@types/ungap__structured-clone": "~1.2.0",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
-  }
+  },
+  "sideEffects": false
 }

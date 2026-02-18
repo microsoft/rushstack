@@ -74,6 +74,7 @@
     "webpack": "~4.47.0"
   },
   "sideEffects": [
-    "./lib/OverrideWebpackIdentifierAllocation"
+    "lib-esm/OverrideWebpackIdentifierAllocation.js",
+    "lib-commonjs/OverrideWebpackIdentifierAllocation.js"
   ]
 }

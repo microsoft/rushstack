@@ -71,5 +71,13 @@
     "eslint-9": "npm:eslint@~9.25.1",
     "eslint": "~9.37.0",
     "typescript": "~5.8.2"
-  }
+  },
+  "sideEffects": [
+    "lib-esm/modern-module-resolution.js",
+    "lib-esm/custom-config-package-names.js",
+    "lib-esm/eslint-bulk-suppressions/index.js",
+    "lib-commonjs/modern-module-resolution.js",
+    "lib-commonjs/custom-config-package-names.js",
+    "lib-commonjs/eslint-bulk-suppressions/index.js"
+  ]
 }

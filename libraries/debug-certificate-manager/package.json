@@ -45,5 +45,6 @@
     "@types/node-forge": "1.0.4",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
-  }
+  },
+  "sideEffects": false
 }

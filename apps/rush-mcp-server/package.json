@@ -64,5 +64,9 @@
     "local-node-rig": "workspace:*",
     "typescript": "~5.8.2",
     "@types/node": "20.17.19"
-  }
+  },
+  "sideEffects": [
+    "lib-commonjs/start.js",
+    "lib-esm/start.js"
+  ]
 }

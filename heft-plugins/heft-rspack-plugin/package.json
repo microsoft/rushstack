@@ -57,5 +57,6 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "@rspack/core": "~1.6.0-beta.0"
-  }
+  },
+  "sideEffects": false
 }

@@ -42,5 +42,6 @@
     "local-web-rig": "workspace:*",
     "webpack": "~5.105.2",
     "webpack-bundle-analyzer": "~4.5.0"
-  }
+  },
+  "sideEffects": false
 }
