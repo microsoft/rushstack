@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Sort the `additionalFilesForOperation` property in operation settings entries in projects' `config/rush-project.json` files before computing operation hashes to produce a stable hash for caching.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
