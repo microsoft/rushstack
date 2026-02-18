@@ -1,0 +1,9 @@
+{
+  "name": "atomic",
+  "author": {
+    "name": "Sean Larkin",
+    "email": "selarkin@microsoft.com"
+  },
+  "description": "A plugin implementing the Atomic Workflow (https://github.com/flora131/atomic)",
+  "version": "0.0.1"
+}

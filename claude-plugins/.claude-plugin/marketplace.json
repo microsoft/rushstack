@@ -1,0 +1,16 @@
+{
+  "name": "local-rushstack-plugins",
+  "owner": {
+    "name": "Rushstack"
+  },
+  "metadata": {
+    "description": "A collection of local rushstack plugins"
+  },
+  "plugins": [
+    {
+      "name": "atomic",
+      "source": "./atomic-workflow-plugin",
+      "description": "A plugin implementing the Atomic Workflow (https://github.com/flora131/atomic)"
+    }
+  ]
+}
