@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-json-schema-typings-plugin",
+      "comment": "Strip the `$schema` metadata property from JSON schema files before generating TypeScript typings, so it does not appear as a property in the generated `.d.ts` declarations.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-json-schema-typings-plugin"
+}

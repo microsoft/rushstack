@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Config With Schema Field",
+  "type": "object",
+  "properties": {
+    "name": {
+      "description": "The name.",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

@@ -43,8 +43,13 @@ export class JsonSchemaTypingsGenerator extends TypingsGenerator {
         relativePath: string
       ): Promise<string> => {
         const parsedFileContents: IExtendedJson4Schema = JSON.parse(fileContents);
-        const { [X_TSDOC_RELEASE_TAG_KEY]: tsdocReleaseTag, ...jsonSchemaWithoutReleaseTag } =
-          parsedFileContents;
+        const {
+          [X_TSDOC_RELEASE_TAG_KEY]: tsdocReleaseTag,
+          // Strip $schema so it doesn't appear as a property in the generated types
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          $schema: _schema,
+          ...jsonSchemaWithoutMetadata
+        } = parsedFileContents;
 
         // Use the absolute directory of the schema file so that cross-file $ref
         // (e.g. { "$ref": "./other.schema.json" }) resolves correctly.
@@ -53,7 +58,7 @@ export class JsonSchemaTypingsGenerator extends TypingsGenerator {
           dirname.length + 1,
           -SCHEMA_FILE_EXTENSION.length
         );
-        let typings: string = await compile(jsonSchemaWithoutReleaseTag, filenameWithoutExtension, {
+        let typings: string = await compile(jsonSchemaWithoutMetadata, filenameWithoutExtension, {
           // The typings generator adds its own banner comment
           bannerComment: '',
           cwd: dirname,

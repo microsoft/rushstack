@@ -60,4 +60,16 @@ describe('JsonSchemaTypingsGenerator', () => {
     // The parent typings should reference the child type
     expect(parentTypings).toContain('ChildType');
   });
+
+  it('strips the $schema property from generated typings', async () => {
+    const generator = new JsonSchemaTypingsGenerator({
+      srcFolder: schemasFolder,
+      generatedTsFolder: outputFolder
+    });
+
+    await generator.generateTypingsAsync(['with-schema-field.schema.json']);
+    const typings: string = await readGeneratedTypings('with-schema-field.schema.json');
+    expect(typings).toMatchSnapshot();
+    expect(typings).not.toContain('$schema');
+  });
 });
