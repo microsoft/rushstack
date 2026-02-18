@@ -155,6 +155,59 @@ describe(JsonSchema.name, () => {
     expect(() => schemaWithVendorExtensions.validateObject({ name: 'hello' }, '')).toThrow();
   });
 
+  test('rejects vendor extension keywords that are not at the schema root level', () => {
+    const schemaWithNestedVendorExtension: JsonSchema = JsonSchema.fromLoadedObject(
+      {
+        title: 'Test nested vendor extension',
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+            'x-myvendor-display-name': 'Name field'
+          }
+        },
+        additionalProperties: false,
+        required: ['name']
+      },
+      { schemaVersion: 'draft-07' }
+    );
+    expect(() => schemaWithNestedVendorExtension.validateObject({ name: 'hello' }, '')).toThrow();
+  });
+
+  test('rejects malformed vendor extension keywords that do not match x-<vendor>-<keyword>', () => {
+    // Missing vendor segment: "x-tag" has no second hyphen-separated part
+    const schemaWithMalformedTag: JsonSchema = JsonSchema.fromLoadedObject(
+      {
+        title: 'Test malformed vendor extension',
+        'x-tag': '@beta',
+        type: 'object',
+        properties: {
+          name: { type: 'string' }
+        },
+        additionalProperties: false,
+        required: ['name']
+      },
+      { schemaVersion: 'draft-07' }
+    );
+    expect(() => schemaWithMalformedTag.validateObject({ name: 'hello' }, '')).toThrow();
+
+    // Uppercase characters in vendor segment
+    const schemaWithUppercaseTag: JsonSchema = JsonSchema.fromLoadedObject(
+      {
+        title: 'Test uppercase vendor extension',
+        'x-MyVendor-tag': 'value',
+        type: 'object',
+        properties: {
+          name: { type: 'string' }
+        },
+        additionalProperties: false,
+        required: ['name']
+      },
+      { schemaVersion: 'draft-07' }
+    );
+    expect(() => schemaWithUppercaseTag.validateObject({ name: 'hello' }, '')).toThrow();
+  });
+
   test('successfully applies custom formats', () => {
     const schemaWithCustomFormat = JsonSchema.fromLoadedObject(
       {
