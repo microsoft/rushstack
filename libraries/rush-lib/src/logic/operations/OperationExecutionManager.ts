@@ -259,9 +259,13 @@ export class OperationExecutionManager {
       this._terminal.writeStdoutLine('');
     }
 
-    this._terminal.writeStdoutLine(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
-
-    const maxParallelism: number = Math.min(totalOperations, this._parallelism);
+    // For display purposes, cap the reported number of simultaneous processes by the number of operations.
+    // This avoids confusing messages like "Executing a maximum of 10 simultaneous processes..." when
+    // there are only 4 operations.
+    const maxSimultaneousProcesses: number = Math.min(totalOperations, this._parallelism);
+    this._terminal.writeStdoutLine(
+      `Executing a maximum of ${maxSimultaneousProcesses} simultaneous processes...`
+    );
 
     await this._beforeExecuteOperations?.(this._executionRecords);
 
@@ -309,7 +313,10 @@ export class OperationExecutionManager {
       },
       {
         allowOversubscription: this._allowOversubscription,
-        concurrency: maxParallelism,
+        // In weighted mode, concurrency represents the total "unit budget", not the max number of tasks.
+        // Do not cap by totalOperations, since that would incorrectly shrink the unit budget and
+        // reduce parallelism for operations with weight > 1.
+        concurrency: this._parallelism,
         weighted: true
       }
     );
