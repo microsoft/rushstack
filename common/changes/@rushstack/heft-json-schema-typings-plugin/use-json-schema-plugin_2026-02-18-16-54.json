@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-json-schema-typings-plugin",
+      "comment": "Add support for the `x-tsdoc-tag` custom property in JSON schema files. When present (e.g. `\"x-tsdoc-tag\": \"@beta\"`), the specified TSDoc release tag is injected into the generated `.d.ts` declarations, allowing API Extractor to apply the correct release level when these types are re-exported from package entry points.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-json-schema-typings-plugin"
+}

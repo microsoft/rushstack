@@ -335,6 +335,10 @@ export class JsonSchema {
         }
       }
 
+      // Register the "x-tsdoc-tag" custom keyword used by @rushstack/heft-json-schema-typings-plugin
+      // so that AJV's strict mode does not reject it as an unknown keyword.
+      validator.addKeyword('x-tsdoc-tag');
+
       // Enable json-schema format validation
       // https://ajv.js.org/packages/ajv-formats.html
       addFormats(validator);

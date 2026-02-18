@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Register `x-tsdoc-tag` as a known keyword in `JsonSchema` so that AJV strict mode does not reject JSON schema files that include this custom metadata property.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}
