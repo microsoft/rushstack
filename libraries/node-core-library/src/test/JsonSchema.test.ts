@@ -125,7 +125,7 @@ describe(JsonSchema.name, () => {
       {
         title: 'Test vendor extensions',
         'x-tsdoc-release-tag': '@beta',
-        'x-intellij-html-description': '<b>bold</b>',
+        'x-myvendor-html-description': '<b>bold</b>',
         type: 'object',
         properties: {
           name: { type: 'string' }

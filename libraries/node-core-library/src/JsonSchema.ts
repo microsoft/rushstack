@@ -12,26 +12,22 @@ import { JsonFile, type JsonObject } from './JsonFile';
 import { FileSystem } from './FileSystem';
 
 /**
- * Pattern matching JSON Schema vendor extension keywords in the form `x-<vendor>-<keyword>`.
- * @example `x-tsdoc-release-tag`, `x-intellij-html-description`
+ * Pattern matching JSON Schema vendor extension keywords in the form `x-<vendor>-<keyword>`,
+ * where `<vendor>` is alphanumeric and `<keyword>` is kebab-case alphanumeric.
+ * @example `x-tsdoc-release-tag`, `x-myvendor-description`
  */
-const VENDOR_EXTENSION_KEY_PATTERN: RegExp = /^x-.+-/;
+const VENDOR_EXTENSION_KEY_PATTERN: RegExp = /^x-[a-z0-9]+-[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /**
- * Recursively scans a JSON object (typically a JSON Schema) and collects all property
- * keys matching the vendor extension pattern `x-<vendor>-<keyword>`.
+ * Collects top-level property keys from a JSON object that match the vendor extension
+ * pattern `x-<vendor>-<keyword>`.  Only root-level keys are inspected for performance.
  */
 function _collectVendorExtensionKeywords(obj: unknown, keywords: Set<string>): void {
-  if (Array.isArray(obj)) {
-    for (const item of obj) {
-      _collectVendorExtensionKeywords(item, keywords);
-    }
-  } else if (typeof obj === 'object' && obj !== null) {
-    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+  if (typeof obj === 'object' && obj !== null && !Array.isArray(obj)) {
+    for (const key of Object.keys(obj as Record<string, unknown>)) {
       if (VENDOR_EXTENSION_KEY_PATTERN.test(key)) {
         keywords.add(key);
       }
-      _collectVendorExtensionKeywords(value, keywords);
     }
   }
 }
@@ -152,7 +148,7 @@ export interface IJsonSchemaLoadOptions {
    * @remarks
    * The JSON Schema specification allows vendor-specific extensions using the `x-` prefix.
    * For example, `x-tsdoc-release-tag` is used by `@rushstack/heft-json-schema-typings-plugin`.
-   * Other tools may define their own extensions such as `x-intellij-html-description`.
+   * Other tools may define their own extensions such as `x-myvendor-html-description`.
    *
    * By default, the schema tree is scanned for any keys matching the `x-<vendor>-<keyword>`
    * pattern, and those keys are registered as custom AJV keywords so that strict mode validation
@@ -397,9 +393,9 @@ export class JsonSchema {
 
       JsonSchema._collectDependentSchemas(collectedSchemas, this._dependentSchemas, seenObjects, seenIds);
 
-      // Unless explicitly rejected, scan the schema tree for vendor extension keys
-      // matching the x-<vendor>-<keyword> pattern and register them with AJV so
-      // that strict mode does not reject them as unknown keywords.
+      // Unless explicitly rejected, scan the top-level keys of each schema for vendor
+      // extension keys matching the x-<vendor>-<keyword> pattern and register them with
+      // AJV so that strict mode does not reject them as unknown keywords.
       if (!this._rejectVendorExtensionKeywords) {
         const vendorKeywords: Set<string> = new Set<string>();
         _collectVendorExtensionKeywords(this._schemaObject, vendorKeywords);
