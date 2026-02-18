@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "sort additionalFilesForOperation to produce a stable hash for caching",
+      "comment": "Sort the `additionalFilesForOperation` property in operation settings entries in projects' `config/rush-project.json` files before computing operation hashes to produce a stable hash for caching.",
       "type": "none"
     }
   ],
