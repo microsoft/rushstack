@@ -75,6 +75,7 @@
     "update-notifier": "~5.1.0"
   },
   "exports": {
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
     "./lib/*": {
       "import": "./lib-esm/*.js",
       "require": "./lib-commonjs/*.js",

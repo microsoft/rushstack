@@ -18,11 +18,13 @@
       "require": "./lib-commonjs/index.js",
       "types": "./dist/heft-isolated-typescript-transpile-plugin.d.ts"
     },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
     "./lib/*": {
       "import": "./lib-esm/*.js",
       "require": "./lib-commonjs/*.js",
       "types": "./lib-dts/*.d.ts"
     },
+    "./heft-plugin.json": "./heft-plugin.json",
     "./package.json": "./package.json"
   },
   "typesVersions": {

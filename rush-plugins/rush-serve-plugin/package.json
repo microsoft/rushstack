@@ -48,11 +48,13 @@
     "./api": {
       "types": "./lib-dts/api.types.d.ts"
     },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
     "./lib/*": {
       "import": "./lib-esm/*.js",
       "require": "./lib-commonjs/*.js",
       "types": "./lib-dts/*.d.ts"
     },
+    "./rush-plugin-manifest.json": "./rush-plugin-manifest.json",
     "./package.json": "./package.json"
   },
   "typesVersions": {

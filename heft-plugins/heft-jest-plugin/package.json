@@ -53,11 +53,13 @@
     "jest-watch-select-projects": "2.0.0"
   },
   "exports": {
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
     "./lib/*": {
       "import": "./lib-esm/*.js",
       "require": "./lib-commonjs/*.js",
       "types": "./lib-dts/*.d.ts"
     },
+    "./heft-plugin.json": "./heft-plugin.json",
     "./package.json": "./package.json"
   },
   "typesVersions": {

@@ -19,6 +19,7 @@
       "require": "./lib-commonjs/index.js",
       "types": "./dist/rush-lib.d.ts"
     },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
     "./lib/*": {
       "require": "./lib-commonjs/*.js",
       "types": "./lib-dts/*.d.ts"

@@ -33,6 +33,7 @@
       "require": "./lib-commonjs/*.js",
       "types": "./lib-dts/*.d.ts"
     },
+    "./heft-plugin.json": "./heft-plugin.json",
     "./package.json": "./package.json"
   },
   "typesVersions": {

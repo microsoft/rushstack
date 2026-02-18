@@ -18,6 +18,7 @@
       "require": "./lib-commonjs/index.js",
       "types": "./dist/mcp-server.d.ts"
     },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
     "./lib/*": {
       "import": "./lib-esm/*.js",
       "require": "./lib-commonjs/*.js",
