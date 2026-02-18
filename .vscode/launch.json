@@ -5,7 +5,7 @@
 			"name": "Rush Debug",
 			"type": "node",
 			"request": "launch",
-			"program": "${workspaceRoot}/apps/rush/lib-commonjs-commonjs/start-dev.js",
+			"program": "${workspaceRoot}/apps/rush/lib-commonjs/start-dev.js",
 			"stopOnEntry": true,
 			"args": [
 				"start"
