@@ -28,12 +28,18 @@ async function getFolderItemsAsync(
   return Object.fromEntries(results);
 }
 
-const rootFolder: string | undefined = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname);
-if (!rootFolder) {
-  throw new Error('Could not find root folder for the test');
-}
-
 describe('json-schema-typings-plugin', () => {
+  let rootFolder: string;
+
+  beforeAll(() => {
+    const foundRootFolder: string | undefined = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname);
+    if (!foundRootFolder) {
+      throw new Error('Could not find root folder for the test');
+    }
+
+    rootFolder = foundRootFolder;
+  });
+
   it('should generate typings for JSON Schemas', async () => {
     const folderItems: Record<string, string> = await getFolderItemsAsync(
       `${rootFolder}/temp/schema-dts`,
