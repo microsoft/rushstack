@@ -18,6 +18,11 @@
       "items": {
         "type": "string"
       }
+    },
+
+    "formatWithPrettier": {
+      "type": "boolean",
+      "description": "If true, format generated typings with prettier. Defaults to false."
     }
   }
 }

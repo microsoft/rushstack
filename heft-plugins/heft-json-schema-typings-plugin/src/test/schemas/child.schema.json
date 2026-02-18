@@ -1,0 +1,17 @@
+{
+  "title": "Child Type",
+  "description": "A reusable child type.",
+  "type": "object",
+  "properties": {
+    "childName": {
+      "description": "The name of the child.",
+      "type": "string"
+    },
+    "childValue": {
+      "description": "The value of the child.",
+      "type": "number"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["childName"]
+}

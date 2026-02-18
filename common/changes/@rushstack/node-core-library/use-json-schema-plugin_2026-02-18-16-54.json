@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Add a property to the `JsonSchema` validator to control the handling of vendor extension keywords. By default, vendor extension keywords matching the `x-<vendor>-<keyword>` pattern are accepted. Set the new `rejectVendorExtensionKeywords` option to `true` to restore the previous strict behavior.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}
