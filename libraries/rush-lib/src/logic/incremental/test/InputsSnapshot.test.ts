@@ -413,6 +413,253 @@ describe(InputsSnapshot.name, () => {
       expect(result2).not.toEqual(result1);
     });
 
+    it('Respects dependsOnNodeVersion', () => {
+      const { project, options } = getTestConfig();
+      const baseline: string = new InputsSnapshot(options).getOperationOwnStateHash(project, '_phase:build');
+
+      const projectConfig1: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
+        operationSettingsByOperationName: new Map([
+          [
+            '_phase:build',
+            {
+              operationName: '_phase:build',
+              dependsOnNodeVersion: true
+            }
+          ]
+        ])
+      };
+
+      const input1: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([
+          [
+            project,
+            {
+              projectConfig: projectConfig1 as RushProjectConfiguration
+            }
+          ]
+        ]),
+        nodeVersion: 'v18.17.0'
+      });
+
+      const result1: string = input1.getOperationOwnStateHash(project, '_phase:build');
+
+      expect(result1).toMatchSnapshot();
+      expect(result1).not.toEqual(baseline);
+
+      const input2: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([
+          [
+            project,
+            {
+              projectConfig: projectConfig1 as RushProjectConfiguration
+            }
+          ]
+        ]),
+        nodeVersion: 'v20.10.0'
+      });
+
+      const result2: string = input2.getOperationOwnStateHash(project, '_phase:build');
+
+      expect(result2).toMatchSnapshot();
+      expect(result2).not.toEqual(baseline);
+      expect(result2).not.toEqual(result1);
+    });
+
+    it('Respects dependsOnNodeVersion with major granularity', () => {
+      const { project, options } = getTestConfig();
+
+      const projectConfig: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
+        operationSettingsByOperationName: new Map([
+          [
+            '_phase:build',
+            {
+              operationName: '_phase:build',
+              dependsOnNodeVersion: 'major'
+            }
+          ]
+        ])
+      };
+
+      // Same major, different minor — should produce the same hash
+      const input1: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
+        nodeVersion: 'v18.17.0'
+      });
+
+      const input2: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
+        nodeVersion: 'v18.20.3'
+      });
+
+      const result1: string = input1.getOperationOwnStateHash(project, '_phase:build');
+      const result2: string = input2.getOperationOwnStateHash(project, '_phase:build');
+
+      expect(result1).toEqual(result2);
+
+      // Different major — should produce a different hash
+      const input3: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
+        nodeVersion: 'v20.10.0'
+      });
+
+      const result3: string = input3.getOperationOwnStateHash(project, '_phase:build');
+
+      expect(result3).not.toEqual(result1);
+    });
+
+    it('Respects dependsOnNodeVersion with minor granularity', () => {
+      const { project, options } = getTestConfig();
+
+      const projectConfig: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
+        operationSettingsByOperationName: new Map([
+          [
+            '_phase:build',
+            {
+              operationName: '_phase:build',
+              dependsOnNodeVersion: 'minor'
+            }
+          ]
+        ])
+      };
+
+      // Same major.minor, different patch — should produce the same hash
+      const input1: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
+        nodeVersion: 'v18.17.0'
+      });
+
+      const input2: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
+        nodeVersion: 'v18.17.5'
+      });
+
+      const result1: string = input1.getOperationOwnStateHash(project, '_phase:build');
+      const result2: string = input2.getOperationOwnStateHash(project, '_phase:build');
+
+      expect(result1).toEqual(result2);
+
+      // Different minor — should produce a different hash
+      const input3: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
+        nodeVersion: 'v18.20.0'
+      });
+
+      const result3: string = input3.getOperationOwnStateHash(project, '_phase:build');
+
+      expect(result3).not.toEqual(result1);
+    });
+
+    it('Respects dependsOnNodeVersion with patch granularity', () => {
+      const { project, options } = getTestConfig();
+
+      const projectConfig: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
+        operationSettingsByOperationName: new Map([
+          [
+            '_phase:build',
+            {
+              operationName: '_phase:build',
+              dependsOnNodeVersion: 'patch'
+            }
+          ]
+        ])
+      };
+
+      // true and 'patch' should produce identical hashes
+      const projectConfigTrue: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
+        operationSettingsByOperationName: new Map([
+          [
+            '_phase:build',
+            {
+              operationName: '_phase:build',
+              dependsOnNodeVersion: true
+            }
+          ]
+        ])
+      };
+
+      const inputPatch: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
+        nodeVersion: 'v18.17.1'
+      });
+
+      const inputTrue: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([[project, { projectConfig: projectConfigTrue as RushProjectConfiguration }]]),
+        nodeVersion: 'v18.17.1'
+      });
+
+      const resultPatch: string = inputPatch.getOperationOwnStateHash(project, '_phase:build');
+      const resultTrue: string = inputTrue.getOperationOwnStateHash(project, '_phase:build');
+
+      expect(resultPatch).toEqual(resultTrue);
+
+      // Different patch — should produce a different hash
+      const input2: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
+        nodeVersion: 'v18.17.2'
+      });
+
+      const result2: string = input2.getOperationOwnStateHash(project, '_phase:build');
+
+      expect(result2).not.toEqual(resultPatch);
+    });
+
+    it('Does not include node version when dependsOnNodeVersion is not set', () => {
+      const { project, options } = getTestConfig();
+
+      const projectConfig: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
+        operationSettingsByOperationName: new Map([
+          [
+            '_phase:build',
+            {
+              operationName: '_phase:build'
+            }
+          ]
+        ])
+      };
+
+      const input1: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([
+          [
+            project,
+            {
+              projectConfig: projectConfig as RushProjectConfiguration
+            }
+          ]
+        ]),
+        nodeVersion: 'v18.17.0'
+      });
+
+      const input2: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([
+          [
+            project,
+            {
+              projectConfig: projectConfig as RushProjectConfiguration
+            }
+          ]
+        ]),
+        nodeVersion: 'v20.10.0'
+      });
+
+      const result1: string = input1.getOperationOwnStateHash(project, '_phase:build');
+      const result2: string = input2.getOperationOwnStateHash(project, '_phase:build');
+
+      expect(result1).toEqual(result2);
+    });
+
     it('Respects dependsOnEnvVars', () => {
       const { project, options } = getTestConfig();
       const baseline: string = new InputsSnapshot(options).getOperationOwnStateHash(project, '_phase:build');

@@ -669,6 +669,7 @@ export interface IOperationSettings {
     allowCobuildWithoutCache?: boolean;
     dependsOnAdditionalFiles?: string[];
     dependsOnEnvVars?: string[];
+    dependsOnNodeVersion?: boolean | NodeVersionGranularity;
     disableBuildCacheForOperation?: boolean;
     ignoreChangedProjectsOnlyFlag?: boolean;
     operationName: string;
@@ -960,6 +961,9 @@ export class LockStepVersionPolicy extends VersionPolicy {
 }
 
 export { LookupByPath }
+
+// @alpha
+export type NodeVersionGranularity = 'major' | 'minor' | 'patch';
 
 // @public
 export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {

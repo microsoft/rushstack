@@ -98,6 +98,13 @@
               }
             }
           },
+          "dependsOnNodeVersion": {
+            "description": "Specifies whether and at what granularity the Node.js version should be included in the hash used for the build cache. When enabled, changing the Node.js version at the specified granularity will invalidate cached outputs and cause the operation to be re-executed. This is useful for projects that produce Node.js-version-specific outputs, such as native module builds. Allowed values: true (alias for 'patch'), 'major' (e.g. '18'), 'minor' (e.g. '18.17'), or 'patch' (e.g. '18.17.1').",
+            "oneOf": [
+              { "type": "boolean", "enum": [true] },
+              { "type": "string", "enum": ["major", "minor", "patch"] }
+            ]
+          },
           "weight": {
             "description": "The number of concurrency units that this operation should take up. The maximum concurrency units is determined by the -p flag.",
             "type": "integer",

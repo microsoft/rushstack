@@ -10,7 +10,11 @@ import { type IReadonlyLookupByPath, LookupByPath } from '@rushstack/lookup-by-p
 import { InternalError, Path, Sort } from '@rushstack/node-core-library';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import type {
+  IOperationSettings,
+  NodeVersionGranularity,
+  RushProjectConfiguration
+} from '../../api/RushProjectConfiguration';
 import { RushConstants } from '../RushConstants';
 
 /**
@@ -90,6 +94,11 @@ export interface IInputsSnapshotParameters {
    * @defaultValue \{ ...process.env \}
    */
   environment?: Record<string, string | undefined>;
+  /**
+   * The Node.js version string to use for `dependsOnNodeVersion`. Defaults to `process.version`.
+   * @defaultValue process.version
+   */
+  nodeVersion?: string;
   /**
    * File paths (keys into additionalHashes or hashes) to be included as part of every operation's dependencies.
    */
@@ -205,6 +214,10 @@ export class InputsSnapshot implements IInputsSnapshot {
    * The environment to use for `dependsOnEnvVars`.
    */
   private readonly _environment: Record<string, string | undefined>;
+  /**
+   * Pre-computed Node.js version strings at each granularity level for `dependsOnNodeVersion`.
+   */
+  private readonly _nodeVersionByGranularity: Readonly<Record<NodeVersionGranularity, string>>;
 
   /**
    *
@@ -219,6 +232,7 @@ export class InputsSnapshot implements IInputsSnapshot {
       hashes,
       hasUncommittedChanges,
       lookupByPath,
+      nodeVersion = process.version,
       rootDir
     } = params;
     const projectMetadataMap: Map<
@@ -274,6 +288,8 @@ export class InputsSnapshot implements IInputsSnapshot {
     this._globalAdditionalHashes = globalAdditionalHashes;
     // Snapshot the environment so that queries are not impacted by when they happen
     this._environment = environment;
+    // Parse Node.js version once so it doesn't need to be re-parsed per operation
+    this._nodeVersionByGranularity = _parseNodeVersion(nodeVersion);
     this.hashes = hashes;
     this.hasUncommittedChanges = hasUncommittedChanges;
     this.rootDirectory = rootDir;
@@ -380,13 +396,19 @@ export class InputsSnapshot implements IInputsSnapshot {
         const operationSettings: Readonly<IOperationSettings> | undefined =
           record.projectConfig?.operationSettingsByOperationName.get(operationName);
         if (operationSettings) {
-          const { dependsOnEnvVars, outputFolderNames } = operationSettings;
+          const { dependsOnEnvVars, dependsOnNodeVersion, outputFolderNames } = operationSettings;
           if (dependsOnEnvVars) {
             // As long as we enumerate environment variables in a consistent order, we will get a stable hash.
             // Changing the order in rush-project.json will change the hash anyway since the file contents are part of the hash.
             for (const envVar of dependsOnEnvVars) {
               hasher.update(`${hashDelimiter}$${envVar}=${this._environment[envVar] || ''}`);
             }
+          }
+
+          if (dependsOnNodeVersion) {
+            const granularity: NodeVersionGranularity =
+              dependsOnNodeVersion === true ? 'patch' : dependsOnNodeVersion;
+            hasher.update(`${hashDelimiter}nodeVersion=${this._nodeVersionByGranularity[granularity]}`);
           }
 
           if (outputFolderNames) {
@@ -419,6 +441,24 @@ export class InputsSnapshot implements IInputsSnapshot {
       yield [filePath, hash];
     }
   }
+}
+
+/**
+ * Parses a Node.js version string once and returns pre-computed strings for each granularity level.
+ *
+ * @param rawVersion - The full Node.js version string (e.g. `v18.17.1`)
+ * @returns An object with pre-computed version strings for `major`, `minor`, and `patch` granularities
+ */
+function _parseNodeVersion(rawVersion: string): Record<NodeVersionGranularity, string> {
+  // Strip leading 'v' if present
+  const version: string = rawVersion.startsWith('v') ? rawVersion.slice(1) : rawVersion;
+  const [major, minor]: string[] = version.split('.');
+
+  return {
+    major,
+    minor: `${major}.${minor}`,
+    patch: version
+  };
 }
 
 function getOrCreateProjectFilter(
