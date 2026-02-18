@@ -1,0 +1,34 @@
+{
+  "name": "@rushstack/rush-npm-publish-plugin",
+  "version": "5.167.0",
+  "description": "Rush plugin for publishing packages to npm registry",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack",
+    "directory": "rush-plugins/rush-npm-publish-plugin"
+  },
+  "homepage": "https://rushjs.io",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "heft test-watch",
+    "test": "heft test",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rush-sdk": "workspace:*",
+    "semver": "~7.5.4"
+  },
+  "devDependencies": {
+    "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
+    "@types/semver": "7.5.0",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
+  }
+}

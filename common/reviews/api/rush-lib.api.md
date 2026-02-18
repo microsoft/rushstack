@@ -103,6 +103,22 @@ export class ChangeManager {
     static createEmptyChangeFiles(rushConfiguration: RushConfiguration, projectName: string, emailAddress: string): string | undefined;
 }
 
+// @beta
+export enum ChangeType {
+    // (undocumented)
+    dependency = 1,
+    // (undocumented)
+    hotfix = 2,
+    // (undocumented)
+    major = 5,
+    // (undocumented)
+    minor = 4,
+    // (undocumented)
+    none = 0,
+    // (undocumented)
+    patch = 3
+}
+
 // Warning: (ae-forgotten-export) The symbol "IBuildCacheJson" needs to be exported by the entry point index.d.ts
 //
 // @beta (undocumented)
@@ -804,6 +820,51 @@ export type _IProjectBuildCacheOptions = _IOperationBuildCacheOptions & {
 };
 
 // @beta
+export interface IPublishCommand extends IRushCommand {
+    readonly dryRun: boolean;
+}
+
+// @beta
+export interface IPublishProjectInfo {
+    readonly changeType: ChangeType;
+    readonly newVersion: string;
+    readonly previousVersion: string;
+    readonly project: RushConfigurationProject;
+    readonly providerConfig: Record<string, unknown> | undefined;
+}
+
+// @beta
+export interface IPublishProvider {
+    checkExistsAsync(options: IPublishProviderCheckExistsOptions): Promise<boolean>;
+    packAsync(options: IPublishProviderPackOptions): Promise<void>;
+    readonly providerName: string;
+    publishAsync(options: IPublishProviderPublishOptions): Promise<void>;
+}
+
+// @beta
+export interface IPublishProviderCheckExistsOptions {
+    readonly project: RushConfigurationProject;
+    readonly providerConfig: Record<string, unknown> | undefined;
+    readonly version: string;
+}
+
+// @beta
+export interface IPublishProviderPackOptions {
+    readonly dryRun: boolean;
+    readonly logger: ILogger;
+    readonly projects: ReadonlyArray<IPublishProjectInfo>;
+    readonly releaseFolder: string;
+}
+
+// @beta
+export interface IPublishProviderPublishOptions {
+    readonly dryRun: boolean;
+    readonly logger: ILogger;
+    readonly projects: ReadonlyArray<IPublishProjectInfo>;
+    readonly tag: string | undefined;
+}
+
+// @beta
 export interface IRushCommand {
     readonly actionName: string;
 }
@@ -1209,6 +1270,9 @@ export class ProjectChangeAnalyzer {
     _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal, projectSelection?: ReadonlySet<RushConfigurationProject>): Promise<GetInputsSnapshotAsyncFn | undefined>;
 }
 
+// @beta
+export type PublishProviderFactory = () => Promise<IPublishProvider>;
+
 // @public
 export class RepoStateFile {
     readonly filePath: string;
@@ -1396,6 +1460,7 @@ export class RushConfigurationProject {
     readonly projectRushConfigFolder: string;
     readonly projectRushTempFolder: string;
     readonly publishFolder: string;
+    get publishTargets(): ReadonlyArray<string>;
     readonly reviewCategory: string | undefined;
     readonly rushConfiguration: RushConfiguration;
     get shouldPublish(): boolean;
@@ -1499,11 +1564,13 @@ export class RushLifecycleHooks {
     subspace: Subspace,
     variant: string | undefined
     ]>;
+    readonly afterPublish: AsyncSeriesHook<[command: IPublishCommand]>;
     readonly beforeInstall: AsyncSeriesHook<[
     command: IGlobalCommand,
     subspace: Subspace,
     variant: string | undefined
     ]>;
+    readonly beforePublish: AsyncSeriesHook<[command: IPublishCommand]>;
     readonly flushTelemetry: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]>;
     readonly initialize: AsyncSeriesHook<IRushCommand>;
     readonly runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand>;
@@ -1543,11 +1610,15 @@ export class RushSession {
     // (undocumented)
     getLogger(name: string): ILogger;
     // (undocumented)
+    getPublishProviderFactory(publishTargetName: string): PublishProviderFactory | undefined;
+    // (undocumented)
     readonly hooks: RushLifecycleHooks;
     // (undocumented)
     registerCloudBuildCacheProviderFactory(cacheProviderName: string, factory: CloudBuildCacheProviderFactory): void;
     // (undocumented)
     registerCobuildLockProviderFactory(cobuildLockProviderName: string, factory: CobuildLockProviderFactory): void;
+    // (undocumented)
+    registerPublishProviderFactory(publishTargetName: string, factory: PublishProviderFactory): void;
     // (undocumented)
     get terminalProvider(): ITerminalProvider;
 }

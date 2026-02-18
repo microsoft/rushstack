@@ -420,6 +420,12 @@ importers:
       '@rushstack/rush-http-build-cache-plugin':
         specifier: workspace:*
         version: link:../../rush-plugins/rush-http-build-cache-plugin
+      '@rushstack/rush-npm-publish-plugin':
+        specifier: workspace:*
+        version: link:../../rush-plugins/rush-npm-publish-plugin
+      '@rushstack/rush-vscode-publish-plugin':
+        specifier: workspace:*
+        version: link:../../rush-plugins/rush-vscode-publish-plugin
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
@@ -5036,6 +5042,37 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
 
+  ../../../rush-plugins/rush-npm-publish-plugin:
+    dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@rushstack/rush-sdk':
+        specifier: workspace:*
+        version: link:../../libraries/rush-sdk
+      semver:
+        specifier: ~7.5.4
+        version: 7.5.4
+    devDependencies:
+      '@microsoft/rush-lib':
+        specifier: workspace:*
+        version: link:../../libraries/rush-lib
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
+      '@types/semver':
+        specifier: 7.5.0
+        version: 7.5.0
+      eslint:
+        specifier: ~9.37.0
+        version: 9.37.0
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../rush-plugins/rush-redis-cobuild-plugin:
     dependencies:
       '@redis/client':
@@ -5149,6 +5186,31 @@ importers:
       '@types/ws':
         specifier: 8.5.5
         version: 8.5.5
+      eslint:
+        specifier: ~9.37.0
+        version: 9.37.0
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
+  ../../../rush-plugins/rush-vscode-publish-plugin:
+    dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@rushstack/rush-sdk':
+        specifier: workspace:*
+        version: link:../../libraries/rush-sdk
+    devDependencies:
+      '@microsoft/rush-lib':
+        specifier: workspace:*
+        version: link:../../libraries/rush-lib
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
