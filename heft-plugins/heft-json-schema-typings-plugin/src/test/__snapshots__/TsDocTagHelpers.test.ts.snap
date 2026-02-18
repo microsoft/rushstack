@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`_addTsDocTagToExports creates a new JSDoc block for an export without a preceding comment 1`] = `
+"/**
+ * @public
+ */
+export type Foo = {};"
+`;
+
+exports[`_addTsDocTagToExports does not double-tag an export that already has a JSDoc block 1`] = `
+"/**
+ * Already documented.
+ *
+ * @public
+ */
+export interface IConfig {
+  name: string;
+}"
+`;
+
+exports[`_addTsDocTagToExports does not modify non-export lines 1`] = `
+"// A leading comment
+const internal = 1;
+
+/**
+ * @beta
+ */
+export type Foo = {};"
+`;
+
+exports[`_addTsDocTagToExports handles multiple exports with and without JSDoc comments 1`] = `
+"/**
+ * First type.
+ *
+ * @beta
+ */
+export type Foo = {};
+
+/**
+ * @beta
+ */
+export type Bar = {};"
+`;
+
+exports[`_addTsDocTagToExports injects tag into an existing JSDoc comment before an export 1`] = `
+"/**
+ * A description.
+ *
+ * @beta
+ */
+export type Foo = {};"
+`;
+
+exports[`_addTsDocTagToExports normalizes CRLF line endings to LF 1`] = `
+"/**
+ * A description.
+ *
+ * @beta
+ */
+export type Foo = {};"
+`;

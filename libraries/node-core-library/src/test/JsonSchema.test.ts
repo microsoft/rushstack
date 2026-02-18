@@ -120,6 +120,23 @@ describe(JsonSchema.name, () => {
     });
   });
 
+  test('accepts a schema containing the x-tsdoc-tag custom keyword', () => {
+    const schemaWithTsDocTag: JsonSchema = JsonSchema.fromLoadedObject(
+      {
+        title: 'Test x-tsdoc-tag',
+        'x-tsdoc-tag': '@beta',
+        type: 'object',
+        properties: {
+          name: { type: 'string' }
+        },
+        additionalProperties: false,
+        required: ['name']
+      },
+      { schemaVersion: 'draft-07' }
+    );
+    expect(() => schemaWithTsDocTag.validateObject({ name: 'hello' }, '')).not.toThrow();
+  });
+
   test('successfully applies custom formats', () => {
     const schemaWithCustomFormat = JsonSchema.fromLoadedObject(
       {

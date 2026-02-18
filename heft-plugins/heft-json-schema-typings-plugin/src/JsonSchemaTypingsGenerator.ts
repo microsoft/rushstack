@@ -8,32 +8,9 @@ import { compileFromFile } from 'json-schema-to-typescript';
 
 import { type ITypingsGeneratorBaseOptions, TypingsGenerator } from '@rushstack/typings-generator';
 
+import { _addTsDocTagToExports } from './TsDocTagHelpers';
+
 interface IJsonSchemaTypingsGeneratorBaseOptions extends ITypingsGeneratorBaseOptions {}
-
-/**
- * Adds a TSDoc release tag (e.g. `@public`, `@beta`) to all exported declarations
- * in generated typings.
- *
- * `json-schema-to-typescript` does not emit release tags, so this function
- * post-processes the output to ensure API Extractor treats these types with the
- * correct release tag when they are re-exported from package entry points.
- */
-function _addTsDocTagToExports(typingsData: string, tag: string): string {
-  // Normalize line endings for consistent regex matching.
-  // The TypingsGenerator base class applies NewlineKind.OsDefault when writing.
-  const normalized: string = typingsData.replace(/\r\n/g, '\n');
-
-  // Pass 1: For exports preceded by an existing JSDoc comment, insert
-  // the tag before the closing "*/".
-  let result: string = normalized.replace(/ \*\/\n(export )/g, ` *\n * ${tag}\n */\n$1`);
-
-  // Pass 2: For exports NOT preceded by a JSDoc comment, insert a new
-  // JSDoc block. The negative lookbehind ensures Pass 1
-  // results are not double-matched.
-  result = result.replace(/(?<!\*\/\n)^(export )/gm, `/**\n * ${tag}\n */\n$1`);
-
-  return result;
-}
 
 export class JsonSchemaTypingsGenerator extends TypingsGenerator {
   public constructor(options: IJsonSchemaTypingsGeneratorBaseOptions) {
