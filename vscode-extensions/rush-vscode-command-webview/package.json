@@ -9,7 +9,8 @@
     "directory": "vscode-extensions/rush-vscode-command-webview"
   },
   "license": "MIT",
-  "main": "./lib/index.js",
+  "main": "./lib-esm/index.js",
+  "types": "./lib-dts/index.d.ts",
   "scripts": {
     "_phase:build": "heft build --clean",
     "_phase:test": "",
@@ -41,5 +42,6 @@
     "local-web-rig": "workspace:*",
     "webpack": "~5.105.2",
     "webpack-bundle-analyzer": "~4.5.0"
-  }
+  },
+  "sideEffects": false
 }

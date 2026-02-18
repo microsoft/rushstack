@@ -28,5 +28,23 @@
     "@types/semver": "7.5.0",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
-  }
+  },
+  "exports": {
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./heft-plugin.json": "./heft-plugin.json",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
+  "sideEffects": false
 }

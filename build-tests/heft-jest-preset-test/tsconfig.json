@@ -20,6 +20,5 @@
     "target": "ES2015",
     "lib": ["ES2015"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "lib"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

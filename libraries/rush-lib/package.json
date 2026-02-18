@@ -12,12 +12,24 @@
   },
   "engineStrict": true,
   "homepage": "https://rushjs.io",
-  "main": "lib/index.js",
-  "typings": "dist/rush-lib.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "types": "./dist/rush-lib.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/rush-lib.d.ts",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
   "typesVersions": {
     "*": {
-      "lib-esnext/*": [
-        "lib/*"
+      "lib/*": [
+        "lib-dts/*"
       ]
     }
   },
@@ -96,9 +108,13 @@
     "@rushstack/rush-http-build-cache-plugin": "workspace:*"
   },
   "sideEffects": [
-    "lib-esnext/start-pnpm.js",
-    "lib-esnext/start.js",
-    "lib-esnext/startx.js",
-    "lib-esnext/utilities/SetRushLibPath.js"
+    "lib-esm/start-pnpm.js",
+    "lib-esm/start.js",
+    "lib-esm/startx.js",
+    "lib-esm/utilities/SetRushLibPath.js",
+    "lib-commonjs/start-pnpm.js",
+    "lib-commonjs/start.js",
+    "lib-commonjs/startx.js",
+    "lib-commonjs/utilities/SetRushLibPath.js"
   ]
 }

@@ -2,8 +2,29 @@
   "name": "@rushstack/operation-graph",
   "version": "0.5.7",
   "description": "Library for managing and executing operations in a directed acyclic graph.",
-  "main": "lib/index.js",
-  "typings": "dist/operation-graph.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/operation-graph.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/operation-graph.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
@@ -31,5 +52,6 @@
     "@types/node": {
       "optional": true
     }
-  }
+  },
+  "sideEffects": false
 }

@@ -13,7 +13,7 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-esnext", "lib-umd"] }],
+      "cleanFiles": [{ "includeGlobs": ["dist", "lib-commonjs", "lib", "lib-esm", "lib-esnext", "lib-umd"] }],
 
       "tasksByName": {
         "typescript": {
@@ -39,7 +39,7 @@
             "pluginPackage": "@rushstack/heft",
             "pluginName": "run-script-plugin",
             "options": {
-              "scriptPath": "./lib/test-metadata.js"
+              "scriptPath": "./lib-commonjs/test-metadata.js"
             }
           }
         }

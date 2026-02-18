@@ -29,5 +29,23 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "@rushstack/heft-rspack-plugin": "workspace:*"
-  }
+  },
+  "exports": {
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./heft-plugin.json": "./heft-plugin.json",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
+  "sideEffects": false
 }

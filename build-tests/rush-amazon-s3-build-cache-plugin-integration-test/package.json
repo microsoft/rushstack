@@ -21,5 +21,20 @@
     "eslint": "~9.37.0",
     "http-proxy": "~1.18.1",
     "local-node-rig": "workspace:*"
+  },
+  "exports": {
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
   }
 }

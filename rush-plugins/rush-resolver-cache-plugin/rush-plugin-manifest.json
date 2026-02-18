@@ -4,7 +4,7 @@
     {
       "pluginName": "rush-resolver-cache-plugin",
       "description": "Rush plugin for generating a resolver cache file after successful install.",
-      "entryPoint": "lib/index.js"
+      "entryPoint": "./lib-commonjs/index.js"
     }
   ]
 }

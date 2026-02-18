@@ -30,7 +30,7 @@ function createWebpackConfig({ production }) {
       ]
     },
     entry: {
-      app: path.join(__dirname, 'lib', 'index.js'),
+      app: path.join(__dirname, 'lib-commonjs', 'index.js'),
 
       // Put these libraries in a separate vendor bundle
       vendor: ['react', 'react-dom']

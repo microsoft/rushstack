@@ -3,9 +3,23 @@
   "description": "Building this project is a regression test for api-extractor",
   "version": "1.0.0",
   "private": true,
-  "module": "lib/index.mjs",
   "type": "module",
-  "types": "dist/api-extractor-d-mts-test.d.mts",
+  "types": "./dist/api-extractor-d-mts-test.d.mts",
+  "exports": {
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean"

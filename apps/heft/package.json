@@ -21,8 +21,31 @@
     "node": ">=10.13.0"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
-  "main": "lib/index.js",
-  "types": "dist/heft.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/heft.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/heft.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./heft-plugin.json": "./heft-plugin.json",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "bin": {
     "heft": "./bin/heft"
   },
@@ -53,5 +76,11 @@
     "@types/watchpack": "2.4.0",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
-  }
+  },
+  "sideEffects": [
+    "lib-commonjs/start.js",
+    "lib-commonjs/startWithVersionSelector.js",
+    "lib-esm/start.js",
+    "lib-esm/startWithVersionSelector.js"
+  ]
 }

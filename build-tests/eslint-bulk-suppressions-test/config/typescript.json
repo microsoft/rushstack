@@ -1,0 +1,5 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/typescript.schema.json",
+
+  "additionalModuleKindsToEmit": []
+}

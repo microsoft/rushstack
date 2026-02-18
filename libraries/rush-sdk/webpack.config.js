@@ -16,7 +16,7 @@ module.exports = ({ webpack: { BannerPlugin } }) => {
     packageName: '@microsoft/rush-lib',
     useNodeJSResolver: true
   });
-  const { moduleExports: exportSpecifiers } = require(`${rushLibFolder}/lib/index.exports.json`);
+  const { moduleExports: exportSpecifiers } = require(`${rushLibFolder}/lib-commonjs/index.exports.json`);
   // Assign named exports after the bundle to ensure they're properly exposed for ESM imports
   const footerCodeForLibShim = exportSpecifiers
     .map((name) => `exports.${name} = module.exports.${name};`)
@@ -25,14 +25,19 @@ module.exports = ({ webpack: { BannerPlugin } }) => {
   // Explicitly exclude @microsoft/rush-lib
   externalDependencyNames.delete('@microsoft/rush-lib');
 
+  // Resolve rush-lib deep imports to the intermediate ESM source rather than the
+  // DeepImportsPlugin stubs (which load from the dist/ webpack bundle). This avoids
+  // embedding a nested webpack runtime that expects a separate commons.js chunk.
+  const rushLibLibAlias = `${rushLibFolder}/lib-intermediate-esm`;
+
   return {
     context: __dirname,
     mode: 'development', // So the output isn't minified
     devtool: 'source-map',
     entry: {
       // Using CommonJS due to access of module.parent
-      index: `${__dirname}/lib-commonjs/index.js`,
-      loader: `${__dirname}/lib-commonjs/loader.js`
+      index: `${__dirname}/lib-intermediate-commonjs/index.js`,
+      loader: `${__dirname}/lib-intermediate-commonjs/loader.js`
     },
     output: {
       path: `${__dirname}/lib-shim`,
@@ -63,6 +68,11 @@ module.exports = ({ webpack: { BannerPlugin } }) => {
       }),
       new PreserveDynamicRequireWebpackPlugin()
     ],
+    resolve: {
+      alias: {
+        '@microsoft/rush-lib/lib': rushLibLibAlias
+      }
+    },
     externals: [
       ({ request }, callback) => {
         let packageName;

@@ -25,7 +25,7 @@ module.exports = ({ webpack }) => {
   return {
     mode: 'development',
     entry: {
-      'test-bundle': `${__dirname}/lib/index.js`
+      'test-bundle': `${__dirname}/lib-esm/index.js`
     }
   };
 };

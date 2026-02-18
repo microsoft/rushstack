@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add `sideEffects` field to package.json.",
+      "type": "patch",
+      "packageName": "@rushstack/eslint-config"
+    }
+  ],
+  "packageName": "@rushstack/eslint-config",
+  "email": "iclanton@users.noreply.github.com"
+}

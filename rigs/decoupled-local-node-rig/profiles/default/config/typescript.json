@@ -3,5 +3,12 @@
 
   "extends": "@rushstack/heft-node-rig/profiles/default/config/typescript.json",
 
-  "onlyResolveSymlinksInNodeModules": true
+  "onlyResolveSymlinksInNodeModules": true,
+
+  "additionalModuleKindsToEmit": [
+    {
+      "moduleKind": "esnext",
+      "outFolderName": "lib-esm"
+    }
+  ]
 }

@@ -11,8 +11,29 @@
     "node": ">=10.13.0"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
-  "main": "lib/index.js",
-  "types": "dist/heft-config-file.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/heft-config-file.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/heft-config-file.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
@@ -32,5 +53,6 @@
     "@types/ungap__structured-clone": "~1.2.0",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
-  }
+  },
+  "sideEffects": false
 }

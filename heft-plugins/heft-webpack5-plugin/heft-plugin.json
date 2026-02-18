@@ -4,8 +4,8 @@
   "taskPlugins": [
     {
       "pluginName": "webpack5-plugin",
-      "entryPoint": "./lib/Webpack5Plugin",
-      "optionsSchema": "./lib/schemas/heft-webpack5-plugin.schema.json",
+      "entryPoint": "./lib-commonjs/Webpack5Plugin",
+      "optionsSchema": "./lib-commonjs/schemas/heft-webpack5-plugin.schema.json",
 
       "parameterScope": "webpack5",
       "parameters": [

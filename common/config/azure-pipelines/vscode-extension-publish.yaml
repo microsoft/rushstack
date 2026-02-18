@@ -102,7 +102,7 @@ extends:
                                 }
                             ]
 
-                      - bash: node node_modules/@rushstack/heft/lib/start.js verify-signature --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --manifest-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.manifestPath }} --signature-path ${{ extension.projectRelativeAssetsDir }}/extension.signature.p7s
+                      - bash: node node_modules/@rushstack/heft/lib-commonjs/start.js verify-signature --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --manifest-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.manifestPath }} --signature-path ${{ extension.projectRelativeAssetsDir }}/extension.signature.p7s
                         displayName: 'Verify Signature: ${{ extension.key }}'
                         workingDirectory: ${{ extension.projectPath }}
 
@@ -114,6 +114,6 @@ extends:
                           scriptLocation: 'inlineScript'
                           workingDirectory: ${{ extension.projectPath }}
                           ${{ if parameters.publishUnsigned }}:
-                            inlineScript: node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --publish-unsigned
+                            inlineScript: node node_modules/@rushstack/heft/lib-commonjs/start.js publish-vsix --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --publish-unsigned
                           ${{ else }}:
-                            inlineScript: node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --manifest-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.manifestPath }} --signature-path ${{ extension.projectRelativeAssetsDir }}/extension.signature.p7s
+                            inlineScript: node node_modules/@rushstack/heft/lib-commonjs/start.js publish-vsix --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --manifest-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.manifestPath }} --signature-path ${{ extension.projectRelativeAssetsDir }}/extension.signature.p7s

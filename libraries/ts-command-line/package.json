@@ -7,8 +7,29 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/ts-command-line"
   },
-  "main": "lib/index.js",
-  "typings": "dist/ts-command-line.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/ts-command-line.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/ts-command-line.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
@@ -26,5 +47,6 @@
     "@rushstack/node-core-library": "workspace:*",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
-  }
+  },
+  "sideEffects": false
 }

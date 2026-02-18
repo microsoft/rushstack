@@ -17,8 +17,30 @@
   "bin": {
     "api-documenter": "./bin/api-documenter"
   },
-  "main": "lib/index.js",
-  "typings": "dist/rollup.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/rollup.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/rollup.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "dependencies": {
     "@microsoft/api-extractor-model": "workspace:*",
     "@microsoft/tsdoc": "~0.16.0",
@@ -34,5 +56,9 @@
     "@types/resolve": "1.20.2",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
-  }
+  },
+  "sideEffects": [
+    "lib-commonjs/start.js",
+    "lib-esm/start.js"
+  ]
 }

@@ -45,7 +45,7 @@ export async function runAsync(runScriptOptions: IRunScriptOptions): Promise<voi
       const childProcess: ChildProcess = Executable.spawn(
         process.argv0,
         [
-          `${buildFolderPath}/node_modules/@microsoft/api-documenter/lib/start`,
+          `${buildFolderPath}/node_modules/@microsoft/api-documenter/lib-commonjs/start`,
           'generate',
           `--input-folder`,
           `${buildFolderPath}/temp/etc/${scenarioFolderName}`,

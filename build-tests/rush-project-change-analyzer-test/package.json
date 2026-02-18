@@ -18,5 +18,20 @@
     "@types/node": "20.17.19",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
+  },
+  "exports": {
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
   }
 }

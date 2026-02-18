@@ -8,8 +8,9 @@
     "type": "git",
     "directory": "rush-plugins/rush-serve-plugin"
   },
-  "main": "lib-commonjs/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "heft test --clean",
     "_phase:build": "heft run --only build -- --clean",
@@ -40,12 +41,20 @@
   },
   "exports": {
     ".": {
-      "require": "./lib/index.js",
-      "types": "./dist/rush-serve-plugin.d.ts"
+      "types": "./dist/rush-serve-plugin.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
     },
     "./api": {
-      "types": "./lib/api.types.d.ts"
+      "types": "./lib-dts/api.types.d.ts"
     },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./rush-plugin-manifest.json": "./rush-plugin-manifest.json",
     "./package.json": "./package.json"
   },
   "typesVersions": {
@@ -54,8 +63,12 @@
         "dist/rush-serve-plugin.d.ts"
       ],
       "api": [
-        "lib/api.types.d.ts"
+        "lib-dts/api.types.d.ts"
+      ],
+      "lib/*": [
+        "lib-dts/*"
       ]
     }
-  }
+  },
+  "sideEffects": false
 }

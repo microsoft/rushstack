@@ -3531,15 +3531,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/node':
-        specifier: 20.17.19
-        version: 20.17.19
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../heft-plugins/heft-webpack4-plugin:
     dependencies:

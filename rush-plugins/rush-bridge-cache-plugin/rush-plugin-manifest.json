@@ -4,8 +4,8 @@
     {
       "pluginName": "rush-bridge-cache-plugin",
       "description": "Rush plugin that provides the ability to directly read or write the build cache from the command line via a custom choice parameter on build commands.",
-      "entryPoint": "./lib/index.js",
-      "optionsSchema": "lib/schemas/bridge-cache-config.schema.json"
+      "entryPoint": "./lib-commonjs/index.js",
+      "optionsSchema": "./lib-commonjs/schemas/bridge-cache-config.schema.json"
     }
   ]
 }

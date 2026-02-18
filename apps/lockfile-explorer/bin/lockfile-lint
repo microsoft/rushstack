@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require('../lib/start-lint.js');
+require('../lib-commonjs/start-lint.js');

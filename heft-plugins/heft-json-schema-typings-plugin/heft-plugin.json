@@ -4,8 +4,8 @@
   "taskPlugins": [
     {
       "pluginName": "json-schema-typings-plugin",
-      "entryPoint": "./lib/JsonSchemaTypingsPlugin",
-      "optionsSchema": "./lib/schemas/heft-json-schema-typings-plugin.schema.json"
+      "entryPoint": "./lib-commonjs/JsonSchemaTypingsPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/heft-json-schema-typings-plugin.schema.json"
     }
   ]
 }

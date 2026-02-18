@@ -3,7 +3,7 @@
   "description": "Building this project tests every task and config file for Heft when targeting the Node.js runtime",
   "version": "1.0.0",
   "private": true,
-  "main": "lib/index.js",
+  "main": "./lib/index.js",
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",

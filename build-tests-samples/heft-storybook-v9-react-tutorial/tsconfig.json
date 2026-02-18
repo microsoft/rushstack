@@ -2,7 +2,7 @@
   "$schema": "http://json.schemastore.org/tsconfig",
 
   "compilerOptions": {
-    "outDir": "lib",
+    "outDir": "lib-esm",
     "rootDir": "src",
 
     "forceConsistentCasingInFileNames": true,
@@ -27,6 +27,5 @@
     "lib": ["es2020", "scripthost", "dom"],
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "lib"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

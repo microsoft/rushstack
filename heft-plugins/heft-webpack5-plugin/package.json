@@ -8,8 +8,31 @@
     "directory": "heft-plugins/heft-webpack5-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
-  "main": "lib/index.js",
-  "types": "dist/heft-webpack5-plugin.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/heft-webpack5-plugin.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/heft-webpack5-plugin.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./heft-plugin.json": "./heft-plugin.json",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
@@ -36,5 +59,6 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "webpack": "~5.105.2"
-  }
+  },
+  "sideEffects": false
 }

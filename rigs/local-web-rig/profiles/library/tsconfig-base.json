@@ -7,7 +7,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
 
-    "outDir": "${configDir}/lib",
+    "outDir": "${configDir}/lib-esm",
+    "declarationDir": "${configDir}/lib-dts",
     "rootDir": "${configDir}/src",
     "rootDirs": ["${configDir}/src", "${configDir}/temp/sass-ts"],
 

@@ -33,7 +33,8 @@ export async function runScenariosAsync(
   const scenariosWithCustomCompilerOptions: string[] = [];
 
   const scenarioFolderNames: string[] = [];
-  const folderItems: FolderItem[] = await FileSystem.readFolderItemsAsync(libFolderPath);
+  const libDtsFolderPath: string = `${buildFolderPath}/lib-dts`;
+  const folderItems: FolderItem[] = await FileSystem.readFolderItemsAsync(libDtsFolderPath);
   for (const folderItem of folderItems) {
     if (folderItem.isDirectory()) {
       scenarioFolderNames.push(folderItem.name);
@@ -43,7 +44,7 @@ export async function runScenariosAsync(
   await Async.forEachAsync(
     scenarioFolderNames,
     async (scenarioFolderName) => {
-      const entryPoint: string = `${buildFolderPath}/lib/${scenarioFolderName}/index.d.ts`;
+      const entryPoint: string = `${libDtsFolderPath}/${scenarioFolderName}/index.d.ts`;
       entryPoints.push(entryPoint);
 
       const overridesPath: string = `${buildFolderPath}/src/${scenarioFolderName}/config/api-extractor-overrides.json`;

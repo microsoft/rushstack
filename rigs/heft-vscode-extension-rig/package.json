@@ -28,5 +28,6 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*"
-  }
+  },
+  "sideEffects": false
 }

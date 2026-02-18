@@ -9,7 +9,7 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["lib-esnext"] }],
+      "cleanFiles": [{ "includeGlobs": ["lib-intermediate-commonjs", "lib-intermediate-esm"] }],
 
       "tasksByName": {
         "copy-mock-flush-telemetry-plugin": {
@@ -20,26 +20,26 @@
             "options": {
               "copyOperations": [
                 {
-                  "sourcePath": "lib-commonjs/cli/test/rush-mock-flush-telemetry-plugin",
+                  "sourcePath": "lib-intermediate-commonjs/cli/test/rush-mock-flush-telemetry-plugin",
                   "destinationFolders": [
-                    "lib-commonjs/cli/test/tapFlushTelemetryAndRunBuildActionRepo/common/autoinstallers/plugins/node_modules/rush-mock-flush-telemetry-plugin"
+                    "lib-intermediate-commonjs/cli/test/tapFlushTelemetryAndRunBuildActionRepo/common/autoinstallers/plugins/node_modules/rush-mock-flush-telemetry-plugin"
                   ],
                   "fileExtensions": [".json", ".js", ".map"],
                   "hardlink": true
                 },
                 {
                   "sourcePath": "src/cli/test",
-                  "destinationFolders": ["lib-commonjs/cli/test"],
+                  "destinationFolders": ["lib-intermediate-commonjs/cli/test"],
                   "fileExtensions": [".js"]
                 },
                 {
                   "sourcePath": "src/logic/pnpm/test",
-                  "destinationFolders": ["lib-commonjs/logic/pnpm/test"],
+                  "destinationFolders": ["lib-intermediate-commonjs/logic/pnpm/test"],
                   "fileExtensions": [".yaml"]
                 },
                 {
                   "sourcePath": "src/logic/test",
-                  "destinationFolders": ["lib-commonjs/logic/test"],
+                  "destinationFolders": ["lib-intermediate-commonjs/logic/test"],
                   "includeGlobs": ["**/.mergequeueignore"]
                 }
               ]
@@ -54,6 +54,23 @@
             "pluginName": "run-script-plugin",
             "options": {
               "scriptPath": "./scripts/copyEmptyModules.js"
+            }
+          }
+        },
+
+        "copy-legacy-compatibility-index-js": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "src/legacy-compatibility",
+                  "destinationFolders": ["lib"],
+                  "includeGlobs": ["*"]
+                }
+              ]
             }
           }
         },

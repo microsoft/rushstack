@@ -2,8 +2,29 @@
   "name": "@rushstack/node-core-library",
   "version": "5.19.1",
   "description": "Core libraries that every NodeJS toolchain project should use",
-  "main": "lib/index.js",
-  "typings": "dist/node-core-library.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/node-core-library.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/node-core-library.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
@@ -42,5 +63,6 @@
     "@types/node": {
       "optional": true
     }
-  }
+  },
+  "sideEffects": false
 }

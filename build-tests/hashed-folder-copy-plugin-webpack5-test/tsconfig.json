@@ -15,7 +15,7 @@
     "target": "es5",
     "types": ["webpack-env", "@rushstack/hashed-folder-copy-plugin/ambientTypes"],
 
-    "outDir": "lib",
+    "outDir": "lib-esm",
     "rootDir": "src",
     "rootDirs": ["src", "temp/loc-json-ts"]
   },

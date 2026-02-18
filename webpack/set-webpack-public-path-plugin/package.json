@@ -2,8 +2,29 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "version": "5.2.15",
   "description": "This plugin sets the webpack public path at runtime.",
-  "main": "lib/index.js",
-  "typings": "dist/set-webpack-public-path-plugin.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/set-webpack-public-path-plugin.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/set-webpack-public-path-plugin.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -34,5 +55,6 @@
     "local-node-rig": "workspace:*",
     "memfs": "4.12.0",
     "webpack": "~5.105.2"
-  }
+  },
+  "sideEffects": false
 }

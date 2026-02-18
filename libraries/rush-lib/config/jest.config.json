@@ -1,19 +1,19 @@
 {
   "extends": "local-node-rig/profiles/default/config/jest.config.json",
 
-  "roots": ["<rootDir>/lib-commonjs"],
+  "roots": ["<rootDir>/lib-intermediate-commonjs"],
 
-  "testMatch": ["<rootDir>/lib-commonjs/**/*.test.js"],
+  "testMatch": ["<rootDir>/lib-intermediate-commonjs/**/*.test.js"],
 
   "collectCoverageFrom": [
-    "lib-commonjs/**/*.js",
-    "!lib-commonjs/**/*.d.ts",
-    "!lib-commonjs/**/*.test.js",
-    "!lib-commonjs/**/test/**",
-    "!lib-commonjs/**/__tests__/**",
-    "!lib-commonjs/**/__fixtures__/**",
-    "!lib-commonjs/**/__mocks__/**"
+    "lib-intermediate-commonjs/**/*.js",
+    "!lib-intermediate-commonjs/**/*.d.ts",
+    "!lib-intermediate-commonjs/**/*.test.js",
+    "!lib-intermediate-commonjs/**/test/**",
+    "!lib-intermediate-commonjs/**/__tests__/**",
+    "!lib-intermediate-commonjs/**/__fixtures__/**",
+    "!lib-intermediate-commonjs/**/__mocks__/**"
   ],
 
-  "globalTeardown": "<rootDir>/lib-commonjs/utilities/test/global-teardown.js"
+  "globalTeardown": "<rootDir>/lib-intermediate-commonjs/utilities/test/global-teardown.js"
 }

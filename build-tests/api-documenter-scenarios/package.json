@@ -3,7 +3,22 @@
   "description": "Building this project is a regression test for api-documenter",
   "version": "1.0.0",
   "private": true,
-  "typings": "dist/internal/some-fake-file.d.ts",
+  "types": "./dist/internal/some-fake-file.d.ts",
+  "exports": {
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft build --clean"

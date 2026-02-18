@@ -9,8 +9,31 @@
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
   "license": "MIT",
-  "main": "lib/index.js",
-  "types": "dist/heft-isolated-typescript-transpile-plugin.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/heft-isolated-typescript-transpile-plugin.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/heft-isolated-typescript-transpile-plugin.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./heft-plugin.json": "./heft-plugin.json",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "scripts": {
     "build": "heft build --clean",
     "start": "heft test --clean --watch",
@@ -33,5 +56,6 @@
     "@swc/core": "1.7.10",
     "@types/tapable": "1.0.6",
     "tapable": "1.1.3"
-  }
+  },
+  "sideEffects": false
 }

@@ -25,8 +25,30 @@
     "directory": "apps/api-extractor"
   },
   "homepage": "https://api-extractor.com",
-  "main": "lib/index.js",
-  "typings": "dist/rollup.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/rollup.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/rollup.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "bin": {
     "api-extractor": "./bin/api-extractor"
   },
@@ -60,5 +82,9 @@
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0",
     "local-eslint-config": "workspace:*"
-  }
+  },
+  "sideEffects": [
+    "lib-commonjs/start.js",
+    "lib-esm/start.js"
+  ]
 }

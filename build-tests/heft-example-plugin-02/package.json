@@ -3,8 +3,8 @@
   "description": "This is an example heft plugin that taps the hooks exposed from heft-example-plugin-01",
   "version": "1.0.0",
   "private": true,
-  "main": "./lib/index.js",
-  "typings": "./lib/index.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "types": "./lib-commonjs/index.d.ts",
   "scripts": {
     "build": "heft build --clean",
     "start": "heft build-watch",

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/heft-web-rig"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig",
+  "email": "iclanton@users.noreply.github.com"
+}

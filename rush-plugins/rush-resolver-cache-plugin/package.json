@@ -8,8 +8,9 @@
     "type": "git",
     "directory": "rush-plugins/rush-resolver-cache-plugin"
   },
-  "main": "lib-commonjs/index.js",
-  "types": "dist/rush-resolver-cache-plugin.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/rush-resolver-cache-plugin.d.ts",
   "scripts": {
     "build": "heft test --clean",
     "_phase:build": "heft run --only build -- --clean",
@@ -30,16 +31,27 @@
   },
   "exports": {
     ".": {
-      "require": "./lib/index.js",
-      "types": "./dist/rush-resolver-cache-plugin.d.ts"
+      "types": "./dist/rush-resolver-cache-plugin.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
     },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./rush-plugin-manifest.json": "./rush-plugin-manifest.json",
     "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {
       ".": [
         "dist/rush-resolver-cache-plugin.d.ts"
+      ],
+      "lib/*": [
+        "lib-dts/*"
       ]
     }
-  }
+  },
+  "sideEffects": false
 }

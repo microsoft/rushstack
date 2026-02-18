@@ -8,30 +8,25 @@
     "type": "git",
     "directory": "libraries/load-themed-styles"
   },
+  "keywords": [],
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
     "_phase:test": "heft run --only test -- --clean"
   },
-  "main": "lib-commonjs/index.js",
-  "module": "lib-esm/index.js",
-  "typings": "lib-dts/index.d.ts",
-  "keywords": [],
-  "devDependencies": {
-    "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
-    "local-web-rig": "workspace:*"
-  },
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./lib-dts/index.d.ts",
   "exports": {
     ".": {
-      "require": "./lib-commonjs/index.js",
+      "types": "./lib-dts/index.d.ts",
       "import": "./lib-esm/index.js",
-      "types": "./lib-dts/index.d.ts"
+      "require": "./lib-commonjs/index.js"
     },
     "./lib/*": {
-      "require": "./lib-commonjs/*",
+      "types": "./lib-dts/*",
       "import": "./lib-esm/*",
-      "types": "./lib-dts/*"
+      "require": "./lib-commonjs/*"
     },
     "./package.json": "./package.json"
   },
@@ -41,5 +36,11 @@
         "lib-dts/*"
       ]
     }
-  }
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-web-rig": "workspace:*"
+  },
+  "sideEffects": false
 }

@@ -8,7 +8,7 @@
       "type": "node",
       "request": "launch",
       "name": "Debug \"heft start\"",
-      "program": "${workspaceFolder}/node_modules/@rushstack/heft/lib/start.js",
+      "program": "${workspaceFolder}/node_modules/@rushstack/heft/lib-commonjs/start.js",
       "cwd": "${workspaceFolder}",
       "args": ["--debug", "start", "--storybook"],
       "console": "integratedTerminal",

@@ -830,7 +830,7 @@ describe('ConfigurationFile', () => {
                 'node_modules',
                 '@rushstack',
                 'node-core-library',
-                'lib',
+                'lib-commonjs',
                 'index.js'
               )
             )
@@ -911,7 +911,7 @@ describe('ConfigurationFile', () => {
                 'node_modules',
                 '@rushstack',
                 'node-core-library',
-                'lib',
+                'lib-commonjs',
                 'index.js'
               )
             )
@@ -994,7 +994,7 @@ describe('ConfigurationFile', () => {
                 'node_modules',
                 '@rushstack',
                 'node-core-library',
-                'lib',
+                'lib-commonjs',
                 'index.js'
               )
             )
@@ -1075,7 +1075,7 @@ describe('ConfigurationFile', () => {
                 'node_modules',
                 '@rushstack',
                 'node-core-library',
-                'lib',
+                'lib-commonjs',
                 'index.js'
               )
             )
@@ -1762,7 +1762,7 @@ describe('ConfigurationFile', () => {
       // a newline on Windows, and a curly brace on other platforms, even though the location is
       // accurate in both cases. Use a regex to match either.
       expect(() => configFileLoader.loadConfigurationFileForProject(terminal, __dirname)).toThrowError(
-        /In configuration file "<project root>\/lib\/test\/errorCases\/invalidJson\/config.json": SyntaxError: Unexpected token '(}|\\n)' at 2:19/
+        /In configuration file "<project root>\/lib-commonjs\/test\/errorCases\/invalidJson\/config.json": SyntaxError: Unexpected token '(}|\\n)' at 2:19/
       );
 
       jest.restoreAllMocks();
@@ -1792,7 +1792,7 @@ describe('ConfigurationFile', () => {
       await expect(
         configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
       ).rejects.toThrowError(
-        /In configuration file "<project root>\/lib\/test\/errorCases\/invalidJson\/config.json": SyntaxError: Unexpected token '(}|\\n)' at 2:19/
+        /In configuration file "<project root>\/lib-commonjs\/test\/errorCases\/invalidJson\/config.json": SyntaxError: Unexpected token '(}|\\n)' at 2:19/
       );
 
       jest.restoreAllMocks();

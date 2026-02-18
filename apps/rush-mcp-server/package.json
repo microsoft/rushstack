@@ -9,8 +9,30 @@
     "monorepo",
     "server"
   ],
-  "main": "lib/index.js",
-  "typings": "dist/mcp-server.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/mcp-server.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/mcp-server.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
@@ -43,5 +65,9 @@
     "local-node-rig": "workspace:*",
     "typescript": "~5.8.2",
     "@types/node": "20.17.19"
-  }
+  },
+  "sideEffects": [
+    "lib-commonjs/start.js",
+    "lib-esm/start.js"
+  ]
 }

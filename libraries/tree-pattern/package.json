@@ -2,8 +2,29 @@
   "name": "@rushstack/tree-pattern",
   "version": "0.3.4",
   "description": "A fast, lightweight pattern matcher for tree structures such as an Abstract Syntax Tree (AST)",
-  "main": "lib/index.js",
-  "typings": "dist/tree-pattern.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/tree-pattern.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/tree-pattern.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
@@ -19,5 +40,6 @@
     "@rushstack/heft": "1.1.7",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
-  }
+  },
+  "sideEffects": false
 }

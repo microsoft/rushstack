@@ -8,8 +8,8 @@
     "directory": "apps/rush-sdk"
   },
   "homepage": "https://rushjs.io",
-  "main": "lib-shim/index.js",
-  "typings": "dist/rush-lib.d.ts",
+  "main": "./lib-shim/index.js",
+  "types": "./dist/rush-lib.d.ts",
   "exports": {
     ".": {
       "types": "./dist/rush-lib.d.ts",
@@ -20,8 +20,8 @@
       "default": "./lib-shim/loader.js"
     },
     "./lib/*": {
-      "types": "./lib/*.d.ts",
-      "default": "./lib/*.js"
+      "types": "./lib-dts/*.d.ts",
+      "default": "./lib-commonjs/*.js"
     },
     "./package.json": "./package.json"
   },
@@ -29,6 +29,9 @@
     "*": {
       "loader": [
         "./dist/loader.d.ts"
+      ],
+      "lib/*": [
+        "lib-dts/*"
       ]
     }
   },
@@ -59,5 +62,6 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "webpack": "~5.105.2"
-  }
+  },
+  "sideEffects": false
 }

@@ -2,8 +2,29 @@
   "name": "@rushstack/webpack4-module-minifier-plugin",
   "version": "0.14.14",
   "description": "This plugin splits minification of webpack compilations into smaller units.",
-  "main": "lib/index.js",
-  "typings": "dist/webpack4-module-minifier-plugin.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/webpack4-module-minifier-plugin.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/webpack4-module-minifier-plugin.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -53,6 +74,7 @@
     "webpack": "~4.47.0"
   },
   "sideEffects": [
-    "./lib/OverrideWebpackIdentifierAllocation"
+    "lib-esm/OverrideWebpackIdentifierAllocation.js",
+    "lib-commonjs/OverrideWebpackIdentifierAllocation.js"
   ]
 }

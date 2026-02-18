@@ -15,10 +15,10 @@
    *
    * The config file path will be `<rush-repo>/common/config/rush-mcp/<plugin-name>.json`.
    */
-  // "configFileSchema": "./lib/rush-mcp-example-plugin.schema.json",
+  // "configFileSchema": "./lib-commonjs/rush-mcp-example-plugin.schema.json",
 
   /**
    * The entry point, whose default export should be a class that implements
    */
-  "entryPoint": "./lib/index.js"
+  "entryPoint": "./lib-commonjs/index.js"
 }

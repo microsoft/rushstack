@@ -75,9 +75,9 @@ describe('JestConfigLoader', () => {
   });
 
   it('resolves extended config modules', async () => {
-    // Because we require the built modules, we need to set our rootDir to be in the 'lib' folder, since transpilation
+    // Because we require the built modules, we need to set our rootDir to be in the 'lib-commonjs' folder, since transpilation
     // means that we don't run on the built test assets directly
-    const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project1');
+    const rootDir: string = path.resolve(__dirname, '..', '..', 'lib-commonjs', 'test', 'project1');
     const loader: ProjectConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
       rootDir,
       'config/jest.config.json'
@@ -162,9 +162,9 @@ describe('JestConfigLoader', () => {
   });
 
   it('resolves extended package modules', async () => {
-    // Because we require the built modules, we need to set our rootDir to be in the 'lib' folder, since transpilation
+    // Because we require the built modules, we need to set our rootDir to be in the 'lib-commonjs' folder, since transpilation
     // means that we don't run on the built test assets directly
-    const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project2');
+    const rootDir: string = path.resolve(__dirname, '..', '..', 'lib-commonjs', 'test', 'project2');
     const loader: ProjectConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
       rootDir,
       'config/jest.config.json'
@@ -189,9 +189,9 @@ describe('JestConfigLoader', () => {
   });
 
   it('replaces jest-environment-jsdom with the patched version', async () => {
-    // Because we require the built modules, we need to set our rootDir to be in the 'lib' folder, since transpilation
+    // Because we require the built modules, we need to set our rootDir to be in the 'lib-commonjs' folder, since transpilation
     // means that we don't run on the built test assets directly
-    const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project3');
+    const rootDir: string = path.resolve(__dirname, '..', '..', 'lib-commonjs', 'test', 'project3');
     const loader: ProjectConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
       rootDir,
       'config/jest.config.json'
