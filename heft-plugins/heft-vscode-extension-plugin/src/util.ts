@@ -1,10 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Executable, IExecutableSpawnOptions, IWaitForExitResult } from '@rushstack/node-core-library';
 import type { ChildProcess } from 'node:child_process';
 import * as path from 'node:path';
-import { TerminalStreamWritable, TerminalProviderSeverity, ITerminal } from '@rushstack/terminal';
+
+import {
+  Executable,
+  type IExecutableSpawnOptions,
+  type IWaitForExitResult
+} from '@rushstack/node-core-library';
+import { TerminalStreamWritable, TerminalProviderSeverity, type ITerminal } from '@rushstack/terminal';
 
 export async function executeAndWaitAsync(
   terminal: ITerminal,

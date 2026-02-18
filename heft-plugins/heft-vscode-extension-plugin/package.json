@@ -15,21 +15,34 @@
     "_phase:build": "heft run --only build -- --clean",
     "_phase:test": "heft run --only test -- --clean"
   },
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "exports": {
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./heft-plugin.json": "./heft-plugin.json",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "peerDependencies": {
     "@rushstack/heft": "^1.1.14"
   },
-  "devDependencies": {
-    "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
-    "eslint": "~9.37.0",
-    "@types/node": "20.17.19"
-  },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "@vscode/vsce": "3.2.1",
-    "@rushstack/terminal": "workspace:*"
+    "@rushstack/terminal": "workspace:*",
+    "@vscode/vsce": "3.2.1"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
   },
   "sideEffects": false
 }
