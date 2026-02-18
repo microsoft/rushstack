@@ -537,8 +537,9 @@ export class ProjectChangeAnalyzer {
       return;
     }
 
-    // Determine which catalog names have changed
-    let changedCatalogNames: Set<string>;
+    // Determine which specific packages changed within each catalog namespace
+    // Maps catalogNamespace (e.g. "default", "react17") → Set of changed package names
+    let changedCatalogPackages: Map<string, Set<string>>;
     try {
       const oldPnpmConfigText: string = await this._git.getBlobContentAsync({
         blobSpec: `${mergeCommit}:${pnpmConfigRelativePath}`,
@@ -547,32 +548,45 @@ export class ProjectChangeAnalyzer {
       const oldPnpmConfig: IPnpmOptionsJson = JSON.parse(oldPnpmConfigText);
       const oldCatalogs: Record<string, Record<string, string>> = oldPnpmConfig.globalCatalogs ?? {};
 
-      changedCatalogNames = new Set<string>();
+      changedCatalogPackages = new Map<string, Set<string>>();
 
-      // Check current catalogs for new or modified entries
+      // Check current catalogs for new or modified package entries
       for (const [catalogName, packages] of Object.entries(currentCatalogs)) {
         const oldPackages: Record<string, string> | undefined = oldCatalogs[catalogName];
         if (!oldPackages) {
-          changedCatalogNames.add(catalogName);
+          // Entire catalog is new — all packages in it are changed
+          changedCatalogPackages.set(catalogName, new Set(Object.keys(packages)));
           continue;
         }
+        const changedPkgs: Set<string> = new Set<string>();
         for (const [pkgName, version] of Object.entries(packages)) {
           if (oldPackages[pkgName] !== version) {
-            changedCatalogNames.add(catalogName);
-            break;
+            changedPkgs.add(pkgName);
           }
+        }
+        // Check for packages that were removed from this catalog
+        for (const pkgName of Object.keys(oldPackages)) {
+          if (!(pkgName in packages)) {
+            changedPkgs.add(pkgName);
+          }
+        }
+        if (changedPkgs.size > 0) {
+          changedCatalogPackages.set(catalogName, changedPkgs);
         }
       }
 
-      // Check for catalogs that were removed
-      for (const catalogName of Object.keys(oldCatalogs)) {
+      // Check for catalogs that were entirely removed
+      for (const [catalogName, oldPackages] of Object.entries(oldCatalogs)) {
         if (!(catalogName in currentCatalogs)) {
-          changedCatalogNames.add(catalogName);
+          changedCatalogPackages.set(catalogName, new Set(Object.keys(oldPackages)));
         }
       }
     } catch {
-      // Old file didn't exist or was unparseable — treat all current catalogs as changed
-      changedCatalogNames = new Set<string>(Object.keys(currentCatalogs));
+      // Old file didn't exist or was unparseable — treat all packages in all current catalogs as changed
+      changedCatalogPackages = new Map<string, Set<string>>();
+      for (const [catalogName, packages] of Object.entries(currentCatalogs)) {
+        changedCatalogPackages.set(catalogName, new Set(Object.keys(packages)));
+      }
       if (rushConfiguration.subspacesFeatureEnabled) {
         terminal.writeLine(
           `"${subspace.subspaceName}" subspace pnpm-config.json was created or unparseable. Assuming all projects are affected.`
@@ -584,10 +598,9 @@ export class ProjectChangeAnalyzer {
       }
     }
 
-    if (changedCatalogNames.size > 0) {
-      // Build a map of catalogName → Set<RushConfigurationProject> for this subspace's projects
+    if (changedCatalogPackages.size > 0) {
+      // Check each project in the subspace to see if it depends on a changed catalog package
       const subspaceProjects: RushConfigurationProject[] = subspace.getProjects();
-      const catalogToProjects: Map<string, Set<RushConfigurationProject>> = new Map();
       for (const project of subspaceProjects) {
         const { dependencies, devDependencies, optionalDependencies } = project.packageJson;
         const allDeps: Record<string, string>[] = [
@@ -596,31 +609,27 @@ export class ProjectChangeAnalyzer {
           optionalDependencies ?? {}
         ];
 
+        let isAffected: boolean = false;
         for (const deps of allDeps) {
+          if (isAffected) {
+            break;
+          }
           for (const [depName, depVersion] of Object.entries(deps)) {
             const specifier: DependencySpecifier = DependencySpecifier.parseWithCache(depName, depVersion);
             if (specifier.specifierType === DependencySpecifierType.Catalog) {
               // versionSpecifier holds the catalog name (empty string for "catalog:")
               const catalogName: string = specifier.versionSpecifier || 'default';
-              let projectSet: Set<RushConfigurationProject> | undefined = catalogToProjects.get(catalogName);
-              if (!projectSet) {
-                projectSet = new Set();
-                catalogToProjects.set(catalogName, projectSet);
+              const changedPkgs: Set<string> | undefined = changedCatalogPackages.get(catalogName);
+              if (changedPkgs?.has(depName)) {
+                isAffected = true;
+                break;
               }
-              projectSet.add(project);
             }
           }
         }
-      }
 
-      // Mark projects using changed catalogs as changed
-      for (const catalogName of changedCatalogNames) {
-        const affectedProjects: Set<RushConfigurationProject> | undefined =
-          catalogToProjects.get(catalogName);
-        if (affectedProjects) {
-          for (const project of affectedProjects) {
-            changedProjects.add(project);
-          }
+        if (isAffected) {
+          changedProjects.add(project);
         }
       }
     }

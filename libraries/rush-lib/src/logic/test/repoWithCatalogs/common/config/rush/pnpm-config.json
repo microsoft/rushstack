@@ -6,7 +6,8 @@
       "lodash": "^4.17.21"
     },
     "tools": {
-      "typescript": "~5.3.0"
+      "typescript": "~5.3.0",
+      "eslint": "^8.50.0"
     }
   }
 }

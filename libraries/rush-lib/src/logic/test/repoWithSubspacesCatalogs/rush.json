@@ -29,6 +29,16 @@
       "packageName": "f",
       "projectFolder": "f",
       "subspaceName": "project-change-analyzer-test-subspace"
+    },
+    {
+      "packageName": "g",
+      "projectFolder": "g",
+      "subspaceName": "project-change-analyzer-test-subspace"
+    },
+    {
+      "packageName": "h",
+      "projectFolder": "h",
+      "subspaceName": "project-change-analyzer-test-subspace"
     }
   ]
 }

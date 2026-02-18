@@ -1,0 +1,8 @@
+{
+  "name": "g",
+  "version": "1.0.0",
+  "description": "Test package g — uses only bar from default catalog",
+  "dependencies": {
+    "bar": "catalog:"
+  }
+}
