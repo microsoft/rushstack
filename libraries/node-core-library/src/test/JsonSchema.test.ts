@@ -120,11 +120,11 @@ describe(JsonSchema.name, () => {
     });
   });
 
-  test('accepts a schema containing the x-tsdoc-tag custom keyword', () => {
+  test('accepts a schema containing the x-tsdoc-release-tag custom keyword', () => {
     const schemaWithTsDocTag: JsonSchema = JsonSchema.fromLoadedObject(
       {
-        title: 'Test x-tsdoc-tag',
-        'x-tsdoc-tag': '@beta',
+        title: 'Test x-tsdoc-release-tag',
+        'x-tsdoc-release-tag': '@beta',
         type: 'object',
         properties: {
           name: { type: 'string' }

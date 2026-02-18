@@ -11,6 +11,18 @@ import addFormats from 'ajv-formats';
 import { JsonFile, type JsonObject } from './JsonFile';
 import { FileSystem } from './FileSystem';
 
+/**
+ * The JSON schema keyword `x-tsdoc-release-tag` is used by
+ * `@rushstack/heft-json-schema-typings-plugin` to annotate generated `.d.ts`
+ * declarations with a TSDoc release tag such as `@public` or `@beta`.
+ *
+ * This constant is also registered with AJV so that strict mode does not reject
+ * schema files that include it.
+ *
+ * @beta
+ */
+export const X_TSDOC_RELEASE_TAG_KEYWORD: 'x-tsdoc-release-tag' = 'x-tsdoc-release-tag';
+
 interface ISchemaWithId {
   // draft-04 uses "id"
   id: string | undefined;
@@ -335,9 +347,9 @@ export class JsonSchema {
         }
       }
 
-      // Register the "x-tsdoc-tag" custom keyword used by @rushstack/heft-json-schema-typings-plugin
+      // Register the "x-tsdoc-release-tag" custom keyword used by @rushstack/heft-json-schema-typings-plugin
       // so that AJV's strict mode does not reject it as an unknown keyword.
-      validator.addKeyword('x-tsdoc-tag');
+      validator.addKeyword(X_TSDOC_RELEASE_TAG_KEYWORD);
 
       // Enable json-schema format validation
       // https://ajv.js.org/packages/ajv-formats.html

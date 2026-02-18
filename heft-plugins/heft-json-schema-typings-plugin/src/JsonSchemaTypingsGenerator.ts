@@ -6,8 +6,9 @@ import * as path from 'node:path';
 import { compile } from 'json-schema-to-typescript';
 
 import { type ITypingsGeneratorBaseOptions, TypingsGenerator } from '@rushstack/typings-generator';
+import { X_TSDOC_RELEASE_TAG_KEYWORD } from '@rushstack/node-core-library';
 
-import { _addTsDocTagToExports } from './TsDocTagHelpers';
+import { _addTsDocReleaseTagToExports, _validateTsDocReleaseTag } from './TsDocReleaseTagHelpers';
 
 interface IJsonSchemaTypingsGeneratorBaseOptions extends ITypingsGeneratorBaseOptions {
   /**
@@ -20,11 +21,10 @@ interface IJsonSchemaTypingsGeneratorBaseOptions extends ITypingsGeneratorBaseOp
 }
 
 const SCHEMA_FILE_EXTENSION: '.schema.json' = '.schema.json';
-const X_TSDOC_TAG_KEY: 'x-tsdoc-tag' = 'x-tsdoc-tag';
 
 type Json4Schema = Parameters<typeof compile>[0];
 interface IExtendedJson4Schema extends Json4Schema {
-  [X_TSDOC_TAG_KEY]?: string;
+  [X_TSDOC_RELEASE_TAG_KEYWORD]?: string;
 }
 
 export class JsonSchemaTypingsGenerator extends TypingsGenerator {
@@ -40,7 +40,8 @@ export class JsonSchemaTypingsGenerator extends TypingsGenerator {
         relativePath: string
       ): Promise<string> => {
         const parsedFileContents: IExtendedJson4Schema = JSON.parse(fileContents);
-        const { [X_TSDOC_TAG_KEY]: tsdocTag, ...jsonSchemaWithoutTsDocTag } = parsedFileContents;
+        const { [X_TSDOC_RELEASE_TAG_KEYWORD]: tsdocReleaseTag, ...jsonSchemaWithoutReleaseTag } =
+          parsedFileContents;
 
         // Use the absolute directory of the schema file so that cross-file $ref
         // (e.g. { "$ref": "./other.schema.json" }) resolves correctly.
@@ -49,17 +50,18 @@ export class JsonSchemaTypingsGenerator extends TypingsGenerator {
           dirname.length + 1,
           -SCHEMA_FILE_EXTENSION.length
         );
-        let typings: string = await compile(jsonSchemaWithoutTsDocTag, filenameWithoutExtension, {
+        let typings: string = await compile(jsonSchemaWithoutReleaseTag, filenameWithoutExtension, {
           // The typings generator adds its own banner comment
           bannerComment: '',
           cwd: dirname,
           format: formatWithPrettier
         });
 
-        // Check for an "x-tsdoc-tag" property in the schema (e.g. "@public" or "@beta").
+        // Check for an "x-tsdoc-release-tag" property in the schema (e.g. "@public" or "@beta").
         // If present, inject the tag into JSDoc comments for all exported declarations.
-        if (tsdocTag) {
-          typings = _addTsDocTagToExports(typings, tsdocTag);
+        if (tsdocReleaseTag) {
+          _validateTsDocReleaseTag(tsdocReleaseTag, relativePath);
+          typings = _addTsDocReleaseTagToExports(typings, tsdocReleaseTag);
         }
 
         return typings;

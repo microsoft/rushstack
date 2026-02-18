@@ -962,4 +962,7 @@ declare namespace User {
 }
 export { User }
 
+// @beta
+export const X_TSDOC_RELEASE_TAG_KEYWORD: 'x-tsdoc-release-tag';
+
 ```

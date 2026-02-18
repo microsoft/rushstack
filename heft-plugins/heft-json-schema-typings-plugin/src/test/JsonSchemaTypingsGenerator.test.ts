@@ -30,7 +30,7 @@ describe('JsonSchemaTypingsGenerator', () => {
     expect(typings).toMatchSnapshot();
   });
 
-  it('injects x-tsdoc-tag into exported declarations', async () => {
+  it('injects x-tsdoc-release-tag into exported declarations', async () => {
     const generator = new JsonSchemaTypingsGenerator({
       srcFolder: schemasFolder,
       generatedTsFolder: outputFolder
