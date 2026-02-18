@@ -57,15 +57,16 @@ export class JsonSchemaTypingsGenerator extends TypingsGenerator {
         const { [X_TSDOC_RELEASE_TAG_KEY]: tsdocReleaseTag, ...jsonSchemaWithoutReleaseTag } =
           parsedFileContents;
 
-        // Unless includeSchemaMetadata is true, strip $schema so it doesn't appear
-        // as a property in the generated types.
-        let schemaForCompilation: Json4Schema;
-        if (includeSchemaMetadata) {
-          schemaForCompilation = jsonSchemaWithoutReleaseTag;
-        } else {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { $schema: _schema, ...rest } = jsonSchemaWithoutReleaseTag;
-          schemaForCompilation = rest;
+        // Unless includeSchemaMetadata is true, strip $schema from the schema's
+        // "properties" object so it doesn't appear as a field in the generated types.
+        const schemaForCompilation: Json4Schema = jsonSchemaWithoutReleaseTag;
+        if (!includeSchemaMetadata && schemaForCompilation.properties) {
+          const {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            $schema,
+            ...otherProperties
+          } = schemaForCompilation.properties;
+          schemaForCompilation.properties = otherProperties;
         }
 
         // Use the absolute directory of the schema file so that cross-file $ref

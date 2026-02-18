@@ -73,7 +73,7 @@ describe('JsonSchemaTypingsGenerator', () => {
     expect(typings).not.toContain('$schema');
   });
 
-  it('succeeds with includeSchemaMetadata enabled', async () => {
+  it('includes $schema in output when includeSchemaMetadata is true', async () => {
     const generator = new JsonSchemaTypingsGenerator({
       srcFolder: schemasFolder,
       generatedTsFolder: outputFolder,
@@ -83,5 +83,6 @@ describe('JsonSchemaTypingsGenerator', () => {
     await generator.generateTypingsAsync(['with-schema-field.schema.json']);
     const typings: string = await readGeneratedTypings('with-schema-field.schema.json');
     expect(typings).toMatchSnapshot();
+    expect(typings).toContain('$schema');
   });
 });

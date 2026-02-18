@@ -3,6 +3,10 @@
   "title": "Config With Schema Field",
   "type": "object",
   "properties": {
+    "$schema": {
+      "description": "The JSON schema URL.",
+      "type": "string"
+    },
     "name": {
       "description": "The name.",
       "type": "string"
