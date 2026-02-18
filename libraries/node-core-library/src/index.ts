@@ -113,8 +113,7 @@ export {
   type IJsonSchemaValidateOptions,
   type IJsonSchemaValidateObjectWithOptions,
   JsonSchema,
-  type JsonSchemaVersion,
-  X_TSDOC_RELEASE_TAG_KEYWORD
+  type JsonSchemaVersion
 } from './JsonSchema';
 
 export { LegacyAdapters, type LegacyCallback } from './LegacyAdapters';

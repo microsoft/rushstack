@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { X_TSDOC_RELEASE_TAG_KEYWORD } from '@rushstack/node-core-library';
-
+export const X_TSDOC_RELEASE_TAG_KEY: 'x-tsdoc-release-tag' = 'x-tsdoc-release-tag';
 const RELEASE_TAG_PATTERN: RegExp = /^@[a-z]+$/;
 
 /**
@@ -12,7 +11,7 @@ const RELEASE_TAG_PATTERN: RegExp = /^@[a-z]+$/;
 export function _validateTsDocReleaseTag(value: string, schemaPath: string): void {
   if (!RELEASE_TAG_PATTERN.test(value)) {
     throw new Error(
-      `Invalid ${X_TSDOC_RELEASE_TAG_KEYWORD} value ${JSON.stringify(value)} in ${schemaPath}. ` +
+      `Invalid ${X_TSDOC_RELEASE_TAG_KEY} value ${JSON.stringify(value)} in ${schemaPath}. ` +
         'Expected a single lowercase word starting with "@" (e.g. "@public", "@beta").'
     );
   }

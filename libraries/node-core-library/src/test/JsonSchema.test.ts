@@ -120,10 +120,28 @@ describe(JsonSchema.name, () => {
     });
   });
 
-  test('accepts a schema containing the x-tsdoc-release-tag custom keyword', () => {
-    const schemaWithTsDocTag: JsonSchema = JsonSchema.fromLoadedObject(
+  test('accepts vendor extension keywords when allowVendorExtensionKeywords is enabled', () => {
+    const schemaWithVendorExtensions: JsonSchema = JsonSchema.fromLoadedObject(
       {
-        title: 'Test x-tsdoc-release-tag',
+        title: 'Test vendor extensions',
+        'x-tsdoc-release-tag': '@beta',
+        'x-intellij-html-description': '<b>bold</b>',
+        type: 'object',
+        properties: {
+          name: { type: 'string' }
+        },
+        additionalProperties: false,
+        required: ['name']
+      },
+      { schemaVersion: 'draft-07', allowVendorExtensionKeywords: true }
+    );
+    expect(() => schemaWithVendorExtensions.validateObject({ name: 'hello' }, '')).not.toThrow();
+  });
+
+  test('rejects vendor extension keywords when allowVendorExtensionKeywords is not enabled', () => {
+    const schemaWithVendorExtensions: JsonSchema = JsonSchema.fromLoadedObject(
+      {
+        title: 'Test vendor extensions rejected',
         'x-tsdoc-release-tag': '@beta',
         type: 'object',
         properties: {
@@ -134,7 +152,7 @@ describe(JsonSchema.name, () => {
       },
       { schemaVersion: 'draft-07' }
     );
-    expect(() => schemaWithTsDocTag.validateObject({ name: 'hello' }, '')).not.toThrow();
+    expect(() => schemaWithVendorExtensions.validateObject({ name: 'hello' }, '')).toThrow();
   });
 
   test('successfully applies custom formats', () => {

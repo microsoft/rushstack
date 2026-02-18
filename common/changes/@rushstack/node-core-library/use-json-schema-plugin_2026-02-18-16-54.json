@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Register `x-tsdoc-release-tag` as a known keyword in `JsonSchema` so that AJV strict mode does not reject JSON schema files that include this custom metadata property.",
+      "comment": "Add an `allowVendorExtensionKeywords` option to `JsonSchema` that automatically registers `x-<vendor>-<keyword>` properties with the AJV validator so that strict mode does not reject JSON schema files containing vendor extensions.",
       "type": "minor"
     }
   ],

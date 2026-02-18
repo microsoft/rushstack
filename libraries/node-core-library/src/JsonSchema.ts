@@ -12,16 +12,29 @@ import { JsonFile, type JsonObject } from './JsonFile';
 import { FileSystem } from './FileSystem';
 
 /**
- * The JSON schema keyword `x-tsdoc-release-tag` is used by
- * `@rushstack/heft-json-schema-typings-plugin` to annotate generated `.d.ts`
- * declarations with a TSDoc release tag such as `@public` or `@beta`.
- *
- * This constant is also registered with AJV so that strict mode does not reject
- * schema files that include it.
- *
- * @beta
+ * Pattern matching JSON Schema vendor extension keywords in the form `x-<vendor>-<keyword>`.
+ * @example `x-tsdoc-release-tag`, `x-intellij-html-description`
  */
-export const X_TSDOC_RELEASE_TAG_KEYWORD: 'x-tsdoc-release-tag' = 'x-tsdoc-release-tag';
+const VENDOR_EXTENSION_KEY_PATTERN: RegExp = /^x-.+-/;
+
+/**
+ * Recursively scans a JSON object (typically a JSON Schema) and collects all property
+ * keys matching the vendor extension pattern `x-<vendor>-<keyword>`.
+ */
+function _collectVendorExtensionKeywords(obj: unknown, keywords: Set<string>): void {
+  if (Array.isArray(obj)) {
+    for (const item of obj) {
+      _collectVendorExtensionKeywords(item, keywords);
+    }
+  } else if (typeof obj === 'object' && obj !== null) {
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      if (VENDOR_EXTENSION_KEY_PATTERN.test(key)) {
+        keywords.add(key);
+      }
+      _collectVendorExtensionKeywords(value, keywords);
+    }
+  }
+}
 
 interface ISchemaWithId {
   // draft-04 uses "id"
@@ -131,6 +144,24 @@ export interface IJsonSchemaLoadOptions {
    * for example define generic numeric formats (e.g. uint8) or domain-specific formats.
    */
   customFormats?: Record<string, IJsonSchemaCustomFormat<string> | IJsonSchemaCustomFormat<number>>;
+
+  /**
+   * If true, JSON Schema vendor extension keywords matching the pattern `x-<vendor>-<keyword>`
+   * are automatically registered with the AJV validator so that strict mode does not reject them.
+   *
+   * @remarks
+   * The JSON Schema specification allows vendor-specific extensions using the `x-` prefix.
+   * For example, `x-tsdoc-release-tag` is used by `@rushstack/heft-json-schema-typings-plugin`.
+   * Other tools may define their own extensions such as `x-intellij-html-description`.
+   *
+   * By default, AJV's strict mode rejects unknown keywords.  Enabling this option causes the
+   * schema tree to be scanned for any keys matching the `x-<vendor>-<keyword>` pattern, and those
+   * keys are registered as custom keywords so that validation succeeds.
+   *
+   * @defaultValue false
+   * @beta
+   */
+  allowVendorExtensionKeywords?: boolean;
 }
 
 /**
@@ -181,6 +212,7 @@ export class JsonSchema {
   private _customFormats:
     | Record<string, IJsonSchemaCustomFormat<string> | IJsonSchemaCustomFormat<number>>
     | undefined = undefined;
+  private _allowVendorExtensionKeywords: boolean = false;
 
   private constructor() {}
 
@@ -204,6 +236,7 @@ export class JsonSchema {
       schema._dependentSchemas = options.dependentSchemas || [];
       schema._schemaVersion = options.schemaVersion;
       schema._customFormats = options.customFormats;
+      schema._allowVendorExtensionKeywords = options.allowVendorExtensionKeywords ?? false;
     }
 
     return schema;
@@ -223,6 +256,7 @@ export class JsonSchema {
       schema._dependentSchemas = options.dependentSchemas || [];
       schema._schemaVersion = options.schemaVersion;
       schema._customFormats = options.customFormats;
+      schema._allowVendorExtensionKeywords = options.allowVendorExtensionKeywords ?? false;
     }
 
     return schema;
@@ -347,10 +381,6 @@ export class JsonSchema {
         }
       }
 
-      // Register the "x-tsdoc-release-tag" custom keyword used by @rushstack/heft-json-schema-typings-plugin
-      // so that AJV's strict mode does not reject it as an unknown keyword.
-      validator.addKeyword(X_TSDOC_RELEASE_TAG_KEYWORD);
-
       // Enable json-schema format validation
       // https://ajv.js.org/packages/ajv-formats.html
       addFormats(validator);
@@ -365,6 +395,20 @@ export class JsonSchema {
       const seenIds: Set<string> = new Set<string>();
 
       JsonSchema._collectDependentSchemas(collectedSchemas, this._dependentSchemas, seenObjects, seenIds);
+
+      // If vendor extension keywords are allowed, scan the schema tree for keys
+      // matching the x-<vendor>-<keyword> pattern and register them with AJV so
+      // that strict mode does not reject them as unknown keywords.
+      if (this._allowVendorExtensionKeywords) {
+        const vendorKeywords: Set<string> = new Set<string>();
+        _collectVendorExtensionKeywords(this._schemaObject, vendorKeywords);
+        for (const collectedSchema of collectedSchemas) {
+          _collectVendorExtensionKeywords(collectedSchema._schemaObject, vendorKeywords);
+        }
+        for (const keyword of vendorKeywords) {
+          validator.addKeyword(keyword);
+        }
+      }
 
       // Validate each schema in order.  We specifically do not supply them all together, because we want
       // to make sure that circular references will fail to validate.

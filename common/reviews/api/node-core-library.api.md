@@ -460,6 +460,8 @@ export type IJsonSchemaFromObjectOptions = IJsonSchemaLoadOptions;
 
 // @public
 export interface IJsonSchemaLoadOptions {
+    // @beta
+    allowVendorExtensionKeywords?: boolean;
     customFormats?: Record<string, IJsonSchemaCustomFormat<string> | IJsonSchemaCustomFormat<number>>;
     dependentSchemas?: JsonSchema[];
     schemaVersion?: JsonSchemaVersion;
@@ -961,8 +963,5 @@ declare namespace User {
     }
 }
 export { User }
-
-// @beta
-export const X_TSDOC_RELEASE_TAG_KEYWORD: 'x-tsdoc-release-tag';
 
 ```

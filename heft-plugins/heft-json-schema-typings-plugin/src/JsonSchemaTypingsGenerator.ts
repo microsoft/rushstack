@@ -6,9 +6,12 @@ import * as path from 'node:path';
 import { compile } from 'json-schema-to-typescript';
 
 import { type ITypingsGeneratorBaseOptions, TypingsGenerator } from '@rushstack/typings-generator';
-import { X_TSDOC_RELEASE_TAG_KEYWORD } from '@rushstack/node-core-library';
 
-import { _addTsDocReleaseTagToExports, _validateTsDocReleaseTag } from './TsDocReleaseTagHelpers';
+import {
+  _addTsDocReleaseTagToExports,
+  _validateTsDocReleaseTag,
+  X_TSDOC_RELEASE_TAG_KEY
+} from './TsDocReleaseTagHelpers';
 
 interface IJsonSchemaTypingsGeneratorBaseOptions extends ITypingsGeneratorBaseOptions {
   /**
@@ -24,7 +27,7 @@ const SCHEMA_FILE_EXTENSION: '.schema.json' = '.schema.json';
 
 type Json4Schema = Parameters<typeof compile>[0];
 interface IExtendedJson4Schema extends Json4Schema {
-  [X_TSDOC_RELEASE_TAG_KEYWORD]?: string;
+  [X_TSDOC_RELEASE_TAG_KEY]?: string;
 }
 
 export class JsonSchemaTypingsGenerator extends TypingsGenerator {
@@ -40,7 +43,7 @@ export class JsonSchemaTypingsGenerator extends TypingsGenerator {
         relativePath: string
       ): Promise<string> => {
         const parsedFileContents: IExtendedJson4Schema = JSON.parse(fileContents);
-        const { [X_TSDOC_RELEASE_TAG_KEYWORD]: tsdocReleaseTag, ...jsonSchemaWithoutReleaseTag } =
+        const { [X_TSDOC_RELEASE_TAG_KEY]: tsdocReleaseTag, ...jsonSchemaWithoutReleaseTag } =
           parsedFileContents;
 
         // Use the absolute directory of the schema file so that cross-file $ref
