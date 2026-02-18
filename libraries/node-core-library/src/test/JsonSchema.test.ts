@@ -120,7 +120,7 @@ describe(JsonSchema.name, () => {
     });
   });
 
-  test('accepts vendor extension keywords when allowVendorExtensionKeywords is enabled', () => {
+  test('accepts vendor extension keywords by default', () => {
     const schemaWithVendorExtensions: JsonSchema = JsonSchema.fromLoadedObject(
       {
         title: 'Test vendor extensions',
@@ -133,12 +133,12 @@ describe(JsonSchema.name, () => {
         additionalProperties: false,
         required: ['name']
       },
-      { schemaVersion: 'draft-07', allowVendorExtensionKeywords: true }
+      { schemaVersion: 'draft-07' }
     );
     expect(() => schemaWithVendorExtensions.validateObject({ name: 'hello' }, '')).not.toThrow();
   });
 
-  test('rejects vendor extension keywords when allowVendorExtensionKeywords is not enabled', () => {
+  test('rejects vendor extension keywords when rejectVendorExtensionKeywords is enabled', () => {
     const schemaWithVendorExtensions: JsonSchema = JsonSchema.fromLoadedObject(
       {
         title: 'Test vendor extensions rejected',
@@ -150,7 +150,7 @@ describe(JsonSchema.name, () => {
         additionalProperties: false,
         required: ['name']
       },
-      { schemaVersion: 'draft-07' }
+      { schemaVersion: 'draft-07', rejectVendorExtensionKeywords: true }
     );
     expect(() => schemaWithVendorExtensions.validateObject({ name: 'hello' }, '')).toThrow();
   });

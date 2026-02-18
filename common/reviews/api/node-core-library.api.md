@@ -460,10 +460,10 @@ export type IJsonSchemaFromObjectOptions = IJsonSchemaLoadOptions;
 
 // @public
 export interface IJsonSchemaLoadOptions {
-    // @beta
-    allowVendorExtensionKeywords?: boolean;
     customFormats?: Record<string, IJsonSchemaCustomFormat<string> | IJsonSchemaCustomFormat<number>>;
     dependentSchemas?: JsonSchema[];
+    // @beta
+    rejectVendorExtensionKeywords?: boolean;
     schemaVersion?: JsonSchemaVersion;
 }
 

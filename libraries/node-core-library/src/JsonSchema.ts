@@ -146,22 +146,23 @@ export interface IJsonSchemaLoadOptions {
   customFormats?: Record<string, IJsonSchemaCustomFormat<string> | IJsonSchemaCustomFormat<number>>;
 
   /**
-   * If true, JSON Schema vendor extension keywords matching the pattern `x-<vendor>-<keyword>`
-   * are automatically registered with the AJV validator so that strict mode does not reject them.
+   * If true, the AJV validator will reject JSON Schema vendor extension keywords
+   * matching the pattern `x-<vendor>-<keyword>` as unknown keywords.
    *
    * @remarks
    * The JSON Schema specification allows vendor-specific extensions using the `x-` prefix.
    * For example, `x-tsdoc-release-tag` is used by `@rushstack/heft-json-schema-typings-plugin`.
    * Other tools may define their own extensions such as `x-intellij-html-description`.
    *
-   * By default, AJV's strict mode rejects unknown keywords.  Enabling this option causes the
-   * schema tree to be scanned for any keys matching the `x-<vendor>-<keyword>` pattern, and those
-   * keys are registered as custom keywords so that validation succeeds.
+   * By default, the schema tree is scanned for any keys matching the `x-<vendor>-<keyword>`
+   * pattern, and those keys are registered as custom AJV keywords so that strict mode validation
+   * succeeds.  Set this option to `true` to disable this behavior and treat vendor extension
+   * keywords as unknown (which causes AJV strict mode to reject them).
    *
    * @defaultValue false
    * @beta
    */
-  allowVendorExtensionKeywords?: boolean;
+  rejectVendorExtensionKeywords?: boolean;
 }
 
 /**
@@ -212,7 +213,7 @@ export class JsonSchema {
   private _customFormats:
     | Record<string, IJsonSchemaCustomFormat<string> | IJsonSchemaCustomFormat<number>>
     | undefined = undefined;
-  private _allowVendorExtensionKeywords: boolean = false;
+  private _rejectVendorExtensionKeywords: boolean = false;
 
   private constructor() {}
 
@@ -236,7 +237,7 @@ export class JsonSchema {
       schema._dependentSchemas = options.dependentSchemas || [];
       schema._schemaVersion = options.schemaVersion;
       schema._customFormats = options.customFormats;
-      schema._allowVendorExtensionKeywords = options.allowVendorExtensionKeywords ?? false;
+      schema._rejectVendorExtensionKeywords = options.rejectVendorExtensionKeywords ?? false;
     }
 
     return schema;
@@ -256,7 +257,7 @@ export class JsonSchema {
       schema._dependentSchemas = options.dependentSchemas || [];
       schema._schemaVersion = options.schemaVersion;
       schema._customFormats = options.customFormats;
-      schema._allowVendorExtensionKeywords = options.allowVendorExtensionKeywords ?? false;
+      schema._rejectVendorExtensionKeywords = options.rejectVendorExtensionKeywords ?? false;
     }
 
     return schema;
@@ -396,10 +397,10 @@ export class JsonSchema {
 
       JsonSchema._collectDependentSchemas(collectedSchemas, this._dependentSchemas, seenObjects, seenIds);
 
-      // If vendor extension keywords are allowed, scan the schema tree for keys
+      // Unless explicitly rejected, scan the schema tree for vendor extension keys
       // matching the x-<vendor>-<keyword> pattern and register them with AJV so
       // that strict mode does not reject them as unknown keywords.
-      if (this._allowVendorExtensionKeywords) {
+      if (!this._rejectVendorExtensionKeywords) {
         const vendorKeywords: Set<string> = new Set<string>();
         _collectVendorExtensionKeywords(this._schemaObject, vendorKeywords);
         for (const collectedSchema of collectedSchemas) {
