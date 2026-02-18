@@ -30,7 +30,7 @@
             "options": {
               "copyOperations": [
                 {
-                  "sourcePath": "lib-commonjs/legacy-compatibility",
+                  "sourcePath": "src/legacy-compatibility",
                   "destinationFolders": ["lib"],
                   "includeGlobs": ["*"]
                 }

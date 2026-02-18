@@ -3,4 +3,3 @@
 
 // This file is specifically included for compatibility with older global installations of Heft.
 require('../lib-commonjs/start.js');
-export {};
