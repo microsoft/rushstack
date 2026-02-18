@@ -84,11 +84,11 @@ jobs:
         working-directory: repo-a/build-tests/rush-package-manager-integration-test
 
       - name: Ensure repo README is up-to-date
-        run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
+        run: node repo-scripts/repo-toolbox/lib-commonjs/start.js readme --verify
         working-directory: repo-a
 
       - name: Collect JSON schemas
-        run: node repo-scripts/repo-toolbox/lib/start.js collect-json-schemas --output-path ${GITHUB_WORKSPACE}/artifacts/json-schemas
+        run: node repo-scripts/repo-toolbox/lib-commonjs/start.js collect-json-schemas --output-path ${GITHUB_WORKSPACE}/artifacts/json-schemas
         working-directory: repo-a
 
       - name: Clone another copy of the repo to test the build cache
@@ -104,13 +104,13 @@ jobs:
         working-directory: repo-b
 
       - name: Rush update (rush-lib)
-        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js update
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib-commonjs/start-dev.js update
         working-directory: repo-b
 
       - name: Rush test (rush-lib)
-        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib-commonjs/start-dev.js test --verbose --production --timeline
         working-directory: repo-b
 
       - name: Rush test (rush-lib) again to verify build cache hits
-        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib-commonjs/start-dev.js test --verbose --production --timeline
         working-directory: repo-b

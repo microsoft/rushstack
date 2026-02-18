@@ -30,6 +30,6 @@
 # ---------------------------------------------------------------------------
 # DO NOT MODIFY ABOVE THIS LINE!  Add any project-specific overrides below.
 # ---------------------------------------------------------------------------
-/lib/start-dev.*
-/lib/start-dev-docs.*
+/lib-*/start-dev.*
+/lib-*/start-dev-docs.*
 

@@ -12,7 +12,7 @@ function setLockFileGetProcessStartTime(fn: (process: number) => string | undefi
 }
 
 // lib/test
-const libTestFolder: string = path.resolve(__dirname, '../../lib/test');
+const libTestFolder: string = path.resolve(__dirname, '../../lib-commonjs/test');
 
 describe(LockFile.name, () => {
   afterEach(() => {
