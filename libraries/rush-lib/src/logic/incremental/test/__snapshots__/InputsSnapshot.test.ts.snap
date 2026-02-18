@@ -10,6 +10,10 @@ exports[`InputsSnapshot getOperationOwnStateHash Respects dependsOnEnvVars 1`] =
 
 exports[`InputsSnapshot getOperationOwnStateHash Respects dependsOnEnvVars 2`] = `"2c68d56fc9278b6495496070a6a992b929c37a83"`;
 
+exports[`InputsSnapshot getOperationOwnStateHash Respects dependsOnNodeVersion 1`] = `"df8e519b405d7deca932c0085c1c6b48b57ae4fc"`;
+
+exports[`InputsSnapshot getOperationOwnStateHash Respects dependsOnNodeVersion 2`] = `"8323bdc4729024e6f0e4b4378f0f3e6bef96dce2"`;
+
 exports[`InputsSnapshot getOperationOwnStateHash Respects globalAdditionalFiles 1`] = `"0e0437ad1941bacd098b22da15dc673f86ca6003"`;
 
 exports[`InputsSnapshot getOperationOwnStateHash Respects incrementalBuildIgnoredGlobs 1`] = `"f7b5af9ffdaa39831ed3374f28d0f7dccbee9c8d"`;

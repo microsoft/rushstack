@@ -669,6 +669,7 @@ export interface IOperationSettings {
     allowCobuildWithoutCache?: boolean;
     dependsOnAdditionalFiles?: string[];
     dependsOnEnvVars?: string[];
+    dependsOnNodeVersion?: boolean;
     disableBuildCacheForOperation?: boolean;
     ignoreChangedProjectsOnlyFlag?: boolean;
     operationName: string;

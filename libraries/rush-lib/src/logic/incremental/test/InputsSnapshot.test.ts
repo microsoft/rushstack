@@ -413,6 +413,106 @@ describe(InputsSnapshot.name, () => {
       expect(result2).not.toEqual(result1);
     });
 
+    it('Respects dependsOnNodeVersion', () => {
+      const { project, options } = getTestConfig();
+      const baseline: string = new InputsSnapshot(options).getOperationOwnStateHash(project, '_phase:build');
+
+      const projectConfig1: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
+        operationSettingsByOperationName: new Map([
+          [
+            '_phase:build',
+            {
+              operationName: '_phase:build',
+              dependsOnNodeVersion: true
+            }
+          ]
+        ])
+      };
+
+      const input1: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([
+          [
+            project,
+            {
+              projectConfig: projectConfig1 as RushProjectConfiguration
+            }
+          ]
+        ]),
+        nodeVersion: 'v18.17.0'
+      });
+
+      const result1: string = input1.getOperationOwnStateHash(project, '_phase:build');
+
+      expect(result1).toMatchSnapshot();
+      expect(result1).not.toEqual(baseline);
+
+      const input2: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([
+          [
+            project,
+            {
+              projectConfig: projectConfig1 as RushProjectConfiguration
+            }
+          ]
+        ]),
+        nodeVersion: 'v20.10.0'
+      });
+
+      const result2: string = input2.getOperationOwnStateHash(project, '_phase:build');
+
+      expect(result2).toMatchSnapshot();
+      expect(result2).not.toEqual(baseline);
+      expect(result2).not.toEqual(result1);
+    });
+
+    it('Does not include node version when dependsOnNodeVersion is not set', () => {
+      const { project, options } = getTestConfig();
+
+      const projectConfig: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
+        operationSettingsByOperationName: new Map([
+          [
+            '_phase:build',
+            {
+              operationName: '_phase:build'
+            }
+          ]
+        ])
+      };
+
+      const input1: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([
+          [
+            project,
+            {
+              projectConfig: projectConfig as RushProjectConfiguration
+            }
+          ]
+        ]),
+        nodeVersion: 'v18.17.0'
+      });
+
+      const input2: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([
+          [
+            project,
+            {
+              projectConfig: projectConfig as RushProjectConfiguration
+            }
+          ]
+        ]),
+        nodeVersion: 'v20.10.0'
+      });
+
+      const result1: string = input1.getOperationOwnStateHash(project, '_phase:build');
+      const result2: string = input2.getOperationOwnStateHash(project, '_phase:build');
+
+      expect(result1).toEqual(result2);
+    });
+
     it('Respects dependsOnEnvVars', () => {
       const { project, options } = getTestConfig();
       const baseline: string = new InputsSnapshot(options).getOperationOwnStateHash(project, '_phase:build');

@@ -98,6 +98,10 @@
               }
             }
           },
+          "dependsOnNodeVersion": {
+            "description": "If set to true, the Node.js version (process.version) will be included in the hash used for the build cache. This ensures that if the Node.js version changes, cached outputs will be invalidated and the operation will be re-executed. This is useful for projects that produce Node.js-version-specific outputs, such as native module builds.",
+            "type": "boolean"
+          },
           "weight": {
             "description": "The number of concurrency units that this operation should take up. The maximum concurrency units is determined by the -p flag.",
             "type": "integer",

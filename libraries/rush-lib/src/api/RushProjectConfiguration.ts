@@ -113,6 +113,14 @@ export interface IOperationSettings {
   dependsOnEnvVars?: string[];
 
   /**
+   * If set to true, the Node.js version (process.version) will be included in the hash used for the
+   * build cache. This ensures that if the Node.js version changes, cached outputs will be invalidated
+   * and the operation will be re-executed. This is useful for projects that produce
+   * Node.js-version-specific outputs, such as native module builds.
+   */
+  dependsOnNodeVersion?: boolean;
+
+  /**
    * An optional list of glob (minimatch) patterns pointing to files that can affect this operation.
    * The hash values of the contents of these files will become part of the final hash when reading
    * and writing the build cache.

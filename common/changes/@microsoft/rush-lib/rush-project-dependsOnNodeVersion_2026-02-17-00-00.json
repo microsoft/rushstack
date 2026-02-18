@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a new `dependsOnNodeVersion` setting for operation entries in rush-project.json. When set to `true`, the Node.js version is included in the build cache hash, ensuring that cached outputs are invalidated when the Node.js version changes.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

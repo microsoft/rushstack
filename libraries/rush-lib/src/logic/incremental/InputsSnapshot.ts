@@ -91,6 +91,11 @@ export interface IInputsSnapshotParameters {
    */
   environment?: Record<string, string | undefined>;
   /**
+   * The Node.js version string to use for `dependsOnNodeVersion`. Defaults to `process.version`.
+   * @defaultValue process.version
+   */
+  nodeVersion?: string;
+  /**
    * File paths (keys into additionalHashes or hashes) to be included as part of every operation's dependencies.
    */
   globalAdditionalFiles?: Iterable<string>;
@@ -205,6 +210,10 @@ export class InputsSnapshot implements IInputsSnapshot {
    * The environment to use for `dependsOnEnvVars`.
    */
   private readonly _environment: Record<string, string | undefined>;
+  /**
+   * The Node.js version string to use for `dependsOnNodeVersion`.
+   */
+  private readonly _nodeVersion: string;
 
   /**
    *
@@ -219,6 +228,7 @@ export class InputsSnapshot implements IInputsSnapshot {
       hashes,
       hasUncommittedChanges,
       lookupByPath,
+      nodeVersion = process.version,
       rootDir
     } = params;
     const projectMetadataMap: Map<
@@ -274,6 +284,8 @@ export class InputsSnapshot implements IInputsSnapshot {
     this._globalAdditionalHashes = globalAdditionalHashes;
     // Snapshot the environment so that queries are not impacted by when they happen
     this._environment = environment;
+    // Snapshot the Node.js version so that queries are not impacted by when they happen
+    this._nodeVersion = nodeVersion;
     this.hashes = hashes;
     this.hasUncommittedChanges = hasUncommittedChanges;
     this.rootDirectory = rootDir;
@@ -380,13 +392,17 @@ export class InputsSnapshot implements IInputsSnapshot {
         const operationSettings: Readonly<IOperationSettings> | undefined =
           record.projectConfig?.operationSettingsByOperationName.get(operationName);
         if (operationSettings) {
-          const { dependsOnEnvVars, outputFolderNames } = operationSettings;
+          const { dependsOnEnvVars, dependsOnNodeVersion, outputFolderNames } = operationSettings;
           if (dependsOnEnvVars) {
             // As long as we enumerate environment variables in a consistent order, we will get a stable hash.
             // Changing the order in rush-project.json will change the hash anyway since the file contents are part of the hash.
             for (const envVar of dependsOnEnvVars) {
               hasher.update(`${hashDelimiter}$${envVar}=${this._environment[envVar] || ''}`);
             }
+          }
+
+          if (dependsOnNodeVersion) {
+            hasher.update(`${hashDelimiter}nodeVersion=${this._nodeVersion}`);
           }
 
           if (outputFolderNames) {
