@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.169.1",
+      "tag": "@microsoft/rush_v5.169.1",
+      "date": "Thu, 19 Feb 2026 01:30:24 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add missing README for rush-azure-storage-build-cache-plugin and rush-buildxl-graph-plugin. Filter files from publish for rush-bridge-cache-plugin."
+          },
+          {
+            "comment": "Fix an issue where files were missing from the published version of `@rushstack/package-extractor`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.169.0",
       "tag": "@microsoft/rush_v5.169.0",
       "date": "Thu, 19 Feb 2026 00:05:11 GMT",

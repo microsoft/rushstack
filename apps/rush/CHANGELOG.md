@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 19 Feb 2026 00:05:11 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Feb 2026 01:30:24 GMT and should not be manually modified.
+
+## 5.169.1
+Thu, 19 Feb 2026 01:30:24 GMT
+
+### Updates
+
+- Add missing README for rush-azure-storage-build-cache-plugin and rush-buildxl-graph-plugin. Filter files from publish for rush-bridge-cache-plugin.
+- Fix an issue where files were missing from the published version of `@rushstack/package-extractor`.
 
 ## 5.169.0
 Thu, 19 Feb 2026 00:05:11 GMT
