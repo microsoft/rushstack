@@ -8,6 +8,7 @@
   "exports": {
     ".": {
       "types": "./dist/hashed-folder-copy-plugin.d.ts",
+      "import": "./lib-esm/index.js",
       "require": "./lib-commonjs/index.js"
     },
     "./ambientTypes": {
@@ -15,6 +16,7 @@
     },
     "./lib/*": {
       "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
       "require": "./lib-commonjs/*.js"
     },
     "./package.json": "./package.json"
