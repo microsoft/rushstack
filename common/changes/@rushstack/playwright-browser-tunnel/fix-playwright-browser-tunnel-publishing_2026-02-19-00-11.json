@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/playwright-browser-tunnel",
+      "comment": "Filter files from publish and include missing LICENSE file.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/playwright-browser-tunnel"
+}
