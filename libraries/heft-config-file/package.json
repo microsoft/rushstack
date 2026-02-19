@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-config-file",
-  "version": "0.19.7",
+  "version": "0.20.0",
   "description": "Configuration file loader for @rushstack/heft",
   "repository": {
     "type": "git",

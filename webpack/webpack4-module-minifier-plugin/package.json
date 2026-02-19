@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack4-module-minifier-plugin",
-  "version": "0.14.14",
+  "version": "0.15.0",
   "description": "This plugin splits minification of webpack compilations into smaller units.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",

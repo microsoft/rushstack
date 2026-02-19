@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-patch",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "description": "Enhance ESLint with better support for large scale monorepos",
   "main": "./lib-commonjs/usage.js",
   "module": "./lib-esm/usage.js",
