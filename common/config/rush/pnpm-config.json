@@ -249,7 +249,11 @@
     "@vscode/vsce>cheerio": "1.0.0-rc.12",
 
     // `loader-utils@2.0.0` has a vulnerability
-    "loader-utils@^2.0.0": "2.0.4"
+    "loader-utils@^2.0.0": "2.0.4",
+
+    // `ajv` versions < 8.18.0 have a ReDoS vulnerability when using the `$data` option
+    // https://github.com/advisories/GHSA-2g4f-4pwh-qvx6
+    "ajv@<8.18.0": "8.18.0"
   },
 
   /**
