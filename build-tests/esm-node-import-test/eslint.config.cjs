@@ -1,12 +1,14 @@
-// This is a workaround for https://github.com/eslint/eslint/issues/3458
-require('local-node-rig/profiles/default/includes/eslint/flat/patch/modern-module-resolution');
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 const nodeProfile = require('local-node-rig/profiles/default/includes/eslint/flat/profile/node');
 const friendlyLocalsMixin = require('local-node-rig/profiles/default/includes/eslint/flat/mixins/friendly-locals');
+const tsdocMixin = require('local-node-rig/profiles/default/includes/eslint/flat/mixins/tsdoc');
 
 module.exports = [
   ...nodeProfile,
   ...friendlyLocalsMixin,
+  ...tsdocMixin,
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
