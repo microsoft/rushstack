@@ -1,0 +1,23 @@
+/**
+ * Configures heft to use the TypeScript plugin for building.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v4/heft.schema.json",
+
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [
+        {
+          "sourcePath": "lib-esm"
+        }
+      ],
+      "tasksByName": {
+        "typescript": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-typescript-plugin"
+          }
+        }
+      }
+    }
+  }
+}

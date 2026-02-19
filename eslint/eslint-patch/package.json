@@ -6,23 +6,28 @@
   "module": "./lib-esm/usage.js",
   "exports": {
     ".": {
+      "node": "./lib-commonjs/usage.js",
       "import": "./lib-esm/usage.js",
       "require": "./lib-commonjs/usage.js"
     },
     "./modern-module-resolution": {
+      "node": "./lib-commonjs/modern-module-resolution.js",
       "import": "./lib-esm/modern-module-resolution.js",
       "require": "./lib-commonjs/modern-module-resolution.js"
     },
     "./custom-config-package-names": {
+      "node": "./lib-commonjs/custom-config-package-names.js",
       "import": "./lib-esm/custom-config-package-names.js",
       "require": "./lib-commonjs/custom-config-package-names.js"
     },
     "./eslint-bulk-suppressions": {
+      "node": "./lib-commonjs/eslint-bulk-suppressions/index.js",
       "import": "./lib-esm/eslint-bulk-suppressions/index.js",
       "require": "./lib-commonjs/eslint-bulk-suppressions/index.js"
     },
     "./lib/*": {
       "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
       "import": "./lib-esm/*.js",
       "require": "./lib-commonjs/*.js"
     },
