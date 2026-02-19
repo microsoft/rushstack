@@ -1,6 +1,13 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Thu, 19 Feb 2026 00:04:53 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Feb 2026 16:14:02 GMT and should not be manually modified.
+
+## 2.2.1
+Thu, 19 Feb 2026 16:14:02 GMT
+
+### Patches
+
+- Publish patch release because dependencies of 2.2.0 were incorrectly published.
 
 ## 2.2.0
 Thu, 19 Feb 2026 00:04:53 GMT
