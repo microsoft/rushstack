@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-vscode-extension-rig
 
-This log was last generated on Sat, 07 Feb 2026 01:13:26 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Feb 2026 00:04:52 GMT and should not be manually modified.
+
+## 1.1.21
+Thu, 19 Feb 2026 00:04:52 GMT
+
+### Patches
+
+- Add `sideEffects` field to package.json.
 
 ## 1.1.20
 Sat, 07 Feb 2026 01:13:26 GMT

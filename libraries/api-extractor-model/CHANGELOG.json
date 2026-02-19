@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.33.0",
+      "tag": "@microsoft/api-extractor-model_v7.33.0",
+      "date": "Thu, 19 Feb 2026 00:04:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `\"exports\"` field in `package.json`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.20.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.32.2",
       "tag": "@microsoft/api-extractor-model_v7.32.2",
       "date": "Sat, 06 Dec 2025 01:12:29 GMT",

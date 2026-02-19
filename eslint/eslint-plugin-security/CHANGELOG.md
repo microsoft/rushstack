@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin-security
 
-This log was last generated on Mon, 13 Oct 2025 15:13:02 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Feb 2026 00:04:52 GMT and should not be manually modified.
+
+## 0.14.0
+Thu, 19 Feb 2026 00:04:52 GMT
+
+### Minor changes
+
+- Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `"exports"` field in `package.json`.
 
 ## 0.13.0
 Mon, 13 Oct 2025 15:13:02 GMT

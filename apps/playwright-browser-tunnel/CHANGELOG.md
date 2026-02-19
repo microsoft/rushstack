@@ -1,6 +1,13 @@
 # Change Log - @rushstack/playwright-browser-tunnel
 
-This log was last generated on Wed, 11 Feb 2026 23:14:09 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Feb 2026 00:04:53 GMT and should not be manually modified.
+
+## 0.3.0
+Thu, 19 Feb 2026 00:04:53 GMT
+
+### Minor changes
+
+- Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `"exports"` field in `package.json`.
 
 ## 0.2.4
 Wed, 11 Feb 2026 23:14:09 GMT

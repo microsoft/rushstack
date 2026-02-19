@@ -1,6 +1,15 @@
 # Change Log - @rushstack/heft-json-schema-typings-plugin
 
-This log was last generated on Sat, 07 Feb 2026 01:13:26 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Feb 2026 00:04:52 GMT and should not be manually modified.
+
+## 1.2.0
+Thu, 19 Feb 2026 00:04:52 GMT
+
+### Minor changes
+
+- Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `"exports"` field in `package.json`.
+- Add support for the `x-tsdoc-release-tag` custom property in JSON schema files. When present (e.g. `"x-tsdoc-release-tag": "@beta"`), the specified TSDoc release tag is injected into the generated `.d.ts` declarations, allowing API Extractor to apply the correct release level when these types are re-exported from package entry points.
+- Add a `formatWithPrettier` option (defaults to `false`) to skip prettier formatting of generated typings.
 
 ## 1.1.14
 Sat, 07 Feb 2026 01:13:26 GMT

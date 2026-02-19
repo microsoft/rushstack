@@ -2,6 +2,32 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "4.6.2",
+      "tag": "@rushstack/eslint-config_v4.6.2",
+      "date": "Thu, 19 Feb 2026 00:04:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add `sideEffects` field to package.json."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.16.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.23.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-packlets\" to `0.15.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.14.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.6.1",
       "tag": "@rushstack/eslint-config_v4.6.1",
       "date": "Wed, 12 Nov 2025 01:57:54 GMT",

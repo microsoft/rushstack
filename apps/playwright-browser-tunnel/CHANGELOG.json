@@ -2,6 +2,32 @@
   "name": "@rushstack/playwright-browser-tunnel",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@rushstack/playwright-browser-tunnel_v0.3.0",
+      "date": "Thu, 19 Feb 2026 00:04:53 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `\"exports\"` field in `package.json`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.20.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.22.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.4",
       "tag": "@rushstack/playwright-browser-tunnel_v0.2.4",
       "date": "Wed, 11 Feb 2026 23:14:09 GMT",

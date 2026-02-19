@@ -2,6 +2,29 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.20.0",
+      "tag": "@rushstack/heft-config-file_v0.20.0",
+      "date": "Thu, 19 Feb 2026 00:04:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `\"exports\"` field in `package.json`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.20.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.22.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.19.7",
       "tag": "@rushstack/heft-config-file_v0.19.7",
       "date": "Wed, 07 Jan 2026 01:12:24 GMT",

@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.16.0",
+      "tag": "@rushstack/eslint-patch_v1.16.0",
+      "date": "Thu, 19 Feb 2026 00:04:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `\"exports\"` field in `package.json`."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.15.0",
       "tag": "@rushstack/eslint-patch_v1.15.0",
       "date": "Wed, 12 Nov 2025 01:57:54 GMT",

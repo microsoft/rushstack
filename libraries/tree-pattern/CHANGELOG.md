@@ -1,6 +1,13 @@
 # Change Log - @rushstack/tree-pattern
 
-This log was last generated on Sat, 27 Jul 2024 00:10:27 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Feb 2026 00:04:53 GMT and should not be manually modified.
+
+## 0.4.0
+Thu, 19 Feb 2026 00:04:53 GMT
+
+### Minor changes
+
+- Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `"exports"` field in `package.json`.
 
 ## 0.3.4
 Sat, 27 Jul 2024 00:10:27 GMT

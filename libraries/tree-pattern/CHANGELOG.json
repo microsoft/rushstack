@@ -2,6 +2,18 @@
   "name": "@rushstack/tree-pattern",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@rushstack/tree-pattern_v0.4.0",
+      "date": "Thu, 19 Feb 2026 00:04:53 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `\"exports\"` field in `package.json`."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.4",
       "tag": "@rushstack/tree-pattern_v0.3.4",
       "date": "Sat, 27 Jul 2024 00:10:27 GMT",

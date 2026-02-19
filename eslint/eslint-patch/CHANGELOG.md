@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Wed, 12 Nov 2025 01:57:54 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Feb 2026 00:04:52 GMT and should not be manually modified.
+
+## 1.16.0
+Thu, 19 Feb 2026 00:04:52 GMT
+
+### Minor changes
+
+- Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `"exports"` field in `package.json`.
 
 ## 1.15.0
 Wed, 12 Nov 2025 01:57:54 GMT

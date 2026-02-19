@@ -2,6 +2,35 @@
   "name": "@rushstack/heft-rspack-plugin",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@rushstack/heft-rspack-plugin_v0.3.0",
+      "date": "Thu, 19 Feb 2026 00:04:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `\"exports\"` field in `package.json`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.20.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.22.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.14` to `1.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.9",
       "tag": "@rushstack/heft-rspack-plugin_v0.2.9",
       "date": "Sat, 07 Feb 2026 01:13:26 GMT",

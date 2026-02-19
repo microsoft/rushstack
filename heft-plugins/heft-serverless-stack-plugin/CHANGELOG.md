@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-serverless-stack-plugin
 
-This log was last generated on Sat, 07 Feb 2026 01:13:26 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Feb 2026 00:04:52 GMT and should not be manually modified.
+
+## 1.2.0
+Thu, 19 Feb 2026 00:04:52 GMT
+
+### Minor changes
+
+- Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `"exports"` field in `package.json`.
 
 ## 1.1.15
 Sat, 07 Feb 2026 01:13:26 GMT

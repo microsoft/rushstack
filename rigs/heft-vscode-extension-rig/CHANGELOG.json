@@ -2,6 +2,41 @@
   "name": "@rushstack/heft-vscode-extension-rig",
   "entries": [
     {
+      "version": "1.1.21",
+      "tag": "@rushstack/heft-vscode-extension-rig_v1.1.21",
+      "date": "Thu, 19 Feb 2026 00:04:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add `sideEffects` field to package.json."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.57.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-vscode-extension-plugin\" to `1.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.14` to `1.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.20",
       "tag": "@rushstack/heft-vscode-extension-rig_v1.1.20",
       "date": "Sat, 07 Feb 2026 01:13:26 GMT",

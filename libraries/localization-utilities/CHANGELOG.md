@@ -1,6 +1,13 @@
 # Change Log - @rushstack/localization-utilities
 
-This log was last generated on Sat, 07 Feb 2026 01:13:26 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Feb 2026 00:04:53 GMT and should not be manually modified.
+
+## 0.15.0
+Thu, 19 Feb 2026 00:04:53 GMT
+
+### Minor changes
+
+- Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `"exports"` field in `package.json`.
 
 ## 0.14.14
 Sat, 07 Feb 2026 01:13:26 GMT

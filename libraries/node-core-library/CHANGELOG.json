@@ -2,6 +2,26 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.20.0",
+      "tag": "@rushstack/node-core-library_v5.20.0",
+      "date": "Thu, 19 Feb 2026 00:04:53 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `\"exports\"` field in `package.json`."
+          },
+          {
+            "comment": "Add a property to the `JsonSchema` validator to control the handling of vendor extension keywords. By default, vendor extension keywords matching the `x-<vendor>-<keyword>` pattern are accepted. Set the new `rejectVendorExtensionKeywords` option to `true` to restore the previous strict behavior."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/problem-matcher\" to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.19.1",
       "tag": "@rushstack/node-core-library_v5.19.1",
       "date": "Sat, 06 Dec 2025 01:12:28 GMT",
