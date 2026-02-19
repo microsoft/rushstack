@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack-embedded-dependencies-plugin",
+      "comment": "Add missing LICENSE file to package.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/webpack-embedded-dependencies-plugin"
+}

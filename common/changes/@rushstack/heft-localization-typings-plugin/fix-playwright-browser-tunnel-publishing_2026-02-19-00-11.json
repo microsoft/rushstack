@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-localization-typings-plugin",
+      "comment": "Add missing README and LICENSE files to package.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-localization-typings-plugin"
+}
