@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-pnpm-kit-v8",
+      "comment": "Filter files from publish.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-pnpm-kit-v8"
+}

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-serverless-stack-plugin",
+      "comment": "Add missing LICENSE file to package.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-serverless-stack-plugin"
+}
