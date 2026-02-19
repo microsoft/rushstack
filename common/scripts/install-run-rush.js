@@ -16,25 +16,25 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 176760:
-/*!****************************!*\
-  !*** external "node:path" ***!
-  \****************************/
-/***/ ((module) => {
-
-module.exports = require("node:path");
-
-/***/ }),
-
-/***/ 973024:
+/***/ 973024
 /*!**************************!*\
   !*** external "node:fs" ***!
   \**************************/
-/***/ ((module) => {
+(module) {
 
 module.exports = require("node:fs");
 
-/***/ })
+/***/ },
+
+/***/ 176760
+/*!****************************!*\
+  !*** external "node:path" ***!
+  \****************************/
+(module) {
+
+module.exports = require("node:path");
+
+/***/ }
 
 /******/ 	});
 /************************************************************************/
@@ -47,6 +47,12 @@ module.exports = require("node:fs");
 /******/ 		var cachedModule = __webpack_module_cache__[moduleId];
 /******/ 		if (cachedModule !== undefined) {
 /******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Check if module exists (development only)
+/******/ 		if (__webpack_modules__[moduleId] === undefined) {
+/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 			e.code = 'MODULE_NOT_FOUND';
+/******/ 			throw e;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
@@ -107,9 +113,9 @@ module.exports = require("node:fs");
 var __webpack_exports__ = {};
 // This entry needs to be wrapped in an IIFE because it needs to be isolated against other modules in the chunk.
 (() => {
-/*!************************************************!*\
-  !*** ./lib-esnext/scripts/install-run-rush.js ***!
-  \************************************************/
+/*!**********************************************************!*\
+  !*** ./lib-intermediate-esm/scripts/install-run-rush.js ***!
+  \**********************************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var node_path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! node:path */ 176760);
 /* harmony import */ var node_path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(node_path__WEBPACK_IMPORTED_MODULE_0__);

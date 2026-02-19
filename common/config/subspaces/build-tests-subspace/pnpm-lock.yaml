@@ -13,7 +13,7 @@ overrides:
 
 packageExtensionsChecksum: sha256-8fXYR9X9qRA57SZJJSADz6C9KMP6QQYYut4DHyehah0=
 
-pnpmfileChecksum: sha256-La8sfCMI7irxJPTW6u4mJb4vNiyLrXeEbKaXv5G3dL0=
+pnpmfileChecksum: sha256-E1T7OJ3DLTjpDqf4RdJzK9VDtAxgm4gDEQCLYdHD8nI=
 
 importers:
 
@@ -844,7 +844,7 @@ packages:
   '@rushstack/heft-api-extractor-plugin@file:../../../heft-plugins/heft-api-extractor-plugin':
     resolution: {directory: ../../../heft-plugins/heft-api-extractor-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': 1.1.14
+      '@rushstack/heft': 1.2.0
 
   '@rushstack/heft-config-file@file:../../../libraries/heft-config-file':
     resolution: {directory: ../../../libraries/heft-config-file, type: directory}
@@ -853,7 +853,7 @@ packages:
   '@rushstack/heft-jest-plugin@file:../../../heft-plugins/heft-jest-plugin':
     resolution: {directory: ../../../heft-plugins/heft-jest-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': ^1.1.14
+      '@rushstack/heft': ^1.2.0
       jest-environment-jsdom: ^29.5.0
       jest-environment-node: ^29.5.0
     peerDependenciesMeta:
@@ -865,17 +865,17 @@ packages:
   '@rushstack/heft-lint-plugin@file:../../../heft-plugins/heft-lint-plugin':
     resolution: {directory: ../../../heft-plugins/heft-lint-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': 1.1.14
+      '@rushstack/heft': 1.2.0
 
   '@rushstack/heft-node-rig@file:../../../rigs/heft-node-rig':
     resolution: {directory: ../../../rigs/heft-node-rig, type: directory}
     peerDependencies:
-      '@rushstack/heft': ^1.1.14
+      '@rushstack/heft': ^1.2.0
 
   '@rushstack/heft-typescript-plugin@file:../../../heft-plugins/heft-typescript-plugin':
     resolution: {directory: ../../../heft-plugins/heft-typescript-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': 1.1.14
+      '@rushstack/heft': 1.2.0
 
   '@rushstack/heft@file:../../../apps/heft':
     resolution: {directory: ../../../apps/heft, type: directory}
