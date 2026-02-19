@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Thu, 19 Feb 2026 00:04:53 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Feb 2026 01:30:06 GMT and should not be manually modified.
+
+## 0.12.1
+Thu, 19 Feb 2026 01:30:06 GMT
+
+### Patches
+
+- Fix an issue where `lib-` folders were excluded from publish.
 
 ## 0.12.0
 Thu, 19 Feb 2026 00:04:53 GMT

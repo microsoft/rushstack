@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-localization-typings-plugin
 
-This log was last generated on Thu, 19 Feb 2026 00:04:52 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Feb 2026 01:30:06 GMT and should not be manually modified.
+
+## 1.1.1
+Thu, 19 Feb 2026 01:30:06 GMT
+
+### Patches
+
+- Add missing README and LICENSE files to package.
 
 ## 1.1.0
 Thu, 19 Feb 2026 00:04:52 GMT

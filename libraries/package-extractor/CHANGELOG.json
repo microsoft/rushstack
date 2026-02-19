@@ -2,6 +2,23 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.12.1",
+      "tag": "@rushstack/package-extractor_v0.12.1",
+      "date": "Thu, 19 Feb 2026 01:30:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where `lib-` folders were excluded from publish."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.12.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.0",
       "tag": "@rushstack/package-extractor_v0.12.0",
       "date": "Thu, 19 Feb 2026 00:04:53 GMT",

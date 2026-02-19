@@ -1,6 +1,11 @@
 # Change Log - @rushstack/heft-vscode-extension-rig
 
-This log was last generated on Thu, 19 Feb 2026 00:04:52 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Feb 2026 01:30:06 GMT and should not be manually modified.
+
+## 1.1.22
+Thu, 19 Feb 2026 01:30:06 GMT
+
+_Version update only_
 
 ## 1.1.21
 Thu, 19 Feb 2026 00:04:52 GMT

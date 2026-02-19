@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-vscode-extension-rig",
   "entries": [
     {
+      "version": "1.1.22",
+      "tag": "@rushstack/heft-vscode-extension-rig_v1.1.22",
+      "date": "Thu, 19 Feb 2026 01:30:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.12.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.21",
       "tag": "@rushstack/heft-vscode-extension-rig_v1.1.21",
       "date": "Thu, 19 Feb 2026 00:04:52 GMT",

@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-localization-typings-plugin",
   "entries": [
     {
+      "version": "1.1.1",
+      "tag": "@rushstack/heft-localization-typings-plugin_v1.1.1",
+      "date": "Thu, 19 Feb 2026 01:30:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add missing README and LICENSE files to package."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.0",
       "tag": "@rushstack/heft-localization-typings-plugin_v1.1.0",
       "date": "Thu, 19 Feb 2026 00:04:52 GMT",

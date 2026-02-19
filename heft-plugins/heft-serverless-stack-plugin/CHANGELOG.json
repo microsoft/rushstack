@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-serverless-stack-plugin",
   "entries": [
     {
+      "version": "1.2.1",
+      "tag": "@rushstack/heft-serverless-stack-plugin_v1.2.1",
+      "date": "Thu, 19 Feb 2026 01:30:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add missing LICENSE file to package."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.0",
       "tag": "@rushstack/heft-serverless-stack-plugin_v1.2.0",
       "date": "Thu, 19 Feb 2026 00:04:52 GMT",
