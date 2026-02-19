@@ -10,6 +10,7 @@ import {
   PackageManagerOptionsConfigurationBase
 } from '../base/BasePackageManagerOptionsConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import type { RushUserConfiguration } from '../../api/RushUserConfiguration';
 import schemaJson from '../../schemas/pnpm-config.schema.json';
 
 /**
@@ -466,13 +467,15 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     return this._globalPatchedDependencies;
   }
 
-  private constructor(json: IPnpmOptionsJson, commonTempFolder: string, jsonFilename?: string) {
+  private constructor(json: IPnpmOptionsJson, commonTempFolder: string, jsonFilename?: string, rushUserConfiguration?: RushUserConfiguration) {
     super(json);
     this._json = json;
     this.jsonFilename = jsonFilename;
     this.pnpmStore = json.pnpmStore || 'local';
     if (EnvironmentConfiguration.pnpmStorePathOverride) {
       this.pnpmStorePath = EnvironmentConfiguration.pnpmStorePathOverride;
+    } else if (rushUserConfiguration?.pnpmStorePath) {
+      this.pnpmStorePath = rushUserConfiguration.pnpmStorePath;
     } else if (this.pnpmStore === 'global') {
       this.pnpmStorePath = '';
     } else {
@@ -504,7 +507,8 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   /** @internal */
   public static loadFromJsonFileOrThrow(
     jsonFilePath: string,
-    commonTempFolder: string
+    commonTempFolder: string,
+    rushUserConfiguration?: RushUserConfiguration
   ): PnpmOptionsConfiguration {
     // TODO: plumb through the terminal
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
@@ -518,15 +522,16 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
       jsonFilePath
     );
     pnpmConfigJson.$schema = pnpmOptionsConfigFile.getSchemaPropertyOriginalValue(pnpmConfigJson);
-    return new PnpmOptionsConfiguration(pnpmConfigJson || {}, commonTempFolder, jsonFilePath);
+    return new PnpmOptionsConfiguration(pnpmConfigJson || {}, commonTempFolder, jsonFilePath, rushUserConfiguration);
   }
 
   /** @internal */
   public static loadFromJsonObject(
     json: IPnpmOptionsJson,
-    commonTempFolder: string
+    commonTempFolder: string,
+    rushUserConfiguration?: RushUserConfiguration
   ): PnpmOptionsConfiguration {
-    return new PnpmOptionsConfiguration(json, commonTempFolder);
+    return new PnpmOptionsConfiguration(json, commonTempFolder, undefined, rushUserConfiguration);
   }
 
   /**

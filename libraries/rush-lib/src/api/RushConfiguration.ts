@@ -46,6 +46,7 @@ import type { PackageManagerOptionsConfigurationBase } from '../logic/base/BaseP
 import { CustomTipsConfiguration } from './CustomTipsConfiguration';
 import { SubspacesConfiguration } from './SubspacesConfiguration';
 import { Subspace } from './Subspace';
+import { RushUserConfiguration } from './RushUserConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'main';
@@ -246,6 +247,11 @@ export class RushConfiguration {
   // subspaceName -> subspace
   private readonly _subspacesByName: Map<string, Subspace>;
   private readonly _subspaces: Subspace[] = [];
+
+  /**
+   * @internal
+   */
+  public readonly _rushUserConfiguration: RushUserConfiguration;
 
   /**
    * The name of the package manager being used to install dependencies
@@ -677,12 +683,16 @@ export class RushConfiguration {
     );
     this._rushPluginsConfiguration = new RushPluginsConfiguration(rushPluginsConfigFilename);
 
+    // Load user configuration for per-user settings like pnpm store path
+    this._rushUserConfiguration = RushUserConfiguration.initialize();
+
     this.npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
     this.yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
     try {
       this.pnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
         `${this.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}`,
-        this.commonTempFolder
+        this.commonTempFolder,
+        this._rushUserConfiguration
       );
       if (rushConfigurationJson.pnpmOptions) {
         throw new Error(
@@ -694,7 +704,8 @@ export class RushConfiguration {
       if (FileSystem.isNotExistError(error as Error)) {
         this.pnpmOptions = PnpmOptionsConfiguration.loadFromJsonObject(
           rushConfigurationJson.pnpmOptions || {},
-          this.commonTempFolder
+          this.commonTempFolder,
+          this._rushUserConfiguration
         );
       } else {
         throw error;

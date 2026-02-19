@@ -80,7 +80,8 @@ export class Subspace {
       try {
         this._cachedPnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
           this.getPnpmConfigFilePath(),
-          subspaceTempFolder
+          subspaceTempFolder,
+          this._rushConfiguration._rushUserConfiguration
         );
         this._cachedPnpmOptionsInitialized = true;
       } catch (e) {
