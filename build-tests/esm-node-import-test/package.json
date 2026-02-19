@@ -5,17 +5,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "heft build --clean",
+    "build": "heft test --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "node --experimental-vm-modules lib-esm/index.js"
+    "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-typescript-plugin": "workspace:*",
-    "@types/node": "20.17.19",
-    "typescript": "~5.8.2"
+    "local-node-rig": "workspace:*"
   }
 }
