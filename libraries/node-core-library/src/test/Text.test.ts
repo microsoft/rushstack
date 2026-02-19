@@ -3,7 +3,7 @@
 
 import { Text } from '../Text';
 
-describe(Text.name, () => {
+describe('Text', () => {
   describe(Text.padEnd.name, () => {
     it("Throws an exception if the padding character isn't a single character", () => {
       expect(() => Text.padEnd('123', 1, '')).toThrow();
