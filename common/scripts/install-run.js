@@ -16,11 +16,11 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 90178:
-/*!****************************************************!*\
-  !*** ./lib-esnext/utilities/executionUtilities.js ***!
-  \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ 953844
+/*!**************************************************************!*\
+  !*** ./lib-intermediate-esm/utilities/executionUtilities.js ***!
+  \**************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -47,33 +47,13 @@ function escapeArgumentIfNeeded(command, isWindows = IS_WINDOWS) {
 }
 //# sourceMappingURL=executionUtilities.js.map
 
-/***/ }),
+/***/ },
 
-/***/ 176760:
-/*!****************************!*\
-  !*** external "node:path" ***!
-  \****************************/
-/***/ ((module) => {
-
-module.exports = require("node:path");
-
-/***/ }),
-
-/***/ 731421:
-/*!*************************************!*\
-  !*** external "node:child_process" ***!
-  \*************************************/
-/***/ ((module) => {
-
-module.exports = require("node:child_process");
-
-/***/ }),
-
-/***/ 832286:
-/*!************************************************!*\
-  !*** ./lib-esnext/utilities/npmrcUtilities.js ***!
-  \************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ 359480
+/*!**********************************************************!*\
+  !*** ./lib-intermediate-esm/utilities/npmrcUtilities.js ***!
+  \**********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -100,7 +80,7 @@ __webpack_require__.r(__webpack_exports__);
 // create a global _combinedNpmrc for cache purpose
 const _combinedNpmrcMap = new Map();
 function _trimNpmrcFile(options) {
-    const { sourceNpmrcPath, linesToPrepend, linesToAppend, supportEnvVarFallbackSyntax } = options;
+    const { sourceNpmrcPath, linesToPrepend, linesToAppend, supportEnvVarFallbackSyntax, filterNpmIncompatibleProperties, env = process.env } = options;
     const combinedNpmrcFromCache = _combinedNpmrcMap.get(sourceNpmrcPath);
     if (combinedNpmrcFromCache !== undefined) {
         return combinedNpmrcFromCache;
@@ -116,21 +96,63 @@ function _trimNpmrcFile(options) {
         npmrcFileLines.push(...linesToAppend);
     }
     npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
-    const resultLines = trimNpmrcFileLines(npmrcFileLines, process.env, supportEnvVarFallbackSyntax);
+    const resultLines = trimNpmrcFileLines(npmrcFileLines, env, supportEnvVarFallbackSyntax, filterNpmIncompatibleProperties);
     const combinedNpmrc = resultLines.join('\n');
     //save the cache
     _combinedNpmrcMap.set(sourceNpmrcPath, combinedNpmrc);
     return combinedNpmrc;
 }
 /**
+ * List of npmrc properties that are not supported by npm but may be present in the config.
+ * These include pnpm-specific properties and deprecated npm properties.
+ */
+const NPM_INCOMPATIBLE_PROPERTIES = new Set([
+    // pnpm-specific hoisting configuration
+    'hoist',
+    'hoist-pattern',
+    'public-hoist-pattern',
+    'shamefully-hoist',
+    // Deprecated or unknown npm properties that cause warnings
+    'email',
+    'publish-branch'
+]);
+/**
+ * List of registry-scoped npmrc property suffixes that are pnpm-specific.
+ * These are properties like "//registry.example.com/:tokenHelper" where "tokenHelper"
+ * is the suffix after the last colon.
+ */
+const NPM_INCOMPATIBLE_REGISTRY_SCOPED_PROPERTIES = new Set([
+    // pnpm-specific token helper properties
+    'tokenHelper',
+    'urlTokenHelper'
+]);
+/**
+ * Regular expression to extract property names from .npmrc lines.
+ * Matches everything before '=', '[', or whitespace to capture the property name.
+ * Note: The 'g' flag is intentionally omitted since we only need the first match.
+ * Examples:
+ *   "registry=https://..." -> matches "registry"
+ *   "hoist-pattern[]=..." -> matches "hoist-pattern"
+ */
+const PROPERTY_NAME_REGEX = /^([^=\[\s]+)/;
+/**
+ * Regular expression to extract environment variable names and optional fallback values.
+ * Matches patterns like:
+ *   nameString                 -> group 1: nameString,    group 2: undefined
+ *   nameString-fallbackString  -> group 1: nameString,    group 2: fallbackString
+ *   nameString:-fallbackString -> group 1: nameString,    group 2: fallbackString
+ */
+const ENV_VAR_WITH_FALLBACK_REGEX = /^(?<name>[^:-]+)(?::?-(?<fallback>.+))?$/;
+/**
  *
  * @param npmrcFileLines The npmrc file's lines
  * @param env The environment variables object
  * @param supportEnvVarFallbackSyntax Whether to support fallback values in the form of `${VAR_NAME:-fallback}`
- * @returns
+ * @param filterNpmIncompatibleProperties Whether to filter out properties that npm doesn't understand
+ * @returns An array of processed npmrc file lines with undefined environment variables and npm-incompatible properties commented out
  */
-function trimNpmrcFileLines(npmrcFileLines, env, supportEnvVarFallbackSyntax) {
-    var _a;
+function trimNpmrcFileLines(npmrcFileLines, env, supportEnvVarFallbackSyntax, filterNpmIncompatibleProperties = false) {
+    var _a, _b, _c;
     const resultLines = [];
     // This finds environment variable tokens that look like "${VAR_NAME}"
     const expansionRegExp = /\$\{([^\}]+)\}/g;
@@ -139,6 +161,7 @@ function trimNpmrcFileLines(npmrcFileLines, env, supportEnvVarFallbackSyntax) {
     // Trim out lines that reference environment variables that aren't defined
     for (let line of npmrcFileLines) {
         let lineShouldBeTrimmed = false;
+        let trimReason = '';
         //remove spaces before or after key and value
         line = line
             .split('=')
@@ -146,49 +169,89 @@ function trimNpmrcFileLines(npmrcFileLines, env, supportEnvVarFallbackSyntax) {
             .join('=');
         // Ignore comment lines
         if (!commentRegExp.test(line)) {
-            const environmentVariables = line.match(expansionRegExp);
-            if (environmentVariables) {
-                for (const token of environmentVariables) {
-                    /**
-                     * Remove the leading "${" and the trailing "}" from the token
-                     *
-                     * ${nameString}                  -> nameString
-                     * ${nameString-fallbackString}   -> name-fallbackString
-                     * ${nameString:-fallbackString}  -> name:-fallbackString
-                     */
-                    const nameWithFallback = token.substring(2, token.length - 1);
-                    let environmentVariableName;
-                    let fallback;
-                    if (supportEnvVarFallbackSyntax) {
-                        /**
-                         * Get the environment variable name and fallback value.
-                         *
-                         *                                name          fallback
-                         * nameString                 ->  nameString    undefined
-                         * nameString-fallbackString  ->  nameString    fallbackString
-                         * nameString:-fallbackString ->  nameString    fallbackString
-                         */
-                        const matched = nameWithFallback.match(/^([^:-]+)(?:\:?-(.+))?$/);
-                        // matched: [originStr, variableName, fallback]
-                        environmentVariableName = (_a = matched === null || matched === void 0 ? void 0 : matched[1]) !== null && _a !== void 0 ? _a : nameWithFallback;
-                        fallback = matched === null || matched === void 0 ? void 0 : matched[2];
+            // Check if this is a property that npm doesn't understand
+            if (filterNpmIncompatibleProperties) {
+                // Extract the property name (everything before the '=' or '[')
+                const match = line.match(PROPERTY_NAME_REGEX);
+                if (match) {
+                    const propertyName = match[1];
+                    // Check if this is a registry-scoped property (starts with "//" like "//registry.npmjs.org/:_authToken")
+                    const isRegistryScoped = propertyName.startsWith('//');
+                    if (isRegistryScoped) {
+                        // For registry-scoped properties, check if the suffix (after the last colon) is npm-incompatible
+                        // Example: "//registry.example.com/:tokenHelper" -> suffix is "tokenHelper"
+                        const lastColonIndex = propertyName.lastIndexOf(':');
+                        if (lastColonIndex !== -1) {
+                            const registryPropertySuffix = propertyName.substring(lastColonIndex + 1);
+                            if (NPM_INCOMPATIBLE_REGISTRY_SCOPED_PROPERTIES.has(registryPropertySuffix)) {
+                                lineShouldBeTrimmed = true;
+                                trimReason = 'NPM_INCOMPATIBLE_PROPERTY';
+                            }
+                        }
                     }
                     else {
-                        environmentVariableName = nameWithFallback;
+                        // For non-registry-scoped properties, check the full property name
+                        if (NPM_INCOMPATIBLE_PROPERTIES.has(propertyName)) {
+                            lineShouldBeTrimmed = true;
+                            trimReason = 'NPM_INCOMPATIBLE_PROPERTY';
+                        }
                     }
-                    // Is the environment variable and fallback value defined.
-                    if (!env[environmentVariableName] && !fallback) {
-                        // No, so trim this line
-                        lineShouldBeTrimmed = true;
-                        break;
+                }
+            }
+            // Check for undefined environment variables
+            if (!lineShouldBeTrimmed) {
+                const environmentVariables = line.match(expansionRegExp);
+                if (environmentVariables) {
+                    for (const token of environmentVariables) {
+                        /**
+                         * Remove the leading "${" and the trailing "}" from the token
+                         *
+                         * ${nameString}                  -> nameString
+                         * ${nameString-fallbackString}   -> name-fallbackString
+                         * ${nameString:-fallbackString}  -> name:-fallbackString
+                         */
+                        const nameWithFallback = token.slice(2, -1);
+                        let environmentVariableName;
+                        let fallback;
+                        if (supportEnvVarFallbackSyntax) {
+                            /**
+                             * Get the environment variable name and fallback value.
+                             *
+                             *                                name          fallback
+                             * nameString                 ->  nameString    undefined
+                             * nameString-fallbackString  ->  nameString    fallbackString
+                             * nameString:-fallbackString ->  nameString    fallbackString
+                             */
+                            const matched = nameWithFallback.match(ENV_VAR_WITH_FALLBACK_REGEX);
+                            environmentVariableName = (_b = (_a = matched === null || matched === void 0 ? void 0 : matched.groups) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : nameWithFallback;
+                            fallback = (_c = matched === null || matched === void 0 ? void 0 : matched.groups) === null || _c === void 0 ? void 0 : _c.fallback;
+                        }
+                        else {
+                            environmentVariableName = nameWithFallback;
+                        }
+                        // Is the environment variable and fallback value defined.
+                        if (!env[environmentVariableName] && !fallback) {
+                            // No, so trim this line
+                            lineShouldBeTrimmed = true;
+                            trimReason = 'MISSING_ENVIRONMENT_VARIABLE';
+                            break;
+                        }
                     }
                 }
             }
         }
         if (lineShouldBeTrimmed) {
-            // Example output:
-            // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
-            resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
+            // Comment out the line with appropriate reason
+            if (trimReason === 'NPM_INCOMPATIBLE_PROPERTY') {
+                // Example output:
+                // "; UNSUPPORTED BY NPM: email=test@example.com"
+                resultLines.push('; UNSUPPORTED BY NPM: ' + line);
+            }
+            else {
+                // Example output:
+                // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
+                resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
+            }
         }
         else {
             resultLines.push(line);
@@ -242,33 +305,57 @@ function isVariableSetInNpmrcFile(sourceNpmrcFolder, variableKey, supportEnvVarF
     if (!node_fs__WEBPACK_IMPORTED_MODULE_0__.existsSync(sourceNpmrcPath)) {
         return false;
     }
-    const trimmedNpmrcFile = _trimNpmrcFile({ sourceNpmrcPath, supportEnvVarFallbackSyntax });
+    const trimmedNpmrcFile = _trimNpmrcFile({
+        sourceNpmrcPath,
+        supportEnvVarFallbackSyntax,
+        filterNpmIncompatibleProperties: false
+    });
     const variableKeyRegExp = new RegExp(`^${variableKey}=`, 'm');
     return trimmedNpmrcFile.match(variableKeyRegExp) !== null;
 }
 //# sourceMappingURL=npmrcUtilities.js.map
 
-/***/ }),
+/***/ },
 
-/***/ 848161:
-/*!**************************!*\
-  !*** external "node:os" ***!
-  \**************************/
-/***/ ((module) => {
+/***/ 731421
+/*!*************************************!*\
+  !*** external "node:child_process" ***!
+  \*************************************/
+(module) {
 
-module.exports = require("node:os");
+module.exports = require("node:child_process");
 
-/***/ }),
+/***/ },
 
-/***/ 973024:
+/***/ 973024
 /*!**************************!*\
   !*** external "node:fs" ***!
   \**************************/
-/***/ ((module) => {
+(module) {
 
 module.exports = require("node:fs");
 
-/***/ })
+/***/ },
+
+/***/ 848161
+/*!**************************!*\
+  !*** external "node:os" ***!
+  \**************************/
+(module) {
+
+module.exports = require("node:os");
+
+/***/ },
+
+/***/ 176760
+/*!****************************!*\
+  !*** external "node:path" ***!
+  \****************************/
+(module) {
+
+module.exports = require("node:path");
+
+/***/ }
 
 /******/ 	});
 /************************************************************************/
@@ -281,6 +368,12 @@ module.exports = require("node:fs");
 /******/ 		var cachedModule = __webpack_module_cache__[moduleId];
 /******/ 		if (cachedModule !== undefined) {
 /******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Check if module exists (development only)
+/******/ 		if (__webpack_modules__[moduleId] === undefined) {
+/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 			e.code = 'MODULE_NOT_FOUND';
+/******/ 			throw e;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
@@ -341,9 +434,9 @@ module.exports = require("node:fs");
 var __webpack_exports__ = {};
 // This entry needs to be wrapped in an IIFE because it needs to be isolated against other modules in the chunk.
 (() => {
-/*!*******************************************!*\
-  !*** ./lib-esnext/scripts/install-run.js ***!
-  \*******************************************/
+/*!*****************************************************!*\
+  !*** ./lib-intermediate-esm/scripts/install-run.js ***!
+  \*****************************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   RUSH_JSON_FILENAME: () => (/* binding */ RUSH_JSON_FILENAME),
@@ -360,8 +453,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var node_os__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(node_os__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var node_path__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! node:path */ 176760);
 /* harmony import */ var node_path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(node_path__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _utilities_npmrcUtilities__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../utilities/npmrcUtilities */ 832286);
-/* harmony import */ var _utilities_executionUtilities__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../utilities/executionUtilities */ 90178);
+/* harmony import */ var _utilities_npmrcUtilities__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../utilities/npmrcUtilities */ 359480);
+/* harmony import */ var _utilities_executionUtilities__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../utilities/executionUtilities */ 953844);
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 /* eslint-disable no-console */
@@ -509,7 +602,10 @@ function _resolvePackageVersion(logger, rushCommonFolder, { name, version }) {
                 sourceNpmrcFolder,
                 targetNpmrcFolder: rushTempFolder,
                 logger,
-                supportEnvVarFallbackSyntax: false
+                supportEnvVarFallbackSyntax: false,
+                // Always filter npm-incompatible properties in install-run scripts.
+                // Any warnings will be shown when running Rush commands directly.
+                filterNpmIncompatibleProperties: true
             });
             // This returns something that looks like:
             // ```
@@ -745,7 +841,10 @@ function installAndRun(logger, packageName, packageVersion, packageBinName, pack
             sourceNpmrcFolder,
             targetNpmrcFolder: packageInstallFolder,
             logger,
-            supportEnvVarFallbackSyntax: false
+            supportEnvVarFallbackSyntax: false,
+            // Always filter npm-incompatible properties in install-run scripts.
+            // Any warnings will be shown when running Rush commands directly.
+            filterNpmIncompatibleProperties: true
         });
         _createPackageJson(packageInstallFolder, packageName, packageVersion);
         const installCommand = lockFilePath ? 'ci' : 'install';

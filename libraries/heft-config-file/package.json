@@ -49,7 +49,7 @@
     "jsonpath-plus": "~10.3.0"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.1.7",
+    "@rushstack/heft": "1.2.0",
     "@types/ungap__structured-clone": "~1.2.0",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"

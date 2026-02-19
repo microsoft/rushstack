@@ -4,7 +4,7 @@
   "operationSettings": [
     {
       "operationName": "_phase:build",
-      "outputFolderNames": ["lib-commonjs", "lib-dts", "lib-esm", "temp/build"]
+      "outputFolderNames": ["lib-commonjs", "lib-dts", "lib-esm", "lib-es5", "temp/build"]
     },
     {
       "operationName": "_phase:test",

@@ -5,7 +5,9 @@
   "operationSettings": [
     {
       "operationName": "_phase:build",
-      "outputFolderNames": [".heft", "lib-esm", "dist"]
+      "outputFolderNames": [".heft", "lib-esm", "lib-commonjs", "dist"],
+      // This project builds differently between Node 18 and other versions of Node
+      "dependsOnNodeVersion": "major"
     },
     {
       "operationName": "_phase:test",

@@ -837,7 +837,14 @@ describe('ConfigurationFile', () => {
           },
           {
             plugin: FileSystem.getRealPath(
-              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'heft', 'lib', 'index.js')
+              nodeJsPath.resolve(
+                projectRoot,
+                'node_modules',
+                '@rushstack',
+                'heft',
+                'lib-commonjs',
+                'index.js'
+              )
             )
           },
           {
@@ -918,7 +925,14 @@ describe('ConfigurationFile', () => {
           },
           {
             plugin: await FileSystem.getRealPathAsync(
-              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'heft', 'lib', 'index.js')
+              nodeJsPath.resolve(
+                projectRoot,
+                'node_modules',
+                '@rushstack',
+                'heft',
+                'lib-commonjs',
+                'index.js'
+              )
             )
           },
           {
@@ -1001,7 +1015,14 @@ describe('ConfigurationFile', () => {
           },
           {
             plugin: FileSystem.getRealPath(
-              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'heft', 'lib', 'index.js')
+              nodeJsPath.resolve(
+                projectRoot,
+                'node_modules',
+                '@rushstack',
+                'heft',
+                'lib-commonjs',
+                'index.js'
+              )
             )
           },
           {
@@ -1082,7 +1103,14 @@ describe('ConfigurationFile', () => {
           },
           {
             plugin: await FileSystem.getRealPathAsync(
-              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'heft', 'lib', 'index.js')
+              nodeJsPath.resolve(
+                projectRoot,
+                'node_modules',
+                '@rushstack',
+                'heft',
+                'lib-commonjs',
+                'index.js'
+              )
             )
           },
           {
