@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Temporarily remove `\"exports\": { \"...\": { \"import\": \"...\" } }` properties to fix issues with importing in an ESM context. See https://github.com/microsoft/rushstack/issues/5644.",
+      "type": "patch",
+      "packageName": "@microsoft/api-extractor-model"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model",
+  "email": "iclanton@users.noreply.github.com"
+}

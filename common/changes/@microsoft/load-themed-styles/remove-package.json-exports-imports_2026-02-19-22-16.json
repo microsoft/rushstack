@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Temporarily remove `\"exports\": { \"...\": { \"import\": \"...\" } }` properties to fix issues with importing in an ESM context. See https://github.com/microsoft/rushstack/issues/5644.",
+      "type": "patch",
+      "packageName": "@microsoft/load-themed-styles"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles",
+  "email": "iclanton@users.noreply.github.com"
+}

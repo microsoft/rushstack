@@ -20,12 +20,10 @@
   "exports": {
     ".": {
       "types": "./lib-dts/index.d.ts",
-      "import": "./lib-esm/index.js",
       "require": "./lib-commonjs/index.js"
     },
     "./lib/*": {
       "types": "./lib-dts/*",
-      "import": "./lib-esm/*",
       "require": "./lib-commonjs/*"
     },
     "./package.json": "./package.json"

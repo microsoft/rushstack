@@ -30,7 +30,6 @@
   "exports": {
     "./lib/*": {
       "types": "./lib-dts/*.d.ts",
-      "import": "./lib-esm/*.js",
       "require": "./lib-commonjs/*.js"
     },
     "./heft-plugin.json": "./heft-plugin.json",

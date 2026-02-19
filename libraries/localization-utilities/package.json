@@ -8,13 +8,11 @@
   "exports": {
     ".": {
       "types": "./dist/localization-utilities.d.ts",
-      "import": "./lib-esm/index.js",
       "require": "./lib-commonjs/index.js"
     },
     "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
     "./lib/*": {
       "types": "./lib-dts/*.d.ts",
-      "import": "./lib-esm/*.js",
       "require": "./lib-commonjs/*.js"
     },
     "./package.json": "./package.json"
