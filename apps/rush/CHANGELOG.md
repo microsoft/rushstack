@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 12 Feb 2026 23:01:10 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Feb 2026 00:05:11 GMT and should not be manually modified.
+
+## 5.169.0
+Thu, 19 Feb 2026 00:05:11 GMT
+
+### Updates
+
+- Sort the `additionalFilesForOperation` property in operation settings entries in projects' `config/rush-project.json` files before computing operation hashes to produce a stable hash for caching.
+- Normalize package layout. CommonJS is now under `lib-commonjs` and DTS is now under `lib-dts`. Imports to `lib` still work as before, handled by the `"exports"` field in `package.json`.
+- Add a new "omitAppleDoubleFilesFromBuildCache" experiment. When enabled, the Rush build cache will omit macOS AppleDouble metadata files (._*) from cache archives when a companion file exists in the same directory. This prevents platform-specific metadata files from polluting the shared build cache. The exclusion only applies when running on macOS.
+- Add a new `dependsOnNodeVersion` setting for operation entries in rush-project.json. When enabled, the Node.js version is included in the build cache hash, ensuring that cached outputs are invalidated when the Node.js version changes. Accepts `true` (alias for `"patch"`), `"major"`, `"minor"`, or `"patch"` to control the granularity of version matching.
 
 ## 5.168.0
 Thu, 12 Feb 2026 23:01:10 GMT
