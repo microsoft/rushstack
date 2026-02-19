@@ -4,7 +4,7 @@
   "operationSettings": [
     {
       "operationName": "_phase:build",
-      "outputFolderNames": ["lib-esm", "lib-css", "dist", "temp/sass-ts"]
+      "outputFolderNames": ["lib-esm", "lib-commonjs", "lib-css", "dist", "temp/sass-ts"]
     },
     {
       "operationName": "_phase:test",

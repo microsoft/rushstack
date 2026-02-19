@@ -4,7 +4,7 @@
   "operationSettings": [
     {
       "operationName": "_phase:build",
-      "outputFolderNames": ["lib-esm"]
+      "outputFolderNames": ["lib-esm", "dist"]
     }
   ]
 }
