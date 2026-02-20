@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 19 Feb 2026 01:30:24 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Feb 2026 00:15:23 GMT and should not be manually modified.
+
+## 5.169.2
+Fri, 20 Feb 2026 00:15:23 GMT
+
+### Updates
+
+- Add `"node"` condition before `"import"` in the `"exports"` map so that Node.js uses the CJS output (which handles extensionless imports), while bundlers still use ESM via `"import"`. Fixes https://github.com/microsoft/rushstack/issues/5644.
 
 ## 5.169.1
 Thu, 19 Feb 2026 01:30:24 GMT
