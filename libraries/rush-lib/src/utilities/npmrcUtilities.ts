@@ -19,9 +19,6 @@ export interface ILogger {
  * The text of the the .npmrc.
  */
 
-// create a global _combinedNpmrc for cache purpose
-const _combinedNpmrcMap: Map<string, string> = new Map();
-
 function _trimNpmrcFile(
   options: Pick<
     INpmrcTrimOptions,
@@ -41,10 +38,6 @@ function _trimNpmrcFile(
     filterNpmIncompatibleProperties,
     env = process.env
   } = options;
-  const combinedNpmrcFromCache: string | undefined = _combinedNpmrcMap.get(sourceNpmrcPath);
-  if (combinedNpmrcFromCache !== undefined) {
-    return combinedNpmrcFromCache;
-  }
 
   let npmrcFileLines: string[] = [];
   if (linesToPrepend) {
@@ -69,9 +62,6 @@ function _trimNpmrcFile(
   );
 
   const combinedNpmrc: string = resultLines.join('\n');
-
-  //save the cache
-  _combinedNpmrcMap.set(sourceNpmrcPath, combinedNpmrc);
 
   return combinedNpmrc;
 }
