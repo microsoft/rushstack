@@ -63,6 +63,11 @@ module.exports = {
         // module that is not available once the package is published.
         'import/no-extraneous-dependencies': ['error', { devDependencies: true, peerDependencies: true }],
 
+        // Rationale: Relative imports must include the .ts/.tsx file extension so that
+        // TypeScript's rewriteRelativeImportExtensions can produce correct .js extensions
+        // in the compiled output. This is required for proper ESM resolution in Node.js.
+        'import/extensions': ['error', 'ignorePackages'],
+
         // Rationale: Use of `== null` comparisons is common-place
         eqeqeq: ['error', 'always', { null: 'ignore' }],
 
