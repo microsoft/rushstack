@@ -18,6 +18,7 @@
   "exports": {
     "./lib/*": {
       "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
       "import": "./lib-esm/*.js",
       "require": "./lib-commonjs/*.js"
     },

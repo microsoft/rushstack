@@ -1,0 +1,20 @@
+{
+  "name": "esm-node-import-test",
+  "description": "This project validates that importing a rushstack package from a 'type: module' Node.js project works correctly with the package.json 'exports' field. See https://github.com/microsoft/rushstack/issues/5644",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "heft test --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
+  }
+}

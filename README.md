@@ -182,6 +182,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/eslint-bulk-suppressions-test](./build-tests/eslint-bulk-suppressions-test/) | Sample code to test eslint bulk suppressions |
 | [/build-tests/eslint-bulk-suppressions-test-flat](./build-tests/eslint-bulk-suppressions-test-flat/) | Sample code to test eslint bulk suppressions with flat configs |
 | [/build-tests/eslint-bulk-suppressions-test-legacy](./build-tests/eslint-bulk-suppressions-test-legacy/) | Sample code to test eslint bulk suppressions for versions of eslint < 8.57.0 |
+| [/build-tests/esm-node-import-test](./build-tests/esm-node-import-test/) | This project validates that importing a rushstack package from a 'type: module' Node.js project works correctly with the package.json 'exports' field. See https://github.com/microsoft/rushstack/issues/5644 |
 | [/build-tests/hashed-folder-copy-plugin-webpack5-test](./build-tests/hashed-folder-copy-plugin-webpack5-test/) | Building this project exercises @rushstack/hashed-folder-copy-plugin with Webpack 5. NOTE - THIS TEST IS CURRENTLY EXPECTED TO BE BROKEN |
 | [/build-tests/heft-copy-files-test](./build-tests/heft-copy-files-test/) | Building this project tests copying files with Heft |
 | [/build-tests/heft-example-lifecycle-plugin](./build-tests/heft-example-lifecycle-plugin/) | This is an example heft plugin for testing the lifecycle hooks |

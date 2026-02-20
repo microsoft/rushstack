@@ -1642,6 +1642,22 @@ importers:
         specifier: ~5.8.2
         version: 5.8.2
 
+  ../../../build-tests/esm-node-import-test:
+    dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      eslint:
+        specifier: ~9.37.0
+        version: 9.37.0
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../build-tests/hashed-folder-copy-plugin-webpack5-test:
     devDependencies:
       '@rushstack/hashed-folder-copy-plugin':
@@ -4571,7 +4587,7 @@ importers:
         version: 1.2.0(@types/node@20.17.19)
       '@rushstack/heft-node-rig':
         specifier: 2.11.20
-        version: 2.11.20(@rushstack/heft@1.2.0(@types/node@20.17.19))(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(jest-environment-jsdom@29.5.0)
+        version: 2.11.20(@rushstack/heft@1.2.0(@types/node@20.17.19))(@types/node@20.17.19)(jest-environment-jsdom@29.5.0)
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
@@ -22334,41 +22350,6 @@ snapshots:
       jest-util: 29.7.0
       slash: 3.0.0
 
-  '@jest/core@29.5.0':
-    dependencies:
-      '@jest/console': 29.7.0
-      '@jest/reporters': 29.5.0
-      '@jest/test-result': 29.7.0(@types/node@22.9.3)
-      '@jest/transform': 29.5.0
-      '@jest/types': 29.5.0
-      '@types/node': 22.9.3
-      ansi-escapes: 4.3.2
-      chalk: 4.1.2
-      ci-info: 3.9.0
-      exit: 0.1.2
-      graceful-fs: 4.2.11
-      jest-changed-files: 29.7.0
-      jest-config: 29.5.0(@types/node@22.9.3)
-      jest-haste-map: 29.7.0
-      jest-message-util: 29.7.0
-      jest-regex-util: 29.6.3
-      jest-resolve: 29.5.0
-      jest-resolve-dependencies: 29.7.0
-      jest-runner: 29.7.0
-      jest-runtime: 29.7.0
-      jest-snapshot: 29.5.0
-      jest-util: 29.7.0
-      jest-validate: 29.7.0
-      jest-watcher: 29.7.0
-      micromatch: 4.0.8
-      pretty-format: 29.7.0
-      slash: 3.0.0
-      strip-ansi: 6.0.1
-    transitivePeerDependencies:
-      - babel-plugin-macros
-      - supports-color
-      - ts-node
-
   '@jest/core@29.5.0(babel-plugin-macros@3.1.0)':
     dependencies:
       '@jest/console': 29.7.0
@@ -24024,7 +24005,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft-jest-plugin@1.2.0(@rushstack/heft@1.2.0(@types/node@20.17.19))(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(jest-environment-jsdom@29.5.0)(jest-environment-node@29.5.0)':
+  '@rushstack/heft-jest-plugin@1.2.0(@rushstack/heft@1.2.0(@types/node@20.17.19))(@types/node@20.17.19)(jest-environment-jsdom@29.5.0)(jest-environment-node@29.5.0)':
     dependencies:
       '@jest/core': 29.5.0(babel-plugin-macros@3.1.0)
       '@jest/reporters': 29.5.0
@@ -24057,13 +24038,13 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft-node-rig@2.11.20(@rushstack/heft@1.2.0(@types/node@20.17.19))(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(jest-environment-jsdom@29.5.0)':
+  '@rushstack/heft-node-rig@2.11.20(@rushstack/heft@1.2.0(@types/node@20.17.19))(@types/node@20.17.19)(jest-environment-jsdom@29.5.0)':
     dependencies:
       '@microsoft/api-extractor': 7.57.0(@types/node@20.17.19)
       '@rushstack/eslint-config': 4.6.2(eslint@9.37.0)(typescript@5.8.2)
       '@rushstack/heft': 1.2.0(@types/node@20.17.19)
       '@rushstack/heft-api-extractor-plugin': 1.3.0(@rushstack/heft@1.2.0(@types/node@20.17.19))(@types/node@20.17.19)
-      '@rushstack/heft-jest-plugin': 1.2.0(@rushstack/heft@1.2.0(@types/node@20.17.19))(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(jest-environment-jsdom@29.5.0)(jest-environment-node@29.5.0)
+      '@rushstack/heft-jest-plugin': 1.2.0(@rushstack/heft@1.2.0(@types/node@20.17.19))(@types/node@20.17.19)(jest-environment-jsdom@29.5.0)(jest-environment-node@29.5.0)
       '@rushstack/heft-lint-plugin': 1.2.0(@rushstack/heft@1.2.0(@types/node@20.17.19))(@types/node@20.17.19)
       '@rushstack/heft-typescript-plugin': 1.2.0(@rushstack/heft@1.2.0(@types/node@20.17.19))(@types/node@20.17.19)
       '@types/heft-jest': 1.0.1
@@ -32165,36 +32146,6 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  jest-config@29.5.0(@types/node@22.9.3):
-    dependencies:
-      '@babel/core': 7.20.12
-      '@jest/test-sequencer': 29.7.0(@types/node@22.9.3)
-      '@jest/types': 29.5.0
-      babel-jest: 29.7.0(@babel/core@7.20.12)
-      chalk: 4.1.2
-      ci-info: 3.9.0
-      deepmerge: 4.3.1
-      glob: 7.2.3
-      graceful-fs: 4.2.11
-      jest-circus: 29.7.0(babel-plugin-macros@3.1.0)
-      jest-environment-node: 29.5.0
-      jest-get-type: 29.6.3
-      jest-regex-util: 29.6.3
-      jest-resolve: 29.5.0
-      jest-runner: 29.7.0
-      jest-util: 29.7.0
-      jest-validate: 29.7.0
-      micromatch: 4.0.8
-      parse-json: 5.2.0
-      pretty-format: 29.7.0
-      slash: 3.0.0
-      strip-json-comments: 3.1.1
-    optionalDependencies:
-      '@types/node': 22.9.3
-    transitivePeerDependencies:
-      - babel-plugin-macros
-      - supports-color
-
   jest-config@29.5.0(@types/node@22.9.3)(babel-plugin-macros@3.1.0):
     dependencies:
       '@babel/core': 7.20.12
@@ -32645,7 +32596,7 @@ snapshots:
 
   jest@29.3.1(@types/node@20.17.19):
     dependencies:
-      '@jest/core': 29.5.0
+      '@jest/core': 29.5.0(babel-plugin-macros@3.1.0)
       '@jest/types': 29.5.0
       import-local: 3.2.0
       jest-cli: 29.7.0(@types/node@20.17.19)
