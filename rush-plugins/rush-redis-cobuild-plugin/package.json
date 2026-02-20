@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-redis-cobuild-plugin",
-  "version": "5.169.1",
+  "version": "5.169.2",
   "description": "Rush plugin for Redis cobuild lock",
   "repository": {
     "type": "git",
