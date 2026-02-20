@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/tree-pattern",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "A fast, lightweight pattern matcher for tree structures such as an Abstract Syntax Tree (AST)",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
