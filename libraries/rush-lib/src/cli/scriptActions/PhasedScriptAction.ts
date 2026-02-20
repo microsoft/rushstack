@@ -566,6 +566,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         changedProjectsOnly,
         cobuildConfiguration,
         customParameters: customParametersByName,
+        remainderArgs: this.remainder?.values,
         isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
         isInitial: true,
         isWatch,
