@@ -7,6 +7,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "target": "es2018",
+    "rewriteRelativeImportExtensions": true,
 
     "outDir": "${configDir}/lib-commonjs",
     "declarationDir": "${configDir}/lib-dts",
