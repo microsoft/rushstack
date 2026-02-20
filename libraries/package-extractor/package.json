@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/package-extractor",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "description": "A library for bundling selected files and dependencies into a deployable package.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",

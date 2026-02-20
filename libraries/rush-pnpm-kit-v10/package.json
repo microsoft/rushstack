@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-pnpm-kit-v10",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "rush pnpm kit v10",
   "license": "MIT",
   "main": "./lib-commonjs/index.js",
