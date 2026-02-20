@@ -2,6 +2,32 @@
   "name": "@rushstack/webpack4-localization-plugin",
   "entries": [
     {
+      "version": "0.20.1",
+      "tag": "@rushstack/webpack4-localization-plugin_v0.20.1",
+      "date": "Fri, 20 Feb 2026 00:15:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add `\"node\"` condition before `\"import\"` in the `\"exports\"` map so that Node.js uses the CJS output (which handles extensionless imports), while bundlers still use ESM via `\"import\"`. Fixes https://github.com/microsoft/rushstack/issues/5644."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.15.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.20.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.22.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.20.0",
       "tag": "@rushstack/webpack4-localization-plugin_v0.20.0",
       "date": "Thu, 19 Feb 2026 00:04:53 GMT",

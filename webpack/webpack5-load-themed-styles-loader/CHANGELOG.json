@@ -2,6 +2,32 @@
   "name": "@microsoft/webpack5-load-themed-styles-loader",
   "entries": [
     {
+      "version": "0.4.1",
+      "tag": "@microsoft/webpack5-load-themed-styles-loader_v0.4.1",
+      "date": "Fri, 20 Feb 2026 00:15:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add `\"node\"` condition before `\"import\"` in the `\"exports\"` map so that Node.js uses the CJS output (which handles extensionless imports), while bundlers still use ESM via `\"import\"`. Fixes https://github.com/microsoft/rushstack/issues/5644."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.20.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.2.0` to `2.2.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.0",
       "tag": "@microsoft/webpack5-load-themed-styles-loader_v0.4.0",
       "date": "Thu, 19 Feb 2026 00:04:52 GMT",

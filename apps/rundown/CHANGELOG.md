@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rundown
 
-This log was last generated on Thu, 19 Feb 2026 00:04:53 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Feb 2026 00:15:04 GMT and should not be manually modified.
+
+## 1.3.1
+Fri, 20 Feb 2026 00:15:04 GMT
+
+### Patches
+
+- Add `"node"` condition before `"import"` in the `"exports"` map so that Node.js uses the CJS output (which handles extensionless imports), while bundlers still use ESM via `"import"`. Fixes https://github.com/microsoft/rushstack/issues/5644.
 
 ## 1.3.0
 Thu, 19 Feb 2026 00:04:53 GMT

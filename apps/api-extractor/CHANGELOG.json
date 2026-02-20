@@ -2,6 +2,35 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.57.1",
+      "tag": "@microsoft/api-extractor_v7.57.1",
+      "date": "Fri, 20 Feb 2026 00:15:03 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add `\"node\"` condition before `\"import\"` in the `\"exports\"` map so that Node.js uses the CJS output (which handles extensionless imports), while bundlers still use ESM via `\"import\"`. Fixes https://github.com/microsoft/rushstack/issues/5644."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.20.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.7.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.22.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.57.0",
       "tag": "@microsoft/api-extractor_v7.57.0",
       "date": "Thu, 19 Feb 2026 00:04:52 GMT",
