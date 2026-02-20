@@ -21,7 +21,7 @@
             "pluginPackage": "@rushstack/heft-json-schema-typings-plugin",
             "pluginName": "json-schema-typings-plugin",
             "options": {
-              "generatedTsFolders": ["temp/schema-ts", "lib"]
+              "generatedTsFolders": ["temp/schema-ts", "lib", "lib-dts"]
             }
           }
         }
