@@ -524,10 +524,8 @@ export class ProjectChangeAnalyzer {
     changedProjects: Set<RushConfigurationProject>
   ): Promise<void> {
     const pnpmOptions: PnpmOptionsConfiguration | undefined = subspace.getPnpmOptions();
-    const currentCatalogs: Record<string, Record<string, string>> | undefined = pnpmOptions?.globalCatalogs;
-    if (!currentCatalogs) {
-      return;
-    }
+    // Default to an empty object if no global catalogs are configured, handle case of globalCatalogs being deleted
+    const currentCatalogs: Record<string, Record<string, string>> = pnpmOptions?.globalCatalogs ?? {};
 
     const pnpmConfigRelativePath: string = Path.convertToSlashes(
       path.relative(repoRoot, subspace.getPnpmConfigFilePath())
@@ -539,17 +537,35 @@ export class ProjectChangeAnalyzer {
 
     // Determine which specific packages changed within each catalog namespace
     // Maps catalogNamespace (e.g. "default", "react17") → Set of changed package names
-    let changedCatalogPackages: Map<string, Set<string>>;
+    let oldCatalogs: Record<string, Record<string, string>> | undefined;
     try {
       const oldPnpmConfigText: string = await this._git.getBlobContentAsync({
         blobSpec: `${mergeCommit}:${pnpmConfigRelativePath}`,
         repositoryRoot: repoRoot
       });
       const oldPnpmConfig: IPnpmOptionsJson = JSON.parse(oldPnpmConfigText);
-      const oldCatalogs: Record<string, Record<string, string>> = oldPnpmConfig.globalCatalogs ?? {};
+      oldCatalogs = oldPnpmConfig.globalCatalogs ?? {};
+    } catch {
+      // Old file didn't exist or was unparseable — treat all packages in all current catalogs as changed
+      if (rushConfiguration.subspacesFeatureEnabled) {
+        terminal.writeLine(
+          `"${subspace.subspaceName}" subspace pnpm-config.json was created or unparseable. Assuming all projects are affected.`
+        );
+      } else {
+        terminal.writeLine(
+          `pnpm-config.json was created or unparseable. Assuming all projects are affected.`
+        );
+      }
+    }
 
-      changedCatalogPackages = new Map<string, Set<string>>();
+    const changedCatalogPackages: Map<string, Set<string>> = new Map<string, Set<string>>();
 
+    if (oldCatalogs === undefined) {
+      // Could not load old catalogs — treat all packages in all current catalogs as changed
+      for (const [catalogName, packages] of Object.entries(currentCatalogs)) {
+        changedCatalogPackages.set(catalogName, new Set(Object.keys(packages)));
+      }
+    } else {
       // Check current catalogs for new or modified package entries
       for (const [catalogName, packages] of Object.entries(currentCatalogs)) {
         const oldPackages: Record<string, string> | undefined = oldCatalogs[catalogName];
@@ -581,32 +597,18 @@ export class ProjectChangeAnalyzer {
           changedCatalogPackages.set(catalogName, new Set(Object.keys(oldPackages)));
         }
       }
-    } catch {
-      // Old file didn't exist or was unparseable — treat all packages in all current catalogs as changed
-      changedCatalogPackages = new Map<string, Set<string>>();
-      for (const [catalogName, packages] of Object.entries(currentCatalogs)) {
-        changedCatalogPackages.set(catalogName, new Set(Object.keys(packages)));
-      }
-      if (rushConfiguration.subspacesFeatureEnabled) {
-        terminal.writeLine(
-          `"${subspace.subspaceName}" subspace pnpm-config.json was created or unparseable. Assuming all projects are affected.`
-        );
-      } else {
-        terminal.writeLine(
-          `pnpm-config.json was created or unparseable. Assuming all projects are affected.`
-        );
-      }
     }
 
     if (changedCatalogPackages.size > 0) {
       // Check each project in the subspace to see if it depends on a changed catalog package
       const subspaceProjects: RushConfigurationProject[] = subspace.getProjects();
       for (const project of subspaceProjects) {
-        const { dependencies, devDependencies, optionalDependencies } = project.packageJson;
+        const { dependencies, devDependencies, optionalDependencies, peerDependencies } = project.packageJson;
         const allDeps: Record<string, string>[] = [
           dependencies ?? {},
           devDependencies ?? {},
-          optionalDependencies ?? {}
+          optionalDependencies ?? {},
+          peerDependencies ?? {}
         ];
 
         let isAffected: boolean = false;
