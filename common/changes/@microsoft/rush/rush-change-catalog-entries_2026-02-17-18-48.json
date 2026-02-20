@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "add pnpm global catalog detection to rush change",
-      "type": "patch"
+      "comment": "Add support for pnpm global catalog detection to `rush change`. Now, when a dependencyis changed in the pnpm global catalog, changelogs will be required for affected published packages.",
+      "type": "none"
     }
   ],
   "packageName": "@microsoft/rush"
