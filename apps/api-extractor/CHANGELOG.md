@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 20 Feb 2026 00:15:03 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Feb 2026 16:14:49 GMT and should not be manually modified.
+
+## 7.57.2
+Fri, 20 Feb 2026 16:14:49 GMT
+
+### Patches
+
+- Bump minimatch from 10.1.2 to 10.2.1
 
 ## 7.57.1
 Fri, 20 Feb 2026 00:15:03 GMT

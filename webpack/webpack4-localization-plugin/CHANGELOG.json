@@ -2,6 +2,26 @@
   "name": "@rushstack/webpack4-localization-plugin",
   "entries": [
     {
+      "version": "0.20.2",
+      "tag": "@rushstack/webpack4-localization-plugin_v0.20.2",
+      "date": "Fri, 20 Feb 2026 16:14:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump minimatch from 10.1.2 to 10.2.1"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.15.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.20.1",
       "tag": "@rushstack/webpack4-localization-plugin_v0.20.1",
       "date": "Fri, 20 Feb 2026 00:15:04 GMT",

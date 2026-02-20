@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.57.2",
+      "tag": "@microsoft/api-extractor_v7.57.2",
+      "date": "Fri, 20 Feb 2026 16:14:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump minimatch from 10.1.2 to 10.2.1"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.57.1",
       "tag": "@microsoft/api-extractor_v7.57.1",
       "date": "Fri, 20 Feb 2026 00:15:03 GMT",
