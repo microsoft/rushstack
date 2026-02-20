@@ -1,5 +1,147 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Executable process list captures command line when present (linux) 1`] = `
+Array [
+  Object {
+    "childProcessInfos": Array [
+      Object {
+        "childProcessInfos": Array [
+          Object {
+            "childProcessInfos": Array [],
+            "commandLine": "/tmp/child.sh arg1",
+            "parentProcessInfo": [Circular],
+            "processId": 11,
+            "processName": "child",
+          },
+        ],
+        "commandLine": "/usr/bin/node --foo --bar=baz",
+        "parentProcessInfo": [Circular],
+        "processId": 10,
+        "processName": "node",
+      },
+    ],
+    "parentProcessInfo": undefined,
+    "processId": 0,
+    "processName": "",
+  },
+  Object {
+    "childProcessInfos": Array [
+      Object {
+        "childProcessInfos": Array [],
+        "commandLine": "/tmp/child.sh arg1",
+        "parentProcessInfo": [Circular],
+        "processId": 11,
+        "processName": "child",
+      },
+    ],
+    "commandLine": "/usr/bin/node --foo --bar=baz",
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+      ],
+      "parentProcessInfo": undefined,
+      "processId": 0,
+      "processName": "",
+    },
+    "processId": 10,
+    "processName": "node",
+  },
+  Object {
+    "childProcessInfos": Array [],
+    "commandLine": "/tmp/child.sh arg1",
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+      ],
+      "commandLine": "/usr/bin/node --foo --bar=baz",
+      "parentProcessInfo": Object {
+        "childProcessInfos": Array [
+          [Circular],
+        ],
+        "parentProcessInfo": undefined,
+        "processId": 0,
+        "processName": "",
+      },
+      "processId": 10,
+      "processName": "node",
+    },
+    "processId": 11,
+    "processName": "child",
+  },
+]
+`;
+
+exports[`Executable process list captures command line when present (win32) 1`] = `
+Array [
+  Object {
+    "childProcessInfos": Array [
+      Object {
+        "childProcessInfos": Array [
+          Object {
+            "childProcessInfos": Array [],
+            "commandLine": "helper.exe --opt arg",
+            "parentProcessInfo": [Circular],
+            "processId": 101,
+            "processName": "helper.exe",
+          },
+        ],
+        "commandLine": "C:\\\\Program Files\\\\nodejs\\\\node.exe --foo --bar=baz",
+        "parentProcessInfo": [Circular],
+        "processId": 100,
+        "processName": "node.exe",
+      },
+    ],
+    "parentProcessInfo": undefined,
+    "processId": 0,
+    "processName": "",
+  },
+  Object {
+    "childProcessInfos": Array [
+      Object {
+        "childProcessInfos": Array [],
+        "commandLine": "helper.exe --opt arg",
+        "parentProcessInfo": [Circular],
+        "processId": 101,
+        "processName": "helper.exe",
+      },
+    ],
+    "commandLine": "C:\\\\Program Files\\\\nodejs\\\\node.exe --foo --bar=baz",
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+      ],
+      "parentProcessInfo": undefined,
+      "processId": 0,
+      "processName": "",
+    },
+    "processId": 100,
+    "processName": "node.exe",
+  },
+  Object {
+    "childProcessInfos": Array [],
+    "commandLine": "helper.exe --opt arg",
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+      ],
+      "commandLine": "C:\\\\Program Files\\\\nodejs\\\\node.exe --foo --bar=baz",
+      "parentProcessInfo": Object {
+        "childProcessInfos": Array [
+          [Circular],
+        ],
+        "parentProcessInfo": undefined,
+        "processId": 0,
+        "processName": "",
+      },
+      "processId": 100,
+      "processName": "node.exe",
+    },
+    "processId": 101,
+    "processName": "helper.exe",
+  },
+]
+`;
+
 exports[`Executable process list parses unix output 1`] = `
 Object {
   "childProcessInfos": Array [
@@ -9,6 +151,7 @@ Object {
           "childProcessInfos": Array [
             Object {
               "childProcessInfos": Array [],
+              "commandLine": " ",
               "parentProcessInfo": [Circular],
               "processId": 4,
               "processName": "process2",
@@ -43,6 +186,7 @@ Object {
       "childProcessInfos": Array [
         Object {
           "childProcessInfos": Array [],
+          "commandLine": " ",
           "parentProcessInfo": [Circular],
           "processId": 4,
           "processName": "process2",
@@ -77,6 +221,7 @@ Object {
   "childProcessInfos": Array [
     Object {
       "childProcessInfos": Array [],
+      "commandLine": " ",
       "parentProcessInfo": [Circular],
       "processId": 4,
       "processName": "process2",
@@ -111,6 +256,7 @@ Object {
 exports[`Executable process list parses unix output 4`] = `
 Object {
   "childProcessInfos": Array [],
+  "commandLine": " ",
   "parentProcessInfo": Object {
     "childProcessInfos": Array [
       [Circular],
@@ -153,6 +299,7 @@ Object {
         "childProcessInfos": Array [
           Object {
             "childProcessInfos": Array [],
+            "commandLine": " ",
             "parentProcessInfo": [Circular],
             "processId": 4,
             "processName": "process2",
@@ -189,6 +336,7 @@ Object {
           "childProcessInfos": Array [
             Object {
               "childProcessInfos": Array [],
+              "commandLine": " ",
               "parentProcessInfo": [Circular],
               "processId": 4,
               "processName": "process2",
@@ -223,6 +371,7 @@ Object {
       "childProcessInfos": Array [
         Object {
           "childProcessInfos": Array [],
+          "commandLine": " ",
           "parentProcessInfo": [Circular],
           "processId": 4,
           "processName": "process2",
@@ -257,6 +406,7 @@ Object {
   "childProcessInfos": Array [
     Object {
       "childProcessInfos": Array [],
+      "commandLine": " ",
       "parentProcessInfo": [Circular],
       "processId": 4,
       "processName": "process2",
@@ -291,6 +441,7 @@ Object {
 exports[`Executable process list parses unix stream output 4`] = `
 Object {
   "childProcessInfos": Array [],
+  "commandLine": " ",
   "parentProcessInfo": Object {
     "childProcessInfos": Array [
       [Circular],
@@ -333,6 +484,7 @@ Object {
         "childProcessInfos": Array [
           Object {
             "childProcessInfos": Array [],
+            "commandLine": " ",
             "parentProcessInfo": [Circular],
             "processId": 4,
             "processName": "process2",
