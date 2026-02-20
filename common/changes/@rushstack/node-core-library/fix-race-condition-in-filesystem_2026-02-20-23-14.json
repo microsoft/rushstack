@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Fix race condition in FileSystem.create*Link helpers: EEXIST errors that occur after ensureFolder/ensureFolderAsync are now handled consistently with the initial EEXIST handling.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}
