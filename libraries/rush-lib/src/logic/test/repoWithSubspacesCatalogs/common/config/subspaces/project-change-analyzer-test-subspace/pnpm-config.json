@@ -1,0 +1,13 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json",
+  "globalCatalogs": {
+    "default": {
+      "foo": "~2.0.0",
+      "bar": "^3.0.0"
+    },
+    "tools": {
+      "typescript": "~5.3.0",
+      "eslint": "^8.50.0"
+    }
+  }
+}

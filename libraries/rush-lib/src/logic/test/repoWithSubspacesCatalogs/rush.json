@@ -1,0 +1,44 @@
+{
+  "rushVersion": "1.0.5",
+  "pnpmVersion": "9.15.0",
+
+  "projects": [
+    {
+      "packageName": "a",
+      "projectFolder": "a"
+    },
+    {
+      "packageName": "b",
+      "projectFolder": "b"
+    },
+    {
+      "packageName": "c",
+      "projectFolder": "c"
+    },
+    {
+      "packageName": "d",
+      "projectFolder": "d",
+      "subspaceName": "project-change-analyzer-test-subspace"
+    },
+    {
+      "packageName": "e",
+      "projectFolder": "e",
+      "subspaceName": "project-change-analyzer-test-subspace"
+    },
+    {
+      "packageName": "f",
+      "projectFolder": "f",
+      "subspaceName": "project-change-analyzer-test-subspace"
+    },
+    {
+      "packageName": "g",
+      "projectFolder": "g",
+      "subspaceName": "project-change-analyzer-test-subspace"
+    },
+    {
+      "packageName": "h",
+      "projectFolder": "h",
+      "subspaceName": "project-change-analyzer-test-subspace"
+    }
+  ]
+}
