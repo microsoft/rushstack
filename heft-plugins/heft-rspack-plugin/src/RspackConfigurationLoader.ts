@@ -9,7 +9,7 @@ import type * as TRspack from '@rspack/core';
 import type { HeftConfiguration, IHeftTaskSession } from '@rushstack/heft';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import type { IRspackPluginOptions } from './RspackPlugin';
+import type { RspackPluginConfiguration as IRspackPluginOptions } from './schemas/heft-rspack-plugin-options.schema.json.d.ts';
 import {
   type IRspackConfiguration,
   type IRspackConfigurationFnEnvironment,

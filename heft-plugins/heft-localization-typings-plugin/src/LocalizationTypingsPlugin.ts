@@ -11,7 +11,7 @@ import type {
 } from '@rushstack/heft';
 import { TypingsGenerator } from '@rushstack/localization-utilities';
 
-import type { Options as ILocalizationTypingsPluginOptions } from './schemas/options.schema.json.d.ts';
+import type { HeftLocalizationTypingsPluginOptions as ILocalizationTypingsPluginOptions } from './schemas/heft-localization-typings-plugin.schema.json.d.ts';
 
 const PLUGIN_NAME: 'localization-typings-plugin' = 'localization-typings-plugin';
 
