@@ -53,6 +53,7 @@
     "jest-watch-select-projects": "2.0.0"
   },
   "exports": {
+    "./includes/*.json": "./includes/*.json",
     "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
     "./lib/*": {
       "types": "./lib-dts/*.d.ts",
