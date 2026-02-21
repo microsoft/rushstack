@@ -11,7 +11,7 @@ import type {
 import type { ITerminal } from '@rushstack/terminal';
 
 import { JsonSchemaTypingsGenerator } from './JsonSchemaTypingsGenerator';
-import type { Options as IJsonSchemaTypingsPluginOptions } from './schemas/options.schema.json.d.ts';
+import type { HeftJsonSchemaTypingsPluginOptions as IJsonSchemaTypingsPluginOptions } from './schemas/heft-json-schema-typings-plugin-options.schema.json';
 
 const PLUGIN_NAME: 'json-schema-typings-plugin' = 'json-schema-typings-plugin';
 
