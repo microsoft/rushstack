@@ -14,7 +14,7 @@
     },
 
     "projectFolder": {
-      "description": "Determines the \"<projectFolder>\" token that can be used with other config file settings.  The project folder typically contains the tsconfig.json and package.json config files, but the path is user-defined.  The path is resolved relative to the folder of the config file that contains the setting.  The default value for \"projectFolder\" is the token \"<lookup>\", which means the folder is determined using the following heuristics:\n\nIf the config/rig.json system is used (as defined by @rushstack/rig-package), then the \"<lookup>\" value will be the package folder that referenced the rig.\n\nOtherwise, the \"<lookup>\" value is determined by traversing parent folders, starting from the folder containing api-extractor.json, and stopping at the first folder that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in this way, then an error will be reported.",
+      "description": "Determines the \"<projectFolder>\" token that can be used with other config file settings.  The project folder typically contains the tsconfig.json and package.json config files, but the path is user-defined.  The path is resolved relative to the folder of the config file that contains the setting.  The default value for \"projectFolder\" is the token \"<lookup>\", which means the folder is determined using the following heuristics:\n\nIf the config/rig.json system is used (as defined by `@rushstack/rig-package`), then the \"<lookup>\" value will be the package folder that referenced the rig.\n\nOtherwise, the \"<lookup>\" value is determined by traversing parent folders, starting from the folder containing api-extractor.json, and stopping at the first folder that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in this way, then an error will be reported.",
       "type": "string"
     },
 
@@ -85,7 +85,7 @@
         },
 
         "reportVariants": {
-          "description": "To support different approval requirements for different API levels, multiple \"variants\" of the API report can be generated.  The \"reportVariants\" setting specifies a list of variants to be generated.  If omitted, by default only the \"complete\" variant will be generated, which includes all @internal, @alpha, @beta, and @public items.  Other possible variants are \"alpha\" (@alpha + @beta + @public), \"beta\" (@beta + @public), and \"public\" (@public only).",
+          "description": "To support different approval requirements for different API levels, multiple \"variants\" of the API report can be generated.  The \"reportVariants\" setting specifies a list of variants to be generated.  If omitted, by default only the \"complete\" variant will be generated, which includes all `@internal`, `@alpha`, `@beta`, and `@public` items.  Other possible variants are \"alpha\" (`@alpha` + `@beta` + `@public`), \"beta\" (`@beta` + `@public`), and \"public\" (`@public` only).",
           "type": "array",
           "items": {
             "type": "string",
@@ -109,7 +109,7 @@
         },
 
         "tagsToReport": {
-          "description": "Specifies a list of TSDoc tags that should be reported in the API report file for items whose documentation contains them.  This can be used to include standard TSDoc tags or custom ones.  Specified tag names must begin with \"@\".  By default, the following tags are reported: [@sealed, @virtual, @override, @eventProperty, @deprecated].  Tags will appear in the order they are specified in this list.  Note that an item's release tag will always reported; this behavior cannot be overridden.",
+          "description": "Specifies a list of TSDoc tags that should be reported in the API report file for items whose documentation contains them.  This can be used to include standard TSDoc tags or custom ones.  Specified tag names must begin with `@`.  By default, the following tags are reported: [`@sealed`, `@virtual`, `@override`, `@eventProperty`, `@deprecated`].  Tags will appear in the order they are specified in this list.  Note that an item's release tag will always reported; this behavior cannot be overridden.",
           "type": "object",
           "patternProperties": {
             "^@[^\\s]*$": {
@@ -169,15 +169,15 @@
           "type": "string"
         },
         "alphaTrimmedFilePath": {
-          "description": "Specifies the output path for a .d.ts rollup file to be generated with trimming for an \"alpha\" release. This file will include only declarations that are marked as \"@public\", \"@beta\", or \"@alpha\". The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
+          "description": "Specifies the output path for a .d.ts rollup file to be generated with trimming for an \"alpha\" release. This file will include only declarations that are marked as `@public`, `@beta`, or `@alpha`. The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
           "type": "string"
         },
         "betaTrimmedFilePath": {
-          "description": "Specifies the output path for a .d.ts rollup file to be generated with trimming for a \"beta\" release. This file will include only declarations that are marked as \"@public\" or \"@beta\". The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
+          "description": "Specifies the output path for a .d.ts rollup file to be generated with trimming for a \"beta\" release. This file will include only declarations that are marked as `@public` or `@beta`. The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
           "type": "string"
         },
         "publicTrimmedFilePath": {
-          "description": "Specifies the output path for a .d.ts rollup file to be generated with trimming for a \"public\" release. This file will include only declarations that are marked as \"@public\". If the path is an empty string, then this file will not be written. The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
+          "description": "Specifies the output path for a .d.ts rollup file to be generated with trimming for a \"public\" release. This file will include only declarations that are marked as `@public`. If the path is an empty string, then this file will not be written. The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
           "type": "string"
         },
         "omitTrimmingComments": {
