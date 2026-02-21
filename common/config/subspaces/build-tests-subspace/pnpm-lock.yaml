@@ -166,6 +166,10 @@ importers:
 
 packages:
 
+  '@apidevtools/json-schema-ref-parser@11.9.3':
+    resolution: {integrity: sha512-60vepv88RwcJtSHrD6MjIL6Ta3SOYbgfnkHb+ppAVK+o9mXprRtulx7VlRl3lN3bbvysAfCS7WMVfhUYemB0IQ==}
+    engines: {node: '>= 16'}
+
   '@babel/code-frame@7.28.6':
     resolution: {integrity: sha512-JYgintcMjRiCvS8mMECzaEn+m3PfoQiyqukOMCCVQtoJGYJw8j/8LBJEiqkHLkfwCcs74E3pbAUFNg7d9VNJ+Q==}
     engines: {node: '>=6.9.0'}
@@ -422,14 +426,6 @@ packages:
       '@types/node':
         optional: true
 
-  '@isaacs/balanced-match@4.0.1':
-    resolution: {integrity: sha512-yzMTt9lEb8Gv7zRioUilSglI0c0smZ9k5D65677DLWLtWJaXIS3CqcGyUFByYKlnUj6TkjLVs54fBl6+TiGQDQ==}
-    engines: {node: 20 || >=22}
-
-  '@isaacs/brace-expansion@5.0.1':
-    resolution: {integrity: sha512-WMz71T1JS624nWj2n2fnYAuPovhv7EUhk69R6i9dsVyzxt5eM3bjwvgk9L+APE1TRscGysAVMANkB0jh0LQZrQ==}
-    engines: {node: 20 || >=22}
-
   '@isaacs/fs-minipass@4.0.1':
     resolution: {integrity: sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==}
     engines: {node: '>=18.0.0'}
@@ -554,6 +550,9 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@jsdevtools/ono@7.1.3':
+    resolution: {integrity: sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==}
 
   '@jsep-plugin/assignment@1.3.0':
     resolution: {integrity: sha512-VVgV+CXrhbMI3aSusQyclHkenWSAm95WaiKrMxRFam3JSUiIaQjoMIw2sEs/OX4XifnqeQUN4DYbJjlA8EfktQ==}
@@ -844,7 +843,7 @@ packages:
   '@rushstack/heft-api-extractor-plugin@file:../../../heft-plugins/heft-api-extractor-plugin':
     resolution: {directory: ../../../heft-plugins/heft-api-extractor-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': 1.2.0
+      '@rushstack/heft': 1.2.2
 
   '@rushstack/heft-config-file@file:../../../libraries/heft-config-file':
     resolution: {directory: ../../../libraries/heft-config-file, type: directory}
@@ -853,7 +852,7 @@ packages:
   '@rushstack/heft-jest-plugin@file:../../../heft-plugins/heft-jest-plugin':
     resolution: {directory: ../../../heft-plugins/heft-jest-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': ^1.2.0
+      '@rushstack/heft': ^1.2.2
       jest-environment-jsdom: ^29.5.0
       jest-environment-node: ^29.5.0
     peerDependenciesMeta:
@@ -862,20 +861,25 @@ packages:
       jest-environment-node:
         optional: true
 
+  '@rushstack/heft-json-schema-typings-plugin@file:../../../heft-plugins/heft-json-schema-typings-plugin':
+    resolution: {directory: ../../../heft-plugins/heft-json-schema-typings-plugin, type: directory}
+    peerDependencies:
+      '@rushstack/heft': 1.2.2
+
   '@rushstack/heft-lint-plugin@file:../../../heft-plugins/heft-lint-plugin':
     resolution: {directory: ../../../heft-plugins/heft-lint-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': 1.2.0
+      '@rushstack/heft': 1.2.2
 
   '@rushstack/heft-node-rig@file:../../../rigs/heft-node-rig':
     resolution: {directory: ../../../rigs/heft-node-rig, type: directory}
     peerDependencies:
-      '@rushstack/heft': ^1.2.0
+      '@rushstack/heft': ^1.2.2
 
   '@rushstack/heft-typescript-plugin@file:../../../heft-plugins/heft-typescript-plugin':
     resolution: {directory: ../../../heft-plugins/heft-typescript-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': 1.2.0
+      '@rushstack/heft': 1.2.2
 
   '@rushstack/heft@file:../../../apps/heft':
     resolution: {directory: ../../../apps/heft, type: directory}
@@ -955,6 +959,14 @@ packages:
   '@rushstack/ts-command-line@file:../../../libraries/ts-command-line':
     resolution: {directory: ../../../libraries/ts-command-line, type: directory}
 
+  '@rushstack/typings-generator@file:../../../libraries/typings-generator':
+    resolution: {directory: ../../../libraries/typings-generator, type: directory}
+    peerDependencies:
+      '@types/node': '*'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
   '@sinclair/typebox@0.27.8':
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
 
@@ -1020,6 +1032,9 @@ packages:
 
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
+
+  '@types/lodash@4.17.23':
+    resolution: {integrity: sha512-RDvF6wTulMPjrNdCoYRC8gNR880JNGT8uB+REUpC2Ns4pRqQJhGz90wh7rgdXDPpCczF3VGktDuFGVnz8zP7HA==}
 
   '@types/node@20.17.19':
     resolution: {integrity: sha512-LEwC7o1ifqg/6r2gn9Dns0f1rhK+fPFDoMiceTJ6kWmVk6bgXBI/9IOWfVan4WiAavK9pIVWdX0/e3J+eEUh5A==}
@@ -1363,6 +1378,10 @@ packages:
     resolution: {integrity: sha512-pbnl5XzGBdrFU/wT4jqmJVPn2B6UHPBOhzMQkY/SPUPB6QtUXtmBHBIwCbXJol93mOpGMnQyP/+BB19q04xj7g==}
     engines: {node: '>=4'}
 
+  binary-extensions@2.3.0:
+    resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
+    engines: {node: '>=8'}
+
   bl@4.1.0:
     resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
 
@@ -1455,6 +1474,10 @@ packages:
 
   chardet@2.1.1:
     resolution: {integrity: sha512-PsezH1rqdV9VvyNhxxOW32/d75r01NY7TQCmOqomRo15ZSOKbpTFVsfjghxo6JloQUCGnH4k1LGu0R4yCLlWQQ==}
+
+  chokidar@3.6.0:
+    resolution: {integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==}
+    engines: {node: '>= 8.10.0'}
 
   chownr@3.0.0:
     resolution: {integrity: sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==}
@@ -1917,6 +1940,15 @@ packages:
   fb-watchman@2.0.2:
     resolution: {integrity: sha512-p5161BqbuCaSnB8jIbzQHOlpgsPmK5rJVDfDKO91Axs5NC1uu3HRQm6wt9cd9/+GtQQIO53JdGXXoyDpTAsgYA==}
 
+  fdir@6.5.0:
+    resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
+    engines: {node: '>=12.0.0'}
+    peerDependencies:
+      picomatch: ^3 || ^4
+    peerDependenciesMeta:
+      picomatch:
+        optional: true
+
   figures@3.0.0:
     resolution: {integrity: sha512-HKri+WoWoUgr83pehn/SIgLOMZ9nAWC6dcGj26RY2R4F50u4+RTUz0RCrUlOV3nKRAICW1UGzyb+kcX2qK1S/g==}
     engines: {node: '>=8'}
@@ -2192,6 +2224,10 @@ packages:
   is-bigint@1.1.0:
     resolution: {integrity: sha512-n4ZT37wG78iz03xPRKJrHTdZbe3IicyucEtdRsV5yglwc3GyUfbAfpSeD0FJ41NbUNSt5wbhqfp1fS+BgnvDFQ==}
     engines: {node: '>= 0.4'}
+
+  is-binary-path@2.1.0:
+    resolution: {integrity: sha512-ZMERYes6pDydyuGidse7OsHxtbI7WVeUEozgR/g7rd0xUimYNlvZRE/K2MgZTjWy725IfelLeVcEM97mmtRGXw==}
+    engines: {node: '>=8'}
 
   is-boolean-object@1.2.2:
     resolution: {integrity: sha512-wa56o2/ElJMYqjCjGkXri7it5FbebW5usLw/nPmCMs5DeZ7eziSYZhSmPRn0txqeW4LnAmQQU7FgqLpsEFKM4A==}
@@ -2535,6 +2571,11 @@ packages:
   json-parse-even-better-errors@2.3.1:
     resolution: {integrity: sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==}
 
+  json-schema-to-typescript@15.0.4:
+    resolution: {integrity: sha512-Su9oK8DR4xCmDsLlyvadkXzX6+GGXJpbhwoLtOGArAG61dvbW4YQmSEno2y66ahpIdmLMg6YUf/QHLgiwvkrHQ==}
+    engines: {node: '>=16.0.0'}
+    hasBin: true
+
   json-schema-traverse@0.4.1:
     resolution: {integrity: sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==}
 
@@ -2682,10 +2723,6 @@ packages:
   mimic-fn@3.1.0:
     resolution: {integrity: sha512-Ysbi9uYW9hFyfrThdDEQuykN4Ey6BuwPD2kpI5ES/nFTDn/98yxYNLZJcgUAKPT/mcrLLKaGzJR9YVxJrIdASQ==}
     engines: {node: '>=8'}
-
-  minimatch@10.1.2:
-    resolution: {integrity: sha512-fu656aJ0n2kcXwsnwnv9g24tkU5uSmOlTjd6WyyaKm2Z+h1qmY6bAjrcaIxF/BslFqbZ8UBtbJi7KgQOZD2PTw==}
-    engines: {node: 20 || >=22}
 
   minimatch@10.2.1:
     resolution: {integrity: sha512-MClCe8IL5nRRmawL6ib/eT4oLyeKMGCghibcDWK+J0hh0Q8kqSdia6BvbRMVk6mPa6WqUa5uR2oxt6C5jd533A==}
@@ -2958,6 +2995,11 @@ packages:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
 
+  prettier@3.8.1:
+    resolution: {integrity: sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==}
+    engines: {node: '>=14'}
+    hasBin: true
+
   pretty-error@4.0.0:
     resolution: {integrity: sha512-AoJ5YMAcXKYxKhuJGdcvse+Voc6v1RgnsR3nWcYU7q4t6z0Q6T86sv5Zq8VIRbOWWFpvdGE83LtdSMNd+6Y0xw==}
 
@@ -3019,6 +3061,10 @@ packages:
   readdir-scoped-modules@1.1.0:
     resolution: {integrity: sha512-asaikDeqAQg7JifRsZn1NJZXo9E+VwlyCfbkZhwyISinqk5zNS6266HS5kah6P0SaQKGF6SkNnZVHUzHFYxYDw==}
     deprecated: This functionality has been moved to @npmcli/fs
+
+  readdirp@3.6.0:
+    resolution: {integrity: sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==}
+    engines: {node: '>=8.10.0'}
 
   reflect.getprototypeof@1.0.10:
     resolution: {integrity: sha512-00o4I+DVrefhv+nX0ulyi3biSHCPDe+yLv5o/p6d/UVlirijB8E16FtfwSAi4g3tcqrQ4lRAqQSoFEZJehYEcw==}
@@ -3381,6 +3427,10 @@ packages:
   through@2.3.8:
     resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
 
+  tinyglobby@0.2.15:
+    resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
+    engines: {node: '>=12.0.0'}
+
   tmpl@1.0.5:
     resolution: {integrity: sha512-3f0uOEAQwIqGuWW2MVzYg8fV/QNnc/IpuJNG837rLuczAaLVHslWHZQj4IGiEl5Hs3kkbhwL9Ab7Hrsmuj+Smw==}
 
@@ -3606,6 +3656,12 @@ packages:
     engines: {node: '>=10'}
 
 snapshots:
+
+  '@apidevtools/json-schema-ref-parser@11.9.3':
+    dependencies:
+      '@jsdevtools/ono': 7.1.3
+      '@types/json-schema': 7.0.15
+      js-yaml: 4.1.1
 
   '@babel/code-frame@7.28.6':
     dependencies:
@@ -3896,12 +3952,6 @@ snapshots:
     optionalDependencies:
       '@types/node': 20.17.19
 
-  '@isaacs/balanced-match@4.0.1': {}
-
-  '@isaacs/brace-expansion@5.0.1':
-    dependencies:
-      '@isaacs/balanced-match': 4.0.1
-
   '@isaacs/fs-minipass@4.0.1':
     dependencies:
       minipass: 7.1.2
@@ -4155,6 +4205,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@jsdevtools/ono@7.1.3': {}
 
   '@jsep-plugin/assignment@1.3.0(jsep@1.4.0)':
     dependencies:
@@ -4672,6 +4724,15 @@ snapshots:
       - supports-color
       - ts-node
 
+  '@rushstack/heft-json-schema-typings-plugin@file:../../../heft-plugins/heft-json-schema-typings-plugin(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/node@20.17.19)':
+    dependencies:
+      '@rushstack/heft': file:../../../apps/heft(@types/node@20.17.19)
+      '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
+      '@rushstack/typings-generator': file:../../../libraries/typings-generator(@types/node@20.17.19)
+      json-schema-to-typescript: 15.0.4
+    transitivePeerDependencies:
+      - '@types/node'
+
   '@rushstack/heft-lint-plugin@file:../../../heft-plugins/heft-lint-plugin(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/node@20.17.19)':
     dependencies:
       '@rushstack/heft': file:../../../apps/heft(@types/node@20.17.19)
@@ -4849,6 +4910,15 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
+  '@rushstack/typings-generator@file:../../../libraries/typings-generator(@types/node@20.17.19)':
+    dependencies:
+      '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
+      '@rushstack/terminal': file:../../../libraries/terminal(@types/node@20.17.19)
+      chokidar: 3.6.0
+      fast-glob: 3.3.3
+    optionalDependencies:
+      '@types/node': 20.17.19
+
   '@sinclair/typebox@0.27.8': {}
 
   '@sinclair/typebox@0.34.48': {}
@@ -4926,6 +4996,8 @@ snapshots:
   '@types/json-schema@7.0.15': {}
 
   '@types/json5@0.0.29': {}
+
+  '@types/lodash@4.17.23': {}
 
   '@types/node@20.17.19':
     dependencies:
@@ -5487,6 +5559,8 @@ snapshots:
     dependencies:
       is-windows: 1.0.2
 
+  binary-extensions@2.3.0: {}
+
   bl@4.1.0:
     dependencies:
       buffer: 5.7.1
@@ -5586,6 +5660,18 @@ snapshots:
   char-regex@1.0.2: {}
 
   chardet@2.1.1: {}
+
+  chokidar@3.6.0:
+    dependencies:
+      anymatch: 3.1.3
+      braces: 3.0.3
+      glob-parent: 5.1.2
+      is-binary-path: 2.1.0
+      is-glob: 4.0.3
+      normalize-path: 3.0.0
+      readdirp: 3.6.0
+    optionalDependencies:
+      fsevents: 2.3.3
 
   chownr@3.0.0: {}
 
@@ -6222,6 +6308,10 @@ snapshots:
     dependencies:
       bser: 2.1.1
 
+  fdir@6.5.0(picomatch@4.0.3):
+    optionalDependencies:
+      picomatch: 4.0.3
+
   figures@3.0.0:
     dependencies:
       escape-string-regexp: 1.0.5
@@ -6511,6 +6601,10 @@ snapshots:
   is-bigint@1.1.0:
     dependencies:
       has-bigints: 1.1.0
+
+  is-binary-path@2.1.0:
+    dependencies:
+      binary-extensions: 2.3.0
 
   is-boolean-object@1.2.2:
     dependencies:
@@ -7077,6 +7171,18 @@ snapshots:
 
   json-parse-even-better-errors@2.3.1: {}
 
+  json-schema-to-typescript@15.0.4:
+    dependencies:
+      '@apidevtools/json-schema-ref-parser': 11.9.3
+      '@types/json-schema': 7.0.15
+      '@types/lodash': 4.17.23
+      is-glob: 4.0.3
+      js-yaml: 4.1.1
+      lodash: 4.17.23
+      minimist: 1.2.8
+      prettier: 3.8.1
+      tinyglobby: 0.2.15
+
   json-schema-traverse@0.4.1: {}
 
   json-schema-traverse@1.0.0: {}
@@ -7166,6 +7272,7 @@ snapshots:
       '@microsoft/api-extractor': file:../../../apps/api-extractor(@types/node@20.17.19)
       '@rushstack/eslint-patch': file:../../../eslint/eslint-patch
       '@rushstack/heft': file:../../../apps/heft(@types/node@20.17.19)
+      '@rushstack/heft-json-schema-typings-plugin': file:../../../heft-plugins/heft-json-schema-typings-plugin(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/node@20.17.19)
       '@rushstack/heft-node-rig': file:../../../rigs/heft-node-rig(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/node@20.17.19)
       '@types/heft-jest': 1.0.1
       '@types/node': 20.17.19
@@ -7251,10 +7358,6 @@ snapshots:
   mimic-fn@2.1.0: {}
 
   mimic-fn@3.1.0: {}
-
-  minimatch@10.1.2:
-    dependencies:
-      '@isaacs/brace-expansion': 5.0.1
 
   minimatch@10.2.1:
     dependencies:
@@ -7542,6 +7645,8 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
+  prettier@3.8.1: {}
+
   pretty-error@4.0.0:
     dependencies:
       lodash: 4.17.23
@@ -7625,6 +7730,10 @@ snapshots:
       dezalgo: 1.0.4
       graceful-fs: 4.2.11
       once: 1.4.0
+
+  readdirp@3.6.0:
+    dependencies:
+      picomatch: 2.3.1
 
   reflect.getprototypeof@1.0.10:
     dependencies:
@@ -8025,6 +8134,11 @@ snapshots:
       readable-stream: 3.6.2
 
   through@2.3.8: {}
+
+  tinyglobby@0.2.15:
+    dependencies:
+      fdir: 6.5.0(picomatch@4.0.3)
+      picomatch: 4.0.3
 
   tmpl@1.0.5: {}
 

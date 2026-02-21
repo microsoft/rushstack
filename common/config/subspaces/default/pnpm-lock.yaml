@@ -3280,12 +3280,12 @@ importers:
       '@rushstack/terminal':
         specifier: workspace:*
         version: link:../../libraries/terminal
+      decoupled-local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/decoupled-local-node-rig
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
-      local-node-rig:
-        specifier: workspace:*
-        version: link:../../rigs/local-node-rig
 
   ../../../heft-plugins/heft-lint-plugin:
     dependencies:
@@ -4481,12 +4481,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      decoupled-local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/decoupled-local-node-rig
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
-      local-node-rig:
-        specifier: workspace:*
-        version: link:../../rigs/local-node-rig
 
   ../../../libraries/worker-pool:
     devDependencies:
@@ -4585,6 +4585,9 @@ importers:
       '@rushstack/heft':
         specifier: 1.2.0
         version: 1.2.0(@types/node@20.17.19)
+      '@rushstack/heft-json-schema-typings-plugin':
+        specifier: 1.2.0
+        version: 1.2.0(@rushstack/heft@1.2.0(@types/node@20.17.19))(@types/node@20.17.19)
       '@rushstack/heft-node-rig':
         specifier: 2.11.20
         version: 2.11.20(@rushstack/heft@1.2.0(@types/node@20.17.19))(@types/node@20.17.19)(jest-environment-jsdom@29.5.0)
@@ -4801,6 +4804,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      '@rushstack/heft-json-schema-typings-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-json-schema-typings-plugin
       '@rushstack/heft-node-rig':
         specifier: workspace:*
         version: link:../heft-node-rig
@@ -9021,6 +9027,11 @@ packages:
       jest-environment-node:
         optional: true
 
+  '@rushstack/heft-json-schema-typings-plugin@1.2.0':
+    resolution: {integrity: sha512-mIJplAzTnhq4Z5TND/ZRMElrGP+8MtlACwvFBL4WfXjnbf96O5LH3m+HtEKpTGun9xuai8YWM2MY0etlcsDSPQ==}
+    peerDependencies:
+      '@rushstack/heft': 1.2.0
+
   '@rushstack/heft-lint-plugin@1.2.0':
     resolution: {integrity: sha512-Z7AxUTUHBH+MNmNAdBGTn7TawMLP5tU50hi+E9g/s0WaoHm6TD7CqrI1kPwELGZl4fnqPQHQsgkXC4P94FDDWQ==}
     peerDependencies:
@@ -9100,6 +9111,14 @@ packages:
 
   '@rushstack/ts-command-line@5.3.0':
     resolution: {integrity: sha512-4hneaVxA5zPC8cwUGZtdvCUzGbW8A+b+qrBK3hYs/xO7TyWkgAMKxq/6FJY91fPG8awgmJ+s1w8GuqNXgxsTyw==}
+
+  '@rushstack/typings-generator@0.16.0':
+    resolution: {integrity: sha512-YH1IAbmi/XVEc/R8LwdZ2THhjzb0mdQjQVdaiH22alSryWNU6/vP6KAI5XY98iCnFyHd/tmZkIbj1StFf7pHhQ==}
+    peerDependencies:
+      '@types/node': '*'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
 
   '@rushstack/webpack-plugin-utilities@0.3.16':
     resolution: {integrity: sha512-0Xb0GESYEyv6Q7hzANZ8RIWa3seiJiCKBNNG83znQwMZ9l0bfnoJzZ3cYODkofoK0E8/nr4hTsn/pWKommf6Mw==}
@@ -24041,6 +24060,15 @@ snapshots:
       - supports-color
       - ts-node
 
+  '@rushstack/heft-json-schema-typings-plugin@1.2.0(@rushstack/heft@1.2.0(@types/node@20.17.19))(@types/node@20.17.19)':
+    dependencies:
+      '@rushstack/heft': 1.2.0(@types/node@20.17.19)
+      '@rushstack/node-core-library': 5.20.0(@types/node@20.17.19)
+      '@rushstack/typings-generator': 0.16.0(@types/node@20.17.19)
+      json-schema-to-typescript: 15.0.4
+    transitivePeerDependencies:
+      - '@types/node'
+
   '@rushstack/heft-lint-plugin@1.2.0(@rushstack/heft@1.2.0(@types/node@20.17.19))(@types/node@20.17.19)':
     dependencies:
       '@rushstack/heft': 1.2.0(@types/node@20.17.19)
@@ -24251,6 +24279,15 @@ snapshots:
       string-argv: 0.3.2
     transitivePeerDependencies:
       - '@types/node'
+
+  '@rushstack/typings-generator@0.16.0(@types/node@20.17.19)':
+    dependencies:
+      '@rushstack/node-core-library': 5.20.0(@types/node@20.17.19)
+      '@rushstack/terminal': 0.22.0(@types/node@20.17.19)
+      chokidar: 3.6.0
+      fast-glob: 3.3.3
+    optionalDependencies:
+      '@types/node': 20.17.19
 
   '@rushstack/webpack-plugin-utilities@0.3.16(@types/webpack@4.41.32)(webpack@4.47.0)':
     dependencies:
@@ -30145,7 +30182,7 @@ snapshots:
 
   eslint@8.57.1:
     dependencies:
-      '@eslint-community/eslint-utils': 4.9.1(eslint@9.37.0)
+      '@eslint-community/eslint-utils': 4.9.1(eslint@8.57.1)
       '@eslint-community/regexpp': 4.12.2
       '@eslint/eslintrc': 2.1.4
       '@eslint/js': 8.57.1
