@@ -3,7 +3,7 @@
 
 import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rush-sdk';
 
-import type { IHttpBuildCacheProviderOptions, UploadMethod } from './HttpBuildCacheProvider';
+import type { IHttpBuildCacheProviderOptions, UploadMethod } from './HttpBuildCacheProvider.ts';
 
 const PLUGIN_NAME: string = 'HttpBuildCachePlugin';
 
@@ -74,7 +74,7 @@ export class RushHttpBuildCachePlugin implements IRushPlugin {
           isCacheWriteAllowed: !!isCacheWriteAllowed
         };
 
-        const { HttpBuildCacheProvider } = await import('./HttpBuildCacheProvider');
+        const { HttpBuildCacheProvider } = await import('./HttpBuildCacheProvider.ts');
         return new HttpBuildCacheProvider(options, rushSession);
       });
     });

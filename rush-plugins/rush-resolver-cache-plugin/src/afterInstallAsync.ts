@@ -11,12 +11,12 @@ import type {
 } from '@rushstack/rush-sdk';
 import type { IResolverCacheFile } from '@rushstack/webpack-workspace-resolve-plugin';
 
-import { Async, FileSystem, PnpmShrinkwrapFile } from './externals';
+import { Async, FileSystem, PnpmShrinkwrapFile } from './externals.ts';
 import {
   computeResolverCacheFromLockfileAsync,
   type IPlatformInfo
-} from './computeResolverCacheFromLockfileAsync';
-import type { IResolverContext } from './types';
+} from './computeResolverCacheFromLockfileAsync.ts';
+import type { IResolverContext } from './types.ts';
 
 /**
  * Gets information used to determine compatibility of optional dependencies.

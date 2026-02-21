@@ -6,7 +6,7 @@ import * as path from 'node:path';
 
 import type { IPackageJson } from '@rushstack/node-core-library';
 
-import type { IRequestMessage, ResponseMessage } from './pnpmfileRunnerWorkerThread';
+import type { IRequestMessage, ResponseMessage } from './pnpmfileRunnerWorkerThread.ts';
 
 interface IPromise {
   resolve: (r: IPackageJson) => void;

@@ -4,11 +4,11 @@
 import type { CommandLineAction } from '@rushstack/ts-command-line';
 import type { ITerminal } from '@rushstack/terminal';
 
-import type { HeftConfiguration } from '../../configuration/HeftConfiguration';
-import type { MetricsCollector } from '../../metrics/MetricsCollector';
-import type { LoggingManager } from '../../pluginFramework/logging/LoggingManager';
-import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
-import type { HeftPhase } from '../../pluginFramework/HeftPhase';
+import type { HeftConfiguration } from '../../configuration/HeftConfiguration.ts';
+import type { MetricsCollector } from '../../metrics/MetricsCollector.ts';
+import type { LoggingManager } from '../../pluginFramework/logging/LoggingManager.ts';
+import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession.ts';
+import type { HeftPhase } from '../../pluginFramework/HeftPhase.ts';
 
 export interface IHeftActionOptions {
   readonly internalHeftSession: InternalHeftSession;

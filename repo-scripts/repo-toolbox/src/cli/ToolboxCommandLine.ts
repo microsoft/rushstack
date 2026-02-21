@@ -4,10 +4,10 @@
 import { CommandLineParser } from '@rushstack/ts-command-line';
 import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
 
-import { ReadmeAction } from './actions/ReadmeAction';
-import { RecordVersionsAction } from './actions/RecordVersionsAction';
-import { BumpDecoupledLocalDependencies } from './actions/BumpDecoupledLocalDependencies';
-import { CollectJsonSchemasAction } from './actions/CollectJsonSchemasAction';
+import { ReadmeAction } from './actions/ReadmeAction.ts';
+import { RecordVersionsAction } from './actions/RecordVersionsAction.ts';
+import { BumpDecoupledLocalDependencies } from './actions/BumpDecoupledLocalDependencies.ts';
+import { CollectJsonSchemasAction } from './actions/CollectJsonSchemasAction.ts';
 
 export class ToolboxCommandLine extends CommandLineParser {
   public constructor() {

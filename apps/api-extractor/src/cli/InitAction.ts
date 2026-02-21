@@ -7,8 +7,8 @@ import { FileSystem } from '@rushstack/node-core-library';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 import { Colorize } from '@rushstack/terminal';
 
-import type { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
-import { ExtractorConfig } from '../api/ExtractorConfig';
+import type { ApiExtractorCommandLine } from './ApiExtractorCommandLine.ts';
+import { ExtractorConfig } from '../api/ExtractorConfig.ts';
 
 export class InitAction extends CommandLineAction {
   public constructor(parser: ApiExtractorCommandLine) {

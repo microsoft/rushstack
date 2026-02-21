@@ -3,9 +3,9 @@
 
 import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { BaseRushAction } from './BaseRushAction';
-import { RushAlerts } from '../../utilities/RushAlerts';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { BaseRushAction } from './BaseRushAction.ts';
+import { RushAlerts } from '../../utilities/RushAlerts.ts';
 
 export class AlertAction extends BaseRushAction {
   private readonly _snoozeParameter: CommandLineStringParameter;

@@ -24,5 +24,5 @@ export {
   type ICertificateManagerOptions,
   type ICertificateValidationResult,
   DEFAULT_CERTIFICATE_SUBJECT_NAMES
-} from './CertificateManager';
-export { CertificateStore, type ICertificateStoreOptions } from './CertificateStore';
+} from './CertificateManager.ts';
+export { CertificateStore, type ICertificateStoreOptions } from './CertificateStore.ts';

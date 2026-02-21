@@ -7,14 +7,14 @@ import type { AsyncParallelHook, SyncHook } from 'tapable';
 
 import type { Operation, OperationGroupRecord } from '@rushstack/operation-graph';
 
-import type { IHeftRecordMetricsHookOptions, MetricsCollector } from '../metrics/MetricsCollector';
-import type { ScopedLogger, IScopedLogger } from './logging/ScopedLogger';
-import type { IInternalHeftSessionOptions } from './InternalHeftSession';
-import type { IHeftParameters } from './HeftParameterManager';
-import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
-import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
-import type { HeftPluginHost } from './HeftPluginHost';
-import type { IHeftPhaseOperationMetadata, IHeftTaskOperationMetadata } from '../cli/HeftActionRunner';
+import type { IHeftRecordMetricsHookOptions, MetricsCollector } from '../metrics/MetricsCollector.ts';
+import type { ScopedLogger, IScopedLogger } from './logging/ScopedLogger.ts';
+import type { IInternalHeftSessionOptions } from './InternalHeftSession.ts';
+import type { IHeftParameters } from './HeftParameterManager.ts';
+import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin.ts';
+import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition.ts';
+import type { HeftPluginHost } from './HeftPluginHost.ts';
+import type { IHeftPhaseOperationMetadata, IHeftTaskOperationMetadata } from '../cli/HeftActionRunner.ts';
 
 /**
  * The lifecycle session is responsible for providing session-specific information to Heft lifecycle

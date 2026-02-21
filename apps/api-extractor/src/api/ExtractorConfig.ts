@@ -28,10 +28,10 @@ import type {
   IConfigApiReport,
   IConfigFile,
   IExtractorMessagesConfig
-} from './IConfigFile';
-import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
-import { MessageRouter } from '../collector/MessageRouter';
-import type { IApiModelGenerationOptions } from '../generators/ApiModelGenerator';
+} from './IConfigFile.ts';
+import { PackageMetadataManager } from '../analyzer/PackageMetadataManager.ts';
+import { MessageRouter } from '../collector/MessageRouter.ts';
+import type { IApiModelGenerationOptions } from '../generators/ApiModelGenerator.ts';
 import apiExtractorSchema from '../schemas/api-extractor.schema.json';
 
 /**

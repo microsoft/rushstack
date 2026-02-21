@@ -3,8 +3,8 @@
 
 import { AnsiEscape } from '@rushstack/terminal';
 
-import { RushCommandLineParser } from '../RushCommandLineParser';
-import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration.ts';
 
 describe('CommandLineHelp', () => {
   let oldCwd: string | undefined;

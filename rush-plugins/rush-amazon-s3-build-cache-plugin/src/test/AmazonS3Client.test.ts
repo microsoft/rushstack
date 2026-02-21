@@ -8,9 +8,9 @@ jest.mock('@rushstack/rush-sdk/lib/utilities/WebClient', () => {
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 import { WebClient } from '@rushstack/rush-sdk/lib/utilities/WebClient';
 
-import type { IAmazonS3BuildCacheProviderOptionsAdvanced } from '../AmazonS3BuildCacheProvider';
-import { AmazonS3Client } from '../AmazonS3Client';
-import type { IAmazonS3Credentials } from '../AmazonS3Credentials';
+import type { IAmazonS3BuildCacheProviderOptionsAdvanced } from '../AmazonS3BuildCacheProvider.ts';
+import { AmazonS3Client } from '../AmazonS3Client.ts';
+import type { IAmazonS3Credentials } from '../AmazonS3Credentials.ts';
 
 const webClient = new WebClient();
 

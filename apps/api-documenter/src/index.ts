@@ -9,12 +9,15 @@
  * @packageDocumentation
  */
 
-export type { IFeatureDefinition, IApiDocumenterPluginManifest } from './plugin/IApiDocumenterPluginManifest';
-export { MarkdownDocumenterAccessor } from './plugin/MarkdownDocumenterAccessor';
+export type {
+  IFeatureDefinition,
+  IApiDocumenterPluginManifest
+} from './plugin/IApiDocumenterPluginManifest.ts';
+export { MarkdownDocumenterAccessor } from './plugin/MarkdownDocumenterAccessor.ts';
 export {
   MarkdownDocumenterFeatureContext,
   type IMarkdownDocumenterFeatureOnBeforeWritePageArgs,
   type IMarkdownDocumenterFeatureOnFinishedArgs,
   MarkdownDocumenterFeature
-} from './plugin/MarkdownDocumenterFeature';
-export { PluginFeature, PluginFeatureContext, PluginFeatureInitialization } from './plugin/PluginFeature';
+} from './plugin/MarkdownDocumenterFeature.ts';
+export { PluginFeature, PluginFeatureContext, PluginFeatureInitialization } from './plugin/PluginFeature.ts';

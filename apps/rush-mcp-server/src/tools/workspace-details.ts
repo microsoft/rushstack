@@ -4,7 +4,7 @@
 import type { RushConfiguration, RushConfigurationProject } from '@rushstack/rush-sdk';
 import type { IRushConfigurationJson } from '@rushstack/rush-sdk/lib/api/RushConfiguration';
 
-import { getRushConfiguration } from '../utilities/common';
+import { getRushConfiguration } from '../utilities/common.ts';
 import { BaseTool, type CallToolResult } from './base.tool';
 
 export class RushWorkspaceDetailsTool extends BaseTool {

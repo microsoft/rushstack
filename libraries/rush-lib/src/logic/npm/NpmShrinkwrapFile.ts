@@ -3,11 +3,11 @@
 
 import { JsonFile, FileSystem, InternalError } from '@rushstack/node-core-library';
 
-import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
-import { DependencySpecifier } from '../DependencySpecifier';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
-import type { Subspace } from '../../api/Subspace';
+import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile.ts';
+import { DependencySpecifier } from '../DependencySpecifier.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import type { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile.ts';
+import type { Subspace } from '../../api/Subspace.ts';
 
 interface INpmShrinkwrapDependencyJson {
   version: string;

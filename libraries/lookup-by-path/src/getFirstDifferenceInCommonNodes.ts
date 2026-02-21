@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IReadonlyPathTrieNode } from './LookupByPath';
+import type { IReadonlyPathTrieNode } from './LookupByPath.ts';
 
 /**
  * Options for the getFirstDifferenceInCommonNodes function.

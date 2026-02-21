@@ -3,10 +3,10 @@
 
 import { AlreadyExistsBehavior, FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
 
-import type { RushCommandLineParser as RushCommandLineParserType } from '../RushCommandLineParser';
-import { FlagFile } from '../../api/FlagFile';
-import { RushConstants } from '../../logic/RushConstants';
-import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import type { RushCommandLineParser as RushCommandLineParserType } from '../RushCommandLineParser.ts';
+import { FlagFile } from '../../api/FlagFile.ts';
+import { RushConstants } from '../../logic/RushConstants.ts';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration.ts';
 
 export type SpawnMockArgs = Parameters<typeof import('node:child_process').spawn>;
 export type SpawnMock = jest.Mock<ReturnType<typeof import('node:child_process').spawn>, SpawnMockArgs>;
@@ -94,7 +94,7 @@ export async function getCommandLineParserInstanceAsync(
     FileSystem.deleteFolderAsync(`${repoPath}/b/.rush/temp`)
   ]);
 
-  const { RushCommandLineParser } = await import('../RushCommandLineParser');
+  const { RushCommandLineParser } = await import('../RushCommandLineParser.ts');
 
   // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
   // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test

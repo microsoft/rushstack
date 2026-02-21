@@ -12,7 +12,7 @@ import type { IRushConfigurationProjectJson } from '@rushstack/rush-sdk/lib/api/
 import type { IRushConfigurationJson } from '@rushstack/rush-sdk/lib/api/RushConfiguration';
 
 import { BaseTool, type CallToolResult } from './base.tool';
-import { getRushConfiguration } from '../utilities/common';
+import { getRushConfiguration } from '../utilities/common.ts';
 
 export class RushMigrateProjectTool extends BaseTool {
   private _rushWorkspacePath: string;

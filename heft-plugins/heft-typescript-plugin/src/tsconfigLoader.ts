@@ -8,7 +8,7 @@ import type * as TTypescript from 'typescript';
 import { Path } from '@rushstack/node-core-library';
 import type { HeftConfiguration } from '@rushstack/heft';
 
-import type { IBaseTypeScriptTool } from './TypeScriptBuilder';
+import type { IBaseTypeScriptTool } from './TypeScriptBuilder.ts';
 
 /**
  * @internal
@@ -64,6 +64,14 @@ export function loadTsconfig(options: ILoadTsconfigOptions): TTypescript.ParsedC
   if (tsconfig.options.incremental) {
     tsconfig.options.tsBuildInfoFile = tsCacheFilePath;
   }
+
+  // Force-inject rewriteRelativeImportExtensions and allowImportingTsExtensions.
+  // TypeScript's config parser strips rewriteRelativeImportExtensions when moduleResolution
+  // is not "node16"/"nodenext"/"bundler", and rejects allowImportingTsExtensions without
+  // noEmit or emitDeclarationOnly. Since Heft manages emit and module resolution itself,
+  // we bypass both restrictions by injecting directly after parsing.
+  tsconfig.options.rewriteRelativeImportExtensions = true;
+  tsconfig.options.allowImportingTsExtensions = true;
 
   return tsconfig;
 }

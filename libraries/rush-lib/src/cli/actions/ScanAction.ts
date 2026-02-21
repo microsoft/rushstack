@@ -9,8 +9,8 @@ import { Colorize } from '@rushstack/terminal';
 import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { BaseConfiglessRushAction } from './BaseRushAction';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { BaseConfiglessRushAction } from './BaseRushAction.ts';
 
 export interface IJsonOutput {
   /**

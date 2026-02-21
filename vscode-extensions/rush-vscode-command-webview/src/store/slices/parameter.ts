@@ -6,7 +6,7 @@ import type { FieldValues } from 'react-hook-form';
 
 import type { CommandLineParameterKind } from '@rushstack/ts-command-line';
 
-import { useAppSelector } from '../hooks';
+import { useAppSelector } from '../hooks/index.ts';
 
 export interface ICommandLineParameter {
   readonly kind: CommandLineParameterKind;

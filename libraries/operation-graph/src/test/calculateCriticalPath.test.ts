@@ -6,7 +6,7 @@ import {
   calculateCriticalPathLength,
   calculateCriticalPathLengths,
   type ISortableOperation
-} from '../calculateCriticalPath';
+} from '../calculateCriticalPath.ts';
 
 interface ITestOperation extends ISortableOperation<ITestOperation> {
   // Nothing added, just need an interface to solve the infinite expansion.

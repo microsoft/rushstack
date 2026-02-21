@@ -7,13 +7,13 @@ import * as crypto from 'node:crypto';
 import { FileSystem, type FolderItem, InternalError, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import type { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
-import type { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
-import { TarExecutable } from '../../utilities/TarExecutable';
-import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import type { IOperationExecutionResult } from '../operations/IOperationExecutionResult';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration.ts';
+import type { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider.ts';
+import type { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider.ts';
+import { TarExecutable } from '../../utilities/TarExecutable.ts';
+import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration.ts';
+import type { IOperationExecutionResult } from '../operations/IOperationExecutionResult.ts';
 
 /**
  * @internal

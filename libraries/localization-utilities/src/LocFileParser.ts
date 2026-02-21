@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IgnoreStringFunction, ILocalizationFile, IParseFileOptions } from './interfaces';
-import { parseLocJson } from './parsers/parseLocJson';
-import { parseResJson } from './parsers/parseResJson';
-import { type IParseResxOptionsBase, parseResx } from './parsers/parseResx';
+import type { IgnoreStringFunction, ILocalizationFile, IParseFileOptions } from './interfaces.ts';
+import { parseLocJson } from './parsers/parseLocJson.ts';
+import { parseResJson } from './parsers/parseResJson.ts';
+import { type IParseResxOptionsBase, parseResx } from './parsers/parseResx.ts';
 
 /**
  * @public

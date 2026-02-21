@@ -3,9 +3,9 @@
 
 import type * as tsdoc from '@microsoft/tsdoc';
 
-import { ApiDocumentedItem } from '../items/ApiDocumentedItem';
-import type { Excerpt } from '../mixins/Excerpt';
-import type { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
+import { ApiDocumentedItem } from '../items/ApiDocumentedItem.ts';
+import type { Excerpt } from '../mixins/Excerpt.ts';
+import type { ApiParameterListMixin } from '../mixins/ApiParameterListMixin.ts';
 
 /**
  * Constructor options for {@link Parameter}.

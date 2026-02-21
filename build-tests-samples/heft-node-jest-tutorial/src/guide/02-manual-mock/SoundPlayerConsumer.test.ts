@@ -6,9 +6,9 @@
 
 jest.mock('./SoundPlayer'); // SoundPlayer is now a mock constructor
 
-import { SoundPlayer } from './SoundPlayer';
-import { mockPlaySoundFile } from './__mocks__/SoundPlayer';
-import { SoundPlayerConsumer } from './SoundPlayerConsumer';
+import { SoundPlayer } from './SoundPlayer.ts';
+import { mockPlaySoundFile } from './__mocks__/SoundPlayer.ts';
+import { SoundPlayerConsumer } from './SoundPlayerConsumer.ts';
 
 beforeEach(() => {
   // Clear all instances and calls to constructor and all methods:
@@ -29,7 +29,7 @@ it('We can check if the consumer called a method on the class instance', () => {
 });
 
 // The test below validates that jest-improved-resolver.js is working correctly
-import { SoundPlayer as MockSoundPlayer } from './__mocks__/SoundPlayer';
+import { SoundPlayer as MockSoundPlayer } from './__mocks__/SoundPlayer.ts';
 
 it('Importing ./__mocks__/SoundPlayer returns the same object as importing ./SoundPlayer', () => {
   expect(SoundPlayer).toBe(MockSoundPlayer);

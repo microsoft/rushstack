@@ -6,13 +6,13 @@ import type { AnyAction, Dispatch } from '@reduxjs/toolkit';
 import * as React from 'react';
 import { type CSSProperties, useEffect } from 'react';
 
-import { useAppDispatch } from '../store/hooks';
-import { type ICommandLineParameter, useFilteredParameters } from '../store/slices/parameter';
+import { useAppDispatch } from '../store/hooks/index.ts';
+import { type ICommandLineParameter, useFilteredParameters } from '../store/slices/parameter.ts';
 import {
   setUserSelectedParameterName,
   useCurrentParameterName,
   useUserSelectedParameterName
-} from '../store/slices/ui';
+} from '../store/slices/ui.ts';
 
 const navStyle: CSSProperties = {
   width: '160px',

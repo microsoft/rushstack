@@ -20,8 +20,8 @@ import type {
   IPnpmfileHooks,
   ISubspacePnpmfileShimSettings,
   IWorkspaceProjectInfo
-} from './IPnpmfile';
-import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
+} from './IPnpmfile.ts';
+import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile.ts';
 
 let settings: ISubspacePnpmfileShimSettings;
 let userPnpmfile: IPnpmfile | undefined;

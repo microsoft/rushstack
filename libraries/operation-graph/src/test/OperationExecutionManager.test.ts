@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import { type ITerminal, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
-import { Operation } from '../Operation';
-import { OperationExecutionManager } from '../OperationExecutionManager';
-import { OperationStatus } from '../OperationStatus';
-import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
+import { Operation } from '../Operation.ts';
+import { OperationExecutionManager } from '../OperationExecutionManager.ts';
+import { OperationStatus } from '../OperationStatus.ts';
+import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner.ts';
 import { Async } from '@rushstack/node-core-library';
 
 type ExecuteAsyncMock = jest.Mock<

@@ -6,7 +6,7 @@ import * as process from 'node:process';
 
 import { AnsiEscape, Colorize } from '@rushstack/terminal';
 
-import { KeyboardLoop } from './KeyboardLoop';
+import { KeyboardLoop } from './KeyboardLoop.ts';
 
 export interface IBasePromptOptions {
   message: string;

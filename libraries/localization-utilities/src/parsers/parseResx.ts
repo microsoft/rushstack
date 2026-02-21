@@ -6,7 +6,7 @@ import { XmlDocument, type XmlElement } from 'xmldoc';
 import { Text, type NewlineKind } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import type { ILocalizedString, ILocalizationFile, IParseFileOptions } from '../interfaces';
+import type { ILocalizedString, ILocalizationFile, IParseFileOptions } from '../interfaces.ts';
 
 /**
  * @public

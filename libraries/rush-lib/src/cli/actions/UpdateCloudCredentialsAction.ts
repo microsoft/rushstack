@@ -5,10 +5,10 @@ import type { CommandLineStringParameter, CommandLineFlagParameter } from '@rush
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { BaseRushAction } from './BaseRushAction';
-import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import { RushConstants } from '../../logic/RushConstants';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { BaseRushAction } from './BaseRushAction.ts';
+import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration.ts';
+import { RushConstants } from '../../logic/RushConstants.ts';
 
 export class UpdateCloudCredentialsAction extends BaseRushAction {
   private readonly _interactiveModeFlag: CommandLineFlagParameter;

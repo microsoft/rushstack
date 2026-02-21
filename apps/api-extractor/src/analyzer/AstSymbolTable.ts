@@ -7,18 +7,18 @@ import * as ts from 'typescript';
 
 import { type PackageJsonLookup, InternalError } from '@rushstack/node-core-library';
 
-import { AstDeclaration } from './AstDeclaration';
-import { TypeScriptHelpers } from './TypeScriptHelpers';
-import { AstSymbol } from './AstSymbol';
-import type { AstModule, IAstModuleExportInfo } from './AstModule';
-import { PackageMetadataManager } from './PackageMetadataManager';
-import { ExportAnalyzer } from './ExportAnalyzer';
-import type { AstEntity } from './AstEntity';
-import { AstNamespaceImport } from './AstNamespaceImport';
-import type { MessageRouter } from '../collector/MessageRouter';
-import { TypeScriptInternals, type IGlobalVariableAnalyzer } from './TypeScriptInternals';
-import { SyntaxHelpers } from './SyntaxHelpers';
-import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
+import { AstDeclaration } from './AstDeclaration.ts';
+import { TypeScriptHelpers } from './TypeScriptHelpers.ts';
+import { AstSymbol } from './AstSymbol.ts';
+import type { AstModule, IAstModuleExportInfo } from './AstModule.ts';
+import { PackageMetadataManager } from './PackageMetadataManager.ts';
+import { ExportAnalyzer } from './ExportAnalyzer.ts';
+import type { AstEntity } from './AstEntity.ts';
+import { AstNamespaceImport } from './AstNamespaceImport.ts';
+import type { MessageRouter } from '../collector/MessageRouter.ts';
+import { TypeScriptInternals, type IGlobalVariableAnalyzer } from './TypeScriptInternals.ts';
+import { SyntaxHelpers } from './SyntaxHelpers.ts';
+import { SourceFileLocationFormatter } from './SourceFileLocationFormatter.ts';
 
 /**
  * Options for `AstSymbolTable._fetchAstSymbol()`

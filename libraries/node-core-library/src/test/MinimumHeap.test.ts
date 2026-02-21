@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { MinimumHeap } from '../MinimumHeap';
+import { MinimumHeap } from '../MinimumHeap.ts';
 
 describe(MinimumHeap.name, () => {
   it('iterates in sorted order', () => {

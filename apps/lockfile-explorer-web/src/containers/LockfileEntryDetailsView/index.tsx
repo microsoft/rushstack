@@ -7,14 +7,19 @@ import { ScrollArea, Text } from '@rushstack/rush-themed-ui';
 
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
-import { LfxDependencyKind, type LfxGraphDependency, type LfxGraphEntry } from '../../packlets/lfx-shared';
-import { readPackageJsonAsync } from '../../helpers/lfxApiClient';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { pushToStack, selectCurrentEntry } from '../../store/slices/entrySlice';
-import { ReactNull } from '../../types/ReactNull';
-import { logDiagnosticInfo } from '../../helpers/logDiagnosticInfo';
-import { displaySpecChanges } from '../../helpers/displaySpecChanges';
-import type { IPackageJson } from '../../types/IPackageJson';
+// eslint-disable-next-line @rushstack/packlets/mechanics
+import {
+  LfxDependencyKind,
+  type LfxGraphDependency,
+  type LfxGraphEntry
+} from '../../packlets/lfx-shared/index.ts';
+import { readPackageJsonAsync } from '../../helpers/lfxApiClient.ts';
+import { useAppDispatch, useAppSelector } from '../../store/hooks.ts';
+import { pushToStack, selectCurrentEntry } from '../../store/slices/entrySlice.ts';
+import { ReactNull } from '../../types/ReactNull.ts';
+import { logDiagnosticInfo } from '../../helpers/logDiagnosticInfo.ts';
+import { displaySpecChanges } from '../../helpers/displaySpecChanges.ts';
+import type { IPackageJson } from '../../types/IPackageJson.ts';
 
 enum DependencyType {
   Determinant,

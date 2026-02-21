@@ -3,7 +3,7 @@
 
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { Path } from '../Path';
+import { Path } from '../Path.ts';
 
 describe(Path.name, () => {
   describe(Path.isUnder.name, () => {

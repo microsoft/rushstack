@@ -6,6 +6,6 @@
 export {
   RushRedisCobuildPlugin as default,
   type IRushRedisCobuildPluginOptions
-} from './RushRedisCobuildPlugin';
-export { RedisCobuildLockProvider } from './RedisCobuildLockProvider';
-export type { IRedisCobuildLockProviderOptions } from './RedisCobuildLockProvider';
+} from './RushRedisCobuildPlugin.ts';
+export { RedisCobuildLockProvider } from './RedisCobuildLockProvider.ts';
+export type { IRedisCobuildLockProviderOptions } from './RedisCobuildLockProvider.ts';

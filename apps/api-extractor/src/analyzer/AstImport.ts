@@ -3,8 +3,8 @@
 
 import { InternalError } from '@rushstack/node-core-library';
 
-import type { AstSymbol } from './AstSymbol';
-import { AstSyntheticEntity } from './AstEntity';
+import type { AstSymbol } from './AstSymbol.ts';
+import { AstSyntheticEntity } from './AstEntity.ts';
 
 /**
  * Indicates the import kind for an `AstImport`.

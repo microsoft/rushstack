@@ -5,24 +5,27 @@ import path from 'node:path';
 import { JsonFile } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../../../api/RushConfiguration';
-import { CommandLineConfiguration, type IPhasedCommandConfig } from '../../../api/CommandLineConfiguration';
-import type { Operation } from '../Operation';
-import type { ICommandLineJson } from '../../../api/CommandLineJson';
-import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
-import { ShellOperationRunnerPlugin } from '../ShellOperationRunnerPlugin';
+import { RushConfiguration } from '../../../api/RushConfiguration.ts';
+import {
+  CommandLineConfiguration,
+  type IPhasedCommandConfig
+} from '../../../api/CommandLineConfiguration.ts';
+import type { Operation } from '../Operation.ts';
+import type { ICommandLineJson } from '../../../api/CommandLineJson.ts';
+import { PhasedOperationPlugin } from '../PhasedOperationPlugin.ts';
+import { ShellOperationRunnerPlugin } from '../ShellOperationRunnerPlugin.ts';
 import {
   IgnoredParametersPlugin,
   RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR
-} from '../IgnoredParametersPlugin';
+} from '../IgnoredParametersPlugin.ts';
 import {
   type ICreateOperationsContext,
   PhasedCommandHooks
-} from '../../../pluginFramework/PhasedCommandHooks';
-import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
-import type { IEnvironment } from '../../../utilities/Utilities';
-import type { IOperationRunnerContext } from '../IOperationRunner';
-import type { IOperationExecutionResult } from '../IOperationExecutionResult';
+} from '../../../pluginFramework/PhasedCommandHooks.ts';
+import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration.ts';
+import type { IEnvironment } from '../../../utilities/Utilities.ts';
+import type { IOperationRunnerContext } from '../IOperationRunner.ts';
+import type { IOperationExecutionResult } from '../IOperationExecutionResult.ts';
 
 /**
  * Helper function to create a minimal mock record for testing the createEnvironmentForOperation hook

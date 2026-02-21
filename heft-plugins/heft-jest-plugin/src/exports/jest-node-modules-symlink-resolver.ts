@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import '../JestRealPathPatch';
+import '../JestRealPathPatch.ts';
 // Using this syntax because HeftJestResolver uses `export =` syntax.
-import resolver = require('../HeftJestResolver');
+import resolver = require('../HeftJestResolver.ts');
 export = resolver;

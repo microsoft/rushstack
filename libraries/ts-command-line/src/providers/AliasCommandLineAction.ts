@@ -3,14 +3,17 @@
 
 import * as argparse from 'argparse';
 
-import { CommandLineAction } from './CommandLineAction';
+import { CommandLineAction } from './CommandLineAction.ts';
 import {
   CommandLineParameterKind,
   type CommandLineParameterBase,
   type CommandLineParameter
-} from '../parameters/BaseClasses';
-import type { ICommandLineParserData, IRegisterDefinedParametersState } from './CommandLineParameterProvider';
-import type { ICommandLineParserOptions } from './CommandLineParser';
+} from '../parameters/BaseClasses.ts';
+import type {
+  ICommandLineParserData,
+  IRegisterDefinedParametersState
+} from './CommandLineParameterProvider.ts';
+import type { ICommandLineParserOptions } from './CommandLineParser.ts';
 
 /**
  * Options for the AliasCommandLineAction constructor.

@@ -3,7 +3,7 @@
 
 import process from 'node:process';
 
-import { InternalError } from './InternalError';
+import { InternalError } from './InternalError.ts';
 
 /**
  * A process environment variable name and its value.  Used by {@link EnvironmentMap}.

@@ -10,21 +10,21 @@ import type {
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
-import { Event } from '../../api/EventHooks';
-import type { BaseInstallManager } from '../../logic/base/BaseInstallManager';
-import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes';
-import { PurgeManager } from '../../logic/PurgeManager';
-import { SetupChecks } from '../../logic/SetupChecks';
-import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
-import { Stopwatch } from '../../utilities/Stopwatch';
-import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
-import { RushConstants } from '../../logic/RushConstants';
-import { SUBSPACE_LONG_ARG_NAME, type SelectionParameterSet } from '../parsing/SelectionParameterSet';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { Subspace } from '../../api/Subspace';
-import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
-import { measureAsyncFn } from '../../utilities/performance';
+import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction.ts';
+import { Event } from '../../api/EventHooks.ts';
+import type { BaseInstallManager } from '../../logic/base/BaseInstallManager.ts';
+import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes.ts';
+import { PurgeManager } from '../../logic/PurgeManager.ts';
+import { SetupChecks } from '../../logic/SetupChecks.ts';
+import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater.ts';
+import { Stopwatch } from '../../utilities/Stopwatch.ts';
+import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder.ts';
+import { RushConstants } from '../../logic/RushConstants.ts';
+import { SUBSPACE_LONG_ARG_NAME, type SelectionParameterSet } from '../parsing/SelectionParameterSet.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import type { Subspace } from '../../api/Subspace.ts';
+import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants.ts';
+import { measureAsyncFn } from '../../utilities/performance.ts';
 
 /**
  * Temporary data structure used by `BaseInstallAction.runAsync()`
@@ -226,9 +226,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
       throw new Error(`The value of "${this._maxInstallAttempts.longName}" must be positive and nonzero.`);
     }
 
-    const installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory') = await import(
+    const installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory.ts') = await import(
       /* webpackChunkName: 'InstallManagerFactory' */
-      '../../logic/InstallManagerFactory'
+      '../../logic/InstallManagerFactory.ts'
     );
     let installSuccessful: boolean = true;
 
@@ -318,7 +318,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   }
 
   private async _doInstallAsync(
-    installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory'),
+    installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory.ts'),
     purgeManager: PurgeManager,
     installManagerOptions: IInstallManagerOptions
   ): Promise<void> {

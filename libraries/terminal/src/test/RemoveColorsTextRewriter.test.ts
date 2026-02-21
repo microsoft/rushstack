@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AnsiEscape } from '../AnsiEscape';
-import { Colorize } from '../Colorize';
+import { AnsiEscape } from '../AnsiEscape.ts';
+import { Colorize } from '../Colorize.ts';
 
-import { RemoveColorsTextRewriter } from '../RemoveColorsTextRewriter';
-import type { TextRewriterState } from '../TextRewriter';
+import { RemoveColorsTextRewriter } from '../RemoveColorsTextRewriter.ts';
+import type { TextRewriterState } from '../TextRewriter.ts';
 
 function testCase(inputs: string[]): void {
   const matcher: RemoveColorsTextRewriter = new RemoveColorsTextRewriter();

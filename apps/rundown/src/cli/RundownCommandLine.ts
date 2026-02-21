@@ -3,8 +3,8 @@
 
 import { CommandLineParser } from '@rushstack/ts-command-line';
 
-import { SnapshotAction } from './SnapshotAction';
-import { InspectAction } from './InspectAction';
+import { SnapshotAction } from './SnapshotAction.ts';
+import { InspectAction } from './InspectAction.ts';
 
 export class RundownCommandLine extends CommandLineParser {
   public constructor() {

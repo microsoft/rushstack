@@ -7,14 +7,14 @@ import { CommandLineAction, type ICommandLineActionOptions } from '@rushstack/ts
 import { LockFile } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import { EventHooksManager } from '../../logic/EventHooksManager';
-import { RushCommandLineParser } from '../RushCommandLineParser';
-import { Utilities } from '../../utilities/Utilities';
-import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import type { RushSession } from '../../pluginFramework/RushSession';
-import type { IRushCommand } from '../../pluginFramework/RushLifeCycle';
-import { measureAsyncFn } from '../../utilities/performance';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import { EventHooksManager } from '../../logic/EventHooksManager.ts';
+import { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { Utilities } from '../../utilities/Utilities.ts';
+import type { RushGlobalFolder } from '../../api/RushGlobalFolder.ts';
+import type { RushSession } from '../../pluginFramework/RushSession.ts';
+import type { IRushCommand } from '../../pluginFramework/RushLifeCycle.ts';
+import { measureAsyncFn } from '../../utilities/performance.ts';
 
 const PERF_PREFIX: string = 'rush:action';
 

@@ -5,14 +5,14 @@ import * as ts from 'typescript';
 
 import { InternalError } from '@rushstack/node-core-library';
 
-import type { CollectorEntity } from '../collector/CollectorEntity';
-import { AstImport, AstImportKind } from '../analyzer/AstImport';
-import { AstDeclaration } from '../analyzer/AstDeclaration';
-import type { Collector } from '../collector/Collector';
-import type { Span } from '../analyzer/Span';
-import type { IndentedWriter } from './IndentedWriter';
-import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
-import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
+import type { CollectorEntity } from '../collector/CollectorEntity.ts';
+import { AstImport, AstImportKind } from '../analyzer/AstImport.ts';
+import { AstDeclaration } from '../analyzer/AstDeclaration.ts';
+import type { Collector } from '../collector/Collector.ts';
+import type { Span } from '../analyzer/Span.ts';
+import type { IndentedWriter } from './IndentedWriter.ts';
+import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter.ts';
+import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers.ts';
 
 /**
  * Some common code shared between DtsRollupGenerator and ApiReportGenerator.

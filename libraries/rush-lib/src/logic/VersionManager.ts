@@ -7,16 +7,16 @@ import * as semver from 'semver';
 
 import { type IPackageJson, JsonFile, FileConstants } from '@rushstack/node-core-library';
 
-import { type VersionPolicy, type BumpType, LockStepVersionPolicy } from '../api/VersionPolicy';
-import { ChangeFile } from '../api/ChangeFile';
-import { ChangeType, type IChangeInfo } from '../api/ChangeManagement';
-import { RushConfiguration } from '../api/RushConfiguration';
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import type { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
-import { PublishUtilities } from './PublishUtilities';
-import { ChangeManager } from './ChangeManager';
-import { DependencySpecifier } from './DependencySpecifier';
-import { cloneDeep } from '../utilities/objectUtilities';
+import { type VersionPolicy, type BumpType, LockStepVersionPolicy } from '../api/VersionPolicy.ts';
+import { ChangeFile } from '../api/ChangeFile.ts';
+import { ChangeType, type IChangeInfo } from '../api/ChangeManagement.ts';
+import { RushConfiguration } from '../api/RushConfiguration.ts';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import type { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration.ts';
+import { PublishUtilities } from './PublishUtilities.ts';
+import { ChangeManager } from './ChangeManager.ts';
+import { DependencySpecifier } from './DependencySpecifier.ts';
+import { cloneDeep } from '../utilities/objectUtilities.ts';
 
 export class VersionManager {
   private _rushConfiguration: RushConfiguration;

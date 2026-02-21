@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AnsiEscape } from './AnsiEscape';
-import { TextRewriter, type TextRewriterState } from './TextRewriter';
+import { AnsiEscape } from './AnsiEscape.ts';
+import { TextRewriter, type TextRewriterState } from './TextRewriter.ts';
 
 enum State {
   // Buffer is empty, and we're looking for the ESC character

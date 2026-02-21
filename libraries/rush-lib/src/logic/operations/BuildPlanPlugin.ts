@@ -7,12 +7,12 @@ import type {
   IExecuteOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
-} from '../../pluginFramework/PhasedCommandHooks';
-import type { Operation } from './Operation';
-import { clusterOperations, type IOperationBuildCacheContext } from './CacheableOperationPlugin';
-import { DisjointSet } from '../cobuild/DisjointSet';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
-import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+} from '../../pluginFramework/PhasedCommandHooks.ts';
+import type { Operation } from './Operation.ts';
+import { clusterOperations, type IOperationBuildCacheContext } from './CacheableOperationPlugin.ts';
+import { DisjointSet } from '../cobuild/DisjointSet.ts';
+import type { IOperationExecutionResult } from './IOperationExecutionResult.ts';
+import { RushProjectConfiguration } from '../../api/RushProjectConfiguration.ts';
 
 const PLUGIN_NAME: 'BuildPlanPlugin' = 'BuildPlanPlugin';
 

@@ -9,7 +9,7 @@ jest.mock('node:process', () => {
   };
 });
 
-import { CacheEntryId, type GetCacheEntryIdFunction } from '../CacheEntryId';
+import { CacheEntryId, type GetCacheEntryIdFunction } from '../CacheEntryId.ts';
 
 describe(CacheEntryId.name, () => {
   describe('Valid pattern names', () => {

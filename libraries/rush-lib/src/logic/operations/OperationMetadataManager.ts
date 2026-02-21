@@ -12,11 +12,11 @@ import {
   type ITerminalProvider
 } from '@rushstack/terminal';
 
-import { OperationStateFile } from './OperationStateFile';
-import { RushConstants } from '../RushConstants';
-import type { IOperationStateJson } from './OperationStateFile';
-import type { Operation } from './Operation';
-import { type IStopwatchResult, Stopwatch } from '../../utilities/Stopwatch';
+import { OperationStateFile } from './OperationStateFile.ts';
+import { RushConstants } from '../RushConstants.ts';
+import type { IOperationStateJson } from './OperationStateFile.ts';
+import type { Operation } from './Operation.ts';
+import { type IStopwatchResult, Stopwatch } from '../../utilities/Stopwatch.ts';
 
 /**
  * @internal

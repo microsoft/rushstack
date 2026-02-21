@@ -2,13 +2,13 @@ jest.mock('../GetLatestFromRegistry');
 jest.mock('../ReadPackageJson');
 jest.mock('../FindModulePath');
 
-import createPackageSummary from '../CreatePackageSummary';
-import getLatestFromRegistry from '../GetLatestFromRegistry';
-import readPackageJson from '../ReadPackageJson';
-import findModulePath from '../FindModulePath';
-import type { INpmCheckState, INpmCheckPackageJson } from '../interfaces/INpmCheck';
-import type { INpmRegistryInfo } from '../interfaces/INpmCheckRegistry';
-import type { INpmCheckPackageSummary } from '../interfaces/INpmCheckPackageSummary';
+import createPackageSummary from '../CreatePackageSummary.ts';
+import getLatestFromRegistry from '../GetLatestFromRegistry.ts';
+import readPackageJson from '../ReadPackageJson.ts';
+import findModulePath from '../FindModulePath.ts';
+import type { INpmCheckState, INpmCheckPackageJson } from '../interfaces/INpmCheck.ts';
+import type { INpmRegistryInfo } from '../interfaces/INpmCheckRegistry.ts';
+import type { INpmCheckPackageSummary } from '../interfaces/INpmCheckPackageSummary.ts';
 
 const mockGetLatestFromRegistry = getLatestFromRegistry as jest.MockedFunction<typeof getLatestFromRegistry>;
 const mockReadPackageJson = readPackageJson as jest.MockedFunction<typeof readPackageJson>;

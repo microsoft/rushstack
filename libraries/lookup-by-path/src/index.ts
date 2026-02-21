@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-export type { IPrefixMatch, IReadonlyLookupByPath, IReadonlyPathTrieNode } from './LookupByPath';
-export { LookupByPath } from './LookupByPath';
-export type { IGetFirstDifferenceInCommonNodesOptions } from './getFirstDifferenceInCommonNodes';
-export { getFirstDifferenceInCommonNodes } from './getFirstDifferenceInCommonNodes';
+export type { IPrefixMatch, IReadonlyLookupByPath, IReadonlyPathTrieNode } from './LookupByPath.ts';
+export { LookupByPath } from './LookupByPath.ts';
+export type { IGetFirstDifferenceInCommonNodesOptions } from './getFirstDifferenceInCommonNodes.ts';
+export { getFirstDifferenceInCommonNodes } from './getFirstDifferenceInCommonNodes.ts';

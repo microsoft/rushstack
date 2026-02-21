@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, type JsonObject } from '../JsonFile';
-import { JsonSchema, type IJsonSchemaErrorInfo } from '../JsonSchema';
+import { JsonFile, type JsonObject } from '../JsonFile.ts';
+import { JsonSchema, type IJsonSchemaErrorInfo } from '../JsonSchema.ts';
 
 const SCHEMA_PATH: string = `${__dirname}/test-data/test-schemas/test-schema.schema.json`;
 const DRAFT_04_SCHEMA_PATH: string = `${__dirname}/test-data/test-schemas/test-schema-draft-04.schema.json`;

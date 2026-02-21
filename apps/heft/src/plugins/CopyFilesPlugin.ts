@@ -8,22 +8,22 @@ import * as path from 'node:path';
 import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { Constants } from '../utilities/Constants';
+import { Constants } from '../utilities/Constants.ts';
 import {
   asAbsoluteFileSelectionSpecifier,
   getFileSelectionSpecifierPathsAsync,
   type IFileSelectionSpecifier
-} from './FileGlobSpecifier';
-import type { HeftConfiguration } from '../configuration/HeftConfiguration';
-import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
-import type { IHeftTaskSession, IHeftTaskFileOperations } from '../pluginFramework/HeftTaskSession';
-import type { WatchFileSystemAdapter } from '../utilities/WatchFileSystemAdapter';
+} from './FileGlobSpecifier.ts';
+import type { HeftConfiguration } from '../configuration/HeftConfiguration.ts';
+import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin.ts';
+import type { IHeftTaskSession, IHeftTaskFileOperations } from '../pluginFramework/HeftTaskSession.ts';
+import type { WatchFileSystemAdapter } from '../utilities/WatchFileSystemAdapter.ts';
 import {
   type IIncrementalBuildInfo,
   makePathRelative,
   tryReadBuildInfoAsync,
   writeBuildInfoAsync
-} from '../pluginFramework/IncrementalBuildInfo';
+} from '../pluginFramework/IncrementalBuildInfo.ts';
 
 /**
  * Used to specify a selection of files to copy from a specific source folder to one

@@ -22,7 +22,7 @@ console.log(strings3.string2);
 import(/* webpackChunkName: 'chunk-with-strings' */ './chunks/chunkWithStrings')
   // eslint-disable-next-line @typescript-eslint/naming-convention
   .then(({ ChunkWithStringsClass }) => {
-    const chunk: import('./chunks/chunkWithStrings').ChunkWithStringsClass = new ChunkWithStringsClass();
+    const chunk: import('./chunks/chunkWithStrings.ts').ChunkWithStringsClass = new ChunkWithStringsClass();
     chunk.doStuff();
   })
   .catch((e) => {
@@ -33,7 +33,7 @@ import(/* webpackChunkName: 'chunk-with-strings' */ './chunks/chunkWithStrings')
 import(/* webpackChunkName: 'chunk-without-strings' */ './chunks/chunkWithoutStrings')
   // eslint-disable-next-line @typescript-eslint/naming-convention
   .then(({ ChunkWithoutStringsClass }) => {
-    const chunk: import('./chunks/chunkWithoutStrings').ChunkWithoutStringsClass =
+    const chunk: import('./chunks/chunkWithoutStrings.ts').ChunkWithoutStringsClass =
       new ChunkWithoutStringsClass();
     chunk.doStuff();
   })

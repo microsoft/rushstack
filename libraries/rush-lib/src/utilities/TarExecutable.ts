@@ -8,9 +8,9 @@ import events from 'node:events';
 import { Executable, FileSystem, FileWriter } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
-import { IS_WINDOWS } from './executionUtilities';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration.ts';
+import { IS_WINDOWS } from './executionUtilities.ts';
 
 export interface ITarOptionsBase {
   logFilePath: string;

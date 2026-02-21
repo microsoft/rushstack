@@ -4,8 +4,8 @@
 import { InternalError } from '@rushstack/node-core-library';
 import type { TerminalWritable, ITerminalChunk } from '@rushstack/terminal';
 
-import { CollatedWriter } from './CollatedWriter';
-import { CollatedTerminal } from './CollatedTerminal';
+import { CollatedWriter } from './CollatedWriter.ts';
+import { CollatedTerminal } from './CollatedTerminal.ts';
 
 /**
  * Constructor options for {@link StreamCollator}.

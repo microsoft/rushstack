@@ -15,8 +15,8 @@ import {
   LfxDependencyKind,
   LfxGraphDependency,
   type IJsonLfxWorkspace
-} from '../../build/lfx-shared';
-import * as lockfilePath from './lockfilePath';
+} from '../../build/lfx-shared/index.js';
+import * as lockfilePath from './lockfilePath.ts';
 
 type PnpmLockfileVersion = 54 | 60 | 90;
 type PeerDependenciesMeta = lockfileTypes.LockfilePackageInfo['peerDependenciesMeta'];

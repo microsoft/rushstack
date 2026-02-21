@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import { RawSource } from 'webpack-sources';
-import { rehydrateAsset } from '../RehydrateAsset';
-import { CHUNK_MODULES_TOKEN } from '../Constants';
-import type { IAssetInfo, IModuleMap } from '../ModuleMinifierPlugin.types';
+import { rehydrateAsset } from '../RehydrateAsset.ts';
+import { CHUNK_MODULES_TOKEN } from '../Constants.ts';
+import type { IAssetInfo, IModuleMap } from '../ModuleMinifierPlugin.types.ts';
 
 const modules: IModuleMap = new Map();
 modules.set('a', {

@@ -10,8 +10,8 @@ import { Autoinstaller } from '@rushstack/rush-sdk/lib/logic/Autoinstaller';
 import { RushGlobalFolder } from '@rushstack/rush-sdk/lib/api/RushGlobalFolder';
 import { RushConfiguration } from '@rushstack/rush-sdk/lib/api/RushConfiguration';
 
-import type { IRushMcpPlugin, RushMcpPluginFactory } from './IRushMcpPlugin';
-import { RushMcpPluginSessionInternal } from './RushMcpPluginSession';
+import type { IRushMcpPlugin, RushMcpPluginFactory } from './IRushMcpPlugin.ts';
+import { RushMcpPluginSessionInternal } from './RushMcpPluginSession.ts';
 import rushMcpJsonSchemaObject from '../schemas/rush-mcp.schema.json';
 import rushMcpPluginSchemaObject from '../schemas/rush-mcp-plugin.schema.json';
 

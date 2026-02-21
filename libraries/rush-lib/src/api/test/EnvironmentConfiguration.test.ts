@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
+import { EnvironmentConfiguration } from '../EnvironmentConfiguration.ts';
 
 describe(EnvironmentConfiguration.name, () => {
   let _oldEnv: typeof process.env;

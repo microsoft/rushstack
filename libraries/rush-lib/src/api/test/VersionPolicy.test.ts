@@ -7,8 +7,8 @@ import {
   type ILockStepVersionJson,
   VersionPolicyConfiguration,
   type IIndividualVersionJson
-} from '../VersionPolicyConfiguration';
-import { VersionPolicy, LockStepVersionPolicy, IndividualVersionPolicy, BumpType } from '../VersionPolicy';
+} from '../VersionPolicyConfiguration.ts';
+import { VersionPolicy, LockStepVersionPolicy, IndividualVersionPolicy, BumpType } from '../VersionPolicy.ts';
 
 describe(VersionPolicy.name, () => {
   describe(LockStepVersionPolicy.name, () => {

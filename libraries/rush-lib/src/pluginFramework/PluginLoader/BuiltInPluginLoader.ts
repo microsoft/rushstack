@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IRushPluginConfigurationBase } from '../../api/RushPluginsConfiguration';
-import { type IPluginLoaderOptions, PluginLoaderBase } from './PluginLoaderBase';
+import type { IRushPluginConfigurationBase } from '../../api/RushPluginsConfiguration.ts';
+import { type IPluginLoaderOptions, PluginLoaderBase } from './PluginLoaderBase.ts';
 
 /**
  * @internal

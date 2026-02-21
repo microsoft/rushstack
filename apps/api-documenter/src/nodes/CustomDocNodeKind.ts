@@ -3,12 +3,12 @@
 
 import { TSDocConfiguration, DocNodeKind } from '@microsoft/tsdoc';
 
-import { DocEmphasisSpan } from './DocEmphasisSpan';
-import { DocHeading } from './DocHeading';
-import { DocNoteBox } from './DocNoteBox';
-import { DocTable } from './DocTable';
-import { DocTableCell } from './DocTableCell';
-import { DocTableRow } from './DocTableRow';
+import { DocEmphasisSpan } from './DocEmphasisSpan.ts';
+import { DocHeading } from './DocHeading.ts';
+import { DocNoteBox } from './DocNoteBox.ts';
+import { DocTable } from './DocTable.ts';
+import { DocTableCell } from './DocTableCell.ts';
+import { DocTableRow } from './DocTableRow.ts';
 
 /**
  * Identifies custom subclasses of {@link DocNode}.

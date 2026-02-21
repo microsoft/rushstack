@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { test as base } from '@playwright/test';
-import { tunneledBrowser } from '../src/tunneledBrowserConnection';
+import { tunneledBrowser } from '../src/tunneledBrowserConnection/index.ts';
 
 export const test = base.extend({
   browser: [

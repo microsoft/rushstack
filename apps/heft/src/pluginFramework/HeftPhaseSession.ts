@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { HeftTaskSession } from './HeftTaskSession';
-import { HeftPluginHost } from './HeftPluginHost';
-import type { ScopedLogger } from './logging/ScopedLogger';
-import type { InternalHeftSession } from './InternalHeftSession';
-import type { HeftPhase } from './HeftPhase';
-import type { HeftTask } from './HeftTask';
-import type { IHeftTaskPlugin } from './IHeftPlugin';
-import type { LoggingManager } from './logging/LoggingManager';
+import { HeftTaskSession } from './HeftTaskSession.ts';
+import { HeftPluginHost } from './HeftPluginHost.ts';
+import type { ScopedLogger } from './logging/ScopedLogger.ts';
+import type { InternalHeftSession } from './InternalHeftSession.ts';
+import type { HeftPhase } from './HeftPhase.ts';
+import type { HeftTask } from './HeftTask.ts';
+import type { IHeftTaskPlugin } from './IHeftPlugin.ts';
+import type { LoggingManager } from './logging/LoggingManager.ts';
 
 export interface IHeftPhaseSessionOptions {
   internalHeftSession: InternalHeftSession;

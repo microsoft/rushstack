@@ -5,10 +5,10 @@ import * as path from 'node:path';
 
 import { InternalError, JsonSchema } from '@rushstack/node-core-library';
 
-import type { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
-import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
-import type { HeftLifecycleSession } from '../pluginFramework/HeftLifecycleSession';
-import type { HeftTaskSession } from '../pluginFramework/HeftTaskSession';
+import type { IHeftPlugin } from '../pluginFramework/IHeftPlugin.ts';
+import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger.ts';
+import type { HeftLifecycleSession } from '../pluginFramework/HeftLifecycleSession.ts';
+import type { HeftTaskSession } from '../pluginFramework/HeftTaskSession.ts';
 
 /**
  * "baseParameter" from heft-plugin.schema.json

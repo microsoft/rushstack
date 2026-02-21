@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as loader from '..';
+import * as loader from '../index.ts';
 import type { Stats } from 'webpack';
-import LoadThemedStylesMock = require('./testData/LoadThemedStylesMock');
-import getCompiler from './testData/getCompiler';
+import LoadThemedStylesMock = require('./testData/LoadThemedStylesMock.ts');
+import getCompiler from './testData/getCompiler.ts';
 
 const MATCH_GENERATED_LOADER_STRING_REGEXP: RegExp = /var\sloader\s\=\srequire\(["'](.+?)["']\)/;
 const MATCH_LOADER_DOT_LOADSTYLES_FUNCTION_ASYNC_VALUE_REGEXP: RegExp = /loader\.loadStyles\(.+?,\s(.+?)\)/;

@@ -10,7 +10,7 @@ import type {
 } from '@rushstack/heft';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { JsonSchemaTypingsGenerator } from './JsonSchemaTypingsGenerator';
+import { JsonSchemaTypingsGenerator } from './JsonSchemaTypingsGenerator.ts';
 
 const PLUGIN_NAME: 'json-schema-typings-plugin' = 'json-schema-typings-plugin';
 

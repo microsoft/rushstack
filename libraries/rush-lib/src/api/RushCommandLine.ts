@@ -3,7 +3,7 @@
 
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
 
-import { RushCommandLineParser } from '../cli/RushCommandLineParser';
+import { RushCommandLineParser } from '../cli/RushCommandLineParser.ts';
 
 /**
  * Information about the available parameters associated with a Rush action

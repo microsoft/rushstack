@@ -12,22 +12,22 @@ import {
 
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
-import type { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';
-import type { IPhase } from '../api/CommandLineConfiguration';
-import type { RushConfiguration } from '../api/RushConfiguration';
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import type { Operation } from '../logic/operations/Operation';
+import type { BuildCacheConfiguration } from '../api/BuildCacheConfiguration.ts';
+import type { IPhase } from '../api/CommandLineConfiguration.ts';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import type { Operation } from '../logic/operations/Operation.ts';
 import type {
   IExecutionResult,
   IOperationExecutionResult
-} from '../logic/operations/IOperationExecutionResult';
-import type { CobuildConfiguration } from '../api/CobuildConfiguration';
-import type { RushProjectConfiguration } from '../api/RushProjectConfiguration';
-import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner';
-import type { ITelemetryData } from '../logic/Telemetry';
-import type { OperationStatus } from '../logic/operations/OperationStatus';
-import type { IInputsSnapshot } from '../logic/incremental/InputsSnapshot';
-import type { IEnvironment } from '../utilities/Utilities';
+} from '../logic/operations/IOperationExecutionResult.ts';
+import type { CobuildConfiguration } from '../api/CobuildConfiguration.ts';
+import type { RushProjectConfiguration } from '../api/RushProjectConfiguration.ts';
+import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner.ts';
+import type { ITelemetryData } from '../logic/Telemetry.ts';
+import type { OperationStatus } from '../logic/operations/OperationStatus.ts';
+import type { IInputsSnapshot } from '../logic/incremental/InputsSnapshot.ts';
+import type { IEnvironment } from '../utilities/Utilities.ts';
 
 /**
  * A plugin that interacts with a phased commands.

@@ -3,8 +3,8 @@
 
 import type { RuleTester } from '@typescript-eslint/rule-tester';
 
-import { getRuleTesterWithProject } from './ruleTester';
-import { noNewNullRule } from '../no-new-null';
+import { getRuleTesterWithProject } from './ruleTester.ts';
+import { noNewNullRule } from '../no-new-null.ts';
 
 const ruleTester: RuleTester = getRuleTesterWithProject();
 

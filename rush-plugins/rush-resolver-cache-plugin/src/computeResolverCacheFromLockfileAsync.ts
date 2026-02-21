@@ -8,9 +8,9 @@ import type {
   IResolverCacheFile
 } from '@rushstack/webpack-workspace-resolve-plugin';
 
-import type { PnpmShrinkwrapFile } from './externals';
-import { getDescriptionFileRootFromKey, resolveDependencies, createContextSerializer } from './helpers';
-import type { IResolverContext } from './types';
+import type { PnpmShrinkwrapFile } from './externals.ts';
+import { getDescriptionFileRootFromKey, resolveDependencies, createContextSerializer } from './helpers.ts';
+import type { IResolverContext } from './types.ts';
 
 /**
  * The only parts of a RushConfigurationProject needed by this tool.

@@ -4,12 +4,12 @@
 import { FileSystem, type FolderItem } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
-import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
-import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
-import type { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider';
+import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration.ts';
+import type { RushConfigurationProject } from '../../../api/RushConfigurationProject.ts';
+import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId.ts';
+import type { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider.ts';
 
-import { OperationBuildCache } from '../OperationBuildCache';
+import { OperationBuildCache } from '../OperationBuildCache.ts';
 
 interface ITestOptions {
   enabled: boolean;

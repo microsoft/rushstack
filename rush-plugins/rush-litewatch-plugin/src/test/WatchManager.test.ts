@@ -3,8 +3,8 @@
 
 import type { ITerminalProvider, TerminalProviderSeverity } from '@rushstack/terminal';
 
-import { WatchManager } from '../WatchManager';
-import { WatchProject } from '../WatchProject';
+import { WatchManager } from '../WatchManager.ts';
+import { WatchProject } from '../WatchProject.ts';
 
 class TestTerminalProvider implements ITerminalProvider {
   public readonly supportsColor: boolean = false;

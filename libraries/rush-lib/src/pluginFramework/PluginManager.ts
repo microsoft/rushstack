@@ -4,15 +4,15 @@
 import { FileSystem, Import, InternalError } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import type { CommandLineConfiguration } from '../api/CommandLineConfiguration';
-import type { RushConfiguration } from '../api/RushConfiguration';
-import { BuiltInPluginLoader, type IBuiltInPluginConfiguration } from './PluginLoader/BuiltInPluginLoader';
-import type { IRushPlugin } from './IRushPlugin';
-import { AutoinstallerPluginLoader } from './PluginLoader/AutoinstallerPluginLoader';
-import type { RushSession } from './RushSession';
-import type { PluginLoaderBase } from './PluginLoader/PluginLoaderBase';
-import { Rush } from '../api/Rush';
-import type { RushGlobalFolder } from '../api/RushGlobalFolder';
+import type { CommandLineConfiguration } from '../api/CommandLineConfiguration.ts';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import { BuiltInPluginLoader, type IBuiltInPluginConfiguration } from './PluginLoader/BuiltInPluginLoader.ts';
+import type { IRushPlugin } from './IRushPlugin.ts';
+import { AutoinstallerPluginLoader } from './PluginLoader/AutoinstallerPluginLoader.ts';
+import type { RushSession } from './RushSession.ts';
+import type { PluginLoaderBase } from './PluginLoader/PluginLoaderBase.ts';
+import { Rush } from '../api/Rush.ts';
+import type { RushGlobalFolder } from '../api/RushGlobalFolder.ts';
 
 export interface IPluginManagerOptions {
   terminal: ITerminal;

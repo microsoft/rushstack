@@ -3,8 +3,8 @@
 
 import type { sources, Compilation } from 'webpack';
 
-import { CHUNK_MODULE_TOKEN, CHUNK_MODULE_REGEX } from './Constants';
-import type { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.types';
+import { CHUNK_MODULE_TOKEN, CHUNK_MODULE_REGEX } from './Constants.ts';
+import type { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.types.ts';
 
 /**
  * Rehydrates an asset with minified modules.

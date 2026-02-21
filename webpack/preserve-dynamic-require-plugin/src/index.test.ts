@@ -4,7 +4,7 @@
 jest.disableAutomock();
 import webpack from 'webpack';
 
-import { PreserveDynamicRequireWebpackPlugin } from './index';
+import { PreserveDynamicRequireWebpackPlugin } from './index.ts';
 
 jest.setTimeout(1e9);
 

@@ -6,10 +6,10 @@ import Prompt from 'inquirer/lib/ui/prompt';
 import { NpmCheck, type INpmCheckState, type INpmCheckPackageSummary } from '@rushstack/npm-check-fork';
 import { Colorize } from '@rushstack/terminal';
 
-import type { RushConfiguration } from '../api/RushConfiguration';
-import { upgradeInteractive, type IDepsToUpgradeAnswers } from '../utilities/InteractiveUpgradeUI';
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { SearchListPrompt } from '../utilities/prompts/SearchListPrompt';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import { upgradeInteractive, type IDepsToUpgradeAnswers } from '../utilities/InteractiveUpgradeUI.ts';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import { SearchListPrompt } from '../utilities/prompts/SearchListPrompt.ts';
 
 interface IUpgradeInteractiveDeps {
   projects: RushConfigurationProject[];

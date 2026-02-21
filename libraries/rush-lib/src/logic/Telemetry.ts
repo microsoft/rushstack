@@ -7,10 +7,10 @@ import type { PerformanceEntry } from 'node:perf_hooks';
 
 import { FileSystem, type FileSystemStats, JsonFile } from '@rushstack/node-core-library';
 
-import type { RushConfiguration } from '../api/RushConfiguration';
-import { Rush } from '../api/Rush';
-import type { RushSession } from '../pluginFramework/RushSession';
-import { collectPerformanceEntries } from '../utilities/performance';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import { Rush } from '../api/Rush.ts';
+import type { RushSession } from '../pluginFramework/RushSession.ts';
+import { collectPerformanceEntries } from '../utilities/performance.ts';
 
 /**
  * @beta

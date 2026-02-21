@@ -3,10 +3,13 @@
 
 import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 
-import { ApiItem, ApiItemKind } from '../items/ApiItem';
-import { ApiItemContainerMixin, type IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
-import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { ApiPackage } from './ApiPackage';
+import { ApiItem, ApiItemKind } from '../items/ApiItem.ts';
+import {
+  ApiItemContainerMixin,
+  type IApiItemContainerMixinOptions
+} from '../mixins/ApiItemContainerMixin.ts';
+import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin.ts';
+import { ApiPackage } from './ApiPackage.ts';
 
 /**
  * Constructor options for {@link ApiEntryPoint}.

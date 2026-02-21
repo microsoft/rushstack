@@ -3,7 +3,7 @@
 
 import * as semver from 'semver';
 
-import { Utilities } from './Utilities';
+import { Utilities } from './Utilities.ts';
 
 async function runNpmCommandAndCaptureOutputAsync(
   args: string[],

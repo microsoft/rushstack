@@ -12,12 +12,12 @@ import {
   type TabValue
 } from '@fluentui/react-components';
 
-import { fromExtensionListener } from './Message/fromExtension';
-// import { ParameterView } from './ParameterView';
-// import { Toolbar } from './Toolbar';
-// import { useAppSelector } from './store/hooks';
-import { ProjectView } from './ProjectView';
-import { VersionsView } from './VersionsView';
+import { fromExtensionListener } from './Message/fromExtension.ts';
+// import { ParameterView } from './ParameterView/index.tsx';
+// import { Toolbar } from './Toolbar/index.tsx';
+// import { useAppSelector } from './store/hooks/index.ts';
+import { ProjectView } from './ProjectView/index.tsx';
+import { VersionsView } from './VersionsView/index.tsx';
 
 initializeIcons();
 

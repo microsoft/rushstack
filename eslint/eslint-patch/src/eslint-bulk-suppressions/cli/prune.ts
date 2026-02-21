@@ -3,13 +3,13 @@
 
 import fs from 'node:fs';
 
-import { printPruneHelp } from './utils/print-help';
-import { runEslintAsync } from './runEslint';
-import { ESLINT_BULK_PRUNE_ENV_VAR_NAME } from '../constants';
+import { printPruneHelp } from './utils/print-help.ts';
+import { runEslintAsync } from './runEslint.ts';
+import { ESLINT_BULK_PRUNE_ENV_VAR_NAME } from '../constants.ts';
 import {
   deleteBulkSuppressionsFileInEslintConfigFolder,
   getSuppressionsConfigForEslintConfigFolderPath
-} from '../bulk-suppressions-file';
+} from '../bulk-suppressions-file.ts';
 
 export async function pruneAsync(): Promise<void> {
   const args: string[] = process.argv.slice(3);

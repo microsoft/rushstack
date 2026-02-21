@@ -7,16 +7,16 @@ import * as ts from 'typescript';
 
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 
-import type { Collector } from '../collector/Collector';
-import { AstSymbol } from '../analyzer/AstSymbol';
-import type { AstDeclaration } from '../analyzer/AstDeclaration';
-import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
-import type { SymbolMetadata } from '../collector/SymbolMetadata';
-import type { CollectorEntity } from '../collector/CollectorEntity';
-import { ExtractorMessageId } from '../api/ExtractorMessageId';
-import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
-import type { IAstModuleExportInfo } from '../analyzer/AstModule';
-import type { AstEntity } from '../analyzer/AstEntity';
+import type { Collector } from '../collector/Collector.ts';
+import { AstSymbol } from '../analyzer/AstSymbol.ts';
+import type { AstDeclaration } from '../analyzer/AstDeclaration.ts';
+import type { ApiItemMetadata } from '../collector/ApiItemMetadata.ts';
+import type { SymbolMetadata } from '../collector/SymbolMetadata.ts';
+import type { CollectorEntity } from '../collector/CollectorEntity.ts';
+import { ExtractorMessageId } from '../api/ExtractorMessageId.ts';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport.ts';
+import type { IAstModuleExportInfo } from '../analyzer/AstModule.ts';
+import type { AstEntity } from '../analyzer/AstEntity.ts';
 
 export class ValidationEnhancer {
   public static analyze(collector: Collector): void {

@@ -3,7 +3,7 @@
 
 import inspector from 'node:inspector';
 import { Path } from '@rushstack/node-core-library';
-import { PnpmfileRunner } from '../PnpmfileRunner';
+import { PnpmfileRunner } from '../PnpmfileRunner.ts';
 
 const isDebuggerAttached: boolean = inspector.url() !== undefined;
 

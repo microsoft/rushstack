@@ -4,8 +4,8 @@
 import fs from 'node:fs';
 import worker_threads from 'node:worker_threads';
 
-import type { ICallFrame, ICpuProfile, INodeSummary, IProfileSummary } from './types';
-import type { IMessageToWorker } from './protocol';
+import type { ICallFrame, ICpuProfile, INodeSummary, IProfileSummary } from './types.ts';
+import type { IMessageToWorker } from './protocol.ts';
 
 interface ILocalTimeInfo {
   self: number;

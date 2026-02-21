@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { HeftConfiguration } from '../configuration/HeftConfiguration';
-import type { IHeftTaskSession } from '../pluginFramework/HeftTaskSession';
-import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
+import type { HeftConfiguration } from '../configuration/HeftConfiguration.ts';
+import type { IHeftTaskSession } from '../pluginFramework/HeftTaskSession.ts';
+import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin.ts';
 
 export const PLUGIN_NAME: string = 'set-environment-variables-plugin';
 

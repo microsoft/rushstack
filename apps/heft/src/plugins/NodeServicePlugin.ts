@@ -6,14 +6,14 @@ import * as process from 'node:process';
 
 import { InternalError, SubprocessTerminator } from '@rushstack/node-core-library';
 
-import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
-import type { HeftConfiguration } from '../configuration/HeftConfiguration';
+import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin.ts';
+import type { HeftConfiguration } from '../configuration/HeftConfiguration.ts';
 import type {
   IHeftTaskSession,
   IHeftTaskRunIncrementalHookOptions
-} from '../pluginFramework/HeftTaskSession';
-import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
-import { CoreConfigFiles } from '../utilities/CoreConfigFiles';
+} from '../pluginFramework/HeftTaskSession.ts';
+import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger.ts';
+import { CoreConfigFiles } from '../utilities/CoreConfigFiles.ts';
 
 const PLUGIN_NAME: 'node-service-plugin' = 'node-service-plugin';
 const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';

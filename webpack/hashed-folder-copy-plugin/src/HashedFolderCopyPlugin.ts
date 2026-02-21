@@ -10,8 +10,8 @@ import { Async } from '@rushstack/node-core-library';
 import {
   type IHashedFolderDependency,
   getHashedFolderDependencyForWebpackInstance
-} from './HashedFolderDependency';
-import type { BasicEvaluatedExpression } from './webpackTypes';
+} from './HashedFolderDependency.ts';
+import type { BasicEvaluatedExpression } from './webpackTypes.ts';
 
 interface IParserHelpers {
   evaluateToString: (type: string) => (exp: UnaryExpression) => BasicEvaluatedExpression;

@@ -3,8 +3,8 @@
 
 import type { RuleTester, TestCaseError } from '@typescript-eslint/rule-tester';
 
-import { getRuleTesterWithoutProject } from './ruleTester';
-import { normalizedImportsRule, MESSAGE_ID } from '../normalized-imports';
+import { getRuleTesterWithoutProject } from './ruleTester.ts';
+import { normalizedImportsRule, MESSAGE_ID } from '../normalized-imports.ts';
 
 const ruleTester: RuleTester = getRuleTesterWithoutProject();
 

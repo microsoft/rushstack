@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Tokenizer } from '../Tokenizer';
-import { Parser } from '../Parser';
-import type { AstScript } from '../AstNode';
+import { Tokenizer } from '../Tokenizer.ts';
+import { Parser } from '../Parser.ts';
+import type { AstScript } from '../AstNode.ts';
 
 function escape(s: string): string {
   return s.replace(/\n/g, '[n]').replace(/\r/g, '[r]').replace(/\t/g, '[t]').replace(/\\/g, '[b]');
