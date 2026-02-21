@@ -117,23 +117,40 @@ extends:
                   PR_BODY="Automated PR to bump decoupled local dependencies to the latest published versions."
                   API_BASE="https://api.github.com/repos/${REPO_SLUG}"
 
+                  # Helper to call the GitHub API and fail with a visible error
+                  github_api() {
+                    local RESPONSE HTTP_CODE
+                    RESPONSE=$(curl -s -w "\n%{http_code}" "$@")
+                    HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+                    BODY=$(echo "$RESPONSE" | sed '$d')
+
+                    if [[ "$HTTP_CODE" -ge 200 && "$HTTP_CODE" -lt 300 ]]; then
+                      echo "$BODY"
+                    else
+                      echo "::error::GitHub API returned HTTP ${HTTP_CODE}:" >&2
+                      echo "$BODY" >&2
+                      return 1
+                    fi
+                  }
+
                   # Check if a PR already exists for this branch
-                  EXISTING_PR=$(curl -sf \
+                  OWNER=$(echo "${REPO_SLUG}" | cut -d/ -f1)
+                  EXISTING_PR=$(github_api \
                     -H "Authorization: token ${GITHUB_TOKEN}" \
                     -H "Accept: application/vnd.github+json" \
-                    "${API_BASE}/pulls?head=$(echo "${REPO_SLUG}" | cut -d/ -f1):$(BranchName)&state=open" \
+                    "${API_BASE}/pulls?head=${OWNER}:$(BranchName)&state=open" \
                     | jq '.[0].number // empty')
 
                   if [ -n "$EXISTING_PR" ]; then
                     echo "Updating existing PR #${EXISTING_PR}"
-                    curl -sf -X PATCH \
+                    github_api -X PATCH \
                       -H "Authorization: token ${GITHUB_TOKEN}" \
                       -H "Accept: application/vnd.github+json" \
                       "${API_BASE}/pulls/${EXISTING_PR}" \
                       -d "$(jq -n --arg body "$PR_BODY" '{body: $body}')"
                   else
                     echo "Creating new PR"
-                    curl -sf -X POST \
+                    github_api -X POST \
                       -H "Authorization: token ${GITHUB_TOKEN}" \
                       -H "Accept: application/vnd.github+json" \
                       "${API_BASE}/pulls" \
