@@ -5,8 +5,8 @@ import * as path from 'node:path';
 
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../../../api/RushConfiguration';
-import { VersionPolicyProjectSelectorParser } from '../VersionPolicyProjectSelectorParser';
+import { RushConfiguration } from '../../../api/RushConfiguration.ts';
+import { VersionPolicyProjectSelectorParser } from '../VersionPolicyProjectSelectorParser.ts';
 
 describe(VersionPolicyProjectSelectorParser.name, () => {
   let rushConfiguration: RushConfiguration;

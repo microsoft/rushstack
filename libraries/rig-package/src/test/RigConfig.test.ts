@@ -6,7 +6,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import stripJsonComments from 'strip-json-comments';
 
-import { RigConfig } from '../RigConfig';
+import { RigConfig } from '../RigConfig.ts';
 
 const testProjectFolder: string = path.join(__dirname, 'test-project');
 

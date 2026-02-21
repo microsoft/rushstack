@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ICommandLineChoiceDefinition } from './CommandLineDefinition';
-import { CommandLineParameterBase, CommandLineParameterKind } from './BaseClasses';
+import type { ICommandLineChoiceDefinition } from './CommandLineDefinition.ts';
+import { CommandLineParameterBase, CommandLineParameterKind } from './BaseClasses.ts';
 
 /**
  * The data type returned by {@link CommandLineParameterProvider.(defineChoiceParameter:2)}.

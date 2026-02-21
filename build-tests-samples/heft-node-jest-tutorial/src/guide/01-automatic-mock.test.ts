@@ -6,8 +6,8 @@
 
 jest.mock('./SoundPlayer'); // SoundPlayer is now a mock constructor
 
-import { SoundPlayer } from './SoundPlayer';
-import { SoundPlayerConsumer } from './SoundPlayerConsumer';
+import { SoundPlayer } from './SoundPlayer.ts';
+import { SoundPlayerConsumer } from './SoundPlayerConsumer.ts';
 
 beforeEach(() => {
   // Clear all instances and calls to constructor and all methods:

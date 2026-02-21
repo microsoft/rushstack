@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineParser } from '../providers/CommandLineParser';
-import { CommandLineAction } from '../providers/CommandLineAction';
-import { AliasCommandLineAction } from '../providers/AliasCommandLineAction';
-import { ScopedCommandLineAction } from '../providers/ScopedCommandLineAction';
-import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
-import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
-import type { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider';
-import { SCOPING_PARAMETER_GROUP } from '../Constants';
-import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
+import { CommandLineParser } from '../providers/CommandLineParser.ts';
+import { CommandLineAction } from '../providers/CommandLineAction.ts';
+import { AliasCommandLineAction } from '../providers/AliasCommandLineAction.ts';
+import { ScopedCommandLineAction } from '../providers/ScopedCommandLineAction.ts';
+import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter.ts';
+import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter.ts';
+import type { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider.ts';
+import { SCOPING_PARAMETER_GROUP } from '../Constants.ts';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities.ts';
 
 class GenericCommandLine extends CommandLineParser {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

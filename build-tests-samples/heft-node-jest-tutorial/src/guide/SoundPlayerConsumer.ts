@@ -4,7 +4,7 @@
 // This example is adapted from the Jest guide here:
 // https://jestjs.io/docs/en/es6-class-mocks
 
-import { SoundPlayer } from './SoundPlayer';
+import { SoundPlayer } from './SoundPlayer.ts';
 
 export class SoundPlayerConsumer {
   private _soundPlayer: SoundPlayer;

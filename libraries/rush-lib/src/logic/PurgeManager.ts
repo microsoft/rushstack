@@ -5,10 +5,10 @@ import * as path from 'node:path';
 
 import { Colorize } from '@rushstack/terminal';
 
-import { AsyncRecycler } from '../utilities/AsyncRecycler';
-import type { RushConfiguration } from '../api/RushConfiguration';
-import { RushConstants } from './RushConstants';
-import type { RushGlobalFolder } from '../api/RushGlobalFolder';
+import { AsyncRecycler } from '../utilities/AsyncRecycler.ts';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import { RushConstants } from './RushConstants.ts';
+import type { RushGlobalFolder } from '../api/RushGlobalFolder.ts';
 
 /**
  * This class implements the logic for "rush purge"

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IRushMcpPlugin, RushMcpPluginSession } from '@rushstack/mcp-server';
-import { StateCapitalTool } from './StateCapitalTool';
+import { StateCapitalTool } from './StateCapitalTool.ts';
 
 export interface IExamplePluginConfigFile {
   capitalsByState: Record<string, string>;

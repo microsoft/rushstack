@@ -5,18 +5,18 @@ import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
-} from '../../pluginFramework/PhasedCommandHooks';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
-import { IPCOperationRunner } from './IPCOperationRunner';
-import type { Operation } from './Operation';
-import { OperationStatus } from './OperationStatus';
+} from '../../pluginFramework/PhasedCommandHooks.ts';
+import type { IOperationExecutionResult } from './IOperationExecutionResult.ts';
+import { IPCOperationRunner } from './IPCOperationRunner.ts';
+import type { Operation } from './Operation.ts';
+import { OperationStatus } from './OperationStatus.ts';
 import {
   PLUGIN_NAME as ShellOperationPluginName,
   formatCommand,
   getCustomParameterValuesByOperation,
   type ICustomParameterValuesForOperation,
   getDisplayName
-} from './ShellOperationRunnerPlugin';
+} from './ShellOperationRunnerPlugin.ts';
 
 const PLUGIN_NAME: 'IPCOperationRunnerPlugin' = 'IPCOperationRunnerPlugin';
 

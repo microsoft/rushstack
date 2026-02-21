@@ -3,12 +3,12 @@
 
 import { AnsiEscape } from '@rushstack/terminal';
 
-import { ScopedCommandLineAction } from '../providers/ScopedCommandLineAction';
-import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
-import { CommandLineParser } from '../providers/CommandLineParser';
-import type { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider';
-import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
-import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
+import { ScopedCommandLineAction } from '../providers/ScopedCommandLineAction.ts';
+import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter.ts';
+import { CommandLineParser } from '../providers/CommandLineParser.ts';
+import type { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider.ts';
+import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter.ts';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities.ts';
 
 class TestScopedAction extends ScopedCommandLineAction {
   public done: boolean = false;

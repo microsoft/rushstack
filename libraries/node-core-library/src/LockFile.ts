@@ -4,9 +4,9 @@
 import * as path from 'node:path';
 import * as child_process from 'node:child_process';
 
-import { FileSystem } from './FileSystem';
-import { FileWriter } from './FileWriter';
-import { Async } from './Async';
+import { FileSystem } from './FileSystem.ts';
+import { FileWriter } from './FileWriter.ts';
+import { Async } from './Async.ts';
 
 /**
  * http://man7.org/linux/man-pages/man5/proc.5.html

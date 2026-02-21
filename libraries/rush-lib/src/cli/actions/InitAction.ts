@@ -12,10 +12,10 @@ import {
 import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { Colorize } from '@rushstack/terminal';
 
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { BaseConfiglessRushAction } from './BaseRushAction';
-import { assetsFolderPath } from '../../utilities/PathConstants';
-import { copyTemplateFileAsync } from '../../utilities/templateUtilities';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { BaseConfiglessRushAction } from './BaseRushAction.ts';
+import { assetsFolderPath } from '../../utilities/PathConstants.ts';
+import { copyTemplateFileAsync } from '../../utilities/templateUtilities.ts';
 
 export class InitAction extends BaseConfiglessRushAction {
   private readonly _overwriteParameter: CommandLineFlagParameter;

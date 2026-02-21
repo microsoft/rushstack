@@ -3,11 +3,11 @@ jest.mock('../CreatePackageSummary', () => ({
   default: jest.fn(async () => ({}))
 }));
 
-import createPackageSummary from '../CreatePackageSummary';
+import createPackageSummary from '../CreatePackageSummary.ts';
 const mockCreatePackageSummary = createPackageSummary as jest.MockedFunction<typeof createPackageSummary>;
 
-import type { INpmCheckState } from '../interfaces/INpmCheck';
-import NpmCheck from '../NpmCheck';
+import type { INpmCheckState } from '../interfaces/INpmCheck.ts';
+import NpmCheck from '../NpmCheck.ts';
 
 describe('NpmCheck', () => {
   it('should mimic rush initial options', async () => {

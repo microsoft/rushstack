@@ -5,5 +5,5 @@ export { BaseTool, type IBaseToolOptions, type CallToolResult } from './base.too
 export { RushMigrateProjectTool } from './migrate-project.tool';
 export { RushProjectDetailsTool } from './project-details.tool';
 export { RushCommandValidatorTool } from './rush-command-validator.tool';
-export { RushWorkspaceDetailsTool } from './workspace-details';
+export { RushWorkspaceDetailsTool } from './workspace-details.ts';
 export { RushConflictResolverTool } from './conflict-resolver.tool';

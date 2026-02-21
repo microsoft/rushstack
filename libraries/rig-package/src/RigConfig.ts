@@ -7,7 +7,7 @@ import * as fs from 'node:fs';
 import * as nodeResolve from 'resolve';
 import stripJsonComments from 'strip-json-comments';
 
-import { Helpers } from './Helpers';
+import { Helpers } from './Helpers.ts';
 
 /**
  * Represents the literal contents of the `config/rig.json` file.

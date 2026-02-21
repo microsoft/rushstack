@@ -6,8 +6,8 @@ import * as path from 'node:path';
 import { FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import type { RushUserConfiguration } from '../../api/RushUserConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import type { RushUserConfiguration } from '../../api/RushUserConfiguration.ts';
 
 /**
  * Options for creating a file system build cache provider.

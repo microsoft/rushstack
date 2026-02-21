@@ -4,9 +4,9 @@
 import { parseProblemMatchersJson } from '@rushstack/problem-matcher';
 import type { IProblemMatcher, IProblemMatcherJson, IProblem } from '@rushstack/problem-matcher';
 
-import type { ITerminalChunk } from './ITerminalChunk';
-import { type ITerminalWritableOptions, TerminalWritable } from './TerminalWritable';
-import type { IProblemCollector } from './IProblemCollector';
+import type { ITerminalChunk } from './ITerminalChunk.ts';
+import { type ITerminalWritableOptions, TerminalWritable } from './TerminalWritable.ts';
+import type { IProblemCollector } from './IProblemCollector.ts';
 
 /**
  * Constructor options for {@link ProblemCollector}.

@@ -3,7 +3,7 @@
 
 import type { IApiDocumenterPluginManifest } from '@microsoft/api-documenter';
 
-import { RushStackFeature } from './RushStackFeature';
+import { RushStackFeature } from './RushStackFeature.ts';
 
 export const apiDocumenterPluginManifest: IApiDocumenterPluginManifest = {
   manifestVersion: 1000,

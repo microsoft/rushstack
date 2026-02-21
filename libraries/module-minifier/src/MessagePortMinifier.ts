@@ -10,7 +10,7 @@ import type {
   IModuleMinificationRequest,
   IModuleMinificationResult,
   IModuleMinifier
-} from './types';
+} from './types.ts';
 
 /**
  * Minifier implementation that outsources requests to the other side of a MessagePort

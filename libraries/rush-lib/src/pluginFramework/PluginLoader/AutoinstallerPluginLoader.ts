@@ -11,16 +11,16 @@ import {
   type JsonSchema
 } from '@rushstack/node-core-library';
 
-import type { IRushPluginConfiguration } from '../../api/RushPluginsConfiguration';
-import { Autoinstaller } from '../../logic/Autoinstaller';
-import { RushConstants } from '../../logic/RushConstants';
+import type { IRushPluginConfiguration } from '../../api/RushPluginsConfiguration.ts';
+import { Autoinstaller } from '../../logic/Autoinstaller.ts';
+import { RushConstants } from '../../logic/RushConstants.ts';
 import {
   type IPluginLoaderOptions,
   type IRushPluginManifest,
   type IRushPluginManifestJson,
   PluginLoaderBase
-} from './PluginLoaderBase';
-import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
+} from './PluginLoaderBase.ts';
+import type { RushGlobalFolder } from '../../api/RushGlobalFolder.ts';
 
 interface IAutoinstallerPluginLoaderOptions extends IPluginLoaderOptions<IRushPluginConfiguration> {
   restrictConsoleOutput: boolean;

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as vscode from 'vscode';
-import { terminal } from '../logic/logger';
+import { terminal } from '../logic/logger.ts';
 
 let rushTaskProvider: RushTaskProvider | undefined;
 

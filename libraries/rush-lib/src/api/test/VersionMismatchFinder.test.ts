@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { RushConfigurationProject } from '../RushConfigurationProject';
-import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
-import { PackageJsonEditor } from '../PackageJsonEditor';
-import { CommonVersionsConfiguration } from '../CommonVersionsConfiguration';
-import type { VersionMismatchFinderEntity } from '../../logic/versionMismatch/VersionMismatchFinderEntity';
-import { VersionMismatchFinderProject } from '../../logic/versionMismatch/VersionMismatchFinderProject';
-import { VersionMismatchFinderCommonVersions } from '../../logic/versionMismatch/VersionMismatchFinderCommonVersions';
+import type { RushConfigurationProject } from '../RushConfigurationProject.ts';
+import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder.ts';
+import { PackageJsonEditor } from '../PackageJsonEditor.ts';
+import { CommonVersionsConfiguration } from '../CommonVersionsConfiguration.ts';
+import type { VersionMismatchFinderEntity } from '../../logic/versionMismatch/VersionMismatchFinderEntity.ts';
+import { VersionMismatchFinderProject } from '../../logic/versionMismatch/VersionMismatchFinderProject.ts';
+import { VersionMismatchFinderCommonVersions } from '../../logic/versionMismatch/VersionMismatchFinderCommonVersions.ts';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 describe(VersionMismatchFinder.name, () => {

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-export { SetPublicPathPluginBase } from './SetPublicPathPluginBase';
+export { SetPublicPathPluginBase } from './SetPublicPathPluginBase.ts';
 export {
   SetPublicPathPlugin,
   type ISetWebpackPublicPathOptions,
@@ -9,5 +9,5 @@ export {
   type IScriptNameAssetNameOptions,
   type IScriptNameOptions,
   type IScriptNameRegexOptions
-} from './SetPublicPathPlugin';
-export { SetPublicPathCurrentScriptPlugin } from './SetPublicPathCurrentScriptPlugin';
+} from './SetPublicPathPlugin.ts';
+export { SetPublicPathCurrentScriptPlugin } from './SetPublicPathCurrentScriptPlugin.ts';

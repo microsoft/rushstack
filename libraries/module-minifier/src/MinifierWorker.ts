@@ -5,8 +5,8 @@ import { parentPort, workerData } from 'node:worker_threads';
 
 import type { MinifyOptions } from 'terser';
 
-import { minifySingleFileAsync } from './MinifySingleFile';
-import type { IModuleMinificationRequest, IModuleMinificationResult } from './types';
+import { minifySingleFileAsync } from './MinifySingleFile.ts';
+import type { IModuleMinificationRequest, IModuleMinificationResult } from './types.ts';
 
 const terserOptions: MinifyOptions = workerData;
 

@@ -11,14 +11,14 @@
  */
 
 // eslint-disable-next-line no-restricted-syntax
-export * from './DocClass1';
+export * from './DocClass1.ts';
 // eslint-disable-next-line no-restricted-syntax
-export * from './DocEnums';
-import type { IDocInterface1, IDocInterface3, SystemEvent } from './DocClass1';
+export * from './DocEnums.ts';
+import type { IDocInterface1, IDocInterface3, SystemEvent } from './DocClass1.ts';
 
-export { DecoratorExample } from './DecoratorExample';
+export { DecoratorExample } from './DecoratorExample.ts';
 
-export { AbstractClass } from './AbstractClass';
+export { AbstractClass } from './AbstractClass.ts';
 
 /**
  * A type alias

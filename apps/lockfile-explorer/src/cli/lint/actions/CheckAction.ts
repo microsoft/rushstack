@@ -14,13 +14,13 @@ import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { AlreadyReportedError, Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
 import lockfileLintSchema from '../../../schemas/lockfile-lint.schema.json';
-import { LOCKFILE_EXPLORER_FOLDERNAME, LOCKFILE_LINT_JSON_FILENAME } from '../../../constants/common';
-import type { LintCommandLineParser } from '../LintCommandLineParser';
+import { LOCKFILE_EXPLORER_FOLDERNAME, LOCKFILE_LINT_JSON_FILENAME } from '../../../constants/common.ts';
+import type { LintCommandLineParser } from '../LintCommandLineParser.ts';
 import {
   getShrinkwrapFileMajorVersion,
   parseDependencyPath,
   splicePackageWithVersion
-} from '../../../utils/shrinkwrap';
+} from '../../../utils/shrinkwrap.ts';
 
 export interface ILintRule {
   rule: 'restrict-versions';

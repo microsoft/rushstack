@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 // Load the Jest patches before anything else loads
-import './patches/jestWorkerPatch';
+import './patches/jestWorkerPatch.ts';
 
 import type { EventEmitter } from 'node:events';
 import * as path from 'node:path';
@@ -34,9 +34,9 @@ import {
 import { FileSystem, Path, Import, JsonFile, PackageName } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import type { IHeftJestReporterOptions } from './HeftJestReporter';
-import { jestResolve } from './JestUtils';
-import { TerminalWritableStream } from './TerminalWritableStream';
+import type { IHeftJestReporterOptions } from './HeftJestReporter.ts';
+import { jestResolve } from './JestUtils.ts';
+import { TerminalWritableStream } from './TerminalWritableStream.ts';
 import anythingSchema from './schemas/anything.schema.json';
 
 const jestPluginSymbol: unique symbol = Symbol('heft-jest-plugin');

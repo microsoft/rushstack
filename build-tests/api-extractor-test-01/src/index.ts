@@ -84,18 +84,18 @@ export class DecoratorTest {
   }
 }
 
-export { default as AbstractClass } from './AbstractClass';
-export { default as AbstractClass2, AbstractClass3 } from './AbstractClass2';
+export { default as AbstractClass } from './AbstractClass.ts';
+export { default as AbstractClass2, AbstractClass3 } from './AbstractClass2.ts';
 
-export { ClassWithAccessModifiers } from './AccessModifiers';
+export { ClassWithAccessModifiers } from './AccessModifiers.ts';
 
-export { ClassWithTypeLiterals } from './ClassWithTypeLiterals';
+export { ClassWithTypeLiterals } from './ClassWithTypeLiterals.ts';
 
-export * from './DeclarationMerging';
+export * from './DeclarationMerging.ts';
 
-export * from './Enums';
+export * from './Enums.ts';
 
-export { DefaultExportEdgeCase, default as ClassExportedAsDefault } from './DefaultExportEdgeCase';
+export { DefaultExportEdgeCase, default as ClassExportedAsDefault } from './DefaultExportEdgeCase.ts';
 
 /**
  * Test that we can correctly carry default imports into the rollup .d.ts file
@@ -107,21 +107,21 @@ export declare class UseLong {
   use_long(): Long;
 }
 
-export { ClassWithSymbols, fullyExportedCustomSymbol } from './EcmaScriptSymbols';
+export { ClassWithSymbols, fullyExportedCustomSymbol } from './EcmaScriptSymbols.ts';
 
-export { ForgottenExportConsumer1 } from './ForgottenExportConsumer1';
-export { ForgottenExportConsumer2 } from './ForgottenExportConsumer2';
-export { ForgottenExportConsumer3 } from './ForgottenExportConsumer3';
+export { ForgottenExportConsumer1 } from './ForgottenExportConsumer1.ts';
+export { ForgottenExportConsumer2 } from './ForgottenExportConsumer2.ts';
+export { ForgottenExportConsumer3 } from './ForgottenExportConsumer3.ts';
 
-export type { default as IInterfaceAsDefaultExport } from './IInterfaceAsDefaultExport';
+export type { default as IInterfaceAsDefaultExport } from './IInterfaceAsDefaultExport.ts';
 
 /**
  * Test the alias-following logic:  This class gets aliased twice before being
  * exported from the package.
  */
-export { ReexportedClass3 as ReexportedClass } from './ReexportedClass3/ReexportedClass3';
+export { ReexportedClass3 as ReexportedClass } from './ReexportedClass3/ReexportedClass3.ts';
 
-export { TypeReferencesInAedoc } from './TypeReferencesInAedoc';
-export { ReferenceLibDirective } from './ReferenceLibDirective';
+export { TypeReferencesInAedoc } from './TypeReferencesInAedoc.ts';
+export { ReferenceLibDirective } from './ReferenceLibDirective.ts';
 
-export { VARIABLE, NamespaceContainingVariable } from './variableDeclarations';
+export { VARIABLE, NamespaceContainingVariable } from './variableDeclarations.ts';

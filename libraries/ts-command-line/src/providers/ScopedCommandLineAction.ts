@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { SCOPING_PARAMETER_GROUP } from '../Constants';
-import { CommandLineAction, type ICommandLineActionOptions } from './CommandLineAction';
-import { CommandLineParser, type ICommandLineParserOptions } from './CommandLineParser';
-import { CommandLineParserExitError } from './CommandLineParserExitError';
-import type { CommandLineParameter } from '../parameters/BaseClasses';
+import { SCOPING_PARAMETER_GROUP } from '../Constants.ts';
+import { CommandLineAction, type ICommandLineActionOptions } from './CommandLineAction.ts';
+import { CommandLineParser, type ICommandLineParserOptions } from './CommandLineParser.ts';
+import { CommandLineParserExitError } from './CommandLineParserExitError.ts';
+import type { CommandLineParameter } from '../parameters/BaseClasses.ts';
 import type {
   CommandLineParameterProvider,
   ICommandLineParserData,
   IRegisterDefinedParametersState
-} from './CommandLineParameterProvider';
+} from './CommandLineParameterProvider.ts';
 
 interface IInternalScopedCommandLineParserOptions extends ICommandLineParserOptions {
   readonly actionOptions: ICommandLineActionOptions;

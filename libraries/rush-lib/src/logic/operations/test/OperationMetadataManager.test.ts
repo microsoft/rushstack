@@ -5,15 +5,15 @@ jest.mock('../OperationStateFile');
 jest.mock('node:fs');
 
 import { MockWritable, StringBufferTerminalProvider, Terminal, TerminalChunkKind } from '@rushstack/terminal';
-import type { IPhase } from '../../../api/CommandLineConfiguration';
-import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
-import { OperationMetadataManager } from '../OperationMetadataManager';
-import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalProvider';
+import type { IPhase } from '../../../api/CommandLineConfiguration.ts';
+import type { RushConfigurationProject } from '../../../api/RushConfigurationProject.ts';
+import { OperationMetadataManager } from '../OperationMetadataManager.ts';
+import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalProvider.ts';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { FileSystem } from '@rushstack/node-core-library';
 import * as fs from 'node:fs';
 import { Readable } from 'node:stream';
-import { Operation } from '../Operation';
+import { Operation } from '../Operation.ts';
 
 const mockWritable: MockWritable = new MockWritable();
 const mockTerminal: Terminal = new Terminal(new CollatedTerminalProvider(new CollatedTerminal(mockWritable)));

@@ -12,4 +12,4 @@ export {
   type ICredentialCacheEntry,
   type ICredentialCacheOptions,
   RUSH_USER_FOLDER_NAME
-} from './CredentialCache';
+} from './CredentialCache.ts';

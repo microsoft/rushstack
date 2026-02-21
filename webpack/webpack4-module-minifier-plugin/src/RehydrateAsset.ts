@@ -3,8 +3,8 @@
 
 import { CachedSource, ConcatSource, ReplaceSource, type Source } from 'webpack-sources';
 
-import { CHUNK_MODULES_TOKEN } from './Constants';
-import type { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.types';
+import { CHUNK_MODULES_TOKEN } from './Constants.ts';
+import type { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.types.ts';
 
 /**
  * Rehydrates an asset with minified modules.

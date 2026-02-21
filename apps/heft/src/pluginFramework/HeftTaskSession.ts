@@ -5,16 +5,16 @@ import { AsyncParallelHook, AsyncSeriesWaterfallHook } from 'tapable';
 
 import { InternalError } from '@rushstack/node-core-library';
 
-import type { MetricsCollector } from '../metrics/MetricsCollector';
-import type { IScopedLogger } from './logging/ScopedLogger';
-import type { HeftTask } from './HeftTask';
-import type { IHeftPhaseSessionOptions } from './HeftPhaseSession';
-import type { HeftParameterManager, IHeftParameters } from './HeftParameterManager';
-import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
-import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
-import type { HeftPluginHost } from './HeftPluginHost';
-import type { GlobFn, WatchGlobFn } from '../plugins/FileGlobSpecifier';
-import type { IWatchFileSystem } from '../utilities/WatchFileSystemAdapter';
+import type { MetricsCollector } from '../metrics/MetricsCollector.ts';
+import type { IScopedLogger } from './logging/ScopedLogger.ts';
+import type { HeftTask } from './HeftTask.ts';
+import type { IHeftPhaseSessionOptions } from './HeftPhaseSession.ts';
+import type { HeftParameterManager, IHeftParameters } from './HeftParameterManager.ts';
+import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin.ts';
+import type { ICopyOperation } from '../plugins/CopyFilesPlugin.ts';
+import type { HeftPluginHost } from './HeftPluginHost.ts';
+import type { GlobFn, WatchGlobFn } from '../plugins/FileGlobSpecifier.ts';
+import type { IWatchFileSystem } from '../utilities/WatchFileSystemAdapter.ts';
 
 /**
  * The type of {@link IHeftTaskSession.parsedCommandLine}, which exposes details about the

@@ -16,7 +16,7 @@ import type {
   IModuleMinificationResult,
   IModuleMinificationRequest,
   IModuleMinifier
-} from './types';
+} from './types.ts';
 
 /**
  * Options for configuring the WorkerPoolMinifier

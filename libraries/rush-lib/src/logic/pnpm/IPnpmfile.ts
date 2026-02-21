@@ -4,8 +4,8 @@
 import type * as pnpmKitV8 from '@rushstack/rush-pnpm-kit-v8';
 import type { IPackageJson } from '@rushstack/node-core-library';
 
-import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
 
 /**
  * The `settings` parameter passed to {@link IPnpmfileShim.hooks.readPackage} and

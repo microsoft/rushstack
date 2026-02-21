@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineAction, type CommandLineStringParameter } from '../../index';
+import { CommandLineAction, type CommandLineStringParameter } from '../../index.ts';
 
 export class RunAction extends CommandLineAction {
   private readonly _title: CommandLineStringParameter;

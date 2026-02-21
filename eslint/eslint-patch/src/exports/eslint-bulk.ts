@@ -3,4 +3,4 @@
 
 // "lib/exports/eslint-bulk" is the entry point for the @rushstack/eslint-bulk command line front end.
 
-import '../eslint-bulk-suppressions/cli/start';
+import '../eslint-bulk-suppressions/cli/start.ts';

@@ -3,8 +3,8 @@
 
 import type { IProblemPattern } from '@rushstack/problem-matcher';
 
-import { type FileLocationStyle, Path } from './Path';
-import { TypeUuid } from './TypeUuid';
+import { type FileLocationStyle, Path } from './Path.ts';
+import { TypeUuid } from './TypeUuid.ts';
 
 /**
  * Provides options for the creation of a FileError.

@@ -5,9 +5,9 @@
 
 import { Enum } from '@rushstack/node-core-library';
 
-import type { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
-import { ReleaseTag } from '../aedoc/ReleaseTag';
-import type { DeserializerContext } from '../model/DeserializerContext';
+import type { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem.ts';
+import { ReleaseTag } from '../aedoc/ReleaseTag.ts';
+import type { DeserializerContext } from '../model/DeserializerContext.ts';
 
 /**
  * Constructor options for {@link (ApiReleaseTagMixin:interface)}.

@@ -8,7 +8,7 @@
 //
 //    require("@rushstack/eslint-patch/custom-config-package-names");
 //
-import { configArrayFactory, ModuleResolver, Naming } from './_patch-base';
+import { configArrayFactory, ModuleResolver, Naming } from './_patch-base.ts';
 
 if (!configArrayFactory.__loadExtendedShareableConfigPatched) {
   configArrayFactory.__loadExtendedShareableConfigPatched = true;

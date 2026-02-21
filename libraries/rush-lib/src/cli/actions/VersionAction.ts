@@ -6,17 +6,17 @@ import * as semver from 'semver';
 import { type IPackageJson, FileConstants, Enum } from '@rushstack/node-core-library';
 import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-import { BumpType, type LockStepVersionPolicy } from '../../api/VersionPolicy';
-import type { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import * as PolicyValidator from '../../logic/policy/PolicyValidator';
-import { BaseRushAction } from './BaseRushAction';
-import { PublishGit } from '../../logic/PublishGit';
-import { Git } from '../../logic/Git';
-import { RushConstants } from '../../logic/RushConstants';
-import type * as VersionManagerType from '../../logic/VersionManager';
+import { BumpType, type LockStepVersionPolicy } from '../../api/VersionPolicy.ts';
+import type { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration.ts';
+import { RushConfiguration } from '../../api/RushConfiguration.ts';
+import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder.ts';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import * as PolicyValidator from '../../logic/policy/PolicyValidator.ts';
+import { BaseRushAction } from './BaseRushAction.ts';
+import { PublishGit } from '../../logic/PublishGit.ts';
+import { Git } from '../../logic/Git.ts';
+import { RushConstants } from '../../logic/RushConstants.ts';
+import type * as VersionManagerType from '../../logic/VersionManager.ts';
 
 export const DEFAULT_PACKAGE_UPDATE_MESSAGE: string = 'Bump versions [skip ci]';
 export const DEFAULT_CHANGELOG_UPDATE_MESSAGE: string = 'Update changelogs [skip ci]';
@@ -109,7 +109,7 @@ export class VersionAction extends BaseRushAction {
     this._validateInput();
     const versionManagerModule: typeof VersionManagerType = await import(
       /* webpackChunkName: 'VersionManager' */
-      '../../logic/VersionManager'
+      '../../logic/VersionManager.ts'
     );
     const versionManager: VersionManagerType.VersionManager = new versionManagerModule.VersionManager(
       this.rushConfiguration,

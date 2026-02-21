@@ -6,14 +6,14 @@ import React, { useCallback } from 'react';
 import { Button, ScrollArea, Text } from '@rushstack/rush-themed-ui';
 
 import styles from './styles.scss';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../store/hooks.ts';
 import {
   addBookmark,
   forwardStack,
   popStack,
   removeBookmark,
   selectCurrentEntry
-} from '../../store/slices/entrySlice';
+} from '../../store/slices/entrySlice.ts';
 
 export const SelectedEntryPreview = (): React.ReactElement => {
   const selectedEntry = useAppSelector(selectCurrentEntry);

@@ -12,17 +12,17 @@ import {
 import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
 import { Terminal, ConsoleTerminalProvider, type ITerminal } from '@rushstack/terminal';
 
-import { MetricsCollector } from '../metrics/MetricsCollector';
-import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
-import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
-import { CleanAction } from './actions/CleanAction';
-import { PhaseAction } from './actions/PhaseAction';
-import { RunAction } from './actions/RunAction';
-import type { IHeftActionOptions } from './actions/IHeftAction';
-import { AliasAction } from './actions/AliasAction';
-import { getToolParameterNamesFromArgs } from '../utilities/CliUtilities';
-import { Constants } from '../utilities/Constants';
+import { MetricsCollector } from '../metrics/MetricsCollector.ts';
+import { HeftConfiguration } from '../configuration/HeftConfiguration.ts';
+import { InternalHeftSession } from '../pluginFramework/InternalHeftSession.ts';
+import { LoggingManager } from '../pluginFramework/logging/LoggingManager.ts';
+import { CleanAction } from './actions/CleanAction.ts';
+import { PhaseAction } from './actions/PhaseAction.ts';
+import { RunAction } from './actions/RunAction.ts';
+import type { IHeftActionOptions } from './actions/IHeftAction.ts';
+import { AliasAction } from './actions/AliasAction.ts';
+import { getToolParameterNamesFromArgs } from '../utilities/CliUtilities.ts';
+import { Constants } from '../utilities/Constants.ts';
 
 /**
  * This interfaces specifies values for parameters that must be parsed before the CLI

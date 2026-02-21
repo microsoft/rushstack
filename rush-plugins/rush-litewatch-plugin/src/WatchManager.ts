@@ -3,7 +3,7 @@
 
 import { type ITerminal, type ITerminalProvider, Terminal } from '@rushstack/terminal';
 
-import { type WatchProject, WatchState } from './WatchProject';
+import { type WatchProject, WatchState } from './WatchProject.ts';
 
 export class WatchManager {
   private readonly _terminal: ITerminal;

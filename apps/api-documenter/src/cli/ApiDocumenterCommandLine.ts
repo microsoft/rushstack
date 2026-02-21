@@ -3,9 +3,9 @@
 
 import { CommandLineParser } from '@rushstack/ts-command-line';
 
-import { MarkdownAction } from './MarkdownAction';
-import { YamlAction } from './YamlAction';
-import { GenerateAction } from './GenerateAction';
+import { MarkdownAction } from './MarkdownAction.ts';
+import { YamlAction } from './YamlAction.ts';
+import { GenerateAction } from './GenerateAction.ts';
 
 export class ApiDocumenterCommandLine extends CommandLineParser {
   public constructor() {

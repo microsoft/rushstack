@@ -10,7 +10,7 @@ import type { SourceLocation } from 'estree';
 
 import { LegacyAdapters } from '@rushstack/node-core-library';
 
-import { renderError } from './HashedFolderCopyPlugin';
+import { renderError } from './HashedFolderCopyPlugin.ts';
 import type {
   ConnectionState,
   DependencyTemplateContext,
@@ -20,7 +20,7 @@ import type {
   ResolverWithOptions,
   UpdateHashContextDependency,
   WebpackHash
-} from './webpackTypes';
+} from './webpackTypes.ts';
 
 export interface IHashedFolderDependency extends webpack.dependencies.NullDependency {
   processAssetsAsync(compilation: webpack.Compilation, globFs: glob.FileSystemAdapter): Promise<void>;

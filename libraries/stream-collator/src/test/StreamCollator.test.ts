@@ -3,8 +3,8 @@
 
 import { TerminalChunkKind, MockWritable } from '@rushstack/terminal';
 
-import { StreamCollator } from '../StreamCollator';
-import type { CollatedWriter } from '../CollatedWriter';
+import { StreamCollator } from '../StreamCollator.ts';
+import type { CollatedWriter } from '../CollatedWriter.ts';
 
 let collator: StreamCollator;
 const mockWritable: MockWritable = new MockWritable();

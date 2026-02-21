@@ -3,12 +3,12 @@
 
 import { type DocDeclarationReference, type DocMemberSelector, SelectorKind } from '@microsoft/tsdoc';
 
-import { type ApiItem, ApiItemKind } from '../items/ApiItem';
-import type { ApiModel } from './ApiModel';
-import type { ApiPackage } from './ApiPackage';
-import type { ApiEntryPoint } from './ApiEntryPoint';
-import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
-import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
+import { type ApiItem, ApiItemKind } from '../items/ApiItem.ts';
+import type { ApiModel } from './ApiModel.ts';
+import type { ApiPackage } from './ApiPackage.ts';
+import type { ApiEntryPoint } from './ApiEntryPoint.ts';
+import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin.ts';
+import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin.ts';
 
 /**
  * Result object for {@link ApiModel.resolveDeclarationReference}.

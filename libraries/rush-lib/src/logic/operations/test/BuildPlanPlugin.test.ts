@@ -4,27 +4,27 @@
 import { MockWritable, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { JsonFile } from '@rushstack/node-core-library';
 import { StreamCollator } from '@rushstack/stream-collator';
-import { BuildPlanPlugin } from '../BuildPlanPlugin';
+import { BuildPlanPlugin } from '../BuildPlanPlugin.ts';
 import {
   type ICreateOperationsContext,
   type IExecuteOperationsContext,
   PhasedCommandHooks
-} from '../../../pluginFramework/PhasedCommandHooks';
-import type { Operation } from '../Operation';
-import { RushConfiguration } from '../../../api/RushConfiguration';
+} from '../../../pluginFramework/PhasedCommandHooks.ts';
+import type { Operation } from '../Operation.ts';
+import { RushConfiguration } from '../../../api/RushConfiguration.ts';
 import {
   CommandLineConfiguration,
   type IPhase,
   type IPhasedCommandConfig
-} from '../../../api/CommandLineConfiguration';
-import { OperationExecutionRecord } from '../OperationExecutionRecord';
-import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
-import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
-import { RushConstants } from '../../RushConstants';
-import { MockOperationRunner } from './MockOperationRunner';
+} from '../../../api/CommandLineConfiguration.ts';
+import { OperationExecutionRecord } from '../OperationExecutionRecord.ts';
+import { PhasedOperationPlugin } from '../PhasedOperationPlugin.ts';
+import type { RushConfigurationProject } from '../../../api/RushConfigurationProject.ts';
+import { RushConstants } from '../../RushConstants.ts';
+import { MockOperationRunner } from './MockOperationRunner.ts';
 import path from 'node:path';
-import type { ICommandLineJson } from '../../../api/CommandLineJson';
-import type { IInputsSnapshot } from '../../incremental/InputsSnapshot';
+import type { ICommandLineJson } from '../../../api/CommandLineJson.ts';
+import type { IInputsSnapshot } from '../../incremental/InputsSnapshot.ts';
 
 describe(BuildPlanPlugin.name, () => {
   const rushJsonFile: string = path.resolve(__dirname, `../../test/workspaceRepo/rush.json`);

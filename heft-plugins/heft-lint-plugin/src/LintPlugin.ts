@@ -19,10 +19,10 @@ import type {
 } from '@rushstack/heft-typescript-plugin';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 
-import type { LinterBase } from './LinterBase';
-import { Eslint } from './Eslint';
-import { Tslint } from './Tslint';
-import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
+import type { LinterBase } from './LinterBase.ts';
+import { Eslint } from './Eslint.ts';
+import { Tslint } from './Tslint.ts';
+import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals.ts';
 
 const PLUGIN_NAME: 'lint-plugin' = 'lint-plugin';
 const TYPESCRIPT_PLUGIN_PACKAGE_NAME: '@rushstack/heft-typescript-plugin' =

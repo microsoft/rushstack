@@ -4,16 +4,16 @@
 import type { ITerminal } from '@rushstack/terminal';
 import { Colorize, PrintUtilities } from '@rushstack/terminal';
 
-import type { IPhase } from '../../api/CommandLineConfiguration';
+import type { IPhase } from '../../api/CommandLineConfiguration.ts';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
-} from '../../pluginFramework/PhasedCommandHooks';
-import type { IExecutionResult } from './IOperationExecutionResult';
-import { OperationStatus } from './OperationStatus';
-import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
-import type { OperationExecutionRecord } from './OperationExecutionRecord';
+} from '../../pluginFramework/PhasedCommandHooks.ts';
+import type { IExecutionResult } from './IOperationExecutionResult.ts';
+import { OperationStatus } from './OperationStatus.ts';
+import type { CobuildConfiguration } from '../../api/CobuildConfiguration.ts';
+import type { OperationExecutionRecord } from './OperationExecutionRecord.ts';
 
 const PLUGIN_NAME: 'ConsoleTimelinePlugin' = 'ConsoleTimelinePlugin';
 

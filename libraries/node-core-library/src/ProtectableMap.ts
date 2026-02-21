@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ProtectableMapView } from './ProtectableMapView';
+import { ProtectableMapView } from './ProtectableMapView.ts';
 
 /**
  * Constructor parameters for {@link ProtectableMap}

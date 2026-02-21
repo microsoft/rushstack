@@ -3,8 +3,8 @@
 
 import { FileSystem } from '@rushstack/node-core-library';
 
-import type { IExtractorMetadataJson } from '../../../PackageExtractor';
-import { EXTRACTOR_METADATA_FILENAME } from '../../../PathConstants';
+import type { IExtractorMetadataJson } from '../../../PackageExtractor.ts';
+import { EXTRACTOR_METADATA_FILENAME } from '../../../PathConstants.ts';
 
 export async function getExtractorMetadataAsync(): Promise<IExtractorMetadataJson> {
   const extractorMetadataPath: string = `${__dirname}/${EXTRACTOR_METADATA_FILENAME}`;

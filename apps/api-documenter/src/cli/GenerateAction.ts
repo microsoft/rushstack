@@ -5,11 +5,11 @@ import * as path from 'node:path';
 
 import { FileSystem } from '@rushstack/node-core-library';
 
-import type { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
-import { BaseAction } from './BaseAction';
-import { DocumenterConfig } from '../documenters/DocumenterConfig';
-import { ExperimentalYamlDocumenter } from '../documenters/ExperimentalYamlDocumenter';
-import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter';
+import type { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine.ts';
+import { BaseAction } from './BaseAction.ts';
+import { DocumenterConfig } from '../documenters/DocumenterConfig.ts';
+import { ExperimentalYamlDocumenter } from '../documenters/ExperimentalYamlDocumenter.ts';
+import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter.ts';
 
 export class GenerateAction extends BaseAction {
   public constructor(parser: ApiDocumenterCommandLine) {

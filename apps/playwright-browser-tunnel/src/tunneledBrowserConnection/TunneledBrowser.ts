@@ -7,11 +7,11 @@ import playwright from 'playwright-core';
 import type { ITerminal } from '@rushstack/terminal';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import type { BrowserName } from '../PlaywrightBrowserTunnel';
-import { DEFAULT_LISTEN_PORT } from './constants';
-import type { IDisposableTunneledBrowser } from './ITunneledBrowser';
-import type { IDisposableTunneledBrowserConnection } from './ITunneledBrowserConnection';
-import { tunneledBrowserConnection } from './TunneledBrowserConnection';
+import type { BrowserName } from '../PlaywrightBrowserTunnel.ts';
+import { DEFAULT_LISTEN_PORT } from './constants.ts';
+import type { IDisposableTunneledBrowser } from './ITunneledBrowser.ts';
+import type { IDisposableTunneledBrowserConnection } from './ITunneledBrowserConnection.ts';
+import { tunneledBrowserConnection } from './TunneledBrowserConnection.ts';
 
 /**
  * Creates a Playwright Browser instance connected via a tunneled WebSocket connection.

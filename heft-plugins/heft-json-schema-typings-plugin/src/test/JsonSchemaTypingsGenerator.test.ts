@@ -3,7 +3,7 @@
 
 import { FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
 
-import { JsonSchemaTypingsGenerator } from '../JsonSchemaTypingsGenerator';
+import { JsonSchemaTypingsGenerator } from '../JsonSchemaTypingsGenerator.ts';
 
 const projectFolder: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
 const schemasFolder: string = `${__dirname}/schemas`;

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { wrapWordsToLines } from './wrap-words-to-lines';
+import { wrapWordsToLines } from './wrap-words-to-lines.ts';
 
 export function printPruneHelp(): void {
   const help: string = `eslint-bulk prune

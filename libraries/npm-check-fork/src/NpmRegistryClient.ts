@@ -7,7 +7,7 @@ import * as os from 'node:os';
 import * as process from 'node:process';
 import * as zlib from 'node:zlib';
 
-import type { INpmRegistryPackageResponse } from './interfaces/INpmCheckRegistry';
+import type { INpmRegistryPackageResponse } from './interfaces/INpmCheckRegistry.ts';
 
 /**
  * Options for configuring the NpmRegistryClient.

@@ -5,9 +5,9 @@ import type { HeftConfiguration, IHeftParameters, IHeftTaskSession, IScopedLogge
 import { MockScopedLogger } from '@rushstack/heft/lib/pluginFramework/logging/MockScopedLogger';
 import { type ITerminal, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import * as WebpackConfigurationLoader from '../WebpackConfigurationLoader';
-import { _createAccessorHooks } from '../Webpack5Plugin';
-import { type IWebpackConfiguration, STAGE_LOAD_LOCAL_CONFIG } from '../shared';
+import * as WebpackConfigurationLoader from '../WebpackConfigurationLoader.ts';
+import { _createAccessorHooks } from '../Webpack5Plugin.ts';
+import { type IWebpackConfiguration, STAGE_LOAD_LOCAL_CONFIG } from '../shared.ts';
 
 interface IMockLoadWebpackConfigurationOptions
   extends WebpackConfigurationLoader.ILoadWebpackConfigurationOptions {

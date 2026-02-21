@@ -5,9 +5,9 @@ import {
   type CommandLineFlagParameter,
   CommandLineAction,
   type IRequiredCommandLineChoiceParameter
-} from '../../index';
+} from '../../index.ts';
 
-import { BusinessLogic } from './BusinessLogic';
+import { BusinessLogic } from './BusinessLogic.ts';
 
 type Protocol = 'ftp' | 'webdav' | 'scp';
 

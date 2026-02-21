@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CobuildLock, type ICobuildLockOptions } from '../CobuildLock';
+import { CobuildLock, type ICobuildLockOptions } from '../CobuildLock.ts';
 
-import type { CobuildConfiguration } from '../../../api/CobuildConfiguration';
-import type { OperationBuildCache } from '../../buildCache/OperationBuildCache';
-import type { ICobuildContext } from '../ICobuildLockProvider';
+import type { CobuildConfiguration } from '../../../api/CobuildConfiguration.ts';
+import type { OperationBuildCache } from '../../buildCache/OperationBuildCache.ts';
+import type { ICobuildContext } from '../ICobuildLockProvider.ts';
 
 describe(CobuildLock.name, () => {
   function prepareSubject(): CobuildLock {

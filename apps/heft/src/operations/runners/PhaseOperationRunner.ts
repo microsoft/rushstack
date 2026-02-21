@@ -7,10 +7,10 @@ import {
   OperationStatus
 } from '@rushstack/operation-graph';
 
-import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
-import type { HeftPhase } from '../../pluginFramework/HeftPhase';
-import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
-import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
+import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFilesPlugin.ts';
+import type { HeftPhase } from '../../pluginFramework/HeftPhase.ts';
+import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession.ts';
+import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession.ts';
 
 export interface IPhaseOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;

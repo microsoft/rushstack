@@ -5,8 +5,8 @@ import * as path from 'node:path';
 
 import * as semver from 'semver';
 
-import { RushConstants } from '../../logic/RushConstants';
-import { PackageManager } from './PackageManager';
+import { RushConstants } from '../../logic/RushConstants.ts';
+import { PackageManager } from './PackageManager.ts';
 
 /**
  * Support for interacting with the PNPM package manager.

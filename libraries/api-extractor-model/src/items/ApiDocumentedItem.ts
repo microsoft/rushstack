@@ -3,8 +3,8 @@
 
 import * as tsdoc from '@microsoft/tsdoc';
 
-import { ApiItem, type IApiItemOptions, type IApiItemJson } from './ApiItem';
-import type { DeserializerContext } from '../model/DeserializerContext';
+import { ApiItem, type IApiItemOptions, type IApiItemJson } from './ApiItem.ts';
+import type { DeserializerContext } from '../model/DeserializerContext.ts';
 
 /**
  * Constructor options for {@link ApiDocumentedItem}.

@@ -3,7 +3,7 @@
 
 import { Text, type NewlineKind } from '@rushstack/node-core-library';
 
-import { TextRewriter, type TextRewriterState } from './TextRewriter';
+import { TextRewriter, type TextRewriterState } from './TextRewriter.ts';
 
 interface INormalizeNewlinesTextRewriterState extends TextRewriterState {
   characterToIgnore: string;

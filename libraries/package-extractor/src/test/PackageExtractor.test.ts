@@ -10,7 +10,7 @@ import {
   PackageExtractor,
   type IExtractorProjectConfiguration,
   type IExtractorMetadataJson
-} from '../PackageExtractor';
+} from '../PackageExtractor.ts';
 
 // Do this work in the "temp/test.jest" directory since it gets cleaned on clean runs
 const extractorTargetFolder: string = path.resolve(__dirname, '..', '..', 'test-output');

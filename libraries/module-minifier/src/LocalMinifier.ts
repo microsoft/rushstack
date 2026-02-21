@@ -12,8 +12,8 @@ import type {
   IModuleMinificationRequest,
   IModuleMinificationResult,
   IModuleMinifier
-} from './types';
-import { minifySingleFileAsync } from './MinifySingleFile';
+} from './types.ts';
+import { minifySingleFileAsync } from './MinifySingleFile.ts';
 
 /**
  * Options for configuring the LocalMinifier

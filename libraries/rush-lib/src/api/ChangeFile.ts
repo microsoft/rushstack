@@ -7,9 +7,9 @@ import type gitInfo from 'git-repo-info';
 
 import { JsonFile } from '@rushstack/node-core-library';
 
-import type { RushConfiguration } from './RushConfiguration';
-import type { IChangeFile, IChangeInfo } from './ChangeManagement';
-import { Git } from '../logic/Git';
+import type { RushConfiguration } from './RushConfiguration.ts';
+import type { IChangeFile, IChangeInfo } from './ChangeManagement.ts';
+import { Git } from '../logic/Git.ts';
 
 /**
  * This class represents a single change file.

@@ -9,7 +9,7 @@ import {
   type ITypingsGeneratorOptions,
   TypingsGenerator,
   type ITypingsGeneratorOptionsWithCustomReadFile
-} from './TypingsGenerator';
+} from './TypingsGenerator.ts';
 
 /**
  * @public

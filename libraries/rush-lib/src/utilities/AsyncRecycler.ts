@@ -7,8 +7,8 @@ import * as path from 'node:path';
 
 import { Text, Path, FileSystem, type FolderItem } from '@rushstack/node-core-library';
 
-import { Utilities } from './Utilities';
-import { IS_WINDOWS } from './executionUtilities';
+import { Utilities } from './Utilities.ts';
+import { IS_WINDOWS } from './executionUtilities.ts';
 
 /**
  * For deleting large folders, AsyncRecycler is significantly faster than Utilities.dangerouslyDeletePath().

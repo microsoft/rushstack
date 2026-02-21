@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Sort } from '../Sort';
+import { Sort } from '../Sort.ts';
 
 test('Sort.compareByValue', () => {
   const array: number[] = [3, 6, 2];

@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
-import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
-import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
-import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
+import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser.ts';
+import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction.ts';
+import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter.ts';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities.ts';
 
 describe(DynamicCommandLineParser.name, () => {
   it('parses an action', async () => {

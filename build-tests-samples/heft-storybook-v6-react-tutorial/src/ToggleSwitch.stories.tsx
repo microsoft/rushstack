@@ -4,7 +4,7 @@
 import * as React from 'react';
 import type { ComponentStory, ComponentMeta } from 'heft-storybook-v6-react-tutorial-storykit';
 
-import { ToggleSwitch } from './ToggleSwitch';
+import { ToggleSwitch } from './ToggleSwitch.tsx';
 
 export default {
   title: 'Octogonz/ToggleSwitch',

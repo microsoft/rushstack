@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as nodeJsPath from 'node:path';
-import { Import } from '../Import';
-import { PackageJsonLookup } from '../PackageJsonLookup';
-import { Path } from '../Path';
+import { Import } from '../Import.ts';
+import { PackageJsonLookup } from '../PackageJsonLookup.ts';
+import { Path } from '../Path.ts';
 
 describe(Import.name, () => {
   const packageRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;

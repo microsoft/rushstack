@@ -3,8 +3,8 @@
 
 import * as ts from 'typescript';
 
-import type { Collector } from '../collector/Collector';
-import { ExtractorMessageId } from '../api/ExtractorMessageId';
+import type { Collector } from '../collector/Collector.ts';
+import { ExtractorMessageId } from '../api/ExtractorMessageId.ts';
 
 export class PackageDocComment {
   /**

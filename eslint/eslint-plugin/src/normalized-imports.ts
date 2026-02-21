@@ -10,7 +10,7 @@ import {
   parseImportSpecifierFromExpression,
   serializeImportSpecifier,
   type IParsedImportSpecifier
-} from './LintUtilities';
+} from './LintUtilities.ts';
 
 export const MESSAGE_ID: 'error-normalized-imports' = 'error-normalized-imports';
 type RuleModule = TSESLint.RuleModule<typeof MESSAGE_ID, []>;

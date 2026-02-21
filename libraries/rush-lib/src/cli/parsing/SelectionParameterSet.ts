@@ -9,20 +9,20 @@ import type {
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { Selection } from '../../logic/Selection';
-import type { ISelectorParser as ISelectorParser } from '../../logic/selectors/ISelectorParser';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { Selection } from '../../logic/Selection.ts';
+import type { ISelectorParser as ISelectorParser } from '../../logic/selectors/ISelectorParser.ts';
 import {
   GitChangedProjectSelectorParser,
   type IGitSelectorParserOptions
-} from '../../logic/selectors/GitChangedProjectSelectorParser';
-import { NamedProjectSelectorParser } from '../../logic/selectors/NamedProjectSelectorParser';
-import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelectorParser';
-import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser';
-import { SubspaceSelectorParser } from '../../logic/selectors/SubspaceSelectorParser';
-import { PathProjectSelectorParser } from '../../logic/selectors/PathProjectSelectorParser';
-import type { Subspace } from '../../api/Subspace';
+} from '../../logic/selectors/GitChangedProjectSelectorParser.ts';
+import { NamedProjectSelectorParser } from '../../logic/selectors/NamedProjectSelectorParser.ts';
+import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelectorParser.ts';
+import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser.ts';
+import { SubspaceSelectorParser } from '../../logic/selectors/SubspaceSelectorParser.ts';
+import { PathProjectSelectorParser } from '../../logic/selectors/PathProjectSelectorParser.ts';
+import type { Subspace } from '../../api/Subspace.ts';
 
 export const SUBSPACE_LONG_ARG_NAME: '--subspace' = '--subspace';
 

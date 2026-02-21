@@ -3,8 +3,8 @@
 
 import type { RuleTester } from '@typescript-eslint/rule-tester';
 
-import { getRuleTesterWithProject } from './ruleTester';
-import { hoistJestMock } from '../hoist-jest-mock';
+import { getRuleTesterWithProject } from './ruleTester.ts';
+import { hoistJestMock } from '../hoist-jest-mock.ts';
 
 const ruleTester: RuleTester = getRuleTesterWithProject();
 

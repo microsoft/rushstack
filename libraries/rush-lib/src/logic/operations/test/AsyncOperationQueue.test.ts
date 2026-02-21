@@ -1,13 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Operation } from '../Operation';
-import { type IOperationExecutionRecordContext, OperationExecutionRecord } from '../OperationExecutionRecord';
-import { MockOperationRunner } from './MockOperationRunner';
-import { AsyncOperationQueue, type IOperationSortFunction } from '../AsyncOperationQueue';
-import { OperationStatus } from '../OperationStatus';
-import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
-import type { IPhase } from '../../../api/CommandLineConfiguration';
+import { Operation } from '../Operation.ts';
+import {
+  type IOperationExecutionRecordContext,
+  OperationExecutionRecord
+} from '../OperationExecutionRecord.ts';
+import { MockOperationRunner } from './MockOperationRunner.ts';
+import { AsyncOperationQueue, type IOperationSortFunction } from '../AsyncOperationQueue.ts';
+import { OperationStatus } from '../OperationStatus.ts';
+import type { RushConfigurationProject } from '../../../api/RushConfigurationProject.ts';
+import type { IPhase } from '../../../api/CommandLineConfiguration.ts';
 
 function addDependency(consumer: OperationExecutionRecord, dependency: OperationExecutionRecord): void {
   consumer.dependencies.add(dependency);

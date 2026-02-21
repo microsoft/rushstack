@@ -5,8 +5,8 @@ import { type IStackTokens, type ITextFieldProps, Stack, TextField } from '@flue
 import * as React from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 
-import { IconButton } from '../components/IconButton';
-import type { IHookFormProps } from './interface';
+import { IconButton } from '../components/IconButton.tsx';
+import type { IHookFormProps } from './interface.ts';
 
 export type IControlledTextFieldArrayProps = ITextFieldProps & IHookFormProps<string>;
 

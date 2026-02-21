@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IYamlTocFile } from '../yaml/IYamlTocFile';
+import type { IYamlTocFile } from '../yaml/IYamlTocFile.ts';
 
 /**
  * Typescript interface describing the config schema for toc.yml file format.

@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import {
   ESLINT_BULK_FORCE_REGENERATE_PATCH_ENV_VAR_NAME,
   ESLINT_BULK_PATCH_PATH_ENV_VAR_NAME
-} from './constants';
+} from './constants.ts';
 
 /**
  * Dynamically generate file to properly patch many versions of ESLint

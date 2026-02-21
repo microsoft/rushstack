@@ -19,19 +19,19 @@ import type {
 import { getPseudolocalizer, type ILocalizationFile, parseResJson } from '@rushstack/localization-utilities';
 import { Async } from '@rushstack/node-core-library/lib/Async';
 
-import * as Constants from './utilities/Constants';
+import * as Constants from './utilities/Constants.ts';
 import type {
   ILocalizationPluginOptions,
   ILocalizationStats,
   ILocaleFileData,
   ILocaleFileObject,
   IResolvedMissingTranslations
-} from './interfaces';
-import type { IAssetPathOptions } from './webpackInterfaces';
-import { markEntity, getMark } from './utilities/EntityMarker';
-import { processLocalizedAssetCachedAsync, processNonLocalizedAssetCachedAsync } from './AssetProcessor';
-import { getHashFunction, type HashFn, updateAssetHashes } from './trueHashes';
-import { chunkIsJs } from './utilities/chunkUtilities';
+} from './interfaces.ts';
+import type { IAssetPathOptions } from './webpackInterfaces.ts';
+import { markEntity, getMark } from './utilities/EntityMarker.ts';
+import { processLocalizedAssetCachedAsync, processNonLocalizedAssetCachedAsync } from './AssetProcessor.ts';
+import { getHashFunction, type HashFn, updateAssetHashes } from './trueHashes.ts';
+import { chunkIsJs } from './utilities/chunkUtilities.ts';
 
 /**
  * @public

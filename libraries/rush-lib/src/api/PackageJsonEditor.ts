@@ -5,7 +5,7 @@ import * as semver from 'semver';
 
 import { InternalError, type IPackageJson, JsonFile, Sort, JsonSyntax } from '@rushstack/node-core-library';
 
-import { cloneDeep } from '../utilities/objectUtilities';
+import { cloneDeep } from '../utilities/objectUtilities.ts';
 
 /**
  * @public

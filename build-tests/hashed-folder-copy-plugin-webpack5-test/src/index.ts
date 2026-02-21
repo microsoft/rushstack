@@ -1,4 +1,4 @@
-import { ASSETS_BASE_URL2 } from './submodule';
+import { ASSETS_BASE_URL2 } from './submodule.ts';
 
 const ASSETS_BASE_URL: string = requireFolder({
   outputFolder: 'assets_[hash]',

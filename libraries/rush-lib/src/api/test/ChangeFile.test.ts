@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ChangeFile } from '../ChangeFile';
-import { RushConfiguration } from '../RushConfiguration';
-import { ChangeType } from '../ChangeManagement';
+import { ChangeFile } from '../ChangeFile.ts';
+import { RushConfiguration } from '../RushConfiguration.ts';
+import { ChangeType } from '../ChangeManagement.ts';
 
 describe(ChangeFile.name, () => {
   it('can add a change', () => {

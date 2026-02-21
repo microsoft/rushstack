@@ -3,9 +3,9 @@
 
 import { type IDocNodeParameters, DocNode } from '@microsoft/tsdoc';
 
-import { CustomDocNodeKind } from './CustomDocNodeKind';
-import { DocTableRow } from './DocTableRow';
-import type { DocTableCell } from './DocTableCell';
+import { CustomDocNodeKind } from './CustomDocNodeKind.ts';
+import { DocTableRow } from './DocTableRow.ts';
+import type { DocTableCell } from './DocTableCell.ts';
 
 /**
  * Constructor parameters for {@link DocTable}.

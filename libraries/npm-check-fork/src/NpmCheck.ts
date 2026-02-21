@@ -1,9 +1,9 @@
 import _ from 'lodash';
 
 import type { INpmCheckPackageJson, INpmCheckState } from './interfaces/INpmCheck.ts';
-import type { INpmCheckPackageSummary } from './interfaces/INpmCheckPackageSummary';
-import createPackageSummary from './CreatePackageSummary';
-import initializeState from './NpmCheckState';
+import type { INpmCheckPackageSummary } from './interfaces/INpmCheckPackageSummary.ts';
+import createPackageSummary from './CreatePackageSummary.ts';
+import initializeState from './NpmCheckState.ts';
 
 export default async function NpmCheck(initialOptions?: INpmCheckState): Promise<INpmCheckState> {
   const state: INpmCheckState = await initializeState(initialOptions);

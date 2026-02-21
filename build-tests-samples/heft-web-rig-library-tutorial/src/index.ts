@@ -2,4 +2,4 @@
 // See LICENSE in the project root for license information.
 
 // eslint-disable-next-line no-restricted-syntax
-export * from './ToggleSwitch';
+export * from './ToggleSwitch.tsx';

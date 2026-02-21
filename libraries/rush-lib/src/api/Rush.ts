@@ -6,16 +6,16 @@ import * as path from 'node:path';
 import { InternalError, type IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
 import type { ITerminalProvider } from '@rushstack/terminal';
 
-import '../utilities/SetRushLibPath';
+import '../utilities/SetRushLibPath.ts';
 
-import { RushCommandLineParser } from '../cli/RushCommandLineParser';
-import { RushStartupBanner } from '../cli/RushStartupBanner';
-import { RushXCommandLine } from '../cli/RushXCommandLine';
-import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
-import { EnvironmentVariableNames } from './EnvironmentConfiguration';
-import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
-import { RushPnpmCommandLine } from '../cli/RushPnpmCommandLine';
-import { measureAsyncFn } from '../utilities/performance';
+import { RushCommandLineParser } from '../cli/RushCommandLineParser.ts';
+import { RushStartupBanner } from '../cli/RushStartupBanner.ts';
+import { RushXCommandLine } from '../cli/RushXCommandLine.ts';
+import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor.ts';
+import { EnvironmentVariableNames } from './EnvironmentConfiguration.ts';
+import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader.ts';
+import { RushPnpmCommandLine } from '../cli/RushPnpmCommandLine.ts';
+import { measureAsyncFn } from '../utilities/performance.ts';
 
 /**
  * Options to pass to the rush "launch" functions.

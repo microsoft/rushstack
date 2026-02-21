@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ScopedCommandLineAction } from '../providers/ScopedCommandLineAction';
-import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
-import { CommandLineParser } from '../providers/CommandLineParser';
-import type { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider';
-import { AliasCommandLineAction } from '../providers/AliasCommandLineAction';
-import { CommandLineAction } from '../providers/CommandLineAction';
-import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
-import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
+import { ScopedCommandLineAction } from '../providers/ScopedCommandLineAction.ts';
+import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter.ts';
+import { CommandLineParser } from '../providers/CommandLineParser.ts';
+import type { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider.ts';
+import { AliasCommandLineAction } from '../providers/AliasCommandLineAction.ts';
+import { CommandLineAction } from '../providers/CommandLineAction.ts';
+import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter.ts';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities.ts';
 
 class TestAliasAction extends AliasCommandLineAction {
   public done: boolean = false;

@@ -4,12 +4,12 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { JsonFile, type JsonObject } from '@rushstack/node-core-library';
-import { RushTaskProvider } from './TaskProvider';
-import { terminal } from '../logic/logger';
-import { RushWorkspace } from '../logic/RushWorkspace';
+import { RushTaskProvider } from './TaskProvider.ts';
+import { terminal } from '../logic/logger.ts';
+import { RushWorkspace } from '../logic/RushWorkspace.ts';
 
 import type { RushConfiguration, RushConfigurationProject } from '@rushstack/rush-sdk';
-import { RushCommandWebViewPanel } from '../logic/RushCommandWebViewPanel';
+import { RushCommandWebViewPanel } from '../logic/RushCommandWebViewPanel.ts';
 
 interface IRushProjectParams {
   label: string;

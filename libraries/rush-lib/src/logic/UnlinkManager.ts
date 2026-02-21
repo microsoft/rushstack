@@ -6,11 +6,11 @@ import * as path from 'node:path';
 import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import type { RushConfiguration } from '../api/RushConfiguration';
-import { Utilities } from '../utilities/Utilities';
-import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
-import { FlagFile } from '../api/FlagFile';
-import { RushConstants } from './RushConstants';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import { Utilities } from '../utilities/Utilities.ts';
+import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile.ts';
+import { FlagFile } from '../api/FlagFile.ts';
+import { RushConstants } from './RushConstants.ts';
 
 /**
  * This class implements the logic for "rush unlink"

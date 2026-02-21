@@ -7,12 +7,12 @@ import type { Tapable, TapOptions } from 'tapable';
 
 const { Template } = webpack;
 
-import { STAGE_AFTER } from './Constants';
+import { STAGE_AFTER } from './Constants.ts';
 import type {
   IExtendedModule,
   IModuleMinifierPluginHooks,
   IPostProcessFragmentContext
-} from './ModuleMinifierPlugin.types';
+} from './ModuleMinifierPlugin.types.ts';
 
 const PLUGIN_NAME: 'AsyncImportCompressionPlugin' = 'AsyncImportCompressionPlugin';
 

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import RawScriptLoader = require('./../RawScriptLoader');
+import RawScriptLoader = require('./../RawScriptLoader.ts');
 
 function wrapResult(result: string): string {
   return `var exports = {};

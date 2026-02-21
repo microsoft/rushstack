@@ -5,7 +5,7 @@ import { EOL } from 'node:os';
 
 import supportsColor from 'supports-color';
 
-import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
+import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider.ts';
 
 /**
  * Options to be provided to a {@link ConsoleTerminalProvider}

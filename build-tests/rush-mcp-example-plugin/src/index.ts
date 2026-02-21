@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { RushMcpPluginSession, RushMcpPluginFactory } from '@rushstack/mcp-server';
-import { ExamplePlugin, type IExamplePluginConfigFile } from './ExamplePlugin';
+import { ExamplePlugin, type IExamplePluginConfigFile } from './ExamplePlugin.ts';
 
 function createPlugin(
   session: RushMcpPluginSession,

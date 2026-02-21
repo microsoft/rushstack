@@ -7,19 +7,19 @@ import type * as tsdoc from '@microsoft/tsdoc';
 import { Sort, InternalError } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import { AstDeclaration } from '../analyzer/AstDeclaration';
-import type { AstSymbol } from '../analyzer/AstSymbol';
+import { AstDeclaration } from '../analyzer/AstDeclaration.ts';
+import type { AstSymbol } from '../analyzer/AstSymbol.ts';
 import {
   ExtractorMessage,
   ExtractorMessageCategory,
   type IExtractorMessageOptions,
   type IExtractorMessageProperties
-} from '../api/ExtractorMessage';
-import { type ExtractorMessageId, allExtractorMessageIds } from '../api/ExtractorMessageId';
-import type { IExtractorMessagesConfig, IConfigMessageReportingRule } from '../api/IConfigFile';
-import type { ISourceLocation, SourceMapper } from './SourceMapper';
-import { ExtractorLogLevel } from '../api/ExtractorLogLevel';
-import { ConsoleMessageId } from '../api/ConsoleMessageId';
+} from '../api/ExtractorMessage.ts';
+import { type ExtractorMessageId, allExtractorMessageIds } from '../api/ExtractorMessageId.ts';
+import type { IExtractorMessagesConfig, IConfigMessageReportingRule } from '../api/IConfigFile.ts';
+import type { ISourceLocation, SourceMapper } from './SourceMapper.ts';
+import { ExtractorLogLevel } from '../api/ExtractorLogLevel.ts';
+import { ConsoleMessageId } from '../api/ConsoleMessageId.ts';
 
 interface IReportingRule {
   logLevel: ExtractorLogLevel;

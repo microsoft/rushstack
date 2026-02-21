@@ -7,8 +7,8 @@ import { Colorize } from '@rushstack/terminal';
 
 // Minimize dependencies to avoid compatibility errors that might be encountered before
 // NodeJsCompatibility.terminateIfVersionIsTooOld() gets to run.
-import type { RushConfiguration } from '../api/RushConfiguration';
-import { RushConstants } from './RushConstants';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import { RushConstants } from './RushConstants.ts';
 
 /**
  * This constant is the major version of the next LTS node Node.js release. This constant should be updated when

@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Terminal } from '../Terminal';
-import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
-import { Colorize } from '../Colorize';
+import { Terminal } from '../Terminal.ts';
+import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider.ts';
+import { Colorize } from '../Colorize.ts';
 
 describe(Terminal.name, () => {
   let terminal: Terminal;

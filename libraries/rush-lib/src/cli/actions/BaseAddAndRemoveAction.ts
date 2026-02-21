@@ -7,15 +7,15 @@ import type {
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
-import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';
+import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater.ts';
 import type {
   IPackageForRushUpdate,
   IPackageJsonUpdaterRushBaseUpdateOptions
-} from '../../logic/PackageJsonUpdaterTypes';
-import { RushConstants } from '../../logic/RushConstants';
-import { VARIANT_PARAMETER } from '../../api/Variants';
+} from '../../logic/PackageJsonUpdaterTypes.ts';
+import { RushConstants } from '../../logic/RushConstants.ts';
+import { VARIANT_PARAMETER } from '../../api/Variants.ts';
 
 export const PACKAGE_PARAMETER_NAME: '--package' = '--package';
 
@@ -106,7 +106,7 @@ export abstract class BaseAddAndRemoveAction extends BaseRushAction {
 
   public async runAsync(): Promise<void> {
     const packageJsonUpdater: typeof PackageJsonUpdaterType = await import(
-      /* webpackChunkName: 'PackageJsonUpdater' */ '../../logic/PackageJsonUpdater'
+      /* webpackChunkName: 'PackageJsonUpdater' */ '../../logic/PackageJsonUpdater.ts'
     );
     const updater: PackageJsonUpdaterType.PackageJsonUpdater = new packageJsonUpdater.PackageJsonUpdater(
       this.terminal,

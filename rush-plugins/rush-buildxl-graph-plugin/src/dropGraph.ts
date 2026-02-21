@@ -6,9 +6,9 @@ import path from 'node:path';
 import type { ICreateOperationsContext, ILogger, Operation, RushConfiguration } from '@rushstack/rush-sdk';
 import { JsonFile } from '@rushstack/node-core-library';
 
-import type { IBuildXLRushGraph } from './DropBuildGraphPlugin';
-import { type IGraphNode, GraphProcessor } from './GraphProcessor';
-import { filterObjectForDebug, filterObjectForTesting } from './debugGraphFiltering';
+import type { IBuildXLRushGraph } from './DropBuildGraphPlugin.ts';
+import { type IGraphNode, GraphProcessor } from './GraphProcessor.ts';
+import { filterObjectForDebug, filterObjectForTesting } from './debugGraphFiltering.ts';
 
 export interface IDropGraphOptions {
   operations: Set<Operation>;

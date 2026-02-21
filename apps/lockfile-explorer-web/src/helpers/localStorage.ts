@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { type LfxGraphEntry, LfxGraphEntryKind } from '../packlets/lfx-shared';
+// eslint-disable-next-line @rushstack/packlets/mechanics
+import { type LfxGraphEntry, LfxGraphEntryKind } from '../packlets/lfx-shared/index.ts';
 
 const BOOKMARK_KEY: string = 'LOCKFILE_EXPLORER_BOOKMARKS';
 

@@ -1,4 +1,4 @@
-import type { INpmCheckPackageSummary } from './INpmCheckPackageSummary';
+import type { INpmCheckPackageSummary } from './INpmCheckPackageSummary.ts';
 
 export interface INpmCheckPackageJson {
   name?: string;

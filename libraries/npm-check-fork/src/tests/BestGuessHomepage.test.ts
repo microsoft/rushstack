@@ -1,8 +1,8 @@
 // Mock gitUrl.parse
 jest.mock('giturl', () => ({ parse: (url: string) => url }));
 
-import bestGuessHomepage from '../BestGuessHomepage';
-import type { INpmCheckRegistryData } from '../interfaces/INpmCheckRegistry';
+import bestGuessHomepage from '../BestGuessHomepage.ts';
+import type { INpmCheckRegistryData } from '../interfaces/INpmCheckRegistry.ts';
 
 describe('bestGuessHomepage', () => {
   it('returns false if data is undefined', () => {

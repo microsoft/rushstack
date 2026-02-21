@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { pruneAsync } from './prune';
-import { suppressAsync } from './suppress';
-import { isCorrectCwd } from './utils/is-correct-cwd';
-import { printHelp } from './utils/print-help';
+import { pruneAsync } from './prune.ts';
+import { suppressAsync } from './suppress.ts';
+import { isCorrectCwd } from './utils/is-correct-cwd.ts';
+import { printHelp } from './utils/print-help.ts';
 
 if (process.argv.includes('-h') || process.argv.includes('-H') || process.argv.includes('--help')) {
   printHelp();

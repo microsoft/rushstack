@@ -4,10 +4,10 @@
 import { JsonFile } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { Rush } from '../../api/Rush';
-import { Telemetry, type ITelemetryData, type ITelemetryMachineInfo } from '../Telemetry';
-import { RushSession } from '../../pluginFramework/RushSession';
+import { RushConfiguration } from '../../api/RushConfiguration.ts';
+import { Rush } from '../../api/Rush.ts';
+import { Telemetry, type ITelemetryData, type ITelemetryMachineInfo } from '../Telemetry.ts';
+import { RushSession } from '../../pluginFramework/RushSession.ts';
 
 interface ITelemetryPrivateMembers extends Omit<Telemetry, '_flushAsyncTasks'> {
   _flushAsyncTasks: Map<symbol, Promise<void>>;

@@ -6,12 +6,12 @@ import { type ILogMessageCallbackOptions, pnpmSyncCopyAsync } from 'pnpm-sync-li
 import { Async, FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { OperationStatus } from './OperationStatus';
-import type { IOperationRunnerContext } from './IOperationRunner';
-import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
-import type { OperationExecutionRecord } from './OperationExecutionRecord';
-import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
-import { RushConstants } from '../RushConstants';
+import { OperationStatus } from './OperationStatus.ts';
+import type { IOperationRunnerContext } from './IOperationRunner.ts';
+import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks.ts';
+import type { OperationExecutionRecord } from './OperationExecutionRecord.ts';
+import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities.ts';
+import { RushConstants } from '../RushConstants.ts';
 
 const PLUGIN_NAME: 'PnpmSyncCopyOperationPlugin' = 'PnpmSyncCopyOperationPlugin';
 

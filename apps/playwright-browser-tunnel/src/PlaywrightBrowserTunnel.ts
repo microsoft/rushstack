@@ -15,8 +15,8 @@ import {
   getWebSocketCloseReason,
   getWebSocketReadyStateString,
   WebSocketCloseCode
-} from './utilities';
-import { LaunchOptionsValidator, type ILaunchOptionsValidationResult } from './LaunchOptionsValidator';
+} from './utilities.ts';
+import { LaunchOptionsValidator, type ILaunchOptionsValidationResult } from './LaunchOptionsValidator.ts';
 
 /**
  * Allowed Playwright browser names.

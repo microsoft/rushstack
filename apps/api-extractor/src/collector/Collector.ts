@@ -14,26 +14,26 @@ import {
   PackageName
 } from '@rushstack/node-core-library';
 
-import { ExtractorMessageId } from '../api/ExtractorMessageId';
-import { CollectorEntity } from './CollectorEntity';
-import { AstSymbolTable } from '../analyzer/AstSymbolTable';
-import type { AstEntity } from '../analyzer/AstEntity';
-import type { AstModule, IAstModuleExportInfo } from '../analyzer/AstModule';
-import { AstSymbol } from '../analyzer/AstSymbol';
-import type { AstDeclaration } from '../analyzer/AstDeclaration';
-import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
-import { WorkingPackage } from './WorkingPackage';
-import { PackageDocComment } from '../aedoc/PackageDocComment';
-import { type DeclarationMetadata, InternalDeclarationMetadata } from './DeclarationMetadata';
-import { ApiItemMetadata, type IApiItemMetadataOptions } from './ApiItemMetadata';
-import { SymbolMetadata } from './SymbolMetadata';
-import { TypeScriptInternals, type IGlobalVariableAnalyzer } from '../analyzer/TypeScriptInternals';
-import type { MessageRouter } from './MessageRouter';
-import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
-import { ExtractorConfig } from '../api/ExtractorConfig';
-import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
-import { AstImport } from '../analyzer/AstImport';
-import type { SourceMapper } from './SourceMapper';
+import { ExtractorMessageId } from '../api/ExtractorMessageId.ts';
+import { CollectorEntity } from './CollectorEntity.ts';
+import { AstSymbolTable } from '../analyzer/AstSymbolTable.ts';
+import type { AstEntity } from '../analyzer/AstEntity.ts';
+import type { AstModule, IAstModuleExportInfo } from '../analyzer/AstModule.ts';
+import { AstSymbol } from '../analyzer/AstSymbol.ts';
+import type { AstDeclaration } from '../analyzer/AstDeclaration.ts';
+import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers.ts';
+import { WorkingPackage } from './WorkingPackage.ts';
+import { PackageDocComment } from '../aedoc/PackageDocComment.ts';
+import { type DeclarationMetadata, InternalDeclarationMetadata } from './DeclarationMetadata.ts';
+import { ApiItemMetadata, type IApiItemMetadataOptions } from './ApiItemMetadata.ts';
+import { SymbolMetadata } from './SymbolMetadata.ts';
+import { TypeScriptInternals, type IGlobalVariableAnalyzer } from '../analyzer/TypeScriptInternals.ts';
+import type { MessageRouter } from './MessageRouter.ts';
+import { AstReferenceResolver } from '../analyzer/AstReferenceResolver.ts';
+import { ExtractorConfig } from '../api/ExtractorConfig.ts';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport.ts';
+import { AstImport } from '../analyzer/AstImport.ts';
+import type { SourceMapper } from './SourceMapper.ts';
 
 /**
  * Options for Collector constructor.

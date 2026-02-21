@@ -5,7 +5,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { JsonFile } from '@rushstack/node-core-library';
 
-import type { RushSession, RushConfiguration, ITelemetryData } from '../../../index';
+import type { RushSession, RushConfiguration, ITelemetryData } from '../../../index.ts';
 
 export default class RushMockFlushTelemetryPlugin {
   public apply(rushSession: RushSession, rushConfiguration: RushConfiguration): void {

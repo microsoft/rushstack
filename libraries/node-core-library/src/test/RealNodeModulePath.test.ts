@@ -4,7 +4,10 @@
 import type * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { type IRealNodeModulePathResolverOptions, RealNodeModulePathResolver } from '../RealNodeModulePath';
+import {
+  type IRealNodeModulePathResolverOptions,
+  RealNodeModulePathResolver
+} from '../RealNodeModulePath.ts';
 
 const mocklstatSync: jest.Mock<ReturnType<typeof fs.lstatSync>, Parameters<typeof fs.lstatSync>> = jest.fn();
 const lstatSync: typeof fs.lstatSync = mocklstatSync as unknown as typeof fs.lstatSync;

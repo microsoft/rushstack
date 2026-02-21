@@ -39,7 +39,7 @@ import type {
   ITransformTask,
   IEmitKind,
   ITransformModulesRequestMessage
-} from './types';
+} from './types.ts';
 
 /**
  * @public

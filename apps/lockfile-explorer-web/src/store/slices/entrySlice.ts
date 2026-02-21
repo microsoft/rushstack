@@ -3,13 +3,14 @@
 
 import { createSlice, type PayloadAction, type Reducer } from '@reduxjs/toolkit';
 
-import { type LfxGraphEntry, LfxGraphEntryKind } from '../../packlets/lfx-shared';
-import type { RootState } from '../index';
+// eslint-disable-next-line @rushstack/packlets/mechanics
+import { type LfxGraphEntry, LfxGraphEntryKind } from '../../packlets/lfx-shared/index.ts';
+import type { RootState } from '../index.ts';
 import {
   getBookmarksFromStorage,
   removeBookmarkFromLocalStorage,
   saveBookmarkToLocalStorage
-} from '../../helpers/localStorage';
+} from '../../helpers/localStorage.ts';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type EntryState = {

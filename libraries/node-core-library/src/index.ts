@@ -11,7 +11,7 @@
 
 export type { IProblemPattern } from '@rushstack/problem-matcher';
 
-export { AlreadyReportedError } from './AlreadyReportedError';
+export { AlreadyReportedError } from './AlreadyReportedError.ts';
 
 export {
   Async,
@@ -20,15 +20,15 @@ export {
   type IRunWithRetriesOptions,
   type IRunWithTimeoutOptions,
   type IWeighted
-} from './Async';
+} from './Async.ts';
 
-export { FileConstants, FolderConstants } from './Constants';
+export { FileConstants, FolderConstants } from './Constants.ts';
 
-export { Disposables } from './Disposables';
+export { Disposables } from './Disposables.ts';
 
-export { Enum } from './Enum';
+export { Enum } from './Enum.ts';
 
-export { EnvironmentMap, type IEnvironmentEntry } from './EnvironmentMap';
+export { EnvironmentMap, type IEnvironmentEntry } from './EnvironmentMap.ts';
 
 export {
   type ExecutableStdioStreamMapping,
@@ -43,9 +43,9 @@ export {
   type IWaitForExitResultWithoutOutput,
   type IProcessInfo,
   Executable
-} from './Executable';
+} from './Executable.ts';
 
-export { type IFileErrorOptions, type IFileErrorFormattingOptions, FileError } from './FileError';
+export { type IFileErrorOptions, type IFileErrorFormattingOptions, FileError } from './FileError.ts';
 
 export {
   AlreadyExistsBehavior,
@@ -66,9 +66,9 @@ export {
   type IFileSystemUpdateTimeParameters,
   type IFileSystemWriteBinaryFileOptions,
   type IFileSystemWriteFileOptions
-} from './FileSystem';
+} from './FileSystem.ts';
 
-export { FileWriter, type IFileWriterFlags } from './FileWriter';
+export { FileWriter, type IFileWriterFlags } from './FileWriter.ts';
 
 export {
   Import,
@@ -78,9 +78,9 @@ export {
   type IImportResolveModuleAsyncOptions,
   type IImportResolvePackageOptions,
   type IImportResolvePackageAsyncOptions
-} from './Import';
+} from './Import.ts';
 
-export { InternalError } from './InternalError';
+export { InternalError } from './InternalError.ts';
 
 export type {
   INodePackageJson,
@@ -91,7 +91,7 @@ export type {
   IPeerDependenciesMetaTable,
   IDependenciesMetaTable,
   IPackageJsonExports
-} from './IPackageJson';
+} from './IPackageJson.ts';
 
 export {
   type JsonObject,
@@ -102,7 +102,7 @@ export {
   type IJsonFileStringifyOptions,
   type IJsonFileSaveOptions,
   JsonFile
-} from './JsonFile';
+} from './JsonFile.ts';
 
 export {
   type IJsonSchemaErrorInfo,
@@ -114,19 +114,19 @@ export {
   type IJsonSchemaValidateObjectWithOptions,
   JsonSchema,
   type JsonSchemaVersion
-} from './JsonSchema';
+} from './JsonSchema.ts';
 
-export { LegacyAdapters, type LegacyCallback } from './LegacyAdapters';
+export { LegacyAdapters, type LegacyCallback } from './LegacyAdapters.ts';
 
-export { LockFile } from './LockFile';
+export { LockFile } from './LockFile.ts';
 
-export { MapExtensions } from './MapExtensions';
+export { MapExtensions } from './MapExtensions.ts';
 
-export { MinimumHeap } from './MinimumHeap';
+export { MinimumHeap } from './MinimumHeap.ts';
 
-export { Objects } from './Objects';
+export { Objects } from './Objects.ts';
 
-export { type IPackageJsonLookupParameters, PackageJsonLookup } from './PackageJsonLookup';
+export { type IPackageJsonLookupParameters, PackageJsonLookup } from './PackageJsonLookup.ts';
 
 export {
   PackageName,
@@ -134,31 +134,31 @@ export {
   type IPackageNameParserOptions,
   type IParsedPackageName,
   type IParsedPackageNameOrError
-} from './PackageName';
+} from './PackageName.ts';
 
 export {
   Path,
   type FileLocationStyle,
   type IPathFormatFileLocationOptions,
   type IPathFormatConciselyOptions
-} from './Path';
+} from './Path.ts';
 
-export { PosixModeBits } from './PosixModeBits';
+export { PosixModeBits } from './PosixModeBits.ts';
 
-export type { Brand } from './PrimitiveTypes';
+export type { Brand } from './PrimitiveTypes.ts';
 
-export { ProtectableMap, type IProtectableMapParameters } from './ProtectableMap';
+export { ProtectableMap, type IProtectableMapParameters } from './ProtectableMap.ts';
 
-export { RealNodeModulePathResolver, type IRealNodeModulePathResolverOptions } from './RealNodeModulePath';
+export { RealNodeModulePathResolver, type IRealNodeModulePathResolverOptions } from './RealNodeModulePath.ts';
 
-export { Sort } from './Sort';
+export { Sort } from './Sort.ts';
 
-export { StringBuilder, type IStringBuilder } from './StringBuilder';
+export { StringBuilder, type IStringBuilder } from './StringBuilder.ts';
 
-export { type ISubprocessOptions, SubprocessTerminator } from './SubprocessTerminator';
+export { type ISubprocessOptions, SubprocessTerminator } from './SubprocessTerminator.ts';
 
-export { Encoding, Text, NewlineKind, type IReadLinesFromIterableOptions } from './Text';
+export { Encoding, Text, NewlineKind, type IReadLinesFromIterableOptions } from './Text.ts';
 
-export { TypeUuid } from './TypeUuid';
+export { TypeUuid } from './TypeUuid.ts';
 
-export { User } from './User';
+export { User } from './User.ts';

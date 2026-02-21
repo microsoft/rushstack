@@ -5,7 +5,7 @@ import * as path from 'node:path';
 
 import { User } from '@rushstack/node-core-library';
 
-import { EnvironmentConfiguration } from './EnvironmentConfiguration';
+import { EnvironmentConfiguration } from './EnvironmentConfiguration.ts';
 
 /**
  * This class provides global folders that are used for rush's internal install locations.

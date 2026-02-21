@@ -18,9 +18,9 @@ import type { CommandLineChoiceListParameter } from '@rushstack/ts-command-line/
 import type { CommandLineChoiceParameter } from '@rushstack/ts-command-line/lib/parameters/CommandLineChoiceParameter';
 import type { CommandLineIntegerParameter } from '@rushstack/ts-command-line/lib/parameters/CommandLineIntegerParameter';
 
-import { ControlledTextField } from '../../ControlledFormComponents/ControlledTextField';
-import { ControlledComboBox } from '../../ControlledFormComponents/ControlledComboBox';
-import { ControlledTextFieldArray } from '../../ControlledFormComponents/ControlledTextFieldArray';
+import { ControlledTextField } from '../../ControlledFormComponents/ControlledTextField.tsx';
+import { ControlledComboBox } from '../../ControlledFormComponents/ControlledComboBox.tsx';
+import { ControlledTextFieldArray } from '../../ControlledFormComponents/ControlledTextFieldArray.tsx';
 import {
   type ICommandLineParameter,
   onChangeFormDefaultValues,
@@ -28,13 +28,13 @@ import {
   useArgsTextList,
   useFilteredParameters,
   useParameters
-} from '../../store/slices/parameter';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { ParameterFormWatcher } from './Watcher';
-import { ControlledToggle } from '../../ControlledFormComponents/ControlledToggle';
-import { FIELD_ANCHOR_CLASSNAME } from '../../hooks/parametersFormScroll';
-import { setFormValidateAsync, useUserSelectedParameterName } from '../../store/slices/ui';
-import { RunButton } from '../../Toolbar/RunButton';
+} from '../../store/slices/parameter.ts';
+import { useAppDispatch, useAppSelector } from '../../store/hooks/index.ts';
+import { ParameterFormWatcher } from './Watcher.tsx';
+import { ControlledToggle } from '../../ControlledFormComponents/ControlledToggle.tsx';
+import { FIELD_ANCHOR_CLASSNAME } from '../../hooks/parametersFormScroll.ts';
+import { setFormValidateAsync, useUserSelectedParameterName } from '../../store/slices/ui.ts';
+import { RunButton } from '../../Toolbar/RunButton.tsx';
 
 const formStyle: CSSProperties = {
   // width: '430px'

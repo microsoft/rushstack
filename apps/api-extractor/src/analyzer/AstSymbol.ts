@@ -5,8 +5,8 @@ import type * as ts from 'typescript';
 
 import { InternalError } from '@rushstack/node-core-library';
 
-import type { AstDeclaration } from './AstDeclaration';
-import { AstEntity } from './AstEntity';
+import type { AstDeclaration } from './AstDeclaration.ts';
+import { AstEntity } from './AstEntity.ts';
 
 /**
  * Constructor options for AstSymbol

@@ -11,7 +11,7 @@ import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import type { IScopedLogger } from '@rushstack/heft';
 
-import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
+import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals.ts';
 
 export interface ILinterBaseOptions {
   scopedLogger: IScopedLogger;

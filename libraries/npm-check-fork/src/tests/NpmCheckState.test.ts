@@ -1,5 +1,5 @@
-import type { INpmCheckState } from '../interfaces/INpmCheck';
-import initializeState from '../NpmCheckState';
+import type { INpmCheckState } from '../interfaces/INpmCheck.ts';
+import initializeState from '../NpmCheckState.ts';
 
 describe('NpmCheckState', () => {
   it('should create with default options', async () => {

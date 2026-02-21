@@ -9,7 +9,7 @@ import { type RushSession, EnvironmentConfiguration } from '@rushstack/rush-sdk'
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { WebClient } from '@rushstack/rush-sdk/lib/utilities/WebClient';
 
-import { HttpBuildCacheProvider, type IHttpBuildCacheProviderOptions } from '../HttpBuildCacheProvider';
+import { HttpBuildCacheProvider, type IHttpBuildCacheProviderOptions } from '../HttpBuildCacheProvider.ts';
 
 const EXAMPLE_OPTIONS: IHttpBuildCacheProviderOptions = {
   url: 'https://buildcache.example.acme.com',

@@ -13,13 +13,13 @@
  * @packageDocumentation
  */
 
-import EmbeddedDependenciesWebpackPlugin from './EmbeddedDependenciesWebpackPlugin';
+import EmbeddedDependenciesWebpackPlugin from './EmbeddedDependenciesWebpackPlugin.ts';
 
 export type {
   IPackageData,
   IEmbeddedDependenciesWebpackPluginOptions,
   LicenseFileGeneratorFunction,
   LicenseFileName
-} from './EmbeddedDependenciesWebpackPlugin';
+} from './EmbeddedDependenciesWebpackPlugin.ts';
 
 export default EmbeddedDependenciesWebpackPlugin;

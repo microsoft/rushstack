@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-export { PLUGIN_NAME as PluginName, STAGE_LOAD_LOCAL_CONFIG } from './shared';
+export { PLUGIN_NAME as PluginName, STAGE_LOAD_LOCAL_CONFIG } from './shared.ts';
 
 export type {
   IWebpackConfigurationWithDevServer,
@@ -10,4 +10,4 @@ export type {
   IWebpackPluginAccessor,
   IWebpackPluginAccessorHooks,
   IWebpackPluginAccessorParameters
-} from './shared';
+} from './shared.ts';

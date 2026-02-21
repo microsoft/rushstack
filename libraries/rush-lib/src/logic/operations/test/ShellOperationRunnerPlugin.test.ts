@@ -6,24 +6,24 @@ import { JsonFile } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 import { CommandLineAction, CommandLineParser, type CommandLineParameter } from '@rushstack/ts-command-line';
 
-import { RushConfiguration } from '../../../api/RushConfiguration';
+import { RushConfiguration } from '../../../api/RushConfiguration.ts';
 import {
   CommandLineConfiguration,
   type IPhasedCommandConfig,
   type IParameterJson,
   type IPhase
-} from '../../../api/CommandLineConfiguration';
-import type { Operation } from '../Operation';
-import type { ICommandLineJson } from '../../../api/CommandLineJson';
-import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
-import { ShellOperationRunnerPlugin } from '../ShellOperationRunnerPlugin';
+} from '../../../api/CommandLineConfiguration.ts';
+import type { Operation } from '../Operation.ts';
+import type { ICommandLineJson } from '../../../api/CommandLineJson.ts';
+import { PhasedOperationPlugin } from '../PhasedOperationPlugin.ts';
+import { ShellOperationRunnerPlugin } from '../ShellOperationRunnerPlugin.ts';
 import {
   type ICreateOperationsContext,
   PhasedCommandHooks
-} from '../../../pluginFramework/PhasedCommandHooks';
-import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
-import { defineCustomParameters } from '../../../cli/parsing/defineCustomParameters';
-import { associateParametersByPhase } from '../../../cli/parsing/associateParametersByPhase';
+} from '../../../pluginFramework/PhasedCommandHooks.ts';
+import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration.ts';
+import { defineCustomParameters } from '../../../cli/parsing/defineCustomParameters.ts';
+import { associateParametersByPhase } from '../../../cli/parsing/associateParametersByPhase.ts';
 
 interface ISerializedOperation {
   name: string;

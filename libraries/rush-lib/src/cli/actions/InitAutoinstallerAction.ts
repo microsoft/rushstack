@@ -5,9 +5,9 @@ import type { IRequiredCommandLineStringParameter } from '@rushstack/ts-command-
 import { FileSystem, NewlineKind, type IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import { BaseRushAction } from './BaseRushAction';
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { Autoinstaller } from '../../logic/Autoinstaller';
+import { BaseRushAction } from './BaseRushAction.ts';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { Autoinstaller } from '../../logic/Autoinstaller.ts';
 
 export class InitAutoinstallerAction extends BaseRushAction {
   private readonly _name: IRequiredCommandLineStringParameter;

@@ -4,7 +4,7 @@
 import { InternalError } from '@rushstack/node-core-library';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
-import type { IParameterJson, IPhase } from '../../api/CommandLineConfiguration';
+import type { IParameterJson, IPhase } from '../../api/CommandLineConfiguration.ts';
 
 /**
  * Associates command line parameters with their associated phases.

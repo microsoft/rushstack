@@ -10,9 +10,9 @@ import type {
   ITranspilationRequestMessage,
   ITranspilationSuccessMessage,
   ITypescriptWorkerData
-} from './types';
-import type { ExtendedTypeScript } from './internalTypings/TypeScriptInternals';
-import { configureProgramForMultiEmit } from './configureProgramForMultiEmit';
+} from './types.ts';
+import type { ExtendedTypeScript } from './internalTypings/TypeScriptInternals.ts';
+import { configureProgramForMultiEmit } from './configureProgramForMultiEmit.ts';
 
 const typedWorkerData: ITypescriptWorkerData = workerData;
 

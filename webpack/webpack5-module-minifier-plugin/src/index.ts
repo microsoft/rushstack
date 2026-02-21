@@ -10,8 +10,8 @@ export {
   CHUNK_MODULE_REGEX,
   STAGE_BEFORE,
   STAGE_AFTER
-} from './Constants';
-export { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset';
+} from './Constants.ts';
+export { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset.ts';
 export type {
   IAssetInfo,
   IAssetMap,
@@ -26,5 +26,5 @@ export type {
   IModuleStats,
   IPostProcessFragmentContext,
   IRenderedModulePosition
-} from './ModuleMinifierPlugin.types';
-export { ModuleMinifierPlugin } from './ModuleMinifierPlugin';
+} from './ModuleMinifierPlugin.types.ts';
+export { ModuleMinifierPlugin } from './ModuleMinifierPlugin.ts';

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ChunkClass } from '../chunks/ChunkClass';
+import { ChunkClass } from '../chunks/ChunkClass.ts';
 
 describe('Example Test', () => {
   it('Correctly tests stuff', () => {

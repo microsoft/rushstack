@@ -12,7 +12,7 @@ import {
   CONFIG_CERTIFICATE_FILENAME,
   CONFIG_KEY_FILENAME,
   CONFIG_STORE_PATH
-} from './constants';
+} from './constants.ts';
 
 type StorePaths = Record<'windows' | 'linux' | 'osx', string>;
 export interface IExtensionConfig extends ICertificateStoreOptions {

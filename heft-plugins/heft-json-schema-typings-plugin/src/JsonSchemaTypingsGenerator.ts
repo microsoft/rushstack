@@ -11,7 +11,7 @@ import {
   _addTsDocReleaseTagToExports,
   _validateTsDocReleaseTag,
   X_TSDOC_RELEASE_TAG_KEY
-} from './TsDocReleaseTagHelpers';
+} from './TsDocReleaseTagHelpers.ts';
 
 interface IJsonSchemaTypingsGeneratorBaseOptions extends ITypingsGeneratorBaseOptions {
   /**

@@ -3,10 +3,10 @@
 
 import { CommandLineAction } from '@rushstack/ts-command-line';
 
-import { HeftActionRunner } from '../HeftActionRunner';
-import { Selection } from '../../utilities/Selection';
-import type { IHeftAction, IHeftActionOptions } from './IHeftAction';
-import type { HeftPhase } from '../../pluginFramework/HeftPhase';
+import { HeftActionRunner } from '../HeftActionRunner.ts';
+import { Selection } from '../../utilities/Selection.ts';
+import type { IHeftAction, IHeftActionOptions } from './IHeftAction.ts';
+import type { HeftPhase } from '../../pluginFramework/HeftPhase.ts';
 
 export interface IPhaseActionOptions extends IHeftActionOptions {
   phase: HeftPhase;

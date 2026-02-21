@@ -4,7 +4,7 @@
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
-import { RushConstants } from '../logic/RushConstants';
+import { RushConstants } from '../logic/RushConstants.ts';
 import type {
   CommandJson,
   ICommandLineJson,
@@ -18,7 +18,7 @@ import type {
   IIntegerListParameterJson,
   IChoiceListParameterJson,
   IPhasedCommandWithoutPhasesJson
-} from './CommandLineJson';
+} from './CommandLineJson.ts';
 import schemaJson from '../schemas/command-line.schema.json';
 
 export interface IShellCommandTokenContext {

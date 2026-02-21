@@ -11,8 +11,8 @@ const {
   findRushJsonFolder,
   RUSH_JSON_FILENAME,
   runWithErrorAndStatusCode
-}: typeof import('./install-run') = __non_webpack_require__('./install-run');
-import type { ILogger } from '../utilities/npmrcUtilities';
+}: typeof import('./install-run.ts') = __non_webpack_require__('./install-run');
+import type { ILogger } from '../utilities/npmrcUtilities.ts';
 
 const PACKAGE_NAME: string = '@microsoft/rush';
 const RUSH_PREVIEW_VERSION: string = 'RUSH_PREVIEW_VERSION';

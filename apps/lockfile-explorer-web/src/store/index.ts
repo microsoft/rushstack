@@ -3,8 +3,8 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 
-import { entryReducer } from './slices/entrySlice';
-import { workspaceReducer } from './slices/workspaceSlice';
+import { entryReducer } from './slices/entrySlice.ts';
+import { workspaceReducer } from './slices/workspaceSlice.ts';
 
 /* eslint @rushstack/typedef-var: off */
 export const store = configureStore({

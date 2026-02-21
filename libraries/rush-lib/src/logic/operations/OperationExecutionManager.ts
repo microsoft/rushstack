@@ -12,14 +12,17 @@ import {
 import { StreamCollator, type CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
 import { NewlineKind, Async, InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
 
-import { AsyncOperationQueue, type IOperationSortFunction } from './AsyncOperationQueue';
-import type { Operation } from './Operation';
-import { OperationStatus } from './OperationStatus';
-import { type IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
-import type { IExecutionResult } from './IOperationExecutionResult';
-import type { IEnvironment } from '../../utilities/Utilities';
-import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
-import type { IStopwatchResult } from '../../utilities/Stopwatch';
+import { AsyncOperationQueue, type IOperationSortFunction } from './AsyncOperationQueue.ts';
+import type { Operation } from './Operation.ts';
+import { OperationStatus } from './OperationStatus.ts';
+import {
+  type IOperationExecutionRecordContext,
+  OperationExecutionRecord
+} from './OperationExecutionRecord.ts';
+import type { IExecutionResult } from './IOperationExecutionResult.ts';
+import type { IEnvironment } from '../../utilities/Utilities.ts';
+import type { IInputsSnapshot } from '../incremental/InputsSnapshot.ts';
+import type { IStopwatchResult } from '../../utilities/Stopwatch.ts';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;

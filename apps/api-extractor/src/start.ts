@@ -5,8 +5,8 @@ import * as os from 'node:os';
 
 import { Colorize } from '@rushstack/terminal';
 
-import { ApiExtractorCommandLine } from './cli/ApiExtractorCommandLine';
-import { Extractor } from './api/Extractor';
+import { ApiExtractorCommandLine } from './cli/ApiExtractorCommandLine.ts';
+import { Extractor } from './api/Extractor.ts';
 
 console.log(
   os.EOL +

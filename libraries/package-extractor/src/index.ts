@@ -10,6 +10,6 @@ export {
   type IExtractorMetadataJson,
   type IProjectInfoJson,
   type IExtractorSubspace
-} from './PackageExtractor';
+} from './PackageExtractor.ts';
 
-export type { ILinkInfo } from './SymlinkAnalyzer';
+export type { ILinkInfo } from './SymlinkAnalyzer.ts';

@@ -5,7 +5,7 @@ import * as path from 'node:path';
 
 import { FileSystem, JsonFile, JsonSchema, User } from '@rushstack/node-core-library';
 
-import { RushConstants } from '../logic/RushConstants';
+import { RushConstants } from '../logic/RushConstants.ts';
 import schemaJson from '../schemas/rush-user-settings.schema.json';
 
 interface IRushUserSettingsJson {

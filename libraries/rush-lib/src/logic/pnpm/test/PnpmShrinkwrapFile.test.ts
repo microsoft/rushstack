@@ -1,13 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { type DependencySpecifier, DependencySpecifierType } from '../../DependencySpecifier';
-import { PnpmShrinkwrapFile, parsePnpm9DependencyKey, parsePnpmDependencyKey } from '../PnpmShrinkwrapFile';
-import { RushConfiguration } from '../../../api/RushConfiguration';
-import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
-import type { Subspace } from '../../../api/Subspace';
+import { type DependencySpecifier, DependencySpecifierType } from '../../DependencySpecifier.ts';
+import {
+  PnpmShrinkwrapFile,
+  parsePnpm9DependencyKey,
+  parsePnpmDependencyKey
+} from '../PnpmShrinkwrapFile.ts';
+import { RushConfiguration } from '../../../api/RushConfiguration.ts';
+import type { RushConfigurationProject } from '../../../api/RushConfigurationProject.ts';
+import type { Subspace } from '../../../api/Subspace.ts';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
-import { PnpmOptionsConfiguration } from '../PnpmOptionsConfiguration';
+import { PnpmOptionsConfiguration } from '../PnpmOptionsConfiguration.ts';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 
 const DEPENDENCY_NAME: string = 'dependency_name';

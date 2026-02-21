@@ -10,15 +10,15 @@ import type {
   IExtractorSubspace
 } from '@rushstack/package-extractor';
 
-import { BaseRushAction } from './BaseRushAction';
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { PnpmfileConfiguration } from '../../logic/pnpm/PnpmfileConfiguration';
-import type { ILogger } from '../../pluginFramework/logging/Logger';
+import { BaseRushAction } from './BaseRushAction.ts';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { PnpmfileConfiguration } from '../../logic/pnpm/PnpmfileConfiguration.ts';
+import type { ILogger } from '../../pluginFramework/logging/Logger.ts';
 import type {
   DeployScenarioConfiguration,
   IDeployScenarioProjectJson
-} from '../../logic/deploy/DeployScenarioConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+} from '../../logic/deploy/DeployScenarioConfiguration.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
 
 export class DeployAction extends BaseRushAction {
   private readonly _logger: ILogger;
@@ -106,7 +106,7 @@ export class DeployAction extends BaseRushAction {
 
   protected async runAsync(): Promise<void> {
     const scenarioName: string | undefined = this._scenario.value;
-    const { DeployScenarioConfiguration } = await import('../../logic/deploy/DeployScenarioConfiguration');
+    const { DeployScenarioConfiguration } = await import('../../logic/deploy/DeployScenarioConfiguration.ts');
     const scenarioFilePath: string = DeployScenarioConfiguration.getConfigFilePath(
       scenarioName,
       this.rushConfiguration

@@ -8,7 +8,7 @@ import stringArgv from 'string-argv';
 
 import { FileSystem, PackageJsonLookup, Sort, Text } from '@rushstack/node-core-library';
 
-import type { IpcMessage } from './LauncherTypes';
+import type { IpcMessage } from './LauncherTypes.ts';
 
 export class Rundown {
   // Map from required path --> caller path

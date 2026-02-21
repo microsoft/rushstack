@@ -14,7 +14,7 @@ import {
   type RushLibModuleType,
   requireRushLibUnderFolderPath,
   sdkContext
-} from './helpers';
+} from './helpers.ts';
 
 declare const global: typeof globalThis & {
   ___rush___rushLibModule?: RushLibModuleType;

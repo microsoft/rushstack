@@ -3,11 +3,11 @@
 
 import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { BaseRushAction } from './BaseRushAction';
-import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';
-import type * as InteractiveUpgraderType from '../../logic/InteractiveUpgrader';
-import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { BaseRushAction } from './BaseRushAction.ts';
+import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater.ts';
+import type * as InteractiveUpgraderType from '../../logic/InteractiveUpgrader.ts';
+import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants.ts';
 
 export class UpgradeInteractiveAction extends BaseRushAction {
   private _makeConsistentFlag: CommandLineFlagParameter;
@@ -50,8 +50,8 @@ export class UpgradeInteractiveAction extends BaseRushAction {
 
   public async runAsync(): Promise<void> {
     const [{ PackageJsonUpdater }, { InteractiveUpgrader }] = await Promise.all([
-      import(/* webpackChunkName: 'PackageJsonUpdater' */ '../../logic/PackageJsonUpdater'),
-      import(/* webpackChunkName: 'InteractiveUpgrader' */ '../../logic/InteractiveUpgrader')
+      import(/* webpackChunkName: 'PackageJsonUpdater' */ '../../logic/PackageJsonUpdater.ts'),
+      import(/* webpackChunkName: 'InteractiveUpgrader' */ '../../logic/InteractiveUpgrader.ts')
     ]);
 
     const packageJsonUpdater: PackageJsonUpdaterType.PackageJsonUpdater = new PackageJsonUpdater(

@@ -3,7 +3,7 @@
 
 import type * as zod from 'zod';
 
-import type { CallToolResult } from './zodTypes';
+import type { CallToolResult } from './zodTypes.ts';
 
 /**
  * MCP plugins should implement this interface.

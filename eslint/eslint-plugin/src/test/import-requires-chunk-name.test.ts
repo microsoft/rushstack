@@ -3,8 +3,8 @@
 
 import type { RuleTester } from '@typescript-eslint/rule-tester';
 
-import { getRuleTesterWithProject } from './ruleTester';
-import { importRequiresChunkNameRule } from '../import-requires-chunk-name';
+import { getRuleTesterWithProject } from './ruleTester.ts';
+import { importRequiresChunkNameRule } from '../import-requires-chunk-name.ts';
 
 const ruleTester: RuleTester = getRuleTesterWithProject();
 

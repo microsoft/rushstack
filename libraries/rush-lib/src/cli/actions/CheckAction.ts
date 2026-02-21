@@ -4,10 +4,10 @@
 import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { Colorize } from '@rushstack/terminal';
 
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { BaseRushAction } from './BaseRushAction';
-import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
-import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { BaseRushAction } from './BaseRushAction.ts';
+import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder.ts';
+import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants.ts';
 
 export class CheckAction extends BaseRushAction {
   private readonly _jsonFlag: CommandLineFlagParameter;

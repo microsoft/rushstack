@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TextRange } from '../TextRange';
+import { TextRange } from '../TextRange.ts';
 
 function escape(s: string): string {
   return s.replace(/\n/g, '[n]').replace(/\r/g, '[r]').replace(/\t/g, '[t]');

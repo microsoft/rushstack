@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 
-import { ToggleSwitch, type IToggleEventArgs } from './ToggleSwitch';
+import { ToggleSwitch, type IToggleEventArgs } from './ToggleSwitch.tsx';
 
 /**
  * This React component renders the application page.

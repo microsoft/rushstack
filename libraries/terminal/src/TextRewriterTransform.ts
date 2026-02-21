@@ -3,11 +3,11 @@
 
 import type { NewlineKind } from '@rushstack/node-core-library';
 
-import { type ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
-import { TerminalTransform, type ITerminalTransformOptions } from './TerminalTransform';
-import type { TextRewriter, TextRewriterState } from './TextRewriter';
-import { RemoveColorsTextRewriter } from './RemoveColorsTextRewriter';
-import { NormalizeNewlinesTextRewriter } from './NormalizeNewlinesTextRewriter';
+import { type ITerminalChunk, TerminalChunkKind } from './ITerminalChunk.ts';
+import { TerminalTransform, type ITerminalTransformOptions } from './TerminalTransform.ts';
+import type { TextRewriter, TextRewriterState } from './TextRewriter.ts';
+import { RemoveColorsTextRewriter } from './RemoveColorsTextRewriter.ts';
+import { NormalizeNewlinesTextRewriter } from './NormalizeNewlinesTextRewriter.ts';
 
 /**
  * Constructor options for {@link TextRewriterTransform}.

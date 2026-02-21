@@ -7,8 +7,8 @@ import { promisify } from 'node:util';
 import webpack, { type Stats } from 'webpack';
 import { Volume } from 'memfs/lib/volume';
 
-import { TrueHashPlugin } from '../TrueHashPlugin';
-import { MemFSPlugin } from './MemFSPlugin';
+import { TrueHashPlugin } from '../TrueHashPlugin.ts';
+import { MemFSPlugin } from './MemFSPlugin.ts';
 
 async function testNonLocalizedInner(minimize: boolean): Promise<void> {
   async function getResultsAsync(useTrueHashPlugin: boolean): Promise<{

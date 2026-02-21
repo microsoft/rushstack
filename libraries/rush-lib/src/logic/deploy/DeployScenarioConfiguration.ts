@@ -6,9 +6,9 @@ import * as path from 'node:path';
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import type { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
 import schemaJson from '../../schemas/deploy-scenario.schema.json';
-import { RushConstants } from '../RushConstants';
+import { RushConstants } from '../RushConstants.ts';
 
 // Describes IDeployScenarioJson.projectSettings
 export interface IDeployScenarioProjectJson {

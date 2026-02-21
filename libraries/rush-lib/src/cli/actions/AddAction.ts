@@ -5,16 +5,16 @@ import * as semver from 'semver';
 
 import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
-import { BaseAddAndRemoveAction, PACKAGE_PARAMETER_NAME } from './BaseAddAndRemoveAction';
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { DependencySpecifier } from '../../logic/DependencySpecifier';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { BaseAddAndRemoveAction, PACKAGE_PARAMETER_NAME } from './BaseAddAndRemoveAction.ts';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { DependencySpecifier } from '../../logic/DependencySpecifier.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
 import {
   type IPackageForRushAdd,
   type IPackageJsonUpdaterRushAddOptions,
   SemVerStyle
-} from '../../logic/PackageJsonUpdaterTypes';
-import { getVariantAsync } from '../../api/Variants';
+} from '../../logic/PackageJsonUpdaterTypes.ts';
+import { getVariantAsync } from '../../api/Variants.ts';
 
 const ADD_ACTION_NAME: 'add' = 'add';
 export const MAKE_CONSISTENT_FLAG_NAME: '--make-consistent' = '--make-consistent';

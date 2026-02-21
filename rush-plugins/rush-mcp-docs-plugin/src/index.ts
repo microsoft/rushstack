@@ -3,7 +3,7 @@
 
 import type { RushMcpPluginSession, RushMcpPluginFactory } from '@rushstack/mcp-server';
 
-import { DocsPlugin, type IDocsPluginConfigFile } from './DocsPlugin';
+import { DocsPlugin, type IDocsPluginConfigFile } from './DocsPlugin.ts';
 
 function createPlugin(
   session: RushMcpPluginSession,

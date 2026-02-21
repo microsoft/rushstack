@@ -1,2 +1,2 @@
-import * as ns from './ns';
+import * as ns from './ns.ts';
 export { ns };

@@ -21,7 +21,7 @@ import {
 import {
   AzureStorageAuthentication,
   type IAzureStorageAuthenticationOptions
-} from './AzureStorageAuthentication';
+} from './AzureStorageAuthentication.ts';
 
 export interface IAzureStorageBuildCacheProviderOptions extends IAzureStorageAuthenticationOptions {
   blobPrefix?: string;

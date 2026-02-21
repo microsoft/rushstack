@@ -16,11 +16,14 @@ import {
 } from '@rushstack/node-core-library';
 import { PrintUtilities, Colorize, ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import { Utilities } from '../../utilities/Utilities';
-import { type IArtifactoryPackageRegistryJson, ArtifactoryConfiguration } from './ArtifactoryConfiguration';
-import type { WebClient as WebClientType, IWebClientResponse } from '../../utilities/WebClient';
-import { TerminalInput } from './TerminalInput';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import { Utilities } from '../../utilities/Utilities.ts';
+import {
+  type IArtifactoryPackageRegistryJson,
+  ArtifactoryConfiguration
+} from './ArtifactoryConfiguration.ts';
+import type { WebClient as WebClientType, IWebClientResponse } from '../../utilities/WebClient.ts';
+import { TerminalInput } from './TerminalInput.ts';
 
 interface IArtifactoryCustomizableMessages {
   introduction: string;
@@ -288,7 +291,7 @@ export class SetupPackageRegistry {
     this._terminal.writeLine('\nFetching an NPM token from the Artifactory service...');
 
     // Defer this import since it is conditionally needed.
-    const { WebClient } = await import('../../utilities/WebClient');
+    const { WebClient } = await import('../../utilities/WebClient.ts');
     const webClient: WebClientType = new WebClient();
 
     webClient.addBasicAuthHeader(artifactoryUser, artifactoryKey);

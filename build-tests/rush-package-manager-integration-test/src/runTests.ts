@@ -3,8 +3,8 @@
 
 import { Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
 
-import { testNpmModeAsync } from './testNpmMode';
-import { testYarnModeAsync } from './testYarnMode';
+import { testNpmModeAsync } from './testNpmMode.ts';
+import { testYarnModeAsync } from './testYarnMode.ts';
 
 /**
  * Main test runner that executes all package manager integration tests

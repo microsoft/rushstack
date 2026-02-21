@@ -6,7 +6,7 @@ import * as os from 'node:os';
 import { PackageJsonLookup } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import { ApiDocumenterCommandLine } from './cli/ApiDocumenterCommandLine';
+import { ApiDocumenterCommandLine } from './cli/ApiDocumenterCommandLine.ts';
 
 const myPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 

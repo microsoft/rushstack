@@ -3,7 +3,7 @@
 
 import type { IJsonLfxWorkspace } from '../../../build/lfx-shared';
 
-import * as graphTestHelpers from './graphTestHelpers';
+import * as graphTestHelpers from './graphTestHelpers.ts';
 
 export const workspace: IJsonLfxWorkspace = {
   workspaceRootFullPath: '/repo',

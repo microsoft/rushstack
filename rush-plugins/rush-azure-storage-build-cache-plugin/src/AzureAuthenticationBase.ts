@@ -25,7 +25,7 @@ import { CredentialCache } from '@rushstack/credential-cache';
 import type { ICredentialCacheEntry } from '@rushstack/credential-cache';
 import { PrintUtilities } from '@rushstack/terminal';
 
-import { AdoCodespacesAuthCredential } from './AdoCodespacesAuthCredential';
+import { AdoCodespacesAuthCredential } from './AdoCodespacesAuthCredential.ts';
 
 /**
  * @public

@@ -4,7 +4,7 @@
 import type * as child_process from 'node:child_process';
 import process from 'node:process';
 
-import { Executable } from './Executable';
+import { Executable } from './Executable.ts';
 
 /**
  * Details about how the `child_process.ChildProcess` was created.

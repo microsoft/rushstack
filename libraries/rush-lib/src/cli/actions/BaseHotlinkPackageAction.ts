@@ -5,8 +5,8 @@ import path from 'node:path';
 
 import type { IRequiredCommandLineStringParameter } from '@rushstack/ts-command-line';
 
-import { HotlinkManager } from '../../utilities/HotlinkManager';
-import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
+import { HotlinkManager } from '../../utilities/HotlinkManager.ts';
+import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction.ts';
 
 export abstract class BaseHotlinkPackageAction extends BaseRushAction {
   protected readonly _pathParameter: IRequiredCommandLineStringParameter;

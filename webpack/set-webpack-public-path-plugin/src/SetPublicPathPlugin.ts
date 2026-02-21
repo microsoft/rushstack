@@ -5,8 +5,8 @@ import type webpack from 'webpack';
 
 import { Text } from '@rushstack/node-core-library';
 
-import { type IInternalOptions, getSetPublicPathCode } from './codeGenerator';
-import { SetPublicPathPluginBase } from './SetPublicPathPluginBase';
+import { type IInternalOptions, getSetPublicPathCode } from './codeGenerator.ts';
+import { SetPublicPathPluginBase } from './SetPublicPathPluginBase.ts';
 
 /**
  * The base options for setting the webpack public path at runtime.

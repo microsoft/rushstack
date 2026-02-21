@@ -4,7 +4,7 @@
 import { PackageJsonLookup } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import { TraceImportCommandLineParser } from './TraceImportCommandLineParser';
+import { TraceImportCommandLineParser } from './TraceImportCommandLineParser.ts';
 
 const toolVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 

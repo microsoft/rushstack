@@ -3,8 +3,8 @@
 
 import type { RuleTester } from '@typescript-eslint/rule-tester';
 
-import { getRuleTesterWithProject } from './ruleTester';
-import { noUntypedUnderscoreRule } from '../no-untyped-underscore';
+import { getRuleTesterWithProject } from './ruleTester.ts';
+import { noUntypedUnderscoreRule } from '../no-untyped-underscore.ts';
 
 const ruleTester: RuleTester = getRuleTesterWithProject();
 

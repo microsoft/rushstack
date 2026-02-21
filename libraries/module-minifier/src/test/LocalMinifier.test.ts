@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IMinifierConnection } from '../types';
+import type { IMinifierConnection } from '../types.ts';
 
 let terserVersion: string = '1.0.0';
 jest.mock('terser/package.json', () => {
@@ -14,7 +14,7 @@ jest.mock('terser/package.json', () => {
 
 describe('LocalMinifier', () => {
   it('Includes terserOptions in config hash', async () => {
-    const { LocalMinifier } = await import('../LocalMinifier');
+    const { LocalMinifier } = await import('../LocalMinifier.ts');
     // eslint-disable-next-line @typescript-eslint/no-redeclare
     type LocalMinifier = typeof LocalMinifier.prototype;
 
@@ -40,7 +40,7 @@ describe('LocalMinifier', () => {
   });
 
   it('Includes terser package version in config hash', async () => {
-    const { LocalMinifier } = await import('../LocalMinifier');
+    const { LocalMinifier } = await import('../LocalMinifier.ts');
     // eslint-disable-next-line @typescript-eslint/no-redeclare
     type LocalMinifier = typeof LocalMinifier.prototype;
 

@@ -8,8 +8,8 @@ import * as semver from 'semver';
 import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
 import { Colorize, PrintUtilities } from '@rushstack/terminal';
 
-import type { RushConfiguration } from '../api/RushConfiguration';
-import { RushConstants } from './RushConstants';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import { RushConstants } from './RushConstants.ts';
 
 // Refuses to run at all if the PNPM version is older than this, because there
 // are known bugs or missing features in earlier releases.

@@ -3,10 +3,10 @@
 
 import * as path from 'node:path';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { Git } from '../Git';
-import { PublishGit } from '../PublishGit';
-import { PublishUtilities } from '../PublishUtilities';
+import { RushConfiguration } from '../../api/RushConfiguration.ts';
+import { Git } from '../Git.ts';
+import { PublishGit } from '../PublishGit.ts';
+import { PublishUtilities } from '../PublishUtilities.ts';
 
 describe('PublishGit Test', () => {
   let gitPath: string;

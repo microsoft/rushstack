@@ -5,10 +5,10 @@ import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/Declara
 import { PackageName } from '@rushstack/node-core-library';
 import { DocDeclarationReference } from '@microsoft/tsdoc';
 
-import { ApiItem, ApiItemKind } from '../items/ApiItem';
-import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
-import { ApiPackage } from './ApiPackage';
-import { ModelReferenceResolver, type IResolveDeclarationReferenceResult } from './ModelReferenceResolver';
+import { ApiItem, ApiItemKind } from '../items/ApiItem.ts';
+import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin.ts';
+import { ApiPackage } from './ApiPackage.ts';
+import { ModelReferenceResolver, type IResolveDeclarationReferenceResult } from './ModelReferenceResolver.ts';
 
 /**
  * A serializable representation of a collection of API declarations.

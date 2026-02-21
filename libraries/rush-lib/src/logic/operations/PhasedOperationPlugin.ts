@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { IPhase } from '../../api/CommandLineConfiguration';
-import { Operation } from './Operation';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import type { IPhase } from '../../api/CommandLineConfiguration.ts';
+import { Operation } from './Operation.ts';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
-} from '../../pluginFramework/PhasedCommandHooks';
-import type { IOperationSettings } from '../../api/RushProjectConfiguration';
+} from '../../pluginFramework/PhasedCommandHooks.ts';
+import type { IOperationSettings } from '../../api/RushProjectConfiguration.ts';
 
 const PLUGIN_NAME: 'PhasedOperationPlugin' = 'PhasedOperationPlugin';
 

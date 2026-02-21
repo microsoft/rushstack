@@ -20,15 +20,15 @@ import {
   InternalError
 } from '@rushstack/node-core-library';
 
-import { type IChangeInfo, ChangeType, type IVersionPolicyChangeInfo } from '../api/ChangeManagement';
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { Utilities, type IEnvironment } from '../utilities/Utilities';
-import type { PrereleaseToken } from './PrereleaseToken';
-import type { ChangeFiles } from './ChangeFiles';
-import type { RushConfiguration } from '../api/RushConfiguration';
-import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
-import { Git, DEFAULT_GIT_TAG_SEPARATOR } from './Git';
-import type { LockStepVersionPolicy } from '../api/VersionPolicy';
+import { type IChangeInfo, ChangeType, type IVersionPolicyChangeInfo } from '../api/ChangeManagement.ts';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import { Utilities, type IEnvironment } from '../utilities/Utilities.ts';
+import type { PrereleaseToken } from './PrereleaseToken.ts';
+import type { ChangeFiles } from './ChangeFiles.ts';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier.ts';
+import { Git, DEFAULT_GIT_TAG_SEPARATOR } from './Git.ts';
+import type { LockStepVersionPolicy } from '../api/VersionPolicy.ts';
 
 export interface IChangeRequests {
   packageChanges: Map<string, IChangeInfo>;

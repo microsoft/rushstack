@@ -6,8 +6,8 @@ import { SyncHook } from 'tapable';
 import { InternalError } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
-import type { IHeftPlugin } from './IHeftPlugin';
+import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition.ts';
+import type { IHeftPlugin } from './IHeftPlugin.ts';
 
 export abstract class HeftPluginHost {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -18,14 +18,14 @@ import {
 } from '@rushstack/node-core-library';
 import { PackageExtractor } from '@rushstack/package-extractor';
 
-import type { RushConfiguration } from '../api/RushConfiguration';
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { RushConstants } from '../logic/RushConstants';
-import { PnpmSyncUtilities } from './PnpmSyncUtilities';
-import { BaseLinkManager, SymlinkKind } from '../logic/base/BaseLinkManager';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import { RushConstants } from '../logic/RushConstants.ts';
+import { PnpmSyncUtilities } from './PnpmSyncUtilities.ts';
+import { BaseLinkManager, SymlinkKind } from '../logic/base/BaseLinkManager.ts';
 import schema from '../schemas/rush-hotlink-state.schema.json';
-import { PURGE_ACTION_NAME } from './actionNameConstants';
-import type { Subspace } from '../api/Subspace';
+import { PURGE_ACTION_NAME } from './actionNameConstants.ts';
+import type { Subspace } from '../api/Subspace.ts';
 
 type HotlinkLinkType = 'LinkPackage' | 'BridgePackage';
 

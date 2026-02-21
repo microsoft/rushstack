@@ -3,7 +3,7 @@
 
 import { Async, MinimumHeap } from '@rushstack/node-core-library';
 
-import { OperationStatus } from './OperationStatus';
+import { OperationStatus } from './OperationStatus.ts';
 
 interface IQueueItem {
   task: () => Promise<void>;

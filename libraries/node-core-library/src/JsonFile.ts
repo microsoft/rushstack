@@ -5,9 +5,9 @@ import * as os from 'node:os';
 
 import * as jju from 'jju';
 
-import type { JsonSchema, IJsonSchemaErrorInfo, IJsonSchemaValidateOptions } from './JsonSchema';
-import { Text, type NewlineKind } from './Text';
-import { FileSystem } from './FileSystem';
+import type { JsonSchema, IJsonSchemaErrorInfo, IJsonSchemaValidateOptions } from './JsonSchema.ts';
+import { Text, type NewlineKind } from './Text.ts';
+import { FileSystem } from './FileSystem.ts';
 
 /**
  * Represents a JSON-serializable object whose type has not been determined yet.

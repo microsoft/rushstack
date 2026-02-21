@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import './mockRushCommandLineParser';
+import './mockRushCommandLineParser.ts';
 
 import path from 'node:path';
 import { FileSystem, LockFile } from '@rushstack/node-core-library';
-import { RushCommandLineParser } from '../RushCommandLineParser';
-import { Autoinstaller } from '../../logic/Autoinstaller';
-import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { Autoinstaller } from '../../logic/Autoinstaller.ts';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration.ts';
 
 describe('PluginCommandLineParameters', () => {
   let originCWD: string | undefined;

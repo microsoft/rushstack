@@ -11,8 +11,8 @@ import {
   type IComputeResolverCacheFromLockfileOptions,
   type IPartialRushProject,
   type IPlatformInfo
-} from '../computeResolverCacheFromLockfileAsync';
-import type { IResolverContext } from '../types';
+} from '../computeResolverCacheFromLockfileAsync.ts';
+import type { IResolverContext } from '../types.ts';
 
 interface ITestCase {
   workspaceRoot: string;

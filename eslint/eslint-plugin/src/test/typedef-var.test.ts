@@ -3,8 +3,8 @@
 
 import type { RuleTester } from '@typescript-eslint/rule-tester';
 
-import { getRuleTesterWithProject } from './ruleTester';
-import { typedefVar } from '../typedef-var';
+import { getRuleTesterWithProject } from './ruleTester.ts';
+import { typedefVar } from '../typedef-var.ts';
 
 const ruleTester: RuleTester = getRuleTesterWithProject();
 

@@ -3,7 +3,7 @@
 
 import { JsonFile } from '@rushstack/node-core-library';
 
-import type { ILocalizationFile, IParseFileOptions } from '../interfaces';
+import type { ILocalizationFile, IParseFileOptions } from '../interfaces.ts';
 
 /**
  * @public

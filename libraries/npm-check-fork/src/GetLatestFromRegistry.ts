@@ -8,13 +8,13 @@ import semver from 'semver';
 
 import { Async } from '@rushstack/node-core-library';
 
-import bestGuessHomepage from './BestGuessHomepage';
-import { NpmRegistryClient, type INpmRegistryClientResult } from './NpmRegistryClient';
+import bestGuessHomepage from './BestGuessHomepage.ts';
+import { NpmRegistryClient, type INpmRegistryClientResult } from './NpmRegistryClient.ts';
 import type {
   INpmRegistryInfo,
   INpmCheckRegistryData,
   INpmRegistryPackageResponse
-} from './interfaces/INpmCheckRegistry';
+} from './interfaces/INpmCheckRegistry.ts';
 
 // Module-level registry client instance (lazy initialized)
 let _registryClient: NpmRegistryClient | undefined;

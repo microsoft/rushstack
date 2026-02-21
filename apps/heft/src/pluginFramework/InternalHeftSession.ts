@@ -3,22 +3,22 @@
 
 import { Async, InternalError } from '@rushstack/node-core-library';
 
-import { Constants } from '../utilities/Constants';
-import { HeftLifecycle } from './HeftLifecycle';
-import { HeftPhaseSession } from './HeftPhaseSession';
-import { HeftPhase } from './HeftPhase';
+import { Constants } from '../utilities/Constants.ts';
+import { HeftLifecycle } from './HeftLifecycle.ts';
+import { HeftPhaseSession } from './HeftPhaseSession.ts';
+import { HeftPhase } from './HeftPhase.ts';
 import {
   CoreConfigFiles,
   type IHeftConfigurationJson,
   type IHeftConfigurationJsonActionReference
-} from '../utilities/CoreConfigFiles';
-import type { MetricsCollector } from '../metrics/MetricsCollector';
-import type { LoggingManager } from './logging/LoggingManager';
-import type { HeftConfiguration } from '../configuration/HeftConfiguration';
-import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
-import type { HeftTask } from './HeftTask';
-import type { HeftParameterManager } from './HeftParameterManager';
-import type { IHeftParsedCommandLine } from './HeftTaskSession';
+} from '../utilities/CoreConfigFiles.ts';
+import type { MetricsCollector } from '../metrics/MetricsCollector.ts';
+import type { LoggingManager } from './logging/LoggingManager.ts';
+import type { HeftConfiguration } from '../configuration/HeftConfiguration.ts';
+import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition.ts';
+import type { HeftTask } from './HeftTask.ts';
+import type { HeftParameterManager } from './HeftParameterManager.ts';
+import type { IHeftParsedCommandLine } from './HeftTaskSession.ts';
 
 export interface IInternalHeftSessionOptions {
   heftConfiguration: HeftConfiguration;

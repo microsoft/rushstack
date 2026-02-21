@@ -3,9 +3,13 @@
 
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
-import { BaseRushAction, type IBaseRushActionOptions } from '../actions/BaseRushAction';
-import type { Command, CommandLineConfiguration, IParameterJson } from '../../api/CommandLineConfiguration';
-import { defineCustomParameters } from '../parsing/defineCustomParameters';
+import { BaseRushAction, type IBaseRushActionOptions } from '../actions/BaseRushAction.ts';
+import type {
+  Command,
+  CommandLineConfiguration,
+  IParameterJson
+} from '../../api/CommandLineConfiguration.ts';
+import { defineCustomParameters } from '../parsing/defineCustomParameters.ts';
 
 /**
  * Constructor parameters for BaseScriptAction

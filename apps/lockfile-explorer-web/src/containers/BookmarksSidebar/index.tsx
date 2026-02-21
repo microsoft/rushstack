@@ -7,9 +7,9 @@ import { Button, ScrollArea, Text } from '@rushstack/rush-themed-ui';
 
 import appStyles from '../../App.scss';
 import styles from './styles.scss';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../store/hooks.ts';
 import type { LfxGraphEntry } from '../../packlets/lfx-shared';
-import { clearStackAndPush, removeBookmark } from '../../store/slices/entrySlice';
+import { clearStackAndPush, removeBookmark } from '../../store/slices/entrySlice.ts';
 
 export const BookmarksSidebar = (): React.ReactElement => {
   const bookmarks = useAppSelector((state) => state.entry.bookmarkedEntries);

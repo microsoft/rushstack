@@ -10,7 +10,7 @@ import {
   parseGitLsTree,
   getRepoRoot,
   parseGitHashObject
-} from '../getRepoState';
+} from '../getRepoState.ts';
 
 import { FileSystem } from '@rushstack/node-core-library';
 

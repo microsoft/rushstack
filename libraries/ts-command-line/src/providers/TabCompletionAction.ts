@@ -3,17 +3,17 @@
 
 import stringArgv from 'string-argv';
 
-import type { IRequiredCommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
-import type { IRequiredCommandLineStringParameter } from '../parameters/CommandLineStringParameter';
+import type { IRequiredCommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter.ts';
+import type { IRequiredCommandLineStringParameter } from '../parameters/CommandLineStringParameter.ts';
 import {
   CommandLineParameterKind,
   type CommandLineParameterBase,
   CommandLineParameterWithArgument,
   type CommandLineParameter
-} from '../parameters/BaseClasses';
-import { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';
-import { CommandLineAction } from './CommandLineAction';
-import { CommandLineConstants } from '../Constants';
+} from '../parameters/BaseClasses.ts';
+import { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter.ts';
+import { CommandLineAction } from './CommandLineAction.ts';
+import { CommandLineConstants } from '../Constants.ts';
 
 const DEFAULT_WORD_TO_AUTOCOMPLETE: string = '';
 const DEFAULT_POSITION: number = 0;

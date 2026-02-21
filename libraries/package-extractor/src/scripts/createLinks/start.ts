@@ -3,7 +3,7 @@
 
 import { Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
 
-import { CreateLinksCommandLineParser } from './cli/CreateLinksCommandLineParser';
+import { CreateLinksCommandLineParser } from './cli/CreateLinksCommandLineParser.ts';
 
 const terminal: Terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: true }));
 

@@ -5,7 +5,7 @@ import * as ts from 'typescript';
 
 import { InternalError, Sort, Text } from '@rushstack/node-core-library';
 
-import { IndentedWriter } from '../generators/IndentedWriter';
+import { IndentedWriter } from '../generators/IndentedWriter.ts';
 
 interface IWriteModifiedTextOptions {
   writer: IndentedWriter;

@@ -3,12 +3,12 @@
 
 import * as argparse from 'argparse';
 
-import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
-import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
-import { CommandLineParameterBase } from '../parameters/BaseClasses';
-import type { CommandLineParser } from '../providers/CommandLineParser';
-import type { CommandLineAction } from '../providers/CommandLineAction';
-import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
+import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser.ts';
+import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction.ts';
+import { CommandLineParameterBase } from '../parameters/BaseClasses.ts';
+import type { CommandLineParser } from '../providers/CommandLineParser.ts';
+import type { CommandLineAction } from '../providers/CommandLineAction.ts';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities.ts';
 
 interface IExtendedArgumentParser extends argparse.ArgumentParser {
   _printMessage: (message: string) => void;

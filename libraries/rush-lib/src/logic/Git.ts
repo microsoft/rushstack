@@ -11,12 +11,12 @@ import { Executable, AlreadyReportedError, Path, Async } from '@rushstack/node-c
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { ensureGitMinimumVersion } from '@rushstack/package-deps-hash';
 
-import { Utilities } from '../utilities/Utilities';
-import * as GitEmailPolicy from './policy/GitEmailPolicy';
-import type { RushConfiguration } from '../api/RushConfiguration';
-import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
-import { type IChangedGitStatusEntry, type IGitStatusEntry, parseGitStatus } from './GitStatusParser';
-import { RushConstants } from './RushConstants';
+import { Utilities } from '../utilities/Utilities.ts';
+import * as GitEmailPolicy from './policy/GitEmailPolicy.ts';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration.ts';
+import { type IChangedGitStatusEntry, type IGitStatusEntry, parseGitStatus } from './GitStatusParser.ts';
+import { RushConstants } from './RushConstants.ts';
 
 export const DEFAULT_GIT_TAG_SEPARATOR: string = '_';
 

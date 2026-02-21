@@ -10,7 +10,7 @@ import { RigConfig } from '@rushstack/rig-package';
 import type { RushConfigurationProject } from '@rushstack/rush-sdk';
 
 import rushProjectServeSchema from './schemas/rush-project-serve.schema.json';
-import type { IRushProjectServeJson, IRoutingRule } from './types';
+import type { IRushProjectServeJson, IRoutingRule } from './types.ts';
 
 export class RushServeConfiguration {
   private readonly _loader: ProjectConfigurationFile<IRushProjectServeJson>;

@@ -11,7 +11,7 @@ import {
   ConfigurationFileBase,
   type IOnConfigurationFileNotFoundCallback,
   type IConfigurationFileOptions
-} from './ConfigurationFileBase';
+} from './ConfigurationFileBase.ts';
 
 /**
  * @beta

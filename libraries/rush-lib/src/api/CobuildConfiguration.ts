@@ -6,11 +6,11 @@ import { randomUUID } from 'node:crypto';
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { EnvironmentConfiguration } from './EnvironmentConfiguration';
-import type { CobuildLockProviderFactory, RushSession } from '../pluginFramework/RushSession';
-import { RushConstants } from '../logic/RushConstants';
-import type { ICobuildLockProvider } from '../logic/cobuild/ICobuildLockProvider';
-import type { RushConfiguration } from './RushConfiguration';
+import { EnvironmentConfiguration } from './EnvironmentConfiguration.ts';
+import type { CobuildLockProviderFactory, RushSession } from '../pluginFramework/RushSession.ts';
+import { RushConstants } from '../logic/RushConstants.ts';
+import type { ICobuildLockProvider } from '../logic/cobuild/ICobuildLockProvider.ts';
+import type { RushConfiguration } from './RushConfiguration.ts';
 import schemaJson from '../schemas/cobuild.schema.json';
 
 /**

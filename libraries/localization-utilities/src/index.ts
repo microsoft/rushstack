@@ -13,14 +13,14 @@ export type {
   IPseudolocaleOptions,
   IParseFileOptions,
   IgnoreStringFunction
-} from './interfaces';
-export { parseLocJson } from './parsers/parseLocJson';
-export { parseResJson } from './parsers/parseResJson';
-export { parseResx, type IParseResxOptions, type IParseResxOptionsBase } from './parsers/parseResx';
-export { parseLocFile, type IParseLocFileOptions, type ParserKind } from './LocFileParser';
+} from './interfaces.ts';
+export { parseLocJson } from './parsers/parseLocJson.ts';
+export { parseResJson } from './parsers/parseResJson.ts';
+export { parseResx, type IParseResxOptions, type IParseResxOptionsBase } from './parsers/parseResx.ts';
+export { parseLocFile, type IParseLocFileOptions, type ParserKind } from './LocFileParser.ts';
 export {
   type ITypingsGeneratorOptions,
   type IInferInterfaceNameExportAsDefaultOptions,
   TypingsGenerator
-} from './TypingsGenerator';
-export { getPseudolocalizer } from './Pseudolocalization';
+} from './TypingsGenerator.ts';
+export { getPseudolocalizer } from './Pseudolocalization.ts';

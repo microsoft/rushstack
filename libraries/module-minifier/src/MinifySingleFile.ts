@@ -4,8 +4,8 @@
 import { minify, type MinifyOptions, type MinifyOutput, type SimpleIdentifierMangler } from 'terser';
 import type { RawSourceMap } from 'source-map';
 
-import { getIdentifier } from './MinifiedIdentifier';
-import type { IModuleMinificationRequest, IModuleMinificationResult } from './types';
+import { getIdentifier } from './MinifiedIdentifier.ts';
+import type { IModuleMinificationRequest, IModuleMinificationResult } from './types.ts';
 
 const nth_identifier: SimpleIdentifierMangler = {
   get: getIdentifier
