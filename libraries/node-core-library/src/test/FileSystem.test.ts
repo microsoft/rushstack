@@ -3,8 +3,8 @@
 
 import fs from 'node:fs';
 
-import { FileSystem } from '../FileSystem';
-import { PosixModeBits } from '../PosixModeBits';
+import { FileSystem } from '../FileSystem.ts';
+import { PosixModeBits } from '../PosixModeBits.ts';
 
 describe(FileSystem.name, () => {
   test(FileSystem.formatPosixModeBits.name, () => {

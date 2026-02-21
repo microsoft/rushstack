@@ -10,10 +10,10 @@ import type * as SetPublicPathPluginPackageType from '@rushstack/set-webpack-pub
 import { type NewlineKind, Text } from '@rushstack/node-core-library';
 import type { IgnoreStringFunction } from '@rushstack/localization-utilities';
 
-import { Constants } from './utilities/Constants';
-import type { LocalizationPlugin } from './LocalizationPlugin';
-import type { ILocLoaderOptions } from './loaders/LocLoader';
-import type { IBaseLoaderOptions } from './loaders/LoaderFactory';
+import { Constants } from './utilities/Constants.ts';
+import type { LocalizationPlugin } from './LocalizationPlugin.ts';
+import type { ILocLoaderOptions } from './loaders/LocLoader.ts';
+import type { IBaseLoaderOptions } from './loaders/LoaderFactory.ts';
 
 export interface IWebpackConfigurationUpdaterOptions {
   pluginInstance: LocalizationPlugin;

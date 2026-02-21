@@ -5,15 +5,15 @@ import { AsyncParallelHook, SyncHook } from 'tapable';
 
 import { InternalError } from '@rushstack/node-core-library';
 
-import { HeftPluginConfiguration } from '../configuration/HeftPluginConfiguration';
-import { HeftPluginHost } from './HeftPluginHost';
-import type { InternalHeftSession } from './InternalHeftSession';
-import type { IHeftConfigurationJsonPluginSpecifier } from '../utilities/CoreConfigFiles';
+import { HeftPluginConfiguration } from '../configuration/HeftPluginConfiguration.ts';
+import { HeftPluginHost } from './HeftPluginHost.ts';
+import type { InternalHeftSession } from './InternalHeftSession.ts';
+import type { IHeftConfigurationJsonPluginSpecifier } from '../utilities/CoreConfigFiles.ts';
 import type {
   HeftLifecyclePluginDefinition,
   HeftPluginDefinitionBase
-} from '../configuration/HeftPluginDefinition';
-import type { IHeftLifecyclePlugin, IHeftPlugin } from './IHeftPlugin';
+} from '../configuration/HeftPluginDefinition.ts';
+import type { IHeftLifecyclePlugin, IHeftPlugin } from './IHeftPlugin.ts';
 import {
   HeftLifecycleSession,
   type IHeftLifecycleCleanHookOptions,
@@ -25,8 +25,8 @@ import {
   type IHeftTaskFinishHookOptions,
   type IHeftPhaseStartHookOptions,
   type IHeftPhaseFinishHookOptions
-} from './HeftLifecycleSession';
-import type { ScopedLogger } from './logging/ScopedLogger';
+} from './HeftLifecycleSession.ts';
+import type { ScopedLogger } from './logging/ScopedLogger.ts';
 
 export interface IHeftLifecycleContext {
   lifecycleSession?: HeftLifecycleSession;

@@ -8,14 +8,14 @@ import type * as TWebpack from 'webpack';
 import { FileSystem } from '@rushstack/node-core-library';
 import type { IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 
-import type { IWebpackPluginOptions } from './Webpack5Plugin';
+import type { IWebpackPluginOptions } from './Webpack5Plugin.ts';
 import {
   PLUGIN_NAME,
   STAGE_LOAD_LOCAL_CONFIG,
   type IWebpackConfiguration,
   type IWebpackConfigurationFnEnvironment,
   type IWebpackPluginAccessorHooks
-} from './shared';
+} from './shared.ts';
 
 type IWebpackConfigJsExport =
   | TWebpack.Configuration

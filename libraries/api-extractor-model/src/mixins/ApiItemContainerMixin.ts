@@ -13,20 +13,20 @@ import {
   type IApiItemOptions,
   type IApiItemConstructor,
   ApiItemKind
-} from '../items/ApiItem';
-import { ApiNameMixin } from './ApiNameMixin';
-import type { DeserializerContext } from '../model/DeserializerContext';
-import type { ApiModel } from '../model/ApiModel';
-import type { ApiClass } from '../model/ApiClass';
-import type { ApiInterface } from '../model/ApiInterface';
-import { type ExcerptToken, ExcerptTokenKind } from './Excerpt';
+} from '../items/ApiItem.ts';
+import { ApiNameMixin } from './ApiNameMixin.ts';
+import type { DeserializerContext } from '../model/DeserializerContext.ts';
+import type { ApiModel } from '../model/ApiModel.ts';
+import type { ApiClass } from '../model/ApiClass.ts';
+import type { ApiInterface } from '../model/ApiInterface.ts';
+import { type ExcerptToken, ExcerptTokenKind } from './Excerpt.ts';
 import {
   type IFindApiItemsResult,
   type IFindApiItemsMessage,
   FindApiItemsMessageId
-} from './IFindApiItemsResult';
-import type { HeritageType } from '../model/HeritageType';
-import type { IResolveDeclarationReferenceResult } from '../model/ModelReferenceResolver';
+} from './IFindApiItemsResult.ts';
+import type { HeritageType } from '../model/HeritageType.ts';
+import type { IResolveDeclarationReferenceResult } from '../model/ModelReferenceResolver.ts';
 
 /**
  * Constructor options for {@link (ApiItemContainerMixin:interface)}.

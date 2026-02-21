@@ -7,7 +7,7 @@ import {
   AWS_SESSION_TOKEN,
   fromAmazonEnv,
   fromRushEnv
-} from '../AmazonS3Credentials';
+} from '../AmazonS3Credentials.ts';
 import { EnvironmentConfiguration } from '@rushstack/rush-sdk';
 
 describe('Amazon S3 Credentials', () => {

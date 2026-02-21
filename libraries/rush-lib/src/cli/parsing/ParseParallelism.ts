@@ -3,7 +3,7 @@
 
 import * as os from 'node:os';
 
-import { IS_WINDOWS } from '../../utilities/executionUtilities';
+import { IS_WINDOWS } from '../../utilities/executionUtilities.ts';
 
 /**
  * Parses a command line specification for desired parallelism.

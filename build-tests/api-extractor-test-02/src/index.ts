@@ -12,12 +12,12 @@
  *
  * @packageDocumentation
  */
-export { SubclassWithImport } from './SubclassWithImport';
+export { SubclassWithImport } from './SubclassWithImport.ts';
 
-export type * from './TypeFromImportedModule';
+export type * from './TypeFromImportedModule.ts';
 
-export { importDeduping1 } from './ImportDeduping1';
-export { importDeduping2 } from './ImportDeduping2';
+export { importDeduping1 } from './ImportDeduping1.ts';
+export { importDeduping2 } from './ImportDeduping2.ts';
 export { ReexportedClass as RenamedReexportedClass3 } from 'api-extractor-test-01';
 
-export * from './Ambient';
+export * from './Ambient.ts';

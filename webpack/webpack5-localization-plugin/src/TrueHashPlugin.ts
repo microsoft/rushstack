@@ -3,7 +3,7 @@
 
 import type { Compilation, Compiler, WebpackPluginInstance } from 'webpack';
 
-import { type HashFn, getHashFunction, updateAssetHashes } from './trueHashes';
+import { type HashFn, getHashFunction, updateAssetHashes } from './trueHashes.ts';
 
 const PLUGIN_NAME: 'true-hash' = 'true-hash';
 

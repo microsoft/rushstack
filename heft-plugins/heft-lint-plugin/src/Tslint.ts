@@ -11,8 +11,8 @@ import { Import, JsonFile, FileError, FileSystem } from '@rushstack/node-core-li
 import type { ITerminal } from '@rushstack/terminal';
 import type { HeftConfiguration } from '@rushstack/heft';
 
-import { LinterBase, type ILinterBaseOptions } from './LinterBase';
-import type { IExtendedLinter } from './internalTypings/TslintInternals';
+import { LinterBase, type ILinterBaseOptions } from './LinterBase.ts';
+import type { IExtendedLinter } from './internalTypings/TslintInternals.ts';
 
 interface ITslintOptions extends ILinterBaseOptions {
   tslintPackage: typeof TTslint;

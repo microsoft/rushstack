@@ -4,7 +4,7 @@
 import(/* webpackChunkName: 'chunk-with-strings' */ './chunks/chunkWithStrings')
   // eslint-disable-next-line @typescript-eslint/naming-convention
   .then(({ ChunkWithStringsClass }) => {
-    const chunk: import('./chunks/chunkWithStrings').ChunkWithStringsClass = new ChunkWithStringsClass();
+    const chunk: import('./chunks/chunkWithStrings.ts').ChunkWithStringsClass = new ChunkWithStringsClass();
     chunk.doStuff();
   })
   .catch((e) => {

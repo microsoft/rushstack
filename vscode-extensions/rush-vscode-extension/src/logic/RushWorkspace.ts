@@ -4,7 +4,7 @@
 import { RushSdkLoader, type ISdkCallbackEvent } from '@rushstack/rush-sdk/loader';
 
 import * as vscode from 'vscode';
-import { terminal } from './logger';
+import { terminal } from './logger.ts';
 
 import type { CommandLineAction } from '@rushstack/rush-vscode-command-webview';
 import type * as RushLib from '@rushstack/rush-sdk';

@@ -8,7 +8,7 @@ import {
   type ITerminal
 } from '@rushstack/terminal';
 
-import { LoggingManager } from './LoggingManager';
+import { LoggingManager } from './LoggingManager.ts';
 
 /**
  * A logger which is used to emit errors and warnings to the console, as well as to write

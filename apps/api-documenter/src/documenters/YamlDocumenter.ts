@@ -60,11 +60,11 @@ import type {
   IYamlReference,
   IYamlReferenceSpec,
   IYamlInheritanceTree
-} from '../yaml/IYamlApiFile';
-import type { IYamlTocFile, IYamlTocItem } from '../yaml/IYamlTocFile';
-import { Utilities } from '../utils/Utilities';
-import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
-import { convertUDPYamlToSDP } from '../utils/ToSdpConvertHelper';
+} from '../yaml/IYamlApiFile.ts';
+import type { IYamlTocFile, IYamlTocItem } from '../yaml/IYamlTocFile.ts';
+import { Utilities } from '../utils/Utilities.ts';
+import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter.ts';
+import { convertUDPYamlToSDP } from '../utils/ToSdpConvertHelper.ts';
 import typescriptSchema from '../yaml/typescript.schema.json';
 
 const yamlApiSchema: JsonSchema = JsonSchema.fromLoadedObject(typescriptSchema);

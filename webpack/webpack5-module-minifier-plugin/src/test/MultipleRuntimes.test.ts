@@ -7,9 +7,9 @@ import { promisify } from 'node:util';
 import webpack, { type Stats, type InputFileSystem, type OutputFileSystem } from 'webpack';
 import { Volume } from 'memfs/lib/volume';
 
-import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin';
-import { MockMinifier } from './MockMinifier';
-import { RecordMetadataPlugin } from './RecordMetadataPlugin';
+import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin.ts';
+import { MockMinifier } from './MockMinifier.ts';
+import { RecordMetadataPlugin } from './RecordMetadataPlugin.ts';
 import { type IModuleMinifier, LocalMinifier } from '@rushstack/module-minifier';
 
 jest.setTimeout(1e9);

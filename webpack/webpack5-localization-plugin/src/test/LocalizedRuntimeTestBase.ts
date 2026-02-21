@@ -7,11 +7,11 @@ import { promisify } from 'node:util';
 import webpack, { type Compiler, type Stats } from 'webpack';
 import { Volume } from 'memfs/lib/volume';
 
-import { MemFSPlugin } from './MemFSPlugin';
-import type { ILocalizationPluginOptions } from '../interfaces';
-import { LocalizationPlugin } from '../LocalizationPlugin';
-import { type ITrueHashPluginOptions, TrueHashPlugin } from '../TrueHashPlugin';
-import { markEntity } from '../utilities/EntityMarker';
+import { MemFSPlugin } from './MemFSPlugin.ts';
+import type { ILocalizationPluginOptions } from '../interfaces.ts';
+import { LocalizationPlugin } from '../LocalizationPlugin.ts';
+import { type ITrueHashPluginOptions, TrueHashPlugin } from '../TrueHashPlugin.ts';
+import { markEntity } from '../utilities/EntityMarker.ts';
 
 class InjectCustomPlaceholderPlugin implements webpack.WebpackPluginInstance {
   private readonly _localizationPlugin: LocalizationPlugin;

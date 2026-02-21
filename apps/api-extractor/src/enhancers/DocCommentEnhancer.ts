@@ -6,13 +6,13 @@ import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 
-import type { Collector } from '../collector/Collector';
-import { AstSymbol } from '../analyzer/AstSymbol';
-import type { AstDeclaration } from '../analyzer/AstDeclaration';
-import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
-import { ExtractorMessageId } from '../api/ExtractorMessageId';
-import { VisitorState } from '../collector/VisitorState';
-import { ResolverFailure } from '../analyzer/AstReferenceResolver';
+import type { Collector } from '../collector/Collector.ts';
+import { AstSymbol } from '../analyzer/AstSymbol.ts';
+import type { AstDeclaration } from '../analyzer/AstDeclaration.ts';
+import type { ApiItemMetadata } from '../collector/ApiItemMetadata.ts';
+import { ExtractorMessageId } from '../api/ExtractorMessageId.ts';
+import { VisitorState } from '../collector/VisitorState.ts';
+import { ResolverFailure } from '../analyzer/AstReferenceResolver.ts';
 
 export class DocCommentEnhancer {
   private readonly _collector: Collector;

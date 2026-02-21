@@ -13,6 +13,12 @@ module.exports = [
       parserOptions: {
         tsconfigRootDir: __dirname
       }
+    },
+    rules: {
+      // This project uses ts-loader, so imports must remain extensionless.
+      // Adding .ts extensions would cause rewriteRelativeImportExtensions to emit .js,
+      // which webpack can't resolve since only .ts source files exist on disk.
+      'import/extensions': 'off'
     }
   }
 ];

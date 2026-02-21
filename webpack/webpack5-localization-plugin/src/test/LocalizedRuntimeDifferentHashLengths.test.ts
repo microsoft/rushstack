@@ -5,7 +5,7 @@ jest.disableAutomock();
 
 import { createHash } from 'node:crypto';
 
-import { runTests } from './LocalizedRuntimeTestBase';
+import { runTests } from './LocalizedRuntimeTestBase.ts';
 
 runTests({
   hashFunction: (contents) => createHash('sha256').update(contents).digest('hex')

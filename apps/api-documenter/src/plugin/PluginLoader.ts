@@ -5,13 +5,13 @@ import * as path from 'node:path';
 
 import * as resolve from 'resolve';
 
-import type { IApiDocumenterPluginManifest, IFeatureDefinition } from './IApiDocumenterPluginManifest';
+import type { IApiDocumenterPluginManifest, IFeatureDefinition } from './IApiDocumenterPluginManifest.ts';
 import {
   MarkdownDocumenterFeature,
   type MarkdownDocumenterFeatureContext
-} from './MarkdownDocumenterFeature';
-import { PluginFeatureInitialization } from './PluginFeature';
-import type { DocumenterConfig } from '../documenters/DocumenterConfig';
+} from './MarkdownDocumenterFeature.ts';
+import { PluginFeatureInitialization } from './PluginFeature.ts';
+import type { DocumenterConfig } from '../documenters/DocumenterConfig.ts';
 
 interface ILoadedPlugin {
   packageName: string;

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IJsonLfxDependency, IJsonLfxEntry, IJsonLfxGraph } from './IJsonLfxGraph';
-import { type ILfxGraphEntryOptions, LfxGraph, LfxGraphDependency, LfxGraphEntry } from './LfxGraph';
+import type { IJsonLfxDependency, IJsonLfxEntry, IJsonLfxGraph } from './IJsonLfxGraph.ts';
+import { type ILfxGraphEntryOptions, LfxGraph, LfxGraphDependency, LfxGraphEntry } from './LfxGraph.ts';
 
 export function serializeToJson(graph: LfxGraph): IJsonLfxGraph {
   const jsonLfxEntries: IJsonLfxEntry[] = [];

@@ -3,7 +3,7 @@
 
 import type { IRushPlugin, RushSession, RushConfiguration, ILogger } from '@rushstack/rush-sdk';
 
-import type { AzureEnvironmentName, LoginFlowType } from './AzureAuthenticationBase';
+import type { AzureEnvironmentName, LoginFlowType } from './AzureAuthenticationBase.ts';
 
 const PLUGIN_NAME: 'AzureInteractiveAuthPlugin' = 'AzureInteractiveAuthPlugin';
 
@@ -81,7 +81,7 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
     const { hooks } = rushSession;
 
     const handler: () => Promise<void> = async () => {
-      const { AzureStorageAuthentication } = await import('./AzureStorageAuthentication');
+      const { AzureStorageAuthentication } = await import('./AzureStorageAuthentication.ts');
       const {
         storageAccountName,
         storageContainerName,

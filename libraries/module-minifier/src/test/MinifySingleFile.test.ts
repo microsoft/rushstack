@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { minifySingleFileAsync } from '../MinifySingleFile';
+import { minifySingleFileAsync } from '../MinifySingleFile.ts';
 
 describe(minifySingleFileAsync.name, () => {
   it('uses consistent identifiers for webpack vars', async () => {

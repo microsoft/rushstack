@@ -4,12 +4,12 @@
 import { Async } from '@rushstack/node-core-library';
 import type { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { BaseHotlinkPackageAction } from './BaseHotlinkPackageAction';
-import type { HotlinkManager } from '../../utilities/HotlinkManager';
-import { BRIDGE_PACKAGE_ACTION_NAME, LINK_PACKAGE_ACTION_NAME } from '../../utilities/actionNameConstants';
-import { RushConstants } from '../../logic/RushConstants';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { BaseHotlinkPackageAction } from './BaseHotlinkPackageAction.ts';
+import type { HotlinkManager } from '../../utilities/HotlinkManager.ts';
+import { BRIDGE_PACKAGE_ACTION_NAME, LINK_PACKAGE_ACTION_NAME } from '../../utilities/actionNameConstants.ts';
+import { RushConstants } from '../../logic/RushConstants.ts';
 
 export class LinkPackageAction extends BaseHotlinkPackageAction {
   protected readonly _projectListParameter: CommandLineStringListParameter;

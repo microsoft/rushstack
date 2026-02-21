@@ -3,7 +3,7 @@
 
 import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rush-sdk';
 
-import type { AzureEnvironmentName, LoginFlowFailoverMap, LoginFlowType } from './AzureAuthenticationBase';
+import type { AzureEnvironmentName, LoginFlowFailoverMap, LoginFlowType } from './AzureAuthenticationBase.ts';
 
 const PLUGIN_NAME: string = 'AzureStorageBuildCachePlugin';
 
@@ -66,7 +66,7 @@ export class RushAzureStorageBuildCachePlugin implements IRushPlugin {
           azureBlobStorageConfiguration: IAzureBlobStorageConfigurationJson;
         };
         const { azureBlobStorageConfiguration } = buildCacheConfig as IBuildCache;
-        const { AzureStorageBuildCacheProvider } = await import('./AzureStorageBuildCacheProvider');
+        const { AzureStorageBuildCacheProvider } = await import('./AzureStorageBuildCacheProvider.ts');
         return new AzureStorageBuildCacheProvider({
           storageAccountName: azureBlobStorageConfiguration.storageAccountName,
           storageContainerName: azureBlobStorageConfiguration.storageContainerName,

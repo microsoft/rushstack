@@ -3,8 +3,8 @@
 
 import process from 'node:process';
 
-import { type ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
-import { TerminalWritable } from './TerminalWritable';
+import { type ITerminalChunk, TerminalChunkKind } from './ITerminalChunk.ts';
+import { TerminalWritable } from './TerminalWritable.ts';
 
 /**
  * A {@link TerminalWritable} subclass that writes its output directly to the process `stdout` and `stderr`

@@ -3,7 +3,7 @@
 
 import React from 'react';
 
-import { useAppSelector } from '../store/hooks';
+import { useAppSelector } from '../store/hooks/index.ts';
 
 export const ProjectView: React.FC = () => {
   const { projectName, projectVersion, dependencies, devDependencies } = useAppSelector(

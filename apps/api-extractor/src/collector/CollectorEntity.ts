@@ -5,10 +5,10 @@ import * as ts from 'typescript';
 
 import { Sort } from '@rushstack/node-core-library';
 
-import { AstSymbol } from '../analyzer/AstSymbol';
-import { Collector } from './Collector';
-import type { AstEntity } from '../analyzer/AstEntity';
-import { AstNamespaceExport } from '../analyzer/AstNamespaceExport';
+import { AstSymbol } from '../analyzer/AstSymbol.ts';
+import { Collector } from './Collector.ts';
+import type { AstEntity } from '../analyzer/AstEntity.ts';
+import { AstNamespaceExport } from '../analyzer/AstNamespaceExport.ts';
 
 /**
  * This is a data structure used by the Collector to track an AstEntity that may be emitted in the *.d.ts file.

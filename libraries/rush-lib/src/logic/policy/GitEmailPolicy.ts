@@ -4,11 +4,11 @@
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import { Utilities } from '../../utilities/Utilities';
-import { Git } from '../Git';
-import { RushConstants } from '../RushConstants';
-import type { IPolicyValidatorOptions } from './PolicyValidator';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import { Utilities } from '../../utilities/Utilities.ts';
+import { Git } from '../Git.ts';
+import { RushConstants } from '../RushConstants.ts';
+import type { IPolicyValidatorOptions } from './PolicyValidator.ts';
 
 export async function validateAsync(
   rushConfiguration: RushConfiguration,

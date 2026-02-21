@@ -14,16 +14,16 @@ import {
 } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import { LastInstallFlag } from '../../api/LastInstallFlag';
-import type { PackageManagerName } from '../../api/packageManager/PackageManager';
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import { Utilities } from '../../utilities/Utilities';
-import type { IConfigurationEnvironment } from '../base/BasePackageManagerOptionsConfiguration';
-import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
-import { merge } from '../../utilities/objectUtilities';
-import type { Subspace } from '../../api/Subspace';
-import { RushConstants } from '../RushConstants';
+import { LastInstallFlag } from '../../api/LastInstallFlag.ts';
+import type { PackageManagerName } from '../../api/packageManager/PackageManager.ts';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import type { RushGlobalFolder } from '../../api/RushGlobalFolder.ts';
+import { Utilities } from '../../utilities/Utilities.ts';
+import type { IConfigurationEnvironment } from '../base/BasePackageManagerOptionsConfiguration.ts';
+import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration.ts';
+import { merge } from '../../utilities/objectUtilities.ts';
+import type { Subspace } from '../../api/Subspace.ts';
+import { RushConstants } from '../RushConstants.ts';
 
 interface ICommonPackageJson extends IPackageJson {
   pnpm?: {

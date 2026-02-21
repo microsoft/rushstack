@@ -8,8 +8,8 @@ import Ajv, { type Options as AjvOptions, type ErrorObject, type ValidateFunctio
 import AjvDraft04 from 'ajv-draft-04';
 import addFormats from 'ajv-formats';
 
-import { JsonFile, type JsonObject } from './JsonFile';
-import { FileSystem } from './FileSystem';
+import { JsonFile, type JsonObject } from './JsonFile.ts';
+import { FileSystem } from './FileSystem.ts';
 
 /**
  * Pattern matching JSON Schema vendor extension keywords in the form `x-<vendor>-<keyword>`,

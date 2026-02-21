@@ -19,20 +19,20 @@ import {
 } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import { SymlinkAnalyzer, type ILinkInfo, type PathNode } from './SymlinkAnalyzer';
-import { AssetHandler } from './AssetHandler';
+import { SymlinkAnalyzer, type ILinkInfo, type PathNode } from './SymlinkAnalyzer.ts';
+import { AssetHandler } from './AssetHandler.ts';
 import {
   matchesWithStar,
   remapSourcePathForTargetFolder,
   remapPathForExtractorMetadata,
   makeBinLinksAsync
-} from './Utils';
+} from './Utils.ts';
 import {
   CREATE_LINKS_SCRIPT_FILENAME,
   EXTRACTOR_METADATA_FILENAME,
   SCRIPTS_FOLDER_PATH
-} from './PathConstants';
-import { MAX_CONCURRENCY } from './scripts/createLinks/utilities/constants';
+} from './PathConstants.ts';
+import { MAX_CONCURRENCY } from './scripts/createLinks/utilities/constants.ts';
 
 // (@types/npm-packlist is missing this API)
 declare module 'npm-packlist' {

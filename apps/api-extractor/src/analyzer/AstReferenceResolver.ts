@@ -5,14 +5,14 @@ import * as ts from 'typescript';
 
 import * as tsdoc from '@microsoft/tsdoc';
 
-import type { AstSymbolTable } from './AstSymbolTable';
-import type { AstEntity } from './AstEntity';
-import type { AstDeclaration } from './AstDeclaration';
-import type { WorkingPackage } from '../collector/WorkingPackage';
-import type { AstModule } from './AstModule';
-import type { Collector } from '../collector/Collector';
-import type { DeclarationMetadata } from '../collector/DeclarationMetadata';
-import { AstSymbol } from './AstSymbol';
+import type { AstSymbolTable } from './AstSymbolTable.ts';
+import type { AstEntity } from './AstEntity.ts';
+import type { AstDeclaration } from './AstDeclaration.ts';
+import type { WorkingPackage } from '../collector/WorkingPackage.ts';
+import type { AstModule } from './AstModule.ts';
+import type { Collector } from '../collector/Collector.ts';
+import type { DeclarationMetadata } from '../collector/DeclarationMetadata.ts';
+import { AstSymbol } from './AstSymbol.ts';
 
 /**
  * Used by `AstReferenceResolver` to report a failed resolution.

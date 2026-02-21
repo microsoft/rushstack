@@ -6,10 +6,10 @@ import type { loader } from 'webpack';
 import { Terminal } from '@rushstack/terminal';
 import { type ILocalizationFile, parseLocFile } from '@rushstack/localization-utilities';
 
-import type { LocalizationPlugin } from '../LocalizationPlugin';
-import { loaderFactory, type IBaseLoaderOptions } from './LoaderFactory';
-import { EntityMarker } from '../utilities/EntityMarker';
-import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
+import type { LocalizationPlugin } from '../LocalizationPlugin.ts';
+import { loaderFactory, type IBaseLoaderOptions } from './LoaderFactory.ts';
+import { EntityMarker } from '../utilities/EntityMarker.ts';
+import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider.ts';
 
 export interface ILocLoaderOptions extends IBaseLoaderOptions {
   pluginInstance: LocalizationPlugin;

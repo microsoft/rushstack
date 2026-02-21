@@ -12,8 +12,8 @@ import type * as TSemver from 'semver';
 
 import type { IPackageJson } from '@rushstack/node-core-library';
 
-import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
-import type { IPnpmfile, IPnpmfileShimSettings, IPnpmfileContext, IPnpmfileHooks } from './IPnpmfile';
+import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile.ts';
+import type { IPnpmfile, IPnpmfileShimSettings, IPnpmfileContext, IPnpmfileHooks } from './IPnpmfile.ts';
 
 let settings: IPnpmfileShimSettings | undefined;
 let allPreferredVersions: Map<string, string> | undefined;

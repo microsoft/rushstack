@@ -3,9 +3,9 @@
 
 import type * as Webpack from 'webpack';
 
-import { Constants } from './utilities/Constants';
-import type { ILocaleElementMap } from './interfaces';
-import type { LocalizationPlugin, IStringSerialNumberData as IStringData } from './LocalizationPlugin';
+import { Constants } from './utilities/Constants.ts';
+import type { ILocaleElementMap } from './interfaces.ts';
+import type { LocalizationPlugin, IStringSerialNumberData as IStringData } from './LocalizationPlugin.ts';
 
 interface IReconstructionElement {
   kind: 'static' | 'localized' | 'dynamic';

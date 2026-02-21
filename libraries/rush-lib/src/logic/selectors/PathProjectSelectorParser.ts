@@ -6,10 +6,10 @@ import * as nodePath from 'node:path';
 import { AlreadyReportedError, Path } from '@rushstack/node-core-library';
 import type { LookupByPath } from '@rushstack/lookup-by-path';
 
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser';
-import { RushConstants } from '../RushConstants';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import type { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser.ts';
+import { RushConstants } from '../RushConstants.ts';
 
 export class PathProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {
   private readonly _rushConfiguration: RushConfiguration;

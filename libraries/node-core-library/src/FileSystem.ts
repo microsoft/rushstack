@@ -7,8 +7,8 @@ import * as fsPromises from 'node:fs/promises';
 
 import * as fsx from 'fs-extra';
 
-import { Text, type NewlineKind, Encoding } from './Text';
-import { PosixModeBits } from './PosixModeBits';
+import { Text, type NewlineKind, Encoding } from './Text.ts';
+import { PosixModeBits } from './PosixModeBits.ts';
 
 /**
  * An alias for the Node.js `fs.Stats` object.

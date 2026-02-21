@@ -3,9 +3,9 @@
 
 import { AsyncParallelHook, AsyncSeriesHook, HookMap } from 'tapable';
 
-import type { ITelemetryData } from '../logic/Telemetry';
-import type { PhasedCommandHooks } from './PhasedCommandHooks';
-import type { Subspace } from '../api/Subspace';
+import type { ITelemetryData } from '../logic/Telemetry.ts';
+import type { PhasedCommandHooks } from './PhasedCommandHooks.ts';
+import type { Subspace } from '../api/Subspace.ts';
 
 /**
  * Information about the currently executing command provided to plugins.

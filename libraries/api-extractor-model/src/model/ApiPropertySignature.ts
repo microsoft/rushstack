@@ -8,8 +8,8 @@ import {
   type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 
-import { ApiItemKind } from '../items/ApiItem';
-import { ApiPropertyItem, type IApiPropertyItemOptions } from '../items/ApiPropertyItem';
+import { ApiItemKind } from '../items/ApiItem.ts';
+import { ApiPropertyItem, type IApiPropertyItemOptions } from '../items/ApiPropertyItem.ts';
 
 /**
  * Constructor options for {@link ApiPropertySignature}.

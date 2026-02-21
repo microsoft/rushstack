@@ -14,13 +14,13 @@ import {
   DocBlockTag
 } from '@microsoft/tsdoc';
 
-import { CustomDocNodes } from '../../nodes/CustomDocNodeKind';
-import { DocHeading } from '../../nodes/DocHeading';
-import { DocEmphasisSpan } from '../../nodes/DocEmphasisSpan';
-import { DocTable } from '../../nodes/DocTable';
-import { DocTableRow } from '../../nodes/DocTableRow';
-import { DocTableCell } from '../../nodes/DocTableCell';
-import { CustomMarkdownEmitter } from '../CustomMarkdownEmitter';
+import { CustomDocNodes } from '../../nodes/CustomDocNodeKind.ts';
+import { DocHeading } from '../../nodes/DocHeading.ts';
+import { DocEmphasisSpan } from '../../nodes/DocEmphasisSpan.ts';
+import { DocTable } from '../../nodes/DocTable.ts';
+import { DocTableRow } from '../../nodes/DocTableRow.ts';
+import { DocTableCell } from '../../nodes/DocTableCell.ts';
+import { CustomMarkdownEmitter } from '../CustomMarkdownEmitter.ts';
 import { ApiModel, type ApiItem } from '@microsoft/api-extractor-model';
 
 test('render Markdown from TSDoc', () => {

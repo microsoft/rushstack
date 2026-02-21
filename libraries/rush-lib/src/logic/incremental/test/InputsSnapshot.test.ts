@@ -3,12 +3,12 @@
 
 import { LookupByPath } from '@rushstack/lookup-by-path';
 
-import type { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
+import type { RushProjectConfiguration } from '../../../api/RushProjectConfiguration.ts';
 import {
   InputsSnapshot,
   type IInputsSnapshotParameters,
   type IRushConfigurationProjectForSnapshot
-} from '../InputsSnapshot';
+} from '../InputsSnapshot.ts';
 
 describe(InputsSnapshot.name, () => {
   function getTestConfig(): {

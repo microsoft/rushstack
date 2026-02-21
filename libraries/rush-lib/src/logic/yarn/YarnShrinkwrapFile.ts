@@ -8,13 +8,13 @@ import {
   Import
 } from '@rushstack/node-core-library';
 
-import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
-import { RushConstants } from '../RushConstants';
-import type { DependencySpecifier } from '../DependencySpecifier';
-import { PackageNameParsers } from '../../api/PackageNameParsers';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
-import type { Subspace } from '../../api/Subspace';
+import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile.ts';
+import { RushConstants } from '../RushConstants.ts';
+import type { DependencySpecifier } from '../DependencySpecifier.ts';
+import { PackageNameParsers } from '../../api/PackageNameParsers.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import type { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile.ts';
+import type { Subspace } from '../../api/Subspace.ts';
 
 /**
  * @yarnpkg/lockfile doesn't have types

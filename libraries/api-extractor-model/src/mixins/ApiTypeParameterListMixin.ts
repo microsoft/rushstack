@@ -5,11 +5,11 @@
 
 import { InternalError } from '@rushstack/node-core-library';
 
-import type { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
-import type { Excerpt, IExcerptTokenRange } from './Excerpt';
-import { TypeParameter } from '../model/TypeParameter';
-import { ApiDeclaredItem } from '../items/ApiDeclaredItem';
-import type { DeserializerContext } from '../model/DeserializerContext';
+import type { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem.ts';
+import type { Excerpt, IExcerptTokenRange } from './Excerpt.ts';
+import { TypeParameter } from '../model/TypeParameter.ts';
+import { ApiDeclaredItem } from '../items/ApiDeclaredItem.ts';
+import type { DeserializerContext } from '../model/DeserializerContext.ts';
 
 /**
  * Represents parameter information that is part of {@link IApiTypeParameterListMixinOptions}

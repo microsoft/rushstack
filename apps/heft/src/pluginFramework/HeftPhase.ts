@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { HeftTask, type IHeftTask } from './HeftTask';
-import type { InternalHeftSession } from './InternalHeftSession';
-import type { IHeftConfigurationJsonPhaseSpecifier } from '../utilities/CoreConfigFiles';
-import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
+import { HeftTask, type IHeftTask } from './HeftTask.ts';
+import type { InternalHeftSession } from './InternalHeftSession.ts';
+import type { IHeftConfigurationJsonPhaseSpecifier } from '../utilities/CoreConfigFiles.ts';
+import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin.ts';
 
 const RESERVED_PHASE_NAMES: Set<string> = new Set(['lifecycle']);
 

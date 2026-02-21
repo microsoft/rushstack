@@ -29,9 +29,9 @@ import { EnvironmentVariableNames } from '@microsoft/rush-lib';
 import type { ILaunchOptions } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
 
-import { RushCommandSelector } from './RushCommandSelector';
-import { RushVersionSelector } from './RushVersionSelector';
-import { MinimalRushConfiguration } from './MinimalRushConfiguration';
+import { RushCommandSelector } from './RushCommandSelector.ts';
+import { RushVersionSelector } from './RushVersionSelector.ts';
+import { MinimalRushConfiguration } from './MinimalRushConfiguration.ts';
 
 // Load the configuration
 const configuration: MinimalRushConfiguration | undefined =

@@ -3,9 +3,9 @@
 
 import * as path from 'node:path';
 
-import type { HeftConfiguration } from '../configuration/HeftConfiguration';
-import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
-import type { IHeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
+import type { HeftConfiguration } from '../configuration/HeftConfiguration.ts';
+import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin.ts';
+import type { IHeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession.ts';
 
 interface IRunScriptPluginOptions {
   scriptPath: string;

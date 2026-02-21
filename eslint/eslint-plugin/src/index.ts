@@ -3,17 +3,17 @@
 
 import type { TSESLint } from '@typescript-eslint/utils';
 
-import { hoistJestMock } from './hoist-jest-mock';
-import { noBackslashImportsRule } from './no-backslash-imports';
-import { noExternalLocalImportsRule } from './no-external-local-imports';
-import { noNewNullRule } from './no-new-null';
-import { noNullRule } from './no-null';
-import { noTransitiveDependencyImportsRule } from './no-transitive-dependency-imports';
-import { noUntypedUnderscoreRule } from './no-untyped-underscore';
-import { normalizedImportsRule } from './normalized-imports';
-import { typedefVar } from './typedef-var';
-import { importRequiresChunkNameRule } from './import-requires-chunk-name';
-import { pairReactDomRenderUnmountRule } from './pair-react-dom-render-unmount';
+import { hoistJestMock } from './hoist-jest-mock.ts';
+import { noBackslashImportsRule } from './no-backslash-imports.ts';
+import { noExternalLocalImportsRule } from './no-external-local-imports.ts';
+import { noNewNullRule } from './no-new-null.ts';
+import { noNullRule } from './no-null.ts';
+import { noTransitiveDependencyImportsRule } from './no-transitive-dependency-imports.ts';
+import { noUntypedUnderscoreRule } from './no-untyped-underscore.ts';
+import { normalizedImportsRule } from './normalized-imports.ts';
+import { typedefVar } from './typedef-var.ts';
+import { importRequiresChunkNameRule } from './import-requires-chunk-name.ts';
+import { pairReactDomRenderUnmountRule } from './pair-react-dom-render-unmount.ts';
 
 interface IPlugin {
   rules: { [ruleName: string]: TSESLint.RuleModule<string, unknown[]> };

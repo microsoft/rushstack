@@ -1,22 +1,22 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration.ts';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
-} from '../../pluginFramework/PhasedCommandHooks';
-import { RushConstants } from '../RushConstants';
-import { NullOperationRunner } from './NullOperationRunner';
-import { Operation } from './Operation';
-import { OperationStatus } from './OperationStatus';
+} from '../../pluginFramework/PhasedCommandHooks.ts';
+import { RushConstants } from '../RushConstants.ts';
+import { NullOperationRunner } from './NullOperationRunner.ts';
+import { Operation } from './Operation.ts';
+import { OperationStatus } from './OperationStatus.ts';
 import {
   getCustomParameterValuesByOperation,
   type ICustomParameterValuesForOperation,
   getDisplayName,
   initializeShellOperationRunner
-} from './ShellOperationRunnerPlugin';
+} from './ShellOperationRunnerPlugin.ts';
 
 export const PLUGIN_NAME: 'ShardedPhasedOperationPlugin' = 'ShardedPhasedOperationPlugin';
 

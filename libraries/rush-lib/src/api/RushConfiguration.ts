@@ -20,32 +20,32 @@ import {
 } from '@rushstack/node-core-library';
 import { LookupByPath } from '@rushstack/lookup-by-path';
 
-import { Rush } from './Rush';
-import { RushConfigurationProject, type IRushConfigurationProjectJson } from './RushConfigurationProject';
-import { RushConstants } from '../logic/RushConstants';
-import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
-import { EventHooks } from './EventHooks';
-import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
-import { EnvironmentConfiguration } from './EnvironmentConfiguration';
-import type { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
-import { Utilities } from '../utilities/Utilities';
-import type { PackageManagerName, PackageManager } from './packageManager/PackageManager';
-import { NpmPackageManager } from './packageManager/NpmPackageManager';
-import { YarnPackageManager } from './packageManager/YarnPackageManager';
-import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
-import { ExperimentsConfiguration } from './ExperimentsConfiguration';
-import { PackageNameParsers } from './PackageNameParsers';
-import type { RepoStateFile } from '../logic/RepoStateFile';
-import { RushPluginsConfiguration } from './RushPluginsConfiguration';
-import { type IPnpmOptionsJson, PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
-import { type INpmOptionsJson, NpmOptionsConfiguration } from '../logic/npm/NpmOptionsConfiguration';
-import { type IYarnOptionsJson, YarnOptionsConfiguration } from '../logic/yarn/YarnOptionsConfiguration';
+import { Rush } from './Rush.ts';
+import { RushConfigurationProject, type IRushConfigurationProjectJson } from './RushConfigurationProject.ts';
+import { RushConstants } from '../logic/RushConstants.ts';
+import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy.ts';
+import { EventHooks } from './EventHooks.ts';
+import { VersionPolicyConfiguration } from './VersionPolicyConfiguration.ts';
+import { EnvironmentConfiguration } from './EnvironmentConfiguration.ts';
+import type { CommonVersionsConfiguration } from './CommonVersionsConfiguration.ts';
+import { Utilities } from '../utilities/Utilities.ts';
+import type { PackageManagerName, PackageManager } from './packageManager/PackageManager.ts';
+import { NpmPackageManager } from './packageManager/NpmPackageManager.ts';
+import { YarnPackageManager } from './packageManager/YarnPackageManager.ts';
+import { PnpmPackageManager } from './packageManager/PnpmPackageManager.ts';
+import { ExperimentsConfiguration } from './ExperimentsConfiguration.ts';
+import { PackageNameParsers } from './PackageNameParsers.ts';
+import type { RepoStateFile } from '../logic/RepoStateFile.ts';
+import { RushPluginsConfiguration } from './RushPluginsConfiguration.ts';
+import { type IPnpmOptionsJson, PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration.ts';
+import { type INpmOptionsJson, NpmOptionsConfiguration } from '../logic/npm/NpmOptionsConfiguration.ts';
+import { type IYarnOptionsJson, YarnOptionsConfiguration } from '../logic/yarn/YarnOptionsConfiguration.ts';
 import schemaJson from '../schemas/rush.schema.json';
-import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer';
-import type { PackageManagerOptionsConfigurationBase } from '../logic/base/BasePackageManagerOptionsConfiguration';
-import { CustomTipsConfiguration } from './CustomTipsConfiguration';
-import { SubspacesConfiguration } from './SubspacesConfiguration';
-import { Subspace } from './Subspace';
+import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer.ts';
+import type { PackageManagerOptionsConfigurationBase } from '../logic/base/BasePackageManagerOptionsConfiguration.ts';
+import { CustomTipsConfiguration } from './CustomTipsConfiguration.ts';
+import { SubspacesConfiguration } from './SubspacesConfiguration.ts';
+import { Subspace } from './Subspace.ts';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'main';
@@ -1470,7 +1470,7 @@ export class RushConfiguration {
   public getImplicitlyPreferredVersions(subspace?: Subspace, variant?: string): Map<string, string> {
     // TODO: During the next major release of Rush, replace this `require` call with a dynamic import, and
     // change this function to be async.
-    const DependencyAnalyzerModule: typeof DependencyAnalyzerModuleType = require('../logic/DependencyAnalyzer');
+    const DependencyAnalyzerModule: typeof DependencyAnalyzerModuleType = require('../logic/DependencyAnalyzer.js');
     const dependencyAnalyzer: DependencyAnalyzerModuleType.DependencyAnalyzer =
       DependencyAnalyzerModule.DependencyAnalyzer.forRushConfiguration(this);
     const dependencyAnalysis: DependencyAnalyzerModuleType.IDependencyAnalysis =

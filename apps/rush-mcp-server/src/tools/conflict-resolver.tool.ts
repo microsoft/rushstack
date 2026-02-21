@@ -6,8 +6,8 @@ import { z } from 'zod';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 import type { IExecutableSpawnSyncOptions } from '@rushstack/node-core-library';
 
-import { CommandRunner } from '../utilities/command-runner';
-import { getRushConfiguration } from '../utilities/common';
+import { CommandRunner } from '../utilities/command-runner.ts';
+import { getRushConfiguration } from '../utilities/common.ts';
 import { BaseTool, type CallToolResult } from './base.tool';
 
 export class RushConflictResolverTool extends BaseTool {

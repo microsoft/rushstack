@@ -3,8 +3,8 @@
 
 import type * as ts from 'typescript';
 
-import { Path } from './Path';
-import type { PackletAnalyzer } from './PackletAnalyzer';
+import { Path } from './Path.ts';
+import type { PackletAnalyzer } from './PackletAnalyzer.ts';
 
 enum RefFileKind {
   Import,

@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { BaseAddAndRemoveAction, PACKAGE_PARAMETER_NAME } from './BaseAddAndRemoveAction';
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { BaseAddAndRemoveAction, PACKAGE_PARAMETER_NAME } from './BaseAddAndRemoveAction.ts';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
 import type {
   IPackageForRushRemove,
   IPackageJsonUpdaterRushRemoveOptions
-} from '../../logic/PackageJsonUpdaterTypes';
-import { getVariantAsync } from '../../api/Variants';
+} from '../../logic/PackageJsonUpdaterTypes.ts';
+import { getVariantAsync } from '../../api/Variants.ts';
 
 const REMOVE_ACTION_NAME: 'remove' = 'remove';
 

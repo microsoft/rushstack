@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { Autoinstaller } from '../../logic/Autoinstaller';
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { BaseAutoinstallerAction } from './BaseAutoinstallerAction';
+import type { Autoinstaller } from '../../logic/Autoinstaller.ts';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { BaseAutoinstallerAction } from './BaseAutoinstallerAction.ts';
 
 export class InstallAutoinstallerAction extends BaseAutoinstallerAction {
   public constructor(parser: RushCommandLineParser) {

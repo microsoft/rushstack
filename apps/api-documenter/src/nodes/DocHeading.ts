@@ -3,7 +3,7 @@
 
 import { type IDocNodeParameters, DocNode } from '@microsoft/tsdoc';
 
-import { CustomDocNodeKind } from './CustomDocNodeKind';
+import { CustomDocNodeKind } from './CustomDocNodeKind.ts';
 
 /**
  * Constructor parameters for {@link DocHeading}.

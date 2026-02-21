@@ -199,7 +199,7 @@
             },
             {
               "kind": "Content",
-              "text": "import(\"./other\")."
+              "text": "import(\"./other.ts\")."
             },
             {
               "kind": "Reference",

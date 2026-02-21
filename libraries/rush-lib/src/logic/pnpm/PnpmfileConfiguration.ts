@@ -7,14 +7,14 @@ import * as semver from 'semver';
 
 import { FileSystem, Import, type IPackageJson, JsonFile, MapExtensions } from '@rushstack/node-core-library';
 
-import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
-import type { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
-import * as pnpmfile from './PnpmfileShim';
-import { pnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants';
-import type { IPnpmfileContext, IPnpmfileShimSettings } from './IPnpmfile';
-import type { Subspace } from '../../api/Subspace';
+import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager.ts';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration.ts';
+import type { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration.ts';
+import * as pnpmfile from './PnpmfileShim.ts';
+import { pnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants.ts';
+import type { IPnpmfileContext, IPnpmfileShimSettings } from './IPnpmfile.ts';
+import type { Subspace } from '../../api/Subspace.ts';
 
 /**
  * Loads PNPM's pnpmfile.js configuration, and invokes it to preprocess package.json files,

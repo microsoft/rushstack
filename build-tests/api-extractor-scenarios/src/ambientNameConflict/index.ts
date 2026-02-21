@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Promise as MyPromise } from './localFile';
+import { Promise as MyPromise } from './localFile.ts';
 
 /**
  * @public

@@ -6,10 +6,10 @@ import yaml from 'js-yaml';
 import { FileSystem, Text, Async } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import type { RushConfiguration } from '../api/RushConfiguration';
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { Stopwatch } from '../utilities/Stopwatch';
-import { RushConstants } from './RushConstants';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import { Stopwatch } from '../utilities/Stopwatch.ts';
+import { RushConstants } from './RushConstants.ts';
 
 /**
  * Project property configuration

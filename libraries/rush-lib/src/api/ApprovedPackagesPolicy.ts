@@ -3,13 +3,13 @@
 
 import * as path from 'node:path';
 
-import { ApprovedPackagesConfiguration } from './ApprovedPackagesConfiguration';
-import { RushConstants } from '../logic/RushConstants';
+import { ApprovedPackagesConfiguration } from './ApprovedPackagesConfiguration.ts';
+import { RushConstants } from '../logic/RushConstants.ts';
 import type {
   RushConfiguration,
   IRushConfigurationJson,
   IApprovedPackagesPolicyJson
-} from './RushConfiguration';
+} from './RushConfiguration.ts';
 
 /**
  * This is a helper object for RushConfiguration.

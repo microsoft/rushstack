@@ -14,5 +14,5 @@ export type {
   IProblemMatcherJson,
   IProblemPattern,
   IProblem
-} from './ProblemMatcher';
-export { parseProblemMatchersJson } from './ProblemMatcher';
+} from './ProblemMatcher.ts';
+export { parseProblemMatchersJson } from './ProblemMatcher.ts';

@@ -7,8 +7,8 @@ export {
   CHUNK_MODULES_TOKEN,
   STAGE_BEFORE,
   STAGE_AFTER
-} from './Constants';
-export { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset';
+} from './Constants.ts';
+export { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset.ts';
 export type {
   IRenderedModulePosition,
   IAssetInfo,
@@ -25,10 +25,10 @@ export type {
   IPostProcessFragmentContext,
   IModuleMinifierPluginHooks,
   _IAcornComment
-} from './ModuleMinifierPlugin.types';
-export { ModuleMinifierPlugin } from './ModuleMinifierPlugin';
-export { PortableMinifierModuleIdsPlugin } from './PortableMinifierIdsPlugin';
-export { rehydrateAsset } from './RehydrateAsset';
+} from './ModuleMinifierPlugin.types.ts';
+export { ModuleMinifierPlugin } from './ModuleMinifierPlugin.ts';
+export { PortableMinifierModuleIdsPlugin } from './PortableMinifierIdsPlugin.ts';
+export { rehydrateAsset } from './RehydrateAsset.ts';
 export type {
   ILocalMinifierOptions,
   IMinifierConnection,

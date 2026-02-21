@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { SplitterTransform } from '../SplitterTransform';
-import { MockWritable } from '../MockWritable';
-import { TerminalChunkKind, type ITerminalChunk } from '../ITerminalChunk';
+import { SplitterTransform } from '../SplitterTransform.ts';
+import { MockWritable } from '../MockWritable.ts';
+import { TerminalChunkKind, type ITerminalChunk } from '../ITerminalChunk.ts';
 
 // Helper to create chunks succinctly
 function c(text: string, kind: TerminalChunkKind = TerminalChunkKind.Stdout): ITerminalChunk {

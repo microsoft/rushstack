@@ -6,9 +6,9 @@ import { FileSystem, JsonFile, Path, Text } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { RigConfig } from '@rushstack/rig-package';
 
-import { ProjectConfigurationFile } from '../ProjectConfigurationFile';
-import { PathResolutionMethod, InheritanceType, ConfigurationFileBase } from '../ConfigurationFileBase';
-import { NonProjectConfigurationFile } from '../NonProjectConfigurationFile';
+import { ProjectConfigurationFile } from '../ProjectConfigurationFile.ts';
+import { PathResolutionMethod, InheritanceType, ConfigurationFileBase } from '../ConfigurationFileBase.ts';
+import { NonProjectConfigurationFile } from '../NonProjectConfigurationFile.ts';
 
 describe('ConfigurationFile', () => {
   const projectRoot: string = nodeJsPath.resolve(__dirname, '../..');

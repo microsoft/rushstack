@@ -1,21 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IPhase } from '../../api/CommandLineConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { RushConstants } from '../RushConstants';
-import { NullOperationRunner } from './NullOperationRunner';
-import { convertSlashesForWindows, ShellOperationRunner } from './ShellOperationRunner';
-import { OperationStatus } from './OperationStatus';
+import type { IPhase } from '../../api/CommandLineConfiguration.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { RushConstants } from '../RushConstants.ts';
+import { NullOperationRunner } from './NullOperationRunner.ts';
+import { convertSlashesForWindows, ShellOperationRunner } from './ShellOperationRunner.ts';
+import { OperationStatus } from './OperationStatus.ts';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
-} from '../../pluginFramework/PhasedCommandHooks';
-import type { Operation } from './Operation';
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import type { IOperationRunner } from './IOperationRunner';
-import { IS_WINDOWS } from '../../utilities/executionUtilities';
+} from '../../pluginFramework/PhasedCommandHooks.ts';
+import type { Operation } from './Operation.ts';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import type { IOperationRunner } from './IOperationRunner.ts';
+import { IS_WINDOWS } from '../../utilities/executionUtilities.ts';
 
 export const PLUGIN_NAME: 'ShellOperationRunnerPlugin' = 'ShellOperationRunnerPlugin';
 

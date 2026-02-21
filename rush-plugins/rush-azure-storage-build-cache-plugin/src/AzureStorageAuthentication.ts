@@ -16,7 +16,7 @@ import {
   AzureAuthenticationBase,
   type ICredentialResult,
   type IAzureAuthenticationBaseOptions
-} from './AzureAuthenticationBase';
+} from './AzureAuthenticationBase.ts';
 
 /**
  * @public

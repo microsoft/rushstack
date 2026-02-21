@@ -15,9 +15,9 @@ import {
   type IPackageJsonExports
 } from '@rushstack/node-core-library';
 
-import { Extractor } from '../api/Extractor';
-import type { MessageRouter } from '../collector/MessageRouter';
-import { ConsoleMessageId } from '../api/ConsoleMessageId';
+import { Extractor } from '../api/Extractor.ts';
+import type { MessageRouter } from '../collector/MessageRouter.ts';
+import { ConsoleMessageId } from '../api/ConsoleMessageId.ts';
 
 /**
  * Represents analyzed information for a package.json file.

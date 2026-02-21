@@ -3,10 +3,10 @@
 
 import { InternalError } from '@rushstack/node-core-library';
 
-import type { IOperationState } from './IOperationRunner';
-import type { Operation } from './Operation';
-import { OperationStatus } from './OperationStatus';
-import { Stopwatch } from './Stopwatch';
+import type { IOperationState } from './IOperationRunner.ts';
+import type { Operation } from './Operation.ts';
+import { OperationStatus } from './OperationStatus.ts';
+import { Stopwatch } from './Stopwatch.ts';
 
 /**
  * Meta-entity that tracks information about a group of related operations.

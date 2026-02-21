@@ -13,7 +13,7 @@ import type {
 } from '@rushstack/heft';
 import type { IWaitForExitResult } from '@rushstack/node-core-library';
 
-import { executeAndWaitAsync, vsceScriptPath } from './util';
+import { executeAndWaitAsync, vsceScriptPath } from './util.ts';
 
 interface IVSCodeExtensionPublishPluginOptions {}
 

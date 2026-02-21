@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 import { FileSystem } from '@rushstack/node-core-library';
-import { PnpmWorkspaceFile } from '../PnpmWorkspaceFile';
+import { PnpmWorkspaceFile } from '../PnpmWorkspaceFile.ts';
 
 describe(PnpmWorkspaceFile.name, () => {
   const tempDir: string = path.join(__dirname, 'temp');

@@ -12,34 +12,34 @@ import type {
   ICommandLineStringDefinition,
   ICommandLineStringListDefinition,
   ICommandLineRemainderDefinition
-} from '../parameters/CommandLineDefinition';
-import type { ICommandLineParserOptions } from './CommandLineParser';
+} from '../parameters/CommandLineDefinition.ts';
+import type { ICommandLineParserOptions } from './CommandLineParser.ts';
 import {
   type CommandLineParameterBase,
   type CommandLineParameterWithArgument,
   CommandLineParameterKind,
   type CommandLineParameter
-} from '../parameters/BaseClasses';
+} from '../parameters/BaseClasses.ts';
 import {
   CommandLineChoiceParameter,
   type IRequiredCommandLineChoiceParameter
-} from '../parameters/CommandLineChoiceParameter';
-import { CommandLineChoiceListParameter } from '../parameters/CommandLineChoiceListParameter';
+} from '../parameters/CommandLineChoiceParameter.ts';
+import { CommandLineChoiceListParameter } from '../parameters/CommandLineChoiceListParameter.ts';
 import {
   CommandLineIntegerParameter,
   type IRequiredCommandLineIntegerParameter
-} from '../parameters/CommandLineIntegerParameter';
-import { CommandLineIntegerListParameter } from '../parameters/CommandLineIntegerListParameter';
-import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
+} from '../parameters/CommandLineIntegerParameter.ts';
+import { CommandLineIntegerListParameter } from '../parameters/CommandLineIntegerListParameter.ts';
+import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter.ts';
 import {
   CommandLineStringParameter,
   type IRequiredCommandLineStringParameter
-} from '../parameters/CommandLineStringParameter';
-import { CommandLineStringListParameter } from '../parameters/CommandLineStringListParameter';
-import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
-import { SCOPING_PARAMETER_GROUP } from '../Constants';
-import { CommandLineParserExitError } from './CommandLineParserExitError';
-import { escapeSprintf } from '../escapeSprintf';
+} from '../parameters/CommandLineStringParameter.ts';
+import { CommandLineStringListParameter } from '../parameters/CommandLineStringListParameter.ts';
+import { CommandLineRemainder } from '../parameters/CommandLineRemainder.ts';
+import { SCOPING_PARAMETER_GROUP } from '../Constants.ts';
+import { CommandLineParserExitError } from './CommandLineParserExitError.ts';
+import { escapeSprintf } from '../escapeSprintf.ts';
 
 /**
  * The result containing the parsed parameter long name and scope. Returned when calling

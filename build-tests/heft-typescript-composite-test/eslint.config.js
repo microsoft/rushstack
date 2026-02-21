@@ -12,6 +12,11 @@ module.exports = [
         tsconfigRootDir: __dirname,
         project: './tsconfig-eslint.json'
       }
+    },
+    rules: {
+      // This project uses TypeScript composite mode with moduleResolution: "node",
+      // which doesn't support rewriteRelativeImportExtensions or allowImportingTsExtensions
+      'import/extensions': 'off'
     }
   }
 ];

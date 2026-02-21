@@ -4,10 +4,10 @@
 import type { ITerminal, ITerminalProvider } from '@rushstack/terminal';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 
-import type { OperationStatus } from './OperationStatus';
-import type { OperationMetadataManager } from './OperationMetadataManager';
-import type { IStopwatchResult } from '../../utilities/Stopwatch';
-import type { IEnvironment } from '../../utilities/Utilities';
+import type { OperationStatus } from './OperationStatus.ts';
+import type { OperationMetadataManager } from './OperationMetadataManager.ts';
+import type { IStopwatchResult } from '../../utilities/Stopwatch.ts';
+import type { IEnvironment } from '../../utilities/Utilities.ts';
 
 /**
  * Information passed to the executing `IOperationRunner`

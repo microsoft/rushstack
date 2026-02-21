@@ -26,21 +26,21 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
   };
 });
 
-import './mockRushCommandLineParser';
+import './mockRushCommandLineParser.ts';
 
 import type { SpawnOptions } from 'node:child_process';
 import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
-import { Autoinstaller } from '../../logic/Autoinstaller';
-import type { ITelemetryData } from '../../logic/Telemetry';
+import { Autoinstaller } from '../../logic/Autoinstaller.ts';
+import type { ITelemetryData } from '../../logic/Telemetry.ts';
 import {
   getCommandLineParserInstanceAsync,
   type SpawnMockArgs,
   type SpawnMockCall,
   isolateEnvironmentConfigurationForTests,
   type IEnvironmentConfigIsolation
-} from './TestUtils';
-import { IS_WINDOWS } from '../../utilities/executionUtilities';
+} from './TestUtils.ts';
+import { IS_WINDOWS } from '../../utilities/executionUtilities.ts';
 
 // Ordinals into the `mock.calls` array referencing each of the arguments to `spawn`. Note that
 // the exact structure of these arguments differs between Windows and non-Windows platforms, so

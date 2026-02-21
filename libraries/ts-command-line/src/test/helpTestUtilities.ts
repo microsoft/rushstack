@@ -3,7 +3,7 @@
 
 import { AnsiEscape } from '@rushstack/terminal';
 
-import type { CommandLineParser } from '../providers/CommandLineParser';
+import type { CommandLineParser } from '../providers/CommandLineParser.ts';
 
 export function ensureHelpTextMatchesSnapshot(parser: CommandLineParser): void {
   const globalHelpText: string = AnsiEscape.formatForTests(parser.renderHelpText());

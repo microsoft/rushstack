@@ -13,7 +13,7 @@ import {
   ModuleResolver,
   isModuleResolutionError,
   ESLINT_MAJOR_VERSION
-} from './_patch-base';
+} from './_patch-base.ts';
 
 // error: "The argument 'filename' must be a file URL object, file URL string, or absolute path string. Received ''"
 const isInvalidImporterPath: (ex: unknown) => boolean = (ex) =>

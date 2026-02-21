@@ -3,7 +3,7 @@
 
 import * as parser from '@typescript-eslint/parser';
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import { noUnsafeRegExp } from '../no-unsafe-regexp';
+import { noUnsafeRegExp } from '../no-unsafe-regexp.ts';
 
 const ruleTester = new RuleTester({ languageOptions: { parser } });
 ruleTester.run('no-unsafe-regexp', noUnsafeRegExp, {

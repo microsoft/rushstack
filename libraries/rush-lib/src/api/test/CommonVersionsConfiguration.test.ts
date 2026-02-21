@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommonVersionsConfiguration } from '../CommonVersionsConfiguration';
-import type { RushConfiguration } from '../RushConfiguration';
+import { CommonVersionsConfiguration } from '../CommonVersionsConfiguration.ts';
+import type { RushConfiguration } from '../RushConfiguration.ts';
 
 describe(CommonVersionsConfiguration.name, () => {
   it('can load the file', () => {

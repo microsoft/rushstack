@@ -3,8 +3,8 @@
 
 import { Colorize } from '@rushstack/terminal';
 
-import { RushConstants } from '../logic/RushConstants';
-import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
+import { RushConstants } from '../logic/RushConstants.ts';
+import { NodeJsCompatibility } from '../logic/NodeJsCompatibility.ts';
 
 export class RushStartupBanner {
   public static logBanner(rushVersion: string, isManaged: boolean): void {

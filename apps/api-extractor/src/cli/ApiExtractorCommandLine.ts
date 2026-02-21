@@ -7,8 +7,8 @@ import { CommandLineParser, type CommandLineFlagParameter } from '@rushstack/ts-
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import { RunAction } from './RunAction';
-import { InitAction } from './InitAction';
+import { RunAction } from './RunAction.ts';
+import { InitAction } from './InitAction.ts';
 
 export class ApiExtractorCommandLine extends CommandLineParser {
   private readonly _debugParameter: CommandLineFlagParameter;

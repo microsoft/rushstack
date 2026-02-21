@@ -3,7 +3,7 @@
 
 import * as fs from 'node:fs';
 
-import { Path } from './Path';
+import { Path } from './Path.ts';
 
 export type InputFileMessageIds =
   | 'file-in-packets-folder'

@@ -62,7 +62,7 @@ const { Git: OriginalGit } = jest.requireActual('../Git');
 
 // Mock function for getBlobContentAsync to be customized in each test
 const mockGetBlobContentAsync: jest.MockedFunction<
-  typeof import('../Git').Git.prototype.getBlobContentAsync
+  typeof import('../Git.ts').Git.prototype.getBlobContentAsync
 > = jest.fn();
 
 /** Mock Git to test `getChangedProjectsAsync` */
@@ -117,18 +117,18 @@ import { resolve } from 'node:path';
 import type { IDetailedRepoState, IFileDiffStatus } from '@rushstack/package-deps-hash';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import { ProjectChangeAnalyzer, isPackageJsonVersionOnlyChange } from '../ProjectChangeAnalyzer';
-import { RushConfiguration } from '../../api/RushConfiguration';
+import { ProjectChangeAnalyzer, isPackageJsonVersionOnlyChange } from '../ProjectChangeAnalyzer.ts';
+import { RushConfiguration } from '../../api/RushConfiguration.ts';
 import type {
   IInputsSnapshot,
   GetInputsSnapshotAsyncFn,
   IInputsSnapshotParameters
-} from '../incremental/InputsSnapshot';
+} from '../incremental/InputsSnapshot.ts';
 import type {
   ILoadFromFileOptions,
   ILoadFromStringOptions,
   PnpmShrinkwrapFile
-} from '../pnpm/PnpmShrinkwrapFile';
+} from '../pnpm/PnpmShrinkwrapFile.ts';
 
 describe(ProjectChangeAnalyzer.name, () => {
   beforeEach(() => {

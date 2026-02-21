@@ -3,15 +3,15 @@
 
 import { Async } from '@rushstack/node-core-library';
 
-import type { Operation } from './Operation';
+import type { Operation } from './Operation.ts';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
-} from '../../pluginFramework/PhasedCommandHooks';
-import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
-import type { OperationExecutionRecord } from './OperationExecutionRecord';
+} from '../../pluginFramework/PhasedCommandHooks.ts';
+import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration.ts';
+import type { IOperationExecutionResult } from './IOperationExecutionResult.ts';
+import type { OperationExecutionRecord } from './OperationExecutionRecord.ts';
 
 const PLUGIN_NAME: 'WeightedOperationPlugin' = 'WeightedOperationPlugin';
 

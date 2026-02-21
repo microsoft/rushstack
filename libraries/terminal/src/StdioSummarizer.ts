@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { type ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
-import { type ITerminalWritableOptions, TerminalWritable } from './TerminalWritable';
+import { type ITerminalChunk, TerminalChunkKind } from './ITerminalChunk.ts';
+import { type ITerminalWritableOptions, TerminalWritable } from './TerminalWritable.ts';
 
 /**
  * Constructor options for {@link StdioSummarizer}.

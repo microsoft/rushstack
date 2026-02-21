@@ -8,20 +8,23 @@ import {
   type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 
-import { ApiItemKind } from '../items/ApiItem';
-import { ApiProtectedMixin, type IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin';
-import { ApiStaticMixin, type IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
-import { type IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
-import { type IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
-import { type IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
-import { ApiReturnTypeMixin, type IApiReturnTypeMixinOptions } from '../mixins/ApiReturnTypeMixin';
-import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { type IApiAbstractMixinOptions, ApiAbstractMixin } from '../mixins/ApiAbstractMixin';
+import { ApiItemKind } from '../items/ApiItem.ts';
+import { ApiProtectedMixin, type IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin.ts';
+import { ApiStaticMixin, type IApiStaticMixinOptions } from '../mixins/ApiStaticMixin.ts';
+import { type IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem.ts';
+import {
+  type IApiParameterListMixinOptions,
+  ApiParameterListMixin
+} from '../mixins/ApiParameterListMixin.ts';
+import { type IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin.ts';
+import { ApiReturnTypeMixin, type IApiReturnTypeMixinOptions } from '../mixins/ApiReturnTypeMixin.ts';
+import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin.ts';
+import { type IApiAbstractMixinOptions, ApiAbstractMixin } from '../mixins/ApiAbstractMixin.ts';
 import {
   ApiTypeParameterListMixin,
   type IApiTypeParameterListMixinOptions
-} from '../mixins/ApiTypeParameterListMixin';
-import { ApiOptionalMixin, type IApiOptionalMixinOptions } from '../mixins/ApiOptionalMixin';
+} from '../mixins/ApiTypeParameterListMixin.ts';
+import { ApiOptionalMixin, type IApiOptionalMixinOptions } from '../mixins/ApiOptionalMixin.ts';
 
 /**
  * Constructor options for {@link ApiMethod}.

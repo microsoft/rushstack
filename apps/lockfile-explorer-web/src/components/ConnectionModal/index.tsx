@@ -7,8 +7,8 @@ import { Button, Text } from '@rushstack/rush-themed-ui';
 
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
-import { checkAliveAsync } from '../../helpers/lfxApiClient';
-import type { ReactNull } from '../../types/ReactNull';
+import { checkAliveAsync } from '../../helpers/lfxApiClient.ts';
+import type { ReactNull } from '../../types/ReactNull.ts';
 
 export const ConnectionModal = (): React.ReactElement | ReactNull => {
   const [isAlive, setIsAlive] = useState(true);

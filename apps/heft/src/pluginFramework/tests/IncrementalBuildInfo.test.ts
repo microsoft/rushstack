@@ -10,7 +10,7 @@ import {
   deserializeBuildInfo,
   type IIncrementalBuildInfo,
   type ISerializedIncrementalBuildInfo
-} from '../IncrementalBuildInfo';
+} from '../IncrementalBuildInfo.ts';
 
 const posixBuildInfo: IIncrementalBuildInfo = {
   configHash: 'foobar',

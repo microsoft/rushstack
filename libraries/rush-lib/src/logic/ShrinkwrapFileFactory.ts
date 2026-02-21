@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { PackageManagerName } from '../api/packageManager/PackageManager';
-import type { BaseShrinkwrapFile } from './base/BaseShrinkwrapFile';
-import { NpmShrinkwrapFile } from './npm/NpmShrinkwrapFile';
-import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
-import { YarnShrinkwrapFile } from './yarn/YarnShrinkwrapFile';
+import type { PackageManagerName } from '../api/packageManager/PackageManager.ts';
+import type { BaseShrinkwrapFile } from './base/BaseShrinkwrapFile.ts';
+import { NpmShrinkwrapFile } from './npm/NpmShrinkwrapFile.ts';
+import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile.ts';
+import { YarnShrinkwrapFile } from './yarn/YarnShrinkwrapFile.ts';
 
 export interface IShrinkwrapFileFactoryOptions {
   packageManager: PackageManagerName;

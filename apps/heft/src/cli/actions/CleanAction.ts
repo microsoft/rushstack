@@ -9,16 +9,16 @@ import {
 import type { ITerminal } from '@rushstack/terminal';
 import { OperationStatus } from '@rushstack/operation-graph';
 
-import type { IHeftAction, IHeftActionOptions } from './IHeftAction';
-import type { HeftPhase } from '../../pluginFramework/HeftPhase';
-import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
-import type { MetricsCollector } from '../../metrics/MetricsCollector';
-import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
-import type { HeftTaskSession } from '../../pluginFramework/HeftTaskSession';
-import { Constants } from '../../utilities/Constants';
-import { definePhaseScopingParameters, expandPhases } from './RunAction';
-import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
-import { ensureCliAbortSignal, initializeHeft, runWithLoggingAsync } from '../HeftActionRunner';
+import type { IHeftAction, IHeftActionOptions } from './IHeftAction.ts';
+import type { HeftPhase } from '../../pluginFramework/HeftPhase.ts';
+import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession.ts';
+import type { MetricsCollector } from '../../metrics/MetricsCollector.ts';
+import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession.ts';
+import type { HeftTaskSession } from '../../pluginFramework/HeftTaskSession.ts';
+import { Constants } from '../../utilities/Constants.ts';
+import { definePhaseScopingParameters, expandPhases } from './RunAction.ts';
+import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFilesPlugin.ts';
+import { ensureCliAbortSignal, initializeHeft, runWithLoggingAsync } from '../HeftActionRunner.ts';
 
 export class CleanAction extends CommandLineAction implements IHeftAction {
   public readonly watch: boolean = false;

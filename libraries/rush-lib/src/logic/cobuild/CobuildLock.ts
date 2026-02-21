@@ -3,10 +3,10 @@
 
 import { InternalError } from '@rushstack/node-core-library';
 
-import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
-import type { OperationStatus } from '../operations/OperationStatus';
-import type { ICobuildContext } from './ICobuildLockProvider';
-import type { OperationBuildCache } from '../buildCache/OperationBuildCache';
+import type { CobuildConfiguration } from '../../api/CobuildConfiguration.ts';
+import type { OperationStatus } from '../operations/OperationStatus.ts';
+import type { ICobuildContext } from './ICobuildLockProvider.ts';
+import type { OperationBuildCache } from '../buildCache/OperationBuildCache.ts';
 
 const KEY_SEPARATOR: ':' = ':';
 

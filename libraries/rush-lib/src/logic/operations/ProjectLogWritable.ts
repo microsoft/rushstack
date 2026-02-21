@@ -10,9 +10,9 @@ import {
   type ITerminalChunk
 } from '@rushstack/terminal';
 
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { PackageNameParsers } from '../../api/PackageNameParsers';
-import { RushConstants } from '../RushConstants';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { PackageNameParsers } from '../../api/PackageNameParsers.ts';
+import { RushConstants } from '../RushConstants.ts';
 
 export interface IProjectLogWritableOptions {
   logFilePaths: ILogFilePaths;

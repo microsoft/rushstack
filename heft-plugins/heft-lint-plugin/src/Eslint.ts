@@ -14,8 +14,8 @@ import stableStringify from 'json-stable-stringify-without-jsonify';
 import { FileError, FileSystem } from '@rushstack/node-core-library';
 import type { HeftConfiguration } from '@rushstack/heft';
 
-import { LinterBase, type ILinterBaseOptions } from './LinterBase';
-import type { IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
+import { LinterBase, type ILinterBaseOptions } from './LinterBase.ts';
+import type { IExtendedSourceFile } from './internalTypings/TypeScriptInternals.ts';
 import { name as pluginName, version as pluginVersion } from '../package.json';
 
 interface IEslintOptions extends ILinterBaseOptions {
@@ -351,7 +351,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     if (sarifLogPath) {
       const rulesMeta: TEslint.ESLint.LintResultData['rulesMeta'] =
         this._linter.getRulesMetaForResults(lintResults);
-      const { formatEslintResultsAsSARIF } = await import('./SarifFormatter');
+      const { formatEslintResultsAsSARIF } = await import('./SarifFormatter.ts');
       const sarifString: string = JSON.stringify(
         formatEslintResultsAsSARIF(lintResults, rulesMeta, {
           ignoreSuppressed: false,

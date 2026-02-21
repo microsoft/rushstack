@@ -31,9 +31,9 @@ import type {
   IWebSocketAfterExecuteEventMessage,
   IWebSocketBatchStatusChangeEventMessage,
   IWebSocketCommandMessage
-} from './api.types';
-import { PLUGIN_NAME } from './constants';
-import type { IPhasedCommandHandlerOptions } from './types';
+} from './api.types.ts';
+import { PLUGIN_NAME } from './constants.ts';
+import type { IPhasedCommandHandlerOptions } from './types.ts';
 
 export type WebSocketServerUpgrader = (server: Http2SecureServer) => void;
 

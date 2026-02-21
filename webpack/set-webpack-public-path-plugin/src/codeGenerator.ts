@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ISetWebpackPublicPathOptions } from './SetPublicPathPlugin';
+import type { ISetWebpackPublicPathOptions } from './SetPublicPathPlugin.ts';
 
 export interface IInternalOptions extends ISetWebpackPublicPathOptions {
   webpackPublicPathVariable: string;

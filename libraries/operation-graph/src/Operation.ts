@@ -4,16 +4,16 @@
 import { InternalError } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { Stopwatch } from './Stopwatch';
+import { Stopwatch } from './Stopwatch.ts';
 import type {
   IOperationRunner,
   IOperationRunnerContext,
   IOperationState,
   IOperationStates
-} from './IOperationRunner';
-import type { OperationError } from './OperationError';
-import { OperationStatus } from './OperationStatus';
-import type { OperationGroupRecord } from './OperationGroupRecord';
+} from './IOperationRunner.ts';
+import type { OperationError } from './OperationError.ts';
+import { OperationStatus } from './OperationStatus.ts';
+import type { OperationGroupRecord } from './OperationGroupRecord.ts';
 
 /**
  * Options for constructing a new Operation.

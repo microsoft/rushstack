@@ -13,9 +13,9 @@
  * @packageDocumentation
  */
 
-export { Button, type IButtonProps } from './components/Button';
-export { ScrollArea, type IScrollAreaProps } from './components/ScrollArea';
-export { Tabs, type ITabsItem, type ITabsProps } from './components/Tabs';
-export { Checkbox, type ICheckboxProps } from './components/Checkbox';
-export { Input, type IInputProps } from './components/Input';
-export { Text, type TextType, type ITextProps } from './components/Text';
+export { Button, type IButtonProps } from './components/Button/index.tsx';
+export { ScrollArea, type IScrollAreaProps } from './components/ScrollArea/index.tsx';
+export { Tabs, type ITabsItem, type ITabsProps } from './components/Tabs/index.tsx';
+export { Checkbox, type ICheckboxProps } from './components/Checkbox/index.tsx';
+export { Input, type IInputProps } from './components/Input/index.tsx';
+export { Text, type TextType, type ITextProps } from './components/Text/index.tsx';

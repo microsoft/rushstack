@@ -10,11 +10,11 @@ import { getRepoRoot } from '@rushstack/package-deps-hash';
 import { AlreadyReportedError, Path, type FileSystemStats, FileSystem } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import { Git } from './Git';
-import type { IInputsSnapshot, GetInputsSnapshotAsyncFn } from './incremental/InputsSnapshot';
-import type { RushConfiguration } from '../api/RushConfiguration';
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { IS_WINDOWS } from '../utilities/executionUtilities';
+import { Git } from './Git.ts';
+import type { IInputsSnapshot, GetInputsSnapshotAsyncFn } from './incremental/InputsSnapshot.ts';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import { IS_WINDOWS } from '../utilities/executionUtilities.ts';
 
 export interface IProjectWatcherOptions {
   abortSignal: AbortSignal;

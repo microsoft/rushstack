@@ -3,10 +3,10 @@
 
 import type { StdioSummarizer, IProblemCollector } from '@rushstack/terminal';
 
-import type { OperationStatus } from './OperationStatus';
-import type { Operation } from './Operation';
-import type { IStopwatchResult } from '../../utilities/Stopwatch';
-import type { ILogFilePaths } from './ProjectLogWritable';
+import type { OperationStatus } from './OperationStatus.ts';
+import type { Operation } from './Operation.ts';
+import type { IStopwatchResult } from '../../utilities/Stopwatch.ts';
+import type { ILogFilePaths } from './ProjectLogWritable.ts';
 
 /**
  * The `IOperationExecutionResult` interface represents the results of executing an {@link Operation}.

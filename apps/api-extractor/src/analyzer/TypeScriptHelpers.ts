@@ -7,8 +7,8 @@ import * as ts from 'typescript';
 
 import { InternalError } from '@rushstack/node-core-library';
 
-import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
-import { TypeScriptInternals } from './TypeScriptInternals';
+import { SourceFileLocationFormatter } from './SourceFileLocationFormatter.ts';
+import { TypeScriptInternals } from './TypeScriptInternals.ts';
 
 export class TypeScriptHelpers {
   // Matches TypeScript's encoded names for well-known ECMAScript symbols like

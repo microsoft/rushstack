@@ -3,7 +3,7 @@
 
 import type { TSESLint } from '@typescript-eslint/utils';
 
-import { noUnsafeRegExp } from './no-unsafe-regexp';
+import { noUnsafeRegExp } from './no-unsafe-regexp.ts';
 
 interface IPlugin {
   rules: { [ruleName: string]: TSESLint.RuleModule<string, unknown[]> };

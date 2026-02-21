@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import type { IPolicyValidatorOptions } from './PolicyValidator';
-import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
-import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
-import type { RepoStateFile } from '../RepoStateFile';
-import type { Subspace } from '../../api/Subspace';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import type { IPolicyValidatorOptions } from './PolicyValidator.ts';
+import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile.ts';
+import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory.ts';
+import type { RepoStateFile } from '../RepoStateFile.ts';
+import type { Subspace } from '../../api/Subspace.ts';
 
 export interface IShrinkwrapFilePolicyValidatorOptions extends IPolicyValidatorOptions {
   repoState: RepoStateFile;

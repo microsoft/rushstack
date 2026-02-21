@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushConstants } from '../../logic/RushConstants';
+import { RushConstants } from '../../logic/RushConstants.ts';
 import {
   type IPhasedCommandConfig,
   CommandLineConfiguration,
   type IParameterJson,
   type IPhase,
   type Command
-} from '../CommandLineConfiguration';
+} from '../CommandLineConfiguration.ts';
 
 describe(CommandLineConfiguration.name, () => {
   it('Forbids a misnamed phase', () => {

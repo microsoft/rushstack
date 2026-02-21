@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import { Path } from '../Path';
+import { Path } from '../Path.ts';
 
 function toPosixPath(value: string): string {
   return value.replace(/[\\\/]/g, '/');

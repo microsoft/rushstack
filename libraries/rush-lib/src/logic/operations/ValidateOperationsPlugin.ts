@@ -3,16 +3,16 @@
 
 import type { ITerminal } from '@rushstack/terminal';
 
-import type { Operation } from './Operation';
+import type { Operation } from './Operation.ts';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
-} from '../../pluginFramework/PhasedCommandHooks';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
-import type { IPhase } from '../../api/CommandLineConfiguration';
+} from '../../pluginFramework/PhasedCommandHooks.ts';
+import type { IOperationExecutionResult } from './IOperationExecutionResult.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import type { RushProjectConfiguration } from '../../api/RushProjectConfiguration.ts';
+import type { IPhase } from '../../api/CommandLineConfiguration.ts';
 
 const PLUGIN_NAME: 'ValidateOperationsPlugin' = 'ValidateOperationsPlugin';
 

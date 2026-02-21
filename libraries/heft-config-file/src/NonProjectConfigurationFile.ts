@@ -4,7 +4,7 @@
 import { FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { ConfigurationFileBase } from './ConfigurationFileBase';
+import { ConfigurationFileBase } from './ConfigurationFileBase.ts';
 
 /**
  * @beta

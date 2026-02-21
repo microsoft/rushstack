@@ -5,8 +5,8 @@ import * as path from 'node:path';
 
 import type { IRushPlugin, RushSession, RushConfiguration, IPhasedCommand } from '@rushstack/rush-sdk';
 
-import { PLUGIN_NAME } from './constants';
-import type { IBaseRoutingRuleJson, IRoutingRule } from './types';
+import { PLUGIN_NAME } from './constants.ts';
+import type { IBaseRoutingRuleJson, IRoutingRule } from './types.ts';
 
 export interface IGlobalRoutingFolderRuleJson extends IBaseRoutingRuleJson {
   workspaceRelativeFile: undefined;
@@ -85,7 +85,7 @@ export class RushServePlugin implements IRushPlugin {
 
       // Defer importing the implementation until this plugin is actually invoked.
       await (
-        await import('./phasedCommandHandler')
+        await import('./phasedCommandHandler.ts')
       ).phasedCommandHandler({
         rushSession,
         rushConfiguration,
