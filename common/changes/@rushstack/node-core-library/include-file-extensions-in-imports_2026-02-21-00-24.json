@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Update the compiled output to include file extensions in import specifiers, fixing Node.js ESM resolution when consuming this package via its ESM entry point.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}
