@@ -5,7 +5,7 @@
 
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["temp/schema-dts"] }],
+      "cleanFiles": [{ "includeGlobs": ["temp/schema-dts", "temp/schema-dts-formatted"] }],
 
       "tasksByName": {
         "json-schema-typings": {
