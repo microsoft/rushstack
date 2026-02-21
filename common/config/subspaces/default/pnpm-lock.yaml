@@ -4840,6 +4840,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      '@rushstack/heft-json-schema-typings-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-json-schema-typings-plugin
       '@rushstack/heft-web-rig':
         specifier: workspace:*
         version: link:../heft-web-rig
