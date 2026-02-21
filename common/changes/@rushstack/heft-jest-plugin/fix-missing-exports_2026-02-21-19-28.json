@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "Add missing \"./includes/*.json\" to the package.json \"exports\" field so that Jest config files like \"@rushstack/heft-jest-plugin/includes/jest-shared.config.json\" are importable.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin"
+}

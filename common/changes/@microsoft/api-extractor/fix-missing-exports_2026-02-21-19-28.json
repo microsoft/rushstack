@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Add missing \"./extends/*.json\" to the package.json \"exports\" field so that \"@microsoft/api-extractor/extends/tsdoc-base.json\" is importable.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}

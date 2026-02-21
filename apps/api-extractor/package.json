@@ -35,6 +35,7 @@
       "import": "./lib-esm/index.js",
       "require": "./lib-commonjs/index.js"
     },
+    "./extends/*.json": "./extends/*.json",
     "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
     "./lib/*": {
       "types": "./lib-dts/*.d.ts",
