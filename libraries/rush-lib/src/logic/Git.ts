@@ -3,7 +3,6 @@
 
 import type child_process from 'node:child_process';
 import * as path from 'node:path';
-import * as url from 'node:url';
 
 import gitInfo from 'git-repo-info';
 import { trueCasePathSync } from 'true-case-path';
@@ -487,25 +486,31 @@ export class Git {
       }
     }
 
-    const parsedUrl: url.UrlWithStringQuery = url.parse(result);
+    // Use the WHATWG URL API instead of the deprecated url.parse().
+    // The URL constructor throws for non-standard URLs (e.g. local paths), so we
+    // catch and leave the result unchanged in that case.
+    try {
+      const parsedUrl: URL = new URL(result);
 
-    // Only convert recognized schemes
-
-    switch (parsedUrl.protocol) {
-      case 'http:':
-      case 'https:':
-      case 'ssh:':
-      case 'ftp:':
-      case 'ftps:':
-      case 'git:':
-      case 'git+http:':
-      case 'git+https:':
-      case 'git+ssh:':
-      case 'git+ftp:':
-      case 'git+ftps:':
-        // Assemble the parts we want:
-        result = `https://${parsedUrl.host}${parsedUrl.pathname}`;
-        break;
+      // Only convert recognized schemes
+      switch (parsedUrl.protocol) {
+        case 'http:':
+        case 'https:':
+        case 'ssh:':
+        case 'ftp:':
+        case 'ftps:':
+        case 'git:':
+        case 'git+http:':
+        case 'git+https:':
+        case 'git+ssh:':
+        case 'git+ftp:':
+        case 'git+ftps:':
+          // Assemble the parts we want:
+          result = `https://${parsedUrl.host}${parsedUrl.pathname}`;
+          break;
+      }
+    } catch {
+      // Not a valid URL (e.g. a local path) -- leave result unchanged
     }
 
     // Trim ".git" or ".git/" from the end
