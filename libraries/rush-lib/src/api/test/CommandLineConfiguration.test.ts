@@ -294,4 +294,129 @@ describe(CommandLineConfiguration.name, () => {
       expect(phase.shellCommand).toEqual('echo');
     });
   });
+
+  describe('allowRemainderArguments configuration', () => {
+    it('should accept allowRemainderArguments for bulk commands', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'bulk',
+            name: 'test-remainder-bulk',
+            summary: 'Test bulk command with remainder arguments',
+            enableParallelism: true,
+            safeForSimultaneousRushProcesses: false,
+            allowRemainderArguments: true
+          }
+        ]
+      });
+
+      const command = commandLineConfiguration.commands.get('test-remainder-bulk');
+      expect(command).toBeDefined();
+      expect(command?.allowRemainderArguments).toBe(true);
+    });
+
+    it('should accept allowRemainderArguments for global commands', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'global',
+            name: 'test-remainder-global',
+            summary: 'Test global command with remainder arguments',
+            shellCommand: 'echo',
+            safeForSimultaneousRushProcesses: false,
+            allowRemainderArguments: true
+          }
+        ]
+      });
+
+      const command = commandLineConfiguration.commands.get('test-remainder-global');
+      expect(command).toBeDefined();
+      expect(command?.allowRemainderArguments).toBe(true);
+    });
+
+    it('should accept allowRemainderArguments for phased commands', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'phased',
+            name: 'test-remainder-phased',
+            summary: 'Test phased command with remainder arguments',
+            enableParallelism: true,
+            safeForSimultaneousRushProcesses: false,
+            phases: ['_phase:test'],
+            allowRemainderArguments: true
+          }
+        ],
+        phases: [
+          {
+            name: '_phase:test'
+          }
+        ]
+      });
+
+      const command = commandLineConfiguration.commands.get('test-remainder-phased');
+      expect(command).toBeDefined();
+      expect(command?.allowRemainderArguments).toBe(true);
+    });
+
+    it('should default allowRemainderArguments to false when not specified', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'global',
+            name: 'test-no-remainder',
+            summary: 'Test command without remainder arguments',
+            shellCommand: 'echo',
+            safeForSimultaneousRushProcesses: false
+          }
+        ]
+      });
+
+      const command = commandLineConfiguration.commands.get('test-no-remainder');
+      expect(command).toBeDefined();
+      expect(command?.allowRemainderArguments).toBeUndefined();
+    });
+
+    it('should work with both custom parameters and remainder arguments', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'global',
+            name: 'test-mixed-params',
+            summary: 'Test command with both custom parameters and remainder arguments',
+            shellCommand: 'echo',
+            safeForSimultaneousRushProcesses: false,
+            allowRemainderArguments: true
+          }
+        ],
+        parameters: [
+          {
+            parameterKind: 'flag',
+            longName: '--verbose',
+            associatedCommands: ['test-mixed-params'],
+            description: 'Enable verbose logging'
+          },
+          {
+            parameterKind: 'string',
+            longName: '--output',
+            argumentName: 'PATH',
+            associatedCommands: ['test-mixed-params'],
+            description: 'Output file path'
+          },
+          {
+            parameterKind: 'integer',
+            longName: '--count',
+            argumentName: 'NUM',
+            associatedCommands: ['test-mixed-params'],
+            description: 'Number of iterations'
+          }
+        ]
+      });
+
+      const command = commandLineConfiguration.commands.get('test-mixed-params');
+      expect(command).toBeDefined();
+      expect(command?.allowRemainderArguments).toBe(true);
+      expect(command?.associatedParameters.size).toBe(3);
+    });
+  });
 });

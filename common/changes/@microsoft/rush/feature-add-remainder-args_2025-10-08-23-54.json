@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for remainder arguments with new `allowRemainderArguments` option in a global, bulk, and phased command configurations in `common/config/rush/command-line.json`",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

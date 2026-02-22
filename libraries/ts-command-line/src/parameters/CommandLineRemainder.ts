@@ -24,6 +24,10 @@ export class CommandLineRemainder {
    *
    * @remarks
    * The array will be empty if the command-line has not been parsed yet.
+   *
+   * When the `--` separator is used to delimit remainder arguments, it is automatically
+   * excluded from this array. For example, `my-tool --flag -- arg1 arg2` will result in
+   * `values` being `["arg1", "arg2"]`, not `["--", "arg1", "arg2"]`.
    */
   public get values(): ReadonlyArray<string> {
     return this._values;
@@ -39,7 +43,18 @@ export class CommandLineRemainder {
       throw new Error(`Unexpected data object for remainder: ` + JSON.stringify(data));
     }
 
-    this._values.push(...data);
+    // Filter out the first '--' separator that argparse includes in the remainder values.
+    // Users expect everything AFTER '--' to be passed through, not including '--' itself.
+    // However, if '--' appears again later, it should be preserved in case the underlying
+    // tool needs it for its own purposes.
+    const firstSeparatorIndex: number = data.indexOf('--');
+    if (firstSeparatorIndex !== -1) {
+      // Remove the first '--' and keep everything after it
+      this._values.push(...data.slice(firstSeparatorIndex + 1));
+    } else {
+      // No separator found, push all data
+      this._values.push(...data);
+    }
   }
 
   /** {@inheritDoc CommandLineParameterBase.appendToArgList} @override */

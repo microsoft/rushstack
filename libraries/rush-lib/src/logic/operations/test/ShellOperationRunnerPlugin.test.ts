@@ -275,4 +275,65 @@ describe(ShellOperationRunnerPlugin.name, () => {
     // All projects snapshot
     expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
   });
+
+  it('should handle remainderArgs when provided in context', async () => {
+    const rushJsonFile: string = path.resolve(__dirname, `../../test/customShellCommandinBulkRepo/rush.json`);
+    const commandLineJsonFile: string = path.resolve(
+      __dirname,
+      `../../test/customShellCommandinBulkRepo/common/config/rush/command-line.json`
+    );
+
+    const rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
+    const commandLineJson: ICommandLineJson = JsonFile.load(commandLineJsonFile);
+
+    const commandLineConfiguration = new CommandLineConfiguration(commandLineJson);
+
+    const echoCommand: IPhasedCommandConfig = commandLineConfiguration.commands.get(
+      'echo'
+    )! as IPhasedCommandConfig;
+
+    // Create context with remainder arguments
+    const fakeCreateOperationsContext: Pick<
+      ICreateOperationsContext,
+      | 'phaseOriginal'
+      | 'phaseSelection'
+      | 'projectSelection'
+      | 'projectsInUnknownState'
+      | 'projectConfigurations'
+      | 'rushConfiguration'
+      | 'remainderArgs'
+    > = {
+      phaseOriginal: echoCommand.phases,
+      phaseSelection: echoCommand.phases,
+      projectSelection: new Set(rushConfiguration.projects),
+      projectsInUnknownState: new Set(rushConfiguration.projects),
+      projectConfigurations: new Map(),
+      rushConfiguration,
+      remainderArgs: ['--verbose', '--output', 'file.log']
+    };
+
+    const hooks: PhasedCommandHooks = new PhasedCommandHooks();
+
+    // Generates the default operation graph
+    new PhasedOperationPlugin().apply(hooks);
+    // Applies the Shell Operation Runner to selected operations
+    new ShellOperationRunnerPlugin().apply(hooks);
+
+    const operations: Set<Operation> = await hooks.createOperations.promise(
+      new Set(),
+      fakeCreateOperationsContext as ICreateOperationsContext
+    );
+
+    // Verify that operations were created and include remainder args in config hash
+    expect(operations.size).toBeGreaterThan(0);
+
+    // Get the first operation and check that remainder args affect the command configuration
+    const operation = Array.from(operations)[0];
+    const configHash = operation.runner!.getConfigHash();
+
+    // The config hash should include the remainder arguments
+    expect(configHash).toContain('--verbose');
+    expect(configHash).toContain('--output');
+    expect(configHash).toContain('file.log');
+  });
 });

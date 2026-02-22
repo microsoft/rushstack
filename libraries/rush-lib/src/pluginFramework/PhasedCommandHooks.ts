@@ -65,6 +65,11 @@ export interface ICreateOperationsContext {
    */
   readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
   /**
+   * The remainder arguments from the command line, if any.
+   * These are additional arguments that were not recognized as regular parameters.
+   */
+  readonly remainderArgs?: ReadonlyArray<string>;
+  /**
    * If true, projects may read their output from cache or be skipped if already up to date.
    * If false, neither of the above may occur, e.g. "rush rebuild"
    */
