@@ -5,7 +5,7 @@
 
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["temp/schema-dts", "temp/schema-dts-formatted"] }],
+      "cleanFiles": [{ "includeGlobs": ["temp/schema-dts-unformatted", "temp/schema-dts-formatted"] }],
 
       "tasksByName": {
         "json-schema-typings-unformatted": {
@@ -14,7 +14,7 @@
             "pluginName": "json-schema-typings-plugin",
             "options": {
               "srcFolder": "node_modules/@rushstack/node-core-library/src/test/test-data/test-schemas",
-              "generatedTsFolders": ["temp/schema-dts"]
+              "generatedTsFolders": ["temp/schema-dts-unformatted"]
             }
           }
         },
