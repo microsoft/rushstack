@@ -187,13 +187,16 @@ describe(RigConfig.name, () => {
       );
     });
   });
-
   it('validates a rig.json file using the schema', () => {
     const rigConfigFilePath: string = path.join(testProjectFolder, 'config', 'rig.json');
 
     const ajv = new Ajv({
       verbose: true
     });
+
+    // Delete our older "draft-04/schema" and use AJV's built-in schema
+    // eslint-disable-next-line
+    delete (RigConfig.jsonSchemaObject as any)['$schema'];
 
     // Compile our schema
     const validateRigFile: ValidateFunction = ajv.compile(RigConfig.jsonSchemaObject);
