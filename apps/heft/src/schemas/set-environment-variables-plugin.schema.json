@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "CopyFiles Heft Task Event Options",
-  "description": "Defines configuration used by the \"copyFiles\" Heft task event.",
+  "title": "SetEnvironmentVariables Heft Task Event Options",
+  "description": "Defines configuration used by the \"setEnvironmentVariables\" Heft task event.",
   "type": "object",
 
   "additionalProperties": false,

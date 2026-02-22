@@ -6,11 +6,7 @@ import * as path from 'node:path';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IHeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
-
-interface IRunScriptPluginOptions {
-  scriptPath: string;
-  scriptOptions: Record<string, unknown>;
-}
+import type { RunScriptHeftTaskEventOptions as IRunScriptPluginOptions } from '../schemas/run-script-options.schema.json.d.ts';
 
 /**
  * Options provided to scripts that are run using the RunScriptPlugin.
@@ -21,7 +17,7 @@ export interface IRunScriptOptions {
   heftTaskSession: IHeftTaskSession;
   heftConfiguration: HeftConfiguration;
   runOptions: IHeftTaskRunHookOptions;
-  scriptOptions: Record<string, unknown>;
+  scriptOptions: Record<string, unknown> | undefined;
 }
 
 /**

@@ -1,7 +1,8 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
   "title": "CopyFiles Heft Task Event Options",
   "description": "Defines configuration used by the \"copyFiles\" Heft task event.",
+  "x-tsdoc-release-tag": "@public",
   "type": "object",
 
   "additionalProperties": false,
@@ -13,74 +14,68 @@
       "description": "An array of copy operations to perform during the specified Heft event.",
 
       "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["destinationFolders"],
-        "anyOf": [
-          { "required": ["sourcePath"] },
-          { "required": ["fileExtensions"] },
-          { "required": ["includeGlobs"] },
-          { "required": ["excludeGlobs"] }
-        ],
-        "properties": {
-          "sourcePath": {
-            "title": "Source Path",
+        "$ref": "#/$defs/copyOperationBase"
+      }
+    }
+  },
+
+  "$defs": {
+    "copyOperationBase": {
+      "description": "Configures a copy operation for the \"copyFiles\" task event.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["destinationFolders"],
+      "properties": {
+        "sourcePath": {
+          "type": "string",
+          "description": "The target folder, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. If no globs or file extensions are specified, the folder will be copied. To copy a single file, set \"includeGlobs\" to an array containing the exact name of the file. If this parameter is not provided, defaults to the project root.",
+          "pattern": "[^\\\\]"
+        },
+
+        "fileExtensions": {
+          "type": "array",
+          "description": "If specified, this option recursively scans all folders under \"sourcePath\" and includes any files that match the specified extensions.  (If \"fileExtensions\" and \"includeGlobs\" are both specified, their selections are added together.)",
+          "items": {
             "type": "string",
-            "description": "The target folder, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. If no globs or file extensions are specified, the folder will be copied. To copy a single file, set \"includeGlobs\" to an array containing the exact name of the file. If this parameter is not provided, defaults to the project root.",
-            "pattern": "[^\\\\]"
-          },
-
-          "destinationFolders": {
-            "title": "Destination Folders",
-            "type": "array",
-            "description": "One or more folders that files and folders will be copied into, relative to the project root.",
-            "items": {
-              "type": "string",
-              "pattern": "[^\\\\]"
-            }
-          },
-
-          "fileExtensions": {
-            "title": "File Extensions",
-            "type": "array",
-            "description": "If specified, this option recursively scans all folders under \"sourcePath\" and includes any files that match the specified extensions.  (If \"fileExtensions\" and \"includeGlobs\" are both specified, their selections are added together.)",
-            "items": {
-              "type": "string",
-              "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"
-            }
-          },
-
-          "excludeGlobs": {
-            "title": "Exclude Globs",
-            "type": "array",
-            "description": "A list of glob patterns that exclude files or folders from being copied.  The paths are resolved relative to \"sourcePath\".  These exclusions eliminate items that were selected by the \"includeGlobs\" or \"fileExtensions\" setting.",
-            "items": {
-              "type": "string",
-              "pattern": "[^\\\\]"
-            }
-          },
-
-          "includeGlobs": {
-            "title": "Include Globs",
-            "type": "array",
-            "description": "A list of glob patterns that select files to be copied.  The paths are resolved relative to \"sourcePath\".",
-            "items": {
-              "type": "string",
-              "pattern": "[^\\\\]"
-            }
-          },
-
-          "flatten": {
-            "title": "Flatten",
-            "type": "boolean",
-            "description": "Normally, copying will preserve the path relative to \"sourcePath\" under the destination folder (e.g. if \"sourcePath\" is \"src/test\" and \"destinationFolders\" is [\"out\"], \"src/test/a/b/c.txt\" will be copied to \"out/a/b/c.txt\").  Specify \"flatten=true\" to discard path information and keep only the filename (e.g. \"out/c.txt\".  If two files have the same name an error will be reported. The default value is false."
-          },
-
-          "hardlink": {
-            "title": "Hardlink",
-            "type": "boolean",
-            "description": "If true, filesystem hard links will be created instead of copying the file.  Depending on the operating system, this may be faster.  The default value is false.  NOTE: This may cause unexpected behavior if a tool modifies the link. The contained directory structure will be re-created and all files will be individually hardlinked.  This means that folders will be new filesystem entities and will have separate folder metadata, while the contained files will maintain normal hardlink behavior.  This is done since folders do not have a cross-platform equivalent of a hardlink, and since file symlinks provide fundamentally different functionality in comparison to hardlinks."
+            "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"
           }
+        },
+
+        "excludeGlobs": {
+          "type": "array",
+          "description": "A list of glob patterns that exclude files or folders from being copied.  The paths are resolved relative to \"sourcePath\".  These exclusions eliminate items that were selected by the \"includeGlobs\" or \"fileExtensions\" setting.",
+          "items": {
+            "type": "string",
+            "pattern": "[^\\\\]"
+          }
+        },
+
+        "includeGlobs": {
+          "type": "array",
+          "description": "A list of glob patterns that select files to be copied.  The paths are resolved relative to \"sourcePath\".",
+          "items": {
+            "type": "string",
+            "pattern": "[^\\\\]"
+          }
+        },
+
+        "destinationFolders": {
+          "type": "array",
+          "description": "One or more folders that files and folders will be copied into, relative to the project root.",
+          "items": {
+            "type": "string",
+            "pattern": "[^\\\\]"
+          }
+        },
+
+        "flatten": {
+          "type": "boolean",
+          "description": "Normally, copying will preserve the path relative to \"sourcePath\" under the destination folder (e.g. if \"sourcePath\" is \"src/test\" and \"destinationFolders\" is [\"out\"], \"src/test/a/b/c.txt\" will be copied to \"out/a/b/c.txt\").  Specify \"flatten=true\" to discard path information and keep only the filename (e.g. \"out/c.txt\").  If two files have the same name an error will be reported. The default value is false."
+        },
+
+        "hardlink": {
+          "type": "boolean",
+          "description": "If true, filesystem hard links will be created instead of copying the file.  Depending on the operating system, this may be faster.  The default value is false.  NOTE: This may cause unexpected behavior if a tool modifies the link. The contained directory structure will be re-created and all files will be individually hardlinked.  This means that folders will be new filesystem entities and will have separate folder metadata, while the contained files will maintain normal hardlink behavior.  This is done since folders do not have a cross-platform equivalent of a hardlink, and since file symlinks provide fundamentally different functionality in comparison to hardlinks."
         }
       }
     }

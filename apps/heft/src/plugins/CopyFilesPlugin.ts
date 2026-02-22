@@ -24,6 +24,12 @@ import {
   tryReadBuildInfoAsync,
   writeBuildInfoAsync
 } from '../pluginFramework/IncrementalBuildInfo';
+import type {
+  CopyFilesHeftTaskEventOptions as ICopyFilesPluginOptions,
+  CopyOperationBase as ICopyOperationBase
+} from '../schemas/copy-files-options.schema.json.d.ts';
+
+export type { ICopyOperationBase };
 
 /**
  * Used to specify a selection of files to copy from a specific source folder to one
@@ -31,30 +37,7 @@ import {
  *
  * @public
  */
-export interface ICopyOperation extends IFileSelectionSpecifier {
-  /**
-   * Absolute paths to folders which files or folders should be copied to.
-   */
-  destinationFolders: string[];
-
-  /**
-   * Copy only the file and discard the relative path from the source folder.
-   */
-  flatten?: boolean;
-
-  /**
-   * Hardlink files instead of copying.
-   *
-   * @remarks
-   * If the sourcePath is a folder, the contained directory structure will be re-created
-   * and all files will be individually hardlinked. This means that folders will be new
-   * filesystem entities and will have separate folder metadata, while the contained files
-   * will maintain normal hardlink behavior. This is done since folders do not have a
-   * cross-platform equivalent of a hardlink, and since file symlinks provide fundamentally
-   * different functionality in comparison to hardlinks.
-   */
-  hardlink?: boolean;
-}
+export interface ICopyOperation extends IFileSelectionSpecifier, ICopyOperationBase {}
 
 /**
  * Used to specify a selection of files to copy from a specific source folder to one
@@ -68,10 +51,6 @@ export interface IIncrementalCopyOperation extends ICopyOperation {
    * IHeftTaskRunIncrementalHookOptions.changedFiles map.
    */
   onlyIfChanged?: boolean;
-}
-
-interface ICopyFilesPluginOptions {
-  copyOperations: ICopyOperation[];
 }
 
 interface ICopyDescriptor {

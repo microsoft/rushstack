@@ -1,18 +1,17 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Heft Configuration",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "title": "Heft Plugin Configuration",
   "description": "Defines configuration used by core Heft.",
   "type": "object",
 
-  "definitions": {
+  "$defs": {
     "anything": {
       "type": ["array", "boolean", "integer", "number", "object", "string"],
-      "items": { "$ref": "#/definitions/anything" }
+      "items": { "$ref": "#/$defs/anything" }
     },
 
     "baseParameter": {
       "type": "object",
-      "additionalProperties": true,
       "required": ["parameterKind", "longName", "description"],
       "properties": {
         "parameterKind": {
@@ -50,305 +49,178 @@
       "title": "Choice Parameter",
       "description": "A command-line parameter whose argument must be chosen from a list of allowable alternatives",
       "type": "object",
-      "allOf": [
-        { "$ref": "#/definitions/baseParameter" },
-        {
-          "type": "object",
-          "additionalProperties": true,
-          "required": ["alternatives"],
-          "properties": {
-            "parameterKind": {
-              "enum": ["choice"]
-            },
-            "alternatives": {
-              "title": "Alternatives",
-              "description": "A list of alternative argument values that can be chosen for this parameter.",
-              "type": "array",
-              "minItems": 1,
-              "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": ["name", "description"],
-                "properties": {
-                  "name": {
-                    "title": "Name of Alternative",
-                    "description": "A token that is one of the alternatives that can be used with the choice parameter, e.g. \"vanilla\" in \"--flavor vanilla\"",
-                    "type": "string"
-                  },
-                  "description": {
-                    "title": "Description of Alternative",
-                    "description": "A detailed description for the alternative that will be shown in the command-line help.",
-                    "type": "string"
-                  }
-                }
+      "unevaluatedProperties": false,
+      "allOf": [{ "$ref": "#/$defs/baseParameter" }],
+      "required": ["alternatives"],
+      "properties": {
+        "parameterKind": {
+          "enum": ["choice"]
+        },
+        "alternatives": {
+          "title": "Alternatives",
+          "description": "A list of alternative argument values that can be chosen for this parameter.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "description"],
+            "properties": {
+              "name": {
+                "title": "Name of Alternative",
+                "description": "A token that is one of the alternatives that can be used with the choice parameter, e.g. \"vanilla\" in \"--flavor vanilla\"",
+                "type": "string"
+              },
+              "description": {
+                "title": "Description of Alternative",
+                "description": "A detailed description for the alternative that will be shown in the command-line help.",
+                "type": "string"
               }
-            },
-            "defaultValue": {
-              "title": "Default Value",
-              "description": "If the parameter is omitted from the command line, this value will be inserted by default",
-              "type": "string"
             }
           }
         },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "parameterKind": { "$ref": "#/definitions/anything" },
-            "longName": { "$ref": "#/definitions/anything" },
-            "shortName": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" },
-
-            "alternatives": { "$ref": "#/definitions/anything" },
-            "defaultValue": { "$ref": "#/definitions/anything" }
-          }
+        "defaultValue": {
+          "title": "Default Value",
+          "description": "If the parameter is omitted from the command line, this value will be inserted by default",
+          "type": "string"
         }
-      ]
+      }
     },
 
     "choiceListParameter": {
       "title": "Choice List Parameter",
       "description": "A command-line parameter whose arguments must be chosen from a list of allowable alternatives",
       "type": "object",
-      "allOf": [
-        { "$ref": "#/definitions/baseParameter" },
-        {
-          "type": "object",
-          "additionalProperties": true,
-          "required": ["alternatives"],
-          "properties": {
-            "parameterKind": {
-              "enum": ["choiceList"]
-            },
-            "alternatives": {
-              "title": "Alternatives",
-              "description": "A list of alternative argument values that can be chosen for this parameter.",
-              "type": "array",
-              "minItems": 1,
-              "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": ["name", "description"],
-                "properties": {
-                  "name": {
-                    "title": "Name of Alternative",
-                    "description": "A token that is one of the alternatives that can be used with the choice parameter, e.g. \"vanilla\" in \"--flavor vanilla\"",
-                    "type": "string"
-                  },
-                  "description": {
-                    "title": "Description of Alternative",
-                    "description": "A detailed description for the alternative that will be shown in the command-line help.",
-                    "type": "string"
-                  }
-                }
+      "unevaluatedProperties": false,
+      "allOf": [{ "$ref": "#/$defs/baseParameter" }],
+      "required": ["alternatives"],
+      "properties": {
+        "parameterKind": {
+          "enum": ["choiceList"]
+        },
+        "alternatives": {
+          "title": "Alternatives",
+          "description": "A list of alternative argument values that can be chosen for this parameter.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "description"],
+            "properties": {
+              "name": {
+                "title": "Name of Alternative",
+                "description": "A token that is one of the alternatives that can be used with the choice parameter, e.g. \"vanilla\" in \"--flavor vanilla\"",
+                "type": "string"
+              },
+              "description": {
+                "title": "Description of Alternative",
+                "description": "A detailed description for the alternative that will be shown in the command-line help.",
+                "type": "string"
               }
             }
           }
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "parameterKind": { "$ref": "#/definitions/anything" },
-            "longName": { "$ref": "#/definitions/anything" },
-            "shortName": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" },
-
-            "alternatives": { "$ref": "#/definitions/anything" }
-          }
         }
-      ]
+      }
     },
 
     "flagParameter": {
       "title": "Flag Parameter",
       "description": "A command-line parameter whose presence acts as an on/off switch",
       "type": "object",
-      "allOf": [
-        { "$ref": "#/definitions/baseParameter" },
-        {
-          "type": "object",
-          "additionalProperties": true,
-          "properties": {
-            "parameterKind": {
-              "enum": ["flag"]
-            }
-          }
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "parameterKind": { "$ref": "#/definitions/anything" },
-            "longName": { "$ref": "#/definitions/anything" },
-            "shortName": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" }
-          }
+      "unevaluatedProperties": false,
+      "allOf": [{ "$ref": "#/$defs/baseParameter" }],
+      "properties": {
+        "parameterKind": {
+          "enum": ["flag"]
         }
-      ]
+      }
     },
 
     "integerParameter": {
       "title": "Integer Parameter",
       "description": "A command-line parameter whose value is interpreted as an integer",
       "type": "object",
-      "allOf": [
-        { "$ref": "#/definitions/baseParameter" },
-        {
-          "type": "object",
-          "additionalProperties": true,
-          "required": ["argumentName"],
-          "properties": {
-            "parameterKind": {
-              "enum": ["integer"]
-            },
-            "argumentName": {
-              "title": "Argument Name",
-              "description": "The name of the argument for this parameter.",
-              "type": "string"
-            },
-            "defaultValue": {
-              "title": "Default Value",
-              "description": "If the parameter is omitted from the command line, this value will be inserted by default",
-              "type": "integer"
-            }
-          }
+      "unevaluatedProperties": false,
+      "allOf": [{ "$ref": "#/$defs/baseParameter" }],
+      "required": ["argumentName"],
+      "properties": {
+        "parameterKind": {
+          "enum": ["integer"]
         },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "parameterKind": { "$ref": "#/definitions/anything" },
-            "longName": { "$ref": "#/definitions/anything" },
-            "shortName": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" },
-
-            "argumentName": { "$ref": "#/definitions/anything" },
-            "defaultValue": { "$ref": "#/definitions/anything" }
-          }
+        "argumentName": {
+          "title": "Argument Name",
+          "description": "The name of the argument for this parameter.",
+          "type": "string"
+        },
+        "defaultValue": {
+          "title": "Default Value",
+          "description": "If the parameter is omitted from the command line, this value will be inserted by default",
+          "type": "integer"
         }
-      ]
+      }
     },
 
     "integerListParameter": {
       "title": "Integer List Parameter",
       "description": "A command-line parameter whose value is interpreted as a list of integers",
       "type": "object",
-      "allOf": [
-        { "$ref": "#/definitions/baseParameter" },
-        {
-          "type": "object",
-          "additionalProperties": true,
-          "required": ["argumentName"],
-          "properties": {
-            "parameterKind": {
-              "enum": ["integerList"]
-            },
-            "argumentName": {
-              "title": "Argument Name",
-              "description": "The name of the argument for this parameter.",
-              "type": "string"
-            }
-          }
+      "unevaluatedProperties": false,
+      "allOf": [{ "$ref": "#/$defs/baseParameter" }],
+      "required": ["argumentName"],
+      "properties": {
+        "parameterKind": {
+          "enum": ["integerList"]
         },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "parameterKind": { "$ref": "#/definitions/anything" },
-            "longName": { "$ref": "#/definitions/anything" },
-            "shortName": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" },
-
-            "argumentName": { "$ref": "#/definitions/anything" }
-          }
+        "argumentName": {
+          "title": "Argument Name",
+          "description": "The name of the argument for this parameter.",
+          "type": "string"
         }
-      ]
+      }
     },
 
     "stringParameter": {
       "title": "String Parameter",
       "description": "A command-line parameter whose value is interpreted as a string",
       "type": "object",
-      "allOf": [
-        { "$ref": "#/definitions/baseParameter" },
-        {
-          "type": "object",
-          "additionalProperties": true,
-          "required": ["argumentName"],
-          "properties": {
-            "parameterKind": {
-              "enum": ["string"]
-            },
-            "argumentName": {
-              "title": "Argument Name",
-              "description": "The name of the argument for this parameter.",
-              "type": "string"
-            },
-            "defaultValue": {
-              "title": "Default Value",
-              "description": "If the parameter is omitted from the command line, this value will be inserted by default",
-              "type": "string"
-            }
-          }
+      "unevaluatedProperties": false,
+      "allOf": [{ "$ref": "#/$defs/baseParameter" }],
+      "required": ["argumentName"],
+      "properties": {
+        "parameterKind": {
+          "enum": ["string"]
         },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "parameterKind": { "$ref": "#/definitions/anything" },
-            "longName": { "$ref": "#/definitions/anything" },
-            "shortName": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" },
-
-            "argumentName": { "$ref": "#/definitions/anything" },
-            "defaultValue": { "$ref": "#/definitions/anything" }
-          }
+        "argumentName": {
+          "title": "Argument Name",
+          "description": "The name of the argument for this parameter.",
+          "type": "string"
+        },
+        "defaultValue": {
+          "title": "Default Value",
+          "description": "If the parameter is omitted from the command line, this value will be inserted by default",
+          "type": "string"
         }
-      ]
+      }
     },
 
     "stringListParameter": {
       "title": "String List Parameter",
       "description": "A command-line parameter whose value is interpreted as a string list",
       "type": "object",
-      "allOf": [
-        { "$ref": "#/definitions/baseParameter" },
-        {
-          "type": "object",
-          "additionalProperties": true,
-          "required": ["argumentName"],
-          "properties": {
-            "parameterKind": {
-              "enum": ["stringList"]
-            },
-            "argumentName": {
-              "title": "Argument Name",
-              "description": "The name of the argument for this parameter.",
-              "type": "string"
-            }
-          }
+      "unevaluatedProperties": false,
+      "allOf": [{ "$ref": "#/$defs/baseParameter" }],
+      "required": ["argumentName"],
+      "properties": {
+        "parameterKind": {
+          "enum": ["stringList"]
         },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "parameterKind": { "$ref": "#/definitions/anything" },
-            "longName": { "$ref": "#/definitions/anything" },
-            "shortName": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" },
-
-            "argumentName": { "$ref": "#/definitions/anything" }
-          }
+        "argumentName": {
+          "title": "Argument Name",
+          "description": "The name of the argument for this parameter.",
+          "type": "string"
         }
-      ]
+      }
     },
 
     "heft-plugin-base": {
@@ -391,13 +263,13 @@
           "items": {
             "type": "object",
             "oneOf": [
-              { "$ref": "#/definitions/flagParameter" },
-              { "$ref": "#/definitions/integerParameter" },
-              { "$ref": "#/definitions/integerListParameter" },
-              { "$ref": "#/definitions/choiceParameter" },
-              { "$ref": "#/definitions/choiceListParameter" },
-              { "$ref": "#/definitions/stringParameter" },
-              { "$ref": "#/definitions/stringListParameter" }
+              { "$ref": "#/$defs/flagParameter" },
+              { "$ref": "#/$defs/integerParameter" },
+              { "$ref": "#/$defs/integerListParameter" },
+              { "$ref": "#/$defs/choiceParameter" },
+              { "$ref": "#/$defs/choiceListParameter" },
+              { "$ref": "#/$defs/stringParameter" },
+              { "$ref": "#/$defs/stringListParameter" }
             ]
           }
         }
@@ -405,11 +277,11 @@
     },
 
     "heft-lifecycle-plugin": {
-      "$ref": "#/definitions/heft-plugin-base"
+      "$ref": "#/$defs/heft-plugin-base"
     },
 
     "heft-task-plugin": {
-      "$ref": "#/definitions/heft-plugin-base"
+      "$ref": "#/$defs/heft-plugin-base"
     }
   },
 
@@ -425,14 +297,14 @@
       "title": "Lifecycle Plugins",
       "description": "A list of plugins that will be loaded and used for Heft lifecycle hooks.",
       "type": "array",
-      "items": { "$ref": "#/definitions/heft-lifecycle-plugin" }
+      "items": { "$ref": "#/$defs/heft-lifecycle-plugin" }
     },
 
     "taskPlugins": {
       "title": "Task Plugins",
       "description": "A list of plugins that will be loaded and used for Heft task hooks.",
       "type": "array",
-      "items": { "$ref": "#/definitions/heft-task-plugin" }
+      "items": { "$ref": "#/$defs/heft-task-plugin" }
     }
   }
 }

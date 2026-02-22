@@ -46,9 +46,13 @@ export type {
   IHeftTaskRunIncrementalHookOptions
 } from './pluginFramework/HeftTaskSession';
 
-export type { ICopyOperation, IIncrementalCopyOperation } from './plugins/CopyFilesPlugin';
+export type {
+  ICopyOperation,
+  IIncrementalCopyOperation,
+  ICopyOperationBase
+} from './plugins/CopyFilesPlugin';
 
-export type { IDeleteOperation } from './plugins/DeleteFilesPlugin';
+export type { IDeleteOperation, IDeleteOperationBase } from './plugins/DeleteFilesPlugin';
 
 export type { IRunScript, IRunScriptOptions } from './plugins/RunScriptPlugin';
 

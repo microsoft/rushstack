@@ -102,14 +102,30 @@ export class HeftConfiguration {
 }
 
 // @public
-export interface ICopyOperation extends IFileSelectionSpecifier {
-    destinationFolders: string[];
-    flatten?: boolean;
-    hardlink?: boolean;
+export interface ICopyOperation extends IFileSelectionSpecifier, ICopyOperationBase {
 }
 
 // @public
-export interface IDeleteOperation extends IFileSelectionSpecifier {
+export interface ICopyOperationBase {
+    destinationFolders: string[];
+    excludeGlobs?: string[];
+    fileExtensions?: string[];
+    flatten?: boolean;
+    hardlink?: boolean;
+    includeGlobs?: string[];
+    sourcePath?: string;
+}
+
+// @public
+export interface IDeleteOperation extends IFileSelectionSpecifier, IDeleteOperationBase {
+}
+
+// @public
+export interface IDeleteOperationBase {
+    excludeGlobs?: string[];
+    fileExtensions?: string[];
+    includeGlobs?: string[];
+    sourcePath?: string;
 }
 
 // @public
@@ -377,7 +393,7 @@ export interface IRunScriptOptions {
     // (undocumented)
     runOptions: IHeftTaskRunHookOptions;
     // (undocumented)
-    scriptOptions: Record<string, unknown>;
+    scriptOptions: Record<string, unknown> | undefined;
 }
 
 // @public

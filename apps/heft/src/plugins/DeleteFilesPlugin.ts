@@ -15,17 +15,22 @@ import {
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IHeftTaskSession, IHeftTaskFileOperations } from '../pluginFramework/HeftTaskSession';
+import type {
+  DeleteFilesHeftTaskEventOptions as IDeleteFilesPluginOptions,
+  DeleteOperationBase as IDeleteOperationBase
+} from '../schemas/delete-files-options.schema.json.d.ts';
+
+/**
+ * @internal
+ */
+export type { IDeleteOperationBase };
 
 /**
  * Used to specify a selection of source files to delete from the specified source folder.
  *
  * @public
  */
-export interface IDeleteOperation extends IFileSelectionSpecifier {}
-
-interface IDeleteFilesPluginOptions {
-  deleteOperations: IDeleteOperation[];
-}
+export interface IDeleteOperation extends IFileSelectionSpecifier, IDeleteOperationBase {}
 
 interface IGetPathsToDeleteResult {
   filesToDelete: Set<string>;

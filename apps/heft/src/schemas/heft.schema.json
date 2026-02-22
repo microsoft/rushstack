@@ -1,13 +1,13 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
   "title": "Heft Configuration",
   "description": "Defines configuration used by core Heft.",
   "type": "object",
 
-  "definitions": {
+  "$defs": {
     "anything": {
       "type": ["array", "boolean", "integer", "number", "object", "string"],
-      "items": { "$ref": "#/definitions/anything" }
+      "items": { "$ref": "#/$defs/anything" }
     },
 
     "heft-plugin": {
@@ -51,18 +51,11 @@
       }
     },
 
-    "delete-operation": {
+    "fileSelectionSpecifierBase": {
+      "description": "Used to specify a selection of one or more files.",
       "type": "object",
-      "additionalProperties": false,
-      "anyOf": [
-        { "required": ["sourcePath"] },
-        { "required": ["fileExtensions"] },
-        { "required": ["includeGlobs"] },
-        { "required": ["excludeGlobs"] }
-      ],
       "properties": {
         "sourcePath": {
-          "title": "Source Path",
           "type": "string",
           "description": "The target file or folder, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. If no globs or file extensions are specified, the file or folder will be deleted.",
           "pattern": "[^\\\\]"
@@ -77,7 +70,7 @@
         },
         "excludeGlobs": {
           "type": "array",
-          "description": "A list of glob patterns that exclude files or folders from being copied.  The paths are resolved relative to \"sourcePath\".  These exclusions eliminate items that were selected by the \"includeGlobs\" or \"fileExtensions\" setting.",
+          "description": "A list of glob patterns that exclude files or folders from being deleted.  The paths are resolved relative to \"sourcePath\".  These exclusions eliminate items that were selected by the \"includeGlobs\" or \"fileExtensions\" setting.",
           "items": {
             "type": "string",
             "pattern": "[^\\\\]"
@@ -85,13 +78,26 @@
         },
         "includeGlobs": {
           "type": "array",
-          "description": "A list of glob patterns that select files to be copied.  The paths are resolved relative to \"sourcePath\".",
+          "description": "A list of glob patterns that select files to be deleted.  The paths are resolved relative to \"sourcePath\".",
           "items": {
             "type": "string",
             "pattern": "[^\\\\]"
           }
         }
       }
+    },
+
+    "delete-operation": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "anyOf": [
+        { "required": ["sourcePath"] },
+        { "required": ["fileExtensions"] },
+        { "required": ["includeGlobs"] },
+        { "required": ["excludeGlobs"] }
+      ],
+      "allOf": [{ "$ref": "#/$defs/fileSelectionSpecifierBase" }],
+      "properties": {}
     }
   },
 
@@ -111,7 +117,7 @@
     "heftPlugins": {
       "type": "array",
       "description": "List of Heft plugins that are used by a project.",
-      "items": { "$ref": "#/definitions/heft-plugin" }
+      "items": { "$ref": "#/$defs/heft-plugin" }
     },
 
     "aliasesByName": {
@@ -169,7 +175,7 @@
             "cleanFiles": {
               "description": "List of delete operations to perform when cleaning at the beginning of phase execution.",
               "type": "array",
-              "items": { "$ref": "#/definitions/delete-operation" }
+              "items": { "$ref": "#/$defs/delete-operation" }
             },
 
             "tasksByName": {
@@ -183,7 +189,7 @@
                   "additionalProperties": false,
                   "required": ["taskPlugin"],
                   "properties": {
-                    "taskPlugin": { "$ref": "#/definitions/heft-plugin" },
+                    "taskPlugin": { "$ref": "#/$defs/heft-plugin" },
 
                     "taskDependencies": {
                       "type": "array",
