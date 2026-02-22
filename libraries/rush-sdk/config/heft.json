@@ -31,14 +31,16 @@
                   "sourcePath": "./node_modules/@microsoft/rush-lib/dist",
                   "includeGlobs": ["rush-lib.d.ts"],
                   "destinationFolders": ["dist"]
+                },
+                {
+                  "sourcePath": "./node_modules/@microsoft/rush-lib/lib-dts",
+                  "destinationFolders": ["lib-dts"],
+                  "fileExtensions": [".d.ts"],
+                  "hardlink": true
                 }
               ]
             }
           }
-        },
-
-        "typescript": {
-          "taskDependencies": ["copy-rush-lib-types"]
         },
 
         "webpack": {
@@ -49,7 +51,7 @@
         },
 
         "generate-stubs": {
-          "taskDependencies": ["typescript"],
+          "taskDependencies": ["typescript", "copy-rush-lib-types"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft",
             "pluginName": "run-script-plugin",
