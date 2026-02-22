@@ -16,7 +16,10 @@ export type {
 /**
  * @beta
  */
-export type { TypeScriptBuildConfiguration } from './schemas/typescript.schema.json.d.ts';
+export type {
+  TypeScriptBuildConfiguration,
+  AdditionalModuleKindToEmit
+} from './schemas/typescript.schema.json.d.ts';
 
 export {
   PLUGIN_NAME as TypeScriptPluginName,

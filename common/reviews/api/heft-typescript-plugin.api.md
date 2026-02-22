@@ -10,6 +10,12 @@ import semver from 'semver';
 import { SyncHook } from 'tapable';
 import type * as _TTypeScript from 'typescript';
 
+// @beta (undocumented)
+export interface AdditionalModuleKindToEmit {
+    moduleKind: "commonjs" | "amd" | "umd" | "system" | "es2015" | "esnext";
+    outFolderName: string;
+}
+
 // @internal (undocumented)
 export function _getTsconfigFilePath(heftConfiguration: HeftConfiguration, tsconfigRelativePath: string | undefined): string;
 
@@ -108,11 +114,7 @@ export { _TTypeScript }
 // @beta
 export interface TypeScriptBuildConfiguration {
     $schema?: string;
-    additionalModuleKindsToEmit?: {
-        moduleKind: "commonjs" | "amd" | "umd" | "system" | "es2015" | "esnext";
-        outFolderName: string;
-        [k: string]: unknown;
-    }[];
+    additionalModuleKindsToEmit?: AdditionalModuleKindToEmit[];
     buildProjectReferences?: boolean;
     emitCjsExtensionForCommonJS?: boolean;
     emitMjsExtensionForESModule?: boolean;
