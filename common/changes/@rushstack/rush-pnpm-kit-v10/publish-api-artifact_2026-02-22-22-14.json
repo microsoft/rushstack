@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/rush-pnpm-kit-v10"
+    }
+  ],
+  "packageName": "@rushstack/rush-pnpm-kit-v10",
+  "email": "iclanton@users.noreply.github.com"
+}

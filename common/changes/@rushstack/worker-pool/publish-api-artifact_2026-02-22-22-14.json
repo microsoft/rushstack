@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/worker-pool"
+    }
+  ],
+  "packageName": "@rushstack/worker-pool",
+  "email": "iclanton@users.noreply.github.com"
+}

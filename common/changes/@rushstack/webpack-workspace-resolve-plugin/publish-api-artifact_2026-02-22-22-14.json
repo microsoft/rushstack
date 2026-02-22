@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/webpack-workspace-resolve-plugin"
+    }
+  ],
+  "packageName": "@rushstack/webpack-workspace-resolve-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
