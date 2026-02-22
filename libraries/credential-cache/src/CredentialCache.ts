@@ -14,6 +14,12 @@ import {
 } from '@rushstack/node-core-library';
 
 import schemaJson from './schemas/credentials.schema.json';
+import type {
+  CredentialCache as ICredentialCacheJson,
+  CredentialCacheEntry as ICredentialCacheEntryJson
+} from './schemas/credentials.schema.json.d.ts';
+
+export type { ICredentialCacheEntryJson };
 
 // Polyfill for node 18
 Disposables.polyfillDisposeSymbols();
@@ -27,26 +33,11 @@ export const RUSH_USER_FOLDER_NAME: '.rush-user' = '.rush-user';
 const DEFAULT_CACHE_FILENAME: 'credentials.json' = 'credentials.json';
 const LATEST_CREDENTIALS_JSON_VERSION: string = '0.1.0';
 
-interface ICredentialCacheJson {
-  version: string;
-  cacheEntries: {
-    [credentialCacheId: string]: ICacheEntryJson;
-  };
-}
-
-interface ICacheEntryJson {
-  expires: number;
-  credential: string;
-  credentialMetadata?: object;
-}
-
 /**
  * @public
  */
-export interface ICredentialCacheEntry {
+export interface ICredentialCacheEntry extends Omit<ICredentialCacheEntryJson, 'expires'> {
   expires?: Date;
-  credential: string;
-  credentialMetadata?: object;
 }
 
 /**
@@ -62,7 +53,7 @@ export interface ICredentialCacheOptions {
  */
 export class CredentialCache implements Disposable {
   private readonly _cacheFilePath: string;
-  private readonly _cacheEntries: Map<string, ICacheEntryJson>;
+  private readonly _cacheEntries: Map<string, ICredentialCacheEntryJson>;
   private _modified: boolean = false;
   private _disposed: boolean = false;
   private readonly _supportsEditing: boolean;
@@ -78,7 +69,9 @@ export class CredentialCache implements Disposable {
     }
 
     this._cacheFilePath = cacheFilePath;
-    this._cacheEntries = new Map<string, ICacheEntryJson>(Object.entries(loadedJson?.cacheEntries || {}));
+    this._cacheEntries = new Map<string, ICredentialCacheEntryJson>(
+      Object.entries(loadedJson?.cacheEntries || {})
+    );
     this._supportsEditing = !!lockfile;
     this._lockfile = lockfile;
   }
@@ -132,7 +125,7 @@ export class CredentialCache implements Disposable {
 
     const { expires, credential, credentialMetadata } = entry;
     const expiresMilliseconds: number = expires?.getTime() || 0;
-    const existingCacheEntry: ICacheEntryJson | undefined = this._cacheEntries.get(cacheId);
+    const existingCacheEntry: ICredentialCacheEntryJson | undefined = this._cacheEntries.get(cacheId);
     if (
       existingCacheEntry?.credential !== credential ||
       existingCacheEntry?.expires !== expiresMilliseconds ||
@@ -150,7 +143,7 @@ export class CredentialCache implements Disposable {
   public tryGetCacheEntry(cacheId: string): ICredentialCacheEntry | undefined {
     this._validate(false);
 
-    const cacheEntry: ICacheEntryJson | undefined = this._cacheEntries.get(cacheId);
+    const cacheEntry: ICredentialCacheEntryJson | undefined = this._cacheEntries.get(cacheId);
     if (cacheEntry) {
       const result: ICredentialCacheEntry = {
         expires: cacheEntry.expires ? new Date(cacheEntry.expires) : undefined,
@@ -189,7 +182,7 @@ export class CredentialCache implements Disposable {
     this._validate(true);
 
     if (this._modified) {
-      const cacheEntriesJson: { [cacheId: string]: ICacheEntryJson } = {};
+      const cacheEntriesJson: { [cacheId: string]: ICredentialCacheEntryJson } = {};
       for (const [cacheId, cacheEntry] of this._cacheEntries.entries()) {
         cacheEntriesJson[cacheId] = cacheEntry;
       }
