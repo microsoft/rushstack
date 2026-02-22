@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
-  "extends": "decoupled-local-node-rig/profiles/default/config/api-extractor.json",
+  "extends": "decoupled-local-node-rig/profiles/default/config/api-extractor-base.json",
 
   "dtsRollup": {
     "enabled": true,

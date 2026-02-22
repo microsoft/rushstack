@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
-  "extends": "local-web-rig,/profiles/library/config/api-extractor.json",
+  "extends": "local-web-rig/profiles/library/config/api-extractor-base.json",
 
   "docModel": {
     "enabled": false
