@@ -12,6 +12,9 @@ parameters:
   - name: HasChangesVariableName
     type: string
     default: 'HasChanges'
+  - name: WorkingDirectory
+    type: string
+    default: '$(Build.SourcesDirectory)'
 
 steps:
   # Force-push the branch. This is safe because the branch (e.g. "automated/bump-decoupled-deps")
@@ -21,6 +24,7 @@ steps:
       git push origin ${{ parameters.BranchName }} --force
     displayName: 'Push branch'
     condition: and(succeeded(), eq(variables['${{ parameters.HasChangesVariableName }}'], 'true'))
+    workingDirectory: ${{ parameters.WorkingDirectory }}
 
   - bash: |
       set -e
@@ -109,6 +113,7 @@ steps:
     # value contains quotes or other shell metacharacters. Environment variables
     # are set by the AzDO agent outside of the shell, so they are safe regardless
     # of content.
+    workingDirectory: ${{ parameters.WorkingDirectory }}
     env:
       PR_TITLE: ${{ parameters.PrTitle }}
       PR_BODY: ${{ parameters.PrDescription }}
