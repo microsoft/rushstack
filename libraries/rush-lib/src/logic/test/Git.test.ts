@@ -19,7 +19,7 @@ describe(Git.name, () => {
         'https://host.xz/path/to/repo'
       );
       expect(Git.normalizeGitUrlForComparison('http://host.xz:80/path/to/repo')).toEqual(
-        'https://host.xz:80/path/to/repo'
+        'https://host.xz/path/to/repo'
       );
       expect(Git.normalizeGitUrlForComparison('host.xz:path/to/repo.git/')).toEqual(
         'https://host.xz/path/to/repo'
