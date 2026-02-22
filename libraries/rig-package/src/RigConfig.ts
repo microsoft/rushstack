@@ -8,34 +8,14 @@ import * as nodeResolve from 'resolve';
 import stripJsonComments from 'strip-json-comments';
 
 import { Helpers } from './Helpers';
+import type { RigConfiguration as IRigConfigJson } from './schemas/rig.schema.json.d.ts';
 
 /**
  * Represents the literal contents of the `config/rig.json` file.
  *
  * @public
  */
-export interface IRigConfigJson {
-  /**
-   * The name of the rig package to use.
-   *
-   * @remarks
-   * The name must be a valid NPM package name, and must end with the `-rig` suffix.
-   *
-   * Example: `example-rig`
-   */
-  rigPackageName: string;
-
-  /**
-   * Specify which rig profile to use from the rig package.
-   *
-   * @remarks
-   * The name must consist of lowercase alphanumeric words separated by hyphens, for example `"sample-profile"`.
-   * If the `"rigProfile"` is not specified, then the profile name `"default"` will be used.
-   *
-   * Example: `example-profile`
-   */
-  rigProfile?: string;
-}
+export type { IRigConfigJson };
 
 interface IRigConfigOptions {
   projectFolderPath: string;

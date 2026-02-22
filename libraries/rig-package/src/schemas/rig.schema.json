@@ -1,7 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Describes the config/rig.json file",
+  "title": "Rig Configuration",
   "description": "The rig.json file is a standard for sharing project configuration in a monorepo without duplicating files",
+  "x-tsdoc-release-tag": "@public",
   "type": "object",
 
   "additionalProperties": false,

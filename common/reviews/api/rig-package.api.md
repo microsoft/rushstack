@@ -28,6 +28,7 @@ export interface IRigConfig {
 
 // @public
 export interface IRigConfigJson {
+    $schema?: string;
     rigPackageName: string;
     rigProfile?: string;
 }
