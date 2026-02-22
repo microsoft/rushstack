@@ -103,7 +103,9 @@ export interface IAzureStorageAuthenticationOptions extends IAzureAuthentication
 // @public (undocumented)
 export interface ICredentialResult {
     // (undocumented)
-    credentialMetadata?: object;
+    credentialMetadata?: {
+        [k: string]: unknown;
+    };
     // (undocumented)
     credentialString: string;
     // (undocumented)
