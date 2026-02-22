@@ -41,10 +41,26 @@ extends:
       os: windows
     stages:
       # ──────────────────────────────────────────────────────────────────────────
+      # Stage 0: Wait for packages to propagate to the npm registry
+      # ──────────────────────────────────────────────────────────────────────────
+      - stage: WaitForPropagation
+        displayName: 'Wait for npm propagation'
+        jobs:
+          - job:
+            pool: server
+            timeoutInMinutes: 120
+            steps:
+              - task: Delay@1
+                displayName: 'Wait ${{ parameters.delayMinutes }} minute(s)'
+                inputs:
+                  delayForMinutes: '${{ parameters.delayMinutes }}'
+
+      # ──────────────────────────────────────────────────────────────────────────
       # Stage 1: Bump decoupled local dependencies
       # ──────────────────────────────────────────────────────────────────────────
       - stage: BumpDecoupledDeps
         displayName: 'Bump decoupled local dependencies'
+        dependsOn: WaitForPropagation
         variables:
           BranchName: 'automated/bump-decoupled-deps'
           CommitMessage: 'chore: bump decoupled local dependencies'
@@ -56,11 +72,6 @@ extends:
             steps:
               - checkout: self
                 persistCredentials: true
-
-              - bash: |
-                  echo "Waiting ${{ parameters.delayMinutes }} minute(s) for packages to propagate to npm..."
-                  sleep $(( ${{ parameters.delayMinutes }} * 60 ))
-                displayName: 'Wait for packages to propagate'
 
               - template: /common/config/azure-pipelines/templates/install-node.yaml@self
 
@@ -119,7 +130,7 @@ extends:
       # ──────────────────────────────────────────────────────────────────────────
       - stage: UpdateApiDocs
         displayName: 'Update API documentation'
-        dependsOn: [] # Run in parallel with BumpDecoupledDeps
+        dependsOn: WaitForPropagation
         variables:
           BranchName: 'automated/update-api-docs'
           CommitMessage: 'docs: update API documentation'
