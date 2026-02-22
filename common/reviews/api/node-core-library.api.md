@@ -743,7 +743,7 @@ export class JsonSchema {
 }
 
 // @public
-export type JsonSchemaVersion = 'draft-04' | 'draft-07';
+export type JsonSchemaVersion = 'draft-04' | 'draft-07' | 'draft-2019-09';
 
 // @public
 export enum JsonSyntax {

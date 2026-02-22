@@ -7,6 +7,7 @@ import { JsonSchema, type IJsonSchemaErrorInfo } from '../JsonSchema';
 const SCHEMA_PATH: string = `${__dirname}/test-data/test-schemas/test-schema.schema.json`;
 const DRAFT_04_SCHEMA_PATH: string = `${__dirname}/test-data/test-schemas/test-schema-draft-04.schema.json`;
 const DRAFT_07_SCHEMA_PATH: string = `${__dirname}/test-data/test-schemas/test-schema-draft-07.schema.json`;
+const DRAFT_2019_09_SCHEMA_PATH: string = `${__dirname}/test-data/test-schemas/test-schema-draft-2019-09.schema.json`;
 
 describe(JsonSchema.name, () => {
   const schema: JsonSchema = JsonSchema.fromFile(SCHEMA_PATH, {
@@ -50,6 +51,18 @@ describe(JsonSchema.name, () => {
 
       const jsonPath: string = `${__dirname}/test-data/test-schemas/test-valid.schema.json`;
       const jsonObject: JsonObject = JsonFile.loadAndValidate(jsonPath, schemaDraft07);
+
+      expect(jsonObject).toMatchObject({
+        exampleString: 'This is a string',
+        exampleArray: ['apple', 'banana', 'coconut']
+      });
+    });
+
+    test('validates a JSON file against a draft-2019-09 schema', () => {
+      const schemaDraft2019: JsonSchema = JsonSchema.fromFile(DRAFT_2019_09_SCHEMA_PATH);
+
+      const jsonPath: string = `${__dirname}/test-data/test-schemas/test-valid.schema.json`;
+      const jsonObject: JsonObject = JsonFile.loadAndValidate(jsonPath, schemaDraft2019);
 
       expect(jsonObject).toMatchObject({
         exampleString: 'This is a string',
@@ -118,6 +131,22 @@ describe(JsonSchema.name, () => {
 
       expect(errorDetails).toMatchSnapshot();
     });
+  });
+
+  test('validates objects against a draft-2019-09 schema', () => {
+    const schemaDraft2019: JsonSchema = JsonSchema.fromLoadedObject({
+      $schema: 'https://json-schema.org/draft/2019-09/schema#',
+      title: 'Test draft-2019-09 schema',
+      type: 'object',
+      properties: {
+        exampleString: { type: 'string' }
+      },
+      additionalProperties: false,
+      required: ['exampleString']
+    });
+
+    expect(() => schemaDraft2019.validateObject({ exampleString: 'This is a string' }, '')).not.toThrow();
+    expect(() => schemaDraft2019.validateObject({} as JsonObject, '')).toThrow();
   });
 
   test('accepts vendor extension keywords by default', () => {
