@@ -8,7 +8,7 @@
       "cleanFiles": [{ "includeGlobs": ["temp/schema-dts", "temp/schema-dts-formatted"] }],
 
       "tasksByName": {
-        "json-schema-typings": {
+        "json-schema-typings-unformatted": {
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-json-schema-typings-plugin",
             "pluginName": "json-schema-typings-plugin",
