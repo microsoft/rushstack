@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/credential-cache"
+    }
+  ],
+  "packageName": "@rushstack/credential-cache",
+  "email": "iclanton@users.noreply.github.com"
+}

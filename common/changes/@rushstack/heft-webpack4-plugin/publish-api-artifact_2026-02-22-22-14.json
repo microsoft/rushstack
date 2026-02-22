@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/heft-webpack4-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack4-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

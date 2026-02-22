@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/webpack-embedded-dependencies-plugin"
+    }
+  ],
+  "packageName": "@rushstack/webpack-embedded-dependencies-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

@@ -42,6 +42,9 @@ extends:
                 - output: pipelineArtifact
                   targetPath: $(Build.ArtifactStagingDirectory)/packages
                   artifactName: packages
+                - output: pipelineArtifact
+                  targetPath: $(Build.ArtifactStagingDirectory)/api
+                  artifactName: api
             steps:
               - checkout: self
                 persistCredentials: true

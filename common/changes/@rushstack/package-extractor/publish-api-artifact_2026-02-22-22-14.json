@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/package-extractor"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor",
+  "email": "iclanton@users.noreply.github.com"
+}
