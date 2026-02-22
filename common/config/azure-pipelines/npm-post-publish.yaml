@@ -1,0 +1,243 @@
+parameters:
+  - name: delayMinutes
+    displayName: 'Minutes to wait for packages to propagate before running'
+    type: number
+    default: 5
+
+variables:
+  - name: FORCE_COLOR
+    value: 1
+
+resources:
+  pipelines:
+    - pipeline: npmPublish
+      source: 'rushstack NPM Publish'
+      trigger:
+        branches:
+          include:
+            - main
+    - pipeline: npmPublishRush
+      source: 'rushstack NPM Publish (rush)'
+      trigger:
+        branches:
+          include:
+            - main
+  repositories:
+    - repository: 1esPipelines
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
+  parameters:
+    pool:
+      name: Azure-Pipelines-1ESPT-ExDShared
+      os: windows
+    stages:
+      # ──────────────────────────────────────────────────────────────────────────
+      # Stage 1: Bump decoupled local dependencies
+      # ──────────────────────────────────────────────────────────────────────────
+      - stage: BumpDecoupledDeps
+        displayName: 'Bump decoupled local dependencies'
+        variables:
+          BranchName: 'automated/bump-decoupled-deps'
+          CommitMessage: 'chore: bump decoupled local dependencies'
+        jobs:
+          - job:
+            pool:
+              name: publish-rushstack
+              os: linux
+            steps:
+              - checkout: self
+                persistCredentials: true
+
+              - bash: |
+                  echo "Waiting ${{ parameters.delayMinutes }} minute(s) for packages to propagate to npm..."
+                  sleep $(( ${{ parameters.delayMinutes }} * 60 ))
+                displayName: 'Wait for packages to propagate'
+
+              - template: /common/config/azure-pipelines/templates/install-node.yaml@self
+
+              - script: 'git config --local user.email rushbot@users.noreply.github.com'
+                displayName: 'git config email'
+
+              - script: 'git config --local user.name Rushbot'
+                displayName: 'git config name'
+
+              - script: 'node common/scripts/install-run-rush.js install'
+                displayName: 'Rush Install'
+
+              - script: 'node common/scripts/install-run-rush.js build --to repo-toolbox --verbose'
+                displayName: 'Rush Build (repo-toolbox)'
+
+              - script: 'node repo-scripts/repo-toolbox/lib-commonjs/start.js bump-decoupled-local-dependencies'
+                displayName: 'Bump decoupled local dependencies'
+
+              - script: 'node common/scripts/install-run-rush.js update'
+                displayName: 'Rush Update'
+
+              - bash: |
+                  set -e
+
+                  if git diff --quiet; then
+                    echo "No changes detected. Skipping commit and PR."
+                    echo "##vso[task.setvariable variable=HasChanges]false"
+                    exit 0
+                  fi
+
+                  echo "##vso[task.setvariable variable=HasChanges]true"
+
+                  git checkout -B $(BranchName)
+                  git add --all
+                  git commit -m "$(CommitMessage)"
+                displayName: 'Commit dependency changes'
+
+              - bash: |
+                  set -e
+
+                  node common/scripts/install-run-rush.js change \
+                    --bulk \
+                    --bump-type none \
+                    --commit-message "chore: generate change files for decoupled dependency bump"
+                displayName: 'Generate change files'
+                condition: and(succeeded(), eq(variables.HasChanges, 'true'))
+
+              - template: /common/config/azure-pipelines/templates/push-and-create-github-pr.yaml@self
+                parameters:
+                  BranchName: $(BranchName)
+                  PrTitle: $(CommitMessage)
+                  PrDescription: 'Automated PR to bump decoupled local dependencies to the latest published versions.'
+
+      # ──────────────────────────────────────────────────────────────────────────
+      # Stage 2: Update API documentation on rushstack-websites
+      # ──────────────────────────────────────────────────────────────────────────
+      - stage: UpdateApiDocs
+        displayName: 'Update API documentation'
+        dependsOn: [] # Run in parallel with BumpDecoupledDeps
+        variables:
+          BranchName: 'automated/update-api-docs'
+          CommitMessage: 'docs: update API documentation'
+        jobs:
+          - job:
+            pool:
+              name: publish-rushstack
+              os: linux
+            steps:
+              - checkout: self
+                persistCredentials: true
+
+              - template: /common/config/azure-pipelines/templates/install-node.yaml@self
+
+              # Download the api artifact from the triggering publish pipeline.
+              # AzDO automatically resolves which pipeline resource triggered this run.
+              - task: DownloadPipelineArtifact@2
+                displayName: 'Download API review files'
+                inputs:
+                  artifact: api
+                  path: $(Pipeline.Workspace)/api
+
+              # Install and build only api-documenter, which is needed to generate
+              # the markdown output from the *.api.json files.
+              - script: 'node common/scripts/install-run-rush.js install'
+                displayName: 'Rush Install'
+
+              - script: 'node common/scripts/install-run-rush.js build --to @microsoft/api-documenter --verbose'
+                displayName: 'Rush Build (api-documenter)'
+
+              # Run api-documenter to generate markdown files from the *.api.json inputs.
+              - script: 'node apps/api-documenter/bin/api-documenter markdown --input-folder $(Pipeline.Workspace)/api --output-folder $(Pipeline.Workspace)/api-markdown'
+                displayName: 'Generate API markdown'
+
+              # Clone the rushstack-websites repo, update the API docs folder, and
+              # create or update a PR with the changes.
+              - bash: |
+                  set -e
+
+                  # ── Extract credentials from git config ──
+                  # persistCredentials injects an authorization header we can reuse for
+                  # cloning the websites repo and for GitHub API calls.
+                  AUTH_HEADER=$(git config --get-regexp 'http\..*\.extraheader' | head -1 | sed 's/^[^ ]* //')
+                  if [ -z "$AUTH_HEADER" ]; then
+                    echo "##[error]Could not extract authorization header from git config."
+                    exit 1
+                  fi
+
+                  WEBSITES_REPO="https://github.com/microsoft/rushstack-websites.git"
+                  WEBSITES_DIR="$(Pipeline.Workspace)/rushstack-websites"
+
+                  # Clone the websites repo using the same credentials
+                  git -c "http.extraheader=$AUTH_HEADER" clone --depth 1 "$WEBSITES_REPO" "$WEBSITES_DIR"
+                  cd "$WEBSITES_DIR"
+
+                  git config --local user.email rushbot@users.noreply.github.com
+                  git config --local user.name Rushbot
+
+                  # ── Update the API docs folder ──
+                  # Clear the existing pages and replace with freshly generated markdown.
+                  API_DOCS_DIR="websites/api.rushstack.io/docs/pages"
+                  rm -rf "$API_DOCS_DIR"
+                  mkdir -p "$API_DOCS_DIR"
+                  cp -r "$(Pipeline.Workspace)/api-markdown/." "$API_DOCS_DIR/"
+
+                  # ── Check for changes and commit ──
+                  if git diff --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
+                    echo "No API documentation changes detected."
+                    echo "##vso[task.setvariable variable=HasChanges]false"
+                    exit 0
+                  fi
+
+                  echo "##vso[task.setvariable variable=HasChanges]true"
+
+                  git checkout -B $(BranchName)
+                  git add --all
+                  git commit -m "$(CommitMessage)"
+
+                  # ── Push and create/update PR ──
+                  git -c "http.extraheader=$AUTH_HEADER" push origin $(BranchName) --force
+
+                  REPO_SLUG="microsoft/rushstack-websites"
+                  API_BASE="https://api.github.com/repos/${REPO_SLUG}"
+
+                  # Helper to call the GitHub API and fail with a visible error
+                  github_api() {
+                    local CURL_CFG RESPONSE HTTP_CODE BODY
+                    CURL_CFG=$(mktemp)
+                    trap 'rm -f "$CURL_CFG"' RETURN
+                    echo "-H \"${AUTH_HEADER}\"" > "$CURL_CFG"
+                    echo '-H "Accept: application/vnd.github+json"' >> "$CURL_CFG"
+
+                    RESPONSE=$(curl -s -w "\n%{http_code}" -K "$CURL_CFG" "$@")
+                    HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+                    BODY=$(echo "$RESPONSE" | sed '$d')
+
+                    if [[ "$HTTP_CODE" -ge 200 && "$HTTP_CODE" -lt 300 ]]; then
+                      echo "$BODY"
+                    else
+                      echo "##[error]GitHub API returned HTTP ${HTTP_CODE}:" >&2
+                      echo "$BODY" >&2
+                      return 1
+                    fi
+                  }
+
+                  EXISTING_PR=$(github_api \
+                    "${API_BASE}/pulls?head=microsoft:$(BranchName)&state=open" \
+                    | jq '.[0].number // empty')
+
+                  if [ -n "$EXISTING_PR" ]; then
+                    echo "Updating existing PR #${EXISTING_PR}"
+                    github_api -X PATCH \
+                      "${API_BASE}/pulls/${EXISTING_PR}" \
+                      -d "$(jq -n --arg body "$PR_BODY" '{body: $body}')" > /dev/null
+                  else
+                    echo "Creating new PR"
+                    github_api -X POST \
+                      "${API_BASE}/pulls" \
+                      -d "$(jq -n \
+                        --arg title "$(CommitMessage)" \
+                        --arg body "Automated PR to update API reference documentation from the latest published packages." \
+                        --arg head "$(BranchName)" \
+                        --arg base "main" \
+                        '{title: $title, body: $body, head: $head, base: $base}')" > /dev/null
+                  fi
+                displayName: 'Update rushstack-websites and create PR'
