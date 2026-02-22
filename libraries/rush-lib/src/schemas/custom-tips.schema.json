@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Rush custom-tips.json config file",
+  "title": "Rush Custom Tips Configuration",
   "description": "The config file for adding tips to specific messages.",
 
   "type": "object",

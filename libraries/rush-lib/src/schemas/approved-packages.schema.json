@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Rush approved packages config file",
+  "title": "Rush Approved Packages Configuration",
   "description": "For use with the Rush tool, this file tracks a list of NPM packages that have been approved for usage. This schema is used by two config files browser-approved-packages.json and nonbrowser-approved-packages.jsons. See http://rushjs.io for details.",
 
   "definitions": {

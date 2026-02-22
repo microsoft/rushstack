@@ -1,7 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Rush experiments.json config file",
+  "title": "Rush Experiments Configuration",
   "description": "For use with the Rush tool, this file allows repo maintainers to enable and disable experimental Rush features.",
+  "x-tsdoc-release-tag": "@beta",
 
   "type": "object",
   "properties": {
@@ -79,7 +80,7 @@
       "type": "boolean"
     },
     "exemptDecoupledDependenciesBetweenSubspaces": {
-      "description": "Rush has a policy that normally requires Rush projects to specify `workspace:*` in package.json when depending on other projects in the workspace, unless they are explicitly declared as `decoupledLocalDependencies in rush.json. Enabling this experiment will remove that requirement for dependencies belonging to a different subspace. This is useful for large product groups who work in separate subspaces and generally prefer to consume each other's packages via the NPM registry.",
+      "description": "Rush has a policy that normally requires Rush projects to specify `workspace:*` in package.json when depending on other projects in the workspace, unless they are explicitly declared as `decoupledLocalDependencies` in rush.json. Enabling this experiment will remove that requirement for dependencies belonging to a different subspace. This is useful for large product groups who work in separate subspaces and generally prefer to consume each other's packages via the NPM registry.",
       "type": "boolean"
     },
     "omitAppleDoubleFilesFromBuildCache": {

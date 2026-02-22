@@ -1,8 +1,10 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Rush subspace config file.",
+  "title": "Rush Subspaces Configuration",
   "description": "The configuration file for enabling the subspaces feature in rush. This is an EXPERIMENTAL feature which is not yet fully implemented. To opt into the experiment, simply toggle the 'enabled' property in this file.",
   "type": "object",
+
+  "required": ["subspacesEnabled", "subspaceNames"],
 
   "properties": {
     "$schema": {

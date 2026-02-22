@@ -369,13 +369,12 @@ export interface ICobuildContext {
     runnerId: string;
 }
 
-// @beta (undocumented)
-export interface ICobuildJson {
-    // (undocumented)
+// @beta
+export type ICobuildJson = {
+    $schema?: string;
     cobuildFeatureEnabled: boolean;
-    // (undocumented)
     cobuildLockProvider: string;
-}
+};
 
 // @beta (undocumented)
 export interface ICobuildLockProvider {
@@ -462,6 +461,7 @@ export interface IExecutionResult {
 
 // @beta
 export interface IExperimentsJson {
+    $schema?: string;
     allowCobuildWithoutCache?: boolean;
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
     buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
@@ -473,6 +473,7 @@ export interface IExperimentsJson {
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitAppleDoubleFilesFromBuildCache?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
+    phasedCommands?: boolean;
     printEventHooksOutputToConsole?: boolean;
     rushAlerts?: boolean;
     useIPCScriptsInWatchMode?: boolean;

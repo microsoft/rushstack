@@ -137,7 +137,7 @@ export interface IAzureAuthenticationBaseOptions {
  */ export interface ICredentialResult {
   credentialString: string;
   expiresOn?: Date;
-  credentialMetadata?: object;
+  credentialMetadata?: { [k: string]: unknown };
 }
 
 /**
