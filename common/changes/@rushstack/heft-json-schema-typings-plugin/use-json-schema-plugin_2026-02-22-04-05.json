@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-json-schema-typings-plugin",
+      "comment": "Fix TSDoc parse warnings caused by `@` characters in generated type definitions. The `json-schema-to-typescript` library emits JSDoc comments containing raw JSON Schema pattern values (e.g. `\"^@[^\\s]*$\"`), which TSDoc interprets as tag indicators. These values are now wrapped in backtick code spans to prevent the warnings.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-json-schema-typings-plugin"
+}
