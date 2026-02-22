@@ -175,7 +175,7 @@ export class MessageRouter {
 
   private static _getNormalizedRule(rule: IConfigMessageReportingRule): IReportingRule {
     return {
-      logLevel: (rule.logLevel || 'none') as ExtractorLogLevel,
+      logLevel: rule.logLevel || 'none',
       addToApiReportFile: rule.addToApiReportFile || false
     };
   }

@@ -1,7 +1,6 @@
 {
   "title": "API Extractor Configuration",
   "description": "Describes how the API Extractor tool will process a project.",
-  "x-tsdoc-release-tag": "@public",
   "type": "object",
   "properties": {
     "$schema": {
@@ -53,40 +52,6 @@
 
     "compiler": {
       "description": "Determines how the TypeScript compiler engine will be invoked by API Extractor.",
-      "allOf": [{ "$ref": "#/definitions/configCompiler" }]
-    },
-
-    "apiReport": {
-      "description": "Configures how the API report file (*.api.md) will be generated.",
-      "allOf": [{ "$ref": "#/definitions/configApiReport" }]
-    },
-
-    "docModel": {
-      "description": "Configures how the doc model file (*.api.json) will be generated.",
-      "allOf": [{ "$ref": "#/definitions/configDocModel" }]
-    },
-
-    "dtsRollup": {
-      "description": "Configures how the .d.ts rollup file will be generated.",
-      "allOf": [{ "$ref": "#/definitions/configDtsRollup" }]
-    },
-
-    "tsdocMetadata": {
-      "description": "Configures how the tsdoc-metadata.json file will be generated.",
-      "allOf": [{ "$ref": "#/definitions/configTsdocMetadata" }]
-    },
-
-    "messages": {
-      "description": "Configures how API Extractor reports error and warning messages produced during analysis.",
-      "allOf": [{ "$ref": "#/definitions/extractorMessagesConfig" }]
-    }
-  },
-  "required": ["mainEntryPointFilePath"],
-  "additionalProperties": false,
-
-  "definitions": {
-    "configCompiler": {
-      "description": "Determines how the TypeScript compiler engine will be invoked by API Extractor.",
       "type": "object",
       "properties": {
         "tsconfigFilePath": {
@@ -105,14 +70,8 @@
       "additionalProperties": false
     },
 
-    "apiReportVariant": {
-      "description": "The allowed variations of API reports.",
-      "type": "string",
-      "enum": ["public", "beta", "alpha", "complete"]
-    },
-
-    "configApiReport": {
-      "description": "Configures how the API report files (*.api.md) will be generated.",
+    "apiReport": {
+      "description": "Configures how the API report file (*.api.md) will be generated.",
       "type": "object",
       "properties": {
         "enabled": {
@@ -129,7 +88,8 @@
           "description": "To support different approval requirements for different API levels, multiple \"variants\" of the API report can be generated.  The \"reportVariants\" setting specifies a list of variants to be generated.  If omitted, by default only the \"complete\" variant will be generated, which includes all `@internal`, `@alpha`, `@beta`, and `@public` items.  Other possible variants are \"alpha\" (`@alpha` + `@beta` + `@public`), \"beta\" (`@beta` + `@public`), and \"public\" (`@public` only).",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/apiReportVariant"
+            "type": "string",
+            "enum": ["public", "beta", "alpha", "complete"]
           }
         },
 
@@ -163,13 +123,7 @@
       "additionalProperties": false
     },
 
-    "releaseTagForTrim": {
-      "description": "The allowed release tags that can be used to trim API items.",
-      "type": "string",
-      "enum": ["@internal", "@alpha", "@beta", "@public"]
-    },
-
-    "configDocModel": {
+    "docModel": {
       "description": "Configures how the doc model file (*.api.json) will be generated.",
       "type": "object",
       "properties": {
@@ -193,7 +147,7 @@
           "description": "Specifies a list of release tags that will be trimmed from the doc model. The default value is `[\"@internal\"]`.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/releaseTagForTrim"
+            "enum": ["@internal", "@alpha", "@beta", "@public"]
           },
           "uniqueItems": true
         }
@@ -202,7 +156,7 @@
       "additionalProperties": false
     },
 
-    "configDtsRollup": {
+    "dtsRollup": {
       "description": "Configures how the .d.ts rollup file will be generated.",
       "type": "object",
       "properties": {
@@ -235,7 +189,7 @@
       "additionalProperties": false
     },
 
-    "configTsdocMetadata": {
+    "tsdocMetadata": {
       "description": "Configures how the tsdoc-metadata.json file will be generated.",
       "type": "object",
       "properties": {
@@ -251,53 +205,53 @@
       "additionalProperties": false
     },
 
-    "extractorMessagesConfig": {
+    "messages": {
       "description": "Configures how API Extractor reports error and warning messages produced during analysis.",
       "type": "object",
       "properties": {
         "compilerMessageReporting": {
           "description": "Configures handling of diagnostic messages generating the TypeScript compiler while analyzing the input .d.ts files.",
-          "allOf": [{ "$ref": "#/definitions/extractorMessageReportingTable" }]
+          "$ref": "#/definitions/extractorMessageReportingTable"
         },
         "extractorMessageReporting": {
           "description": "Configures handling of messages reported by API Extractor during its analysis.",
-          "allOf": [{ "$ref": "#/definitions/extractorMessageReportingTable" }]
+          "$ref": "#/definitions/extractorMessageReportingTable"
         },
         "tsdocMessageReporting": {
           "description": "Configures handling of messages reported by the TSDoc parser when analyzing code comments.",
-          "allOf": [{ "$ref": "#/definitions/extractorMessageReportingTable" }]
+          "$ref": "#/definitions/extractorMessageReportingTable"
         }
       },
       "additionalProperties": false
-    },
+    }
+  },
+  "required": ["mainEntryPointFilePath"],
+  "additionalProperties": false,
 
+  "definitions": {
     "extractorMessageReportingTable": {
       "type": "object",
       "description": "Specifies a table of reporting rules for different message identifiers, and also the default rule used for identifiers that do not appear in the table. The key is a message identifier for the associated type of message, or \"default\" to specify the default policy. For example, the key might be \"TS2551\" (a compiler message), \"tsdoc-link-tag-unescaped-text\" (a TSDOc message), or \"ae-extra-release-tag\" (a message related to the API Extractor analysis).",
       "patternProperties": {
         ".+": {
-          "$ref": "#/definitions/configMessageReportingRule"
+          "type": "object",
+          "description": "Configures reporting for a given message identifier.",
+          "properties": {
+            "logLevel": {
+              "type": "string",
+              "description": "Specifies whether the message should be written to the the tool's output log. Note that the \"addToApiReportFile\" property may supersede this option.",
+              "enum": ["error", "warning", "none"]
+            },
+            "addToApiReportFile": {
+              "type": "boolean",
+              "description": "If API Extractor is configured to write an API review file (.api.md), then the message will be written inside that file.  If the API review file is NOT being written, then the message is instead logged according to the \"logLevel\" option."
+            }
+          },
+          "additionalProperties": false,
+          "required": ["logLevel"]
         }
       },
       "additionalProperties": false
-    },
-
-    "configMessageReportingRule": {
-      "type": "object",
-      "description": "Configures reporting for a given message identifier.",
-      "properties": {
-        "logLevel": {
-          "type": "string",
-          "description": "Specifies whether the message should be written to the the tool's output log. Note that the \"addToApiReportFile\" property may supersede this option.",
-          "enum": ["error", "warning", "none"]
-        },
-        "addToApiReportFile": {
-          "type": "boolean",
-          "description": "If API Extractor is configured to write an API review file (.api.md), then the message will be written inside that file.  If the API review file is NOT being written, then the message is instead logged according to the \"logLevel\" option."
-        }
-      },
-      "additionalProperties": false,
-      "required": ["logLevel"]
     }
   }
 }
