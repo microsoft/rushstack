@@ -88,7 +88,7 @@ jobs:
         working-directory: repo-a
 
       - name: Collect JSON schemas
-        run: node repo-scripts/repo-toolbox/lib-commonjs/start.js collect-json-schemas --output-path ${GITHUB_WORKSPACE}/artifacts/json-schemas
+        run: node repo-scripts/repo-toolbox/lib-commonjs/start.js collect-project-files --subfolder temp/json-schemas --output-path ${GITHUB_WORKSPACE}/artifacts/json-schemas
         working-directory: repo-a
 
       - name: Clone another copy of the repo to test the build cache

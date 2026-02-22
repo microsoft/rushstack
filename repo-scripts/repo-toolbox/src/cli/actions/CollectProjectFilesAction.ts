@@ -45,23 +45,33 @@ async function* _getFolderItemsRecursiveAsync(
   }
 }
 
-export class CollectJsonSchemasAction extends CommandLineAction {
+export class CollectProjectFilesAction extends CommandLineAction {
   private readonly _outputPathParameter: IRequiredCommandLineStringParameter;
+  private readonly _subfolderParameter: IRequiredCommandLineStringParameter;
 
   private readonly _terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
     super({
-      actionName: 'collect-json-schemas',
-      summary: 'Generates JSON schema files based on rush.json inventory',
-      documentation: "Use this to update the repo's JSON schema files"
+      actionName: 'collect-project-files',
+      summary: 'Collects files from a subfolder of each project into a single output directory',
+      documentation:
+        'Iterates over all Rush projects, collects files from the specified subfolder,' +
+        ' deduplicates by relative path and content, and writes them to the output directory.'
     });
 
     this._terminal = terminal;
 
+    this._subfolderParameter = this.defineStringParameter({
+      parameterLongName: '--subfolder',
+      description: 'The subfolder within each project to collect files from (e.g. "temp/json-schemas").',
+      argumentName: 'SUBFOLDER',
+      required: true
+    });
+
     this._outputPathParameter = this.defineStringParameter({
       parameterLongName: '--output-path',
-      description: 'Path to the output directory for the generated JSON schema files.',
+      description: 'Path to the output directory for the collected files.',
       argumentName: 'PATH',
       required: true
     });
@@ -71,6 +81,7 @@ export class CollectJsonSchemasAction extends CommandLineAction {
     const terminal: ITerminal = this._terminal;
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
+    const subfolder: string = this._subfolderParameter.value;
     const outputPath: string = path.resolve(this._outputPathParameter.value);
 
     const contentByAbsolutePathByRelativePath: Map<string, Map<string, string[]>> = new Map();
@@ -78,26 +89,30 @@ export class CollectJsonSchemasAction extends CommandLineAction {
     await Async.forEachAsync(
       rushConfiguration.projects,
       async ({ projectFolder }: RushConfigurationProject) => {
-        const schemaFiles: AsyncIterable<IFolderItemToCopy> = _getFolderItemsRecursiveAsync(
-          `${projectFolder}/temp/json-schemas`,
+        const files: AsyncIterable<IFolderItemToCopy> = _getFolderItemsRecursiveAsync(
+          `${projectFolder}/${subfolder}`,
           ''
         );
-        await Async.forEachAsync(schemaFiles, async ({ absolutePath, relativePath, content }) => {
-          let contentByAbsolutePath: Map<string, string[]> | undefined =
-            contentByAbsolutePathByRelativePath.get(relativePath);
-          if (!contentByAbsolutePath) {
-            contentByAbsolutePath = new Map();
-            contentByAbsolutePathByRelativePath.set(relativePath, contentByAbsolutePath);
-          }
+        await Async.forEachAsync(
+          files,
+          async ({ absolutePath, relativePath, content }) => {
+            let contentByAbsolutePath: Map<string, string[]> | undefined =
+              contentByAbsolutePathByRelativePath.get(relativePath);
+            if (!contentByAbsolutePath) {
+              contentByAbsolutePath = new Map();
+              contentByAbsolutePathByRelativePath.set(relativePath, contentByAbsolutePath);
+            }
 
-          let absolutePaths: string[] | undefined = contentByAbsolutePath.get(content);
-          if (!absolutePaths) {
-            absolutePaths = [];
-            contentByAbsolutePath.set(content, absolutePaths);
-          }
+            let absolutePaths: string[] | undefined = contentByAbsolutePath.get(content);
+            if (!absolutePaths) {
+              absolutePaths = [];
+              contentByAbsolutePath.set(content, absolutePaths);
+            }
 
-          absolutePaths.push(absolutePath);
-        }, { concurrency: 5 });
+            absolutePaths.push(absolutePath);
+          },
+          { concurrency: 5 }
+        );
       },
       { concurrency: 5 }
     );
@@ -109,7 +124,7 @@ export class CollectJsonSchemasAction extends CommandLineAction {
         encounteredCollisions = true;
 
         terminal.writeErrorLine(
-          `Multiple projects generated different contents for the JSON schema "${relativePath}":`
+          `Multiple projects generated different contents for "${relativePath}" in "${subfolder}":`
         );
 
         for (const absolutePaths of contentByAbsolutePath.values()) {

@@ -1,10 +1,7 @@
 steps:
   - script: 'node repo-scripts/repo-toolbox/lib-commonjs/start.js record-versions --out-file $(Build.ArtifactStagingDirectory)/published-versions/published-versions.json'
     displayName: 'Record Published Versions'
-  - script: 'node repo-scripts/repo-toolbox/lib-commonjs/start.js collect-json-schemas --output-path $(Build.ArtifactStagingDirectory)/json-schemas'
+  - script: 'node repo-scripts/repo-toolbox/lib-commonjs/start.js collect-project-files --subfolder temp/json-schemas --output-path $(Build.ArtifactStagingDirectory)/json-schemas'
     displayName: 'Collect JSON Schemas'
-  - bash: |
-      set -e
-      mkdir -p "$(Build.ArtifactStagingDirectory)/api"
-      cp common/temp/api/*.api.json "$(Build.ArtifactStagingDirectory)/api/"
+  - script: 'node repo-scripts/repo-toolbox/lib-commonjs/start.js collect-project-files --subfolder temp/api --output-path $(Build.ArtifactStagingDirectory)/api'
     displayName: 'Collect API review files'
