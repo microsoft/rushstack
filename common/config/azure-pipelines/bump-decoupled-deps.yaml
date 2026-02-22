@@ -100,73 +100,8 @@ extends:
                 displayName: 'Generate change files'
                 condition: and(succeeded(), eq(variables.HasChanges, 'true'))
 
-              - bash: |
-                  set -e
-                  git push origin $(BranchName) --force
-                displayName: 'Push branch'
-                condition: and(succeeded(), eq(variables.HasChanges, 'true'))
-
-              - bash: |
-                  set -e
-
-                  # Derive owner/repo from the git remote
-                  REPO_SLUG=$(git remote get-url origin | sed -E 's#.*github\.com[:/](.+/[^.]+)(\.git)?$#\1#')
-                  echo "Repository: ${REPO_SLUG}"
-
-                  # Extract the authorization header that AzDO configured via persistCredentials
-                  AUTH_HEADER=$(git config --get-regexp 'http\..*\.extraheader' | head -1 | sed 's/^[^ ]* //')
-                  if [ -z "$AUTH_HEADER" ]; then
-                    echo "##[error]Could not extract authorization header from git config"
-                    exit 1
-                  fi
-
-                  PR_TITLE="$(CommitMessage)"
-                  PR_BODY="Automated PR to bump decoupled local dependencies to the latest published versions."
-                  API_BASE="https://api.github.com/repos/${REPO_SLUG}"
-
-                  # Helper to call the GitHub API and fail with a visible error
-                  github_api() {
-                    local RESPONSE HTTP_CODE
-                    RESPONSE=$(curl -s -w "\n%{http_code}" "$@")
-                    HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-                    BODY=$(echo "$RESPONSE" | sed '$d')
-
-                    if [[ "$HTTP_CODE" -ge 200 && "$HTTP_CODE" -lt 300 ]]; then
-                      echo "$BODY"
-                    else
-                      echo "::error::GitHub API returned HTTP ${HTTP_CODE}:" >&2
-                      echo "$BODY" >&2
-                      return 1
-                    fi
-                  }
-
-                  # Check if a PR already exists for this branch
-                  OWNER=$(echo "${REPO_SLUG}" | cut -d/ -f1)
-                  EXISTING_PR=$(github_api \
-                    -H "$AUTH_HEADER" \
-                    -H "Accept: application/vnd.github+json" \
-                    "${API_BASE}/pulls?head=${OWNER}:$(BranchName)&state=open" \
-                    | jq '.[0].number // empty')
-
-                  if [ -n "$EXISTING_PR" ]; then
-                    echo "Updating existing PR #${EXISTING_PR}"
-                    github_api -X PATCH \
-                      -H "$AUTH_HEADER" \
-                      -H "Accept: application/vnd.github+json" \
-                      "${API_BASE}/pulls/${EXISTING_PR}" \
-                      -d "$(jq -n --arg body "$PR_BODY" '{body: $body}')"
-                  else
-                    echo "Creating new PR"
-                    github_api -X POST \
-                      -H "$AUTH_HEADER" \
-                      -H "Accept: application/vnd.github+json" \
-                      "${API_BASE}/pulls" \
-                      -d "$(jq -n \
-                        --arg title "$PR_TITLE" \
-                        --arg body "$PR_BODY" \
-                        --arg head "$(BranchName)" \
-                        --arg base "main" \
-                        '{title: $title, body: $body, head: $head, base: $base}')"
-                  fi
-                displayName: 'Create or update GitHub PR'
-                condition: and(succeeded(), eq(variables.HasChanges, 'true'))
+              - template: /common/config/azure-pipelines/templates/push-and-create-github-pr.yaml@self
+                parameters:
+                  BranchName: $(BranchName)
+                  PrTitle: $(CommitMessage)
+                  PrDescription: 'Automated PR to bump decoupled local dependencies to the latest published versions.'
