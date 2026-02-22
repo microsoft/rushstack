@@ -4,7 +4,7 @@
   "operationSettings": [
     {
       "operationName": "_phase:build",
-      "outputFolderNames": [".heft", "lib-dts", "lib-esm", "temp/api"]
+      "outputFolderNames": [".heft", "lib-dts", "lib-esm"]
     },
     {
       "operationName": "_phase:test",
