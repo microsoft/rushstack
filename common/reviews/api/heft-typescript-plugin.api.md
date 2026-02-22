@@ -10,12 +10,6 @@ import semver from 'semver';
 import { SyncHook } from 'tapable';
 import type * as _TTypeScript from 'typescript';
 
-// @beta (undocumented)
-export interface AdditionalModuleKindToEmit {
-    moduleKind: "commonjs" | "amd" | "umd" | "system" | "es2015" | "esnext";
-    outFolderName: string;
-}
-
 // @internal (undocumented)
 export function _getTsconfigFilePath(heftConfiguration: HeftConfiguration, tsconfigRelativePath: string | undefined): string;
 
@@ -43,6 +37,12 @@ export interface IChangedFilesHookOptions {
 export interface _ICompilerCapabilities {
     incrementalProgram: boolean;
     solutionBuilder: boolean;
+}
+
+// @beta (undocumented)
+export interface IEmitModuleKind {
+    moduleKind: "commonjs" | "amd" | "umd" | "system" | "es2015" | "esnext";
+    outFolderName: string;
 }
 
 // @internal (undocumented)
@@ -92,29 +92,12 @@ export interface IPartialTsconfigCompilerOptions {
 }
 
 // @beta (undocumented)
-export interface ITypeScriptPluginAccessor {
-    // (undocumented)
-    readonly onChangedFilesHook: SyncHook<IChangedFilesHookOptions>;
-}
-
-// @beta (undocumented)
-export function loadPartialTsconfigFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal, typeScriptConfigurationJson: TypeScriptBuildConfiguration | undefined): Promise<IPartialTsconfig | undefined>;
-
-// @internal (undocumented)
-export function _loadTsconfig(options: _ILoadTsconfigOptions): _TTypeScript.ParsedCommandLine;
-
-// @beta (undocumented)
-export function loadTypeScriptConfigurationFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal): Promise<TypeScriptBuildConfiguration | undefined>;
-
-// @internal (undocumented)
-export function _loadTypeScriptToolAsync(options: _ILoadTypeScriptToolOptions): Promise<_ILoadedTypeScriptTool>;
-
-export { _TTypeScript }
+export type IStaticAssetsCopyConfiguration = ITypeScriptConfigurationJson['staticAssetsToCopy'];
 
 // @beta
-export interface TypeScriptBuildConfiguration {
+export interface ITypeScriptConfigurationJson {
     $schema?: string;
-    additionalModuleKindsToEmit?: AdditionalModuleKindToEmit[];
+    additionalModuleKindsToEmit?: IEmitModuleKind[];
     buildProjectReferences?: boolean;
     emitCjsExtensionForCommonJS?: boolean;
     emitMjsExtensionForESModule?: boolean;
@@ -128,6 +111,26 @@ export interface TypeScriptBuildConfiguration {
     };
     useTranspilerWorker?: boolean;
 }
+
+// @beta (undocumented)
+export interface ITypeScriptPluginAccessor {
+    // (undocumented)
+    readonly onChangedFilesHook: SyncHook<IChangedFilesHookOptions>;
+}
+
+// @beta (undocumented)
+export function loadPartialTsconfigFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal, typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined): Promise<IPartialTsconfig | undefined>;
+
+// @internal (undocumented)
+export function _loadTsconfig(options: _ILoadTsconfigOptions): _TTypeScript.ParsedCommandLine;
+
+// @beta (undocumented)
+export function loadTypeScriptConfigurationFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal): Promise<ITypeScriptConfigurationJson | undefined>;
+
+// @internal (undocumented)
+export function _loadTypeScriptToolAsync(options: _ILoadTypeScriptToolOptions): Promise<_ILoadedTypeScriptTool>;
+
+export { _TTypeScript }
 
 // @public
 export const TypeScriptPluginName: 'typescript-plugin';

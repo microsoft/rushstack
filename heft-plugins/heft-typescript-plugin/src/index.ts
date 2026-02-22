@@ -8,18 +8,14 @@
  */
 
 export type {
+  IEmitModuleKind,
+  IStaticAssetsCopyConfiguration,
+  ITypeScriptConfigurationJson,
   IPartialTsconfigCompilerOptions,
   IPartialTsconfig,
   IChangedFilesHookOptions,
   ITypeScriptPluginAccessor
 } from './TypeScriptPlugin';
-/**
- * @beta
- */
-export type {
-  TypeScriptBuildConfiguration,
-  AdditionalModuleKindToEmit
-} from './schemas/typescript.schema.json.d.ts';
 
 export {
   PLUGIN_NAME as TypeScriptPluginName,

@@ -23,8 +23,18 @@ import type {
 import { TypeScriptBuilder, type ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import anythingSchema from './schemas/anything.schema.json';
 import typescriptConfigSchema from './schemas/typescript.schema.json';
-import type { TypeScriptBuildConfiguration } from './schemas/typescript.schema.json.d.ts';
+import type {
+  TypeScriptBuildConfiguration as ITypeScriptConfigurationJson,
+  AdditionalModuleKindToEmit as IEmitModuleKind
+} from './schemas/typescript.schema.json.d.ts';
 import { getTsconfigFilePath } from './tsconfigLoader';
+
+/**
+ * @beta
+ */
+export type IStaticAssetsCopyConfiguration = ITypeScriptConfigurationJson['staticAssetsToCopy'];
+
+export { IEmitModuleKind, ITypeScriptConfigurationJson };
 
 /**
  * The name of the plugin, as specified in heft-plugin.json
@@ -68,9 +78,7 @@ export interface ITypeScriptPluginAccessor {
   readonly onChangedFilesHook: SyncHook<IChangedFilesHookOptions>;
 }
 
-type IStaticAssetsCopyConfiguration = TypeScriptBuildConfiguration['staticAssetsToCopy'];
-
-const TYPESCRIPT_LOADER_CONFIG: ConfigurationFile.IProjectConfigurationFileSpecification<TypeScriptBuildConfiguration> =
+const TYPESCRIPT_LOADER_CONFIG: ConfigurationFile.IProjectConfigurationFileSpecification<ITypeScriptConfigurationJson> =
   {
     projectRelativeFilePath: 'config/typescript.json',
     jsonSchemaObject: typescriptConfigSchema,
@@ -93,8 +101,8 @@ const TYPESCRIPT_LOADER_CONFIG: ConfigurationFile.IProjectConfigurationFileSpeci
 export async function loadTypeScriptConfigurationFileAsync(
   heftConfiguration: HeftConfiguration,
   terminal: ITerminal
-): Promise<TypeScriptBuildConfiguration | undefined> {
-  return await heftConfiguration.tryLoadProjectConfigurationFileAsync<TypeScriptBuildConfiguration>(
+): Promise<ITypeScriptConfigurationJson | undefined> {
+  return await heftConfiguration.tryLoadProjectConfigurationFileAsync<ITypeScriptConfigurationJson>(
     TYPESCRIPT_LOADER_CONFIG,
     terminal
   );
@@ -109,7 +117,7 @@ const _partialTsconfigFilePromiseCache: Map<string, Promise<IPartialTsconfig | u
 export async function loadPartialTsconfigFileAsync(
   heftConfiguration: HeftConfiguration,
   terminal: ITerminal,
-  typeScriptConfigurationJson: TypeScriptBuildConfiguration | undefined
+  typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined
 ): Promise<IPartialTsconfig | undefined> {
   const buildFolderPath: string = heftConfiguration.buildFolderPath;
 
@@ -175,7 +183,7 @@ export async function loadPartialTsconfigFileAsync(
 }
 
 interface ITypeScriptConfigurationJsonAndPartialTsconfigFile {
-  typeScriptConfigurationJson: TypeScriptBuildConfiguration | undefined;
+  typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined;
   partialTsconfigFile: IPartialTsconfig | undefined;
 }
 
@@ -330,7 +338,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
   ): Promise<ITypeScriptConfigurationJsonAndPartialTsconfigFile> {
     const terminal: ITerminal = taskSession.logger.terminal;
 
-    const typeScriptConfigurationJson: TypeScriptBuildConfiguration | undefined =
+    const typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined =
       await loadTypeScriptConfigurationFileAsync(heftConfiguration, terminal);
 
     const partialTsconfigFile: IPartialTsconfig | undefined = await loadPartialTsconfigFileAsync(
