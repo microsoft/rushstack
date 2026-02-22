@@ -258,8 +258,12 @@ export class RigConfig implements IRigConfig {
   public static get jsonSchemaObject(): object {
     if (RigConfig._jsonSchemaObject === undefined) {
       const jsonSchemaContent: string = fs.readFileSync(RigConfig.jsonSchemaPath).toString();
-      RigConfig._jsonSchemaObject = JSON.parse(jsonSchemaContent);
+      // Remove nonstandard fields that are not part of the JSON Schema specification
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { 'x-tsdoc-release-tag': _, ...schemaObject } = JSON.parse(jsonSchemaContent);
+      RigConfig._jsonSchemaObject = schemaObject;
     }
+
     return RigConfig._jsonSchemaObject!;
   }
 
@@ -500,6 +504,7 @@ export class RigConfig implements IRigConfig {
           throw new Error(`Unsupported field ${JSON.stringify(key)}`);
       }
     }
+
     if (!json.rigPackageName) {
       throw new Error('Missing required field "rigPackageName"');
     }

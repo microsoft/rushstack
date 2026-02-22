@@ -191,19 +191,12 @@ describe(RigConfig.name, () => {
   it('validates a rig.json file using the schema', () => {
     const rigConfigFilePath: string = path.join(testProjectFolder, 'config', 'rig.json');
 
-    // Remove fields that AJV strict mode doesn't recognize
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { 'x-tsdoc-release-tag': _releaseTag, ...schemaObject } = RigConfig.jsonSchemaObject as Record<
-      string,
-      unknown
-    >;
-
     const ajv = new Ajv({
       verbose: true
     });
 
     // Compile our schema
-    const validateRigFile: ValidateFunction = ajv.compile(schemaObject);
+    const validateRigFile: ValidateFunction = ajv.compile(RigConfig.jsonSchemaObject);
 
     // Load the rig.json file
     const rigConfigFileContent: string = fs.readFileSync(rigConfigFilePath).toString();
