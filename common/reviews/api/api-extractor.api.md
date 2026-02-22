@@ -16,7 +16,7 @@ import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 
 // @public
-export type ApiReportVariant = 'public' | 'beta' | 'alpha' | 'complete';
+export type ApiReportVariant = "public" | "beta" | "alpha" | "complete";
 
 // @public
 export class CompilerState {
@@ -195,12 +195,16 @@ export interface IConfigApiReport {
     reportFolder?: string;
     reportTempFolder?: string;
     reportVariants?: ApiReportVariant[];
-    tagsToReport?: Readonly<Record<`@${string}`, boolean>>;
+    tagsToReport?: {
+        [k: string]: boolean;
+    };
 }
 
 // @public
 export interface IConfigCompiler {
-    overrideTsconfig?: {};
+    overrideTsconfig?: {
+        [k: string]: unknown;
+    };
     skipLibCheck?: boolean;
     tsconfigFilePath?: string;
 }
@@ -226,37 +230,37 @@ export interface IConfigDtsRollup {
 
 // @public
 export interface IConfigFile {
+    $schema?: string;
     apiReport?: IConfigApiReport;
     bundledPackages?: string[];
     compiler?: IConfigCompiler;
     docModel?: IConfigDocModel;
-    // @beta
     dtsRollup?: IConfigDtsRollup;
-    enumMemberOrder?: EnumMemberOrder;
+    enumMemberOrder?: "by-name" | "preserve";
     extends?: string;
     mainEntryPointFilePath: string;
     messages?: IExtractorMessagesConfig;
-    newlineKind?: 'crlf' | 'lf' | 'os';
+    newlineKind?: "crlf" | "lf" | "os";
     projectFolder?: string;
     testMode?: boolean;
-    // @beta
     tsdocMetadata?: IConfigTsdocMetadata;
 }
 
 // @public
 export interface IConfigMessageReportingRule {
     addToApiReportFile?: boolean;
-    logLevel: ExtractorLogLevel;
+    logLevel: "error" | "warning" | "none";
 }
 
 // @public
 export interface IConfigMessageReportingTable {
-    [messageId: string]: IConfigMessageReportingRule;
+    // (undocumented)
+    [k: string]: IConfigMessageReportingRule;
 }
 
 // @public
 export interface IConfigTsdocMetadata {
-    enabled: boolean;
+    enabled?: boolean;
     tsdocMetadataFilePath?: string;
 }
 
@@ -308,6 +312,6 @@ export interface IExtractorMessagesConfig {
 }
 
 // @public
-export type ReleaseTagForTrim = '@internal' | '@alpha' | '@beta' | '@public';
+export type ReleaseTagForTrim = "@internal" | "@alpha" | "@beta" | "@public";
 
 ```

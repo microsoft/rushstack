@@ -1208,7 +1208,8 @@ export class ExtractorConfig {
           break;
       }
 
-      const enumMemberOrder: EnumMemberOrder = configObject.enumMemberOrder ?? EnumMemberOrder.ByName;
+      const enumMemberOrder: EnumMemberOrder =
+        (configObject.enumMemberOrder as EnumMemberOrder) ?? EnumMemberOrder.ByName;
 
       extractorConfigParameters = {
         projectFolder: projectFolder,
