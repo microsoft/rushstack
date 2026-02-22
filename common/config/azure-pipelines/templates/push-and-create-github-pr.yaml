@@ -14,6 +14,8 @@ parameters:
     default: 'HasChanges'
 
 steps:
+  # Force-push the branch. This is safe because the branch (e.g. "automated/bump-decoupled-deps")
+  # is exclusively owned by this pipeline and is never manually committed to.
   - bash: |
       set -e
       git push origin ${{ parameters.BranchName }} --force
@@ -23,64 +25,90 @@ steps:
   - bash: |
       set -e
 
-      # Derive owner/repo from the git remote
+      # ── Resolve the GitHub owner/repo from the git remote URL ──
+      # Handles both HTTPS (https://github.com/owner/repo.git) and SSH (git@github.com:owner/repo.git) URLs.
       REPO_SLUG=$(git remote get-url origin | sed -E 's#.*github\.com[:/](.+/[^.]+)(\.git)?$#\1#')
       echo "Repository: ${REPO_SLUG}"
+      OWNER=$(echo "${REPO_SLUG}" | cut -d/ -f1)
 
-      # Extract the authorization header that AzDO configured via persistCredentials
+      # ── Extract credentials from the AzDO-managed git config ──
+      # When "persistCredentials: true" is set on the checkout step, AzDO injects an
+      # "http.<url>.extraheader" git config entry containing an "AUTHORIZATION: basic <token>"
+      # header for the GitHub service connection. We reuse this for GitHub API calls so that
+      # no additional secrets or PATs need to be configured.
       AUTH_HEADER=$(git config --get-regexp 'http\..*\.extraheader' | head -1 | sed 's/^[^ ]* //')
       if [ -z "$AUTH_HEADER" ]; then
         echo "##[error]Could not extract authorization header from git config. Ensure persistCredentials is enabled on the checkout step."
         exit 1
       fi
 
-      PR_TITLE="${{ parameters.PrTitle }}"
-      PR_BODY="${{ parameters.PrDescription }}"
+      # ── Write credentials to a temporary curl config file ──
+      # This avoids passing the auth token as a command-line argument, which would be
+      # visible in process listings (e.g. "ps aux") and could leak into logs.
+      CURL_CONFIG=$(mktemp)
+      trap 'rm -f "$CURL_CONFIG"' EXIT
+      echo "-H \"${AUTH_HEADER}\"" > "$CURL_CONFIG"
+      echo '-H "Accept: application/vnd.github+json"' >> "$CURL_CONFIG"
+
       API_BASE="https://api.github.com/repos/${REPO_SLUG}"
 
-      # Helper to call the GitHub API and fail with a visible error
+      # ── GitHub API helper ──
+      # Calls the GitHub API using the temporary curl config file for auth headers.
+      # On success (2xx), prints the response body to stdout.
+      # On failure, prints the HTTP status and error body to stderr and returns non-zero.
       github_api() {
-        local RESPONSE HTTP_CODE
-        RESPONSE=$(curl -s -w "\n%{http_code}" "$@")
+        local RESPONSE HTTP_CODE BODY
+        RESPONSE=$(curl -s -w "\n%{http_code}" -K "$CURL_CONFIG" "$@")
         HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
         BODY=$(echo "$RESPONSE" | sed '$d')
 
         if [[ "$HTTP_CODE" -ge 200 && "$HTTP_CODE" -lt 300 ]]; then
           echo "$BODY"
         else
-          echo "::error::GitHub API returned HTTP ${HTTP_CODE}:" >&2
+          echo "##[error]GitHub API returned HTTP ${HTTP_CODE}:" >&2
           echo "$BODY" >&2
           return 1
         fi
       }
 
-      # Check if a PR already exists for this branch
-      OWNER=$(echo "${REPO_SLUG}" | cut -d/ -f1)
+      # ── Check for an existing open PR from this branch ──
+      # The GitHub "List pull requests" API filters by "head=OWNER:BRANCH" to find any
+      # open PR already targeting this branch. If one exists, we update it instead of
+      # creating a duplicate.
       EXISTING_PR=$(github_api \
-        -H "$AUTH_HEADER" \
-        -H "Accept: application/vnd.github+json" \
         "${API_BASE}/pulls?head=${OWNER}:${{ parameters.BranchName }}&state=open" \
         | jq '.[0].number // empty')
 
       if [ -n "$EXISTING_PR" ]; then
+        # ── Update existing PR ──
+        # Only the description is updated; the title is left as-is since the branch was
+        # already force-pushed with the new commits above.
         echo "Updating existing PR #${EXISTING_PR}"
         github_api -X PATCH \
-          -H "$AUTH_HEADER" \
-          -H "Accept: application/vnd.github+json" \
           "${API_BASE}/pulls/${EXISTING_PR}" \
-          -d "$(jq -n --arg body "$PR_BODY" '{body: $body}')"
+          -d "$(jq -n --arg body "$PR_BODY" '{body: $body}')" > /dev/null
       else
+        # ── Create new PR ──
+        # jq --arg safely handles JSON escaping of the title and body, so special
+        # characters (quotes, newlines, etc.) in the parameter values are safe.
         echo "Creating new PR"
         github_api -X POST \
-          -H "$AUTH_HEADER" \
-          -H "Accept: application/vnd.github+json" \
           "${API_BASE}/pulls" \
           -d "$(jq -n \
             --arg title "$PR_TITLE" \
             --arg body "$PR_BODY" \
             --arg head "${{ parameters.BranchName }}" \
             --arg base "${{ parameters.TargetBranch }}" \
-            '{title: $title, body: $body, head: $head, base: $base}')"
+            '{title: $title, body: $body, head: $head, base: $base}')" > /dev/null
       fi
     displayName: 'Create or update GitHub PR'
     condition: and(succeeded(), eq(variables['${{ parameters.HasChangesVariableName }}'], 'true'))
+    # Pass PR title and description as environment variables rather than using
+    # ${{ }} template expansion inside the script. Template expansion would
+    # substitute the raw string into the Bash source code, which breaks if the
+    # value contains quotes or other shell metacharacters. Environment variables
+    # are set by the AzDO agent outside of the shell, so they are safe regardless
+    # of content.
+    env:
+      PR_TITLE: ${{ parameters.PrTitle }}
+      PR_BODY: ${{ parameters.PrDescription }}
