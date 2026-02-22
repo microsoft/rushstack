@@ -129,13 +129,6 @@ extends:
               name: publish-rushstack
               os: linux
             steps:
-              # Check out both repos. AzDO places them in subdirectories named after the
-              # repo alias when multiple checkouts are used:
-              #   $(Pipeline.Workspace)/s/self  (rushstack)
-              #   $(Pipeline.Workspace)/s/rushstackWebsites  (rushstack-websites)
-              - checkout: self
-                persistCredentials: true
-
               - checkout: rushstackWebsites
                 persistCredentials: true
 
@@ -149,20 +142,10 @@ extends:
                   artifact: api
                   path: $(Pipeline.Workspace)/api
 
-              # Install and build only api-documenter, which is needed to generate
-              # the markdown output from the *.api.json files.
-              - script: 'node common/scripts/install-run-rush.js install'
-                displayName: 'Rush Install'
-                workingDirectory: $(Pipeline.Workspace)/s/self
-
-              - script: 'node common/scripts/install-run-rush.js build --to @microsoft/api-documenter --verbose'
-                displayName: 'Rush Build (api-documenter)'
-                workingDirectory: $(Pipeline.Workspace)/s/self
-
-              # Run api-documenter to generate markdown files from the *.api.json inputs.
-              - script: 'node apps/api-documenter/bin/api-documenter markdown --input-folder $(Pipeline.Workspace)/api --output-folder $(Pipeline.Workspace)/api-markdown'
+              # Install api-documenter from the package feed (just published) and
+              # generate markdown from the *.api.json inputs.
+              - script: 'npx @microsoft/api-documenter@latest markdown --input-folder $(Pipeline.Workspace)/api --output-folder $(Pipeline.Workspace)/api-markdown'
                 displayName: 'Generate API markdown'
-                workingDirectory: $(Pipeline.Workspace)/s/self
 
               # Update the API docs folder in rushstack-websites and commit.
               - bash: |
@@ -190,11 +173,9 @@ extends:
                   git add --all
                   git commit -m "$(CommitMessage)"
                 displayName: 'Update API docs and commit'
-                workingDirectory: $(Pipeline.Workspace)/s/rushstackWebsites
 
               - template: /common/config/azure-pipelines/templates/push-and-create-github-pr.yaml@self
                 parameters:
                   BranchName: $(BranchName)
                   PrTitle: $(CommitMessage)
                   PrDescription: 'Automated PR to update API reference documentation from the latest published packages.'
-                  WorkingDirectory: $(Pipeline.Workspace)/s/rushstackWebsites
