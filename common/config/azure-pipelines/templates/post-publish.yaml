@@ -3,8 +3,3 @@ steps:
     displayName: 'Record Published Versions'
   - script: 'node repo-scripts/repo-toolbox/lib-commonjs/start.js collect-json-schemas --output-path $(Build.ArtifactStagingDirectory)/json-schemas'
     displayName: 'Collect JSON Schemas'
-  - bash: |
-      set -e
-      mkdir -p "$(Build.ArtifactStagingDirectory)/api"
-      cp common/temp/api/*.api.json "$(Build.ArtifactStagingDirectory)/api/"
-    displayName: 'Collect API review files'
