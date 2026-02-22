@@ -1,17 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
-
-  "mainEntryPointFilePath": "<projectFolder>/lib-dts/index.d.ts",
-
-  "apiReport": {
-    "enabled": true,
-    "reportFolder": "../../../common/reviews/api"
-  },
-
-  "docModel": {
-    "enabled": true,
-    "apiJsonFilePath": "../../../common/temp/api/<unscopedPackageName>.api.json"
-  },
+  "extends": "local-node-rig/profiles/default/config/api-extractor.json",
 
   "dtsRollup": {
     "enabled": true,
