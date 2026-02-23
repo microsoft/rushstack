@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-image-typings-generator-plugin": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",

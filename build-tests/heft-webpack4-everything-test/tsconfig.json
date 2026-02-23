@@ -3,7 +3,7 @@
 
   "compilerOptions": {
     "outDir": "lib-esm",
-    "rootDir": "src",
+    "rootDirs": ["src", "temp/image-typings"],
 
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",

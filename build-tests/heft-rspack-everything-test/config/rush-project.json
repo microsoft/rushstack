@@ -4,7 +4,7 @@
   "operationSettings": [
     {
       "operationName": "_phase:build",
-      "outputFolderNames": ["lib-esm", "lib-commonjs", "dist"]
+      "outputFolderNames": ["lib-esm", "lib-commonjs", "dist", "temp/image-typings"]
     },
     {
       "operationName": "_phase:test",

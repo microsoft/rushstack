@@ -3,9 +3,8 @@
 
   "compilerOptions": {
     "outDir": "lib-esm",
-    "rootDir": "src",
+    "rootDirs": ["src", "temp/image-typings"],
 
-    "allowArbitraryExtensions": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

@@ -199,6 +199,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-image-typings-generator-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
       "allowedCategories": [ "tests" ]
     },

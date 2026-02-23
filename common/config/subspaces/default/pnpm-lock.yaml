@@ -2095,6 +2095,9 @@ importers:
       '@rushstack/heft-dev-cert-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-dev-cert-plugin
+      '@rushstack/heft-image-typings-generator-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-image-typings-generator-plugin
       '@rushstack/heft-jest-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-jest-plugin
@@ -2249,6 +2252,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      '@rushstack/heft-image-typings-generator-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-image-typings-generator-plugin
       '@rushstack/heft-jest-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-jest-plugin
@@ -2408,6 +2414,9 @@ importers:
       '@rushstack/heft-dev-cert-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-dev-cert-plugin
+      '@rushstack/heft-image-typings-generator-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-image-typings-generator-plugin
       '@rushstack/heft-jest-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-jest-plugin
@@ -2468,6 +2477,9 @@ importers:
       '@rushstack/heft-dev-cert-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-dev-cert-plugin
+      '@rushstack/heft-image-typings-generator-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-image-typings-generator-plugin
       '@rushstack/heft-jest-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-jest-plugin
