@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-buildxl-graph-plugin",
-  "version": "5.169.2",
+  "version": "5.169.3",
   "description": "Rush plugin for generating a BuildXL graph.",
   "repository": {
     "type": "git",
