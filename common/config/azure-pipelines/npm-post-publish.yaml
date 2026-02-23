@@ -79,7 +79,7 @@ extends:
           CommitMessage: 'chore: bump decoupled local dependencies'
         jobs:
           - job:
-            displayName: 'Bump and create PR'
+            displayName: 'Bump decoupled dependencies and create PR'
             pool:
               name: publish-rushstack
               os: linux
@@ -150,7 +150,7 @@ extends:
           CommitMessage: 'docs: update API documentation'
         jobs:
           - job:
-            displayName: 'Generate docs and create PR'
+            displayName: 'Update API docs and create PR'
             pool:
               name: publish-rushstack
               os: linux
