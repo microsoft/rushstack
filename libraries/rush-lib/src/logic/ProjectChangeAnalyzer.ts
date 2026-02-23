@@ -558,42 +558,45 @@ export class ProjectChangeAnalyzer {
       }
     }
 
-    const changedCatalogPackages: Map<string, Set<string>> = new Map<string, Set<string>>();
+    const changedCatalogPackages: Map<string, Set<string>> = new Map();
+    const currentCatalogEntries: Map<string, Record<string, string>> = new Map(
+      Object.entries(currentCatalogs)
+    );
 
     if (oldCatalogs === undefined) {
       // Could not load old catalogs — treat all packages in all current catalogs as changed
-      for (const [catalogName, packages] of Object.entries(currentCatalogs)) {
+      for (const [catalogName, packages] of currentCatalogEntries) {
         changedCatalogPackages.set(catalogName, new Set(Object.keys(packages)));
       }
     } else {
       // Check current catalogs for new or modified package entries
-      for (const [catalogName, packages] of Object.entries(currentCatalogs)) {
+      for (const [catalogName, packages] of currentCatalogEntries) {
         const oldPackages: Record<string, string> | undefined = oldCatalogs[catalogName];
         if (!oldPackages) {
           // Entire catalog is new — all packages in it are changed
           changedCatalogPackages.set(catalogName, new Set(Object.keys(packages)));
           continue;
         }
-        const changedPkgs: Set<string> = new Set<string>();
+        const changedPackages: Set<string> = new Set();
         for (const [pkgName, version] of Object.entries(packages)) {
           if (oldPackages[pkgName] !== version) {
-            changedPkgs.add(pkgName);
+            changedPackages.add(pkgName);
           }
         }
         // Check for packages that were removed from this catalog
         for (const pkgName of Object.keys(oldPackages)) {
-          if (!(pkgName in packages)) {
-            changedPkgs.add(pkgName);
+          if (!Object.prototype.hasOwnProperty.call(packages, pkgName)) {
+            changedPackages.add(pkgName);
           }
         }
-        if (changedPkgs.size > 0) {
-          changedCatalogPackages.set(catalogName, changedPkgs);
+        if (changedPackages.size > 0) {
+          changedCatalogPackages.set(catalogName, changedPackages);
         }
       }
 
       // Check for catalogs that were entirely removed
       for (const [catalogName, oldPackages] of Object.entries(oldCatalogs)) {
-        if (!(catalogName in currentCatalogs)) {
+        if (!Object.prototype.hasOwnProperty.call(currentCatalogs, catalogName)) {
           changedCatalogPackages.set(catalogName, new Set(Object.keys(oldPackages)));
         }
       }
@@ -602,38 +605,28 @@ export class ProjectChangeAnalyzer {
     if (changedCatalogPackages.size > 0) {
       // Check each project in the subspace to see if it depends on a changed catalog package
       const subspaceProjects: RushConfigurationProject[] = subspace.getProjects();
-      for (const project of subspaceProjects) {
-        const { dependencies, devDependencies, optionalDependencies, peerDependencies } = project.packageJson;
-        const allDeps: Record<string, string>[] = [
-          dependencies ?? {},
-          devDependencies ?? {},
-          optionalDependencies ?? {},
-          peerDependencies ?? {}
-        ];
+      subspaceProjects.forEach((project) => {
+        const { dependencies, devDependencies, optionalDependencies, peerDependencies } =
+          project.packageJson;
+        const allDependencies: Set<[string, string]> = new Set(
+          [dependencies, devDependencies, optionalDependencies, peerDependencies].flatMap((deps) =>
+            Object.entries(deps ?? {})
+          )
+        );
 
-        let isAffected: boolean = false;
-        for (const deps of allDeps) {
-          if (isAffected) {
-            break;
-          }
-          for (const [depName, depVersion] of Object.entries(deps)) {
-            const specifier: DependencySpecifier = DependencySpecifier.parseWithCache(depName, depVersion);
-            if (specifier.specifierType === DependencySpecifierType.Catalog) {
-              // versionSpecifier holds the catalog name (empty string for "catalog:")
-              const catalogName: string = specifier.versionSpecifier || 'default';
-              const changedPkgs: Set<string> | undefined = changedCatalogPackages.get(catalogName);
-              if (changedPkgs?.has(depName)) {
-                isAffected = true;
-                break;
-              }
+        for (const [depName, depVersion] of allDependencies) {
+          const specifier: DependencySpecifier = DependencySpecifier.parseWithCache(depName, depVersion);
+          if (specifier.specifierType === DependencySpecifierType.Catalog) {
+            // versionSpecifier holds the catalog name (empty string for "catalog:")
+            const catalogName: string = specifier.versionSpecifier || 'default';
+            const changedPkgs: Set<string> | undefined = changedCatalogPackages.get(catalogName);
+            if (changedPkgs?.has(depName)) {
+              changedProjects.add(project);
+              return;
             }
           }
         }
-
-        if (isAffected) {
-          changedProjects.add(project);
-        }
-      }
+      });
     }
   }
 }
