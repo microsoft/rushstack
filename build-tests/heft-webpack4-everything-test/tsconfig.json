@@ -6,6 +6,8 @@
     "rootDirs": ["src", "temp/image-typings"],
 
     "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "jsx": "react",
     "declaration": true,
     "sourceMap": true,
