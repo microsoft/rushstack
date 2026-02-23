@@ -490,6 +490,7 @@ export class TypeScriptBuilder {
     this._cleanupWorker();
     //#endregion
 
+    this._emitModulePackageJsonFiles(ts);
     this._logEmitPerformance(ts);
 
     //#region FINAL_ANALYSIS
@@ -556,6 +557,8 @@ export class TypeScriptBuilder {
     tool.solutionBuilder.build();
     this._cleanupWorker();
     //#endregion
+
+    this._emitModulePackageJsonFiles(ts);
 
     if (pendingTranspilePromises.size) {
       const emitResults: TTypescript.EmitResult[] = await Promise.all(pendingTranspilePromises.values());
@@ -818,7 +821,8 @@ export class TypeScriptBuilder {
             moduleKind,
             additionalModuleKindToEmit.outFolderName,
             /* isPrimary */ false,
-            undefined
+            undefined,
+            additionalModuleKindToEmit.emitModulePackageJson
           );
 
           if (outFolderKey) {
@@ -834,7 +838,8 @@ export class TypeScriptBuilder {
     moduleKind: TTypescript.ModuleKind,
     outFolderPath: string,
     isPrimary: boolean,
-    jsExtensionOverride: string | undefined
+    jsExtensionOverride: string | undefined,
+    emitModulePackageJson: boolean = false
   ): string | undefined {
     let outFolderName: string;
     if (path.isAbsolute(outFolderPath)) {
@@ -885,8 +890,8 @@ export class TypeScriptBuilder {
       outFolderPath,
       moduleKind,
       jsExtensionOverride,
-
-      isPrimary
+      isPrimary,
+      emitModulePackageJson
     });
 
     return `${outFolderName}:${jsExtensionOverride || '.js'}`;
@@ -972,6 +977,7 @@ export class TypeScriptBuilder {
           `Emitting program "${innerCompilerOptions!.configFilePath}"`
         );
 
+        this._emitModulePackageJsonFiles(ts);
         this._logEmitPerformance(ts);
 
         // Reset performance counters
@@ -1126,6 +1132,30 @@ export class TypeScriptBuilder {
     );
 
     return host;
+  }
+
+  /**
+   * For each module kind configured with `emitModulePackageJson: true`, writes a
+   * `package.json` with the appropriate `"type"` field to ensure Node.js correctly
+   * interprets `.js` files in the output folder.
+   */
+  private _emitModulePackageJsonFiles(ts: ExtendedTypeScript): void {
+    for (const moduleKindToEmit of this._moduleKindsToEmit) {
+      if (!moduleKindToEmit.emitModulePackageJson) {
+        continue;
+      }
+
+      const isEsm: boolean =
+        moduleKindToEmit.moduleKind === ts.ModuleKind.ES2015 ||
+        moduleKindToEmit.moduleKind === ts.ModuleKind.ESNext;
+      const moduleType: string = isEsm ? 'module' : 'commonjs';
+
+      const packageJsonPath: string = `${moduleKindToEmit.outFolderPath}package.json`;
+      const packageJsonContent: string = `{\n  "type": "${moduleType}"\n}\n`;
+
+      ts.sys.writeFile(packageJsonPath, packageJsonContent);
+      this._typescriptTerminal.writeVerboseLine(`Wrote ${packageJsonPath} with "type": "${moduleType}"`);
+    }
   }
 
   private _parseModuleKind(ts: ExtendedTypeScript, moduleKindName: string): TTypescript.ModuleKind {

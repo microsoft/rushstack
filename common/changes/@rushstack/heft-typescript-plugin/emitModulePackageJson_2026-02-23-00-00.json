@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-typescript-plugin",
+      "comment": "Add `emitModulePackageJson` option for `additionalModuleKindsToEmit` entries. When enabled, a `package.json` with the appropriate `\"type\"` field (`\"module\"` for ESNext/ES2015 or `\"commonjs\"` for CommonJS) is written to the output folder after compilation. This ensures Node.js correctly interprets `.js` files in the output folder, fixing ESM import failures on Node 18.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-typescript-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

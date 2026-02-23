@@ -31,6 +31,11 @@
           "outFolderName": {
             "type": "string",
             "pattern": "[^\\\\\\/]"
+          },
+
+          "emitModulePackageJson": {
+            "description": "If true, a package.json file will be written to the output folder with the appropriate \"type\" field (e.g. \"module\" for ESNext/ES2015, or \"commonjs\" for CommonJS). This ensures that Node.js correctly interprets .js files in the output folder regardless of the nearest ancestor package.json \"type\" setting.",
+            "type": "boolean"
           }
         },
         "required": ["moduleKind", "outFolderName"]
