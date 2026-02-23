@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["fileExtensions"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "fileExtensions": {
+      "type": "array",
+      "items": {
+        "pattern": "\\.[^\\\\/]+$",
+        "type": "string"
+      }
+    },
+    "generatedTsFolder": {
+      "type": "string"
+    },
+    "secondaryGeneratedTsFolders": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sourceFolderPath": {
+      "type": "string"
+    }
+  }
+}

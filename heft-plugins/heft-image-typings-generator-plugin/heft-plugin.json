@@ -1,10 +1,16 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
   "taskPlugins": [
     {
-      "pluginName": "image-typings-plugin",
-      "entryPoint": "./lib-commonjs/ImageTypingsGeneratorHeftPlugin.js",
-      "optionsSchema": "./lib-commonjs/schemas/image-typings-generator-plugin-options.schema.json"
+      "pluginName": "binary-assets-plugin",
+      "entryPoint": "./lib-commonjs/BinaryAssetsPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/binary-assets-options.schema.json"
+    },
+    {
+      "pluginName": "text-assets-plugin",
+      "entryPoint": "./lib-commonjs/TextAssetsPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/text-assets-options.schema.json"
     }
   ]
 }

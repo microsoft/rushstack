@@ -36,6 +36,9 @@
     "@rushstack/heft": "^1.2.3"
   },
   "dependencies": {
+    "@rushstack/heft-config-file": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "@rushstack/typings-generator": "workspace:*"
   },
   "devDependencies": {

@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["cjsOutputFolders"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "cjsOutputFolders": {
+      "type": "array",
+      "items": {
+        "pattern": "^[^\\\\]+$",
+        "type": "string"
+      }
+    },
+    "esmOutputFolders": {
+      "type": "array",
+      "items": {
+        "pattern": "^[^\\\\]+$",
+        "type": "string"
+      }
+    },
+    "configFileName": {
+      "type": "string",
+      "pattern": "^[^\\\\\\/]+\\.json$"
+    }
+  }
+}

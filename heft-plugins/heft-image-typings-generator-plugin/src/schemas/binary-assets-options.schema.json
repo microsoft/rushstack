@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["configType", "config"],
+      "properties": {
+        "configType": {
+          "type": "string",
+          "enum": ["inline"]
+        },
+        "config": {
+          "required": ["fileExtensions"],
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "$schema": {
+              "type": "string"
+            },
+            "fileExtensions": {
+              "type": "array",
+              "items": {
+                "pattern": "\\.[^\\\\/]+$",
+                "type": "string"
+              }
+            },
+            "generatedTsFolder": {
+              "type": "string"
+            },
+            "secondaryGeneratedTsFolders": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "sourceFolderPath": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["configType", "configFileName"],
+      "properties": {
+        "configType": {
+          "type": "string",
+          "enum": ["file"]
+        },
+        "configFileName": {
+          "type": "string",
+          "pattern": "^[^\\\\\\/]+\\.json$"
+        }
+      }
+    }
+  ]
+}
