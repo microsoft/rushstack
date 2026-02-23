@@ -24,13 +24,13 @@ resources:
         branches:
           include:
             - refs/heads/main
-    # - pipeline: npmPublishRush
-    #   source: 'rushstack NPM Publish (rush)'
-    #   trigger:
-    #     enabled: true
-    #     branches:
-    #       include:
-    #         - refs/heads/main
+    - pipeline: npmPublishRush
+      source: 'rushstack NPM Publish (rush)'
+      trigger:
+        enabled: true
+        branches:
+          include:
+            - refs/heads/main
   repositories:
     - repository: 1esPipelines
       type: git
