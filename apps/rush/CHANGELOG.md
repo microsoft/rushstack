@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 20 Feb 2026 00:15:23 GMT and should not be manually modified.
+This log was last generated on Mon, 23 Feb 2026 00:42:39 GMT and should not be manually modified.
+
+## 5.169.3
+Mon, 23 Feb 2026 00:42:39 GMT
+
+### Updates
+
+- Fix .npmrc syncing to common/temp incorrectly caching results, which caused pnpm-specific properties like hoist-pattern to be stripped when the same .npmrc was processed with different options.
 
 ## 5.169.2
 Fri, 20 Feb 2026 00:15:23 GMT

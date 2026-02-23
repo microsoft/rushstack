@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.169.3",
+      "tag": "@microsoft/rush_v5.169.3",
+      "date": "Mon, 23 Feb 2026 00:42:39 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix .npmrc syncing to common/temp incorrectly caching results, which caused pnpm-specific properties like hoist-pattern to be stripped when the same .npmrc was processed with different options."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.169.2",
       "tag": "@microsoft/rush_v5.169.2",
       "date": "Fri, 20 Feb 2026 00:15:23 GMT",
