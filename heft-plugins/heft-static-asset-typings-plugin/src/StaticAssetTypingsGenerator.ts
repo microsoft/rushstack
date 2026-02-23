@@ -10,8 +10,14 @@ import type {
 } from '@rushstack/heft';
 import { TypingsGenerator } from '@rushstack/typings-generator';
 import { FileSystem, Sort } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
-import type { IStaticAssetTypingsConfigurationJson, StaticAssetConfigurationFileLoader } from './types';
+import type {
+  IAssetPluginOptions,
+  IBinaryStaticAssetTypingsConfigurationJson,
+  ITextStaticAssetTypingsConfigurationJson,
+  StaticAssetConfigurationFileLoader
+} from './types';
 
 const DECLARATION: string = `/**
  * @public
@@ -30,18 +36,19 @@ export interface IStaticAssetGeneratorOptions {
    * A getter for the loader for the riggable config file in the project.
    */
   tryGetConfigAsync: StaticAssetConfigurationFileLoader;
+
   /**
    * The path to the build folder, normalized to use forward slashes as the directory separator.
    */
   slashNormalizedBuildFolderPath: string;
+
   /**
-   *
    * @param relativePath - The relative path of the file to get additional output files for.
    * @returns An array of output file names.
    */
   getAdditionalOutputFiles?: (relativePath: string) => string[];
+
   /**
-   *
    * @param relativePath - The relative path of the file being processed.
    * @param filePath - The absolute path of the file being processed.
    * @param oldVersion - The old version of the file, if any.
@@ -67,63 +74,87 @@ export interface IStaticAssetTypingsGenerator {
   runIncrementalAsync: (runOptions: IRunGeneratorOptions) => Promise<void>;
 }
 
-interface IStaticAssetTypingsConfiguration extends IStaticAssetTypingsConfigurationJson {
-  srcFolder: string;
-  generatedTsFolder: string;
-}
-
 interface IStaticAssetTypingsBuildInfoFile {
   fileVersions: [string, string][];
   pluginVersion: number;
+}
+
+export async function tryGetConfigFromPluginOptionsAsync(
+  terminal: ITerminal,
+  buildFolder: string,
+  rigConfig: HeftConfiguration['rigConfig'],
+  options: IAssetPluginOptions<IBinaryStaticAssetTypingsConfigurationJson>,
+  type: 'binary'
+): Promise<IBinaryStaticAssetTypingsConfigurationJson | undefined>;
+export async function tryGetConfigFromPluginOptionsAsync(
+  terminal: ITerminal,
+  buildFolder: string,
+  rigConfig: HeftConfiguration['rigConfig'],
+  options: IAssetPluginOptions<ITextStaticAssetTypingsConfigurationJson>,
+  type: 'text'
+): Promise<ITextStaticAssetTypingsConfigurationJson | undefined>;
+export async function tryGetConfigFromPluginOptionsAsync(
+  terminal: ITerminal,
+  buildFolder: string,
+  rigConfig: HeftConfiguration['rigConfig'],
+  options: IAssetPluginOptions<
+    IBinaryStaticAssetTypingsConfigurationJson | ITextStaticAssetTypingsConfigurationJson
+  >,
+  type: import('./getConfigFromConfigFileAsync').FileLoaderType
+): Promise<
+  IBinaryStaticAssetTypingsConfigurationJson | ITextStaticAssetTypingsConfigurationJson | undefined
+> {
+  if (options?.configType === 'inline') {
+    return options.config;
+  } else {
+    const { getConfigFromConfigFileAsync } = await import('./getConfigFromConfigFileAsync');
+    const { configFileName } = options;
+    return getConfigFromConfigFileAsync(configFileName, type, terminal, buildFolder, rigConfig);
+  }
 }
 
 /**
  * Constructs a typings generator for processing static assets
  *
  * @param taskSession - The Heft task session
- * @param heftConfiguration - The Heft configuration
+ * @param rigConfig - The Heft configuration
  * @param options - Options for the generator
  * @returns
  */
 export async function createTypingsGeneratorAsync(
   taskSession: IHeftTaskSession,
-  heftConfiguration: HeftConfiguration,
   options: IStaticAssetGeneratorOptions
 ): Promise<IStaticAssetTypingsGenerator | false> {
   const { tryGetConfigAsync, slashNormalizedBuildFolderPath } = options;
 
   const { terminal } = taskSession.logger;
 
-  const configurationJson: IStaticAssetTypingsConfigurationJson | undefined = await tryGetConfigAsync(
-    terminal,
-    slashNormalizedBuildFolderPath,
-    heftConfiguration.rigConfig
-  );
+  const configuration: IBinaryStaticAssetTypingsConfigurationJson | undefined =
+    await tryGetConfigAsync(terminal);
 
-  if (!configurationJson) {
+  if (!configuration) {
     return false;
   }
 
-  const secondaryGeneratedTsFolders: string[] | undefined =
-    configurationJson.secondaryGeneratedTsFolders?.map(
-      (folder) => `${slashNormalizedBuildFolderPath}/${folder}`
-    );
-
-  const { generatedTsFolder = 'temp/static-asset-ts', sourceFolderPath = 'src' } = configurationJson;
-
-  const configuration: IStaticAssetTypingsConfiguration = {
-    ...configurationJson,
-    srcFolder: `${slashNormalizedBuildFolderPath}/${sourceFolderPath}`,
-    generatedTsFolder: `${slashNormalizedBuildFolderPath}/${generatedTsFolder}`,
-    secondaryGeneratedTsFolders
-  };
+  const {
+    generatedTsFolders = ['temp/static-asset-ts'],
+    sourceFolderPath = 'src',
+    fileExtensions
+  } = configuration;
+  const resolvedGeneratedTsFolders: string[] | undefined = generatedTsFolders.map(
+    (folder) => `${slashNormalizedBuildFolderPath}/${folder}`
+  );
+  const [generatedTsFolder, ...secondaryGeneratedTsFolders] = resolvedGeneratedTsFolders;
 
   const { getAdditionalOutputFiles, getVersionAndEmitOutputFilesAsync } = options;
 
   const fileVersions: Map<string, string> = new Map();
 
   const typingsGenerator: TypingsGenerator<boolean> = new TypingsGenerator<boolean>({
-    ...configuration,
+    srcFolder: `${slashNormalizedBuildFolderPath}/${sourceFolderPath}`,
+    generatedTsFolder: `${slashNormalizedBuildFolderPath}/${generatedTsFolder}`,
+    secondaryGeneratedTsFolders,
+    fileExtensions,
     terminal,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     parseAndGenerateTypings: async (

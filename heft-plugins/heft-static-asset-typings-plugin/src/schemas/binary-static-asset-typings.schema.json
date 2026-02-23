@@ -14,17 +14,16 @@
         "type": "string"
       }
     },
-    "generatedTsFolder": {
-      "type": "string"
-    },
-    "secondaryGeneratedTsFolders": {
+    "generatedTsFolders": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^[^\\\\]+$"
       }
     },
     "sourceFolderPath": {
-      "type": "string"
+      "type": "string",
+      "pattern": "^[^\\\\]+$"
     }
   }
 }

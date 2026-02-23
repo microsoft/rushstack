@@ -16,32 +16,29 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "$schema": {
-              "type": "string"
-            },
             "fileExtensions": {
               "type": "array",
               "items": {
-                "pattern": "\\.[^\\\\/]+$",
-                "type": "string"
+                "type": "string",
+                "pattern": "\\.[^\\\\/]+$"
               }
             },
-            "generatedTsFolder": {
-              "type": "string"
-            },
-            "secondaryGeneratedTsFolders": {
+            "generatedTsFolders": {
               "type": "array",
               "items": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^[^\\\\]+$"
               }
             },
             "sourceFolderPath": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^[^\\\\]+$"
             }
           }
         }
       }
     },
+
     {
       "type": "object",
       "additionalProperties": false,

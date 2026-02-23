@@ -2,22 +2,35 @@
 // See LICENSE in the project root for license information.
 
 import type { HeftConfiguration } from '@rushstack/heft';
-import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
+import { InheritanceType, ProjectConfigurationFile } from '@rushstack/heft-config-file';
 import type { ITerminal } from '@rushstack/terminal';
 
-import type { IStaticAssetTypingsConfigurationJson } from './types';
-import staticAssetSchema from './schemas/static-asset-typings.schema.json';
+import type {
+  IBinaryStaticAssetTypingsConfigurationJson,
+  ITextStaticAssetTypingsConfigurationJson
+} from './types';
+import binaryStaticAssetSchema from './schemas/binary-assets-options.schema.json';
+import textStaticAssetSchema from './schemas/text-assets-options.schema.json';
 
 const configurationFileLoaderByFileName: Map<
   string,
-  ConfigurationFile<IStaticAssetTypingsConfigurationJson>
+  ProjectConfigurationFile<
+    IBinaryStaticAssetTypingsConfigurationJson | ITextStaticAssetTypingsConfigurationJson
+  >
 > = new Map();
 
+export type FileLoaderType = 'binary' | 'text';
+
 function createConfigurationFileLoader(
-  configFileName: string
-): ConfigurationFile<IStaticAssetTypingsConfigurationJson> {
-  return new ConfigurationFile<IStaticAssetTypingsConfigurationJson>({
-    jsonSchemaObject: staticAssetSchema,
+  configFileName: string,
+  fileLoaderType: FileLoaderType
+): ProjectConfigurationFile<
+  IBinaryStaticAssetTypingsConfigurationJson | ITextStaticAssetTypingsConfigurationJson
+> {
+  return new ProjectConfigurationFile<
+    IBinaryStaticAssetTypingsConfigurationJson | ITextStaticAssetTypingsConfigurationJson
+  >({
+    jsonSchemaObject: fileLoaderType === 'binary' ? binaryStaticAssetSchema : textStaticAssetSchema,
     projectRelativeFilePath: `config/${configFileName}`,
     propertyInheritance: {
       fileExtensions: {
@@ -29,14 +42,20 @@ function createConfigurationFileLoader(
 
 export function getConfigFromConfigFileAsync(
   configFileName: string,
+  fileLoaderType: FileLoaderType,
   terminal: ITerminal,
   slashNormalizedBuildFolderPath: string,
   rigConfig: HeftConfiguration['rigConfig']
-): Promise<IStaticAssetTypingsConfigurationJson | undefined> {
-  let configurationFileLoader: ConfigurationFile<IStaticAssetTypingsConfigurationJson> | undefined =
-    configurationFileLoaderByFileName.get(configFileName);
+): Promise<
+  IBinaryStaticAssetTypingsConfigurationJson | ITextStaticAssetTypingsConfigurationJson | undefined
+> {
+  let configurationFileLoader:
+    | ProjectConfigurationFile<
+        IBinaryStaticAssetTypingsConfigurationJson | ITextStaticAssetTypingsConfigurationJson
+      >
+    | undefined = configurationFileLoaderByFileName.get(configFileName);
   if (!configurationFileLoader) {
-    configurationFileLoader = createConfigurationFileLoader(configFileName);
+    configurationFileLoader = createConfigurationFileLoader(configFileName, fileLoaderType);
     configurationFileLoaderByFileName.set(configFileName, configurationFileLoader);
   }
 

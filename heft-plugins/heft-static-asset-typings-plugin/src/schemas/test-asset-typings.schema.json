@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["fileExtensions", "cjsOutputFolders"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "fileExtensions": {
+      "type": "array",
+      "items": {
+        "pattern": "\\.[^\\\\/]+$",
+        "type": "string"
+      }
+    },
+    "generatedTsFolders": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^\\\\]+$"
+      }
+    },
+    "sourceFolderPath": {
+      "type": "string",
+      "pattern": "^[^\\\\]+$"
+    },
+    "cjsOutputFolders": {
+      "type": "array",
+      "items": {
+        "pattern": "^[^\\\\]+$",
+        "type": "string"
+      }
+    },
+    "esmOutputFolders": {
+      "type": "array",
+      "items": {
+        "pattern": "^[^\\\\]+$",
+        "type": "string"
+      }
+    }
+  }
+}
