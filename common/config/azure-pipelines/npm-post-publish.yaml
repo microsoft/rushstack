@@ -161,6 +161,14 @@ extends:
 
               - template: /common/config/azure-pipelines/templates/install-node.yaml@self
 
+              # Build the custom Docusaurus plugin for api-documenter in the
+              # rushstack-websites repo.
+              - script: 'node common/scripts/install-run-rush.js install'
+                displayName: 'Rush Install (rushstack-websites)'
+
+              - script: 'node common/scripts/install-run-rush.js build --to-except api.rushstack.io --verbose'
+                displayName: 'Rush Build to-except api.rushstack.io (rushstack-websites)'
+
               # Download the api artifact from the triggering publish pipeline.
               # AzDO automatically resolves which pipeline resource triggered this run.
               - task: DownloadPipelineArtifact@2
@@ -173,10 +181,12 @@ extends:
                   artifact: api
                   path: $(Pipeline.Workspace)/api
 
-              # Install api-documenter from the package feed (just published) and
-              # generate markdown from the *.api.json inputs.
-              - script: 'npx @microsoft/api-documenter@latest markdown --input-folder $(Pipeline.Workspace)/api --output-folder $(Pipeline.Workspace)/api-markdown'
-                displayName: 'Generate API markdown'
+              # Run api-documenter with the Docusaurus plugin from the
+              # api.rushstack.io project directory so it picks up
+              # config/api-documenter.json.
+              - script: 'npx @microsoft/api-documenter@latest generate --input-folder $(Pipeline.Workspace)/api --output-folder ./docs/pages'
+                displayName: 'Generate API documentation'
+                workingDirectory: websites/api.rushstack.io
 
               # Update the API docs folder in rushstack-websites and commit.
               - bash: |
@@ -185,11 +195,8 @@ extends:
                   git config --local user.email rushbot@users.noreply.github.com
                   git config --local user.name Rushbot
 
-                  # Clear the existing pages and replace with freshly generated markdown.
-                  API_DOCS_DIR="websites/api.rushstack.io/docs/pages"
-                  rm -rf "$API_DOCS_DIR"
-                  mkdir -p "$API_DOCS_DIR"
-                  cp -r "$(Pipeline.Workspace)/api-markdown/." "$API_DOCS_DIR/"
+                  # Move the generated nav data file to the expected location.
+                  mv websites/api.rushstack.io/docs/api_nav.json websites/api.rushstack.io/data/api_nav.json
 
                   # Check for changes (tracked and untracked)
                   if git diff --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
