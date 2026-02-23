@@ -16,7 +16,18 @@
       "cleanFiles": [{ "includeGlobs": ["dist", "lib-commonjs", "lib", "lib-esm", "lib-esnext", "lib-umd"] }],
 
       "tasksByName": {
+        "text-typings": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-static-asset-typings-plugin",
+            "pluginName": "text-assets-plugin",
+            "options": {
+              "cjsOutputFolders": ["lib-commonjs"],
+              "esmOutputFolders": ["lib-esm"]
+            }
+          }
+        },
         "typescript": {
+          "taskDependencies": ["text-typings"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-typescript-plugin"
           }

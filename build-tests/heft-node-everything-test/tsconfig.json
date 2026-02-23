@@ -5,6 +5,7 @@
     "outDir": "lib-commonjs",
     "declarationDir": "lib-dts",
     "rootDir": "src",
+    "rootDirs": ["src", "temp/text-typings"],
 
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",

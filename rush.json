@@ -1097,12 +1097,6 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@rushstack/heft-image-typings-generator-plugin",
-      "projectFolder": "heft-plugins/heft-image-typings-generator-plugin",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
       "packageName": "@rushstack/heft-isolated-typescript-transpile-plugin",
       "projectFolder": "heft-plugins/heft-isolated-typescript-transpile-plugin",
       "reviewCategory": "libraries",
@@ -1153,6 +1147,12 @@
     {
       "packageName": "@rushstack/heft-serverless-stack-plugin",
       "projectFolder": "heft-plugins/heft-serverless-stack-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-static-asset-typings-plugin",
+      "projectFolder": "heft-plugins/heft-static-asset-typings-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

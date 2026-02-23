@@ -50,7 +50,7 @@
         "image-typings": {
           "taskDependencies": ["set-browserslist-ignore-old-data-env-var"],
           "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-image-typings-generator-plugin",
+            "pluginPackage": "@rushstack/heft-static-asset-typings-plugin",
             "options": {
               "fileExtensions": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp", ".avif"],
               "generatedTsFolder": "temp/image-typings"

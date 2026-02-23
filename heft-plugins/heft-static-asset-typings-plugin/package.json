@@ -1,7 +1,7 @@
 {
-  "name": "@rushstack/heft-image-typings-generator-plugin",
+  "name": "@rushstack/heft-static-asset-typings-plugin",
   "version": "0.0.0",
-  "description": "Generate typings for images.",
+  "description": "A Heft plugin that generates TypeScript typings for static asset files such as images and text files.",
   "scripts": {
     "build": "heft build --clean",
     "start": "heft test --clean --watch",
@@ -10,7 +10,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "heft-plugins/heft-image-typings-generator-plugin"
+    "directory": "heft-plugins/heft-static-asset-typings-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
   "exports": {

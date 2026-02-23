@@ -1,6 +1,10 @@
 {
   "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json",
 
+  // The project outputs to lib-commonjs, not lib
+  "roots": ["<rootDir>/lib-commonjs"],
+  "testMatch": ["<rootDir>/lib-commonjs/**/*.test.{cjs,js}"],
+
   // Enable code coverage for Jest
   "collectCoverage": true,
   "coverageDirectory": "<rootDir>/coverage",
