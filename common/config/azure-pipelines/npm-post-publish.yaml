@@ -160,6 +160,8 @@ extends:
                 persistCredentials: true
 
               - template: /common/config/azure-pipelines/templates/install-node.yaml@self
+                parameters:
+                  NodeMajorVersion: 24
 
               # Build the custom Docusaurus plugin for api-documenter in the
               # rushstack-websites repo.
