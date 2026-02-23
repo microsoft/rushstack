@@ -48,7 +48,6 @@ extends:
     sdl:
       sourceRepositoriesToScan:
         exclude:
-          - repository: self
           - repository: rushstackWebsites
     pool:
       name: Azure-Pipelines-1ESPT-ExDShared
