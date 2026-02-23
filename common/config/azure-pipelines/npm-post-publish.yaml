@@ -43,6 +43,10 @@ resources:
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
   parameters:
+    sdl:
+      sourceRepositoriesToScan:
+        exclude:
+          - repository: rushstackWebsites
     pool:
       name: Azure-Pipelines-1ESPT-ExDShared
       os: windows
