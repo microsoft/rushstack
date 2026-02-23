@@ -96,7 +96,7 @@ extends:
               - script: 'git config --local user.name Rushbot'
                 displayName: 'git config name'
 
-              - script: 'node common/scripts/install-run-rush.js install'
+              - script: 'node common/scripts/install-run-rush.js install --to repo-toolbox'
                 displayName: 'Rush Install'
 
               - script: 'node common/scripts/install-run-rush.js build --to repo-toolbox --verbose'
