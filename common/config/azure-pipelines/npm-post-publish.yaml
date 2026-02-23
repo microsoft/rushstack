@@ -166,6 +166,10 @@ extends:
               - task: DownloadPipelineArtifact@2
                 displayName: 'Download API review files'
                 inputs:
+                  source: specific
+                  project: GitHubProjects
+                  pipeline: 'rushstack NPM Publish'
+                  runVersion: latest
                   artifact: api
                   path: $(Pipeline.Workspace)/api
 
