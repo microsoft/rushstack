@@ -20,12 +20,14 @@ resources:
     - pipeline: npmPublish
       source: 'rushstack NPM Publish'
       trigger:
+        enabled: true
         branches:
           include:
             - main
     - pipeline: npmPublishRush
       source: 'rushstack NPM Publish (rush)'
       trigger:
+        enabled: true
         branches:
           include:
             - main
@@ -46,6 +48,7 @@ extends:
     sdl:
       sourceRepositoriesToScan:
         exclude:
+          - repository: self
           - repository: rushstackWebsites
     pool:
       name: Azure-Pipelines-1ESPT-ExDShared
