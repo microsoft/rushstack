@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/module-minifier",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "Wrapper for terser to support bulk parallel minification.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
