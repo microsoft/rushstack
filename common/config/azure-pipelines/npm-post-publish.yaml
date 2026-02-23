@@ -46,6 +46,7 @@ extends:
     sdl:
       sourceRepositoriesToScan:
         exclude:
+          - repository: self
           - repository: rushstackWebsites
     pool:
       name: Azure-Pipelines-1ESPT-ExDShared
@@ -58,6 +59,7 @@ extends:
         displayName: 'Wait for npm propagation'
         jobs:
           - job:
+            displayName: 'Delay'
             pool: server
             timeoutInMinutes: 120
             steps:
@@ -77,6 +79,7 @@ extends:
           CommitMessage: 'chore: bump decoupled local dependencies'
         jobs:
           - job:
+            displayName: 'Bump and create PR'
             pool:
               name: publish-rushstack
               os: linux
@@ -147,6 +150,7 @@ extends:
           CommitMessage: 'docs: update API documentation'
         jobs:
           - job:
+            displayName: 'Generate docs and create PR'
             pool:
               name: publish-rushstack
               os: linux
