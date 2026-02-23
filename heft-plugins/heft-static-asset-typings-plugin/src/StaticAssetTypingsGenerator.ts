@@ -245,7 +245,11 @@ async function runTypingsGeneratorIncrementalAsync(
   terminal.writeLine('Finished processing static assets.');
 }
 
-function hasChanges(current: ReadonlyMap<string, string>, old: ReadonlyMap<string, string>): boolean {
+/**
+ * @internal
+ * Returns true if the current map has different entries than the old map.
+ */
+export function hasChanges(current: ReadonlyMap<string, string>, old: ReadonlyMap<string, string>): boolean {
   if (current.size !== old.size) {
     return true;
   }
