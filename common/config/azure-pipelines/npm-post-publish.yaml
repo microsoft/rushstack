@@ -4,6 +4,8 @@ parameters:
     type: number
     default: 5
 
+name: 'Post-publish $(Date:yyyyMMdd).$(Rev:r) (triggered by $(resources.triggeringAlias))'
+
 variables:
   - name: FORCE_COLOR
     value: 1
