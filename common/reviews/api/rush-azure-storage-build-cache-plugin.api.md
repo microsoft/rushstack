@@ -98,6 +98,8 @@ export interface IAzureStorageAuthenticationOptions extends IAzureAuthentication
     storageAccountName: string;
     // (undocumented)
     storageContainerName: string;
+    // (undocumented)
+    storageEndpoint?: string;
 }
 
 // @public (undocumented)
