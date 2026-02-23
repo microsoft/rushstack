@@ -37,7 +37,7 @@ resources:
     - repository: rushstackWebsites
       type: github
       name: microsoft/rushstack-websites
-      endpoint: pipelinesMicrosoftRushstack
+      endpoint: GitHubProjects
       ref: refs/heads/main
 
 extends:
