@@ -51,9 +51,13 @@
           "taskDependencies": ["set-browserslist-ignore-old-data-env-var"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-static-asset-typings-plugin",
+            "pluginName": "binary-assets-plugin",
             "options": {
-              "fileExtensions": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp", ".avif"],
-              "generatedTsFolder": "temp/image-typings"
+              "configType": "inline",
+              "config": {
+                "fileExtensions": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp", ".avif"],
+                "generatedTsFolder": "temp/image-typings"
+              }
             }
           }
         },

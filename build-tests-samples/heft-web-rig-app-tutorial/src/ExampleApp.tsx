@@ -3,6 +3,7 @@
 
 import * as React from 'react';
 import { ToggleSwitch, type IToggleEventArgs } from 'heft-web-rig-library-tutorial';
+
 import exampleImage from './example-image.png';
 
 /**
