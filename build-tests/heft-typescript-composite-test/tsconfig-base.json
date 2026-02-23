@@ -3,7 +3,7 @@
 
   "compilerOptions": {
     "outDir": "lib",
-    "rootDirs": ["src", "temp/image-typings"],
+    "rootDir": "src",
 
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
