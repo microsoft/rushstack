@@ -3167,6 +3167,22 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
 
+  ../../../heft-plugins/heft-image-typings-generator-plugin:
+    dependencies:
+      '@rushstack/typings-generator':
+        specifier: workspace:*
+        version: link:../../libraries/typings-generator
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      eslint:
+        specifier: ~9.37.0
+        version: 9.37.0
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../heft-plugins/heft-isolated-typescript-transpile-plugin:
     dependencies:
       '@rushstack/lookup-by-path':
@@ -30145,7 +30161,7 @@ snapshots:
 
   eslint@8.57.1:
     dependencies:
-      '@eslint-community/eslint-utils': 4.9.1(eslint@9.37.0)
+      '@eslint-community/eslint-utils': 4.9.1(eslint@8.57.1)
       '@eslint-community/regexpp': 4.12.2
       '@eslint/eslintrc': 2.1.4
       '@eslint/js': 8.57.1

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+  "taskPlugins": [
+    {
+      "pluginName": "image-typings-plugin",
+      "entryPoint": "./lib-commonjs/ImageTypingsGeneratorHeftPlugin.js",
+      "optionsSchema": "./lib-commonjs/schemas/image-typings-generator-plugin-options.schema.json"
+    }
+  ]
+}

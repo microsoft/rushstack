@@ -1,0 +1,46 @@
+{
+  "name": "@rushstack/heft-image-typings-generator-plugin",
+  "version": "0.0.0",
+  "description": "Generate typings for images.",
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "heft test --clean --watch",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "heft-plugins/heft-image-typings-generator-plugin"
+  },
+  "homepage": "https://rushstack.io/pages/heft/overview/",
+  "exports": {
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./heft-plugin.json": "./heft-plugin.json",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "@rushstack/heft": "^1.2.3"
+  },
+  "dependencies": {
+    "@rushstack/typings-generator": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
+  }
+}

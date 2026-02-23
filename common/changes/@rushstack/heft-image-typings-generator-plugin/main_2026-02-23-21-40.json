@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-image-typings-generator-plugin",
+      "comment": "Initial release.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-image-typings-generator-plugin"
+}

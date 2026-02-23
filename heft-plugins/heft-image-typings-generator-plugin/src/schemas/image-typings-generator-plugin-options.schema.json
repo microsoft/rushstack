@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "required": ["generatedTsFolder"],
+  "properties": {
+    "fileExtensions": {
+      "description": "File extensions to generate typings for, e.g. \".png\", \".jpg\", \".svg\". Defaults to [\".png\", \".jpg\", \".jpeg\", \".gif\", \".svg\"] if not provided.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "\\..+"
+      }
+    },
+    "generatedTsFolder": {
+      "description": "The output folder where generated .d.ts typings will be written.",
+      "type": "string"
+    },
+    "srcFolder": {
+      "description": "The source folder to scan for image files. Defaults to \"src\".",
+      "type": "string"
+    }
+  }
+}
