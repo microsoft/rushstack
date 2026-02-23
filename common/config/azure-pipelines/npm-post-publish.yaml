@@ -8,6 +8,11 @@ variables:
   - name: FORCE_COLOR
     value: 1
 
+# This pipeline is triggered only by pipeline resources (npm publish pipelines),
+# not by CI pushes or PR builds.
+trigger: none
+pr: none
+
 resources:
   pipelines:
     - pipeline: npmPublish
