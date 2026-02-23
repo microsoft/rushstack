@@ -4738,6 +4738,9 @@ importers:
       '@rushstack/heft-api-extractor-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-api-extractor-plugin
+      '@rushstack/heft-image-typings-generator-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-image-typings-generator-plugin
       '@rushstack/heft-jest-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-jest-plugin

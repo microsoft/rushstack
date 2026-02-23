@@ -47,8 +47,18 @@
             "pluginPackage": "@rushstack/heft-sass-plugin"
           }
         },
+        "image-typings": {
+          "taskDependencies": ["set-browserslist-ignore-old-data-env-var"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-image-typings-generator-plugin",
+            "options": {
+              "fileExtensions": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp", ".avif"],
+              "generatedTsFolder": "temp/image-typings"
+            }
+          }
+        },
         "typescript": {
-          "taskDependencies": ["sass"],
+          "taskDependencies": ["sass", "image-typings"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-typescript-plugin"
           }

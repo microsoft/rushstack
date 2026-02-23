@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "Add `@rushstack/heft-image-typings-generator-plugin` to the `app` and `library` profiles, generating `.d.ts` typings for image files (`.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.ico`, `.webp`, `.avif`). This enables type-safe image imports in TypeScript without needing `allowArbitraryExtensions` or `require()` calls. Also add `.webp` and `.avif` to the webpack asset resource rule.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig"
+}

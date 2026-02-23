@@ -3,6 +3,7 @@
 
 import * as React from 'react';
 import { ToggleSwitch, type IToggleEventArgs } from 'heft-web-rig-library-tutorial';
+import exampleImage from './example-image.png';
 
 /**
  * This React component renders the application page.
@@ -24,10 +25,7 @@ export class ExampleApp extends React.Component {
         <ToggleSwitch leftColor={'#800000'} rightColor={'#008000'} onToggle={this._onToggle} />
 
         <p>Here is an example image:</p>
-        <img
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          src={require('./example-image.png')}
-        />
+        <img src={exampleImage} />
       </div>
     );
   }
