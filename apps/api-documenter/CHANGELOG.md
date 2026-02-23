@@ -1,6 +1,11 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 20 Feb 2026 16:14:49 GMT and should not be manually modified.
+This log was last generated on Mon, 23 Feb 2026 00:42:21 GMT and should not be manually modified.
+
+## 7.29.3
+Mon, 23 Feb 2026 00:42:21 GMT
+
+_Version update only_
 
 ## 7.29.2
 Fri, 20 Feb 2026 16:14:49 GMT

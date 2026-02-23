@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 20 Feb 2026 16:14:49 GMT and should not be manually modified.
+This log was last generated on Mon, 23 Feb 2026 00:42:21 GMT and should not be manually modified.
+
+## 7.57.3
+Mon, 23 Feb 2026 00:42:21 GMT
+
+### Patches
+
+- Add missing "./extends/*.json" to the package.json "exports" field so that "@microsoft/api-extractor/extends/tsdoc-base.json" is importable.
 
 ## 7.57.2
 Fri, 20 Feb 2026 16:14:49 GMT

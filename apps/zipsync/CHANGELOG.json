@@ -2,6 +2,21 @@
   "name": "@rushstack/zipsync",
   "entries": [
     {
+      "version": "0.3.3",
+      "tag": "@rushstack/zipsync_v0.3.3",
+      "date": "Mon, 23 Feb 2026 00:42:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.9.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.2",
       "tag": "@rushstack/zipsync_v0.3.2",
       "date": "Fri, 20 Feb 2026 16:14:49 GMT",

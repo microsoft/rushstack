@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.57.3",
+      "tag": "@microsoft/api-extractor_v7.57.3",
+      "date": "Mon, 23 Feb 2026 00:42:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add missing \"./extends/*.json\" to the package.json \"exports\" field so that \"@microsoft/api-extractor/extends/tsdoc-base.json\" is importable."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.57.2",
       "tag": "@microsoft/api-extractor_v7.57.2",
       "date": "Fri, 20 Feb 2026 16:14:49 GMT",

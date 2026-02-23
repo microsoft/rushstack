@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Fri, 20 Feb 2026 16:14:49 GMT and should not be manually modified.
+This log was last generated on Mon, 23 Feb 2026 00:42:21 GMT and should not be manually modified.
+
+## 1.2.3
+Mon, 23 Feb 2026 00:42:21 GMT
+
+### Patches
+
+- Add missing "./includes/*.json" to the package.json "exports" field so that Jest config files like "@rushstack/heft-jest-plugin/includes/jest-shared.config.json" are importable.
 
 ## 1.2.2
 Fri, 20 Feb 2026 16:14:49 GMT
