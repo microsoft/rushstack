@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "add catalog support for 'rush-pnpm update'",
+      "comment": "Add catalog support to `rush-pnpm update`.",
       "type": "none"
     }
   ],
