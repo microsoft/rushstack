@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add custom endpoint support via a `storageEndpoint` configuration option for the Azure Storage build cache plugin.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
