@@ -490,6 +490,7 @@ export class TypeScriptBuilder {
     this._cleanupWorker();
     //#endregion
 
+    this._emitModulePackageJsonFiles(ts);
     this._logEmitPerformance(ts);
 
     //#region FINAL_ANALYSIS
@@ -556,6 +557,8 @@ export class TypeScriptBuilder {
     tool.solutionBuilder.build();
     this._cleanupWorker();
     //#endregion
+
+    this._emitModulePackageJsonFiles(ts);
 
     if (pendingTranspilePromises.size) {
       const emitResults: TTypescript.EmitResult[] = await Promise.all(pendingTranspilePromises.values());
@@ -735,7 +738,8 @@ export class TypeScriptBuilder {
         ts.ModuleKind.CommonJS,
         tsconfig.options.outDir!,
         /* isPrimary */ tsconfig.options.module === ts.ModuleKind.CommonJS,
-        '.cjs'
+        '.cjs',
+        /* emitModulePackageJson */ false
       );
 
       const cjsReason: IModuleKindReason = {
@@ -754,7 +758,8 @@ export class TypeScriptBuilder {
         ts.ModuleKind.ESNext,
         tsconfig.options.outDir!,
         /* isPrimary */ tsconfig.options.module === ts.ModuleKind.ESNext,
-        '.mjs'
+        '.mjs',
+        /* emitModulePackageJson */ false
       );
 
       const mjsReason: IModuleKindReason = {
@@ -773,7 +778,8 @@ export class TypeScriptBuilder {
         tsconfig.options.module,
         tsconfig.options.outDir!,
         /* isPrimary */ true,
-        /* jsExtensionOverride */ undefined
+        /* jsExtensionOverride */ undefined,
+        /* emitModulePackageJson */ false
       );
 
       const tsConfigReason: IModuleKindReason = {
@@ -788,16 +794,14 @@ export class TypeScriptBuilder {
     }
 
     if (this._configuration.additionalModuleKindsToEmit) {
-      for (const additionalModuleKindToEmit of this._configuration.additionalModuleKindsToEmit) {
-        const moduleKind: TTypescript.ModuleKind = this._parseModuleKind(
-          ts,
-          additionalModuleKindToEmit.moduleKind
-        );
+      for (const { moduleKind: moduleKindString, outFolderName, emitModulePackageJson = false } of this
+        ._configuration.additionalModuleKindsToEmit) {
+        const moduleKind: TTypescript.ModuleKind = this._parseModuleKind(ts, moduleKindString);
 
-        const outDirKey: string = `${additionalModuleKindToEmit.outFolderName}:.js`;
+        const outDirKey: string = `${outFolderName}:.js`;
         const moduleKindReason: IModuleKindReason = {
           kind: ts.ModuleKind[moduleKind] as keyof typeof TTypescript.ModuleKind,
-          outDir: additionalModuleKindToEmit.outFolderName,
+          outDir: outFolderName,
           extension: '.js',
           reason: `additionalModuleKindsToEmit`
         };
@@ -807,18 +811,19 @@ export class TypeScriptBuilder {
 
         if (existingKind) {
           throw new Error(
-            `Module kind "${additionalModuleKindToEmit.moduleKind}" is already emitted at ${existingKind.outDir} with extension '${existingKind.extension}' by option ${existingKind.reason}.`
+            `Module kind "${moduleKind}" is already emitted at ${existingKind.outDir} with extension '${existingKind.extension}' by option ${existingKind.reason}.`
           );
         } else if (existingDir) {
           throw new Error(
-            `Output folder "${additionalModuleKindToEmit.outFolderName}" already contains module kind ${existingDir.kind} with extension '${existingDir.extension}', specified by option ${existingDir.reason}.`
+            `Output folder "${outFolderName}" already contains module kind ${existingDir.kind} with extension '${existingDir.extension}', specified by option ${existingDir.reason}.`
           );
         } else {
           const outFolderKey: string | undefined = this._addModuleKindToEmit(
             moduleKind,
-            additionalModuleKindToEmit.outFolderName,
+            outFolderName,
             /* isPrimary */ false,
-            undefined
+            undefined,
+            emitModulePackageJson
           );
 
           if (outFolderKey) {
@@ -834,7 +839,8 @@ export class TypeScriptBuilder {
     moduleKind: TTypescript.ModuleKind,
     outFolderPath: string,
     isPrimary: boolean,
-    jsExtensionOverride: string | undefined
+    jsExtensionOverride: string | undefined,
+    emitModulePackageJson: boolean
   ): string | undefined {
     let outFolderName: string;
     if (path.isAbsolute(outFolderPath)) {
@@ -885,8 +891,8 @@ export class TypeScriptBuilder {
       outFolderPath,
       moduleKind,
       jsExtensionOverride,
-
-      isPrimary
+      isPrimary,
+      emitModulePackageJson
     });
 
     return `${outFolderName}:${jsExtensionOverride || '.js'}`;
@@ -972,6 +978,7 @@ export class TypeScriptBuilder {
           `Emitting program "${innerCompilerOptions!.configFilePath}"`
         );
 
+        this._emitModulePackageJsonFiles(ts);
         this._logEmitPerformance(ts);
 
         // Reset performance counters
@@ -1126,6 +1133,57 @@ export class TypeScriptBuilder {
     );
 
     return host;
+  }
+
+  /**
+   * For each module kind configured with `emitModulePackageJson: true`, writes a
+   * `package.json` with the appropriate `"type"` field to ensure Node.js correctly
+   * interprets `.js` files in the output folder.
+   */
+  private _emitModulePackageJsonFiles(ts: ExtendedTypeScript): void {
+    for (const { emitModulePackageJson, moduleKind, outFolderPath } of this._moduleKindsToEmit) {
+      if (!emitModulePackageJson) {
+        continue;
+      }
+
+      // "module" and "commonjs" are the only recognized values. See
+      // https://nodejs.org/api/packages.html#type
+      let moduleType: string | undefined;
+      switch (moduleKind) {
+        // UMD contains a CommonJS wrapper, so it should be treated as CommonJS for package.json generation purposes
+        case ts.ModuleKind.UMD:
+        case ts.ModuleKind.CommonJS: {
+          moduleType = 'commonjs';
+          break;
+        }
+
+        case ts.ModuleKind.AMD:
+        case ts.ModuleKind.None:
+        case ts.ModuleKind.Preserve:
+        case ts.ModuleKind.System: {
+          moduleType = undefined;
+          break;
+        }
+
+        default: {
+          moduleType = 'module';
+          break;
+        }
+      }
+
+      if (moduleType) {
+        const packageJsonPath: string = `${outFolderPath}package.json`;
+        const packageJsonContent: string = `{\n  "type": "${moduleType}"\n}\n`;
+
+        ts.sys.writeFile(packageJsonPath, packageJsonContent);
+        this._typescriptTerminal.writeVerboseLine(`Wrote ${packageJsonPath} with "type": "${moduleType}"`);
+      } else {
+        throw new Error(
+          `Unsupported module kind ${ts.ModuleKind[moduleKind]} for package.json generation. ` +
+            `Remove the \`emitModulePackageJson\` option for this module kind.`
+        );
+      }
+    }
   }
 
   private _parseModuleKind(ts: ExtendedTypeScript, moduleKindName: string): TTypescript.ModuleKind {
