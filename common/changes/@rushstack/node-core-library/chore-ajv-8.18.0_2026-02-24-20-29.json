@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Update  dependency to  to mitigate CVE-2025-69873.",
+      "comment": "Update `ajv` dependency to `~8.18.0` to mitigate CVE-2025-69873.",
       "type": "patch",
       "packageName": "@rushstack/node-core-library"
     }
