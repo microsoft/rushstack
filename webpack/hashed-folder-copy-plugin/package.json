@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/hashed-folder-copy-plugin",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "Webpack plugin for copying a folder to the output directory with a hash in the folder name.",
   "types": "./dist/hashed-folder-copy-plugin.d.ts",
   "main": "./lib-commonjs/index.js",

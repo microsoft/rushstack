@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/set-webpack-public-path-plugin",
-  "version": "5.3.4",
+  "version": "5.3.5",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",

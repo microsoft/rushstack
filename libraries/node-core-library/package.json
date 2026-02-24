@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/node-core-library",
-  "version": "5.20.1",
+  "version": "5.20.2",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
