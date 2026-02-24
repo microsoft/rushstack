@@ -2,6 +2,27 @@
   "name": "@rushstack/zipsync",
   "entries": [
     {
+      "version": "0.3.4",
+      "tag": "@rushstack/zipsync_v0.3.4",
+      "date": "Tue, 24 Feb 2026 01:13:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.22.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.9.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.3",
       "tag": "@rushstack/zipsync_v0.3.3",
       "date": "Mon, 23 Feb 2026 00:42:21 GMT",

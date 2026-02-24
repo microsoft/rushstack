@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 20 Feb 2026 00:15:04 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Feb 2026 01:13:27 GMT and should not be manually modified.
+
+## 5.20.2
+Tue, 24 Feb 2026 01:13:27 GMT
+
+### Patches
+
+- Fix race condition in FileSystem.create*Link helpers: EEXIST errors that occur after ensureFolder/ensureFolderAsync are now handled consistently with the initial EEXIST handling.
 
 ## 5.20.1
 Fri, 20 Feb 2026 00:15:04 GMT
