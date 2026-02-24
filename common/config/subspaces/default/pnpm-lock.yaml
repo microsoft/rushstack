@@ -1950,6 +1950,9 @@ importers:
       '@rushstack/heft-lint-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-static-asset-typings-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-static-asset-typings-plugin
       '@rushstack/heft-typescript-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-typescript-plugin
@@ -1995,6 +1998,9 @@ importers:
       '@rushstack/heft-lint-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-static-asset-typings-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-static-asset-typings-plugin
       '@rushstack/heft-typescript-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-typescript-plugin
@@ -2104,6 +2110,9 @@ importers:
       '@rushstack/heft-rspack-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-rspack-plugin
+      '@rushstack/heft-static-asset-typings-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-static-asset-typings-plugin
       '@rushstack/heft-typescript-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-typescript-plugin
@@ -2414,6 +2423,9 @@ importers:
       '@rushstack/heft-lint-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-static-asset-typings-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-static-asset-typings-plugin
       '@rushstack/heft-typescript-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-typescript-plugin
@@ -2474,6 +2486,9 @@ importers:
       '@rushstack/heft-lint-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-static-asset-typings-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-static-asset-typings-plugin
       '@rushstack/heft-typescript-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-typescript-plugin
@@ -3460,6 +3475,31 @@ importers:
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../heft-webpack5-plugin
+      eslint:
+        specifier: ~9.37.0
+        version: 9.37.0
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
+  ../../../heft-plugins/heft-static-asset-typings-plugin:
+    dependencies:
+      '@rushstack/heft-config-file':
+        specifier: workspace:*
+        version: link:../../libraries/heft-config-file
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
+      '@rushstack/typings-generator':
+        specifier: workspace:*
+        version: link:../../libraries/typings-generator
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
@@ -4719,6 +4759,9 @@ importers:
       '@rushstack/heft-sass-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-sass-plugin
+      '@rushstack/heft-static-asset-typings-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-static-asset-typings-plugin
       '@rushstack/heft-typescript-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-typescript-plugin
@@ -30145,7 +30188,7 @@ snapshots:
 
   eslint@8.57.1:
     dependencies:
-      '@eslint-community/eslint-utils': 4.9.1(eslint@9.37.0)
+      '@eslint-community/eslint-utils': 4.9.1(eslint@8.57.1)
       '@eslint-community/regexpp': 4.12.2
       '@eslint/eslintrc': 2.1.4
       '@eslint/js': 8.57.1

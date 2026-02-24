@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "Add `@rushstack/heft-static-asset-typings-plugin` to the `app` and `library` profiles, generating `.d.ts` typings for static asset files (images and text). This enables type-safe asset imports in TypeScript without needing `allowArbitraryExtensions` or `require()` calls. Also add `.webp` and `.avif` to the webpack asset resource rule.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig"
+}

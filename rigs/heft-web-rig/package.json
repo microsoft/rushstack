@@ -19,6 +19,7 @@
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft-api-extractor-plugin": "workspace:*",
+    "@rushstack/heft-static-asset-typings-plugin": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-sass-plugin": "workspace:*",

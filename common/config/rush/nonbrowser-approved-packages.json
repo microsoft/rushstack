@@ -199,6 +199,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-static-asset-typings-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
       "allowedCategories": [ "tests" ]
     },

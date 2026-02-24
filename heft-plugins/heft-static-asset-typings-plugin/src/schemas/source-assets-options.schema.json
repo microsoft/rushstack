@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["configType", "config"],
+      "properties": {
+        "configType": {
+          "type": "string",
+          "enum": ["inline"]
+        },
+        "config": {
+          "required": ["fileExtensions", "cjsOutputFolders"],
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fileExtensions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "\\.[^\\\\/]+$"
+              }
+            },
+            "generatedTsFolders": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[^\\\\]+$"
+              }
+            },
+            "sourceFolderPath": {
+              "type": "string",
+              "pattern": "^[^\\\\]+$"
+            },
+            "cjsOutputFolders": {
+              "type": "array",
+              "items": {
+                "pattern": "^[^\\\\]+$",
+                "type": "string"
+              }
+            },
+            "esmOutputFolders": {
+              "type": "array",
+              "items": {
+                "pattern": "^[^\\\\]+$",
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["configType", "configFileName"],
+      "properties": {
+        "configType": {
+          "type": "string",
+          "enum": ["file"]
+        },
+        "configFileName": {
+          "type": "string",
+          "pattern": "^[^\\\\\\/]+\\.json$"
+        }
+      }
+    }
+  ]
+}
