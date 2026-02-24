@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/heft-static-asset-typings-plugin",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/heft-static-asset-typings-plugin_v0.1.0",
+      "date": "Tue, 24 Feb 2026 02:08:44 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release."
+          }
+        ]
+      }
+    }
+  ]
+}

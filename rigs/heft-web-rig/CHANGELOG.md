@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Tue, 24 Feb 2026 01:13:27 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Feb 2026 02:08:44 GMT and should not be manually modified.
+
+## 1.4.0
+Tue, 24 Feb 2026 02:08:44 GMT
+
+### Minor changes
+
+- Add `@rushstack/heft-static-asset-typings-plugin` to the `app` and `library` profiles, generating `.d.ts` typings for static asset files (images and text). This enables type-safe asset imports in TypeScript without needing `allowArbitraryExtensions` or `require()` calls. Also add `.webp` and `.avif` to the webpack asset resource rule.
 
 ## 1.3.5
 Tue, 24 Feb 2026 01:13:27 GMT

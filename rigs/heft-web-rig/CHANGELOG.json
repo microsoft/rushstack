@@ -2,6 +2,23 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "1.4.0",
+      "tag": "@rushstack/heft-web-rig_v1.4.0",
+      "date": "Tue, 24 Feb 2026 02:08:44 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `@rushstack/heft-static-asset-typings-plugin` to the `app` and `library` profiles, generating `.d.ts` typings for static asset files (images and text). This enables type-safe asset imports in TypeScript without needing `allowArbitraryExtensions` or `require()` calls. Also add `.webp` and `.avif` to the webpack asset resource rule."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-static-asset-typings-plugin\" to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.5",
       "tag": "@rushstack/heft-web-rig_v1.3.5",
       "date": "Tue, 24 Feb 2026 01:13:27 GMT",
