@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update `ajv` dependency to `~8.18.0` to mitigate CVE-2025-69873.",
+      "type": "patch",
+      "packageName": "@rushstack/rig-package"
+    }
+  ],
+  "packageName": "@rushstack/rig-package",
+  "email": "ksakira10@users.noreply.github.com"
+}
