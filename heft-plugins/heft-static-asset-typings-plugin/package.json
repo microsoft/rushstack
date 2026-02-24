@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-static-asset-typings-plugin",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A Heft plugin that generates TypeScript typings for static asset files such as images and text files.",
   "scripts": {
     "build": "heft build --clean",
