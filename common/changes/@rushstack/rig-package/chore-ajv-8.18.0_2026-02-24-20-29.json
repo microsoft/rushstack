@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update  dependency to  to mitigate CVE-2025-69873.",
+      "type": "patch",
+      "packageName": "@rushstack/rig-package"
+    }
+  ],
+  "packageName": "@rushstack/rig-package",
+  "email": "ksakira10@users.noreply.github.com"
+}
