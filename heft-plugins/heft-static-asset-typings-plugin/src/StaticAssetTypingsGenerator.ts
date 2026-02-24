@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { createHash } from 'node:crypto';
+
 import type {
   HeftConfiguration,
   IHeftTaskRunHookOptions,
@@ -19,14 +21,18 @@ import type {
   StaticAssetConfigurationFileLoader
 } from './types';
 
-const DECLARATION: string = `/**
- * @public
- */
-declare const content: string;
-export default content;
-`;
+// Use explicit \n to avoid platform-dependent line endings in template literals.
+const DECLARATION: string = [
+  '/**',
+  ' * @public',
+  ' */',
+  'declare const content: string;',
+  'export default content;',
+  ''
+].join('\n');
 
-const PLUGIN_VERSION: number = 1;
+// Include a hash of DECLARATION so the cache is invalidated if the declaration content changes.
+const PLUGIN_VERSION: string = `1-${createHash('sha1').update(DECLARATION).digest('hex').slice(0, 8)}`;
 
 /**
  * Options for constructing a static asset typings generator
@@ -76,7 +82,7 @@ export interface IStaticAssetTypingsGenerator {
 
 interface IStaticAssetTypingsBuildInfoFile {
   fileVersions: [string, string][];
-  pluginVersion: number;
+  pluginVersion: string;
 }
 
 export async function tryGetConfigFromPluginOptionsAsync(

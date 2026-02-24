@@ -4,7 +4,7 @@
 import { createHash } from 'node:crypto';
 
 import type { HeftConfiguration, IHeftTaskSession, IHeftTaskPlugin } from '@rushstack/heft';
-import { FileSystem } from '@rushstack/node-core-library';
+import { Async, FileSystem } from '@rushstack/node-core-library';
 
 import {
   createTypingsGeneratorAsync,
@@ -17,6 +17,15 @@ import type { IAssetPluginOptions, ITextStaticAssetTypingsConfigurationJson } fr
 
 const PLUGIN_NAME: 'text-assets-plugin' = 'text-assets-plugin';
 
+// Pre-allocated preamble/postamble buffers to avoid repeated allocations.
+// Used with FileSystem.writeBuffersToFileAsync (writev) for efficient output.
+const CJS_PREAMBLE: Buffer = Buffer.from(
+  '"use strict"\nObject.defineProperty(exports, "__esModule", { value: true });\nvar content = '
+);
+const CJS_POSTAMBLE: Buffer = Buffer.from(';\nexports.default = content;\n');
+const ESM_PREAMBLE: Buffer = Buffer.from('const content = ');
+const ESM_POSTAMBLE: Buffer = Buffer.from(';\nexport default content;\n');
+
 export default class TextAssetsPlugin
   implements IHeftTaskPlugin<IAssetPluginOptions<ITextStaticAssetTypingsConfigurationJson>>
 {
@@ -28,106 +37,96 @@ export default class TextAssetsPlugin
     heftConfiguration: HeftConfiguration,
     pluginOptions: IAssetPluginOptions<ITextStaticAssetTypingsConfigurationJson>
   ): void {
-    let generator: IStaticAssetTypingsGenerator | undefined | false;
+    let generatorPromise: Promise<IStaticAssetTypingsGenerator | false> | undefined;
+
+    async function initializeGeneratorAsync(): Promise<IStaticAssetTypingsGenerator | false> {
+      const { slashNormalizedBuildFolderPath, rigConfig } = heftConfiguration;
+
+      const options: ITextStaticAssetTypingsConfigurationJson | undefined =
+        await tryGetConfigFromPluginOptionsAsync(
+          taskSession.logger.terminal,
+          slashNormalizedBuildFolderPath,
+          rigConfig,
+          pluginOptions,
+          'text'
+        );
+
+      if (options) {
+        const { fileExtensions, sourceFolderPath, generatedTsFolders, cjsOutputFolders, esmOutputFolders } =
+          options;
+
+        const resolvedCjsOutputFolders: string[] = cjsOutputFolders.map(
+          (jsPath) => `${slashNormalizedBuildFolderPath}/${jsPath}`
+        );
+        const resolvedEsmOutputFolders: string[] =
+          esmOutputFolders?.map((jsPath) => `${slashNormalizedBuildFolderPath}/${jsPath}`) ?? [];
+        const jsOutputFolders: string[] = [...resolvedCjsOutputFolders, ...resolvedEsmOutputFolders];
+
+        function getAdditionalOutputFiles(relativePath: string): string[] {
+          return jsOutputFolders.map((folder) => `${folder}/${relativePath}.js`);
+        }
+
+        async function getVersionAndEmitOutputFilesAsync(
+          filePath: string,
+          relativePath: string,
+          oldVersion: string | undefined
+        ): Promise<string | undefined> {
+          const fileContents: Buffer = await FileSystem.readFileToBufferAsync(filePath);
+          const fileVersion: string = createHash('sha1').update(fileContents).digest('base64');
+          if (fileVersion === oldVersion) {
+            return;
+          }
+
+          const stringFileContents: string = fileContents.toString('utf8');
+
+          const contentBuffer: Buffer = Buffer.from(JSON.stringify(stringFileContents));
+
+          const outputs: { path: string; buffers: NodeJS.ArrayBufferView[] }[] = [];
+          for (const folder of resolvedCjsOutputFolders) {
+            outputs.push({
+              path: `${folder}/${relativePath}.js`,
+              buffers: [CJS_PREAMBLE, contentBuffer, CJS_POSTAMBLE]
+            });
+          }
+          for (const folder of resolvedEsmOutputFolders) {
+            outputs.push({
+              path: `${folder}/${relativePath}.js`,
+              buffers: [ESM_PREAMBLE, contentBuffer, ESM_POSTAMBLE]
+            });
+          }
+
+          await Async.forEachAsync(outputs, async ({ path, buffers }) => {
+            await FileSystem.writeBuffersToFileAsync(path, buffers, { ensureFolderExists: true });
+          });
+
+          return fileVersion;
+        }
+
+        const staticAssetGeneratorOptions: IStaticAssetGeneratorOptions = {
+          tryGetConfigAsync: async () => {
+            return {
+              fileExtensions,
+              sourceFolderPath,
+              generatedTsFolders
+            };
+          },
+          slashNormalizedBuildFolderPath,
+          getAdditionalOutputFiles,
+          getVersionAndEmitOutputFilesAsync
+        };
+
+        return createTypingsGeneratorAsync(taskSession, staticAssetGeneratorOptions);
+      } else {
+        return false;
+      }
+    }
 
     async function createAndRunGeneratorAsync(runOptions: IRunGeneratorOptions): Promise<void> {
-      if (generator === undefined) {
-        const { slashNormalizedBuildFolderPath, rigConfig } = heftConfiguration;
-
-        const options: ITextStaticAssetTypingsConfigurationJson | undefined =
-          await tryGetConfigFromPluginOptionsAsync(
-            taskSession.logger.terminal,
-            slashNormalizedBuildFolderPath,
-            rigConfig,
-            pluginOptions,
-            'text'
-          );
-
-        if (options) {
-          const { fileExtensions, sourceFolderPath, generatedTsFolders, cjsOutputFolders, esmOutputFolders } =
-            options;
-
-          const resolvedCjsOutputFolders: string[] = cjsOutputFolders.map(
-            (jsPath) => `${slashNormalizedBuildFolderPath}/${jsPath}`
-          );
-          const resolvedEsmOutputFolders: string[] =
-            esmOutputFolders?.map((jsPath) => `${slashNormalizedBuildFolderPath}/${jsPath}`) ?? [];
-          const jsOutputFolders: string[] = [...resolvedCjsOutputFolders, ...resolvedEsmOutputFolders];
-
-          function getAdditionalOutputFiles(relativePath: string): string[] {
-            return jsOutputFolders.map((folder) => `${folder}/${relativePath}.js`);
-          }
-
-          async function getVersionAndEmitOutputFilesAsync(
-            filePath: string,
-            relativePath: string,
-            oldVersion: string | undefined
-          ): Promise<string | undefined> {
-            const fileContents: Buffer = await FileSystem.readFileToBufferAsync(filePath);
-            const fileVersion: string = createHash('sha1').update(fileContents).digest('base64');
-            if (fileVersion === oldVersion) {
-              return;
-            }
-
-            const stringFileContents: string = fileContents.toString('utf8');
-
-            const stringifiedContents: string = JSON.stringify(stringFileContents);
-
-            const outputs: Map<string, Buffer> = new Map();
-            if (resolvedCjsOutputFolders.length) {
-              const outputSource: string = [
-                `"use strict"`,
-                `Object.defineProperty(exports, "__esModule", { value: true });`,
-                `var content = ${stringifiedContents};`,
-                `exports.default = content;`
-              ].join('\n');
-              const outputBuffer: Buffer = Buffer.from(outputSource);
-              for (const folder of resolvedCjsOutputFolders) {
-                outputs.set(`${folder}/${relativePath}.js`, outputBuffer);
-              }
-            }
-
-            if (resolvedEsmOutputFolders.length) {
-              const outputSource: string = [
-                `const content = ${stringifiedContents};`,
-                `export default content;`
-              ].join('\n');
-              const outputBuffer: Buffer = Buffer.from(outputSource);
-              for (const folder of resolvedEsmOutputFolders) {
-                outputs.set(`${folder}/${relativePath}.js`, outputBuffer);
-              }
-            }
-
-            await Promise.all(
-              Array.from(outputs, ([outputPath, outputBuffer]) =>
-                FileSystem.writeFileAsync(outputPath, outputBuffer, { ensureFolderExists: true })
-              )
-            );
-
-            return fileVersion;
-          }
-
-          const staticAssetGeneratorOptions: IStaticAssetGeneratorOptions = {
-            tryGetConfigAsync: async () => {
-              return {
-                fileExtensions,
-                sourceFolderPath,
-                generatedTsFolders
-              };
-            },
-            slashNormalizedBuildFolderPath,
-            getAdditionalOutputFiles,
-            getVersionAndEmitOutputFilesAsync
-          };
-
-          // eslint-disable-next-line require-atomic-updates
-          generator = await createTypingsGeneratorAsync(taskSession, staticAssetGeneratorOptions);
-        } else {
-          // eslint-disable-next-line require-atomic-updates
-          generator = false;
-        }
+      if (generatorPromise === undefined) {
+        generatorPromise = initializeGeneratorAsync();
       }
 
+      const generator: IStaticAssetTypingsGenerator | false = await generatorPromise;
       if (generator === false) {
         return;
       }

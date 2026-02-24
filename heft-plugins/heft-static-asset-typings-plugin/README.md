@@ -191,7 +191,7 @@ Provide configuration directly in heft.json under `options.config`:
 | Option              | Type       | Default                  | Description                                     |
 | ------------------- | ---------- | ------------------------ | ----------------------------------------------- |
 | `fileExtensions`    | `string[]` | —                        | **(required)** File extensions to generate typings for. |
-| `generatedTsFolders`| `string[]` | `["temp/static-asset-ts"]` | Output folders for the generated `.d.ts` files. |
+| `generatedTsFolders`| `string[]` | `["temp/static-asset-ts"]` | Folders where generated `.d.ts` files are written. The first entry should be listed in `rootDirs` so TypeScript can resolve the asset imports during type-checking. Additional entries are typically your project's published typings folder(s). |
 | `sourceFolderPath`  | `string`   | `"src"`                  | Source folder to scan for asset files.           |
 
 #### `text-assets-plugin` inline config

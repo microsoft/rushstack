@@ -40,14 +40,14 @@ export default class BinaryAssetsPlugin
       getVersionAndEmitOutputFilesAsync: async () => 'versionless'
     };
 
-    let generator: IStaticAssetTypingsGenerator | undefined | false;
+    let generatorPromise: Promise<IStaticAssetTypingsGenerator | false> | undefined;
 
     async function createAndRunGeneratorAsync(runOptions: IRunGeneratorOptions): Promise<void> {
-      if (generator === undefined) {
-        // eslint-disable-next-line require-atomic-updates
-        generator = await createTypingsGeneratorAsync(taskSession, staticAssetGeneratorOptions);
+      if (generatorPromise === undefined) {
+        generatorPromise = createTypingsGeneratorAsync(taskSession, staticAssetGeneratorOptions);
       }
 
+      const generator: IStaticAssetTypingsGenerator | false = await generatorPromise;
       if (generator === false) {
         return;
       }
