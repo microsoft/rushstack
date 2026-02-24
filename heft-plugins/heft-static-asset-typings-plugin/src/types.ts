@@ -4,7 +4,7 @@
 import type { ITerminal } from '@rushstack/terminal';
 
 export interface IAssetsInlineConfigPluginOptionsBase<
-  TConfig extends IBinaryStaticAssetTypingsConfigurationJson
+  TConfig extends IResourceStaticAssetTypingsConfigurationJson
 > {
   configType: 'inline';
   /**
@@ -21,21 +21,22 @@ export interface IAssetsFileConfigPluginOptions {
   configFileName: string;
 }
 
-export type IAssetPluginOptions<TConfig extends IBinaryStaticAssetTypingsConfigurationJson> =
+export type IAssetPluginOptions<TConfig extends IResourceStaticAssetTypingsConfigurationJson> =
   | IAssetsInlineConfigPluginOptionsBase<TConfig>
   | IAssetsFileConfigPluginOptions;
 
-export interface IBinaryStaticAssetTypingsConfigurationJson {
+export interface IResourceStaticAssetTypingsConfigurationJson {
   fileExtensions: string[];
   generatedTsFolders?: string[];
   sourceFolderPath?: string;
 }
 
-export interface ITextStaticAssetTypingsConfigurationJson extends IBinaryStaticAssetTypingsConfigurationJson {
+export interface ISourceStaticAssetTypingsConfigurationJson
+  extends IResourceStaticAssetTypingsConfigurationJson {
   cjsOutputFolders: string[];
   esmOutputFolders?: string[];
 }
 
 export type StaticAssetConfigurationFileLoader = (
   terminal: ITerminal
-) => Promise<IBinaryStaticAssetTypingsConfigurationJson | undefined>;
+) => Promise<IResourceStaticAssetTypingsConfigurationJson | undefined>;

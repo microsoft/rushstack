@@ -13,10 +13,10 @@
         "image-typings": {
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-static-asset-typings-plugin",
-            "pluginName": "binary-assets-plugin",
+            "pluginName": "resource-assets-plugin",
             "options": {
               "configType": "file",
-              "configFileName": "binary-assets.json"
+              "configFileName": "resource-assets.json"
             }
           }
         },

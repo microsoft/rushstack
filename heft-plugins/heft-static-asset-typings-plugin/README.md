@@ -1,15 +1,21 @@
 # @rushstack/heft-static-asset-typings-plugin
 
 This Heft plugin generates TypeScript `.d.ts` typings for static asset files, enabling type-safe
-`import` statements for non-TypeScript resources. It provides two task plugins:
+`import` statements for non-TypeScript files. It provides two task plugins:
 
-- **`binary-assets-plugin`** — Generates `.d.ts` typings for binary files such as images (`.png`,
-  `.jpg`, `.svg`, etc.). Each matched file gets a typing that exports a default string value representing
-  the asset URL.
+- **`resource-assets-plugin`** — Generates `.d.ts` typings for _resource_ files such as images (`.png`,
+  `.jpg`, `.svg`, etc.) and fonts. These are opaque binary blobs whose content is not meaningful to
+  JavaScript; the generated typing simply exports a default `string` representing the asset URL
+  (e.g. as resolved by a bundler's asset loader).
 
-- **`text-assets-plugin`** — Generates `.d.ts` typings _and_ JavaScript module output for text-based
-  files (`.html`, `.txt`, `.md`, etc.). The generated JS modules export the file contents as a
-  default string, making text assets importable as ES modules.
+- **`source-assets-plugin`** — Generates `.d.ts` typings _and_ JavaScript module output for _source_
+  files (`.html`, `.css`, `.txt`, `.md`, etc.) whose textual content is consumed at runtime. The
+  generated JS modules read the file and re-export its content as a default `string`, making these
+  assets importable as ES modules.
+
+The terminology follows the [webpack convention](https://webpack.js.org/guides/asset-modules/)
+where _resource_ assets are emitted as separate files referenced by URL, while _source_ assets are
+inlined as strings.
 
 Both plugins support incremental and watch-mode builds.
 
@@ -23,7 +29,7 @@ Both plugins support incremental and watch-mode builds.
 
 2. Load the appropriate plugin(s) in your project's **config/heft.json**:
 
-   ### Binary assets (images, fonts, etc.)
+   ### Resource assets (images, fonts, etc.)
 
    **Inline configuration** — specify options directly in heft.json:
 
@@ -36,7 +42,7 @@ Both plugins support incremental and watch-mode builds.
            "image-typings": {
              "taskPlugin": {
                "pluginPackage": "@rushstack/heft-static-asset-typings-plugin",
-               "pluginName": "binary-assets-plugin",
+               "pluginName": "resource-assets-plugin",
                "options": {
                  "configType": "inline",
                  "config": {
@@ -67,10 +73,10 @@ Both plugins support incremental and watch-mode builds.
            "image-typings": {
              "taskPlugin": {
                "pluginPackage": "@rushstack/heft-static-asset-typings-plugin",
-               "pluginName": "binary-assets-plugin",
+               "pluginName": "resource-assets-plugin",
                "options": {
                  "configType": "file",
-                 "configFileName": "binary-assets.json"
+                 "configFileName": "resource-assets.json"
                }
              }
            },
@@ -84,7 +90,7 @@ Both plugins support incremental and watch-mode builds.
    }
    ```
 
-   And create a **config/binary-assets.json** file (which can be provided by a rig):
+   And create a **config/resource-assets.json** file (which can be provided by a rig):
 
    ```jsonc
    {
@@ -93,7 +99,7 @@ Both plugins support incremental and watch-mode builds.
    }
    ```
 
-   ### Text assets
+   ### Source assets
 
    **Inline configuration:**
 
@@ -106,7 +112,7 @@ Both plugins support incremental and watch-mode builds.
            "text-typings": {
              "taskPlugin": {
                "pluginPackage": "@rushstack/heft-static-asset-typings-plugin",
-               "pluginName": "text-assets-plugin",
+               "pluginName": "source-assets-plugin",
                "options": {
                  "configType": "inline",
                  "config": {
@@ -139,10 +145,10 @@ Both plugins support incremental and watch-mode builds.
            "text-typings": {
              "taskPlugin": {
                "pluginPackage": "@rushstack/heft-static-asset-typings-plugin",
-               "pluginName": "text-assets-plugin",
+               "pluginName": "source-assets-plugin",
                "options": {
                  "configType": "file",
-                 "configFileName": "text-assets.json"
+                 "configFileName": "source-assets.json"
                }
              }
            },
@@ -156,7 +162,7 @@ Both plugins support incremental and watch-mode builds.
    }
    ```
 
-   And create a **config/text-assets.json** file (which can be provided by a rig):
+   And create a **config/source-assets.json** file (which can be provided by a rig):
 
    ```jsonc
    {
@@ -186,7 +192,7 @@ Both plugins support two configuration modes via the `configType` option:
 
 Provide configuration directly in heft.json under `options.config`:
 
-#### `binary-assets-plugin` inline config
+#### `resource-assets-plugin` inline config
 
 | Option              | Type       | Default                  | Description                                     |
 | ------------------- | ---------- | ------------------------ | ----------------------------------------------- |
@@ -194,7 +200,7 @@ Provide configuration directly in heft.json under `options.config`:
 | `generatedTsFolders`| `string[]` | `["temp/static-asset-ts"]` | Folders where generated `.d.ts` files are written. The first entry should be listed in `rootDirs` so TypeScript can resolve the asset imports during type-checking. Additional entries are typically your project's published typings folder(s). |
 | `sourceFolderPath`  | `string`   | `"src"`                  | Source folder to scan for asset files.           |
 
-#### `text-assets-plugin` inline config
+#### `source-assets-plugin` inline config
 
 Includes all the above, plus:
 

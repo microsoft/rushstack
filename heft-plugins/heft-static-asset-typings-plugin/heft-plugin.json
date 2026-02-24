@@ -3,14 +3,14 @@
 
   "taskPlugins": [
     {
-      "pluginName": "binary-assets-plugin",
-      "entryPoint": "./lib-commonjs/BinaryAssetsPlugin",
-      "optionsSchema": "./lib-commonjs/schemas/binary-assets-options.schema.json"
+      "pluginName": "resource-assets-plugin",
+      "entryPoint": "./lib-commonjs/ResourceAssetsPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/resource-assets-options.schema.json"
     },
     {
-      "pluginName": "text-assets-plugin",
-      "entryPoint": "./lib-commonjs/TextAssetsPlugin",
-      "optionsSchema": "./lib-commonjs/schemas/text-assets-options.schema.json"
+      "pluginName": "source-assets-plugin",
+      "entryPoint": "./lib-commonjs/SourceAssetsPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/source-assets-options.schema.json"
     }
   ]
 }

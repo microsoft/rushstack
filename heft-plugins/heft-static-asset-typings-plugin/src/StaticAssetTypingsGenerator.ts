@@ -16,8 +16,8 @@ import type { ITerminal } from '@rushstack/terminal';
 
 import type {
   IAssetPluginOptions,
-  IBinaryStaticAssetTypingsConfigurationJson,
-  ITextStaticAssetTypingsConfigurationJson,
+  IResourceStaticAssetTypingsConfigurationJson,
+  ISourceStaticAssetTypingsConfigurationJson,
   StaticAssetConfigurationFileLoader
 } from './types';
 
@@ -89,26 +89,26 @@ export async function tryGetConfigFromPluginOptionsAsync(
   terminal: ITerminal,
   buildFolder: string,
   rigConfig: HeftConfiguration['rigConfig'],
-  options: IAssetPluginOptions<IBinaryStaticAssetTypingsConfigurationJson>,
-  type: 'binary'
-): Promise<IBinaryStaticAssetTypingsConfigurationJson | undefined>;
+  options: IAssetPluginOptions<IResourceStaticAssetTypingsConfigurationJson>,
+  type: 'resource'
+): Promise<IResourceStaticAssetTypingsConfigurationJson | undefined>;
 export async function tryGetConfigFromPluginOptionsAsync(
   terminal: ITerminal,
   buildFolder: string,
   rigConfig: HeftConfiguration['rigConfig'],
-  options: IAssetPluginOptions<ITextStaticAssetTypingsConfigurationJson>,
-  type: 'text'
-): Promise<ITextStaticAssetTypingsConfigurationJson | undefined>;
+  options: IAssetPluginOptions<ISourceStaticAssetTypingsConfigurationJson>,
+  type: 'source'
+): Promise<ISourceStaticAssetTypingsConfigurationJson | undefined>;
 export async function tryGetConfigFromPluginOptionsAsync(
   terminal: ITerminal,
   buildFolder: string,
   rigConfig: HeftConfiguration['rigConfig'],
   options: IAssetPluginOptions<
-    IBinaryStaticAssetTypingsConfigurationJson | ITextStaticAssetTypingsConfigurationJson
+    IResourceStaticAssetTypingsConfigurationJson | ISourceStaticAssetTypingsConfigurationJson
   >,
   type: import('./getConfigFromConfigFileAsync').FileLoaderType
 ): Promise<
-  IBinaryStaticAssetTypingsConfigurationJson | ITextStaticAssetTypingsConfigurationJson | undefined
+  IResourceStaticAssetTypingsConfigurationJson | ISourceStaticAssetTypingsConfigurationJson | undefined
 > {
   if (options?.configType === 'inline') {
     return options.config;
@@ -135,7 +135,7 @@ export async function createTypingsGeneratorAsync(
 
   const { terminal } = taskSession.logger;
 
-  const configuration: IBinaryStaticAssetTypingsConfigurationJson | undefined =
+  const configuration: IResourceStaticAssetTypingsConfigurationJson | undefined =
     await tryGetConfigAsync(terminal);
 
   if (!configuration) {

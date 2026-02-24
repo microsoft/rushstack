@@ -6,31 +6,31 @@ import { InheritanceType, ProjectConfigurationFile } from '@rushstack/heft-confi
 import type { ITerminal } from '@rushstack/terminal';
 
 import type {
-  IBinaryStaticAssetTypingsConfigurationJson,
-  ITextStaticAssetTypingsConfigurationJson
+  IResourceStaticAssetTypingsConfigurationJson,
+  ISourceStaticAssetTypingsConfigurationJson
 } from './types';
-import binaryStaticAssetSchema from './schemas/binary-static-asset-typings.schema.json';
-import textStaticAssetSchema from './schemas/test-asset-typings.schema.json';
+import resourceStaticAssetSchema from './schemas/resource-static-asset-typings.schema.json';
+import sourceStaticAssetSchema from './schemas/source-static-asset-typings.schema.json';
 
 const configurationFileLoaderByFileName: Map<
   string,
   ProjectConfigurationFile<
-    IBinaryStaticAssetTypingsConfigurationJson | ITextStaticAssetTypingsConfigurationJson
+    IResourceStaticAssetTypingsConfigurationJson | ISourceStaticAssetTypingsConfigurationJson
   >
 > = new Map();
 
-export type FileLoaderType = 'binary' | 'text';
+export type FileLoaderType = 'resource' | 'source';
 
 function createConfigurationFileLoader(
   configFileName: string,
   fileLoaderType: FileLoaderType
 ): ProjectConfigurationFile<
-  IBinaryStaticAssetTypingsConfigurationJson | ITextStaticAssetTypingsConfigurationJson
+  IResourceStaticAssetTypingsConfigurationJson | ISourceStaticAssetTypingsConfigurationJson
 > {
   return new ProjectConfigurationFile<
-    IBinaryStaticAssetTypingsConfigurationJson | ITextStaticAssetTypingsConfigurationJson
+    IResourceStaticAssetTypingsConfigurationJson | ISourceStaticAssetTypingsConfigurationJson
   >({
-    jsonSchemaObject: fileLoaderType === 'binary' ? binaryStaticAssetSchema : textStaticAssetSchema,
+    jsonSchemaObject: fileLoaderType === 'resource' ? resourceStaticAssetSchema : sourceStaticAssetSchema,
     projectRelativeFilePath: `config/${configFileName}`,
     propertyInheritance: {
       fileExtensions: {
@@ -47,11 +47,11 @@ export function getConfigFromConfigFileAsync(
   slashNormalizedBuildFolderPath: string,
   rigConfig: HeftConfiguration['rigConfig']
 ): Promise<
-  IBinaryStaticAssetTypingsConfigurationJson | ITextStaticAssetTypingsConfigurationJson | undefined
+  IResourceStaticAssetTypingsConfigurationJson | ISourceStaticAssetTypingsConfigurationJson | undefined
 > {
   let configurationFileLoader:
     | ProjectConfigurationFile<
-        IBinaryStaticAssetTypingsConfigurationJson | ITextStaticAssetTypingsConfigurationJson
+        IResourceStaticAssetTypingsConfigurationJson | ISourceStaticAssetTypingsConfigurationJson
       >
     | undefined = configurationFileLoaderByFileName.get(configFileName);
   if (!configurationFileLoader) {

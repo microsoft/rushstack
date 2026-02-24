@@ -13,9 +13,9 @@ import {
   type IStaticAssetGeneratorOptions,
   type IStaticAssetTypingsGenerator
 } from './StaticAssetTypingsGenerator';
-import type { IAssetPluginOptions, ITextStaticAssetTypingsConfigurationJson } from './types';
+import type { IAssetPluginOptions, ISourceStaticAssetTypingsConfigurationJson } from './types';
 
-const PLUGIN_NAME: 'text-assets-plugin' = 'text-assets-plugin';
+const PLUGIN_NAME: 'source-assets-plugin' = 'source-assets-plugin';
 
 // Pre-allocated preamble/postamble buffers to avoid repeated allocations.
 // Used with FileSystem.writeBuffersToFileAsync (writev) for efficient output.
@@ -26,8 +26,8 @@ const CJS_POSTAMBLE: Buffer = Buffer.from(';\nexports.default = content;\n');
 const ESM_PREAMBLE: Buffer = Buffer.from('const content = ');
 const ESM_POSTAMBLE: Buffer = Buffer.from(';\nexport default content;\n');
 
-export default class TextAssetsPlugin
-  implements IHeftTaskPlugin<IAssetPluginOptions<ITextStaticAssetTypingsConfigurationJson>>
+export default class SourceAssetsPlugin
+  implements IHeftTaskPlugin<IAssetPluginOptions<ISourceStaticAssetTypingsConfigurationJson>>
 {
   /**
    * Generate typings for text files before TypeScript compilation.
@@ -35,20 +35,20 @@ export default class TextAssetsPlugin
   public apply(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    pluginOptions: IAssetPluginOptions<ITextStaticAssetTypingsConfigurationJson>
+    pluginOptions: IAssetPluginOptions<ISourceStaticAssetTypingsConfigurationJson>
   ): void {
     let generatorPromise: Promise<IStaticAssetTypingsGenerator | false> | undefined;
 
     async function initializeGeneratorAsync(): Promise<IStaticAssetTypingsGenerator | false> {
       const { slashNormalizedBuildFolderPath, rigConfig } = heftConfiguration;
 
-      const options: ITextStaticAssetTypingsConfigurationJson | undefined =
+      const options: ISourceStaticAssetTypingsConfigurationJson | undefined =
         await tryGetConfigFromPluginOptionsAsync(
           taskSession.logger.terminal,
           slashNormalizedBuildFolderPath,
           rigConfig,
           pluginOptions,
-          'text'
+          'source'
         );
 
       if (options) {

@@ -10,12 +10,12 @@ import {
   type IStaticAssetGeneratorOptions,
   type IStaticAssetTypingsGenerator
 } from './StaticAssetTypingsGenerator';
-import type { IAssetPluginOptions, IBinaryStaticAssetTypingsConfigurationJson } from './types';
+import type { IAssetPluginOptions, IResourceStaticAssetTypingsConfigurationJson } from './types';
 
 const PLUGIN_NAME: 'static-asset-typings-plugin' = 'static-asset-typings-plugin';
 
-export default class BinaryAssetsPlugin
-  implements IHeftTaskPlugin<IAssetPluginOptions<IBinaryStaticAssetTypingsConfigurationJson>>
+export default class ResourceAssetsPlugin
+  implements IHeftTaskPlugin<IAssetPluginOptions<IResourceStaticAssetTypingsConfigurationJson>>
 {
   /**
    * Generate typings for text files before TypeScript compilation.
@@ -23,7 +23,7 @@ export default class BinaryAssetsPlugin
   public apply(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IAssetPluginOptions<IBinaryStaticAssetTypingsConfigurationJson>
+    options: IAssetPluginOptions<IResourceStaticAssetTypingsConfigurationJson>
   ): void {
     const { slashNormalizedBuildFolderPath, rigConfig } = heftConfiguration;
     const staticAssetGeneratorOptions: IStaticAssetGeneratorOptions = {
@@ -33,7 +33,7 @@ export default class BinaryAssetsPlugin
           slashNormalizedBuildFolderPath,
           rigConfig,
           options,
-          'binary'
+          'resource'
         );
       },
       slashNormalizedBuildFolderPath,
