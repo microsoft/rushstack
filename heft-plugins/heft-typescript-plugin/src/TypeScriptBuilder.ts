@@ -1141,21 +1141,48 @@ export class TypeScriptBuilder {
    * interprets `.js` files in the output folder.
    */
   private _emitModulePackageJsonFiles(ts: ExtendedTypeScript): void {
-    for (const moduleKindToEmit of this._moduleKindsToEmit) {
-      if (!moduleKindToEmit.emitModulePackageJson) {
+    for (const { emitModulePackageJson, moduleKind, outFolderPath } of this._moduleKindsToEmit) {
+      if (!emitModulePackageJson) {
         continue;
       }
 
-      const isEsm: boolean =
-        moduleKindToEmit.moduleKind === ts.ModuleKind.ES2015 ||
-        moduleKindToEmit.moduleKind === ts.ModuleKind.ESNext;
-      const moduleType: string = isEsm ? 'module' : 'commonjs';
+      // "module" and "commonjs" are the only recognized values. See
+      // https://nodejs.org/api/packages.html#type
+      let moduleType: string | undefined;
+      switch (moduleKind) {
+        // UMD contains a CommonJS wrapper, so it should be treated as CommonJS for package.json generation purposes
+        case ts.ModuleKind.UMD:
+        case ts.ModuleKind.CommonJS: {
+          moduleType = 'commonjs';
+          break;
+        }
 
-      const packageJsonPath: string = `${moduleKindToEmit.outFolderPath}package.json`;
-      const packageJsonContent: string = `{\n  "type": "${moduleType}"\n}\n`;
+        case ts.ModuleKind.AMD:
+        case ts.ModuleKind.None:
+        case ts.ModuleKind.Preserve:
+        case ts.ModuleKind.System: {
+          moduleType = undefined;
+          break;
+        }
 
-      ts.sys.writeFile(packageJsonPath, packageJsonContent);
-      this._typescriptTerminal.writeVerboseLine(`Wrote ${packageJsonPath} with "type": "${moduleType}"`);
+        default: {
+          moduleType = 'module';
+          break;
+        }
+      }
+
+      if (moduleType) {
+        const packageJsonPath: string = `${outFolderPath}package.json`;
+        const packageJsonContent: string = `{\n  "type": "${moduleType}"\n}\n`;
+
+        ts.sys.writeFile(packageJsonPath, packageJsonContent);
+        this._typescriptTerminal.writeVerboseLine(`Wrote ${packageJsonPath} with "type": "${moduleType}"`);
+      } else {
+        throw new Error(
+          `Unsupported module kind ${ts.ModuleKind[moduleKind]} for package.json generation. ` +
+            `Remove the \`emitModulePackageJson\` option for this module kind.`
+        );
+      }
     }
   }
 
