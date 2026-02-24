@@ -18,8 +18,8 @@
     "moduleResolution": "node",
 
     "module": "esnext",
-    "target": "es2017",
-    "lib": ["es2017"]
+    "target": "es2022",
+    "lib": ["es2022"]
   },
   "include": ["../../../../src/**/*.ts", "../../../../src/**/*.tsx"],
   "exclude": ["../../../../node_modules", "../../../../lib"]

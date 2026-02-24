@@ -6,7 +6,7 @@
   "compilerOptions": {
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "target": "es2018",
+    "target": "es2022",
 
     "outDir": "${configDir}/lib-commonjs",
     "declarationDir": "${configDir}/lib-dts",
