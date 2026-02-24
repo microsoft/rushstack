@@ -794,16 +794,14 @@ export class TypeScriptBuilder {
     }
 
     if (this._configuration.additionalModuleKindsToEmit) {
-      for (const additionalModuleKindToEmit of this._configuration.additionalModuleKindsToEmit) {
-        const moduleKind: TTypescript.ModuleKind = this._parseModuleKind(
-          ts,
-          additionalModuleKindToEmit.moduleKind
-        );
+      for (const { moduleKind: moduleKindString, outFolderName, emitModulePackageJson = false } of this
+        ._configuration.additionalModuleKindsToEmit) {
+        const moduleKind: TTypescript.ModuleKind = this._parseModuleKind(ts, moduleKindString);
 
-        const outDirKey: string = `${additionalModuleKindToEmit.outFolderName}:.js`;
+        const outDirKey: string = `${outFolderName}:.js`;
         const moduleKindReason: IModuleKindReason = {
           kind: ts.ModuleKind[moduleKind] as keyof typeof TTypescript.ModuleKind,
-          outDir: additionalModuleKindToEmit.outFolderName,
+          outDir: outFolderName,
           extension: '.js',
           reason: `additionalModuleKindsToEmit`
         };
@@ -813,19 +811,19 @@ export class TypeScriptBuilder {
 
         if (existingKind) {
           throw new Error(
-            `Module kind "${additionalModuleKindToEmit.moduleKind}" is already emitted at ${existingKind.outDir} with extension '${existingKind.extension}' by option ${existingKind.reason}.`
+            `Module kind "${moduleKind}" is already emitted at ${existingKind.outDir} with extension '${existingKind.extension}' by option ${existingKind.reason}.`
           );
         } else if (existingDir) {
           throw new Error(
-            `Output folder "${additionalModuleKindToEmit.outFolderName}" already contains module kind ${existingDir.kind} with extension '${existingDir.extension}', specified by option ${existingDir.reason}.`
+            `Output folder "${outFolderName}" already contains module kind ${existingDir.kind} with extension '${existingDir.extension}', specified by option ${existingDir.reason}.`
           );
         } else {
           const outFolderKey: string | undefined = this._addModuleKindToEmit(
             moduleKind,
-            additionalModuleKindToEmit.outFolderName,
+            outFolderName,
             /* isPrimary */ false,
             undefined,
-            additionalModuleKindToEmit.emitModulePackageJson ?? false
+            emitModulePackageJson
           );
 
           if (outFolderKey) {
