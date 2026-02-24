@@ -8,8 +8,7 @@
   "additionalModuleKindsToEmit": [
     {
       "moduleKind": "esnext",
-      "outFolderName": "lib-esm",
-      "emitModulePackageJson": true
+      "outFolderName": "lib-esm"
     }
   ]
 }

@@ -738,7 +738,8 @@ export class TypeScriptBuilder {
         ts.ModuleKind.CommonJS,
         tsconfig.options.outDir!,
         /* isPrimary */ tsconfig.options.module === ts.ModuleKind.CommonJS,
-        '.cjs'
+        '.cjs',
+        /* emitModulePackageJson */ false
       );
 
       const cjsReason: IModuleKindReason = {
@@ -757,7 +758,8 @@ export class TypeScriptBuilder {
         ts.ModuleKind.ESNext,
         tsconfig.options.outDir!,
         /* isPrimary */ tsconfig.options.module === ts.ModuleKind.ESNext,
-        '.mjs'
+        '.mjs',
+        /* emitModulePackageJson */ false
       );
 
       const mjsReason: IModuleKindReason = {
@@ -776,7 +778,8 @@ export class TypeScriptBuilder {
         tsconfig.options.module,
         tsconfig.options.outDir!,
         /* isPrimary */ true,
-        /* jsExtensionOverride */ undefined
+        /* jsExtensionOverride */ undefined,
+        /* emitModulePackageJson */ false
       );
 
       const tsConfigReason: IModuleKindReason = {
@@ -822,7 +825,7 @@ export class TypeScriptBuilder {
             additionalModuleKindToEmit.outFolderName,
             /* isPrimary */ false,
             undefined,
-            additionalModuleKindToEmit.emitModulePackageJson
+            additionalModuleKindToEmit.emitModulePackageJson ?? false
           );
 
           if (outFolderKey) {
@@ -839,7 +842,7 @@ export class TypeScriptBuilder {
     outFolderPath: string,
     isPrimary: boolean,
     jsExtensionOverride: string | undefined,
-    emitModulePackageJson: boolean = false
+    emitModulePackageJson: boolean
   ): string | undefined {
     let outFolderName: string;
     if (path.isAbsolute(outFolderPath)) {
