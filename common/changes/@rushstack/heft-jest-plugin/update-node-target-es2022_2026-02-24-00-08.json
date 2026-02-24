@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/heft-jest-plugin",
       "comment": "Update TypeScript compilation target to es2022 to match the minimum supported Node.js version (18.15.0)",
-      "type": "patch"
+      "type": "major"
     }
   ],
   "packageName": "@rushstack/heft-jest-plugin"
