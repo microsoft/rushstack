@@ -17,6 +17,7 @@
     "@rushstack/heft-api-extractor-plugin": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-static-asset-typings-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "20.17.19",

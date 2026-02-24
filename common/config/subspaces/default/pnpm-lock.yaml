@@ -1950,6 +1950,9 @@ importers:
       '@rushstack/heft-lint-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-static-asset-typings-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-static-asset-typings-plugin
       '@rushstack/heft-typescript-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-typescript-plugin

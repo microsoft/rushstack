@@ -18,7 +18,7 @@
               "configType": "inline",
               "config": {
                 "fileExtensions": [".png"],
-                "generatedTsFolder": "temp/image-typings"
+                "generatedTsFolders": ["temp/image-typings"]
               }
             }
           }

@@ -15,11 +15,8 @@
             "pluginPackage": "@rushstack/heft-static-asset-typings-plugin",
             "pluginName": "binary-assets-plugin",
             "options": {
-              "configType": "inline",
-              "config": {
-                "fileExtensions": [".png"],
-                "generatedTsFolder": "temp/image-typings"
-              }
+              "configType": "file",
+              "configFileName": "binary-assets.json"
             }
           }
         },

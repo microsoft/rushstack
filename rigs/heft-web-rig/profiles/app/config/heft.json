@@ -56,7 +56,7 @@
               "configType": "inline",
               "config": {
                 "fileExtensions": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp", ".avif"],
-                "generatedTsFolder": "temp/image-typings"
+                "generatedTsFolders": ["temp/image-typings"]
               }
             }
           }

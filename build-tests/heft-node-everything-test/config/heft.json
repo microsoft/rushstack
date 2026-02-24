@@ -21,8 +21,13 @@
             "pluginPackage": "@rushstack/heft-static-asset-typings-plugin",
             "pluginName": "text-assets-plugin",
             "options": {
-              "cjsOutputFolders": ["lib-commonjs"],
-              "esmOutputFolders": ["lib-esm"]
+              "configType": "inline",
+              "config": {
+                "fileExtensions": [".html"],
+                "cjsOutputFolders": ["lib-commonjs"],
+                "esmOutputFolders": ["lib-esm"],
+                "generatedTsFolders": ["temp/text-typings"]
+              }
             }
           }
         },

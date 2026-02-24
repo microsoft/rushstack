@@ -9,8 +9,8 @@ import type {
   IBinaryStaticAssetTypingsConfigurationJson,
   ITextStaticAssetTypingsConfigurationJson
 } from './types';
-import binaryStaticAssetSchema from './schemas/binary-assets-options.schema.json';
-import textStaticAssetSchema from './schemas/text-assets-options.schema.json';
+import binaryStaticAssetSchema from './schemas/binary-static-asset-typings.schema.json';
+import textStaticAssetSchema from './schemas/test-asset-typings.schema.json';
 
 const configurationFileLoaderByFileName: Map<
   string,

@@ -25,6 +25,8 @@ Both plugins support incremental and watch-mode builds.
 
    ### Binary assets (images, fonts, etc.)
 
+   **Inline configuration** — specify options directly in heft.json:
+
    ```jsonc
    {
      "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
@@ -39,7 +41,7 @@ Both plugins support incremental and watch-mode builds.
                  "configType": "inline",
                  "config": {
                    "fileExtensions": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp", ".avif"],
-                   "generatedTsFolder": "temp/image-typings"
+                   "generatedTsFolders": ["temp/image-typings"]
                  }
                }
              }
@@ -54,7 +56,7 @@ Both plugins support incremental and watch-mode builds.
    }
    ```
 
-   ### Text assets
+   **File configuration** — load settings from a riggable config file:
 
    ```jsonc
    {
@@ -62,24 +64,106 @@ Both plugins support incremental and watch-mode builds.
      "phasesByName": {
        "build": {
          "tasksByName": {
-           "text-assets": {
+           "image-typings": {
              "taskPlugin": {
                "pluginPackage": "@rushstack/heft-static-asset-typings-plugin",
-               "pluginName": "text-assets-plugin",
+               "pluginName": "binary-assets-plugin",
                "options": {
-                 "cjsOutputFolders": ["lib-commonjs"],
-                 "esmOutputFolders": ["lib-esm"]
-                 // "configFileName": "text-assets.json"  // (optional, name of riggable config file)
+                 "configType": "file",
+                 "configFileName": "binary-assets.json"
                }
              }
            },
            "typescript": {
-             "taskDependencies": ["text-assets"]
+             "taskDependencies": ["image-typings"]
              // ...
            }
          }
        }
      }
+   }
+   ```
+
+   And create a **config/binary-assets.json** file (which can be provided by a rig):
+
+   ```jsonc
+   {
+     "fileExtensions": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp", ".avif"],
+     "generatedTsFolders": ["temp/image-typings"]
+   }
+   ```
+
+   ### Text assets
+
+   **Inline configuration:**
+
+   ```jsonc
+   {
+     "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+     "phasesByName": {
+       "build": {
+         "tasksByName": {
+           "text-typings": {
+             "taskPlugin": {
+               "pluginPackage": "@rushstack/heft-static-asset-typings-plugin",
+               "pluginName": "text-assets-plugin",
+               "options": {
+                 "configType": "inline",
+                 "config": {
+                   "fileExtensions": [".html"],
+                   "cjsOutputFolders": ["lib-commonjs"],
+                   "esmOutputFolders": ["lib-esm"],
+                   "generatedTsFolders": ["temp/text-typings"]
+                 }
+               }
+             }
+           },
+           "typescript": {
+             "taskDependencies": ["text-typings"]
+             // ...
+           }
+         }
+       }
+     }
+   }
+   ```
+
+   **File configuration:**
+
+   ```jsonc
+   {
+     "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+     "phasesByName": {
+       "build": {
+         "tasksByName": {
+           "text-typings": {
+             "taskPlugin": {
+               "pluginPackage": "@rushstack/heft-static-asset-typings-plugin",
+               "pluginName": "text-assets-plugin",
+               "options": {
+                 "configType": "file",
+                 "configFileName": "text-assets.json"
+               }
+             }
+           },
+           "typescript": {
+             "taskDependencies": ["text-typings"]
+             // ...
+           }
+         }
+       }
+     }
+   }
+   ```
+
+   And create a **config/text-assets.json** file (which can be provided by a rig):
+
+   ```jsonc
+   {
+     "fileExtensions": [".html"],
+     "cjsOutputFolders": ["lib-commonjs"],
+     "esmOutputFolders": ["lib-esm"],
+     "generatedTsFolders": ["temp/text-typings"]
    }
    ```
 
@@ -96,44 +180,39 @@ Both plugins support incremental and watch-mode builds.
 
 ## Plugin options
 
-### `binary-assets-plugin`
+Both plugins support two configuration modes via the `configType` option:
 
-Supports two configuration modes:
+### Inline mode (`configType: "inline"`)
 
-**Inline mode** (`configType: "inline"`):
+Provide configuration directly in heft.json under `options.config`:
 
-| Option                       | Type       | Default   | Description                                                          |
-| ---------------------------- | ---------- | --------- | -------------------------------------------------------------------- |
-| `config.fileExtensions`      | `string[]` | —         | **(required)** File extensions to generate typings for.              |
-| `config.generatedTsFolder`   | `string`   | `"temp/static-asset-typings"` | Output folder for the generated `.d.ts` files.        |
-| `config.secondaryGeneratedTsFolders` | `string[]` | `[]` | Additional output folders for generated `.d.ts` files.              |
-| `config.sourceFolderPath`    | `string`   | `"src"`   | Source folder to scan for asset files.                               |
+#### `binary-assets-plugin` inline config
 
-**File mode** (`configType: "file"`):
+| Option              | Type       | Default                  | Description                                     |
+| ------------------- | ---------- | ------------------------ | ----------------------------------------------- |
+| `fileExtensions`    | `string[]` | —                        | **(required)** File extensions to generate typings for. |
+| `generatedTsFolders`| `string[]` | `["temp/static-asset-ts"]` | Output folders for the generated `.d.ts` files. |
+| `sourceFolderPath`  | `string`   | `"src"`                  | Source folder to scan for asset files.           |
+
+#### `text-assets-plugin` inline config
+
+Includes all the above, plus:
+
+| Option              | Type       | Default                  | Description                                          |
+| ------------------- | ---------- | ------------------------ | ---------------------------------------------------- |
+| `cjsOutputFolders`  | `string[]` | —                        | **(required)** Output folders for generated CommonJS `.js` modules. |
+| `esmOutputFolders`   | `string[]` | `[]`                    | Output folders for generated ESM `.js` modules.      |
+
+### File mode (`configType: "file"`)
+
+Load configuration from a riggable JSON config file in the project's `config/` folder:
 
 | Option           | Type     | Description                                                            |
 | ---------------- | -------- | ---------------------------------------------------------------------- |
-| `configFileName` | `string` | **(required)** Name of a riggable JSON config file in the `config/` folder. |
+| `configFileName` | `string` | **(required)** Name of the JSON config file in the `config/` folder.   |
 
-### `text-assets-plugin`
-
-| Option           | Type       | Default              | Description                                                      |
-| ---------------- | ---------- | -------------------- | ---------------------------------------------------------------- |
-| `cjsOutputFolders` | `string[]` | —                  | **(required)** Output folders for generated CommonJS `.js` modules. |
-| `esmOutputFolders` | `string[]` | `[]`                | Output folders for generated ESM `.js` modules.                  |
-| `configFileName` | `string`   | `"text-assets.json"` | Name of a riggable JSON config file in the `config/` folder.     |
-
-## Riggable config file format
-
-Both plugins can load configuration from a riggable JSON config file (located in your project's
-`config/` folder). The schema supports the following properties:
-
-| Property                     | Type       | Default   | Description                                                    |
-| ---------------------------- | ---------- | --------- | -------------------------------------------------------------- |
-| `fileExtensions`             | `string[]` | —         | **(required)** File extensions to process.                     |
-| `generatedTsFolder`          | `string`   | `"temp/static-asset-typings"` | Output folder for generated `.d.ts` typings.    |
-| `secondaryGeneratedTsFolders`| `string[]` | `[]`      | Additional output folders for generated typings.               |
-| `sourceFolderPath`           | `string`   | `"src"`   | Source folder to scan for matching files.                      |
+The config file supports the same properties as inline mode (see tables above). Config files
+can be provided by a rig, making file mode ideal for shared build configurations.
 
 ## Links
 
