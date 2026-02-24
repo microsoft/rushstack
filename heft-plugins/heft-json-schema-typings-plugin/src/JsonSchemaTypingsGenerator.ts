@@ -60,6 +60,15 @@ export class JsonSchemaTypingsGenerator extends TypingsGenerator {
           format: formatWithPrettier
         });
 
+        // The json-schema-to-typescript library generates JSDoc comments containing
+        // inline values that may include "@" characters, such as:
+        //   via the `patternProperty` "^@[^\s]*$".
+        // TSDoc interprets "@" as a tag indicator, causing parse warnings.
+        // Wrap double-quoted values in backtick code spans to prevent this issue.
+        // Use " +" for the leading whitespace so this matches at any JSDoc indentation
+        // level (e.g. top-level " * ..." or nested "     * ...").
+        typings = typings.replace(/^( +\* .+`(?:patternProperty|definition)`) "([^"]+)"/gm, '$1 `"$2"`');
+
         // Check for an "x-tsdoc-release-tag" property in the schema (e.g. "@public" or "@beta").
         // If present, inject the tag into JSDoc comments for all exported declarations.
         if (tsdocReleaseTag) {

@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Sass Configuration",
-  "description": "This schema describes the \"config/sass.json\" config file used to configure \"@rushstack/heft-jest-plugin\", and also the \"options\" field that can be specified in heft.json when loading the plugin.",
+  "description": "This schema describes the \"config/sass.json\" config file used to configure `@rushstack/heft-jest-plugin`, and also the \"options\" field that can be specified in heft.json when loading the plugin.",
   "type": "object",
 
   "additionalProperties": false,

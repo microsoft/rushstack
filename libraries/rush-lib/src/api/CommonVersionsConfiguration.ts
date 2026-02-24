@@ -19,6 +19,7 @@ import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
 import type { RushConfiguration } from './RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 import schemaJson from '../schemas/common-versions.schema.json';
+import type { RushCommonVersionsConfiguration as ICommonVersionsJson } from '../schemas/common-versions.schema.json.d.ts';
 
 /**
  * Part of the ICommonVersionsJson structure.
@@ -40,21 +41,6 @@ export declare interface ICommonVersionsJsonVersionsMap {
    * range specifiers.
    */
   [dependencyName: string]: string[];
-}
-
-/**
- * Describes the file structure for the "common/config/rush/common-versions.json" config file.
- */
-interface ICommonVersionsJson {
-  $schema?: string;
-
-  preferredVersions?: ICommonVersionsJsonVersionMap;
-
-  implicitlyPreferredVersions?: boolean;
-
-  allowedAlternativeVersions?: ICommonVersionsJsonVersionsMap;
-
-  ensureConsistentVersions?: boolean;
 }
 
 /**

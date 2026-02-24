@@ -10,7 +10,7 @@
     "outDir": "${configDir}/lib-esm",
     "declarationDir": "${configDir}/lib-dts",
     "rootDir": "${configDir}/src",
-    "rootDirs": ["${configDir}/src", "${configDir}/temp/sass-ts"],
+    "rootDirs": ["${configDir}/src", "${configDir}/temp/sass-ts", "${configDir}/temp/schema-ts"],
 
     "types": ["heft-jest", "webpack-env"],
     "typeRoots": ["${configDir}/node_modules/@types", "../../node_modules/@types"]

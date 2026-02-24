@@ -10,6 +10,7 @@
 export {
   CredentialCache,
   type ICredentialCacheEntry,
+  type ICredentialCacheEntryJson,
   type ICredentialCacheOptions,
   RUSH_USER_FOLDER_NAME
 } from './CredentialCache';

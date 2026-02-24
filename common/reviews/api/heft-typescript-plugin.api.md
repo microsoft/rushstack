@@ -41,11 +41,7 @@ export interface _ICompilerCapabilities {
 
 // @beta (undocumented)
 export interface IEmitModuleKind {
-    // (undocumented)
-    jsExtensionOverride?: string;
-    // (undocumented)
-    moduleKind: 'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext';
-    // (undocumented)
+    moduleKind: "commonjs" | "amd" | "umd" | "system" | "es2015" | "esnext";
     outFolderName: string;
 }
 
@@ -96,25 +92,23 @@ export interface IPartialTsconfigCompilerOptions {
 }
 
 // @beta (undocumented)
-export interface IStaticAssetsCopyConfiguration {
-    // (undocumented)
-    excludeGlobs: string[];
-    // (undocumented)
-    fileExtensions: string[];
-    // (undocumented)
-    includeGlobs: string[];
-}
+export type IStaticAssetsCopyConfiguration = ITypeScriptConfigurationJson['staticAssetsToCopy'];
 
-// @beta (undocumented)
+// @beta
 export interface ITypeScriptConfigurationJson {
-    additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
+    $schema?: string;
+    additionalModuleKindsToEmit?: IEmitModuleKind[];
     buildProjectReferences?: boolean;
-    emitCjsExtensionForCommonJS?: boolean | undefined;
-    emitMjsExtensionForESModule?: boolean | undefined;
+    emitCjsExtensionForCommonJS?: boolean;
+    emitMjsExtensionForESModule?: boolean;
+    extends?: string;
     onlyResolveSymlinksInNodeModules?: boolean;
-    // (undocumented)
     project?: string;
-    staticAssetsToCopy?: IStaticAssetsCopyConfiguration;
+    staticAssetsToCopy?: {
+        fileExtensions?: string[];
+        excludeGlobs?: string[];
+        includeGlobs?: string[];
+    };
     useTranspilerWorker?: boolean;
 }
 

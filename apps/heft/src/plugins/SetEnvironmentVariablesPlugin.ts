@@ -4,12 +4,14 @@
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskSession } from '../pluginFramework/HeftTaskSession';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
+import type { SetEnvironmentVariablesHeftTaskEventOptions as ISetEnvironmentVariablesPluginOptions } from '../schemas/set-environment-variables-plugin.schema.json.d.ts';
 
 export const PLUGIN_NAME: string = 'set-environment-variables-plugin';
 
-export interface ISetEnvironmentVariablesPluginOptions {
-  environmentVariablesToSet: Record<string, string>;
-}
+/**
+ * @public
+ */
+export type { ISetEnvironmentVariablesPluginOptions };
 
 export default class SetEnvironmentVariablesPlugin
   implements IHeftTaskPlugin<ISetEnvironmentVariablesPluginOptions>

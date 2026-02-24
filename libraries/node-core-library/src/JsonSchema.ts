@@ -5,6 +5,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import Ajv, { type Options as AjvOptions, type ErrorObject, type ValidateFunction } from 'ajv';
+import Ajv2019 from 'ajv/dist/2019';
 import AjvDraft04 from 'ajv-draft-04';
 import addFormats from 'ajv-formats';
 
@@ -44,7 +45,7 @@ interface ISchemaWithId {
  * https://json-schema.org/specification
  * @public
  */
-export type JsonSchemaVersion = 'draft-04' | 'draft-07';
+export type JsonSchemaVersion = 'draft-04' | 'draft-07' | 'draft-2019-09';
 
 /**
  * A definition for a custom format to consider during validation.
@@ -175,7 +176,8 @@ export type IJsonSchemaFromObjectOptions = IJsonSchemaLoadOptions;
 
 const JSON_SCHEMA_URL_PREFIX_BY_JSON_SCHEMA_VERSION: Map<JsonSchemaVersion, string> = new Map([
   ['draft-04', 'http://json-schema.org/draft-04/schema'],
-  ['draft-07', 'http://json-schema.org/draft-07/schema']
+  ['draft-07', 'http://json-schema.org/draft-07/schema'],
+  ['draft-2019-09', 'https://json-schema.org/draft/2019-09/schema']
 ]);
 
 /**
@@ -368,6 +370,11 @@ export class JsonSchema {
       switch (targetSchemaVersion) {
         case 'draft-04': {
           validator = new AjvDraft04(validatorOptions);
+          break;
+        }
+
+        case 'draft-2019-09': {
+          validator = new Ajv2019(validatorOptions);
           break;
         }
 

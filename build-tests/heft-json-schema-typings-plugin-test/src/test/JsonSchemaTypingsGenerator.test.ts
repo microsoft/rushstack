@@ -40,15 +40,15 @@ describe('json-schema-typings-plugin', () => {
     rootFolder = foundRootFolder;
   });
 
-  it('should generate typings for JSON Schemas', async () => {
+  it('should generate typings for JSON Schemas (unformatted)', async () => {
     const folderItems: Record<string, string> = await getFolderItemsAsync(
-      `${rootFolder}/temp/schema-dts`,
+      `${rootFolder}/temp/schema-dts-unformatted`,
       '.'
     );
     expect(folderItems).toMatchSnapshot();
   });
 
-  it('should generate formatted typings for JSON Schemas', async () => {
+  it('should generate typings for JSON Schemas (formatted)', async () => {
     const folderItems: Record<string, string> = await getFolderItemsAsync(
       `${rootFolder}/temp/schema-dts-formatted`,
       '.'

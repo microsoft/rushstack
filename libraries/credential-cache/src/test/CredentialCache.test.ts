@@ -274,7 +274,7 @@ describe(CredentialCache.name, () => {
     it('correctly sets credentialMetadata', async () => {
       const credentialId: string = 'test-credential';
       const credentialValue: string = 'test-value';
-      const credentialMetadata: object = {
+      const credentialMetadata: { [k: string]: unknown } = {
         a: 1,
         b: true
       };
@@ -307,11 +307,11 @@ describe(CredentialCache.name, () => {
     it('correctly updates credentialMetadata', async () => {
       const credentialId: string = 'test-credential';
       const credentialValue: string = 'test-value';
-      const oldCredentialMetadata: object = {
+      const oldCredentialMetadata: { [k: string]: unknown } = {
         a: 1,
         b: true
       };
-      const newCredentialMetadata: object = {
+      const newCredentialMetadata: { [k: string]: unknown } = {
         c: ['a', 'b', 'c']
       };
 

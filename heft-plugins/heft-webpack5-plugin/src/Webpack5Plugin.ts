@@ -26,11 +26,8 @@ import {
 } from './shared';
 import { tryLoadWebpackConfigurationAsync } from './WebpackConfigurationLoader';
 import { type DeferredWatchFileSystem, OverrideNodeWatchFSPlugin } from './DeferredWatchFileSystem';
+import type { Webpack5PluginConfiguration } from './schemas/heft-webpack5-plugin-options.schema.json.d.ts';
 
-export interface IWebpackPluginOptions {
-  devConfigurationPath?: string | undefined;
-  configurationPath?: string | undefined;
-}
 const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';
 const WEBPACK_PACKAGE_NAME: 'webpack' = 'webpack';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: 'webpack-dev-server' = 'webpack-dev-server';
@@ -40,7 +37,7 @@ const WEBPACK_DEV_MIDDLEWARE_PACKAGE_NAME: 'webpack-dev-middleware' = 'webpack-d
 /**
  * @internal
  */
-export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOptions> {
+export default class Webpack5Plugin implements IHeftTaskPlugin<Webpack5PluginConfiguration> {
   private _accessor: IWebpackPluginAccessor | undefined;
   private _isServeMode: boolean = false;
   private _webpack: typeof TWebpack | undefined;
@@ -68,7 +65,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   public apply(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IWebpackPluginOptions = {}
+    options: Webpack5PluginConfiguration = {}
   ): void {
     this._isServeMode = taskSession.parameters.getFlagParameter(SERVE_PARAMETER_LONG_NAME).value;
     if (this._isServeMode && !taskSession.parameters.watch) {
@@ -96,7 +93,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   private async _getWebpackConfigurationAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IWebpackPluginOptions,
+    options: Webpack5PluginConfiguration,
     requestRun?: () => void
   ): Promise<IWebpackConfiguration | undefined> {
     if (this._webpackConfiguration === false) {
@@ -170,7 +167,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   private async _runWebpackAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IWebpackPluginOptions
+    options: Webpack5PluginConfiguration
   ): Promise<void> {
     this._validateEnvironmentVariable(taskSession);
     if (taskSession.parameters.watch || this._isServeMode) {
@@ -218,7 +215,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   private async _runWebpackWatchAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IWebpackPluginOptions,
+    options: Webpack5PluginConfiguration,
     requestRun: () => void
   ): Promise<void> {
     // Save a handle to the original promise, since the this-scoped promise will be replaced whenever

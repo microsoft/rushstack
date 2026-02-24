@@ -16,20 +16,9 @@ import type {
 } from '@rushstack/heft';
 
 import { PLUGIN_NAME } from './constants';
-import { type ICssOutputFolder, type ISassProcessorOptions, SassProcessor } from './SassProcessor';
-import sassConfigSchema from './schemas/heft-sass-plugin.schema.json';
-
-export interface ISassConfigurationJson {
-  srcFolder?: string;
-  generatedTsFolder?: string;
-  cssOutputFolders?: (string | ICssOutputFolder)[];
-  secondaryGeneratedTsFolders?: string[];
-  exportAsDefault?: boolean;
-  fileExtensions?: string[];
-  nonModuleFileExtensions?: string[];
-  silenceDeprecations?: string[];
-  excludeFiles?: string[];
-}
+import { type ISassProcessorOptions, SassProcessor } from './SassProcessor';
+import type { SassConfiguration as ISassConfigurationJson } from './schemas/heft-sass-plugin-options.schema.json.d.ts';
+import sassConfigSchema from './schemas/heft-sass-plugin-options.schema.json';
 
 const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
 
@@ -113,7 +102,7 @@ export default class SassPlugin implements IHeftPlugin {
           excludeFiles,
           fileExtensions,
           nonModuleFileExtensions,
-          cssOutputFolders: cssOutputFolders?.map((folder: string | ICssOutputFolder) => {
+          cssOutputFolders: cssOutputFolders?.map((folder) => {
             const folderPath: string = typeof folder === 'string' ? folder : folder.folder;
             const shimModuleFormat: 'commonjs' | 'esnext' | undefined =
               typeof folder === 'string' ? undefined : folder.shimModuleFormat;

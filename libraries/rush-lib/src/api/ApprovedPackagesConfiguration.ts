@@ -8,24 +8,10 @@ import { JsonFile, JsonSchema, FileSystem, NewlineKind, InternalError } from '@r
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
 import schemaJson from '../schemas/approved-packages.schema.json';
 import { RushConstants } from '../logic/RushConstants';
-
-/**
- * Part of IApprovedPackagesJson.
- */
-export interface IApprovedPackagesItemJson {
-  name: string;
-  allowedCategories: string[];
-}
-
-/**
- * This represents the JSON data structure for the "browser-approved-packages.json"
- * and "nonbrowser-approved-packages.json" configuration files.  See "approved-packages.schema.json"
- * for documentation.
- */
-export interface IApprovedPackagesJson {
-  $schema?: string;
-  packages: IApprovedPackagesItemJson[];
-}
+import type {
+  RushApprovedPackagesConfiguration as IApprovedPackagesJson,
+  PackageInfo as IApprovedPackagesItemJson
+} from '../schemas/approved-packages.schema.json.d.ts';
 
 /**
  * An item returned by ApprovedPackagesConfiguration

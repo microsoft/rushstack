@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Heft Localization Typings Plugin Options",
 
   "type": "object",
   "additionalProperties": false,

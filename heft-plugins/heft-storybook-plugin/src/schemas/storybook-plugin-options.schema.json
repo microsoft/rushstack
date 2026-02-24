@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Heft Storybook Plugin Options Configuration",
-  "description": "This schema describes the \"options\" field that can be specified in heft.json when loading \"@rushstack/heft-storybook-plugin\".",
+  "description": "This schema describes the \"options\" field that can be specified in heft.json when loading `@rushstack/heft-storybook-plugin`.",
   "type": "object",
   "additionalProperties": false,
   "required": ["storykitPackageName"],

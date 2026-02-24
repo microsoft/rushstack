@@ -27,13 +27,18 @@ export class CredentialCache implements Disposable {
 }
 
 // @public (undocumented)
-export interface ICredentialCacheEntry {
-    // (undocumented)
-    credential: string;
-    // (undocumented)
-    credentialMetadata?: object;
+export interface ICredentialCacheEntry extends Omit<ICredentialCacheEntryJson, 'expires'> {
     // (undocumented)
     expires?: Date;
+}
+
+// @public
+export interface ICredentialCacheEntryJson {
+    credential: string;
+    credentialMetadata?: {
+        [k: string]: unknown;
+    };
+    expires: number;
 }
 
 // @public (undocumented)

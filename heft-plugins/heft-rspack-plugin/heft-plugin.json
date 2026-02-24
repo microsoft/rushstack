@@ -5,7 +5,7 @@
     {
       "pluginName": "rspack-plugin",
       "entryPoint": "./lib-commonjs/RspackPlugin",
-      "optionsSchema": "./lib-commonjs/schemas/heft-rspack-plugin.schema.json",
+      "optionsSchema": "./lib-commonjs/schemas/heft-rspack-plugin-options.schema.json",
 
       "parameterScope": "rspack",
       "parameters": [

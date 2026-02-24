@@ -17,7 +17,10 @@ import type {
   IExtendedSolutionBuilder,
   ITypeScriptNodeSystem
 } from './internalTypings/TypeScriptInternals';
-import type { ITypeScriptConfigurationJson, IEmitModuleKind } from './TypeScriptPlugin';
+import type {
+  AdditionalModuleKindToEmit,
+  TypeScriptBuildConfiguration
+} from './schemas/typescript.schema.json.d.ts';
 import type { PerformanceMeasurer } from './Performance';
 import type {
   ICachedEmitModuleKind,
@@ -29,7 +32,7 @@ import { configureProgramForMultiEmit } from './configureProgramForMultiEmit';
 import { loadTsconfig } from './tsconfigLoader';
 import { loadTypeScriptToolAsync } from './loadTypeScriptTool';
 
-export interface ITypeScriptBuilderConfiguration extends ITypeScriptConfigurationJson {
+export interface ITypeScriptBuilderConfiguration extends TypeScriptBuildConfiguration {
   /**
    * The root folder of the build.
    */
@@ -153,7 +156,7 @@ export class TypeScriptBuilder {
       const configHash: crypto.Hash = crypto.createHash('sha1');
 
       // Relativize the outFolderName paths before hashing to ensure portability across different machines
-      const normalizedConfig: IEmitModuleKind[] =
+      const normalizedConfig: AdditionalModuleKindToEmit[] =
         this._configuration.additionalModuleKindsToEmit?.map((emitKind) => ({
           ...emitKind,
           outFolderName: Path.convertToSlashes(

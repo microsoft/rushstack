@@ -1,7 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Configuration for Rush's cobuild.",
+  "title": "Rush Cobuild Configuration",
   "description": "For use with the Rush tool, this file provides configuration options for cobuild feature. See http://rushjs.io for details.",
+  "x-tsdoc-release-tag": "@beta",
   "definitions": {
     "anything": {
       "type": ["array", "boolean", "integer", "number", "object", "string"],

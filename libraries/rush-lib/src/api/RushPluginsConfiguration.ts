@@ -4,6 +4,7 @@
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
 import schemaJson from '../schemas/rush-plugins.schema.json';
+import type { RushPluginsConfiguration as IRushPluginsConfigurationJson } from '../schemas/rush-plugins.schema.json.d.ts';
 
 /**
  * @internal
@@ -15,10 +16,6 @@ export interface IRushPluginConfigurationBase {
 
 export interface IRushPluginConfiguration extends IRushPluginConfigurationBase {
   autoinstallerName: string;
-}
-
-interface IRushPluginsConfigurationJson {
-  plugins: IRushPluginConfiguration[];
 }
 
 export class RushPluginsConfiguration {

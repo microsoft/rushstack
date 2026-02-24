@@ -2,9 +2,31 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "TypeScript Build Configuration",
   "description": "Defines optional options for TypeScript build.",
+  "x-tsdoc-release-tag": "@beta",
   "type": "object",
 
   "additionalProperties": false,
+
+  "definitions": {
+    "additionalModuleKindToEmit": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "moduleKind": {
+          "description": "Specifies the module format to emit.  The value must be one of the module formats supported by the TypeScript compiler.",
+          "type": "string",
+          "enum": ["commonjs", "amd", "umd", "system", "es2015", "esnext"]
+        },
+
+        "outFolderName": {
+          "description": "Specifies the output folder name where the compiler will emit the module format.  This folder name is resolved relative to the project root.",
+          "type": "string",
+          "pattern": "[^\\\\\\/]"
+        }
+      },
+      "required": ["moduleKind", "outFolderName"]
+    }
+  },
 
   "properties": {
     "$schema": {
@@ -21,19 +43,7 @@
       "type": "array",
       "description": "If provided, emit these module kinds in addition to the modules specified in the tsconfig. Note that this option only applies to the main tsconfig.json configuration.",
       "items": {
-        "type": "object",
-        "properties": {
-          "moduleKind": {
-            "type": "string",
-            "enum": ["commonjs", "amd", "umd", "system", "es2015", "esnext"]
-          },
-
-          "outFolderName": {
-            "type": "string",
-            "pattern": "[^\\\\\\/]"
-          }
-        },
-        "required": ["moduleKind", "outFolderName"]
+        "$ref": "#/definitions/additionalModuleKindToEmit"
       }
     },
 

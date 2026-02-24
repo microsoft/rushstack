@@ -12,14 +12,12 @@ import { RushConstants } from '../logic/RushConstants';
 import type { ICobuildLockProvider } from '../logic/cobuild/ICobuildLockProvider';
 import type { RushConfiguration } from './RushConfiguration';
 import schemaJson from '../schemas/cobuild.schema.json';
+import type { RushCobuildConfiguration as ICobuildJson } from '../schemas/cobuild.schema.json.d.ts';
 
 /**
  * @beta
  */
-export interface ICobuildJson {
-  cobuildFeatureEnabled: boolean;
-  cobuildLockProvider: string;
-}
+export type { ICobuildJson };
 
 /**
  * @beta

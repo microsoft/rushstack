@@ -100,8 +100,7 @@ module.exports = () => {
           path: `${__dirname}/temp/build/webpack-dll/[name].json`,
           inFolderName: 'lib-intermediate-esm',
           outFolderName: 'lib-commonjs',
-          pathsToIgnore: ['utilities/prompts/SearchListPrompt.js'],
-          dTsFilesInputFolderName: 'lib-dts'
+          pathsToIgnore: ['utilities/prompts/SearchListPrompt.js']
         })
       ],
       {

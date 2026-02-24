@@ -8,7 +8,7 @@ import type * as TWebpack from 'webpack';
 import { FileSystem } from '@rushstack/node-core-library';
 import type { IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 
-import type { IWebpackPluginOptions } from './Webpack4Plugin';
+import type { Webpack4PluginConfiguration } from './schemas/heft-webpack4-plugin-options.schema.json.d.ts';
 import {
   PLUGIN_NAME,
   STAGE_LOAD_LOCAL_CONFIG,
@@ -47,7 +47,7 @@ const DEFAULT_WEBPACK_DEV_CONFIG_PATH: './webpack.dev.config.js' = './webpack.de
  */
 export async function tryLoadWebpackConfigurationAsync(
   options: ILoadWebpackConfigurationOptions,
-  pluginOptions: IWebpackPluginOptions
+  pluginOptions: Webpack4PluginConfiguration
 ): Promise<IWebpackConfiguration | undefined> {
   const { taskSession, hooks, _tryLoadConfigFileAsync = tryLoadWebpackConfigurationFileAsync } = options;
   const { logger } = taskSession;
@@ -108,7 +108,7 @@ export async function tryLoadWebpackConfigurationAsync(
  */
 export async function tryLoadWebpackConfigurationFileAsync(
   options: ILoadWebpackConfigurationOptions,
-  pluginOptions: IWebpackPluginOptions
+  pluginOptions: Webpack4PluginConfiguration
 ): Promise<IWebpackConfiguration | undefined> {
   // TODO: Eventually replace this custom logic with a call to this utility in in webpack-cli:
   // https://github.com/webpack/webpack-cli/blob/next/packages/webpack-cli/lib/groups/ConfigGroup.js

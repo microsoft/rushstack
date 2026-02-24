@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema",
-  "title": "Rush rush-plugins.json config file",
+  "title": "Rush Plugins Configuration",
   "description": "This file defines plugins used by Rush",
   "type": "object",
   "required": ["plugins"],

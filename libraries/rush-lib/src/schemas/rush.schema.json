@@ -104,7 +104,7 @@
           "type": "boolean"
         },
         "resolutionStrategy": {
-          "description": "(Deprecated) Configures the strategy used to select versions during installation.  This feature requires PNPM version 3.1 or newer.  It corresponds to the \"--resolution-strategy\" command-line option for PNPM.  Possible values are \"fast\" and \"fewer-dependencies\".  PNPM's default is \"fast\", but this may be incompatible with certain packages, for example the \"@types\" packages from DefinitelyTyped.  Rush's default is \"fewer-dependencies\", which causes PNPM to avoid installing a newer version if an already installed version can be reused; this is more similar to NPM's algorithm.",
+          "description": "(Deprecated) Configures the strategy used to select versions during installation.  This feature requires PNPM version 3.1 or newer.  It corresponds to the \"--resolution-strategy\" command-line option for PNPM.  Possible values are \"fast\" and \"fewer-dependencies\".  PNPM's default is \"fast\", but this may be incompatible with certain packages, for example the `@types` packages from DefinitelyTyped.  Rush's default is \"fewer-dependencies\", which causes PNPM to avoid installing a newer version if an already installed version can be reused; this is more similar to NPM's algorithm.",
           "type": "string",
           "enum": ["fewer-dependencies", "fast"]
         },
@@ -156,7 +156,7 @@
           }
         },
         "ignoredNpmScopes": {
-          "description": "A list of NPM package scopes that will be excluded from review (e.g. \"@types\")",
+          "description": "A list of NPM package scopes that will be excluded from review (e.g. `@types`)",
           "type": "array",
           "items": {
             "type": "string",
@@ -171,14 +171,14 @@
       "type": "object",
       "properties": {
         "allowedEmailRegExps": {
-          "description": "A list of regular expressions describing allowable e-mail patterns for Git commits.  They are case-insensitive anchored JavaScript RegExps.  Example: \".*@example\\.com\"",
+          "description": "A list of regular expressions describing allowable e-mail patterns for Git commits.  They are case-insensitive anchored JavaScript RegExps.  Example: `.*@example\\.com`",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
         "sampleEmail": {
-          "description": "An example valid e-mail address for \"Mr. Example\" that conforms to one of the allowedEmailRegExps.  Example: \"mr-example@contoso\\.com\"",
+          "description": "An example valid e-mail address for \"Mr. Example\" that conforms to one of the allowedEmailRegExps.  Example: `mr-example@contoso\\.com`",
           "type": "string"
         },
         "versionBumpCommitMessage": {
@@ -249,7 +249,7 @@
       "type": "boolean"
     },
     "allowedProjectTags": {
-      "description": "This is an optional, but recommended, list of allowed tags that can be applied to Rush projects using the \"tags\" setting in this file.  This list is useful for preventing mistakes such as misspelling, and it also provides a centralized place to document your tags.  If \"allowedProjectTags\" list is not specified, then any valid tag is allowed.  A tag name must be one or more words separated by hyphens or slashes, where a word may contain lowercase ASCII letters, digits, \".\", and \"@\" characters.",
+      "description": "This is an optional, but recommended, list of allowed tags that can be applied to Rush projects using the \"tags\" setting in this file.  This list is useful for preventing mistakes such as misspelling, and it also provides a centralized place to document your tags.  If \"allowedProjectTags\" list is not specified, then any valid tag is allowed.  A tag name must be one or more words separated by hyphens or slashes, where a word may contain lowercase ASCII letters, digits, \".\", and `@` characters.",
       "type": "array",
       "items": {
         "type": "string",
@@ -305,7 +305,7 @@
             "type": "string"
           },
           "tags": {
-            "description": "An optional set of custom tags that can be used to select this project. For example, adding \"my-custom-tag\" will allow this project to be selected by the command \"rush list --only tag:my-custom-tag\". The tag name must be one or more words separated by hyphens or slashes, where a word may contain lowercase ASCII letters, digits, \".\", and \"@\" characters.",
+            "description": "An optional set of custom tags that can be used to select this project. For example, adding \"my-custom-tag\" will allow this project to be selected by the command \"rush list --only tag:my-custom-tag\". The tag name must be one or more words separated by hyphens or slashes, where a word may contain lowercase ASCII letters, digits, \".\", and `@` characters.",
             "type": "array",
             "items": {
               "type": "string",

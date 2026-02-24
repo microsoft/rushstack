@@ -5,16 +5,16 @@
 
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["temp/schema-dts"] }],
+      "cleanFiles": [{ "includeGlobs": ["temp/schema-dts-unformatted", "temp/schema-dts-formatted"] }],
 
       "tasksByName": {
-        "json-schema-typings": {
+        "json-schema-typings-unformatted": {
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-json-schema-typings-plugin",
             "pluginName": "json-schema-typings-plugin",
             "options": {
               "srcFolder": "node_modules/@rushstack/node-core-library/src/test/test-data/test-schemas",
-              "generatedTsFolders": ["temp/schema-dts"]
+              "generatedTsFolders": ["temp/schema-dts-unformatted"]
             }
           }
         },

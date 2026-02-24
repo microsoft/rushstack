@@ -5,7 +5,7 @@
     {
       "pluginName": "webpack4-plugin",
       "entryPoint": "./lib-commonjs/Webpack4Plugin",
-      "optionsSchema": "./lib-commonjs/schemas/heft-webpack4-plugin.schema.json",
+      "optionsSchema": "./lib-commonjs/schemas/heft-webpack4-plugin-options.schema.json",
 
       "parameterScope": "webpack4",
       "parameters": [

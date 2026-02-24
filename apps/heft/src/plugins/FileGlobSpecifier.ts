@@ -9,38 +9,9 @@ import glob, { type FileSystemAdapter, type Entry } from 'fast-glob';
 import { Async } from '@rushstack/node-core-library';
 
 import type { IWatchFileSystemAdapter, IWatchedFileState } from '../utilities/WatchFileSystemAdapter';
+import type { FileSelectionSpecifierBase as IFileSelectionSpecifier } from '../schemas/file-selection.schema.json.d.ts';
 
-/**
- * Used to specify a selection of one or more files.
- *
- * @public
- */
-export interface IFileSelectionSpecifier {
-  /**
-   * Absolute path to the target. The provided sourcePath can be to a file or a folder. If
-   * fileExtensions, excludeGlobs, or includeGlobs are specified, the sourcePath is assumed
-   * to be a folder. If it is not a folder, an error will be thrown.
-   */
-  sourcePath?: string;
-
-  /**
-   * File extensions that should be included from the source folder. Only supported when the sourcePath
-   * is a folder.
-   */
-  fileExtensions?: string[];
-
-  /**
-   * Globs that should be explicitly excluded. This takes precedence over globs listed in "includeGlobs" and
-   * files that match the file extensions provided in "fileExtensions". Only supported when the sourcePath
-   * is a folder.
-   */
-  excludeGlobs?: string[];
-
-  /**
-   * Globs that should be explicitly included. Only supported when the sourcePath is a folder.
-   */
-  includeGlobs?: string[];
-}
+export type { IFileSelectionSpecifier };
 
 /**
  * A supported subset of options used when globbing files.

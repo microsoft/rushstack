@@ -1,5 +1,5 @@
 {
-  "extends": "local-node-rig/profiles/default/config/jest.config.json",
+  "extends": "decoupled-local-node-rig/profiles/default/config/jest.config.json",
   "moduleNameMapper": {
     "^prettier$": "<configDir>/jestMocks/prettier.js"
   }

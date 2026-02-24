@@ -35,6 +35,8 @@ import type {
 } from '@rushstack/heft-webpack5-plugin';
 import type { IRspackPluginAccessor, PluginName as RspackPluginName } from '@rushstack/heft-rspack-plugin';
 
+import type { HeftStorybookPluginOptionsConfiguration } from './schemas/storybook-plugin-options.schema.json.d.ts';
+
 const PLUGIN_NAME: 'storybook-plugin' = 'storybook-plugin';
 const WEBPACK4_PLUGIN_NAME: typeof Webpack4PluginName = 'webpack4-plugin';
 const WEBPACK5_PLUGIN_NAME: typeof Webpack5PluginName = 'webpack5-plugin';
@@ -72,94 +74,6 @@ interface IStorybookCliCallingConfig {
   packageName: string;
 }
 
-/**
- * Options for `StorybookPlugin`.
- *
- * @public
- */
-export interface IStorybookPluginOptions {
-  /**
-   * Specifies an NPM package that will provide the Storybook dependencies for the project.
-   *
-   * @example
-   * `"storykitPackageName": "my-react-storykit"`
-   *
-   * @remarks
-   *
-   * Storybook's conventional approach is for your app project to have direct dependencies
-   * on NPM packages such as `@storybook/react` and `@storybook/addon-essentials`.  These packages have
-   * heavyweight dependencies such as Babel, Webpack, and the associated loaders and plugins needed to
-   * build the Storybook app (which is bundled completely independently from Heft).  Naively adding these
-   * dependencies to your app's package.json muddies the waters of two radically different toolchains,
-   * and is likely to lead to dependency conflicts, for example if Heft installs Webpack 5 but
-   * `@storybook/react` installs Webpack 4.
-   *
-   * To solve this problem, `heft-storybook-plugin` introduces the concept of a separate
-   * "storykit package".  All of your Storybook NPM packages are moved to be dependencies of the
-   * storykit.  Storybook's browser API unfortunately isn't separated into dedicated NPM packages,
-   * but instead is exported by the Node.js toolchain packages such as `@storybook/react`.  For
-   * an even cleaner separation the storykit package can simply reexport such APIs.
-   */
-  storykitPackageName: string;
-
-  /**
-   * Specify how the Storybook CLI should be invoked.  Possible values:
-   *
-   *  - "storybook6": For a static build, Heft will expect the cliPackageName package
-   *     to define a binary command named "build-storybook". For the dev server mode,
-   *     Heft will expect to find a binary command named "start-storybook". These commands
-   *     must be declared in the "bin" section of package.json since Heft invokes the script directly.
-   *     The output folder will be specified using the "--output-dir" CLI parameter.
-   *
-   * - "storybook7": Heft looks for a single binary command named "sb". It will be invoked as
-   *    "sb build" for static builds, or "sb dev" for dev server mode.
-   *     The output folder will be specified using the "--output-dir" CLI parameter.
-   *
-   *  @defaultValue `storybook7`
-   */
-  cliCallingConvention?: `${StorybookCliVersion}`;
-
-  /**
-   * Specify the NPM package that provides the CLI binary to run.
-   * It will be resolved from the folder of your storykit package.
-   *
-   * @defaultValue
-   *  The default is `@storybook/cli` when `cliCallingConvention` is  `storybook7`
-   *  and `@storybook/react` when `cliCallingConvention` is  `storybook6`
-   */
-  cliPackageName?: string;
-
-  /**
-   * The customized output dir for storybook static build.
-   * If this is empty, then it will use the storybook default output dir.
-   *
-   * @example
-   * If you want to change the static build output dir to staticBuildDir, then the static build output dir would be:
-   *
-   * `"staticBuildOutputFolder": "newStaticBuildDir"`
-   */
-  staticBuildOutputFolder?: string;
-
-  /**
-   * Specifies an NPM dependency name that is used as the (cwd) target for the storybook commands
-   * By default the plugin executes the storybook commands in the local package context,
-   * but for distribution purposes it can be useful to split the TS library and storybook exports into two packages.
-   *
-   * @example
-   * If you create a storybook app project "my-ui-storybook-library-app" for the storybook preview distribution,
-   * and your main UI component library is my-ui-storybook-library.
-   *
-   * Your 'app' project is able to compile the 'library' storybook preview using the CWD target:
-   *
-   * `"cwdPackageName": "my-storybook-ui-library"`
-   */
-  cwdPackageName?: string;
-  /**
-   * Specifies whether to capture the webpack stats for the storybook build by adding the `--webpack-stats-json` CLI flag.
-   */
-  captureWebpackStats?: boolean;
-}
-
 interface IRunStorybookOptions extends IPrepareStorybookOptions {
   logger: IScopedLogger;
   isServeMode: boolean;
@@ -170,7 +84,7 @@ interface IRunStorybookOptions extends IPrepareStorybookOptions {
   verbose: boolean;
 }
 
-interface IPrepareStorybookOptions extends IStorybookPluginOptions {
+interface IPrepareStorybookOptions extends HeftStorybookPluginOptionsConfiguration {
   logger: IScopedLogger;
   taskSession: IHeftTaskSession;
   heftConfiguration: HeftConfiguration;
@@ -216,14 +130,14 @@ const STORYBOOK_TEST_FLAG_NAME: '--storybook-test' = '--storybook-test';
 const DOCS_FLAG_NAME: '--docs' = '--docs';
 
 /** @public */
-export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPluginOptions> {
+export default class StorybookPlugin implements IHeftTaskPlugin<HeftStorybookPluginOptionsConfiguration> {
   /**
    * Generate typings for Sass files before TypeScript compilation.
    */
   public apply(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IStorybookPluginOptions
+    options: HeftStorybookPluginOptionsConfiguration
   ): void {
     const logger: IScopedLogger = taskSession.logger;
     const storybookParameter: CommandLineFlagParameter =
@@ -450,7 +364,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
 
   private async _runStorybookAsync(
     runStorybookOptions: IRunStorybookOptions,
-    options: IStorybookPluginOptions
+    options: HeftStorybookPluginOptionsConfiguration
   ): Promise<void> {
     const { logger, resolvedModulePath, verbose, isServeMode, isTestMode, isDocsMode } = runStorybookOptions;
     let { workingDirectory, outputFolder } = runStorybookOptions;
@@ -617,7 +531,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     logger.terminal.writeVerboseLine('Completed synchronous portion of launching startupModulePath');
   }
 
-  private _getStorybookVersion(options: IStorybookPluginOptions): `${StorybookCliVersion}` {
+  private _getStorybookVersion(options: HeftStorybookPluginOptionsConfiguration): `${StorybookCliVersion}` {
     return options.cliCallingConvention ?? DEFAULT_STORYBOOK_VERSION;
   }
 }

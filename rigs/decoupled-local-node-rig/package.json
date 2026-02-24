@@ -13,6 +13,7 @@
     "@rushstack/eslint-config": "4.6.2",
     "@rushstack/eslint-patch": "1.16.0",
     "@rushstack/eslint-plugin": "0.23.0",
+    "@rushstack/heft-json-schema-typings-plugin": "1.2.0",
     "@rushstack/heft-node-rig": "2.11.20",
     "@rushstack/heft": "1.2.0",
     "@types/heft-jest": "1.0.1",

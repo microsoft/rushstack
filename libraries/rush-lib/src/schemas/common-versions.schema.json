@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Rush common-versions.json config file",
+  "title": "Rush Common Versions Configuration",
   "description": "For use with the Rush tool, this file manages dependency versions that affect all projects in the repo. See http://rushjs.io for details.",
   "type": "object",
   "properties": {

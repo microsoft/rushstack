@@ -27,11 +27,8 @@ import {
 } from './shared';
 import { tryLoadRspackConfigurationAsync } from './RspackConfigurationLoader';
 import { type DeferredWatchFileSystem, OverrideNodeWatchFSPlugin } from './DeferredWatchFileSystem';
+import type { RspackPluginConfiguration as IRspackPluginOptions } from './schemas/heft-rspack-plugin-options.schema.json.d.ts';
 
-export interface IRspackPluginOptions {
-  devConfigurationPath?: string | undefined;
-  configurationPath?: string | undefined;
-}
 const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';
 const RSPACK_PACKAGE_NAME: '@rspack/core' = '@rspack/core';
 const RSPACK_DEV_SERVER_PACKAGE_NAME: '@rspack/dev-server' = '@rspack/dev-server';
@@ -426,9 +423,7 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
       taskSession.logger.terminal.writeLine('Running incremental Rspack compilation');
       await rspackCompilationDonePromise;
     } else {
-      taskSession.logger.terminal.writeLine(
-        'Rspack has not detected changes. Listing previous diagnostics.'
-      );
+      taskSession.logger.terminal.writeLine('Rspack has not detected changes. Listing previous diagnostics.');
     }
 
     this._emitErrors(taskSession.logger);

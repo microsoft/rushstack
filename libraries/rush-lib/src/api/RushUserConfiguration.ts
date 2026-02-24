@@ -7,10 +7,7 @@ import { FileSystem, JsonFile, JsonSchema, User } from '@rushstack/node-core-lib
 
 import { RushConstants } from '../logic/RushConstants';
 import schemaJson from '../schemas/rush-user-settings.schema.json';
-
-interface IRushUserSettingsJson {
-  buildCacheFolder?: string;
-}
+import type { RushUserSettings as IRushUserSettingsJson } from '../schemas/rush-user-settings.schema.json.d.ts';
 
 /**
  * Rush per-user configuration data.

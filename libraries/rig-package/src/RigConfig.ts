@@ -8,34 +8,14 @@ import * as nodeResolve from 'resolve';
 import stripJsonComments from 'strip-json-comments';
 
 import { Helpers } from './Helpers';
+import type { RigConfiguration as IRigConfigJson } from './schemas/rig.schema.json.d.ts';
 
 /**
  * Represents the literal contents of the `config/rig.json` file.
  *
  * @public
  */
-export interface IRigConfigJson {
-  /**
-   * The name of the rig package to use.
-   *
-   * @remarks
-   * The name must be a valid NPM package name, and must end with the `-rig` suffix.
-   *
-   * Example: `example-rig`
-   */
-  rigPackageName: string;
-
-  /**
-   * Specify which rig profile to use from the rig package.
-   *
-   * @remarks
-   * The name must consist of lowercase alphanumeric words separated by hyphens, for example `"sample-profile"`.
-   * If the `"rigProfile"` is not specified, then the profile name `"default"` will be used.
-   *
-   * Example: `example-profile`
-   */
-  rigProfile?: string;
-}
+export type { IRigConfigJson };
 
 interface IRigConfigOptions {
   projectFolderPath: string;
@@ -278,8 +258,12 @@ export class RigConfig implements IRigConfig {
   public static get jsonSchemaObject(): object {
     if (RigConfig._jsonSchemaObject === undefined) {
       const jsonSchemaContent: string = fs.readFileSync(RigConfig.jsonSchemaPath).toString();
-      RigConfig._jsonSchemaObject = JSON.parse(jsonSchemaContent);
+      // Remove nonstandard fields that are not part of the JSON Schema specification
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { 'x-tsdoc-release-tag': _, ...schemaObject } = JSON.parse(jsonSchemaContent);
+      RigConfig._jsonSchemaObject = schemaObject;
     }
+
     return RigConfig._jsonSchemaObject!;
   }
 
@@ -520,6 +504,7 @@ export class RigConfig implements IRigConfig {
           throw new Error(`Unsupported field ${JSON.stringify(key)}`);
       }
     }
+
     if (!json.rigPackageName) {
       throw new Error('Missing required field "rigPackageName"');
     }

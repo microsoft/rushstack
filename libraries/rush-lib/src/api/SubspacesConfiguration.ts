@@ -6,6 +6,7 @@ import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 import type { RushConfiguration } from './RushConfiguration';
 import schemaJson from '../schemas/subspaces.schema.json';
 import { RushConstants } from '../logic/RushConstants';
+import type { RushSubspacesConfiguration as ISubspacesConfigurationJson } from '../schemas/subspaces.schema.json.d.ts';
 
 /**
  * The allowed naming convention for subspace names.
@@ -20,12 +21,7 @@ export const SPLIT_WORKSPACE_SUBSPACE_NAME_REGEXP: RegExp = /^[a-z0-9][+_\-a-z0-
  * This represents the JSON data structure for the "subspaces.json" configuration file.
  * See subspace.schema.json for documentation.
  */
-export interface ISubspacesConfigurationJson {
-  subspacesEnabled: boolean;
-  splitWorkspaceCompatibility?: boolean;
-  preventSelectingAllSubspaces?: boolean;
-  subspaceNames: string[];
-}
+export type { ISubspacesConfigurationJson };
 
 /**
  * This represents the subspace configurations for a repository, based on the "subspaces.json"

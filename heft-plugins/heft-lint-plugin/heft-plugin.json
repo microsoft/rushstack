@@ -5,7 +5,7 @@
     {
       "pluginName": "lint-plugin",
       "entryPoint": "./lib-commonjs/LintPlugin",
-      "optionsSchema": "./lib-commonjs/schemas/heft-lint-plugin.schema.json",
+      "optionsSchema": "./lib-commonjs/schemas/heft-lint-plugin-options.schema.json",
 
       "parameterScope": "lint",
       "parameters": [
