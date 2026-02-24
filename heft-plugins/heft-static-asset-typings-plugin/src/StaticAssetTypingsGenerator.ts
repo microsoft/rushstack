@@ -158,7 +158,7 @@ export async function createTypingsGeneratorAsync(
 
   const typingsGenerator: TypingsGenerator<boolean> = new TypingsGenerator<boolean>({
     srcFolder: `${slashNormalizedBuildFolderPath}/${sourceFolderPath}`,
-    generatedTsFolder: `${slashNormalizedBuildFolderPath}/${generatedTsFolder}`,
+    generatedTsFolder,
     secondaryGeneratedTsFolders,
     fileExtensions,
     terminal,
