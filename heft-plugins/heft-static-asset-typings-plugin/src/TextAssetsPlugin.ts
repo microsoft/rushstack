@@ -95,9 +95,13 @@ export default class TextAssetsPlugin
             });
           }
 
-          await Async.forEachAsync(outputs, async ({ path, buffers }) => {
-            await FileSystem.writeBuffersToFileAsync(path, buffers, { ensureFolderExists: true });
-          });
+          await Async.forEachAsync(
+            outputs,
+            async ({ path, buffers }) => {
+              await FileSystem.writeBuffersToFileAsync(path, buffers, { ensureFolderExists: true });
+            },
+            { concurrency: 10 }
+          );
 
           return fileVersion;
         }

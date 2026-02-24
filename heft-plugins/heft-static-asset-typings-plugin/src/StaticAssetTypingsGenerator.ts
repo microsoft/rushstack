@@ -192,6 +192,9 @@ export async function createTypingsGeneratorAsync(
     getAdditionalOutputFiles
   });
 
+  // TODO: Heft has an internal incremental cache layer (IncrementalBuildInfo) used by built-in
+  // plugins like CopyFilesPlugin. It is not currently part of Heft's public API surface. If it
+  // becomes public, we should migrate to it instead of managing our own cache file.
   const cacheFilePath: string = `${taskSession.tempFolderPath}/static-assets.json`;
   try {
     const cacheFileContent: string = await FileSystem.readFileAsync(cacheFilePath);
