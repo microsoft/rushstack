@@ -1518,25 +1518,33 @@ export class FileSystem {
     );
   }
 
+  private static _handleLinkExistError(
+    linkFn: () => void,
+    options: IInternalFileSystemCreateLinkOptions,
+    error: Error
+  ): void {
+    switch (options.alreadyExistsBehavior) {
+      case AlreadyExistsBehavior.Ignore:
+        break;
+      case AlreadyExistsBehavior.Overwrite:
+        // fsx.linkSync does not allow overwriting so we must manually delete. If it's
+        // a folder, it will throw an error.
+        this.deleteFile(options.newLinkPath);
+        linkFn();
+        break;
+      case AlreadyExistsBehavior.Error:
+      default:
+        throw error;
+    }
+  }
+
   private static _handleLink(linkFn: () => void, options: IInternalFileSystemCreateLinkOptions): void {
     try {
       linkFn();
     } catch (error) {
       if (FileSystem.isExistError(error as Error)) {
         // Link exists, handle it
-        switch (options.alreadyExistsBehavior) {
-          case AlreadyExistsBehavior.Ignore:
-            break;
-          case AlreadyExistsBehavior.Overwrite:
-            // fsx.linkSync does not allow overwriting so we must manually delete. If it's
-            // a folder, it will throw an error.
-            this.deleteFile(options.newLinkPath);
-            linkFn();
-            break;
-          case AlreadyExistsBehavior.Error:
-          default:
-            throw error;
-        }
+        FileSystem._handleLinkExistError(linkFn, options, error as Error);
       } else {
         // When attempting to create a link in a directory that does not exist, an ENOENT
         // or ENOTDIR error is thrown, so we should ensure the directory exists before
@@ -1547,11 +1555,41 @@ export class FileSystem {
           (!options.linkTargetMustExist || FileSystem.exists(options.linkTargetPath))
         ) {
           this.ensureFolder(nodeJsPath.dirname(options.newLinkPath));
-          linkFn();
+          try {
+            linkFn();
+          } catch (retryError) {
+            if (FileSystem.isExistError(retryError as Error)) {
+              // Another concurrent process may have created the link between the ensureFolder
+              // call and the retry; handle it the same way as the initial exist error.
+              FileSystem._handleLinkExistError(linkFn, options, retryError as Error);
+            } else {
+              throw retryError;
+            }
+          }
         } else {
           throw error;
         }
       }
+    }
+  }
+
+  private static async _handleLinkExistErrorAsync(
+    linkFn: () => Promise<void>,
+    options: IInternalFileSystemCreateLinkOptions,
+    error: Error
+  ): Promise<void> {
+    switch (options.alreadyExistsBehavior) {
+      case AlreadyExistsBehavior.Ignore:
+        break;
+      case AlreadyExistsBehavior.Overwrite:
+        // fsx.linkSync does not allow overwriting so we must manually delete. If it's
+        // a folder, it will throw an error.
+        await this.deleteFileAsync(options.newLinkPath);
+        await linkFn();
+        break;
+      case AlreadyExistsBehavior.Error:
+      default:
+        throw error;
     }
   }
 
@@ -1564,19 +1602,7 @@ export class FileSystem {
     } catch (error) {
       if (FileSystem.isExistError(error as Error)) {
         // Link exists, handle it
-        switch (options.alreadyExistsBehavior) {
-          case AlreadyExistsBehavior.Ignore:
-            break;
-          case AlreadyExistsBehavior.Overwrite:
-            // fsx.linkSync does not allow overwriting so we must manually delete. If it's
-            // a folder, it will throw an error.
-            await this.deleteFileAsync(options.newLinkPath);
-            await linkFn();
-            break;
-          case AlreadyExistsBehavior.Error:
-          default:
-            throw error;
-        }
+        await FileSystem._handleLinkExistErrorAsync(linkFn, options, error as Error);
       } else {
         // When attempting to create a link in a directory that does not exist, an ENOENT
         // or ENOTDIR error is thrown, so we should ensure the directory exists before
@@ -1587,7 +1613,17 @@ export class FileSystem {
           (!options.linkTargetMustExist || (await FileSystem.existsAsync(options.linkTargetPath)))
         ) {
           await this.ensureFolderAsync(nodeJsPath.dirname(options.newLinkPath));
-          await linkFn();
+          try {
+            await linkFn();
+          } catch (retryError) {
+            if (FileSystem.isExistError(retryError as Error)) {
+              // Another concurrent process may have created the link between the ensureFolderAsync
+              // call and the retry; handle it the same way as the initial exist error.
+              await FileSystem._handleLinkExistErrorAsync(linkFn, options, retryError as Error);
+            } else {
+              throw retryError;
+            }
+          }
         } else {
           throw error;
         }
