@@ -6,7 +6,6 @@ import { once } from 'node:events';
 
 import type { BrowserServer, BrowserType, LaunchOptions } from 'playwright-core';
 import { type RawData, WebSocket, type WebSocketServer } from 'ws';
-import semver from 'semver';
 
 import { TerminalProviderSeverity, TerminalStreamWritable, type ITerminal } from '@rushstack/terminal';
 import { Executable, FileSystem, Async } from '@rushstack/node-core-library';
@@ -48,7 +47,7 @@ export interface IHandshake {
   action: 'handshake';
   browserName: BrowserName;
   launchOptions: LaunchOptions;
-  playwrightVersion: semver.SemVer;
+  playwrightVersion: string;
 }
 
 type TunnelMode = 'poll-connection' | 'wait-for-incoming-connection';
@@ -432,10 +431,7 @@ export class PlaywrightTunnel {
     if (action !== 'handshake') {
       throw new Error(`Invalid action: ${action}. Expected 'handshake'.`);
     }
-    const playwrightVersionSemver: semver.SemVer | null = semver.coerce(playwrightVersion);
-    if (!playwrightVersionSemver) {
-      throw new Error(`Invalid Playwright version: ${playwrightVersion}. Must be a valid semver version.`);
-    }
+
     if (!isValidBrowserName(browserName)) {
       throw new Error(
         `Invalid browser name: ${browserName}. Must be one of ${Array.from(validBrowserNames).join(', ')}.`
@@ -445,7 +441,7 @@ export class PlaywrightTunnel {
     return {
       action,
       launchOptions: launchOptions as LaunchOptions,
-      playwrightVersion: playwrightVersionSemver,
+      playwrightVersion,
       browserName
     };
   }
