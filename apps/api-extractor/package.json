@@ -78,7 +78,7 @@
     "typescript": "5.8.2"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.2.5",
+    "@rushstack/heft": "1.2.6",
     "@types/lodash": "4.17.23",
     "@types/resolve": "1.20.2",
     "@types/semver": "7.5.0",
