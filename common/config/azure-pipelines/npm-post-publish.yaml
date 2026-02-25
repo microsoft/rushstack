@@ -179,6 +179,7 @@ extends:
                   source: specific
                   project: GitHubProjects
                   pipeline: 'rushstack NPM Publish'
+                  preferTriggeringPipeline: true
                   runVersion: latest
                   artifact: api
                   path: $(Pipeline.Workspace)/api
