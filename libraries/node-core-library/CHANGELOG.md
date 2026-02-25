@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 24 Feb 2026 01:13:27 GMT and should not be manually modified.
+This log was last generated on Wed, 25 Feb 2026 00:34:29 GMT and should not be manually modified.
+
+## 5.20.3
+Wed, 25 Feb 2026 00:34:29 GMT
+
+### Patches
+
+- Update `ajv` dependency to `~8.18.0` to mitigate CVE-2025-69873.
 
 ## 5.20.2
 Tue, 24 Feb 2026 01:13:27 GMT

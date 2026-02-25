@@ -1,6 +1,13 @@
 # Change Log - @rushstack/playwright-browser-tunnel
 
-This log was last generated on Tue, 24 Feb 2026 01:13:27 GMT and should not be manually modified.
+This log was last generated on Wed, 25 Feb 2026 00:34:29 GMT and should not be manually modified.
+
+## 0.3.6
+Wed, 25 Feb 2026 00:34:29 GMT
+
+### Patches
+
+- Add playwright-versioning and remove semver
 
 ## 0.3.5
 Tue, 24 Feb 2026 01:13:27 GMT

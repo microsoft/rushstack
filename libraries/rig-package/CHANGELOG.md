@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rig-package
 
-This log was last generated on Fri, 20 Feb 2026 00:15:04 GMT and should not be manually modified.
+This log was last generated on Wed, 25 Feb 2026 00:34:29 GMT and should not be manually modified.
+
+## 0.7.2
+Wed, 25 Feb 2026 00:34:29 GMT
+
+### Patches
+
+- Update `ajv` dependency to `~8.18.0` to mitigate CVE-2025-69873.
 
 ## 0.7.1
 Fri, 20 Feb 2026 00:15:04 GMT

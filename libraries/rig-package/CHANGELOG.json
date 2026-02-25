@@ -2,6 +2,18 @@
   "name": "@rushstack/rig-package",
   "entries": [
     {
+      "version": "0.7.2",
+      "tag": "@rushstack/rig-package_v0.7.2",
+      "date": "Wed, 25 Feb 2026 00:34:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update `ajv` dependency to `~8.18.0` to mitigate CVE-2025-69873."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.1",
       "tag": "@rushstack/rig-package_v0.7.1",
       "date": "Fri, 20 Feb 2026 00:15:04 GMT",
