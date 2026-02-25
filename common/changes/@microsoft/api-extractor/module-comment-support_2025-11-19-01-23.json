@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Add support for @module comments on namespace objects. When a module is re-exported as a namespace (e.g., `export * as Foo from './Foo'`), any @module comment from the source file is now applied to the generated namespace declaration in the .d.ts rollup.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "copilot@github.com"
+}
