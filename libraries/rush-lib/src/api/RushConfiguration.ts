@@ -961,8 +961,11 @@ export class RushConfiguration {
         allowedProjectTags,
         subspace
       });
-      subspace._addProject(project);
 
+      // Validates project according to its access restrictions
+      project.validateAccess();
+
+      subspace._addProject(project);
       this._projects.push(project);
       if (this._projectsByName.has(project.packageName)) {
         throw new Error(
