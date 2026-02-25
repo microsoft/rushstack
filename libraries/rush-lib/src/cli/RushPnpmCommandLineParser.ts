@@ -584,7 +584,7 @@ export class RushPnpmCommandLineParser {
 
         if (!Objects.areDeepEqual(currentGlobalOnlyBuiltDependencies, newGlobalOnlyBuiltDependencies)) {
           // Update onlyBuiltDependencies to pnpm configuration file
-          pnpmOptions?.updateGlobalOnlyBuiltDependencies(newGlobalOnlyBuiltDependencies);
+          await pnpmOptions?.updateGlobalOnlyBuiltDependenciesAsync(newGlobalOnlyBuiltDependencies);
 
           // Rerun installation to update
           await this._doRushUpdateAsync();
@@ -605,7 +605,7 @@ export class RushPnpmCommandLineParser {
 
         const workspaceYamlFilename: string = path.join(subspaceTempFolder, 'pnpm-workspace.yaml');
         const newCatalogs: Record<string, Record<string, string>> | undefined =
-          PnpmWorkspaceFile.loadCatalogsFromFile(workspaceYamlFilename);
+          await PnpmWorkspaceFile.loadCatalogsFromFileAsync(workspaceYamlFilename);
         const currentCatalogs: Record<string, Record<string, string>> | undefined =
           pnpmOptions.globalCatalogs;
 

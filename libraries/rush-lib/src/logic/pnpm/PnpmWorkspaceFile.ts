@@ -64,13 +64,13 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
    * @param workspaceYamlFilename - The path to the pnpm-workspace.yaml file
    * @returns The catalogs object, or undefined if the file doesn't exist or has no catalogs
    */
-  public static loadCatalogsFromFile(
+  public static async loadCatalogsFromFileAsync(
     workspaceYamlFilename: string
-  ): Record<string, Record<string, string>> | undefined {
-    if (!FileSystem.exists(workspaceYamlFilename)) {
+  ): Promise<Record<string, Record<string, string>> | undefined> {
+    if (!(await FileSystem.existsAsync(workspaceYamlFilename))) {
       return undefined;
     }
-    const content: string = FileSystem.readFile(workspaceYamlFilename);
+    const content: string = await FileSystem.readFileAsync(workspaceYamlFilename);
     const parsed: IPnpmWorkspaceYaml | undefined = yamlModule.load(content) as IPnpmWorkspaceYaml | undefined;
 
     if (!parsed || !parsed.catalogs) {

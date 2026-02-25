@@ -294,7 +294,7 @@ describe(PnpmOptionsConfiguration.name, () => {
       }
     });
 
-    it('handles undefined in updateGlobalOnlyBuiltDependencies', () => {
+    it('handles undefined in updateGlobalOnlyBuiltDependenciesAsync', async () => {
       const testConfigPath: string = path.join(__dirname, 'temp', 'pnpm-config-undefined-test.json');
       const tempDir: string = path.dirname(testConfigPath);
       FileSystem.ensureFolder(tempDir);
@@ -316,9 +316,9 @@ describe(PnpmOptionsConfiguration.name, () => {
           'esbuild'
         ]);
 
-        expect(() => {
-          pnpmConfiguration.updateGlobalOnlyBuiltDependencies(undefined);
-        }).not.toThrow();
+        await expect(
+          pnpmConfiguration.updateGlobalOnlyBuiltDependenciesAsync(undefined)
+        ).resolves.not.toThrow();
 
         const reloadedConfig: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
           testConfigPath,

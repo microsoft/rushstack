@@ -12,7 +12,9 @@ describe(PnpmWorkspaceFile.name, () => {
 
   let mockWriteFile: jest.SpyInstance;
   let mockReadFile: jest.SpyInstance;
+  let mockReadFileAsync: jest.SpyInstance;
   let mockExists: jest.SpyInstance;
+  let mockExistsAsync: jest.SpyInstance;
   let writtenContent: string | undefined;
 
   beforeEach(() => {
@@ -34,8 +36,21 @@ describe(PnpmWorkspaceFile.name, () => {
       return writtenContent;
     });
 
+    // Mock async version for loadCatalogsFromFileAsync
+    mockReadFileAsync = jest.spyOn(FileSystem, 'readFileAsync').mockImplementation(async () => {
+      if (writtenContent === undefined) {
+        throw new Error('File not found');
+      }
+      return writtenContent;
+    });
+
     // Mock FileSystem.exists to return true if content was written
     mockExists = jest.spyOn(FileSystem, 'exists').mockImplementation(() => {
+      return writtenContent !== undefined;
+    });
+
+    // Mock async version for loadCatalogsFromFileAsync
+    mockExistsAsync = jest.spyOn(FileSystem, 'existsAsync').mockImplementation(async () => {
       return writtenContent !== undefined;
     });
   });
@@ -43,7 +58,9 @@ describe(PnpmWorkspaceFile.name, () => {
   afterEach(() => {
     mockWriteFile.mockRestore();
     mockReadFile.mockRestore();
+    mockReadFileAsync.mockRestore();
     mockExists.mockRestore();
+    mockExistsAsync.mockRestore();
   });
 
   describe('basic functionality', () => {
@@ -181,23 +198,23 @@ describe(PnpmWorkspaceFile.name, () => {
     });
   });
 
-  describe('loadCatalogsFromFile', () => {
-    it('returns undefined for non-existent file', () => {
+  describe('loadCatalogsFromFileAsync', () => {
+    it('returns undefined for non-existent file', async () => {
       const nonExistentFile: string = path.join(tempDir, 'non-existent.yaml');
-      const catalogs = PnpmWorkspaceFile.loadCatalogsFromFile(nonExistentFile);
+      const catalogs = await PnpmWorkspaceFile.loadCatalogsFromFileAsync(nonExistentFile);
       expect(catalogs).toBeUndefined();
     });
 
-    it('returns undefined when file has no catalogs', () => {
+    it('returns undefined when file has no catalogs', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(path.join(projectsDir, 'app1'));
       workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
 
-      const catalogs = PnpmWorkspaceFile.loadCatalogsFromFile(workspaceFilePath);
+      const catalogs = await PnpmWorkspaceFile.loadCatalogsFromFileAsync(workspaceFilePath);
       expect(catalogs).toBeUndefined();
     });
 
-    it('loads catalogs from existing file', () => {
+    it('loads catalogs from existing file', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(path.join(projectsDir, 'app1'));
       workspaceFile.setCatalogs({
@@ -211,7 +228,7 @@ describe(PnpmWorkspaceFile.name, () => {
       });
       workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
 
-      const catalogs = PnpmWorkspaceFile.loadCatalogsFromFile(workspaceFilePath);
+      const catalogs = await PnpmWorkspaceFile.loadCatalogsFromFileAsync(workspaceFilePath);
       expect(catalogs).toEqual({
         default: {
           react: '^18.0.0',

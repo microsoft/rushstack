@@ -552,14 +552,16 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   /**
    * Updates globalOnlyBuiltDependencies field of the PNPM options in the common/config/rush/pnpm-config.json file.
    */
-  public updateGlobalOnlyBuiltDependencies(onlyBuiltDependencies: string[] | undefined): void {
+  public async updateGlobalOnlyBuiltDependenciesAsync(
+    onlyBuiltDependencies: string[] | undefined
+  ): Promise<void> {
     if (onlyBuiltDependencies === undefined) {
       delete this._json.globalOnlyBuiltDependencies;
     } else {
       this._json.globalOnlyBuiltDependencies = onlyBuiltDependencies;
     }
     if (this.jsonFilename) {
-      JsonFile.save(this._json, this.jsonFilename, { updateExistingFile: true });
+      await JsonFile.saveAsync(this._json, this.jsonFilename, { updateExistingFile: true });
     }
   }
 

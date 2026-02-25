@@ -60,7 +60,7 @@ catalogs:
       }
     });
 
-    it('syncs updated catalogs from pnpm-workspace.yaml to pnpm-config.json', () => {
+    it('syncs updated catalogs from pnpm-workspace.yaml to pnpm-config.json', async () => {
       const updatedWorkspaceYaml = `packages:
   - '../../apps/*'
 catalogs:
@@ -88,7 +88,7 @@ catalogs:
       });
 
       const { PnpmWorkspaceFile } = require('../../logic/pnpm/PnpmWorkspaceFile');
-      const newCatalogs = PnpmWorkspaceFile.loadCatalogsFromFile(pnpmWorkspacePath);
+      const newCatalogs = await PnpmWorkspaceFile.loadCatalogsFromFileAsync(pnpmWorkspacePath);
 
       pnpmOptions?.updateGlobalCatalogs(newCatalogs);
 
@@ -110,9 +110,9 @@ catalogs:
       });
     });
 
-    it('does not update pnpm-config.json when catalogs are unchanged', () => {
+    it('does not update pnpm-config.json when catalogs are unchanged', async () => {
       const { PnpmWorkspaceFile } = require('../../logic/pnpm/PnpmWorkspaceFile');
-      const newCatalogs = PnpmWorkspaceFile.loadCatalogsFromFile(pnpmWorkspacePath);
+      const newCatalogs = await PnpmWorkspaceFile.loadCatalogsFromFileAsync(pnpmWorkspacePath);
 
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
         path.join(testRepoPath, 'rush.json')
@@ -131,14 +131,14 @@ catalogs:
       });
     });
 
-    it('removes catalogs when pnpm-workspace.yaml has no catalogs', () => {
+    it('removes catalogs when pnpm-workspace.yaml has no catalogs', async () => {
       const workspaceWithoutCatalogs = `packages:
   - '../../apps/*'
 `;
       FileSystem.writeFile(pnpmWorkspacePath, workspaceWithoutCatalogs);
 
       const { PnpmWorkspaceFile } = require('../../logic/pnpm/PnpmWorkspaceFile');
-      const newCatalogs = PnpmWorkspaceFile.loadCatalogsFromFile(pnpmWorkspacePath);
+      const newCatalogs = await PnpmWorkspaceFile.loadCatalogsFromFileAsync(pnpmWorkspacePath);
 
       expect(newCatalogs).toBeUndefined();
 

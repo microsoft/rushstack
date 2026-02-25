@@ -1184,7 +1184,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly strictPeerDependencies: boolean;
     readonly unsupportedPackageJsonSettings: unknown | undefined;
     updateGlobalCatalogs(catalogs: Record<string, Record<string, string>> | undefined): void;
-    updateGlobalOnlyBuiltDependencies(onlyBuiltDependencies: string[] | undefined): void;
+    updateGlobalOnlyBuiltDependenciesAsync(onlyBuiltDependencies: string[] | undefined): Promise<void>;
     updateGlobalPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void;
     readonly useWorkspaces: boolean;
 }
