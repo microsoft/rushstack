@@ -1,0 +1,8 @@
+{
+  "name": "e",
+  "version": "1.0.0",
+  "description": "Project E uses only eslint from tools catalog",
+  "devDependencies": {
+    "eslint": "catalog:tools"
+  }
+}
