@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "Include missing `lib-*` folders.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles"
+}

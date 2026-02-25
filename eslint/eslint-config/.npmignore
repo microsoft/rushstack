@@ -8,6 +8,7 @@
 !/lib/**
 !/lib-*/**
 !/dist/**
+!/includes/**
 
 !CHANGELOG.md
 !CHANGELOG.json
@@ -20,6 +21,9 @@
 /lib/**/test/
 /lib-*/**/test/
 *.test.js
+*.test.[cm]js
+*.test.d.ts
+*.test.d.[cm]ts
 
 # NOTE: These don't need to be specified, because NPM includes them automatically.
 #
@@ -31,8 +35,28 @@
 # DO NOT MODIFY ABOVE THIS LINE!  Add any project-specific overrides below.
 # ---------------------------------------------------------------------------
 
-!*.js
+!/*.js
+!/*.[cm]js
+!/*.d.ts
+!/*.d.[cm]ts
+
 !flat/**/*.js
+!flat/**/*.[cm]js
+!flat/**/*.d.ts
+!flat/**/*.d.[cm]ts
+
 !mixins/*.js
+!mixins/*.[cm]js
+!mixins/*.d.ts
+!mixins/*.d.[cm]ts
+
 !patch/*.js
+!patch/*.[cm]js
+!patch/*.d.ts
+!patch/*.d.[cm]ts
+
 !profile/*.js
+!profile/*.[cm]js
+!profile/*.d.ts
+!profile/*.d.[cm]ts
+
