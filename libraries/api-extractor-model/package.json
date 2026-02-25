@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor-model",
-  "version": "7.33.3",
+  "version": "7.33.4",
   "description": "A helper library for loading and saving the .api.json files created by API Extractor",
   "repository": {
     "type": "git",
