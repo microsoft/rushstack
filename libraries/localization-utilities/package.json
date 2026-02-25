@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/localization-utilities",
-  "version": "0.15.4",
+  "version": "0.15.5",
   "description": "This plugin contains some useful functions for localization.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
