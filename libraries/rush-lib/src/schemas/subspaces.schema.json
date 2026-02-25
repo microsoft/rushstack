@@ -27,6 +27,10 @@
       "items": {
         "type": "string"
       }
+    },
+    "subspaceInitAssetsFolder": {
+      "description": "Where assets located for init a new subspace",
+      "type": "string"
     }
   }
 }
