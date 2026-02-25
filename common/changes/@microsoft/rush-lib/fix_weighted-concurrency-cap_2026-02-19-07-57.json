@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-lib",
+      "comment": "Fix weighted concurrency budget being capped by operation count",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush-lib"
+}
