@@ -7,7 +7,6 @@
 import type { Browser } from 'playwright-core';
 import { ITerminal } from '@rushstack/terminal';
 import type { LaunchOptions } from 'playwright-core';
-import semver from 'semver';
 
 // @beta
 export type BrowserName = 'chromium' | 'firefox' | 'webkit';
@@ -43,7 +42,7 @@ export interface IHandshake {
     // (undocumented)
     launchOptions: LaunchOptions;
     // (undocumented)
-    playwrightVersion: semver.SemVer;
+    playwrightVersion: string;
 }
 
 // @beta
@@ -112,7 +111,7 @@ export class PlaywrightTunnel {
 }
 
 // @beta
-export function tunneledBrowserConnection(logger: ITerminal, port?: number): Promise<IDisposableTunneledBrowserConnection>;
+export function tunneledBrowserConnection(logger: ITerminal, port?: number, playwrightVersion?: string): Promise<IDisposableTunneledBrowserConnection>;
 
 // @beta
 export type TunnelStatus = 'waiting-for-connection' | 'browser-server-running' | 'stopped' | 'setting-up-browser-server' | 'error';

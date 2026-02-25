@@ -23,15 +23,14 @@ import type {
 } from './ITunneledBrowserConnection';
 import { DEFAULT_LISTEN_PORT, SUPPORTED_BROWSER_NAMES } from './constants';
 
-const { version: playwrightVersion } = playwrightPackageJson;
-
 /**
  * Creates a tunneled WebSocket endpoint that a local Playwright client can connect to.
  * @beta
  */
 export async function tunneledBrowserConnection(
   logger: ITerminal,
-  port: number = DEFAULT_LISTEN_PORT
+  port: number = DEFAULT_LISTEN_PORT,
+  playwrightVersion: string = playwrightPackageJson.version
 ): Promise<IDisposableTunneledBrowserConnection> {
   // Server that remote peer (actual browser host) connects to
   const remoteWsServer: WebSocketServer = new WebSocketServer({ port });
