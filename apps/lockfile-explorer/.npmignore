@@ -21,6 +21,9 @@
 /lib/**/test/
 /lib-*/**/test/
 *.test.js
+*.test.[cm]js
+*.test.d.ts
+*.test.d.[cm]ts
 
 # NOTE: These don't need to be specified, because NPM includes them automatically.
 #
