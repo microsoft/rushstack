@@ -265,6 +265,41 @@ export class Autoinstaller {
     } else {
       this._logIfConsoleOutputIsNotRestricted(Colorize.green('Already up to date.'));
     }
+
+    // Write the last-install.flag file so that a subsequent "rush install-autoinstaller"
+    // will not perform a redundant install.
+    await this._createFlagsAsync(packageJsonEditor.saveToObject());
+  }
+
+  private async _createFlagsAsync(packageJson: IPackageJson): Promise<void> {
+    const autoinstallerFullPath: string = this.folderFullPath;
+
+    // Example: .../common/autoinstallers/my-task/.rush/temp
+    const lastInstallFlagPath: string = path.join(
+      autoinstallerFullPath,
+      RushConstants.projectRushFolderName,
+      'temp'
+    );
+
+    const lastInstallFlag: LastInstallFlag = new LastInstallFlag(lastInstallFlagPath, {
+      node: process.versions.node,
+      packageManager: this._rushConfiguration.packageManager,
+      packageManagerVersion: this._rushConfiguration.packageManagerToolVersion,
+      packageJson: packageJson,
+      rushJsonFolder: this._rushConfiguration.rushJsonFolder
+    });
+
+    // Create file: ../common/autoinstallers/my-task/.rush/temp/last-install.flag
+    await lastInstallFlag.createAsync();
+
+    // Example: ../common/autoinstallers/my-task/node_modules
+    const nodeModulesFolder: string = `${autoinstallerFullPath}/${RushConstants.nodeModulesFolderName}`;
+    const flagPath: string = `${nodeModulesFolder}/rush-autoinstaller.flag`;
+
+    FileSystem.writeFile(
+      flagPath,
+      'If this file is deleted, Rush will assume that the node_modules folder has been cleaned and will reinstall it.'
+    );
   }
 
   private _logIfConsoleOutputIsNotRestricted(message?: string): void {
