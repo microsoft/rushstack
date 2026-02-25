@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/problem-matcher"
+    }
+  ],
+  "packageName": "@rushstack/problem-matcher",
+  "email": "rushbot@users.noreply.github.com"
+}

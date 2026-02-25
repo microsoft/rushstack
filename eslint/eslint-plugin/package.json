@@ -56,7 +56,7 @@
     "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.2.5",
+    "@rushstack/heft": "1.2.6",
     "@typescript-eslint/parser": "~8.56.1",
     "@typescript-eslint/rule-tester": "~8.56.1",
     "decoupled-local-node-rig": "workspace:*",
