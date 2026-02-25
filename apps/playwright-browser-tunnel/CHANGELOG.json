@@ -2,6 +2,18 @@
   "name": "@rushstack/playwright-browser-tunnel",
   "entries": [
     {
+      "version": "0.3.7",
+      "tag": "@rushstack/playwright-browser-tunnel_v0.3.7",
+      "date": "Wed, 25 Feb 2026 21:39:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.6",
       "tag": "@rushstack/playwright-browser-tunnel_v0.3.6",
       "date": "Wed, 25 Feb 2026 00:34:29 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Wed, 25 Feb 2026 00:34:30 GMT and should not be manually modified.
+This log was last generated on Wed, 25 Feb 2026 21:39:42 GMT and should not be manually modified.
+
+## 7.33.4
+Wed, 25 Feb 2026 21:39:42 GMT
+
+### Patches
+
+- Bump `@microsoft/tsdoc-config` to `~0.18.1` to mitigate CVE-2025-69873.
 
 ## 7.33.3
 Wed, 25 Feb 2026 00:34:30 GMT

@@ -2,6 +2,32 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "4.6.4",
+      "tag": "@rushstack/eslint-config_v4.6.4",
+      "date": "Wed, 25 Feb 2026 21:39:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump `eslint-plugin-tsdoc` to `~0.5.1` to mitigate CVE-2026-26996."
+          },
+          {
+            "comment": "Bump `@typescript-eslint/*` dependencies to `~8.56.1`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.23.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-packlets\" to `0.15.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.14.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.6.3",
       "tag": "@rushstack/eslint-config_v4.6.3",
       "date": "Fri, 20 Feb 2026 00:15:04 GMT",

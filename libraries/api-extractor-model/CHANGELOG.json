@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.33.4",
+      "tag": "@microsoft/api-extractor-model_v7.33.4",
+      "date": "Wed, 25 Feb 2026 21:39:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump `@microsoft/tsdoc-config` to `~0.18.1` to mitigate CVE-2025-69873."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.33.3",
       "tag": "@microsoft/api-extractor-model_v7.33.3",
       "date": "Wed, 25 Feb 2026 00:34:30 GMT",
