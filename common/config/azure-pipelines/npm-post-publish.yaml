@@ -1,0 +1,221 @@
+parameters:
+  - name: delayMinutes
+    displayName: 'Minutes to wait for packages to propagate before running'
+    type: number
+    default: 5
+
+name: 'Post-publish $(Date:yyyyMMdd).$(Rev:r) (triggered by $(resources.triggeringAlias))'
+
+variables:
+  - name: FORCE_COLOR
+    value: 1
+
+# This pipeline is triggered only by pipeline resources (npm publish pipelines),
+# not by CI pushes or PR builds.
+trigger: none
+pr: none
+
+resources:
+  pipelines:
+    - pipeline: npmPublish
+      source: 'rushstack NPM Publish'
+      trigger:
+        enabled: true
+        branches:
+          include:
+            - refs/heads/main
+    - pipeline: npmPublishRush
+      source: 'rushstack NPM Publish (rush)'
+      trigger:
+        enabled: true
+        branches:
+          include:
+            - refs/heads/main
+  repositories:
+    - repository: 1esPipelines
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+    - repository: rushstackWebsites
+      type: github
+      name: microsoft/rushstack-websites
+      endpoint: GitHubProjects
+      ref: refs/heads/main
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
+  parameters:
+    sdl:
+      sourceRepositoriesToScan:
+        exclude:
+          - repository: rushstackWebsites
+    pool:
+      name: Azure-Pipelines-1ESPT-ExDShared
+      os: windows
+    stages:
+      # ──────────────────────────────────────────────────────────────────────────
+      # Stage 0: Wait for packages to propagate to the npm registry
+      # ──────────────────────────────────────────────────────────────────────────
+      - stage: WaitForPropagation
+        displayName: 'Wait for npm propagation'
+        jobs:
+          - job:
+            displayName: 'Delay'
+            pool: server
+            timeoutInMinutes: 120
+            steps:
+              - task: Delay@1
+                displayName: 'Wait ${{ parameters.delayMinutes }} minute(s)'
+                inputs:
+                  delayForMinutes: '${{ parameters.delayMinutes }}'
+
+      # ──────────────────────────────────────────────────────────────────────────
+      # Stage 1: Bump decoupled local dependencies
+      # ──────────────────────────────────────────────────────────────────────────
+      - stage: BumpDecoupledDeps
+        displayName: 'Bump decoupled local dependencies'
+        dependsOn: WaitForPropagation
+        variables:
+          BranchName: 'automated/bump-decoupled-deps'
+          CommitMessage: 'chore: bump decoupled local dependencies'
+        jobs:
+          - job:
+            displayName: 'Bump decoupled dependencies and create PR'
+            pool:
+              name: publish-rushstack
+              os: linux
+            steps:
+              - checkout: self
+                persistCredentials: true
+
+              - template: /common/config/azure-pipelines/templates/install-node.yaml@self
+
+              - script: 'git config --local user.email rushbot@users.noreply.github.com'
+                displayName: 'git config email'
+
+              - script: 'git config --local user.name Rushbot'
+                displayName: 'git config name'
+
+              - script: 'node common/scripts/install-run-rush.js install --to repo-toolbox'
+                displayName: 'Rush Install'
+
+              - script: 'node common/scripts/install-run-rush.js build --to repo-toolbox --verbose'
+                displayName: 'Rush Build (repo-toolbox)'
+
+              - script: 'node repo-scripts/repo-toolbox/lib-commonjs/start.js bump-decoupled-local-dependencies'
+                displayName: 'Bump decoupled local dependencies'
+
+              - script: 'node common/scripts/install-run-rush.js update'
+                displayName: 'Rush Update'
+
+              - bash: |
+                  set -e
+
+                  if git diff --quiet; then
+                    echo "No changes detected. Skipping commit and PR."
+                    echo "##vso[task.setvariable variable=HasChanges]false"
+                    exit 0
+                  fi
+
+                  echo "##vso[task.setvariable variable=HasChanges]true"
+
+                  git checkout -B $(BranchName)
+                  git add --all
+                  git commit -m "$(CommitMessage)"
+                displayName: 'Commit dependency changes'
+
+              - bash: |
+                  set -e
+
+                  node common/scripts/install-run-rush.js change \
+                    --bulk \
+                    --bump-type none \
+                    --commit-message "chore: generate change files for decoupled dependency bump"
+                displayName: 'Generate change files'
+                condition: and(succeeded(), eq(variables.HasChanges, 'true'))
+
+              - template: /common/config/azure-pipelines/templates/push-and-create-github-pr.yaml@self
+                parameters:
+                  BranchName: $(BranchName)
+                  PrTitle: $(CommitMessage)
+                  PrDescription: 'Automated PR to bump decoupled local dependencies to the latest published versions.'
+
+      # ──────────────────────────────────────────────────────────────────────────
+      # Stage 2: Update API documentation on rushstack-websites
+      # ──────────────────────────────────────────────────────────────────────────
+      - stage: UpdateApiDocs
+        displayName: 'Update API documentation'
+        dependsOn: WaitForPropagation
+        variables:
+          BranchName: 'automated/update-api-docs'
+          CommitMessage: 'docs: update API documentation'
+        jobs:
+          - job:
+            displayName: 'Update API docs and create PR'
+            pool:
+              name: publish-rushstack
+              os: linux
+            steps:
+              - checkout: rushstackWebsites
+                persistCredentials: true
+
+              - template: /common/config/azure-pipelines/templates/install-node.yaml@self
+                parameters:
+                  NodeMajorVersion: 24
+
+              # Build the custom Docusaurus plugin for api-documenter in the
+              # rushstack-websites repo.
+              - script: 'node common/scripts/install-run-rush.js install'
+                displayName: 'Rush Install (rushstack-websites)'
+
+              - script: 'node common/scripts/install-run-rush.js build --to-except api.rushstack.io --verbose'
+                displayName: 'Rush Build to-except api.rushstack.io (rushstack-websites)'
+
+              # Download the api artifact from the triggering publish pipeline.
+              # AzDO automatically resolves which pipeline resource triggered this run.
+              - task: DownloadPipelineArtifact@2
+                displayName: 'Download API review files'
+                inputs:
+                  source: specific
+                  project: GitHubProjects
+                  pipeline: 'rushstack NPM Publish'
+                  runVersion: latest
+                  artifact: api
+                  path: $(Pipeline.Workspace)/api
+
+              # Run api-documenter with the Docusaurus plugin from the
+              # api.rushstack.io project directory so it picks up
+              # config/api-documenter.json.
+              - script: 'npx @microsoft/api-documenter@latest generate --input-folder $(Pipeline.Workspace)/api --output-folder ./docs/pages'
+                displayName: 'Generate API documentation'
+                workingDirectory: websites/api.rushstack.io
+
+              # Update the API docs folder in rushstack-websites and commit.
+              - bash: |
+                  set -e
+
+                  git config --local user.email rushbot@users.noreply.github.com
+                  git config --local user.name Rushbot
+
+                  # Move the generated nav data file to the expected location.
+                  mv websites/api.rushstack.io/docs/api_nav.json websites/api.rushstack.io/data/api_nav.json
+
+                  # Check for changes (tracked and untracked)
+                  if git diff --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
+                    echo "No API documentation changes detected."
+                    echo "##vso[task.setvariable variable=HasChanges]false"
+                    exit 0
+                  fi
+
+                  echo "##vso[task.setvariable variable=HasChanges]true"
+
+                  git checkout -B $(BranchName)
+                  git add --all
+                  git commit -m "$(CommitMessage)"
+                displayName: 'Update API docs and commit'
+
+              - template: /common/config/azure-pipelines/templates/push-and-create-github-pr.yaml@self
+                parameters:
+                  BranchName: $(BranchName)
+                  PrTitle: $(CommitMessage)
+                  PrDescription: 'Automated PR to update API reference documentation from the latest published packages.'
