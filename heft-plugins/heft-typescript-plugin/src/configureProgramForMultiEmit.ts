@@ -5,14 +5,21 @@ import type * as TTypescript from 'typescript';
 
 import { InternalError } from '@rushstack/node-core-library';
 
-import type { ExtendedTypeScript } from './internalTypings/TypeScriptInternals';
-import type { ICachedEmitModuleKind } from './types';
+import type { ExtendedTypeScript } from './internalTypings/TypeScriptInternals.ts';
+import type { ICachedEmitModuleKind } from './types.ts';
 
 // symbols for attaching hidden metadata to ts.Program instances.
 const INNER_GET_COMPILER_OPTIONS_SYMBOL: unique symbol = Symbol('getCompilerOptions');
 const INNER_EMIT_SYMBOL: unique symbol = Symbol('emit');
 
 const JS_EXTENSION_REGEX: RegExp = /\.js(\.map)?$/;
+
+/**
+ * Regex to match relative import/require specifiers ending in `.js` within compiled JS output.
+ * Captures: full match with quotes and `.js`, group 1 = the relative path without `.js`.
+ * Used to rewrite `.js` → `.cjs`/`.mjs` when jsExtensionOverride is set.
+ */
+const RELATIVE_JS_SPECIFIER_REGEX: RegExp = /(?<=(?:from|require\(|import\()\s*['"])(\.[^'"]*?)\.js(?=['"])/g;
 
 function wrapWriteFile(
   this: void,
@@ -23,7 +30,8 @@ function wrapWriteFile(
     return baseWriteFile;
   }
 
-  const replacementExtension: string = `${jsExtensionOverride}$1`;
+  const fileReplacementExtension: string = `${jsExtensionOverride}$1`;
+
   return (
     fileName: string,
     data: string,
@@ -31,13 +39,18 @@ function wrapWriteFile(
     onError?: ((message: string) => void) | undefined,
     sourceFiles?: readonly TTypescript.SourceFile[] | undefined
   ) => {
-    return baseWriteFile(
-      fileName.replace(JS_EXTENSION_REGEX, replacementExtension),
-      data,
-      writeBOM,
-      onError,
-      sourceFiles
-    );
+    fileName = fileName.replace(JS_EXTENSION_REGEX, fileReplacementExtension);
+
+    // When jsExtensionOverride is set (e.g., `.cjs` or `.mjs`), also rewrite `.js` extensions
+    // in relative import/require specifiers within the file content. This is necessary because
+    // TypeScript's rewriteRelativeImportExtensions always rewrites `.ts` → `.js`, regardless
+    // of the actual output extension. Without this, a `.cjs` file would contain
+    // `require("./foo.js")` pointing to an ESM `.js` file instead of `require("./foo.cjs")`.
+    if (!fileName.endsWith('.map')) {
+      data = data.replace(RELATIVE_JS_SPECIFIER_REGEX, `$1${jsExtensionOverride}`);
+    }
+
+    return baseWriteFile(fileName, data, writeBOM, onError, sourceFiles);
   };
 }
 
@@ -52,8 +65,7 @@ export function configureProgramForMultiEmit(
     // Attach the originals to the Program instance to avoid modifying the same Program twice.
     // Don't use WeakMap because this Program could theoretically get a { ... } applied to it.
     [INNER_GET_COMPILER_OPTIONS_SYMBOL]?: TTypescript.Program['getCompilerOptions'];
-    [INNER_EMIT_SYMBOL]?: // https://github.com/microsoft/TypeScript/blob/88cb76d314a93937ce8d9543114ccbad993be6d1/src/compiler/program.ts#L2697-L2698
-    // There is a "forceDtsEmit" parameter that is not on the published types.
+    [INNER_EMIT_SYMBOL]?: // There is a "forceDtsEmit" parameter that is not on the published types. // https://github.com/microsoft/TypeScript/blob/88cb76d314a93937ce8d9543114ccbad993be6d1/src/compiler/program.ts#L2697-L2698
     (...args: [...Parameters<TTypescript.Program['emit']>, boolean | undefined]) => TTypescript.EmitResult;
   }
 

@@ -8,7 +8,7 @@ import glob, { type FileSystemAdapter, type Entry } from 'fast-glob';
 
 import { Async } from '@rushstack/node-core-library';
 
-import type { IWatchFileSystemAdapter, IWatchedFileState } from '../utilities/WatchFileSystemAdapter';
+import type { IWatchFileSystemAdapter, IWatchedFileState } from '../utilities/WatchFileSystemAdapter.ts';
 
 /**
  * Used to specify a selection of one or more files.

@@ -11,9 +11,9 @@ import {
 import * as React from 'react';
 import type { CSSProperties } from 'react';
 
-import { useStickyToolbar } from '../hooks/parametersFormScroll';
-import { RunButton } from './RunButton';
-import { SearchBar } from './SearchBar';
+import { useStickyToolbar } from '../hooks/parametersFormScroll.ts';
+import { RunButton } from './RunButton.tsx';
+import { SearchBar } from './SearchBar.tsx';
 
 // Styles definition
 const stackStyles: IStackStyles = {

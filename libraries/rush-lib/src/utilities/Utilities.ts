@@ -19,11 +19,11 @@ import {
   type IWaitForExitResultWithoutOutput
 } from '@rushstack/node-core-library';
 
-import type { RushConfiguration } from '../api/RushConfiguration';
-import { syncNpmrc } from './npmrcUtilities';
-import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
-import { RushConstants } from '../logic/RushConstants';
-import { escapeArgumentIfNeeded, IS_WINDOWS } from './executionUtilities';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import { syncNpmrc } from './npmrcUtilities.ts';
+import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration.ts';
+import { RushConstants } from '../logic/RushConstants.ts';
+import { escapeArgumentIfNeeded, IS_WINDOWS } from './executionUtilities.ts';
 
 export type UNINITIALIZED = 'UNINITIALIZED';
 // eslint-disable-next-line @typescript-eslint/no-redeclare

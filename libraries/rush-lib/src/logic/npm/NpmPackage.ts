@@ -7,7 +7,7 @@ import type readPackageTree from 'read-package-tree';
 
 import { JsonFile, type IPackageJson } from '@rushstack/node-core-library';
 
-import { BasePackage, type IRushTempPackageJson } from '../base/BasePackage';
+import { BasePackage, type IRushTempPackageJson } from '../base/BasePackage.ts';
 
 /**
  * Used by the linking algorithm when doing NPM package resolution.

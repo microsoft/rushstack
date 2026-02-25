@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { getPseudolocalizer } from '../Pseudolocalization';
-import type { IPseudolocaleOptions } from '../interfaces';
+import { getPseudolocalizer } from '../Pseudolocalization.ts';
+import type { IPseudolocaleOptions } from '../interfaces.ts';
 
 describe(getPseudolocalizer.name, () => {
   it('gets distinct pseudolocalizers', () => {

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import { PnpmOptionsConfiguration } from '../PnpmOptionsConfiguration';
+import { PnpmOptionsConfiguration } from '../PnpmOptionsConfiguration.ts';
 import { TestUtilities } from '@rushstack/heft-config-file';
 
 const fakeCommonTempFolder: string = path.join(__dirname, 'common', 'temp');

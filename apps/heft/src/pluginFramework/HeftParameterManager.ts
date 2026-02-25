@@ -19,7 +19,7 @@ import type {
   HeftPluginDefinitionBase,
   IChoiceParameterAlternativeJson,
   IParameterJson
-} from '../configuration/HeftPluginDefinition';
+} from '../configuration/HeftPluginDefinition.ts';
 
 /**
  * The default parameters provided by Heft.

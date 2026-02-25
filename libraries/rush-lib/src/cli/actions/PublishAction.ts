@@ -13,23 +13,23 @@ import type {
 import { FileSystem } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import { type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { Npm } from '../../utilities/Npm';
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { PublishUtilities } from '../../logic/PublishUtilities';
-import { ChangelogGenerator } from '../../logic/ChangelogGenerator';
-import { PrereleaseToken } from '../../logic/PrereleaseToken';
-import { ChangeManager } from '../../logic/ChangeManager';
-import { BaseRushAction } from './BaseRushAction';
-import { PublishGit } from '../../logic/PublishGit';
-import * as PolicyValidator from '../../logic/policy/PolicyValidator';
-import type { VersionPolicy } from '../../api/VersionPolicy';
-import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
-import { Utilities } from '../../utilities/Utilities';
-import { Git } from '../../logic/Git';
-import { RushConstants } from '../../logic/RushConstants';
-import { IS_WINDOWS } from '../../utilities/executionUtilities';
+import { type IChangeInfo, ChangeType } from '../../api/ChangeManagement.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { Npm } from '../../utilities/Npm.ts';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { PublishUtilities } from '../../logic/PublishUtilities.ts';
+import { ChangelogGenerator } from '../../logic/ChangelogGenerator.ts';
+import { PrereleaseToken } from '../../logic/PrereleaseToken.ts';
+import { ChangeManager } from '../../logic/ChangeManager.ts';
+import { BaseRushAction } from './BaseRushAction.ts';
+import { PublishGit } from '../../logic/PublishGit.ts';
+import * as PolicyValidator from '../../logic/policy/PolicyValidator.ts';
+import type { VersionPolicy } from '../../api/VersionPolicy.ts';
+import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction.ts';
+import { Utilities } from '../../utilities/Utilities.ts';
+import { Git } from '../../logic/Git.ts';
+import { RushConstants } from '../../logic/RushConstants.ts';
+import { IS_WINDOWS } from '../../utilities/executionUtilities.ts';
 
 export class PublishAction extends BaseRushAction {
   private readonly _addCommitDetails: CommandLineFlagParameter;

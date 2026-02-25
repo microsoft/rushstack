@@ -3,10 +3,10 @@
 
 import type { IPackageJson } from '@rushstack/node-core-library';
 
-import type { ApprovedPackagesPolicy } from '../api/ApprovedPackagesPolicy';
-import type { RushConfiguration } from '../api/RushConfiguration';
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { DependencySpecifier } from './DependencySpecifier';
+import type { ApprovedPackagesPolicy } from '../api/ApprovedPackagesPolicy.ts';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import { DependencySpecifier } from './DependencySpecifier.ts';
 
 export class ApprovedPackagesChecker {
   private readonly _rushConfiguration: RushConfiguration;

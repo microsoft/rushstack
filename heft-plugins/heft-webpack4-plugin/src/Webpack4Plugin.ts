@@ -23,13 +23,13 @@ import {
   type IWebpackConfiguration,
   type IWebpackPluginAccessor,
   type IWebpackPluginAccessorHooks
-} from './shared';
-import { tryLoadWebpackConfigurationAsync } from './WebpackConfigurationLoader';
+} from './shared.ts';
+import { tryLoadWebpackConfigurationAsync } from './WebpackConfigurationLoader.ts';
 import {
   type DeferredWatchFileSystem,
   type IWatchFileSystem,
   OverrideNodeWatchFSPlugin
-} from './DeferredWatchFileSystem';
+} from './DeferredWatchFileSystem.ts';
 
 type ExtendedWatching = TWebpack.Watching & {
   resume: () => void;

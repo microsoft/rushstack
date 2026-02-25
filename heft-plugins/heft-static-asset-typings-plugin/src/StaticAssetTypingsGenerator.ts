@@ -113,7 +113,7 @@ export async function tryGetConfigFromPluginOptionsAsync(
   if (options?.configType === 'inline') {
     return options.config;
   } else {
-    const { getConfigFromConfigFileAsync } = await import('./getConfigFromConfigFileAsync');
+    const { getConfigFromConfigFileAsync } = await import('./getConfigFromConfigFileAsync.js');
     const { configFileName } = options;
     return getConfigFromConfigFileAsync(configFileName, type, terminal, buildFolder, rigConfig);
   }

@@ -3,9 +3,9 @@
 
 import type { CommandLineStringParameter, ICommandLineStringDefinition } from '@rushstack/ts-command-line';
 
-import { EnvironmentVariableNames } from './EnvironmentConfiguration';
-import type { RushConfiguration } from './RushConfiguration';
-import { RushConstants } from '../logic/RushConstants';
+import { EnvironmentVariableNames } from './EnvironmentConfiguration.ts';
+import type { RushConfiguration } from './RushConfiguration.ts';
+import { RushConstants } from '../logic/RushConstants.ts';
 
 /**
  * Provides the parameter configuration for '--variant'.

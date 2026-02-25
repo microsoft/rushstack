@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { store } from '../store';
-import { type IProjectState, initializeProjectInfo, onChangeProject } from '../store/slices/project';
+import { store } from '../store/index.ts';
+import { type IProjectState, initializeProjectInfo, onChangeProject } from '../store/slices/project.ts';
 
 export type IFromExtensionMessage = IFromExtensionMessageInitialize;
 

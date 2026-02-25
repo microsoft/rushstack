@@ -12,12 +12,12 @@ import {
 } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import type { IRushPluginConfigurationBase } from '../../api/RushPluginsConfiguration';
-import { RushConstants } from '../../logic/RushConstants';
-import type { IRushPlugin } from '../IRushPlugin';
-import { RushSdk } from './RushSdk';
+import { CommandLineConfiguration } from '../../api/CommandLineConfiguration.ts';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import type { IRushPluginConfigurationBase } from '../../api/RushPluginsConfiguration.ts';
+import { RushConstants } from '../../logic/RushConstants.ts';
+import type { IRushPlugin } from '../IRushPlugin.ts';
+import { RushSdk } from './RushSdk.ts';
 import schemaJson from '../../schemas/rush-plugin-manifest.schema.json';
 
 export interface IRushPluginManifest {

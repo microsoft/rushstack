@@ -5,8 +5,8 @@ import { ComboBox, type IComboBoxOption, type IComboBoxProps } from '@fluentui/r
 import * as React from 'react';
 import { Controller, useFormState } from 'react-hook-form';
 
-import { ErrorMessage } from './ErrorMessage';
-import type { IHookFormProps } from './interface';
+import { ErrorMessage } from './ErrorMessage.tsx';
+import type { IHookFormProps } from './interface.ts';
 
 export type IControlledComboBoxProps = IComboBoxProps & IHookFormProps<string>;
 

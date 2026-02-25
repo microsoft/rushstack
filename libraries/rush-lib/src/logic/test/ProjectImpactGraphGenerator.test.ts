@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem, Path } from '@rushstack/node-core-library';
-import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { Stopwatch } from '../../utilities/Stopwatch';
+import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator.ts';
+import { RushConfiguration } from '../../api/RushConfiguration.ts';
+import { Stopwatch } from '../../utilities/Stopwatch.ts';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 const NORMALIZED_DIRNAME: string = Path.convertToSlashes(__dirname);

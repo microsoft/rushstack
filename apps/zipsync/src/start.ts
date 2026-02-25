@@ -5,7 +5,7 @@ import { ConsoleTerminalProvider } from '@rushstack/terminal/lib/ConsoleTerminal
 import { Terminal } from '@rushstack/terminal/lib/Terminal';
 
 import { version } from '../package.json';
-import { ZipSyncCommandLineParser } from './cli/ZipSyncCommandLineParser';
+import { ZipSyncCommandLineParser } from './cli/ZipSyncCommandLineParser.ts';
 
 const toolVersion: string = version;
 

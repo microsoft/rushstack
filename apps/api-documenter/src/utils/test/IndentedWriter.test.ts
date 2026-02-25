@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IndentedWriter } from '../IndentedWriter';
+import { IndentedWriter } from '../IndentedWriter.ts';
 
 test('01 Demo from docs', () => {
   const indentedWriter: IndentedWriter = new IndentedWriter();

@@ -9,12 +9,12 @@ import {
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { Selection } from '../../utilities/Selection';
-import { HeftActionRunner } from '../HeftActionRunner';
-import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
-import type { IHeftAction, IHeftActionOptions } from './IHeftAction';
-import type { HeftPhase } from '../../pluginFramework/HeftPhase';
-import { Constants } from '../../utilities/Constants';
+import { Selection } from '../../utilities/Selection.ts';
+import { HeftActionRunner } from '../HeftActionRunner.ts';
+import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession.ts';
+import type { IHeftAction, IHeftActionOptions } from './IHeftAction.ts';
+import type { HeftPhase } from '../../pluginFramework/HeftPhase.ts';
+import { Constants } from '../../utilities/Constants.ts';
 
 export function expandPhases(
   onlyParameter: CommandLineStringListParameter,

@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import { PackageJsonLookup } from '../PackageJsonLookup';
-import type { IPackageJson, INodePackageJson } from '../IPackageJson';
-import { FileConstants } from '../Constants';
+import { PackageJsonLookup } from '../PackageJsonLookup.ts';
+import type { IPackageJson, INodePackageJson } from '../IPackageJson.ts';
+import { FileConstants } from '../Constants.ts';
 
 describe(PackageJsonLookup.name, () => {
   describe('basic tests', () => {

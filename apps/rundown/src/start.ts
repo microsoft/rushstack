@@ -3,7 +3,7 @@
 
 import { PackageJsonLookup } from '@rushstack/node-core-library';
 
-import { RundownCommandLine } from './cli/RundownCommandLine';
+import { RundownCommandLine } from './cli/RundownCommandLine.ts';
 
 const toolVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 

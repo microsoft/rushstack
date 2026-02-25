@@ -3,8 +3,8 @@
 
 import { StringBuilder, Text } from '@rushstack/node-core-library';
 
-import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
-import { AnsiEscape } from './AnsiEscape';
+import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider.ts';
+import { AnsiEscape } from './AnsiEscape.ts';
 
 /**
  * @beta

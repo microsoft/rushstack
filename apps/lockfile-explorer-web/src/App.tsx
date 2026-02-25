@@ -4,16 +4,16 @@
 import React, { useEffect } from 'react';
 
 import styles from './App.scss';
-import { readLockfileAsync } from './parsing/readLockfile';
-import { LockfileViewer } from './containers/LockfileViewer';
-import { PackageJsonViewer } from './containers/PackageJsonViewer';
-import { useAppDispatch } from './store/hooks';
-import { loadEntries } from './store/slices/entrySlice';
-import { LockfileEntryDetailsView } from './containers/LockfileEntryDetailsView';
-import { BookmarksSidebar } from './containers/BookmarksSidebar';
-import { SelectedEntryPreview } from './containers/SelectedEntryPreview';
-import { LogoPanel } from './containers/LogoPanel';
-import { ConnectionModal } from './components/ConnectionModal';
+import { readLockfileAsync } from './parsing/readLockfile.ts';
+import { LockfileViewer } from './containers/LockfileViewer/index.tsx';
+import { PackageJsonViewer } from './containers/PackageJsonViewer/index.tsx';
+import { useAppDispatch } from './store/hooks.ts';
+import { loadEntries } from './store/slices/entrySlice.ts';
+import { LockfileEntryDetailsView } from './containers/LockfileEntryDetailsView/index.tsx';
+import { BookmarksSidebar } from './containers/BookmarksSidebar/index.tsx';
+import { SelectedEntryPreview } from './containers/SelectedEntryPreview/index.tsx';
+import { LogoPanel } from './containers/LogoPanel/index.tsx';
+import { ConnectionModal } from './components/ConnectionModal/index.tsx';
 
 /**
  * This React component renders the application page.

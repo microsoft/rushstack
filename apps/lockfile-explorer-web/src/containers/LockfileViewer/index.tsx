@@ -6,16 +6,17 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Tabs, Checkbox, ScrollArea, Input, Text } from '@rushstack/rush-themed-ui';
 
 import styles from './styles.scss';
-import { type LfxGraphEntry, LfxGraphEntryKind } from '../../packlets/lfx-shared';
-import { ReactNull } from '../../types/ReactNull';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+// eslint-disable-next-line @rushstack/packlets/mechanics
+import { type LfxGraphEntry, LfxGraphEntryKind } from '../../packlets/lfx-shared/index.ts';
+import { ReactNull } from '../../types/ReactNull.ts';
+import { useAppDispatch, useAppSelector } from '../../store/hooks.ts';
 import {
   pushToStack,
   selectCurrentEntry,
   selectFilteredEntries,
   setFilter as selectFilter
-} from '../../store/slices/entrySlice';
-import { getFilterFromLocalStorage, saveFilterToLocalStorage } from '../../helpers/localStorage';
+} from '../../store/slices/entrySlice.ts';
+import { getFilterFromLocalStorage, saveFilterToLocalStorage } from '../../helpers/localStorage.ts';
 
 interface ILockfileEntryGroup {
   entryName: string;

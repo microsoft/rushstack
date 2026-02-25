@@ -8,8 +8,8 @@ import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 import {
   type IPackageManagerOptionsJsonBase,
   PackageManagerOptionsConfigurationBase
-} from '../base/BasePackageManagerOptionsConfiguration';
-import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+} from '../base/BasePackageManagerOptionsConfiguration.ts';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration.ts';
 import schemaJson from '../../schemas/pnpm-config.schema.json';
 
 /**

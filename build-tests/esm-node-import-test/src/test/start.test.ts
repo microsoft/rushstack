@@ -12,9 +12,16 @@ describe('ESM Node Import Test', () => {
       throw new Error('Unable to determine build folder path for test script.');
     }
 
-    const result: ChildProcess = Executable.spawn(process.execPath, [`${buildFolderPath}/lib-esm/start.js`], {
-      currentWorkingDirectory: buildFolderPath
-    });
+    // Use --no-warnings to suppress MODULE_TYPELESS_PACKAGE_JSON warnings that Node.js 22+
+    // emits when loading .js files via the "import" exports condition from a package without
+    // "type": "module". This warning is expected and doesn't indicate a failure.
+    const result: ChildProcess = Executable.spawn(
+      process.execPath,
+      ['--no-warnings', `${buildFolderPath}/lib-esm/start.js`],
+      {
+        currentWorkingDirectory: buildFolderPath
+      }
+    );
 
     const { stderr, stdout, exitCode, signal } = await Executable.waitForExitAsync(result, {
       encoding: 'utf8'

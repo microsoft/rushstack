@@ -4,7 +4,7 @@
 import * as path from 'node:path';
 import { execSync } from 'node:child_process';
 
-import { getPackageDeps, parseGitLsTree, parseGitFilename } from '../getPackageDeps';
+import { getPackageDeps, parseGitLsTree, parseGitFilename } from '../getPackageDeps.ts';
 
 import { FileSystem, FileConstants } from '@rushstack/node-core-library';
 

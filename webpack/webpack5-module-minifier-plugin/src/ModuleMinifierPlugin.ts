@@ -33,7 +33,7 @@ import {
   MODULE_WRAPPER_SHORTHAND_SUFFIX,
   STAGE_BEFORE,
   STAGE_AFTER
-} from './Constants';
+} from './Constants.ts';
 import type {
   IModuleMinifierPluginOptions,
   IModuleMap,
@@ -45,9 +45,9 @@ import type {
   IModuleStats,
   IModuleMinifierPluginStats as IModuleMinifierPluginStats,
   IAssetStats
-} from './ModuleMinifierPlugin.types';
-import { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset';
-import { rehydrateAsset } from './RehydrateAsset';
+} from './ModuleMinifierPlugin.types.ts';
+import { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset.ts';
+import { rehydrateAsset } from './RehydrateAsset.ts';
 
 // The name of the plugin, for use in taps
 const PLUGIN_NAME: 'ModuleMinifierPlugin' = 'ModuleMinifierPlugin';

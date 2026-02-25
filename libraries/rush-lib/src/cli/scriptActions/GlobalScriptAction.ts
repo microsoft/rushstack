@@ -14,13 +14,13 @@ import {
 } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import type { IGlobalCommand } from '../../pluginFramework/RushLifeCycle';
-import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAction';
-import { Utilities } from '../../utilities/Utilities';
-import { Stopwatch } from '../../utilities/Stopwatch';
-import { Autoinstaller } from '../../logic/Autoinstaller';
-import type { IGlobalCommandConfig, IShellCommandTokenContext } from '../../api/CommandLineConfiguration';
-import { measureAsyncFn } from '../../utilities/performance';
+import type { IGlobalCommand } from '../../pluginFramework/RushLifeCycle.ts';
+import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAction.ts';
+import { Utilities } from '../../utilities/Utilities.ts';
+import { Stopwatch } from '../../utilities/Stopwatch.ts';
+import { Autoinstaller } from '../../logic/Autoinstaller.ts';
+import type { IGlobalCommandConfig, IShellCommandTokenContext } from '../../api/CommandLineConfiguration.ts';
+import { measureAsyncFn } from '../../utilities/performance.ts';
 
 /**
  * Constructor parameters for GlobalScriptAction.

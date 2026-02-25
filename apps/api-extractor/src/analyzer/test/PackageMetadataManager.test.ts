@@ -9,7 +9,7 @@ jest.mock('node:path', () => {
   };
 });
 
-import { PackageMetadataManager } from '../PackageMetadataManager';
+import { PackageMetadataManager } from '../PackageMetadataManager.ts';
 import { FileSystem, type INodePackageJson, NewlineKind } from '@rushstack/node-core-library';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -5,17 +5,17 @@ import * as ts from 'typescript';
 
 import { InternalError } from '@rushstack/node-core-library';
 
-import { TypeScriptHelpers } from './TypeScriptHelpers';
-import { AstSymbol } from './AstSymbol';
-import { AstImport, type IAstImportOptions, AstImportKind } from './AstImport';
-import { AstModule, type IAstModuleExportInfo } from './AstModule';
-import { TypeScriptInternals } from './TypeScriptInternals';
-import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
-import type { IFetchAstSymbolOptions } from './AstSymbolTable';
-import type { AstEntity } from './AstEntity';
-import { AstNamespaceImport } from './AstNamespaceImport';
-import { SyntaxHelpers } from './SyntaxHelpers';
-import { AstNamespaceExport } from './AstNamespaceExport';
+import { TypeScriptHelpers } from './TypeScriptHelpers.ts';
+import { AstSymbol } from './AstSymbol.ts';
+import { AstImport, type IAstImportOptions, AstImportKind } from './AstImport.ts';
+import { AstModule, type IAstModuleExportInfo } from './AstModule.ts';
+import { TypeScriptInternals } from './TypeScriptInternals.ts';
+import { SourceFileLocationFormatter } from './SourceFileLocationFormatter.ts';
+import type { IFetchAstSymbolOptions } from './AstSymbolTable.ts';
+import type { AstEntity } from './AstEntity.ts';
+import { AstNamespaceImport } from './AstNamespaceImport.ts';
+import { SyntaxHelpers } from './SyntaxHelpers.ts';
+import { AstNamespaceExport } from './AstNamespaceExport.ts';
 
 /**
  * Exposes the minimal APIs from AstSymbolTable that are needed by ExportAnalyzer.

@@ -22,14 +22,14 @@ import {
 import { getProjectLogFolders } from '@rushstack/rush-sdk/lib/logic/operations/ProjectLogWritable';
 import { type CommandLineIntegerParameter, CommandLineParameterKind } from '@rushstack/ts-command-line';
 
-import { PLUGIN_NAME } from './constants';
-import { RushServeConfiguration } from './RushProjectServeConfigFile';
-import type { IRoutingRule, IPhasedCommandHandlerOptions } from './types';
+import { PLUGIN_NAME } from './constants.ts';
+import { RushServeConfiguration } from './RushProjectServeConfigFile.ts';
+import type { IRoutingRule, IPhasedCommandHandlerOptions } from './types.ts';
 import {
   getLogServePathForProject,
   tryEnableBuildStatusWebSocketServer,
   type WebSocketServerUpgrader
-} from './tryEnableBuildStatusWebSocketServer';
+} from './tryEnableBuildStatusWebSocketServer.ts';
 
 export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions): Promise<void> {
   const { rushSession, command, portParameterLongName, globalRoutingRules } = options;

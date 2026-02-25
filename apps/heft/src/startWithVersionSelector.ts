@@ -10,8 +10,8 @@ import * as fs from 'node:fs';
 
 import type { IPackageJson } from '@rushstack/node-core-library';
 
-import { getToolParameterNamesFromArgs } from './utilities/CliUtilities';
-import { Constants } from './utilities/Constants';
+import { getToolParameterNamesFromArgs } from './utilities/CliUtilities.ts';
+import { Constants } from './utilities/Constants.ts';
 
 // Excerpted from PackageJsonLookup.tryGetPackageFolderFor()
 function tryGetPackageFolderFor(resolvedFileOrFolderPath: string): string | undefined {

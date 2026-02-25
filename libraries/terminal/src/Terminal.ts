@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
-import { Colorize } from './Colorize';
-import type { ITerminal, ITerminalWriteOptions, TerminalWriteParameters } from './ITerminal';
-import { AnsiEscape } from './AnsiEscape';
+import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider.ts';
+import { Colorize } from './Colorize.ts';
+import type { ITerminal, ITerminalWriteOptions, TerminalWriteParameters } from './ITerminal.ts';
+import { AnsiEscape } from './AnsiEscape.ts';
 
 /**
  * This class facilitates writing to a console.

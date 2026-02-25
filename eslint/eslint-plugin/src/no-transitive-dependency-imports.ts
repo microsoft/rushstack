@@ -3,7 +3,7 @@
 
 import type { TSESTree, TSESLint } from '@typescript-eslint/utils';
 
-import { parseImportSpecifierFromExpression, type IParsedImportSpecifier } from './LintUtilities';
+import { parseImportSpecifierFromExpression, type IParsedImportSpecifier } from './LintUtilities.ts';
 
 export const MESSAGE_ID: 'error-transitive-dependency-imports' = 'error-transitive-dependency-imports';
 type RuleModule = TSESLint.RuleModule<typeof MESSAGE_ID, []>;

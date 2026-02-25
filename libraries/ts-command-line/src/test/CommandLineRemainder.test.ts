@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { CommandLineAction } from '../providers/CommandLineAction';
-import type { CommandLineParser } from '../providers/CommandLineParser';
-import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
-import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
-import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
-import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
+import type { CommandLineAction } from '../providers/CommandLineAction.ts';
+import type { CommandLineParser } from '../providers/CommandLineParser.ts';
+import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser.ts';
+import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction.ts';
+import { CommandLineRemainder } from '../parameters/CommandLineRemainder.ts';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities.ts';
 
 function createParser(): DynamicCommandLineParser {
   const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({

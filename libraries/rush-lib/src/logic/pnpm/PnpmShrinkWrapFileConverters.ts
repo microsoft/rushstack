@@ -26,7 +26,7 @@ import type {
 
 import * as pnpmKitV9 from '@rushstack/rush-pnpm-kit-v9';
 
-import { removeNullishProps } from '../../utilities/objectUtilities';
+import { removeNullishProps } from '../../utilities/objectUtilities.ts';
 
 type DepPath = string & { __brand: 'DepPath' };
 // eslint-disable-next-line @typescript-eslint/typedef

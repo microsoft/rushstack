@@ -3,8 +3,8 @@
 
 import type { Compilation, Compiler, WebpackPluginInstance } from 'webpack';
 
-import type { IModuleStats, IModuleMinifierPluginStats, IAssetStats } from '../ModuleMinifierPlugin.types';
-import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin';
+import type { IModuleStats, IModuleMinifierPluginStats, IAssetStats } from '../ModuleMinifierPlugin.types.ts';
+import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin.ts';
 
 export type IFlattenedModuleMetadata = Map<string | number, number | 'inline'>;
 export type IFlattenedCompilationModuleMetadata = Map<string | number, IFlattenedModuleMetadata>;

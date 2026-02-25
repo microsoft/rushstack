@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { OperationStatus } from './OperationStatus';
+import type { OperationStatus } from './OperationStatus.ts';
 
 /**
  * A message sent to the host to ask it to run this task.

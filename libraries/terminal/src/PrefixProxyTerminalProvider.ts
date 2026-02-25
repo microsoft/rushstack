@@ -3,7 +3,7 @@
 
 import { Text } from '@rushstack/node-core-library';
 
-import type { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
+import type { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider.ts';
 
 /**
  * @beta

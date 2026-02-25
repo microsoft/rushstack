@@ -15,21 +15,21 @@ import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 import { getRepoRoot } from '@rushstack/package-deps-hash';
 
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { type IChangeFile, type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
-import { ChangeFile } from '../../api/ChangeFile';
-import { BaseRushAction } from './BaseRushAction';
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { ChangeFiles } from '../../logic/ChangeFiles';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { type IChangeFile, type IChangeInfo, ChangeType } from '../../api/ChangeManagement.ts';
+import { ChangeFile } from '../../api/ChangeFile.ts';
+import { BaseRushAction } from './BaseRushAction.ts';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { ChangeFiles } from '../../logic/ChangeFiles.ts';
 import {
   type VersionPolicy,
   type IndividualVersionPolicy,
   type LockStepVersionPolicy,
   VersionPolicyDefinitionName
-} from '../../api/VersionPolicy';
-import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
-import { Git } from '../../logic/Git';
-import { RushConstants } from '../../logic/RushConstants';
+} from '../../api/VersionPolicy.ts';
+import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer.ts';
+import { Git } from '../../logic/Git.ts';
+import { RushConstants } from '../../logic/RushConstants.ts';
 
 const BULK_LONG_NAME: string = '--bulk';
 const BULK_MESSAGE_LONG_NAME: string = '--message';

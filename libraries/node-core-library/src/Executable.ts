@@ -5,11 +5,11 @@ import * as os from 'node:os';
 import * as child_process from 'node:child_process';
 import * as path from 'node:path';
 
-import { EnvironmentMap } from './EnvironmentMap';
-import { FileSystem } from './FileSystem';
-import { PosixModeBits } from './PosixModeBits';
-import { Text } from './Text';
-import { InternalError } from './InternalError';
+import { EnvironmentMap } from './EnvironmentMap.ts';
+import { FileSystem } from './FileSystem.ts';
+import { PosixModeBits } from './PosixModeBits.ts';
+import { Text } from './Text.ts';
+import { InternalError } from './InternalError.ts';
 
 const OS_PLATFORM: NodeJS.Platform = os.platform();
 

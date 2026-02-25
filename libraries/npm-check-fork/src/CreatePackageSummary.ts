@@ -5,11 +5,14 @@ import _ from 'lodash';
 import semver from 'semver';
 
 import type { INpmCheckState, INpmCheckPackageJson } from './interfaces/INpmCheck.ts';
-import type { INpmCheckPackageSummary, INpmCheckVersionBumpType } from './interfaces/INpmCheckPackageSummary';
-import type { INpmRegistryInfo } from './interfaces/INpmCheckRegistry';
-import findModulePath from './FindModulePath';
-import getLatestFromRegistry from './GetLatestFromRegistry';
-import readPackageJson from './ReadPackageJson';
+import type {
+  INpmCheckPackageSummary,
+  INpmCheckVersionBumpType
+} from './interfaces/INpmCheckPackageSummary.ts';
+import type { INpmRegistryInfo } from './interfaces/INpmCheckRegistry.ts';
+import findModulePath from './FindModulePath.ts';
+import getLatestFromRegistry from './GetLatestFromRegistry.ts';
+import readPackageJson from './ReadPackageJson.ts';
 
 export default async function createPackageSummary(
   moduleName: string,

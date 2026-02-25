@@ -3,13 +3,13 @@
 
 import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
-import { BaseInstallAction } from './BaseInstallAction';
-import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes';
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { Subspace } from '../../api/Subspace';
-import { getVariantAsync } from '../../api/Variants';
+import { BaseInstallAction } from './BaseInstallAction.ts';
+import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes.ts';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { SelectionParameterSet } from '../parsing/SelectionParameterSet.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import type { Subspace } from '../../api/Subspace.ts';
+import { getVariantAsync } from '../../api/Variants.ts';
 
 export class InstallAction extends BaseInstallAction {
   private readonly _checkOnlyParameter: CommandLineFlagParameter;

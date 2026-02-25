@@ -5,7 +5,7 @@ import {
   getIdentifierInternal,
   getOrdinalFromIdentifierInternal,
   getIdentifier
-} from '../MinifiedIdentifier';
+} from '../MinifiedIdentifier.ts';
 
 describe('MinifiedIdentifier', () => {
   describe(getIdentifierInternal.name, () => {

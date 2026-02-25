@@ -6,30 +6,30 @@ import * as semver from 'semver';
 import type { INpmCheckPackageSummary } from '@rushstack/npm-check-fork';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import type { RushConfiguration } from '../api/RushConfiguration';
-import type { BaseInstallManager } from './base/BaseInstallManager';
-import type { IInstallManagerOptions } from './base/BaseInstallManagerTypes';
-import { InstallManagerFactory } from './InstallManagerFactory';
-import { VersionMismatchFinder } from './versionMismatch/VersionMismatchFinder';
-import { PurgeManager } from './PurgeManager';
-import { Utilities } from '../utilities/Utilities';
-import { DependencyType, type PackageJsonDependency } from '../api/PackageJsonEditor';
-import type { RushGlobalFolder } from '../api/RushGlobalFolder';
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import type { VersionMismatchFinderEntity } from './versionMismatch/VersionMismatchFinderEntity';
-import { VersionMismatchFinderProject } from './versionMismatch/VersionMismatchFinderProject';
-import { RushConstants } from './RushConstants';
-import { InstallHelpers } from './installManager/InstallHelpers';
-import type { DependencyAnalyzer, IDependencyAnalysis } from './DependencyAnalyzer';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import type { BaseInstallManager } from './base/BaseInstallManager.ts';
+import type { IInstallManagerOptions } from './base/BaseInstallManagerTypes.ts';
+import { InstallManagerFactory } from './InstallManagerFactory.ts';
+import { VersionMismatchFinder } from './versionMismatch/VersionMismatchFinder.ts';
+import { PurgeManager } from './PurgeManager.ts';
+import { Utilities } from '../utilities/Utilities.ts';
+import { DependencyType, type PackageJsonDependency } from '../api/PackageJsonEditor.ts';
+import type { RushGlobalFolder } from '../api/RushGlobalFolder.ts';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import type { VersionMismatchFinderEntity } from './versionMismatch/VersionMismatchFinderEntity.ts';
+import { VersionMismatchFinderProject } from './versionMismatch/VersionMismatchFinderProject.ts';
+import { RushConstants } from './RushConstants.ts';
+import { InstallHelpers } from './installManager/InstallHelpers.ts';
+import type { DependencyAnalyzer, IDependencyAnalysis } from './DependencyAnalyzer.ts';
 import {
   type IPackageForRushAdd,
   type IPackageJsonUpdaterRushAddOptions,
   type IPackageJsonUpdaterRushBaseUpdateOptions,
   type IPackageJsonUpdaterRushRemoveOptions,
   SemVerStyle
-} from './PackageJsonUpdaterTypes';
-import type { Subspace } from '../api/Subspace';
-import { MAKE_CONSISTENT_FLAG_NAME } from '../cli/actions/AddAction';
+} from './PackageJsonUpdaterTypes.ts';
+import type { Subspace } from '../api/Subspace.ts';
+import { MAKE_CONSISTENT_FLAG_NAME } from '../cli/actions/AddAction.ts';
 
 /**
  * Options for adding a dependency to a particular project.
@@ -121,7 +121,7 @@ export class PackageJsonUpdater {
     const { projects, packagesToAdd, updateOtherPackages, skipUpdate, debugInstall, variant } = options;
     const { DependencyAnalyzer } = await import(
       /* webpackChunkName: 'DependencyAnalyzer' */
-      './DependencyAnalyzer'
+      './DependencyAnalyzer.ts'
     );
     const dependencyAnalyzer: DependencyAnalyzer = DependencyAnalyzer.forRushConfiguration(
       this._rushConfiguration
@@ -325,7 +325,7 @@ export class PackageJsonUpdater {
 
     const { DependencyAnalyzer } = await import(
       /* webpackChunkName: 'DependencyAnalyzer' */
-      './DependencyAnalyzer'
+      './DependencyAnalyzer.ts'
     );
     const dependencyAnalyzer: DependencyAnalyzer = DependencyAnalyzer.forRushConfiguration(
       this._rushConfiguration

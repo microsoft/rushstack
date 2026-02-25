@@ -4,16 +4,16 @@
 import * as path from 'node:path';
 import { JsonFile } from '@rushstack/node-core-library';
 
-import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
-import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
+import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile.ts';
+import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory.ts';
 import {
   parsePnpmDependencyKey,
   PnpmShrinkwrapFile,
   ShrinkwrapFileMajorVersion
-} from '../pnpm/PnpmShrinkwrapFile';
-import { DependencySpecifier } from '../DependencySpecifier';
-import { NpmShrinkwrapFile } from '../npm/NpmShrinkwrapFile';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+} from '../pnpm/PnpmShrinkwrapFile.ts';
+import { DependencySpecifier } from '../DependencySpecifier.ts';
+import { NpmShrinkwrapFile } from '../npm/NpmShrinkwrapFile.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
 
 describe(NpmShrinkwrapFile.name, () => {
   const shrinkwrapFilePath: string = `${__dirname}/shrinkwrapFile/npm-shrinkwrap.json`;

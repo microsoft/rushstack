@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ICommandLineChoiceListDefinition } from './CommandLineDefinition';
-import { CommandLineParameterBase, CommandLineParameterKind } from './BaseClasses';
-import { EnvironmentVariableParser } from './EnvironmentVariableParser';
+import type { ICommandLineChoiceListDefinition } from './CommandLineDefinition.ts';
+import { CommandLineParameterBase, CommandLineParameterKind } from './BaseClasses.ts';
+import { EnvironmentVariableParser } from './EnvironmentVariableParser.ts';
 
 /**
  * The data type returned by {@link CommandLineParameterProvider.defineChoiceListParameter}.

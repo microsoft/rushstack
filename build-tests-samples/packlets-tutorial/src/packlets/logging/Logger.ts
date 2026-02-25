@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { MessageType } from './MessageType';
+import { MessageType } from './MessageType.ts';
 
 export class Logger {
   public log(messageType: MessageType, message: string): void {

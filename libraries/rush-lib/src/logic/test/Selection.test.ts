@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { type IPartialProject, Selection } from '../Selection';
+import { type IPartialProject, Selection } from '../Selection.ts';
 
 const { union, intersection, expandAllDependencies, expandAllConsumers } = Selection;
 

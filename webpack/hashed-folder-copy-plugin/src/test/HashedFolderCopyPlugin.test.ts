@@ -74,7 +74,7 @@ async function runTestAsync(inputFolderPath: string): Promise<void> {
     import('memfs/lib/volume'),
     import('webpack'),
     import('node:util'),
-    import('../HashedFolderCopyPlugin')
+    import('../HashedFolderCopyPlugin.ts')
   ]);
 
   const memoryFileSystem: Volume = new Volume();

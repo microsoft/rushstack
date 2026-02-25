@@ -3,7 +3,7 @@
 
 import type { Meta, StoryObj } from 'heft-storybook-v9-react-tutorial-storykit';
 
-import { ToggleSwitch } from './ToggleSwitch';
+import { ToggleSwitch } from './ToggleSwitch.tsx';
 
 export default {
   title: 'Octogonz/ToggleSwitch',

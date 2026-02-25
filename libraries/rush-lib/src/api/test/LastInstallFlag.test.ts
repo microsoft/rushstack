@@ -4,7 +4,7 @@
 import * as path from 'node:path';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import { LastInstallFlag } from '../LastInstallFlag';
+import { LastInstallFlag } from '../LastInstallFlag.ts';
 
 const TEMP_DIR_PATH: string = `${__dirname}/temp`;
 

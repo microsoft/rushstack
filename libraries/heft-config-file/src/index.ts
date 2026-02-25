@@ -29,9 +29,9 @@ export {
   type IPropertyInheritanceDefaults,
   PathResolutionMethod,
   type PropertyInheritanceCustomFunction
-} from './ConfigurationFileBase';
+} from './ConfigurationFileBase.ts';
 
-import { ProjectConfigurationFile } from './ProjectConfigurationFile';
+import { ProjectConfigurationFile } from './ProjectConfigurationFile.ts';
 
 /**
  * @deprecated Use {@link ProjectConfigurationFile} instead.
@@ -50,7 +50,7 @@ export {
   ProjectConfigurationFile,
   type IProjectConfigurationFileOptions,
   type IProjectConfigurationFileSpecification
-} from './ProjectConfigurationFile';
-export { NonProjectConfigurationFile } from './NonProjectConfigurationFile';
+} from './ProjectConfigurationFile.ts';
+export { NonProjectConfigurationFile } from './NonProjectConfigurationFile.ts';
 
-export * as TestUtilities from './TestUtilities';
+export * as TestUtilities from './TestUtilities.ts';

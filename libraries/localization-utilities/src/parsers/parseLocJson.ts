@@ -3,7 +3,7 @@
 
 import { JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
-import type { ILocalizationFile, IParseFileOptions } from '../interfaces';
+import type { ILocalizationFile, IParseFileOptions } from '../interfaces.ts';
 import locJsonSchema from '../schemas/locJson.schema.json';
 
 const LOC_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(locJsonSchema);

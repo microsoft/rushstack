@@ -9,15 +9,15 @@
  * @packageDocumentation
  */
 
-export { AlphaClass } from './AlphaClass';
-export { BetaClass } from './BetaClass';
-export { PublicClass, type IPublicClassInternalParameters } from './PublicClass';
-export { InternalClass } from './InternalClass';
-export { EntangledNamespace } from './EntangledNamespace';
+export { AlphaClass } from './AlphaClass.ts';
+export { BetaClass } from './BetaClass.ts';
+export { PublicClass, type IPublicClassInternalParameters } from './PublicClass.ts';
+export { InternalClass } from './InternalClass.ts';
+export { EntangledNamespace } from './EntangledNamespace.ts';
 
-export * from './EnumExamples';
+export * from './EnumExamples.ts';
 
-export type { BetaInterface } from './BetaInterface';
+export type { BetaInterface } from './BetaInterface.ts';
 
 /**
  * This is a module-scoped variable.
@@ -25,7 +25,7 @@ export type { BetaInterface } from './BetaInterface';
  */
 export const variableDeclaration: string = 'hello';
 
-import { AlphaClass } from './AlphaClass';
+import { AlphaClass } from './AlphaClass.ts';
 
 /**
  * This is an exported type alias.
@@ -33,6 +33,6 @@ import { AlphaClass } from './AlphaClass';
  */
 export type ExportedAlias = AlphaClass;
 
-export type { IPublicComplexInterface } from './IPublicComplexInterface';
+export type { IPublicComplexInterface } from './IPublicComplexInterface.ts';
 
 export type { Lib1Interface } from 'api-extractor-lib1-test';

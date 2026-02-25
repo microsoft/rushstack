@@ -18,19 +18,19 @@ import {
   Path
 } from '@rushstack/node-core-library';
 
-import { ExtractorConfig, type IExtractorConfigApiReport } from './ExtractorConfig';
-import { Collector } from '../collector/Collector';
-import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator';
-import { ApiModelGenerator } from '../generators/ApiModelGenerator';
-import { ApiReportGenerator } from '../generators/ApiReportGenerator';
-import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
-import { ValidationEnhancer } from '../enhancers/ValidationEnhancer';
-import { DocCommentEnhancer } from '../enhancers/DocCommentEnhancer';
-import { CompilerState } from './CompilerState';
-import type { ExtractorMessage } from './ExtractorMessage';
-import { MessageRouter } from '../collector/MessageRouter';
-import { ConsoleMessageId } from './ConsoleMessageId';
-import { SourceMapper } from '../collector/SourceMapper';
+import { ExtractorConfig, type IExtractorConfigApiReport } from './ExtractorConfig.ts';
+import { Collector } from '../collector/Collector.ts';
+import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator.ts';
+import { ApiModelGenerator } from '../generators/ApiModelGenerator.ts';
+import { ApiReportGenerator } from '../generators/ApiReportGenerator.ts';
+import { PackageMetadataManager } from '../analyzer/PackageMetadataManager.ts';
+import { ValidationEnhancer } from '../enhancers/ValidationEnhancer.ts';
+import { DocCommentEnhancer } from '../enhancers/DocCommentEnhancer.ts';
+import { CompilerState } from './CompilerState.ts';
+import type { ExtractorMessage } from './ExtractorMessage.ts';
+import { MessageRouter } from '../collector/MessageRouter.ts';
+import { ConsoleMessageId } from './ConsoleMessageId.ts';
+import { SourceMapper } from '../collector/SourceMapper.ts';
 
 /**
  * Runtime options for Extractor.

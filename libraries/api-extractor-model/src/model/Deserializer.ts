@@ -1,29 +1,29 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { type IApiItemJson, type IApiItemOptions, type ApiItem, ApiItemKind } from '../items/ApiItem';
-import { ApiClass, type IApiClassOptions, type IApiClassJson } from './ApiClass';
-import { ApiEntryPoint, type IApiEntryPointOptions } from './ApiEntryPoint';
-import { ApiMethod, type IApiMethodOptions } from './ApiMethod';
-import { ApiModel } from './ApiModel';
-import { ApiNamespace, type IApiNamespaceOptions } from './ApiNamespace';
-import { ApiPackage, type IApiPackageOptions, type IApiPackageJson } from './ApiPackage';
-import { ApiInterface, type IApiInterfaceOptions, type IApiInterfaceJson } from './ApiInterface';
-import { ApiPropertySignature, type IApiPropertySignatureOptions } from './ApiPropertySignature';
-import { ApiMethodSignature, type IApiMethodSignatureOptions } from './ApiMethodSignature';
-import { ApiProperty, type IApiPropertyOptions } from './ApiProperty';
-import { ApiEnumMember, type IApiEnumMemberOptions } from './ApiEnumMember';
-import { ApiEnum, type IApiEnumOptions } from './ApiEnum';
-import type { IApiPropertyItemJson } from '../items/ApiPropertyItem';
-import { ApiConstructor, type IApiConstructorOptions } from './ApiConstructor';
-import { ApiConstructSignature, type IApiConstructSignatureOptions } from './ApiConstructSignature';
-import { ApiFunction, type IApiFunctionOptions } from './ApiFunction';
-import { ApiCallSignature, type IApiCallSignatureOptions } from './ApiCallSignature';
-import { ApiIndexSignature, type IApiIndexSignatureOptions } from './ApiIndexSignature';
-import { ApiTypeAlias, type IApiTypeAliasOptions, type IApiTypeAliasJson } from './ApiTypeAlias';
-import { ApiVariable, type IApiVariableOptions, type IApiVariableJson } from './ApiVariable';
-import type { IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
-import type { DeserializerContext } from './DeserializerContext';
+import { type IApiItemJson, type IApiItemOptions, type ApiItem, ApiItemKind } from '../items/ApiItem.ts';
+import { ApiClass, type IApiClassOptions, type IApiClassJson } from './ApiClass.ts';
+import { ApiEntryPoint, type IApiEntryPointOptions } from './ApiEntryPoint.ts';
+import { ApiMethod, type IApiMethodOptions } from './ApiMethod.ts';
+import { ApiModel } from './ApiModel.ts';
+import { ApiNamespace, type IApiNamespaceOptions } from './ApiNamespace.ts';
+import { ApiPackage, type IApiPackageOptions, type IApiPackageJson } from './ApiPackage.ts';
+import { ApiInterface, type IApiInterfaceOptions, type IApiInterfaceJson } from './ApiInterface.ts';
+import { ApiPropertySignature, type IApiPropertySignatureOptions } from './ApiPropertySignature.ts';
+import { ApiMethodSignature, type IApiMethodSignatureOptions } from './ApiMethodSignature.ts';
+import { ApiProperty, type IApiPropertyOptions } from './ApiProperty.ts';
+import { ApiEnumMember, type IApiEnumMemberOptions } from './ApiEnumMember.ts';
+import { ApiEnum, type IApiEnumOptions } from './ApiEnum.ts';
+import type { IApiPropertyItemJson } from '../items/ApiPropertyItem.ts';
+import { ApiConstructor, type IApiConstructorOptions } from './ApiConstructor.ts';
+import { ApiConstructSignature, type IApiConstructSignatureOptions } from './ApiConstructSignature.ts';
+import { ApiFunction, type IApiFunctionOptions } from './ApiFunction.ts';
+import { ApiCallSignature, type IApiCallSignatureOptions } from './ApiCallSignature.ts';
+import { ApiIndexSignature, type IApiIndexSignatureOptions } from './ApiIndexSignature.ts';
+import { ApiTypeAlias, type IApiTypeAliasOptions, type IApiTypeAliasJson } from './ApiTypeAlias.ts';
+import { ApiVariable, type IApiVariableOptions, type IApiVariableJson } from './ApiVariable.ts';
+import type { IApiDeclaredItemJson } from '../items/ApiDeclaredItem.ts';
+import type { DeserializerContext } from './DeserializerContext.ts';
 
 export class Deserializer {
   public static deserialize(context: DeserializerContext, jsonObject: IApiItemJson): ApiItem {

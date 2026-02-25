@@ -10,12 +10,12 @@ import readPackageTree from 'read-package-tree';
 import { FileSystem, FileConstants, LegacyAdapters } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import { RushConstants } from '../RushConstants';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { Utilities } from '../../utilities/Utilities';
-import { NpmPackage, type IResolveOrCreateResult, PackageDependencyKind } from './NpmPackage';
-import { PackageLookup } from '../PackageLookup';
-import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
+import { RushConstants } from '../RushConstants.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { Utilities } from '../../utilities/Utilities.ts';
+import { NpmPackage, type IResolveOrCreateResult, PackageDependencyKind } from './NpmPackage.ts';
+import { PackageLookup } from '../PackageLookup.ts';
+import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager.ts';
 
 interface IQueueItem {
   // A project from somewhere under "common/temp/node_modules"

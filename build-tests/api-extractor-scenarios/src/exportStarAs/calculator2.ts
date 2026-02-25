@@ -20,4 +20,4 @@ export function subtract(a: bigint, b: bigint): bigint {
   return a - b;
 }
 
-export * from './common';
+export * from './common.ts';

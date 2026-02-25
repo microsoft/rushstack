@@ -4,8 +4,8 @@
 import * as path from 'node:path';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import { FlagFile } from '../FlagFile';
-import { RushConstants } from '../../logic/RushConstants';
+import { FlagFile } from '../FlagFile.ts';
+import { RushConstants } from '../../logic/RushConstants.ts';
 
 const TEMP_DIR_PATH: string = `${__dirname}/temp`;
 

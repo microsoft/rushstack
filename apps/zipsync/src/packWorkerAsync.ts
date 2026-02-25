@@ -8,9 +8,9 @@ import type {
   IHostToWorkerMessage,
   IZipSyncPackWorkerResult,
   IZipSyncPackOptions
-} from './packWorker';
+} from './packWorker.ts';
 
-export type { IZipSyncPackWorkerResult } from './packWorker';
+export type { IZipSyncPackWorkerResult } from './packWorker.ts';
 
 export async function packWorkerAsync(
   options: Omit<IZipSyncPackOptions, 'terminal'>

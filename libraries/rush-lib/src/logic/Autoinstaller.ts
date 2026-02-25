@@ -14,15 +14,15 @@ import {
 } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import { Utilities } from '../utilities/Utilities';
-import type { RushConfiguration } from '../api/RushConfiguration';
-import { PackageJsonEditor } from '../api/PackageJsonEditor';
-import { InstallHelpers } from './installManager/InstallHelpers';
-import type { RushGlobalFolder } from '../api/RushGlobalFolder';
-import { RushConstants } from './RushConstants';
-import { LastInstallFlag } from '../api/LastInstallFlag';
-import { RushCommandLineParser } from '../cli/RushCommandLineParser';
-import type { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
+import { Utilities } from '../utilities/Utilities.ts';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import { PackageJsonEditor } from '../api/PackageJsonEditor.ts';
+import { InstallHelpers } from './installManager/InstallHelpers.ts';
+import type { RushGlobalFolder } from '../api/RushGlobalFolder.ts';
+import { RushConstants } from './RushConstants.ts';
+import { LastInstallFlag } from '../api/LastInstallFlag.ts';
+import { RushCommandLineParser } from '../cli/RushCommandLineParser.ts';
+import type { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager.ts';
 
 export interface IAutoinstallerOptions {
   autoinstallerName: string;

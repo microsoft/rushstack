@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { SetPublicPathPlugin, type ISetWebpackPublicPathPluginOptions } from '../SetPublicPathPlugin';
-import { testForPlugin } from './testBase';
+import { SetPublicPathPlugin, type ISetWebpackPublicPathPluginOptions } from '../SetPublicPathPlugin.ts';
+import { testForPlugin } from './testBase.ts';
 
 const options: ISetWebpackPublicPathPluginOptions[] = [
   { scriptName: { useAssetName: true } },

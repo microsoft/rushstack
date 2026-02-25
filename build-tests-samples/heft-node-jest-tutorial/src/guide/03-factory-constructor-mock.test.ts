@@ -14,8 +14,8 @@ jest.mock('./SoundPlayer', () => {
   };
 });
 
-import { SoundPlayerConsumer } from './SoundPlayerConsumer';
-import { SoundPlayer } from './SoundPlayer';
+import { SoundPlayerConsumer } from './SoundPlayerConsumer.ts';
+import { SoundPlayer } from './SoundPlayer.ts';
 
 beforeEach(() => {
   mocked(SoundPlayer).mockClear();

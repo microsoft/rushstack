@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import * as GitEmailPolicy from './GitEmailPolicy';
-import * as ShrinkwrapFilePolicy from './ShrinkwrapFilePolicy';
-import * as EnvironmentPolicy from './EnvironmentPolicy';
-import type { Subspace } from '../../api/Subspace';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import * as GitEmailPolicy from './GitEmailPolicy.ts';
+import * as ShrinkwrapFilePolicy from './ShrinkwrapFilePolicy.ts';
+import * as EnvironmentPolicy from './EnvironmentPolicy.ts';
+import type { Subspace } from '../../api/Subspace.ts';
 
 export interface IPolicyValidatorOptions {
   bypassPolicyAllowed?: boolean;

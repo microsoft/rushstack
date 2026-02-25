@@ -9,30 +9,30 @@
  * @packageDocumentation
  */
 
-export { ConsoleMessageId } from './api/ConsoleMessageId';
+export { ConsoleMessageId } from './api/ConsoleMessageId.ts';
 
-export { CompilerState, type ICompilerStateCreateOptions } from './api/CompilerState';
+export { CompilerState, type ICompilerStateCreateOptions } from './api/CompilerState.ts';
 
-export { Extractor, type IExtractorInvokeOptions, ExtractorResult } from './api/Extractor';
+export { Extractor, type IExtractorInvokeOptions, ExtractorResult } from './api/Extractor.ts';
 
 export {
   type IExtractorConfigApiReport,
   type IExtractorConfigPrepareOptions,
   type IExtractorConfigLoadForFolderOptions,
   ExtractorConfig
-} from './api/ExtractorConfig';
+} from './api/ExtractorConfig.ts';
 
-export type { IApiModelGenerationOptions } from './generators/ApiModelGenerator';
+export type { IApiModelGenerationOptions } from './generators/ApiModelGenerator.ts';
 
-export { ExtractorLogLevel } from './api/ExtractorLogLevel';
+export { ExtractorLogLevel } from './api/ExtractorLogLevel.ts';
 
 export {
   ExtractorMessage,
   type IExtractorMessageProperties,
   ExtractorMessageCategory
-} from './api/ExtractorMessage';
+} from './api/ExtractorMessage.ts';
 
-export { ExtractorMessageId } from './api/ExtractorMessageId';
+export { ExtractorMessageId } from './api/ExtractorMessageId.ts';
 
 export type {
   ApiReportVariant,
@@ -46,4 +46,4 @@ export type {
   IExtractorMessagesConfig,
   IConfigFile,
   ReleaseTagForTrim
-} from './api/IConfigFile';
+} from './api/IConfigFile.ts';

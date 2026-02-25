@@ -5,15 +5,15 @@ import * as crypto from 'node:crypto';
 
 import { InternalError, JsonFile } from '@rushstack/node-core-library';
 
-import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
+import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile.ts';
 import type {
   PnpmShrinkwrapFile,
   IPnpmShrinkwrapDependencyYaml,
   IPnpmVersionSpecifier
-} from './PnpmShrinkwrapFile';
-import type { DependencySpecifier } from '../DependencySpecifier';
-import { RushConstants } from '../RushConstants';
-import type { Subspace } from '../../api/Subspace';
+} from './PnpmShrinkwrapFile.ts';
+import type { DependencySpecifier } from '../DependencySpecifier.ts';
+import { RushConstants } from '../RushConstants.ts';
+import type { Subspace } from '../../api/Subspace.ts';
 
 /**
  *

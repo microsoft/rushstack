@@ -3,7 +3,7 @@
 
 import type { LaunchOptions } from 'playwright-core';
 
-import type { BrowserName } from '../PlaywrightBrowserTunnel';
+import type { BrowserName } from '../PlaywrightBrowserTunnel.ts';
 
 export interface IHandshake {
   action: 'handshake';

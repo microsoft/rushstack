@@ -3,8 +3,8 @@
 
 import type { RuleTester, TestCaseError } from '@typescript-eslint/rule-tester';
 
-import { getRuleTesterWithProject } from './ruleTester';
-import { noTransitiveDependencyImportsRule, MESSAGE_ID } from '../no-transitive-dependency-imports';
+import { getRuleTesterWithProject } from './ruleTester.ts';
+import { noTransitiveDependencyImportsRule, MESSAGE_ID } from '../no-transitive-dependency-imports.ts';
 
 const ruleTester: RuleTester = getRuleTesterWithProject();
 const expectedErrors: TestCaseError<typeof MESSAGE_ID>[] = [{ messageId: MESSAGE_ID }];

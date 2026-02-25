@@ -4,9 +4,9 @@
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
-import type { IPhase } from '../CommandLineConfiguration';
-import type { RushConfigurationProject } from '../RushConfigurationProject';
-import { RushProjectConfiguration } from '../RushProjectConfiguration';
+import type { IPhase } from '../CommandLineConfiguration.ts';
+import type { RushConfigurationProject } from '../RushConfigurationProject.ts';
+import { RushProjectConfiguration } from '../RushProjectConfiguration.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function stripSymbolsFromObject(obj: any | undefined): void {

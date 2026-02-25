@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import { Utilities } from '../../utilities/Utilities';
+import { Utilities } from '../../utilities/Utilities.ts';
 
 // Increase the timeout since this command spawns child processes
 jest.setTimeout(10000);

@@ -13,7 +13,7 @@ import type {
   IYamlSyntax,
   IYamlReferenceSpec,
   IYamlReference
-} from '../yaml/IYamlApiFile';
+} from '../yaml/IYamlApiFile.ts';
 import type {
   PackageYamlModel,
   EnumYamlModel,
@@ -22,7 +22,7 @@ import type {
   FieldYamlModel,
   FunctionYamlModel,
   CommonYamlModel
-} from '../yaml/ISDPYamlFile';
+} from '../yaml/ISDPYamlFile.ts';
 
 export function convertUDPYamlToSDP(folderPath: string): void {
   convert(folderPath, folderPath);

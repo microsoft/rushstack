@@ -17,4 +17,4 @@ export {
   type IRigConfig,
   RigConfig,
   type ILoadForProjectFolderOptions
-} from './RigConfig';
+} from './RigConfig.ts';

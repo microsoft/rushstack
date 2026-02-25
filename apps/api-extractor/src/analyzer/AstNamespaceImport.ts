@@ -3,9 +3,9 @@
 
 import type * as ts from 'typescript';
 
-import type { AstModule, IAstModuleExportInfo } from './AstModule';
-import { AstSyntheticEntity } from './AstEntity';
-import type { Collector } from '../collector/Collector';
+import type { AstModule, IAstModuleExportInfo } from './AstModule.ts';
+import { AstSyntheticEntity } from './AstEntity.ts';
+import type { Collector } from '../collector/Collector.ts';
 
 export interface IAstNamespaceImportOptions {
   readonly astModule: AstModule;

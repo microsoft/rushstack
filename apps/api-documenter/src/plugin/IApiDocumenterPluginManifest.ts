@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { MarkdownDocumenterFeature } from './MarkdownDocumenterFeature';
-import type { PluginFeatureInitialization } from './PluginFeature';
+import type { MarkdownDocumenterFeature } from './MarkdownDocumenterFeature.ts';
+import type { PluginFeatureInitialization } from './PluginFeature.ts';
 
 /**
  * Defines a "feature" that is provided by an API Documenter plugin.  A feature is a user-defined module

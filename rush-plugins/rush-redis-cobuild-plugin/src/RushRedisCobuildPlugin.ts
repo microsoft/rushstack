@@ -4,9 +4,12 @@
 import { Import } from '@rushstack/node-core-library';
 import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rush-sdk';
 
-import type { IRedisCobuildLockProviderOptions, RedisCobuildLockProvider } from './RedisCobuildLockProvider';
+import type {
+  IRedisCobuildLockProviderOptions,
+  RedisCobuildLockProvider
+} from './RedisCobuildLockProvider.ts';
 
-const RedisCobuildLockProviderModule: typeof import('./RedisCobuildLockProvider') = Import.lazy(
+const RedisCobuildLockProviderModule: typeof import('./RedisCobuildLockProvider.ts') = Import.lazy(
   './RedisCobuildLockProvider',
   require
 );

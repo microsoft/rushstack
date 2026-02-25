@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineAction } from '../providers/CommandLineAction';
-import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
-import { CommandLineParser } from '../providers/CommandLineParser';
-import type { IScopedLongNameParseResult } from '../providers/CommandLineParameterProvider';
-import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
+import { CommandLineAction } from '../providers/CommandLineAction.ts';
+import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter.ts';
+import { CommandLineParser } from '../providers/CommandLineParser.ts';
+import type { IScopedLongNameParseResult } from '../providers/CommandLineParameterProvider.ts';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities.ts';
 
 class GenericCommandLine extends CommandLineParser {
   public constructor(action: new () => CommandLineAction) {

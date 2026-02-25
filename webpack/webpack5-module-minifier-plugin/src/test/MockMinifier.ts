@@ -13,7 +13,7 @@ import {
   MODULE_WRAPPER_SUFFIX,
   MODULE_WRAPPER_SHORTHAND_PREFIX,
   MODULE_WRAPPER_SHORTHAND_SUFFIX
-} from '../Constants';
+} from '../Constants.ts';
 
 export class MockMinifier implements IModuleMinifier {
   public readonly requests: Map<string, string> = new Map();

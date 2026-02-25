@@ -7,13 +7,13 @@ jest.mock('../../logic/dotenv', () => ({
 
 import { PackageJsonLookup } from '@rushstack/node-core-library';
 
-import { Utilities } from '../../utilities/Utilities';
-import { Rush, type ILaunchOptions } from '../../api/Rush';
-import { RushConfiguration } from '../../api/RushConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { NodeJsCompatibility } from '../../logic/NodeJsCompatibility';
+import { Utilities } from '../../utilities/Utilities.ts';
+import { Rush, type ILaunchOptions } from '../../api/Rush.ts';
+import { RushConfiguration } from '../../api/RushConfiguration.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { NodeJsCompatibility } from '../../logic/NodeJsCompatibility.ts';
 
-import { RushXCommandLine } from '../RushXCommandLine';
+import { RushXCommandLine } from '../RushXCommandLine.ts';
 
 describe(RushXCommandLine.name, () => {
   let $argv: string[];

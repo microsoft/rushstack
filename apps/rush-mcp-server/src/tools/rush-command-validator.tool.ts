@@ -9,7 +9,7 @@ import { JsonFile } from '@rushstack/node-core-library';
 import type { ICommandLineJson } from '@rushstack/rush-sdk/lib/api/CommandLineJson';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 
-import { getRushConfiguration } from '../utilities/common';
+import { getRushConfiguration } from '../utilities/common.ts';
 import { BaseTool, type CallToolResult } from './base.tool';
 
 export const selectionParamsSet: ReadonlySet<string> = new Set([

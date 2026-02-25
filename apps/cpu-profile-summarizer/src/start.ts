@@ -14,8 +14,8 @@ import {
 } from '@rushstack/ts-command-line';
 import { WorkerPool } from '@rushstack/worker-pool';
 
-import type { IMessageFromWorker } from './protocol';
-import type { INodeSummary, IProfileSummary } from './types';
+import type { IMessageFromWorker } from './protocol.ts';
+import type { INodeSummary, IProfileSummary } from './types.ts';
 
 /**
  * Merges summarized information from multiple profiles into a single collection.

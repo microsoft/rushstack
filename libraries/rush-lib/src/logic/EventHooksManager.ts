@@ -3,12 +3,12 @@
 
 import { Colorize } from '@rushstack/terminal';
 
-import type { EventHooks } from '../api/EventHooks';
-import { type IEnvironment, Utilities } from '../utilities/Utilities';
-import { Event } from '../api/EventHooks';
-import { Stopwatch } from '../utilities/Stopwatch';
-import type { RushConfiguration } from '../api/RushConfiguration';
-import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+import type { EventHooks } from '../api/EventHooks.ts';
+import { type IEnvironment, Utilities } from '../utilities/Utilities.ts';
+import { Event } from '../api/EventHooks.ts';
+import { Stopwatch } from '../utilities/Stopwatch.ts';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration.ts';
 
 export class EventHooksManager {
   private _rushConfiguration: RushConfiguration;

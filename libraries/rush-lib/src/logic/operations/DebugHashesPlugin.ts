@@ -3,9 +3,9 @@
 
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
-import type { Operation } from './Operation';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks.ts';
+import type { Operation } from './Operation.ts';
+import type { IOperationExecutionResult } from './IOperationExecutionResult.ts';
 
 const PLUGIN_NAME: 'DebugHashesPlugin' = 'DebugHashesPlugin';
 

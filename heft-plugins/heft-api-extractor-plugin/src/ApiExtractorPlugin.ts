@@ -11,7 +11,7 @@ import type {
   ConfigurationFile
 } from '@rushstack/heft';
 
-import { invokeApiExtractorAsync } from './ApiExtractorRunner';
+import { invokeApiExtractorAsync } from './ApiExtractorRunner.ts';
 import apiExtractorConfigSchema from './schemas/api-extractor-task.schema.json';
 
 // eslint-disable-next-line @rushstack/no-new-null

@@ -7,16 +7,16 @@ import * as crypto from 'node:crypto';
 import { FileSystem } from '@rushstack/node-core-library';
 import type { IPackageJson } from '@rushstack/node-core-library';
 
-import type { RushConfiguration } from './RushConfiguration';
-import type { RushConfigurationProject } from './RushConfigurationProject';
-import { EnvironmentConfiguration } from './EnvironmentConfiguration';
-import { RushConstants } from '../logic/RushConstants';
-import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
-import { RepoStateFile } from '../logic/RepoStateFile';
-import type { PnpmPackageManager } from './packageManager/PnpmPackageManager';
-import { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
-import { SubspacePnpmfileConfiguration } from '../logic/pnpm/SubspacePnpmfileConfiguration';
-import type { ISubspacePnpmfileShimSettings } from '../logic/pnpm/IPnpmfile';
+import type { RushConfiguration } from './RushConfiguration.ts';
+import type { RushConfigurationProject } from './RushConfigurationProject.ts';
+import { EnvironmentConfiguration } from './EnvironmentConfiguration.ts';
+import { RushConstants } from '../logic/RushConstants.ts';
+import { CommonVersionsConfiguration } from './CommonVersionsConfiguration.ts';
+import { RepoStateFile } from '../logic/RepoStateFile.ts';
+import type { PnpmPackageManager } from './packageManager/PnpmPackageManager.ts';
+import { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration.ts';
+import { SubspacePnpmfileConfiguration } from '../logic/pnpm/SubspacePnpmfileConfiguration.ts';
+import type { ISubspacePnpmfileShimSettings } from '../logic/pnpm/IPnpmfile.ts';
 
 /**
  * @internal

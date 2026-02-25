@@ -1,4 +1,4 @@
-import * as forgottenNs from './forgottenNs';
+import * as forgottenNs from './forgottenNs.ts';
 
 /**
  * @public

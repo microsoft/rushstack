@@ -3,11 +3,11 @@
 
 import type { IPackageJson } from '@rushstack/node-core-library';
 
-import { BumpType } from '../../api/VersionPolicy';
-import type { ChangeFile } from '../../api/ChangeFile';
-import { ChangeType, type IChangeInfo } from '../../api/ChangeManagement';
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { VersionManager } from '../VersionManager';
+import { BumpType } from '../../api/VersionPolicy.ts';
+import type { ChangeFile } from '../../api/ChangeFile.ts';
+import { ChangeType, type IChangeInfo } from '../../api/ChangeManagement.ts';
+import { RushConfiguration } from '../../api/RushConfiguration.ts';
+import { VersionManager } from '../VersionManager.ts';
 
 function _getChanges(changeFiles: Map<string, ChangeFile>, packageName: string): IChangeInfo[] | undefined {
   const changeFile: ChangeFile | undefined = changeFiles.get(packageName);

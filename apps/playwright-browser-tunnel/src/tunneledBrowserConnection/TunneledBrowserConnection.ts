@@ -8,20 +8,20 @@ import { WebSocket, WebSocketServer } from 'ws';
 
 import type { ITerminal } from '@rushstack/terminal';
 
-import { HttpServer } from '../HttpServer';
-import type { BrowserName } from '../PlaywrightBrowserTunnel';
+import { HttpServer } from '../HttpServer.ts';
+import type { BrowserName } from '../PlaywrightBrowserTunnel.ts';
 import {
   getNormalizedErrorString,
   getWebSocketCloseReason,
   getWebSocketReadyStateString,
   WebSocketCloseCode
-} from '../utilities';
+} from '../utilities.ts';
 import type {
   IDisposableTunneledBrowserConnection,
   IHandshake,
   IHandshakeAck
-} from './ITunneledBrowserConnection';
-import { DEFAULT_LISTEN_PORT, SUPPORTED_BROWSER_NAMES } from './constants';
+} from './ITunneledBrowserConnection.ts';
+import { DEFAULT_LISTEN_PORT, SUPPORTED_BROWSER_NAMES } from './constants.ts';
 
 /**
  * Creates a tunneled WebSocket endpoint that a local Playwright client can connect to.

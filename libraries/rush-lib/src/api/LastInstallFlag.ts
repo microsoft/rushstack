@@ -5,12 +5,12 @@ import { pnpmSyncGetJsonVersion } from 'pnpm-sync-lib';
 
 import { JsonFile, type JsonObject, Path, type IPackageJson, Objects } from '@rushstack/node-core-library';
 
-import type { PackageManagerName } from './packageManager/PackageManager';
-import type { RushConfiguration } from './RushConfiguration';
-import * as objectUtilities from '../utilities/objectUtilities';
-import type { Subspace } from './Subspace';
-import { Selection } from '../logic/Selection';
-import { FlagFile } from './FlagFile';
+import type { PackageManagerName } from './packageManager/PackageManager.ts';
+import type { RushConfiguration } from './RushConfiguration.ts';
+import * as objectUtilities from '../utilities/objectUtilities.ts';
+import type { Subspace } from './Subspace.ts';
+import { Selection } from '../logic/Selection.ts';
+import { FlagFile } from './FlagFile.ts';
 
 const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install';
 

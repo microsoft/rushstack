@@ -11,7 +11,7 @@ export class RushSdk {
 
   public static ensureInitialized(): void {
     if (!RushSdk._initialized) {
-      const rushLibModule: RushLibModuleType = require('../../index');
+      const rushLibModule: RushLibModuleType = require('../../index.js');
 
       // The "@rushstack/rush-sdk" shim will look for this global variable to obtain
       // Rush's instance of "@microsoft/rush-lib".

@@ -6,7 +6,7 @@ import path from 'node:path';
 import type { IRushMcpTool, RushMcpPluginSession, CallToolResult, zodModule } from '@rushstack/mcp-server';
 import { JsonFile } from '@rushstack/node-core-library';
 
-import type { DocsPlugin } from './DocsPlugin';
+import type { DocsPlugin } from './DocsPlugin.ts';
 
 interface IDocsResult {
   query: string;

@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineAction } from '../providers/CommandLineAction';
-import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
-import { CommandLineParser } from '../providers/CommandLineParser';
-import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
+import { CommandLineAction } from '../providers/CommandLineAction.ts';
+import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter.ts';
+import { CommandLineParser } from '../providers/CommandLineParser.ts';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities.ts';
 
 class TestAction extends CommandLineAction {
   public done: boolean = false;

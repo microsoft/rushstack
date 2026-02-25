@@ -7,7 +7,7 @@ import * as fs from 'node:fs';
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
 import { ESLintUtils } from '@typescript-eslint/utils';
 
-import { PackletAnalyzer } from './PackletAnalyzer';
+import { PackletAnalyzer } from './PackletAnalyzer.ts';
 
 export type MessageIds = 'missing-readme' | 'error-reading-file' | 'readme-too-short';
 type Options = [

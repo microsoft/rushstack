@@ -11,19 +11,19 @@
  * @packageDocumentation
  */
 
-import type * as ConfigurationFile from './configuration/types';
+import type * as ConfigurationFile from './configuration/types.ts';
 export type { ConfigurationFile };
 
 export {
   HeftConfiguration,
   type IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
-} from './configuration/HeftConfiguration';
+} from './configuration/HeftConfiguration.ts';
 
-export type { IRigPackageResolver } from './configuration/RigPackageResolver';
+export type { IRigPackageResolver } from './configuration/RigPackageResolver.ts';
 
-export type { IHeftPlugin, IHeftTaskPlugin, IHeftLifecyclePlugin } from './pluginFramework/IHeftPlugin';
+export type { IHeftPlugin, IHeftTaskPlugin, IHeftLifecyclePlugin } from './pluginFramework/IHeftPlugin.ts';
 
-export type { IHeftParameters, IHeftDefaultParameters } from './pluginFramework/HeftParameterManager';
+export type { IHeftParameters, IHeftDefaultParameters } from './pluginFramework/HeftParameterManager.ts';
 
 export type {
   IHeftLifecycleSession,
@@ -35,7 +35,7 @@ export type {
   IHeftTaskFinishHookOptions,
   IHeftPhaseStartHookOptions,
   IHeftPhaseFinishHookOptions
-} from './pluginFramework/HeftLifecycleSession';
+} from './pluginFramework/HeftLifecycleSession.ts';
 
 export type {
   IHeftParsedCommandLine,
@@ -44,15 +44,20 @@ export type {
   IHeftTaskFileOperations,
   IHeftTaskRunHookOptions,
   IHeftTaskRunIncrementalHookOptions
-} from './pluginFramework/HeftTaskSession';
+} from './pluginFramework/HeftTaskSession.ts';
 
-export type { ICopyOperation, IIncrementalCopyOperation } from './plugins/CopyFilesPlugin';
+export type { ICopyOperation, IIncrementalCopyOperation } from './plugins/CopyFilesPlugin.ts';
 
-export type { IDeleteOperation } from './plugins/DeleteFilesPlugin';
+export type { IDeleteOperation } from './plugins/DeleteFilesPlugin.ts';
 
-export type { IRunScript, IRunScriptOptions } from './plugins/RunScriptPlugin';
+export type { IRunScript, IRunScriptOptions } from './plugins/RunScriptPlugin.ts';
 
-export type { IFileSelectionSpecifier, IGlobOptions, GlobFn, WatchGlobFn } from './plugins/FileGlobSpecifier';
+export type {
+  IFileSelectionSpecifier,
+  IGlobOptions,
+  GlobFn,
+  WatchGlobFn
+} from './plugins/FileGlobSpecifier.ts';
 
 export type {
   IWatchedFileState,
@@ -61,16 +66,16 @@ export type {
   ReaddirStringCallback,
   StatCallback,
   IReaddirOptions
-} from './utilities/WatchFileSystemAdapter';
+} from './utilities/WatchFileSystemAdapter.ts';
 
 export {
   type IHeftRecordMetricsHookOptions,
   type IMetricsData,
   type IPerformanceData as _IPerformanceData,
   MetricsCollector as _MetricsCollector
-} from './metrics/MetricsCollector';
+} from './metrics/MetricsCollector.ts';
 
-export type { IScopedLogger } from './pluginFramework/logging/ScopedLogger';
+export type { IScopedLogger } from './pluginFramework/logging/ScopedLogger.ts';
 
 // Re-export types required to use custom command-line parameters
 export type {
@@ -84,8 +89,8 @@ export type {
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
-export type { IHeftTaskOperationMetadata } from './cli/HeftActionRunner';
-export type { IHeftPhaseOperationMetadata } from './cli/HeftActionRunner';
+export type { IHeftTaskOperationMetadata } from './cli/HeftActionRunner.ts';
+export type { IHeftPhaseOperationMetadata } from './cli/HeftActionRunner.ts';
 
-export type { IHeftTask } from './pluginFramework/HeftTask';
-export type { IHeftPhase } from './pluginFramework/HeftPhase';
+export type { IHeftTask } from './pluginFramework/HeftTask.ts';
+export type { IHeftPhase } from './pluginFramework/HeftPhase.ts';

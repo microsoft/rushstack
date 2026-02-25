@@ -14,13 +14,13 @@ import type {
 } from '@rushstack/operation-graph';
 import { TerminalProviderSeverity, type ITerminal, type ITerminalProvider } from '@rushstack/terminal';
 
-import type { IPhase } from '../../api/CommandLineConfiguration';
-import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { Utilities } from '../../utilities/Utilities';
-import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
-import { OperationError } from './OperationError';
-import { OperationStatus } from './OperationStatus';
+import type { IPhase } from '../../api/CommandLineConfiguration.ts';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { Utilities } from '../../utilities/Utilities.ts';
+import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner.ts';
+import { OperationError } from './OperationError.ts';
+import { OperationStatus } from './OperationStatus.ts';
 
 export interface IIPCOperationRunnerOptions {
   phase: IPhase;

@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushConstants } from '../RushConstants';
-import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
-import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
-import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
+import { RushConstants } from '../RushConstants.ts';
+import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor.ts';
+import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration.ts';
+import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity.ts';
 
 export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEntity {
   private _fileManager: CommonVersionsConfiguration;

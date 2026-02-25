@@ -12,8 +12,8 @@ import {
 } from '@rushstack/rush-sdk';
 import { WebClient } from '@rushstack/rush-sdk/lib/utilities/WebClient';
 
-import { AmazonS3Client } from './AmazonS3Client';
-import { type IAmazonS3Credentials, fromAmazonEnv, fromRushEnv } from './AmazonS3Credentials';
+import { AmazonS3Client } from './AmazonS3Client.ts';
+import { type IAmazonS3Credentials, fromAmazonEnv, fromRushEnv } from './AmazonS3Credentials.ts';
 
 /**
  * @public

@@ -12,18 +12,18 @@ import {
 } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import type { RushConfiguration } from './RushConfiguration';
-import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuildCacheProvider';
-import { RushConstants } from '../logic/RushConstants';
-import type { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider';
-import { RushUserConfiguration } from './RushUserConfiguration';
-import { EnvironmentConfiguration, EnvironmentVariableNames } from './EnvironmentConfiguration';
+import type { RushConfiguration } from './RushConfiguration.ts';
+import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuildCacheProvider.ts';
+import { RushConstants } from '../logic/RushConstants.ts';
+import type { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider.ts';
+import { RushUserConfiguration } from './RushUserConfiguration.ts';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from './EnvironmentConfiguration.ts';
 import {
   CacheEntryId,
   type IGenerateCacheEntryIdOptions,
   type GetCacheEntryIdFunction
-} from '../logic/buildCache/CacheEntryId';
-import type { CloudBuildCacheProviderFactory, RushSession } from '../pluginFramework/RushSession';
+} from '../logic/buildCache/CacheEntryId.ts';
+import type { CloudBuildCacheProviderFactory, RushSession } from '../pluginFramework/RushSession.ts';
 import schemaJson from '../schemas/build-cache.schema.json';
 
 /**

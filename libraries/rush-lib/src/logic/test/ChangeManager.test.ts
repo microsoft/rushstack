@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { LockStepVersionPolicy } from '../../api/VersionPolicy';
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { ChangeManager } from '../ChangeManager';
-import { PrereleaseToken } from '../PrereleaseToken';
+import type { LockStepVersionPolicy } from '../../api/VersionPolicy.ts';
+import { RushConfiguration } from '../../api/RushConfiguration.ts';
+import { ChangeManager } from '../ChangeManager.ts';
+import { PrereleaseToken } from '../PrereleaseToken.ts';
 
 describe(ChangeManager.name, () => {
   const rushJsonFile: string = `${__dirname}/packages/rush.json`;

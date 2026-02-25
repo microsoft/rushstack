@@ -8,10 +8,10 @@ import * as zlib from 'node:zlib';
 
 import type { ITerminal } from '@rushstack/terminal/lib/ITerminal';
 
-import { crc32Builder } from './crc32';
-import { DISPOSE_SYMBOL, getDisposableFileHandle, type IDisposableFileHandle } from './fs';
-import { type IIncrementalZlib, type IncrementalZlibMode, createIncrementalZlib } from './compress';
-import { markStart, markEnd, getDuration, emitSummary, formatDuration } from './perf';
+import { crc32Builder } from './crc32.ts';
+import { DISPOSE_SYMBOL, getDisposableFileHandle, type IDisposableFileHandle } from './fs.ts';
+import { type IIncrementalZlib, type IncrementalZlibMode, createIncrementalZlib } from './compress.ts';
+import { markStart, markEnd, getDuration, emitSummary, formatDuration } from './perf.ts';
 import {
   writeLocalFileHeader,
   writeDataDescriptor,
@@ -23,8 +23,8 @@ import {
   type ZipMetaCompressionMethod,
   type IFileEntry,
   dosDateTime
-} from './zipUtils';
-import { calculateSHA1 } from './hash';
+} from './zipUtils.ts';
+import { calculateSHA1 } from './hash.ts';
 import {
   type ZipSyncOptionCompression,
   type IMetadata,
@@ -32,7 +32,7 @@ import {
   METADATA_VERSION,
   METADATA_FILENAME,
   defaultBufferSize
-} from './zipSyncUtils';
+} from './zipSyncUtils.ts';
 
 /**
  * File extensions for which additional DEFLATE/ZSTD compression is unlikely to help.

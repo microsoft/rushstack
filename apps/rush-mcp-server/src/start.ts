@@ -9,8 +9,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { FileSystem } from '@rushstack/node-core-library';
 import { RushSdkLoader } from '@rushstack/rush-sdk/loader';
 
-import { log } from './utilities/log';
-import type { RushMCPServer } from './server';
+import { log } from './utilities/log.ts';
+import type { RushMCPServer } from './server.ts';
 
 const main = async (): Promise<void> => {
   const rushWorkspacePath: string | undefined = process.argv[2];
@@ -31,7 +31,7 @@ const main = async (): Promise<void> => {
     rushJsonSearchFolder: rushWorkspaceFullPath
   });
 
-  const RushMCPServerClass: typeof RushMCPServer = (await import('./server')).RushMCPServer;
+  const RushMCPServerClass: typeof RushMCPServer = (await import('./server.ts')).RushMCPServer;
 
   const server: RushMCPServer = new RushMCPServerClass(rushWorkspaceFullPath);
   await server.startAsync();

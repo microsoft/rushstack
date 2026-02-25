@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CONFIGURATION_FILE_FIELD_ANNOTATION, type IAnnotatedField } from './ConfigurationFileBase';
+import { CONFIGURATION_FILE_FIELD_ANNOTATION, type IAnnotatedField } from './ConfigurationFileBase.ts';
 
 /**
  * Returns an object with investigative annotations stripped, useful for snapshot testing.

@@ -18,9 +18,9 @@ import {
   type CommandLineFlagParameter
 } from '@rushstack/ts-command-line';
 
-import { Extractor, type ExtractorResult } from '../api/Extractor';
-import type { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
-import { ExtractorConfig, type IExtractorConfigPrepareOptions } from '../api/ExtractorConfig';
+import { Extractor, type ExtractorResult } from '../api/Extractor.ts';
+import type { ApiExtractorCommandLine } from './ApiExtractorCommandLine.ts';
+import { ExtractorConfig, type IExtractorConfigPrepareOptions } from '../api/ExtractorConfig.ts';
 
 export class RunAction extends CommandLineAction {
   private readonly _configFileParameter: CommandLineStringParameter;

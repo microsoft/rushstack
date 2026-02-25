@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-export { LocalizationPlugin, type IStringPlaceholder as _IStringPlaceholder } from './LocalizationPlugin';
+export { LocalizationPlugin, type IStringPlaceholder as _IStringPlaceholder } from './LocalizationPlugin.ts';
 
 export type {
   IDefaultLocaleOptions,
@@ -19,6 +19,6 @@ export type {
   IPseudolocalesOptions,
   IResolvedMissingTranslations,
   ITypingsGenerationOptions
-} from './interfaces';
+} from './interfaces.ts';
 
-export type { ILocalizedWebpackChunk } from './webpackInterfaces';
+export type { ILocalizedWebpackChunk } from './webpackInterfaces.ts';

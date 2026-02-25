@@ -11,8 +11,8 @@ import {
 } from '@rushstack/heft-config-file';
 import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 
-import { Constants } from '../utilities/Constants';
-import { RigPackageResolver, type IRigPackageResolver } from './RigPackageResolver';
+import { Constants } from '../utilities/Constants.ts';
+import { RigPackageResolver, type IRigPackageResolver } from './RigPackageResolver.ts';
 
 /**
  * @internal

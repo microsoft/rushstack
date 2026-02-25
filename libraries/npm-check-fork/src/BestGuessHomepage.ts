@@ -2,7 +2,7 @@
 
 import gitUrl from 'giturl';
 
-import type { INpmCheckPackageVersion, INpmCheckRegistryData } from './interfaces/INpmCheckRegistry';
+import type { INpmCheckPackageVersion, INpmCheckRegistryData } from './interfaces/INpmCheckRegistry.ts';
 
 export default function bestGuessHomepage(data: INpmCheckRegistryData | undefined): string | false {
   if (!data) {

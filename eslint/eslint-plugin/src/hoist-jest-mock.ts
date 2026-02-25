@@ -4,7 +4,7 @@
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
 import { AST_NODE_TYPES } from '@typescript-eslint/utils';
 
-import * as hoistJestMockPatterns from './hoistJestMockPatterns';
+import * as hoistJestMockPatterns from './hoistJestMockPatterns.ts';
 
 type MessageIds = 'error-unhoisted-jest-mock';
 type Options = [];

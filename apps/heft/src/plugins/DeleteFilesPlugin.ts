@@ -6,15 +6,15 @@ import type * as fs from 'node:fs';
 import { FileSystem, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { Constants } from '../utilities/Constants';
+import { Constants } from '../utilities/Constants.ts';
 import {
   getFileSelectionSpecifierPathsAsync,
   asAbsoluteFileSelectionSpecifier,
   type IFileSelectionSpecifier
-} from './FileGlobSpecifier';
-import type { HeftConfiguration } from '../configuration/HeftConfiguration';
-import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
-import type { IHeftTaskSession, IHeftTaskFileOperations } from '../pluginFramework/HeftTaskSession';
+} from './FileGlobSpecifier.ts';
+import type { HeftConfiguration } from '../configuration/HeftConfiguration.ts';
+import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin.ts';
+import type { IHeftTaskSession, IHeftTaskFileOperations } from '../pluginFramework/HeftTaskSession.ts';
 
 /**
  * Used to specify a selection of source files to delete from the specified source folder.

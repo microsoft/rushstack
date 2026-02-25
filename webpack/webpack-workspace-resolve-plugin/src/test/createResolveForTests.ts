@@ -8,7 +8,7 @@ import type { Resolver, InputFileSystem } from 'webpack';
 
 import type { IPrefixMatch } from '@rushstack/lookup-by-path';
 
-import { WorkspaceLayoutCache, type IResolveContext } from '../WorkspaceLayoutCache';
+import { WorkspaceLayoutCache, type IResolveContext } from '../WorkspaceLayoutCache.ts';
 
 export type ResolveCallback = Parameters<Resolver['hooks']['result']['tapAsync']>[1];
 export type ResolveRequest = Parameters<ResolveCallback>[0];

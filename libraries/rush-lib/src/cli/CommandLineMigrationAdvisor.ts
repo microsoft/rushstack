@@ -3,7 +3,7 @@
 
 import { Colorize, PrintUtilities } from '@rushstack/terminal';
 
-import { RushConstants } from '../logic/RushConstants';
+import { RushConstants } from '../logic/RushConstants.ts';
 
 export class CommandLineMigrationAdvisor {
   // NOTE: THIS RUNS BEFORE THE REAL COMMAND-LINE PARSING.

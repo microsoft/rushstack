@@ -8,7 +8,7 @@ import type { Compiler, Compilation, WebpackPluginInstance, WebpackError, InputF
 import { Async, Sort, LegacyAdapters, FileSystem } from '@rushstack/node-core-library';
 import type { IPackageJson } from '@rushstack/node-core-library';
 
-import { LICENSE_FILES_REGEXP, COPYRIGHT_REGEX } from './regexpUtils';
+import { LICENSE_FILES_REGEXP, COPYRIGHT_REGEX } from './regexpUtils.ts';
 
 const PLUGIN_NAME: 'EmbeddedDependenciesWebpackPlugin' = 'EmbeddedDependenciesWebpackPlugin';
 const PLUGIN_ERROR_PREFIX: string = '[embedded-dependencies-webpack-plugin]';

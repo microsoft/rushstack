@@ -4,14 +4,14 @@
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import { type PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
-import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
-import type { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
-import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
-import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
-import { CustomTipId } from '../../api/CustomTipsConfiguration';
-import type { Subspace } from '../../api/Subspace';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import { type PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor.ts';
+import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration.ts';
+import type { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity.ts';
+import { VersionMismatchFinderProject } from './VersionMismatchFinderProject.ts';
+import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions.ts';
+import { CustomTipId } from '../../api/CustomTipsConfiguration.ts';
+import type { Subspace } from '../../api/Subspace.ts';
 
 const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 

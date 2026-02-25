@@ -11,7 +11,7 @@ import {
 import { InternalError } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import { type ResolutionType, traceImport } from './traceImport';
+import { type ResolutionType, traceImport } from './traceImport.ts';
 
 export class TraceImportCommandLineParser extends CommandLineParser {
   private readonly _debugParameter: CommandLineFlagParameter;

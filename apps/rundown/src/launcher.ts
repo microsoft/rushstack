@@ -4,8 +4,8 @@
 import moduleApi = require('module');
 import process from 'node:process';
 
-import { LauncherAction } from './LauncherTypes'; // "import type" doesn't work with const enums
-import type { IIpcTrace, IIpcDone, IIpcTraceRecord } from './LauncherTypes';
+import { LauncherAction } from './LauncherTypes.ts'; // "import type" doesn't work with const enums
+import type { IIpcTrace, IIpcDone, IIpcTraceRecord } from './LauncherTypes.ts';
 
 // The _ipcTraceRecordsBatch will get transmitted when this many items are accumulated
 const IPC_BATCH_SIZE: number = 300;

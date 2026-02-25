@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
-import { Terminal } from '../Terminal';
-import { PrintUtilities } from '../PrintUtilities';
+import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider.ts';
+import { Terminal } from '../Terminal.ts';
+import { PrintUtilities } from '../PrintUtilities.ts';
 
 describe(PrintUtilities.name, () => {
   let terminalProvider: StringBufferTerminalProvider;

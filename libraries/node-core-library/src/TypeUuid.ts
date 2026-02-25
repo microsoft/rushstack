@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { InternalError } from './InternalError';
+import { InternalError } from './InternalError.ts';
 
 const classPrototypeUuidSymbol: symbol = Symbol.for('TypeUuid.classPrototypeUuid');
 

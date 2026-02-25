@@ -3,7 +3,7 @@
 
 import { virtual, ISimpleInterface } from 'api-extractor-test-01';
 
-import { RenamedReexportedClass } from './RenamedReexportedClass';
+import { RenamedReexportedClass } from './RenamedReexportedClass.ts';
 
 /**
  * Example of a class that inherits from an externally imported class.

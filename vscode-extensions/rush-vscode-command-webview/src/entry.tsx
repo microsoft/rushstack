@@ -7,8 +7,8 @@ import { Provider } from 'react-redux';
 // import { ThemeProvider, PartialTheme } from '@fluentui/react';
 import { FluentProvider, teamsDarkTheme } from '@fluentui/react-components';
 
-import { App } from './App';
-import { store } from './store';
+import { App } from './App.tsx';
+import { store } from './store/index.ts';
 
 // const theme: PartialTheme = {
 //   palette: {

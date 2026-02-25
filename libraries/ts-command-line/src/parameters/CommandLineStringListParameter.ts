@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ICommandLineStringListDefinition } from './CommandLineDefinition';
-import { CommandLineParameterWithArgument, CommandLineParameterKind } from './BaseClasses';
-import { EnvironmentVariableParser } from './EnvironmentVariableParser';
+import type { ICommandLineStringListDefinition } from './CommandLineDefinition.ts';
+import { CommandLineParameterWithArgument, CommandLineParameterKind } from './BaseClasses.ts';
+import { EnvironmentVariableParser } from './EnvironmentVariableParser.ts';
 
 /**
  * The data type returned by {@link CommandLineParameterProvider.defineStringListParameter}.

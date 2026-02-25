@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-typescript-plugin",
+      "comment": "Update the compiled output to include file extensions in import specifiers, fixing Node.js ESM resolution. Remove the addJsExtensionToImports option; this is now handled automatically by the TypeScript compiler.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-typescript-plugin"
+}

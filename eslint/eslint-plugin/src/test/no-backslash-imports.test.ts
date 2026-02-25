@@ -3,8 +3,8 @@
 
 import type { RuleTester, TestCaseError } from '@typescript-eslint/rule-tester';
 
-import { getRuleTesterWithProject } from './ruleTester';
-import { noBackslashImportsRule, MESSAGE_ID } from '../no-backslash-imports';
+import { getRuleTesterWithProject } from './ruleTester.ts';
+import { noBackslashImportsRule, MESSAGE_ID } from '../no-backslash-imports.ts';
 
 const ruleTester: RuleTester = getRuleTesterWithProject();
 const expectedErrors: TestCaseError<typeof MESSAGE_ID>[] = [{ messageId: MESSAGE_ID }];

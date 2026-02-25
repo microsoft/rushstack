@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IPackageJson } from '../types/IPackageJson';
+import type { IPackageJson } from '../types/IPackageJson.ts';
 
 export interface ISpecChange {
   type: 'add' | 'remove' | 'diff';

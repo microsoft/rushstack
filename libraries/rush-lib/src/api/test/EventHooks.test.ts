@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushConfiguration } from '../RushConfiguration';
-import { Event, EventHooks } from '../EventHooks';
+import { RushConfiguration } from '../RushConfiguration.ts';
+import { Event, EventHooks } from '../EventHooks.ts';
 
 describe(EventHooks.name, () => {
   it('loads a post build hook from rush.json', () => {

@@ -5,7 +5,7 @@ import vm from 'node:vm';
 
 import { FileSystem } from '@rushstack/node-core-library';
 
-import type { IPseudolocaleOptions } from './interfaces';
+import type { IPseudolocaleOptions } from './interfaces.ts';
 
 const pseudolocalePath: string = require.resolve('pseudolocale/pseudolocale.min.js');
 

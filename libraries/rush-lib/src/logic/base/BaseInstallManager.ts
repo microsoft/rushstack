@@ -28,38 +28,38 @@ import {
 } from '@rushstack/node-core-library';
 import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
 
-import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
-import type { AsyncRecycler } from '../../utilities/AsyncRecycler';
-import type { BaseShrinkwrapFile } from './BaseShrinkwrapFile';
-import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import { Git } from '../Git';
+import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker.ts';
+import type { AsyncRecycler } from '../../utilities/AsyncRecycler.ts';
+import type { BaseShrinkwrapFile } from './BaseShrinkwrapFile.ts';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration.ts';
+import { Git } from '../Git.ts';
 import {
   type LastInstallFlag,
   getCommonTempFlag,
   type ILastInstallFlagJson
-} from '../../api/LastInstallFlag';
-import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
-import type { PurgeManager } from '../PurgeManager';
-import type { ICurrentVariantJson, RushConfiguration } from '../../api/RushConfiguration';
-import { Rush } from '../../api/Rush';
-import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import { RushConstants } from '../RushConstants';
-import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
-import { Utilities } from '../../utilities/Utilities';
-import { InstallHelpers } from '../installManager/InstallHelpers';
-import * as PolicyValidator from '../policy/PolicyValidator';
-import type { WebClient as WebClientType, IWebClientResponse } from '../../utilities/WebClient';
-import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
-import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
-import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
-import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
-import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
-import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfiguration';
-import type { Subspace } from '../../api/Subspace';
-import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
-import { FlagFile } from '../../api/FlagFile';
-import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
-import { HotlinkManager } from '../../utilities/HotlinkManager';
+} from '../../api/LastInstallFlag.ts';
+import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager.ts';
+import type { PurgeManager } from '../PurgeManager.ts';
+import type { ICurrentVariantJson, RushConfiguration } from '../../api/RushConfiguration.ts';
+import { Rush } from '../../api/Rush.ts';
+import type { RushGlobalFolder } from '../../api/RushGlobalFolder.ts';
+import { RushConstants } from '../RushConstants.ts';
+import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory.ts';
+import { Utilities } from '../../utilities/Utilities.ts';
+import { InstallHelpers } from '../installManager/InstallHelpers.ts';
+import * as PolicyValidator from '../policy/PolicyValidator.ts';
+import type { WebClient as WebClientType, IWebClientResponse } from '../../utilities/WebClient.ts';
+import { SetupPackageRegistry } from '../setup/SetupPackageRegistry.ts';
+import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration.ts';
+import type { IInstallManagerOptions } from './BaseInstallManagerTypes.ts';
+import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities.ts';
+import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration.ts';
+import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfiguration.ts';
+import type { Subspace } from '../../api/Subspace.ts';
+import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator.ts';
+import { FlagFile } from '../../api/FlagFile.ts';
+import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities.ts';
+import { HotlinkManager } from '../../utilities/HotlinkManager.ts';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -1076,7 +1076,7 @@ ${gitLfsHookHandling}
     // Note that the "@" symbol does not normally get URL-encoded
     queryUrl += RushConstants.rushPackageName.replace('/', '%2F');
 
-    const { WebClient } = await import('../../utilities/WebClient');
+    const { WebClient } = await import('../../utilities/WebClient.ts');
 
     const webClient: WebClientType = new WebClient();
     webClient.userAgent = `pnpm/? npm/? node/${process.version} ${os.platform()} ${os.arch()}`;

@@ -19,32 +19,36 @@ import {
 } from '@rushstack/node-core-library';
 import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 
-import { BaseInstallManager } from '../base/BaseInstallManager';
-import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
-import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
-import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
+import { BaseInstallManager } from '../base/BaseInstallManager.ts';
+import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes.ts';
+import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile.ts';
+import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier.ts';
 import {
   type PackageJsonEditor,
   DependencyType,
   type PackageJsonDependencyMeta
-} from '../../api/PackageJsonEditor';
-import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { RushConstants } from '../RushConstants';
-import { Utilities } from '../../utilities/Utilities';
-import { InstallHelpers } from './InstallHelpers';
-import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
-import type { RepoStateFile } from '../RepoStateFile';
-import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
-import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
-import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
-import type { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
-import type { Subspace } from '../../api/Subspace';
-import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
-import { FlagFile } from '../../api/FlagFile';
-import { Stopwatch } from '../../utilities/Stopwatch';
-import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
+} from '../../api/PackageJsonEditor.ts';
+import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { RushConstants } from '../RushConstants.ts';
+import { Utilities } from '../../utilities/Utilities.ts';
+import { InstallHelpers } from './InstallHelpers.ts';
+import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration.ts';
+import type { RepoStateFile } from '../RepoStateFile.ts';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration.ts';
+import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory.ts';
+import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile.ts';
+import {
+  type CustomTipId,
+  type ICustomTipInfo,
+  PNPM_CUSTOM_TIPS
+} from '../../api/CustomTipsConfiguration.ts';
+import type { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile.ts';
+import type { Subspace } from '../../api/Subspace.ts';
+import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager.ts';
+import { FlagFile } from '../../api/FlagFile.ts';
+import { Stopwatch } from '../../utilities/Stopwatch.ts';
+import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration.ts';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };

@@ -10,8 +10,8 @@ import { FileSystem, Path } from '@rushstack/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import type { Subspace } from '@microsoft/rush-lib/lib/api/Subspace';
 
-import * as lockfilePath from '../graph/lockfilePath';
-import type { IAppState } from '../state';
+import * as lockfilePath from '../graph/lockfilePath.ts';
+import type { IAppState } from '../state/index.ts';
 
 export const init = (options: {
   lockfileExplorerProjectRoot: string;

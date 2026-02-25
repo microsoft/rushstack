@@ -3,7 +3,7 @@
 
 import { PackageJsonLookup } from '@rushstack/node-core-library';
 
-import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration.ts';
 
 const rootDir: string | undefined = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname);
 if (rootDir) {

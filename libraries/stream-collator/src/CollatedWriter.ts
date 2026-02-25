@@ -3,8 +3,8 @@
 
 import { type ITerminalChunk, TerminalWritable } from '@rushstack/terminal';
 
-import type { StreamCollator } from './StreamCollator';
-import { CollatedTerminal } from './CollatedTerminal';
+import type { StreamCollator } from './StreamCollator.ts';
+import { CollatedTerminal } from './CollatedTerminal.ts';
 
 /**
  * An writable interface for managing output of simultaneous processes.

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { getFirstDifferenceInCommonNodes } from '../getFirstDifferenceInCommonNodes';
-import type { IReadonlyPathTrieNode } from '../LookupByPath';
+import { getFirstDifferenceInCommonNodes } from '../getFirstDifferenceInCommonNodes.ts';
+import type { IReadonlyPathTrieNode } from '../LookupByPath.ts';
 
 describe(getFirstDifferenceInCommonNodes.name, () => {
   it('detects a changed file at the current node', () => {

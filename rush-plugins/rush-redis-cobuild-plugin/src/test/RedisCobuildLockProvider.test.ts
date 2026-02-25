@@ -11,7 +11,10 @@ import {
   OperationStatus,
   RushSession
 } from '@rushstack/rush-sdk';
-import { type IRedisCobuildLockProviderOptions, RedisCobuildLockProvider } from '../RedisCobuildLockProvider';
+import {
+  type IRedisCobuildLockProviderOptions,
+  RedisCobuildLockProvider
+} from '../RedisCobuildLockProvider.ts';
 
 const rushSession: RushSession = new RushSession({
   terminalProvider: new ConsoleTerminalProvider(),

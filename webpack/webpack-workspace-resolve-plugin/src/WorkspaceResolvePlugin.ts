@@ -3,9 +3,9 @@
 
 import type { WebpackPluginInstance, Compiler, ResolveOptions } from 'webpack';
 
-import type { WorkspaceLayoutCache } from './WorkspaceLayoutCache';
-import { KnownDescriptionFilePlugin } from './KnownDescriptionFilePlugin';
-import { KnownPackageDependenciesPlugin } from './KnownPackageDependenciesPlugin';
+import type { WorkspaceLayoutCache } from './WorkspaceLayoutCache.ts';
+import { KnownDescriptionFilePlugin } from './KnownDescriptionFilePlugin.ts';
+import { KnownPackageDependenciesPlugin } from './KnownPackageDependenciesPlugin.ts';
 
 /**
  * Options for constructing a `WorkspaceResolvePlugin`.

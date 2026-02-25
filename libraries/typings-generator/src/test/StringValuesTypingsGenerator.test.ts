@@ -5,7 +5,7 @@ import type { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal
 import type {
   IStringValuesTypingsGeneratorBaseOptions,
   IStringValueTypings
-} from '../StringValuesTypingsGenerator';
+} from '../StringValuesTypingsGenerator.ts';
 
 let inputFs: Record<string, string>;
 let outputFs: Record<string, string>;
@@ -48,7 +48,7 @@ describe('StringValuesTypingsGenerator', () => {
   ): void {
     it('should generate typings', async () => {
       const [{ StringValuesTypingsGenerator }, { Terminal, StringBufferTerminalProvider }] =
-        await Promise.all([import('../StringValuesTypingsGenerator'), import('@rushstack/terminal')]);
+        await Promise.all([import('../StringValuesTypingsGenerator.ts'), import('@rushstack/terminal')]);
       const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
       const terminal: Terminal = new Terminal(terminalProvider);
 

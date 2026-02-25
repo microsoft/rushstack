@@ -3,7 +3,7 @@
 
 import { Enum } from '@rushstack/node-core-library';
 
-import type { IEventHooksJson } from './RushConfiguration';
+import type { IEventHooksJson } from './RushConfiguration.ts';
 
 /**
  * Events happen during Rush runs.

@@ -5,8 +5,8 @@ import type { default as webpack, Compilation, Chunk, Asset, sources, util } fro
 
 import { Text } from '@rushstack/node-core-library';
 
-import type { ILocalizedWebpackChunk } from './webpackInterfaces';
-import { chunkIsJs } from './utilities/chunkUtilities';
+import type { ILocalizedWebpackChunk } from './webpackInterfaces.ts';
+import { chunkIsJs } from './utilities/chunkUtilities.ts';
 
 interface IHashReplacement {
   existingHash: string;

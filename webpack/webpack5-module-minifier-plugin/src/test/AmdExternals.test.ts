@@ -9,9 +9,9 @@ import { Volume } from 'memfs/lib/volume';
 
 import { type IModuleMinifier, LocalMinifier } from '@rushstack/module-minifier';
 
-import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin';
-import { MockMinifier } from './MockMinifier';
-import { RecordMetadataPlugin } from './RecordMetadataPlugin';
+import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin.ts';
+import { MockMinifier } from './MockMinifier.ts';
+import { RecordMetadataPlugin } from './RecordMetadataPlugin.ts';
 
 jest.setTimeout(1e9);
 

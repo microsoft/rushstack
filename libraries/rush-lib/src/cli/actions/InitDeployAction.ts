@@ -8,12 +8,12 @@ import type {
 } from '@rushstack/ts-command-line';
 import { Colorize } from '@rushstack/terminal';
 
-import { BaseRushAction } from './BaseRushAction';
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { DeployScenarioConfiguration } from '../../logic/deploy/DeployScenarioConfiguration';
-import { assetsFolderPath } from '../../utilities/PathConstants';
-import { RushConstants } from '../../logic/RushConstants';
+import { BaseRushAction } from './BaseRushAction.ts';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { DeployScenarioConfiguration } from '../../logic/deploy/DeployScenarioConfiguration.ts';
+import { assetsFolderPath } from '../../utilities/PathConstants.ts';
+import { RushConstants } from '../../logic/RushConstants.ts';
 
 const CONFIG_TEMPLATE_PATH: string = `${assetsFolderPath}/rush-init-deploy/scenario-template.json`;
 

@@ -4,7 +4,7 @@
 import * as path from 'node:path';
 import { Path } from '@rushstack/node-core-library';
 
-import { ExtractorConfig } from '../ExtractorConfig';
+import { ExtractorConfig } from '../ExtractorConfig.ts';
 
 const testDataFolder: string = path.join(__dirname, 'test-data');
 

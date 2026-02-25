@@ -9,7 +9,7 @@ import {
   type IAnalyzerError,
   type InputFileMessageIds,
   type ImportMessageIds
-} from './PackletAnalyzer';
+} from './PackletAnalyzer.ts';
 
 export type MessageIds = InputFileMessageIds | ImportMessageIds;
 type Options = [];

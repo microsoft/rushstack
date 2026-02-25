@@ -3,7 +3,7 @@
 
 import type * as tsdoc from '@microsoft/tsdoc';
 
-import type { AstDeclaration } from '../analyzer/AstDeclaration';
+import type { AstDeclaration } from '../analyzer/AstDeclaration.ts';
 
 /**
  * Stores the Collector's additional analysis for a specific `AstDeclaration` signature.  This object is assigned to

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { type IDisposable, Utilities } from '../Utilities';
+import { type IDisposable, Utilities } from '../Utilities.ts';
 
 function withComSpec<T>(value: string | undefined, callback: () => T): T {
   const originalValue: string | undefined = process.env.comspec;

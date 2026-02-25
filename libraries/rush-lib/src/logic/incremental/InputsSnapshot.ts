@@ -9,13 +9,13 @@ import ignore, { type Ignore } from 'ignore';
 import { type IReadonlyLookupByPath, LookupByPath } from '@rushstack/lookup-by-path';
 import { InternalError, Path, Sort } from '@rushstack/node-core-library';
 
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
 import type {
   IOperationSettings,
   NodeVersionGranularity,
   RushProjectConfiguration
-} from '../../api/RushProjectConfiguration';
-import { RushConstants } from '../RushConstants';
+} from '../../api/RushProjectConfiguration.ts';
+import { RushConstants } from '../RushConstants.ts';
 
 /**
  * @beta

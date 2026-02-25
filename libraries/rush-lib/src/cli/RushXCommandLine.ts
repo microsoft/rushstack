@@ -16,19 +16,19 @@ import {
   type ITerminal
 } from '@rushstack/terminal';
 
-import { Utilities } from '../utilities/Utilities';
-import { ProjectCommandSet } from '../logic/ProjectCommandSet';
-import { type ILaunchOptions, Rush } from '../api/Rush';
-import { RushConfiguration } from '../api/RushConfiguration';
-import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
-import { RushStartupBanner } from './RushStartupBanner';
-import { EventHooksManager } from '../logic/EventHooksManager';
-import { Event } from '../api/EventHooks';
-import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
-import { RushConstants } from '../logic/RushConstants';
-import { PnpmSyncUtilities } from '../utilities/PnpmSyncUtilities';
-import { initializeDotEnv } from '../logic/dotenv';
-import { escapeArgumentIfNeeded } from '../utilities/executionUtilities';
+import { Utilities } from '../utilities/Utilities.ts';
+import { ProjectCommandSet } from '../logic/ProjectCommandSet.ts';
+import { type ILaunchOptions, Rush } from '../api/Rush.ts';
+import { RushConfiguration } from '../api/RushConfiguration.ts';
+import { NodeJsCompatibility } from '../logic/NodeJsCompatibility.ts';
+import { RushStartupBanner } from './RushStartupBanner.ts';
+import { EventHooksManager } from '../logic/EventHooksManager.ts';
+import { Event } from '../api/EventHooks.ts';
+import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration.ts';
+import { RushConstants } from '../logic/RushConstants.ts';
+import { PnpmSyncUtilities } from '../utilities/PnpmSyncUtilities.ts';
+import { initializeDotEnv } from '../logic/dotenv.ts';
+import { escapeArgumentIfNeeded } from '../utilities/executionUtilities.ts';
 
 interface IRushXCommandLineArguments {
   /**

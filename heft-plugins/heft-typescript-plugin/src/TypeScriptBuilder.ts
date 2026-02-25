@@ -16,18 +16,18 @@ import type {
   ExtendedTypeScript,
   IExtendedSolutionBuilder,
   ITypeScriptNodeSystem
-} from './internalTypings/TypeScriptInternals';
-import type { ITypeScriptConfigurationJson, IEmitModuleKind } from './TypeScriptPlugin';
-import type { PerformanceMeasurer } from './Performance';
+} from './internalTypings/TypeScriptInternals.ts';
+import type { ITypeScriptConfigurationJson, IEmitModuleKind } from './TypeScriptPlugin.ts';
+import type { PerformanceMeasurer } from './Performance.ts';
 import type {
   ICachedEmitModuleKind,
   ITranspilationRequestMessage,
   ITranspilationResponseMessage,
   ITypescriptWorkerData
-} from './types';
-import { configureProgramForMultiEmit } from './configureProgramForMultiEmit';
-import { loadTsconfig } from './tsconfigLoader';
-import { loadTypeScriptToolAsync } from './loadTypeScriptTool';
+} from './types.ts';
+import { configureProgramForMultiEmit } from './configureProgramForMultiEmit.ts';
+import { loadTsconfig } from './tsconfigLoader.ts';
+import { loadTypeScriptToolAsync } from './loadTypeScriptTool.ts';
 
 export interface ITypeScriptBuilderConfiguration extends ITypeScriptConfigurationJson {
   /**

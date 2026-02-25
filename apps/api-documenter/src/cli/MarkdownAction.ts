@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
-import { BaseAction } from './BaseAction';
-import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter';
+import type { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine.ts';
+import { BaseAction } from './BaseAction.ts';
+import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter.ts';
 
 export class MarkdownAction extends BaseAction {
   public constructor(parser: ApiDocumenterCommandLine) {

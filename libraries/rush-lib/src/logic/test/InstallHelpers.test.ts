@@ -5,8 +5,8 @@ import { type IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { TestUtilities } from '@rushstack/heft-config-file';
 
-import { InstallHelpers } from '../installManager/InstallHelpers';
-import { RushConfiguration } from '../../api/RushConfiguration';
+import { InstallHelpers } from '../installManager/InstallHelpers.ts';
+import { RushConfiguration } from '../../api/RushConfiguration.ts';
 
 describe('InstallHelpers', () => {
   describe('generateCommonPackageJson', () => {

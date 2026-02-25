@@ -1,4 +1,4 @@
-import { foo } from './other';
+import { foo } from './other.ts';
 
 /**
  * @public

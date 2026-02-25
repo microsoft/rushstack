@@ -8,7 +8,7 @@ import {
 } from '@rushstack/node-core-library';
 import type { ITerminalProvider } from '@rushstack/terminal';
 
-import { ScopedLogger } from './ScopedLogger';
+import { ScopedLogger } from './ScopedLogger.ts';
 export interface ILoggingManagerOptions {
   terminalProvider: ITerminalProvider;
 }

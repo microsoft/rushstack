@@ -7,8 +7,8 @@ import type * as https from 'node:https';
 import { EventEmitter } from 'node:events';
 import * as zlib from 'node:zlib';
 
-import { NpmRegistryClient, type INpmRegistryClientOptions } from '../NpmRegistryClient';
-import type { INpmRegistryPackageResponse } from '../interfaces/INpmCheckRegistry';
+import { NpmRegistryClient, type INpmRegistryClientOptions } from '../NpmRegistryClient.ts';
+import type { INpmRegistryPackageResponse } from '../interfaces/INpmCheckRegistry.ts';
 
 describe('NpmRegistryClient', () => {
   let mockHttpsRequest: jest.Mock;

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { LookupByPath } from '../LookupByPath';
+import { LookupByPath } from '../LookupByPath.ts';
 
 describe(LookupByPath.iteratePathSegments.name, () => {
   it('returns empty for an empty string', () => {

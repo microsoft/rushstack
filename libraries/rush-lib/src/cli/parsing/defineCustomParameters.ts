@@ -3,9 +3,9 @@
 
 import type { CommandLineAction, CommandLineParameter } from '@rushstack/ts-command-line';
 
-import type { IParameterJson } from '../../api/CommandLineConfiguration';
-import { RushConstants } from '../../logic/RushConstants';
-import type { ParameterJson } from '../../api/CommandLineJson';
+import type { IParameterJson } from '../../api/CommandLineConfiguration.ts';
+import { RushConstants } from '../../logic/RushConstants.ts';
+import type { ParameterJson } from '../../api/CommandLineJson.ts';
 
 /**
  * Helper function to create CommandLineParameter instances from parameter definitions.

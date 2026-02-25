@@ -3,14 +3,14 @@
 
 import type { Asset, AssetInfo, Chunk, Compilation, sources } from 'webpack';
 
-import * as Constants from './utilities/Constants';
+import * as Constants from './utilities/Constants.ts';
 import type {
   LocalizationPlugin,
   IStringPlaceholder,
   ValueForLocaleFn,
   ICustomDataPlaceholder
-} from './LocalizationPlugin';
-import type { ILocalizedWebpackChunk, IAssetPathOptions } from './webpackInterfaces';
+} from './LocalizationPlugin.ts';
+import type { ILocalizedWebpackChunk, IAssetPathOptions } from './webpackInterfaces.ts';
 
 const LOCALIZED_RECONSTRUCTION_ELEMENT_KIND: 1 = 1;
 const DYNAMIC_RECONSTRUCTION_ELEMENT_KIND: 2 = 2;

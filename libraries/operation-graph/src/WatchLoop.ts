@@ -5,15 +5,15 @@ import { once } from 'node:events';
 
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 
-import type { OperationRequestRunCallback } from './Operation';
-import { OperationStatus } from './OperationStatus';
+import type { OperationRequestRunCallback } from './Operation.ts';
+import { OperationStatus } from './OperationStatus.ts';
 import type {
   IAfterExecuteEventMessage,
   IPCHost,
   CommandMessageFromHost,
   ISyncEventMessage,
   IRequestRunEventMessage
-} from './protocol.types';
+} from './protocol.types.ts';
 
 /**
  * Callbacks for the watch loop.

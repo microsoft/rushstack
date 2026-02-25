@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 // TODO: Allow dynamic override of these values in the input to the minifier
-import { IDENTIFIER_LEADING_DIGITS, IDENTIFIER_TRAILING_DIGITS } from './constants';
+import { IDENTIFIER_LEADING_DIGITS, IDENTIFIER_TRAILING_DIGITS } from './constants.ts';
 
 // Set of ECMAScript reserved keywords (past and present): https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_grammar
 const RESERVED_KEYWORDS: string[] = [

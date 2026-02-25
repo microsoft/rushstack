@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-export { getDate } from './getDate';
-export { Date } from './Date';
+export { getDate } from './getDate.ts';
+export { Date } from './Date.ts';

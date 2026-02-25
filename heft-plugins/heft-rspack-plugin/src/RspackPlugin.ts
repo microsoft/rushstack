@@ -24,9 +24,9 @@ import {
   PLUGIN_NAME,
   type IRspackPluginAccessorHooks,
   type RspackCoreImport
-} from './shared';
-import { tryLoadRspackConfigurationAsync } from './RspackConfigurationLoader';
-import { type DeferredWatchFileSystem, OverrideNodeWatchFSPlugin } from './DeferredWatchFileSystem';
+} from './shared.ts';
+import { tryLoadRspackConfigurationAsync } from './RspackConfigurationLoader.ts';
+import { type DeferredWatchFileSystem, OverrideNodeWatchFSPlugin } from './DeferredWatchFileSystem.ts';
 
 export interface IRspackPluginOptions {
   devConfigurationPath?: string | undefined;
@@ -426,9 +426,7 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
       taskSession.logger.terminal.writeLine('Running incremental Rspack compilation');
       await rspackCompilationDonePromise;
     } else {
-      taskSession.logger.terminal.writeLine(
-        'Rspack has not detected changes. Listing previous diagnostics.'
-      );
+      taskSession.logger.terminal.writeLine('Rspack has not detected changes. Listing previous diagnostics.');
     }
 
     this._emitErrors(taskSession.logger);

@@ -10,8 +10,8 @@ import {
 } from '@rushstack/typings-generator';
 import { FileSystem, type NewlineKind } from '@rushstack/node-core-library';
 
-import type { IgnoreStringFunction, ILocalizationFile } from './interfaces';
-import { parseLocFile } from './LocFileParser';
+import type { IgnoreStringFunction, ILocalizationFile } from './interfaces.ts';
+import { parseLocFile } from './LocFileParser.ts';
 
 /**
  * @public

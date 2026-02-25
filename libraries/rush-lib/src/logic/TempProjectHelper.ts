@@ -8,10 +8,10 @@ import * as tar from 'tar';
 
 import { FileConstants, FileSystem, PosixModeBits } from '@rushstack/node-core-library';
 
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import type { RushConfiguration } from '../api/RushConfiguration';
-import { RushConstants } from './RushConstants';
-import type { Subspace } from '../api/Subspace';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import { RushConstants } from './RushConstants.ts';
+import type { Subspace } from '../api/Subspace.ts';
 
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */

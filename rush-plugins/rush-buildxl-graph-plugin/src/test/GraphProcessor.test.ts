@@ -5,7 +5,7 @@ import type { IOperationRunner, Operation } from '@rushstack/rush-sdk';
 import type { ShellOperationRunner } from '@rushstack/rush-sdk/lib/logic/operations/ShellOperationRunner';
 import { Terminal, NoOpTerminalProvider } from '@rushstack/terminal';
 
-import { GraphProcessor, type IGraphNode } from '../GraphProcessor';
+import { GraphProcessor, type IGraphNode } from '../GraphProcessor.ts';
 
 // to update the examples folder, run the following command from the project root:
 // export DEBUG_RUSH_BUILD_GRAPH="test" && rush build --production -t . --drop-graph ./src/examples/graph.json

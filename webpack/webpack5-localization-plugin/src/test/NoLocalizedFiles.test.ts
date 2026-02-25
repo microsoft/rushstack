@@ -7,8 +7,8 @@ import { promisify } from 'node:util';
 import webpack, { type Stats } from 'webpack';
 import { Volume } from 'memfs/lib/volume';
 
-import { LocalizationPlugin } from '../LocalizationPlugin';
-import { MemFSPlugin } from './MemFSPlugin';
+import { LocalizationPlugin } from '../LocalizationPlugin.ts';
+import { MemFSPlugin } from './MemFSPlugin.ts';
 
 async function testNonLocalizedInner(minimize: boolean): Promise<void> {
   const memoryFileSystem: Volume = new Volume();

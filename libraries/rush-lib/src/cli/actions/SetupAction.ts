@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { SetupPackageRegistry } from '../../logic/setup/SetupPackageRegistry';
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { BaseRushAction } from './BaseRushAction';
+import { SetupPackageRegistry } from '../../logic/setup/SetupPackageRegistry.ts';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { BaseRushAction } from './BaseRushAction.ts';
 
 export class SetupAction extends BaseRushAction {
   public constructor(parser: RushCommandLineParser) {

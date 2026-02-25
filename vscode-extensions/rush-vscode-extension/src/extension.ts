@@ -4,11 +4,11 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { type LogLevel, setLogLevel, terminal } from './logic/logger';
-import { RushWorkspace } from './logic/RushWorkspace';
-import { RushProjectsProvider } from './providers/RushProjectsProvider';
-import { RushTaskProvider } from './providers/TaskProvider';
-import { RushCommandWebViewPanel } from './logic/RushCommandWebViewPanel';
+import { type LogLevel, setLogLevel, terminal } from './logic/logger.ts';
+import { RushWorkspace } from './logic/RushWorkspace.ts';
+import { RushProjectsProvider } from './providers/RushProjectsProvider.ts';
+import { RushTaskProvider } from './providers/TaskProvider.ts';
+import { RushCommandWebViewPanel } from './logic/RushCommandWebViewPanel.ts';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed

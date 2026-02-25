@@ -14,32 +14,32 @@ import {
   Terminal
 } from '@rushstack/terminal';
 
-import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
-import { OperationStatus } from './OperationStatus';
-import { CobuildLock, type ICobuildCompletedState } from '../cobuild/CobuildLock';
-import { OperationBuildCache } from '../buildCache/OperationBuildCache';
-import { RushConstants } from '../RushConstants';
-import type { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider.ts';
+import { OperationStatus } from './OperationStatus.ts';
+import { CobuildLock, type ICobuildCompletedState } from '../cobuild/CobuildLock.ts';
+import { OperationBuildCache } from '../buildCache/OperationBuildCache.ts';
+import { RushConstants } from '../RushConstants.ts';
+import type { RushProjectConfiguration } from '../../api/RushProjectConfiguration.ts';
 import {
   initializeProjectLogFilesAsync,
   getProjectLogFilePaths,
   type ILogFilePaths
-} from './ProjectLogWritable';
-import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
-import { DisjointSet } from '../cobuild/DisjointSet';
-import { PeriodicCallback } from './PeriodicCallback';
-import { NullTerminalProvider } from '../../utilities/NullTerminalProvider';
-import type { Operation } from './Operation';
-import type { IOperationRunnerContext } from './IOperationRunner';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+} from './ProjectLogWritable.ts';
+import type { CobuildConfiguration } from '../../api/CobuildConfiguration.ts';
+import { DisjointSet } from '../cobuild/DisjointSet.ts';
+import { PeriodicCallback } from './PeriodicCallback.ts';
+import { NullTerminalProvider } from '../../utilities/NullTerminalProvider.ts';
+import type { Operation } from './Operation.ts';
+import type { IOperationRunnerContext } from './IOperationRunner.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
 import type {
   IExecuteOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
-} from '../../pluginFramework/PhasedCommandHooks';
-import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
-import type { OperationExecutionRecord } from './OperationExecutionRecord';
+} from '../../pluginFramework/PhasedCommandHooks.ts';
+import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration.ts';
+import type { IOperationExecutionResult } from './IOperationExecutionResult.ts';
+import type { OperationExecutionRecord } from './OperationExecutionRecord.ts';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
 const PERIODIC_CALLBACK_INTERVAL_IN_SECONDS: number = 10;

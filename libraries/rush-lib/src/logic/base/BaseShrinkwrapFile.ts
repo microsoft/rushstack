@@ -5,16 +5,16 @@ import * as semver from 'semver';
 
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import { RushConstants } from '../RushConstants';
-import { type DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
-import type { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import { PackageNameParsers } from '../../api/PackageNameParsers';
-import type { IExperimentsJson } from '../../api/ExperimentsConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { BaseProjectShrinkwrapFile } from './BaseProjectShrinkwrapFile';
-import type { PackageManagerOptionsConfigurationBase } from './BasePackageManagerOptionsConfiguration';
-import type { Subspace } from '../../api/Subspace';
+import { RushConstants } from '../RushConstants.ts';
+import { type DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier.ts';
+import type { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy.ts';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import { PackageNameParsers } from '../../api/PackageNameParsers.ts';
+import type { IExperimentsJson } from '../../api/ExperimentsConfiguration.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import type { BaseProjectShrinkwrapFile } from './BaseProjectShrinkwrapFile.ts';
+import type { PackageManagerOptionsConfigurationBase } from './BasePackageManagerOptionsConfiguration.ts';
+import type { Subspace } from '../../api/Subspace.ts';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.

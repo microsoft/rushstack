@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { getConfig } from './config';
+import { getConfig } from './config.ts';
 import { CertificateManager, CertificateStore } from '@rushstack/debug-certificate-manager';
 import type { ITerminal } from '@rushstack/terminal';
 

@@ -10,8 +10,8 @@ import {
   RushCommandValidatorTool,
   RushWorkspaceDetailsTool,
   RushProjectDetailsTool
-} from './tools';
-import { RushMcpPluginLoader } from './pluginFramework/RushMcpPluginLoader';
+} from './tools/index.ts';
+import { RushMcpPluginLoader } from './pluginFramework/RushMcpPluginLoader.ts';
 
 export class RushMCPServer extends McpServer {
   private _rushWorkspacePath: string;

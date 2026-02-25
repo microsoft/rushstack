@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineParser, type CommandLineFlagParameter } from '../../index';
+import { CommandLineParser, type CommandLineFlagParameter } from '../../index.ts';
 
-import { PushAction } from './PushAction';
-import { RunAction } from './RunAction';
-import { BusinessLogic } from './BusinessLogic';
+import { PushAction } from './PushAction.ts';
+import { RunAction } from './RunAction.ts';
+import { BusinessLogic } from './BusinessLogic.ts';
 
 export class WidgetCommandLine extends CommandLineParser {
   private readonly _verbose: CommandLineFlagParameter;

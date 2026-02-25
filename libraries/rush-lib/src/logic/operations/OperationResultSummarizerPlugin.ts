@@ -8,12 +8,12 @@ import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
-} from '../../pluginFramework/PhasedCommandHooks';
-import type { IExecutionResult, IOperationExecutionResult } from './IOperationExecutionResult';
-import type { Operation } from './Operation';
-import { OperationStatus } from './OperationStatus';
-import type { OperationExecutionRecord } from './OperationExecutionRecord';
-import type { IStopwatchResult } from '../../utilities/Stopwatch';
+} from '../../pluginFramework/PhasedCommandHooks.ts';
+import type { IExecutionResult, IOperationExecutionResult } from './IOperationExecutionResult.ts';
+import type { Operation } from './Operation.ts';
+import { OperationStatus } from './OperationStatus.ts';
+import type { OperationExecutionRecord } from './OperationExecutionRecord.ts';
+import type { IStopwatchResult } from '../../utilities/Stopwatch.ts';
 
 const PLUGIN_NAME: 'OperationResultSummarizerPlugin' = 'OperationResultSummarizerPlugin';
 

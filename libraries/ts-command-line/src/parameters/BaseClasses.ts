@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { SCOPING_PARAMETER_GROUP } from '../Constants';
+import type { SCOPING_PARAMETER_GROUP } from '../Constants.ts';
 import type {
   IBaseCommandLineDefinition,
   IBaseCommandLineDefinitionWithArgument
-} from './CommandLineDefinition';
-import type { CommandLineChoiceListParameter } from './CommandLineChoiceListParameter';
-import type { CommandLineChoiceParameter } from './CommandLineChoiceParameter';
-import type { CommandLineFlagParameter } from './CommandLineFlagParameter';
-import type { CommandLineIntegerListParameter } from './CommandLineIntegerListParameter';
-import type { CommandLineIntegerParameter } from './CommandLineIntegerParameter';
-import type { CommandLineStringListParameter } from './CommandLineStringListParameter';
-import type { CommandLineStringParameter } from './CommandLineStringParameter';
+} from './CommandLineDefinition.ts';
+import type { CommandLineChoiceListParameter } from './CommandLineChoiceListParameter.ts';
+import type { CommandLineChoiceParameter } from './CommandLineChoiceParameter.ts';
+import type { CommandLineFlagParameter } from './CommandLineFlagParameter.ts';
+import type { CommandLineIntegerListParameter } from './CommandLineIntegerListParameter.ts';
+import type { CommandLineIntegerParameter } from './CommandLineIntegerParameter.ts';
+import type { CommandLineStringListParameter } from './CommandLineStringListParameter.ts';
+import type { CommandLineStringParameter } from './CommandLineStringParameter.ts';
 
 /**
  * Identifies the kind of a CommandLineParameter.

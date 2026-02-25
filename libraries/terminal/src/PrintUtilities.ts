@@ -3,7 +3,7 @@
 
 import { Text } from '@rushstack/node-core-library';
 
-import type { ITerminal } from './ITerminal';
+import type { ITerminal } from './ITerminal.ts';
 
 /**
  * A sensible fallback column width for consoles.

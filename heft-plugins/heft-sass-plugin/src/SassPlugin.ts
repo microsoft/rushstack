@@ -15,8 +15,8 @@ import type {
   ConfigurationFile
 } from '@rushstack/heft';
 
-import { PLUGIN_NAME } from './constants';
-import { type ICssOutputFolder, type ISassProcessorOptions, SassProcessor } from './SassProcessor';
+import { PLUGIN_NAME } from './constants.ts';
+import { type ICssOutputFolder, type ISassProcessorOptions, SassProcessor } from './SassProcessor.ts';
 import sassConfigSchema from './schemas/heft-sass-plugin.schema.json';
 
 export interface ISassConfigurationJson {

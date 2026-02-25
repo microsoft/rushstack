@@ -5,7 +5,7 @@ import { type ITextFieldProps, TextField } from '@fluentui/react';
 import * as React from 'react';
 import { Controller } from 'react-hook-form';
 
-import type { IHookFormProps } from './interface';
+import type { IHookFormProps } from './interface.ts';
 
 export type IControlledTextFieldProps = ITextFieldProps & IHookFormProps<string>;
 

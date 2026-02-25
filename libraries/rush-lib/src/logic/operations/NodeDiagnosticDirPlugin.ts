@@ -5,10 +5,10 @@ import path from 'node:path';
 
 import { FileSystem } from '@rushstack/node-core-library';
 
-import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
-import type { IEnvironment } from '../../utilities/Utilities';
-import type { Operation } from './Operation';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks.ts';
+import type { IEnvironment } from '../../utilities/Utilities.ts';
+import type { Operation } from './Operation.ts';
+import type { IOperationExecutionResult } from './IOperationExecutionResult.ts';
 
 const PLUGIN_NAME: 'NodeDiagnosticDirPlugin' = 'NodeDiagnosticDirPlugin';
 

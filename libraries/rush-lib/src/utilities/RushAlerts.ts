@@ -4,10 +4,10 @@
 import { Colorize, PrintUtilities, type ITerminal } from '@rushstack/terminal';
 import { FileSystem, JsonFile, JsonSchema, JsonSyntax } from '@rushstack/node-core-library';
 
-import type { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
 import rushAlertsSchemaJson from '../schemas/rush-alerts.schema.json';
-import { RushConstants } from '../logic/RushConstants';
-import { PURGE_ACTION_NAME } from './actionNameConstants';
+import { RushConstants } from '../logic/RushConstants.ts';
+import { PURGE_ACTION_NAME } from './actionNameConstants.ts';
 
 export interface IRushAlertsOptions {
   terminal: ITerminal;

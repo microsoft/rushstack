@@ -4,9 +4,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import type { EnhancedStore } from '@reduxjs/toolkit';
 
-import parameterReducer, { type IParameterState } from './slices/parameter';
-import uiReducer, { type IUIState } from './slices/ui';
-import projectReducer, { type IProjectState } from './slices/project';
+import parameterReducer, { type IParameterState } from './slices/parameter.ts';
+import uiReducer, { type IUIState } from './slices/ui.ts';
+import projectReducer, { type IProjectState } from './slices/project.ts';
 
 export interface IRootState {
   parameter: IParameterState;

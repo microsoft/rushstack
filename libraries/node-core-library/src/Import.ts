@@ -7,10 +7,10 @@ import nodeModule = require('module');
 import importLazy = require('import-lazy');
 import * as Resolve from 'resolve';
 
-import { PackageJsonLookup } from './PackageJsonLookup';
-import { FileSystem } from './FileSystem';
-import type { IPackageJson } from './IPackageJson';
-import { PackageName } from './PackageName';
+import { PackageJsonLookup } from './PackageJsonLookup.ts';
+import { FileSystem } from './FileSystem.ts';
+import type { IPackageJson } from './IPackageJson.ts';
+import { PackageName } from './PackageName.ts';
 
 type RealpathFnType = Parameters<typeof Resolve.default>[1]['realpath'];
 

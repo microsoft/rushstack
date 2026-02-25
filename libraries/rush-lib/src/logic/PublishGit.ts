@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { PublishUtilities } from './PublishUtilities';
-import { Utilities } from '../utilities/Utilities';
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import type { Git } from './Git';
+import { PublishUtilities } from './PublishUtilities.ts';
+import { Utilities } from '../utilities/Utilities.ts';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import type { Git } from './Git.ts';
 
 const DUMMY_BRANCH_NAME: string = '-branch-name-';
 

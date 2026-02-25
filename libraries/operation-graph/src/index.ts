@@ -8,7 +8,7 @@ export type {
   IOperationRunnerContext,
   IOperationState,
   IOperationStates
-} from './IOperationRunner';
+} from './IOperationRunner.ts';
 
 export type {
   IAfterExecuteEventMessage,
@@ -21,23 +21,23 @@ export type {
   ISyncCommandMessage,
   CommandMessageFromHost,
   IPCHost
-} from './protocol.types';
+} from './protocol.types.ts';
 
 export {
   type IExecuteOperationContext,
   type IOperationOptions,
   Operation,
   type OperationRequestRunCallback
-} from './Operation';
+} from './Operation.ts';
 
-export { OperationError } from './OperationError';
+export { OperationError } from './OperationError.ts';
 
-export { type IOperationExecutionOptions, OperationExecutionManager } from './OperationExecutionManager';
+export { type IOperationExecutionOptions, OperationExecutionManager } from './OperationExecutionManager.ts';
 
-export { OperationGroupRecord } from './OperationGroupRecord';
+export { OperationGroupRecord } from './OperationGroupRecord.ts';
 
-export { OperationStatus } from './OperationStatus';
+export { OperationStatus } from './OperationStatus.ts';
 
-export { Stopwatch } from './Stopwatch';
+export { Stopwatch } from './Stopwatch.ts';
 
-export { type IWatchLoopOptions, type IWatchLoopState, WatchLoop } from './WatchLoop';
+export { type IWatchLoopOptions, type IWatchLoopState, WatchLoop } from './WatchLoop.ts';

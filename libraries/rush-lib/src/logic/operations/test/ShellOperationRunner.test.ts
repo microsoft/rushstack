@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { convertSlashesForWindows } from '../ShellOperationRunner';
+import { convertSlashesForWindows } from '../ShellOperationRunner.ts';
 
 describe(convertSlashesForWindows.name, () => {
   it('converted inputs', () => {

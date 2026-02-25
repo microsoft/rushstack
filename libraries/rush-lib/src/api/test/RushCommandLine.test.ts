@@ -3,7 +3,7 @@
 
 import path from 'node:path';
 
-import { RushCommandLine } from '../RushCommandLine';
+import { RushCommandLine } from '../RushCommandLine.ts';
 
 describe(RushCommandLine.name, () => {
   it(`Returns a spec`, async () => {

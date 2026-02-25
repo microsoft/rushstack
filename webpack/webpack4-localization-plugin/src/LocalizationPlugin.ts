@@ -15,11 +15,11 @@ import {
   TypingsGenerator
 } from '@rushstack/localization-utilities';
 
-import { Constants } from './utilities/Constants';
+import { Constants } from './utilities/Constants.ts';
 import {
   type IWebpackConfigurationUpdaterOptions,
   WebpackConfigurationUpdater
-} from './WebpackConfigurationUpdater';
+} from './WebpackConfigurationUpdater.ts';
 import type {
   ILocalizationPluginOptions,
   ILocalizationStats,
@@ -27,10 +27,15 @@ import type {
   ILocaleElementMap,
   ILocalizedStrings,
   IResolvedMissingTranslations
-} from './interfaces';
-import type { ILocalizedWebpackChunk } from './webpackInterfaces';
-import { EntityMarker } from './utilities/EntityMarker';
-import { type IAsset, type IProcessAssetResult, AssetProcessor, PLACEHOLDER_REGEX } from './AssetProcessor';
+} from './interfaces.ts';
+import type { ILocalizedWebpackChunk } from './webpackInterfaces.ts';
+import { EntityMarker } from './utilities/EntityMarker.ts';
+import {
+  type IAsset,
+  type IProcessAssetResult,
+  AssetProcessor,
+  PLACEHOLDER_REGEX
+} from './AssetProcessor.ts';
 
 /**
  * @internal

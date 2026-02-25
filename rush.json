@@ -642,12 +642,6 @@
       "shouldPublish": false
     },
     {
-      "packageName": "esm-node-import-test",
-      "projectFolder": "build-tests/esm-node-import-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "eslint-bulk-suppressions-test",
       "projectFolder": "build-tests/eslint-bulk-suppressions-test",
       "reviewCategory": "tests",
@@ -665,6 +659,12 @@
       "reviewCategory": "tests",
       "shouldPublish": false,
       "cyclicDependencyProjects": ["@rushstack/eslint-config"]
+    },
+    {
+      "packageName": "esm-node-import-test",
+      "projectFolder": "build-tests/esm-node-import-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
     },
     {
       "packageName": "package-extractor-test-01",

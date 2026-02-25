@@ -5,17 +5,17 @@ import type * as argparse from 'argparse';
 
 import { Colorize } from '@rushstack/terminal';
 
-import type { CommandLineAction } from './CommandLineAction';
-import type { AliasCommandLineAction } from './AliasCommandLineAction';
+import type { CommandLineAction } from './CommandLineAction.ts';
+import type { AliasCommandLineAction } from './AliasCommandLineAction.ts';
 import {
   CommandLineParameterProvider,
   type IRegisterDefinedParametersState,
   type ICommandLineParserData
-} from './CommandLineParameterProvider';
-import { CommandLineParserExitError, CustomArgumentParser } from './CommandLineParserExitError';
-import { TabCompleteAction } from './TabCompletionAction';
-import { TypeUuid, uuidAlreadyReportedError } from '../TypeUuidLite';
-import { escapeSprintf } from '../escapeSprintf';
+} from './CommandLineParameterProvider.ts';
+import { CommandLineParserExitError, CustomArgumentParser } from './CommandLineParserExitError.ts';
+import { TabCompleteAction } from './TabCompletionAction.ts';
+import { TypeUuid, uuidAlreadyReportedError } from '../TypeUuidLite.ts';
+import { escapeSprintf } from '../escapeSprintf.ts';
 
 /**
  * Options for the {@link CommandLineParser} constructor.

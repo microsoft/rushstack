@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import { FileSystem } from '../FileSystem';
+import { FileSystem } from '../FileSystem.ts';
 
 let _cachedHomeFolder: string | undefined;
 

@@ -3,7 +3,7 @@
 
 import type { IPackageJson } from '@rushstack/node-core-library';
 
-import { PackageJsonEditor } from './PackageJsonEditor';
+import { PackageJsonEditor } from './PackageJsonEditor.ts';
 
 export interface IFromObjectOptions {
   object: IPackageJson;

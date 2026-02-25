@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IgnoreStringFunction } from '../../interfaces';
-import { parseResJson } from '../parseResJson';
+import type { IgnoreStringFunction } from '../../interfaces.ts';
+import { parseResJson } from '../parseResJson.ts';
 
 describe(parseResJson.name, () => {
   it('parses a valid file', () => {

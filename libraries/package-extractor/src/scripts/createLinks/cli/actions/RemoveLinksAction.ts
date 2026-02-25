@@ -7,9 +7,9 @@ import { Async, FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 
-import type { IExtractorMetadataJson } from '../../../../PackageExtractor';
-import { getExtractorMetadataAsync } from '../../utilities/CreateLinksUtilities';
-import { TARGET_ROOT_FOLDER, MAX_CONCURRENCY } from '../../utilities/constants';
+import type { IExtractorMetadataJson } from '../../../../PackageExtractor.ts';
+import { getExtractorMetadataAsync } from '../../utilities/CreateLinksUtilities.ts';
+import { TARGET_ROOT_FOLDER, MAX_CONCURRENCY } from '../../utilities/constants.ts';
 
 export async function removeLinksAsync(
   terminal: ITerminal,

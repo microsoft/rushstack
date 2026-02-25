@@ -7,13 +7,13 @@
  * @packageDocumentation
  */
 
-export { CommandLineAction, type ICommandLineActionOptions } from './providers/CommandLineAction';
-export { DynamicCommandLineAction } from './providers/DynamicCommandLineAction';
-export { ScopedCommandLineAction } from './providers/ScopedCommandLineAction';
+export { CommandLineAction, type ICommandLineActionOptions } from './providers/CommandLineAction.ts';
+export { DynamicCommandLineAction } from './providers/DynamicCommandLineAction.ts';
+export { ScopedCommandLineAction } from './providers/ScopedCommandLineAction.ts';
 export {
   AliasCommandLineAction,
   type IAliasCommandLineActionOptions
-} from './providers/AliasCommandLineAction';
+} from './providers/AliasCommandLineAction.ts';
 
 export type {
   IBaseCommandLineDefinition,
@@ -26,43 +26,43 @@ export type {
   ICommandLineChoiceDefinition,
   ICommandLineChoiceListDefinition,
   ICommandLineRemainderDefinition
-} from './parameters/CommandLineDefinition';
+} from './parameters/CommandLineDefinition.ts';
 
 export {
   type CommandLineParameter,
   CommandLineParameterKind,
   CommandLineParameterBase,
   CommandLineParameterWithArgument
-} from './parameters/BaseClasses';
+} from './parameters/BaseClasses.ts';
 
-export { CommandLineFlagParameter } from './parameters/CommandLineFlagParameter';
+export { CommandLineFlagParameter } from './parameters/CommandLineFlagParameter.ts';
 export {
   CommandLineStringParameter,
   type IRequiredCommandLineStringParameter
-} from './parameters/CommandLineStringParameter';
-export { CommandLineStringListParameter } from './parameters/CommandLineStringListParameter';
+} from './parameters/CommandLineStringParameter.ts';
+export { CommandLineStringListParameter } from './parameters/CommandLineStringListParameter.ts';
 export {
   CommandLineIntegerParameter,
   type IRequiredCommandLineIntegerParameter
-} from './parameters/CommandLineIntegerParameter';
-export { CommandLineIntegerListParameter } from './parameters/CommandLineIntegerListParameter';
+} from './parameters/CommandLineIntegerParameter.ts';
+export { CommandLineIntegerListParameter } from './parameters/CommandLineIntegerListParameter.ts';
 export {
   CommandLineChoiceParameter,
   type IRequiredCommandLineChoiceParameter
-} from './parameters/CommandLineChoiceParameter';
-export { CommandLineChoiceListParameter } from './parameters/CommandLineChoiceListParameter';
-export { CommandLineRemainder } from './parameters/CommandLineRemainder';
+} from './parameters/CommandLineChoiceParameter.ts';
+export { CommandLineChoiceListParameter } from './parameters/CommandLineChoiceListParameter.ts';
+export { CommandLineRemainder } from './parameters/CommandLineRemainder.ts';
 
 export {
   CommandLineParameterProvider,
   type IScopedLongNameParseResult,
   type ICommandLineParserData as _ICommandLineParserData,
   type IRegisterDefinedParametersState as _IRegisterDefinedParametersState
-} from './providers/CommandLineParameterProvider';
+} from './providers/CommandLineParameterProvider.ts';
 
-export { CommandLineParser, type ICommandLineParserOptions } from './providers/CommandLineParser';
-export { DynamicCommandLineParser } from './providers/DynamicCommandLineParser';
+export { CommandLineParser, type ICommandLineParserOptions } from './providers/CommandLineParser.ts';
+export { DynamicCommandLineParser } from './providers/DynamicCommandLineParser.ts';
 
-export { CommandLineConstants } from './Constants';
+export { CommandLineConstants } from './Constants.ts';
 
-export { CommandLineHelper } from './CommandLineHelper';
+export { CommandLineHelper } from './CommandLineHelper.ts';

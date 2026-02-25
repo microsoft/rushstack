@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { trimNpmrcFileLines } from '../npmrcUtilities';
+import { trimNpmrcFileLines } from '../npmrcUtilities.ts';
 
 describe('npmrcUtilities', () => {
   function runTests(supportEnvVarFallbackSyntax: boolean): void {

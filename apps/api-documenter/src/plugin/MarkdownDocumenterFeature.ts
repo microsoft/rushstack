@@ -4,8 +4,8 @@
 import type { ApiItem, ApiModel } from '@microsoft/api-extractor-model';
 import { TypeUuid } from '@rushstack/node-core-library';
 
-import { PluginFeature } from './PluginFeature';
-import type { MarkdownDocumenterAccessor } from './MarkdownDocumenterAccessor';
+import { PluginFeature } from './PluginFeature.ts';
+import type { MarkdownDocumenterAccessor } from './MarkdownDocumenterAccessor.ts';
 
 /**
  * Context object for {@link MarkdownDocumenterFeature}.

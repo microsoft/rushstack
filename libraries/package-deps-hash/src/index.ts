@@ -13,7 +13,7 @@
  * @packageDocumentation
  */
 
-export { getPackageDeps, getGitHashForFiles } from './getPackageDeps';
+export { getPackageDeps, getGitHashForFiles } from './getPackageDeps.ts';
 export {
   type IFileDiffStatus,
   type IDetailedRepoState,
@@ -23,4 +23,4 @@ export {
   getRepoStateAsync,
   ensureGitMinimumVersion,
   hashFilesAsync
-} from './getRepoState';
+} from './getRepoState.ts';

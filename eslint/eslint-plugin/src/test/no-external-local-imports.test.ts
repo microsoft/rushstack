@@ -3,8 +3,8 @@
 
 import type { RuleTester } from '@typescript-eslint/rule-tester';
 
-import { getRuleTesterWithoutProject } from './ruleTester';
-import { noExternalLocalImportsRule } from '../no-external-local-imports';
+import { getRuleTesterWithoutProject } from './ruleTester.ts';
+import { noExternalLocalImportsRule } from '../no-external-local-imports.ts';
 
 const ruleTester: RuleTester = getRuleTesterWithoutProject();
 

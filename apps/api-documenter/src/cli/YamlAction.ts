@@ -6,10 +6,10 @@ import type {
   IRequiredCommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
 
-import type { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
-import { BaseAction } from './BaseAction';
-import { YamlDocumenter, type YamlFormat } from '../documenters/YamlDocumenter';
-import { OfficeYamlDocumenter } from '../documenters/OfficeYamlDocumenter';
+import type { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine.ts';
+import { BaseAction } from './BaseAction.ts';
+import { YamlDocumenter, type YamlFormat } from '../documenters/YamlDocumenter.ts';
+import { OfficeYamlDocumenter } from '../documenters/OfficeYamlDocumenter.ts';
 
 export class YamlAction extends BaseAction {
   private readonly _officeParameter: CommandLineFlagParameter;

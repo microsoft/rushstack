@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ModuleKind, ScriptTarget } from './SwcIsolatedTranspilePlugin';
+import type { ModuleKind, ScriptTarget } from './SwcIsolatedTranspilePlugin.ts';
 
 export interface IProjectOptions {
   buildFolder: string;

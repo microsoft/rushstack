@@ -3,8 +3,8 @@
 
 import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
-import { BaseReportAction } from './BaseReportAction';
-import { Rundown } from '../Rundown';
+import { BaseReportAction } from './BaseReportAction.ts';
+import { Rundown } from '../Rundown.ts';
 
 export class InspectAction extends BaseReportAction {
   private readonly _traceParameter: CommandLineFlagParameter;

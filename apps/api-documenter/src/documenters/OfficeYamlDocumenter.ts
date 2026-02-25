@@ -9,9 +9,9 @@ import type { ApiModel } from '@microsoft/api-extractor-model';
 import { FileSystem } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import type { IYamlTocItem } from '../yaml/IYamlTocFile';
-import type { IYamlItem } from '../yaml/IYamlApiFile';
-import { YamlDocumenter } from './YamlDocumenter';
+import type { IYamlTocItem } from '../yaml/IYamlTocFile.ts';
+import type { IYamlItem } from '../yaml/IYamlApiFile.ts';
+import { YamlDocumenter } from './YamlDocumenter.ts';
 
 interface ISnippetsFile {
   /**

@@ -4,17 +4,20 @@
 import path from 'node:path';
 import { JsonFile } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../../../api/RushConfiguration';
-import { CommandLineConfiguration, type IPhasedCommandConfig } from '../../../api/CommandLineConfiguration';
-import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
-import type { Operation } from '../Operation';
-import type { ICommandLineJson } from '../../../api/CommandLineJson';
-import { RushConstants } from '../../RushConstants';
-import { MockOperationRunner } from './MockOperationRunner';
+import { RushConfiguration } from '../../../api/RushConfiguration.ts';
+import {
+  CommandLineConfiguration,
+  type IPhasedCommandConfig
+} from '../../../api/CommandLineConfiguration.ts';
+import { PhasedOperationPlugin } from '../PhasedOperationPlugin.ts';
+import type { Operation } from '../Operation.ts';
+import type { ICommandLineJson } from '../../../api/CommandLineJson.ts';
+import { RushConstants } from '../../RushConstants.ts';
+import { MockOperationRunner } from './MockOperationRunner.ts';
 import {
   type ICreateOperationsContext,
   PhasedCommandHooks
-} from '../../../pluginFramework/PhasedCommandHooks';
+} from '../../../pluginFramework/PhasedCommandHooks.ts';
 
 function serializeOperation(operation: Operation): string {
   return `${operation.name} (${operation.enabled ? 'enabled' : 'disabled'}${operation.runner!.silent ? ', silent' : ''}) -> [${Array.from(

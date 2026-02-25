@@ -41,7 +41,7 @@ export default class RushResolverCachePlugin implements IRushPlugin {
         const { afterInstallAsync } = await import(
           /* webpackChunkMode: 'eager' */
           /* webpackExports: ["afterInstallAsync"] */
-          './afterInstallAsync'
+          './afterInstallAsync.ts'
         );
 
         await afterInstallAsync(rushSession, rushConfiguration, subspace, variant, logger);

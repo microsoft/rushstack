@@ -8,8 +8,8 @@ import * as ts from 'typescript';
 import { JsonFile } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import { ExtractorConfig } from './ExtractorConfig';
-import type { IExtractorInvokeOptions } from './Extractor';
+import { ExtractorConfig } from './ExtractorConfig.ts';
+import type { IExtractorInvokeOptions } from './Extractor.ts';
 
 /**
  * Options for {@link CompilerState.create}

@@ -9,14 +9,14 @@ import type { ReplaceSource } from 'webpack-sources';
 import type { TapOptions } from 'tapable';
 import RequestShortener from 'webpack/lib/RequestShortener';
 
-import { STAGE_AFTER, STAGE_BEFORE } from './Constants';
+import { STAGE_AFTER, STAGE_BEFORE } from './Constants.ts';
 import type {
   _INormalModuleFactoryModuleData,
   IExtendedModule,
   IModuleMinifierPluginHooks,
   _IWebpackCompilationData,
   IPostProcessFragmentContext
-} from './ModuleMinifierPlugin.types';
+} from './ModuleMinifierPlugin.types.ts';
 
 const PLUGIN_NAME: 'PortableMinifierModuleIdsPlugin' = 'PortableMinifierModuleIdsPlugin';
 

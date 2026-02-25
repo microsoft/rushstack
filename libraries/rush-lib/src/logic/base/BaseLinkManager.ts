@@ -11,14 +11,14 @@ import {
 } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import { Utilities } from '../../utilities/Utilities';
-import { Stopwatch } from '../../utilities/Stopwatch';
-import type { BasePackage } from './BasePackage';
-import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import { RushConstants } from '../RushConstants';
-import { FlagFile } from '../../api/FlagFile';
-import { IS_WINDOWS } from '../../utilities/executionUtilities';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import { Utilities } from '../../utilities/Utilities.ts';
+import { Stopwatch } from '../../utilities/Stopwatch.ts';
+import type { BasePackage } from './BasePackage.ts';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration.ts';
+import { RushConstants } from '../RushConstants.ts';
+import { FlagFile } from '../../api/FlagFile.ts';
+import { IS_WINDOWS } from '../../utilities/executionUtilities.ts';
 
 export enum SymlinkKind {
   File,

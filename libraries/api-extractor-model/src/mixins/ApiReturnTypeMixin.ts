@@ -5,10 +5,10 @@
 
 import { InternalError } from '@rushstack/node-core-library';
 
-import type { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
-import type { IExcerptTokenRange, Excerpt } from './Excerpt';
-import { ApiDeclaredItem } from '../items/ApiDeclaredItem';
-import type { DeserializerContext } from '../model/DeserializerContext';
+import type { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem.ts';
+import type { IExcerptTokenRange, Excerpt } from './Excerpt.ts';
+import { ApiDeclaredItem } from '../items/ApiDeclaredItem.ts';
+import type { DeserializerContext } from '../model/DeserializerContext.ts';
 
 /**
  * Constructor options for {@link (ApiReturnTypeMixin:interface)}.

@@ -12,12 +12,15 @@ import {
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 
-import { ApiItem, ApiItemKind, type IApiItemJson } from '../items/ApiItem';
-import { ApiItemContainerMixin, type IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
-import { ApiDocumentedItem, type IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
-import type { ApiEntryPoint } from './ApiEntryPoint';
-import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { DeserializerContext, ApiJsonSchemaVersion } from './DeserializerContext';
+import { ApiItem, ApiItemKind, type IApiItemJson } from '../items/ApiItem.ts';
+import {
+  ApiItemContainerMixin,
+  type IApiItemContainerMixinOptions
+} from '../mixins/ApiItemContainerMixin.ts';
+import { ApiDocumentedItem, type IApiDocumentedItemOptions } from '../items/ApiDocumentedItem.ts';
+import type { ApiEntryPoint } from './ApiEntryPoint.ts';
+import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin.ts';
+import { DeserializerContext, ApiJsonSchemaVersion } from './DeserializerContext.ts';
 
 /**
  * Constructor options for {@link ApiPackage}.

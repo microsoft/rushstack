@@ -3,8 +3,8 @@
 
 import { FileSystem, NewlineKind } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
-import type { IgnoreStringFunction } from '../../interfaces';
-import { type IParseResxOptions, parseResx } from '../parseResx';
+import type { IgnoreStringFunction } from '../../interfaces.ts';
+import { type IParseResxOptions, parseResx } from '../parseResx.ts';
 
 describe(parseResx.name, () => {
   let terminalProvider: StringBufferTerminalProvider;

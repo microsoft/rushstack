@@ -6,7 +6,7 @@ import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rus
 import type {
   IAmazonS3BuildCacheProviderOptionsAdvanced,
   IAmazonS3BuildCacheProviderOptionsSimple
-} from './AmazonS3BuildCacheProvider';
+} from './AmazonS3BuildCacheProvider.ts';
 
 const PLUGIN_NAME: string = 'AmazonS3BuildCachePlugin';
 
@@ -92,7 +92,7 @@ export class RushAmazonS3BuildCachePlugin implements IRushPlugin {
           throw new Error('You must provide either an s3Endpoint or s3Bucket');
         }
 
-        const { AmazonS3BuildCacheProvider } = await import('./AmazonS3BuildCacheProvider');
+        const { AmazonS3BuildCacheProvider } = await import('./AmazonS3BuildCacheProvider.ts');
         return new AmazonS3BuildCacheProvider(options, rushSession);
       });
     });
