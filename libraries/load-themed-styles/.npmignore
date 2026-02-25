@@ -5,7 +5,8 @@
 
 # Use negative patterns to bring back the specific things we want to publish.
 !/bin/**
-!/lib*/**
+!/lib/**
+!/lib-*/**
 !/dist/**
 
 !CHANGELOG.md
@@ -16,7 +17,8 @@
 
 # Ignore certain patterns that should not get published.
 /dist/*.stats.*
-/lib*/**/test/
+/lib/**/test/
+/lib-*/**/test/
 *.test.js
 
 # NOTE: These don't need to be specified, because NPM includes them automatically.
