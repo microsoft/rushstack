@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lockfile-explorer",
+      "comment": "Add user-friendly warning for outdated pnpm-lock.yaml instead of throwing an error. The warning suggests running \"rush update --full\" to fix the issue.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/lockfile-explorer"
+}
