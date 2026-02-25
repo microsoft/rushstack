@@ -8,6 +8,7 @@
 !/lib/**
 !/lib-*/**
 !/dist/**
+!/includes/**
 
 !CHANGELOG.md
 !CHANGELOG.json
@@ -30,6 +31,3 @@
 # ---------------------------------------------------------------------------
 # DO NOT MODIFY ABOVE THIS LINE!  Add any project-specific overrides below.
 # ---------------------------------------------------------------------------
-
-!rush-mcp-plugin.json
-!*.schema.json

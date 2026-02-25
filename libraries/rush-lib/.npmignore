@@ -8,6 +8,7 @@
 !/lib/**
 !/lib-*/**
 !/dist/**
+!/includes/**
 
 !CHANGELOG.md
 !CHANGELOG.json
@@ -20,7 +21,6 @@
 /lib/**/test/
 /lib-*/**/test/
 *.test.js
-*.exports.json
 
 # NOTE: These don't need to be specified, because NPM includes them automatically.
 #
@@ -32,7 +32,9 @@
 # DO NOT MODIFY ABOVE THIS LINE!  Add any project-specific overrides below.
 # ---------------------------------------------------------------------------
 
-!/assets/**
+# These are generated during build and then used by rush-sdk. They are not useful
+# to external consumers.
+*.exports.json
 
 # Exclude intermediate build outputs (not shipped)
 /lib-intermediate-*/**

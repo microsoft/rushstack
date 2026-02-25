@@ -8,6 +8,7 @@
 !/lib/**
 !/lib-*/**
 !/dist/**
+!/includes/**
 
 !CHANGELOG.md
 !CHANGELOG.json
@@ -31,6 +32,4 @@
 # DO NOT MODIFY ABOVE THIS LINE!  Add any project-specific overrides below.
 # ---------------------------------------------------------------------------
 
-!/includes/**
 !UPGRADING.md
-lib-*/legacy-compatibility/**
