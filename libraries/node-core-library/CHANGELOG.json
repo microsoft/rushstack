@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.20.3",
+      "tag": "@rushstack/node-core-library_v5.20.3",
+      "date": "Wed, 25 Feb 2026 00:34:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update `ajv` dependency to `~8.18.0` to mitigate CVE-2025-69873."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.20.2",
       "tag": "@rushstack/node-core-library_v5.20.2",
       "date": "Tue, 24 Feb 2026 01:13:27 GMT",

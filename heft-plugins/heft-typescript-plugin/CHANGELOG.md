@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-typescript-plugin
 
-This log was last generated on Tue, 24 Feb 2026 01:13:27 GMT and should not be manually modified.
+This log was last generated on Wed, 25 Feb 2026 00:34:29 GMT and should not be manually modified.
+
+## 1.3.0
+Wed, 25 Feb 2026 00:34:29 GMT
+
+### Minor changes
+
+- Add `emitModulePackageJson` option for `additionalModuleKindsToEmit` entries. When enabled, a `package.json` with the appropriate `"type"` field is written to the output folder after compilation, ensuring Node.js correctly interprets `.js` files regardless of the nearest ancestor package.json `"type"` setting.
 
 ## 1.2.4
 Tue, 24 Feb 2026 01:13:27 GMT

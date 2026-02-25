@@ -2,6 +2,27 @@
   "name": "@rushstack/webpack5-localization-plugin",
   "entries": [
     {
+      "version": "0.16.5",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.16.5",
+      "date": "Wed, 25 Feb 2026 00:34:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.15.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.20.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.22.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.16.4",
       "tag": "@rushstack/webpack5-localization-plugin_v0.16.4",
       "date": "Tue, 24 Feb 2026 01:13:27 GMT",
