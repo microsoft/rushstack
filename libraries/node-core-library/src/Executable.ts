@@ -230,6 +230,14 @@ export interface IProcessInfo {
   processName: string;
 
   /**
+   * The full command line of the process, when available.
+   *
+   * @remarks On some platforms this may be empty or truncated for kernel processes
+   * or when the OS does not expose the command line.
+   */
+  commandLine?: string;
+
+  /**
    * The process ID.
    */
   processId: number;
@@ -288,10 +296,11 @@ export function parseProcessListOutput(
 //  PPID     PID   COMMAND
 // 51234   56784   process name
 const NAME_GROUP: 'name' = 'name';
+const COMMAND_LINE_GROUP: 'command' = 'command';
 const PROCESS_ID_GROUP: 'pid' = 'pid';
 const PARENT_PROCESS_ID_GROUP: 'ppid' = 'ppid';
 const PROCESS_LIST_ENTRY_REGEX: RegExp = new RegExp(
-  `^\\s*(?<${PARENT_PROCESS_ID_GROUP}>\\d+)\\s+(?<${PROCESS_ID_GROUP}>\\d+)\\s+(?<${NAME_GROUP}>.+?)\\s*$`
+  `^\\s*(?<${PARENT_PROCESS_ID_GROUP}>\\d+)\\s+(?<${PROCESS_ID_GROUP}>\\d+)\\s+(?<${NAME_GROUP}>[^\\s]+)(?:\\s+(?<${COMMAND_LINE_GROUP}>.+))?\\s*$`
 );
 
 function parseProcessInfoEntry(
@@ -299,15 +308,49 @@ function parseProcessInfoEntry(
   existingProcessInfoById: Map<number, IProcessInfo>,
   platform: NodeJS.Platform
 ): void {
-  const processListEntryRegex: RegExp = PROCESS_LIST_ENTRY_REGEX;
-  const match: RegExpMatchArray | null = line.match(processListEntryRegex);
-  if (!match?.groups) {
-    throw new InternalError(`Invalid process list entry: ${line}`);
-  }
+  let processName: string;
+  let commandLine: string | undefined;
+  let processId: number;
+  let parentProcessId: number;
 
-  const processName: string = match.groups[NAME_GROUP];
-  const processId: number = parseInt(match.groups[PROCESS_ID_GROUP], 10);
-  const parentProcessId: number = parseInt(match.groups[PARENT_PROCESS_ID_GROUP], 10);
+  if (platform === 'win32') {
+    if (line.includes('\t')) {
+      // Tab-delimited output (PowerShell path with CommandLine)
+      const win32Match: RegExpMatchArray | null = line.match(
+        /^\s*(?<ppid>\d+)\s+(?<pid>\d+)\s+(?<name>[^\s]+)(?:\s+(?<cmd>.+))?\s*$/
+      );
+      if (!win32Match?.groups) {
+        throw new InternalError(`Invalid process list entry: ${line}`);
+      }
+      processName = win32Match.groups.name;
+      const cmd: string | undefined = win32Match.groups.cmd;
+      commandLine = cmd && cmd.length > 0 ? cmd : undefined;
+      processId = parseInt(win32Match.groups.pid, 10);
+      parentProcessId = parseInt(win32Match.groups.ppid, 10);
+    } else {
+      // Legacy space-delimited listing: treat everything after pid as name, no command line
+      const tokens: string[] = line.trim().split(/\s+/);
+      if (tokens.length < 3) {
+        throw new InternalError(`Invalid process list entry: ${line}`);
+      }
+      const [ppidString, pidString, ...nameParts] = tokens;
+      processName = nameParts.join(' ');
+      commandLine = undefined;
+      processId = parseInt(pidString, 10);
+      parentProcessId = parseInt(ppidString, 10);
+    }
+  } else {
+    const processListEntryRegex: RegExp = PROCESS_LIST_ENTRY_REGEX;
+    const match: RegExpMatchArray | null = line.match(processListEntryRegex);
+    if (!match?.groups) {
+      throw new InternalError(`Invalid process list entry: ${line}`);
+    }
+    processName = match.groups[NAME_GROUP];
+    const parsedCommandLine: string | undefined = match.groups[COMMAND_LINE_GROUP];
+    commandLine = parsedCommandLine && parsedCommandLine.length > 0 ? parsedCommandLine : undefined;
+    processId = parseInt(match.groups[PROCESS_ID_GROUP], 10);
+    parentProcessId = parseInt(match.groups[PARENT_PROCESS_ID_GROUP], 10);
+  }
 
   // Only care about the parent process if it is not the same as the current process.
   let parentProcessInfo: IProcessInfo | undefined;
@@ -334,10 +377,16 @@ function parseProcessInfoEntry(
       parentProcessInfo,
       childProcessInfos: []
     };
+    if (commandLine !== undefined) {
+      processInfo.commandLine = commandLine;
+    }
     existingProcessInfoById.set(processId, processInfo);
   } else {
     // Update placeholder entry
     processInfo.processName = processName;
+    if (commandLine !== undefined) {
+      processInfo.commandLine = commandLine;
+    }
     processInfo.parentProcessInfo = parentProcessInfo;
   }
 
@@ -368,11 +417,11 @@ function getProcessListProcessOptions(): ICommandLineOptions {
   if (OS_PLATFORM === 'win32') {
     command = 'powershell.exe';
     // Order of declared properties sets the order of the output.
-    // Put name last to simplify parsing, since it can contain spaces.
+    // Emit tab-delimited columns to allow the command line to contain spaces.
     args = [
       '-NoProfile',
       '-Command',
-      `'PPID PID Name'; Get-CimInstance Win32_Process | % { '{0} {1} {2}' -f $_.ParentProcessId, $_.ProcessId, $_.Name }`
+      `'PPID\`tPID\`tName\`tCommandLine'; Get-CimInstance Win32_Process | % { '{0}\`t{1}\`t{2}\`t{3}' -f $_.ParentProcessId, $_.ProcessId, $_.Name, ($_.CommandLine -replace "\`t", " ") }`
     ];
   } else {
     command = 'ps';
@@ -382,7 +431,8 @@ function getProcessListProcessOptions(): ICommandLineOptions {
     // Order of declared properties sets the order of the output. We will
     // need to request the "comm" property last in order to ensure that the
     // process names are not truncated on certain platforms
-    args = ['-Awo', 'ppid,pid,comm'];
+    // Include both the comm (thread name) and args (full command line) columns.
+    args = ['-Awwxo', 'ppid,pid,comm,args'];
   }
   return { path: command, args };
 }
