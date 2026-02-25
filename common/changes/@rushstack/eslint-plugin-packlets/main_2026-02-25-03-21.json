@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin-packlets",
+      "comment": "Bump `@typescript-eslint/*` dependencies to `~8.56.1`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin-packlets"
+}
