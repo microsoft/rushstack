@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lookup-by-path",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/lookup-by-path"
+}
