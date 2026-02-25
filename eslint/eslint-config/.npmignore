@@ -35,8 +35,28 @@
 # DO NOT MODIFY ABOVE THIS LINE!  Add any project-specific overrides below.
 # ---------------------------------------------------------------------------
 
-!*.js
+!/*.js
+!/*.[cm]js
+!/*.d.ts
+!/*.d.[cm]ts
+
 !flat/**/*.js
+!flat/**/*.[cm]js
+!flat/**/*.d.ts
+!flat/**/*.d.[cm]ts
+
 !mixins/*.js
+!mixins/*.[cm]js
+!mixins/*.d.ts
+!mixins/*.d.[cm]ts
+
 !patch/*.js
+!patch/*.[cm]js
+!patch/*.d.ts
+!patch/*.d.[cm]ts
+
 !profile/*.js
+!profile/*.[cm]js
+!profile/*.d.ts
+!profile/*.d.[cm]ts
+
