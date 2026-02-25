@@ -77,14 +77,8 @@ __webpack_require__.r(__webpack_exports__);
  * @returns
  * The text of the the .npmrc.
  */
-// create a global _combinedNpmrc for cache purpose
-const _combinedNpmrcMap = new Map();
 function _trimNpmrcFile(options) {
     const { sourceNpmrcPath, linesToPrepend, linesToAppend, supportEnvVarFallbackSyntax, filterNpmIncompatibleProperties, env = process.env } = options;
-    const combinedNpmrcFromCache = _combinedNpmrcMap.get(sourceNpmrcPath);
-    if (combinedNpmrcFromCache !== undefined) {
-        return combinedNpmrcFromCache;
-    }
     let npmrcFileLines = [];
     if (linesToPrepend) {
         npmrcFileLines.push(...linesToPrepend);
@@ -98,8 +92,6 @@ function _trimNpmrcFile(options) {
     npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
     const resultLines = trimNpmrcFileLines(npmrcFileLines, env, supportEnvVarFallbackSyntax, filterNpmIncompatibleProperties);
     const combinedNpmrc = resultLines.join('\n');
-    //save the cache
-    _combinedNpmrcMap.set(sourceNpmrcPath, combinedNpmrc);
     return combinedNpmrc;
 }
 /**
