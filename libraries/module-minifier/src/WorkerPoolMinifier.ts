@@ -35,6 +35,11 @@ export interface IWorkerPoolMinifierOptions {
   terserOptions?: MinifyOptions;
 
   /**
+   * Indicates whether to cache minification results in memory.
+   */
+  cache?: boolean;
+
+  /**
    * If true, log to the console about the minification results.
    */
   verbose?: boolean;
@@ -58,11 +63,12 @@ export class WorkerPoolMinifier implements IModuleMinifier {
   private _deduped: number;
   private _minified: number;
 
-  private readonly _resultCache: Map<string, IModuleMinificationResult>;
+  private readonly _resultCache: Map<string, IModuleMinificationResult> | undefined;
   private readonly _activeRequests: Map<string, IModuleMinificationCallback[]>;
 
   public constructor(options: IWorkerPoolMinifierOptions) {
     const {
+      cache = true,
       maxThreads = os.availableParallelism?.() ?? os.cpus().length,
       terserOptions = {},
       verbose = false,
@@ -70,7 +76,7 @@ export class WorkerPoolMinifier implements IModuleMinifier {
     } = options || {};
 
     const activeRequests: Map<string, IModuleMinificationCallback[]> = new Map();
-    const resultCache: Map<string, IModuleMinificationResult> = new Map();
+    const resultCache: Map<string, IModuleMinificationResult> | undefined = cache ? new Map() : undefined;
     const terserPool: WorkerPool = new WorkerPool({
       id: 'Minifier',
       maxWorkers: maxThreads,
@@ -113,7 +119,7 @@ export class WorkerPoolMinifier implements IModuleMinifier {
   public minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void {
     const { hash } = request;
 
-    const cached: IModuleMinificationResult | undefined = this._resultCache.get(hash);
+    const cached: IModuleMinificationResult | undefined = this._resultCache?.get(hash);
     if (cached) {
       ++this._deduped;
       return callback(cached);
@@ -141,7 +147,7 @@ export class WorkerPoolMinifier implements IModuleMinifier {
             message.hash
           )!;
           activeRequests.delete(message.hash);
-          this._resultCache.set(message.hash, message);
+          this._resultCache?.set(message.hash, message);
           for (const workerCallback of workerCallbacks) {
             workerCallback(message);
           }
@@ -180,7 +186,7 @@ export class WorkerPoolMinifier implements IModuleMinifier {
           console.log(`Shutting down minifier worker pool`);
         }
         await this._pool.finishAsync();
-        this._resultCache.clear();
+        this._resultCache?.clear();
         this._activeRequests.clear();
         if (this._verbose) {
           // eslint-disable-next-line no-console
