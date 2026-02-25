@@ -26,8 +26,8 @@
     "typeRoots": ["../../../../../node_modules/@types", "../../node_modules/@types"],
 
     "module": "commonjs",
-    "target": "es2017",
-    "lib": ["es2017"],
+    "target": "es2022",
+    "lib": ["es2022"],
 
     "incremental": true
   },

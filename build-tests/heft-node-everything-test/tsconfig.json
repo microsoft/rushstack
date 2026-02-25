@@ -19,8 +19,8 @@
     "types": ["heft-jest", "node"],
 
     "module": "commonjs",
-    "target": "es2017",
-    "lib": ["es2017"]
+    "target": "es2022",
+    "lib": ["es2022"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"]
 }
