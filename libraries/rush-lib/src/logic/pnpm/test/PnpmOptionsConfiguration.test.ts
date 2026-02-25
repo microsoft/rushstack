@@ -4,6 +4,8 @@
 import * as path from 'node:path';
 import { PnpmOptionsConfiguration } from '../PnpmOptionsConfiguration';
 import { TestUtilities } from '@rushstack/heft-config-file';
+import { EnvironmentConfiguration } from '../../../api/EnvironmentConfiguration';
+import type { RushUserConfiguration } from '../../../api/RushUserConfiguration';
 
 const fakeCommonTempFolder: string = path.join(__dirname, 'common', 'temp');
 
@@ -121,5 +123,70 @@ describe(PnpmOptionsConfiguration.name, () => {
         fastify: '^4.26.0'
       }
     });
+  });
+
+  it('uses default store path when no user configuration is provided', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonObject(
+      {},
+      fakeCommonTempFolder
+    );
+
+    expect(pnpmConfiguration.pnpmStorePath).toEqual(`${fakeCommonTempFolder}/pnpm-store`);
+  });
+
+  it('uses user configuration storePath when provided', () => {
+    const mockUserConfig: Partial<RushUserConfiguration> = {
+      buildCacheFolder: undefined,
+      pnpmStorePath: '/custom/pnpm/store'
+    };
+
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonObject(
+      {},
+      fakeCommonTempFolder,
+      mockUserConfig as RushUserConfiguration
+    );
+
+    expect(pnpmConfiguration.pnpmStorePath).toEqual('/custom/pnpm/store');
+  });
+
+  it('environment variable takes precedence over user configuration', () => {
+    // Save original value
+    const originalEnvValue = process.env.RUSH_PNPM_STORE_PATH;
+
+    try {
+      // Set environment variable with a path that will be normalized
+      // Use an absolute path like the temp folder
+      const envStorePath: string = path.join(fakeCommonTempFolder, 'env-pnpm-store');
+      process.env.RUSH_PNPM_STORE_PATH = envStorePath;
+
+      // Re-validate environment configuration to pick up the change
+      EnvironmentConfiguration.reset();
+      EnvironmentConfiguration.validate();
+
+      const mockUserConfig: Partial<RushUserConfiguration> = {
+        buildCacheFolder: undefined,
+        pnpmStorePath: '/custom/pnpm/store'
+      };
+
+      const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonObject(
+        {},
+        fakeCommonTempFolder,
+        mockUserConfig as RushUserConfiguration
+      );
+
+      // The environment variable value should be used (after normalization)
+      expect(pnpmConfiguration.pnpmStorePath).toContain('env-pnpm-store');
+    } finally {
+      // Restore original value
+      if (originalEnvValue !== undefined) {
+        process.env.RUSH_PNPM_STORE_PATH = originalEnvValue;
+      } else {
+        delete process.env.RUSH_PNPM_STORE_PATH;
+      }
+
+      // Re-validate to restore original state
+      EnvironmentConfiguration.reset();
+      EnvironmentConfiguration.validate();
+    }
   });
 });

@@ -10,6 +10,9 @@ import schemaJson from '../schemas/rush-user-settings.schema.json';
 
 interface IRushUserSettingsJson {
   buildCacheFolder?: string;
+  pnpm?: {
+    storePath?: string;
+  };
 }
 
 /**
@@ -25,11 +28,18 @@ export class RushUserConfiguration {
    */
   public readonly buildCacheFolder: string | undefined;
 
+  /**
+   * If provided, specifies the path for the PNPM store directory.
+   * Can be overridden by the RUSH_PNPM_STORE_PATH environment variable.
+   */
+  public readonly pnpmStorePath: string | undefined;
+
   private constructor(rushUserConfigurationJson: IRushUserSettingsJson | undefined) {
     this.buildCacheFolder = rushUserConfigurationJson?.buildCacheFolder;
     if (this.buildCacheFolder && !path.isAbsolute(this.buildCacheFolder)) {
       throw new Error('buildCacheFolder must be an absolute path');
     }
+    this.pnpmStorePath = rushUserConfigurationJson?.pnpm?.storePath;
   }
 
   public static async initializeAsync(): Promise<RushUserConfiguration> {
@@ -38,6 +48,24 @@ export class RushUserConfiguration {
     let rushUserSettingsJson: IRushUserSettingsJson | undefined;
     try {
       rushUserSettingsJson = await JsonFile.loadAndValidateAsync(
+        rushUserSettingsFilePath,
+        RushUserConfiguration._schema
+      );
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e as Error)) {
+        throw e;
+      }
+    }
+
+    return new RushUserConfiguration(rushUserSettingsJson);
+  }
+
+  public static initialize(): RushUserConfiguration {
+    const rushUserFolderPath: string = RushUserConfiguration.getRushUserFolderPath();
+    const rushUserSettingsFilePath: string = path.join(rushUserFolderPath, 'settings.json');
+    let rushUserSettingsJson: IRushUserSettingsJson | undefined;
+    try {
+      rushUserSettingsJson = JsonFile.loadAndValidate(
         rushUserSettingsFilePath,
         RushUserConfiguration._schema
       );

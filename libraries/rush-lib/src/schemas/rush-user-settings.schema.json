@@ -13,6 +13,18 @@
     "buildCacheFolder": {
       "type": "string",
       "description": "If provided, store build cache in the specified folder. Must be an absolute path."
+    },
+
+    "pnpm": {
+      "type": "object",
+      "description": "PNPM-specific user configuration options.",
+      "properties": {
+        "storePath": {
+          "type": "string",
+          "description": "If provided, specifies the path for the PNPM store directory. Can be overridden by the RUSH_PNPM_STORE_PATH environment variable."
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false
