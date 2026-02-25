@@ -1,0 +1,18 @@
+/**
+ * This is the main configuration file for Rush.
+ * For full documentation, please see https://rushjs.io
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
+  "rushVersion": "5.166.0",
+  "pnpmVersion": "10.27.0",
+  "nodeSupportedVersionRange": "*",
+  // "projectFolderMinDepth": 1,
+  // "projectFolderMaxDepth": 2,
+  "projects": [
+    {
+      "packageName": "a",
+      "projectFolder": "a"
+    }
+  ]
+}

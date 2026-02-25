@@ -32,8 +32,7 @@ export interface IWorkspaceProjectInfo
  * The `settings` parameter passed to {@link IPnpmfileShim.hooks.readPackage} and
  * {@link IPnpmfileShim.hooks.afterAllResolved}.
  */
-export interface ISubspacePnpmfileShimSettings {
-  semverPath: string;
+export interface ISubspacePnpmfileShimSettings extends Omit<IPnpmfileShimSettings, 'workspaceVersions'> {
   workspaceProjects: Record<string, IWorkspaceProjectInfo>;
   subspaceProjects: Record<string, IWorkspaceProjectInfo>;
   userPnpmfilePath?: string;
