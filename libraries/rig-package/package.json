@@ -44,7 +44,7 @@
     "strip-json-comments": "~3.1.1"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.2.0",
+    "@rushstack/heft": "1.2.5",
     "@types/resolve": "1.20.2",
     "ajv": "~8.18.0",
     "decoupled-local-node-rig": "workspace:*",
