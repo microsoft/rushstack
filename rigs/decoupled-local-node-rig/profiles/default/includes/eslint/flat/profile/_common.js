@@ -4,7 +4,8 @@
 const { expandNamingConventionSelectors } = require('@rushstack/eslint-config/flat/profile/_macros');
 const { commonNamingConventionSelectors } = require('@rushstack/eslint-config/flat/profile/_common');
 const rushstackEslintPlugin = require('@rushstack/eslint-plugin');
-const typescriptEslintPlugin = require('@typescript-eslint/eslint-plugin');
+// TODO: Put back when when the decoupled local dependency update goes in
+// const typescriptEslintPlugin = require('@typescript-eslint/eslint-plugin');
 const importEslintPlugin = require('eslint-plugin-import');
 const headersEslintPlugin = require('eslint-plugin-headers');
 
@@ -16,7 +17,7 @@ module.exports = {
       files: ['**/*.ts', '**/*.tsx'],
       plugins: {
         '@rushstack': rushstackEslintPlugin,
-        '@typescript-eslint': typescriptEslintPlugin,
+        // '@typescript-eslint': typescriptEslintPlugin,
         import: importEslintPlugin,
         headers: headersEslintPlugin
       },
