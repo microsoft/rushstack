@@ -1446,6 +1446,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "@rushstack/rush-operation-resource-plugin",
+      "projectFolder": "rush-plugins/rush-operation-resource-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
       "packageName": "@rushstack/rush-redis-cobuild-plugin",
       "projectFolder": "rush-plugins/rush-redis-cobuild-plugin",
       "reviewCategory": "libraries",

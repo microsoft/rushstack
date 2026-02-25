@@ -1,0 +1,14 @@
+{
+  "extends": "local-node-rig/profiles/default/config/jest.config.json",
+  "clearMocks": true,
+  "restoreMocks": true,
+  "collectCoverage": true,
+  "coverageThreshold": {
+    "global": {
+      "branches": 4,
+      "functions": 15,
+      "lines": 4,
+      "statements": 4
+    }
+  }
+}
