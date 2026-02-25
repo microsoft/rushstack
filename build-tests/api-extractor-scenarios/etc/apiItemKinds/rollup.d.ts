@@ -46,6 +46,12 @@ export declare namespace n1 {
 }
 
 /** @public */
+export declare namespace n2 {
+    const name2: SomeOtherType;
+    export { SomeOtherType as SomeType, type SomeOtherType as YetAnotherType, type name2 };
+}
+
+/** @public */
 export declare let nonConstVariable: string;
 
 /** @public */
@@ -77,6 +83,9 @@ export declare class SimpleClass {
 
 /** @public */
 export declare function someFunction(): void;
+
+/** @public */
+export declare type SomeOtherType = string;
 
 /** @public */
 export declare type SomeType = number;

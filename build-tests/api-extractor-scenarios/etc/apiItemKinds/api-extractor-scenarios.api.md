@@ -62,6 +62,13 @@ export namespace n1 {
 }
 
 // @public (undocumented)
+export namespace n2 {
+    const // (undocumented)
+    name2: SomeOtherType;
+    export { SomeOtherType as SomeType, type SomeOtherType as YetAnotherType, type name2 };
+}
+
+// @public (undocumented)
 export let nonConstVariable: string;
 
 // @public (undocumented)
@@ -90,6 +97,9 @@ export class SimpleClass {
 
 // @public (undocumented)
 export function someFunction(): void;
+
+// @public (undocumented)
+export type SomeOtherType = string;
 
 // @public (undocumented)
 export type SomeType = number;
