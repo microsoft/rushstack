@@ -309,7 +309,7 @@ describe(PnpmOptionsConfiguration.name, () => {
         );
         expect(reloadedConfig.globalOnlyBuiltDependencies).toBeUndefined();
 
-        const savedConfigJson = JsonFile.load(testConfigPath);
+        const savedConfigJson = await JsonFile.loadAsync(testConfigPath);
         expect(savedConfigJson.$schema).toBe(
           'https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json'
         );
