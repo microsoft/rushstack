@@ -517,12 +517,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
       terminal,
       jsonFilePath
     );
-    const schemaValue: string | undefined =
-      pnpmOptionsConfigFile.getSchemaPropertyOriginalValue(pnpmConfigJson);
-    // Only set $schema if it has a defined value, since JsonFile.save() will fail if any property is undefined
-    if (schemaValue !== undefined) {
-      pnpmConfigJson.$schema = schemaValue;
-    }
+    pnpmConfigJson.$schema = pnpmOptionsConfigFile.getSchemaPropertyOriginalValue(pnpmConfigJson);
     return new PnpmOptionsConfiguration(pnpmConfigJson || {}, commonTempFolder, jsonFilePath);
   }
 
