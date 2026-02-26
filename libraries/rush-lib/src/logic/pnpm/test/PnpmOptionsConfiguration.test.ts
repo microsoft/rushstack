@@ -204,11 +204,8 @@ describe(PnpmOptionsConfiguration.name, () => {
   });
 
   describe('$schema handling', () => {
-    it('does not fail when $schema is undefined', () => {
-      const testConfigPath: string = path.join(__dirname, 'temp', 'pnpm-config-no-schema.json');
-
-      const tempDir: string = path.dirname(testConfigPath);
-      FileSystem.ensureFolder(tempDir);
+    it('does not fail when $schema is undefined', async () => {
+      const testConfigPath: string = `${__dirname}/temp/pnpm-config-no-schema.json`;
 
       try {
         const configWithoutSchema = {
@@ -218,7 +215,7 @@ describe(PnpmOptionsConfiguration.name, () => {
             }
           }
         };
-        JsonFile.save(configWithoutSchema, testConfigPath, { ensureFolderExists: true });
+        await JsonFile.saveAsync(configWithoutSchema, testConfigPath, { ensureFolderExists: true });
 
         const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
           testConfigPath,
