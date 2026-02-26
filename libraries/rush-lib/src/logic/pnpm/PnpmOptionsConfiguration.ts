@@ -548,7 +548,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   ): Promise<void> {
     this._json.globalOnlyBuiltDependencies = onlyBuiltDependencies;
     if (this.jsonFilename) {
-      await JsonFile.saveAsync(this._json, this.jsonFilename, { updateExistingFile: true });
+      await JsonFile.saveAsync(this._json, this.jsonFilename, { updateExistingFile: true, ignoreUndefinedValues: true });
     }
   }
 
