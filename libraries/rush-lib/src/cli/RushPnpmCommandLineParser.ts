@@ -610,7 +610,7 @@ export class RushPnpmCommandLineParser {
           pnpmOptions.globalCatalogs;
 
         if (!Objects.areDeepEqual(currentCatalogs, newCatalogs)) {
-          pnpmOptions.updateGlobalCatalogs(newCatalogs);
+          await pnpmOptions.updateGlobalCatalogsAsync(newCatalogs);
 
           this._terminal.writeWarningLine(
             `Rush refreshed the ${RushConstants.pnpmConfigFilename} with updated catalog definitions.\n` +

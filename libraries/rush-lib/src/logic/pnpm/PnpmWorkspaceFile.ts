@@ -77,7 +77,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
         throw error;
       }
     }
-    
+
     const parsed: IPnpmWorkspaceYaml | undefined = yamlModule.load(content) as IPnpmWorkspaceYaml | undefined;
 
     return parsed?.catalogs;

@@ -6,58 +6,29 @@ import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 import { TestUtilities } from '@rushstack/heft-config-file';
 import { RushConfiguration } from '../../api/RushConfiguration';
 
+const MONOREPO_ROOT: string = path.dirname(
+  RushConfiguration.tryFindRushJsonLocation({ startingFolder: __dirname })!
+);
+const CATALOG_SYNC_REPO_PATH: string = `${__dirname}/catalogSyncTestRepo`;
+
 describe('RushPnpmCommandLineParser', () => {
   describe('catalog syncing', () => {
-    let testRepoPath: string;
-    let pnpmConfigPath: string;
-    let pnpmWorkspacePath: string;
+    const testRepoPath: string = `${MONOREPO_ROOT}/temp/catalog-sync-test-repo`;
+    const pnpmConfigPath: string = `${testRepoPath}/common/config/rush/pnpm-config.json`;
+    const pnpmWorkspacePath: string = `${testRepoPath}/common/temp/pnpm-workspace.yaml`;
 
-    beforeEach(() => {
-      testRepoPath = path.join(__dirname, 'temp', 'catalog-sync-test-repo');
-      FileSystem.ensureFolder(testRepoPath);
+    beforeEach(async () => {
+      await FileSystem.copyFilesAsync({ sourcePath: CATALOG_SYNC_REPO_PATH, destinationPath: testRepoPath });
 
-      const rushJsonPath: string = `${testRepoPath/rush.json`;
-      const rushJson = {
-        $schema: 'https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json',
-        rushVersion: '5.166.0',
-        pnpmVersion: '10.28.1',
-        nodeSupportedVersionRange: '>=18.0.0',
-        projects: []
-      };
-      JsonFile.save(rushJson, rushJsonPath, { ensureFolderExists: true });
-
-      const configDir: string = path.join(testRepoPath, 'common', 'config', 'rush');
-      FileSystem.ensureFolder(configDir);
-
-      pnpmConfigPath = path.join(configDir, 'pnpm-config.json');
-      const pnpmConfig = {
-        globalCatalogs: {
-          default: {
-            react: '^18.0.0',
-            'react-dom': '^18.0.0'
-          }
-        }
-      };
-      JsonFile.save(pnpmConfig, pnpmConfigPath);
-
-      const tempDir: string = path.join(testRepoPath, 'common', 'temp');
-      FileSystem.ensureFolder(tempDir);
-
-      pnpmWorkspacePath = path.join(tempDir, 'pnpm-workspace.yaml');
-      const workspaceYaml = `packages:
-  - '../../apps/*'
-catalogs:
-  default:
-    react: ^18.0.0
-    react-dom: ^18.0.0
-`;
-      FileSystem.writeFile(pnpmWorkspacePath, workspaceYaml);
+      // common/temp is gitignored so it is not part of the static repo; copy the initial workspace file here
+      await FileSystem.copyFilesAsync({
+        sourcePath: `${CATALOG_SYNC_REPO_PATH}/pnpm-workspace.yaml`,
+        destinationPath: pnpmWorkspacePath
+      });
     });
 
-    afterEach(() => {
-      if (FileSystem.exists(testRepoPath)) {
-        FileSystem.deleteFolder(testRepoPath);
-      }
+    afterEach(async () => {
+      await FileSystem.deleteFolderAsync(testRepoPath);
     });
 
     it('syncs updated catalogs from pnpm-workspace.yaml to pnpm-config.json', async () => {
@@ -71,10 +42,10 @@ catalogs:
   frontend:
     vue: ^3.4.0
 `;
-      FileSystem.writeFile(pnpmWorkspacePath, updatedWorkspaceYaml);
+      await FileSystem.writeFileAsync(pnpmWorkspacePath, updatedWorkspaceYaml);
 
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-        path.join(testRepoPath, 'rush.json')
+        `${testRepoPath}/rush.json`
       );
 
       const subspace = rushConfiguration.getSubspace('default');
@@ -90,10 +61,10 @@ catalogs:
       const { PnpmWorkspaceFile } = require('../../logic/pnpm/PnpmWorkspaceFile');
       const newCatalogs = await PnpmWorkspaceFile.loadCatalogsFromFileAsync(pnpmWorkspacePath);
 
-      pnpmOptions?.updateGlobalCatalogs(newCatalogs);
+      await pnpmOptions?.updateGlobalCatalogsAsync(newCatalogs);
 
       const updatedRushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-        path.join(testRepoPath, 'rush.json')
+        `${testRepoPath}/rush.json`
       );
       const updatedSubspace = updatedRushConfiguration.getSubspace('default');
       const updatedPnpmOptions = updatedSubspace.getPnpmOptions();
@@ -115,12 +86,12 @@ catalogs:
       const newCatalogs = await PnpmWorkspaceFile.loadCatalogsFromFileAsync(pnpmWorkspacePath);
 
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-        path.join(testRepoPath, 'rush.json')
+        `${testRepoPath}/rush.json`
       );
       const subspace = rushConfiguration.getSubspace('default');
       const pnpmOptions = subspace.getPnpmOptions();
 
-      pnpmOptions?.updateGlobalCatalogs(newCatalogs);
+      await pnpmOptions?.updateGlobalCatalogsAsync(newCatalogs);
 
       const savedConfig = JsonFile.load(pnpmConfigPath);
       expect(savedConfig.globalCatalogs).toEqual({
@@ -135,7 +106,7 @@ catalogs:
       const workspaceWithoutCatalogs = `packages:
   - '../../apps/*'
 `;
-      FileSystem.writeFile(pnpmWorkspacePath, workspaceWithoutCatalogs);
+      await FileSystem.writeFileAsync(pnpmWorkspacePath, workspaceWithoutCatalogs);
 
       const { PnpmWorkspaceFile } = require('../../logic/pnpm/PnpmWorkspaceFile');
       const newCatalogs = await PnpmWorkspaceFile.loadCatalogsFromFileAsync(pnpmWorkspacePath);
@@ -143,15 +114,15 @@ catalogs:
       expect(newCatalogs).toBeUndefined();
 
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-        path.join(testRepoPath, 'rush.json')
+        `${testRepoPath}/rush.json`
       );
       const subspace = rushConfiguration.getSubspace('default');
       const pnpmOptions = subspace.getPnpmOptions();
 
-      pnpmOptions?.updateGlobalCatalogs(newCatalogs);
+      await pnpmOptions?.updateGlobalCatalogsAsync(newCatalogs);
 
       const updatedRushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-        path.join(testRepoPath, 'rush.json')
+        `${testRepoPath}/rush.json`
       );
       const updatedSubspace = updatedRushConfiguration.getSubspace('default');
       const updatedPnpmOptions = updatedSubspace.getPnpmOptions();

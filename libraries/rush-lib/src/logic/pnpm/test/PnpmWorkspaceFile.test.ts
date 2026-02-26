@@ -31,7 +31,7 @@ describe(PnpmWorkspaceFile.name, () => {
     // Mock FileSystem.readFile to return the written content
     mockReadFile = jest.spyOn(FileSystem, 'readFile').mockImplementation(() => {
       if (writtenContent === undefined) {
-        throw new Error('File not found');
+        throw Object.assign(new Error('ENOENT: no such file or directory'), { code: 'ENOENT', errno: -2, syscall: 'open' });
       }
       return writtenContent;
     });
@@ -39,7 +39,7 @@ describe(PnpmWorkspaceFile.name, () => {
     // Mock async version for loadCatalogsFromFileAsync
     mockReadFileAsync = jest.spyOn(FileSystem, 'readFileAsync').mockImplementation(async () => {
       if (writtenContent === undefined) {
-        throw new Error('File not found');
+        throw Object.assign(new Error('ENOENT: no such file or directory'), { code: 'ENOENT', errno: -2, syscall: 'open' });
       }
       return writtenContent;
     });
