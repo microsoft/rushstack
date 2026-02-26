@@ -201,9 +201,7 @@ describe(PnpmOptionsConfiguration.name, () => {
 
         expect(reloadedConfig.globalCatalogs).toBeUndefined();
       } finally {
-        if (FileSystem.exists(testConfigPath)) {
-          FileSystem.deleteFile(testConfigPath);
-        }
+        await FileSystem.deleteFileAsync(testConfigPath);
       }
     });
   });
