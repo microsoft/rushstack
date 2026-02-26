@@ -3,50 +3,71 @@
 
 import { ProjectConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 
-import publishSchemaJson from '../schemas/publish.schema.json';
+import rushPublishSchemaJson from '../schemas/rush-publish.schema.json';
 
 /**
- * Represents the parsed contents of a project's `config/publish.json` file.
+ * Represents a single publish provider entry in the `providers` array.
  * @public
  */
-export interface IPublishJson {
+export interface IRushPublishProviderEntry {
   /**
-   * An object whose keys are publish target names (e.g. 'npm', 'vsix') and whose
-   * values are provider-specific configuration objects.
+   * The name of the publish provider (e.g. 'npm', 'vsix').
    */
-  providers?: Record<string, Record<string, unknown>>;
+  name: string;
+
+  /**
+   * Provider-specific configuration options.
+   */
+  options?: Record<string, unknown>;
 }
 
 /**
- * The `ProjectConfigurationFile` instance for loading `config/publish.json` with
+ * Represents the parsed contents of a project's `config/rush-publish.json` file.
+ * @public
+ */
+export interface IRushPublishJson {
+  /**
+   * An array of publish provider entries. Each entry specifies a provider name
+   * and an optional set of provider-specific configuration options.
+   */
+  providers?: IRushPublishProviderEntry[];
+}
+
+/**
+ * The `ProjectConfigurationFile` instance for loading `config/rush-publish.json` with
  * rig resolution and property inheritance.
  *
  * @remarks
- * The `providers` property uses custom inheritance: child provider sections are
- * shallow-merged over parent provider sections. This means a project can override
- * specific provider configs from a rig while inheriting others.
+ * The `providers` property uses custom inheritance with name-based deduplication:
+ * parent entries whose name does not appear in the child array are prepended,
+ * followed by the child entries. This means a project can override specific
+ * provider configs from a rig while inheriting others.
  *
  * @internal
  */
-export const PUBLISH_CONFIGURATION_FILE: ProjectConfigurationFile<IPublishJson> =
-  new ProjectConfigurationFile<IPublishJson>({
-    projectRelativeFilePath: 'config/publish.json',
-    jsonSchemaObject: publishSchemaJson,
+export const RUSH_PUBLISH_CONFIGURATION_FILE: ProjectConfigurationFile<IRushPublishJson> =
+  new ProjectConfigurationFile<IRushPublishJson>({
+    projectRelativeFilePath: 'config/rush-publish.json',
+    jsonSchemaObject: rushPublishSchemaJson,
     propertyInheritance: {
       providers: {
         inheritanceType: InheritanceType.custom,
         inheritanceFunction: (
-          child: Record<string, Record<string, unknown>> | undefined,
-          parent: Record<string, Record<string, unknown>> | undefined
-        ): Record<string, Record<string, unknown>> | undefined => {
+          child: IRushPublishProviderEntry[] | undefined,
+          parent: IRushPublishProviderEntry[] | undefined
+        ): IRushPublishProviderEntry[] | undefined => {
           if (!child) {
             return parent;
           }
           if (!parent) {
             return child;
           }
-          // Shallow merge: child provider sections override parent provider sections
-          return { ...parent, ...child };
+          // Name-based deduplication: inherit parent entries not overridden by child
+          const childNames: Set<string> = new Set(child.map((entry) => entry.name));
+          const inherited: IRushPublishProviderEntry[] = parent.filter(
+            (entry) => !childNames.has(entry.name)
+          );
+          return [...inherited, ...child];
         }
       }
     }

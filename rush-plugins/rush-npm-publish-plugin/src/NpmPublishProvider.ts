@@ -18,7 +18,7 @@ import type {
 
 /**
  * Configuration options for the npm publish provider, read from
- * the `providers.npm` section of `config/publish.json`.
+ * the `providers.npm` section of `config/rush-publish.json`.
  */
 export interface INpmProviderConfig {
   registryUrl?: string;
@@ -183,8 +183,7 @@ export class NpmPublishProvider implements IPublishProvider {
    */
   private _calculateTarballName(project: IPublishProjectInfo['project']): string {
     const packageName: string = project.packageName;
-    const name: string =
-      packageName[0] === '@' ? packageName.substring(1).replace(/\//g, '-') : packageName;
+    const name: string = packageName[0] === '@' ? packageName.substring(1).replace(/\//g, '-') : packageName;
 
     if (project.rushConfiguration.packageManager === 'yarn') {
       return `${name}-v${project.packageJson.version}.tgz`;

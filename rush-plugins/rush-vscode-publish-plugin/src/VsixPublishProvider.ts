@@ -13,7 +13,7 @@ import type {
 
 /**
  * Configuration options for the VSIX publish provider, read from
- * the `providers.vsix` section of `config/publish.json`.
+ * the `providers.vsix` section of `config/rush-publish.json`.
  */
 export interface IVsixProviderConfig {
   /**

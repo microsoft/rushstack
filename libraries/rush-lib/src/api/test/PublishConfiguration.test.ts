@@ -6,9 +6,9 @@ import * as path from 'node:path';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { RigConfig } from '@rushstack/rig-package';
 
-import { PUBLISH_CONFIGURATION_FILE, type IPublishJson } from '../PublishConfiguration';
+import { RUSH_PUBLISH_CONFIGURATION_FILE, type IRushPublishJson } from '../PublishConfiguration';
 
-describe('PUBLISH_CONFIGURATION_FILE', () => {
+describe(RUSH_PUBLISH_CONFIGURATION_FILE.name, () => {
   let terminal: Terminal;
 
   beforeEach(() => {
@@ -16,15 +16,15 @@ describe('PUBLISH_CONFIGURATION_FILE', () => {
     terminal = new Terminal(terminalProvider);
   });
 
-  it('loads config from project config/publish.json', async () => {
+  it('loads config from project config/rush-publish.json', async () => {
     const projectFolder: string = path.resolve(__dirname, 'publishConfig', 'project-only');
     const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
       projectFolderPath: projectFolder,
       bypassCache: true
     });
 
-    const config: IPublishJson | undefined =
-      await PUBLISH_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+    const config: IRushPublishJson | undefined =
+      await RUSH_PUBLISH_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
         terminal,
         projectFolder,
         rigConfig
@@ -42,8 +42,8 @@ describe('PUBLISH_CONFIGURATION_FILE', () => {
       bypassCache: true
     });
 
-    const config: IPublishJson | undefined =
-      await PUBLISH_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+    const config: IRushPublishJson | undefined =
+      await RUSH_PUBLISH_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
         terminal,
         projectFolder,
         rigConfig
@@ -59,8 +59,8 @@ describe('PUBLISH_CONFIGURATION_FILE', () => {
       bypassCache: true
     });
 
-    const config: IPublishJson | undefined =
-      await PUBLISH_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+    const config: IRushPublishJson | undefined =
+      await RUSH_PUBLISH_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
         terminal,
         projectFolder,
         rigConfig
@@ -81,8 +81,8 @@ describe('PUBLISH_CONFIGURATION_FILE', () => {
       bypassCache: true
     });
 
-    const config: IPublishJson | undefined =
-      await PUBLISH_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+    const config: IRushPublishJson | undefined =
+      await RUSH_PUBLISH_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
         terminal,
         projectFolder,
         rigConfig
@@ -105,5 +105,70 @@ describe('PUBLISH_CONFIGURATION_FILE', () => {
     if (providerKeys.includes('npm')) {
       expect(config!.providers!.npm).toMatchObject({ registryUrl: 'https://registry.npmjs.org' });
     }
+  });
+
+  it('validates known npm provider config fields', async () => {
+    const projectFolder: string = path.resolve(__dirname, 'publishConfig', 'npm-valid');
+    const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
+      projectFolderPath: projectFolder,
+      bypassCache: true
+    });
+
+    const config: IRushPublishJson | undefined =
+      await RUSH_PUBLISH_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+        terminal,
+        projectFolder,
+        rigConfig
+      );
+
+    expect(config).toBeDefined();
+    expect(config!.providers!.npm).toMatchObject({
+      registryUrl: 'https://registry.npmjs.org',
+      npmAuthToken: 'test-token',
+      tag: 'latest',
+      access: 'public'
+    });
+  });
+
+  it('validates known vsix provider config fields', async () => {
+    const projectFolder: string = path.resolve(__dirname, 'publishConfig', 'vsix-valid');
+    const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
+      projectFolderPath: projectFolder,
+      bypassCache: true
+    });
+
+    const config: IRushPublishJson | undefined =
+      await RUSH_PUBLISH_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+        terminal,
+        projectFolder,
+        rigConfig
+      );
+
+    expect(config).toBeDefined();
+    expect(config!.providers!.vsix).toMatchObject({
+      vsixPathPattern: 'dist/vsix/extension.vsix',
+      useAzureCredential: true
+    });
+  });
+
+  it('allows arbitrary properties on custom provider keys', async () => {
+    const projectFolder: string = path.resolve(__dirname, 'publishConfig', 'custom-provider');
+    const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
+      projectFolderPath: projectFolder,
+      bypassCache: true
+    });
+
+    const config: IRushPublishJson | undefined =
+      await RUSH_PUBLISH_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+        terminal,
+        projectFolder,
+        rigConfig
+      );
+
+    expect(config).toBeDefined();
+    expect(config!.providers!['my-custom-target']).toMatchObject({
+      apiEndpoint: 'https://custom.example.com',
+      authMethod: 'bearer'
+    });
   });
 });

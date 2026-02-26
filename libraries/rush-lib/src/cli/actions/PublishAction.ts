@@ -13,7 +13,11 @@ import { RigConfig } from '@rushstack/rig-package';
 import { Colorize, ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
-import { type IPublishJson, PUBLISH_CONFIGURATION_FILE } from '../../api/PublishConfiguration';
+import {
+  type IRushPublishJson,
+  type IRushPublishProviderEntry,
+  RUSH_PUBLISH_CONFIGURATION_FILE
+} from '../../api/PublishConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { ChangelogGenerator } from '../../logic/ChangelogGenerator';
@@ -56,7 +60,7 @@ export class PublishAction extends BaseRushAction {
   private _prereleaseToken!: PrereleaseToken;
   private _hotfixTagOverride!: string;
   private _targetNpmrcPublishFolder!: string;
-  private readonly _publishConfigCache: Map<string, IPublishJson | undefined> = new Map();
+  private readonly _publishConfigCache: Map<string, IRushPublishJson | undefined> = new Map();
   private readonly _providerCache: Map<string, IPublishProvider> = new Map();
 
   public constructor(parser: RushCommandLineParser) {
@@ -461,11 +465,10 @@ export class PublishAction extends BaseRushAction {
       getShouldPrintStacks: () => false
     });
 
-    for (const target of project.publishTargets) {
-      if (target === 'none') {
-        continue;
-      }
+    const publishTargets: string[] = await this._getPublishTargetsAsync(project);
+    this._validatePublishConfigAsync(project, publishTargets);
 
+    for (const target of publishTargets) {
       const provider: IPublishProvider = await this._getProviderAsync(target, project.packageName);
       const providerConfig: Record<string, unknown> | undefined = await this._getProviderConfigAsync(
         project,
@@ -521,11 +524,10 @@ export class PublishAction extends BaseRushAction {
     // Ensure the release folder exists
     FileSystem.ensureFolder(releaseFolder);
 
-    for (const target of project.publishTargets) {
-      if (target === 'none') {
-        continue;
-      }
+    const publishTargets: string[] = await this._getPublishTargetsAsync(project);
+    this._validatePublishConfigAsync(project, publishTargets);
 
+    for (const target of publishTargets) {
       const provider: IPublishProvider = await this._getProviderAsync(target, project.packageName);
       const providerConfig: Record<string, unknown> | undefined = await this._getProviderConfigAsync(
         project,
@@ -577,12 +579,12 @@ export class PublishAction extends BaseRushAction {
   }
 
   /**
-   * Load and cache the riggable config/publish.json for a given project.
+   * Load and cache the riggable config/rush-publish.json for a given project.
    */
   private async _loadPublishConfigAsync(
     project: RushConfigurationProject
-  ): Promise<IPublishJson | undefined> {
-    const cached: IPublishJson | undefined | null = this._publishConfigCache.get(project.packageName);
+  ): Promise<IRushPublishJson | undefined> {
+    const cached: IRushPublishJson | undefined | null = this._publishConfigCache.get(project.packageName);
     if (cached !== undefined) {
       // Cached result: null means we tried loading but the file doesn't exist
       return cached ?? undefined;
@@ -593,8 +595,8 @@ export class PublishAction extends BaseRushAction {
       projectFolderPath: project.projectFolder
     });
 
-    const publishJson: IPublishJson | undefined =
-      await PUBLISH_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+    const publishJson: IRushPublishJson | undefined =
+      await RUSH_PUBLISH_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
         terminal,
         project.projectFolder,
         rigConfig
@@ -603,6 +605,53 @@ export class PublishAction extends BaseRushAction {
     // Store null for "not found" to distinguish from "not yet loaded"
     this._publishConfigCache.set(project.packageName, publishJson ?? undefined);
     return publishJson;
+  }
+
+  /**
+   * Derive the publish targets for a project from its config/rush-publish.json.
+   * - If no config file exists, returns ['npm'] for backward compatibility.
+   * - If config exists but providers is absent or empty, returns [] (version-only mode).
+   * - If config exists with providers, returns Object.keys(providers).
+   */
+  private async _getPublishTargetsAsync(project: RushConfigurationProject): Promise<string[]> {
+    const publishJson: IRushPublishJson | undefined = await this._loadPublishConfigAsync(project);
+    if (!publishJson) {
+      // No config file: default to npm for backward compatibility
+      return ['npm'];
+    }
+    const providers: Record<string, Record<string, unknown>> | undefined = publishJson.providers;
+    if (!providers || Object.keys(providers).length === 0) {
+      // Config exists but no providers: version-only mode
+      return [];
+    }
+    return Object.keys(providers);
+  }
+
+  /**
+   * Validate publish configuration for a project before publishing or packing.
+   */
+  private _validatePublishConfigAsync(project: RushConfigurationProject, publishTargets: string[]): void {
+    // Validate: private:true is only invalid when publishTargets includes 'npm'
+    if (project.shouldPublish && project.packageJson.private && publishTargets.includes('npm')) {
+      throw new Error(
+        `The project "${project.packageName}" specifies "shouldPublish": true with ` +
+          `publish targets including "npm", but the package.json file specifies "private": true. ` +
+          `Either remove "shouldPublish" or configure a non-npm provider in config/rush-publish.json.`
+      );
+    }
+
+    // Validate: version-only (empty providers) is incompatible with lockstep version policies
+    if (publishTargets.length === 0 && project.versionPolicyName) {
+      const policy: VersionPolicy | undefined =
+        this.rushConfiguration.versionPolicyConfiguration.getVersionPolicy(project.versionPolicyName);
+      if (policy && policy.isLockstepped) {
+        throw new Error(
+          `The project "${project.packageName}" has no publish targets (version-only mode via ` +
+            `config/rush-publish.json) but uses the lockstep version policy "${project.versionPolicyName}". ` +
+            `Version-only mode is incompatible with lockstep version policies.`
+        );
+      }
+    }
   }
 
   /**
@@ -616,7 +665,7 @@ export class PublishAction extends BaseRushAction {
       if (!factory) {
         throw new Error(
           `No publish provider registered for target "${targetName}". ` +
-            `Project "${packageName}" has publishTarget including "${targetName}" ` +
+            `Project "${packageName}" has a "${targetName}" provider in config/rush-publish.json ` +
             `but no plugin has registered a provider for it.`
         );
       }
@@ -633,10 +682,10 @@ export class PublishAction extends BaseRushAction {
     project: RushConfigurationProject,
     targetName: string
   ): Promise<Record<string, unknown> | undefined> {
-    const publishJson: IPublishJson | undefined = await this._loadPublishConfigAsync(project);
+    const publishJson: IRushPublishJson | undefined = await this._loadPublishConfigAsync(project);
     const baseConfig: Record<string, unknown> | undefined = publishJson?.providers?.[targetName];
 
-    // For npm target, merge CLI flag overrides on top of config/publish.json values
+    // For npm target, merge CLI flag overrides on top of config/rush-publish.json values
     if (targetName === 'npm') {
       const cliOverrides: Record<string, unknown> = {};
       if (this._registryUrl.value) {

@@ -1,0 +1,8 @@
+{
+  "providers": {
+    "my-custom-target": {
+      "apiEndpoint": "https://custom.example.com",
+      "authMethod": "bearer"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "providers": {
+    "vsix": {
+      "vsixPathPattern": "dist/vsix/extension.vsix",
+      "useAzureCredential": true
+    }
+  }
+}

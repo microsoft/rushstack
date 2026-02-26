@@ -27,7 +27,6 @@ export interface IRushConfigurationProjectJson {
   cyclicDependencyProjects?: string[];
   versionPolicyName?: string;
   shouldPublish?: boolean;
-  publishTarget?: string | string[];
   skipRushCheck?: boolean;
   publishFolder?: string;
   tags?: string[];
@@ -68,7 +67,6 @@ export interface IRushConfigurationProjectOptions {
  */
 export class RushConfigurationProject {
   private readonly _shouldPublish: boolean;
-  private readonly _publishTargets: ReadonlyArray<string>;
 
   private _versionPolicy: VersionPolicy | undefined = undefined;
   private _dependencyProjects: Set<RushConfigurationProject> | undefined = undefined;
@@ -330,50 +328,6 @@ export class RushConfigurationProject {
     this.skipRushCheck = !!projectJson.skipRushCheck;
     this.versionPolicyName = projectJson.versionPolicyName;
 
-    // Normalize publishTarget: string -> [string], undefined -> ['npm']
-    const rawTarget: string | string[] | undefined = projectJson.publishTarget;
-    if (rawTarget === undefined) {
-      this._publishTargets = ['npm'];
-    } else if (typeof rawTarget === 'string') {
-      this._publishTargets = [rawTarget];
-    } else {
-      this._publishTargets = rawTarget;
-    }
-
-    // Validate: 'none' cannot be combined with other targets
-    if (this._publishTargets.includes('none') && this._publishTargets.length > 1) {
-      throw new Error(
-        `The project "${packageName}" specifies publishTarget "none" combined with other targets. ` +
-          `The "none" target cannot be combined with other publish targets.`
-      );
-    }
-
-    // Validate: 'none' is incompatible with lockstep version policies
-    if (
-      this._publishTargets.includes('none') &&
-      this.versionPolicyName &&
-      rushConfiguration.versionPolicyConfiguration
-    ) {
-      const policy: VersionPolicy | undefined = rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
-        this.versionPolicyName
-      );
-      if (policy && policy.isLockstepped) {
-        throw new Error(
-          `The project "${packageName}" specifies publishTarget "none" but uses the lockstep ` +
-            `version policy "${this.versionPolicyName}". The "none" target is incompatible with ` +
-            `lockstep version policies.`
-        );
-      }
-    }
-
-    // Validate: private:true is only invalid when publishTargets includes 'npm'
-    if (this._shouldPublish && this.packageJson.private && this._publishTargets.includes('npm')) {
-      throw new Error(
-        `The project "${packageName}" specifies "shouldPublish": true with ` +
-          `publishTarget including "npm", but the package.json file specifies "private": true.`
-      );
-    }
-
     this.publishFolder = absoluteProjectFolder;
     const { publishFolder } = projectJson;
     if (publishFolder) {
@@ -519,21 +473,6 @@ export class RushConfigurationProject {
    */
   public get shouldPublish(): boolean {
     return this._shouldPublish || !!this.versionPolicyName;
-  }
-
-  /**
-   * Specifies the publish targets for this project. Determines which publish
-   * provider plugins handle publishing during `rush publish`.
-   *
-   * @remarks
-   * Common values: `'npm'`, `'vsix'`, `'none'`.
-   * When the array contains `'none'`, the project participates in versioning
-   * but is not published by any provider.
-   * When omitted in rush.json, defaults to `['npm']` for backward compatibility.
-   * A string value is normalized to a single-element array.
-   */
-  public get publishTargets(): ReadonlyArray<string> {
-    return this._publishTargets;
   }
 
   /**

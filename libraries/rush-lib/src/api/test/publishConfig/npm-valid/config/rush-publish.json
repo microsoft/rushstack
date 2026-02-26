@@ -1,0 +1,10 @@
+{
+  "providers": {
+    "npm": {
+      "registryUrl": "https://registry.npmjs.org",
+      "npmAuthToken": "test-token",
+      "tag": "latest",
+      "access": "public"
+    }
+  }
+}

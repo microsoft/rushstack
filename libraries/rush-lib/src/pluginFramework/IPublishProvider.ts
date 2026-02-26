@@ -31,7 +31,7 @@ export interface IPublishProjectInfo {
   readonly changeType: ChangeType;
 
   /**
-   * Provider-specific configuration from config/publish.json for this project.
+   * Provider-specific configuration from config/rush-publish.json for this project.
    * This is the value of the `providers[targetName]` section.
    */
   readonly providerConfig: Record<string, unknown> | undefined;
@@ -80,7 +80,7 @@ export interface IPublishProviderCheckExistsOptions {
   readonly version: string;
 
   /**
-   * Provider-specific configuration from config/publish.json for this project.
+   * Provider-specific configuration from config/rush-publish.json for this project.
    */
   readonly providerConfig: Record<string, unknown> | undefined;
 }
