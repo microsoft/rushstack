@@ -32,6 +32,7 @@ import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTyp
 import { Utilities } from '../utilities/Utilities';
 import type { Subspace } from '../api/Subspace';
 import type { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
+import { PnpmWorkspaceFile } from '../logic/pnpm/PnpmWorkspaceFile';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { initializeDotEnv } from '../logic/dotenv';
 
@@ -583,7 +584,7 @@ export class RushPnpmCommandLineParser {
 
         if (!Objects.areDeepEqual(currentGlobalOnlyBuiltDependencies, newGlobalOnlyBuiltDependencies)) {
           // Update onlyBuiltDependencies to pnpm configuration file
-          pnpmOptions?.updateGlobalOnlyBuiltDependencies(newGlobalOnlyBuiltDependencies);
+          await pnpmOptions?.updateGlobalOnlyBuiltDependenciesAsync(newGlobalOnlyBuiltDependencies);
 
           // Rerun installation to update
           await this._doRushUpdateAsync();
@@ -591,6 +592,29 @@ export class RushPnpmCommandLineParser {
           this._terminal.writeWarningLine(
             `Rush refreshed the ${RushConstants.pnpmConfigFilename} and shrinkwrap file.\n` +
               '  Please commit this change to Git.'
+          );
+        }
+        break;
+      }
+      case 'up':
+      case 'update': {
+        const pnpmOptions: PnpmOptionsConfiguration | undefined = this._subspace.getPnpmOptions();
+        if (pnpmOptions === undefined) {
+          break;
+        }
+
+        const workspaceYamlFilename: string = path.join(subspaceTempFolder, 'pnpm-workspace.yaml');
+        const newCatalogs: Record<string, Record<string, string>> | undefined =
+          await PnpmWorkspaceFile.loadCatalogsFromFileAsync(workspaceYamlFilename);
+        const currentCatalogs: Record<string, Record<string, string>> | undefined =
+          pnpmOptions.globalCatalogs;
+
+        if (!Objects.areDeepEqual(currentCatalogs, newCatalogs)) {
+          await pnpmOptions.updateGlobalCatalogsAsync(newCatalogs);
+
+          this._terminal.writeWarningLine(
+            `Rush refreshed the ${RushConstants.pnpmConfigFilename} with updated catalog definitions.\n` +
+              `  Run "rush update --recheck" to update the lockfile, then commit these changes to Git.`
           );
         }
         break;
