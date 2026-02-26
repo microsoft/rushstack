@@ -280,16 +280,14 @@ describe(PnpmOptionsConfiguration.name, () => {
     });
 
     it('handles undefined in updateGlobalOnlyBuiltDependenciesAsync', async () => {
-      const testConfigPath: string = path.join(__dirname, 'temp', 'pnpm-config-undefined-test.json');
-      const tempDir: string = path.dirname(testConfigPath);
-      FileSystem.ensureFolder(tempDir);
+      const testConfigPath: string = `${__dirname}/temp/pnpm-config-undefined-test.json`;
 
       try {
         const initialConfig = {
           $schema: 'https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json',
           globalOnlyBuiltDependencies: ['node-gyp', 'esbuild']
         };
-        JsonFile.save(initialConfig, testConfigPath, { ensureFolderExists: true });
+        await JsonFile.saveAsync(initialConfig, testConfigPath, { ensureFolderExists: true });
 
         const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
           testConfigPath,
