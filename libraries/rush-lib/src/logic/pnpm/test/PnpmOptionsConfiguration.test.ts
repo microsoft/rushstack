@@ -244,10 +244,7 @@ describe(PnpmOptionsConfiguration.name, () => {
     });
 
     it('preserves $schema when it exists', () => {
-      const testConfigPath: string = path.join(__dirname, 'temp', 'pnpm-config-with-schema.json');
-
-      const tempDir: string = path.dirname(testConfigPath);
-      FileSystem.ensureFolder(tempDir);
+      const testConfigPath: string = `${__dirname}/temp/pnpm-config-with-schema.json`;
 
       try {
         // Create config with $schema
@@ -259,7 +256,7 @@ describe(PnpmOptionsConfiguration.name, () => {
             }
           }
         };
-        JsonFile.save(configWithSchema, testConfigPath, { ensureFolderExists: true });
+        await JsonFile.saveAsync(configWithSchema, testConfigPath, { ensureFolderExists: true });
 
         const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
           testConfigPath,
