@@ -284,9 +284,7 @@ describe(PnpmOptionsConfiguration.name, () => {
           'https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json'
         );
       } finally {
-        if (FileSystem.exists(testConfigPath)) {
-          FileSystem.deleteFile(testConfigPath);
-        }
+        await FileSystem.deleteFile(testConfigPath);
       }
     });
 
