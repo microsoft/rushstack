@@ -16,7 +16,7 @@ describe('RushPnpmCommandLineParser', () => {
       testRepoPath = path.join(__dirname, 'temp', 'catalog-sync-test-repo');
       FileSystem.ensureFolder(testRepoPath);
 
-      const rushJsonPath: string = path.join(testRepoPath, 'rush.json');
+      const rushJsonPath: string = `${testRepoPath/rush.json`;
       const rushJson = {
         $schema: 'https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json',
         rushVersion: '5.166.0',
