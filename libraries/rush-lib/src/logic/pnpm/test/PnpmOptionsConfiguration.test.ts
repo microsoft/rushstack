@@ -315,9 +315,7 @@ describe(PnpmOptionsConfiguration.name, () => {
         );
         expect(savedConfigJson.globalOnlyBuiltDependencies).toBeUndefined();
       } finally {
-        if (FileSystem.exists(testConfigPath)) {
-          FileSystem.deleteFile(testConfigPath);
-        }
+        await FileSystem.deleteFileAsync(testConfigPath);
       }
     });
   });
