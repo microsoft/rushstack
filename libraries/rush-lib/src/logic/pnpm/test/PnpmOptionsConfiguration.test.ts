@@ -245,9 +245,7 @@ describe(PnpmOptionsConfiguration.name, () => {
 
         expect(TestUtilities.stripAnnotations(reloadedConfig.globalCatalogs)).toEqual(updatedCatalogs);
       } finally {
-        if (FileSystem.exists(testConfigPath)) {
-          FileSystem.deleteFile(testConfigPath);
-        }
+        await FileSystem.deleteFile(testConfigPath);
       }
     });
 
