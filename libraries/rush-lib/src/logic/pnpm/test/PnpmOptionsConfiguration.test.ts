@@ -171,11 +171,8 @@ describe(PnpmOptionsConfiguration.name, () => {
       }
     });
 
-    it('handles undefined catalogs', () => {
-      const testConfigPath: string = path.join(__dirname, 'temp', 'pnpm-config-undefined-test.json');
-
-      const tempDir: string = path.dirname(testConfigPath);
-      FileSystem.ensureFolder(tempDir);
+    it('handles undefined catalogs', async () => {
+      const testConfigPath: string = `${__dirname}/temp/pnpm-config-undefined-test.json`;
 
       try {
         const initialConfig = {
@@ -185,7 +182,7 @@ describe(PnpmOptionsConfiguration.name, () => {
             }
           }
         };
-        JsonFile.save(initialConfig, testConfigPath, { ensureFolderExists: true });
+        await JsonFile.saveAsync(initialConfig, testConfigPath, { ensureFolderExists: true });
 
         const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
           testConfigPath,
