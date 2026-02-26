@@ -558,7 +558,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public updateGlobalCatalogs(catalogs: Record<string, Record<string, string>> | undefined): void {
     this._json.globalCatalogs = catalogs;
     if (this.jsonFilename) {
-      JsonFile.save(this._json, this.jsonFilename, { updateExistingFile: true });
+      JsonFile.save(this._json, this.jsonFilename, { updateExistingFile: true, ignoreUndefinedValues: true });
     }
   }
 }
