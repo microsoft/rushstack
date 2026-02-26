@@ -556,11 +556,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * Updates globalCatalogs field of the PNPM options in the common/config/rush/pnpm-config.json file.
    */
   public updateGlobalCatalogs(catalogs: Record<string, Record<string, string>> | undefined): void {
-    if (catalogs === undefined) {
-      delete this._json.globalCatalogs;
-    } else {
-      this._json.globalCatalogs = catalogs;
-    }
+    this._json.globalCatalogs = catalogs;
     if (this.jsonFilename) {
       JsonFile.save(this._json, this.jsonFilename, { updateExistingFile: true });
     }
