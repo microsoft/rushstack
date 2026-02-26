@@ -73,11 +73,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     const content: string = await FileSystem.readFileAsync(workspaceYamlFilename);
     const parsed: IPnpmWorkspaceYaml | undefined = yamlModule.load(content) as IPnpmWorkspaceYaml | undefined;
 
-    if (!parsed || !parsed.catalogs) {
-      return undefined;
-    }
-
-    return parsed.catalogs;
+    return parsed?.catalogs;
   }
 
   /**
