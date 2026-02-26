@@ -270,7 +270,7 @@ describe(PnpmOptionsConfiguration.name, () => {
         };
         pnpmConfiguration.updateGlobalCatalogs(updatedCatalogs);
 
-        const savedConfig = JsonFile.load(testConfigPath);
+        const savedConfig = await JsonFile.loadAsync(testConfigPath);
         expect(savedConfig.$schema).toBe(
           'https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json'
         );
