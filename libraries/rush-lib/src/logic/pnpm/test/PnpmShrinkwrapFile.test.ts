@@ -362,6 +362,36 @@ snapshots:
           )
         ).resolves.toBe(false);
       });
+
+      it('can detect versioned overrides', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v5/versioned-overrides-not-modified.yaml`,
+          project.rushConfiguration.defaultSubspace
+        );
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace,
+            undefined
+          )
+        ).resolves.toBe(false);
+      });
+
+      it('can detect nested dependency overrides', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v5/nested-overrides-not-modified.yaml`,
+          project.rushConfiguration.defaultSubspace
+        );
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace,
+            undefined
+          )
+        ).resolves.toBe(false);
+      });
     });
 
     describe('pnpm lockfile major version 6', () => {
@@ -399,6 +429,36 @@ snapshots:
         const project = getMockRushProject();
         const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v6/overrides-not-modified.yaml`,
+          project.rushConfiguration.defaultSubspace
+        );
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace,
+            undefined
+          )
+        ).resolves.toBe(false);
+      });
+
+      it('can detect versioned overrides', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v6/versioned-overrides-not-modified.yaml`,
+          project.rushConfiguration.defaultSubspace
+        );
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace,
+            undefined
+          )
+        ).resolves.toBe(false);
+      });
+
+      it('can detect nested dependency overrides', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v6/nested-overrides-not-modified.yaml`,
           project.rushConfiguration.defaultSubspace
         );
         await expect(
@@ -461,6 +521,36 @@ snapshots:
         const project = getMockRushProject();
         const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v9/overrides-not-modified.yaml`,
+          project.rushConfiguration.defaultSubspace
+        );
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace,
+            undefined
+          )
+        ).resolves.toBe(false);
+      });
+
+      it('can detect versioned overrides', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v9/versioned-overrides-not-modified.yaml`,
+          project.rushConfiguration.defaultSubspace
+        );
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace,
+            undefined
+          )
+        ).resolves.toBe(false);
+      });
+
+      it('can detect nested dependency overrides', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v9/nested-overrides-not-modified.yaml`,
           project.rushConfiguration.defaultSubspace
         );
         await expect(
