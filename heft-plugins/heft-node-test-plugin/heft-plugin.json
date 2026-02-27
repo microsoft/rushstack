@@ -1,0 +1,20 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
+  "taskPlugins": [
+    {
+      "pluginName": "node-test-plugin",
+      "entryPoint": "./lib/NodeTestPlugin",
+      "optionsSchema": "./lib/schemas/node-test.schema.json",
+
+      "parameterScope": "node-test",
+      "parameters": [
+        {
+          "longName": "--update-snapshots",
+          "parameterKind": "flag",
+          "description": "Update test snapshots instead of comparing against them."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Node Test Plugin Configuration",
+  "description": "Defines options for Node.js test runner plugin execution.",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "testPattern": {
+      "description": "A glob pattern for test files to run. Default is \"test/**/*.test.mjs\".",
+      "type": "string"
+    }
+  }
+}
