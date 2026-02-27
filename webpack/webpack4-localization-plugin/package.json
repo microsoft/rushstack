@@ -60,7 +60,7 @@
     "@rushstack/terminal": "workspace:*",
     "@types/tapable": "1.0.6",
     "loader-utils": "1.4.2",
-    "minimatch": "10.2.1"
+    "minimatch": "10.2.3"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
