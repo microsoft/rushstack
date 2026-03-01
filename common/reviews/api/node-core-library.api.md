@@ -61,6 +61,15 @@ export type Brand<T, BrandTag extends string> = T & {
     __brand: BrandTag;
 };
 
+// @public
+function convertTo(input: string, newlineKind: NewlineKind): string;
+
+// @public
+function convertToCrLf(input: string): string;
+
+// @public
+function convertToLf(input: string): string;
+
 declare namespace Disposables {
     export {
         polyfillDisposeSymbols
@@ -73,6 +82,9 @@ export enum Encoding {
     // (undocumented)
     Utf8 = "utf8"
 }
+
+// @public
+function ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;
 
 // @public
 export class Enum {
@@ -106,6 +118,9 @@ export class EnvironmentMap {
     toObject(): Record<string, string>;
     unset(name: string): void;
 }
+
+// @public
+function escapeRegExp(literal: string): string;
 
 // @public
 export class Executable {
@@ -248,6 +263,9 @@ export type FolderItem = fs.Dirent;
 
 // @public
 function getHomeFolder(): string;
+
+// @public
+function getNewline(newlineKind: NewlineKind): string;
 
 // @public
 export interface IAsyncParallelismOptions {
@@ -851,6 +869,12 @@ export class PackageNameParser {
 }
 
 // @public
+function padEnd(s: string, minimumLength: number, paddingCharacter?: string): string;
+
+// @public
+function padStart(s: string, minimumLength: number, paddingCharacter?: string): string;
+
+// @public
 export class Path {
     static convertToBackslashes(inputPath: string): string;
     static convertToPlatformDefault(inputPath: string): string;
@@ -897,11 +921,23 @@ export class ProtectableMap<K, V> {
 }
 
 // @public
+function readLinesFromIterable(iterable: Iterable<string | Buffer | null>, options?: IReadLinesFromIterableOptions): Generator<string>;
+
+// @public
+function readLinesFromIterableAsync(iterable: AsyncIterable<string | Buffer>, options?: IReadLinesFromIterableOptions): AsyncGenerator<string>;
+
+// @public
 export class RealNodeModulePathResolver {
     constructor(options?: IRealNodeModulePathResolverOptions);
     clearCache(): void;
     readonly realNodeModulePath: (input: string) => string;
 }
+
+// @public
+function replaceAll(input: string, searchValue: string, replaceValue: string): string;
+
+// @public
+function reverse(s: string): string;
 
 // @public
 export class Sort {
@@ -914,6 +950,15 @@ export class Sort {
     static sortSet<T>(set: Set<T>, comparer?: (x: T, y: T) => number): void;
     static sortSetBy<T>(set: Set<T>, keySelector: (element: T) => any, keyComparer?: (x: T, y: T) => number): void;
 }
+
+// @public
+function splitByNewLines(s: undefined): undefined;
+
+// @public
+function splitByNewLines(s: string): string[];
+
+// @public
+function splitByNewLines(s: string | undefined): string[] | undefined;
 
 // @public
 export class StringBuilder implements IStringBuilder {
@@ -929,27 +974,31 @@ export class SubprocessTerminator {
     static readonly RECOMMENDED_OPTIONS: ISubprocessOptions;
 }
 
-// @public
-export class Text {
-    static convertTo(input: string, newlineKind: NewlineKind): string;
-    static convertToCrLf(input: string): string;
-    static convertToLf(input: string): string;
-    static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;
-    static escapeRegExp(literal: string): string;
-    static getNewline(newlineKind: NewlineKind): string;
-    static padEnd(s: string, minimumLength: number, paddingCharacter?: string): string;
-    static padStart(s: string, minimumLength: number, paddingCharacter?: string): string;
-    static readLinesFromIterable(iterable: Iterable<string | Buffer | null>, options?: IReadLinesFromIterableOptions): Generator<string>;
-    static readLinesFromIterableAsync(iterable: AsyncIterable<string | Buffer>, options?: IReadLinesFromIterableOptions): AsyncGenerator<string>;
-    static replaceAll(input: string, searchValue: string, replaceValue: string): string;
-    static reverse(s: string): string;
-    static splitByNewLines(s: undefined): undefined;
-    // (undocumented)
-    static splitByNewLines(s: string): string[];
-    // (undocumented)
-    static splitByNewLines(s: string | undefined): string[] | undefined;
-    static truncateWithEllipsis(s: string, maximumLength: number): string;
+declare namespace Text {
+    export {
+        replaceAll,
+        convertToCrLf,
+        convertToLf,
+        convertTo,
+        NewlineKind,
+        getNewline,
+        padEnd,
+        padStart,
+        truncateWithEllipsis,
+        ensureTrailingNewline,
+        escapeRegExp,
+        Encoding,
+        IReadLinesFromIterableOptions,
+        readLinesFromIterableAsync,
+        readLinesFromIterable,
+        reverse,
+        splitByNewLines
+    }
 }
+export { Text }
+
+// @public
+function truncateWithEllipsis(s: string, maximumLength: number): string;
 
 // @public
 export class TypeUuid {
