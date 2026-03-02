@@ -5,26 +5,19 @@ import * as path from 'node:path';
 import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 import { TestUtilities } from '@rushstack/heft-config-file';
 import { RushConfiguration } from '../../api/RushConfiguration';
+import { PnpmWorkspaceFile } from '../../logic/pnpm/PnpmWorkspaceFile';
 
-const MONOREPO_ROOT: string = path.dirname(
-  RushConfiguration.tryFindRushJsonLocation({ startingFolder: __dirname })!
-);
+const PACKAGE_ROOT: string = path.resolve(__dirname, '../../..');
 const CATALOG_SYNC_REPO_PATH: string = `${__dirname}/catalogSyncTestRepo`;
 
 describe('RushPnpmCommandLineParser', () => {
   describe('catalog syncing', () => {
-    const testRepoPath: string = `${MONOREPO_ROOT}/temp/catalog-sync-test-repo`;
+    const testRepoPath: string = `${PACKAGE_ROOT}/temp/catalog-sync-test-repo`;
     const pnpmConfigPath: string = `${testRepoPath}/common/config/rush/pnpm-config.json`;
     const pnpmWorkspacePath: string = `${testRepoPath}/common/temp/pnpm-workspace.yaml`;
 
     beforeEach(async () => {
       await FileSystem.copyFilesAsync({ sourcePath: CATALOG_SYNC_REPO_PATH, destinationPath: testRepoPath });
-
-      // common/temp is gitignored so it is not part of the static repo; copy the initial workspace file here
-      await FileSystem.copyFilesAsync({
-        sourcePath: `${CATALOG_SYNC_REPO_PATH}/pnpm-workspace.yaml`,
-        destinationPath: pnpmWorkspacePath
-      });
     });
 
     afterEach(async () => {
@@ -58,7 +51,6 @@ catalogs:
         }
       });
 
-      const { PnpmWorkspaceFile } = require('../../logic/pnpm/PnpmWorkspaceFile');
       const newCatalogs = await PnpmWorkspaceFile.loadCatalogsFromFileAsync(pnpmWorkspacePath);
 
       await pnpmOptions?.updateGlobalCatalogsAsync(newCatalogs);
@@ -82,7 +74,6 @@ catalogs:
     });
 
     it('does not update pnpm-config.json when catalogs are unchanged', async () => {
-      const { PnpmWorkspaceFile } = require('../../logic/pnpm/PnpmWorkspaceFile');
       const newCatalogs = await PnpmWorkspaceFile.loadCatalogsFromFileAsync(pnpmWorkspacePath);
 
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
@@ -108,7 +99,6 @@ catalogs:
 `;
       await FileSystem.writeFileAsync(pnpmWorkspacePath, workspaceWithoutCatalogs);
 
-      const { PnpmWorkspaceFile } = require('../../logic/pnpm/PnpmWorkspaceFile');
       const newCatalogs = await PnpmWorkspaceFile.loadCatalogsFromFileAsync(pnpmWorkspacePath);
 
       expect(newCatalogs).toBeUndefined();

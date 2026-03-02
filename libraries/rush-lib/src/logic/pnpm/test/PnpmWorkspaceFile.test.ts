@@ -14,7 +14,6 @@ describe(PnpmWorkspaceFile.name, () => {
   let mockReadFile: jest.SpyInstance;
   let mockReadFileAsync: jest.SpyInstance;
   let mockExists: jest.SpyInstance;
-  let mockExistsAsync: jest.SpyInstance;
   let writtenContent: string | undefined;
 
   beforeEach(() => {
@@ -31,7 +30,11 @@ describe(PnpmWorkspaceFile.name, () => {
     // Mock FileSystem.readFile to return the written content
     mockReadFile = jest.spyOn(FileSystem, 'readFile').mockImplementation(() => {
       if (writtenContent === undefined) {
-        throw Object.assign(new Error('ENOENT: no such file or directory'), { code: 'ENOENT', errno: -2, syscall: 'open' });
+        throw Object.assign(new Error('ENOENT: no such file or directory'), {
+          code: 'ENOENT',
+          errno: -2,
+          syscall: 'open'
+        });
       }
       return writtenContent;
     });
@@ -39,18 +42,17 @@ describe(PnpmWorkspaceFile.name, () => {
     // Mock async version for loadCatalogsFromFileAsync
     mockReadFileAsync = jest.spyOn(FileSystem, 'readFileAsync').mockImplementation(async () => {
       if (writtenContent === undefined) {
-        throw Object.assign(new Error('ENOENT: no such file or directory'), { code: 'ENOENT', errno: -2, syscall: 'open' });
+        throw Object.assign(new Error('ENOENT: no such file or directory'), {
+          code: 'ENOENT',
+          errno: -2,
+          syscall: 'open'
+        });
       }
       return writtenContent;
     });
 
     // Mock FileSystem.exists to return true if content was written
     mockExists = jest.spyOn(FileSystem, 'exists').mockImplementation(() => {
-      return writtenContent !== undefined;
-    });
-
-    // Mock async version for loadCatalogsFromFileAsync
-    mockExistsAsync = jest.spyOn(FileSystem, 'existsAsync').mockImplementation(async () => {
       return writtenContent !== undefined;
     });
   });
@@ -60,7 +62,6 @@ describe(PnpmWorkspaceFile.name, () => {
     mockReadFile.mockRestore();
     mockReadFileAsync.mockRestore();
     mockExists.mockRestore();
-    mockExistsAsync.mockRestore();
   });
 
   describe('basic functionality', () => {

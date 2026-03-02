@@ -5,12 +5,9 @@ import * as path from 'node:path';
 import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 import { PnpmOptionsConfiguration } from '../PnpmOptionsConfiguration';
 import { TestUtilities } from '@rushstack/heft-config-file';
-import { RushConfiguration } from '../../../api/RushConfiguration';
 
-const MONOREPO_ROOT: string = path.dirname(
-  RushConfiguration.tryFindRushJsonLocation({ startingFolder: __dirname })!
-);
-const TEST_TEMP_FOLDER: string = `${MONOREPO_ROOT}/temp/pnpm-config-update-test`;
+const PACKAGE_ROOT: string = path.resolve(__dirname, '../../../..');
+const TEST_TEMP_FOLDER: string = `${PACKAGE_ROOT}/temp/pnpm-config-update-test`;
 
 const fakeCommonTempFolder: string = `${__dirname}/common/temp`;
 
