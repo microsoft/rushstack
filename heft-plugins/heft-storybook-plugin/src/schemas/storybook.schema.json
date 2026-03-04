@@ -37,6 +37,11 @@
       "title": "Specifies whether to capture the webpack stats for storybook build.",
       "description": "If this is true, then it will capture the webpack stats for storybook build. Defaults to false.",
       "type": "boolean"
+    },
+    "quiet": {
+      "title": "Specifies whether to run storybook in quiet mode (--quiet).",
+      "description": "If this is true, then it will run storybook in quiet mode. Defaults to true.",
+      "type": "boolean"
     }
   }
 }
