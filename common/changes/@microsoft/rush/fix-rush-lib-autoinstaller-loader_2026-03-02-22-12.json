@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix autoinstaller plugin loader behavior.",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "61671317+kevin-y-ang@users.noreply.github.com"
+}
