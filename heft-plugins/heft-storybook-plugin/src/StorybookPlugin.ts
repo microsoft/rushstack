@@ -164,6 +164,13 @@ export interface IStorybookPluginOptions {
    * which disables Storybook's telemetry data collection.
    */
   disableTelemetry?: boolean;
+
+  /**
+   * Specifies whether to run storybook in quiet mode (--quiet).
+   *
+   * @defaultValue `true`
+   */
+  quiet?: boolean;
 }
 
 interface IRunStorybookOptions extends IPrepareStorybookOptions {
@@ -493,7 +500,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       storybookArgs.push('--webpack-stats-json');
     }
 
-    if (!verbose) {
+    if (options.quiet !== false && !verbose) {
       storybookArgs.push('--quiet');
     }
 
