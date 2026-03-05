@@ -26,6 +26,8 @@ import { runWorkspaceCommandAsync } from '@rushstack/vscode-shared/lib/runWorksp
 import { VScodeOutputChannelTerminalProvider } from '@rushstack/vscode-shared/lib/VScodeOutputChannelTerminalProvider';
 import packageJson from '../package.json';
 
+import { McpTunnel } from './McpTunnel';
+
 const EXTENSION_DISPLAY_NAME: string = 'Playwright Local Browser Server';
 const COMMAND_SHOW_LOG: string = 'playwright-local-browser-server.showLog';
 const COMMAND_SHOW_SETTINGS: string = 'playwright-local-browser-server.showSettings';
@@ -33,6 +35,8 @@ const COMMAND_START_TUNNEL: string = 'playwright-local-browser-server.start';
 const COMMAND_STOP_TUNNEL: string = 'playwright-local-browser-server.stop';
 const COMMAND_SHOW_MENU: string = 'playwright-local-browser-server.showMenu';
 const COMMAND_MANAGE_ALLOWLIST: string = 'playwright-local-browser-server.manageAllowlist';
+const COMMAND_START_MCP_TUNNEL: string = 'playwright-local-browser-server.startMcp';
+const COMMAND_STOP_MCP_TUNNEL: string = 'playwright-local-browser-server.stopMcp';
 const VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS: string = 'workbench.action.openSettings';
 const EXTENSION_ID: string = `${packageJson.publisher}.${packageJson.name}`;
 const VSCODE_SETTINGS_EXTENSION_FILTER: string = `@ext:${EXTENSION_ID}`;
@@ -155,8 +159,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   updateStatusBar('stopped');
   statusBarItem.show();
 
-  // Tunnel instance
+  // Tunnel instances
   let tunnel: PlaywrightTunnel | undefined;
+  let mcpTunnel: McpTunnel | undefined;
 
   function getTmpPath(): string {
     return path.join(os.tmpdir(), 'playwright-browser-tunnel');
@@ -462,21 +467,110 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }
   }
 
+  async function handleStartMcpTunnelAsync(): Promise<void> {
+    if (mcpTunnel) {
+      outputChannel.appendLine('MCP tunnel is already running.');
+      void vscode.window.showInformationMessage('MCP tunnel is already running.');
+      return;
+    }
+
+    // Stop browser tunnel if running
+    if (tunnel) {
+      outputChannel.appendLine('Stopping browser tunnel before starting MCP tunnel...');
+      await handleStopTunnelAsync();
+    }
+
+    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(
+      'playwright-local-browser-server'
+    );
+    const mcpPort: number = config.get<number>('mcpTunnelPort', 56768);
+    const mcpCommand: string = config.get<string>(
+      'mcpCommand',
+      'npx @playwright/mcp --isolated --browser msedge --storage-state=C:\\Users\\supsing\\storage-state.json'
+    );
+
+    outputChannel.appendLine(
+      `>>> Using MCP command: ${mcpCommand}; ${config.inspect('mcpCommand') ?? 'empy'}`
+    );
+    try {
+      outputChannel.appendLine(`Starting MCP tunnel on port ${mcpPort} with command: ${mcpCommand}`);
+
+      const newMcpTunnel: McpTunnel = new McpTunnel({
+        port: mcpPort,
+        mcpCommand,
+        terminal,
+        onStatusChange: (status) => {
+          outputChannel.appendLine(`MCP tunnel status changed: ${status}`);
+          updateStatusBar(status);
+        }
+      });
+
+      void newMcpTunnel.startAsync().catch((error: Error) => {
+        outputChannel.appendLine(`MCP tunnel error: ${getNormalizedErrorString(error)}`);
+        updateStatusBar('error');
+        void vscode.window.showErrorMessage(`MCP tunnel error: ${getNormalizedErrorString(error)}`);
+      });
+
+      // eslint-disable-next-line require-atomic-updates
+      mcpTunnel = newMcpTunnel;
+
+      outputChannel.appendLine('MCP tunnel start initiated.');
+    } catch (error) {
+      const errorMessage: string = getNormalizedErrorString(error);
+      outputChannel.appendLine(`Failed to start MCP tunnel: ${errorMessage}`);
+      updateStatusBar('error');
+      void vscode.window.showErrorMessage(`Failed to start MCP tunnel: ${errorMessage}`);
+    }
+  }
+
+  async function handleStopMcpTunnelAsync(): Promise<void> {
+    const currentMcpTunnel: McpTunnel | undefined = mcpTunnel;
+    if (!currentMcpTunnel) {
+      outputChannel.appendLine('No MCP tunnel instance to stop.');
+      void vscode.window.showInformationMessage('MCP tunnel is not running.');
+      return;
+    }
+
+    mcpTunnel = undefined;
+
+    try {
+      outputChannel.appendLine('Stopping MCP tunnel...');
+      await currentMcpTunnel.stopAsync();
+      updateStatusBar('stopped');
+      outputChannel.appendLine('MCP tunnel stopped.');
+      void vscode.window.showInformationMessage('MCP tunnel stopped.');
+    } catch (error) {
+      const errorMessage: string = getNormalizedErrorString(error);
+      outputChannel.appendLine(`Failed to stop MCP tunnel: ${errorMessage}`);
+      void vscode.window.showErrorMessage(`Failed to stop MCP tunnel: ${errorMessage}`);
+    }
+  }
+
   async function handleShowMenu(): Promise<void> {
     interface IQuickPickItem extends vscode.QuickPickItem {
-      action: 'start' | 'stop' | 'showLog' | 'manageAllowlist';
+      action: 'start' | 'stop' | 'startMcp' | 'stopMcp' | 'showLog' | 'manageAllowlist';
     }
 
     const items: IQuickPickItem[] = [
       {
-        label: '$(play) Start Tunnel',
-        description: 'Start the Playwright browser tunnel',
+        label: '$(play) Start Browser Tunnel',
+        description: 'Start the Playwright browser tunnel (browser server mode)',
         action: 'start'
       },
       {
-        label: '$(debug-stop) Stop Tunnel',
+        label: '$(debug-stop) Stop Browser Tunnel',
         description: 'Stop the Playwright browser tunnel',
         action: 'stop'
+      },
+      {
+        label: '$(play) Start MCP Tunnel',
+        description: 'Start the MCP tunnel (runs @playwright/mcp locally, proxied to codespace)',
+        action: 'startMcp'
+      },
+      {
+        label: '$(debug-stop) Stop MCP Tunnel',
+        description: 'Stop the MCP tunnel',
+        action: 'stopMcp'
       },
       {
         label: '$(shield) Manage Allowlist',
@@ -502,6 +596,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         case 'stop':
           await handleStopTunnelAsync();
           break;
+        case 'startMcp':
+          await handleStartMcpTunnelAsync();
+          break;
+        case 'stopMcp':
+          await handleStopMcpTunnelAsync();
+          break;
         case 'manageAllowlist':
           await handleManageAllowlist();
           break;
@@ -521,14 +621,23 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     vscode.commands.registerCommand(COMMAND_STOP_TUNNEL, handleStopTunnelAsync),
     vscode.commands.registerCommand(COMMAND_SHOW_MENU, handleShowMenu),
     vscode.commands.registerCommand(COMMAND_MANAGE_ALLOWLIST, handleManageAllowlist),
-    // Cleanup tunnel on deactivate
+    vscode.commands.registerCommand(COMMAND_START_MCP_TUNNEL, handleStartMcpTunnelAsync),
+    vscode.commands.registerCommand(COMMAND_STOP_MCP_TUNNEL, handleStopMcpTunnelAsync),
+    // Cleanup tunnels on deactivate
     {
       dispose: () => {
         const currentTunnel: PlaywrightTunnel | undefined = tunnel;
         if (currentTunnel) {
-          outputChannel.appendLine('Extension deactivating, stopping tunnel...');
+          outputChannel.appendLine('Extension deactivating, stopping browser tunnel...');
           void currentTunnel.stopAsync().then(() => {
             tunnel = undefined;
+          });
+        }
+        const currentMcpTunnel: McpTunnel | undefined = mcpTunnel;
+        if (currentMcpTunnel) {
+          outputChannel.appendLine('Extension deactivating, stopping MCP tunnel...');
+          void currentMcpTunnel.stopAsync().then(() => {
+            mcpTunnel = undefined;
           });
         }
       }

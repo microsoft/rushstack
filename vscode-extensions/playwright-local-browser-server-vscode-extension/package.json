@@ -1,6 +1,6 @@
 {
   "name": "playwright-local-browser-server",
-  "version": "0.1.3",
+  "version": "0.1.7",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
@@ -68,6 +68,16 @@
         "command": "playwright-local-browser-server.showMenu",
         "title": "Show Tunnel Menu",
         "category": "Playwright Local Browser Server"
+      },
+      {
+        "command": "playwright-local-browser-server.startMcp",
+        "title": "Start MCP Tunnel",
+        "category": "Playwright"
+      },
+      {
+        "command": "playwright-local-browser-server.stopMcp",
+        "title": "Stop MCP Tunnel",
+        "category": "Playwright"
       }
     ],
     "configuration": {
@@ -87,6 +97,16 @@
           "type": "number",
           "default": 56767,
           "description": "Port for the browser tunnel server"
+        },
+        "playwright-local-browser-server.mcpTunnelPort": {
+          "type": "number",
+          "default": 56768,
+          "description": "Port for the MCP tunnel. This should match the port used by mcp-codespace-proxy.mjs on the codespace side."
+        },
+        "playwright-local-browser-server.mcpCommand": {
+          "type": "string",
+          "default": "npx @playwright/mcp",
+          "description": "Command to start the local MCP server. The MCP server must use stdio transport."
         }
       }
     }

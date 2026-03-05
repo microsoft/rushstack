@@ -154,12 +154,99 @@ sequenceDiagram
 	Note over PT,LB: 🎉 Profit!  Local browser available to remote tests transparently
 ```
 
+## MCP Tunnel Mode (Alternative)
+
+As an alternative to the browser tunnel, this extension also supports **MCP Tunnel mode**. Instead of launching a browser server and forwarding WebSocket traffic, it runs a local MCP server (e.g. `@playwright/mcp`) on your machine and proxies MCP protocol messages to/from the codespace.
+
+### Architecture
+
+```
+[MCP Client (Cursor/Claude Code)]  -->  stdio  -->  [mcp-codespace-proxy.mjs]  -->  TCP :56768
+        (codespace)                                       (codespace)                    |
+                                                                              VS Code port forwarding
+                                                                                         |
+[McpTunnel in extension]  -->  TCP :56768  -->  [@playwright/mcp process]  -->  local browser
+        (local machine)                              (local machine)
+```
+
+### Setup
+
+**1. Start MCP Tunnel in VS Code**
+
+Open the Command Palette and run **"Playwright: Start MCP Tunnel"**, or use the status bar menu.
+
+**2. Copy the proxy script to your codespace**
+
+Copy `mcp-codespace-proxy.mjs` (included with this extension) to your codespace. This is a standalone Node.js script with zero external dependencies — it only uses built-in `net` and `readline` modules.
+
+**3. Configure your MCP client on the codespace**
+
+Point your MCP client to the proxy script. For example, in Claude Code (`.claude/settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "node",
+      "args": ["/path/to/mcp-codespace-proxy.mjs", "56768"]
+    }
+  }
+}
+```
+
+The port must match the `playwright-local-browser-server.mcpTunnelPort` setting (default: `56768`).
+
+**4. Use MCP tools from your codespace**
+
+The MCP client will communicate through the proxy to the locally-running `@playwright/mcp` server, which drives a real browser on your local machine.
+
+### MCP Tunnel Sequence Diagram
+
+```mermaid
+sequenceDiagram
+	participant MC as MCP Client (Codespace)
+	participant MP as mcp-codespace-proxy.mjs
+	participant PF as VS Code Port Forwarding
+	participant EXT as VS Code Extension (Local)
+	participant MCP as @playwright/mcp (Local)
+	participant LB as Local Browser
+
+	Note over MC,LB: MCP Tunnel Mode: Local MCP server proxied to codespace
+
+	MP->>MP: Listen on TCP port (56768)
+
+	loop Polling
+		EXT->>PF: Connect to localhost:56768
+		PF->>MP: Forward TCP connection
+	end
+
+	MP-->>EXT: TCP connection established
+
+	EXT->>MCP: Spawn @playwright/mcp (stdio)
+
+	rect rgb(200, 230, 200)
+		Note over MC,LB: Transparent bidirectional MCP communication
+		MC->>MP: MCP request (stdin)
+		MP->>PF: Forward via TCP
+		PF->>EXT: Forward to extension
+		EXT->>MCP: Write to MCP stdin
+		MCP->>LB: Execute browser action
+		LB-->>MCP: Result
+		MCP-->>EXT: MCP response (stdout)
+		EXT-->>PF: Forward via TCP
+		PF-->>MP: Forward to proxy
+		MP-->>MC: MCP response (stdout)
+	end
+```
+
 ## Commands
 
 This extension contributes the following commands:
 
 - **Playwright: Start Playwright Browser Tunnel** (`playwright-local-browser-server.start`)
 - **Playwright: Stop Playwright Browser Tunnel** (`playwright-local-browser-server.stop`)
+- **Playwright: Start MCP Tunnel** (`playwright-local-browser-server.startMcp`)
+- **Playwright: Stop MCP Tunnel** (`playwright-local-browser-server.stopMcp`)
 - **Playwright Local Browser Server: Manage Launch Options Allowlist** (`playwright-local-browser-server.manageAllowlist`)
 - **Playwright Local Browser Server: Show Log** (`playwright-local-browser-server.showLog`)
 - **Playwright Local Browser Server: Show Settings** (`playwright-local-browser-server.showSettings`)
@@ -170,8 +257,11 @@ This extension contributes the following commands:
 - `playwright-local-browser-server.autoStart` (default: `false`) — automatically starts the tunnel when the extension activates.
 - `playwright-local-browser-server.promptBeforeLaunch` (default: `true`) — show a confirmation prompt before launching the browser server with the requested launch options. This helps protect against potentially malicious launch options from compromised environments.
 - `playwright-local-browser-server.tunnelPort` (default: `56767`) — port used by the remote tunnel server.
+- `playwright-local-browser-server.mcpTunnelPort` (default: `56768`) — port for the MCP tunnel. Must match the port used by `mcp-codespace-proxy.mjs` on the codespace side.
+- `playwright-local-browser-server.mcpCommand` (default: `npx @playwright/mcp`) — command to start the local MCP server. The MCP server must use stdio transport.
 
 ## Notes
 
-- The extension currently connects to `ws://127.0.0.1:56767` on the local machine. In Codespaces, make sure the remote port is forwarded so it is reachable as `localhost` from your VS Code UI environment.
+- The browser tunnel connects to `ws://127.0.0.1:56767` on the local machine. In Codespaces, make sure the remote port is forwarded so it is reachable as `localhost` from your VS Code UI environment.
+- The MCP tunnel connects to `127.0.0.1:56768` by default. The codespace proxy listens on this port and VS Code automatically forwards it.
 - For the underlying API and examples, see [`@rushstack/playwright-browser-tunnel`](../../apps/playwright-browser-tunnel).
