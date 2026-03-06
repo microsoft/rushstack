@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/module-minifier",
+      "comment": "Bump serialize-javascript",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier"
+}

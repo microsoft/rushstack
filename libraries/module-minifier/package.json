@@ -40,14 +40,14 @@
   },
   "dependencies": {
     "@rushstack/worker-pool": "workspace:*",
-    "serialize-javascript": "6.0.2",
+    "serialize-javascript": "7.0.3",
     "source-map": "~0.7.3",
     "terser": "^5.9.0"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@types/node": "20.17.19",
-    "@types/serialize-javascript": "5.0.2",
+    "@types/serialize-javascript": "5.0.4",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
   },
