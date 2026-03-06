@@ -2,6 +2,18 @@
   "name": "@rushstack/playwright-browser-tunnel",
   "entries": [
     {
+      "version": "0.3.8",
+      "tag": "@rushstack/playwright-browser-tunnel_v0.3.8",
+      "date": "Fri, 06 Mar 2026 01:14:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the launch-options param"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.7",
       "tag": "@rushstack/playwright-browser-tunnel_v0.3.7",
       "date": "Wed, 25 Feb 2026 21:39:42 GMT",
