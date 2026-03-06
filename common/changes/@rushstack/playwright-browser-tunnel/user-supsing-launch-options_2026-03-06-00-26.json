@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/playwright-browser-tunnel",
+      "comment": "Fix the launch-options param",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/playwright-browser-tunnel"
+}
