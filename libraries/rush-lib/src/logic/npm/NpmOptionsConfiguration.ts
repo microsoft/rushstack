@@ -4,7 +4,7 @@
 import {
   type IPackageManagerOptionsJsonBase,
   PackageManagerOptionsConfigurationBase
-} from '../base/BasePackageManagerOptionsConfiguration';
+} from '../base/BasePackageManagerOptionsConfiguration.ts';
 
 /**
  * Part of IRushConfigurationJson.

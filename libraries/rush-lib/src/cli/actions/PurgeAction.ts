@@ -4,12 +4,12 @@
 import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { Colorize } from '@rushstack/terminal';
 
-import { BaseRushAction } from './BaseRushAction';
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { Stopwatch } from '../../utilities/Stopwatch';
-import { PurgeManager } from '../../logic/PurgeManager';
-import { UnlinkManager } from '../../logic/UnlinkManager';
-import { PURGE_ACTION_NAME } from '../../utilities/actionNameConstants';
+import { BaseRushAction } from './BaseRushAction.ts';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { Stopwatch } from '../../utilities/Stopwatch.ts';
+import { PurgeManager } from '../../logic/PurgeManager.ts';
+import { UnlinkManager } from '../../logic/UnlinkManager.ts';
+import { PURGE_ACTION_NAME } from '../../utilities/actionNameConstants.ts';
 
 export class PurgeAction extends BaseRushAction {
   private readonly _unsafeParameter: CommandLineFlagParameter;

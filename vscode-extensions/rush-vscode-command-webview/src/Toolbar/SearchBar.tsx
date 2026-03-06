@@ -5,8 +5,8 @@ import { SearchBox } from '@fluentui/react';
 import * as React from 'react';
 import type { AnyAction, Dispatch } from '@reduxjs/toolkit';
 
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { onChangeSearchText } from '../store/slices/parameter';
+import { useAppDispatch, useAppSelector } from '../store/hooks/index.ts';
+import { onChangeSearchText } from '../store/slices/parameter.ts';
 
 export const SearchBar = (): React.ReactElement => {
   const searchText: string = useAppSelector((state) => state.parameter.searchText);

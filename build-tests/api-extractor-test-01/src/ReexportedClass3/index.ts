@@ -1,1 +1,1 @@
-export { ReexportedClass2 } from '../ReexportedClass2';
+export { ReexportedClass2 } from '../ReexportedClass2.ts';

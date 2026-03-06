@@ -9,7 +9,7 @@ import { CredentialCache } from '@rushstack/credential-cache';
 import { ConsoleTerminalProvider, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { RushSession, EnvironmentConfiguration, RushUserConfiguration } from '@rushstack/rush-sdk';
 
-import { AmazonS3BuildCacheProvider } from '../AmazonS3BuildCacheProvider';
+import { AmazonS3BuildCacheProvider } from '../AmazonS3BuildCacheProvider.ts';
 
 const rushSession = new RushSession({
   terminalProvider: new ConsoleTerminalProvider(),

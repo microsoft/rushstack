@@ -6,8 +6,8 @@ import {
   DefaultNpmCheckOptions,
   type INpmCheckPackageJson,
   type INpmCheckState
-} from './interfaces/INpmCheck';
-import readPackageJson from './ReadPackageJson';
+} from './interfaces/INpmCheck.ts';
+import readPackageJson from './ReadPackageJson.ts';
 
 export default async function initializeState(initialOptions?: INpmCheckState): Promise<INpmCheckState> {
   const state: INpmCheckState = _.extend(DefaultNpmCheckOptions, initialOptions);

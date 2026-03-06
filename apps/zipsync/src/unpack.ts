@@ -8,9 +8,9 @@ import * as zlib from 'node:zlib';
 import { type IReadonlyPathTrieNode, LookupByPath } from '@rushstack/lookup-by-path/lib/LookupByPath';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { getDisposableFileHandle, rmdirSync, unlinkSync, type IDisposableFileHandle } from './fs';
-import { type IIncrementalZlib, type IncrementalZlibMode, createIncrementalZlib } from './compress';
-import { markStart, markEnd, getDuration, emitSummary, formatDuration } from './perf';
+import { getDisposableFileHandle, rmdirSync, unlinkSync, type IDisposableFileHandle } from './fs.ts';
+import { type IIncrementalZlib, type IncrementalZlibMode, createIncrementalZlib } from './compress.ts';
+import { markStart, markEnd, getDuration, emitSummary, formatDuration } from './perf.ts';
 import {
   findEndOfCentralDirectory,
   parseCentralDirectoryHeader,
@@ -21,15 +21,15 @@ import {
   type IEndOfCentralDirectory,
   type ICentralDirectoryHeaderParseResult,
   type ZipMetaCompressionMethod
-} from './zipUtils';
-import { computeFileHash } from './hash';
+} from './zipUtils.ts';
+import { computeFileHash } from './hash.ts';
 import {
   defaultBufferSize,
   METADATA_FILENAME,
   METADATA_VERSION,
   type IDirQueueItem,
   type IMetadata
-} from './zipSyncUtils';
+} from './zipSyncUtils.ts';
 
 const zlibUnpackModes: Record<ZipMetaCompressionMethod, IncrementalZlibMode | undefined> = {
   [ZSTD_COMPRESSION]: 'zstd-decompress',

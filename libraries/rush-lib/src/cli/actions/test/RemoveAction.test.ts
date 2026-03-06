@@ -1,17 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import '../../test/mockRushCommandLineParser';
+import '../../test/mockRushCommandLineParser.ts';
 
 import { LockFile } from '@rushstack/node-core-library';
 
-import { PackageJsonUpdater } from '../../../logic/PackageJsonUpdater';
-import type { IPackageJsonUpdaterRushRemoveOptions } from '../../../logic/PackageJsonUpdaterTypes';
-import { RushCommandLineParser } from '../../RushCommandLineParser';
-import { RemoveAction } from '../RemoveAction';
-import { VersionMismatchFinderProject } from '../../../logic/versionMismatch/VersionMismatchFinderProject';
-import { DependencyType } from '../../../api/PackageJsonEditor';
-import { EnvironmentConfiguration } from '../../../api/EnvironmentConfiguration';
+import { PackageJsonUpdater } from '../../../logic/PackageJsonUpdater.ts';
+import type { IPackageJsonUpdaterRushRemoveOptions } from '../../../logic/PackageJsonUpdaterTypes.ts';
+import { RushCommandLineParser } from '../../RushCommandLineParser.ts';
+import { RemoveAction } from '../RemoveAction.ts';
+import { VersionMismatchFinderProject } from '../../../logic/versionMismatch/VersionMismatchFinderProject.ts';
+import { DependencyType } from '../../../api/PackageJsonEditor.ts';
+import { EnvironmentConfiguration } from '../../../api/EnvironmentConfiguration.ts';
 
 describe(RemoveAction.name, () => {
   describe('basic "rush remove" tests', () => {

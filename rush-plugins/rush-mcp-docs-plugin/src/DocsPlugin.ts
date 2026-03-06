@@ -3,7 +3,7 @@
 
 import type { IRushMcpPlugin, RushMcpPluginSession } from '@rushstack/mcp-server';
 
-import { DocsTool } from './DocsTool';
+import { DocsTool } from './DocsTool.ts';
 
 export interface IDocsPluginConfigFile {}
 

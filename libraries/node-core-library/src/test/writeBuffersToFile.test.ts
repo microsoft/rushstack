@@ -34,10 +34,10 @@ jest.mock('../Text', () => {
 describe('FileSystem', () => {
   const content: Uint8Array[] = [];
   let totalBytes: number = 0;
-  let FileSystem: typeof import('../FileSystem').FileSystem;
+  let FileSystem: typeof import('../FileSystem.ts').FileSystem;
 
   beforeAll(async () => {
-    FileSystem = (await import('../FileSystem')).FileSystem;
+    FileSystem = (await import('../FileSystem.ts')).FileSystem;
     totalBytes = 0;
     let nextValue = 37;
     for (let i = 0; i < 10; i++) {

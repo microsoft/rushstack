@@ -3,7 +3,7 @@
 
 import { createSlice, type Slice, type SliceCaseReducers } from '@reduxjs/toolkit';
 
-import { useAppSelector } from '../hooks';
+import { useAppSelector } from '../hooks/index.ts';
 
 export interface IUIState {
   isToolbarSticky: boolean;

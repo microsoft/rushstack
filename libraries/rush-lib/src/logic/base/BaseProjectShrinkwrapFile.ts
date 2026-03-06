@@ -3,9 +3,9 @@
 
 import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { RushConstants } from '../RushConstants';
-import type { BaseShrinkwrapFile } from './BaseShrinkwrapFile';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { RushConstants } from '../RushConstants.ts';
+import type { BaseShrinkwrapFile } from './BaseShrinkwrapFile.ts';
 
 /**
  * This class handles creating the project/.rush/temp/shrinkwrap-deps.json file

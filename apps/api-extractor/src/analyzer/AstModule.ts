@@ -3,8 +3,8 @@
 
 import type * as ts from 'typescript';
 
-import type { AstSymbol } from './AstSymbol';
-import type { AstEntity } from './AstEntity';
+import type { AstSymbol } from './AstSymbol.ts';
+import type { AstEntity } from './AstEntity.ts';
 
 /**
  * Represents information collected by {@link AstSymbolTable.fetchAstModuleExportInfo}

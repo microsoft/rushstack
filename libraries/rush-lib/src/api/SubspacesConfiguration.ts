@@ -3,9 +3,9 @@
 
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
-import type { RushConfiguration } from './RushConfiguration';
+import type { RushConfiguration } from './RushConfiguration.ts';
 import schemaJson from '../schemas/subspaces.schema.json';
-import { RushConstants } from '../logic/RushConstants';
+import { RushConstants } from '../logic/RushConstants.ts';
 
 /**
  * The allowed naming convention for subspace names.

@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { Async } from '@rushstack/node-core-library';
-import { OperationStatus } from '../OperationStatus';
-import { WorkQueue } from '../WorkQueue';
+import { OperationStatus } from '../OperationStatus.ts';
+import { WorkQueue } from '../WorkQueue.ts';
 
 describe(WorkQueue.name, () => {
   it('Executes in dependency order', async () => {

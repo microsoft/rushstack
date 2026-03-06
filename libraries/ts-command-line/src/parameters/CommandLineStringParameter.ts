@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ICommandLineStringDefinition } from './CommandLineDefinition';
-import { CommandLineParameterWithArgument, CommandLineParameterKind } from './BaseClasses';
+import type { ICommandLineStringDefinition } from './CommandLineDefinition.ts';
+import { CommandLineParameterWithArgument, CommandLineParameterKind } from './BaseClasses.ts';
 
 /**
  * The data type returned by {@link CommandLineParameterProvider.(defineStringParameter:2)}.

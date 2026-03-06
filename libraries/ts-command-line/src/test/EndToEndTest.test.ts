@@ -3,7 +3,7 @@
 
 import type { ChildProcess } from 'node:child_process';
 import { Executable } from '@rushstack/node-core-library';
-import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities.ts';
 
 const TEST_CLI_PATH: string = `${__dirname}/test-cli/start`;
 
@@ -32,7 +32,7 @@ describe('end-to-end test', () => {
   });
 
   it(`prints the help`, async () => {
-    const { WidgetCommandLine } = await import('./test-cli/WidgetCommandLine');
+    const { WidgetCommandLine } = await import('./test-cli/WidgetCommandLine.ts');
 
     const parser = new WidgetCommandLine();
 

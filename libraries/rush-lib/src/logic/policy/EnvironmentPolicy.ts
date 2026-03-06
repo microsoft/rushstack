@@ -3,9 +3,9 @@
 
 import { AlreadyReportedError, Async, FileSystem } from '@rushstack/node-core-library';
 
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import type { IPolicyValidatorOptions } from './PolicyValidator';
-import { RushConstants } from '../RushConstants';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import type { IPolicyValidatorOptions } from './PolicyValidator.ts';
+import { RushConstants } from '../RushConstants.ts';
 
 /**
  * Ensures the environment where the Rush repo exists is valid

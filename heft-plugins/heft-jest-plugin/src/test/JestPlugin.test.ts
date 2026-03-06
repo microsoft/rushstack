@@ -12,7 +12,7 @@ import {
   JEST_CONFIG_JSDOM_PACKAGE_NAME,
   default as JestPlugin,
   type IHeftJestConfiguration
-} from '../JestPlugin';
+} from '../JestPlugin.ts';
 
 interface IPartialHeftPluginJson {
   taskPlugins?: {

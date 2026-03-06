@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Rush } from './Rush';
+import { Rush } from './Rush.ts';
 
 /**
  * Used by rush-sdk to access internals of rush-lib.

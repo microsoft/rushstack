@@ -7,9 +7,9 @@ import type { NewlineKind } from '@rushstack/node-core-library';
 import { Terminal } from '@rushstack/terminal';
 import { parseLocFile } from '@rushstack/localization-utilities';
 
-import type { LocalizationPlugin } from '../LocalizationPlugin';
-import { createLoader, type IBaseLocLoaderOptions } from './LoaderFactory';
-import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
+import type { LocalizationPlugin } from '../LocalizationPlugin.ts';
+import { createLoader, type IBaseLocLoaderOptions } from './LoaderFactory.ts';
+import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider.ts';
 
 export interface ILocLoaderOptions extends IBaseLocLoaderOptions {
   pluginInstance: LocalizationPlugin;

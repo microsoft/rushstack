@@ -49,22 +49,22 @@ import {
   type IFindApiItemsResult
 } from '@microsoft/api-extractor-model';
 
-import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
-import { DocHeading } from '../nodes/DocHeading';
-import { DocTable } from '../nodes/DocTable';
-import { DocEmphasisSpan } from '../nodes/DocEmphasisSpan';
-import { DocTableRow } from '../nodes/DocTableRow';
-import { DocTableCell } from '../nodes/DocTableCell';
-import { DocNoteBox } from '../nodes/DocNoteBox';
-import { Utilities } from '../utils/Utilities';
-import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
-import { PluginLoader } from '../plugin/PluginLoader';
+import { CustomDocNodes } from '../nodes/CustomDocNodeKind.ts';
+import { DocHeading } from '../nodes/DocHeading.ts';
+import { DocTable } from '../nodes/DocTable.ts';
+import { DocEmphasisSpan } from '../nodes/DocEmphasisSpan.ts';
+import { DocTableRow } from '../nodes/DocTableRow.ts';
+import { DocTableCell } from '../nodes/DocTableCell.ts';
+import { DocNoteBox } from '../nodes/DocNoteBox.ts';
+import { Utilities } from '../utils/Utilities.ts';
+import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter.ts';
+import { PluginLoader } from '../plugin/PluginLoader.ts';
 import {
   type IMarkdownDocumenterFeatureOnBeforeWritePageArgs,
   MarkdownDocumenterFeatureContext
-} from '../plugin/MarkdownDocumenterFeature';
-import type { DocumenterConfig } from './DocumenterConfig';
-import { MarkdownDocumenterAccessor } from '../plugin/MarkdownDocumenterAccessor';
+} from '../plugin/MarkdownDocumenterFeature.ts';
+import type { DocumenterConfig } from './DocumenterConfig.ts';
+import { MarkdownDocumenterAccessor } from '../plugin/MarkdownDocumenterAccessor.ts';
 
 export interface IMarkdownDocumenterOptions {
   apiModel: ApiModel;

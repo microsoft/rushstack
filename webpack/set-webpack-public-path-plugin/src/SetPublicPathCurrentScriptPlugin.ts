@@ -3,7 +3,7 @@
 
 import type webpack from 'webpack';
 
-import { SetPublicPathPluginBase } from './SetPublicPathPluginBase';
+import { SetPublicPathPluginBase } from './SetPublicPathPluginBase.ts';
 
 const PLUGIN_NAME: string = 'set-webpack-public-path-current-script-plugin';
 

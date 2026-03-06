@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { Text, NewlineKind } from '@rushstack/node-core-library';
-import type { TextRewriterState } from '../TextRewriter';
-import { NormalizeNewlinesTextRewriter } from '../NormalizeNewlinesTextRewriter';
+import type { TextRewriterState } from '../TextRewriter.ts';
+import { NormalizeNewlinesTextRewriter } from '../NormalizeNewlinesTextRewriter.ts';
 
 function testCase(input: string): void {
   const matcher: NormalizeNewlinesTextRewriter = new NormalizeNewlinesTextRewriter({

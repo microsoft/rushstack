@@ -9,7 +9,7 @@ import { transformFile } from '@swc/core/binding';
 
 import { Async } from '@rushstack/node-core-library/lib/Async';
 
-import type { IWorkerResult, ITransformTask, ITransformModulesRequestMessage } from './types';
+import type { IWorkerResult, ITransformTask, ITransformModulesRequestMessage } from './types.ts';
 
 interface ISourceMap {
   version: 3;

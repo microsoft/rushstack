@@ -10,9 +10,9 @@ import {
   type IExcerptTokenRange
 } from '@microsoft/api-extractor-model';
 
-import { Span } from '../analyzer/Span';
-import type { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
-import type { AstDeclaration } from '../analyzer/AstDeclaration';
+import { Span } from '../analyzer/Span.ts';
+import type { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator.ts';
+import type { AstDeclaration } from '../analyzer/AstDeclaration.ts';
 
 /**
  * Used to provide ExcerptBuilder with a list of nodes whose token range we want to capture.

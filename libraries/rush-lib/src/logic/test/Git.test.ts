@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import { Git } from '../Git';
-import type { IGitStatusEntry } from '../GitStatusParser';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import { Git } from '../Git.ts';
+import type { IGitStatusEntry } from '../GitStatusParser.ts';
 
 describe(Git.name, () => {
   describe(Git.normalizeGitUrlForComparison.name, () => {

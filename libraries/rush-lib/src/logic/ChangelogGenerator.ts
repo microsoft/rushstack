@@ -7,16 +7,16 @@ import * as semver from 'semver';
 
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
-import { type IChangeRequests, PublishUtilities } from './PublishUtilities';
-import { type IChangeInfo, ChangeType } from '../api/ChangeManagement';
+import { type IChangeRequests, PublishUtilities } from './PublishUtilities.ts';
+import { type IChangeInfo, ChangeType } from '../api/ChangeManagement.ts';
 import type {
   IChangelog,
   IChangeLogEntry,
   IChangeLogComment,
   IChangeLogEntryComments
-} from '../api/Changelog';
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import type { RushConfiguration } from '../api/RushConfiguration';
+} from '../api/Changelog.ts';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
 import schemaJson from '../schemas/changelog.schema.json';
 
 const CHANGELOG_JSON: string = 'CHANGELOG.json';

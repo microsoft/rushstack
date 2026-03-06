@@ -5,4 +5,4 @@ import * as Lib1 from 'api-extractor-lib1-test';
 import { Lib2Interface } from 'api-extractor-lib2-test';
 
 export { Lib1, Lib2Interface };
-export { Item } from './Item';
+export { Item } from './Item.ts';

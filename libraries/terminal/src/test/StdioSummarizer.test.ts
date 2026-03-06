@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TerminalChunkKind } from '../ITerminalChunk';
-import { StdioSummarizer } from '../StdioSummarizer';
-import { StderrLineTransform } from '../StdioLineTransform';
-import { TextRewriterTransform } from '../TextRewriterTransform';
+import { TerminalChunkKind } from '../ITerminalChunk.ts';
+import { StdioSummarizer } from '../StdioSummarizer.ts';
+import { StderrLineTransform } from '../StdioLineTransform.ts';
+import { TextRewriterTransform } from '../TextRewriterTransform.ts';
 import { NewlineKind } from '@rushstack/node-core-library';
 
 describe(StdioSummarizer.name, () => {

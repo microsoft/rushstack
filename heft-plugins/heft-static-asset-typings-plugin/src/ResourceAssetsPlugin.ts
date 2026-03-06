@@ -9,7 +9,7 @@ import {
   type IRunGeneratorOptions,
   type IStaticAssetGeneratorOptions,
   type IStaticAssetTypingsGenerator
-} from './StaticAssetTypingsGenerator';
+} from './StaticAssetTypingsGenerator.js';
 import type { IAssetPluginOptions, IResourceStaticAssetTypingsConfigurationJson } from './types';
 
 const PLUGIN_NAME: 'static-asset-typings-plugin' = 'static-asset-typings-plugin';

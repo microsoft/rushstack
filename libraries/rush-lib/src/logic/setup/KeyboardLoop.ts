@@ -7,7 +7,7 @@ import * as process from 'node:process';
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import { IS_WINDOWS } from '../../utilities/executionUtilities';
+import { IS_WINDOWS } from '../../utilities/executionUtilities.ts';
 
 // TODO: Integrate these into the AnsiEscape API in @rushstack/terminal
 // As part of that work we should generalize the "Colorize" API to support more general

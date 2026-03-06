@@ -3,7 +3,7 @@
 
 import * as fs from 'node:fs';
 
-import type { FileSystemStats } from './FileSystem';
+import type { FileSystemStats } from './FileSystem.ts';
 
 /**
  * Available file handle opening flags.

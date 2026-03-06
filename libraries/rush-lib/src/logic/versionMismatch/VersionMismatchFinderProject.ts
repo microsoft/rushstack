@@ -1,9 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
-import type { PackageJsonEditor, PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity.ts';
+import type {
+  PackageJsonEditor,
+  PackageJsonDependency,
+  DependencyType
+} from '../../api/PackageJsonEditor.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
 
 export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
   public packageName: string;

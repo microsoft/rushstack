@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-export { type IRushMcpPlugin, type RushMcpPluginFactory } from './pluginFramework/IRushMcpPlugin';
-export type { IRushMcpTool } from './pluginFramework/IRushMcpTool';
-export { type IRegisterToolOptions, RushMcpPluginSession } from './pluginFramework/RushMcpPluginSession';
-export { CallToolResultSchema, type CallToolResult, type zodModule } from './pluginFramework/zodTypes';
+export { type IRushMcpPlugin, type RushMcpPluginFactory } from './pluginFramework/IRushMcpPlugin.ts';
+export type { IRushMcpTool } from './pluginFramework/IRushMcpTool.ts';
+export { type IRegisterToolOptions, RushMcpPluginSession } from './pluginFramework/RushMcpPluginSession.ts';
+export { CallToolResultSchema, type CallToolResult, type zodModule } from './pluginFramework/zodTypes.ts';

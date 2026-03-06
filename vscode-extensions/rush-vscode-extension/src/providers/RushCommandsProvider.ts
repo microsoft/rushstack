@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as vscode from 'vscode';
-import { terminal } from '../logic/logger';
-import { RushWorkspace } from '../logic/RushWorkspace';
+import { terminal } from '../logic/logger.ts';
+import { RushWorkspace } from '../logic/RushWorkspace.ts';
 
 import type { CommandLineAction } from '@rushstack/rush-vscode-command-webview';
 

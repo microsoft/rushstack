@@ -6,8 +6,8 @@ import type { LoaderContext, LoaderDefinitionFunction } from 'webpack';
 import { Terminal } from '@rushstack/terminal';
 import { type ILocalizationFile, parseLocFile } from '@rushstack/localization-utilities';
 
-import type { IResxLoaderOptions } from './IResxLoaderOptions';
-import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
+import type { IResxLoaderOptions } from './IResxLoaderOptions.ts';
+import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider.ts';
 
 /**
  * This loader passes through the raw untranslated strings and may be used without a LocalizationPlugin instance.

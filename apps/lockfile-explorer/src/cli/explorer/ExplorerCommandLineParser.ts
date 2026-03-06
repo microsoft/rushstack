@@ -24,12 +24,12 @@ import {
   type IAppContext,
   type IJsonLfxGraph,
   type IJsonLfxWorkspace
-} from '../../../build/lfx-shared';
-import * as lockfilePath from '../../graph/lockfilePath';
-import type { IAppState } from '../../state';
-import { init } from '../../utils/init';
-import { PnpmfileRunner } from '../../graph/PnpmfileRunner';
-import * as lfxGraphLoader from '../../graph/lfxGraphLoader';
+} from '../../../build/lfx-shared/index.js';
+import * as lockfilePath from '../../graph/lockfilePath.ts';
+import type { IAppState } from '../../state/index.ts';
+import { init } from '../../utils/init.ts';
+import { PnpmfileRunner } from '../../graph/PnpmfileRunner.ts';
+import * as lfxGraphLoader from '../../graph/lfxGraphLoader.ts';
 
 const EXPLORER_TOOL_FILENAME: 'lockfile-explorer' = 'lockfile-explorer';
 

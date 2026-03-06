@@ -4,8 +4,8 @@
 import * as zod from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
 
-import type { IRushMcpTool } from './IRushMcpTool';
-import type { zodModule } from './zodTypes';
+import type { IRushMcpTool } from './IRushMcpTool.ts';
+import type { zodModule } from './zodTypes.ts';
 
 /**
  * Each plugin gets its own session.

@@ -12,7 +12,7 @@ import {
 } from '@rushstack/rush-sdk';
 import { CommandLineParameterKind, type CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-import type { IGraphNode } from './GraphProcessor';
+import type { IGraphNode } from './GraphProcessor.ts';
 
 const PLUGIN_NAME: 'DropBuildGraphPlugin' = 'DropBuildGraphPlugin';
 
@@ -75,7 +75,7 @@ export class DropBuildGraphPlugin implements IRushPlugin {
 
       const dropGraphPath: string | undefined = dropGraphParameter?.value;
       if (dropGraphPath) {
-        const { dropGraphAsync } = await import('./dropGraph');
+        const { dropGraphAsync } = await import('./dropGraph.ts');
         const isValid: boolean = await dropGraphAsync({
           operations,
           context,

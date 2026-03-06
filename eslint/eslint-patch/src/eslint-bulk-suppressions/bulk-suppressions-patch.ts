@@ -5,13 +5,13 @@ import fs from 'node:fs';
 
 import type { TSESTree } from '@typescript-eslint/types';
 
-import * as Guards from './ast-guards';
-import { eslintFolder } from '../_patch-base';
+import * as Guards from './ast-guards.ts';
+import { eslintFolder } from '../_patch-base.ts';
 import {
   ESLINT_BULK_ENABLE_ENV_VAR_NAME,
   ESLINT_BULK_PRUNE_ENV_VAR_NAME,
   ESLINT_BULK_SUPPRESS_ENV_VAR_NAME
-} from './constants';
+} from './constants.ts';
 import {
   getSuppressionsConfigForEslintConfigFolderPath,
   serializeSuppression,
@@ -19,7 +19,7 @@ import {
   type ISuppression,
   writeSuppressionsJsonToFile,
   getAllBulkSuppressionsConfigsByEslintConfigFolderPath
-} from './bulk-suppressions-file';
+} from './bulk-suppressions-file.ts';
 
 const ESLINT_CONFIG_FILENAMES: string[] = [
   'eslint.config.js',

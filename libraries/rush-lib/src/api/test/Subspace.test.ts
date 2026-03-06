@@ -3,8 +3,8 @@
 
 import * as path from 'node:path';
 
-import { RushConfiguration } from '../RushConfiguration';
-import { Subspace } from '../Subspace';
+import { RushConfiguration } from '../RushConfiguration.ts';
+import { Subspace } from '../Subspace.ts';
 
 describe(Subspace.name, () => {
   describe('getPnpmCatalogsHash', () => {

@@ -4,7 +4,7 @@
 import type { ESLint as TEslintLegacy } from 'eslint-8';
 import type { ESLint as TEslint } from 'eslint-9';
 
-import { getEslintPathAndVersion } from './utils/get-eslint-cli';
+import { getEslintPathAndVersion } from './utils/get-eslint-cli.ts';
 
 export async function runEslintAsync(files: string[], mode: 'suppress' | 'prune'): Promise<void> {
   const cwd: string = process.cwd();
@@ -26,7 +26,7 @@ export async function runEslintAsync(files: string[], mode: 'suppress' | 'prune'
     throw new Error(`@rushstack/eslint-bulk execution error: ${e.message}`);
   }
 
-  const { write, prune } = await import('../bulk-suppressions-patch');
+  const { write, prune } = await import('../bulk-suppressions-patch.ts');
   switch (mode) {
     case 'suppress': {
       await write();

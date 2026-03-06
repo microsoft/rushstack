@@ -13,16 +13,16 @@
 
 export type { MinifyOptions } from 'terser';
 
-export type { ILocalMinifierOptions } from './LocalMinifier';
-export { LocalMinifier } from './LocalMinifier';
+export type { ILocalMinifierOptions } from './LocalMinifier.ts';
+export { LocalMinifier } from './LocalMinifier.ts';
 
-export { MessagePortMinifier } from './MessagePortMinifier';
+export { MessagePortMinifier } from './MessagePortMinifier.ts';
 
-export { getIdentifier } from './MinifiedIdentifier';
+export { getIdentifier } from './MinifiedIdentifier.ts';
 
-export { minifySingleFileAsync as _minifySingleFileAsync } from './MinifySingleFile';
+export { minifySingleFileAsync as _minifySingleFileAsync } from './MinifySingleFile.ts';
 
-export { NoopMinifier } from './NoopMinifier';
+export { NoopMinifier } from './NoopMinifier.ts';
 
 export type {
   IMinifierConnection,
@@ -33,7 +33,7 @@ export type {
   IModuleMinificationSuccessResult,
   IModuleMinifier,
   IModuleMinifierFunction
-} from './types';
+} from './types.ts';
 
-export type { IWorkerPoolMinifierOptions } from './WorkerPoolMinifier';
-export { WorkerPoolMinifier } from './WorkerPoolMinifier';
+export type { IWorkerPoolMinifierOptions } from './WorkerPoolMinifier.ts';
+export { WorkerPoolMinifier } from './WorkerPoolMinifier.ts';

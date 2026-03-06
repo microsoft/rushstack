@@ -5,4 +5,4 @@ export type {
   ISwcIsolatedTranspilePluginAccessor,
   ModuleKind,
   ScriptTarget
-} from './SwcIsolatedTranspilePlugin';
+} from './SwcIsolatedTranspilePlugin.ts';

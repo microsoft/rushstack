@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { lfxGraphSerializer, type LfxGraph } from '../../../build/lfx-shared';
+import { lfxGraphSerializer, type LfxGraph } from '../../../build/lfx-shared/index.js';
 
-import * as lfxGraphLoader from '../lfxGraphLoader';
-import { TEST_WORKSPACE, TEST_LOCKFILE } from './testLockfile';
+import * as lfxGraphLoader from '../lfxGraphLoader.ts';
+import { TEST_WORKSPACE, TEST_LOCKFILE } from './testLockfile.ts';
 
 describe('serializeToJson', () => {
   it('serializes a simple graph', () => {

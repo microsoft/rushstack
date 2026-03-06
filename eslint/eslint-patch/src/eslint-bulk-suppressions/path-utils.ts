@@ -4,12 +4,12 @@
 import fs from 'node:fs';
 import os from 'node:os';
 
-import { eslintFolder, eslintPackageVersion } from '../_patch-base';
+import { eslintFolder, eslintPackageVersion } from '../_patch-base.ts';
 import {
   ESLINT_BULK_DETECT_ENV_VAR_NAME,
   ESLINT_BULK_STDOUT_END_DELIMETER,
   ESLINT_BULK_STDOUT_START_DELIMETER
-} from './constants';
+} from './constants.ts';
 import currentPackageJson from '../../package.json';
 
 interface IConfiguration {

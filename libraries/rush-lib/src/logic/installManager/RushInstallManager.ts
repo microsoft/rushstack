@@ -18,29 +18,29 @@ import {
 } from '@rushstack/node-core-library';
 import { Colorize, PrintUtilities } from '@rushstack/terminal';
 
-import { BaseInstallManager } from '../base/BaseInstallManager';
-import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
-import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
-import type { IRushTempPackageJson } from '../base/BasePackage';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { RushConstants } from '../RushConstants';
-import { Stopwatch } from '../../utilities/Stopwatch';
-import { Utilities } from '../../utilities/Utilities';
+import { BaseInstallManager } from '../base/BaseInstallManager.ts';
+import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes.ts';
+import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile.ts';
+import type { IRushTempPackageJson } from '../base/BasePackage.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { RushConstants } from '../RushConstants.ts';
+import { Stopwatch } from '../../utilities/Stopwatch.ts';
+import { Utilities } from '../../utilities/Utilities.ts';
 import {
   type PackageJsonEditor,
   DependencyType,
   type PackageJsonDependency
-} from '../../api/PackageJsonEditor';
-import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
-import { InstallHelpers } from './InstallHelpers';
-import { TempProjectHelper } from '../TempProjectHelper';
-import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import type { RushConfiguration } from '../..';
-import type { PurgeManager } from '../PurgeManager';
-import { LinkManagerFactory } from '../LinkManagerFactory';
-import type { BaseLinkManager } from '../base/BaseLinkManager';
-import type { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from '../pnpm/PnpmShrinkwrapFile';
-import type { Subspace } from '../../api/Subspace';
+} from '../../api/PackageJsonEditor.ts';
+import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier.ts';
+import { InstallHelpers } from './InstallHelpers.ts';
+import { TempProjectHelper } from '../TempProjectHelper.ts';
+import type { RushGlobalFolder } from '../../api/RushGlobalFolder.ts';
+import type { RushConfiguration } from '../../index.ts';
+import type { PurgeManager } from '../PurgeManager.ts';
+import { LinkManagerFactory } from '../LinkManagerFactory.ts';
+import type { BaseLinkManager } from '../base/BaseLinkManager.ts';
+import type { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from '../pnpm/PnpmShrinkwrapFile.ts';
+import type { Subspace } from '../../api/Subspace.ts';
 
 const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 

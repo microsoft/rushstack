@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AnsiEscape } from '../AnsiEscape';
-import { Colorize } from '../Colorize';
+import { AnsiEscape } from '../AnsiEscape.ts';
+import { Colorize } from '../Colorize.ts';
 
 describe(AnsiEscape.name, () => {
   it('calls removeCodes() successfully', () => {

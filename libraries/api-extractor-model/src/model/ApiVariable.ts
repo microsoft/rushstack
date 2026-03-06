@@ -8,23 +8,23 @@ import {
   type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 
-import { ApiItemKind } from '../items/ApiItem';
+import { ApiItemKind } from '../items/ApiItem.ts';
 import {
   ApiDeclaredItem,
   type IApiDeclaredItemOptions,
   type IApiDeclaredItemJson
-} from '../items/ApiDeclaredItem';
-import { ApiReleaseTagMixin, type IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
-import { ApiReadonlyMixin, type IApiReadonlyMixinOptions } from '../mixins/ApiReadonlyMixin';
-import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { ApiInitializerMixin, type IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin';
-import type { IExcerptTokenRange, Excerpt } from '../mixins/Excerpt';
-import type { DeserializerContext } from './DeserializerContext';
+} from '../items/ApiDeclaredItem.ts';
+import { ApiReleaseTagMixin, type IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin.ts';
+import { ApiReadonlyMixin, type IApiReadonlyMixinOptions } from '../mixins/ApiReadonlyMixin.ts';
+import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin.ts';
+import { ApiInitializerMixin, type IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin.ts';
+import type { IExcerptTokenRange, Excerpt } from '../mixins/Excerpt.ts';
+import type { DeserializerContext } from './DeserializerContext.ts';
 import {
   type IApiExportedMixinJson,
   type IApiExportedMixinOptions,
   ApiExportedMixin
-} from '../mixins/ApiExportedMixin';
+} from '../mixins/ApiExportedMixin.ts';
 
 /**
  * Constructor options for {@link ApiVariable}.

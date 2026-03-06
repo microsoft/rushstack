@@ -5,16 +5,17 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { ScrollArea, Tabs, Text } from '@rushstack/rush-themed-ui';
 
-import { readPnpmfileAsync, readPackageSpecAsync, readPackageJsonAsync } from '../../helpers/lfxApiClient';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { selectCurrentEntry } from '../../store/slices/entrySlice';
-import type { IPackageJson } from '../../types/IPackageJson';
-import { compareSpec } from '../../parsing/compareSpec';
-import { loadSpecChanges } from '../../store/slices/workspaceSlice';
-import { displaySpecChanges } from '../../helpers/displaySpecChanges';
-import { isEntryModified } from '../../helpers/isEntryModified';
-import { LfxGraphEntryKind } from '../../packlets/lfx-shared';
-import { CodeBox } from './CodeBox';
+import { readPnpmfileAsync, readPackageSpecAsync, readPackageJsonAsync } from '../../helpers/lfxApiClient.ts';
+import { useAppDispatch, useAppSelector } from '../../store/hooks.ts';
+import { selectCurrentEntry } from '../../store/slices/entrySlice.ts';
+import type { IPackageJson } from '../../types/IPackageJson.ts';
+import { compareSpec } from '../../parsing/compareSpec.ts';
+import { loadSpecChanges } from '../../store/slices/workspaceSlice.ts';
+import { displaySpecChanges } from '../../helpers/displaySpecChanges.ts';
+import { isEntryModified } from '../../helpers/isEntryModified.ts';
+// eslint-disable-next-line @rushstack/packlets/mechanics
+import { LfxGraphEntryKind } from '../../packlets/lfx-shared/index.ts';
+import { CodeBox } from './CodeBox.tsx';
 import styles from './styles.scss';
 
 const PackageView: { [key: string]: string } = {

@@ -3,9 +3,9 @@
 
 import type { TSESLint } from '@typescript-eslint/utils';
 
-import { mechanics } from './mechanics';
-import { circularDeps } from './circular-deps';
-import { readme } from './readme';
+import { mechanics } from './mechanics.ts';
+import { circularDeps } from './circular-deps.ts';
+import { readme } from './readme.ts';
 
 interface IPlugin {
   rules: { [ruleName: string]: TSESLint.RuleModule<string, unknown[]> };

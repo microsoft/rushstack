@@ -7,8 +7,8 @@ import type { HeftConfiguration } from '@rushstack/heft';
 import type { ITerminal } from '@rushstack/terminal';
 import { type IPackageJson, JsonFile, RealNodeModulePathResolver } from '@rushstack/node-core-library';
 
-import type { ExtendedTypeScript } from './internalTypings/TypeScriptInternals';
-import type { IBaseTypeScriptTool } from './TypeScriptBuilder';
+import type { ExtendedTypeScript } from './internalTypings/TypeScriptInternals.ts';
+import type { IBaseTypeScriptTool } from './TypeScriptBuilder.ts';
 
 const OLDEST_SUPPORTED_TS_MAJOR_VERSION: number = 2;
 const OLDEST_SUPPORTED_TS_MINOR_VERSION: number = 9;

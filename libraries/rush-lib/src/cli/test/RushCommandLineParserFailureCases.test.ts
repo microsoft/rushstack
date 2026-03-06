@@ -28,10 +28,10 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
 
 import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
-import { Autoinstaller } from '../../logic/Autoinstaller';
-import type { ITelemetryData } from '../../logic/Telemetry';
-import { getCommandLineParserInstanceAsync, setSpawnMock } from './TestUtils';
-import { isolateEnvironmentConfigurationForTests, type IEnvironmentConfigIsolation } from './TestUtils';
+import { Autoinstaller } from '../../logic/Autoinstaller.ts';
+import type { ITelemetryData } from '../../logic/Telemetry.ts';
+import { getCommandLineParserInstanceAsync, setSpawnMock } from './TestUtils.ts';
+import { isolateEnvironmentConfigurationForTests, type IEnvironmentConfigIsolation } from './TestUtils.ts';
 
 describe('RushCommandLineParserFailureCases', () => {
   describe('execute', () => {

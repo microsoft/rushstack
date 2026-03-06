@@ -7,12 +7,15 @@ import {
   Navigation
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 
-import { ApiItemKind } from '../items/ApiItem';
-import { type IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
-import { type IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
-import { type IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
-import { type IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
-import { type IApiReadonlyMixinOptions, ApiReadonlyMixin } from '../mixins/ApiReadonlyMixin';
+import { ApiItemKind } from '../items/ApiItem.ts';
+import { type IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem.ts';
+import {
+  type IApiParameterListMixinOptions,
+  ApiParameterListMixin
+} from '../mixins/ApiParameterListMixin.ts';
+import { type IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin.ts';
+import { type IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin.ts';
+import { type IApiReadonlyMixinOptions, ApiReadonlyMixin } from '../mixins/ApiReadonlyMixin.ts';
 
 /**
  * Constructor options for {@link ApiIndexSignature}.

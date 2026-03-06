@@ -8,12 +8,12 @@ import {
   type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 
-import { ApiItemKind } from '../items/ApiItem';
-import { ApiAbstractMixin, type IApiAbstractMixinOptions } from '../mixins/ApiAbstractMixin';
-import { ApiProtectedMixin, type IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin';
-import { ApiStaticMixin, type IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
-import { ApiInitializerMixin, type IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin';
-import { ApiPropertyItem, type IApiPropertyItemOptions } from '../items/ApiPropertyItem';
+import { ApiItemKind } from '../items/ApiItem.ts';
+import { ApiAbstractMixin, type IApiAbstractMixinOptions } from '../mixins/ApiAbstractMixin.ts';
+import { ApiProtectedMixin, type IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin.ts';
+import { ApiStaticMixin, type IApiStaticMixinOptions } from '../mixins/ApiStaticMixin.ts';
+import { ApiInitializerMixin, type IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin.ts';
+import { ApiPropertyItem, type IApiPropertyItemOptions } from '../items/ApiPropertyItem.ts';
 
 /**
  * Constructor options for {@link ApiProperty}.

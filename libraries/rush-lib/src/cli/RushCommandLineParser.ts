@@ -17,52 +17,52 @@ import {
   type ITerminal
 } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../api/RushConfiguration';
-import { RushConstants } from '../logic/RushConstants';
+import { RushConfiguration } from '../api/RushConfiguration.ts';
+import { RushConstants } from '../logic/RushConstants.ts';
 import {
   type Command,
   CommandLineConfiguration,
   type IGlobalCommandConfig,
   type IPhasedCommandConfig
-} from '../api/CommandLineConfiguration';
-import { AddAction } from './actions/AddAction';
-import { AlertAction } from './actions/AlertAction';
-import { BridgePackageAction } from './actions/BridgePackageAction';
-import { ChangeAction } from './actions/ChangeAction';
-import { CheckAction } from './actions/CheckAction';
-import { DeployAction } from './actions/DeployAction';
-import { InitAction } from './actions/InitAction';
-import { InitAutoinstallerAction } from './actions/InitAutoinstallerAction';
-import { InitDeployAction } from './actions/InitDeployAction';
-import { InstallAction } from './actions/InstallAction';
-import { InstallAutoinstallerAction } from './actions/InstallAutoinstallerAction';
-import { LinkAction } from './actions/LinkAction';
-import { LinkPackageAction } from './actions/LinkPackageAction';
-import { ListAction } from './actions/ListAction';
-import { PublishAction } from './actions/PublishAction';
-import { PurgeAction } from './actions/PurgeAction';
-import { RemoveAction } from './actions/RemoveAction';
-import { ScanAction } from './actions/ScanAction';
-import { UnlinkAction } from './actions/UnlinkAction';
-import { UpdateAction } from './actions/UpdateAction';
-import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction';
-import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAction';
-import { UpgradeInteractiveAction } from './actions/UpgradeInteractiveAction';
-import { VersionAction } from './actions/VersionAction';
-import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
-import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
-import type { IBaseScriptActionOptions } from './scriptActions/BaseScriptAction';
-import { Telemetry } from '../logic/Telemetry';
-import { RushGlobalFolder } from '../api/RushGlobalFolder';
-import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
-import { SetupAction } from './actions/SetupAction';
-import { type ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager';
-import { RushSession } from '../pluginFramework/RushSession';
-import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
-import { InitSubspaceAction } from './actions/InitSubspaceAction';
-import { RushAlerts } from '../utilities/RushAlerts';
-import { initializeDotEnv } from '../logic/dotenv';
-import { measureAsyncFn } from '../utilities/performance';
+} from '../api/CommandLineConfiguration.ts';
+import { AddAction } from './actions/AddAction.ts';
+import { AlertAction } from './actions/AlertAction.ts';
+import { BridgePackageAction } from './actions/BridgePackageAction.ts';
+import { ChangeAction } from './actions/ChangeAction.ts';
+import { CheckAction } from './actions/CheckAction.ts';
+import { DeployAction } from './actions/DeployAction.ts';
+import { InitAction } from './actions/InitAction.ts';
+import { InitAutoinstallerAction } from './actions/InitAutoinstallerAction.ts';
+import { InitDeployAction } from './actions/InitDeployAction.ts';
+import { InstallAction } from './actions/InstallAction.ts';
+import { InstallAutoinstallerAction } from './actions/InstallAutoinstallerAction.ts';
+import { LinkAction } from './actions/LinkAction.ts';
+import { LinkPackageAction } from './actions/LinkPackageAction.ts';
+import { ListAction } from './actions/ListAction.ts';
+import { PublishAction } from './actions/PublishAction.ts';
+import { PurgeAction } from './actions/PurgeAction.ts';
+import { RemoveAction } from './actions/RemoveAction.ts';
+import { ScanAction } from './actions/ScanAction.ts';
+import { UnlinkAction } from './actions/UnlinkAction.ts';
+import { UpdateAction } from './actions/UpdateAction.ts';
+import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction.ts';
+import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAction.ts';
+import { UpgradeInteractiveAction } from './actions/UpgradeInteractiveAction.ts';
+import { VersionAction } from './actions/VersionAction.ts';
+import { GlobalScriptAction } from './scriptActions/GlobalScriptAction.ts';
+import { PhasedScriptAction } from './scriptActions/PhasedScriptAction.ts';
+import type { IBaseScriptActionOptions } from './scriptActions/BaseScriptAction.ts';
+import { Telemetry } from '../logic/Telemetry.ts';
+import { RushGlobalFolder } from '../api/RushGlobalFolder.ts';
+import { NodeJsCompatibility } from '../logic/NodeJsCompatibility.ts';
+import { SetupAction } from './actions/SetupAction.ts';
+import { type ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager.ts';
+import { RushSession } from '../pluginFramework/RushSession.ts';
+import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader.ts';
+import { InitSubspaceAction } from './actions/InitSubspaceAction.ts';
+import { RushAlerts } from '../utilities/RushAlerts.ts';
+import { initializeDotEnv } from '../logic/dotenv.ts';
+import { measureAsyncFn } from '../utilities/performance.ts';
 
 /**
  * Options for `RushCommandLineParser`.

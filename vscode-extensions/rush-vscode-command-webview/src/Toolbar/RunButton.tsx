@@ -5,9 +5,9 @@ import { PrimaryButton } from '@fluentui/react/lib/Button';
 import * as React from 'react';
 import { useCallback } from 'react';
 
-import { sendMessageToExtension } from '../Message/toExtension';
-import { useAppSelector } from '../store/hooks';
-import { useParameterArgs } from '../store/slices/parameter';
+import { sendMessageToExtension } from '../Message/toExtension.ts';
+import { useAppSelector } from '../store/hooks/index.ts';
+import { useParameterArgs } from '../store/slices/parameter.ts';
 
 export const RunButton = (): React.ReactElement => {
   const commandName: string = useAppSelector((state) => state.parameter.commandName);

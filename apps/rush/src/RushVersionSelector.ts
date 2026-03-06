@@ -9,8 +9,8 @@ import { LockFile, Import } from '@rushstack/node-core-library';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
 import { _FlagFile, _RushGlobalFolder, type ILaunchOptions } from '@microsoft/rush-lib';
 
-import { RushCommandSelector } from './RushCommandSelector';
-import type { MinimalRushConfiguration } from './MinimalRushConfiguration';
+import { RushCommandSelector } from './RushCommandSelector.ts';
+import type { MinimalRushConfiguration } from './MinimalRushConfiguration.ts';
 
 const MAX_INSTALL_ATTEMPTS: number = 3;
 

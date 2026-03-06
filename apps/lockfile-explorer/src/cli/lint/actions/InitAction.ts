@@ -8,8 +8,8 @@ import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { RushConfiguration } from '@rushstack/rush-sdk';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import type { LintCommandLineParser } from '../LintCommandLineParser';
-import { LOCKFILE_EXPLORER_FOLDERNAME, LOCKFILE_LINT_JSON_FILENAME } from '../../../constants/common';
+import type { LintCommandLineParser } from '../LintCommandLineParser.ts';
+import { LOCKFILE_EXPLORER_FOLDERNAME, LOCKFILE_LINT_JSON_FILENAME } from '../../../constants/common.ts';
 
 export class InitAction extends CommandLineAction {
   private readonly _terminal: ITerminal;

@@ -13,11 +13,11 @@ import {
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { type INodePackageJson, InternalError } from '@rushstack/node-core-library';
 
-import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
-import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
-import type { Collector } from '../collector/Collector';
-import type { CollectorEntity } from '../collector/CollectorEntity';
-import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
+import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers.ts';
+import { TypeScriptInternals } from '../analyzer/TypeScriptInternals.ts';
+import type { Collector } from '../collector/Collector.ts';
+import type { CollectorEntity } from '../collector/CollectorEntity.ts';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport.ts';
 
 export class DeclarationReferenceGenerator {
   public static readonly unknownReference: string = '?';

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { DependencyAnalyzer, type IDependencyAnalysis } from '../DependencyAnalyzer';
+import { RushConfiguration } from '../../api/RushConfiguration.ts';
+import { DependencyAnalyzer, type IDependencyAnalysis } from '../DependencyAnalyzer.ts';
 
 describe(DependencyAnalyzer.name, () => {
   function getAnalysisForRepoByName(repoName: string): IDependencyAnalysis {

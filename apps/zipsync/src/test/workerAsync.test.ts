@@ -4,9 +4,9 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 
-import { unpackWorkerAsync } from '../unpackWorkerAsync';
-import { packWorkerAsync } from '../packWorkerAsync';
-import { getDemoDataDirectoryDisposable } from './testUtils';
+import { unpackWorkerAsync } from '../unpackWorkerAsync.ts';
+import { packWorkerAsync } from '../packWorkerAsync.ts';
+import { getDemoDataDirectoryDisposable } from './testUtils.ts';
 
 describe('zipSyncWorkerAsync tests', () => {
   it('basic pack test', async () => {

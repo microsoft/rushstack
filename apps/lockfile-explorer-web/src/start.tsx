@@ -5,9 +5,9 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 
-import { App } from './App';
+import { App } from './App.tsx';
 import './start.css';
-import { store } from './store';
+import { store } from './store/index.ts';
 
 const rootDiv: HTMLElement = document.getElementById('root') as HTMLElement;
 ReactDOM.createRoot(rootDiv).render(

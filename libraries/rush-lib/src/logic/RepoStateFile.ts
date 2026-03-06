@@ -3,11 +3,11 @@
 
 import { FileSystem, JsonFile, JsonSchema, NewlineKind } from '@rushstack/node-core-library';
 
-import type { RushConfiguration } from '../api/RushConfiguration';
-import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
-import type { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile.ts';
+import type { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration.ts';
 import schemaJson from '../schemas/repo-state.schema.json';
-import type { Subspace } from '../api/Subspace';
+import type { Subspace } from '../api/Subspace.ts';
 
 /**
  * This interface represents the raw repo-state.json file

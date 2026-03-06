@@ -5,14 +5,14 @@ import * as path from 'node:path';
 
 import { FileSystem, Import, JsonFile, type IDependenciesMetaTable } from '@rushstack/node-core-library';
 
-import { subspacePnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants';
-import type { ISubspacePnpmfileShimSettings, IWorkspaceProjectInfo } from './IPnpmfile';
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
-import { RushConstants } from '../RushConstants';
-import type { Subspace } from '../../api/Subspace';
-import type { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
+import { subspacePnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants.ts';
+import type { ISubspacePnpmfileShimSettings, IWorkspaceProjectInfo } from './IPnpmfile.ts';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager.ts';
+import { RushConstants } from '../RushConstants.ts';
+import type { Subspace } from '../../api/Subspace.ts';
+import type { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration.ts';
 
 /**
  * Loads PNPM's pnpmfile.js configuration, and invokes it to preprocess package.json files,

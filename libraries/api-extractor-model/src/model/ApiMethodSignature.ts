@@ -8,17 +8,20 @@ import {
   type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 
-import { ApiItemKind } from '../items/ApiItem';
-import { ApiDeclaredItem, type IApiDeclaredItemOptions } from '../items/ApiDeclaredItem';
-import { ApiParameterListMixin, type IApiParameterListMixinOptions } from '../mixins/ApiParameterListMixin';
-import { ApiReleaseTagMixin, type IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
-import { type IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
-import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { ApiItemKind } from '../items/ApiItem.ts';
+import { ApiDeclaredItem, type IApiDeclaredItemOptions } from '../items/ApiDeclaredItem.ts';
+import {
+  ApiParameterListMixin,
+  type IApiParameterListMixinOptions
+} from '../mixins/ApiParameterListMixin.ts';
+import { ApiReleaseTagMixin, type IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin.ts';
+import { type IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin.ts';
+import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin.ts';
 import {
   type IApiTypeParameterListMixinOptions,
   ApiTypeParameterListMixin
-} from '../mixins/ApiTypeParameterListMixin';
-import { ApiOptionalMixin, type IApiOptionalMixinOptions } from '../mixins/ApiOptionalMixin';
+} from '../mixins/ApiTypeParameterListMixin.ts';
+import { ApiOptionalMixin, type IApiOptionalMixinOptions } from '../mixins/ApiOptionalMixin.ts';
 
 /** @public */
 export interface IApiMethodSignatureOptions

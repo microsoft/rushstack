@@ -3,9 +3,9 @@
 
 import { Path } from '@rushstack/node-core-library';
 
-import type { IChangelog } from '../../api/Changelog';
-import { ChangeFiles } from '../ChangeFiles';
-import type { RushConfiguration } from '../../api/RushConfiguration';
+import type { IChangelog } from '../../api/Changelog.ts';
+import { ChangeFiles } from '../ChangeFiles.ts';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
 
 describe(ChangeFiles.name, () => {
   let rushConfiguration: RushConfiguration;

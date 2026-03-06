@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { SCOPING_PARAMETER_GROUP } from '../Constants';
+import type { SCOPING_PARAMETER_GROUP } from '../Constants.ts';
 
 /**
  * For use with CommandLineParser, this interface represents a generic command-line parameter

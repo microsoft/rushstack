@@ -3,10 +3,10 @@
 
 import { AlreadyReportedError, PackageName } from '@rushstack/node-core-library';
 
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser';
-import { RushConstants } from '../RushConstants';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import type { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser.ts';
+import { RushConstants } from '../RushConstants.ts';
 
 export class NamedProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {
   private readonly _rushConfiguration: RushConfiguration;

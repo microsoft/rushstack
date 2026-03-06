@@ -11,8 +11,8 @@ export {
   type ICustomDataPlaceholder as _ICustomDataPlaceholder,
   type IValuePlaceholderBase,
   type ValueForLocaleFn
-} from './LocalizationPlugin';
-export { TrueHashPlugin, type ITrueHashPluginOptions } from './TrueHashPlugin';
+} from './LocalizationPlugin.ts';
+export { TrueHashPlugin, type ITrueHashPluginOptions } from './TrueHashPlugin.ts';
 
 export type {
   IDefaultLocaleOptions,
@@ -30,5 +30,5 @@ export type {
   IPassthroughLocaleOptions,
   IPseudolocalesOptions,
   IResolvedMissingTranslations
-} from './interfaces';
-export type { ILocalizedWebpackChunk } from './webpackInterfaces';
+} from './interfaces.ts';
+export type { ILocalizedWebpackChunk } from './webpackInterfaces.ts';

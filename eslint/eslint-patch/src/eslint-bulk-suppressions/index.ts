@@ -1,11 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { eslintFolder, eslintPackageVersion } from '../_patch-base';
-import { findAndConsoleLogPatchPathCli, getPathToLinterJS, ensurePathToGeneratedPatch } from './path-utils';
-import { patchClass, extendVerifyFunction } from './bulk-suppressions-patch';
-import { generatePatchedLinterJsFileIfDoesNotExist } from './generate-patched-file';
-import { ESLINT_BULK_DETECT_ENV_VAR_NAME, ESLINT_BULK_PATCH_PATH_ENV_VAR_NAME } from './constants';
+import { eslintFolder, eslintPackageVersion } from '../_patch-base.ts';
+import {
+  findAndConsoleLogPatchPathCli,
+  getPathToLinterJS,
+  ensurePathToGeneratedPatch
+} from './path-utils.ts';
+import { patchClass, extendVerifyFunction } from './bulk-suppressions-patch.ts';
+import { generatePatchedLinterJsFileIfDoesNotExist } from './generate-patched-file.ts';
+import { ESLINT_BULK_DETECT_ENV_VAR_NAME, ESLINT_BULK_PATCH_PATH_ENV_VAR_NAME } from './constants.ts';
 
 if (!eslintFolder) {
   console.error(

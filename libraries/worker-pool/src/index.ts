@@ -9,5 +9,5 @@
  * @packageDocumentation
  */
 
-export type { IWorkerPoolOptions } from './WorkerPool';
-export { WORKER_ID_SYMBOL, WorkerPool } from './WorkerPool';
+export type { IWorkerPoolOptions } from './WorkerPool.ts';
+export { WORKER_ID_SYMBOL, WorkerPool } from './WorkerPool.ts';

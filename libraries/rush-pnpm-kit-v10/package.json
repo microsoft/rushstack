@@ -9,13 +9,11 @@
   "exports": {
     ".": {
       "types": "./dist/rush-pnpm-kit-v10.d.ts",
-      "node": "./lib-commonjs/index.js",
       "import": "./lib-esm/index.js",
       "require": "./lib-commonjs/index.js"
     },
     "./lib/*": {
       "types": "./lib-dts/*.d.ts",
-      "node": "./lib-commonjs/*.js",
       "import": "./lib-esm/*.js",
       "require": "./lib-commonjs/*.js"
     },

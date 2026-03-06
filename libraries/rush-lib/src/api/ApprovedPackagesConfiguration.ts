@@ -5,9 +5,9 @@ import * as path from 'node:path';
 
 import { JsonFile, JsonSchema, FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
 
-import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
+import { JsonSchemaUrls } from '../logic/JsonSchemaUrls.ts';
 import schemaJson from '../schemas/approved-packages.schema.json';
-import { RushConstants } from '../logic/RushConstants';
+import { RushConstants } from '../logic/RushConstants.ts';
 
 /**
  * Part of IApprovedPackagesJson.

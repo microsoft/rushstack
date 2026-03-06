@@ -20,7 +20,7 @@ import {
 } from '@microsoft/tsdoc';
 import { InternalError } from '@rushstack/node-core-library';
 
-import { IndentedWriter } from '../utils/IndentedWriter';
+import { IndentedWriter } from '../utils/IndentedWriter.ts';
 
 export interface IMarkdownEmitterOptions {}
 

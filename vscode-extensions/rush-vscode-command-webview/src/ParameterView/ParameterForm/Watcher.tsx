@@ -7,8 +7,8 @@ import type { FieldValues, UseFormWatch } from 'react-hook-form';
 import type { AnyAction, Dispatch } from '@reduxjs/toolkit';
 import type { Subscription } from 'react-hook-form/dist/utils/createSubject';
 
-import { useAppDispatch } from '../../store/hooks';
-import { onChangeFormValues } from '../../store/slices/parameter';
+import { useAppDispatch } from '../../store/hooks/index.ts';
+import { onChangeFormValues } from '../../store/slices/parameter.ts';
 
 export interface IParameterFormWatcherProps {
   watch: UseFormWatch<FieldValues>;

@@ -23,25 +23,25 @@ import type {
   CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
 
-import type { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
-import type { HeftConfiguration } from '../configuration/HeftConfiguration';
-import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
-import type { MetricsCollector } from '../metrics/MetricsCollector';
-import { HeftParameterManager } from '../pluginFramework/HeftParameterManager';
-import { TaskOperationRunner } from '../operations/runners/TaskOperationRunner';
-import { PhaseOperationRunner } from '../operations/runners/PhaseOperationRunner';
-import type { IHeftPhase, HeftPhase } from '../pluginFramework/HeftPhase';
-import type { IHeftAction, IHeftActionOptions } from './actions/IHeftAction';
+import type { InternalHeftSession } from '../pluginFramework/InternalHeftSession.ts';
+import type { HeftConfiguration } from '../configuration/HeftConfiguration.ts';
+import type { LoggingManager } from '../pluginFramework/logging/LoggingManager.ts';
+import type { MetricsCollector } from '../metrics/MetricsCollector.ts';
+import { HeftParameterManager } from '../pluginFramework/HeftParameterManager.ts';
+import { TaskOperationRunner } from '../operations/runners/TaskOperationRunner.ts';
+import { PhaseOperationRunner } from '../operations/runners/PhaseOperationRunner.ts';
+import type { IHeftPhase, HeftPhase } from '../pluginFramework/HeftPhase.ts';
+import type { IHeftAction, IHeftActionOptions } from './actions/IHeftAction.ts';
 import type {
   IHeftLifecycleCleanHookOptions,
   IHeftLifecycleSession,
   IHeftLifecycleToolFinishHookOptions,
   IHeftLifecycleToolStartHookOptions
-} from '../pluginFramework/HeftLifecycleSession';
-import type { HeftLifecycle } from '../pluginFramework/HeftLifecycle';
-import type { IHeftTask, HeftTask } from '../pluginFramework/HeftTask';
-import { deleteFilesAsync, type IDeleteOperation } from '../plugins/DeleteFilesPlugin';
-import { Constants } from '../utilities/Constants';
+} from '../pluginFramework/HeftLifecycleSession.ts';
+import type { HeftLifecycle } from '../pluginFramework/HeftLifecycle.ts';
+import type { IHeftTask, HeftTask } from '../pluginFramework/HeftTask.ts';
+import { deleteFilesAsync, type IDeleteOperation } from '../plugins/DeleteFilesPlugin.ts';
+import { Constants } from '../utilities/Constants.ts';
 
 export interface IHeftActionRunnerOptions extends IHeftActionOptions {
   action: IHeftAction;

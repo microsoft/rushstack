@@ -2,15 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import { AlreadyReportedError } from '@rushstack/node-core-library';
-import { OperationStatus } from '../OperationStatus';
-import { type IWatchLoopOptions, type IWatchLoopState, WatchLoop } from '../WatchLoop';
+import { OperationStatus } from '../OperationStatus.ts';
+import { type IWatchLoopOptions, type IWatchLoopState, WatchLoop } from '../WatchLoop.ts';
 import type {
   CommandMessageFromHost,
   EventMessageFromClient,
   IAfterExecuteEventMessage,
   IPCHost,
   ISyncEventMessage
-} from '../protocol.types';
+} from '../protocol.types.ts';
 
 type IMockOptions = {
   [K in keyof IWatchLoopOptions]: jest.Mock<

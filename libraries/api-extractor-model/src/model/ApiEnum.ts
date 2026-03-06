@@ -8,13 +8,16 @@ import {
   type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 
-import { ApiItemKind } from '../items/ApiItem';
-import { ApiDeclaredItem, type IApiDeclaredItemOptions } from '../items/ApiDeclaredItem';
-import { ApiReleaseTagMixin, type IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
-import { ApiItemContainerMixin, type IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
-import type { ApiEnumMember } from './ApiEnumMember';
-import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { type IApiExportedMixinOptions, ApiExportedMixin } from '../mixins/ApiExportedMixin';
+import { ApiItemKind } from '../items/ApiItem.ts';
+import { ApiDeclaredItem, type IApiDeclaredItemOptions } from '../items/ApiDeclaredItem.ts';
+import { ApiReleaseTagMixin, type IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin.ts';
+import {
+  ApiItemContainerMixin,
+  type IApiItemContainerMixinOptions
+} from '../mixins/ApiItemContainerMixin.ts';
+import type { ApiEnumMember } from './ApiEnumMember.ts';
+import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin.ts';
+import { type IApiExportedMixinOptions, ApiExportedMixin } from '../mixins/ApiExportedMixin.ts';
 
 /**
  * Constructor options for {@link ApiEnum}.

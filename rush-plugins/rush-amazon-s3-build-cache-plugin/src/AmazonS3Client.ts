@@ -13,8 +13,8 @@ import {
   AUTHORIZATION_HEADER_NAME
 } from '@rushstack/rush-sdk/lib/utilities/WebClient';
 
-import type { IAmazonS3BuildCacheProviderOptionsAdvanced } from './AmazonS3BuildCacheProvider';
-import { type IAmazonS3Credentials, fromRushEnv } from './AmazonS3Credentials';
+import type { IAmazonS3BuildCacheProviderOptionsAdvanced } from './AmazonS3BuildCacheProvider.ts';
+import { type IAmazonS3Credentials, fromRushEnv } from './AmazonS3Credentials.ts';
 
 const CONTENT_HASH_HEADER_NAME: 'x-amz-content-sha256' = 'x-amz-content-sha256';
 const DATE_HEADER_NAME: 'x-amz-date' = 'x-amz-date';

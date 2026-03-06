@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { BaseRushAction } from './BaseRushAction';
-import { UnlinkManager } from '../../logic/UnlinkManager';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { BaseRushAction } from './BaseRushAction.ts';
+import { UnlinkManager } from '../../logic/UnlinkManager.ts';
 
 export class UnlinkAction extends BaseRushAction {
   public constructor(parser: RushCommandLineParser) {

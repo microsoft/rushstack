@@ -9,8 +9,8 @@ import type { pki } from 'node-forge';
 import { FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { darwinRunSudoAsync, type IRunResult, randomTmpPath, runAsync } from './runCommand';
-import { CertificateStore, type ICertificateStoreOptions } from './CertificateStore';
+import { darwinRunSudoAsync, type IRunResult, randomTmpPath, runAsync } from './runCommand.ts';
+import { CertificateStore, type ICertificateStoreOptions } from './CertificateStore.ts';
 
 const CA_SERIAL_NUMBER: string = '731c321744e34650a202e3ef91c3c1b0';
 const TLS_SERIAL_NUMBER: string = '731c321744e34650a202e3ef00000001';

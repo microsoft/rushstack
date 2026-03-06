@@ -18,27 +18,27 @@ export {
 } from '@rushstack/credential-cache';
 // #endregion
 
-export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
+export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy.ts';
 
-export { RushConfiguration, type ITryFindRushJsonLocationOptions } from './api/RushConfiguration';
+export { RushConfiguration, type ITryFindRushJsonLocationOptions } from './api/RushConfiguration.ts';
 
-export { Subspace } from './api/Subspace';
-export { SubspacesConfiguration } from './api/SubspacesConfiguration';
+export { Subspace } from './api/Subspace.ts';
+export { SubspacesConfiguration } from './api/SubspacesConfiguration.ts';
 
 export {
   type IPackageManagerOptionsJsonBase,
   type IConfigurationEnvironment,
   type IConfigurationEnvironmentVariable,
   PackageManagerOptionsConfigurationBase
-} from './logic/base/BasePackageManagerOptionsConfiguration';
+} from './logic/base/BasePackageManagerOptionsConfiguration.ts';
 export {
   type INpmOptionsJson as _INpmOptionsJson,
   NpmOptionsConfiguration
-} from './logic/npm/NpmOptionsConfiguration';
+} from './logic/npm/NpmOptionsConfiguration.ts';
 export {
   type IYarnOptionsJson as _IYarnOptionsJson,
   YarnOptionsConfiguration
-} from './logic/yarn/YarnOptionsConfiguration';
+} from './logic/yarn/YarnOptionsConfiguration.ts';
 export {
   type IPnpmOptionsJson as _IPnpmOptionsJson,
   type PnpmStoreLocation,
@@ -49,32 +49,35 @@ export {
   type PnpmStoreOptions,
   PnpmOptionsConfiguration,
   type PnpmResolutionMode
-} from './logic/pnpm/PnpmOptionsConfiguration';
+} from './logic/pnpm/PnpmOptionsConfiguration.ts';
 
-export { BuildCacheConfiguration } from './api/BuildCacheConfiguration';
-export { CobuildConfiguration, type ICobuildJson } from './api/CobuildConfiguration';
-export type { GetCacheEntryIdFunction, IGenerateCacheEntryIdOptions } from './logic/buildCache/CacheEntryId';
+export { BuildCacheConfiguration } from './api/BuildCacheConfiguration.ts';
+export { CobuildConfiguration, type ICobuildJson } from './api/CobuildConfiguration.ts';
+export type {
+  GetCacheEntryIdFunction,
+  IGenerateCacheEntryIdOptions
+} from './logic/buildCache/CacheEntryId.ts';
 export {
   FileSystemBuildCacheProvider,
   type IFileSystemBuildCacheProviderOptions
-} from './logic/buildCache/FileSystemBuildCacheProvider';
+} from './logic/buildCache/FileSystemBuildCacheProvider.ts';
 
 export type {
   IPhase,
   PhaseBehaviorForMissingScript as IPhaseBehaviorForMissingScript
-} from './api/CommandLineConfiguration';
+} from './api/CommandLineConfiguration.ts';
 
 export {
   EnvironmentConfiguration,
   EnvironmentVariableNames,
   type IEnvironmentConfigurationInitializeOptions
-} from './api/EnvironmentConfiguration';
+} from './api/EnvironmentConfiguration.ts';
 
-export { RushConstants } from './logic/RushConstants';
+export { RushConstants } from './logic/RushConstants.ts';
 
-export { type PackageManagerName, PackageManager } from './api/packageManager/PackageManager';
+export { type PackageManagerName, PackageManager } from './api/packageManager/PackageManager.ts';
 
-export { RushConfigurationProject } from './api/RushConfigurationProject';
+export { RushConfigurationProject } from './api/RushConfigurationProject.ts';
 
 export {
   type IRushProjectJson as _IRushProjectJson,
@@ -82,30 +85,30 @@ export {
   type NodeVersionGranularity,
   RushProjectConfiguration,
   type IRushPhaseSharding
-} from './api/RushProjectConfiguration';
+} from './api/RushProjectConfiguration.ts';
 
-export { RushUserConfiguration } from './api/RushUserConfiguration';
+export { RushUserConfiguration } from './api/RushUserConfiguration.ts';
 
-export { RushGlobalFolder as _RushGlobalFolder } from './api/RushGlobalFolder';
+export { RushGlobalFolder as _RushGlobalFolder } from './api/RushGlobalFolder.ts';
 
-export { ApprovedPackagesItem, ApprovedPackagesConfiguration } from './api/ApprovedPackagesConfiguration';
+export { ApprovedPackagesItem, ApprovedPackagesConfiguration } from './api/ApprovedPackagesConfiguration.ts';
 
-export { CommonVersionsConfiguration } from './api/CommonVersionsConfiguration';
+export { CommonVersionsConfiguration } from './api/CommonVersionsConfiguration.ts';
 
 export {
   PackageJsonEditor,
   PackageJsonDependency,
   DependencyType,
   PackageJsonDependencyMeta
-} from './api/PackageJsonEditor';
+} from './api/PackageJsonEditor.ts';
 
-export { RepoStateFile } from './logic/RepoStateFile';
+export { RepoStateFile } from './logic/RepoStateFile.ts';
 
-export { EventHooks, Event } from './api/EventHooks';
+export { EventHooks, Event } from './api/EventHooks.ts';
 
-export { ChangeManager } from './api/ChangeManager';
+export { ChangeManager } from './api/ChangeManager.ts';
 
-export { FlagFile as _FlagFile } from './api/FlagFile';
+export { FlagFile as _FlagFile } from './api/FlagFile.ts';
 
 export {
   VersionPolicyDefinitionName,
@@ -113,19 +116,19 @@ export {
   LockStepVersionPolicy,
   IndividualVersionPolicy,
   VersionPolicy
-} from './api/VersionPolicy';
+} from './api/VersionPolicy.ts';
 
 export {
   VersionPolicyConfiguration,
   type ILockStepVersionJson,
   type IIndividualVersionJson,
   type IVersionPolicyJson
-} from './api/VersionPolicyConfiguration';
+} from './api/VersionPolicyConfiguration.ts';
 
-export { type ILaunchOptions, Rush } from './api/Rush';
-export { RushInternals as _RushInternals } from './api/RushInternals';
+export { type ILaunchOptions, Rush } from './api/Rush.ts';
+export { RushInternals as _RushInternals } from './api/RushInternals.ts';
 
-export { ExperimentsConfiguration, type IExperimentsJson } from './api/ExperimentsConfiguration';
+export { ExperimentsConfiguration, type IExperimentsJson } from './api/ExperimentsConfiguration.ts';
 export {
   CustomTipsConfiguration,
   CustomTipId,
@@ -134,79 +137,79 @@ export {
   type ICustomTipItemJson,
   CustomTipSeverity,
   CustomTipType
-} from './api/CustomTipsConfiguration';
+} from './api/CustomTipsConfiguration.ts';
 
-export { ProjectChangeAnalyzer, type IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
+export { ProjectChangeAnalyzer, type IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer.ts';
 export type {
   IInputsSnapshot,
   GetInputsSnapshotAsyncFn as GetInputsSnapshotAsyncFn,
   IRushConfigurationProjectForSnapshot
-} from './logic/incremental/InputsSnapshot';
+} from './logic/incremental/InputsSnapshot.ts';
 
-export type { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
+export type { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner.ts';
 export type {
   IExecutionResult,
   IOperationExecutionResult
-} from './logic/operations/IOperationExecutionResult';
-export { type IOperationOptions, Operation } from './logic/operations/Operation';
-export { OperationStatus } from './logic/operations/OperationStatus';
-export type { ILogFilePaths } from './logic/operations/ProjectLogWritable';
+} from './logic/operations/IOperationExecutionResult.ts';
+export { type IOperationOptions, Operation } from './logic/operations/Operation.ts';
+export { OperationStatus } from './logic/operations/OperationStatus.ts';
+export type { ILogFilePaths } from './logic/operations/ProjectLogWritable.ts';
 
 export {
   RushSession,
   type IRushSessionOptions,
   type CloudBuildCacheProviderFactory,
   type CobuildLockProviderFactory
-} from './pluginFramework/RushSession';
+} from './pluginFramework/RushSession.ts';
 
 export {
   type IRushCommand,
   type IGlobalCommand,
   type IPhasedCommand,
   RushLifecycleHooks
-} from './pluginFramework/RushLifeCycle';
+} from './pluginFramework/RushLifeCycle.ts';
 
 export {
   type ICreateOperationsContext,
   type IExecuteOperationsContext,
   PhasedCommandHooks
-} from './pluginFramework/PhasedCommandHooks';
+} from './pluginFramework/PhasedCommandHooks.ts';
 
-export type { IRushPlugin } from './pluginFramework/IRushPlugin';
-export type { IBuiltInPluginConfiguration as _IBuiltInPluginConfiguration } from './pluginFramework/PluginLoader/BuiltInPluginLoader';
-export type { IRushPluginConfigurationBase as _IRushPluginConfigurationBase } from './api/RushPluginsConfiguration';
-export type { ILogger } from './pluginFramework/logging/Logger';
+export type { IRushPlugin } from './pluginFramework/IRushPlugin.ts';
+export type { IBuiltInPluginConfiguration as _IBuiltInPluginConfiguration } from './pluginFramework/PluginLoader/BuiltInPluginLoader.ts';
+export type { IRushPluginConfigurationBase as _IRushPluginConfigurationBase } from './api/RushPluginsConfiguration.ts';
+export type { ILogger } from './pluginFramework/logging/Logger.ts';
 
-export type { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';
+export type { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider.ts';
 export type {
   ICobuildLockProvider,
   ICobuildContext,
   ICobuildCompletedState
-} from './logic/cobuild/ICobuildLockProvider';
+} from './logic/cobuild/ICobuildLockProvider.ts';
 
-export type { ITelemetryData, ITelemetryMachineInfo, ITelemetryOperationResult } from './logic/Telemetry';
+export type { ITelemetryData, ITelemetryMachineInfo, ITelemetryOperationResult } from './logic/Telemetry.ts';
 
-export type { IStopwatchResult } from './utilities/Stopwatch';
+export type { IStopwatchResult } from './utilities/Stopwatch.ts';
 export {
   OperationStateFile as _OperationStateFile,
   type IOperationStateFileOptions as _IOperationStateFileOptions,
   type IOperationStateJson as _IOperationStateJson
-} from './logic/operations/OperationStateFile';
+} from './logic/operations/OperationStateFile.ts';
 export {
   OperationMetadataManager as _OperationMetadataManager,
   type IOperationMetadataManagerOptions as _IOperationMetadataManagerOptions,
   type IOperationMetaData as _IOperationMetadata
-} from './logic/operations/OperationMetadataManager';
+} from './logic/operations/OperationMetadataManager.ts';
 
 export {
   RushCommandLine,
   type IRushCommandLineSpec,
   type IRushCommandLineParameter,
   type IRushCommandLineAction
-} from './api/RushCommandLine';
+} from './api/RushCommandLine.ts';
 
-export { OperationBuildCache as _OperationBuildCache } from './logic/buildCache/OperationBuildCache';
+export { OperationBuildCache as _OperationBuildCache } from './logic/buildCache/OperationBuildCache.ts';
 export type {
   IOperationBuildCacheOptions as _IOperationBuildCacheOptions,
   IProjectBuildCacheOptions as _IProjectBuildCacheOptions
-} from './logic/buildCache/OperationBuildCache';
+} from './logic/buildCache/OperationBuildCache.ts';

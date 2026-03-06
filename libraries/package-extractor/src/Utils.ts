@@ -8,7 +8,7 @@ import pnpmLinkBins from '@pnpm/link-bins';
 import { Async, FileSystem, Path, Text } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import { MAX_CONCURRENCY } from './scripts/createLinks/utilities/constants';
+import { MAX_CONCURRENCY } from './scripts/createLinks/utilities/constants.ts';
 
 export function matchesWithStar(patternWithStar: string, input: string): boolean {
   // Map "@types/*" --> "^\@types\/.*$"

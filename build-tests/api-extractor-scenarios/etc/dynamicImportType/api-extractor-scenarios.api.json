@@ -320,7 +320,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": "import('./Options')."
+                  "text": "import('./Options.ts')."
                 },
                 {
                   "kind": "Reference",
@@ -355,7 +355,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": "import('./re-export')."
+                  "text": "import('./re-export.ts')."
                 },
                 {
                   "kind": "Reference",

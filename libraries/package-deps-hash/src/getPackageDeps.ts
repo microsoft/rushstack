@@ -6,7 +6,7 @@ import * as path from 'node:path';
 
 import { Executable } from '@rushstack/node-core-library';
 
-import { ensureGitMinimumVersion } from './getRepoState';
+import { ensureGitMinimumVersion } from './getRepoState.ts';
 
 /**
  * Parses a quoted filename sourced from the output of the "git status" command.

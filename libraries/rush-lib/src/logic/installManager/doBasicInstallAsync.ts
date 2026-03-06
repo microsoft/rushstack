@@ -3,15 +3,15 @@
 
 import type { ITerminal } from '@rushstack/terminal';
 
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import type { BaseInstallManager } from '../base/BaseInstallManager';
-import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
-import { InstallManagerFactory } from '../InstallManagerFactory';
-import { SetupChecks } from '../SetupChecks';
-import { PurgeManager } from '../PurgeManager';
-import { VersionMismatchFinder } from '../versionMismatch/VersionMismatchFinder';
-import type { Subspace } from '../../api/Subspace';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import type { RushGlobalFolder } from '../../api/RushGlobalFolder.ts';
+import type { BaseInstallManager } from '../base/BaseInstallManager.ts';
+import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes.ts';
+import { InstallManagerFactory } from '../InstallManagerFactory.ts';
+import { SetupChecks } from '../SetupChecks.ts';
+import { PurgeManager } from '../PurgeManager.ts';
+import { VersionMismatchFinder } from '../versionMismatch/VersionMismatchFinder.ts';
+import type { Subspace } from '../../api/Subspace.ts';
 
 export interface IRunInstallOptions {
   afterInstallAsync?: IInstallManagerOptions['afterInstallAsync'];

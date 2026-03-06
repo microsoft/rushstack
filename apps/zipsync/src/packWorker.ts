@@ -6,10 +6,10 @@ import { parentPort as rawParentPort, type MessagePort } from 'node:worker_threa
 import { Terminal } from '@rushstack/terminal/lib/Terminal';
 import { StringBufferTerminalProvider } from '@rushstack/terminal/lib/StringBufferTerminalProvider';
 
-import { type IZipSyncPackOptions, type IZipSyncPackResult, pack } from './pack';
-import { defaultBufferSize } from './zipSyncUtils';
+import { type IZipSyncPackOptions, type IZipSyncPackResult, pack } from './pack.ts';
+import { defaultBufferSize } from './zipSyncUtils.ts';
 
-export { type IZipSyncPackOptions, type IZipSyncPackResult } from './pack';
+export { type IZipSyncPackOptions, type IZipSyncPackResult } from './pack.ts';
 
 export interface IHashWorkerData {
   basePath: string;

@@ -3,8 +3,8 @@
 
 import type { LfxGraphEntry } from '../../../build/lfx-shared';
 
-import { TEST_WORKSPACE, TEST_LOCKFILE } from './testLockfile';
-import * as lfxGraphLoader from '../lfxGraphLoader';
+import { TEST_WORKSPACE, TEST_LOCKFILE } from './testLockfile.ts';
+import * as lfxGraphLoader from '../lfxGraphLoader.ts';
 
 describe('LockfileGeneration', () => {
   it('creates a valid bi-directional graph', () => {

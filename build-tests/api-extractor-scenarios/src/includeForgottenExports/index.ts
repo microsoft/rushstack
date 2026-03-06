@@ -1,4 +1,4 @@
-import * as internal2 from './internal2';
+import * as internal2 from './internal2.ts';
 
 /**
  * `ForgottenExport2` wants to inherit this doc comment, but unfortunately this isn't
@@ -29,7 +29,7 @@ export function someFunction1(): ForgottenExport1 {
  */
 export type DuplicateName = boolean;
 
-export { someFunction2 } from './internal1';
+export { someFunction2 } from './internal1.ts';
 
 /** @public */
 export namespace SomeNamespace1 {
@@ -67,4 +67,4 @@ export function someFunction6(): AnotherDuplicateName {
   return new AnotherDuplicateName();
 }
 
-export { someFunction7 } from './internal1';
+export { someFunction7 } from './internal1.ts';

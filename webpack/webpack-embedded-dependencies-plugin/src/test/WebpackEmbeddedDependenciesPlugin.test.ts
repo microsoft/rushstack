@@ -3,9 +3,9 @@
 
 import path from 'node:path';
 import { createFsFromVolume, type IFs, Volume } from 'memfs';
-import EmbeddedDependenciesWebpackPlugin from '../EmbeddedDependenciesWebpackPlugin';
+import EmbeddedDependenciesWebpackPlugin from '../EmbeddedDependenciesWebpackPlugin.ts';
 
-import { LICENSE_FILES_REGEXP, COPYRIGHT_REGEX } from '../regexpUtils';
+import { LICENSE_FILES_REGEXP, COPYRIGHT_REGEX } from '../regexpUtils.ts';
 
 import { Testing } from '@rushstack/webpack-plugin-utilities';
 import { FileSystem } from '@rushstack/node-core-library';

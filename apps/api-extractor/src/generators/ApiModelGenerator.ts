@@ -38,20 +38,20 @@ import {
 } from '@microsoft/api-extractor-model';
 import { Path } from '@rushstack/node-core-library';
 
-import type { Collector } from '../collector/Collector';
-import type { ISourceLocation } from '../collector/SourceMapper';
-import type { AstDeclaration } from '../analyzer/AstDeclaration';
-import { ExcerptBuilder, type IExcerptBuilderNodeTransform } from './ExcerptBuilder';
-import { AstSymbol } from '../analyzer/AstSymbol';
-import { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
-import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
-import type { DeclarationMetadata } from '../collector/DeclarationMetadata';
-import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
-import type { AstEntity } from '../analyzer/AstEntity';
-import type { AstModule } from '../analyzer/AstModule';
-import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
-import type { ExtractorConfig } from '../api/ExtractorConfig';
-import { DtsEmitHelpers } from './DtsEmitHelpers';
+import type { Collector } from '../collector/Collector.ts';
+import type { ISourceLocation } from '../collector/SourceMapper.ts';
+import type { AstDeclaration } from '../analyzer/AstDeclaration.ts';
+import { ExcerptBuilder, type IExcerptBuilderNodeTransform } from './ExcerptBuilder.ts';
+import { AstSymbol } from '../analyzer/AstSymbol.ts';
+import { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator.ts';
+import type { ApiItemMetadata } from '../collector/ApiItemMetadata.ts';
+import type { DeclarationMetadata } from '../collector/DeclarationMetadata.ts';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport.ts';
+import type { AstEntity } from '../analyzer/AstEntity.ts';
+import type { AstModule } from '../analyzer/AstModule.ts';
+import { TypeScriptInternals } from '../analyzer/TypeScriptInternals.ts';
+import type { ExtractorConfig } from '../api/ExtractorConfig.ts';
+import { DtsEmitHelpers } from './DtsEmitHelpers.ts';
 
 interface IProcessAstEntityContext {
   name: string;

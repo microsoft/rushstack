@@ -3,7 +3,7 @@
 
 import React from 'react';
 
-import { Text } from '../Text';
+import { Text } from '../Text/index.tsx';
 import styles from './styles.scss';
 
 /**

@@ -7,11 +7,11 @@ import {
   ApiDocumentedItem,
   type IApiDocumentedItemJson,
   type IApiDocumentedItemOptions
-} from './ApiDocumentedItem';
-import type { ApiItem } from './ApiItem';
-import { Excerpt, ExcerptToken, type IExcerptTokenRange, type IExcerptToken } from '../mixins/Excerpt';
-import type { DeserializerContext } from '../model/DeserializerContext';
-import { SourceLocation } from '../model/SourceLocation';
+} from './ApiDocumentedItem.ts';
+import type { ApiItem } from './ApiItem.ts';
+import { Excerpt, ExcerptToken, type IExcerptTokenRange, type IExcerptToken } from '../mixins/Excerpt.ts';
+import type { DeserializerContext } from '../model/DeserializerContext.ts';
+import { SourceLocation } from '../model/SourceLocation.ts';
 
 /**
  * Constructor options for {@link ApiDeclaredItem}.

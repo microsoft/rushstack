@@ -3,10 +3,10 @@
 
 import type * as tsdoc from '@microsoft/tsdoc';
 
-import type { ExtractorMessageId } from './ExtractorMessageId';
-import { ExtractorLogLevel } from './ExtractorLogLevel';
-import type { ConsoleMessageId } from './ConsoleMessageId';
-import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
+import type { ExtractorMessageId } from './ExtractorMessageId.ts';
+import { ExtractorLogLevel } from './ExtractorLogLevel.ts';
+import type { ConsoleMessageId } from './ConsoleMessageId.ts';
+import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter.ts';
 
 /**
  * Used by {@link ExtractorMessage.properties}.

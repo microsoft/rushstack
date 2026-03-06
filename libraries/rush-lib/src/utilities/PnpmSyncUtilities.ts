@@ -11,7 +11,7 @@ import {
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import { RushConstants } from '../logic/RushConstants';
+import { RushConstants } from '../logic/RushConstants.ts';
 
 export class PnpmSyncUtilities {
   private static _addLinePrefix(message: string): string {

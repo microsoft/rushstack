@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { TextRange, ITextLocation } from './TextRange';
+import type { TextRange, ITextLocation } from './TextRange.ts';
 
 /**
  * An Error subclass used to report errors that occur while parsing an input.

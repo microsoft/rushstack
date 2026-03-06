@@ -5,9 +5,9 @@ import type * as ts from 'typescript';
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
 import { ESLintUtils } from '@typescript-eslint/utils';
 
-import { PackletAnalyzer } from './PackletAnalyzer';
-import { DependencyAnalyzer, type IPackletImport } from './DependencyAnalyzer';
-import { Path } from './Path';
+import { PackletAnalyzer } from './PackletAnalyzer.ts';
+import { DependencyAnalyzer, type IPackletImport } from './DependencyAnalyzer.ts';
+import { Path } from './Path.ts';
 
 export type MessageIds = 'circular-import';
 type Options = [];
