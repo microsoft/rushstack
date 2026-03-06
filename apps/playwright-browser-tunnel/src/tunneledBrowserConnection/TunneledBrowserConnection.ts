@@ -156,7 +156,8 @@ export async function tunneledBrowserConnection(
           if (bName && SUPPORTED_BROWSER_NAMES.has(bName)) {
             browserName = bName as BrowserName;
           }
-          const launchOptionsParam: string | null = parsed.searchParams.get('launchOptions');
+          const launchOptionsParam: string | null =
+            parsed.searchParams.get('launch-options') || parsed.searchParams.get('launchOptions');
           if (launchOptionsParam) {
             try {
               launchOptions = JSON.parse(launchOptionsParam);
