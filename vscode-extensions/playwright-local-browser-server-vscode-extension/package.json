@@ -1,6 +1,6 @@
 {
   "name": "playwright-local-browser-server",
-  "version": "0.1.7",
+  "version": "0.1.10",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
@@ -103,10 +103,20 @@
           "default": 56768,
           "description": "Port for the MCP tunnel. This should match the port used by mcp-codespace-proxy.mjs on the codespace side."
         },
-        "playwright-local-browser-server.mcpCommand": {
+        "playwright-local-browser-server.persistentSession": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable a persistent, authenticated browser session. When enabled, the pre-launch command runs on the codespace to produce a Playwright storage state file, which is then copied locally and passed to the MCP server."
+        },
+        "playwright-local-browser-server.preLaunchCommand": {
           "type": "string",
-          "default": "npx @playwright/mcp",
-          "description": "Command to start the local MCP server. The MCP server must use stdio transport."
+          "default": "",
+          "description": "Command to execute on the remote codespace before launching the MCP server. This command should produce a Playwright storage state JSON file at the path specified by 'storageStatePath'. Only used when 'persistentSession' is enabled."
+        },
+        "playwright-local-browser-server.storageStatePath": {
+          "type": "string",
+          "default": "/tmp/storage-state.json",
+          "description": "Path on the remote codespace where the pre-launch command writes the Playwright storage state JSON file. The extension reads this file from the codespace and copies it locally. Only used when 'persistentSession' is enabled."
         }
       }
     }

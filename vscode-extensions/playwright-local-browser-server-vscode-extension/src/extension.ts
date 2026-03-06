@@ -467,6 +467,22 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }
   }
 
+  async function readFileFromCodespaceAsync(remotePath: string): Promise<Uint8Array> {
+    const workspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.workspaceFolders?.[0];
+    let fileUri: vscode.Uri;
+    if (workspaceFolder) {
+      fileUri = vscode.Uri.from({
+        scheme: workspaceFolder.uri.scheme,
+        authority: workspaceFolder.uri.authority,
+        path: remotePath
+      });
+    } else {
+      fileUri = vscode.Uri.parse(`vscode-remote://${vscode.env.remoteName}${remotePath}`);
+    }
+    terminal.writeLine(`Reading remote file: ${fileUri.toString()}`);
+    return await vscode.workspace.fs.readFile(fileUri);
+  }
+
   async function handleStartMcpTunnelAsync(): Promise<void> {
     if (mcpTunnel) {
       outputChannel.appendLine('MCP tunnel is already running.');
@@ -484,15 +500,71 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       'playwright-local-browser-server'
     );
     const mcpPort: number = config.get<number>('mcpTunnelPort', 56768);
-    const mcpCommand: string = config.get<string>(
-      'mcpCommand',
-      'npx @playwright/mcp --isolated --browser msedge --storage-state=C:\\Users\\supsing\\storage-state.json'
-    );
+    const persistentSession: boolean = config.get<boolean>('persistentSession', false);
 
-    outputChannel.appendLine(
-      `>>> Using MCP command: ${mcpCommand}; ${config.inspect('mcpCommand') ?? 'empy'}`
-    );
     try {
+      // Build the MCP command
+      const mcpArgs: string[] = ['npx', '@playwright/mcp@latest', '--browser', 'msedge'];
+
+      if (persistentSession) {
+        const preLaunchCommand: string = config.get<string>('preLaunchCommand', '');
+        const remoteStorageStatePath: string = config.get<string>(
+          'storageStatePath',
+          '/tmp/storage-state.json'
+        );
+
+        if (!preLaunchCommand) {
+          void vscode.window.showErrorMessage(
+            'Persistent session is enabled but no pre-launch command is configured. ' +
+              'Set "playwright-local-browser-server.preLaunchCommand" in settings.'
+          );
+          return;
+        }
+
+        // Run the pre-launch command on the codespace to generate the storage state file
+        outputChannel.appendLine(`Running pre-launch command on codespace: ${preLaunchCommand}`);
+        try {
+          const preLaunchOutput: string = await runWorkspaceCommandAsync({
+            terminalOptions: { name: 'playwright-pre-launch', hideFromUser: true },
+            commandLine: preLaunchCommand,
+            terminal
+          });
+          outputChannel.appendLine(`Pre-launch command output: ${preLaunchOutput}`);
+        } catch (error) {
+          const errorMessage: string = getNormalizedErrorString(error);
+          outputChannel.appendLine(`Pre-launch command failed: ${errorMessage}`);
+          void vscode.window.showErrorMessage(
+            `Pre-launch command failed: ${errorMessage}. MCP tunnel will not start.`
+          );
+          return;
+        }
+
+        // Read the storage state file from the codespace
+        outputChannel.appendLine(`Reading storage state from codespace: ${remoteStorageStatePath}`);
+        let storageStateContents: Uint8Array;
+        try {
+          storageStateContents = await readFileFromCodespaceAsync(remoteStorageStatePath);
+        } catch (error) {
+          const errorMessage: string = getNormalizedErrorString(error);
+          outputChannel.appendLine(`Failed to read storage state from codespace: ${errorMessage}`);
+          void vscode.window.showErrorMessage(
+            `Failed to read storage state file from codespace at ${remoteStorageStatePath}: ${errorMessage}`
+          );
+          return;
+        }
+
+        // Write the storage state file locally
+        const localStorageStatePath: string = path.join(os.tmpdir(), 'playwright-storage-state.json');
+        const fs: typeof import('node:fs') = await import('node:fs');
+        fs.writeFileSync(localStorageStatePath, storageStateContents);
+        outputChannel.appendLine(`Storage state written locally to: ${localStorageStatePath}`);
+
+        // --isolated is required so @playwright/mcp uses browser.newContext() instead of
+        // launchPersistentContext(), which correctly applies the storage state cookies.
+        mcpArgs.push('--isolated', `--storage-state=${localStorageStatePath}`);
+      }
+
+      const mcpCommand: string = mcpArgs.join(' ');
       outputChannel.appendLine(`Starting MCP tunnel on port ${mcpPort} with command: ${mcpCommand}`);
 
       const newMcpTunnel: McpTunnel = new McpTunnel({
