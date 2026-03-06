@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import os from 'node:os';
+
 import { Async } from '@rushstack/node-core-library';
 
 import type { Operation } from './Operation';
@@ -31,6 +33,20 @@ function weightOperations(
   context: ICreateOperationsContext
 ): Map<Operation, IOperationExecutionResult> {
   const { projectConfigurations } = context;
+  const availableParallelism: number = os.availableParallelism();
+
+  const percentageRegExp: RegExp = /^[1-9][0-9]*(\.\d+)?%$/;
+
+  function _tryConvertPercentWeight(weight: `${number}%`): number {
+    if (!percentageRegExp.test(weight)) {
+      throw new Error(`Expected a percentage string like "100%".`);
+    }
+
+    const percentValue: number = parseFloat(weight.slice(0, -1));
+
+    // Use as much CPU as possible, so we round down the weight here
+    return Math.floor((percentValue / 100) * availableParallelism);
+  }
 
   for (const [operation, record] of operations) {
     const { runner } = record as OperationExecutionRecord;
@@ -41,8 +57,18 @@ function weightOperations(
       const projectConfiguration: RushProjectConfiguration | undefined = projectConfigurations.get(project);
       const operationSettings: IOperationSettings | undefined =
         operation.settings ?? projectConfiguration?.operationSettingsByOperationName.get(phase.name);
-      if (operationSettings?.weight) {
-        operation.weight = operationSettings.weight;
+      if (operationSettings?.weight !== undefined) {
+        if (typeof operationSettings.weight === 'number') {
+          operation.weight = operationSettings.weight;
+        } else if (typeof operationSettings.weight === 'string') {
+          try {
+            operation.weight = _tryConvertPercentWeight(operationSettings.weight);
+          } catch (error) {
+            throw new Error(
+              `${operation.name} (invalid weight: ${operationSettings.weight}) ${error instanceof Error ? error.message : String(error)}`
+            );
+          }
+        }
       }
     }
     Async.validateWeightedIterable(operation);

@@ -160,7 +160,7 @@ export interface IOperationSettings {
    * How many concurrency units this operation should take up during execution. The maximum concurrent units is
    *  determined by the -p flag.
    */
-  weight?: number;
+  weight?: number | `${number}%`;
 
   /**
    * If true, this operation can use cobuilds for orchestration without restoring build cache entries.

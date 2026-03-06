@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Support percentage weight in operationSettings in rush-project.json file.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

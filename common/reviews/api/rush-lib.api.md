@@ -676,7 +676,7 @@ export interface IOperationSettings {
     outputFolderNames?: string[];
     parameterNamesToIgnore?: string[];
     sharding?: IRushPhaseSharding;
-    weight?: number;
+    weight?: number | `${number}%`;
 }
 
 // @internal (undocumented)
