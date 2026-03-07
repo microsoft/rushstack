@@ -46,7 +46,7 @@
     "@rushstack/ts-command-line": "workspace:*",
     "ignore": "~5.1.6",
     "jszip": "~3.8.0",
-    "minimatch": "10.2.1",
+    "minimatch": "10.2.3",
     "npm-packlist": "~5.1.3",
     "semver": "~7.5.4"
   },
