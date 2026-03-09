@@ -2,6 +2,26 @@
   "name": "@rushstack/webpack4-localization-plugin",
   "entries": [
     {
+      "version": "0.20.7",
+      "tag": "@rushstack/webpack4-localization-plugin_v0.20.7",
+      "date": "Mon, 09 Mar 2026 15:14:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump `minimatch` version from `10.2.1` to `10.2.3` to address CVE-2026-27903."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.15.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.20.6",
       "tag": "@rushstack/webpack4-localization-plugin_v0.20.6",
       "date": "Wed, 25 Feb 2026 21:39:42 GMT",

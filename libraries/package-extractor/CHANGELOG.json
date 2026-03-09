@@ -2,6 +2,29 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.12.8",
+      "tag": "@rushstack/package-extractor_v0.12.8",
+      "date": "Mon, 09 Mar 2026 15:14:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump `minimatch` version from `10.2.1` to `10.2.3` to address CVE-2026-27903."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.3.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.12.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.7",
       "tag": "@rushstack/package-extractor_v0.12.7",
       "date": "Wed, 25 Feb 2026 21:39:42 GMT",

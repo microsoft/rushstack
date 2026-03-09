@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 25 Feb 2026 21:39:42 GMT and should not be manually modified.
+This log was last generated on Mon, 09 Mar 2026 15:14:07 GMT and should not be manually modified.
+
+## 7.57.7
+Mon, 09 Mar 2026 15:14:07 GMT
+
+### Patches
+
+- Bump `minimatch` version from `10.2.1` to `10.2.3` to address CVE-2026-27903.
 
 ## 7.57.6
 Wed, 25 Feb 2026 21:39:42 GMT
