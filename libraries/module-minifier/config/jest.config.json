@@ -1,3 +1,4 @@
 {
-  "extends": "local-node-rig/profiles/default/config/jest.config.json"
+  "extends": "local-node-rig/profiles/default/config/jest.config.json",
+  "setupFiles": ["<rootDir>/config/jest-setup.js"]
 }
