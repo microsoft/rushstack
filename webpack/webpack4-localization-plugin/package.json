@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack4-localization-plugin",
-  "version": "0.20.6",
+  "version": "0.20.7",
   "description": "This plugin facilitates localization with Webpack.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -60,7 +60,7 @@
     "@rushstack/terminal": "workspace:*",
     "@types/tapable": "1.0.6",
     "loader-utils": "1.4.2",
-    "minimatch": "10.2.1"
+    "minimatch": "10.2.3"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
