@@ -2,6 +2,18 @@
   "name": "@rushstack/module-minifier",
   "entries": [
     {
+      "version": "0.9.8",
+      "tag": "@rushstack/module-minifier_v0.9.8",
+      "date": "Tue, 10 Mar 2026 15:13:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump `serialize-javascript` to partially mitigate CVE-2020-7660."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.7",
       "tag": "@rushstack/module-minifier_v0.9.7",
       "date": "Mon, 09 Mar 2026 15:14:08 GMT",
