@@ -37,6 +37,15 @@ function weightOperations(
 
   const percentageRegExp: RegExp = /^[1-9][0-9]*(\.\d+)?%$/;
 
+  /**
+   * Since the JSON value is a string, it must be a percentage like "50%",
+   * which we convert to a number based on the available parallelism.
+   * For example, if the available parallelism (not the -p flag) is 8 and the weight is "50%",
+   * then the resulting weight will be 4.
+   *
+   * @param weight
+   * @returns
+   */
   function _tryConvertPercentWeight(weight: `${number}%`): number {
     if (!percentageRegExp.test(weight)) {
       throw new Error(`Expected a percentage string like "100%".`);
@@ -65,7 +74,7 @@ function weightOperations(
             operation.weight = _tryConvertPercentWeight(operationSettings.weight);
           } catch (error) {
             throw new Error(
-              `${operation.name} (invalid weight: ${operationSettings.weight}) ${error instanceof Error ? error.message : String(error)}`
+              `${operation.name} (invalid weight: ${JSON.stringify(operationSettings.weight)}) ${(error as Error).message}`
             );
           }
         }

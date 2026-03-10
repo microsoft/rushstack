@@ -149,10 +149,10 @@ describe(WeightedOperationPlugin.name, () => {
     expect(operation.weight).toBe(4);
   });
 
-  it('use ceiling when converting percentage weight to avoid zero weight', async () => {
+  it('use floor when converting percentage weight to avoid zero weight', async () => {
     mockAvailableParallelism(16);
 
-    const project: RushConfigurationProject = createProject('project-ceiling');
+    const project: RushConfigurationProject = createProject('project-floor');
     const operation: Operation = createOperation({
       project,
       settings: {
@@ -197,6 +197,6 @@ describe(WeightedOperationPlugin.name, () => {
 
     await expect(
       applyWeightPluginAsync(createExecutionRecords(operation), createContext(new Map()))
-    ).rejects.toThrow(/invalid weight: 12.5a%/i);
+    ).rejects.toThrow(/invalid weight: "12.5a%"/i);
   });
 });

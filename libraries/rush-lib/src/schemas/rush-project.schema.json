@@ -110,7 +110,7 @@
               {
                 "type": "string",
                 "pattern": "^[1-9][0-9]*(\\.\\d+)?%$",
-                "description": "The percentage of concurrency units that this operation should take up. The maximum concurrency units is determined by the -p flag."
+                "description": "The percentage of concurrency units that this operation should take up. The maximum concurrency units is determined by `os.availableParallelism()`."
               },
               {
                 "description": "The number of concurrency units that this operation should take up. The maximum concurrency units is determined by the -p flag.",
