@@ -9,8 +9,8 @@ import {
   HeftTaskPluginDefinition,
   type IHeftLifecyclePluginDefinitionJson,
   type IHeftTaskPluginDefinitionJson
-} from './HeftPluginDefinition';
-import type { IHeftConfigurationJsonPluginSpecifier } from '../utilities/CoreConfigFiles';
+} from './HeftPluginDefinition.ts';
+import type { IHeftConfigurationJsonPluginSpecifier } from '../utilities/CoreConfigFiles.ts';
 import heftPluginSchema from '../schemas/heft-plugin.schema.json';
 
 export interface IHeftPluginConfigurationJson {

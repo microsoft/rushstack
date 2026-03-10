@@ -11,9 +11,9 @@ import { createHash, randomUUID } from 'node:crypto';
 
 import { NoOpTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import type { ZipSyncOptionCompression } from '../zipSyncUtils';
-import { pack } from '../pack';
-import { unpack } from '../unpack';
+import type { ZipSyncOptionCompression } from '../zipSyncUtils.ts';
+import { pack } from '../pack.ts';
+import { unpack } from '../unpack.ts';
 
 const compressionOptions = ['store', 'deflate', 'zstd', 'auto'] satisfies ZipSyncOptionCompression[];
 

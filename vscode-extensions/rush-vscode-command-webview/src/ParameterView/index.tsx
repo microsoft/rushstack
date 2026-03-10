@@ -4,9 +4,9 @@
 import * as React from 'react';
 import { type IStackStyles, type IStackItemStyles, type IStackTokens, Stack } from '@fluentui/react';
 
-import { useScrollableElement } from '../hooks/parametersFormScroll';
-import { ParameterForm } from './ParameterForm';
-import { ParameterNav } from './ParameterNav';
+import { useScrollableElement } from '../hooks/parametersFormScroll.ts';
+import { ParameterForm } from './ParameterForm/index.tsx';
+import { ParameterNav } from './ParameterNav.tsx';
 
 // Styles definition
 const stackStyles: IStackStyles = {

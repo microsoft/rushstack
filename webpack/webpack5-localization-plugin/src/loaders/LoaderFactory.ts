@@ -5,7 +5,7 @@ import type { LoaderContext, LoaderDefinitionFunction } from 'webpack';
 
 import type { ILocalizationFile } from '@rushstack/localization-utilities';
 
-import { getPluginInstance, type LocalizationPlugin } from '../LocalizationPlugin';
+import { getPluginInstance, type LocalizationPlugin } from '../LocalizationPlugin.ts';
 
 export interface IBaseLocLoaderOptions {
   ignoreString?: (key: string) => boolean;

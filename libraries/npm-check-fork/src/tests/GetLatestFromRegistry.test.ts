@@ -1,7 +1,7 @@
 // Mock the NpmRegistryClient before imports
 jest.mock('../NpmRegistryClient');
 
-import type { INpmRegistryInfo, INpmRegistryPackageResponse } from '../interfaces/INpmCheckRegistry';
+import type { INpmRegistryInfo, INpmRegistryPackageResponse } from '../interfaces/INpmCheckRegistry.ts';
 
 describe('getNpmInfo', () => {
   let getNpmInfo: (packageName: string) => Promise<INpmRegistryInfo>;

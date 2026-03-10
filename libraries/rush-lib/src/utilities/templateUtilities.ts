@@ -4,7 +4,7 @@
 import { FileSystem, InternalError, NewlineKind } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import { Rush } from '../api/Rush';
+import { Rush } from '../api/Rush.ts';
 
 // Matches a well-formed BEGIN macro starting a block section.
 // Example:  /*[BEGIN "DEMO"]*/

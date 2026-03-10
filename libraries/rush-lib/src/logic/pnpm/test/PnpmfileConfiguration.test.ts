@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushConfiguration } from '../../../api/RushConfiguration';
-import { PnpmfileConfiguration } from '../PnpmfileConfiguration';
+import { RushConfiguration } from '../../../api/RushConfiguration.ts';
+import { PnpmfileConfiguration } from '../PnpmfileConfiguration.ts';
 import { JsonFile, type JsonObject } from '@rushstack/node-core-library';
 
 describe(PnpmfileConfiguration.name, () => {

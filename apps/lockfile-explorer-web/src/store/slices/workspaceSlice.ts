@@ -3,7 +3,7 @@
 
 import { createSlice, type PayloadAction, type Reducer } from '@reduxjs/toolkit';
 
-import type { ISpecChange } from '../../parsing/compareSpec';
+import type { ISpecChange } from '../../parsing/compareSpec.ts';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type WorkspaceState = {

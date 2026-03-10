@@ -6,9 +6,9 @@ import type { LoaderContext, LoaderDefinitionFunction } from 'webpack';
 import { Terminal } from '@rushstack/terminal';
 import { parseResx } from '@rushstack/localization-utilities';
 
-import type { IResxLocLoaderOptions } from './IResxLoaderOptions';
-import { createLoader } from './LoaderFactory';
-import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
+import type { IResxLocLoaderOptions } from './IResxLoaderOptions.ts';
+import { createLoader } from './LoaderFactory.ts';
+import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider.ts';
 
 const loader: LoaderDefinitionFunction<IResxLocLoaderOptions> = createLoader(
   (content: string, filePath: string, context: LoaderContext<IResxLocLoaderOptions>) => {

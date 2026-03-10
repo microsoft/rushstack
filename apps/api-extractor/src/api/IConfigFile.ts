@@ -3,7 +3,7 @@
 
 import type { EnumMemberOrder } from '@microsoft/api-extractor-model';
 
-import type { ExtractorLogLevel } from './ExtractorLogLevel';
+import type { ExtractorLogLevel } from './ExtractorLogLevel.ts';
 
 /**
  * Determines how the TypeScript compiler engine will be invoked by API Extractor.

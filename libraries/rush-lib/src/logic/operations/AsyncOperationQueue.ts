@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { OperationExecutionRecord } from './OperationExecutionRecord';
-import { OperationStatus } from './OperationStatus';
-import { RushConstants } from '../RushConstants';
+import type { OperationExecutionRecord } from './OperationExecutionRecord.ts';
+import { OperationStatus } from './OperationStatus.ts';
+import { RushConstants } from '../RushConstants.ts';
 
 /**
  * Implementation of the async iteration protocol for a collection of IOperation objects.

@@ -21,19 +21,19 @@ import {
   PrintUtilities
 } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../api/RushConfiguration';
-import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
-import { RushConstants } from '../logic/RushConstants';
-import { RushGlobalFolder } from '../api/RushGlobalFolder';
-import { PurgeManager } from '../logic/PurgeManager';
-import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
-import type { BaseInstallManager } from '../logic/base/BaseInstallManager';
-import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTypes';
-import { Utilities } from '../utilities/Utilities';
-import type { Subspace } from '../api/Subspace';
-import type { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
-import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
-import { initializeDotEnv } from '../logic/dotenv';
+import { RushConfiguration } from '../api/RushConfiguration.ts';
+import { NodeJsCompatibility } from '../logic/NodeJsCompatibility.ts';
+import { RushConstants } from '../logic/RushConstants.ts';
+import { RushGlobalFolder } from '../api/RushGlobalFolder.ts';
+import { PurgeManager } from '../logic/PurgeManager.ts';
+import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader.ts';
+import type { BaseInstallManager } from '../logic/base/BaseInstallManager.ts';
+import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTypes.ts';
+import { Utilities } from '../utilities/Utilities.ts';
+import type { Subspace } from '../api/Subspace.ts';
+import type { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration.ts';
+import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration.ts';
+import { initializeDotEnv } from '../logic/dotenv.ts';
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
@@ -624,9 +624,9 @@ export class RushPnpmCommandLineParser {
       terminal: this._terminal
     };
 
-    const installManagerFactoryModule: typeof import('../logic/InstallManagerFactory') = await import(
+    const installManagerFactoryModule: typeof import('../logic/InstallManagerFactory.ts') = await import(
       /* webpackChunkName: 'InstallManagerFactory' */
-      '../logic/InstallManagerFactory'
+      '../logic/InstallManagerFactory.ts'
     );
     const installManager: BaseInstallManager =
       await installManagerFactoryModule.InstallManagerFactory.getInstallManagerAsync(

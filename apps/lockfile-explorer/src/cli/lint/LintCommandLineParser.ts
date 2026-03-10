@@ -5,8 +5,8 @@ import { ConsoleTerminalProvider, type ITerminal, Terminal, Colorize } from '@ru
 import { CommandLineParser } from '@rushstack/ts-command-line';
 import { type IPackageJson, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
 
-import { InitAction } from './actions/InitAction';
-import { CheckAction } from './actions/CheckAction';
+import { InitAction } from './actions/InitAction.ts';
+import { CheckAction } from './actions/CheckAction.ts';
 
 const LINT_TOOL_FILENAME: 'lockfile-lint' = 'lockfile-lint';
 

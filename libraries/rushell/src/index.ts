@@ -7,4 +7,4 @@
  * @packageDocumentation
  */
 
-export { Rushell, type IRushellExecuteResult } from './Rushell';
+export { Rushell, type IRushellExecuteResult } from './Rushell.ts';

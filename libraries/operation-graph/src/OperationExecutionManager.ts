@@ -4,12 +4,12 @@
 import { Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import type { IOperationState } from './IOperationRunner';
-import type { IExecuteOperationContext, Operation, OperationRequestRunCallback } from './Operation';
-import type { OperationGroupRecord } from './OperationGroupRecord';
-import { OperationStatus } from './OperationStatus';
-import { calculateCriticalPathLengths } from './calculateCriticalPath';
-import { WorkQueue } from './WorkQueue';
+import type { IOperationState } from './IOperationRunner.ts';
+import type { IExecuteOperationContext, Operation, OperationRequestRunCallback } from './Operation.ts';
+import type { OperationGroupRecord } from './OperationGroupRecord.ts';
+import { OperationStatus } from './OperationStatus.ts';
+import { calculateCriticalPathLengths } from './calculateCriticalPath.ts';
+import { WorkQueue } from './WorkQueue.ts';
 
 /**
  * Options for the current run.

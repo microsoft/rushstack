@@ -16,7 +16,7 @@ export {
   type ITypingsGeneratorOptions,
   type ITypingsGeneratorOptionsWithCustomReadFile,
   TypingsGenerator
-} from './TypingsGenerator';
+} from './TypingsGenerator.ts';
 
 export {
   type IStringValueTyping,
@@ -26,4 +26,4 @@ export {
   type IStringValuesTypingsGeneratorOptions,
   type IStringValuesTypingsGeneratorOptionsWithCustomReadFile,
   StringValuesTypingsGenerator
-} from './StringValuesTypingsGenerator';
+} from './StringValuesTypingsGenerator.ts';

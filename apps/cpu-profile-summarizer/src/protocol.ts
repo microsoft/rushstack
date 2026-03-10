@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IProfileSummary } from './types';
+import type { IProfileSummary } from './types.ts';
 
 /**
  * A message sent to a worker to process a file (or shutdown).

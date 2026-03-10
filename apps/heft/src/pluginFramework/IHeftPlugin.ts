@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { HeftConfiguration } from '../configuration/HeftConfiguration';
-import type { IHeftTaskSession } from './HeftTaskSession';
-import type { IHeftLifecycleSession } from './HeftLifecycleSession';
+import type { HeftConfiguration } from '../configuration/HeftConfiguration.ts';
+import type { IHeftTaskSession } from './HeftTaskSession.ts';
+import type { IHeftLifecycleSession } from './HeftLifecycleSession.ts';
 
 /**
  * The interface used for all Heft plugins.

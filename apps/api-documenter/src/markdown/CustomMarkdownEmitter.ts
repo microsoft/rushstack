@@ -5,18 +5,18 @@ import type { DocNode, DocLinkTag, StringBuilder } from '@microsoft/tsdoc';
 import type { ApiModel, IResolveDeclarationReferenceResult, ApiItem } from '@microsoft/api-extractor-model';
 import { Colorize } from '@rushstack/terminal';
 
-import { CustomDocNodeKind } from '../nodes/CustomDocNodeKind';
-import type { DocHeading } from '../nodes/DocHeading';
-import type { DocNoteBox } from '../nodes/DocNoteBox';
-import type { DocTable } from '../nodes/DocTable';
-import type { DocTableCell } from '../nodes/DocTableCell';
-import type { DocEmphasisSpan } from '../nodes/DocEmphasisSpan';
+import { CustomDocNodeKind } from '../nodes/CustomDocNodeKind.ts';
+import type { DocHeading } from '../nodes/DocHeading.ts';
+import type { DocNoteBox } from '../nodes/DocNoteBox.ts';
+import type { DocTable } from '../nodes/DocTable.ts';
+import type { DocTableCell } from '../nodes/DocTableCell.ts';
+import type { DocEmphasisSpan } from '../nodes/DocEmphasisSpan.ts';
 import {
   MarkdownEmitter,
   type IMarkdownEmitterContext,
   type IMarkdownEmitterOptions
-} from './MarkdownEmitter';
-import type { IndentedWriter } from '../utils/IndentedWriter';
+} from './MarkdownEmitter.ts';
+import type { IndentedWriter } from '../utils/IndentedWriter.ts';
 
 export interface ICustomMarkdownEmitterOptions extends IMarkdownEmitterOptions {
   contextApiItem: ApiItem | undefined;

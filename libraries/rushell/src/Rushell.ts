@@ -5,10 +5,10 @@ import type * as child_process from 'node:child_process';
 
 import { Executable } from '@rushstack/node-core-library';
 
-import { Parser } from './Parser';
-import { Tokenizer } from './Tokenizer';
-import { type AstNode, type AstScript, AstKind, type AstCommand } from './AstNode';
-import { ParseError } from './ParseError';
+import { Parser } from './Parser.ts';
+import { Tokenizer } from './Tokenizer.ts';
+import { type AstNode, type AstScript, AstKind, type AstCommand } from './AstNode.ts';
+import { ParseError } from './ParseError.ts';
 
 /**
  * The returned value for {@link Rushell.execute}.

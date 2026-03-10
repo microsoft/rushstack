@@ -7,16 +7,16 @@ import { Async, FileSystem, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { CommandLineAction, type CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
-import type { IExtractorMetadataJson, IProjectInfoJson } from '../../../../PackageExtractor';
-import { makeBinLinksAsync } from '../../../../Utils';
-import { getExtractorMetadataAsync } from '../../utilities/CreateLinksUtilities';
+import type { IExtractorMetadataJson, IProjectInfoJson } from '../../../../PackageExtractor.ts';
+import { makeBinLinksAsync } from '../../../../Utils.ts';
+import { getExtractorMetadataAsync } from '../../utilities/CreateLinksUtilities.ts';
 import {
   TARGET_ROOT_FOLDER,
   REALIZE_FILES_PARAMETER_NAME,
   LINK_BINS_PARAMETER_NAME,
   MAX_CONCURRENCY
-} from '../../utilities/constants';
-import { removeLinksAsync } from './RemoveLinksAction';
+} from '../../utilities/constants.ts';
+import { removeLinksAsync } from './RemoveLinksAction.ts';
 
 async function createLinksAsync(
   terminal: ITerminal,

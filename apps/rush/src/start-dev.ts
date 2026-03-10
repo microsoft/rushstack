@@ -7,7 +7,7 @@
 import * as rushLib from '@microsoft/rush-lib';
 import { PackageJsonLookup, Import } from '@rushstack/node-core-library';
 
-import { RushCommandSelector } from './RushCommandSelector';
+import { RushCommandSelector } from './RushCommandSelector.ts';
 
 const builtInPluginConfigurations: rushLib._IBuiltInPluginConfiguration[] = [];
 

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TerminalWritable } from './TerminalWritable';
-import type { ITerminalChunk } from './ITerminalChunk';
+import { TerminalWritable } from './TerminalWritable.ts';
+import type { ITerminalChunk } from './ITerminalChunk.ts';
 
 /**
  * Constructor options for {@link CallbackWritable}.

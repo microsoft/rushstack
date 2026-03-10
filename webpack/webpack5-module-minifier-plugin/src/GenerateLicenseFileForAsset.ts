@@ -6,7 +6,7 @@ import * as path from 'node:path';
 import type { Comment } from 'estree';
 import type { Compilation, Module, sources } from 'webpack';
 
-import type { IAssetInfo } from './ModuleMinifierPlugin.types';
+import type { IAssetInfo } from './ModuleMinifierPlugin.types.ts';
 
 function getAllComments(modules: Iterable<Module>): Set<string> {
   const allComments: Set<string> = new Set();

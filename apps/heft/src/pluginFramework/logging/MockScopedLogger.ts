@@ -3,7 +3,7 @@
 
 import type { ITerminal } from '@rushstack/terminal';
 
-import type { IScopedLogger } from './ScopedLogger';
+import type { IScopedLogger } from './ScopedLogger.ts';
 
 /**
  * Implementation of IScopedLogger for use by unit tests.

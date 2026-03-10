@@ -20,10 +20,10 @@ import type {
   ConfigurationFile
 } from '@rushstack/heft';
 
-import { TypeScriptBuilder, type ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
+import { TypeScriptBuilder, type ITypeScriptBuilderConfiguration } from './TypeScriptBuilder.ts';
 import anythingSchema from './schemas/anything.schema.json';
 import typescriptConfigSchema from './schemas/typescript.schema.json';
-import { getTsconfigFilePath } from './tsconfigLoader';
+import { getTsconfigFilePath } from './tsconfigLoader.ts';
 
 /**
  * The name of the plugin, as specified in heft-plugin.json

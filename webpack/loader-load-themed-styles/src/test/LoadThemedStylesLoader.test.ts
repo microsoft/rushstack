@@ -3,8 +3,8 @@
 
 import webpack = require('webpack');
 
-import { LoadThemedStylesLoader } from '../LoadThemedStylesLoader';
-import LoadThemedStylesMock = require('./testData/LoadThemedStylesMock');
+import { LoadThemedStylesLoader } from '../LoadThemedStylesLoader.ts';
+import LoadThemedStylesMock = require('./testData/LoadThemedStylesMock.ts');
 
 function wrapResult(loaderResult: string): string {
   return `var module = { id: 'testId', exports: {} };

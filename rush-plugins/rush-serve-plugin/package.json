@@ -42,7 +42,6 @@
   "exports": {
     ".": {
       "types": "./dist/rush-serve-plugin.d.ts",
-      "node": "./lib-commonjs/index.js",
       "import": "./lib-esm/index.js",
       "require": "./lib-commonjs/index.js"
     },
@@ -52,7 +51,6 @@
     "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
     "./lib/*": {
       "types": "./lib-dts/*.d.ts",
-      "node": "./lib-commonjs/*.js",
       "import": "./lib-esm/*.js",
       "require": "./lib-commonjs/*.js"
     },

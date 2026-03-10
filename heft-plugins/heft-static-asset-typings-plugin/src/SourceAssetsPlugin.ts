@@ -12,7 +12,7 @@ import {
   type IRunGeneratorOptions,
   type IStaticAssetGeneratorOptions,
   type IStaticAssetTypingsGenerator
-} from './StaticAssetTypingsGenerator';
+} from './StaticAssetTypingsGenerator.js';
 import type { IAssetPluginOptions, ISourceStaticAssetTypingsConfigurationJson } from './types';
 
 const PLUGIN_NAME: 'source-assets-plugin' = 'source-assets-plugin';

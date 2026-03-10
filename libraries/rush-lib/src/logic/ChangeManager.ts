@@ -3,15 +3,15 @@
 
 import type { IPackageJson } from '@rushstack/node-core-library';
 
-import type { IChangeInfo } from '../api/ChangeManagement';
-import type { IChangelog } from '../api/Changelog';
-import type { RushConfiguration } from '../api/RushConfiguration';
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import type { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
-import { PublishUtilities, type IChangeRequests } from './PublishUtilities';
-import { ChangeFiles } from './ChangeFiles';
-import { PrereleaseToken } from './PrereleaseToken';
-import { ChangelogGenerator } from './ChangelogGenerator';
+import type { IChangeInfo } from '../api/ChangeManagement.ts';
+import type { IChangelog } from '../api/Changelog.ts';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import type { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration.ts';
+import { PublishUtilities, type IChangeRequests } from './PublishUtilities.ts';
+import { ChangeFiles } from './ChangeFiles.ts';
+import { PrereleaseToken } from './PrereleaseToken.ts';
+import { ChangelogGenerator } from './ChangelogGenerator.ts';
 
 /**
  * The class manages change files and controls how changes logged by change files

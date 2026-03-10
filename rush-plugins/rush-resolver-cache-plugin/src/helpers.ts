@@ -6,7 +6,7 @@ import * as path from 'node:path';
 
 import type { ISerializedResolveContext } from '@rushstack/webpack-workspace-resolve-plugin';
 
-import type { IDependencyEntry, IResolverContext } from './types';
+import type { IDependencyEntry, IResolverContext } from './types.ts';
 
 const MAX_LENGTH_WITHOUT_HASH: number = 120 - 26 - 1;
 const BASE32: string[] = 'abcdefghijklmnopqrstuvwxyz234567'.split('');

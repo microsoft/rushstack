@@ -3,8 +3,8 @@ jest.mock('path', () => ({
   // Add other path methods as needed
 }));
 
-import findModulePath from '../FindModulePath';
-import type { INpmCheckState } from '../interfaces/INpmCheck';
+import findModulePath from '../FindModulePath.ts';
+import type { INpmCheckState } from '../interfaces/INpmCheck.ts';
 import path from 'node:path';
 
 const Module = require('node:module');

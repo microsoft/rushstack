@@ -9,7 +9,7 @@ import {
   configureLoadStyles,
   replaceTokensWithVariables,
   type IThemingInstruction
-} from '../index';
+} from '../index.ts';
 
 describe(detokenize.name, () => {
   it('handles colors', () => {

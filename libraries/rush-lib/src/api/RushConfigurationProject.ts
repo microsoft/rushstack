@@ -7,14 +7,14 @@ import * as semver from 'semver';
 
 import { type IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
 
-import type { RushConfiguration } from './RushConfiguration';
-import type { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
-import type { PackageJsonEditor } from './PackageJsonEditor';
-import { RushConstants } from '../logic/RushConstants';
-import { PackageNameParsers } from './PackageNameParsers';
-import { DependencySpecifier, DependencySpecifierType } from '../logic/DependencySpecifier';
-import { SaveCallbackPackageJsonEditor } from './SaveCallbackPackageJsonEditor';
-import type { Subspace } from './Subspace';
+import type { RushConfiguration } from './RushConfiguration.ts';
+import type { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy.ts';
+import type { PackageJsonEditor } from './PackageJsonEditor.ts';
+import { RushConstants } from '../logic/RushConstants.ts';
+import { PackageNameParsers } from './PackageNameParsers.ts';
+import { DependencySpecifier, DependencySpecifierType } from '../logic/DependencySpecifier.ts';
+import { SaveCallbackPackageJsonEditor } from './SaveCallbackPackageJsonEditor.ts';
+import type { Subspace } from './Subspace.ts';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.

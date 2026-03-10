@@ -7,6 +7,6 @@
  * @packageDocumentation
  */
 
-import * as VersionDetection from './DetectWebpackVersion';
-import * as Testing from './Testing';
+import * as VersionDetection from './DetectWebpackVersion.ts';
+import * as Testing from './Testing.ts';
 export { VersionDetection, Testing };

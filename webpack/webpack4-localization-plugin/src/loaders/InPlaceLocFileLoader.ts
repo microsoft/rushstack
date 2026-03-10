@@ -6,8 +6,8 @@ import type { loader } from 'webpack';
 import { Terminal } from '@rushstack/terminal';
 import { type ILocalizationFile, parseLocFile } from '@rushstack/localization-utilities';
 
-import { loaderFactory, type IBaseLoaderOptions } from './LoaderFactory';
-import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
+import { loaderFactory, type IBaseLoaderOptions } from './LoaderFactory.ts';
+import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider.ts';
 
 export default loaderFactory(function (
   this: loader.LoaderContext,

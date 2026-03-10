@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { SyntaxHelpers } from '../SyntaxHelpers';
+import { SyntaxHelpers } from '../SyntaxHelpers.ts';
 
 describe(SyntaxHelpers.name, () => {
   it(SyntaxHelpers.makeCamelCaseIdentifier.name, () => {

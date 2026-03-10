@@ -7,13 +7,13 @@ import type {
 } from '@rushstack/ts-command-line';
 import { Async } from '@rushstack/node-core-library';
 
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { BaseHotlinkPackageAction } from './BaseHotlinkPackageAction';
-import type { HotlinkManager } from '../../utilities/HotlinkManager';
-import { BRIDGE_PACKAGE_ACTION_NAME, LINK_PACKAGE_ACTION_NAME } from '../../utilities/actionNameConstants';
-import { RushConstants } from '../../logic/RushConstants';
-import type { Subspace } from '../../api/Subspace';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { BaseHotlinkPackageAction } from './BaseHotlinkPackageAction.ts';
+import type { HotlinkManager } from '../../utilities/HotlinkManager.ts';
+import { BRIDGE_PACKAGE_ACTION_NAME, LINK_PACKAGE_ACTION_NAME } from '../../utilities/actionNameConstants.ts';
+import { RushConstants } from '../../logic/RushConstants.ts';
+import type { Subspace } from '../../api/Subspace.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
 
 export class BridgePackageAction extends BaseHotlinkPackageAction {
   private readonly _versionParameter: IRequiredCommandLineStringParameter;

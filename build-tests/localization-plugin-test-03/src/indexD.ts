@@ -5,7 +5,7 @@ import(/* webpackChunkName: 'chunk-without-strings' */ './chunks/chunkWithoutStr
   .then(
     // eslint-disable-next-line @typescript-eslint/naming-convention
     ({ ChunkWithoutStringsClass }) => {
-      const chunk: import('./chunks/chunkWithoutStrings').ChunkWithoutStringsClass =
+      const chunk: import('./chunks/chunkWithoutStrings.ts').ChunkWithoutStringsClass =
         new ChunkWithoutStringsClass();
       chunk.doStuff();
     }

@@ -6,7 +6,7 @@ import * as path from 'node:path';
 
 import type { IPackageJson } from '@rushstack/node-core-library';
 
-import type { IPnpmfileModule, IReadPackageContext } from './IPnpmfileModule';
+import type { IPnpmfileModule, IReadPackageContext } from './IPnpmfileModule.ts';
 
 export interface IRequestMessage {
   id: number;

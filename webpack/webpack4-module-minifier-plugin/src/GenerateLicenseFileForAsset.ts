@@ -12,7 +12,7 @@ import type {
   IModuleInfo,
   IExtendedModule,
   _IAcornComment
-} from './ModuleMinifierPlugin.types';
+} from './ModuleMinifierPlugin.types.ts';
 
 function getAllComments(moduleIds: (string | number)[], minifiedModules: IModuleMap): Set<string> {
   const allComments: Set<string> = new Set();

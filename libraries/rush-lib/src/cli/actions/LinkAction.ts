@@ -3,9 +3,9 @@
 
 import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import type { BaseLinkManager } from '../../logic/base/BaseLinkManager';
-import { BaseRushAction } from './BaseRushAction';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import type { BaseLinkManager } from '../../logic/base/BaseLinkManager.ts';
+import { BaseRushAction } from './BaseRushAction.ts';
 
 export class LinkAction extends BaseRushAction {
   private readonly _force: CommandLineFlagParameter;
@@ -32,9 +32,9 @@ export class LinkAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    const linkManagerFactoryModule: typeof import('../../logic/LinkManagerFactory') = await import(
+    const linkManagerFactoryModule: typeof import('../../logic/LinkManagerFactory.ts') = await import(
       /* webpackChunkName: 'LinkManagerFactory' */
-      '../../logic/LinkManagerFactory'
+      '../../logic/LinkManagerFactory.ts'
     );
     const linkManager: BaseLinkManager = linkManagerFactoryModule.LinkManagerFactory.getLinkManager(
       this.rushConfiguration

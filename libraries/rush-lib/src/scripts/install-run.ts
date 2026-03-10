@@ -10,9 +10,9 @@ import * as path from 'node:path';
 
 import type { IPackageJson } from '@rushstack/node-core-library';
 
-import { syncNpmrc, type ILogger } from '../utilities/npmrcUtilities';
-import { escapeArgumentIfNeeded, IS_WINDOWS } from '../utilities/executionUtilities';
-import type { RushConstants } from '../logic/RushConstants';
+import { syncNpmrc, type ILogger } from '../utilities/npmrcUtilities.ts';
+import { escapeArgumentIfNeeded, IS_WINDOWS } from '../utilities/executionUtilities.ts';
+import type { RushConstants } from '../logic/RushConstants.ts';
 
 export const RUSH_JSON_FILENAME: typeof RushConstants.rushJsonFilename = 'rush.json';
 const RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME: string = 'RUSH_TEMP_FOLDER';

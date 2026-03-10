@@ -3,7 +3,7 @@
 
 import process from 'node:process';
 
-import { EnvironmentMap } from '../EnvironmentMap';
+import { EnvironmentMap } from '../EnvironmentMap.ts';
 
 describe(EnvironmentMap.name, () => {
   test('_sanityCheck() throws', () => {

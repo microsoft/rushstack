@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { printSuppressHelp } from './utils/print-help';
-import { runEslintAsync } from './runEslint';
-import { ESLINT_BULK_SUPPRESS_ENV_VAR_NAME } from '../constants';
+import { printSuppressHelp } from './utils/print-help.ts';
+import { runEslintAsync } from './runEslint.ts';
+import { ESLINT_BULK_SUPPRESS_ENV_VAR_NAME } from '../constants.ts';
 
 interface IParsedArgs {
   rules: string[];

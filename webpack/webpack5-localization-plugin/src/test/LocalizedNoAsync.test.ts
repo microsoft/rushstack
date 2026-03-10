@@ -8,9 +8,9 @@ import { promisify } from 'node:util';
 import webpack, { type Compiler, type Stats } from 'webpack';
 import { Volume } from 'memfs/lib/volume';
 
-import { LocalizationPlugin } from '../LocalizationPlugin';
-import type { ILocalizationPluginOptions } from '../interfaces';
-import { MemFSPlugin } from './MemFSPlugin';
+import { LocalizationPlugin } from '../LocalizationPlugin.ts';
+import type { ILocalizationPluginOptions } from '../interfaces.ts';
+import { MemFSPlugin } from './MemFSPlugin.ts';
 
 async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
   const memoryFileSystem: Volume = new Volume();

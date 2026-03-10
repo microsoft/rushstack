@@ -6,7 +6,7 @@ import type {
   IModuleMinificationCallback,
   IModuleMinificationRequest,
   IModuleMinifier
-} from './types';
+} from './types.ts';
 
 /**
  * Minifier implementation that does not actually transform the code, for debugging.

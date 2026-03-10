@@ -3,7 +3,7 @@
 
 import fs from 'node:fs';
 
-import { VSCODE_PID_ENV_VAR_NAME } from './constants';
+import { VSCODE_PID_ENV_VAR_NAME } from './constants.ts';
 
 export interface ISuppression {
   file: string;

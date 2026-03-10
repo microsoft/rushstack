@@ -4,11 +4,11 @@
 import * as path from 'node:path';
 
 import { JsonFile, Path, Text } from '@rushstack/node-core-library';
-import { RushConfiguration } from '../RushConfiguration';
-import type { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
-import { RushConfigurationProject } from '../RushConfigurationProject';
-import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
-import { DependencyType } from '../PackageJsonEditor';
+import { RushConfiguration } from '../RushConfiguration.ts';
+import type { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy.ts';
+import { RushConfigurationProject } from '../RushConfigurationProject.ts';
+import { EnvironmentConfiguration } from '../EnvironmentConfiguration.ts';
+import { DependencyType } from '../PackageJsonEditor.ts';
 
 function normalizePathForComparison(pathToNormalize: string): string {
   return Text.replaceAll(pathToNormalize, '\\', '/').toUpperCase();

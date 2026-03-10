@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 import type { RushConfiguration, RushConfigurationProject } from '@rushstack/rush-sdk';
 
-import { getRushConfiguration } from '../utilities/common';
+import { getRushConfiguration } from '../utilities/common.ts';
 import { BaseTool, type CallToolResult } from './base.tool';
 
 export class RushProjectDetailsTool extends BaseTool {

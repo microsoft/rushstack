@@ -11,57 +11,57 @@ import type {
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
-import type { Subspace } from '../../api/Subspace';
-import type { IPhasedCommand } from '../../pluginFramework/RushLifeCycle';
+import type { Subspace } from '../../api/Subspace.ts';
+import type { IPhasedCommand } from '../../pluginFramework/RushLifeCycle.ts';
 import {
   PhasedCommandHooks,
   type ICreateOperationsContext,
   type IExecuteOperationsContext
-} from '../../pluginFramework/PhasedCommandHooks';
-import { SetupChecks } from '../../logic/SetupChecks';
-import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
-import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAction';
+} from '../../pluginFramework/PhasedCommandHooks.ts';
+import { SetupChecks } from '../../logic/SetupChecks.ts';
+import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch.ts';
+import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAction.ts';
 import {
   type IOperationExecutionManagerOptions,
   OperationExecutionManager
-} from '../../logic/operations/OperationExecutionManager';
-import { RushConstants } from '../../logic/RushConstants';
-import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
-import type { IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfiguration';
-import type { Operation } from '../../logic/operations/Operation';
-import type { OperationExecutionRecord } from '../../logic/operations/OperationExecutionRecord';
-import { associateParametersByPhase } from '../parsing/associateParametersByPhase';
-import { PhasedOperationPlugin } from '../../logic/operations/PhasedOperationPlugin';
-import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperationRunnerPlugin';
-import { Event } from '../../api/EventHooks';
-import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
-import { OperationStatus } from '../../logic/operations/OperationStatus';
+} from '../../logic/operations/OperationExecutionManager.ts';
+import { RushConstants } from '../../logic/RushConstants.ts';
+import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration.ts';
+import { SelectionParameterSet } from '../parsing/SelectionParameterSet.ts';
+import type { IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfiguration.ts';
+import type { Operation } from '../../logic/operations/Operation.ts';
+import type { OperationExecutionRecord } from '../../logic/operations/OperationExecutionRecord.ts';
+import { associateParametersByPhase } from '../parsing/associateParametersByPhase.ts';
+import { PhasedOperationPlugin } from '../../logic/operations/PhasedOperationPlugin.ts';
+import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperationRunnerPlugin.ts';
+import { Event } from '../../api/EventHooks.ts';
+import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer.ts';
+import { OperationStatus } from '../../logic/operations/OperationStatus.ts';
 import type {
   IExecutionResult,
   IOperationExecutionResult
-} from '../../logic/operations/IOperationExecutionResult';
-import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
-import type { ITelemetryData, ITelemetryOperationResult } from '../../logic/Telemetry';
-import { parseParallelism } from '../parsing/ParseParallelism';
-import { CobuildConfiguration } from '../../api/CobuildConfiguration';
-import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin';
-import type { IInputsSnapshot, GetInputsSnapshotAsyncFn } from '../../logic/incremental/InputsSnapshot';
-import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
-import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
-import { ValidateOperationsPlugin } from '../../logic/operations/ValidateOperationsPlugin';
-import { ShardedPhasedOperationPlugin } from '../../logic/operations/ShardedPhaseOperationPlugin';
-import type { ProjectWatcher } from '../../logic/ProjectWatcher';
-import { FlagFile } from '../../api/FlagFile';
-import { WeightedOperationPlugin } from '../../logic/operations/WeightedOperationPlugin';
-import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
-import { Selection } from '../../logic/Selection';
-import { NodeDiagnosticDirPlugin } from '../../logic/operations/NodeDiagnosticDirPlugin';
-import { IgnoredParametersPlugin } from '../../logic/operations/IgnoredParametersPlugin';
-import { DebugHashesPlugin } from '../../logic/operations/DebugHashesPlugin';
-import { measureAsyncFn, measureFn } from '../../utilities/performance';
+} from '../../logic/operations/IOperationExecutionResult.ts';
+import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin.ts';
+import type { ITelemetryData, ITelemetryOperationResult } from '../../logic/Telemetry.ts';
+import { parseParallelism } from '../parsing/ParseParallelism.ts';
+import { CobuildConfiguration } from '../../api/CobuildConfiguration.ts';
+import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin.ts';
+import type { IInputsSnapshot, GetInputsSnapshotAsyncFn } from '../../logic/incremental/InputsSnapshot.ts';
+import { RushProjectConfiguration } from '../../api/RushProjectConfiguration.ts';
+import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin.ts';
+import { ValidateOperationsPlugin } from '../../logic/operations/ValidateOperationsPlugin.ts';
+import { ShardedPhasedOperationPlugin } from '../../logic/operations/ShardedPhaseOperationPlugin.ts';
+import type { ProjectWatcher } from '../../logic/ProjectWatcher.ts';
+import { FlagFile } from '../../api/FlagFile.ts';
+import { WeightedOperationPlugin } from '../../logic/operations/WeightedOperationPlugin.ts';
+import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants.ts';
+import { Selection } from '../../logic/Selection.ts';
+import { NodeDiagnosticDirPlugin } from '../../logic/operations/NodeDiagnosticDirPlugin.ts';
+import { IgnoredParametersPlugin } from '../../logic/operations/IgnoredParametersPlugin.ts';
+import { DebugHashesPlugin } from '../../logic/operations/DebugHashesPlugin.ts';
+import { measureAsyncFn, measureFn } from '../../utilities/performance.ts';
 
 const PERF_PREFIX: 'rush:phasedScriptAction' = 'rush:phasedScriptAction';
 
@@ -341,7 +341,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       await measureAsyncFn(`${PERF_PREFIX}:install`, async () => {
         const { doBasicInstallAsync } = await import(
           /* webpackChunkName: 'doBasicInstallAsync' */
-          '../../logic/installManager/doBasicInstallAsync'
+          '../../logic/installManager/doBasicInstallAsync.ts'
         );
 
         const variant: string | undefined = await getVariantAsync(
@@ -417,7 +417,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       if (showTimeline) {
         const { ConsoleTimelinePlugin } = await import(
           /* webpackChunkName: 'ConsoleTimelinePlugin' */
-          '../../logic/operations/ConsoleTimelinePlugin'
+          '../../logic/operations/ConsoleTimelinePlugin.ts'
         );
         new ConsoleTimelinePlugin(terminal).apply(this.hooks);
       }
@@ -495,7 +495,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         if (isWatch && this._noIPCParameter?.value === false) {
           new (
             await import(
-              /* webpackChunkName: 'IPCOperationRunnerPlugin' */ '../../logic/operations/IPCOperationRunnerPlugin'
+              /* webpackChunkName: 'IPCOperationRunnerPlugin' */ '../../logic/operations/IPCOperationRunnerPlugin.ts'
             )
           ).IPCOperationRunnerPlugin().apply(this.hooks);
         }
@@ -538,14 +538,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           if (!buildCacheConfiguration?.buildCacheEnabled) {
             throw new Error('You must have build cache enabled to use this option.');
           }
-          const { BuildPlanPlugin } = await import('../../logic/operations/BuildPlanPlugin');
+          const { BuildPlanPlugin } = await import('../../logic/operations/BuildPlanPlugin.ts');
           new BuildPlanPlugin(terminal).apply(this.hooks);
         }
 
         const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
         if (this.rushConfiguration?.isPnpm && experiments?.usePnpmSyncForInjectedDependencies) {
           const { PnpmSyncCopyOperationPlugin } = await import(
-            '../../logic/operations/PnpmSyncCopyOperationPlugin'
+            '../../logic/operations/PnpmSyncCopyOperationPlugin.ts'
           );
           new PnpmSyncCopyOperationPlugin(terminal).apply(this.hooks);
         }
@@ -833,7 +833,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     // Use async import so that we don't pay the cost for sync builds
     const { ProjectWatcher } = await import(
       /* webpackChunkName: 'ProjectWatcher' */
-      '../../logic/ProjectWatcher'
+      '../../logic/ProjectWatcher.ts'
     );
 
     const sessionAbortController: AbortController = this.sessionAbortController;

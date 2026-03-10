@@ -15,25 +15,25 @@ export type {
   IPartialTsconfig,
   IChangedFilesHookOptions,
   ITypeScriptPluginAccessor
-} from './TypeScriptPlugin';
+} from './TypeScriptPlugin.ts';
 
 export {
   PLUGIN_NAME as TypeScriptPluginName,
   loadTypeScriptConfigurationFileAsync,
   loadPartialTsconfigFileAsync
-} from './TypeScriptPlugin';
+} from './TypeScriptPlugin.ts';
 
-export type { IBaseTypeScriptTool as _IBaseTypeScriptTool } from './TypeScriptBuilder';
+export type { IBaseTypeScriptTool as _IBaseTypeScriptTool } from './TypeScriptBuilder.ts';
 export {
   loadTypeScriptToolAsync as _loadTypeScriptToolAsync,
   type ILoadedTypeScriptTool as _ILoadedTypeScriptTool,
   type ICompilerCapabilities as _ICompilerCapabilities,
   type ILoadTypeScriptToolOptions as _ILoadTypeScriptToolOptions
-} from './loadTypeScriptTool';
+} from './loadTypeScriptTool.ts';
 export {
   loadTsconfig as _loadTsconfig,
   getTsconfigFilePath as _getTsconfigFilePath,
   type ILoadTsconfigOptions as _ILoadTsconfigOptions
-} from './tsconfigLoader';
+} from './tsconfigLoader.ts';
 import type * as TTypeScript from 'typescript';
 export { TTypeScript as _TTypeScript };

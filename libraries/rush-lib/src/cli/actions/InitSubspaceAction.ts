@@ -5,11 +5,14 @@ import type { IRequiredCommandLineStringParameter } from '@rushstack/ts-command-
 import { Async, FileSystem, JsonFile } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import { assetsFolderPath } from '../../utilities/PathConstants';
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { BaseRushAction } from './BaseRushAction';
-import { type ISubspacesConfigurationJson, SubspacesConfiguration } from '../../api/SubspacesConfiguration';
-import { copyTemplateFileAsync } from '../../utilities/templateUtilities';
+import { assetsFolderPath } from '../../utilities/PathConstants.ts';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import { BaseRushAction } from './BaseRushAction.ts';
+import {
+  type ISubspacesConfigurationJson,
+  SubspacesConfiguration
+} from '../../api/SubspacesConfiguration.ts';
+import { copyTemplateFileAsync } from '../../utilities/templateUtilities.ts';
 
 export class InitSubspaceAction extends BaseRushAction {
   private readonly _subspaceNameParameter: IRequiredCommandLineStringParameter;

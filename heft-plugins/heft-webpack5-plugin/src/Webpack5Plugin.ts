@@ -23,9 +23,9 @@ import {
   type IWebpackPluginAccessor,
   PLUGIN_NAME,
   type IWebpackPluginAccessorHooks
-} from './shared';
-import { tryLoadWebpackConfigurationAsync } from './WebpackConfigurationLoader';
-import { type DeferredWatchFileSystem, OverrideNodeWatchFSPlugin } from './DeferredWatchFileSystem';
+} from './shared.ts';
+import { tryLoadWebpackConfigurationAsync } from './WebpackConfigurationLoader.ts';
+import { type DeferredWatchFileSystem, OverrideNodeWatchFSPlugin } from './DeferredWatchFileSystem.ts';
 
 export interface IWebpackPluginOptions {
   devConfigurationPath?: string | undefined;
@@ -142,7 +142,9 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           taskSession.logger.terminal
         );
         this._webpack = await import(webpackPackagePath);
-        taskSession.logger.terminal.writeDebugLine(`Using Webpack from rig package at "${webpackPackagePath}"`);
+        taskSession.logger.terminal.writeDebugLine(
+          `Using Webpack from rig package at "${webpackPackagePath}"`
+        );
       } catch (e) {
         // Fallback to bundled version if not found in rig.
         this._webpack = await import(WEBPACK_PACKAGE_NAME);

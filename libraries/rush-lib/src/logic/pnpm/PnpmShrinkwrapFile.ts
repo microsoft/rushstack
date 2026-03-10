@@ -25,23 +25,27 @@ import {
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 import type { IReadonlyLookupByPath } from '@rushstack/lookup-by-path';
 
-import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
-import { DependencySpecifier } from '../DependencySpecifier';
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import type { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
-import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
-import { RushConstants } from '../RushConstants';
-import type { IExperimentsJson } from '../../api/ExperimentsConfiguration';
-import { DependencyType, type PackageJsonDependency, PackageJsonEditor } from '../../api/PackageJsonEditor';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { PnpmfileConfiguration } from './PnpmfileConfiguration';
-import { PnpmProjectShrinkwrapFile } from './PnpmProjectShrinkwrapFile';
-import type { PackageManagerOptionsConfigurationBase } from '../base/BasePackageManagerOptionsConfiguration';
-import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
-import type { IPnpmfile, IPnpmfileContext } from './IPnpmfile';
-import type { Subspace } from '../../api/Subspace';
-import { CustomTipId, type CustomTipsConfiguration } from '../../api/CustomTipsConfiguration';
-import { convertLockfileV9ToLockfileObject } from './PnpmShrinkWrapFileConverters';
+import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile.ts';
+import { DependencySpecifier } from '../DependencySpecifier.ts';
+import type { RushConfiguration } from '../../api/RushConfiguration.ts';
+import type { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy.ts';
+import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon.ts';
+import { RushConstants } from '../RushConstants.ts';
+import type { IExperimentsJson } from '../../api/ExperimentsConfiguration.ts';
+import {
+  DependencyType,
+  type PackageJsonDependency,
+  PackageJsonEditor
+} from '../../api/PackageJsonEditor.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { PnpmfileConfiguration } from './PnpmfileConfiguration.ts';
+import { PnpmProjectShrinkwrapFile } from './PnpmProjectShrinkwrapFile.ts';
+import type { PackageManagerOptionsConfigurationBase } from '../base/BasePackageManagerOptionsConfiguration.ts';
+import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration.ts';
+import type { IPnpmfile, IPnpmfileContext } from './IPnpmfile.ts';
+import type { Subspace } from '../../api/Subspace.ts';
+import { CustomTipId, type CustomTipsConfiguration } from '../../api/CustomTipsConfiguration.ts';
+import { convertLockfileV9ToLockfileObject } from './PnpmShrinkWrapFileConverters.ts';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 const pnpmKitV8: typeof import('@rushstack/rush-pnpm-kit-v8') = Import.lazy(

@@ -7,8 +7,8 @@ import dotenv from 'dotenv';
 
 import type { ITerminal } from '@rushstack/terminal';
 
-import { RushUserConfiguration } from '../api/RushUserConfiguration';
-import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
+import { RushUserConfiguration } from '../api/RushUserConfiguration.ts';
+import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration.ts';
 
 export function initializeDotEnv(terminal: ITerminal, rushJsonFilePath: string | undefined): void {
   if (EnvironmentConfiguration.hasBeenValidated) {

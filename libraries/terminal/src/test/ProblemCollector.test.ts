@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ProblemCollector } from '../ProblemCollector';
+import { ProblemCollector } from '../ProblemCollector.ts';
 import {
   parseProblemMatchersJson,
   type IProblemMatcher,
   type IProblem,
   type IProblemMatcherJson
 } from '@rushstack/problem-matcher/lib/ProblemMatcher';
-import { TerminalChunkKind } from '../ITerminalChunk';
+import { TerminalChunkKind } from '../ITerminalChunk.ts';
 
 class ErrorLineMatcher implements IProblemMatcher {
   public readonly name: string = 'errorLine';

@@ -5,8 +5,8 @@ import * as path from 'node:path';
 
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../../../api/RushConfiguration';
-import { SubspaceSelectorParser } from '../SubspaceSelectorParser';
+import { RushConfiguration } from '../../../api/RushConfiguration.ts';
+import { SubspaceSelectorParser } from '../SubspaceSelectorParser.ts';
 
 describe(SubspaceSelectorParser.name, () => {
   let rushConfiguration: RushConfiguration;

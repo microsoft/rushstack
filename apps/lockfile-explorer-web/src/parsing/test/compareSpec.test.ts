@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IPackageJson } from '../../types/IPackageJson';
-import { compareSpec } from '../compareSpec';
+import type { IPackageJson } from '../../types/IPackageJson.ts';
+import { compareSpec } from '../compareSpec.ts';
 
 const packageJson: IPackageJson = {
   name: 'testPackage',

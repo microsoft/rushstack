@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineParser } from '../providers/CommandLineParser';
-import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
-import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
+import { CommandLineParser } from '../providers/CommandLineParser.ts';
+import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter.ts';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities.ts';
 
 class TestCommandLine extends CommandLineParser {
   public flag: CommandLineFlagParameter;

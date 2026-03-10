@@ -7,11 +7,14 @@ import {
   Navigation
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 
-import { ApiItemKind } from '../items/ApiItem';
-import { type IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
-import { type IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
-import { ApiProtectedMixin, type IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin';
-import { type IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
+import { ApiItemKind } from '../items/ApiItem.ts';
+import { type IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem.ts';
+import {
+  type IApiParameterListMixinOptions,
+  ApiParameterListMixin
+} from '../mixins/ApiParameterListMixin.ts';
+import { ApiProtectedMixin, type IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin.ts';
+import { type IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin.ts';
 
 /**
  * Constructor options for {@link ApiConstructor}.

@@ -16,19 +16,19 @@ import {
 } from '@rushstack/package-deps-hash';
 import type { ITerminal } from '@rushstack/terminal';
 
-import type { RushConfiguration } from '../api/RushConfiguration';
-import type { Subspace } from '../api/Subspace';
-import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
-import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
-import { Git } from './Git';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import type { Subspace } from '../api/Subspace.ts';
+import { RushProjectConfiguration } from '../api/RushProjectConfiguration.ts';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile.ts';
+import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile.ts';
+import { Git } from './Git.ts';
 import {
   type IInputsSnapshotProjectMetadata,
   type IInputsSnapshot,
   InputsSnapshot,
   type GetInputsSnapshotAsyncFn
-} from './incremental/InputsSnapshot';
+} from './incremental/InputsSnapshot.ts';
 
 /**
  * @beta

@@ -18,23 +18,23 @@ import {
 import { InternalError, NewlineKind, FileError } from '@rushstack/node-core-library';
 import { CollatedTerminal, type CollatedWriter, type StreamCollator } from '@rushstack/stream-collator';
 
-import { OperationStatus, TERMINAL_STATUSES } from './OperationStatus';
-import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
-import type { Operation } from './Operation';
-import { Stopwatch } from '../../utilities/Stopwatch';
-import { OperationMetadataManager } from './OperationMetadataManager';
-import type { IPhase } from '../../api/CommandLineConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
-import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
-import { RushConstants } from '../RushConstants';
-import type { IEnvironment } from '../../utilities/Utilities';
+import { OperationStatus, TERMINAL_STATUSES } from './OperationStatus.ts';
+import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner.ts';
+import type { Operation } from './Operation.ts';
+import { Stopwatch } from '../../utilities/Stopwatch.ts';
+import { OperationMetadataManager } from './OperationMetadataManager.ts';
+import type { IPhase } from '../../api/CommandLineConfiguration.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider.ts';
+import type { IOperationExecutionResult } from './IOperationExecutionResult.ts';
+import type { IInputsSnapshot } from '../incremental/InputsSnapshot.ts';
+import { RushConstants } from '../RushConstants.ts';
+import type { IEnvironment } from '../../utilities/Utilities.ts';
 import {
   getProjectLogFilePaths,
   type ILogFilePaths,
   initializeProjectLogFilesAsync
-} from './ProjectLogWritable';
+} from './ProjectLogWritable.ts';
 
 /**
  * @internal

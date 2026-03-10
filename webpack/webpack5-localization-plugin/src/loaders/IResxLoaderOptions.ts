@@ -3,7 +3,7 @@
 
 import type { IParseResxOptionsBase } from '@rushstack/localization-utilities';
 
-import type { IBaseLocLoaderOptions } from './LoaderFactory';
+import type { IBaseLocLoaderOptions } from './LoaderFactory.ts';
 
 /**
  * @public

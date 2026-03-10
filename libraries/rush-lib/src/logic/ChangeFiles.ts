@@ -3,9 +3,9 @@
 
 import { Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
-import type { IChangeInfo } from '../api/ChangeManagement';
-import type { IChangelog } from '../api/Changelog';
-import type { RushConfiguration } from '../api/RushConfiguration';
+import type { IChangeInfo } from '../api/ChangeManagement.ts';
+import type { IChangelog } from '../api/Changelog.ts';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
 import schemaJson from '../schemas/change-file.schema.json';
 
 /**

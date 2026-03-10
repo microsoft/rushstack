@@ -11,11 +11,11 @@ import type {
   IIndividualVersionJson,
   VersionFormatForCommit,
   VersionFormatForPublish
-} from './VersionPolicyConfiguration';
-import type { PackageJsonEditor } from './PackageJsonEditor';
-import type { RushConfiguration } from './RushConfiguration';
-import type { RushConfigurationProject } from './RushConfigurationProject';
-import { cloneDeep } from '../utilities/objectUtilities';
+} from './VersionPolicyConfiguration.ts';
+import type { PackageJsonEditor } from './PackageJsonEditor.ts';
+import type { RushConfiguration } from './RushConfiguration.ts';
+import type { RushConfigurationProject } from './RushConfigurationProject.ts';
+import { cloneDeep } from '../utilities/objectUtilities.ts';
 
 /**
  * Type of version bumps

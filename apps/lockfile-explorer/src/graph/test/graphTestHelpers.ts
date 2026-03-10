@@ -12,8 +12,8 @@ import {
   type IJsonLfxWorkspace,
   lfxGraphSerializer,
   type LfxGraph
-} from '../../../build/lfx-shared';
-import * as lfxGraphLoader from '../lfxGraphLoader';
+} from '../../../build/lfx-shared/index.js';
+import * as lfxGraphLoader from '../lfxGraphLoader.ts';
 
 const FIXTURES_FOLDER: string = path.resolve(__dirname, '../../../src/graph/test/fixtures/');
 

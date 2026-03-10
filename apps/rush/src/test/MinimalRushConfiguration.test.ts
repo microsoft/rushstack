@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import { MinimalRushConfiguration } from '../MinimalRushConfiguration';
+import { MinimalRushConfiguration } from '../MinimalRushConfiguration.ts';
 
 describe(MinimalRushConfiguration.name, () => {
   afterEach(() => {

@@ -3,8 +3,8 @@
 
 import type { IRequiredCommandLineStringParameter } from '@rushstack/ts-command-line';
 
-import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
-import { Autoinstaller } from '../../logic/Autoinstaller';
+import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction.ts';
+import { Autoinstaller } from '../../logic/Autoinstaller.ts';
 
 export abstract class BaseAutoinstallerAction extends BaseRushAction {
   protected readonly _name: IRequiredCommandLineStringParameter;

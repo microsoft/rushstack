@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Enum } from '../Enum';
+import { Enum } from '../Enum.ts';
 
 // Bidirectional map
 enum NumericEnum {

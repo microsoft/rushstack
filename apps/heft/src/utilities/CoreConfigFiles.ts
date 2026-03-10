@@ -13,9 +13,9 @@ import { Import, PackageJsonLookup, InternalError } from '@rushstack/node-core-l
 import type { ITerminal } from '@rushstack/terminal';
 import type { IRigConfig } from '@rushstack/rig-package';
 
-import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
-import type { INodeServicePluginConfiguration } from '../plugins/NodeServicePlugin';
-import { Constants } from './Constants';
+import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin.ts';
+import type { INodeServicePluginConfiguration } from '../plugins/NodeServicePlugin.ts';
+import { Constants } from './Constants.ts';
 
 export interface IHeftConfigurationJsonActionReference {
   actionName: string;

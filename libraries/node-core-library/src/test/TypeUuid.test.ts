@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TypeUuid } from '../TypeUuid';
+import { TypeUuid } from '../TypeUuid.ts';
 
 const UuidA: string = '122f9816-15c2-480f-8c12-ed94d586b653';
 const UuidC: string = 'db7dae9b-38d2-4a0a-a62f-ac6b71c2c575';

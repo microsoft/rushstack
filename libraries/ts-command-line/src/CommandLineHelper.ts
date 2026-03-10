@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineConstants } from './Constants';
+import { CommandLineConstants } from './Constants.ts';
 
 /**
  * Helpers for working with the ts-command-line API.

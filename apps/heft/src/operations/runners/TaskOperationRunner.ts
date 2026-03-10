@@ -12,28 +12,28 @@ import {
 } from '@rushstack/operation-graph';
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 
-import type { HeftTask } from '../../pluginFramework/HeftTask';
+import type { HeftTask } from '../../pluginFramework/HeftTask.ts';
 import {
   copyFilesAsync,
   type ICopyOperation,
   asAbsoluteCopyOperation,
   asRelativeCopyOperation
-} from '../../plugins/CopyFilesPlugin';
-import { deleteFilesAsync } from '../../plugins/DeleteFilesPlugin';
+} from '../../plugins/CopyFilesPlugin.ts';
+import { deleteFilesAsync } from '../../plugins/DeleteFilesPlugin.ts';
 import type {
   HeftTaskSession,
   IHeftTaskFileOperations,
   IHeftTaskRunHookOptions,
   IHeftTaskRunIncrementalHookOptions
-} from '../../pluginFramework/HeftTaskSession';
-import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
-import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
-import { watchGlobAsync, type IGlobOptions } from '../../plugins/FileGlobSpecifier';
+} from '../../pluginFramework/HeftTaskSession.ts';
+import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession.ts';
+import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession.ts';
+import { watchGlobAsync, type IGlobOptions } from '../../plugins/FileGlobSpecifier.ts';
 import {
   type IWatchedFileState,
   type IWatchFileSystem,
   WatchFileSystemAdapter
-} from '../../utilities/WatchFileSystemAdapter';
+} from '../../utilities/WatchFileSystemAdapter.ts';
 
 export interface ITaskOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;

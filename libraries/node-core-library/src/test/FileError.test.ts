@@ -3,8 +3,8 @@
 
 import * as path from 'node:path';
 
-import { FileError } from '../FileError';
-import type { FileLocationStyle } from '../Path';
+import { FileError } from '../FileError.ts';
+import type { FileLocationStyle } from '../Path.ts';
 
 describe(FileError.name, () => {
   let originalValue: string | undefined;

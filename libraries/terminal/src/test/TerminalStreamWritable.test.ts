@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Terminal } from '../Terminal';
-import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
-import { TerminalStreamWritable } from '../TerminalStreamWritable';
-import { TerminalProviderSeverity } from '../ITerminalProvider';
+import { Terminal } from '../Terminal.ts';
+import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider.ts';
+import { TerminalStreamWritable } from '../TerminalStreamWritable.ts';
+import { TerminalProviderSeverity } from '../ITerminalProvider.ts';
 import type { Writable } from 'node:stream';
 
 let terminal: Terminal;

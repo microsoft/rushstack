@@ -3,11 +3,11 @@
 
 import * as semver from 'semver';
 
-import type { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
-import { DependencyType, type PackageJsonDependency } from '../api/PackageJsonEditor';
-import type { RushConfiguration } from '../api/RushConfiguration';
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import type { Subspace } from '../api/Subspace';
+import type { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration.ts';
+import { DependencyType, type PackageJsonDependency } from '../api/PackageJsonEditor.ts';
+import type { RushConfiguration } from '../api/RushConfiguration.ts';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject.ts';
+import type { Subspace } from '../api/Subspace.ts';
 
 export interface IDependencyAnalysis {
   /**

@@ -22,7 +22,7 @@ import {
   requireRushLibUnderFolderPath,
   tryFindRushJsonLocation,
   sdkContext
-} from './helpers';
+} from './helpers.ts';
 
 const verboseEnabled: boolean =
   typeof process !== 'undefined' &&

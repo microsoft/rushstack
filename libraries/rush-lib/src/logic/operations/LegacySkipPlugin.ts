@@ -6,15 +6,15 @@ import path from 'node:path';
 import { FileSystem, JsonFile, type JsonObject } from '@rushstack/node-core-library';
 import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
 
-import type { Operation } from './Operation';
-import { OperationStatus } from './OperationStatus';
+import type { Operation } from './Operation.ts';
+import { OperationStatus } from './OperationStatus.ts';
 import type {
   IExecuteOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
-} from '../../pluginFramework/PhasedCommandHooks';
-import type { IOperationRunnerContext } from './IOperationRunner';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
+} from '../../pluginFramework/PhasedCommandHooks.ts';
+import type { IOperationRunnerContext } from './IOperationRunner.ts';
+import type { IOperationExecutionResult } from './IOperationExecutionResult.ts';
 
 const PLUGIN_NAME: 'LegacySkipPlugin' = 'LegacySkipPlugin';
 

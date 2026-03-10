@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Lib2Class } from 'api-extractor-lib2-test';
-import { SomeClass5 } from './internal';
+import { SomeClass5 } from './internal.ts';
 
 /**
  * Various namespace scenarios.

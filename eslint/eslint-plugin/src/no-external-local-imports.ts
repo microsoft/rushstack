@@ -5,7 +5,7 @@ import * as path from 'node:path';
 
 import type { TSESTree, TSESLint } from '@typescript-eslint/utils';
 
-import { getRootDirectoryFromContext, getImportAbsolutePathFromExpression } from './LintUtilities';
+import { getRootDirectoryFromContext, getImportAbsolutePathFromExpression } from './LintUtilities.ts';
 
 export const MESSAGE_ID: 'error-external-local-imports' = 'error-external-local-imports';
 type RuleModule = TSESLint.RuleModule<typeof MESSAGE_ID, []>;

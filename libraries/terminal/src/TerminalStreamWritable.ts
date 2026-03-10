@@ -3,8 +3,8 @@
 
 import { Writable, type WritableOptions } from 'node:stream';
 
-import type { ITerminal } from './ITerminal';
-import { TerminalProviderSeverity } from './ITerminalProvider';
+import type { ITerminal } from './ITerminal.ts';
+import { TerminalProviderSeverity } from './ITerminalProvider.ts';
 
 /**
  * Options for {@link TerminalStreamWritable}.

@@ -6,14 +6,14 @@ import type { ITerminal } from '@rushstack/terminal';
 import { ProjectConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import { RigConfig } from '@rushstack/rig-package';
 
-import type { RushConfigurationProject } from './RushConfigurationProject';
-import { RushConstants } from '../logic/RushConstants';
-import type { IPhase } from './CommandLineConfiguration';
-import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';
+import type { RushConfigurationProject } from './RushConfigurationProject.ts';
+import { RushConstants } from '../logic/RushConstants.ts';
+import type { IPhase } from './CommandLineConfiguration.ts';
+import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer.ts';
 import schemaJson from '../schemas/rush-project.schema.json';
 import anythingSchemaJson from '../schemas/anything.schema.json';
-import { HotlinkManager } from '../utilities/HotlinkManager';
-import type { RushConfiguration } from './RushConfiguration';
+import { HotlinkManager } from '../utilities/HotlinkManager.ts';
+import type { RushConfiguration } from './RushConfiguration.ts';
 
 /**
  * Describes the file structure for the `<project root>/config/rush-project.json` config file.

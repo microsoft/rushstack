@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-export { PLUGIN_NAME as PluginName, STAGE_LOAD_LOCAL_CONFIG } from './shared';
+export { PLUGIN_NAME as PluginName, STAGE_LOAD_LOCAL_CONFIG } from './shared.ts';
 
 export type {
   IRspackConfigurationWithDevServer,
@@ -17,4 +17,4 @@ export type {
   IRspackPluginAccessorHooks,
   IRspackPluginAccessorParameters,
   RspackCoreImport
-} from './shared';
+} from './shared.ts';

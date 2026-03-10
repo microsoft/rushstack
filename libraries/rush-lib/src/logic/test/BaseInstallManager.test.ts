@@ -4,13 +4,13 @@
 import * as path from 'node:path';
 import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
 
-import { PurgeManager } from '../PurgeManager';
-import { BaseInstallManager, pnpmIgnoreCompatibilityDbParameter } from '../base/BaseInstallManager';
-import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
+import { PurgeManager } from '../PurgeManager.ts';
+import { BaseInstallManager, pnpmIgnoreCompatibilityDbParameter } from '../base/BaseInstallManager.ts';
+import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes.ts';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import type { Subspace } from '../../api/Subspace';
+import { RushConfiguration } from '../../api/RushConfiguration.ts';
+import { RushGlobalFolder } from '../../api/RushGlobalFolder.ts';
+import type { Subspace } from '../../api/Subspace.ts';
 
 class FakeBaseInstallManager extends BaseInstallManager {
   public constructor(

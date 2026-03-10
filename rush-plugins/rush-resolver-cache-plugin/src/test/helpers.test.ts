@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { createBase32Hash, depPathToFilename, getDescriptionFileRootFromKey } from '../helpers';
+import { createBase32Hash, depPathToFilename, getDescriptionFileRootFromKey } from '../helpers.ts';
 
 describe(createBase32Hash.name, () => {
   it('hashes', () => {

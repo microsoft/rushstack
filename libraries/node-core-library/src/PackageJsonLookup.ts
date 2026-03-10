@@ -3,10 +3,10 @@
 
 import * as path from 'node:path';
 
-import { JsonFile } from './JsonFile';
-import type { IPackageJson, INodePackageJson } from './IPackageJson';
-import { FileConstants } from './Constants';
-import { FileSystem } from './FileSystem';
+import { JsonFile } from './JsonFile.ts';
+import type { IPackageJson, INodePackageJson } from './IPackageJson.ts';
+import { FileConstants } from './Constants.ts';
+import { FileSystem } from './FileSystem.ts';
 
 /**
  * Constructor parameters for {@link PackageJsonLookup}

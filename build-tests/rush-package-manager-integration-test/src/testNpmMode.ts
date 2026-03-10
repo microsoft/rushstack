@@ -6,7 +6,7 @@ import * as path from 'node:path';
 
 import type { ITerminal } from '@rushstack/terminal';
 
-import { TestHelper } from './TestHelper';
+import { TestHelper } from './TestHelper.ts';
 
 /**
  * Integration test for Rush npm mode with tar 7.x

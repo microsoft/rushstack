@@ -3,9 +3,9 @@
 
 import type * as argparse from 'argparse';
 
-import { CommandLineParameterProvider } from './CommandLineParameterProvider';
-import { CommandLineParserExitError } from './CommandLineParserExitError';
-import { escapeSprintf } from '../escapeSprintf';
+import { CommandLineParameterProvider } from './CommandLineParameterProvider.ts';
+import { CommandLineParserExitError } from './CommandLineParserExitError.ts';
+import { escapeSprintf } from '../escapeSprintf.ts';
 
 /**
  * Options for the CommandLineAction constructor.

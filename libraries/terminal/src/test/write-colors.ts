@@ -7,8 +7,8 @@
  * Run this program with `node write-colors.js`
  */
 
-import { Terminal, ConsoleTerminalProvider, Colorize } from '../index';
-import { createColorGrid } from './createColorGrid';
+import { Terminal, ConsoleTerminalProvider, Colorize } from '../index.ts';
+import { createColorGrid } from './createColorGrid.ts';
 
 const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
 function writeColorGrid(colorGrid: string[][]): void {

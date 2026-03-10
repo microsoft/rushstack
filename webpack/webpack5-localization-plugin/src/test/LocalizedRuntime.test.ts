@@ -3,6 +3,6 @@
 
 jest.disableAutomock();
 
-import { runTests } from './LocalizedRuntimeTestBase';
+import { runTests } from './LocalizedRuntimeTestBase.ts';
 
 runTests();

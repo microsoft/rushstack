@@ -5,7 +5,7 @@
  * This file is a little program that prints all of the colors to the console
  */
 
-import { Colorize } from '../index';
+import { Colorize } from '../index.ts';
 
 export function createColorGrid(attributeFunction?: (text: string) => string): string[][] {
   const foregroundFunctions: ((text: string) => string)[] = [

@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ParseError } from './ParseError';
-import { type Tokenizer, type Token, TokenKind } from './Tokenizer';
-import { type AstNode, AstScript, AstCommand, AstCompoundWord, AstText } from './AstNode';
+import { ParseError } from './ParseError.ts';
+import { type Tokenizer, type Token, TokenKind } from './Tokenizer.ts';
+import { type AstNode, AstScript, AstCommand, AstCompoundWord, AstText } from './AstNode.ts';
 
 export class Parser {
   private readonly _tokenizer: Tokenizer;

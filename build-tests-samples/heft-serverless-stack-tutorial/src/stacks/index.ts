@@ -3,7 +3,7 @@
 
 import type * as sst from '@serverless-stack/resources';
 
-import MyStack from './MyStack';
+import MyStack from './MyStack.ts';
 
 export default function main(app: sst.App): void {
   // Set default runtime for all functions

@@ -3,18 +3,18 @@
 
 import { InternalError } from '@rushstack/node-core-library';
 
-import { HeftPluginConfiguration } from '../configuration/HeftPluginConfiguration';
+import { HeftPluginConfiguration } from '../configuration/HeftPluginConfiguration.ts';
 import type {
   HeftTaskPluginDefinition,
   HeftPluginDefinitionBase
-} from '../configuration/HeftPluginDefinition';
-import type { HeftPhase, IHeftPhase } from './HeftPhase';
+} from '../configuration/HeftPluginDefinition.ts';
+import type { HeftPhase, IHeftPhase } from './HeftPhase.ts';
 import type {
   IHeftConfigurationJsonTaskSpecifier,
   IHeftConfigurationJsonPluginSpecifier
-} from '../utilities/CoreConfigFiles';
-import type { IHeftTaskPlugin } from './IHeftPlugin';
-import type { IScopedLogger } from './logging/ScopedLogger';
+} from '../utilities/CoreConfigFiles.ts';
+import type { IHeftTaskPlugin } from './IHeftPlugin.ts';
+import type { IScopedLogger } from './logging/ScopedLogger.ts';
 
 const RESERVED_TASK_NAMES: Set<string> = new Set(['clean']);
 

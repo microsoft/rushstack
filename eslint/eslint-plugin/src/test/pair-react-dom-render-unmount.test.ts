@@ -3,8 +3,8 @@
 
 import type { RuleTester } from '@typescript-eslint/rule-tester';
 
-import { getRuleTesterWithProject } from './ruleTester';
-import { pairReactDomRenderUnmountRule } from '../pair-react-dom-render-unmount';
+import { getRuleTesterWithProject } from './ruleTester.ts';
+import { pairReactDomRenderUnmountRule } from '../pair-react-dom-render-unmount.ts';
 
 const ruleTester: RuleTester = getRuleTesterWithProject();
 

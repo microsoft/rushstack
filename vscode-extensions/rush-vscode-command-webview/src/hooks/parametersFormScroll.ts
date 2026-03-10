@@ -4,7 +4,7 @@
 import { type MutableRefObject, type UIEventHandler, useCallback, useEffect, useRef } from 'react';
 import type { Dispatch, AnyAction } from '@reduxjs/toolkit';
 
-import { useAppDispatch } from '../store/hooks';
+import { useAppDispatch } from '../store/hooks/index.ts';
 import {
   setCurretParameterName,
   setIsToolbarSticky,
@@ -12,7 +12,7 @@ import {
   useCurrentParameterName,
   useIsToolbarSticky,
   useUserSelectedParameterName
-} from '../store/slices/ui';
+} from '../store/slices/ui.ts';
 
 export const SCROLLABLE_ELEMENT_ID: string = 'parameters-scrollable-element';
 export const FIELD_ANCHOR_CLASSNAME: string = 'parameters-field-anchor';

@@ -1,7 +1,7 @@
 import path from 'node:path';
 
-import readPackageJson from '../ReadPackageJson';
-import type { INpmCheckPackageJson } from '../interfaces/INpmCheck';
+import readPackageJson from '../ReadPackageJson.ts';
+import type { INpmCheckPackageJson } from '../interfaces/INpmCheck.ts';
 
 describe('readPackageJson', () => {
   it('should return valid packageJson if it exists', async () => {

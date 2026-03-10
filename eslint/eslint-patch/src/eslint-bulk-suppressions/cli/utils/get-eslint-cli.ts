@@ -3,7 +3,7 @@
 
 import path from 'node:path';
 
-import { BULK_SUPPRESSIONS_CLI_ESLINT_PACKAGE_NAME } from '../../constants';
+import { BULK_SUPPRESSIONS_CLI_ESLINT_PACKAGE_NAME } from '../../constants.ts';
 
 // When this list is updated, update the `eslint-bulk-suppressions-newest-test`
 // and/or the `eslint-bulk-suppressions-newest-test` projects' eslint dependencies.

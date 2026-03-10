@@ -6,22 +6,22 @@ import * as ts from 'typescript';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { FileSystem, type NewlineKind, InternalError } from '@rushstack/node-core-library';
 
-import type { Collector } from '../collector/Collector';
-import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
-import { IndentDocCommentScope, Span, type SpanModification } from '../analyzer/Span';
-import { AstImport } from '../analyzer/AstImport';
-import type { CollectorEntity } from '../collector/CollectorEntity';
-import { AstDeclaration } from '../analyzer/AstDeclaration';
-import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
-import { AstSymbol } from '../analyzer/AstSymbol';
-import type { SymbolMetadata } from '../collector/SymbolMetadata';
-import { IndentedWriter } from './IndentedWriter';
-import { DtsEmitHelpers } from './DtsEmitHelpers';
-import type { DeclarationMetadata } from '../collector/DeclarationMetadata';
-import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
-import type { IAstModuleExportInfo } from '../analyzer/AstModule';
-import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
-import type { AstEntity } from '../analyzer/AstEntity';
+import type { Collector } from '../collector/Collector.ts';
+import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers.ts';
+import { IndentDocCommentScope, Span, type SpanModification } from '../analyzer/Span.ts';
+import { AstImport } from '../analyzer/AstImport.ts';
+import type { CollectorEntity } from '../collector/CollectorEntity.ts';
+import { AstDeclaration } from '../analyzer/AstDeclaration.ts';
+import type { ApiItemMetadata } from '../collector/ApiItemMetadata.ts';
+import { AstSymbol } from '../analyzer/AstSymbol.ts';
+import type { SymbolMetadata } from '../collector/SymbolMetadata.ts';
+import { IndentedWriter } from './IndentedWriter.ts';
+import { DtsEmitHelpers } from './DtsEmitHelpers.ts';
+import type { DeclarationMetadata } from '../collector/DeclarationMetadata.ts';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport.ts';
+import type { IAstModuleExportInfo } from '../analyzer/AstModule.ts';
+import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter.ts';
+import type { AstEntity } from '../analyzer/AstEntity.ts';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()

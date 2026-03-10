@@ -13,11 +13,11 @@ import {
   Sort
 } from '@rushstack/node-core-library';
 
-import type { OptionalToUndefined } from '../utilities/Utilities';
-import { PackageNameParsers } from './PackageNameParsers';
-import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
-import type { RushConfiguration } from './RushConfiguration';
-import { RushConstants } from '../logic/RushConstants';
+import type { OptionalToUndefined } from '../utilities/Utilities.ts';
+import { PackageNameParsers } from './PackageNameParsers.ts';
+import { JsonSchemaUrls } from '../logic/JsonSchemaUrls.ts';
+import type { RushConfiguration } from './RushConfiguration.ts';
+import { RushConstants } from '../logic/RushConstants.ts';
 import schemaJson from '../schemas/common-versions.schema.json';
 
 /**

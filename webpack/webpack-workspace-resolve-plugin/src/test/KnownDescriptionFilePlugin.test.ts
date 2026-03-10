@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { KnownDescriptionFilePlugin } from '../KnownDescriptionFilePlugin';
+import { KnownDescriptionFilePlugin } from '../KnownDescriptionFilePlugin.ts';
 
 import {
   parsedJson,
   createResolveForTests,
   type WrappedResolve,
   type ResolveContext
-} from './createResolveForTests';
+} from './createResolveForTests.ts';
 
 function createResolve(separator: '/' | '\\'): WrappedResolve {
   return createResolveForTests(separator, (cache, resolver) => {

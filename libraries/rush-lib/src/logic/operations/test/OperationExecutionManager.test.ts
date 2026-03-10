@@ -19,23 +19,23 @@ jest.mock('@rushstack/terminal', () => {
 import { Terminal, MockWritable, PrintUtilities } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 
-import type { IPhase } from '../../../api/CommandLineConfiguration';
-import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
+import type { IPhase } from '../../../api/CommandLineConfiguration.ts';
+import type { RushConfigurationProject } from '../../../api/RushConfigurationProject.ts';
 import {
   OperationExecutionManager,
   type IOperationExecutionManagerOptions
-} from '../OperationExecutionManager';
-import { _printOperationStatus } from '../OperationResultSummarizerPlugin';
-import { _printTimeline } from '../ConsoleTimelinePlugin';
-import { OperationStatus } from '../OperationStatus';
-import { Operation } from '../Operation';
-import { Utilities } from '../../../utilities/Utilities';
-import type { IOperationRunner } from '../IOperationRunner';
-import { MockOperationRunner } from './MockOperationRunner';
-import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
-import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalProvider';
-import type { CobuildConfiguration } from '../../../api/CobuildConfiguration';
-import type { OperationStateFile } from '../OperationStateFile';
+} from '../OperationExecutionManager.ts';
+import { _printOperationStatus } from '../OperationResultSummarizerPlugin.ts';
+import { _printTimeline } from '../ConsoleTimelinePlugin.ts';
+import { OperationStatus } from '../OperationStatus.ts';
+import { Operation } from '../Operation.ts';
+import { Utilities } from '../../../utilities/Utilities.ts';
+import type { IOperationRunner } from '../IOperationRunner.ts';
+import { MockOperationRunner } from './MockOperationRunner.ts';
+import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult.ts';
+import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalProvider.ts';
+import type { CobuildConfiguration } from '../../../api/CobuildConfiguration.ts';
+import type { OperationStateFile } from '../OperationStateFile.ts';
 
 const mockGetTimeInMs: jest.Mock = jest.fn();
 Utilities.getTimeInMs = mockGetTimeInMs;

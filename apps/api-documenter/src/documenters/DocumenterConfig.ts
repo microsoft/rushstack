@@ -5,7 +5,7 @@ import * as path from 'node:path';
 
 import { JsonSchema, JsonFile, NewlineKind } from '@rushstack/node-core-library';
 
-import type { IConfigFile } from './IConfigFile';
+import type { IConfigFile } from './IConfigFile.ts';
 import apiDocumenterSchema from '../schemas/api-documenter.schema.json';
 
 /**

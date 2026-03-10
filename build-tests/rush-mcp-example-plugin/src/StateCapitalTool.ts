@@ -3,7 +3,7 @@
 
 import type { IRushMcpTool, RushMcpPluginSession, CallToolResult, zodModule } from '@rushstack/mcp-server';
 
-import type { ExamplePlugin } from './ExamplePlugin';
+import type { ExamplePlugin } from './ExamplePlugin.ts';
 
 export class StateCapitalTool implements IRushMcpTool<StateCapitalTool['schema']> {
   public readonly plugin: ExamplePlugin;

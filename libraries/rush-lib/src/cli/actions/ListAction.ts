@@ -5,11 +5,11 @@ import { Sort } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
-import { BaseRushAction } from './BaseRushAction';
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { VersionPolicyDefinitionName } from '../../api/VersionPolicy';
-import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
+import { BaseRushAction } from './BaseRushAction.ts';
+import type { RushCommandLineParser } from '../RushCommandLineParser.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { VersionPolicyDefinitionName } from '../../api/VersionPolicy.ts';
+import { SelectionParameterSet } from '../parsing/SelectionParameterSet.ts';
 
 /**
  * Shape of "rush list --json" output.

@@ -4,12 +4,12 @@
 import type { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { InternalError } from '@rushstack/node-core-library';
 
-import type { Constructor, PropertiesOf } from '../mixins/Mixin';
-import type { ApiPackage } from '../model/ApiPackage';
-import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
-import type { DeserializerContext } from '../model/DeserializerContext';
-import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
-import type { ApiModel } from '../model/ApiModel';
+import type { Constructor, PropertiesOf } from '../mixins/Mixin.ts';
+import type { ApiPackage } from '../model/ApiPackage.ts';
+import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin.ts';
+import type { DeserializerContext } from '../model/DeserializerContext.ts';
+import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin.ts';
+import type { ApiModel } from '../model/ApiModel.ts';
 
 /**
  * The type returned by the {@link ApiItem.kind} property, which can be used to easily distinguish subclasses of
@@ -74,7 +74,9 @@ export class ApiItem {
   public static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem {
     // The Deserializer class is coupled with a ton of other classes, so  we delay loading it
     // to avoid ES5 circular imports.
-    const deserializerModule: typeof import('../model/Deserializer') = require('../model/Deserializer');
+    // NOTE: require() is used instead of import() because rewriteRelativeImportExtensions
+    // does not rewrite require() calls, so we must use the .js extension directly.
+    const deserializerModule: typeof import('../model/Deserializer.ts') = require('../model/Deserializer.js');
     return deserializerModule.Deserializer.deserialize(context, jsonObject);
   }
 

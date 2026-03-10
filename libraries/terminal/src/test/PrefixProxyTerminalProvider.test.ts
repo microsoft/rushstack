@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Terminal } from '../Terminal';
-import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
-import { PrefixProxyTerminalProvider } from '../PrefixProxyTerminalProvider';
-import type { ITerminalProvider } from '../ITerminalProvider';
+import { Terminal } from '../Terminal.ts';
+import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider.ts';
+import { PrefixProxyTerminalProvider } from '../PrefixProxyTerminalProvider.ts';
+import type { ITerminalProvider } from '../ITerminalProvider.ts';
 
 function runTestsForTerminalProvider(
   getTerminalProvider: (terminalProvider: ITerminalProvider) => PrefixProxyTerminalProvider

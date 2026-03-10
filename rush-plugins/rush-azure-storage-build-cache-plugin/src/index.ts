@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushAzureStorageBuildCachePlugin } from './RushAzureStorageBuildCachePlugin';
+import { RushAzureStorageBuildCachePlugin } from './RushAzureStorageBuildCachePlugin.ts';
 export {
   AzureAuthenticationBase,
   type IAzureAuthenticationBaseOptions,
@@ -14,10 +14,10 @@ export {
   type ITryGetCachedCredentialOptionsThrow,
   type ITryGetCachedCredentialOptionsIgnore,
   type ExpiredCredentialBehavior
-} from './AzureAuthenticationBase';
+} from './AzureAuthenticationBase.ts';
 export {
   AzureStorageAuthentication,
   type IAzureStorageAuthenticationOptions
-} from './AzureStorageAuthentication';
+} from './AzureStorageAuthentication.ts';
 
 export default RushAzureStorageBuildCachePlugin;

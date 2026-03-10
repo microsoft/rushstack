@@ -4,7 +4,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { ExampleApp } from './ExampleApp';
+import { ExampleApp } from './ExampleApp.tsx';
 
 import './index.css';
 

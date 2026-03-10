@@ -17,22 +17,22 @@
  * @packageDocumentation
  */
 
-export { PlaywrightTunnel } from './PlaywrightBrowserTunnel';
+export { PlaywrightTunnel } from './PlaywrightBrowserTunnel.ts';
 export type {
   BrowserName,
   TunnelStatus,
   IPlaywrightTunnelOptions,
   IHandshake
-} from './PlaywrightBrowserTunnel';
-export { createTunneledBrowserAsync, tunneledBrowserConnection } from './tunneledBrowserConnection';
+} from './PlaywrightBrowserTunnel.ts';
+export { createTunneledBrowserAsync, tunneledBrowserConnection } from './tunneledBrowserConnection/index.ts';
 export type {
   IDisposableTunneledBrowserConnection,
   IDisposableTunneledBrowser
-} from './tunneledBrowserConnection';
+} from './tunneledBrowserConnection/index.ts';
 export {
   isExtensionInstalledAsync,
   EXTENSION_INSTALLED_FILENAME,
   getNormalizedErrorString
-} from './utilities';
-export { LaunchOptionsValidator, LAUNCH_OPTIONS_ALLOWLIST_FILENAME } from './LaunchOptionsValidator';
-export type { ILaunchOptionsAllowlist, ILaunchOptionsValidationResult } from './LaunchOptionsValidator';
+} from './utilities.ts';
+export { LaunchOptionsValidator, LAUNCH_OPTIONS_ALLOWLIST_FILENAME } from './LaunchOptionsValidator.ts';
+export type { ILaunchOptionsAllowlist, ILaunchOptionsValidationResult } from './LaunchOptionsValidator.ts';

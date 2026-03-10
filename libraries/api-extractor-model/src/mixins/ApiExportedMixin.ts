@@ -5,8 +5,8 @@
 
 import { DeclarationReference, Navigation } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 
-import type { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
-import type { DeserializerContext } from '../model/DeserializerContext';
+import type { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem.ts';
+import type { DeserializerContext } from '../model/DeserializerContext.ts';
 
 /**
  * Constructor options for {@link (IApiExportedMixinOptions:interface)}.

@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
-import { RushConfiguration } from '../../api/RushConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { PublishUtilities, type IChangeRequests } from '../PublishUtilities';
-import { ChangeFiles } from '../ChangeFiles';
+import { type IChangeInfo, ChangeType } from '../../api/ChangeManagement.ts';
+import { RushConfiguration } from '../../api/RushConfiguration.ts';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject.ts';
+import { PublishUtilities, type IChangeRequests } from '../PublishUtilities.ts';
+import { ChangeFiles } from '../ChangeFiles.ts';
 
 function generateChangeSnapshot(
   allPackages: ReadonlyMap<string, RushConfigurationProject>,

@@ -5,7 +5,7 @@ import type { Resolver } from 'webpack';
 
 import type { IPrefixMatch } from '@rushstack/lookup-by-path';
 
-import type { IResolveContext, WorkspaceLayoutCache } from './WorkspaceLayoutCache';
+import type { IResolveContext, WorkspaceLayoutCache } from './WorkspaceLayoutCache.ts';
 
 type ResolveRequest = Parameters<Resolver['hooks']['resolveStep']['call']>[1];
 

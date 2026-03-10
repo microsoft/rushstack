@@ -3,8 +3,8 @@
 
 import process from 'node:process';
 
-import { Npm } from '../Npm';
-import { Utilities } from '../Utilities';
+import { Npm } from '../Npm.ts';
+import { Utilities } from '../Utilities.ts';
 
 describe(Npm.name, () => {
   const packageName: string = '@microsoft/rush-lib-never';

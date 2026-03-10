@@ -7,8 +7,8 @@ import webpack = require('webpack');
 
 import { MessagePortMinifier } from '@rushstack/module-minifier';
 
-import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin';
-import '../OverrideWebpackIdentifierAllocation';
+import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin.ts';
+import '../OverrideWebpackIdentifierAllocation.ts';
 
 // Hack to support mkdirp on node 10
 process.umask = () => 0;

@@ -3,10 +3,10 @@
 
 import { NewlineKind, Text } from '@rushstack/node-core-library';
 
-import { Colorize } from '../Colorize';
-import { TerminalChunkKind } from '../ITerminalChunk';
-import { MockWritable } from '../MockWritable';
-import { TextRewriterTransform } from '../TextRewriterTransform';
+import { Colorize } from '../Colorize.ts';
+import { TerminalChunkKind } from '../ITerminalChunk.ts';
+import { MockWritable } from '../MockWritable.ts';
+import { TextRewriterTransform } from '../TextRewriterTransform.ts';
 
 describe(TextRewriterTransform.name, () => {
   it('should apply standard rewriters', () => {
