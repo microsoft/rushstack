@@ -271,7 +271,8 @@
     // TODO: Remove once Heft is 1.0.0
     "allowAny": ["@rushstack/heft"],
     "allowedVersions": {
-      "webpack": "^4 || ^5"
+      "webpack": "^4 || ^5",
+      "storybook": "*"
     }
   },
 

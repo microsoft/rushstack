@@ -27,7 +27,7 @@ export const metaFrameworks: Record<string, string> = {};
  * No-op stub for `sanitizeAddonName`.
  * @public
  */
-export function sanitizeAddonName(_name: string): string {
+export function sanitizeAddonName(): string {
   return '';
 }
 
@@ -36,10 +36,7 @@ export function sanitizeAddonName(_name: string): string {
  * Returns a minimal object to satisfy callers that expect a non-null result.
  * @public
  */
-export async function computeStorybookMetadata(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ..._args: any[]
-): Promise<Record<string, unknown>> {
+export async function computeStorybookMetadata(): Promise<Record<string, unknown>> {
   return {};
 }
 
@@ -48,10 +45,7 @@ export async function computeStorybookMetadata(
  * Returns a minimal object to satisfy callers that expect a non-null result.
  * @public
  */
-export async function getStorybookMetadata(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ..._args: any[]
-): Promise<Record<string, unknown>> {
+export async function getStorybookMetadata(): Promise<Record<string, unknown>> {
   return {};
 }
 
@@ -59,10 +53,7 @@ export async function getStorybookMetadata(
  * No-op stub for `telemetry`.
  * @public
  */
-export async function telemetry(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ..._args: any[]
-): Promise<void> {
+export async function telemetry(): Promise<void> {
   // no-op
 }
 
@@ -72,8 +63,7 @@ export async function telemetry(
  * No-op stub for `addToGlobalContext`.
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function addToGlobalContext(_key: string, _value: any): void {
+export function addToGlobalContext(): void {
   // no-op
 }
 
@@ -81,10 +71,7 @@ export function addToGlobalContext(_key: string, _value: any): void {
  * No-op stub for `getPrecedingUpgrade`.
  * @public
  */
-export async function getPrecedingUpgrade(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ..._args: any[]
-): Promise<undefined> {
+export async function getPrecedingUpgrade(): Promise<undefined> {
   return undefined;
 }
 
@@ -92,8 +79,7 @@ export async function getPrecedingUpgrade(
  * No-op stub for `oneWayHash`.
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function oneWayHash(_payload: any): string {
+export function oneWayHash(): string {
   return '';
 }
 
@@ -103,7 +89,7 @@ export function oneWayHash(_payload: any): string {
  * No-op stub for `cleanPaths`.
  * @public
  */
-export function cleanPaths(_str: string, _separator?: string): string {
+export function cleanPaths(): string {
   return '';
 }
 
@@ -111,7 +97,7 @@ export function cleanPaths(_str: string, _separator?: string): string {
  * No-op stub for `isExampleStoryId`.
  * @public
  */
-export function isExampleStoryId(_storyId: string): boolean {
+export function isExampleStoryId(): boolean {
   return false;
 }
 
@@ -119,7 +105,7 @@ export function isExampleStoryId(_storyId: string): boolean {
  * No-op stub for `removeAnsiEscapeCodes`.
  * @public
  */
-export function removeAnsiEscapeCodes(_input?: string): string {
+export function removeAnsiEscapeCodes(): string {
   return '';
 }
 
@@ -128,6 +114,6 @@ export function removeAnsiEscapeCodes(_input?: string): string {
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function sanitizeError(_error: Error, _pathSeparator?: string): any {
+export function sanitizeError(): any {
   return {};
 }

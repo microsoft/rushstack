@@ -21,15 +21,11 @@ const EXPECTED_V8_EXPORTS: Record<string, string> = {
   telemetry: 'function'
 };
 
+// Load the official module at the top level to avoid side-effect issues with Jest hooks
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const officialExports: Record<string, any> = require('@storybook/telemetry-8');
+
 describe('storybook-telemetry-stub (v8 compatibility)', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let officialExports: Record<string, any>;
-
-  beforeAll(() => {
-    // The aliased devDependency "@storybook/telemetry-8" resolves to @storybook/telemetry@8.x
-    officialExports = require('@storybook/telemetry-8');
-  });
-
   it('should export every name from @storybook/telemetry v8', () => {
     const officialNames: string[] = Object.keys(officialExports).sort();
     for (const name of officialNames) {
