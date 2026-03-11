@@ -51,10 +51,6 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
-      "name": "@storybook/telemetry",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@ungap/structured-clone",
       "allowedCategories": [ "libraries" ]
     },

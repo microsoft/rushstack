@@ -17,12 +17,8 @@ describe('storybook-telemetry-stub (v8 compatibility)', () => {
   });
 
   it('should match runtime types of the official v8 package', () => {
-    const officialRecord: Record<string, unknown> = officialExports;
-    const officialNames: readonly (keyof typeof stub)[] = Object.keys(
-      officialExports
-    ) as (keyof typeof stub)[];
-    for (const name of officialNames) {
-      expect(typeof stubRecord[name]).toBe(typeof officialRecord[name]);
+    for (const [name, value] of Object.entries(officialExports)) {
+      expect(typeof stubRecord[name]).toBe(typeof value);
     }
   });
 

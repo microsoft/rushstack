@@ -475,6 +475,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@storybook/telemetry",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@storybook/telemetry-7",
       "allowedCategories": [ "libraries" ]
     },
