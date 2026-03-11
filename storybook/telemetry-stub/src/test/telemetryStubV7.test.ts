@@ -2,23 +2,31 @@
 // See LICENSE in the project root for license information.
 
 import * as stub from '../storybook-telemetry-stub';
-import * as officialExports from '@storybook/telemetry-7';
 
 const stubRecord: Record<string, unknown> = stub;
 
+// Storybook 7 is out of support; hardcode the expected exports from @storybook/telemetry@~7.6.0
+const OFFICIAL_V7_EXPORTS: Record<string, string> = {
+  addToGlobalContext: 'function',
+  computeStorybookMetadata: 'function',
+  getPrecedingUpgrade: 'function',
+  getStorybookMetadata: 'function',
+  metaFrameworks: 'object',
+  oneWayHash: 'function',
+  sanitizeAddonName: 'function',
+  telemetry: 'function'
+};
+
 describe('storybook-telemetry-stub (v7 compatibility)', () => {
   it('should export every name from @storybook/telemetry v7', () => {
-    const officialNames: readonly (keyof typeof stub)[] = Object.keys(
-      officialExports
-    ) as (keyof typeof stub)[];
-    for (const name of officialNames) {
+    for (const name of Object.keys(OFFICIAL_V7_EXPORTS)) {
       expect(stub).toHaveProperty(name);
     }
   });
 
   it('should match runtime types of the official v7 package', () => {
-    for (const [name, value] of Object.entries(officialExports)) {
-      expect(typeof stubRecord[name]).toBe(typeof value);
+    for (const [name, expectedType] of Object.entries(OFFICIAL_V7_EXPORTS)) {
+      expect(typeof stubRecord[name]).toBe(expectedType);
     }
   });
 

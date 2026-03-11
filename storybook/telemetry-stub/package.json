@@ -16,7 +16,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@storybook/telemetry-7": "npm:@storybook/telemetry@~7.6.0",
     "@storybook/telemetry-8": "npm:@storybook/telemetry@~8.6.0",
     "@rushstack/heft": "workspace:*",
     "eslint": "~9.37.0",
