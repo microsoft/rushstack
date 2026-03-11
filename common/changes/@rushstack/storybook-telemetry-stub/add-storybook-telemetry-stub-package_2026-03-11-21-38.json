@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/storybook-telemetry-stub",
+      "comment": "Initial package creation: stub replacement for @storybook/telemetry",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/storybook-telemetry-stub"
+}
