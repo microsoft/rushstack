@@ -111,9 +111,9 @@ export function removeAnsiEscapeCodes(): string {
 
 /**
  * No-op stub for `sanitizeError`.
+ * Sanitization doesn't matter if we aren't exporting the data.
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function sanitizeError(): any {
-  return {};
+export function sanitizeError<T>(obj: T): T {
+  return obj;
 }

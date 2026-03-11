@@ -1,11 +1,11 @@
 {
   "name": "@rushstack/storybook-telemetry-stub",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "A stub replacement of @storybook/telemetry for environments that forbid outbound network connections",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "storybook/storybook-telemetry-stub"
+    "directory": "storybook/telemetry-stub"
   },
   "license": "MIT",
   "scripts": {
@@ -21,15 +21,6 @@
     "@rushstack/heft": "workspace:*",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
-  },
-  "exports": {
-    ".": {
-      "types": "./lib-dts/index.d.ts",
-      "node": "./lib-commonjs/index.js",
-      "import": "./lib-esm/index.js",
-      "require": "./lib-commonjs/index.js"
-    },
-    "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {

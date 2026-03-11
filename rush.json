@@ -1610,7 +1610,7 @@
     // "storybook" folder (alphabetical order)
     {
       "packageName": "@rushstack/storybook-telemetry-stub",
-      "projectFolder": "storybook/storybook-telemetry-stub",
+      "projectFolder": "storybook/telemetry-stub",
       "reviewCategory": "libraries",
       "shouldPublish": true
     }
