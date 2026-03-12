@@ -106,9 +106,18 @@
             ]
           },
           "weight": {
-            "description": "The number of concurrency units that this operation should take up. The maximum concurrency units is determined by the -p flag.",
-            "type": "integer",
-            "minimum": 0
+            "oneOf": [
+              {
+                "type": "string",
+                "pattern": "^[1-9][0-9]*(\\.\\d+)?%$",
+                "description": "The number of concurrency units that this operation should take up, as a percent of `os.availableParallelism()`. At runtime this value will be clamped to the range `[1, rushParallelism]`, where `rushParallelism` is the requested parallelism to the current Rush command. To have this operation consume no concurrency, use the number 0 instead of a string."
+              },
+              {
+                "description": "The number of concurrency units that this operation should take up. At runtime this value will be clamped to the range `[0, rushParallelism]`, where `rushParallelism` is the requested parallelism to the current Rush command.",
+                "type": "integer",
+                "minimum": 0
+              }
+            ]
           },
           "allowCobuildWithoutCache": {
             "type": "boolean",
