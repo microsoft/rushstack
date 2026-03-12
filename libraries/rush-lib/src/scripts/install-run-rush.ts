@@ -16,6 +16,7 @@ import type { ILogger } from '../utilities/npmrcUtilities';
 
 const PACKAGE_NAME: string = '@microsoft/rush';
 const RUSH_PREVIEW_VERSION: string = 'RUSH_PREVIEW_VERSION';
+const RUSH_QUIET_MODE: string = 'RUSH_QUIET_MODE';
 const INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE: 'INSTALL_RUN_RUSH_LOCKFILE_PATH' =
   'INSTALL_RUN_RUSH_LOCKFILE_PATH';
 
@@ -73,6 +74,14 @@ function _run(): void {
 
   let commandFound: boolean = false;
   let logger: ILogger = { info: console.log, error: console.error };
+
+  const quietModeEnvValue: string | undefined = process.env[RUSH_QUIET_MODE];
+  if (quietModeEnvValue === '1' || quietModeEnvValue === 'true') {
+    logger = {
+      info: () => {},
+      error: console.error
+    };
+  }
 
   for (const arg of packageBinArgs) {
     if (arg === '-q' || arg === '--quiet') {
