@@ -693,9 +693,9 @@ export class EnvironmentConfiguration {
    */
   public static reset(): void {
     EnvironmentConfiguration._rushTempFolderOverride = undefined;
-
     EnvironmentConfiguration._quietMode = false;
-
+    EnvironmentConfiguration._gitBinaryPath = undefined;
+    EnvironmentConfiguration._tarBinaryPath = undefined;
     EnvironmentConfiguration._hasBeenValidated = false;
   }
 

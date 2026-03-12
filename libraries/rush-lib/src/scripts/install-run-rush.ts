@@ -73,15 +73,9 @@ function _run(): void {
   }
 
   let commandFound: boolean = false;
-  let logger: ILogger = { info: console.log, error: console.error };
 
   const quietModeEnvValue: string | undefined = process.env[RUSH_QUIET_MODE];
-  if (quietModeEnvValue === '1' || quietModeEnvValue === 'true') {
-    logger = {
-      info: () => {},
-      error: console.error
-    };
-  }
+  let quiet: boolean = quietModeEnvValue === '1' || quietModeEnvValue === 'true';
 
   for (const arg of packageBinArgs) {
     if (arg === '-q' || arg === '--quiet') {
@@ -91,10 +85,7 @@ function _run(): void {
       // To maintain the same user experience, the install-run* scripts pass along this
       // flag but also use it to suppress any diagnostic information normally printed
       // to stdout.
-      logger = {
-        info: () => {},
-        error: console.error
-      };
+      quiet = true;
     } else if (!arg.startsWith('-') || arg === '-h' || arg === '--help') {
       // We either found something that looks like a command (i.e. - doesn't start with a "-"),
       // or we found the -h/--help flag, which can be run without a command
@@ -113,6 +104,10 @@ function _run(): void {
     }
     process.exit(1);
   }
+
+  const logger: ILogger = quiet
+    ? { info: () => {}, error: console.error }
+    : { info: console.log, error: console.error };
 
   runWithErrorAndStatusCode(logger, () => {
     const version: string = _getRushVersion(logger);
