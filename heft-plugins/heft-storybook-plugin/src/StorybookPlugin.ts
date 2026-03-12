@@ -158,6 +158,12 @@ export interface IStorybookPluginOptions {
    * Specifies whether to capture the webpack stats for the storybook build by adding the `--webpack-stats-json` CLI flag.
    */
   captureWebpackStats?: boolean;
+  /**
+   * Specifies whether to run storybook in quiet mode (--quiet).
+   *
+   * @defaultValue `true`
+   */
+  quiet?: boolean;
 }
 
 interface IRunStorybookOptions extends IPrepareStorybookOptions {
@@ -487,7 +493,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       storybookArgs.push('--webpack-stats-json');
     }
 
-    if (!verbose) {
+    if (options.quiet !== false && !verbose) {
       storybookArgs.push('--quiet');
     }
 
