@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.170.0",
+      "tag": "@microsoft/rush_v5.170.0",
+      "date": "Thu, 12 Mar 2026 09:15:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add custom endpoint support via a `storageEndpoint` configuration option for the Azure Storage build cache plugin."
+          },
+          {
+            "comment": "Fix autoinstaller plugin loader behavior."
+          },
+          {
+            "comment": "Support percentage weight in operationSettings in rush-project.json file."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.169.3",
       "tag": "@microsoft/rush_v5.169.3",
       "date": "Mon, 23 Feb 2026 00:42:39 GMT",

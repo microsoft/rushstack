@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 23 Feb 2026 00:42:39 GMT and should not be manually modified.
+This log was last generated on Thu, 12 Mar 2026 09:15:52 GMT and should not be manually modified.
+
+## 5.170.0
+Thu, 12 Mar 2026 09:15:52 GMT
+
+### Updates
+
+- Add custom endpoint support via a `storageEndpoint` configuration option for the Azure Storage build cache plugin.
+- Fix autoinstaller plugin loader behavior.
+- Support percentage weight in operationSettings in rush-project.json file.
 
 ## 5.169.3
 Mon, 23 Feb 2026 00:42:39 GMT
