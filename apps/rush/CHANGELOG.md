@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 12 Mar 2026 09:15:52 GMT and should not be manually modified.
+This log was last generated on Thu, 12 Mar 2026 22:33:34 GMT and should not be manually modified.
+
+## 5.170.1
+Thu, 12 Mar 2026 22:33:34 GMT
+
+### Updates
+
+- Fix a recent regression that sometimes produced ENOENT errors when installing autoinstallers
 
 ## 5.170.0
 Thu, 12 Mar 2026 09:15:52 GMT

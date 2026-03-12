@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.170.1",
+      "tag": "@microsoft/rush_v5.170.1",
+      "date": "Thu, 12 Mar 2026 22:33:34 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a recent regression that sometimes produced ENOENT errors when installing autoinstallers"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.170.0",
       "tag": "@microsoft/rush_v5.170.0",
       "date": "Thu, 12 Mar 2026 09:15:52 GMT",
