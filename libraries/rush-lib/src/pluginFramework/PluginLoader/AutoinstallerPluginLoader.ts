@@ -73,7 +73,8 @@ export class AutoinstallerPluginLoader extends PluginLoaderBase<IRushPluginConfi
     // Use read+write instead of copy to ensure line endings are normalized
     const manifestContent: string = FileSystem.readFile(manifestPath);
     FileSystem.writeFile(destinationManifestPath, manifestContent, {
-      convertLineEndings: NewlineKind.Lf
+      convertLineEndings: NewlineKind.Lf,
+      ensureFolderExists: true
     });
     // Make permission consistent since it will be committed to Git
     FileSystem.changePosixModeBits(
@@ -105,7 +106,8 @@ export class AutoinstallerPluginLoader extends PluginLoaderBase<IRushPluginConfi
       // Use read+write instead of copy to ensure line endings are normalized
       const commandLineContent: string = FileSystem.readFile(commandLineJsonFullFilePath);
       FileSystem.writeFile(destinationCommandLineJsonFilePath, commandLineContent, {
-        convertLineEndings: NewlineKind.Lf
+        convertLineEndings: NewlineKind.Lf,
+        ensureFolderExists: true
       });
       // Make permission consistent since it will be committed to Git
       FileSystem.changePosixModeBits(
