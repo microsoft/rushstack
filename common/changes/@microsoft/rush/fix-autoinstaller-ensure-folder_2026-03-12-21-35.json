@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix a recent regression that sometimes produced ENOENT errors when installing autoinstallers",
+      "type": "patch",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "rushbot@users.noreply.github.com"
+}
