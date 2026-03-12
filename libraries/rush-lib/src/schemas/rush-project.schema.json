@@ -113,7 +113,7 @@
                 "description": "The number of concurrency units that this operation should take up, as a percent of `os.availableParallelism()`. At runtime this value will be clamped to the range `[1, rushParallelism]`, where `rushParallelism` is the requested parallelism to the current Rush command. To have this operation consume no concurrency, use the literal value `0`."
               },
               {
-                "description": "The number of concurrency units that this operation should take up. The maximum concurrency units is determined by the -p flag.",
+                "description": "The number of concurrency units that this operation should take up. At runtime this value will be clamped to the range `[0, rushParallelism]`, where `rushParallelism` is the requested parallelism to the current Rush command.",
                 "type": "integer",
                 "minimum": 0
               }
