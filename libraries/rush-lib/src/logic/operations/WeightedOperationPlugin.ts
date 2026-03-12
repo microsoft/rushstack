@@ -48,13 +48,13 @@ function weightOperations(
    */
   function _tryConvertPercentWeight(weight: `${number}%`): number {
     if (!percentageRegExp.test(weight)) {
-      throw new Error(`Expected a percentage string like "100%".`);
+      throw new Error(`Because the JSON value is a string, expecting a percentage like "23.4%".`);
     }
 
     const percentValue: number = parseFloat(weight.slice(0, -1));
 
     // Use as much CPU as possible, so we round down the weight here
-    return Math.floor((percentValue / 100) * availableParallelism);
+    return Math.max(1, Math.floor((percentValue / 100) * availableParallelism));
   }
 
   for (const [operation, record] of operations) {
