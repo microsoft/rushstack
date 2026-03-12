@@ -5,39 +5,67 @@ import * as os from 'node:os';
 
 import { IS_WINDOWS } from '../../utilities/executionUtilities';
 
+export function getNumberOfCores(): number {
+  return os.availableParallelism?.() ?? os.cpus().length;
+}
+
+/**
+ * Since the JSON value is a string, it must be a percentage like "50%",
+ * which we convert to a number based on the available parallelism.
+ * For example, if the available parallelism (not the -p flag) is 8 and the weight is "50%",
+ * then the resulting weight will be 4.
+ *
+ * @param weight
+ * @returns
+ */
+export function parseParallelismPercent(weight: string, numberOfCores: number = getNumberOfCores()): number {
+  const percentageRegExp: RegExp = /^\d+(\.\d+)?%$/;
+
+  if (!percentageRegExp.test(weight)) {
+    throw new Error(`Expecting a percentage string like "12%" or "34.56%".`);
+  }
+
+  const percentValue: number = parseFloat(weight.slice(0, -1));
+
+  if (percentValue <= 0) {
+    throw new Error(`Invalid percentage value of "${percentValue}": value must be greater than zero`);
+  }
+
+  if (percentValue > 100) {
+    throw new Error(`Invalid percentage value of "${percentValue}": value must not exceed 100%`);
+  }
+
+  // Use as much CPU as possible, so we round down the weight here
+  return Math.max(1, Math.floor((percentValue / 100) * numberOfCores));
+}
+
 /**
  * Parses a command line specification for desired parallelism.
  * Factored out to enable unit tests
  */
 export function parseParallelism(
   rawParallelism: string | undefined,
-  numberOfCores: number = os.availableParallelism?.() ?? os.cpus().length
+  numberOfCores: number = getNumberOfCores()
 ): number {
   if (rawParallelism) {
+    rawParallelism = rawParallelism.trim();
+
     if (rawParallelism === 'max') {
       return numberOfCores;
-    } else {
-      const parallelismAsNumber: number = Number(rawParallelism);
-
-      if (typeof rawParallelism === 'string' && rawParallelism.trim().endsWith('%')) {
-        const parsedPercentage: number = Number(rawParallelism.trim().replace(/\%$/, ''));
-
-        if (parsedPercentage <= 0 || parsedPercentage > 100) {
-          throw new Error(
-            `Invalid percentage value of '${rawParallelism}', value cannot be less than '0%' or more than '100%'`
-          );
-        }
-
-        const workers: number = Math.floor((parsedPercentage / 100) * numberOfCores);
-        return Math.max(workers, 1);
-      } else if (!isNaN(parallelismAsNumber)) {
-        return Math.max(parallelismAsNumber, 1);
-      } else {
-        throw new Error(
-          `Invalid parallelism value of '${rawParallelism}', expected a number, a percentage, or 'max'`
-        );
-      }
     }
+
+    if (rawParallelism.endsWith('%')) {
+      return parseParallelismPercent(rawParallelism, numberOfCores);
+    }
+
+    const parallelismAsNumber: number = Number(rawParallelism);
+    if (!isNaN(parallelismAsNumber)) {
+      return Math.max(parallelismAsNumber, 1);
+    }
+
+    throw new Error(
+      `Invalid parallelism value of "${rawParallelism}": expected a number, a percentage string, or "max"`
+    );
   } else {
     // If an explicit parallelism number wasn't provided, then choose a sensible
     // default.

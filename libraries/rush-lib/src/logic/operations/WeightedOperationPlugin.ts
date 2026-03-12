@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import os from 'node:os';
-
 import { Async } from '@rushstack/node-core-library';
 
 import type { Operation } from './Operation';
@@ -14,6 +12,7 @@ import type {
 import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
+import { parseParallelismPercent } from '../../cli/parsing/ParseParallelism';
 
 const PLUGIN_NAME: 'WeightedOperationPlugin' = 'WeightedOperationPlugin';
 
@@ -33,29 +32,6 @@ function weightOperations(
   context: ICreateOperationsContext
 ): Map<Operation, IOperationExecutionResult> {
   const { projectConfigurations } = context;
-  const availableParallelism: number = os.availableParallelism();
-
-  const percentageRegExp: RegExp = /^[1-9][0-9]*(\.\d+)?%$/;
-
-  /**
-   * Since the JSON value is a string, it must be a percentage like "50%",
-   * which we convert to a number based on the available parallelism.
-   * For example, if the available parallelism (not the -p flag) is 8 and the weight is "50%",
-   * then the resulting weight will be 4.
-   *
-   * @param weight
-   * @returns
-   */
-  function _tryConvertPercentWeight(weight: `${number}%`): number {
-    if (!percentageRegExp.test(weight)) {
-      throw new Error(`Because the JSON value is a string, expecting a percentage like "23.4%".`);
-    }
-
-    const percentValue: number = parseFloat(weight.slice(0, -1));
-
-    // Use as much CPU as possible, so we round down the weight here
-    return Math.max(1, Math.floor((percentValue / 100) * availableParallelism));
-  }
 
   for (const [operation, record] of operations) {
     const { runner } = record as OperationExecutionRecord;
@@ -71,7 +47,7 @@ function weightOperations(
           operation.weight = operationSettings.weight;
         } else if (typeof operationSettings.weight === 'string') {
           try {
-            operation.weight = _tryConvertPercentWeight(operationSettings.weight);
+            operation.weight = parseParallelismPercent(operationSettings.weight);
           } catch (error) {
             throw new Error(
               `${operation.name} (invalid weight: ${JSON.stringify(operationSettings.weight)}) ${(error as Error).message}`
