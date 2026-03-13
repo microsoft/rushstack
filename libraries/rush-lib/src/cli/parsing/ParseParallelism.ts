@@ -5,8 +5,11 @@ import * as os from 'node:os';
 
 import { IS_WINDOWS } from '../../utilities/executionUtilities';
 
+let _maxParallelism: number = 0;
+
 export function getNumberOfCores(): number {
-  return os.availableParallelism?.() ?? os.cpus().length;
+  // Ensure this function caches the result (which is expected not to change while the process is loaded), but is expensive to obtain.
+  return _maxParallelism || (_maxParallelism = os.availableParallelism?.() ?? os.cpus().length);
 }
 
 /**
@@ -16,7 +19,7 @@ export function getNumberOfCores(): number {
  * then the resulting weight will be 4.
  *
  * @param weight
- * @returns
+ * @returns the final weight in integer concurrency units in the range [1, numberOfCores]
  */
 export function parseParallelismPercent(weight: string, numberOfCores: number = getNumberOfCores()): number {
   const percentageRegExp: RegExp = /^\d+(\.\d+)?%$/;

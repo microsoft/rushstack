@@ -88,7 +88,7 @@
    * of `_phase:<name>` if they exist. The created child process will be provided with an IPC channel and expected to persist
    * across invocations.
    */
-  // "useIPCScriptsInWatchMode": true,
+  "useIPCScriptsInWatchMode": true,
 
   /**
    * (UNDER DEVELOPMENT) The Rush alerts feature provides a way to send announcements to engineers
