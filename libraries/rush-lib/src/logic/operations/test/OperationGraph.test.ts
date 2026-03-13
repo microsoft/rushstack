@@ -38,6 +38,7 @@ jest.mock('../ProjectLogWritable', () => {
 import { type ITerminal, Terminal } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { MockWritable, PrintUtilities } from '@rushstack/terminal';
+import { Async } from '@rushstack/node-core-library';
 
 import type { IPhase } from '../../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
@@ -259,6 +260,90 @@ describe('OperationGraph', () => {
       expect(result.operationResults.size).toEqual(2);
       expect(result.operationResults.get(failingOperation)?.status).toEqual(OperationStatus.Failure);
       expect(result.operationResults.get(blockedOperation)?.status).toEqual(OperationStatus.Blocked);
+    });
+  });
+
+  describe('Concurrency', () => {
+    it('runs independent operations concurrently when parallelism allows', async () => {
+      let concurrency: number = 0;
+      let maxConcurrency: number = 0;
+
+      const trackingRun = async (): Promise<OperationStatus> => {
+        ++concurrency;
+        await Async.sleepAsync(0);
+        if (concurrency > maxConcurrency) {
+          maxConcurrency = concurrency;
+        }
+        --concurrency;
+        return OperationStatus.Success;
+      };
+
+      const alpha = new Operation({
+        runner: new MockOperationRunner('alpha', trackingRun),
+        phase: mockPhase,
+        project: getOrCreateProject('alpha'),
+        logFilenameIdentifier: 'alpha'
+      });
+      const beta = new Operation({
+        runner: new MockOperationRunner('beta', trackingRun),
+        phase: mockPhase,
+        project: getOrCreateProject('beta'),
+        logFilenameIdentifier: 'beta'
+      });
+
+      const graph: OperationGraph = new OperationGraph(new Set([alpha, beta]), {
+        quietMode: false,
+        debugMode: false,
+        parallelism: 2,
+        allowOversubscription: true,
+        destinations: [mockWritable],
+        abortController: new AbortController()
+      });
+
+      const result: IExecutionResult = await graph.executeAsync({});
+      expect(result.status).toEqual(OperationStatus.Success);
+      expect(maxConcurrency).toBe(2);
+    });
+
+    it('serializes independent operations when parallelism is 1', async () => {
+      let concurrency: number = 0;
+      let maxConcurrency: number = 0;
+
+      const trackingRun = async (): Promise<OperationStatus> => {
+        ++concurrency;
+        await Async.sleepAsync(0);
+        if (concurrency > maxConcurrency) {
+          maxConcurrency = concurrency;
+        }
+        --concurrency;
+        return OperationStatus.Success;
+      };
+
+      const alpha = new Operation({
+        runner: new MockOperationRunner('alpha-seq', trackingRun),
+        phase: mockPhase,
+        project: getOrCreateProject('alpha-seq'),
+        logFilenameIdentifier: 'alpha-seq'
+      });
+      const beta = new Operation({
+        runner: new MockOperationRunner('beta-seq', trackingRun),
+        phase: mockPhase,
+        project: getOrCreateProject('beta-seq'),
+        logFilenameIdentifier: 'beta-seq'
+      });
+
+      const graph: OperationGraph = new OperationGraph(new Set([alpha, beta]), {
+        quietMode: false,
+        debugMode: false,
+        parallelism: 1,
+        allowOversubscription: true,
+        destinations: [mockWritable],
+        abortController: new AbortController()
+      });
+
+      const result: IExecutionResult = await graph.executeAsync({});
+      expect(result.status).toEqual(OperationStatus.Success);
+      expect(maxConcurrency).toBe(1);
     });
   });
 

@@ -209,18 +209,14 @@ describe(ShellOperationRunnerPlugin.name, () => {
 
     const fakeCreateOperationsContext: Pick<
       ICreateOperationsContext,
-      | 'phaseOriginal'
       | 'phaseSelection'
       | 'projectSelection'
-      | 'projectsInUnknownState'
       | 'projectConfigurations'
       | 'rushConfiguration'
       | 'customParameters'
     > = {
-      phaseOriginal: buildCommand.phases,
       phaseSelection: buildCommand.phases,
       projectSelection: new Set(rushConfiguration.projects),
-      projectsInUnknownState: new Set(rushConfiguration.projects),
       projectConfigurations,
       rushConfiguration,
       customParameters: customParametersForContext
@@ -233,9 +229,9 @@ describe(ShellOperationRunnerPlugin.name, () => {
     // Applies the Shell Operation Runner to selected operations
     new ShellOperationRunnerPlugin().apply(hooks);
 
-    const operations: Set<Operation> = await hooks.createOperations.promise(
+    const operations: Set<Operation> = await hooks.createOperationsAsync.promise(
       new Set(),
-      fakeCreateOperationsContext as ICreateOperationsContext
+      fakeCreateOperationsContext as unknown as ICreateOperationsContext
     );
 
     // Verify that project 'a' has the --production parameter filtered out
