@@ -338,6 +338,10 @@ export class OperationGraph implements IOperationGraph {
     return this._status;
   }
 
+  public get terminalDestinations(): ReadonlySet<TerminalWritable> {
+    return this._terminalSplitter.destinations;
+  }
+
   private _setStatus(newStatus: OperationStatus): void {
     if (this._status !== newStatus) {
       this._status = newStatus;
