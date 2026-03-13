@@ -684,7 +684,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     options: IExecuteOperationsOptions,
     iterationOptions: IOperationGraphIterationOptions
   ): Promise<void> {
-    const { graph, ignoreHooks, stopwatch, isWatch, terminal } = options;
+    const { graph, ignoreHooks, stopwatch, terminal } = options;
 
     let success: boolean = false;
     let result: IExecutionResult | undefined;
@@ -734,7 +734,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       measureFn(`${PERF_PREFIX}:doAfterTask`, () => this._doAfterTask());
     }
 
-    if (!success && !isWatch) {
+    if (!success) {
       throw new AlreadyReportedError();
     }
   }
