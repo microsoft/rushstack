@@ -77,16 +77,10 @@ describe(ShellOperationRunnerPlugin.name, () => {
 
     const fakeCreateOperationsContext: Pick<
       ICreateOperationsContext,
-      | 'phaseOriginal'
-      | 'phaseSelection'
-      | 'projectSelection'
-      | 'projectsInUnknownState'
-      | 'projectConfigurations'
+      'phaseSelection' | 'projectSelection' | 'projectConfigurations'
     > = {
-      phaseOriginal: echoCommand.phases,
       phaseSelection: echoCommand.phases,
       projectSelection: new Set(rushConfiguration.projects),
-      projectsInUnknownState: new Set(rushConfiguration.projects),
       projectConfigurations: new Map()
     };
 
@@ -97,7 +91,7 @@ describe(ShellOperationRunnerPlugin.name, () => {
     // Applies the Shell Operation Runner to selected operations
     new ShellOperationRunnerPlugin().apply(hooks);
 
-    const operations: Set<Operation> = await hooks.createOperations.promise(
+    const operations: Set<Operation> = await hooks.createOperationsAsync.promise(
       new Set(),
       fakeCreateOperationsContext as ICreateOperationsContext
     );
@@ -125,16 +119,10 @@ describe(ShellOperationRunnerPlugin.name, () => {
 
     const fakeCreateOperationsContext: Pick<
       ICreateOperationsContext,
-      | 'phaseOriginal'
-      | 'phaseSelection'
-      | 'projectSelection'
-      | 'projectsInUnknownState'
-      | 'projectConfigurations'
+      'phaseSelection' | 'projectSelection' | 'projectConfigurations'
     > = {
-      phaseOriginal: echoCommand.phases,
       phaseSelection: echoCommand.phases,
       projectSelection: new Set(rushConfiguration.projects),
-      projectsInUnknownState: new Set(rushConfiguration.projects),
       projectConfigurations: new Map()
     };
 
@@ -145,7 +133,7 @@ describe(ShellOperationRunnerPlugin.name, () => {
     // Applies the Shell Operation Runner to selected operations
     new ShellOperationRunnerPlugin().apply(hooks);
 
-    const operations: Set<Operation> = await hooks.createOperations.promise(
+    const operations: Set<Operation> = await hooks.createOperationsAsync.promise(
       new Set(),
       fakeCreateOperationsContext as ICreateOperationsContext
     );
