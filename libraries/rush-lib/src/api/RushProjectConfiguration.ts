@@ -14,6 +14,7 @@ import schemaJson from '../schemas/rush-project.schema.json';
 import anythingSchemaJson from '../schemas/anything.schema.json';
 import { HotlinkManager } from '../utilities/HotlinkManager';
 import type { RushConfiguration } from './RushConfiguration';
+import { parseParallelismPercent } from '../cli/parsing/ParseParallelism';
 
 /**
  * Describes the file structure for the `<project root>/config/rush-project.json` config file.
