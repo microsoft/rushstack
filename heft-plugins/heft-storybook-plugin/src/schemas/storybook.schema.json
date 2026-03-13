@@ -37,6 +37,11 @@
       "title": "Specifies whether to capture the webpack stats for storybook build.",
       "description": "If this is true, then it will capture the webpack stats for storybook build. Defaults to false.",
       "type": "boolean"
+    },
+    "disableTelemetry": {
+      "title": "Specifies whether to disable Storybook telemetry.",
+      "description": "If true, sets the STORYBOOK_DISABLE_TELEMETRY=1 environment variable when invoking the Storybook subprocess, which disables Storybook's telemetry data collection. Defaults to false.",
+      "type": "boolean"
     }
   }
 }
