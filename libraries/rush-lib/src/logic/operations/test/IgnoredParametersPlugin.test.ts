@@ -17,6 +17,9 @@ import {
 } from '../IgnoredParametersPlugin';
 import {
   type ICreateOperationsContext,
+  type IOperationGraph,
+  type IOperationGraphContext,
+  OperationGraphHooks,
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
 import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
@@ -61,17 +64,10 @@ describe(IgnoredParametersPlugin.name, () => {
 
     const fakeCreateOperationsContext: Pick<
       ICreateOperationsContext,
-      | 'phaseOriginal'
-      | 'phaseSelection'
-      | 'projectSelection'
-      | 'projectsInUnknownState'
-      | 'projectConfigurations'
-      | 'rushConfiguration'
+      'phaseSelection' | 'projectSelection' | 'projectConfigurations' | 'rushConfiguration'
     > = {
-      phaseOriginal: buildCommand.phases,
       phaseSelection: buildCommand.phases,
       projectSelection: new Set(rushConfiguration.projects),
-      projectsInUnknownState: new Set(rushConfiguration.projects),
       projectConfigurations,
       rushConfiguration
     };
@@ -83,9 +79,17 @@ describe(IgnoredParametersPlugin.name, () => {
     new ShellOperationRunnerPlugin().apply(hooks);
     new IgnoredParametersPlugin().apply(hooks);
 
-    const operations: Set<Operation> = await hooks.createOperations.promise(
+    const operations: Set<Operation> = await hooks.createOperationsAsync.promise(
       new Set(),
-      fakeCreateOperationsContext as ICreateOperationsContext
+      fakeCreateOperationsContext as unknown as ICreateOperationsContext
+    );
+
+    // Set up a mock graph and invoke onGraphCreatedAsync so the plugin registers its graph hooks
+    const graphHooks: OperationGraphHooks = new OperationGraphHooks();
+    const fakeGraph: IOperationGraph = { hooks: graphHooks } as unknown as IOperationGraph;
+    await hooks.onGraphCreatedAsync.promise(
+      fakeGraph,
+      fakeCreateOperationsContext as unknown as IOperationGraphContext
     );
 
     // Test project 'a' which has parameterNamesToIgnore: ["--production"]
@@ -96,7 +100,7 @@ describe(IgnoredParametersPlugin.name, () => {
     const mockRecordA = createMockRecord(operationA!);
 
     // Call the hook to get the environment
-    const envA: IEnvironment = hooks.createEnvironmentForOperation.call({ ...process.env }, mockRecordA);
+    const envA: IEnvironment = graphHooks.createEnvironmentForOperation.call({ ...process.env }, mockRecordA);
 
     // Verify the environment variable is set correctly for project 'a'
     expect(envA[RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR]).toBe('["--production"]');
@@ -107,7 +111,7 @@ describe(IgnoredParametersPlugin.name, () => {
 
     const mockRecordB = createMockRecord(operationB!);
 
-    const envB: IEnvironment = hooks.createEnvironmentForOperation.call({ ...process.env }, mockRecordB);
+    const envB: IEnvironment = graphHooks.createEnvironmentForOperation.call({ ...process.env }, mockRecordB);
 
     // Verify the environment variable is set correctly for project 'b'
     expect(envB[RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR]).toBe(
@@ -132,17 +136,10 @@ describe(IgnoredParametersPlugin.name, () => {
 
     const fakeCreateOperationsContext: Pick<
       ICreateOperationsContext,
-      | 'phaseOriginal'
-      | 'phaseSelection'
-      | 'projectSelection'
-      | 'projectsInUnknownState'
-      | 'projectConfigurations'
-      | 'rushConfiguration'
+      'phaseSelection' | 'projectSelection' | 'projectConfigurations' | 'rushConfiguration'
     > = {
-      phaseOriginal: echoCommand.phases,
       phaseSelection: echoCommand.phases,
       projectSelection: new Set(rushConfiguration.projects),
-      projectsInUnknownState: new Set(rushConfiguration.projects),
       projectConfigurations: new Map(),
       rushConfiguration
     };
@@ -154,9 +151,17 @@ describe(IgnoredParametersPlugin.name, () => {
     new ShellOperationRunnerPlugin().apply(hooks);
     new IgnoredParametersPlugin().apply(hooks);
 
-    const operations: Set<Operation> = await hooks.createOperations.promise(
+    const operations: Set<Operation> = await hooks.createOperationsAsync.promise(
       new Set(),
-      fakeCreateOperationsContext as ICreateOperationsContext
+      fakeCreateOperationsContext as unknown as ICreateOperationsContext
+    );
+
+    // Set up a mock graph and invoke onGraphCreatedAsync so the plugin registers its graph hooks
+    const graphHooks: OperationGraphHooks = new OperationGraphHooks();
+    const fakeGraph: IOperationGraph = { hooks: graphHooks } as unknown as IOperationGraph;
+    await hooks.onGraphCreatedAsync.promise(
+      fakeGraph,
+      fakeCreateOperationsContext as unknown as IOperationGraphContext
     );
 
     // Get any operation
@@ -165,7 +170,7 @@ describe(IgnoredParametersPlugin.name, () => {
 
     const mockRecord = createMockRecord(operation);
 
-    const env: IEnvironment = hooks.createEnvironmentForOperation.call({ ...process.env }, mockRecord);
+    const env: IEnvironment = graphHooks.createEnvironmentForOperation.call({ ...process.env }, mockRecord);
 
     // Verify the environment variable is not set
     expect(env[RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR]).toBeUndefined();
