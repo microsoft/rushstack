@@ -121,15 +121,15 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           iterationOptions: IOperationGraphIterationOptions
         ): undefined => {
           const { inputsSnapshot } = iterationOptions;
-          const { isIncrementalBuildAllowed, projectConfigurations } = context;
-
-          const isInitial: boolean = graph.lastExecutionResults.size === 0;
 
           if (!inputsSnapshot) {
             throw new Error(
               `Build cache is only supported if running in a Git repository. Either disable the build cache or run Rush in a Git repository.`
             );
           }
+
+          const { isIncrementalBuildAllowed, projectConfigurations } = context;
+          const { cacheWriteEnabled } = buildCacheConfiguration;
 
           const disjointSet: DisjointSet<Operation> | undefined = cobuildConfiguration?.cobuildFeatureEnabled
             ? new DisjointSet()
@@ -171,7 +171,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             const buildCacheContext: IOperationBuildCacheContext = {
               // Supports cache writes by default for initial operations.
               // Don't write during watch runs for performance reasons (and to avoid flooding the cache)
-              isCacheWriteAllowed: isInitial,
+              isCacheWriteAllowed: cacheWriteEnabled,
               isCacheReadAllowed: isIncrementalBuildAllowed,
               operationBuildCache: undefined,
               outputFolderNames,
