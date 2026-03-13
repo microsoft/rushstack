@@ -181,6 +181,11 @@ export interface IOperationGraph {
   readonly status: OperationStatus;
 
   /**
+   * The current set of terminal destinations.
+   */
+  readonly terminalDestinations: ReadonlySet<TerminalWritable>;
+
+  /**
    * True if there is a scheduled (but not yet executing) iteration.
    * This will be false while an iteration is actively executing, or when no work is scheduled.
    */
