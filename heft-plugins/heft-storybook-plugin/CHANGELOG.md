@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Mon, 09 Mar 2026 15:14:08 GMT and should not be manually modified.
+This log was last generated on Sat, 14 Mar 2026 00:13:48 GMT and should not be manually modified.
+
+## 1.4.0
+Sat, 14 Mar 2026 00:13:47 GMT
+
+### Minor changes
+
+- Add `disableTelemetry` option to set STORYBOOK_DISABLE_TELEMETRY=1 when invoking Storybook; always set COREPACK_ENABLE_AUTO_PIN=0 in the subprocess environment
 
 ## 1.3.7
 Mon, 09 Mar 2026 15:14:08 GMT
