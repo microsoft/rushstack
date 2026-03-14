@@ -23,6 +23,7 @@ import type {
 } from '../logic/operations/IOperationExecutionResult';
 import type { CobuildConfiguration } from '../api/CobuildConfiguration';
 import type { RushProjectConfiguration } from '../api/RushProjectConfiguration';
+import type { Parallelism } from '../logic/operations/ParseParallelism';
 import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner';
 import type { ITelemetryData } from '../logic/Telemetry';
 import type { OperationStatus } from '../logic/operations/OperationStatus';
@@ -80,7 +81,7 @@ export interface ICreateOperationsContext {
   /**
    * The currently configured maximum parallelism for the command.
    */
-  readonly parallelism: number;
+  readonly parallelism: Parallelism;
   /**
    * The set of phases selected for execution.
    */
@@ -145,14 +146,23 @@ export interface IOperationGraph {
   readonly operations: ReadonlySet<Operation>;
 
   /**
-   * The most recent set of operation execution results, if any.
+   * A map from each `Operation` in the graph to the result of its most recent actual execution,
+   * regardless of which iteration of the graph that execution occurred in.
+   * Empty until at least one operation has completed execution.
+   * Only statuses that represent a completed execution (e.g. `Success`, `Failure`,
+   * `SuccessWithWarning`) are stored here. Statuses such as `Skipped` or `Aborted` —
+   * which indicate that an operation did not actually run — do not update this map.
+   * An entry with status `Ready` indicates that the operation is considered stale and
+   * has been queued to run again.
    */
   readonly lastExecutionResults: ReadonlyMap<Operation, IOperationExecutionResult>;
 
   /**
-   * The maximum allowed parallelism for this execution manager.
+   * The maximum allowed parallelism for this operation graph.
+   * Reads as a concrete integer. Accepts a `Parallelism` value and coerces it on write.
    */
-  parallelism: number;
+  get parallelism(): number;
+  set parallelism(value: Parallelism);
 
   /**
    * If additional debug information should be printed during execution.

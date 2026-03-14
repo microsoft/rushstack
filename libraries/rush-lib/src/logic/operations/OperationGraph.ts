@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import os from 'node:os';
-
 import {
   type TerminalWritable,
   TextRewriterTransform,
@@ -31,6 +29,7 @@ import {
   type IOperationGraphIterationOptions,
   OperationGraphHooks
 } from '../../pluginFramework/PhasedCommandHooks';
+import { type Parallelism, coerceParallelism, getNumberOfCores } from './ParseParallelism';
 import { measureAsyncFn, measureFn } from '../../utilities/performance';
 import type { ITelemetryData, ITelemetryOperationResult } from '../Telemetry';
 
@@ -44,10 +43,10 @@ export interface IOperationGraphTelemetry {
 export interface IOperationGraphOptions {
   quietMode: boolean;
   debugMode: boolean;
-  parallelism: number;
+  parallelism: Parallelism;
   allowOversubscription: boolean;
   destinations: Iterable<TerminalWritable>;
-  /** Optional maximum allowed parallelism. Defaults to os.availableParallelism(). */
+  /** Optional maximum allowed parallelism. Defaults to `getNumberOfCores()`. */
   maxParallelism?: number;
 
   /**
@@ -161,8 +160,8 @@ export class OperationGraph implements IOperationGraph {
 
   public constructor(operations: Set<Operation>, options: IOperationGraphOptions) {
     this.operations = operations;
-    options.maxParallelism ??= os.availableParallelism();
-    options.parallelism = Math.floor(Math.max(1, Math.min(options.parallelism, options.maxParallelism!)));
+    options.maxParallelism ??= getNumberOfCores();
+    options.parallelism = coerceParallelism(options.parallelism, options.maxParallelism!, 1);
     this._options = options;
     this._terminalSplitter = new SplitterTransform({
       destinations: options.destinations
@@ -183,7 +182,7 @@ export class OperationGraph implements IOperationGraph {
   }
 
   /**
-   * {@inheritDoc IOperationExecutionManager.setEnabledStates}
+   * {@inheritDoc IOperationGraph.setEnabledStates}
    */
   public setEnabledStates(
     operations: Iterable<Operation>,
@@ -273,13 +272,14 @@ export class OperationGraph implements IOperationGraph {
   }
 
   public get parallelism(): number {
-    return this._options.parallelism;
+    // After construction, parallelism is always coerced to a concrete number.
+    return this._options.parallelism as number;
   }
-  public set parallelism(value: number) {
-    value = Math.floor(Math.max(1, Math.min(value, this._options.maxParallelism!)));
+  public set parallelism(value: Parallelism) {
+    const coerced: number = coerceParallelism(value, this._options.maxParallelism!, 1);
     const oldValue: number = this.parallelism;
-    if (value !== oldValue) {
-      this._options.parallelism = value;
+    if (coerced !== oldValue) {
+      this._options.parallelism = coerced;
       this._scheduleManagerStateChanged();
     }
   }
@@ -546,6 +546,7 @@ export class OperationGraph implements IOperationGraph {
       streamCollator,
       terminal,
       inputsSnapshot,
+      maxParallelism: this._options.maxParallelism!,
       onOperationStateChanged: undefined,
       createEnvironment: createEnvironmentForOperation,
       invalidate: (operations: Iterable<Operation>, reason: string) => {

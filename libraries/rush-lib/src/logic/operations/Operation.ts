@@ -5,7 +5,7 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { IOperationRunner } from './IOperationRunner';
 import type { IOperationSettings } from '../../api/RushProjectConfiguration';
-import { parseParallelismPercent } from '../../cli/parsing/ParseParallelism';
+import { type Parallelism, parseParallelismPercent } from './ParseParallelism';
 
 /**
  * State for the `enabled` property of an `Operation`.
@@ -66,7 +66,7 @@ export interface IOperationOptions {
 
 /**
  * The `Operation` class is a node in the dependency graph of work that needs to be scheduled by the
- * `OperationExecutionManager`. Each `Operation` has a `runner` member of type `IOperationRunner`, whose
+ * `OperationGraph`. Each `Operation` has a `runner` member of type `IOperationRunner`, whose
  * implementation manages the actual process of running a single operation.
  *
  * The graph of `Operation` instances will be cloned into a separate execution graph after processing.
@@ -108,17 +108,23 @@ export class Operation {
   public runner: IOperationRunner | undefined = undefined;
 
   /**
-   * The weight for this operation. This scalar is the contribution of this operation to the
-   * `criticalPathLength` calculation above. Modify to indicate the following:
-   * - `weight` === 1: indicates that this operation has an average duration
-   * - `weight` &gt; 1: indicates that this operation takes longer than average and so the scheduler
-   *     should try to favor starting it over other, shorter operations. An example might be an operation that
-   *     bundles an entire application and runs whole-program optimization.
-   * - `weight` &lt; 1: indicates that this operation takes less time than average and so the scheduler
-   *     should favor other, longer operations over it. An example might be an operation to unpack a cached
-   *     output, or an operation using NullOperationRunner, which might use a value of 0.
+   * The concurrency weight for this operation. When coerced to an integer via `coerceParallelism`,
+   * this value represents how many concurrency slots the operation consumes while running.
+   *
+   * May be specified as:
+   * - A raw `number`: used directly as the slot count (e.g. `2` consumes two slots).
+   * - An `IParallelismScalar` (e.g. `{ scalar: 0.5 }`): coerced relative to the graph's
+   *   configured `maxParallelism` at execution time, so the weight scales with the available
+   *   concurrency rather than being fixed at parse time.
+   *
+   * Coerced values guide scheduling as follows:
+   * - `1` slot: typical operation consuming one logical thread.
+   * - `> 1` slots: operation that spawns multiple threads or requires significant RAM; reserving
+   *   extra slots prevents overloading the machine (e.g. a whole-program bundler or a test suite
+   *   that runs its own internal parallelism).
+   * - `0` slots: effectively free (e.g. a no-op or cache-restore step).
    */
-  public weight: number;
+  public weight: Parallelism;
 
   /**
    * Get the operation settings for this operation, defaults to the values defined in
@@ -194,13 +200,13 @@ export class Operation {
   }
 }
 
-function _getFinalWeight(rawWeight: string | number, context: string): number {
+function _getFinalWeight(rawWeight: string | number, context: string): Parallelism {
   if (typeof rawWeight === 'number') {
     // Explicit numeric weight allows any value.
     return rawWeight;
   } else {
     try {
-      return parseParallelismPercent(rawWeight);
+      return { scalar: parseParallelismPercent(rawWeight) };
     } catch (err) {
       throw new Error(`Invalid weight for operation "${context}": ${err.message}`);
     }

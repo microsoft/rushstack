@@ -18,6 +18,7 @@ import {
 import { InternalError, NewlineKind, FileError } from '@rushstack/node-core-library';
 import { CollatedTerminal, type CollatedWriter, type StreamCollator } from '@rushstack/stream-collator';
 
+import { coerceParallelism } from './ParseParallelism';
 import { OperationStatus, TERMINAL_STATUSES } from './OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import type { Operation } from './Operation';
@@ -45,6 +46,7 @@ export interface IOperationExecutionRecordContext {
   createEnvironment?: (record: OperationExecutionRecord) => IEnvironment;
   invalidate?: (operations: Iterable<Operation>, reason: string) => void;
   inputsSnapshot: IInputsSnapshot | undefined;
+  maxParallelism: number;
 
   debugMode: boolean;
   quietMode: boolean;
@@ -144,6 +146,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   });
 
   public readonly runner: IOperationRunner;
+  public readonly weight: number;
   public readonly associatedPhase: IPhase;
   public readonly associatedProject: RushConfigurationProject;
   public readonly _operationMetadataManager: OperationMetadataManager;
@@ -169,6 +172,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     this.operation = operation;
     this.enabled = !!enabled;
     this.runner = runner;
+    this.weight = runner.isNoOp ? 0 : coerceParallelism(operation.weight, context.maxParallelism);
     this.associatedPhase = associatedPhase;
     this.associatedProject = associatedProject;
     this.logFilePaths = undefined;
@@ -185,10 +189,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   public get name(): string {
     return this.runner.name;
-  }
-
-  public get weight(): number {
-    return this.operation.weight;
   }
 
   public get debugMode(): boolean {
