@@ -139,10 +139,12 @@ export interface IWebSocketAfterExecuteEventMessage {
   executionStates: IOperationExecutionState[];
   status: ReadableOperationStatus;
   /**
-   * The results of the previous execution iteration for all operations, if available.
-   * This mirrors the values() of the OperationGraph's lastExecutionResults at the time of emission.
+   * Per-operation result records at the time of emission, mirroring the values() of the
+   * OperationGraph's resultByOperation map. Only present if at least one operation has
+   * completed execution. Only statuses from actual executions are included; operations
+   * that were skipped or aborted retain their result from the last time they ran.
    */
-  lastExecutionResults?: IOperationExecutionState[];
+  resultByOperation?: IOperationExecutionState[];
 }
 
 /**
@@ -194,10 +196,12 @@ export interface IWebSocketSyncEventMessage {
     hasScheduledIteration: boolean;
   };
   /**
-   * The results of the previous execution for all operations, if available.
-   * This mirrors the values() of the OperationGraph's lastExecutionResults at the time of emission.
+   * Per-operation result records at the time of emission, mirroring the values() of the
+   * OperationGraph's resultByOperation map. Only present if at least one operation has
+   * completed execution. Only statuses from actual executions are included; operations
+   * that were skipped or aborted retain their result from the last time they ran.
    */
-  lastExecutionResults?: IOperationExecutionState[];
+  resultByOperation?: IOperationExecutionState[];
 }
 
 /**

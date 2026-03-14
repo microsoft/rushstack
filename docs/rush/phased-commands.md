@@ -78,7 +78,7 @@ Plugins that tap `onGraphCreatedAsync` should register their hooks on `operation
 - `status: OperationStatus` — the overall outcome (`Success`, `Failure`, `NoOp`, etc.)
 - `operationResults: ReadonlyMap<Operation, IOperationExecutionResult>` — per-operation results for the iteration
 
-**Watch mode:** `graph.executeAsync(iterationOptions)` returns a `Promise<IExecutionResult>` for the **initial** iteration only. After that promise resolves, a `ProjectWatcher` observes file system changes. When changes are detected (after a debounce), `ProjectWatcher` calls `graph.scheduleIterationAsync(...)`, which queues a new iteration. Subsequent iterations are driven internally and their results are available via `graph.lastExecutionResults`. After each iteration completes with no queued work, `graph.hooks.onWaitingForChanges` fires and the graph enters an idle state until the next change.
+**Watch mode:** `graph.executeAsync(iterationOptions)` returns a `Promise<IExecutionResult>` for the **initial** iteration only. After that promise resolves, a `ProjectWatcher` observes file system changes. When changes are detected (after a debounce), `ProjectWatcher` calls `graph.scheduleIterationAsync(...)`, which queues a new iteration. Subsequent iterations are driven internally and their results are available via `graph.resultByOperation`. After each iteration completes with no queued work, `graph.hooks.onWaitingForChanges` fires and the graph enters an idle state until the next change.
 
 ---
 
@@ -220,7 +220,7 @@ Fires when `IOperationGraph.invalidateOperations()` marks operations as `Ready` 
 | Property | Description |
 | --- | --- |
 | `operations` | All operations in the graph (session-long set) |
-| `lastExecutionResults` | Results from the most recently completed iteration |
+| `resultByOperation` | Per-operation result records, updated live as each operation executes |
 | `status` | Overall execution status (`Ready`, `Executing`, `Success`, `Failure`, etc.) |
 | `hasScheduledIteration` | True if an iteration is queued but not yet running |
 | `abortController` | Session-level `AbortController`; abort this to terminate watch mode |
