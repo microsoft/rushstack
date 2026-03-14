@@ -71,7 +71,7 @@ interface IStatefulExecutionContext {
   hasAnyAborted: boolean;
 
   executionQueue: AsyncOperationQueue;
-  lastExecutionResults: Map<Operation, OperationExecutionRecord>;
+  resultByOperation: Map<Operation, OperationExecutionRecord>;
 
   get completedOperations(): number;
   set completedOperations(value: number);
@@ -146,7 +146,7 @@ export class OperationGraph implements IOperationGraph {
   public readonly operations: Set<Operation>;
   public readonly abortController: AbortController;
 
-  public lastExecutionResults: Map<Operation, OperationExecutionRecord>;
+  public resultByOperation: Map<Operation, OperationExecutionRecord>;
   private readonly _options: IOperationGraphOptions;
 
   private _currentIteration: IExecutionIterationContext | undefined = undefined;
@@ -166,7 +166,7 @@ export class OperationGraph implements IOperationGraph {
     this._terminalSplitter = new SplitterTransform({
       destinations: options.destinations
     });
-    this.lastExecutionResults = new Map();
+    this.resultByOperation = new Map();
     this.abortController = options.abortController;
 
     this.abortController.signal.addEventListener(
@@ -360,7 +360,7 @@ export class OperationGraph implements IOperationGraph {
   public async closeRunnersAsync(operations?: Operation[]): Promise<void> {
     const promises: Promise<void>[] = [];
     const recordMap: ReadonlyMap<Operation, OperationExecutionRecord> =
-      this._currentIteration?.records ?? this.lastExecutionResults;
+      this._currentIteration?.records ?? this.resultByOperation;
     const closedRecords: Set<OperationExecutionRecord> = new Set();
     for (const operation of operations ?? this.operations) {
       if (operation.runner?.closeAsync) {
@@ -387,7 +387,7 @@ export class OperationGraph implements IOperationGraph {
   public invalidateOperations(operations?: Iterable<Operation>, reason?: string): void {
     const invalidated: Set<Operation> = new Set();
     for (const operation of operations ?? this.operations) {
-      const existing: OperationExecutionRecord | undefined = this.lastExecutionResults.get(operation);
+      const existing: OperationExecutionRecord | undefined = this.resultByOperation.get(operation);
       if (existing) {
         existing.status = OperationStatus.Ready;
         invalidated.add(operation);
@@ -411,7 +411,7 @@ export class OperationGraph implements IOperationGraph {
       await this._scheduleIterationAsync(iterationOptions);
     if (!scheduled) {
       return {
-        operationResults: this.lastExecutionResults,
+        operationResults: this.resultByOperation,
         status: OperationStatus.NoOp
       };
     }
@@ -596,11 +596,7 @@ export class OperationGraph implements IOperationGraph {
     }
 
     measureFn(`${PERF_PREFIX}:configureIteration`, () => {
-      hooks.configureIteration.call(
-        executionRecords,
-        this.lastExecutionResults,
-        iterationOptionsForCallbacks
-      );
+      hooks.configureIteration.call(executionRecords, this.resultByOperation, iterationOptionsForCallbacks);
     });
 
     for (const executionRecord of executionRecords.values()) {
@@ -693,7 +689,7 @@ export class OperationGraph implements IOperationGraph {
 
     const { abortController, records: executionRecords, terminal, totalOperations } = iterationContext;
 
-    const isInitial: boolean = this.lastExecutionResults.size === 0;
+    const isInitial: boolean = this.resultByOperation.size === 0;
 
     const iterationOptions: IOperationGraphIterationOptions = {
       inputsSnapshot: iterationContext.inputsSnapshot,
@@ -726,7 +722,7 @@ export class OperationGraph implements IOperationGraph {
       hasAnyNonAllowedWarnings: false,
       hasAnyAborted: false,
       executionQueue,
-      lastExecutionResults: this.lastExecutionResults,
+      resultByOperation: this.resultByOperation,
       get completedOperations(): number {
         return iterationContext.completedOperations;
       },
@@ -787,7 +783,7 @@ export class OperationGraph implements IOperationGraph {
               state.hasAnyAborted = true;
               executionQueue.complete(record);
             } else {
-              const lastState: OperationExecutionRecord | undefined = state.lastExecutionResults.get(
+              const lastState: OperationExecutionRecord | undefined = state.resultByOperation.get(
                 record.operation
               );
               await record.executeAsync(lastState, executionContext);
@@ -1076,7 +1072,7 @@ function _handleOperationFailure(record: OperationExecutionRecord, context: ISta
       );
     }
   }
-  context.lastExecutionResults.set(record.operation, record);
+  context.resultByOperation.set(record.operation, record);
   context.hasAnyFailures = true;
 }
 
@@ -1092,14 +1088,14 @@ function _handleOperationFromCache(
       Colorize.green(`"${record.name}" was restored from the build cache.`)
     );
   }
-  context.lastExecutionResults.set(record.operation, record);
+  context.resultByOperation.set(record.operation, record);
 }
 
 /**
  * Handle skipped operation.
  */
 function _handleOperationSkipped(record: OperationExecutionRecord, context: IStatefulExecutionContext): void {
-  // Do not set lastExecutionResults here. "Skipped" means the operation was not executed,
+  // Do not set resultByOperation here. "Skipped" means the operation was not executed,
   // so it should not be considered the last *execution* result.
   if (!record.silent) {
     record.collatedWriter.terminal.writeStdoutLine(Colorize.green(`"${record.name}" was skipped.`));
@@ -1115,7 +1111,7 @@ function _handleOperationNoOp(record: OperationExecutionRecord, context: IStatef
       Colorize.gray(`"${record.name}" did not define any work.`)
     );
   }
-  context.lastExecutionResults.set(record.operation, record);
+  context.resultByOperation.set(record.operation, record);
 }
 
 /**
@@ -1128,7 +1124,7 @@ function _handleOperationSuccess(record: OperationExecutionRecord, context: ISta
       Colorize.green(`"${record.name}" completed successfully in ${stopwatch.toString()}.`)
     );
   }
-  context.lastExecutionResults.set(record.operation, record);
+  context.resultByOperation.set(record.operation, record);
 }
 
 /**
@@ -1144,7 +1140,7 @@ function _handleOperationSuccessWithWarning(
       Colorize.yellow(`"${record.name}" completed with warnings in ${stopwatch.toString()}.`)
     );
   }
-  context.lastExecutionResults.set(record.operation, record);
+  context.resultByOperation.set(record.operation, record);
   context.hasAnyNonAllowedWarnings ||= !record.runner.warningsAreAllowed;
 }
 
@@ -1161,7 +1157,7 @@ function _getOperationStopwatch(record: OperationExecutionRecord): IStopwatchRes
  * Handle aborted operation.
  */
 function _handleOperationAborted(record: OperationExecutionRecord, context: IStatefulExecutionContext): void {
-  // Do not set lastExecutionResults here. "Aborted" means the operation was not executed,
+  // Do not set resultByOperation here. "Aborted" means the operation was not executed,
   // so it should not be considered the last *execution* result.
   context.hasAnyAborted = true;
 }

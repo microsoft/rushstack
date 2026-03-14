@@ -856,7 +856,7 @@ describe('invalidateOperations', () => {
     const operation: Operation = Array.from(graph.operations)[0];
     graph.invalidateOperations([operation], 'unit-test');
 
-    const postRecord: IOperationExecutionResult | undefined = graph.lastExecutionResults.get(operation);
+    const postRecord: IOperationExecutionResult | undefined = graph.resultByOperation.get(operation);
     expect(postRecord?.status).toBe(OperationStatus.Ready);
     expect(graph.status).toBe(OperationStatus.Ready);
     expect(invalidateCalls.length).toBe(1);
@@ -895,13 +895,12 @@ describe('invalidateOperations', () => {
     const graph: OperationGraph = new OperationGraph(new Set([op1, op2]), graphOptions);
 
     await graph.executeAsync({});
-    for (const record of graph.lastExecutionResults.values()) {
+    for (const record of graph.resultByOperation.values()) {
       expect(record.status).toBeDefined();
     }
 
-    // Cast to align with implementation signature which doesn't mark parameter optional
-    graph.invalidateOperations(undefined as unknown as Iterable<Operation>, 'bulk');
-    for (const record of graph.lastExecutionResults.values()) {
+    graph.invalidateOperations(undefined, 'bulk');
+    for (const record of graph.resultByOperation.values()) {
       expect(record.status).toBe(OperationStatus.Ready);
     }
   });

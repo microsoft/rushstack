@@ -105,7 +105,7 @@ socket.addEventListener('message', (ev) => {
     case 'after-execute': {
       upsertExecutionStates(msg.executionStates);
       buildStatus = msg.status;
-      // msg.lastExecutionResults (if present) can be captured for historical display
+      // msg.resultByOperation (if present) can be captured for historical display
       break;
     }
   }
