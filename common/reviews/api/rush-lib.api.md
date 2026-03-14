@@ -424,7 +424,7 @@ export interface ICreateOperationsContext {
     readonly includePhaseDeps: boolean;
     readonly isIncrementalBuildAllowed: boolean;
     readonly isWatch: boolean;
-    readonly parallelism: number;
+    readonly parallelism: Parallelism;
     readonly phaseSelection: ReadonlySet<IPhase>;
     readonly projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>;
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;
@@ -622,13 +622,15 @@ export interface IOperationGraph {
     invalidateOperations(operations?: Iterable<Operation>, reason?: string): void;
     readonly lastExecutionResults: ReadonlyMap<Operation, IOperationExecutionResult>;
     readonly operations: ReadonlySet<Operation>;
-    parallelism: number;
+    get parallelism(): number;
+    set parallelism(value: Parallelism);
     pauseNextIteration: boolean;
     quietMode: boolean;
     removeTerminalDestination(destination: TerminalWritable, close?: boolean): boolean;
     scheduleIterationAsync(options: IOperationGraphIterationOptions): Promise<boolean>;
     setEnabledStates(operations: Iterable<Operation>, targetState: Operation['enabled'], mode: 'safe' | 'unsafe'): boolean;
     readonly status: OperationStatus;
+    readonly terminalDestinations: ReadonlySet<TerminalWritable>;
 }
 
 // @alpha
@@ -743,6 +745,12 @@ export interface _IOperationStateJson {
 // @public
 export interface IPackageManagerOptionsJsonBase {
     environmentVariables?: IConfigurationEnvironment;
+}
+
+// @beta
+export interface IParallelismScalar {
+    // (undocumented)
+    readonly scalar: number;
 }
 
 // @alpha
@@ -1034,7 +1042,7 @@ export class Operation {
     get name(): string;
     runner: IOperationRunner | undefined;
     settings: IOperationSettings | undefined;
-    weight: number;
+    weight: Parallelism;
 }
 
 // @internal (undocumented)
@@ -1214,6 +1222,9 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
     protected constructor(json: IPackageManagerOptionsJsonBase);
     readonly environmentVariables?: IConfigurationEnvironment;
 }
+
+// @beta
+export type Parallelism = number | IParallelismScalar;
 
 // @alpha
 export class PhasedCommandHooks {

@@ -149,7 +149,7 @@ export class BridgeCachePlugin implements IRushPlugin {
                     }
                   }
                 },
-                { concurrency: context.parallelism }
+                { concurrency: graph.parallelism }
               );
 
               terminal.writeLine(

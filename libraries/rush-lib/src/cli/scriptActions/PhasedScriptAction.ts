@@ -42,7 +42,11 @@ import { OperationStatus } from '../../logic/operations/OperationStatus';
 import type { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
 import type { ITelemetryData } from '../../logic/Telemetry';
-import { parseParallelism } from '../parsing/ParseParallelism';
+import {
+  getNumberOfCores,
+  parseParallelism,
+  type Parallelism
+} from '../../logic/operations/ParseParallelism';
 import { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin';
 import type { IInputsSnapshot, GetInputsSnapshotAsyncFn } from '../../logic/incremental/InputsSnapshot';
@@ -347,7 +351,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
     // if this is parallelizable, then use the value from the flag (undefined or a number),
     // if parallelism is not enabled, then restrict to 1 core
-    const parallelism: number = this._enableParallelism
+    const maxParallelism: number = getNumberOfCores();
+    const parallelism: Parallelism = this._enableParallelism
       ? parseParallelism(this._parallelismParameter?.value)
       : 1;
 
@@ -595,6 +600,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         debugMode: this.parser.isDebug,
         destinations: [StdioWritable.instance],
         parallelism,
+        maxParallelism,
         allowOversubscription: this._allowOversubscription,
         isWatch,
         pauseNextIteration: false,
