@@ -151,6 +151,7 @@ export type {
   IOperationExecutionResult
 } from './logic/operations/IOperationExecutionResult';
 export { type IOperationOptions, type OperationEnabledState, Operation } from './logic/operations/Operation';
+export { type IParallelismScalar, type Parallelism } from './logic/operations/ParseParallelism';
 export { OperationStatus } from './logic/operations/OperationStatus';
 export type { ILogFilePaths } from './logic/operations/ProjectLogWritable';
 
