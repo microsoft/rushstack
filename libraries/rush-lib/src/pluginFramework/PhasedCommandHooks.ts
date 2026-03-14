@@ -146,16 +146,18 @@ export interface IOperationGraph {
   readonly operations: ReadonlySet<Operation>;
 
   /**
-   * A map from each `Operation` in the graph to the result of its most recent actual execution,
-   * regardless of which iteration of the graph that execution occurred in.
-   * Empty until at least one operation has completed execution.
-   * Only statuses that represent a completed execution (e.g. `Success`, `Failure`,
-   * `SuccessWithWarning`) are stored here. Statuses such as `Skipped` or `Aborted` —
-   * which indicate that an operation did not actually run — do not update this map.
+   * A map from each `Operation` in the graph to its current result record.
+   * The map is updated in real time as operations execute during an iteration.
+   * Only statuses representing a completed execution (e.g. `Success`, `Failure`,
+   * `SuccessWithWarning`) write to this map; statuses such as `Skipped` or `Aborted` —
+   * which indicate that an operation did not actually run — do not update it.
+   * For operations that have not yet run in the current iteration, the map retains the
+   * result from whichever prior iteration the operation last ran in.
    * An entry with status `Ready` indicates that the operation is considered stale and
    * has been queued to run again.
+   * Empty until at least one operation has completed execution.
    */
-  readonly lastExecutionResults: ReadonlyMap<Operation, IOperationExecutionResult>;
+  readonly resultByOperation: ReadonlyMap<Operation, IOperationExecutionResult>;
 
   /**
    * The maximum allowed parallelism for this operation graph.

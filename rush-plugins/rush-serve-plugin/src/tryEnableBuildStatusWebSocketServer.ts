@@ -267,8 +267,8 @@ export function tryEnableBuildStatusWebSocketServer(
         status: buildStatus,
         hasScheduledIteration: false
       },
-      lastExecutionResults: lastGraph
-        ? convertToExecutionStateArray(lastGraph.lastExecutionResults.values())
+      resultByOperation: lastGraph
+        ? convertToExecutionStateArray(lastGraph.resultByOperation.values())
         : undefined
     };
     webSocket.send(JSON.stringify(syncMessage));
@@ -315,8 +315,8 @@ export function tryEnableBuildStatusWebSocketServer(
           event: 'after-execute',
           executionStates: states,
           status: buildStatus,
-          lastExecutionResults: lastGraph
-            ? convertToExecutionStateArray(lastGraph.lastExecutionResults.values())
+          resultByOperation: lastGraph
+            ? convertToExecutionStateArray(lastGraph.resultByOperation.values())
             : undefined
         };
         sendWebSocketMessage(afterExecuteMessage);

@@ -626,13 +626,13 @@ export interface IOperationGraph {
     readonly hasScheduledIteration: boolean;
     readonly hooks: OperationGraphHooks;
     invalidateOperations(operations?: Iterable<Operation>, reason?: string): void;
-    readonly lastExecutionResults: ReadonlyMap<Operation, IOperationExecutionResult>;
     readonly operations: ReadonlySet<Operation>;
     get parallelism(): number;
     set parallelism(value: Parallelism);
     pauseNextIteration: boolean;
     quietMode: boolean;
     removeTerminalDestination(destination: TerminalWritable, close?: boolean): boolean;
+    readonly resultByOperation: ReadonlyMap<Operation, IOperationExecutionResult>;
     scheduleIterationAsync(options: IOperationGraphIterationOptions): Promise<boolean>;
     setEnabledStates(operations: Iterable<Operation>, targetState: Operation['enabled'], mode: 'safe' | 'unsafe'): boolean;
     readonly status: OperationStatus;
