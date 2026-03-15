@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add `customParametersByLongName` and `setHandled()` to `IGlobalCommand`, enabling Rush plugins to implement native global commands. Plugins can now define global commands with an empty `shellCommand`, handle execution via the `runGlobalCustomCommand` hook, and access parsed command-line parameters.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -5,6 +5,7 @@ import * as path from 'node:path';
 
 import type { AsyncSeriesHook } from 'tapable';
 
+import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import {
   FileSystem,
   type IPackageJson,
@@ -44,6 +45,9 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
   private readonly _shellCommand: string;
   private readonly _autoinstallerName: string;
   private readonly _autoinstallerFullPath: string;
+
+  private _customParametersByLongName: ReadonlyMap<string, CommandLineParameter> | undefined;
+  private _isHandled: boolean = false;
 
   public constructor(options: IGlobalScriptActionOptions) {
     super(options);
@@ -93,6 +97,37 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
     this.defineScriptParameters();
   }
 
+  /**
+   * {@inheritDoc IGlobalCommand.setHandled}
+   */
+  public setHandled(): void {
+    this._isHandled = true;
+  }
+
+  /**
+   * {@inheritDoc IGlobalCommand.getCustomParametersByLongName}
+   */
+  public getCustomParametersByLongName<TParameter extends CommandLineParameter>(
+    longName: string
+  ): TParameter {
+    if (!this._customParametersByLongName) {
+      const map: Map<string, CommandLineParameter> = new Map();
+      for (const [parameterJson, parameter] of this.customParameters) {
+        map.set(parameterJson.longName, parameter);
+      }
+      this._customParametersByLongName = map;
+    }
+
+    const parameter: CommandLineParameter | undefined = this._customParametersByLongName.get(longName);
+    if (!parameter) {
+      throw new Error(
+        `The command "${this.actionName}" does not have a custom parameter with long name "${longName}".`
+      );
+    }
+
+    return parameter as TParameter;
+  }
+
   private async _prepareAutoinstallerNameAsync(): Promise<void> {
     const autoInstaller: Autoinstaller = new Autoinstaller({
       autoinstallerName: this._autoinstallerName,
@@ -115,6 +150,20 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
     if (hookForAction) {
       // Run the more specific hook for a command with this name after the general hook
       await hookForAction.promise(this);
+    }
+
+    // If a plugin hook called setHandled(), the command has been fully handled.
+    // Skip the default shell command execution.
+    if (this._isHandled) {
+      return;
+    }
+
+    if (this._shellCommand === '') {
+      throw new Error(
+        `The custom command "${this.actionName}" has an empty "shellCommand" value, but no plugin ` +
+          'called setHandled() for this command. An empty "shellCommand" is intended for global ' +
+          'commands whose implementation is provided entirely by a Rush plugin.'
+      );
     }
 
     const additionalPathFolders: string[] =
