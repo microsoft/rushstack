@@ -46,6 +46,7 @@ export class PublishedVersionsJsonPlugin implements IRushPlugin {
           packageJson: { version }
         } of rushConfiguration.projects) {
           if (shouldPublish) {
+            // Note that `shouldPublish` is also `true` when publishing is driven by a version policy.
             publishedPackageVersions[packageName] = version;
           }
         }
