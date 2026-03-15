@@ -1589,6 +1589,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/rush-published-versions-json-plugin",
+      "projectFolder": "rush-plugins/rush-published-versions-json-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/rush-pnpm-kit-v8",
       "projectFolder": "libraries/rush-pnpm-kit-v8",
       "reviewCategory": "libraries",

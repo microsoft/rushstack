@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-published-versions-json-plugin",
+      "comment": "Initial release.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-published-versions-json-plugin"
+}
