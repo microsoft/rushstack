@@ -514,6 +514,8 @@ export interface IGetChangedProjectsOptions {
 
 // @beta
 export interface IGlobalCommand extends IRushCommand {
+    getCustomParametersByLongName<TParameter extends CommandLineParameter>(longName: string): TParameter;
+    setHandled(): void;
 }
 
 // @public
@@ -1502,7 +1504,7 @@ export class RushLifecycleHooks {
     variant: string | undefined
     ]>;
     readonly beforeInstall: AsyncSeriesHook<[
-    command: IGlobalCommand,
+    command: IRushCommand,
     subspace: Subspace,
     variant: string | undefined
     ]>;
