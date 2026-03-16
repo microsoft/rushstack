@@ -412,13 +412,9 @@ snapshots:
       expect(rootIntegrityMap1).toBeDefined();
       expect(rootIntegrityMap2).toBeDefined();
 
-      // The root importer should have different integrity because the linked workspace
-      // package's dependencies changed
-      const rootIntegrity1 = rootIntegrityMap1!.get('.');
-      const rootIntegrity2 = rootIntegrityMap2!.get('.');
-
-      // The self-hash of '.' changes because the importer object itself doesn't change
-      // (it still references link:projects/my-lib), but the workspace lib's hash should differ
+      // The self-hash of '.' does NOT change because the root importer object itself is identical
+      // in both cases (it still references link:projects/my-lib). However, the workspace lib's
+      // integrity hash should differ because its lodash dependency resolved to a different version.
       const libIntegrity1 = rootIntegrityMap1!.get('projects/my-lib');
       const libIntegrity2 = rootIntegrityMap2!.get('projects/my-lib');
 
