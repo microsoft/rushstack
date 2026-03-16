@@ -906,6 +906,190 @@ describe('invalidateOperations', () => {
   });
 });
 
+describe('deferred invalidation during active iteration', () => {
+  const deferGraphOptions: IOperationGraphOptions = {
+    quietMode: false,
+    debugMode: false,
+    parallelism: 2,
+    allowOversubscription: true,
+    destinations: [mockWritable],
+    abortController: new AbortController()
+  };
+
+  function createNamedOp(name: string, runner?: IOperationRunner): Operation {
+    return new Operation({
+      runner: runner ?? new MockOperationRunner(name, async () => OperationStatus.Success),
+      phase: mockPhase,
+      project: getOrCreateProject(name),
+      logFilenameIdentifier: name
+    });
+  }
+
+  it('does not mutate a completed current-iteration record until after the iteration ends', async () => {
+    // op2 depends on op1, so op1 completes first and its record is written to resultByOperation.
+    // The afterExecuteOperationAsync hook for op2 fires while the iteration is still active, giving
+    // us a natural point to invalidate op1 and verify the deferred path.
+    const op1: Operation = createNamedOp('defer-op1');
+    const op2: Operation = createNamedOp('defer-op2');
+    op2.addDependency(op1);
+
+    let op1StatusAtHookTime: OperationStatus | undefined;
+    let op1StatusAfterInvalidateCall: OperationStatus | undefined;
+
+    const invalidateCalls: Array<{ ops: Operation[]; reason: string | undefined }> = [];
+    const graph: OperationGraph = new OperationGraph(new Set([op1, op2]), {
+      ...deferGraphOptions,
+      abortController: new AbortController()
+    });
+    graph.hooks.afterExecuteOperationAsync.tapPromise('test', async (record) => {
+      if (record.operation === op2) {
+        // op1 is already in resultByOperation (set during op1's completion handler)
+        op1StatusAtHookTime = graph.resultByOperation.get(op1)?.status;
+        graph.invalidateOperations([op1], 'mid-iter');
+        // Deferred — record must not have been mutated
+        op1StatusAfterInvalidateCall = graph.resultByOperation.get(op1)?.status;
+      }
+    });
+    graph.hooks.onInvalidateOperations.tap('test', (ops, reason) => {
+      invalidateCalls.push({ ops: [...(ops as Set<Operation>)], reason });
+    });
+
+    const result: IExecutionResult = await graph.executeAsync({});
+
+    // Both ops executed successfully; the abort triggered by invalidation had nothing left to abort.
+    expect(result.status).toBe(OperationStatus.Success);
+
+    // op1 was in resultByOperation (Success) when the hook fired for op2
+    expect(op1StatusAtHookTime).toBe(OperationStatus.Success);
+    // The deferred path must not mutate the record mid-iteration
+    expect(op1StatusAfterInvalidateCall).toBe(OperationStatus.Success);
+
+    // After the iteration .finally() fires, the deferred reset is applied
+    expect(graph.resultByOperation.get(op1)?.status).toBe(OperationStatus.Ready);
+
+    // onInvalidateOperations fires once — after the iteration ends — with [op1] and the reason.
+    // The synchronous call inside invalidateOperations() is skipped because the invalidated set is empty.
+    expect(invalidateCalls).toHaveLength(1);
+    expect(invalidateCalls[0].ops).toHaveLength(1);
+    expect(invalidateCalls[0].ops[0]).toBe(op1);
+    expect(invalidateCalls[0].reason).toBe('mid-iter');
+  });
+
+  it('coalesces deferred invalidations with the same reason into a single hook call', async () => {
+    // op3 depends on both op1 and op2, so both complete before op3 starts.
+    // The afterExecuteOperationAsync hook for op3 invalidates both with the same reason.
+    // The deferred .finally() handler must fire a single onInvalidateOperations call for both.
+    const op1: Operation = createNamedOp('coalesce-op1');
+    const op2: Operation = createNamedOp('coalesce-op2');
+    const op3: Operation = createNamedOp('coalesce-op3');
+    op3.addDependency(op1);
+    op3.addDependency(op2);
+
+    const graph: OperationGraph = new OperationGraph(new Set([op1, op2, op3]), {
+      ...deferGraphOptions,
+      abortController: new AbortController()
+    });
+    graph.hooks.afterExecuteOperationAsync.tapPromise('test', async (record) => {
+      if (record.operation === op3) {
+        graph.invalidateOperations([op1], 'same-reason');
+        graph.invalidateOperations([op2], 'same-reason');
+      }
+    });
+
+    const deferredCalls: Array<{ ops: Operation[]; reason: string | undefined }> = [];
+    graph.hooks.onInvalidateOperations.tap('test', (ops, reason) => {
+      const opsArray: Operation[] = [...(ops as Set<Operation>)];
+      if (opsArray.length > 0) {
+        deferredCalls.push({ ops: opsArray, reason });
+      }
+    });
+
+    await graph.executeAsync({});
+
+    // Only one deferred call: both op1 and op2 arrive together under 'same-reason'
+    expect(deferredCalls).toHaveLength(1);
+    expect(deferredCalls[0].reason).toBe('same-reason');
+    expect(new Set(deferredCalls[0].ops)).toEqual(new Set([op1, op2]));
+
+    // Both records are now Ready
+    expect(graph.resultByOperation.get(op1)?.status).toBe(OperationStatus.Ready);
+    expect(graph.resultByOperation.get(op2)?.status).toBe(OperationStatus.Ready);
+  });
+
+  it('fires separate hook calls for deferred invalidations with distinct reasons', async () => {
+    const op1: Operation = createNamedOp('distinct-op1');
+    const op2: Operation = createNamedOp('distinct-op2');
+    const op3: Operation = createNamedOp('distinct-op3');
+    op3.addDependency(op1);
+    op3.addDependency(op2);
+
+    const graph: OperationGraph = new OperationGraph(new Set([op1, op2, op3]), {
+      ...deferGraphOptions,
+      abortController: new AbortController()
+    });
+    graph.hooks.afterExecuteOperationAsync.tapPromise('test', async (record) => {
+      if (record.operation === op3) {
+        graph.invalidateOperations([op1], 'reason-a');
+        graph.invalidateOperations([op2], 'reason-b');
+      }
+    });
+
+    const deferredCalls: Array<{ ops: Operation[]; reason: string | undefined }> = [];
+    graph.hooks.onInvalidateOperations.tap('test', (ops, reason) => {
+      const opsArray: Operation[] = [...(ops as Set<Operation>)];
+      if (opsArray.length > 0) {
+        deferredCalls.push({ ops: opsArray, reason });
+      }
+    });
+
+    await graph.executeAsync({});
+
+    // Two separate deferred calls — one per reason
+    expect(deferredCalls).toHaveLength(2);
+    const callA: { ops: Operation[]; reason: string | undefined } | undefined = deferredCalls.find(
+      (c) => c.reason === 'reason-a'
+    );
+    const callB: { ops: Operation[]; reason: string | undefined } | undefined = deferredCalls.find(
+      (c) => c.reason === 'reason-b'
+    );
+    expect(callA?.ops).toHaveLength(1);
+    expect(callA?.ops[0]).toBe(op1);
+    expect(callB?.ops).toHaveLength(1);
+    expect(callB?.ops[0]).toBe(op2);
+  });
+
+  it('skips operations that are already in a non-terminal (Ready) state', async () => {
+    // Run the graph, then manually invalidate an op to put it in Ready state.
+    // A second invalidateOperations call on the same (already-Ready) op must be a no-op:
+    // TERMINAL_STATUSES does not include Ready, so the guard prevents processing.
+    const op: Operation = createNamedOp('skip-ready-op');
+    const graph: OperationGraph = new OperationGraph(new Set([op]), {
+      ...deferGraphOptions,
+      abortController: new AbortController()
+    });
+
+    await graph.executeAsync({});
+    expect(graph.resultByOperation.get(op)?.status).toBe(OperationStatus.Success);
+
+    // First invalidation: Success → Ready
+    graph.invalidateOperations([op], 'first');
+    expect(graph.resultByOperation.get(op)?.status).toBe(OperationStatus.Ready);
+
+    // Now tap AFTER the first invalidation so we only observe the second call
+    const secondCallOps: Operation[][] = [];
+    graph.hooks.onInvalidateOperations.tap('test-second', (ops) => {
+      secondCallOps.push([...(ops as Set<Operation>)]);
+    });
+
+    // Second invalidation: op is in Ready state (not terminal) — should be skipped
+    graph.invalidateOperations([op], 'second');
+
+    // Hook is not called at all — the invalidated set was empty, so the call is skipped
+    expect(secondCallOps).toHaveLength(0);
+    expect(graph.resultByOperation.get(op)?.status).toBe(OperationStatus.Ready); // unchanged
+  });
+});
+
 describe('closeRunnersAsync', () => {
   class ClosableRunner extends MockOperationRunner {
     public readonly closeAsync: jest.Mock<Promise<void>, []> = jest.fn(async () => {

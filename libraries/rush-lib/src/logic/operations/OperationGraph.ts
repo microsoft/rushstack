@@ -14,7 +14,7 @@ import { NewlineKind, Async, InternalError, AlreadyReportedError } from '@rushst
 
 import { AsyncOperationQueue, type IOperationSortFunction } from './AsyncOperationQueue';
 import type { Operation } from './Operation';
-import { OperationStatus } from './OperationStatus';
+import { OperationStatus, TERMINAL_STATUSES } from './OperationStatus';
 import {
   type IOperationExecutionContext,
   type IOperationExecutionRecordContext,
@@ -148,6 +148,14 @@ export class OperationGraph implements IOperationGraph {
 
   public resultByOperation: Map<Operation, OperationExecutionRecord>;
   private readonly _options: IOperationGraphOptions;
+
+  /**
+   * Records invalidated during the current iteration that could not be marked `Ready` immediately
+   * because their record object is shared between `resultByOperation` and the active iteration's
+   * `records` map (mutating it mid-iteration would corrupt the summarizer's view of results).
+   * Maps each record to the invalidation reason; applied once the iteration completes.
+   */
+  private readonly _deferredInvalidations: Map<OperationExecutionRecord, string | undefined> = new Map();
 
   private _currentIteration: IExecutionIterationContext | undefined = undefined;
   private _scheduledIteration: IExecutionIterationContext | undefined = undefined;
@@ -386,15 +394,29 @@ export class OperationGraph implements IOperationGraph {
 
   public invalidateOperations(operations?: Iterable<Operation>, reason?: string): void {
     const invalidated: Set<Operation> = new Set();
+    const currentIteration: IExecutionIterationContext | undefined = this._currentIteration;
+    const currentIterationRecords: Map<Operation, OperationExecutionRecord> | undefined =
+      currentIteration?.records;
     for (const operation of operations ?? this.operations) {
       const existing: OperationExecutionRecord | undefined = this.resultByOperation.get(operation);
-      if (existing) {
-        existing.status = OperationStatus.Ready;
-        invalidated.add(operation);
+      if (existing && TERMINAL_STATUSES.has(existing.status)) {
+        if (currentIterationRecords?.get(operation) === existing) {
+          // The record has already executed in the current iteration and was written to
+          // resultByOperation. Mutating its status now would corrupt the iteration's result
+          // snapshot (used by the summarizer). Defer the reset until the iteration ends, and
+          // abort so the operation can be re-run in the next iteration.
+          this._deferredInvalidations.set(existing, reason);
+          currentIteration?.abortController.abort();
+        } else {
+          existing.status = OperationStatus.Ready;
+          invalidated.add(operation);
+        }
       }
     }
-    this.hooks.onInvalidateOperations.call(invalidated, reason);
-    if (!this._currentIteration) {
+    if (invalidated.size > 0) {
+      this.hooks.onInvalidateOperations.call(invalidated, reason);
+    }
+    if (!currentIteration) {
       this._setStatus(OperationStatus.Ready);
     }
   }
@@ -449,6 +471,24 @@ export class OperationGraph implements IOperationGraph {
 
     iteration.promise = this._executeInnerAsync(this._currentIteration).finally(() => {
       this._currentIteration = undefined;
+
+      // Apply any status resets that were deferred because the records were part of the
+      // now-completed iteration and could not be mutated mid-iteration.
+      // Coalesce by reason so consumers receive one notification per reason group.
+      const byReason: Map<string | undefined, Operation[]> = new Map();
+      for (const [record, deferredReason] of this._deferredInvalidations) {
+        record.status = OperationStatus.Ready;
+        let group: Operation[] | undefined = byReason.get(deferredReason);
+        if (!group) {
+          group = [];
+          byReason.set(deferredReason, group);
+        }
+        group.push(record.operation);
+      }
+      this._deferredInvalidations.clear();
+      for (const [deferredReason, ops] of byReason) {
+        this.hooks.onInvalidateOperations.call(ops, deferredReason);
+      }
 
       this._setIdleTimeout();
     });
