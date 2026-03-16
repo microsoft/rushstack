@@ -923,24 +923,46 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
         const { dependencies, devDependencies, optionalDependencies } = importer;
 
-        const externalFilter: (name: string, version: IPnpmVersionSpecifier) => boolean = (
-          name: string,
-          versionSpecifier: IPnpmVersionSpecifier
-        ): boolean => {
-          const version: string = normalizePnpmVersionSpecifier(versionSpecifier);
-          return !version.includes('link:');
+        const processCollection = (
+          collection: Record<string, IPnpmVersionSpecifier>,
+          optional: boolean
+        ): void => {
+          const externalDeps: Record<string, IPnpmVersionSpecifier> = {};
+          for (const [name, versionSpecifier] of Object.entries(collection)) {
+            const version: string = normalizePnpmVersionSpecifier(versionSpecifier);
+            if (version.startsWith('link:')) {
+              // This is a workspace-local dependency; resolve it to an importer key and recurse
+              const linkPath: string = version.slice('link:'.length);
+              const importerDir: string = path.dirname(importerKey);
+              const targetKey: string = Path.convertToSlashes(
+                path.normalize(path.join(importerDir, linkPath))
+              );
+              const linkedIntegrities: Map<string, string> | undefined =
+                this.getIntegrityForImporter(targetKey);
+              if (linkedIntegrities) {
+                for (const [dep, integrity] of linkedIntegrities) {
+                  if (!integrityMap!.has(dep)) {
+                    integrityMap!.set(dep, integrity);
+                  }
+                }
+              }
+            } else {
+              externalDeps[name] = versionSpecifier;
+            }
+          }
+          this._addIntegrities(integrityMap!, externalDeps, optional);
         };
 
         if (dependencies) {
-          this._addIntegrities(integrityMap, dependencies, false, externalFilter);
+          processCollection(dependencies, false);
         }
 
         if (devDependencies) {
-          this._addIntegrities(integrityMap, devDependencies, false, externalFilter);
+          processCollection(devDependencies, false);
         }
 
         if (optionalDependencies) {
-          this._addIntegrities(integrityMap, optionalDependencies, true, externalFilter);
+          processCollection(optionalDependencies, true);
         }
       }
     }
@@ -1269,14 +1291,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _addIntegrities(
     integrityMap: Map<string, string>,
     collection: Record<string, IPnpmVersionSpecifier>,
-    optional: boolean,
-    filter?: (name: string, version: IPnpmVersionSpecifier) => boolean
+    optional: boolean
   ): void {
     for (const [name, version] of Object.entries(collection)) {
-      if (filter && !filter(name, version)) {
-        continue;
-      }
-
       const packageId: string = this._getPackageId(name, version);
       if (integrityMap.has(packageId)) {
         // The entry could already have been added as a nested dependency

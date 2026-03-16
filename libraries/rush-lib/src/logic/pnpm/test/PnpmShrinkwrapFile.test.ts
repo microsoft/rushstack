@@ -314,6 +314,118 @@ snapshots:
       // because the sub-dependency (bar) resolved to different versions
       expect(fooIntegrity1).not.toEqual(fooIntegrity2);
     });
+
+    it('includes workspace-local link: dependencies by recursing into their importer entries', () => {
+      // This test verifies that link: (workspace-local) dependencies are no longer filtered out.
+      // The shrinkwrap-deps.json for an importer should include hashes from its workspace
+      // dependencies' importer sections, all the way down the tree.
+
+      // Shrinkwrap with a root importer that depends on a workspace-local package (link:)
+      // and that local package itself depends on an external package
+      const shrinkwrapContent: string = `
+lockfileVersion: '9.0'
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+importers:
+  .:
+    dependencies:
+      my-lib:
+        specifier: workspace:*
+        version: link:projects/my-lib
+  projects/my-lib:
+    dependencies:
+      lodash:
+        specifier: ^4.17.0
+        version: 4.17.21
+packages:
+  lodash@4.17.21:
+    resolution:
+      integrity: sha512-lodash==
+snapshots:
+  lodash@4.17.21: {}
+`;
+
+      const shrinkwrapFile = PnpmShrinkwrapFile.loadFromString(shrinkwrapContent, {
+        subspaceHasNoProjects: false
+      });
+
+      PnpmShrinkwrapFile.clearCache();
+
+      const rootIntegrityMap = shrinkwrapFile.getIntegrityForImporter('.');
+
+      expect(rootIntegrityMap).toBeDefined();
+
+      // The root importer's integrity map should include the linked workspace package's importer entry
+      expect(rootIntegrityMap!.has('projects/my-lib')).toBe(true);
+
+      // It should also include the transitive external dependency of the linked package
+      expect(rootIntegrityMap!.has('lodash@4.17.21')).toBe(true);
+
+      // The integrity map for the workspace package importer itself should also be available
+      const libIntegrityMap = shrinkwrapFile.getIntegrityForImporter('projects/my-lib');
+      expect(libIntegrityMap).toBeDefined();
+      expect(libIntegrityMap!.has('projects/my-lib')).toBe(true);
+      expect(libIntegrityMap!.has('lodash@4.17.21')).toBe(true);
+    });
+
+    it('produces different hashes when a workspace-local dependency changes', () => {
+      // This test verifies that changing the dependencies of a workspace-local package
+      // causes the root importer's integrity to differ.
+
+      const baseContent = (lodashVersion: string): string => `
+lockfileVersion: '9.0'
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+importers:
+  .:
+    dependencies:
+      my-lib:
+        specifier: workspace:*
+        version: link:projects/my-lib
+  projects/my-lib:
+    dependencies:
+      lodash:
+        specifier: ^4.17.0
+        version: ${lodashVersion}
+packages:
+  ${lodashVersion === '4.17.21' ? 'lodash@4.17.21' : 'lodash@4.17.20'}:
+    resolution:
+      integrity: sha512-lodash${lodashVersion === '4.17.21' ? '21' : '20'}==
+snapshots:
+  ${lodashVersion === '4.17.21' ? 'lodash@4.17.21' : 'lodash@4.17.20'}: {}
+`;
+
+      const shrinkwrapFile1 = PnpmShrinkwrapFile.loadFromString(baseContent('4.17.21'), {
+        subspaceHasNoProjects: false
+      });
+      const shrinkwrapFile2 = PnpmShrinkwrapFile.loadFromString(baseContent('4.17.20'), {
+        subspaceHasNoProjects: false
+      });
+
+      PnpmShrinkwrapFile.clearCache();
+
+      const rootIntegrityMap1 = shrinkwrapFile1.getIntegrityForImporter('.');
+      const rootIntegrityMap2 = shrinkwrapFile2.getIntegrityForImporter('.');
+
+      expect(rootIntegrityMap1).toBeDefined();
+      expect(rootIntegrityMap2).toBeDefined();
+
+      // The root importer should have different integrity because the linked workspace
+      // package's dependencies changed
+      const rootIntegrity1 = rootIntegrityMap1!.get('.');
+      const rootIntegrity2 = rootIntegrityMap2!.get('.');
+
+      // The self-hash of '.' changes because the importer object itself doesn't change
+      // (it still references link:projects/my-lib), but the workspace lib's hash should differ
+      const libIntegrity1 = rootIntegrityMap1!.get('projects/my-lib');
+      const libIntegrity2 = rootIntegrityMap2!.get('projects/my-lib');
+
+      expect(libIntegrity1).toBeDefined();
+      expect(libIntegrity2).toBeDefined();
+      expect(libIntegrity1).not.toEqual(libIntegrity2);
+    });
   });
 
   describe('Check is workspace project modified', () => {
