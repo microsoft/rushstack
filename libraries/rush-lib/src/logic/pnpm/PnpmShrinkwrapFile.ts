@@ -911,15 +911,16 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (!integrityMap) {
       const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getImporter(importerKey);
       if (importer) {
-        integrityMap = new Map();
-        this._integrities.set(importerKey, integrityMap);
+        const resolvedIntegrityMap: Map<string, string> = new Map();
+        integrityMap = resolvedIntegrityMap;
+        this._integrities.set(importerKey, resolvedIntegrityMap);
 
         const sha256Digest: string = crypto
           .createHash('sha256')
           .update(JSON.stringify(importer))
           .digest('base64');
         const selfIntegrity: string = `${importerKey}:${sha256Digest}:`;
-        integrityMap.set(importerKey, selfIntegrity);
+        resolvedIntegrityMap.set(importerKey, selfIntegrity);
 
         const { dependencies, devDependencies, optionalDependencies } = importer;
 
@@ -931,26 +932,24 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
           for (const [name, versionSpecifier] of Object.entries(collection)) {
             const version: string = normalizePnpmVersionSpecifier(versionSpecifier);
             if (version.startsWith('link:')) {
-              // This is a workspace-local dependency; resolve it to an importer key and recurse
+              // This is a workspace-local dependency; resolve it to an importer key and recurse.
+              // The link: path is relative to the project folder (which is the importer key itself),
+              // so we join the importer key with the link path (not dirname).
+              // Lockfile paths are always POSIX, so we use path.posix helpers.
               const linkPath: string = version.slice('link:'.length);
-              const importerDir: string = path.dirname(importerKey);
-              const targetKey: string = Path.convertToSlashes(
-                path.normalize(path.join(importerDir, linkPath))
-              );
+              const targetKey: string = path.posix.normalize(path.posix.join(importerKey, linkPath));
               const linkedIntegrities: Map<string, string> | undefined =
                 this.getIntegrityForImporter(targetKey);
               if (linkedIntegrities) {
                 for (const [dep, integrity] of linkedIntegrities) {
-                  if (!integrityMap!.has(dep)) {
-                    integrityMap!.set(dep, integrity);
-                  }
+                  resolvedIntegrityMap.set(dep, integrity);
                 }
               }
             } else {
               externalDeps[name] = versionSpecifier;
             }
           }
-          this._addIntegrities(integrityMap!, externalDeps, optional);
+          this._addIntegrities(resolvedIntegrityMap, externalDeps, optional);
         };
 
         if (dependencies) {
