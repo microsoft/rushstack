@@ -239,6 +239,7 @@ export class EnvironmentConfiguration {
     static parseBooleanEnvironmentVariable(name: string, value: string | undefined): boolean | undefined;
     static get pnpmStorePathOverride(): string | undefined;
     static get pnpmVerifyStoreIntegrity(): boolean | undefined;
+    static get quietMode(): boolean;
     static reset(): void;
     static get rushGlobalFolderOverride(): string | undefined;
     static get rushTempFolderOverride(): string | undefined;
@@ -273,6 +274,7 @@ export const EnvironmentVariableNames: {
     readonly _RUSH_LIB_PATH: "_RUSH_LIB_PATH";
     readonly RUSH_INVOKED_FOLDER: "RUSH_INVOKED_FOLDER";
     readonly RUSH_INVOKED_ARGS: "RUSH_INVOKED_ARGS";
+    readonly RUSH_QUIET_MODE: "RUSH_QUIET_MODE";
 };
 
 // @beta
