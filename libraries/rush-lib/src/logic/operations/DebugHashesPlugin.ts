@@ -5,7 +5,7 @@ import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
 import type { Operation } from './Operation';
-import type { IConfigurableOperation } from './IOperationExecutionResult';
+import type { IConfigurableOperation, IOperationStateHashComponents } from './IOperationExecutionResult';
 
 const PLUGIN_NAME: 'DebugHashesPlugin' = 'DebugHashesPlugin';
 
@@ -25,9 +25,13 @@ export class DebugHashesPlugin implements IPhasedCommandPlugin {
           terminal.writeLine(Colorize.blue(`===== Begin Hash Computation =====`));
           for (const [operation, record] of operations) {
             terminal.writeLine(Colorize.cyan(`--- ${operation.name} ---`));
-            record.getStateHashComponents().forEach((component) => {
-              terminal.writeLine(component);
-            });
+            const { dependencies, local, config }: IOperationStateHashComponents =
+              record.getStateHashComponents();
+            for (const dep of dependencies) {
+              terminal.writeLine(dep);
+            }
+            terminal.writeLine(`local=${local}`);
+            terminal.writeLine(`config=${config}`);
             terminal.writeLine(Colorize.green(`Result: ${record.getStateHash()}`));
             // Add a blank line between operations to visually separate them
             terminal.writeLine();

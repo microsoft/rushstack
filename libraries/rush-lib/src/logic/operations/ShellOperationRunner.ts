@@ -10,7 +10,7 @@ import type { IPhase } from '../../api/CommandLineConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
-import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
+import type { IOperationRunner, IOperationRunnerContext, IOperationLastState } from './IOperationRunner';
 import { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
 
@@ -62,19 +62,10 @@ export class ShellOperationRunner implements IOperationRunner {
     this._ignoredParameterValues = options.ignoredParameterValues;
   }
 
-  public async executeAsync(context: IOperationRunnerContext, lastState?: {}): Promise<OperationStatus> {
-    try {
-      return await this._executeAsync(context, lastState);
-    } catch (error) {
-      throw new OperationError('executing', (error as Error).message);
-    }
-  }
-
-  public getConfigHash(): string {
-    return this._commandForHash;
-  }
-
-  private async _executeAsync(context: IOperationRunnerContext, lastState?: {}): Promise<OperationStatus> {
+  public async executeAsync(
+    context: IOperationRunnerContext,
+    lastState?: IOperationLastState
+  ): Promise<OperationStatus> {
     return await context.runWithTerminalAsync(
       async (terminal: ITerminal, terminalProvider: ITerminalProvider) => {
         let hasWarningOrError: boolean = false;
@@ -146,6 +137,10 @@ export class ShellOperationRunner implements IOperationRunner {
         createLogFile: true
       }
     );
+  }
+
+  public getConfigHash(): string {
+    return this._commandForHash;
   }
 }
 

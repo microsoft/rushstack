@@ -143,12 +143,17 @@ export type {
   IRushConfigurationProjectForSnapshot
 } from './logic/incremental/InputsSnapshot';
 
-export type { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
+export type {
+  IOperationRunner,
+  IOperationRunnerContext,
+  IOperationLastState
+} from './logic/operations/IOperationRunner';
 export type {
   IConfigurableOperation,
   IBaseOperationExecutionResult,
   IExecutionResult,
-  IOperationExecutionResult
+  IOperationExecutionResult,
+  IOperationStateHashComponents
 } from './logic/operations/IOperationExecutionResult';
 export { type IOperationOptions, type OperationEnabledState, Operation } from './logic/operations/Operation';
 export { type IParallelismScalar, type Parallelism } from './logic/operations/ParseParallelism';

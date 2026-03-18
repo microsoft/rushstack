@@ -4,9 +4,30 @@
 import type { StdioSummarizer, IProblemCollector } from '@rushstack/terminal';
 
 import type { OperationStatus } from './OperationStatus';
+import type { IOperationLastState } from './IOperationRunner';
 import type { Operation } from './Operation';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
 import type { ILogFilePaths } from './ProjectLogWritable';
+
+/**
+ * Structured components of the state hash for an operation.
+ * @alpha
+ */
+export interface IOperationStateHashComponents {
+  /**
+   * The state hashes of operation dependencies, sorted by name.
+   * Each entry is of the form `{dependencyName}={hash}`.
+   */
+  readonly dependencies: readonly string[];
+  /**
+   * The hash of the operation's own local inputs (e.g. tracked files, environment variables).
+   */
+  readonly local: string;
+  /**
+   * The hash of the operation's configuration (e.g. CLI parameters).
+   */
+  readonly config: string;
+}
 
 /**
  * @alpha
@@ -29,10 +50,11 @@ export interface IBaseOperationExecutionResult {
   getStateHash(): string;
 
   /**
-   * Gets the components of the state hash. This is useful for debugging purposes.
+   * Gets the structured components of the state hash. This is useful for debugging and
+   * incremental change detection.
    * Calling this method will throw if Git is not available.
    */
-  getStateHashComponents(): ReadonlyArray<string>;
+  getStateHashComponents(): IOperationStateHashComponents;
 }
 
 /**
@@ -51,7 +73,7 @@ export interface IConfigurableOperation extends IBaseOperationExecutionResult {
  * The `IOperationExecutionResult` interface represents the results of executing an {@link Operation}.
  * @alpha
  */
-export interface IOperationExecutionResult extends IBaseOperationExecutionResult {
+export interface IOperationExecutionResult extends IBaseOperationExecutionResult, IOperationLastState {
   /**
    * The current execution status of an operation. Operations start in the 'ready' state,
    * but can be 'blocked' if an upstream operation failed. It is 'executing' when

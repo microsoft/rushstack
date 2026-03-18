@@ -52,6 +52,22 @@ export interface IPromptGeneratorFunction {
  * Calling `waitForChange()` will return a promise that resolves when the package-deps of one or
  * more projects differ from the value the previous time it was invoked. The first time will always resolve with the full selection.
  */
+const KEY_QUIT: 'q' = 'q';
+const KEY_ABORT: 'a' = 'a';
+const KEY_INVALIDATE: 'i' = 'i';
+const KEY_CLOSE_RUNNERS: 'x' = 'x';
+const KEY_DEBUG: 'd' = 'd';
+const KEY_VERBOSE: 'v' = 'v';
+const KEY_PAUSE_RESUME: 'w' = 'w';
+const KEY_BUILD: 'b' = 'b';
+const KEY_PARALLELISM_UP: '+' = '+';
+const KEY_PARALLELISM_DOWN: '-' = '-';
+
+const KEYBIND_HELP: string =
+  `[${KEY_QUIT}]quit [${KEY_ABORT}]abort-iteration [${KEY_INVALIDATE}]invalidate ` +
+  `[${KEY_CLOSE_RUNNERS}]close-runners [${KEY_DEBUG}]debug [${KEY_VERBOSE}]verbose ` +
+  `[${KEY_PAUSE_RESUME}]pause/resume [${KEY_BUILD}]build [${KEY_PARALLELISM_UP}/${KEY_PARALLELISM_DOWN}]parallelism`;
+
 export class ProjectWatcher {
   private readonly _debounceMs: number;
   private readonly _rushConfiguration: RushConfiguration;
@@ -134,10 +150,7 @@ export class ProjectWatcher {
         ` debug:${em.debugMode ? 'on' : 'off'} verbose:${!em.quietMode ? 'on' : 'off'} parallel:${em.parallelism}`
       );
       // Second line: keybind help kept concise to avoid overwhelming output
-      lines.push(
-        ' keys(active): [q]quit [a]abort-iteration [i]invalidate [x]close-runners [d]debug ' +
-          '[v]verbose [w]pause/resume [b]build [+/-]parallelism'
-      );
+      lines.push(` keys(active): ${KEYBIND_HELP}`);
       statusLines.push(...lines.map((l) => `  ${l}`));
     }
     if (this._graph.status !== OperationStatus.Executing) {
@@ -151,22 +164,6 @@ export class ProjectWatcher {
     }
     this._lastStatus = status;
     this._terminal.writeLine(Colorize.bold(Colorize.cyan(statusLines.join('\n'))));
-  }
-
-  private static *_enumeratePathsToWatch(paths: Iterable<string>, prefixLength: number): Iterable<string> {
-    for (const path of paths) {
-      const rootSlashIndex: number = path.indexOf('/', prefixLength);
-      if (rootSlashIndex < 0) {
-        yield path;
-        return;
-      }
-      yield path.slice(0, rootSlashIndex);
-      let slashIndex: number = path.indexOf('/', rootSlashIndex + 1);
-      while (slashIndex >= 0) {
-        yield path.slice(0, slashIndex);
-        slashIndex = path.indexOf('/', slashIndex + 1);
-      }
-    }
   }
 
   private _startWatching(): void {
@@ -196,7 +193,7 @@ export class ProjectWatcher {
           continue;
         }
         const prefixLength: number = rushProject.projectFolder.length - repoRoot.length - 1;
-        for (const relPrefix of ProjectWatcher._enumeratePathsToWatch(tracked.keys(), prefixLength)) {
+        for (const relPrefix of _enumeratePathsToWatch(tracked.keys(), prefixLength)) {
           foldersToWatch.add(`${this._repoRoot}/${relPrefix}`);
         }
       }
@@ -338,47 +335,45 @@ export class ProjectWatcher {
     if (!chunk) return;
     for (const ch of chunk) {
       switch (ch) {
-        case 'q': // quit entire session
+        case KEY_QUIT:
         case '\u0003': // Ctrl+C
           this._terminal.writeLine('Aborting watch session...');
           this._graph.abortController.abort();
           return; // stop processing further chars
-        case 'a':
+        case KEY_ABORT:
           void manager.abortCurrentIterationAsync().then(() => {
             this._setStatus('Current iteration aborted');
           });
           break;
-        case 'i':
+        case KEY_INVALIDATE:
           manager.invalidateOperations(undefined, 'manual-invalidation');
           this._setStatus('All operations invalidated');
           break;
-        case 'x':
+        case KEY_CLOSE_RUNNERS:
           void manager.closeRunnersAsync().then(() => {
             this._setStatus('Closed all runners');
           });
           break;
-        case 'd':
+        case KEY_DEBUG:
           manager.debugMode = !manager.debugMode;
           this._setStatus(`Debug mode ${manager.debugMode ? 'enabled' : 'disabled'}`);
           break;
-        case 'v':
+        case KEY_VERBOSE:
           manager.quietMode = !manager.quietMode;
           this._setStatus(`Verbose mode ${!manager.quietMode ? 'enabled' : 'disabled'}`);
           break;
-        case 'w':
-          // Toggle pauseNextIteration mode
+        case KEY_PAUSE_RESUME:
           manager.pauseNextIteration = !manager.pauseNextIteration;
           this._setStatus(manager.pauseNextIteration ? 'Watch paused' : 'Watch resumed');
           break;
-        case '+':
+        case KEY_PARALLELISM_UP:
         case '=':
           this._adjustParallelism(1);
           break;
-        case '-':
+        case KEY_PARALLELISM_DOWN:
           this._adjustParallelism(-1);
           break;
-        case 'b':
-          // Queue and (if manual) execute
+        case KEY_BUILD:
           void manager.scheduleIterationAsync({ startTime: performance.now() }).then((queued) => {
             if (queued) {
               if (manager.pauseNextIteration === true) {
@@ -407,6 +402,22 @@ export class ProjectWatcher {
       this._setStatus(`Parallelism set to ${effective}`);
     } else {
       this._setStatus(`Parallelism remains ${effective}`);
+    }
+  }
+}
+
+function* _enumeratePathsToWatch(paths: Iterable<string>, prefixLength: number): Iterable<string> {
+  for (const path of paths) {
+    const rootSlashIndex: number = path.indexOf('/', prefixLength);
+    if (rootSlashIndex < 0) {
+      yield path;
+      return;
+    }
+    yield path.slice(0, rootSlashIndex);
+    let slashIndex: number = path.indexOf('/', rootSlashIndex + 1);
+    while (slashIndex >= 0) {
+      yield path.slice(0, slashIndex);
+      slashIndex = path.indexOf('/', slashIndex + 1);
     }
   }
 }
