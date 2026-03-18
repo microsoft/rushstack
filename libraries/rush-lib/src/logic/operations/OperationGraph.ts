@@ -147,7 +147,19 @@ export class OperationGraph implements IOperationGraph {
   public readonly abortController: AbortController;
 
   public resultByOperation: Map<Operation, OperationExecutionRecord>;
-  private readonly _options: IOperationGraphOptions;
+
+  // Mutable properties extracted from options
+  private _parallelism: number;
+  private _maxParallelism: number;
+  private _debugMode: boolean;
+  private _quietMode: boolean;
+  private _allowOversubscription: boolean;
+  private _pauseNextIteration: boolean;
+
+  // Immutable properties from options
+  private readonly _isWatch: boolean;
+  private readonly _telemetry: IOperationGraphTelemetry | undefined;
+  private readonly _getInputsSnapshotAsync: (() => Promise<IInputsSnapshot | undefined>) | undefined;
 
   /**
    * Records invalidated during the current iteration that could not be marked `Ready` immediately
@@ -167,15 +179,35 @@ export class OperationGraph implements IOperationGraph {
   private _status: OperationStatus = OperationStatus.Ready;
 
   public constructor(operations: Set<Operation>, options: IOperationGraphOptions) {
+    const {
+      debugMode,
+      quietMode,
+      parallelism,
+      allowOversubscription,
+      destinations,
+      maxParallelism = getNumberOfCores(),
+      abortController,
+      isWatch = false,
+      pauseNextIteration = false,
+      telemetry,
+      getInputsSnapshotAsync
+    } = options;
+
     this.operations = operations;
-    options.maxParallelism ??= getNumberOfCores();
-    options.parallelism = coerceParallelism(options.parallelism, options.maxParallelism!, 1);
-    this._options = options;
-    this._terminalSplitter = new SplitterTransform({
-      destinations: options.destinations
-    });
+
+    this._maxParallelism = maxParallelism;
+    this._parallelism = coerceParallelism(parallelism, maxParallelism, 1);
+    this._debugMode = debugMode;
+    this._quietMode = quietMode;
+    this._allowOversubscription = allowOversubscription;
+    this._pauseNextIteration = pauseNextIteration;
+    this._isWatch = isWatch;
+    this._telemetry = telemetry;
+    this._getInputsSnapshotAsync = getInputsSnapshotAsync;
+
+    this._terminalSplitter = new SplitterTransform({ destinations });
     this.resultByOperation = new Map();
-    this.abortController = options.abortController;
+    this.abortController = abortController;
 
     this.abortController.signal.addEventListener(
       'abort',
@@ -280,58 +312,52 @@ export class OperationGraph implements IOperationGraph {
   }
 
   public get parallelism(): number {
-    // After construction, parallelism is always coerced to a concrete number.
-    return this._options.parallelism as number;
+    return this._parallelism;
   }
   public set parallelism(value: Parallelism) {
-    const coerced: number = coerceParallelism(value, this._options.maxParallelism!, 1);
-    const oldValue: number = this.parallelism;
-    if (coerced !== oldValue) {
-      this._options.parallelism = coerced;
+    const coerced: number = coerceParallelism(value, this._maxParallelism, 1);
+    if (coerced !== this._parallelism) {
+      this._parallelism = coerced;
       this._scheduleManagerStateChanged();
     }
   }
 
   public get debugMode(): boolean {
-    return this._options.debugMode;
+    return this._debugMode;
   }
   public set debugMode(value: boolean) {
-    const oldValue: boolean = this.debugMode;
-    if (value !== oldValue) {
-      this._options.debugMode = value;
+    if (value !== this._debugMode) {
+      this._debugMode = value;
       this._scheduleManagerStateChanged();
     }
   }
 
   public get quietMode(): boolean {
-    return this._options.quietMode;
+    return this._quietMode;
   }
   public set quietMode(value: boolean) {
-    const oldValue: boolean = this.quietMode;
-    if (value !== oldValue) {
-      this._options.quietMode = value;
+    if (value !== this._quietMode) {
+      this._quietMode = value;
       this._scheduleManagerStateChanged();
     }
   }
 
   public get allowOversubscription(): boolean {
-    return this._options.allowOversubscription;
+    return this._allowOversubscription;
   }
   public set allowOversubscription(value: boolean) {
-    const oldValue: boolean = this.allowOversubscription;
-    if (value !== oldValue) {
-      this._options.allowOversubscription = value;
+    if (value !== this._allowOversubscription) {
+      this._allowOversubscription = value;
       this._scheduleManagerStateChanged();
     }
   }
 
   public get pauseNextIteration(): boolean {
-    return !!this._options.pauseNextIteration;
+    return this._pauseNextIteration;
   }
   public set pauseNextIteration(value: boolean) {
-    const oldValue: boolean = this.pauseNextIteration;
-    if (value !== oldValue) {
-      this._options.pauseNextIteration = value;
+    if (value !== this._pauseNextIteration) {
+      this._pauseNextIteration = value;
       this._scheduleManagerStateChanged();
 
       this._setIdleTimeout();
@@ -545,7 +571,7 @@ export class OperationGraph implements IOperationGraph {
   private async _scheduleIterationAsync(
     iterationOptions: IOperationGraphIterationOptions
   ): Promise<IExecutionIterationContext | undefined> {
-    const { getInputsSnapshotAsync } = this._options;
+    const { _getInputsSnapshotAsync: getInputsSnapshotAsync } = this;
 
     const { startTime = performance.now(), inputsSnapshot = await getInputsSnapshotAsync?.() } =
       iterationOptions;
@@ -586,7 +612,7 @@ export class OperationGraph implements IOperationGraph {
       streamCollator,
       terminal,
       inputsSnapshot,
-      maxParallelism: this._options.maxParallelism!,
+      maxParallelism: this._maxParallelism,
       onOperationStateChanged: undefined,
       createEnvironment: createEnvironmentForOperation,
       invalidate: (operations: Iterable<Operation>, reason: string) => {
@@ -856,10 +882,10 @@ export class OperationGraph implements IOperationGraph {
       })) ?? status
     );
 
-    const { telemetry } = this._options;
+    const { _telemetry: telemetry } = this;
     if (telemetry) {
       const logEntry: ITelemetryData = measureFn(`${PERF_PREFIX}:prepareTelemetry`, () => {
-        const { isWatch = false } = this._options;
+        const isWatch: boolean = this._isWatch;
         const jsonOperationResults: Record<string, ITelemetryOperationResult> = {};
 
         const durationInSeconds: number = (performance.now() - (iterationContext.startTime ?? 0)) / 1000;
