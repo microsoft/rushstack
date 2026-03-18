@@ -27,8 +27,9 @@ import { OperationMetadataManager } from './OperationMetadataManager';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { IOperationExecutionResult, IOperationStateHashComponents } from './IOperationExecutionResult';
 import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
+import { OperationError } from './OperationError';
 import { RushConstants } from '../RushConstants';
 import type { IEnvironment } from '../../utilities/Utilities';
 import {
@@ -158,7 +159,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   private _collatedWriter: CollatedWriter | undefined = undefined;
   private _status: OperationStatus;
   private _stateHash: string | undefined;
-  private _stateHashComponents: ReadonlyArray<string> | undefined;
+  private _stateHashComponents: IOperationStateHashComponents | undefined;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
     const { runner, associatedPhase, associatedProject, enabled } = operation;
@@ -261,12 +262,14 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   public getStateHash(): string {
     if (this._stateHash === undefined) {
-      const components: readonly string[] = this.getStateHashComponents();
+      const { dependencies, local, config } = this.getStateHashComponents();
 
       const hasher: crypto.Hash = crypto.createHash('sha1');
-      components.forEach((component) => {
-        hasher.update(`${RushConstants.hashDelimiter}${component}`);
-      });
+      for (const dep of dependencies) {
+        hasher.update(`${RushConstants.hashDelimiter}${dep}`);
+      }
+      hasher.update(`${RushConstants.hashDelimiter}local=${local}`);
+      hasher.update(`${RushConstants.hashDelimiter}config=${config}`);
 
       const hash: string = hasher.digest('hex');
       this._stateHash = hash;
@@ -274,7 +277,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     return this._stateHash;
   }
 
-  public getStateHashComponents(): ReadonlyArray<string> {
+  public getStateHashComponents(): IOperationStateHashComponents {
     if (!this._stateHashComponents) {
       const { inputsSnapshot } = this._context;
 
@@ -290,7 +293,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
       // The final state hashes of operation dependencies are factored into the hash to ensure that any
       // state changes in dependencies will invalidate the cache.
-      const components: string[] = Array.from(this.dependencies, (record) => {
+      const dependencies: string[] = Array.from(this.dependencies, (record) => {
         return `${record.name}=${record.getStateHash()}`;
       }).sort();
 
@@ -300,17 +303,13 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       // - Git hashes of tracked files in the associated project
       // - Git hash of the shrinkwrap file for the project
       // - Git hashes of any files specified in `dependsOnAdditionalFiles` (must not be associated with a project)
-      const localStateHash: string = inputsSnapshot.getOperationOwnStateHash(
-        associatedProject,
-        associatedPhase.name
-      );
-      components.push(`local=${localStateHash}`);
+      const local: string = inputsSnapshot.getOperationOwnStateHash(associatedProject, associatedPhase.name);
 
       // Examples of data in the config hash:
       // - CLI parameters (ShellOperationRunner)
-      const configHash: string = this.runner.getConfigHash();
-      components.push(`config=${configHash}`);
-      this._stateHashComponents = components;
+      const config: string = this.runner.getConfigHash();
+
+      this._stateHashComponents = { dependencies, local, config };
     }
     return this._stateHashComponents;
   }
@@ -442,7 +441,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       await executeContext.onResultAsync(this);
     } catch (error) {
       this.status = OperationStatus.Failure;
-      this.error = error;
+      this.error =
+        error instanceof OperationError ? error : new OperationError('executing', (error as Error).message);
       // Make sure that the stopwatch is stopped before reporting the result, otherwise endTime is undefined.
       this.stopwatch.stop();
       // Delegate global state reporting

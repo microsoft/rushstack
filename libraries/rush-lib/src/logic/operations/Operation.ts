@@ -146,13 +146,13 @@ export class Operation {
   public enabled: OperationEnabledState;
 
   public constructor(options: IOperationOptions) {
-    const { phase, project, runner, settings, logFilenameIdentifier } = options;
+    const { phase, project, runner, settings, logFilenameIdentifier, enabled = true } = options;
     this.associatedPhase = phase;
     this.associatedProject = project;
     this.runner = runner;
     this.settings = settings;
     this.logFilenameIdentifier = logFilenameIdentifier;
-    this.enabled = options.enabled ?? true;
+    this.enabled = enabled;
     this.weight = _getFinalWeight(
       settings?.weight ?? 1,
       runner?.name ?? `${project.packageName} (${phase.name}`

@@ -272,7 +272,15 @@ export interface IOperationGraph {
 }
 
 /**
- * Hooks into the execution process for phased commands
+ * Hooks into the execution process for phased commands.
+ *
+ * Lifecycle:
+ * 1. `createOperationsAsync` - Invoked to populate the set of operations for execution.
+ * 2. `onGraphCreatedAsync` - Invoked after the operation graph is created, allowing plugins to
+ *    tap into graph-level hooks (e.g. `configureIteration`, `onWaitingForChanges`).
+ * 3. The graph executes operations. In watch mode, steps 2's hooks drive subsequent iterations.
+ * 4. `beforeLog` - Invoked after each execution iteration completes, before writing telemetry.
+ *
  * @alpha
  */
 export class PhasedCommandHooks {
@@ -297,7 +305,21 @@ export class PhasedCommandHooks {
 }
 
 /**
- * Hooks into the execution process for operations
+ * Hooks into the execution process for operations within the graph.
+ *
+ * Per-iteration lifecycle:
+ * 1. `configureIteration` - Synchronously decide which operations to enable for the next iteration.
+ * 2. `onIterationScheduled` - Fires after the iteration is prepared but before execution begins, if it has any enabled operations.
+ * 3. `beforeExecuteIterationAsync` - Async hook that can bail out the iteration entirely.
+ * 4. Operations execute (status changes reported via `onExecutionStatesUpdated`).
+ * 5. `afterExecuteIterationAsync` - Fires after all operations in the iteration have settled.
+ * 6. `onWaitingForChanges` - Fires when the graph enters idle state (watch mode only).
+ *
+ * Additional hooks:
+ * - `onEnableStatesChanged` - Fires when `setEnabledStates` mutates operation enabled flags.
+ * - `onInvalidateOperations` - Fires when operations are invalidated (e.g. by file watchers).
+ * - `onGraphStateChanged` - Fires on any observable graph state change.
+ *
  * @alpha
  */
 export class OperationGraphHooks {
