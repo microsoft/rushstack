@@ -10,6 +10,18 @@ import type { IStopwatchResult } from '../../utilities/Stopwatch';
 import type { IEnvironment } from '../../utilities/Utilities';
 
 /**
+ * A snapshot of a previous operation execution, passed to runners to inform incremental behavior.
+ *
+ * @beta
+ */
+export interface IOperationLastState {
+  /**
+   * The status from the previous execution of this operation.
+   */
+  readonly status: OperationStatus;
+}
+
+/**
  * Information passed to the executing `IOperationRunner`
  *
  * @beta
@@ -131,7 +143,7 @@ export interface IOperationRunner {
    * @param context - The context object containing information about the execution environment.
    * @param lastState - The last execution result of this operation, if any.
    */
-  executeAsync(context: IOperationRunnerContext, lastState?: {}): Promise<OperationStatus>;
+  executeAsync(context: IOperationRunnerContext, lastState?: IOperationLastState): Promise<OperationStatus>;
 
   /**
    * Return a hash of the configuration that affects the operation.

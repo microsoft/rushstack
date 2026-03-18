@@ -13,7 +13,11 @@ import type {
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { IOperationSettings } from '../../api/RushProjectConfiguration';
-import type { IConfigurableOperation, IOperationExecutionResult } from './IOperationExecutionResult';
+import type {
+  IConfigurableOperation,
+  IOperationExecutionResult,
+  IOperationStateHashComponents
+} from './IOperationExecutionResult';
 import { SUCCESS_STATUSES } from './OperationStatus';
 import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 
@@ -151,21 +155,25 @@ function shouldEnableOperation(
     return true;
   }
 
-  const currentHashComponents: ReadonlyArray<string> = currentState.getStateHashComponents();
-  const lastHashComponents: ReadonlyArray<string> = lastState.getStateHashComponents();
-  if (currentHashComponents.length !== lastHashComponents.length) {
+  const current: IOperationStateHashComponents = currentState.getStateHashComponents();
+  const last: IOperationStateHashComponents = lastState.getStateHashComponents();
+
+  // Always compare local and config hashes
+  if (current.local !== last.local || current.config !== last.config) {
     return true;
   }
 
   const localChangesOnly: boolean = currentState.operation.enabled === 'ignore-dependency-changes';
+  if (localChangesOnly) {
+    return false;
+  }
 
-  // In localChangesOnly mode, we ignore the components that come from dependencies, which are all but the last two
-  for (
-    let i: number = localChangesOnly ? currentHashComponents.length - 2 : 0;
-    i < currentHashComponents.length;
-    i++
-  ) {
-    if (currentHashComponents[i] !== lastHashComponents[i]) {
+  // Compare dependency hashes
+  if (current.dependencies.length !== last.dependencies.length) {
+    return true;
+  }
+  for (let i: number = 0; i < current.dependencies.length; i++) {
+    if (current.dependencies[i] !== last.dependencies[i]) {
       return true;
     }
   }

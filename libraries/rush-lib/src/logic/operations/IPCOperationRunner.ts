@@ -17,7 +17,7 @@ import type { IPhase } from '../../api/CommandLineConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
-import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
+import type { IOperationRunner, IOperationRunnerContext, IOperationLastState } from './IOperationRunner';
 import { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
 
@@ -83,7 +83,10 @@ export class IPCOperationRunner implements IOperationRunner {
     return !!(this._ipcProcess && !this._ipcProcess.killed && typeof this._ipcProcess.exitCode !== 'number');
   }
 
-  public async executeAsync(context: IOperationRunnerContext, lastState?: {}): Promise<OperationStatus> {
+  public async executeAsync(
+    context: IOperationRunnerContext,
+    lastState?: IOperationLastState
+  ): Promise<OperationStatus> {
     const commandToRun: string =
       lastState && this._incrementalCommand ? this._incrementalCommand : this._initialCommand;
     const invalidate: (reason: string) => void = context.getInvalidateCallback();
