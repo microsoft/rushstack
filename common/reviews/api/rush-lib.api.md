@@ -337,7 +337,7 @@ export type GetInputsSnapshotAsyncFn = () => Promise<IInputsSnapshot | undefined
 // @alpha (undocumented)
 export interface IBaseOperationExecutionResult {
     getStateHash(): string;
-    getStateHashComponents(): ReadonlyArray<string>;
+    getStateHashComponents(): IOperationStateHashComponents;
     readonly metadataFolderPath: string | undefined;
     readonly operation: Operation;
 }
@@ -602,7 +602,7 @@ export interface _IOperationBuildCacheOptions {
 }
 
 // @alpha
-export interface IOperationExecutionResult extends IBaseOperationExecutionResult {
+export interface IOperationExecutionResult extends IBaseOperationExecutionResult, IOperationLastState {
     readonly enabled: boolean;
     readonly error: Error | undefined;
     readonly logFilePaths: ILogFilePaths | undefined;
@@ -651,6 +651,11 @@ export interface IOperationGraphIterationOptions {
     startTime?: number;
 }
 
+// @beta
+export interface IOperationLastState {
+    readonly status: OperationStatus;
+}
+
 // @internal (undocumented)
 export interface _IOperationMetadata {
     // (undocumented)
@@ -687,7 +692,7 @@ export interface IOperationOptions {
 export interface IOperationRunner {
     cacheable: boolean;
     closeAsync?(): Promise<void>;
-    executeAsync(context: IOperationRunnerContext, lastState?: {}): Promise<OperationStatus>;
+    executeAsync(context: IOperationRunnerContext, lastState?: IOperationLastState): Promise<OperationStatus>;
     getConfigHash(): string;
     readonly isActive?: boolean;
     readonly isNoOp?: boolean;
@@ -736,6 +741,13 @@ export interface _IOperationStateFileOptions {
     metadataFolder: string;
     // (undocumented)
     projectFolder: string;
+}
+
+// @alpha
+export interface IOperationStateHashComponents {
+    readonly config: string;
+    readonly dependencies: readonly string[];
+    readonly local: string;
 }
 
 // @internal (undocumented)
