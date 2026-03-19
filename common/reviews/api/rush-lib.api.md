@@ -334,7 +334,7 @@ export type GetInputsSnapshotAsyncFn = () => Promise<IInputsSnapshot | undefined
 export interface IBaseOperationExecutionResult {
     getStateHash(): string;
     getStateHashComponents(): IOperationStateHashComponents;
-    readonly metadataFolderPath: string | undefined;
+    readonly metadataFolderPath: string;
     readonly operation: Operation;
 }
 
