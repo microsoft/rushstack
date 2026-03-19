@@ -248,7 +248,7 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
   );
 
   command.hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph) => {
-    graph.hooks.onWaitingForChanges.tap(PLUGIN_NAME, logHost);
+    graph.hooks.onIdle.tap(PLUGIN_NAME, logHost);
   });
 }
 
