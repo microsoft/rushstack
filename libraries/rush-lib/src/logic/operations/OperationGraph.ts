@@ -564,7 +564,7 @@ export class OperationGraph implements IOperationGraph {
     if (!this.pauseNextIteration && this._scheduledIteration) {
       void this.executeScheduledIterationAsync();
     } else {
-      this.hooks.onWaitingForChanges.call();
+      this.hooks.onIdle.call();
     }
   };
 
@@ -1001,6 +1001,7 @@ export class OperationGraph implements IOperationGraph {
         return innerLogEntry;
       });
 
+      measureFn(`${PERF_PREFIX}:beforeLog`, () => this.hooks.beforeLog.call(logEntry));
       telemetry.log(logEntry);
     }
 

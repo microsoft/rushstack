@@ -106,7 +106,7 @@ export interface ICreateOperationsContext {
 }
 
 /**
- * Context used for configuring the manager.
+ * Context used for configuring the operation graph.
  * @alpha
  */
 export interface IOperationGraphContext extends ICreateOperationsContext {
@@ -141,7 +141,7 @@ export interface IOperationGraph {
   readonly hooks: OperationGraphHooks;
 
   /**
-   * The set of operations that the manager is aware of.
+   * The set of operations in the graph.
    */
   readonly operations: ReadonlySet<Operation>;
 
@@ -211,7 +211,8 @@ export interface IOperationGraph {
   readonly abortController: AbortController;
 
   /**
-   * Abort the current execution iteration, if any.
+   * Abort the current execution iteration, if any. Operations that have already started
+   * will run to completion; only operations that have not yet begun will be aborted.
    */
   abortCurrentIterationAsync(): Promise<void>;
 
@@ -247,7 +248,8 @@ export interface IOperationGraph {
    *
    * @param operations - The operations whose enabled state should be updated.
    * @param targetState - The target enabled state to apply.
-   * @param mode - 'unsafe' to directly mutate only the provided operations, 'safe' to apply dependency-aware logic.
+   * @param mode - 'unsafe' to directly mutate only the provided operations, 'safe' to also enable
+   * transitive dependencies of enabled operations and disable transitive dependents of disabled operations.
    * @returns true if any operation's enabled state changed, false otherwise.
    */
   setEnabledStates(
@@ -277,9 +279,8 @@ export interface IOperationGraph {
  * Lifecycle:
  * 1. `createOperationsAsync` - Invoked to populate the set of operations for execution.
  * 2. `onGraphCreatedAsync` - Invoked after the operation graph is created, allowing plugins to
- *    tap into graph-level hooks (e.g. `configureIteration`, `onWaitingForChanges`).
- * 3. The graph executes operations. In watch mode, steps 2's hooks drive subsequent iterations.
- * 4. `beforeLog` - Invoked after each execution iteration completes, before writing telemetry.
+ *    tap into graph-level hooks (e.g. `configureIteration`, `onIdle`).
+ *    See {@link OperationGraphHooks} for the per-iteration lifecycle.
  *
  * @alpha
  */
@@ -292,16 +293,10 @@ export class PhasedCommandHooks {
   > = new AsyncSeriesWaterfallHook(['operations', 'context'], 'createOperationsAsync');
 
   /**
-   * Hook invoked when the execution graph (manager) is created, allowing the plugin to tap into it and interact with it.
+   * Hook invoked when the operation graph is created, allowing the plugin to tap into it and interact with it.
    */
   public readonly onGraphCreatedAsync: AsyncSeriesHook<[IOperationGraph, IOperationGraphContext]> =
     new AsyncSeriesHook(['operationGraph', 'context'], 'onGraphCreatedAsync');
-
-  /**
-   * Hook invoked after executing operations and before waitingForChanges. Allows the caller
-   * to augment or modify the log entry about to be written.
-   */
-  public readonly beforeLog: SyncHook<ITelemetryData, void> = new SyncHook(['telemetryData'], 'beforeLog');
 }
 
 /**
@@ -313,7 +308,7 @@ export class PhasedCommandHooks {
  * 3. `beforeExecuteIterationAsync` - Async hook that can bail out the iteration entirely.
  * 4. Operations execute (status changes reported via `onExecutionStatesUpdated`).
  * 5. `afterExecuteIterationAsync` - Fires after all operations in the iteration have settled.
- * 6. `onWaitingForChanges` - Fires when the graph enters idle state (watch mode only).
+ * 6. `onIdle` - Fires when the graph enters idle state awaiting changes (watch mode only).
  *
  * Additional hooks:
  * - `onEnableStatesChanged` - Fires when `setEnabledStates` mutates operation enabled flags.
@@ -410,7 +405,7 @@ export class OperationGraphHooks {
    * May be used to display additional relevant data to the user.
    * Only relevant when running in watch mode.
    */
-  public readonly onWaitingForChanges: SyncHook<void> = new SyncHook(undefined, 'onWaitingForChanges');
+  public readonly onIdle: SyncHook<void> = new SyncHook(undefined, 'onIdle');
 
   /**
    * Hook invoked after executing a set of operations.
@@ -419,6 +414,12 @@ export class OperationGraphHooks {
   public readonly afterExecuteIterationAsync: AsyncSeriesWaterfallHook<
     [OperationStatus, ReadonlyMap<Operation, IOperationExecutionResult>, IOperationGraphIterationOptions]
   > = new AsyncSeriesWaterfallHook(['status', 'results', 'context'], 'afterExecuteIterationAsync');
+
+  /**
+   * Hook invoked after executing an iteration, before the telemetry entry is written.
+   * Allows the caller to augment or modify the log entry.
+   */
+  public readonly beforeLog: SyncHook<ITelemetryData, void> = new SyncHook(['telemetryData'], 'beforeLog');
 
   /**
    * Hook invoked before executing a operation.

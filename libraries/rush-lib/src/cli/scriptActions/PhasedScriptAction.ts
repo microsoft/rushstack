@@ -600,7 +600,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           },
           nameForLog: this.actionName,
           log: (logEntry: ITelemetryData) => {
-            measureFn(`${PERF_PREFIX}:beforeLog`, () => hooks.beforeLog.call(logEntry));
             parserTelemetry.log(logEntry);
             parserTelemetry.flush();
           }

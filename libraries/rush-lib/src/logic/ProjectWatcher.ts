@@ -111,7 +111,7 @@ export class ProjectWatcher {
     );
 
     // Start watching once execution loop enters waiting state
-    graph.hooks.onWaitingForChanges.tap('ProjectWatcher', () => {
+    graph.hooks.onIdle.tap('ProjectWatcher', () => {
       this._startWatching();
     });
 
