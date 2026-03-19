@@ -694,7 +694,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     let success: boolean = false;
     let result: IExecutionResult | undefined;
 
-    if (iterationOptions.startTime) {
+    if (iterationOptions.startTime !== undefined) {
       (stopwatch as { startTime: number }).startTime = iterationOptions.startTime;
     }
 
