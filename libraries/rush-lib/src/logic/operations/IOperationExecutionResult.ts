@@ -41,7 +41,7 @@ export interface IBaseOperationExecutionResult {
   /**
    * The relative path to the folder that contains operation metadata. This folder will be automatically included in cache entries.
    */
-  readonly metadataFolderPath: string | undefined;
+  readonly metadataFolderPath: string;
 
   /**
    * Gets the hash of the state of all registered inputs to this operation.

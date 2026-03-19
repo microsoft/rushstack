@@ -156,9 +156,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
                 'or one provided by a rig, so it does not support caching.';
 
-            const metadataFolderPath: string | undefined = record.metadataFolderPath;
-
-            const outputFolderNames: string[] = metadataFolderPath ? [metadataFolderPath] : [];
+            const outputFolderNames: string[] = [record.metadataFolderPath];
             const configuredOutputFolderNames: string[] | undefined = operationSettings?.outputFolderNames;
             if (configuredOutputFolderNames) {
               for (const folderName of configuredOutputFolderNames) {
