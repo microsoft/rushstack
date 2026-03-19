@@ -44,14 +44,11 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
     const terminal: ITerminal = this._terminal;
 
-    hooks.onGraphCreatedAsync.tap(
-      PLUGIN_NAME,
-      (manager: IOperationGraph, context: IOperationGraphContext) => {
-        manager.hooks.configureIteration.tap(PLUGIN_NAME, (currentStates, lastStates, iterationOptions) => {
-          createBuildPlan(currentStates, iterationOptions, context);
-        });
-      }
-    );
+    hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph: IOperationGraph, context: IOperationGraphContext) => {
+      graph.hooks.configureIteration.tap(PLUGIN_NAME, (currentStates, lastStates, iterationOptions) => {
+        createBuildPlan(currentStates, iterationOptions, context);
+      });
+    });
 
     function createBuildPlan(
       recordByOperation: ReadonlyMap<Operation, IConfigurableOperation>,
