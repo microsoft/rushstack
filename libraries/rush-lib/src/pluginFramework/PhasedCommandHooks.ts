@@ -231,7 +231,6 @@ export interface IOperationGraph {
 
   /**
    * Executes all operations in the currently scheduled iteration, if any.
-   * Call `abortCurrentIterationAsync()` to cancel the execution of any operations that have not yet begun execution.
    * @returns A promise which is resolved when all operations have been processed to a final state.
    */
   executeScheduledIterationAsync(): Promise<boolean>;
