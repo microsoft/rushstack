@@ -42,16 +42,6 @@ export interface IPromptGeneratorFunction {
   (isPaused: boolean): Iterable<string>;
 }
 
-/**
- * This class is for incrementally watching a set of projects in the repository for changes.
- *
- * We are manually using fs.watch() instead of `chokidar` because all we want from the file system watcher is a boolean
- * signal indicating that "at least 1 file in a watched project changed". We then defer to getInputsSnapshotAsync (which
- * is responsible for change detection in all incremental builds) to determine what actually chanaged.
- *
- * Calling `waitForChange()` will return a promise that resolves when the package-deps of one or
- * more projects differ from the value the previous time it was invoked. The first time will always resolve with the full selection.
- */
 const KEY_QUIT: 'q' = 'q';
 const KEY_ABORT: 'a' = 'a';
 const KEY_INVALIDATE: 'i' = 'i';
@@ -68,6 +58,13 @@ const KEYBIND_HELP: string =
   `[${KEY_CLOSE_RUNNERS}]close-runners [${KEY_DEBUG}]debug [${KEY_VERBOSE}]verbose ` +
   `[${KEY_PAUSE_RESUME}]pause/resume [${KEY_BUILD}]build [${KEY_PARALLELISM_UP}/${KEY_PARALLELISM_DOWN}]parallelism`;
 
+/**
+ * Watches a set of projects in the repository for file changes and triggers
+ * rebuild iterations on the operation graph.
+ *
+ * Uses `fs.watch()` rather than `chokidar` because only a boolean "something changed"
+ * signal is needed; actual change detection is deferred to `getInputsSnapshotAsync`.
+ */
 export class ProjectWatcher {
   private readonly _debounceMs: number;
   private readonly _rushConfiguration: RushConfiguration;
@@ -101,7 +98,7 @@ export class ProjectWatcher {
     this._ensureStdin();
 
     // Capture snapshot (if provided) prior to executing next iteration (will replace initial snapshot)
-    this._graph.hooks.beforeExecuteIterationAsync.tapPromise(
+    graph.hooks.beforeExecuteIterationAsync.tapPromise(
       'ProjectWatcher',
       async (
         records: ReadonlyMap<Operation, unknown>,
@@ -114,12 +111,12 @@ export class ProjectWatcher {
     );
 
     // Start watching once execution loop enters waiting state
-    this._graph.hooks.onWaitingForChanges.tap('ProjectWatcher', () => {
+    graph.hooks.onWaitingForChanges.tap('ProjectWatcher', () => {
       this._startWatching();
     });
 
     // Dispose stdin listener when session aborts
-    this._graph.abortController.signal.addEventListener(
+    graph.abortController.signal.addEventListener(
       'abort',
       () => {
         this._disposeStdin();
@@ -128,32 +125,44 @@ export class ProjectWatcher {
     );
   }
 
+  /**
+   * Resets the rendered line count so the next status update does not attempt
+   * to overwrite previously rendered lines.
+   */
   public clearStatus(): void {
     this._renderedStatusLines = 0;
   }
 
+  /**
+   * Re-renders the most recent status line (or a default) in place.
+   */
   public rerenderStatus(): void {
     this._setStatus(this._lastStatus ?? 'Waiting for changes...');
   }
 
+  /**
+   * Renders the given status message to the terminal, preceded by mode indicators
+   * and keybind help when stdin is active. Overwrites previously rendered status lines
+   * when not mid-execution.
+   */
   private _setStatus(status: string): void {
-    const isPaused: boolean = this._graph.pauseNextIteration === true;
-    const hasScheduledIteration: boolean = this._graph.hasScheduledIteration;
+    const graph: IOperationGraph = this._graph;
+    const isPaused: boolean = graph.pauseNextIteration === true;
+    const hasScheduledIteration: boolean = graph.hasScheduledIteration;
     const modeLabel: string = isPaused ? 'PAUSED' : 'WATCHING';
     const pendingLabel: string = hasScheduledIteration ? ' PENDING' : '';
     const statusLines: string[] = [`[${modeLabel}${pendingLabel}] Watch Status: ${status}`];
     if (this._stdinListening) {
-      const em: IOperationGraph = this._graph;
       const lines: string[] = [];
       // First line: modes
       lines.push(
-        ` debug:${em.debugMode ? 'on' : 'off'} verbose:${!em.quietMode ? 'on' : 'off'} parallel:${em.parallelism}`
+        ` debug:${graph.debugMode ? 'on' : 'off'} verbose:${!graph.quietMode ? 'on' : 'off'} parallel:${graph.parallelism}`
       );
       // Second line: keybind help kept concise to avoid overwhelming output
       lines.push(` keys(active): ${KEYBIND_HELP}`);
       statusLines.push(...lines.map((l) => `  ${l}`));
     }
-    if (this._graph.status !== OperationStatus.Executing) {
+    if (graph.status !== OperationStatus.Executing) {
       // If rendering during execution, don't try to clean previous output.
       if (this._renderedStatusLines > 0) {
         readline.cursorTo(process.stdout, 0);
@@ -166,12 +175,16 @@ export class ProjectWatcher {
     this._terminal.writeLine(Colorize.bold(Colorize.cyan(statusLines.join('\n'))));
   }
 
+  /**
+   * Begins watching the file system for changes in all tracked project folders.
+   * On platforms without native recursive watch support (Linux), enumerates nested
+   * folders from the last snapshot to set up individual watchers.
+   */
   private _startWatching(): void {
     if (this._isWatching) {
       return;
     }
     this._isWatching = true;
-    // leverage manager's abort controller so that aborting the session halts watchers
     const sessionAbortSignal: AbortSignal = this._graph.abortController.signal;
     const repoRoot: string = Path.convertToSlashes(this._rushConfiguration.rushJsonFolder);
     const useNativeRecursiveWatch: boolean = os.platform() === 'win32' || os.platform() === 'darwin';
@@ -217,7 +230,7 @@ export class ProjectWatcher {
             recursive: recursive && useNativeRecursiveWatch,
             signal: sessionAbortSignal
           },
-          (eventType, fileName) => this._onFsEvent(watchedPath, fileName)
+          (eventType, fileName) => this._onFsEvent(fileName)
         );
         watchers.set(watchedPath, watcher);
         this._closePromises.push(
@@ -247,6 +260,9 @@ export class ProjectWatcher {
     this._setStatus('Waiting for changes...');
   }
 
+  /**
+   * Closes all active file system watchers and waits for their close events to settle.
+   */
   private async _stopWatchingAsync(): Promise<void> {
     if (!this._isWatching) {
       return;
@@ -267,7 +283,11 @@ export class ProjectWatcher {
     this._terminal.writeDebugLine('ProjectWatcher: watchers stopped');
   }
 
-  private _onFsEvent(root: string, fileName: string | null): void {
+  /**
+   * Handles a raw file system event by debouncing and scheduling an iteration.
+   * Ignores changes to `.git` and `node_modules`.
+   */
+  private _onFsEvent(fileName: string | null): void {
     if (fileName === '.git' || fileName === 'node_modules') {
       return;
     }
@@ -277,16 +297,22 @@ export class ProjectWatcher {
     this._debounceHandle = setTimeout(() => this._scheduleIteration(), this._debounceMs);
   }
 
+  /**
+   * Schedules a new execution iteration on the graph in response to detected file changes.
+   */
   private _scheduleIteration(): void {
     this._setStatus('File change detected. Queuing new iteration...');
     this._graph
-      .scheduleIterationAsync({} as IOperationGraphIterationOptions)
+      .scheduleIterationAsync({})
       .catch((e: unknown) =>
         this._terminal.writeErrorLine(`Failed to queue iteration: ${(e as Error).message}`)
       );
   }
 
-  /** Setup stdin listener for interactive keybinds */
+  /**
+   * Sets up a raw-mode stdin listener so the user can interact with the watch session
+   * via single-key keybinds. Captures the previous raw-mode state for restoration on dispose.
+   */
   private _ensureStdin(): void {
     if (this._stdinListening || !process.stdin.isTTY) {
       return;
@@ -311,6 +337,9 @@ export class ProjectWatcher {
     this._stdinListening = true;
   }
 
+  /**
+   * Removes the stdin listener and restores the previous raw-mode state.
+   */
   private _disposeStdin(): void {
     if (!this._stdinListening) {
       return;
@@ -329,55 +358,68 @@ export class ProjectWatcher {
     this._stdinListening = false;
   }
 
+  /**
+   * Processes a chunk of stdin data, dispatching each character to the appropriate
+   * keybind action on the operation graph.
+   */
   private _onStdinData(chunk: string): void {
-    const manager: IOperationGraph = this._graph;
-    // Handle control characters
+    const graph: IOperationGraph = this._graph;
     if (!chunk) return;
     for (const ch of chunk) {
       switch (ch) {
         case KEY_QUIT:
-        case '\u0003': // Ctrl+C
+        case '\u0003': {
+          // Ctrl+C
           this._terminal.writeLine('Aborting watch session...');
-          this._graph.abortController.abort();
+          graph.abortController.abort();
           return; // stop processing further chars
-        case KEY_ABORT:
-          void manager.abortCurrentIterationAsync().then(() => {
+        }
+        case KEY_ABORT: {
+          void graph.abortCurrentIterationAsync().then(() => {
             this._setStatus('Current iteration aborted');
           });
           break;
-        case KEY_INVALIDATE:
-          manager.invalidateOperations(undefined, 'manual-invalidation');
+        }
+        case KEY_INVALIDATE: {
+          graph.invalidateOperations(undefined, 'manual-invalidation');
           this._setStatus('All operations invalidated');
           break;
-        case KEY_CLOSE_RUNNERS:
-          void manager.closeRunnersAsync().then(() => {
+        }
+        case KEY_CLOSE_RUNNERS: {
+          void graph.closeRunnersAsync().then(() => {
             this._setStatus('Closed all runners');
           });
           break;
-        case KEY_DEBUG:
-          manager.debugMode = !manager.debugMode;
-          this._setStatus(`Debug mode ${manager.debugMode ? 'enabled' : 'disabled'}`);
+        }
+        case KEY_DEBUG: {
+          graph.debugMode = !graph.debugMode;
+          this._setStatus(`Debug mode ${graph.debugMode ? 'enabled' : 'disabled'}`);
           break;
-        case KEY_VERBOSE:
-          manager.quietMode = !manager.quietMode;
-          this._setStatus(`Verbose mode ${!manager.quietMode ? 'enabled' : 'disabled'}`);
+        }
+        case KEY_VERBOSE: {
+          graph.quietMode = !graph.quietMode;
+          this._setStatus(`Verbose mode ${!graph.quietMode ? 'enabled' : 'disabled'}`);
           break;
-        case KEY_PAUSE_RESUME:
-          manager.pauseNextIteration = !manager.pauseNextIteration;
-          this._setStatus(manager.pauseNextIteration ? 'Watch paused' : 'Watch resumed');
+        }
+        case KEY_PAUSE_RESUME: {
+          graph.pauseNextIteration = !graph.pauseNextIteration;
+          this._setStatus(graph.pauseNextIteration ? 'Watch paused' : 'Watch resumed');
           break;
+        }
         case KEY_PARALLELISM_UP:
-        case '=':
+        case '=': {
           this._adjustParallelism(1);
           break;
-        case KEY_PARALLELISM_DOWN:
+        }
+        case KEY_PARALLELISM_DOWN: {
           this._adjustParallelism(-1);
           break;
-        case KEY_BUILD:
-          void manager.scheduleIterationAsync({ startTime: performance.now() }).then((queued) => {
+        }
+        case KEY_BUILD: {
+          void graph.scheduleIterationAsync({ startTime: performance.now() }).then((queued) => {
             if (queued) {
-              if (manager.pauseNextIteration === true) {
-                void manager.executeScheduledIterationAsync();
+              if (graph.pauseNextIteration === true) {
+                void graph.executeScheduledIterationAsync();
               }
               this._setStatus('Build iteration queued');
             } else {
@@ -385,27 +427,33 @@ export class ProjectWatcher {
             }
           });
           break;
-        default:
+        }
+        default: {
           // ignore other keys
           break;
+        }
       }
     }
   }
 
+  /**
+   * Adjusts the parallelism on the operation graph by the given delta
+   * and reports the result.
+   */
   private _adjustParallelism(delta: number): void {
-    const manager: IOperationGraph = this._graph;
-    const current: number = manager.parallelism;
-    const requested: number = current + delta;
-    manager.parallelism = requested; // setter will clamp/normalize
-    const effective: number = manager.parallelism;
-    if (effective !== current) {
-      this._setStatus(`Parallelism set to ${effective}`);
-    } else {
-      this._setStatus(`Parallelism remains ${effective}`);
-    }
+    const graph: IOperationGraph = this._graph;
+    const previous: number = graph.parallelism;
+    graph.parallelism = previous + delta; // setter will clamp/normalize
+    const effective: number = graph.parallelism;
+    this._setStatus(`Parallelism ${effective !== previous ? 'set to' : 'remains'} ${effective}`);
   }
 }
 
+/**
+ * Given an iterable of repo-relative file paths, yields the set of directory prefixes
+ * that should be watched to cover those files. Used on platforms without native recursive
+ * watch support to enumerate nested folders.
+ */
 function* _enumeratePathsToWatch(paths: Iterable<string>, prefixLength: number): Iterable<string> {
   for (const path of paths) {
     const rootSlashIndex: number = path.indexOf('/', prefixLength);
