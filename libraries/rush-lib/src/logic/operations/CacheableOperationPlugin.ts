@@ -33,12 +33,11 @@ import type { Operation } from './Operation';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type {
-  IOperationGraph,
   IOperationGraphContext,
-  IOperationGraphIterationOptions,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
+import type { IOperationGraph, IOperationGraphIterationOptions } from './IOperationGraph';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';

@@ -4,12 +4,11 @@
 import type { ITerminal } from '@rushstack/terminal';
 
 import type {
-  IOperationGraph,
   IOperationGraphContext,
-  IOperationGraphIterationOptions,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
+import type { IOperationGraph, IOperationGraphIterationOptions } from './IOperationGraph';
 import type { Operation } from './Operation';
 import { clusterOperations, type IOperationBuildCacheContext } from './CacheableOperationPlugin';
 import { DisjointSet } from '../cobuild/DisjointSet';

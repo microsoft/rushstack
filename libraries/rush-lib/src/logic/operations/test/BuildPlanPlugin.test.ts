@@ -7,9 +7,9 @@ import { JsonFile } from '@rushstack/node-core-library';
 import { BuildPlanPlugin } from '../BuildPlanPlugin';
 import {
   type ICreateOperationsContext,
+  type IOperationGraphContext as IOperationExecutionManagerContext,
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
-import type { IOperationGraphContext as IOperationExecutionManagerContext } from '../../../pluginFramework/PhasedCommandHooks';
 import type { Operation } from '../Operation';
 import { RushConfiguration } from '../../../api/RushConfiguration';
 import {

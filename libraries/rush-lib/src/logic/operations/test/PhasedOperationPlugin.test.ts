@@ -14,10 +14,11 @@ import { RushConstants } from '../../RushConstants';
 import { MockOperationRunner } from './MockOperationRunner';
 import {
   type ICreateOperationsContext,
-  OperationGraphHooks,
+  type IOperationGraphContext,
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
-import type { IOperationGraph, IOperationGraphContext } from '../../../pluginFramework/PhasedCommandHooks';
+import type { IOperationGraph } from '../IOperationGraph';
+import { OperationGraphHooks } from '../../../pluginFramework/OperationGraphHooks';
 type IOperationExecutionManager = IOperationGraph;
 type IOperationExecutionManagerContext = IOperationGraphContext;
 

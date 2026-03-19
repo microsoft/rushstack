@@ -14,7 +14,7 @@ import { Git } from './Git';
 import type { IInputsSnapshot } from './incremental/InputsSnapshot';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import type { IOperationGraph, IOperationGraphIterationOptions } from '../pluginFramework/PhasedCommandHooks';
+import type { IOperationGraph, IOperationGraphIterationOptions } from './operations/IOperationGraph';
 import type { Operation } from './operations/Operation';
 import { OperationStatus } from './operations/OperationStatus';
 
@@ -366,13 +366,19 @@ export class ProjectWatcher {
     const graph: IOperationGraph = this._graph;
     if (!chunk) return;
     for (const ch of chunk) {
+      // Once aborted, only respond to Ctrl+C (force exit)
+      if (graph.abortController.signal.aborted) {
+        if (ch === '\u0003') {
+          process.exit(1);
+        }
+        continue;
+      }
       switch (ch) {
-        case KEY_QUIT:
-        case '\u0003': {
-          // Ctrl+C
-          this._terminal.writeLine('Aborting watch session...');
+        case '\u0003':
+        case KEY_QUIT: {
+          this._terminal.writeLine('Aborting watch session... (Ctrl+C to force exit)');
           graph.abortController.abort();
-          return; // stop processing further chars
+          break;
         }
         case KEY_ABORT: {
           void graph.abortCurrentIterationAsync().then(() => {
