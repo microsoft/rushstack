@@ -17,11 +17,11 @@ import {
 } from '../IgnoredParametersPlugin';
 import {
   type ICreateOperationsContext,
-  type IOperationGraph,
   type IOperationGraphContext,
-  OperationGraphHooks,
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
+import type { IOperationGraph } from '../IOperationGraph';
+import { OperationGraphHooks } from '../../../pluginFramework/OperationGraphHooks';
 import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
 import type { IEnvironment } from '../../../utilities/Utilities';
 import type { IOperationRunnerContext } from '../IOperationRunner';

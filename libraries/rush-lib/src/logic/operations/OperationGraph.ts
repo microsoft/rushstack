@@ -24,11 +24,8 @@ import type { IExecutionResult } from './IOperationExecutionResult';
 import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 import type { IEnvironment } from '../../utilities/Utilities';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
-import {
-  type IOperationGraph,
-  type IOperationGraphIterationOptions,
-  OperationGraphHooks
-} from '../../pluginFramework/PhasedCommandHooks';
+import type { IOperationGraph, IOperationGraphIterationOptions } from './IOperationGraph';
+import { OperationGraphHooks } from '../../pluginFramework/OperationGraphHooks';
 import { type Parallelism, coerceParallelism, getNumberOfCores } from './ParseParallelism';
 import { measureAsyncFn, measureFn } from '../../utilities/performance';
 import type { ITelemetryData, ITelemetryOperationResult } from '../Telemetry';
@@ -145,6 +142,7 @@ export class OperationGraph implements IOperationGraph {
   public readonly hooks: OperationGraphHooks = new OperationGraphHooks();
   public readonly operations: Set<Operation>;
   public readonly abortController: AbortController;
+  private readonly _sortedOperations: readonly Operation[];
 
   public resultByOperation: Map<Operation, OperationExecutionRecord>;
 
@@ -205,6 +203,7 @@ export class OperationGraph implements IOperationGraph {
     this._telemetry = telemetry;
     this._getInputsSnapshotAsync = getInputsSnapshotAsync;
 
+    this._sortedOperations = Array.from(operations).sort(sortOperationsByName);
     this._terminalSplitter = new SplitterTransform({ destinations });
     this.resultByOperation = new Map();
     this.abortController = abortController;
@@ -596,8 +595,7 @@ export class OperationGraph implements IOperationGraph {
       onWriterActive
     });
 
-    // Sort the operations by name to ensure consistency and readability.
-    const sortedOperations: Operation[] = Array.from(this.operations).sort(sortOperationsByName);
+    const sortedOperations: readonly Operation[] = this._sortedOperations;
 
     const graph: OperationGraph = this;
 

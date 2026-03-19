@@ -176,13 +176,12 @@ export {
 
 export {
   type ICreateOperationsContext,
-  type IOperationGraphIterationOptions,
   type IOperationGraphContext,
-  type IOperationGraph,
   type IPhasedCommandPlugin,
-  PhasedCommandHooks,
-  OperationGraphHooks
+  PhasedCommandHooks
 } from './pluginFramework/PhasedCommandHooks';
+export type { IOperationGraph, IOperationGraphIterationOptions } from './logic/operations/IOperationGraph';
+export { OperationGraphHooks } from './pluginFramework/OperationGraphHooks';
 
 export type { IRushPlugin } from './pluginFramework/IRushPlugin';
 export type { IBuiltInPluginConfiguration as _IBuiltInPluginConfiguration } from './pluginFramework/PluginLoader/BuiltInPluginLoader';
