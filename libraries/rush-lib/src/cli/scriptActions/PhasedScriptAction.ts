@@ -617,7 +617,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       };
 
       const abortPromise: Promise<void> = once(this.sessionAbortController.signal, 'abort').then(() => {
-        terminal.writeLine(`Exiting watch mode...`);
+        terminal.writeLine(`Shutting down Rush...`);
         return graph.abortCurrentIterationAsync();
       });
 
