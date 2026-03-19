@@ -1091,6 +1091,7 @@ export class OperationGraphHooks {
     readonly beforeExecuteOperationAsync: AsyncSeriesBailHook<[
     IOperationRunnerContext & IOperationExecutionResult
     ], OperationStatus | undefined>;
+    readonly beforeLog: SyncHook<ITelemetryData, void>;
     readonly configureIteration: SyncHook<[
     ReadonlyMap<Operation, IConfigurableOperation>,
     ReadonlyMap<Operation, IOperationExecutionResult>,
@@ -1103,9 +1104,9 @@ export class OperationGraphHooks {
     readonly onEnableStatesChanged: SyncHook<[ReadonlySet<Operation>]>;
     readonly onExecutionStatesUpdated: SyncHook<[ReadonlySet<IOperationExecutionResult>]>;
     readonly onGraphStateChanged: SyncHook<[IOperationGraph]>;
+    readonly onIdle: SyncHook<void>;
     readonly onInvalidateOperations: SyncHook<[Iterable<Operation>, string | undefined]>;
     readonly onIterationScheduled: SyncHook<[ReadonlyMap<Operation, IOperationExecutionResult>]>;
-    readonly onWaitingForChanges: SyncHook<void>;
 }
 
 // @internal
@@ -1240,7 +1241,6 @@ export type Parallelism = number | IParallelismScalar;
 
 // @alpha
 export class PhasedCommandHooks {
-    readonly beforeLog: SyncHook<ITelemetryData, void>;
     readonly createOperationsAsync: AsyncSeriesWaterfallHook<[
     Set<Operation>,
     ICreateOperationsContext

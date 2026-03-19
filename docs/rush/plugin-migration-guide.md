@@ -13,9 +13,9 @@ This guide covers the breaking changes to the Rush plugin API for phased command
 | `PhasedCommandHooks.beforeExecuteOperation` | `operationGraph.hooks.beforeExecuteOperationAsync` |
 | `PhasedCommandHooks.afterExecuteOperation` | `operationGraph.hooks.afterExecuteOperationAsync` |
 | `PhasedCommandHooks.createEnvironmentForOperation` | `operationGraph.hooks.createEnvironmentForOperation` |
-| `PhasedCommandHooks.waitingForChanges` | `operationGraph.hooks.onWaitingForChanges` |
+| `PhasedCommandHooks.waitingForChanges` | `operationGraph.hooks.onIdle` |
 | `PhasedCommandHooks.shutdownAsync` | `IOperationGraph.abortController` signal + `closeRunnersAsync()` |
-| `PhasedCommandHooks.beforeLog` | **Unchanged** — still on `PhasedCommandHooks` |
+| `PhasedCommandHooks.beforeLog` | `operationGraph.hooks.beforeLog` |
 | `IExecuteOperationsContext` | `IOperationGraphIterationOptions` (iteration scope) + `IOperationGraphContext` (session scope) |
 | `WeightedOperationPlugin` | Removed — weight assignment is now part of `PhasedOperationPlugin` |
 
@@ -90,7 +90,7 @@ export class MyPlugin implements IPhasedCommandPlugin {
         // runs after a single operation
       });
 
-      graph.hooks.onWaitingForChanges.tap(PLUGIN_NAME, () => {
+      graph.hooks.onIdle.tap(PLUGIN_NAME, () => {
         // watch mode idle
       });
     });
@@ -243,7 +243,7 @@ hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph) => {
 });
 ```
 
-### `waitingForChanges` → `operationGraph.hooks.onWaitingForChanges`
+### `waitingForChanges` → `operationGraph.hooks.onIdle`
 
 The hook has moved to the graph and been renamed with the standard `on` prefix.
 
@@ -253,7 +253,7 @@ hooks.waitingForChanges.tap(PLUGIN_NAME, () => { });
 
 // After
 hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph) => {
-  graph.hooks.onWaitingForChanges.tap(PLUGIN_NAME, () => { });
+  graph.hooks.onIdle.tap(PLUGIN_NAME, () => { });
 });
 ```
 

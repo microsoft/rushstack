@@ -78,7 +78,7 @@ Plugins that tap `onGraphCreatedAsync` should register their hooks on `operation
 - `status: OperationStatus` — the overall outcome (`Success`, `Failure`, `NoOp`, etc.)
 - `operationResults: ReadonlyMap<Operation, IOperationExecutionResult>` — per-operation results for the iteration
 
-**Watch mode:** `graph.executeAsync(iterationOptions)` returns a `Promise<IExecutionResult>` for the **initial** iteration only. After that promise resolves, a `ProjectWatcher` observes file system changes. When changes are detected (after a debounce), `ProjectWatcher` calls `graph.scheduleIterationAsync(...)`, which queues a new iteration. Subsequent iterations are driven internally and their results are available via `graph.resultByOperation`. After each iteration completes with no queued work, `graph.hooks.onWaitingForChanges` fires and the graph enters an idle state until the next change.
+**Watch mode:** `graph.executeAsync(iterationOptions)` returns a `Promise<IExecutionResult>` for the **initial** iteration only. After that promise resolves, a `ProjectWatcher` observes file system changes. When changes are detected (after a debounce), `ProjectWatcher` calls `graph.scheduleIterationAsync(...)`, which queues a new iteration. Subsequent iterations are driven internally and their results are available via `graph.resultByOperation`. After each iteration completes with no queued work, `graph.hooks.onIdle` fires and the graph enters an idle state until the next change.
 
 ---
 
@@ -133,7 +133,7 @@ AsyncSeriesWaterfallHook<[
 
 Fires after all operations in an iteration have reached a final state. Taps may modify the `OperationStatus` that is returned.
 
-#### `onWaitingForChanges` (Sync)
+#### `onIdle` (Sync)
 
 Fires when the graph is idle and watching for file changes. Only relevant in watch mode.
 
@@ -408,7 +408,7 @@ export class MyPlugin implements IPhasedCommandPlugin {
         return status;
       });
 
-      graph.hooks.onWaitingForChanges.tap('MyPlugin', () => {
+      graph.hooks.onIdle.tap('MyPlugin', () => {
         // Display idle status
       });
 

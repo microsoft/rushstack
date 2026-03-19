@@ -657,8 +657,8 @@ describe('OperationGraph', () => {
         const passQueuedCalls: ReadonlyMap<Operation, IOperationExecutionResult>[] = [];
         graph.hooks.onIterationScheduled.tap('test', (records) => passQueuedCalls.push(records));
 
-        const waitingForChangesCalls: number[] = [];
-        graph.hooks.onWaitingForChanges.tap('test', () => waitingForChangesCalls.push(1));
+        const idleCalls: number[] = [];
+        graph.hooks.onIdle.tap('test', () => idleCalls.push(1));
 
         const queued: boolean = await graph.scheduleIterationAsync({});
         expect(queued).toBe(true);
@@ -669,7 +669,7 @@ describe('OperationGraph', () => {
 
         // Flush the idle timeout. Since pauseNextIteration is true, execution should NOT start automatically.
         jest.runAllTimers();
-        expect(waitingForChangesCalls.length).toBe(1);
+        expect(idleCalls.length).toBe(1);
         expect(runFn).not.toHaveBeenCalled();
 
         // Now manually execute the scheduled iteration
