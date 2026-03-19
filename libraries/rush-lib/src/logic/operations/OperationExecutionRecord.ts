@@ -231,8 +231,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     };
   }
 
-  public get metadataFolderPath(): string | undefined {
-    return this._operationMetadataManager?.metadataFolderPath;
+  public get metadataFolderPath(): string {
+    return this._operationMetadataManager.metadataFolderPath;
   }
 
   public get isTerminal(): boolean {
