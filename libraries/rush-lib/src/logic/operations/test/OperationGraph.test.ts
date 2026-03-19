@@ -54,8 +54,8 @@ import type { IExecutionResult, IOperationExecutionResult } from '../IOperationE
 import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalProvider';
 import type { CobuildConfiguration } from '../../../api/CobuildConfiguration';
 import type { OperationStateFile } from '../OperationStateFile';
-import type { IOperationGraphIterationOptions } from '../../../pluginFramework/PhasedCommandHooks';
-import type { IOperationGraph } from '../../../pluginFramework/PhasedCommandHooks';
+import type { IOperationGraphIterationOptions } from '../IOperationGraph';
+import type { IOperationGraph } from '../IOperationGraph';
 
 const mockGetTimeInMs: jest.Mock = jest.fn();
 Utilities.getTimeInMs = mockGetTimeInMs;

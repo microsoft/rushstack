@@ -8,11 +8,8 @@ import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
-import type {
-  IOperationGraphIterationOptions,
-  IPhasedCommandPlugin,
-  PhasedCommandHooks
-} from '../../pluginFramework/PhasedCommandHooks';
+import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
+import type { IOperationGraphIterationOptions } from './IOperationGraph';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 

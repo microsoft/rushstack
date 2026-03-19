@@ -6,12 +6,11 @@ import type { IPhase } from '../../api/CommandLineConfiguration';
 import { Operation, type OperationEnabledState } from './Operation';
 import type {
   ICreateOperationsContext,
-  IOperationGraph,
   IOperationGraphContext,
-  IOperationGraphIterationOptions,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
+import type { IOperationGraph, IOperationGraphIterationOptions } from './IOperationGraph';
 import type { IOperationSettings } from '../../api/RushProjectConfiguration';
 import type {
   IConfigurableOperation,

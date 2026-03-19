@@ -17,10 +17,10 @@ import type { Subspace } from '../../api/Subspace';
 import type { IPhasedCommand } from '../../pluginFramework/RushLifeCycle';
 import {
   type IOperationGraphContext,
-  type IOperationGraphIterationOptions,
   PhasedCommandHooks,
   type ICreateOperationsContext
 } from '../../pluginFramework/PhasedCommandHooks';
+import type { IOperationGraphIterationOptions } from '../../logic/operations/IOperationGraph';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAction';
@@ -615,9 +615,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         initialSnapshot
       };
 
-      const abortPromise: Promise<void> = once(this.sessionAbortController.signal, 'abort').then(() => {
+      const abortPromise: Promise<void> = once(this.sessionAbortController.signal, 'abort').then(async () => {
         terminal.writeLine(`Shutting down Rush...`);
-        return graph.abortCurrentIterationAsync();
+        return await graph.abortCurrentIterationAsync();
       });
 
       await measureAsyncFn(`${PERF_PREFIX}:executionManager`, async () => {
