@@ -401,9 +401,6 @@ export class OperationGraph implements IOperationGraph {
         const record: OperationExecutionRecord | undefined = recordMap.get(operation);
         promises.push(
           operation.runner.closeAsync().then(() => {
-            if (this.abortController.signal.aborted) {
-              return;
-            }
             if (record) {
               // Collect for batched notification
               closedRecords.add(record);
@@ -413,6 +410,9 @@ export class OperationGraph implements IOperationGraph {
       }
     }
     await Promise.all(promises);
+    if (this.abortController.signal.aborted) {
+      return;
+    }
     if (closedRecords.size) {
       this.hooks.onExecutionStatesUpdated.call(closedRecords);
     }
