@@ -63,7 +63,7 @@ import { InitSubspaceAction } from './actions/InitSubspaceAction';
 import { RushAlerts } from '../utilities/RushAlerts';
 import { initializeDotEnv } from '../logic/dotenv';
 import { measureAsyncFn } from '../utilities/performance';
-import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -221,10 +221,18 @@ export class RushCommandLineParser extends CommandLineParser {
       }
     }
 
-    const quietModeValue: string | undefined =
-      process.env[EnvironmentVariableNames.RUSH_QUIET_MODE];
-    if (quietModeValue === '1' || quietModeValue === 'true') {
-      return true;
+    // If EnvironmentConfiguration has already been initialized, use it to get the quiet mode value.
+    // Otherwise, read directly from process.env because this method may be called before dotenv
+    // files are loaded and EnvironmentConfiguration is validated (e.g. from Rush.launch()).
+    if (EnvironmentConfiguration.hasBeenValidated) {
+      if (EnvironmentConfiguration.quietMode) {
+        return true;
+      }
+    } else {
+      const quietModeValue: string | undefined = process.env[EnvironmentVariableNames.RUSH_QUIET_MODE];
+      if (quietModeValue === '1' || quietModeValue === 'true') {
+        return true;
+      }
     }
 
     return false;

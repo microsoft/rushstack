@@ -625,7 +625,10 @@ export class EnvironmentConfiguration {
           }
 
           case EnvironmentVariableNames.RUSH_QUIET_MODE: {
-            // Accept both "true"/"false" string values and the standard "1"/"0" values
+            // Accept "true"/"false" string values in addition to the standard "1"/"0" values because
+            // install-run-rush.ts, RushCommandLineParser, and RushXCommandLine read this variable
+            // directly from process.env (before EnvironmentConfiguration is initialized) and also
+            // accept "true" as a truthy value. The two code paths must agree on accepted values.
             if (value === 'true' || value === 'false') {
               EnvironmentConfiguration._quietMode = value === 'true';
             } else {

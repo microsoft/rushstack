@@ -15,15 +15,17 @@ const {
 import type { ILogger } from '../utilities/npmrcUtilities';
 
 const PACKAGE_NAME: string = '@microsoft/rush';
-const RUSH_PREVIEW_VERSION: string = 'RUSH_PREVIEW_VERSION';
-const RUSH_QUIET_MODE: string = 'RUSH_QUIET_MODE';
+const RUSH_PREVIEW_VERSION_ENV_VAR_NAME: string = 'RUSH_PREVIEW_VERSION';
+const RUSH_QUIET_MODE_ENV_VAR_NAME: string = 'RUSH_QUIET_MODE';
 const INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE: 'INSTALL_RUN_RUSH_LOCKFILE_PATH' =
   'INSTALL_RUN_RUSH_LOCKFILE_PATH';
 
 function _getRushVersion(logger: ILogger): string {
-  const rushPreviewVersion: string | undefined = process.env[RUSH_PREVIEW_VERSION];
+  const rushPreviewVersion: string | undefined = process.env[RUSH_PREVIEW_VERSION_ENV_VAR_NAME];
   if (rushPreviewVersion !== undefined) {
-    logger.info(`Using Rush version from environment variable ${RUSH_PREVIEW_VERSION}=${rushPreviewVersion}`);
+    logger.info(
+      `Using Rush version from environment variable ${RUSH_PREVIEW_VERSION_ENV_VAR_NAME}=${rushPreviewVersion}`
+    );
     return rushPreviewVersion;
   }
 
@@ -74,7 +76,9 @@ function _run(): void {
 
   let commandFound: boolean = false;
 
-  const quietModeEnvValue: string | undefined = process.env[RUSH_QUIET_MODE];
+  // This is a bootstrap script that runs before rush-lib is loaded. EnvironmentConfiguration is not
+  // available here, so we read the environment variable directly.
+  const quietModeEnvValue: string | undefined = process.env[RUSH_QUIET_MODE_ENV_VAR_NAME];
   let quiet: boolean = quietModeEnvValue === '1' || quietModeEnvValue === 'true';
 
   for (const arg of packageBinArgs) {

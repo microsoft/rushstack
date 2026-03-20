@@ -295,6 +295,8 @@ export class RushXCommandLine {
       }
     }
 
+    // This method is called at the start of launchRushXAsync(), before RushConfiguration.loadFromConfigurationFile()
+    // initializes EnvironmentConfiguration. We must read process.env directly here.
     const quietModeValue: string | undefined =
       process.env[EnvironmentVariableNames.RUSH_QUIET_MODE];
     if (quietModeValue === '1' || quietModeValue === 'true') {
