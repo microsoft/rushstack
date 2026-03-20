@@ -293,7 +293,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   }
 
   public async runAsync(): Promise<void> {
-    const stopwatch: Stopwatch = Stopwatch.start();
+    // Initialize the stopwatch's start time at 0 (process startup).
+    const stopwatch: Stopwatch = Stopwatch.start(0);
 
     if (this._alwaysInstall || this._installParameter?.value) {
       await measureAsyncFn(`${PERF_PREFIX}:install`, async () => {
@@ -633,9 +634,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       };
 
       const initialIterationOptions: IOperationGraphIterationOptions = {
-        inputsSnapshot: initialSnapshot,
-        // Mark as starting at time 0, which is process startup.
-        startTime: 0
+        inputsSnapshot: initialSnapshot
       };
       if (isWatch) {
         if (!initialSnapshot) {
@@ -693,10 +692,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
     let success: boolean = false;
     let result: IExecutionResult | undefined;
-
-    if (iterationOptions.startTime !== undefined) {
-      (stopwatch as { startTime: number }).startTime = iterationOptions.startTime;
-    }
 
     try {
       const definiteResult: IExecutionResult = await measureAsyncFn(
