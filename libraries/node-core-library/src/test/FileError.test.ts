@@ -29,7 +29,7 @@ describe(FileError.name, () => {
       absolutePath: `/path/to/project/path/to/file`,
       projectFolder: '/path/to/project'
     });
-    expect(error1.toString()).toMatchInlineSnapshot(`"path/to/file:1 - message"`);
+    expect(error1.toString()).toMatchInlineSnapshot(`"path/to/file - message"`);
   });
 
   it('correctly performs Unix-style relative file path formatting', () => {
@@ -59,7 +59,7 @@ describe(FileError.name, () => {
       column: 12
     });
     expect(error3.getFormattedErrorMessage({ format: 'Unix' })).toMatchInlineSnapshot(
-      `"path/to/file:1:12 - message"`
+      `"path/to/file - message"`
     );
 
     const error4: FileError = new FileError('message', {
@@ -67,7 +67,7 @@ describe(FileError.name, () => {
       projectFolder: '/path/to/project'
     });
     expect(error4.getFormattedErrorMessage({ format: 'Unix' })).toMatchInlineSnapshot(
-      `"path/to/file:1 - message"`
+      `"path/to/file - message"`
     );
   });
 
@@ -106,8 +106,8 @@ describe(FileError.name, () => {
     // Because the file path is resolved on disk, the output will vary based on platform.
     // Only check that it ends as expected and is an absolute path.
     const error3Message: string = error3.getFormattedErrorMessage({ format: 'Unix' });
-    expect(error3Message).toMatch(/.+:1:12 - message$/);
-    const error3Path: string = error3Message.slice(0, error3Message.length - ':1:12 - message'.length);
+    expect(error3Message).toMatch(/.+ - message$/);
+    const error3Path: string = error3Message.slice(0, error3Message.length - ' - message'.length);
     expect(path.isAbsolute(error3Path)).toEqual(true);
 
     const error4: FileError = new FileError('message', {
@@ -117,8 +117,8 @@ describe(FileError.name, () => {
     // Because the file path is resolved on disk, the output will vary based on platform.
     // Only check that it ends as expected and is an absolute path.
     const error4Message: string = error4.getFormattedErrorMessage({ format: 'Unix' });
-    expect(error4Message).toMatch(/.+:1 - message$/);
-    const error4Path: string = error4Message.slice(0, error4Message.length - ':1 - message'.length);
+    expect(error4Message).toMatch(/.+ - message$/);
+    const error4Path: string = error4Message.slice(0, error4Message.length - ' - message'.length);
     expect(path.isAbsolute(error4Path)).toEqual(true);
   });
 
@@ -149,7 +149,7 @@ describe(FileError.name, () => {
       column: 12
     });
     expect(error3.getFormattedErrorMessage({ format: 'VisualStudio' })).toMatchInlineSnapshot(
-      `"path/to/file(1,12) - message"`
+      `"path/to/file - message"`
     );
 
     const error4: FileError = new FileError('message', {
@@ -157,7 +157,7 @@ describe(FileError.name, () => {
       projectFolder: '/path/to/project'
     });
     expect(error4.getFormattedErrorMessage({ format: 'VisualStudio' })).toMatchInlineSnapshot(
-      `"path/to/file(1) - message"`
+      `"path/to/file - message"`
     );
   });
 
@@ -196,8 +196,8 @@ describe(FileError.name, () => {
     // Because the file path is resolved on disk, the output will vary based on platform.
     // Only check that it ends as expected and is an absolute path.
     const error3Message: string = error3.getFormattedErrorMessage({ format: 'VisualStudio' });
-    expect(error3Message).toMatch(/.+\(1,12\) - message$/);
-    const error3Path: string = error3Message.slice(0, error3Message.length - '(1,12) - message'.length);
+    expect(error3Message).toMatch(/.+ - message$/);
+    const error3Path: string = error3Message.slice(0, error3Message.length - ' - message'.length);
     expect(path.isAbsolute(error3Path)).toEqual(true);
 
     const error4: FileError = new FileError('message', {
@@ -207,8 +207,8 @@ describe(FileError.name, () => {
     // Because the file path is resolved on disk, the output will vary based on platform.
     // Only check that it ends as expected and is an absolute path.
     const error4Message: string = error4.getFormattedErrorMessage({ format: 'VisualStudio' });
-    expect(error4Message).toMatch(/.+\(1\) - message$/);
-    const error4Path: string = error4Message.slice(0, error4Message.length - '(1) - message'.length);
+    expect(error4Message).toMatch(/.+ - message$/);
+    const error4Path: string = error4Message.slice(0, error4Message.length - ' - message'.length);
     expect(path.isAbsolute(error4Path)).toEqual(true);
   });
 });
