@@ -31,6 +31,7 @@ Loaded @microsoft/rush-lib from process.env._RUSH_LIB_PATH
   'LookupByPath',
   'NpmOptionsConfiguration',
   'Operation',
+  'OperationGraphHooks',
   'OperationStatus',
   'PackageJsonDependency',
   'PackageJsonDependencyMeta',

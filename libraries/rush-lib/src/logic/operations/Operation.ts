@@ -5,6 +5,19 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { IOperationRunner } from './IOperationRunner';
 import type { IOperationSettings } from '../../api/RushProjectConfiguration';
+import { type Parallelism, parseParallelismPercent } from './ParseParallelism';
+
+/**
+ * State for the `enabled` property of an `Operation`.
+ *
+ * - `true`: The operation should be executed if it or any dependencies changed.
+ * - `false`: The operation should be skipped.
+ * - `"ignore-dependency-changes"`: The operation should be executed if there are local changes in the project,
+ *   otherwise it should be skipped. This is useful for operations like "test" where you may want to skip
+ *   testing projects that haven't changed.
+ * @alpha
+ */
+export type OperationEnabledState = boolean | 'ignore-dependency-changes';
 
 /**
  * Options for constructing a new Operation.
@@ -20,6 +33,19 @@ export interface IOperationOptions {
    * The Rush project associated with this Operation
    */
   project: RushConfigurationProject;
+
+  /**
+   * If set to false, this operation will be skipped during evaluation (return OperationStatus.Skipped).
+   * This is useful for plugins to alter the scope of the operation graph across executions,
+   * e.g. to enable or disable unit test execution, or to include or exclude dependencies.
+   *
+   * The special value "ignore-dependency-changes" can be used to indicate that this operation should only
+   * be executed if there are local changes in the project. This is useful for operations like
+   * "test" where you may want to skip testing projects that haven't changed.
+   *
+   * The default value is `true`, meaning the operation will be executed if it or any dependencies change.
+   */
+  enabled?: OperationEnabledState;
 
   /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
@@ -40,7 +66,7 @@ export interface IOperationOptions {
 
 /**
  * The `Operation` class is a node in the dependency graph of work that needs to be scheduled by the
- * `OperationExecutionManager`. Each `Operation` has a `runner` member of type `IOperationRunner`, whose
+ * `OperationGraph`. Each `Operation` has a `runner` member of type `IOperationRunner`, whose
  * implementation manages the actual process of running a single operation.
  *
  * The graph of `Operation` instances will be cloned into a separate execution graph after processing.
@@ -82,17 +108,23 @@ export class Operation {
   public runner: IOperationRunner | undefined = undefined;
 
   /**
-   * The weight for this operation. This scalar is the contribution of this operation to the
-   * `criticalPathLength` calculation above. Modify to indicate the following:
-   * - `weight` === 1: indicates that this operation has an average duration
-   * - `weight` &gt; 1: indicates that this operation takes longer than average and so the scheduler
-   *     should try to favor starting it over other, shorter operations. An example might be an operation that
-   *     bundles an entire application and runs whole-program optimization.
-   * - `weight` &lt; 1: indicates that this operation takes less time than average and so the scheduler
-   *     should favor other, longer operations over it. An example might be an operation to unpack a cached
-   *     output, or an operation using NullOperationRunner, which might use a value of 0.
+   * The concurrency weight for this operation. When coerced to an integer via `coerceParallelism`,
+   * this value represents how many concurrency slots the operation consumes while running.
+   *
+   * May be specified as:
+   * - A raw `number`: used directly as the slot count (e.g. `2` consumes two slots).
+   * - An `IParallelismScalar` (e.g. `{ scalar: 0.5 }`): coerced relative to the graph's
+   *   configured `maxParallelism` at execution time, so the weight scales with the available
+   *   concurrency rather than being fixed at parse time.
+   *
+   * Coerced values guide scheduling as follows:
+   * - `1` slot: typical operation consuming one logical thread.
+   * - `> 1` slots: operation that spawns multiple threads or requires significant RAM; reserving
+   *   extra slots prevents overloading the machine (e.g. a whole-program bundler or a test suite
+   *   that runs its own internal parallelism).
+   * - `0` slots: effectively free (e.g. a no-op or cache-restore step).
    */
-  public weight: number = 1;
+  public weight: Parallelism;
 
   /**
    * Get the operation settings for this operation, defaults to the values defined in
@@ -104,17 +136,27 @@ export class Operation {
    * If set to false, this operation will be skipped during evaluation (return OperationStatus.Skipped).
    * This is useful for plugins to alter the scope of the operation graph across executions,
    * e.g. to enable or disable unit test execution, or to include or exclude dependencies.
+   *
+   * The special value "ignore-dependency-changes" can be used to indicate that this operation should only
+   * be executed if there are local changes in the project. This is useful for operations like
+   * "test" where you may want to skip testing projects that haven't changed.
+   *
+   * The default value is `true`, meaning the operation will be executed if it or any dependencies change.
    */
-  public enabled: boolean;
+  public enabled: OperationEnabledState;
 
   public constructor(options: IOperationOptions) {
-    const { phase, project, runner, settings, logFilenameIdentifier } = options;
+    const { phase, project, runner, settings, logFilenameIdentifier, enabled = true } = options;
     this.associatedPhase = phase;
     this.associatedProject = project;
     this.runner = runner;
     this.settings = settings;
     this.logFilenameIdentifier = logFilenameIdentifier;
-    this.enabled = true;
+    this.enabled = enabled;
+    this.weight = _getFinalWeight(
+      settings?.weight ?? 1,
+      runner?.name ?? `${project.packageName} (${phase.name}`
+    );
   }
 
   /**
@@ -155,5 +197,18 @@ export class Operation {
     // Cast internally to avoid adding the overhead of getters
     (this.dependencies as Set<Operation>).delete(dependency);
     (dependency.consumers as Set<Operation>).delete(this);
+  }
+}
+
+function _getFinalWeight(rawWeight: string | number, context: string): Parallelism {
+  if (typeof rawWeight === 'number') {
+    // Explicit numeric weight allows any value.
+    return rawWeight;
+  } else {
+    try {
+      return { scalar: parseParallelismPercent(rawWeight) };
+    } catch (err) {
+      throw new Error(`Invalid weight for operation "${context}": ${err.message}`);
+    }
   }
 }

@@ -120,6 +120,13 @@ export interface IPhasedCommandConfig extends IPhasedCommandWithoutPhasesJson, I
    */
   watchDebounceMs?: number;
   /**
+   * If true, when running this command in watch mode the operation graph will include every project
+   * in the repository (respecting phase selection), but only the projects selected by the user's
+   * CLI project selection parameters will be initially enabled. Other projects will remain disabled
+   * unless they become required or are explicitly selected in a subsequent pass.
+   */
+  includeAllProjectsInWatchGraph?: boolean;
+  /**
    * If set to `true`, then this phased command will always perform an install before executing, regardless of CLI flags.
    * If set to `false`, then Rush will define a built-in "--install" CLI flag for this command.
    * If undefined, then Rush does not define a built-in "--install" CLI flag for this command and no installation is performed.
@@ -383,6 +390,8 @@ export class CommandLineConfiguration {
             if (watchOptions) {
               normalizedCommand.alwaysWatch = watchOptions.alwaysWatch;
               normalizedCommand.watchDebounceMs = watchOptions.debounceMs;
+              normalizedCommand.includeAllProjectsInWatchGraph =
+                !!watchOptions.includeAllProjectsInWatchGraph;
 
               // No implicit phase dependency expansion for watch mode.
               for (const phaseName of watchOptions.watchPhases) {

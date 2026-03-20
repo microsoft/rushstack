@@ -70,3 +70,12 @@ export const TERMINAL_STATUSES: Set<OperationStatus> = new Set([
   OperationStatus.NoOp,
   OperationStatus.Aborted
 ]);
+
+/**
+ * The set of statuses that are considered successful and don't trigger a rebuild if current.
+ */
+export const SUCCESS_STATUSES: Set<OperationStatus> = new Set([
+  OperationStatus.Success,
+  OperationStatus.FromCache,
+  OperationStatus.NoOp
+]);

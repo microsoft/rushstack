@@ -32,6 +32,7 @@ import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
 import { SyncWaterfallHook } from 'tapable';
 import { Terminal } from '@rushstack/terminal';
+import type { TerminalWritable } from '@rushstack/terminal';
 
 // @public
 export class ApprovedPackagesConfiguration {
@@ -329,6 +330,14 @@ export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) =>
 // @beta
 export type GetInputsSnapshotAsyncFn = () => Promise<IInputsSnapshot | undefined>;
 
+// @alpha (undocumented)
+export interface IBaseOperationExecutionResult {
+    getStateHash(): string;
+    getStateHashComponents(): IOperationStateHashComponents;
+    readonly metadataFolderPath: string;
+    readonly operation: Operation;
+}
+
 // @internal (undocumented)
 export interface _IBuiltInPluginConfiguration extends _IRushPluginConfigurationBase {
     // (undocumented)
@@ -389,6 +398,11 @@ export interface ICobuildLockProvider {
     setCompletedStateAsync(context: Readonly<ICobuildContext>, state: ICobuildCompletedState): Promise<void>;
 }
 
+// @alpha
+export interface IConfigurableOperation extends IBaseOperationExecutionResult {
+    enabled: boolean;
+}
+
 // @public
 export interface IConfigurationEnvironment {
     [environmentVariableName: string]: IConfigurationEnvironmentVariable;
@@ -406,17 +420,14 @@ export interface ICreateOperationsContext {
     readonly changedProjectsOnly: boolean;
     readonly cobuildConfiguration: CobuildConfiguration | undefined;
     readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
+    readonly generateFullGraph?: boolean;
     readonly includePhaseDeps: boolean;
-    readonly invalidateOperation?: ((operation: Operation, reason: string) => void) | undefined;
     readonly isIncrementalBuildAllowed: boolean;
-    readonly isInitial: boolean;
     readonly isWatch: boolean;
-    readonly parallelism: number;
-    readonly phaseOriginal: ReadonlySet<IPhase>;
+    readonly parallelism: Parallelism;
     readonly phaseSelection: ReadonlySet<IPhase>;
     readonly projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>;
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;
-    readonly projectsInUnknownState: ReadonlySet<RushConfigurationProject>;
     readonly rushConfiguration: RushConfiguration;
 }
 
@@ -448,12 +459,6 @@ export interface ICustomTipsJson {
 export interface IEnvironmentConfigurationInitializeOptions {
     // (undocumented)
     doNotNormalizePaths?: boolean;
-}
-
-// @alpha
-export interface IExecuteOperationsContext extends ICreateOperationsContext {
-    readonly abortController: AbortController;
-    readonly inputsSnapshot?: IInputsSnapshot;
 }
 
 // @alpha
@@ -591,19 +596,58 @@ export interface _IOperationBuildCacheOptions {
 }
 
 // @alpha
-export interface IOperationExecutionResult {
+export interface IOperationExecutionResult extends IBaseOperationExecutionResult, IOperationLastState {
+    readonly enabled: boolean;
     readonly error: Error | undefined;
-    getStateHash(): string;
-    getStateHashComponents(): ReadonlyArray<string>;
     readonly logFilePaths: ILogFilePaths | undefined;
-    readonly metadataFolderPath: string | undefined;
     readonly nonCachedDurationMs: number | undefined;
-    readonly operation: Operation;
     readonly problemCollector: IProblemCollector;
     readonly silent: boolean;
     readonly status: OperationStatus;
     readonly stdioSummarizer: StdioSummarizer;
     readonly stopwatch: IStopwatchResult;
+}
+
+// @alpha
+export interface IOperationGraph {
+    readonly abortController: AbortController;
+    abortCurrentIterationAsync(): Promise<void>;
+    addTerminalDestination(destination: TerminalWritable): void;
+    allowOversubscription: boolean;
+    closeRunnersAsync(operations?: Iterable<Operation>): Promise<void>;
+    debugMode: boolean;
+    executeScheduledIterationAsync(): Promise<boolean>;
+    readonly hasScheduledIteration: boolean;
+    readonly hooks: OperationGraphHooks;
+    invalidateOperations(operations?: Iterable<Operation>, reason?: string): void;
+    readonly operations: ReadonlySet<Operation>;
+    get parallelism(): number;
+    set parallelism(value: Parallelism);
+    pauseNextIteration: boolean;
+    quietMode: boolean;
+    removeTerminalDestination(destination: TerminalWritable, close?: boolean): boolean;
+    readonly resultByOperation: ReadonlyMap<Operation, IOperationExecutionResult>;
+    scheduleIterationAsync(options: IOperationGraphIterationOptions): Promise<boolean>;
+    setEnabledStates(operations: Iterable<Operation>, targetState: Operation['enabled'], mode: 'safe' | 'unsafe'): boolean;
+    readonly status: OperationStatus;
+    readonly terminalDestinations: ReadonlySet<TerminalWritable>;
+}
+
+// @alpha
+export interface IOperationGraphContext extends ICreateOperationsContext {
+    readonly initialSnapshot?: IInputsSnapshot;
+}
+
+// @alpha
+export interface IOperationGraphIterationOptions {
+    // (undocumented)
+    inputsSnapshot?: IInputsSnapshot;
+    startTime?: number;
+}
+
+// @beta
+export interface IOperationLastState {
+    readonly status: OperationStatus;
 }
 
 // @internal (undocumented)
@@ -630,6 +674,7 @@ export interface _IOperationMetadataManagerOptions {
 
 // @alpha
 export interface IOperationOptions {
+    enabled?: OperationEnabledState;
     logFilenameIdentifier: string;
     phase: IPhase;
     project: RushConfigurationProject;
@@ -640,8 +685,10 @@ export interface IOperationOptions {
 // @beta
 export interface IOperationRunner {
     cacheable: boolean;
-    executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
+    closeAsync?(): Promise<void>;
+    executeAsync(context: IOperationRunnerContext, lastState?: IOperationLastState): Promise<OperationStatus>;
     getConfigHash(): string;
+    readonly isActive?: boolean;
     readonly isNoOp?: boolean;
     readonly name: string;
     reportTiming: boolean;
@@ -655,6 +702,7 @@ export interface IOperationRunnerContext {
     debugMode: boolean;
     environment: IEnvironment | undefined;
     error?: Error;
+    getInvalidateCallback(): (reason: string) => void;
     // @internal
     _operationMetadataManager: _OperationMetadataManager;
     quietMode: boolean;
@@ -689,6 +737,13 @@ export interface _IOperationStateFileOptions {
     projectFolder: string;
 }
 
+// @alpha
+export interface IOperationStateHashComponents {
+    readonly config: string;
+    readonly dependencies: readonly string[];
+    readonly local: string;
+}
+
 // @internal (undocumented)
 export interface _IOperationStateJson {
     // (undocumented)
@@ -702,6 +757,12 @@ export interface _IOperationStateJson {
 // @public
 export interface IPackageManagerOptionsJsonBase {
     environmentVariables?: IConfigurationEnvironment;
+}
+
+// @beta
+export interface IParallelismScalar {
+    // (undocumented)
+    readonly scalar: number;
 }
 
 // @alpha
@@ -728,6 +789,11 @@ export interface IPhasedCommand extends IRushCommand {
     readonly hooks: PhasedCommandHooks;
     // @alpha
     readonly sessionAbortController: AbortController;
+}
+
+// @alpha
+export interface IPhasedCommandPlugin {
+    apply(hooks: PhasedCommandHooks): void;
 }
 
 // @public
@@ -982,13 +1048,13 @@ export class Operation {
     readonly consumers: ReadonlySet<Operation>;
     deleteDependency(dependency: Operation): void;
     readonly dependencies: ReadonlySet<Operation>;
-    enabled: boolean;
+    enabled: OperationEnabledState;
     get isNoOp(): boolean;
     logFilenameIdentifier: string;
     get name(): string;
     runner: IOperationRunner | undefined;
     settings: IOperationSettings | undefined;
-    weight: number;
+    weight: Parallelism;
 }
 
 // @internal (undocumented)
@@ -996,13 +1062,51 @@ export class _OperationBuildCache {
     // (undocumented)
     get cacheId(): string | undefined;
     // (undocumented)
-    static forOperation(executionResult: IOperationExecutionResult, options: _IOperationBuildCacheOptions): _OperationBuildCache;
+    static forOperation(executionResult: IBaseOperationExecutionResult, options: _IOperationBuildCacheOptions): _OperationBuildCache;
     // (undocumented)
     static getOperationBuildCache(options: _IProjectBuildCacheOptions): _OperationBuildCache;
     // (undocumented)
     tryRestoreFromCacheAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean>;
     // (undocumented)
     trySetCacheEntryAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean>;
+}
+
+// @alpha
+export type OperationEnabledState = boolean | 'ignore-dependency-changes';
+
+// @alpha
+export class OperationGraphHooks {
+    readonly afterExecuteIterationAsync: AsyncSeriesWaterfallHook<[
+    OperationStatus,
+    ReadonlyMap<Operation, IOperationExecutionResult>,
+    IOperationGraphIterationOptions
+    ]>;
+    readonly afterExecuteOperationAsync: AsyncSeriesHook<[
+    IOperationRunnerContext & IOperationExecutionResult
+    ]>;
+    readonly beforeExecuteIterationAsync: AsyncSeriesBailHook<[
+    ReadonlyMap<Operation, IOperationExecutionResult>,
+    IOperationGraphIterationOptions
+    ], OperationStatus | undefined | void>;
+    readonly beforeExecuteOperationAsync: AsyncSeriesBailHook<[
+    IOperationRunnerContext & IOperationExecutionResult
+    ], OperationStatus | undefined>;
+    readonly beforeLog: SyncHook<ITelemetryData, void>;
+    readonly configureIteration: SyncHook<[
+    ReadonlyMap<Operation, IConfigurableOperation>,
+    ReadonlyMap<Operation, IOperationExecutionResult>,
+    IOperationGraphIterationOptions
+    ]>;
+    readonly createEnvironmentForOperation: SyncWaterfallHook<[
+    IEnvironment,
+    IOperationRunnerContext & IOperationExecutionResult
+    ]>;
+    readonly onEnableStatesChanged: SyncHook<[ReadonlySet<Operation>]>;
+    readonly onExecutionStatesUpdated: SyncHook<[ReadonlySet<IOperationExecutionResult>]>;
+    readonly onGraphStateChanged: SyncHook<[IOperationGraph]>;
+    readonly onIdle: SyncHook<void>;
+    readonly onInvalidateOperations: SyncHook<[Iterable<Operation>, string | undefined]>;
+    readonly onIterationScheduled: SyncHook<[ReadonlyMap<Operation, IOperationExecutionResult>]>;
 }
 
 // @internal
@@ -1132,28 +1236,16 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
     readonly environmentVariables?: IConfigurationEnvironment;
 }
 
+// @beta
+export type Parallelism = number | IParallelismScalar;
+
 // @alpha
 export class PhasedCommandHooks {
-    readonly afterExecuteOperation: AsyncSeriesHook<[
-    IOperationRunnerContext & IOperationExecutionResult
+    readonly createOperationsAsync: AsyncSeriesWaterfallHook<[
+    Set<Operation>,
+    ICreateOperationsContext
     ]>;
-    readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, IExecuteOperationsContext]>;
-    readonly beforeExecuteOperation: AsyncSeriesBailHook<[
-    IOperationRunnerContext & IOperationExecutionResult
-    ], OperationStatus | undefined>;
-    readonly beforeExecuteOperations: AsyncSeriesHook<[
-    Map<Operation, IOperationExecutionResult>,
-    IExecuteOperationsContext
-    ]>;
-    readonly beforeLog: SyncHook<ITelemetryData, void>;
-    readonly createEnvironmentForOperation: SyncWaterfallHook<[
-    IEnvironment,
-    IOperationRunnerContext & IOperationExecutionResult
-    ]>;
-    readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
-    readonly onOperationStatusChanged: SyncHook<[IOperationExecutionResult]>;
-    readonly shutdownAsync: AsyncParallelHook<void>;
-    readonly waitingForChanges: SyncHook<void>;
+    readonly onGraphCreatedAsync: AsyncSeriesHook<[IOperationGraph, IOperationGraphContext]>;
 }
 
 // @public
