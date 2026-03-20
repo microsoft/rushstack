@@ -307,7 +307,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
           logFilenameIdentifier: `${this._operationMetadataManager.logFilenameIdentifier}${logFileSuffix}`
         })
       : undefined;
-    this.logFilePaths = logFilePaths;
+    if (logFilePaths !== undefined) {
+      this.logFilePaths = logFilePaths;
+    }
 
     const projectLogWritable: TerminalWritable | undefined = logFilePaths
       ? await initializeProjectLogFilesAsync({

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update OperationExecutionRecord to only set `this.logFilePaths` if the value to be assigned is not `undefined`",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
