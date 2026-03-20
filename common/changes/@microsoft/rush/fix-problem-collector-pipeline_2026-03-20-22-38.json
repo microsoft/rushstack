@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix ProblemCollector wiring in OperationExecutionRecord: add preventAutoclose, strip ANSI colors before matching, and always include problemCollector in the terminal pipeline",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
