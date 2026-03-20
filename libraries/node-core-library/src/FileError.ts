@@ -50,7 +50,7 @@ const uuidFileError: string = '37a4c772-2dc8-4c66-89ae-262f8cc1f0c1';
 const baseFolderEnvVar: string = 'RUSHSTACK_FILE_ERROR_BASE_FOLDER';
 
 const unixProblemMatcherPattern: IProblemPattern = {
-  regexp: '^\\[[^\\]]+\\]\\s+(Error|Warning):\\s+([^:]+):(\\d+):(\\d+)\\s+-\\s+(?:\\(([^)]+)\\)\\s+)?(.*)$',
+  regexp: '^\\[[^\\]]+\\]\\s+(Error|Warning):\\s+([^:]+):(\\d+)(?::(\\d+))?\\s+-\\s+(?:\\(([^)]+)\\)\\s+)?(.*)$',
   severity: 1,
   file: 2,
   line: 3,
@@ -61,7 +61,7 @@ const unixProblemMatcherPattern: IProblemPattern = {
 
 const vsProblemMatcherPattern: IProblemPattern = {
   regexp:
-    '^\\[[^\\]]+\\]\\s+(Error|Warning):\\s+([^\\(]+)\\((\\d+),(\\d+)\\)\\s+-\\s+(?:\\(([^)]+)\\)\\s+)?(.*)$',
+    '^\\[[^\\]]+\\]\\s+(Error|Warning):\\s+([^\\(]+)\\((\\d+)(?:,(\\d+))?\\)\\s+-\\s+(?:\\(([^)]+)\\)\\s+)?(.*)$',
   severity: 1,
   file: 2,
   line: 3,
@@ -146,7 +146,7 @@ export class FileError extends Error {
       pathToFormat: this.absolutePath,
       message: this.message,
       line: this.line ?? 1,
-      column: this.column ?? 1
+      column: this.column
     });
   }
 
