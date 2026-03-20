@@ -1293,15 +1293,29 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     optional: boolean
   ): void {
     for (const [name, version] of Object.entries(collection)) {
-      const packageId: string = this._getPackageId(name, version);
-      if (integrityMap.has(packageId)) {
-        // The entry could already have been added as a nested dependency
-        continue;
-      }
+      const normalizedVersion: string = normalizePnpmVersionSpecifier(version);
+      if (normalizedVersion.startsWith('link:')) {
+        // In a package snapshot, link: paths are resolved relative to the pnpm workspace root,
+        // which means they are already direct keys into the importer map.
+        const targetKey: string = normalizedVersion.slice('link:'.length);
+        const linkedIntegrities: Map<string, string> | undefined =
+          this.getIntegrityForImporter(targetKey);
+        if (linkedIntegrities) {
+          for (const [dep, integrity] of linkedIntegrities) {
+            integrityMap.set(dep, integrity);
+          }
+        }
+      } else {
+        const packageId: string = this._getPackageId(name, version);
+        if (integrityMap.has(packageId)) {
+          // The entry could already have been added as a nested dependency
+          continue;
+        }
 
-      const contribution: Map<string, string> = this._getIntegrityForPackage(packageId, optional);
-      for (const [dep, integrity] of contribution) {
-        integrityMap.set(dep, integrity);
+        const contribution: Map<string, string> = this._getIntegrityForPackage(packageId, optional);
+        for (const [dep, integrity] of contribution) {
+          integrityMap.set(dep, integrity);
+        }
       }
     }
   }

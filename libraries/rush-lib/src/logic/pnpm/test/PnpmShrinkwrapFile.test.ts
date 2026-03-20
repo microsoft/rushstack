@@ -485,13 +485,14 @@ snapshots:
       expect(proj1IntegrityMap!.has('ext-b@1.0.0')).toBe(true);
     });
 
-    it('scenario 2: workspace project 1 -> external dep 1 and workspace project 2 -> external dep 2', () => {
-      // Tests that when project-1 has both an external direct dependency AND a workspace link
-      // dependency, both sub-trees are fully captured in the integrity map.
+    it('scenario 2: workspace project 1 -> external dep 1 -> (link:) workspace project 2 -> external dep 2', () => {
+      // Tests that when an external package's snapshot has a link: dependency pointing back into
+      // the workspace, the linked workspace project's integrity is fully captured.
       //
-      // project-1 depends on ext-x (direct external) and project-2 (workspace link).
-      // project-2 depends on ext-y.
-      // All four should appear in project-1's integrity map.
+      // project-1 depends on ext-a (external).
+      // ext-a's snapshot has a link: dep that resolves to project-2 (a workspace project).
+      // project-2 depends on ext-b (external).
+      // All four entries should appear in project-1's integrity map.
 
       const shrinkwrapContent: string = `
 lockfileVersion: '9.0'
@@ -503,27 +504,26 @@ importers:
     {}
   ../../project-1:
     dependencies:
-      ext-x:
-        specifier: ^2.0.0
-        version: 2.0.0
-      project-2:
-        specifier: workspace:*
-        version: link:../project-2
+      ext-a:
+        specifier: ^1.0.0
+        version: 1.0.0
   ../../project-2:
     dependencies:
-      ext-y:
-        specifier: ^3.0.0
-        version: 3.0.0
+      ext-b:
+        specifier: ^2.0.0
+        version: 2.0.0
 packages:
-  ext-x@2.0.0:
+  ext-a@1.0.0:
     resolution:
-      integrity: sha512-ext-x==
-  ext-y@3.0.0:
+      integrity: sha512-ext-a==
+  ext-b@2.0.0:
     resolution:
-      integrity: sha512-ext-y==
+      integrity: sha512-ext-b==
 snapshots:
-  ext-x@2.0.0: {}
-  ext-y@3.0.0: {}
+  ext-a@1.0.0:
+    dependencies:
+      project-2: link:../../project-2
+  ext-b@2.0.0: {}
 `;
 
       const shrinkwrapFile = PnpmShrinkwrapFile.loadFromString(shrinkwrapContent, {
@@ -535,12 +535,12 @@ snapshots:
       const proj1IntegrityMap = shrinkwrapFile.getIntegrityForImporter('../../project-1');
 
       expect(proj1IntegrityMap).toBeDefined();
-      // ext-x (direct external dep of project-1)
-      expect(proj1IntegrityMap!.has('ext-x@2.0.0')).toBe(true);
-      // project-2 (workspace link dep of project-1)
+      // ext-a (direct external dep of project-1)
+      expect(proj1IntegrityMap!.has('ext-a@1.0.0')).toBe(true);
+      // project-2 (workspace project, reached via link: in ext-a's snapshot)
       expect(proj1IntegrityMap!.has('../../project-2')).toBe(true);
-      // ext-y (external dep of project-2, reached via link)
-      expect(proj1IntegrityMap!.has('ext-y@3.0.0')).toBe(true);
+      // ext-b (external dep of project-2, reached transitively through the link:)
+      expect(proj1IntegrityMap!.has('ext-b@2.0.0')).toBe(true);
     });
   });
 
