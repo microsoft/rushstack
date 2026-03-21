@@ -6,6 +6,8 @@ import { Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-li
 import type { IChangeInfo } from '../api/ChangeManagement';
 import type { IChangelog } from '../api/Changelog';
 import type { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
+import { type LockStepVersionPolicy, VersionPolicyDefinitionName } from '../api/VersionPolicy';
 import schemaJson from '../schemas/change-file.schema.json';
 
 /**
@@ -59,6 +61,36 @@ export class ChangeFiles {
         throw new Error(`Invalid change file: ${filePath}`);
       }
     });
+
+    if (rushConfiguration.experimentsConfiguration.configuration.strictChangefileValidation) {
+      const errors: string[] = [];
+
+      for (const packageName of projectsWithChangeDescriptions) {
+        const project: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(packageName);
+
+        if (!project) {
+          errors.push(
+            `Change file(s) reference a project "${packageName}" that does not exist in the Rush configuration.`
+          );
+          continue;
+        }
+
+        if (project.versionPolicy?.definitionName === VersionPolicyDefinitionName.lockStepVersion) {
+          const { mainProject }: LockStepVersionPolicy = project.versionPolicy as LockStepVersionPolicy;
+          if (mainProject && mainProject !== packageName) {
+            errors.push(
+              `Change file(s) reference the project "${packageName}" which belongs to lockstepped ` +
+                `version policy "${project.versionPolicy.policyName}". Change files should be ` +
+                `created for the policy's main project "${mainProject}" instead.`
+            );
+          }
+        }
+      }
+
+      if (errors.length > 0) {
+        throw new Error(errors.join('\n'));
+      }
+    }
 
     const projectsMissingChangeDescriptions: Set<string> = new Set(changedPackages);
     projectsWithChangeDescriptions.forEach((name) => projectsMissingChangeDescriptions.delete(name));
