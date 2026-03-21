@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add 'declare' modifier to fix TS2612 property redeclaration errors when targeting ES2022",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
