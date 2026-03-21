@@ -28,39 +28,45 @@ export class ChangeFiles {
   /**
    * Validate if the newly added change files match the changed packages.
    */
-  public static validate(
+  public static async validateAsync(
     newChangeFilePaths: string[],
     changedPackages: string[],
     rushConfiguration: RushConfiguration
-  ): void {
+  ): Promise<void> {
     const schema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
     const projectsWithChangeDescriptions: Set<string> = new Set<string>();
-    newChangeFilePaths.forEach((filePath) => {
-      // eslint-disable-next-line no-console
-      console.log(`Found change file: ${filePath}`);
+    await Async.forEachAsync(
+      newChangeFilePaths,
+      async (filePath) => {
+        // eslint-disable-next-line no-console
+        console.log(`Found change file: ${filePath}`);
 
-      const changeFile: IChangeInfo = JsonFile.loadAndValidate(filePath, schema);
+        const changeFile: IChangeInfo = JsonFile.loadAndValidate(filePath, schema);
 
-      if (rushConfiguration.hotfixChangeEnabled) {
-        if (changeFile && changeFile.changes) {
-          for (const change of changeFile.changes) {
-            if (change.type !== 'none' && change.type !== 'hotfix') {
-              throw new Error(
-                `Change file ${filePath} specifies a type of '${change.type}' ` +
-                  `but only 'hotfix' and 'none' change types may be used in a branch with 'hotfixChangeEnabled'.`
-              );
+        if (rushConfiguration.hotfixChangeEnabled) {
+          if (changeFile && changeFile.changes) {
+            for (const change of changeFile.changes) {
+              if (change.type !== 'none' && change.type !== 'hotfix') {
+                throw new Error(
+                  `Change file ${filePath} specifies a type of '${change.type}' ` +
+                    `but only 'hotfix' and 'none' change types may be used in a branch with 'hotfixChangeEnabled'.`
+                );
+              }
             }
           }
         }
-      }
 
-      if (changeFile && changeFile.changes) {
-        changeFile.changes.forEach((change) => projectsWithChangeDescriptions.add(change.packageName));
-      } else {
-        throw new Error(`Invalid change file: ${filePath}`);
-      }
-    });
+        if (changeFile && changeFile.changes) {
+          for (const { packageName } of changeFile.changes) {
+            projectsWithChangeDescriptions.add(packageName);
+          }
+        } else {
+          throw new Error(`Invalid change file: ${filePath}`);
+        }
+      },
+      { concurrency: 50 }
+    );
 
     if (rushConfiguration.experimentsConfiguration.configuration.strictChangefileValidation) {
       const errors: string[] = [];
@@ -93,10 +99,14 @@ export class ChangeFiles {
     }
 
     const projectsMissingChangeDescriptions: Set<string> = new Set(changedPackages);
-    projectsWithChangeDescriptions.forEach((name) => projectsMissingChangeDescriptions.delete(name));
+    for (const name of projectsWithChangeDescriptions) {
+      projectsMissingChangeDescriptions.delete(name);
+    }
+
     if (projectsMissingChangeDescriptions.size > 0) {
-      const projectsMissingChangeDescriptionsArray: string[] = [];
-      projectsMissingChangeDescriptions.forEach((name) => projectsMissingChangeDescriptionsArray.push(name));
+      const projectsMissingChangeDescriptionsArray: string[] = Array.from(
+        projectsMissingChangeDescriptions
+      ).sort();
       throw new Error(
         [
           'The following projects have been changed and require change descriptions, but change descriptions were not ' +

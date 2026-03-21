@@ -387,7 +387,7 @@ export class ChangeAction extends BaseRushAction {
 
   private async _validateChangeFileAsync(changedPackages: string[]): Promise<void> {
     const files: string[] = await this._getChangeFilesAsync();
-    ChangeFiles.validate(files, changedPackages, this.rushConfiguration);
+    await ChangeFiles.validateAsync(files, changedPackages, this.rushConfiguration);
   }
 
   private async _getChangeFilesAsync(): Promise<string[]> {
