@@ -42,3 +42,6 @@
 # Exclude intermediate build outputs (not shipped)
 /lib-intermediate-*/**
 /lib-commonjs/**/*.exports.json
+
+# Include assets used by `rush init`
+!/assets/**
