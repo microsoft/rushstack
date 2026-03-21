@@ -129,6 +129,7 @@ __webpack_require__.r(__webpack_exports__);
 const { installAndRun, findRushJsonFolder, RUSH_JSON_FILENAME, runWithErrorAndStatusCode } = require('./install-run');
 const PACKAGE_NAME = '@microsoft/rush';
 const RUSH_PREVIEW_VERSION = 'RUSH_PREVIEW_VERSION';
+const RUSH_QUIET_MODE = 'RUSH_QUIET_MODE';
 const INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE = 'INSTALL_RUN_RUSH_LOCKFILE_PATH';
 function _getRushVersion(logger) {
     const rushPreviewVersion = process.env[RUSH_PREVIEW_VERSION];
@@ -171,7 +172,8 @@ function _run() {
         throw new Error('Unexpected exception: could not detect node path or script path');
     }
     let commandFound = false;
-    let logger = { info: console.log, error: console.error };
+    const quietModeEnvValue = process.env[RUSH_QUIET_MODE];
+    let quiet = quietModeEnvValue === '1' || quietModeEnvValue === 'true';
     for (const arg of packageBinArgs) {
         if (arg === '-q' || arg === '--quiet') {
             // The -q/--quiet flag is supported by both `rush` and `rushx`, and will suppress
@@ -180,10 +182,7 @@ function _run() {
             // To maintain the same user experience, the install-run* scripts pass along this
             // flag but also use it to suppress any diagnostic information normally printed
             // to stdout.
-            logger = {
-                info: () => { },
-                error: console.error
-            };
+            quiet = true;
         }
         else if (!arg.startsWith('-') || arg === '-h' || arg === '--help') {
             // We either found something that looks like a command (i.e. - doesn't start with a "-"),
@@ -204,6 +203,9 @@ function _run() {
         }
         process.exit(1);
     }
+    const logger = quiet
+        ? { info: () => { }, error: console.error }
+        : { info: console.log, error: console.error };
     runWithErrorAndStatusCode(logger, () => {
         const version = _getRushVersion(logger);
         logger.info(`The ${RUSH_JSON_FILENAME} configuration requests Rush version ${version}`);
