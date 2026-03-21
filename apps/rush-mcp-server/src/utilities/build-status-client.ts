@@ -143,7 +143,14 @@ export async function fetchBuildStatusAsync(
   return new Promise<IBuildStatusSnapshot>((resolve, reject) => {
     const ws: WebSocket = new WebSocket(url, { rejectUnauthorized: false });
     let settled: boolean = false;
-    let connectionTimeout: NodeJS.Timeout;
+
+    const connectionTimeout: NodeJS.Timeout = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        ws.close();
+        reject(new Error(`Connection to rush start timed out after 10000ms.`));
+      }
+    }, 10000);
 
     function settle(action: () => void): void {
       if (!settled) {
@@ -152,11 +159,6 @@ export async function fetchBuildStatusAsync(
         action();
       }
     }
-
-    connectionTimeout = setTimeout(() => {
-      ws.close();
-      settle(() => reject(new Error(`Connection to rush start timed out after 10000ms.`)));
-    }, 10000);
 
     ws.on('error', (err: Error) => {
       settle(() =>
