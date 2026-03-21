@@ -142,32 +142,49 @@ export async function fetchBuildStatusAsync(
 
   return new Promise<IBuildStatusSnapshot>((resolve, reject) => {
     const ws: WebSocket = new WebSocket(url, { rejectUnauthorized: false });
+    let settled: boolean = false;
+
+    function settle(action: () => void): void {
+      if (!settled) {
+        settled = true;
+        clearTimeout(connectionTimeout);
+        action();
+      }
+    }
 
     const connectionTimeout: NodeJS.Timeout = setTimeout(() => {
       ws.close();
-      reject(new Error(`Connection to rush start timed out after 10000ms.`));
+      settle(() => reject(new Error(`Connection to rush start timed out after 10000ms.`)));
     }, 10000);
 
     ws.on('error', (err: Error) => {
-      clearTimeout(connectionTimeout);
-      reject(
-        new Error(
-          `Cannot connect to rush start on port ${options.port}. Ensure \`rush start\` is running. (${err.message})`
+      settle(() =>
+        reject(
+          new Error(
+            `Cannot connect to rush start on port ${options.port}. Ensure \`rush start\` is running. (${err.message})`
+          )
+        )
+      );
+    });
+
+    ws.on('close', () => {
+      settle(() =>
+        reject(
+          new Error(`Connection to rush start on port ${options.port} closed before receiving build status.`)
         )
       );
     });
 
     ws.on('message', (data: WebSocket.Data) => {
-      clearTimeout(connectionTimeout);
       try {
         const message: IWebSocketEventMessage = JSON.parse(data.toString());
         if (message.event === 'sync') {
+          settle(() => resolve(toSnapshot(message)));
           ws.close();
-          resolve(toSnapshot(message));
         }
       } catch (parseError: unknown) {
         ws.close();
-        reject(new Error(`Failed to parse WebSocket message: ${parseError}`));
+        settle(() => reject(new Error(`Failed to parse WebSocket message: ${parseError}`)));
       }
     });
   });
