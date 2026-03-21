@@ -5089,6 +5089,31 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
 
+  ../../../rush-plugins/rush-operation-resource-plugin:
+    dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@rushstack/rush-sdk':
+        specifier: workspace:*
+        version: link:../../libraries/rush-sdk
+      https-proxy-agent:
+        specifier: ~5.0.0
+        version: 5.0.1
+    devDependencies:
+      '@microsoft/rush-lib':
+        specifier: workspace:*
+        version: link:../../libraries/rush-lib
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../rush-plugins/rush-redis-cobuild-plugin:
     dependencies:
       '@redis/client':
