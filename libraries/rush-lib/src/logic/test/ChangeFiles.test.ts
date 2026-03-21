@@ -11,6 +11,8 @@ import { VersionPolicyDefinitionName } from '../../api/VersionPolicy';
 import type { ExperimentsConfiguration } from '../../api/ExperimentsConfiguration';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
+const FORWARD_SLASH_DIRNAME: string = Path.convertToSlashes(__dirname);
+
 describe(ChangeFiles.name, () => {
   let rushConfiguration: RushConfiguration;
 
@@ -32,7 +34,7 @@ describe(ChangeFiles.name, () => {
     expect(
       terminalProvider
         .getAllOutputAsChunks({ asLines: true })
-        .map((chunk) => chunk.replace(__dirname, '<TEST DIR>'))
+        .map((chunk) => chunk.replace(FORWARD_SLASH_DIRNAME, '<TEST DIR>'))
     ).toMatchSnapshot();
   });
 
@@ -142,7 +144,7 @@ describe(ChangeFiles.name, () => {
           await ChangeFiles.validateAsync(terminal, [changeFile], ['nonexistent-package'], strictConfig);
           fail('Expected validateAsync to throw');
         } catch (error) {
-          const normalizedMessage: string = error.message.replace(__dirname, '<TEST DIR>');
+          const normalizedMessage: string = error.message.replace(FORWARD_SLASH_DIRNAME, '<TEST DIR>');
           expect(normalizedMessage).toMatchSnapshot();
         }
       });
@@ -166,7 +168,7 @@ describe(ChangeFiles.name, () => {
           await ChangeFiles.validateAsync(terminal, [changeFile], ['lockstep-secondary'], strictConfig);
           fail('Expected validateAsync to throw');
         } catch (error) {
-          const normalizedMessage: string = error.message.replace(__dirname, '<TEST DIR>');
+          const normalizedMessage: string = error.message.replace(FORWARD_SLASH_DIRNAME, '<TEST DIR>');
           expect(normalizedMessage).toMatchSnapshot();
         }
       });
