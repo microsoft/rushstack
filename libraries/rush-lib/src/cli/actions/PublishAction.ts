@@ -298,7 +298,7 @@ export class PublishAction extends BaseRushAction {
 
       // Make changes to package.json and change logs.
       changeManager.apply(this._apply.value);
-      await changeManager.updateChangelogAsync(this._apply.value);
+      await changeManager.updateChangelogAsync(this.terminal, this._apply.value);
 
       this._setDependenciesBeforeCommit();
 

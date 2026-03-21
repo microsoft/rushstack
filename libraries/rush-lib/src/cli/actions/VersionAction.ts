@@ -135,6 +135,7 @@ export class VersionAction extends BaseRushAction {
     } else if (this._bumpVersion.value) {
       const tempBranch: string = 'version/bump-' + new Date().getTime();
       await versionManager.bumpAsync(
+        this.terminal,
         this._versionPolicy.value,
         this._overwriteBump.value ? Enum.getValueByKey(BumpType, this._overwriteBump.value) : undefined,
         this._prereleaseIdentifier.value,

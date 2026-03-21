@@ -2,10 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import { Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import type { IChangeInfo } from '../api/ChangeManagement';
 import type { IChangelog } from '../api/Changelog';
 import type { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
+import { type LockStepVersionPolicy, VersionPolicyDefinitionName } from '../api/VersionPolicy';
 import schemaJson from '../schemas/change-file.schema.json';
 
 /**
@@ -26,45 +29,95 @@ export class ChangeFiles {
   /**
    * Validate if the newly added change files match the changed packages.
    */
-  public static validate(
+  public static async validateAsync(
+    terminal: ITerminal,
     newChangeFilePaths: string[],
     changedPackages: string[],
     rushConfiguration: RushConfiguration
-  ): void {
+  ): Promise<void> {
     const schema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-    const projectsWithChangeDescriptions: Set<string> = new Set<string>();
-    newChangeFilePaths.forEach((filePath) => {
-      // eslint-disable-next-line no-console
-      console.log(`Found change file: ${filePath}`);
+    const projectsWithChangeDescriptions: Set<string> = new Set();
+    const changefilesByProjectName: Map<string, string[]> = new Map();
+    await Async.forEachAsync(
+      newChangeFilePaths,
+      async (filePath) => {
+        terminal.writeLine(`Found change file: ${filePath}`);
 
-      const changeFile: IChangeInfo = JsonFile.loadAndValidate(filePath, schema);
+        const changeFile: IChangeInfo = JsonFile.loadAndValidate(filePath, schema);
 
-      if (rushConfiguration.hotfixChangeEnabled) {
-        if (changeFile && changeFile.changes) {
-          for (const change of changeFile.changes) {
-            if (change.type !== 'none' && change.type !== 'hotfix') {
-              throw new Error(
-                `Change file ${filePath} specifies a type of '${change.type}' ` +
-                  `but only 'hotfix' and 'none' change types may be used in a branch with 'hotfixChangeEnabled'.`
-              );
+        if (rushConfiguration.hotfixChangeEnabled) {
+          if (changeFile && changeFile.changes) {
+            for (const change of changeFile.changes) {
+              if (change.type !== 'none' && change.type !== 'hotfix') {
+                throw new Error(
+                  `Change file ${filePath} specifies a type of '${change.type}' ` +
+                    `but only 'hotfix' and 'none' change types may be used in a branch with 'hotfixChangeEnabled'.`
+                );
+              }
             }
+          }
+        }
+
+        if (changeFile && changeFile.changes) {
+          for (const { packageName } of changeFile.changes) {
+            projectsWithChangeDescriptions.add(packageName);
+            let files: string[] | undefined = changefilesByProjectName.get(packageName);
+            if (!files) {
+              files = [];
+              changefilesByProjectName.set(packageName, files);
+            }
+
+            files.push(filePath);
+          }
+        } else {
+          throw new Error(`Invalid change file: ${filePath}`);
+        }
+      },
+      { concurrency: 50 }
+    );
+
+    if (rushConfiguration.experimentsConfiguration.configuration.strictChangefileValidation) {
+      const errors: string[] = [];
+
+      for (const packageName of projectsWithChangeDescriptions) {
+        const affectedFiles: string[] = changefilesByProjectName.get(packageName) ?? [];
+        const fileList: string = affectedFiles.map((f) => `  - ${f}`).join('\n');
+        const project: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(packageName);
+
+        if (!project) {
+          errors.push(
+            `Change file(s) reference a project "${packageName}" that does not exist in the Rush configuration:\n${fileList}`
+          );
+          continue;
+        }
+
+        if (project.versionPolicy?.definitionName === VersionPolicyDefinitionName.lockStepVersion) {
+          const { mainProject }: LockStepVersionPolicy = project.versionPolicy as LockStepVersionPolicy;
+          if (mainProject && mainProject !== packageName) {
+            errors.push(
+              `Change file(s) reference the project "${packageName}" which belongs to lockstepped ` +
+                `version policy "${project.versionPolicy.policyName}". Change files should be ` +
+                `created for the policy's main project "${mainProject}" instead:\n${fileList}`
+            );
           }
         }
       }
 
-      if (changeFile && changeFile.changes) {
-        changeFile.changes.forEach((change) => projectsWithChangeDescriptions.add(change.packageName));
-      } else {
-        throw new Error(`Invalid change file: ${filePath}`);
+      if (errors.length > 0) {
+        throw new Error(errors.join('\n'));
       }
-    });
+    }
 
     const projectsMissingChangeDescriptions: Set<string> = new Set(changedPackages);
-    projectsWithChangeDescriptions.forEach((name) => projectsMissingChangeDescriptions.delete(name));
+    for (const name of projectsWithChangeDescriptions) {
+      projectsMissingChangeDescriptions.delete(name);
+    }
+
     if (projectsMissingChangeDescriptions.size > 0) {
-      const projectsMissingChangeDescriptionsArray: string[] = [];
-      projectsMissingChangeDescriptions.forEach((name) => projectsMissingChangeDescriptionsArray.push(name));
+      const projectsMissingChangeDescriptionsArray: string[] = Array.from(
+        projectsMissingChangeDescriptions
+      ).sort();
       throw new Error(
         [
           'The following projects have been changed and require change descriptions, but change descriptions were not ' +
@@ -77,12 +130,11 @@ export class ChangeFiles {
     }
   }
 
-  public static getChangeComments(newChangeFilePaths: string[]): Map<string, string[]> {
+  public static getChangeComments(terminal: ITerminal, newChangeFilePaths: string[]): Map<string, string[]> {
     const changes: Map<string, string[]> = new Map<string, string[]>();
 
     newChangeFilePaths.forEach((filePath) => {
-      // eslint-disable-next-line no-console
-      console.log(`Found change file: ${filePath}`);
+      terminal.writeLine(`Found change file: ${filePath}`);
       const changeRequest: IChangeInfo = JsonFile.load(filePath);
       if (changeRequest && changeRequest.changes) {
         changeRequest.changes!.forEach((change) => {
@@ -122,7 +174,11 @@ export class ChangeFiles {
   /**
    * Delete all change files
    */
-  public async deleteAllAsync(shouldDelete: boolean, updatedChangelogs?: IChangelog[]): Promise<number> {
+  public async deleteAllAsync(
+    terminal: ITerminal,
+    shouldDelete: boolean,
+    updatedChangelogs?: IChangelog[]
+  ): Promise<number> {
     if (updatedChangelogs) {
       // Skip changes files if the package's change log is not updated.
       const packagesToInclude: Set<string> = new Set<string>();
@@ -151,24 +207,28 @@ export class ChangeFiles {
         { concurrency: 5 }
       );
 
-      return await this._deleteFilesAsync(filesToDelete, shouldDelete);
+      return await this._deleteFilesAsync(terminal, filesToDelete, shouldDelete);
     } else {
       // Delete all change files.
       const files: string[] = await this.getFilesAsync();
-      return await this._deleteFilesAsync(files, shouldDelete);
+      return await this._deleteFilesAsync(terminal, files, shouldDelete);
     }
   }
 
-  private async _deleteFilesAsync(files: string[], shouldDelete: boolean): Promise<number> {
+  private async _deleteFilesAsync(
+    terminal: ITerminal,
+    files: string[],
+    shouldDelete: boolean
+  ): Promise<number> {
     if (files.length) {
-      // eslint-disable-next-line no-console
-      console.log(`\n* ${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ${files.length} change file(s).`);
+      terminal.writeLine(
+        `\n* ${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ${files.length} change file(s).`
+      );
 
       await Async.forEachAsync(
         files,
         async (filePath) => {
-          // eslint-disable-next-line no-console
-          console.log(` - ${filePath}`);
+          terminal.writeLine(` - ${filePath}`);
           if (shouldDelete) {
             await FileSystem.deleteFileAsync(filePath);
           }

@@ -477,6 +477,7 @@ export interface IExperimentsJson {
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     printEventHooksOutputToConsole?: boolean;
     rushAlerts?: boolean;
+    strictChangefileValidation?: boolean;
     useIPCScriptsInWatchMode?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
