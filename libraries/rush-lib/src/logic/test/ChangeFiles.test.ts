@@ -6,12 +6,19 @@ import { Path } from '@rushstack/node-core-library';
 import type { IChangelog } from '../../api/Changelog';
 import { ChangeFiles } from '../ChangeFiles';
 import type { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { VersionPolicyDefinitionName } from '../../api/VersionPolicy';
+import type { ExperimentsConfiguration } from '../../api/ExperimentsConfiguration';
 
 describe(ChangeFiles.name, () => {
   let rushConfiguration: RushConfiguration;
 
   beforeEach(() => {
-    rushConfiguration = {} as RushConfiguration;
+    rushConfiguration = {
+      experimentsConfiguration: {
+        configuration: {}
+      }
+    } as RushConfiguration;
   });
 
   describe(ChangeFiles.prototype.getFilesAsync.name, () => {
@@ -57,7 +64,10 @@ describe(ChangeFiles.name, () => {
     it('allows a hotfix in a hotfix branch.', () => {
       const changeFile: string = `${__dirname}/multipleHotfixChanges/change1.json`;
       const changedPackages: string[] = ['a'];
-      ChangeFiles.validate([changeFile], changedPackages, { hotfixChangeEnabled: true } as RushConfiguration);
+      ChangeFiles.validate([changeFile], changedPackages, {
+        ...rushConfiguration,
+        hotfixChangeEnabled: true
+      } as RushConfiguration);
     });
 
     it('throws when there is any missing package.', () => {
@@ -93,6 +103,101 @@ describe(ChangeFiles.name, () => {
       expect(() => {
         ChangeFiles.validate([changeFileA, changeFileB, changeFileC], changedPackages, rushConfiguration);
       }).not.toThrow(Error);
+    });
+
+    describe('with strictChangefileValidation', () => {
+      let strictConfig: RushConfiguration;
+
+      function createStrictConfig(
+        getProjectByName: (name: string) => RushConfigurationProject | undefined
+      ): RushConfiguration {
+        return {
+          experimentsConfiguration: {
+            configuration: { strictChangefileValidation: true }
+          } as ExperimentsConfiguration,
+          getProjectByName
+        } as unknown as RushConfiguration;
+      }
+
+      it('throws when change file references a nonexistent project', () => {
+        const changeFile: string = `${__dirname}/strictValidation/nonexistentProject.json`;
+        strictConfig = createStrictConfig(() => undefined);
+        expect(() => {
+          ChangeFiles.validate([changeFile], ['nonexistent-package'], strictConfig);
+        }).toThrow(/does not exist in the Rush configuration/);
+      });
+
+      it('throws when change file references a non-main lockstep project', () => {
+        const changeFile: string = `${__dirname}/strictValidation/nonMainLockstep.json`;
+        strictConfig = createStrictConfig((name: string) => {
+          if (name === 'lockstep-secondary') {
+            return {
+              packageName: 'lockstep-secondary',
+              versionPolicy: {
+                policyName: 'myLockstep',
+                definitionName: VersionPolicyDefinitionName.lockStepVersion,
+                mainProject: 'lockstep-main'
+              }
+            } as unknown as RushConfigurationProject;
+          }
+          return undefined;
+        });
+        expect(() => {
+          ChangeFiles.validate([changeFile], ['lockstep-secondary'], strictConfig);
+        }).toThrow(/main project "lockstep-main"/);
+      });
+
+      it('does not throw when change file references the main lockstep project', () => {
+        const changeFile: string = `${__dirname}/strictValidation/mainLockstep.json`;
+        strictConfig = createStrictConfig((name: string) => {
+          if (name === 'lockstep-main') {
+            return {
+              packageName: 'lockstep-main',
+              versionPolicy: {
+                policyName: 'myLockstep',
+                definitionName: VersionPolicyDefinitionName.lockStepVersion,
+                mainProject: 'lockstep-main'
+              }
+            } as unknown as RushConfigurationProject;
+          }
+          return undefined;
+        });
+        expect(() => {
+          ChangeFiles.validate([changeFile], ['lockstep-main'], strictConfig);
+        }).not.toThrow();
+      });
+
+      it('does not throw when change file references a lockstep project with no mainProject', () => {
+        const changeFile: string = `${__dirname}/strictValidation/mainLockstep.json`;
+        strictConfig = createStrictConfig((name: string) => {
+          if (name === 'lockstep-main') {
+            return {
+              packageName: 'lockstep-main',
+              versionPolicy: {
+                policyName: 'myLockstep',
+                definitionName: VersionPolicyDefinitionName.lockStepVersion,
+                mainProject: undefined
+              }
+            } as unknown as RushConfigurationProject;
+          }
+          return undefined;
+        });
+        expect(() => {
+          ChangeFiles.validate([changeFile], ['lockstep-main'], strictConfig);
+        }).not.toThrow();
+      });
+
+      it('does not throw when experiment is disabled', () => {
+        const changeFile: string = `${__dirname}/strictValidation/nonexistentProject.json`;
+        const config: RushConfiguration = {
+          experimentsConfiguration: {
+            configuration: { strictChangefileValidation: false }
+          } as ExperimentsConfiguration
+        } as unknown as RushConfiguration;
+        expect(() => {
+          ChangeFiles.validate([changeFile], ['nonexistent-package'], config);
+        }).not.toThrow();
+      });
     });
   });
 
