@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import type { IChangeInfo } from '../api/ChangeManagement';
 import type { IChangelog } from '../api/Changelog';
@@ -29,6 +30,7 @@ export class ChangeFiles {
    * Validate if the newly added change files match the changed packages.
    */
   public static async validateAsync(
+    terminal: ITerminal,
     newChangeFilePaths: string[],
     changedPackages: string[],
     rushConfiguration: RushConfiguration
@@ -40,8 +42,7 @@ export class ChangeFiles {
     await Async.forEachAsync(
       newChangeFilePaths,
       async (filePath) => {
-        // eslint-disable-next-line no-console
-        console.log(`Found change file: ${filePath}`);
+        terminal.writeLine(`Found change file: ${filePath}`);
 
         const changeFile: IChangeInfo = JsonFile.loadAndValidate(filePath, schema);
 
@@ -129,12 +130,11 @@ export class ChangeFiles {
     }
   }
 
-  public static getChangeComments(newChangeFilePaths: string[]): Map<string, string[]> {
+  public static getChangeComments(terminal: ITerminal, newChangeFilePaths: string[]): Map<string, string[]> {
     const changes: Map<string, string[]> = new Map<string, string[]>();
 
     newChangeFilePaths.forEach((filePath) => {
-      // eslint-disable-next-line no-console
-      console.log(`Found change file: ${filePath}`);
+      terminal.writeLine(`Found change file: ${filePath}`);
       const changeRequest: IChangeInfo = JsonFile.load(filePath);
       if (changeRequest && changeRequest.changes) {
         changeRequest.changes!.forEach((change) => {
@@ -174,7 +174,11 @@ export class ChangeFiles {
   /**
    * Delete all change files
    */
-  public async deleteAllAsync(shouldDelete: boolean, updatedChangelogs?: IChangelog[]): Promise<number> {
+  public async deleteAllAsync(
+    terminal: ITerminal,
+    shouldDelete: boolean,
+    updatedChangelogs?: IChangelog[]
+  ): Promise<number> {
     if (updatedChangelogs) {
       // Skip changes files if the package's change log is not updated.
       const packagesToInclude: Set<string> = new Set<string>();
@@ -203,24 +207,28 @@ export class ChangeFiles {
         { concurrency: 5 }
       );
 
-      return await this._deleteFilesAsync(filesToDelete, shouldDelete);
+      return await this._deleteFilesAsync(terminal, filesToDelete, shouldDelete);
     } else {
       // Delete all change files.
       const files: string[] = await this.getFilesAsync();
-      return await this._deleteFilesAsync(files, shouldDelete);
+      return await this._deleteFilesAsync(terminal, files, shouldDelete);
     }
   }
 
-  private async _deleteFilesAsync(files: string[], shouldDelete: boolean): Promise<number> {
+  private async _deleteFilesAsync(
+    terminal: ITerminal,
+    files: string[],
+    shouldDelete: boolean
+  ): Promise<number> {
     if (files.length) {
-      // eslint-disable-next-line no-console
-      console.log(`\n* ${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ${files.length} change file(s).`);
+      terminal.writeLine(
+        `\n* ${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ${files.length} change file(s).`
+      );
 
       await Async.forEachAsync(
         files,
         async (filePath) => {
-          // eslint-disable-next-line no-console
-          console.log(` - ${filePath}`);
+          terminal.writeLine(` - ${filePath}`);
           if (shouldDelete) {
             await FileSystem.deleteFileAsync(filePath);
           }
