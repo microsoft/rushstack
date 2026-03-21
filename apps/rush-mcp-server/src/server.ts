@@ -5,6 +5,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import {
   type BaseTool,
+  RushBuildStatusTool,
   RushConflictResolverTool,
   RushMigrateProjectTool,
   RushCommandValidatorTool,
@@ -36,6 +37,7 @@ export class RushMCPServer extends McpServer {
   }
 
   private _initializeTools(): void {
+    this._tools.push(new RushBuildStatusTool());
     this._tools.push(new RushConflictResolverTool());
     this._tools.push(new RushMigrateProjectTool(this._rushWorkspacePath));
     this._tools.push(new RushCommandValidatorTool());

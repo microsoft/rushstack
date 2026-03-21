@@ -59,6 +59,7 @@
     "@rushstack/rush-sdk": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@modelcontextprotocol/sdk": "~1.10.2",
+    "ws": "~8.14.1",
     "zod": "~3.25.76"
   },
   "devDependencies": {
@@ -66,7 +67,8 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "typescript": "~5.8.2",
-    "@types/node": "20.17.19"
+    "@types/node": "20.17.19",
+    "@types/ws": "8.5.5"
   },
   "sideEffects": [
     "lib-commonjs/start.js",
