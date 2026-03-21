@@ -114,6 +114,9 @@ extends:
                   Arguments: 'update'
                   DisplayName: 'Rush Update'
 
+              - bash: cp common/temp/install-run/@microsoft+rush@*/package-lock.json common/config/validation/rush-package-lock.json
+                displayName: 'Update rush-package-lock.json'
+
               - bash: |
                   set -e
 
