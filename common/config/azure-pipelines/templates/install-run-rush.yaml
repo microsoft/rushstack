@@ -1,0 +1,23 @@
+# Runs install-run-rush.js with the specified CLI arguments and sets the
+# INSTALL_RUN_RUSH_LOCKFILE_PATH environment variable.
+parameters:
+  - name: Arguments
+    type: string
+  - name: DisplayName
+    type: string
+  - name: Condition
+    type: string
+    default: ''
+  - name: NpmAuthToken
+    type: string
+    default: ''
+
+steps:
+  - script: 'node common/scripts/install-run-rush.js ${{ parameters.Arguments }}'
+    displayName: '${{ parameters.DisplayName }}'
+    ${{ if ne(parameters.Condition, '') }}:
+      condition: ${{ parameters.Condition }}
+    env:
+      INSTALL_RUN_RUSH_LOCKFILE_PATH: $(Build.SourcesDirectory)/common/config/validation/rush-package-lock.json
+      ${{ if ne(parameters.NpmAuthToken, '') }}:
+        NPM_AUTH_TOKEN: ${{ parameters.NpmAuthToken }}

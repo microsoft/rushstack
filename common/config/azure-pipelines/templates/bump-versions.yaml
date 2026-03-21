@@ -6,5 +6,11 @@ parameters:
     default: $(Build.SourceBranchName)
 
 steps:
-  - script: 'node common/scripts/install-run-rush.js version --bump --version-policy ${{ parameters.VersionPolicyName }} --target-branch ${{ parameters.BranchName }}'
-    displayName: 'Rush Version (Policy: ${{ parameters.VersionPolicyName }})'
+  - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+    parameters:
+      Arguments: >
+        version
+        --bump
+        --version-policy ${{ parameters.VersionPolicyName }}
+        --target-branch ${{ parameters.BranchName }}
+      DisplayName: 'Rush Version (Policy: ${{ parameters.VersionPolicyName }})'
