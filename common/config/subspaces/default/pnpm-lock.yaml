@@ -2116,9 +2116,6 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
-      '@rushstack/rush-sdk':
-        specifier: workspace:*
-        version: link:../../libraries/rush-sdk
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
@@ -2498,9 +2495,6 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
-      '@rushstack/rush-sdk':
-        specifier: workspace:*
-        version: link:../../libraries/rush-sdk
       '@rushstack/webpack5-module-minifier-plugin':
         specifier: workspace:*
         version: link:../../webpack/webpack5-module-minifier-plugin
@@ -30172,7 +30166,7 @@ snapshots:
 
   eslint@8.57.1:
     dependencies:
-      '@eslint-community/eslint-utils': 4.9.1(eslint@8.57.1)
+      '@eslint-community/eslint-utils': 4.9.1(eslint@9.37.0)
       '@eslint-community/regexpp': 4.12.2
       '@eslint/eslintrc': 2.1.4
       '@eslint/js': 8.57.1
