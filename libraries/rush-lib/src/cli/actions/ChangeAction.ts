@@ -38,6 +38,7 @@ const BULK_BUMP_TYPE_LONG_NAME: string = '--bump-type';
 export class ChangeAction extends BaseRushAction {
   private readonly _git: Git;
   private readonly _verifyParameter: CommandLineFlagParameter;
+  private readonly _verifyAllParameter: CommandLineFlagParameter;
   private readonly _noFetchParameter: CommandLineFlagParameter;
   private readonly _targetBranchParameter: CommandLineStringParameter;
   private readonly _changeEmailParameter: CommandLineStringParameter;
@@ -96,6 +97,14 @@ export class ChangeAction extends BaseRushAction {
       parameterLongName: '--verify',
       parameterShortName: '-v',
       description: 'Verify the change file has been generated and that it is a valid JSON file'
+    });
+
+    this._verifyAllParameter = this.defineFlagParameter({
+      parameterLongName: '--verify-all',
+      description:
+        'Validate all change files in the repository, not just those added in the current branch. ' +
+        'Reports errors for change files that reference nonexistent projects or target non-main projects ' +
+        'in a lockstepped version policy. Requires the "strictChangefileValidation" experiment to be enabled.'
     });
 
     this._noFetchParameter = this.defineFlagParameter({
@@ -162,29 +171,64 @@ export class ChangeAction extends BaseRushAction {
   }
 
   public async runAsync(): Promise<void> {
-    const targetBranch: string = await this._getTargetBranchAsync();
-    // eslint-disable-next-line no-console
-    console.log(`The target branch is ${targetBranch}`);
-
-    if (this._verifyParameter.value) {
-      const errors: string[] = [
+    if (this._verifyAllParameter.value) {
+      const incompatibleParameters: (
+        | CommandLineFlagParameter
+        | CommandLineStringParameter
+        | CommandLineChoiceParameter
+      )[] = [
+        this._verifyParameter,
         this._bulkChangeParameter,
         this._bulkChangeMessageParameter,
         this._bulkChangeBumpTypeParameter,
         this._overwriteFlagParameter,
         this._commitChangesFlagParameter
-      ]
+      ];
+      const errors: string[] = incompatibleParameters
+        .filter((parameter) => parameter.value)
+        .map(
+          (parameter) =>
+            `The ${parameter.longName} parameter cannot be provided with the ` +
+            `${this._verifyAllParameter.longName} parameter`
+        );
+      if (errors.length > 0) {
+        errors.forEach((error) => {
+          this.terminal.writeErrorLine(error);
+        });
+        throw new AlreadyReportedError();
+      }
+
+      await this._validateAllChangeFilesAsync();
+      return;
+    }
+
+    const targetBranch: string = await this._getTargetBranchAsync();
+    // eslint-disable-next-line no-console
+    console.log(`The target branch is ${targetBranch}`);
+
+    if (this._verifyParameter.value) {
+      const incompatibleParameters: (
+        | CommandLineFlagParameter
+        | CommandLineStringParameter
+        | CommandLineChoiceParameter
+      )[] = [
+        this._bulkChangeParameter,
+        this._bulkChangeMessageParameter,
+        this._bulkChangeBumpTypeParameter,
+        this._overwriteFlagParameter,
+        this._commitChangesFlagParameter
+      ];
+      const errors: string[] = incompatibleParameters
         .map((parameter) => {
           return parameter.value
-            ? `The {${this._bulkChangeParameter.longName} parameter cannot be provided with the ` +
+            ? `The ${parameter.longName} parameter cannot be provided with the ` +
                 `${this._verifyParameter.longName} parameter`
             : '';
         })
         .filter((error) => error !== '');
       if (errors.length > 0) {
         errors.forEach((error) => {
-          // eslint-disable-next-line no-console
-          console.error(error);
+          this.terminal.writeErrorLine(error);
         });
         throw new AlreadyReportedError();
       }
@@ -388,6 +432,12 @@ export class ChangeAction extends BaseRushAction {
   private async _validateChangeFileAsync(changedPackages: string[]): Promise<void> {
     const files: string[] = await this._getChangeFilesAsync();
     await ChangeFiles.validateAsync(files, changedPackages, this.rushConfiguration);
+  }
+
+  private async _validateAllChangeFilesAsync(): Promise<void> {
+    const changeFiles: ChangeFiles = new ChangeFiles(this.rushConfiguration.changesFolder);
+    const allChangeFiles: string[] = await changeFiles.getFilesAsync();
+    await ChangeFiles.validateAsync(allChangeFiles, [], this.rushConfiguration);
   }
 
   private async _getChangeFilesAsync(): Promise<string[]> {

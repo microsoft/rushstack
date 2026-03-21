@@ -92,6 +92,14 @@ Object {
           "shortName": "-v",
         },
         Object {
+          "description": "Validate all change files in the repository, not just those added in the current branch. Reports errors for change files that reference nonexistent projects or target non-main projects in a lockstepped version policy. Requires the \\"strictChangefileValidation\\" experiment to be enabled.",
+          "environmentVariable": undefined,
+          "kind": "Flag",
+          "longName": "--verify-all",
+          "required": false,
+          "shortName": undefined,
+        },
+        Object {
           "description": "Skips fetching the baseline branch before running \\"git diff\\" to detect changes.",
           "environmentVariable": undefined,
           "kind": "Flag",
