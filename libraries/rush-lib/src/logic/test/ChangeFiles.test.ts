@@ -9,9 +9,13 @@ import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { VersionPolicyDefinitionName } from '../../api/VersionPolicy';
 import type { ExperimentsConfiguration } from '../../api/ExperimentsConfiguration';
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 describe(ChangeFiles.name, () => {
   let rushConfiguration: RushConfiguration;
+
+  let terminalProvider: StringBufferTerminalProvider;
+  let terminal: Terminal;
 
   beforeEach(() => {
     rushConfiguration = {
@@ -19,6 +23,17 @@ describe(ChangeFiles.name, () => {
         configuration: {}
       }
     } as RushConfiguration;
+
+    terminalProvider = new StringBufferTerminalProvider();
+    terminal = new Terminal(terminalProvider);
+  });
+
+  afterEach(() => {
+    expect(
+      terminalProvider
+        .getAllOutputAsChunks({ asLines: true })
+        .map((chunk) => chunk.replace(__dirname, '<TEST DIR>'))
+    ).toMatchSnapshot();
   });
 
   describe(ChangeFiles.prototype.getFilesAsync.name, () => {
@@ -55,7 +70,7 @@ describe(ChangeFiles.name, () => {
       const changeFile: string = `${__dirname}/leafChange/change1.json`;
       const changedPackages: string[] = ['d'];
       await expect(
-        ChangeFiles.validateAsync([changeFile], changedPackages, {
+        ChangeFiles.validateAsync(terminal, [changeFile], changedPackages, {
           hotfixChangeEnabled: true
         } as RushConfiguration)
       ).rejects.toThrow(Error);
@@ -64,7 +79,7 @@ describe(ChangeFiles.name, () => {
     it('allows a hotfix in a hotfix branch.', async () => {
       const changeFile: string = `${__dirname}/multipleHotfixChanges/change1.json`;
       const changedPackages: string[] = ['a'];
-      await ChangeFiles.validateAsync([changeFile], changedPackages, {
+      await ChangeFiles.validateAsync(terminal, [changeFile], changedPackages, {
         ...rushConfiguration,
         hotfixChangeEnabled: true
       } as RushConfiguration);
@@ -74,14 +89,14 @@ describe(ChangeFiles.name, () => {
       const changeFile: string = `${__dirname}/verifyChanges/changes.json`;
       const changedPackages: string[] = ['a', 'b', 'c'];
       await expect(
-        ChangeFiles.validateAsync([changeFile], changedPackages, rushConfiguration)
+        ChangeFiles.validateAsync(terminal, [changeFile], changedPackages, rushConfiguration)
       ).rejects.toThrow(Error);
     });
 
     it('does not throw when there is no missing packages', async () => {
       const changeFile: string = `${__dirname}/verifyChanges/changes.json`;
       const changedPackages: string[] = ['a'];
-      await ChangeFiles.validateAsync([changeFile], changedPackages, rushConfiguration);
+      await ChangeFiles.validateAsync(terminal, [changeFile], changedPackages, rushConfiguration);
     });
 
     it('throws when missing packages from categorized changes', async () => {
@@ -89,7 +104,7 @@ describe(ChangeFiles.name, () => {
       const changeFileB: string = `${__dirname}/categorizedChanges/@ms/b/changeB.json`;
       const changedPackages: string[] = ['@ms/a', '@ms/b', 'c'];
       await expect(
-        ChangeFiles.validateAsync([changeFileA, changeFileB], changedPackages, rushConfiguration)
+        ChangeFiles.validateAsync(terminal, [changeFileA, changeFileB], changedPackages, rushConfiguration)
       ).rejects.toThrow(Error);
     });
 
@@ -99,6 +114,7 @@ describe(ChangeFiles.name, () => {
       const changeFileC: string = `${__dirname}/categorizedChanges/changeC.json`;
       const changedPackages: string[] = ['@ms/a', '@ms/b', 'c'];
       await ChangeFiles.validateAsync(
+        terminal,
         [changeFileA, changeFileB, changeFileC],
         changedPackages,
         rushConfiguration
@@ -122,9 +138,13 @@ describe(ChangeFiles.name, () => {
       it('throws when change file references a nonexistent project', async () => {
         const changeFile: string = `${__dirname}/strictValidation/nonexistentProject.json`;
         strictConfig = createStrictConfig(() => undefined);
-        await expect(
-          ChangeFiles.validateAsync([changeFile], ['nonexistent-package'], strictConfig)
-        ).rejects.toThrow(/does not exist in the Rush configuration/);
+        try {
+          await ChangeFiles.validateAsync(terminal, [changeFile], ['nonexistent-package'], strictConfig);
+          fail('Expected validateAsync to throw');
+        } catch (error) {
+          const normalizedMessage: string = error.message.replace(__dirname, '<TEST DIR>');
+          expect(normalizedMessage).toMatchSnapshot();
+        }
       });
 
       it('throws when change file references a non-main lockstep project', async () => {
@@ -142,9 +162,13 @@ describe(ChangeFiles.name, () => {
           }
           return undefined;
         });
-        await expect(
-          ChangeFiles.validateAsync([changeFile], ['lockstep-secondary'], strictConfig)
-        ).rejects.toThrow(/main project "lockstep-main"/);
+        try {
+          await ChangeFiles.validateAsync(terminal, [changeFile], ['lockstep-secondary'], strictConfig);
+          fail('Expected validateAsync to throw');
+        } catch (error) {
+          const normalizedMessage: string = error.message.replace(__dirname, '<TEST DIR>');
+          expect(normalizedMessage).toMatchSnapshot();
+        }
       });
 
       it('does not throw when change file references the main lockstep project', async () => {
@@ -162,7 +186,7 @@ describe(ChangeFiles.name, () => {
           }
           return undefined;
         });
-        await ChangeFiles.validateAsync([changeFile], ['lockstep-main'], strictConfig);
+        await ChangeFiles.validateAsync(terminal, [changeFile], ['lockstep-main'], strictConfig);
       });
 
       it('does not throw when change file references a lockstep project with no mainProject', async () => {
@@ -180,7 +204,7 @@ describe(ChangeFiles.name, () => {
           }
           return undefined;
         });
-        await ChangeFiles.validateAsync([changeFile], ['lockstep-main'], strictConfig);
+        await ChangeFiles.validateAsync(terminal, [changeFile], ['lockstep-main'], strictConfig);
       });
 
       it('does not throw when experiment is disabled', async () => {
@@ -190,7 +214,7 @@ describe(ChangeFiles.name, () => {
             configuration: { strictChangefileValidation: false }
           } as ExperimentsConfiguration
         } as unknown as RushConfiguration;
-        await ChangeFiles.validateAsync([changeFile], ['nonexistent-package'], config);
+        await ChangeFiles.validateAsync(terminal, [changeFile], ['nonexistent-package'], config);
       });
     });
   });
@@ -199,7 +223,7 @@ describe(ChangeFiles.name, () => {
     it('delete all files when there are no prerelease packages', async () => {
       const changesPath: string = `${__dirname}/multipleChangeFiles`;
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      expect(await changeFiles.deleteAllAsync(false)).toEqual(3);
+      expect(await changeFiles.deleteAllAsync(terminal, false)).toEqual(3);
     });
 
     it('does not delete change files for package whose change logs do not get updated. ', async () => {
@@ -215,13 +239,13 @@ describe(ChangeFiles.name, () => {
           entries: []
         }
       ];
-      expect(await changeFiles.deleteAllAsync(false, updatedChangelogs)).toEqual(2);
+      expect(await changeFiles.deleteAllAsync(terminal, false, updatedChangelogs)).toEqual(2);
     });
 
     it('delete all files when there are hotfixes', async () => {
       const changesPath: string = `${__dirname}/multipleHotfixChanges`;
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      expect(await changeFiles.deleteAllAsync(false)).toEqual(3);
+      expect(await changeFiles.deleteAllAsync(terminal, false)).toEqual(3);
     });
   });
 });

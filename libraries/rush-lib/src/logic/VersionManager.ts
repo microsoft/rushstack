@@ -6,6 +6,7 @@ import * as path from 'node:path';
 import * as semver from 'semver';
 
 import { type IPackageJson, JsonFile, FileConstants } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import { type VersionPolicy, type BumpType, LockStepVersionPolicy } from '../api/VersionPolicy';
 import { ChangeFile } from '../api/ChangeFile';
@@ -65,6 +66,7 @@ export class VersionManager {
    * @param shouldCommit - whether the changes will be written to disk
    */
   public async bumpAsync(
+    terminal: ITerminal,
     lockStepVersionPolicyName?: string,
     bumpType?: BumpType,
     identifier?: string,
@@ -94,7 +96,7 @@ export class VersionManager {
       changeManager.apply(!!shouldCommit)!.forEach((packageJson) => {
         this.updatedProjects.set(packageJson.name, packageJson);
       });
-      await changeManager.updateChangelogAsync(!!shouldCommit);
+      await changeManager.updateChangelogAsync(terminal, !!shouldCommit);
     }
 
     // Refresh rush configuration again, since we've further modified the package.json files

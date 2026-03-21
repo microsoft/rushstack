@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IPackageJson } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import type { IChangeInfo } from '../api/ChangeManagement';
 import type { IChangelog } from '../api/Changelog';
@@ -117,7 +118,7 @@ export class ChangeManager {
     return updatedPackages;
   }
 
-  public async updateChangelogAsync(shouldCommit: boolean): Promise<void> {
+  public async updateChangelogAsync(terminal: ITerminal, shouldCommit: boolean): Promise<void> {
     // Do not update changelog or delete the change files for prerelease.
     // Save them for the official release.
     if (!this._prereleaseToken.hasValue) {
@@ -130,7 +131,7 @@ export class ChangeManager {
       );
 
       // Remove the change request files only if "-a" was provided.
-      await this._changeFiles.deleteAllAsync(shouldCommit, updatedChangelogs);
+      await this._changeFiles.deleteAllAsync(terminal, shouldCommit, updatedChangelogs);
     }
   }
 }
