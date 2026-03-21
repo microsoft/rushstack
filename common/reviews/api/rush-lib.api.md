@@ -1173,9 +1173,9 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     // (undocumented)
     readonly jsonFilename: string | undefined;
     // @internal (undocumented)
-    static loadFromJsonFileOrThrow(jsonFilePath: string, commonTempFolder: string): PnpmOptionsConfiguration;
+    static loadFromJsonFileOrThrow(jsonFilePath: string, commonTempFolder: string, rushUserConfiguration?: RushUserConfiguration): PnpmOptionsConfiguration;
     // @internal (undocumented)
-    static loadFromJsonObject(json: _IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration;
+    static loadFromJsonObject(json: _IPnpmOptionsJson, commonTempFolder: string, rushUserConfiguration?: RushUserConfiguration): PnpmOptionsConfiguration;
     readonly minimumReleaseAge: number | undefined;
     readonly minimumReleaseAgeExclude: string[] | undefined;
     readonly pnpmLockfilePolicies: IPnpmLockfilePolicies | undefined;
@@ -1340,6 +1340,8 @@ export class RushConfiguration {
     //
     // @internal (undocumented)
     readonly _rushPluginsConfiguration: RushPluginsConfiguration;
+    // @internal (undocumented)
+    readonly _rushUserConfiguration: RushUserConfiguration;
     readonly shrinkwrapFilename: string;
     get shrinkwrapFilePhrase(): string;
     // @beta
@@ -1560,7 +1562,10 @@ export class RushUserConfiguration {
     // (undocumented)
     static getRushUserFolderPath(): string;
     // (undocumented)
+    static initialize(): RushUserConfiguration;
+    // (undocumented)
     static initializeAsync(): Promise<RushUserConfiguration>;
+    readonly pnpmStorePath: string | undefined;
 }
 
 // @public
