@@ -3,6 +3,8 @@
 
 import { AsyncParallelHook, AsyncSeriesHook, HookMap } from 'tapable';
 
+import type { CommandLineParameter } from '@rushstack/ts-command-line';
+
 import type { ITelemetryData } from '../logic/Telemetry';
 import type { PhasedCommandHooks } from './PhasedCommandHooks';
 import type { Subspace } from '../api/Subspace';
@@ -23,7 +25,17 @@ export interface IRushCommand {
  * @beta
  */
 export interface IGlobalCommand extends IRushCommand {
-  // Nothing added.
+  /**
+   * Get a parameter by its long name (e.g. "--output-path") that was defined in command-line.json for this command.
+   * If the parameter was not defined or not provided on the command line, this will throw.
+   */
+  getCustomParametersByLongName<TParameter extends CommandLineParameter>(longName: string): TParameter;
+
+  /**
+   * Call this from a plugin hook to indicate that the command has been fully handled
+   * by the plugin. When set, the default shell command execution will be skipped.
+   */
+  setHandled(): void;
 }
 
 /**
@@ -94,7 +106,7 @@ export class RushLifecycleHooks {
    * The hook to run between preparing the common/temp folder and invoking the package manager during "rush install" or "rush update".
    */
   public readonly beforeInstall: AsyncSeriesHook<
-    [command: IGlobalCommand, subspace: Subspace, variant: string | undefined]
+    [command: IRushCommand, subspace: Subspace, variant: string | undefined]
   > = new AsyncSeriesHook(['command', 'subspace', 'variant'], 'beforeInstall');
 
   /**

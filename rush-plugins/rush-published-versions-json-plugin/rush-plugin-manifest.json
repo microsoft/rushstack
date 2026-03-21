@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-plugin-manifest.schema.json",
+  "plugins": [
+    {
+      "pluginName": "rush-published-versions-json-plugin",
+      "description": "A Rush plugin for generating a JSON file containing the versions of all published packages in the monorepo.",
+      "entryPoint": "./lib-commonjs/index.js",
+      "associatedCommands": ["record-published-versions"],
+      "commandLineJsonFilePath": "./command-line.json"
+    }
+  ]
+}
