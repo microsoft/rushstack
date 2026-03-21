@@ -35,7 +35,8 @@ export class ChangeFiles {
   ): Promise<void> {
     const schema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-    const projectsWithChangeDescriptions: Set<string> = new Set<string>();
+    const projectsWithChangeDescriptions: Set<string> = new Set();
+    const changefilesByProjectName: Map<string, string[]> = new Map();
     await Async.forEachAsync(
       newChangeFilePaths,
       async (filePath) => {
@@ -60,6 +61,13 @@ export class ChangeFiles {
         if (changeFile && changeFile.changes) {
           for (const { packageName } of changeFile.changes) {
             projectsWithChangeDescriptions.add(packageName);
+            let files: string[] | undefined = changefilesByProjectName.get(packageName);
+            if (!files) {
+              files = [];
+              changefilesByProjectName.set(packageName, files);
+            }
+
+            files.push(filePath);
           }
         } else {
           throw new Error(`Invalid change file: ${filePath}`);
@@ -72,11 +80,13 @@ export class ChangeFiles {
       const errors: string[] = [];
 
       for (const packageName of projectsWithChangeDescriptions) {
+        const affectedFiles: string[] = changefilesByProjectName.get(packageName) ?? [];
+        const fileList: string = affectedFiles.map((f) => `  - ${f}`).join('\n');
         const project: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(packageName);
 
         if (!project) {
           errors.push(
-            `Change file(s) reference a project "${packageName}" that does not exist in the Rush configuration.`
+            `Change file(s) reference a project "${packageName}" that does not exist in the Rush configuration:\n${fileList}`
           );
           continue;
         }
@@ -87,7 +97,7 @@ export class ChangeFiles {
             errors.push(
               `Change file(s) reference the project "${packageName}" which belongs to lockstepped ` +
                 `version policy "${project.versionPolicy.policyName}". Change files should be ` +
-                `created for the policy's main project "${mainProject}" instead.`
+                `created for the policy's main project "${mainProject}" instead:\n${fileList}`
             );
           }
         }
