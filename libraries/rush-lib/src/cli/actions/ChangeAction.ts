@@ -434,6 +434,13 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private async _validateAllChangeFilesAsync(): Promise<void> {
+    if (!this.rushConfiguration.experimentsConfiguration.configuration.strictChangefileValidation) {
+      throw new Error(
+        `The ${this._verifyAllParameter.longName} parameter requires the ` +
+          '"strictChangefileValidation" experiment to be enabled.'
+      );
+    }
+
     const changeFiles: ChangeFiles = new ChangeFiles(this.rushConfiguration.changesFolder);
     const allChangeFiles: string[] = await changeFiles.getFilesAsync();
     await ChangeFiles.validateAsync(this.terminal, allChangeFiles, [], this.rushConfiguration);
