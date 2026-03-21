@@ -2,6 +2,34 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.171.0",
+      "tag": "@microsoft/rush_v5.171.0",
+      "date": "Sat, 21 Mar 2026 03:10:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add RUSH_QUIET_MODE environment variable that, when set to `1` or `true`, is equivalent to passing `--quiet` for `rush`, `rushx`, and `install-run-rush.ts`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Update OperationExecutionRecord to only set `this.logFilePaths` if the value to be assigned is not `undefined`"
+          },
+          {
+            "comment": "Fix ProblemCollector wiring in OperationExecutionRecord: add preventAutoclose, strip ANSI colors before matching, and always include problemCollector in the terminal pipeline"
+          },
+          {
+            "comment": "Fix weighted concurrency budget being capped by operation count"
+          }
+        ],
+        "none": [
+          {
+            "comment": "Fix an issue where the assets used by `rush init` weren't shipped."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.170.1",
       "tag": "@microsoft/rush_v5.170.1",
       "date": "Thu, 12 Mar 2026 22:33:34 GMT",

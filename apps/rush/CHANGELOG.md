@@ -1,6 +1,23 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 12 Mar 2026 22:33:34 GMT and should not be manually modified.
+This log was last generated on Sat, 21 Mar 2026 03:10:24 GMT and should not be manually modified.
+
+## 5.171.0
+Sat, 21 Mar 2026 03:10:24 GMT
+
+### Minor changes
+
+- Add RUSH_QUIET_MODE environment variable that, when set to `1` or `true`, is equivalent to passing `--quiet` for `rush`, `rushx`, and `install-run-rush.ts`
+
+### Patches
+
+- Update OperationExecutionRecord to only set `this.logFilePaths` if the value to be assigned is not `undefined`
+- Fix ProblemCollector wiring in OperationExecutionRecord: add preventAutoclose, strip ANSI colors before matching, and always include problemCollector in the terminal pipeline
+- Fix weighted concurrency budget being capped by operation count
+
+### Updates
+
+- Fix an issue where the assets used by `rush init` weren't shipped.
 
 ## 5.170.1
 Thu, 12 Mar 2026 22:33:34 GMT
