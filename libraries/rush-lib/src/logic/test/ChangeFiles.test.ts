@@ -50,59 +50,59 @@ describe(ChangeFiles.name, () => {
     });
   });
 
-  describe(ChangeFiles.validate.name, () => {
-    it('throws when there is a patch in a hotfix branch.', () => {
+  describe(ChangeFiles.validateAsync.name, () => {
+    it('throws when there is a patch in a hotfix branch.', async () => {
       const changeFile: string = `${__dirname}/leafChange/change1.json`;
       const changedPackages: string[] = ['d'];
-      expect(() => {
-        ChangeFiles.validate([changeFile], changedPackages, {
+      await expect(
+        ChangeFiles.validateAsync([changeFile], changedPackages, {
           hotfixChangeEnabled: true
-        } as RushConfiguration);
-      }).toThrow(Error);
+        } as RushConfiguration)
+      ).rejects.toThrow(Error);
     });
 
-    it('allows a hotfix in a hotfix branch.', () => {
+    it('allows a hotfix in a hotfix branch.', async () => {
       const changeFile: string = `${__dirname}/multipleHotfixChanges/change1.json`;
       const changedPackages: string[] = ['a'];
-      ChangeFiles.validate([changeFile], changedPackages, {
+      await ChangeFiles.validateAsync([changeFile], changedPackages, {
         ...rushConfiguration,
         hotfixChangeEnabled: true
       } as RushConfiguration);
     });
 
-    it('throws when there is any missing package.', () => {
+    it('throws when there is any missing package.', async () => {
       const changeFile: string = `${__dirname}/verifyChanges/changes.json`;
       const changedPackages: string[] = ['a', 'b', 'c'];
-      expect(() => {
-        ChangeFiles.validate([changeFile], changedPackages, rushConfiguration);
-      }).toThrow(Error);
+      await expect(
+        ChangeFiles.validateAsync([changeFile], changedPackages, rushConfiguration)
+      ).rejects.toThrow(Error);
     });
 
-    it('does not throw when there is no missing packages', () => {
+    it('does not throw when there is no missing packages', async () => {
       const changeFile: string = `${__dirname}/verifyChanges/changes.json`;
       const changedPackages: string[] = ['a'];
-      expect(() => {
-        ChangeFiles.validate([changeFile], changedPackages, rushConfiguration);
-      }).not.toThrow();
+      await ChangeFiles.validateAsync([changeFile], changedPackages, rushConfiguration);
     });
 
-    it('throws when missing packages from categorized changes', () => {
+    it('throws when missing packages from categorized changes', async () => {
       const changeFileA: string = `${__dirname}/categorizedChanges/@ms/a/changeA.json`;
       const changeFileB: string = `${__dirname}/categorizedChanges/@ms/b/changeB.json`;
       const changedPackages: string[] = ['@ms/a', '@ms/b', 'c'];
-      expect(() => {
-        ChangeFiles.validate([changeFileA, changeFileB], changedPackages, rushConfiguration);
-      }).toThrow(Error);
+      await expect(
+        ChangeFiles.validateAsync([changeFileA, changeFileB], changedPackages, rushConfiguration)
+      ).rejects.toThrow(Error);
     });
 
-    it('does not throw when no missing packages from categorized changes', () => {
+    it('does not throw when no missing packages from categorized changes', async () => {
       const changeFileA: string = `${__dirname}/categorizedChanges/@ms/a/changeA.json`;
       const changeFileB: string = `${__dirname}/categorizedChanges/@ms/b/changeB.json`;
       const changeFileC: string = `${__dirname}/categorizedChanges/changeC.json`;
       const changedPackages: string[] = ['@ms/a', '@ms/b', 'c'];
-      expect(() => {
-        ChangeFiles.validate([changeFileA, changeFileB, changeFileC], changedPackages, rushConfiguration);
-      }).not.toThrow(Error);
+      await ChangeFiles.validateAsync(
+        [changeFileA, changeFileB, changeFileC],
+        changedPackages,
+        rushConfiguration
+      );
     });
 
     describe('with strictChangefileValidation', () => {
@@ -119,15 +119,15 @@ describe(ChangeFiles.name, () => {
         } as unknown as RushConfiguration;
       }
 
-      it('throws when change file references a nonexistent project', () => {
+      it('throws when change file references a nonexistent project', async () => {
         const changeFile: string = `${__dirname}/strictValidation/nonexistentProject.json`;
         strictConfig = createStrictConfig(() => undefined);
-        expect(() => {
-          ChangeFiles.validate([changeFile], ['nonexistent-package'], strictConfig);
-        }).toThrow(/does not exist in the Rush configuration/);
+        await expect(
+          ChangeFiles.validateAsync([changeFile], ['nonexistent-package'], strictConfig)
+        ).rejects.toThrow(/does not exist in the Rush configuration/);
       });
 
-      it('throws when change file references a non-main lockstep project', () => {
+      it('throws when change file references a non-main lockstep project', async () => {
         const changeFile: string = `${__dirname}/strictValidation/nonMainLockstep.json`;
         strictConfig = createStrictConfig((name: string) => {
           if (name === 'lockstep-secondary') {
@@ -142,12 +142,12 @@ describe(ChangeFiles.name, () => {
           }
           return undefined;
         });
-        expect(() => {
-          ChangeFiles.validate([changeFile], ['lockstep-secondary'], strictConfig);
-        }).toThrow(/main project "lockstep-main"/);
+        await expect(
+          ChangeFiles.validateAsync([changeFile], ['lockstep-secondary'], strictConfig)
+        ).rejects.toThrow(/main project "lockstep-main"/);
       });
 
-      it('does not throw when change file references the main lockstep project', () => {
+      it('does not throw when change file references the main lockstep project', async () => {
         const changeFile: string = `${__dirname}/strictValidation/mainLockstep.json`;
         strictConfig = createStrictConfig((name: string) => {
           if (name === 'lockstep-main') {
@@ -162,12 +162,10 @@ describe(ChangeFiles.name, () => {
           }
           return undefined;
         });
-        expect(() => {
-          ChangeFiles.validate([changeFile], ['lockstep-main'], strictConfig);
-        }).not.toThrow();
+        await ChangeFiles.validateAsync([changeFile], ['lockstep-main'], strictConfig);
       });
 
-      it('does not throw when change file references a lockstep project with no mainProject', () => {
+      it('does not throw when change file references a lockstep project with no mainProject', async () => {
         const changeFile: string = `${__dirname}/strictValidation/mainLockstep.json`;
         strictConfig = createStrictConfig((name: string) => {
           if (name === 'lockstep-main') {
@@ -182,21 +180,17 @@ describe(ChangeFiles.name, () => {
           }
           return undefined;
         });
-        expect(() => {
-          ChangeFiles.validate([changeFile], ['lockstep-main'], strictConfig);
-        }).not.toThrow();
+        await ChangeFiles.validateAsync([changeFile], ['lockstep-main'], strictConfig);
       });
 
-      it('does not throw when experiment is disabled', () => {
+      it('does not throw when experiment is disabled', async () => {
         const changeFile: string = `${__dirname}/strictValidation/nonexistentProject.json`;
         const config: RushConfiguration = {
           experimentsConfiguration: {
             configuration: { strictChangefileValidation: false }
           } as ExperimentsConfiguration
         } as unknown as RushConfiguration;
-        expect(() => {
-          ChangeFiles.validate([changeFile], ['nonexistent-package'], config);
-        }).not.toThrow();
+        await ChangeFiles.validateAsync([changeFile], ['nonexistent-package'], config);
       });
     });
   });
