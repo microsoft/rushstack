@@ -96,17 +96,26 @@ extends:
               - script: 'git config --local user.name Rushbot'
                 displayName: 'git config name'
 
-              - script: 'node common/scripts/install-run-rush.js install --to repo-toolbox'
-                displayName: 'Rush Install'
+              - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+                parameters:
+                  Arguments: 'install --to repo-toolbox'
+                  DisplayName: 'Rush Install'
 
-              - script: 'node common/scripts/install-run-rush.js build --to repo-toolbox --verbose'
-                displayName: 'Rush Build (repo-toolbox)'
+              - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+                parameters:
+                  Arguments: 'build --to repo-toolbox --verbose'
+                  DisplayName: 'Rush Build (repo-toolbox)'
 
               - script: 'node repo-scripts/repo-toolbox/lib-commonjs/start.js bump-decoupled-local-dependencies'
                 displayName: 'Bump decoupled local dependencies'
 
-              - script: 'node common/scripts/install-run-rush.js update'
-                displayName: 'Rush Update'
+              - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+                parameters:
+                  Arguments: 'update'
+                  DisplayName: 'Rush Update'
+
+              - bash: cp common/temp/install-run/@microsoft+rush@*/package-lock.json common/config/validation/rush-package-lock.json
+                displayName: 'Update rush-package-lock.json'
 
               - bash: |
                   set -e
@@ -124,15 +133,15 @@ extends:
                   git commit -m "$(CommitMessage)"
                 displayName: 'Commit dependency changes'
 
-              - bash: |
-                  set -e
-
-                  node common/scripts/install-run-rush.js change \
-                    --bulk \
-                    --bump-type none \
+              - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+                parameters:
+                  Arguments: >
+                    change
+                    --bulk
+                    --bump-type none
                     --commit-message "chore: generate change files for decoupled dependency bump"
-                displayName: 'Generate change files'
-                condition: and(succeeded(), eq(variables.HasChanges, 'true'))
+                  DisplayName: 'Generate change files'
+                  Condition: "and(succeeded(), eq(variables.HasChanges, 'true'))"
 
               - template: /common/config/azure-pipelines/templates/push-and-create-github-pr.yaml@self
                 parameters:
@@ -163,13 +172,15 @@ extends:
                 parameters:
                   NodeMajorVersion: 24
 
-              # Build the custom Docusaurus plugin for api-documenter in the
-              # rushstack-websites repo.
-              - script: 'node common/scripts/install-run-rush.js install'
-                displayName: 'Rush Install (rushstack-websites)'
+              - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+                parameters:
+                  Arguments: 'install'
+                  DisplayName: 'Rush Install (rushstack-websites)'
 
-              - script: 'node common/scripts/install-run-rush.js build --to-except api.rushstack.io --verbose'
-                displayName: 'Rush Build to-except api.rushstack.io (rushstack-websites)'
+              - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+                parameters:
+                  Arguments: 'build --to-except api.rushstack.io --verbose'
+                  DisplayName: 'Rush Build to-except api.rushstack.io (rushstack-websites)'
 
               # Download the api artifact from the triggering publish pipeline.
               # AzDO automatically resolves which pipeline resource triggered this run.
