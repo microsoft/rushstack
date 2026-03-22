@@ -11,7 +11,7 @@ import type {
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
-import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
+import { Async, FileSystem, JsonFile, AlreadyReportedError } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 import { getRepoRoot } from '@rushstack/package-deps-hash';
 
@@ -387,6 +387,10 @@ export class ChangeAction extends BaseRushAction {
     } else {
       this._logNoChangeFileRequired();
     }
+
+    if (this.rushConfiguration.experimentsConfiguration.configuration.strictChangefileValidation) {
+      await this._detectDeletedProjectChangeFilesAsync();
+    }
   }
 
   private async _getTargetBranchAsync(): Promise<string> {
@@ -444,6 +448,80 @@ export class ChangeAction extends BaseRushAction {
     const changeFiles: ChangeFiles = new ChangeFiles(this.rushConfiguration.changesFolder);
     const allChangeFiles: string[] = await changeFiles.getFilesAsync();
     await ChangeFiles.validateAsync(this.terminal, allChangeFiles, [], this.rushConfiguration);
+  }
+
+  /**
+   * Detects projects that were deleted from rush.json on this branch and checks whether
+   * any existing change files still reference them.
+   */
+  private async _detectDeletedProjectChangeFilesAsync(): Promise<void> {
+    const repoRoot: string = getRepoRoot(this.rushConfiguration.rushJsonFolder);
+    const targetBranch: string = await this._getTargetBranchAsync();
+    const mergeBase: string = await this._git.getMergeBaseAsync(targetBranch, this.terminal);
+
+    // Read the old rush.json from the merge base
+    let oldRushJsonContent: string;
+    try {
+      const rushJsonRelativePath: string = path.relative(repoRoot, this.rushConfiguration.rushJsonFile);
+      oldRushJsonContent = await this._git.getBlobContentAsync({
+        blobSpec: `${mergeBase}:${rushJsonRelativePath}`,
+        repositoryRoot: repoRoot
+      });
+    } catch {
+      // If rush.json didn't exist on the target branch, nothing to compare
+      return;
+    }
+
+    const oldRushJson: { projects?: { packageName: string }[] } = JSON.parse(oldRushJsonContent);
+    const oldProjectNames: Set<string> = new Set(
+      (oldRushJson.projects ?? []).map((p) => p.packageName)
+    );
+
+    const currentProjectNames: Set<string> = new Set(
+      this.rushConfiguration.projects.map((p) => p.packageName)
+    );
+
+    const deletedProjectNames: Set<string> = new Set<string>();
+    for (const name of oldProjectNames) {
+      if (!currentProjectNames.has(name)) {
+        deletedProjectNames.add(name);
+      }
+    }
+
+    if (deletedProjectNames.size === 0) {
+      return;
+    }
+
+    // Scan all change files for references to deleted projects
+    const changeFilesInstance: ChangeFiles = new ChangeFiles(this.rushConfiguration.changesFolder);
+    const allChangeFilePaths: string[] = await changeFilesInstance.getFilesAsync();
+
+    const defunctChangeFiles: string[] = [];
+    await Async.forEachAsync(
+      allChangeFilePaths,
+      async (filePath) => {
+        const changeFile: IChangeInfo = await JsonFile.loadAsync(filePath);
+        if (changeFile?.changes) {
+          for (const change of changeFile.changes) {
+            if (deletedProjectNames.has(change.packageName)) {
+              defunctChangeFiles.push(filePath);
+              break;
+            }
+          }
+        }
+      },
+      { concurrency: 50 }
+    );
+
+    if (defunctChangeFiles.length > 0) {
+      throw new Error(
+        [
+          `The following change files reference projects that were removed from ${RushConstants.rushJsonFilename}. ` +
+            `Please delete them:`,
+          ...defunctChangeFiles.map((filePath) => `- ${filePath}`)
+        ].join('\n')
+      );
+    }
   }
 
   private async _getChangeFilesAsync(): Promise<string[]> {
