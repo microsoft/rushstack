@@ -382,32 +382,31 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private async _verifyAsync(): Promise<void> {
-    const changedPackages: string[] = await this._getChangedProjectNamesAsync();
-    const strictValidation: boolean =
-      !!this.rushConfiguration.experimentsConfiguration.configuration.strictChangefileValidation;
+    const changedProjectNames: string[] = await this._getChangedProjectNamesAsync();
+    const strictValidation: boolean | undefined =
+      this.rushConfiguration.experimentsConfiguration.configuration.strictChangefileValidation;
 
     // When strict validation is enabled, validate ALL change files to catch references to
     // deleted or nonexistent projects. Otherwise, only validate change files added on this branch.
+    const changeFilesInstance: ChangeFiles = new ChangeFiles(this.rushConfiguration);
     let filesToValidate: string[];
     if (strictValidation) {
-      const changeFilesInstance: ChangeFiles = new ChangeFiles(this.rushConfiguration.changesFolder);
-      filesToValidate = await changeFilesInstance.getFilesAsync();
+      filesToValidate = await changeFilesInstance.getAllChangeFilesAsync();
     } else {
       filesToValidate = await this._getChangeFilesAsync();
     }
 
-    if (changedPackages.length > 0 || filesToValidate.length > 0) {
+    if (changedProjectNames.length > 0 || filesToValidate.length > 0) {
       const deletedProjectNames: Set<string> | undefined = strictValidation
         ? await this._getDeletedProjectNamesAsync()
         : undefined;
 
-      await ChangeFiles.validateAsync(
-        this.terminal,
+      await changeFilesInstance.validateAsync({
+        terminal: this.terminal,
         filesToValidate,
-        changedPackages,
-        this.rushConfiguration,
+        changedProjectNames,
         deletedProjectNames
-      );
+      });
     } else {
       this._logNoChangeFileRequired();
     }
@@ -460,16 +459,15 @@ export class ChangeAction extends BaseRushAction {
       );
     }
 
-    const changeFiles: ChangeFiles = new ChangeFiles(this.rushConfiguration.changesFolder);
-    const allChangeFiles: string[] = await changeFiles.getFilesAsync();
+    const changeFiles: ChangeFiles = new ChangeFiles(this.rushConfiguration);
+    const allChangeFiles: string[] = await changeFiles.getAllChangeFilesAsync();
     const deletedProjectNames: Set<string> = await this._getDeletedProjectNamesAsync();
-    await ChangeFiles.validateAsync(
-      this.terminal,
-      allChangeFiles,
-      [],
-      this.rushConfiguration,
+    await changeFiles.validateAsync({
+      terminal: this.terminal,
+      filesToValidate: allChangeFiles,
+      changedProjectNames: [],
       deletedProjectNames
-    );
+    });
   }
 
   /**

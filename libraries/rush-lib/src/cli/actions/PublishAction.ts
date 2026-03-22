@@ -281,11 +281,7 @@ export class PublishAction extends BaseRushAction {
     allPackages: ReadonlyMap<string, RushConfigurationProject>
   ): Promise<void> {
     const changeManager: ChangeManager = new ChangeManager(this.rushConfiguration);
-    await changeManager.loadAsync(
-      this.rushConfiguration.changesFolder,
-      this._prereleaseToken,
-      this._addCommitDetails.value
-    );
+    await changeManager.loadAsync(this._prereleaseToken, this._addCommitDetails.value);
 
     if (changeManager.hasChanges()) {
       const orderedChanges: IChangeInfo[] = changeManager.packageChanges;

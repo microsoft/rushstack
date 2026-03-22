@@ -29,11 +29,11 @@ Array [
 ]
 `;
 
-exports[`ChangeFiles getFilesAsync returns correctly when change files are categorized 1`] = `Array []`;
+exports[`ChangeFiles getAllChangeFilesAsync returns correctly when change files are categorized 1`] = `Array []`;
 
-exports[`ChangeFiles getFilesAsync returns correctly when there is one change file 1`] = `Array []`;
+exports[`ChangeFiles getAllChangeFilesAsync returns correctly when there is one change file 1`] = `Array []`;
 
-exports[`ChangeFiles getFilesAsync returns empty array when no change files 1`] = `Array []`;
+exports[`ChangeFiles getAllChangeFilesAsync returns empty array when no change files 1`] = `Array []`;
 
 exports[`ChangeFiles validateAsync allows a hotfix in a hotfix branch. 1`] = `
 Array [

@@ -78,7 +78,7 @@ export class PublishUtilities {
     // eslint-disable-next-line no-console
     console.log(`Finding changes in: ${changeFiles.getChangesPath()}`);
 
-    const files: string[] = await changeFiles.getFilesAsync();
+    const files: string[] = await changeFiles.getAllChangeFilesAsync();
 
     // Add the minimum changes defined by the change descriptions.
     for (const changeFilePath of files) {
