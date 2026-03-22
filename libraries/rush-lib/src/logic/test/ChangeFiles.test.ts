@@ -38,24 +38,30 @@ describe(ChangeFiles.name, () => {
     ).toMatchSnapshot();
   });
 
-  describe(ChangeFiles.prototype.getFilesAsync.name, () => {
+  describe(ChangeFiles.prototype.getAllChangeFilesAsync.name, () => {
     it('returns correctly when there is one change file', async () => {
       const changesPath: string = `${__dirname}/leafChange`;
-      const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
+      const changeFiles: ChangeFiles = new ChangeFiles({
+        changesFolder: changesPath
+      } as unknown as RushConfiguration);
       const expectedPath: string = Path.convertToSlashes(`${changesPath}/change1.json`);
-      expect(await changeFiles.getFilesAsync()).toEqual([expectedPath]);
+      expect(await changeFiles.getAllChangeFilesAsync()).toEqual([expectedPath]);
     });
 
     it('returns empty array when no change files', async () => {
       const changesPath: string = `${__dirname}/noChange`;
-      const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      expect(await changeFiles.getFilesAsync()).toHaveLength(0);
+      const changeFiles: ChangeFiles = new ChangeFiles({
+        changesFolder: changesPath
+      } as unknown as RushConfiguration);
+      expect(await changeFiles.getAllChangeFilesAsync()).toHaveLength(0);
     });
 
     it('returns correctly when change files are categorized', async () => {
       const changesPath: string = `${__dirname}/categorizedChanges`;
-      const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      const files: string[] = await changeFiles.getFilesAsync();
+      const changeFiles: ChangeFiles = new ChangeFiles({
+        changesFolder: changesPath
+      } as unknown as RushConfiguration);
+      const files: string[] = await changeFiles.getAllChangeFilesAsync();
       expect(files).toHaveLength(3);
 
       const expectedPathA: string = Path.convertToSlashes(`${changesPath}/@ms/a/changeA.json`);
@@ -67,38 +73,57 @@ describe(ChangeFiles.name, () => {
     });
   });
 
-  describe(ChangeFiles.validateAsync.name, () => {
+  describe(ChangeFiles.prototype.validateAsync.name, () => {
     it('throws when there is a patch in a hotfix branch.', async () => {
       const changeFile: string = `${__dirname}/leafChange/change1.json`;
       const changedPackages: string[] = ['d'];
       await expect(
-        ChangeFiles.validateAsync(terminal, [changeFile], changedPackages, {
-          hotfixChangeEnabled: true
-        } as RushConfiguration)
+        new ChangeFiles({
+          hotfixChangeEnabled: true,
+          experimentsConfiguration: {
+            configuration: {}
+          }
+        } as unknown as RushConfiguration).validateAsync({
+          terminal,
+          filesToValidate: [changeFile],
+          changedProjectNames: changedPackages
+        })
       ).rejects.toThrow(Error);
     });
 
     it('allows a hotfix in a hotfix branch.', async () => {
       const changeFile: string = `${__dirname}/multipleHotfixChanges/change1.json`;
       const changedPackages: string[] = ['a'];
-      await ChangeFiles.validateAsync(terminal, [changeFile], changedPackages, {
+      await new ChangeFiles({
         ...rushConfiguration,
         hotfixChangeEnabled: true
-      } as RushConfiguration);
+      } as unknown as RushConfiguration).validateAsync({
+        terminal,
+        filesToValidate: [changeFile],
+        changedProjectNames: changedPackages
+      });
     });
 
     it('throws when there is any missing package.', async () => {
       const changeFile: string = `${__dirname}/verifyChanges/changes.json`;
       const changedPackages: string[] = ['a', 'b', 'c'];
       await expect(
-        ChangeFiles.validateAsync(terminal, [changeFile], changedPackages, rushConfiguration)
+        new ChangeFiles(rushConfiguration).validateAsync({
+          terminal,
+          filesToValidate: [changeFile],
+          changedProjectNames: changedPackages
+        })
       ).rejects.toThrow(Error);
     });
 
     it('does not throw when there is no missing packages', async () => {
       const changeFile: string = `${__dirname}/verifyChanges/changes.json`;
       const changedPackages: string[] = ['a'];
-      await ChangeFiles.validateAsync(terminal, [changeFile], changedPackages, rushConfiguration);
+      await new ChangeFiles(rushConfiguration).validateAsync({
+        terminal,
+        filesToValidate: [changeFile],
+        changedProjectNames: changedPackages
+      });
     });
 
     it('throws when missing packages from categorized changes', async () => {
@@ -106,7 +131,11 @@ describe(ChangeFiles.name, () => {
       const changeFileB: string = `${__dirname}/categorizedChanges/@ms/b/changeB.json`;
       const changedPackages: string[] = ['@ms/a', '@ms/b', 'c'];
       await expect(
-        ChangeFiles.validateAsync(terminal, [changeFileA, changeFileB], changedPackages, rushConfiguration)
+        new ChangeFiles(rushConfiguration).validateAsync({
+          terminal,
+          filesToValidate: [changeFileA, changeFileB],
+          changedProjectNames: changedPackages
+        })
       ).rejects.toThrow(Error);
     });
 
@@ -115,12 +144,11 @@ describe(ChangeFiles.name, () => {
       const changeFileB: string = `${__dirname}/categorizedChanges/@ms/b/changeB.json`;
       const changeFileC: string = `${__dirname}/categorizedChanges/changeC.json`;
       const changedPackages: string[] = ['@ms/a', '@ms/b', 'c'];
-      await ChangeFiles.validateAsync(
+      await new ChangeFiles(rushConfiguration).validateAsync({
         terminal,
-        [changeFileA, changeFileB, changeFileC],
-        changedPackages,
-        rushConfiguration
-      );
+        filesToValidate: [changeFileA, changeFileB, changeFileC],
+        changedProjectNames: changedPackages
+      });
     });
 
     describe('with strictChangefileValidation', () => {
@@ -141,7 +169,11 @@ describe(ChangeFiles.name, () => {
         const changeFile: string = `${__dirname}/strictValidation/nonexistentProject.json`;
         strictConfig = createStrictConfig(() => undefined);
         try {
-          await ChangeFiles.validateAsync(terminal, [changeFile], ['nonexistent-package'], strictConfig);
+          await new ChangeFiles(strictConfig).validateAsync({
+            terminal,
+            filesToValidate: [changeFile],
+            changedProjectNames: ['nonexistent-package']
+          });
           fail('Expected validateAsync to throw');
         } catch (error) {
           const normalizedMessage: string = error.message.replace(FORWARD_SLASH_DIRNAME, '<TEST DIR>');
@@ -165,7 +197,11 @@ describe(ChangeFiles.name, () => {
           return undefined;
         });
         try {
-          await ChangeFiles.validateAsync(terminal, [changeFile], ['lockstep-secondary'], strictConfig);
+          await new ChangeFiles(strictConfig).validateAsync({
+            terminal,
+            filesToValidate: [changeFile],
+            changedProjectNames: ['lockstep-secondary']
+          });
           fail('Expected validateAsync to throw');
         } catch (error) {
           const normalizedMessage: string = error.message.replace(FORWARD_SLASH_DIRNAME, '<TEST DIR>');
@@ -188,7 +224,11 @@ describe(ChangeFiles.name, () => {
           }
           return undefined;
         });
-        await ChangeFiles.validateAsync(terminal, [changeFile], ['lockstep-main'], strictConfig);
+        await new ChangeFiles(strictConfig).validateAsync({
+          terminal,
+          filesToValidate: [changeFile],
+          changedProjectNames: ['lockstep-main']
+        });
       });
 
       it('does not throw when change file references a lockstep project with no mainProject', async () => {
@@ -206,7 +246,11 @@ describe(ChangeFiles.name, () => {
           }
           return undefined;
         });
-        await ChangeFiles.validateAsync(terminal, [changeFile], ['lockstep-main'], strictConfig);
+        await new ChangeFiles(strictConfig).validateAsync({
+          terminal,
+          filesToValidate: [changeFile],
+          changedProjectNames: ['lockstep-main']
+        });
       });
 
       it('does not throw when experiment is disabled', async () => {
@@ -216,7 +260,11 @@ describe(ChangeFiles.name, () => {
             configuration: { strictChangefileValidation: false }
           } as ExperimentsConfiguration
         } as unknown as RushConfiguration;
-        await ChangeFiles.validateAsync(terminal, [changeFile], ['nonexistent-package'], config);
+        await new ChangeFiles(config).validateAsync({
+          terminal,
+          filesToValidate: [changeFile],
+          changedProjectNames: ['nonexistent-package']
+        });
       });
     });
   });
@@ -224,13 +272,17 @@ describe(ChangeFiles.name, () => {
   describe(ChangeFiles.prototype.deleteAllAsync.name, () => {
     it('delete all files when there are no prerelease packages', async () => {
       const changesPath: string = `${__dirname}/multipleChangeFiles`;
-      const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
+      const changeFiles: ChangeFiles = new ChangeFiles({
+        changesFolder: changesPath
+      } as unknown as RushConfiguration);
       expect(await changeFiles.deleteAllAsync(terminal, false)).toEqual(3);
     });
 
     it('does not delete change files for package whose change logs do not get updated. ', async () => {
       const changesPath: string = `${__dirname}/multipleChangeFiles`;
-      const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
+      const changeFiles: ChangeFiles = new ChangeFiles({
+        changesFolder: changesPath
+      } as unknown as RushConfiguration);
       const updatedChangelogs: IChangelog[] = [
         {
           name: 'a',
@@ -246,7 +298,9 @@ describe(ChangeFiles.name, () => {
 
     it('delete all files when there are hotfixes', async () => {
       const changesPath: string = `${__dirname}/multipleHotfixChanges`;
-      const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
+      const changeFiles: ChangeFiles = new ChangeFiles({
+        changesFolder: changesPath
+      } as unknown as RushConfiguration);
       expect(await changeFiles.deleteAllAsync(terminal, false)).toEqual(3);
     });
   });

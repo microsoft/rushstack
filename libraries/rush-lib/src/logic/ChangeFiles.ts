@@ -11,6 +11,17 @@ import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { type LockStepVersionPolicy, VersionPolicyDefinitionName } from '../api/VersionPolicy';
 import schemaJson from '../schemas/change-file.schema.json';
 
+export interface IValidateOptions {
+  terminal: ITerminal;
+  filesToValidate: Iterable<string>;
+  changedProjectNames: Iterable<string>;
+  /**
+   * Optional set of project names that were removed from rush.json.
+   * When provided, produces a more specific error message for these projects.
+   */
+  deletedProjectNames?: ReadonlySet<string>;
+}
+
 /**
  * This class represents the collection of change files existing in the repo and provides operations
  * for those change files.
@@ -20,37 +31,38 @@ export class ChangeFiles {
    * Change file path relative to changes folder.
    */
   private _files: string[] | undefined;
-  private _changesPath: string;
+  private readonly _rushConfiguration: RushConfiguration;
+  private readonly _changesPath: string;
 
-  public constructor(changesPath: string) {
-    this._changesPath = changesPath;
+  public constructor(rushConfiguration: RushConfiguration) {
+    this._rushConfiguration = rushConfiguration;
+    this._changesPath = rushConfiguration.changesFolder;
   }
 
   /**
    * Validate if the newly added change files match the changed packages.
-   *
-   * @param deletedProjectNames - Optional set of project names that were removed from rush.json.
-   *   When provided, produces a more specific error message for these projects.
    */
-  public static async validateAsync(
-    terminal: ITerminal,
-    newChangeFilePaths: string[],
-    changedPackages: string[],
-    rushConfiguration: RushConfiguration,
-    deletedProjectNames?: ReadonlySet<string>
-  ): Promise<void> {
+  public async validateAsync(options: IValidateOptions): Promise<void> {
+    const { terminal, filesToValidate, changedProjectNames, deletedProjectNames } = options;
     const schema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+    const rushConfiguration: RushConfiguration = this._rushConfiguration;
+    const {
+      hotfixChangeEnabled,
+      experimentsConfiguration: {
+        configuration: { strictChangefileValidation }
+      }
+    } = rushConfiguration;
 
     const projectsWithChangeDescriptions: Set<string> = new Set();
     const changefilesByProjectName: Map<string, string[]> = new Map();
     await Async.forEachAsync(
-      newChangeFilePaths,
+      filesToValidate,
       async (filePath) => {
         terminal.writeLine(`Found change file: ${filePath}`);
 
         const changeFile: IChangeInfo = JsonFile.loadAndValidate(filePath, schema);
 
-        if (rushConfiguration.hotfixChangeEnabled) {
+        if (hotfixChangeEnabled) {
           if (changeFile && changeFile.changes) {
             for (const change of changeFile.changes) {
               if (change.type !== 'none' && change.type !== 'hotfix') {
@@ -81,7 +93,7 @@ export class ChangeFiles {
       { concurrency: 50 }
     );
 
-    if (rushConfiguration.experimentsConfiguration.configuration.strictChangefileValidation) {
+    if (strictChangefileValidation) {
       const errors: string[] = [];
 
       for (const packageName of projectsWithChangeDescriptions) {
@@ -121,7 +133,7 @@ export class ChangeFiles {
       }
     }
 
-    const projectsMissingChangeDescriptions: Set<string> = new Set(changedPackages);
+    const projectsMissingChangeDescriptions: Set<string> = new Set(changedProjectNames);
     for (const name of projectsWithChangeDescriptions) {
       projectsMissingChangeDescriptions.delete(name);
     }
@@ -167,7 +179,7 @@ export class ChangeFiles {
   /**
    * Get the array of absolute paths of change files.
    */
-  public async getFilesAsync(): Promise<string[]> {
+  public async getAllChangeFilesAsync(): Promise<string[]> {
     if (!this._files) {
       const { default: glob } = await import('fast-glob');
       this._files = (await glob('**/*.json', { cwd: this._changesPath, absolute: true })) || [];
@@ -198,7 +210,7 @@ export class ChangeFiles {
         packagesToInclude.add(changelog.name);
       });
 
-      const files: string[] = await this.getFilesAsync();
+      const files: string[] = await this.getAllChangeFilesAsync();
       const filesToDelete: string[] = [];
       await Async.forEachAsync(
         files,
@@ -222,7 +234,7 @@ export class ChangeFiles {
       return await this._deleteFilesAsync(terminal, filesToDelete, shouldDelete);
     } else {
       // Delete all change files.
-      const files: string[] = await this.getFilesAsync();
+      const files: string[] = await this.getAllChangeFilesAsync();
       return await this._deleteFilesAsync(terminal, files, shouldDelete);
     }
   }
@@ -238,7 +250,7 @@ export class ChangeFiles {
       );
 
       await Async.forEachAsync(
-        files,
+        files.sort(),
         async (filePath) => {
           terminal.writeLine(` - ${filePath}`);
           if (shouldDelete) {

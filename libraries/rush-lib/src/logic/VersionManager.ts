@@ -90,7 +90,7 @@ export class VersionManager {
       this._getManuallyVersionedProjects()
     );
 
-    await changeManager.loadAsync(this._rushConfiguration.changesFolder);
+    await changeManager.loadAsync();
     if (changeManager.hasChanges()) {
       changeManager.validateChanges(this._versionPolicyConfiguration);
       changeManager.apply(!!shouldCommit)!.forEach((packageJson) => {

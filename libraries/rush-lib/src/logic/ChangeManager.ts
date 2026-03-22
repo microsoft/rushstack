@@ -34,12 +34,10 @@ export class ChangeManager {
 
   /**
    * Load changes from change files
-   * @param changesPath - location of change files
    * @param prereleaseToken - prerelease token
    * @param includeCommitDetails - whether commit details need to be included in changes
    */
   public async loadAsync(
-    changesPath: string,
     prereleaseToken: PrereleaseToken = new PrereleaseToken(),
     includeCommitDetails: boolean = false
   ): Promise<void> {
@@ -47,7 +45,7 @@ export class ChangeManager {
 
     this._prereleaseToken = prereleaseToken;
 
-    this._changeFiles = new ChangeFiles(changesPath);
+    this._changeFiles = new ChangeFiles(this._rushConfiguration);
     this._allChanges = await PublishUtilities.findChangeRequestsAsync(
       this._allPackages,
       this._rushConfiguration,
