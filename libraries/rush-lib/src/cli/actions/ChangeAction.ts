@@ -320,7 +320,7 @@ export class ChangeAction extends BaseRushAction {
 
       const existingChangeComments: Map<string, string[]> = ChangeFiles.getChangeComments(
         this.terminal,
-        await this._getChangeFilesAsync()
+        await this._getChangeFilesSinceBaseBranchAsync()
       );
       changeFileData = await this._promptForChangeFileDataAsync(
         promptModule,
@@ -393,7 +393,7 @@ export class ChangeAction extends BaseRushAction {
     if (strictValidation) {
       filesToValidate = await changeFilesInstance.getAllChangeFilesAsync();
     } else {
-      filesToValidate = await this._getChangeFilesAsync();
+      filesToValidate = await this._getChangeFilesSinceBaseBranchAsync();
     }
 
     if (changedProjectNames.length > 0 || filesToValidate.length > 0) {
@@ -492,21 +492,20 @@ export class ChangeAction extends BaseRushAction {
     }
 
     const oldRushJson: IRushConfigurationJson = JsonFile.parseString(oldRushJsonContent);
-    const currentProjectNames: Set<string> = new Set(
-      this.rushConfiguration.projects.map((p) => p.packageName)
-    );
+    const currentProjectsByName: ReadonlyMap<string, RushConfigurationProject> =
+      this.rushConfiguration.projectsByName;
 
     const deletedProjectNames: Set<string> = new Set<string>();
-    for (const project of oldRushJson.projects) {
-      if (!currentProjectNames.has(project.packageName)) {
-        deletedProjectNames.add(project.packageName);
+    for (const { packageName } of oldRushJson.projects) {
+      if (!currentProjectsByName.has(packageName)) {
+        deletedProjectNames.add(packageName);
       }
     }
 
     return deletedProjectNames;
   }
 
-  private async _getChangeFilesAsync(): Promise<string[]> {
+  private async _getChangeFilesSinceBaseBranchAsync(): Promise<string[]> {
     const repoRoot: string = getRepoRoot(this.rushConfiguration.rushJsonFolder);
     const relativeChangesFolder: string = path.relative(repoRoot, this.rushConfiguration.changesFolder);
     const targetBranch: string = await this._getTargetBranchAsync();
