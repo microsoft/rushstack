@@ -28,12 +28,16 @@ export class ChangeFiles {
 
   /**
    * Validate if the newly added change files match the changed packages.
+   *
+   * @param deletedProjectNames - Optional set of project names that were removed from rush.json.
+   *   When provided, produces a more specific error message for these projects.
    */
   public static async validateAsync(
     terminal: ITerminal,
     newChangeFilePaths: string[],
     changedPackages: string[],
-    rushConfiguration: RushConfiguration
+    rushConfiguration: RushConfiguration,
+    deletedProjectNames?: ReadonlySet<string>
   ): Promise<void> {
     const schema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
@@ -86,9 +90,17 @@ export class ChangeFiles {
         const project: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(packageName);
 
         if (!project) {
-          errors.push(
-            `Change file(s) reference a project "${packageName}" that does not exist in the Rush configuration:\n${fileList}`
-          );
+          if (deletedProjectNames?.has(packageName)) {
+            errors.push(
+              `The project "${packageName}" was removed from rush.json, but the following change ` +
+                `files still reference it. Please delete them:\n${fileList}`
+            );
+          } else {
+            errors.push(
+              `Change file(s) reference a project "${packageName}" that does not exist in the Rush ` +
+                `configuration:\n${fileList}`
+            );
+          }
           continue;
         }
 
