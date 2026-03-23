@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix \"Unknown env config\" warnings from npm during rush-pnpm operations (e.g. publish) by passing pnpm configuration via CLI args instead of NPM_CONFIG_* environment variables.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
