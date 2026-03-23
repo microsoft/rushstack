@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-isolated-typescript-transpile-plugin",
-      "comment": "Add Node20",
+      "comment": "Add support for the `Node20` TypeScript module kind.",
       "type": "minor"
     }
   ],
