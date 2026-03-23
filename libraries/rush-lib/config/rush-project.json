@@ -1,0 +1,10 @@
+{
+  "extends": "local-node-rig/profiles/default/config/rush-project.json",
+
+  "operationSettings": [
+    {
+      "operationName": "_phase:build",
+      "outputFolderNames": ["lib-intermediate-commonjs", "lib-intermediate-esm"]
+    }
+  ]
+}

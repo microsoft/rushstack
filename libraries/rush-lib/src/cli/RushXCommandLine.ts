@@ -295,6 +295,11 @@ export class RushXCommandLine {
       }
     }
 
+    const quietModeValue: string | undefined = process.env[EnvironmentVariableNames.RUSH_QUIET_MODE];
+    if (quietModeValue === '1' || quietModeValue === 'true') {
+      quiet = true;
+    }
+
     if (!commandName) {
       help = true;
     }

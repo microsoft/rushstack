@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-web-rig",
-  "version": "1.2.3",
+  "version": "1.4.3",
   "description": "A rig package for web browser projects that build using Heft",
   "license": "MIT",
   "scripts": {
@@ -13,12 +13,13 @@
     "directory": "rigs/heft-web-rig"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^1.1.10"
+    "@rushstack/heft": "^1.2.7"
   },
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft-api-extractor-plugin": "workspace:*",
+    "@rushstack/heft-static-asset-typings-plugin": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-sass-plugin": "workspace:*",
@@ -43,9 +44,10 @@
     "url-loader": "~4.1.1",
     "webpack-bundle-analyzer": "~4.5.0",
     "webpack-merge": "~5.8.0",
-    "webpack": "~5.103.0"
+    "webpack": "~5.105.2"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*"
-  }
+  },
+  "sideEffects": false
 }

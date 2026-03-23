@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.166.0",
+  "rushVersion": "5.171.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -467,6 +467,12 @@
       "reviewCategory": "libraries"
     },
     {
+      "packageName": "@rushstack/playwright-browser-tunnel",
+      "projectFolder": "apps/playwright-browser-tunnel",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/rush-themed-ui",
       "projectFolder": "libraries/rush-themed-ui",
       "reviewCategory": "libraries"
@@ -632,6 +638,12 @@
     {
       "packageName": "eslint-9-test",
       "projectFolder": "build-tests/eslint-9-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "esm-node-import-test",
+      "projectFolder": "build-tests/esm-node-import-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -1053,6 +1065,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-package-manager-integration-test",
+      "projectFolder": "build-tests/rush-package-manager-integration-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "rush-redis-cobuild-plugin-integration-test",
       "projectFolder": "build-tests/rush-redis-cobuild-plugin-integration-test",
       "reviewCategory": "tests",
@@ -1129,6 +1147,12 @@
     {
       "packageName": "@rushstack/heft-serverless-stack-plugin",
       "projectFolder": "heft-plugins/heft-serverless-stack-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-static-asset-typings-plugin",
+      "projectFolder": "heft-plugins/heft-static-asset-typings-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
@@ -1462,6 +1486,12 @@
     {
       "packageName": "debug-certificate-manager",
       "projectFolder": "vscode-extensions/debug-certificate-manager-vscode-extension",
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"]
+    },
+    {
+      "packageName": "playwright-local-browser-server",
+      "projectFolder": "vscode-extensions/playwright-local-browser-server-vscode-extension",
       "reviewCategory": "vscode-extensions",
       "tags": ["vsix"]
     },

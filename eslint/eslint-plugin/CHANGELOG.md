@@ -1,6 +1,27 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Tue, 11 Nov 2025 16:13:26 GMT and should not be manually modified.
+This log was last generated on Wed, 25 Feb 2026 21:39:42 GMT and should not be manually modified.
+
+## 0.23.2
+Wed, 25 Feb 2026 21:39:42 GMT
+
+### Patches
+
+- Bump `@typescript-eslint/*` dependencies to `~8.56.1`.
+
+## 0.23.1
+Fri, 20 Feb 2026 00:15:04 GMT
+
+### Patches
+
+- Add `"node"` condition before `"import"` in the `"exports"` map so that Node.js uses the CJS output (which handles extensionless imports), while bundlers still use ESM via `"import"`. Fixes https://github.com/microsoft/rushstack/issues/5644.
+
+## 0.23.0
+Thu, 19 Feb 2026 00:04:52 GMT
+
+### Minor changes
+
+- Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `"exports"` field in `package.json`.
 
 ## 0.22.1
 Tue, 11 Nov 2025 16:13:26 GMT

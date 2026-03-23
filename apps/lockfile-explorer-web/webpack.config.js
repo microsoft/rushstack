@@ -10,6 +10,9 @@ module.exports = function createConfig(env, argv) {
     projectRoot: __dirname,
     // Documentation: https://webpack.js.org/configuration/
     configOverride: {
+      entry: {
+        app: `${__dirname}/lib-esm/start.js`
+      },
       resolve: {
         alias: {
           // Don't rebundle this large library

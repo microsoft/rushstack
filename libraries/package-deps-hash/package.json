@@ -1,9 +1,32 @@
 {
   "name": "@rushstack/package-deps-hash",
-  "version": "4.6.4",
+  "version": "4.7.7",
   "description": "",
-  "main": "lib/index.js",
-  "typings": "dist/package-deps-hash.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/package-deps-hash.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/package-deps-hash.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -22,5 +45,6 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*"
-  }
+  },
+  "sideEffects": false
 }

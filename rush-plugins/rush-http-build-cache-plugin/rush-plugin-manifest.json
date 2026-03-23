@@ -4,8 +4,8 @@
     {
       "pluginName": "rush-http-build-cache-plugin",
       "description": "Rush plugin for generic HTTP build cache",
-      "entryPoint": "lib/index.js",
-      "optionsSchema": "lib/schemas/http-config.schema.json"
+      "entryPoint": "./lib-commonjs/index.js",
+      "optionsSchema": "./lib-commonjs/schemas/http-config.schema.json"
     }
   ]
 }

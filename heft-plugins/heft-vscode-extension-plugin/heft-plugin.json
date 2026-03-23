@@ -3,12 +3,12 @@
   "taskPlugins": [
     {
       "pluginName": "vscode-extension-package-plugin",
-      "entryPoint": "./lib/VSCodeExtensionPackagePlugin.js",
+      "entryPoint": "./lib-commonjs/VSCodeExtensionPackagePlugin.js",
       "parameterScope": "package"
     },
     {
       "pluginName": "vscode-extension-verify-signature-plugin",
-      "entryPoint": "./lib/VSCodeExtensionVerifySignaturePlugin.js",
+      "entryPoint": "./lib-commonjs/VSCodeExtensionVerifySignaturePlugin.js",
       "parameterScope": "verify-signature",
       "parameters": [
         {
@@ -36,7 +36,7 @@
     },
     {
       "pluginName": "vscode-extension-publish-plugin",
-      "entryPoint": "./lib/VSCodeExtensionPublishPlugin.js",
+      "entryPoint": "./lib-commonjs/VSCodeExtensionPublishPlugin.js",
       "parameterScope": "publish-vsix",
       "parameters": [
         {

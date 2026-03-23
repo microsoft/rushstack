@@ -74,6 +74,11 @@ export interface IModuleInfo {
    * The id of the module, from the chunk graph.
    */
   id: string | number;
+
+  /**
+   * Whether this module was in method shorthand format
+   */
+  isShorthand?: boolean;
 }
 
 /**

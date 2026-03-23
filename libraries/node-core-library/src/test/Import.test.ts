@@ -53,7 +53,7 @@ describe(Import.name, () => {
         Path.convertToSlashes(
           Import.resolveModule({ modulePath: '@rushstack/heft', baseFolderPath: __dirname })
         )
-      ).toMatch(/node_modules\/@rushstack\/heft\/lib\/index.js$/);
+      ).toMatch(/node_modules\/@rushstack\/heft\/lib-commonjs\/index.js$/);
     });
 
     it('resolves a path inside a dependency', () => {
@@ -86,29 +86,29 @@ describe(Import.name, () => {
             baseFolderPath: nodeJsPath.join(packageRoot, 'node_modules', '@rushstack', 'heft')
           })
         )
-      ).toMatch(/node_modules\/@rushstack\/ts-command-line\/lib\/index\.js$/);
+      ).toMatch(/node_modules\/@rushstack\/ts-command-line\/lib-commonjs\/index\.js$/);
     });
 
     it('resolves a path inside a dependency of a dependency', () => {
       expect(
         Path.convertToSlashes(
           Import.resolveModule({
-            modulePath: '@rushstack/ts-command-line/lib/Constants.js',
+            modulePath: '@rushstack/ts-command-line/lib-commonjs/Constants.js',
             baseFolderPath: nodeJsPath.join(packageRoot, 'node_modules', '@rushstack', 'heft')
           })
         )
-      ).toMatch(/node_modules\/@rushstack\/ts-command-line\/lib\/Constants\.js$/);
+      ).toMatch(/node_modules\/@rushstack\/ts-command-line\/lib-commonjs\/Constants\.js$/);
     });
 
     it('resolves a path inside a dependency of a dependency without an extension', () => {
       expect(
         Path.convertToSlashes(
           Import.resolveModule({
-            modulePath: '@rushstack/ts-command-line/lib/Constants',
+            modulePath: '@rushstack/ts-command-line/lib-commonjs/Constants',
             baseFolderPath: nodeJsPath.join(packageRoot, 'node_modules', '@rushstack', 'heft')
           })
         )
-      ).toMatch(/node_modules\/@rushstack\/ts-command-line\/lib\/Constants\.js$/);
+      ).toMatch(/node_modules\/@rushstack\/ts-command-line\/lib-commonjs\/Constants\.js$/);
     });
 
     describe('allowSelfReference', () => {
@@ -122,11 +122,11 @@ describe(Import.name, () => {
         ).toEqual(packageRoot);
         expect(
           Import.resolveModule({
-            modulePath: '@rushstack/node-core-library/lib/Constants.js',
+            modulePath: '@rushstack/node-core-library/lib-commonjs/Constants.js',
             baseFolderPath: __dirname,
             allowSelfReference: true
           })
-        ).toEqual(nodeJsPath.join(packageRoot, 'lib', 'Constants.js'));
+        ).toEqual(nodeJsPath.join(packageRoot, 'lib-commonjs', 'Constants.js'));
       });
 
       it('resolves the real path inside a package with allowSelfReference turned on', () => {
@@ -150,7 +150,7 @@ describe(Import.name, () => {
         );
         expectToThrowNormalizedErrorMatchingSnapshot(() =>
           Import.resolveModule({
-            modulePath: '@rushstack/node-core-library/lib/Constants.js',
+            modulePath: '@rushstack/node-core-library/lib-commonjs/Constants.js',
             baseFolderPath: __dirname
           })
         );
@@ -206,7 +206,7 @@ describe(Import.name, () => {
       expectToThrowNormalizedErrorMatchingSnapshot(() =>
         Path.convertToSlashes(
           Import.resolvePackage({
-            packageName: '@rushstack/heft/lib/start.js',
+            packageName: '@rushstack/heft/lib-commonjs/start.js',
             baseFolderPath: __dirname
           })
         )
@@ -228,7 +228,7 @@ describe(Import.name, () => {
       expectToThrowNormalizedErrorMatchingSnapshot(() =>
         Path.convertToSlashes(
           Import.resolvePackage({
-            packageName: '@rushstack/ts-command-line/lib/Constants.js',
+            packageName: '@rushstack/ts-command-line/lib-commonjs/Constants.js',
             baseFolderPath: nodeJsPath.join(packageRoot, 'node_modules', '@rushstack', 'heft')
           })
         )
@@ -263,7 +263,7 @@ describe(Import.name, () => {
       it('fails to resolve a path inside this package with allowSelfReference turned on', () => {
         expectToThrowNormalizedErrorMatchingSnapshot(() =>
           Import.resolvePackage({
-            packageName: '@rushstack/node-core-library/lib/Constants.js',
+            packageName: '@rushstack/node-core-library/lib-commonjs/Constants.js',
             baseFolderPath: __dirname,
             allowSelfReference: true
           })

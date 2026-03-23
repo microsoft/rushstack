@@ -59,6 +59,7 @@ export interface IFactoryMeta {
 // @public
 export interface IModuleInfo {
     id: string | number;
+    isShorthand?: boolean;
     module: Module;
     source: sources.Source;
 }
@@ -109,6 +110,12 @@ export interface IRenderedModulePosition {
 
 // @public
 export const MODULE_WRAPPER_PREFIX: '__MINIFY_MODULE__(';
+
+// @public
+export const MODULE_WRAPPER_SHORTHAND_PREFIX: `${typeof MODULE_WRAPPER_PREFIX}{__DEFAULT_ID__`;
+
+// @public
+export const MODULE_WRAPPER_SHORTHAND_SUFFIX: `}${typeof MODULE_WRAPPER_SUFFIX}`;
 
 // @public
 export const MODULE_WRAPPER_SUFFIX: ');';

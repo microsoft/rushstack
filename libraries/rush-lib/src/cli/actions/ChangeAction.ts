@@ -366,7 +366,9 @@ export class ChangeAction extends BaseRushAction {
         // Not enabling, since this would be a breaking change
         includeExternalDependencies: false,
         // Since install may not have happened, cannot read rush-project.json
-        enableFiltering: false
+        enableFiltering: false,
+        // Exclude version-only changes to prevent 'rush version --bump' from triggering 'rush change --verify'
+        excludeVersionOnlyChanges: true
       });
     const projectHostMap: Map<RushConfigurationProject, string> = this._generateHostMap();
 

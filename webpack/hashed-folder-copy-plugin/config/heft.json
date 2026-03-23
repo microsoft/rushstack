@@ -41,7 +41,7 @@
                 {
                   "sourcePath": "./src/test/scenarios/",
                   "includeGlobs": ["**/*"],
-                  "destinationFolders": ["lib/test/scenarios"]
+                  "destinationFolders": ["lib-commonjs/test/scenarios"]
                 }
               ]
             }

@@ -1,5 +1,25 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
 
-  "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json"
+  "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
+
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [{ "includeGlobs": ["lib-esnext"] }],
+
+      "tasksByName": {
+        "lint": {
+          "taskPlugin": {
+            "options": {
+              "sarifLogPath": "temp/build/lint/lint.sarif"
+            }
+          }
+        }
+      }
+    },
+
+    "test": {
+      "cleanFiles": [{ "includeGlobs": ["coverage"] }]
+    }
+  }
 }

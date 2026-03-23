@@ -4,8 +4,8 @@
   "taskPlugins": [
     {
       "pluginName": "rspack-plugin",
-      "entryPoint": "./lib/RspackPlugin",
-      "optionsSchema": "./lib/schemas/heft-rspack-plugin.schema.json",
+      "entryPoint": "./lib-commonjs/RspackPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/heft-rspack-plugin.schema.json",
 
       "parameterScope": "rspack",
       "parameters": [

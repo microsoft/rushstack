@@ -11,7 +11,7 @@
   "additionalModuleKindsToEmit": [
     {
       "moduleKind": "esnext",
-      "outFolderName": "lib-esnext"
+      "outFolderName": "lib-esm"
     },
     {
       "moduleKind": "umd",

@@ -1,0 +1,20 @@
+{
+  "title": "Basic Config",
+  "type": "object",
+  "properties": {
+    "name": {
+      "description": "The name of the item.",
+      "type": "string"
+    },
+    "count": {
+      "description": "The number of items.",
+      "type": "integer"
+    },
+    "enabled": {
+      "description": "Whether the feature is enabled.",
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["name"]
+}

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor-model",
-  "version": "7.32.2",
+  "version": "7.33.4",
   "description": "A helper library for loading and saving the .api.json files created by API Extractor",
   "repository": {
     "type": "git",
@@ -8,8 +8,31 @@
     "directory": "libraries/api-extractor-model"
   },
   "homepage": "https://api-extractor.com",
-  "main": "lib/index.js",
-  "typings": "dist/rollup.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/rollup.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/rollup.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
@@ -18,12 +41,13 @@
   },
   "dependencies": {
     "@microsoft/tsdoc": "~0.16.0",
-    "@microsoft/tsdoc-config": "~0.18.0",
+    "@microsoft/tsdoc-config": "~0.18.1",
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.1.7",
+    "@rushstack/heft": "1.2.7",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
-  }
+  },
+  "sideEffects": false
 }

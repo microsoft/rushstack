@@ -4,6 +4,9 @@
 
 ```ts
 
+// @public
+export const templateContent: string;
+
 // @public (undocumented)
 export class TestClass {
 }

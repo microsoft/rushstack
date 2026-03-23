@@ -1,6 +1,82 @@
 # Change Log - @rushstack/webpack5-module-minifier-plugin
 
-This log was last generated on Thu, 08 Jan 2026 01:12:30 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Mar 2026 15:13:12 GMT and should not be manually modified.
+
+## 5.8.8
+Tue, 10 Mar 2026 15:13:12 GMT
+
+_Version update only_
+
+## 5.8.7
+Mon, 09 Mar 2026 15:14:08 GMT
+
+_Version update only_
+
+## 5.8.6
+Wed, 25 Feb 2026 21:39:42 GMT
+
+_Version update only_
+
+## 5.8.5
+Wed, 25 Feb 2026 00:34:30 GMT
+
+_Version update only_
+
+## 5.8.4
+Tue, 24 Feb 2026 01:13:27 GMT
+
+_Version update only_
+
+## 5.8.3
+Mon, 23 Feb 2026 00:42:21 GMT
+
+_Version update only_
+
+## 5.8.2
+Fri, 20 Feb 2026 16:14:49 GMT
+
+_Version update only_
+
+## 5.8.1
+Fri, 20 Feb 2026 00:15:04 GMT
+
+### Patches
+
+- Add `"node"` condition before `"import"` in the `"exports"` map so that Node.js uses the CJS output (which handles extensionless imports), while bundlers still use ESM via `"import"`. Fixes https://github.com/microsoft/rushstack/issues/5644.
+
+## 5.8.0
+Thu, 19 Feb 2026 00:04:53 GMT
+
+### Minor changes
+
+- Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `"exports"` field in `package.json`.
+
+## 5.7.0
+Thu, 12 Feb 2026 23:00:53 GMT
+
+### Minor changes
+
+- Add support for webpack's ECMAScript method shorthand format. The plugin now detects when modules are emitted using method shorthand syntax (without 'function' keyword or arrow syntax) and wraps them appropriately for minification.
+
+## 5.6.14
+Sat, 07 Feb 2026 01:13:26 GMT
+
+_Version update only_
+
+## 5.6.13
+Wed, 04 Feb 2026 20:42:47 GMT
+
+_Version update only_
+
+## 5.6.12
+Wed, 04 Feb 2026 16:13:27 GMT
+
+_Version update only_
+
+## 5.6.11
+Fri, 30 Jan 2026 01:16:13 GMT
+
+_Version update only_
 
 ## 5.6.10
 Thu, 08 Jan 2026 01:12:30 GMT

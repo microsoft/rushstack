@@ -12,7 +12,7 @@
             "pluginPackage": "@rushstack/heft",
             "pluginName": "run-script-plugin",
             "options": {
-              "scriptPath": "./lib/run-start.js"
+              "scriptPath": "./lib-commonjs/run-start.js"
             }
           }
         }

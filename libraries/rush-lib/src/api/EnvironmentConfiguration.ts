@@ -245,7 +245,14 @@ export const EnvironmentVariableNames = {
    * Other lifecycle scripts should not make assumptions about Rush's command line syntax
    * if Rush did not explicitly pass along command-line parameters to their process.
    */
-  RUSH_INVOKED_ARGS: 'RUSH_INVOKED_ARGS'
+  RUSH_INVOKED_ARGS: 'RUSH_INVOKED_ARGS',
+
+  /**
+   * When set to `1` or `true`, this environment variable is equivalent to passing the `--quiet` flag
+   * to `rush`, `rushx`, and `install-run-rush.ts`. It suppresses informational startup messages
+   * while preserving error output.
+   */
+  RUSH_QUIET_MODE: 'RUSH_QUIET_MODE'
 } as const;
 
 /**
@@ -292,6 +299,8 @@ export class EnvironmentConfiguration {
   private static _gitBinaryPath: string | undefined;
 
   private static _tarBinaryPath: string | undefined;
+
+  private static _quietMode: boolean = false;
 
   /**
    * If true, the environment configuration has been validated and initialized.
@@ -457,6 +466,15 @@ export class EnvironmentConfiguration {
   }
 
   /**
+   * If `true`, Rush will suppress informational startup messages, equivalent to passing `--quiet`.
+   * See {@link EnvironmentVariableNames.RUSH_QUIET_MODE}
+   */
+  public static get quietMode(): boolean {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._quietMode;
+  }
+
+  /**
    * The front-end RushVersionSelector relies on `RUSH_GLOBAL_FOLDER`, so its value must be read before
    * `EnvironmentConfiguration` is initialized (and actually before the correct version of `EnvironmentConfiguration`
    * is even installed). Thus we need to read this environment variable differently from all the others.
@@ -606,6 +624,20 @@ export class EnvironmentConfiguration {
             break;
           }
 
+          case EnvironmentVariableNames.RUSH_QUIET_MODE: {
+            // Accept both "true"/"false" string values and the standard "1"/"0" values
+            if (value === 'true' || value === 'false') {
+              EnvironmentConfiguration._quietMode = value === 'true';
+            } else {
+              EnvironmentConfiguration._quietMode =
+                EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                  EnvironmentVariableNames.RUSH_QUIET_MODE,
+                  value
+                ) ?? false;
+            }
+            break;
+          }
+
           case EnvironmentVariableNames.RUSH_PARALLELISM:
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
           case EnvironmentVariableNames.RUSH_VARIANT:
@@ -661,7 +693,9 @@ export class EnvironmentConfiguration {
    */
   public static reset(): void {
     EnvironmentConfiguration._rushTempFolderOverride = undefined;
-
+    EnvironmentConfiguration._quietMode = false;
+    EnvironmentConfiguration._gitBinaryPath = undefined;
+    EnvironmentConfiguration._tarBinaryPath = undefined;
     EnvironmentConfiguration._hasBeenValidated = false;
   }
 

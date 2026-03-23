@@ -1,6 +1,89 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 12 Jan 2026 23:39:06 GMT and should not be manually modified.
+This log was last generated on Sat, 21 Mar 2026 03:10:24 GMT and should not be manually modified.
+
+## 5.171.0
+Sat, 21 Mar 2026 03:10:24 GMT
+
+### Minor changes
+
+- Add RUSH_QUIET_MODE environment variable that, when set to `1` or `true`, is equivalent to passing `--quiet` for `rush`, `rushx`, and `install-run-rush.ts`
+
+### Patches
+
+- Update OperationExecutionRecord to only set `this.logFilePaths` if the value to be assigned is not `undefined`
+- Fix ProblemCollector wiring in OperationExecutionRecord: add preventAutoclose, strip ANSI colors before matching, and always include problemCollector in the terminal pipeline
+- Fix weighted concurrency budget being capped by operation count
+
+### Updates
+
+- Fix an issue where the assets used by `rush init` weren't shipped.
+
+## 5.170.1
+Thu, 12 Mar 2026 22:33:34 GMT
+
+### Updates
+
+- Fix a recent regression that sometimes produced ENOENT errors when installing autoinstallers
+
+## 5.170.0
+Thu, 12 Mar 2026 09:15:52 GMT
+
+### Updates
+
+- Add custom endpoint support via a `storageEndpoint` configuration option for the Azure Storage build cache plugin.
+- Fix autoinstaller plugin loader behavior.
+- Support percentage weight in operationSettings in rush-project.json file.
+
+## 5.169.3
+Mon, 23 Feb 2026 00:42:39 GMT
+
+### Updates
+
+- Fix .npmrc syncing to common/temp incorrectly caching results, which caused pnpm-specific properties like hoist-pattern to be stripped when the same .npmrc was processed with different options.
+
+## 5.169.2
+Fri, 20 Feb 2026 00:15:23 GMT
+
+### Updates
+
+- Add `"node"` condition before `"import"` in the `"exports"` map so that Node.js uses the CJS output (which handles extensionless imports), while bundlers still use ESM via `"import"`. Fixes https://github.com/microsoft/rushstack/issues/5644.
+
+## 5.169.1
+Thu, 19 Feb 2026 01:30:24 GMT
+
+### Updates
+
+- Add missing README for rush-azure-storage-build-cache-plugin and rush-buildxl-graph-plugin. Filter files from publish for rush-bridge-cache-plugin.
+- Fix an issue where files were missing from the published version of `@rushstack/package-extractor`.
+
+## 5.169.0
+Thu, 19 Feb 2026 00:05:11 GMT
+
+### Updates
+
+- Sort the `additionalFilesForOperation` property in operation settings entries in projects' `config/rush-project.json` files before computing operation hashes to produce a stable hash for caching.
+- Normalize package layout. CommonJS is now under `lib-commonjs` and DTS is now under `lib-dts`. Imports to `lib` still work as before, handled by the `"exports"` field in `package.json`.
+- Add a new "omitAppleDoubleFilesFromBuildCache" experiment. When enabled, the Rush build cache will omit macOS AppleDouble metadata files (._*) from cache archives when a companion file exists in the same directory. This prevents platform-specific metadata files from polluting the shared build cache. The exclusion only applies when running on macOS.
+- Add a new `dependsOnNodeVersion` setting for operation entries in rush-project.json. When enabled, the Node.js version is included in the build cache hash, ensuring that cached outputs are invalidated when the Node.js version changes. Accepts `true` (alias for `"patch"`), `"major"`, `"minor"`, or `"patch"` to control the granularity of version matching.
+
+## 5.168.0
+Thu, 12 Feb 2026 23:01:10 GMT
+
+### Updates
+
+- Add named exports to support named imports to `@rushstack/rush-sdk`.
+- Fix `rush change --verify` to ignore version-only changes in package.json files and changes to CHANGELOG.md and CHANGELOG.json files, preventing false positives after `rush version --bump` updates package versions and changelogs.
+
+## 5.167.0
+Thu, 05 Feb 2026 00:24:16 GMT
+
+### Updates
+
+- Add support for `rush-pnpm approve-builds` command to persist `globalOnlyBuiltDependencies` in pnpm-config.json
+- Filter npm-incompatible properties from .npmrc when npm is used with a configuration intended for pnpm or yarn, to eliminate spurious warnings during package manager installation.
+- Fix a longstanding issue where a package.json script could hang on Windows if it accessed STDIN under certain circumstances
+- Upgrade tar dependency from 6.2.1 to 7.5.6 to fix security vulnerability GHSA-8qq5-rm4j-mr97
 
 ## 5.166.0
 Mon, 12 Jan 2026 23:39:06 GMT

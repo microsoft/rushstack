@@ -31,6 +31,40 @@ describe(AzureStorageBuildCacheProvider.name, () => {
     ).toThrowErrorMatchingSnapshot();
   });
 
+  describe('storageEndpoint', () => {
+    it('uses the default endpoint when storageEndpoint is not provided', () => {
+      const subject: AzureStorageBuildCacheProvider = new AzureStorageBuildCacheProvider({
+        storageAccountName: 'storage-account',
+        storageContainerName: 'container-name',
+        isCacheWriteAllowed: false
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((subject as any)._storageAccountUrl).toBe('https://storage-account.blob.core.windows.net/');
+    });
+
+    it('uses the custom endpoint when storageEndpoint is provided', () => {
+      const subject: AzureStorageBuildCacheProvider = new AzureStorageBuildCacheProvider({
+        storageAccountName: 'devstoreaccount1',
+        storageContainerName: 'container-name',
+        storageEndpoint: 'http://127.0.0.1:10000/devstoreaccount1',
+        isCacheWriteAllowed: false
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((subject as any)._storageAccountUrl).toBe('http://127.0.0.1:10000/devstoreaccount1/');
+    });
+
+    it('preserves a trailing slash on the custom endpoint', () => {
+      const subject: AzureStorageBuildCacheProvider = new AzureStorageBuildCacheProvider({
+        storageAccountName: 'devstoreaccount1',
+        storageContainerName: 'container-name',
+        storageEndpoint: 'https://my-proxy.example.com/devstoreaccount1/',
+        isCacheWriteAllowed: false
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((subject as any)._storageAccountUrl).toBe('https://my-proxy.example.com/devstoreaccount1/');
+    });
+  });
+
   describe('isCacheWriteAllowed', () => {
     function prepareSubject(
       optionValue: boolean,

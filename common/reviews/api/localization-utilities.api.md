@@ -96,10 +96,10 @@ export interface ITypingsGeneratorOptions extends ITypingsGeneratorBaseOptions {
 export function parseLocFile(options: IParseLocFileOptions): ILocalizationFile;
 
 // @public (undocumented)
-export function parseLocJson({ content, filePath, ignoreString }: IParseFileOptions): ILocalizationFile;
+export function parseLocJson(input: IParseFileOptions): ILocalizationFile;
 
 // @public (undocumented)
-export function parseResJson({ content, ignoreString, filePath }: IParseFileOptions): ILocalizationFile;
+export function parseResJson(input: IParseFileOptions): ILocalizationFile;
 
 // @public (undocumented)
 export function parseResx(options: IParseResxOptions): ILocalizationFile;

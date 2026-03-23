@@ -26,7 +26,7 @@
               "copyOperations": [
                 {
                   "sourcePath": "src",
-                  "destinationFolders": ["lib"],
+                  "destinationFolders": ["lib-dts"],
                   "fileExtensions": [".d.ts"]
                 }
               ]
@@ -40,7 +40,7 @@
             "pluginPackage": "@rushstack/heft",
             "pluginName": "run-script-plugin",
             "options": {
-              "scriptPath": "./lib/runScenarios.js"
+              "scriptPath": "./lib-commonjs/runScenarios.js"
             }
           }
         }

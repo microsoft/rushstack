@@ -1,9 +1,32 @@
 {
   "name": "@rushstack/webpack-plugin-utilities",
-  "version": "0.5.10",
+  "version": "0.6.8",
   "description": "This plugin sets the webpack public path at runtime.",
-  "main": "lib/index.js",
-  "typings": "dist/webpack-plugin-utilities.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/webpack-plugin-utilities.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/webpack-plugin-utilities.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -35,6 +58,7 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "@types/tapable": "1.0.6",
-    "webpack": "~5.103.0"
-  }
+    "webpack": "~5.105.2"
+  },
+  "sideEffects": false
 }

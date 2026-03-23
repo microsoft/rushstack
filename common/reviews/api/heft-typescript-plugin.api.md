@@ -42,6 +42,8 @@ export interface _ICompilerCapabilities {
 // @beta (undocumented)
 export interface IEmitModuleKind {
     // (undocumented)
+    emitModulePackageJson?: boolean;
+    // (undocumented)
     jsExtensionOverride?: string;
     // (undocumented)
     moduleKind: 'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext';

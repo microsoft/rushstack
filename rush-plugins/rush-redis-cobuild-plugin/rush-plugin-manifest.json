@@ -4,8 +4,8 @@
     {
       "pluginName": "rush-redis-cobuild-plugin",
       "description": "Rush plugin for Redis cobuild lock",
-      "entryPoint": "lib/index.js",
-      "optionsSchema": "lib/schemas/redis-config.schema.json"
+      "entryPoint": "./lib-commonjs/index.js",
+      "optionsSchema": "./lib-commonjs/schemas/redis-config.schema.json"
     }
   ]
 }

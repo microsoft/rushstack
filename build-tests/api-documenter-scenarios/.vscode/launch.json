@@ -1,0 +1,34 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "heft build (runScenarios.js)",
+      "program": "${workspaceFolder}/node_modules/@rushstack/heft/lib/start.js",
+      "cwd": "${workspaceFolder}",
+      "args": ["--debug", "build"],
+      "console": "integratedTerminal",
+      "sourceMaps": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "api-documenter [scenario]",
+      "program": "${workspaceFolder}/node_modules/@microsoft/api-documenter/lib/start.js",
+      "cwd": "${workspaceFolder}/temp/configs",
+      "args": [
+        "generate",
+        "--input-folder",
+        "${workspaceFolder}/temp/etc/commentedDestructure",
+        "--output-folder",
+        "${workspaceFolder}/temp/etc/commentedDestructure/markdown"
+      ],
+      "console": "integratedTerminal",
+      "sourceMaps": true
+    }
+  ]
+}

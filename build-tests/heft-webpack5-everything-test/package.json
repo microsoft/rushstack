@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "@rushstack/heft-dev-cert-plugin": "workspace:*",
+    "@rushstack/heft-static-asset-typings-plugin": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
@@ -31,6 +32,6 @@
     "source-map-loader": "~3.0.1",
     "tslint": "~5.20.1",
     "typescript": "~5.9.3",
-    "webpack": "~5.103.0"
+    "webpack": "~5.105.2"
   }
 }

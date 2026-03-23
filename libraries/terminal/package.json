@@ -1,9 +1,32 @@
 {
   "name": "@rushstack/terminal",
-  "version": "0.21.0",
+  "version": "0.22.3",
   "description": "User interface primitives for console applications",
-  "main": "lib/index.js",
-  "typings": "dist/terminal.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/terminal.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/terminal.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
@@ -21,7 +44,7 @@
     "supports-color": "~8.1.1"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.1.7",
+    "@rushstack/heft": "1.2.7",
     "@types/supports-color": "8.1.3",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
@@ -33,5 +56,6 @@
     "@types/node": {
       "optional": true
     }
-  }
+  },
+  "sideEffects": false
 }

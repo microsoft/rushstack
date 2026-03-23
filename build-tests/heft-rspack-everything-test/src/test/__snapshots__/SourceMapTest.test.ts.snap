@@ -2,7 +2,7 @@
 
 exports[`Source Maps Chunk has a source that matches the sourceFileRegex 1`] = `
 Array [
-  "webpack://heft-rspack-everything-test/./lib/chunks/ChunkClass.js",
+  "webpack://heft-rspack-everything-test/./lib-esm/chunks/ChunkClass.js",
 ]
 `;
 
@@ -18,7 +18,7 @@ Array [
   "webpack://heft-rspack-everything-test/webpack/runtime/rspack_version",
   "webpack://heft-rspack-everything-test/webpack/runtime/auto_public_path",
   "webpack://heft-rspack-everything-test/webpack/runtime/rspack_unique_id",
-  "webpack://heft-rspack-everything-test/./lib/indexA.js",
+  "webpack://heft-rspack-everything-test/./lib-esm/indexA.js",
 ]
 `;
 
@@ -26,6 +26,6 @@ exports[`Source Maps Test-B has a source that matches the sourceFileRegex 1`] = 
 Array [
   "webpack://heft-rspack-everything-test/webpack/runtime/rspack_version",
   "webpack://heft-rspack-everything-test/webpack/runtime/rspack_unique_id",
-  "webpack://heft-rspack-everything-test/./lib/indexB.js",
+  "webpack://heft-rspack-everything-test/./lib-esm/indexB.js",
 ]
 `;

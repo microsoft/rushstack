@@ -4,6 +4,7 @@
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": false,
-    "outDir": "./lib"
+    "outDir": "./lib-commonjs",
+    "declarationDir": "./lib-dts"
   }
 }

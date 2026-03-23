@@ -158,6 +158,12 @@ export interface IStorybookPluginOptions {
    * Specifies whether to capture the webpack stats for the storybook build by adding the `--webpack-stats-json` CLI flag.
    */
   captureWebpackStats?: boolean;
+
+  /**
+   * If true, sets the `STORYBOOK_DISABLE_TELEMETRY=1` environment variable when invoking the Storybook subprocess,
+   * which disables Storybook's telemetry data collection.
+   */
+  disableTelemetry?: boolean;
 }
 
 interface IRunStorybookOptions extends IPrepareStorybookOptions {
@@ -499,6 +505,15 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       storybookArgs.push('--docs');
     }
 
+    const storybookEnv: NodeJS.ProcessEnv = {
+      ...process.env,
+      // Prevent corepack from prompting to pin a package manager version
+      COREPACK_ENABLE_AUTO_PIN: '0'
+    };
+    if (options.disableTelemetry) {
+      storybookEnv.STORYBOOK_DISABLE_TELEMETRY = '1';
+    }
+
     if (isServeMode) {
       // Instantiate storybook runner synchronously for incremental builds
       // this ensure that the process is not killed when heft watcher detects file changes
@@ -506,10 +521,17 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
         logger,
         resolvedModulePath,
         storybookArgs,
+        storybookEnv,
         storybookCliVersion === StorybookCliVersion.STORYBOOK8
       );
     } else {
-      await this._invokeAsSubprocessAsync(logger, resolvedModulePath, storybookArgs, workingDirectory);
+      await this._invokeAsSubprocessAsync(
+        logger,
+        resolvedModulePath,
+        storybookArgs,
+        workingDirectory,
+        storybookEnv
+      );
     }
   }
 
@@ -524,15 +546,15 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     logger: IScopedLogger,
     command: string,
     args: string[],
-    cwd: string
+    cwd: string,
+    env: NodeJS.ProcessEnv
   ): Promise<void> {
     return await new Promise<void>((resolve, reject) => {
-      const storybookEnv: NodeJS.ProcessEnv = { ...process.env };
       const forkedProcess: child_process.ChildProcess = child_process.fork(command, args, {
         execArgv: process.execArgv,
         cwd,
         stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
-        env: storybookEnv,
+        env,
         ...SubprocessTerminator.RECOMMENDED_OPTIONS
       });
 
@@ -587,6 +609,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     logger: IScopedLogger,
     command: string,
     args: string[],
+    env: NodeJS.ProcessEnv,
     patchNpmConfigUserAgent: boolean
   ): void {
     logger.terminal.writeLine('Launching ' + command);
@@ -606,6 +629,13 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     // At the time when storybook checks env.npm_config_user_agent it has been reset to undefined
     if (patchNpmConfigUserAgent) {
       process.env.npm_config_user_agent = 'npm';
+    }
+
+    // Apply custom environment variables
+    for (const [key, value] of Object.entries(env)) {
+      if (value !== undefined) {
+        process.env[key] = value;
+      }
     }
 
     // invoke command synchronously

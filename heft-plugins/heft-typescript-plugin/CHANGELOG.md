@@ -1,6 +1,72 @@
 # Change Log - @rushstack/heft-typescript-plugin
 
-This log was last generated on Thu, 08 Jan 2026 01:12:30 GMT and should not be manually modified.
+This log was last generated on Mon, 09 Mar 2026 15:14:08 GMT and should not be manually modified.
+
+## 1.3.2
+Mon, 09 Mar 2026 15:14:08 GMT
+
+_Version update only_
+
+## 1.3.1
+Wed, 25 Feb 2026 21:39:42 GMT
+
+_Version update only_
+
+## 1.3.0
+Wed, 25 Feb 2026 00:34:29 GMT
+
+### Minor changes
+
+- Add `emitModulePackageJson` option for `additionalModuleKindsToEmit` entries. When enabled, a `package.json` with the appropriate `"type"` field is written to the output folder after compilation, ensuring Node.js correctly interprets `.js` files regardless of the nearest ancestor package.json `"type"` setting.
+
+## 1.2.4
+Tue, 24 Feb 2026 01:13:27 GMT
+
+_Version update only_
+
+## 1.2.3
+Mon, 23 Feb 2026 00:42:21 GMT
+
+_Version update only_
+
+## 1.2.2
+Fri, 20 Feb 2026 16:14:49 GMT
+
+_Version update only_
+
+## 1.2.1
+Fri, 20 Feb 2026 00:15:04 GMT
+
+### Patches
+
+- Add `"node"` condition before `"import"` in the `"exports"` map so that Node.js uses the CJS output (which handles extensionless imports), while bundlers still use ESM via `"import"`. Fixes https://github.com/microsoft/rushstack/issues/5644.
+
+## 1.2.0
+Thu, 19 Feb 2026 00:04:52 GMT
+
+### Minor changes
+
+- Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `"exports"` field in `package.json`.
+
+## 1.1.14
+Sat, 07 Feb 2026 01:13:26 GMT
+
+_Version update only_
+
+## 1.1.13
+Wed, 04 Feb 2026 20:42:47 GMT
+
+_Version update only_
+
+## 1.1.12
+Wed, 04 Feb 2026 16:13:27 GMT
+
+_Version update only_
+
+## 1.1.11
+Fri, 30 Jan 2026 01:16:13 GMT
+
+_Version update only_
 
 ## 1.1.10
 Thu, 08 Jan 2026 01:12:30 GMT

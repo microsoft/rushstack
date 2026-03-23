@@ -26,6 +26,7 @@ import * as semver from 'semver';
 import { Text, PackageJsonLookup } from '@rushstack/node-core-library';
 import { Colorize, ConsoleTerminalProvider, type ITerminalProvider } from '@rushstack/terminal';
 import { EnvironmentVariableNames } from '@microsoft/rush-lib';
+import type { ILaunchOptions } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
 
 import { RushCommandSelector } from './RushCommandSelector';
@@ -87,7 +88,7 @@ const isManaged: boolean = !!configuration;
 
 const terminalProvider: ITerminalProvider = new ConsoleTerminalProvider();
 
-const launchOptions: rushLib.ILaunchOptions = { isManaged, alreadyReportedNodeTooNewError, terminalProvider };
+const launchOptions: ILaunchOptions = { isManaged, alreadyReportedNodeTooNewError, terminalProvider };
 
 // If we're inside a repo folder, and it's requesting a different version, then use the RushVersionManager to
 // install it

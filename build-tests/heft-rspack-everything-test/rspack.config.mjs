@@ -31,8 +31,8 @@ const config = {
     extensions: ['.js', '.json']
   },
   entry: {
-    'heft-test-A': resolve(__dirname, 'lib', 'indexA.js'),
-    'heft-test-B': resolve(__dirname, 'lib', 'indexB.js')
+    'heft-test-A': resolve(__dirname, 'lib-esm', 'indexA.js'),
+    'heft-test-B': resolve(__dirname, 'lib-esm', 'indexB.js')
   },
   output: {
     path: resolve(__dirname, 'dist'),

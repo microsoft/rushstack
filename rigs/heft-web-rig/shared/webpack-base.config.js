@@ -205,7 +205,7 @@ function createWebpackConfig({ env, argv, projectRoot, configOverride, extractCs
         },
 
         {
-          test: /\.(jpeg|jpg|png|gif|svg|ico|woff|woff2|ttf|eot)$/,
+          test: /\.(jpeg|jpg|png|gif|svg|ico|webp|avif|woff|woff2|ttf|eot)$/,
           // Allows import/require() to be used with an asset file. The file will be copied to the output folder,
           // and the import statement will return its URL.
           // https://webpack.js.org/guides/asset-modules/#resource-assets

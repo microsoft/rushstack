@@ -1,6 +1,30 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Wed, 07 Jan 2026 01:12:24 GMT and should not be manually modified.
+This log was last generated on Wed, 25 Feb 2026 00:34:30 GMT and should not be manually modified.
+
+## 0.22.3
+Wed, 25 Feb 2026 00:34:30 GMT
+
+_Version update only_
+
+## 0.22.2
+Tue, 24 Feb 2026 01:13:27 GMT
+
+_Version update only_
+
+## 0.22.1
+Fri, 20 Feb 2026 00:15:04 GMT
+
+### Patches
+
+- Add `"node"` condition before `"import"` in the `"exports"` map so that Node.js uses the CJS output (which handles extensionless imports), while bundlers still use ESM via `"import"`. Fixes https://github.com/microsoft/rushstack/issues/5644.
+
+## 0.22.0
+Thu, 19 Feb 2026 00:04:53 GMT
+
+### Minor changes
+
+- Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `"exports"` field in `package.json`.
 
 ## 0.21.0
 Wed, 07 Jan 2026 01:12:24 GMT

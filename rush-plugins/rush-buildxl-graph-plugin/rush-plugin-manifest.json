@@ -4,8 +4,8 @@
     {
       "pluginName": "rush-buildxl-graph-plugin",
       "description": "Plugin for providing access to Rush build graph.",
-      "entryPoint": "lib/index.js",
-      "optionsSchema": "lib/schemas/rush-buildxl-graph-plugin.schema.json"
+      "entryPoint": "./lib-commonjs/index.js",
+      "optionsSchema": "./lib-commonjs/schemas/rush-buildxl-graph-plugin.schema.json"
     }
   ]
 }

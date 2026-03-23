@@ -239,6 +239,7 @@ export class EnvironmentConfiguration {
     static parseBooleanEnvironmentVariable(name: string, value: string | undefined): boolean | undefined;
     static get pnpmStorePathOverride(): string | undefined;
     static get pnpmVerifyStoreIntegrity(): boolean | undefined;
+    static get quietMode(): boolean;
     static reset(): void;
     static get rushGlobalFolderOverride(): string | undefined;
     static get rushTempFolderOverride(): string | undefined;
@@ -273,6 +274,7 @@ export const EnvironmentVariableNames: {
     readonly _RUSH_LIB_PATH: "_RUSH_LIB_PATH";
     readonly RUSH_INVOKED_FOLDER: "RUSH_INVOKED_FOLDER";
     readonly RUSH_INVOKED_ARGS: "RUSH_INVOKED_ARGS";
+    readonly RUSH_QUIET_MODE: "RUSH_QUIET_MODE";
 };
 
 // @beta
@@ -471,6 +473,7 @@ export interface IExperimentsJson {
     forbidPhantomResolvableNodeModulesFolders?: boolean;
     generateProjectImpactGraphDuringRushUpdate?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
+    omitAppleDoubleFilesFromBuildCache?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     printEventHooksOutputToConsole?: boolean;
     rushAlerts?: boolean;
@@ -497,6 +500,7 @@ export interface IGenerateCacheEntryIdOptions {
 // @beta (undocumented)
 export interface IGetChangedProjectsOptions {
     enableFiltering: boolean;
+    excludeVersionOnlyChanges?: boolean;
     includeExternalDependencies: boolean;
     // (undocumented)
     shouldFetch?: boolean;
@@ -582,6 +586,7 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 // @internal (undocumented)
 export interface _IOperationBuildCacheOptions {
     buildCacheConfiguration: BuildCacheConfiguration;
+    excludeAppleDoubleFiles: boolean;
     terminal: ITerminal;
 }
 
@@ -666,13 +671,14 @@ export interface IOperationSettings {
     allowCobuildWithoutCache?: boolean;
     dependsOnAdditionalFiles?: string[];
     dependsOnEnvVars?: string[];
+    dependsOnNodeVersion?: boolean | NodeVersionGranularity;
     disableBuildCacheForOperation?: boolean;
     ignoreChangedProjectsOnlyFlag?: boolean;
     operationName: string;
     outputFolderNames?: string[];
     parameterNamesToIgnore?: string[];
     sharding?: IRushPhaseSharding;
-    weight?: number;
+    weight?: number | `${number}%`;
 }
 
 // @internal (undocumented)
@@ -958,6 +964,9 @@ export class LockStepVersionPolicy extends VersionPolicy {
 
 export { LookupByPath }
 
+// @alpha
+export type NodeVersionGranularity = 'major' | 'minor' | 'patch';
+
 // @public
 export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     // @internal
@@ -1003,11 +1012,11 @@ export class _OperationMetadataManager {
     readonly logFilenameIdentifier: string;
     get metadataFolderPath(): string;
     // (undocumented)
-    saveAsync({ durationInSeconds, cobuildContextId, cobuildRunnerId, logPath, errorLogPath, logChunksPath }: _IOperationMetadata): Promise<void>;
+    saveAsync(input: _IOperationMetadata): Promise<void>;
     // (undocumented)
     readonly stateFile: _OperationStateFile;
     // (undocumented)
-    tryRestoreAsync({ terminal, terminalProvider, errorLogPath, cobuildContextId, cobuildRunnerId }: {
+    tryRestoreAsync(input: {
         terminalProvider: ITerminalProvider;
         terminal: ITerminal;
         errorLogPath: string;
@@ -1176,6 +1185,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly resolutionMode: PnpmResolutionMode | undefined;
     readonly strictPeerDependencies: boolean;
     readonly unsupportedPackageJsonSettings: unknown | undefined;
+    updateGlobalOnlyBuiltDependencies(onlyBuiltDependencies: string[] | undefined): void;
     updateGlobalPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void;
     readonly useWorkspaces: boolean;
 }

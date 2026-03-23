@@ -2,7 +2,7 @@
   "operationSettings": [
     {
       "operationName": "_phase:build",
-      "outputFolderNames": ["lib", "dist"]
+      "outputFolderNames": ["lib-commonjs", "dist"]
     }
   ]
 }

@@ -6,17 +6,17 @@
   "taskPlugins": [
     {
       "pluginName": "copy-files-plugin",
-      "entryPoint": "./lib/plugins/CopyFilesPlugin",
-      "optionsSchema": "./lib/schemas/copy-files-options.schema.json"
+      "entryPoint": "./lib-commonjs/plugins/CopyFilesPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/copy-files-options.schema.json"
     },
     {
       "pluginName": "delete-files-plugin",
-      "entryPoint": "./lib/plugins/DeleteFilesPlugin",
-      "optionsSchema": "./lib/schemas/delete-files-options.schema.json"
+      "entryPoint": "./lib-commonjs/plugins/DeleteFilesPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/delete-files-options.schema.json"
     },
     {
       "pluginName": "node-service-plugin",
-      "entryPoint": "./lib/plugins/NodeServicePlugin",
+      "entryPoint": "./lib-commonjs/plugins/NodeServicePlugin",
       "parameterScope": "node-service",
       "parameters": [
         {
@@ -28,13 +28,13 @@
     },
     {
       "pluginName": "run-script-plugin",
-      "entryPoint": "./lib/plugins/RunScriptPlugin",
-      "optionsSchema": "./lib/schemas/run-script-options.schema.json"
+      "entryPoint": "./lib-commonjs/plugins/RunScriptPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/run-script-options.schema.json"
     },
     {
-      "entryPoint": "./lib/plugins/SetEnvironmentVariablesPlugin",
+      "entryPoint": "./lib-commonjs/plugins/SetEnvironmentVariablesPlugin",
       "pluginName": "set-environment-variables-plugin",
-      "optionsSchema": "./lib/schemas/set-environment-variables-plugin.schema.json"
+      "optionsSchema": "./lib-commonjs/schemas/set-environment-variables-plugin.schema.json"
     }
   ]
 }

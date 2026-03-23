@@ -3,7 +3,7 @@
   "description": "This project contains a Heft plugin that adds a custom parameter to built-in actions",
   "version": "1.0.0",
   "private": true,
-  "main": "lib/index.js",
+  "main": "./lib/index.js",
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",

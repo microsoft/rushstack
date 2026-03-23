@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+import type { Stats } from 'node:fs';
 
 import * as tar from 'tar';
 
@@ -46,7 +47,7 @@ export class TempProjectHelper {
       noPax: true,
       sync: true,
       prefix: npmPackageFolder,
-      filter: (tarPath: string, stat: tar.FileStat): boolean => {
+      filter: (tarPath: string, stat: Stats): boolean => {
         if (
           !this._rushConfiguration.experimentsConfiguration.configuration.noChmodFieldInTarHeaderNormalization
         ) {

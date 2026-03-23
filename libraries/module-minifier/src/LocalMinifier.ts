@@ -3,6 +3,7 @@
 
 import { createHash } from 'node:crypto';
 
+import './cryptoPolyfill';
 import serialize from 'serialize-javascript';
 import type { MinifyOptions } from 'terser';
 

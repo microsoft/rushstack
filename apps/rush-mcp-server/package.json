@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/mcp-server",
-  "version": "0.3.10",
+  "version": "0.4.7",
   "description": "A Model Context Protocol server implementation for Rush",
   "keywords": [
     "rush",
@@ -9,8 +9,32 @@
     "monorepo",
     "server"
   ],
-  "main": "lib/index.js",
-  "typings": "dist/mcp-server.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/mcp-server.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/mcp-server.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
@@ -43,5 +67,9 @@
     "local-node-rig": "workspace:*",
     "typescript": "~5.9.3",
     "@types/node": "20.17.19"
-  }
+  },
+  "sideEffects": [
+    "lib-commonjs/start.js",
+    "lib-esm/start.js"
+  ]
 }

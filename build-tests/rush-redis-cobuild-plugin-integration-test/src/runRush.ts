@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// Import from lib-commonjs for easy debugging
-import { RushCommandLineParser } from '@microsoft/rush-lib/lib-commonjs/cli/RushCommandLineParser';
-import * as rushLib from '@microsoft/rush-lib/lib-commonjs';
+import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
+import * as rushLib from '@microsoft/rush-lib';
 
 // Setup redis cobuild plugin
 const builtInPluginConfigurations: rushLib._IBuiltInPluginConfiguration[] = [];

@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { templateContent } from '../index';
+
 interface IInterface {
   element: string;
 }
@@ -19,5 +21,11 @@ describe('Example Test', () => {
       element: 'a'
     };
     expect(interfaceInstance).toBeTruthy();
+  });
+
+  it('Correctly imports text assets', () => {
+    expect(typeof templateContent).toBe('string');
+    expect(templateContent).toContain('<title>Example Template</title>');
+    expect(templateContent).toContain('Hello, world!');
   });
 });

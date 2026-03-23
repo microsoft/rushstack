@@ -3,10 +3,11 @@
 
   "extends": "local-node-rig/profiles/default/config/typescript.json",
 
+  "$additionalModuleKindsToEmit.inheritanceType": "replace",
   "additionalModuleKindsToEmit": [
     {
       "moduleKind": "esnext",
-      "outFolderName": "lib-esnext"
+      "outFolderName": "lib-intermediate-esm"
     }
   ]
 }

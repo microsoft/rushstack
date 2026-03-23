@@ -249,7 +249,7 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
 }
 
 // @public
-export abstract class CommandLineParser extends CommandLineParameterProvider {
+export class CommandLineParser extends CommandLineParameterProvider {
     constructor(options: ICommandLineParserOptions);
     get actions(): ReadonlyArray<CommandLineAction>;
     addAction(action: CommandLineAction): void;

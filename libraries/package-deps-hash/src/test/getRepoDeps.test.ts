@@ -14,7 +14,9 @@ import {
 
 import { FileSystem } from '@rushstack/node-core-library';
 
-const SOURCE_PATH: string = path.join(__dirname).replace(path.join('lib', 'test'), path.join('src', 'test'));
+const SOURCE_PATH: string = path
+  .join(__dirname)
+  .replace(path.join('lib-commonjs', 'test'), path.join('src', 'test'));
 
 const TEST_PREFIX: string = `libraries/package-deps-hash/src/test/`;
 const TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'testProject');

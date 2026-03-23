@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/trace-import",
-  "version": "0.6.10",
+  "version": "0.7.7",
   "description": "CLI tool for understanding how require() and \"import\" statements get resolved",
   "repository": {
     "type": "git",
@@ -31,5 +31,25 @@
     "@types/semver": "7.5.0",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
-  }
+  },
+  "exports": {
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
+  "sideEffects": [
+    "lib-commonjs/start.js",
+    "lib-esm/start.js"
+  ]
 }

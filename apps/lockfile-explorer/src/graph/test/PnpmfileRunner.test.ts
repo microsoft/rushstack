@@ -14,12 +14,12 @@ jest.setTimeout(isDebuggerAttached ? 1e9 : 10000);
 describe(PnpmfileRunner.name, () => {
   it('transforms a package.json file', async () => {
     const dirname: string = Path.convertToSlashes(__dirname);
-    const libIndex: number = dirname.lastIndexOf('/lib/');
+    const libIndex: number = dirname.lastIndexOf('/lib-commonjs/');
     if (libIndex < 0) {
       throw new Error('Unexpected file path');
     }
     const srcDirname: string =
-      dirname.substring(0, libIndex) + '/src/' + dirname.substring(libIndex + '/lib/'.length);
+      dirname.substring(0, libIndex) + '/src/' + dirname.substring(libIndex + '/lib-commonjs/'.length);
 
     const pnpmfilePath: string = srcDirname + '/fixtures/PnpmfileRunner/.pnpmfile.cjs';
     const logMessages: string[] = [];

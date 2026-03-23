@@ -1,9 +1,32 @@
 {
   "name": "@microsoft/webpack5-load-themed-styles-loader",
-  "version": "0.3.10",
+  "version": "0.4.7",
   "description": "This simple loader wraps the loading of CSS in script equivalent to `require('load-themed-styles').loadStyles( /* css text */ )`. It is designed to be a replacement for style-loader.",
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./lib-dts/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib-dts/index.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -16,7 +39,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@microsoft/load-themed-styles": "^2.1.25",
+    "@microsoft/load-themed-styles": "^2.2.7",
     "webpack": "^5"
   },
   "peerDependenciesMeta": {
@@ -32,6 +55,7 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "memfs": "4.12.0",
-    "webpack": "~5.103.0"
-  }
+    "webpack": "~5.105.2"
+  },
+  "sideEffects": false
 }

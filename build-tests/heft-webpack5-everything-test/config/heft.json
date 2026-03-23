@@ -10,7 +10,21 @@
       "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-commonjs"] }],
 
       "tasksByName": {
+        "image-typings": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-static-asset-typings-plugin",
+            "pluginName": "resource-assets-plugin",
+            "options": {
+              "configType": "inline",
+              "config": {
+                "fileExtensions": [".png"],
+                "generatedTsFolders": ["temp/image-typings"]
+              }
+            }
+          }
+        },
         "typescript": {
+          "taskDependencies": ["image-typings"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-typescript-plugin"
           }

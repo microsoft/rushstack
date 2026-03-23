@@ -62,4 +62,10 @@ export interface ICachedEmitModuleKind {
    * Declarations are only emitted for the primary module kind.
    */
   isPrimary: boolean;
+
+  /**
+   * If true, a package.json with the appropriate "type" field will be written
+   * to the output folder after emit.
+   */
+  emitModulePackageJson: boolean;
 }

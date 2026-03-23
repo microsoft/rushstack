@@ -1,8 +1,45 @@
 {
   "name": "@rushstack/eslint-patch",
-  "version": "1.15.0",
+  "version": "1.16.1",
   "description": "Enhance ESLint with better support for large scale monorepos",
-  "main": "lib/usage.js",
+  "main": "./lib-commonjs/usage.js",
+  "module": "./lib-esm/usage.js",
+  "exports": {
+    ".": {
+      "node": "./lib-commonjs/usage.js",
+      "import": "./lib-esm/usage.js",
+      "require": "./lib-commonjs/usage.js"
+    },
+    "./modern-module-resolution": {
+      "node": "./lib-commonjs/modern-module-resolution.js",
+      "import": "./lib-esm/modern-module-resolution.js",
+      "require": "./lib-commonjs/modern-module-resolution.js"
+    },
+    "./custom-config-package-names": {
+      "node": "./lib-commonjs/custom-config-package-names.js",
+      "import": "./lib-esm/custom-config-package-names.js",
+      "require": "./lib-commonjs/custom-config-package-names.js"
+    },
+    "./eslint-bulk-suppressions": {
+      "node": "./lib-commonjs/eslint-bulk-suppressions/index.js",
+      "import": "./lib-esm/eslint-bulk-suppressions/index.js",
+      "require": "./lib-commonjs/eslint-bulk-suppressions/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
@@ -30,14 +67,22 @@
     "patch"
   ],
   "devDependencies": {
-    "@rushstack/heft": "1.1.7",
+    "@rushstack/heft": "1.2.7",
     "@types/eslint-8": "npm:@types/eslint@8.56.10",
     "@types/eslint-9": "npm:@types/eslint@9.6.1",
-    "@typescript-eslint/types": "~8.46.0",
+    "@typescript-eslint/types": "~8.56.1",
     "decoupled-local-node-rig": "workspace:*",
     "eslint-8": "npm:eslint@~8.57.0",
     "eslint-9": "npm:eslint@~9.25.1",
     "eslint": "~9.37.0",
     "typescript": "~5.9.3"
-  }
+  },
+  "sideEffects": [
+    "lib-esm/modern-module-resolution.js",
+    "lib-esm/custom-config-package-names.js",
+    "lib-esm/eslint-bulk-suppressions/index.js",
+    "lib-commonjs/modern-module-resolution.js",
+    "lib-commonjs/custom-config-package-names.js",
+    "lib-commonjs/eslint-bulk-suppressions/index.js"
+  ]
 }

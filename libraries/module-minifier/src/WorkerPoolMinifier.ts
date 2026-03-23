@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import os from 'node:os';
 import type { ResourceLimits } from 'node:worker_threads';
 
+import './cryptoPolyfill';
 import serialize from 'serialize-javascript';
 import type { MinifyOptions } from 'terser';
 

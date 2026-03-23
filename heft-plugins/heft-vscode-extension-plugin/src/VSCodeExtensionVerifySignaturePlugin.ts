@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'node:path';
+
 import type {
   HeftConfiguration,
   IHeftTaskPlugin,
@@ -9,7 +11,7 @@ import type {
   CommandLineStringParameter
 } from '@rushstack/heft';
 import type { IWaitForExitResult } from '@rushstack/node-core-library';
-import * as path from 'node:path';
+
 import { executeAndWaitAsync, vsceScriptPath } from './util';
 
 interface IVSCodeExtensionVerifySignaturePluginOptions {}

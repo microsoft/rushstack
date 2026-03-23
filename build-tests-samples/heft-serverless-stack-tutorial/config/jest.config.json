@@ -1,6 +1,19 @@
 {
   "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json",
 
+  "roots": ["<rootDir>/lib-commonjs"],
+
+  "testMatch": ["<rootDir>/lib-commonjs/**/*.test.js"],
+  "collectCoverageFrom": [
+    "lib-commonjs/**/*.js",
+    "!lib-commonjs/**/*.d.ts",
+    "!lib-commonjs/**/*.test.js",
+    "!lib-commonjs/**/test/**",
+    "!lib-commonjs/**/__tests__/**",
+    "!lib-commonjs/**/__fixtures__/**",
+    "!lib-commonjs/**/__mocks__/**"
+  ],
+
   // These additional properties exist for caching purposes in the rushstack repo
 
   // Enable code coverage for Jest

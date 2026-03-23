@@ -118,7 +118,7 @@ function generateConfiguration(mode, outputFolderName, webpack) {
         },
         typingsOptions: {
           generatedTsFolder: `${__dirname}/temp/loc-json-ts`,
-          secondaryGeneratedTsFolders: ['lib'],
+          secondaryGeneratedTsFolders: ['lib-commonjs'],
           sourceRoot: `${__dirname}/src`,
           exportAsDefault: true
         },

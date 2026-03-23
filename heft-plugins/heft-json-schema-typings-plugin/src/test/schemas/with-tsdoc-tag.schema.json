@@ -1,0 +1,12 @@
+{
+  "x-tsdoc-release-tag": "@public",
+  "title": "Public Config",
+  "type": "object",
+  "properties": {
+    "value": {
+      "description": "A value.",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

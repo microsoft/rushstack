@@ -25,6 +25,12 @@ import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import type { ApiReportVariant } from '../api/IConfigFile';
 import type { SymbolMetadata } from '../collector/SymbolMetadata';
 
+interface IContext {
+  collector: Collector;
+  reportVariant: ApiReportVariant;
+  alreadyProcessedSignatures: Set<Span>;
+}
+
 export class ApiReportGenerator {
   private static _trimSpacesRegExp: RegExp = / +$/gm;
 
@@ -92,6 +98,12 @@ export class ApiReportGenerator {
     }
     writer.ensureSkippedLine();
 
+    const context: IContext = {
+      collector,
+      reportVariant,
+      alreadyProcessedSignatures: new Set()
+    };
+
     // Emit the regular declarations
     for (const entity of collector.entities) {
       const astEntity: AstEntity = entity.astEntity;
@@ -152,7 +164,7 @@ export class ApiReportGenerator {
               if (apiItemMetadata.isPreapproved) {
                 ApiReportGenerator._modifySpanForPreapproved(span);
               } else {
-                ApiReportGenerator._modifySpan(collector, span, entity, astDeclaration, false, reportVariant);
+                ApiReportGenerator._modifySpan(span, entity, astDeclaration, false, context);
               }
 
               span.writeModifiedText(writer);
@@ -276,13 +288,14 @@ export class ApiReportGenerator {
    * Before writing out a declaration, _modifySpan() applies various fixups to make it nice.
    */
   private static _modifySpan(
-    collector: Collector,
     span: Span,
     entity: CollectorEntity,
     astDeclaration: AstDeclaration,
     insideTypeLiteral: boolean,
-    reportVariant: ApiReportVariant
+    context: IContext
   ): void {
+    const { collector, reportVariant } = context;
+
     // Should we process this declaration at all?
     if (!ApiReportGenerator._shouldIncludeDeclaration(collector, astDeclaration, reportVariant)) {
       span.modification.skipAll();
@@ -382,6 +395,19 @@ export class ApiReportGenerator {
         }
         break;
 
+      case ts.SyntaxKind.Parameter:
+        {
+          // (signature) -> SyntaxList -> Parameter
+          const signatureParent: Span | undefined = span.parent;
+          if (signatureParent) {
+            if (!context.alreadyProcessedSignatures.has(signatureParent)) {
+              context.alreadyProcessedSignatures.add(signatureParent);
+              DtsEmitHelpers.normalizeParameterNames(signatureParent);
+            }
+          }
+        }
+        break;
+
       case ts.SyntaxKind.Identifier:
         const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityForNode(
           span.node as ts.Identifier
@@ -414,12 +440,11 @@ export class ApiReportGenerator {
           astDeclaration,
           (childSpan, childAstDeclaration) => {
             ApiReportGenerator._modifySpan(
-              collector,
               childSpan,
               entity,
               childAstDeclaration,
               insideTypeLiteral,
-              reportVariant
+              context
             );
           }
         );
@@ -460,14 +485,7 @@ export class ApiReportGenerator {
           }
         }
 
-        ApiReportGenerator._modifySpan(
-          collector,
-          child,
-          entity,
-          childAstDeclaration,
-          insideTypeLiteral,
-          reportVariant
-        );
+        ApiReportGenerator._modifySpan(child, entity, childAstDeclaration, insideTypeLiteral, context);
       }
     }
   }

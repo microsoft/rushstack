@@ -4,7 +4,7 @@
   "compilerOptions": {
     "outDir": "../../../../../lib",
     "rootDir": "../../../../../src",
-    "rootDirs": ["../../../../../src", "../../../../../temp/sass-ts"],
+    "rootDirs": ["../../../../../src", "../../../../../temp/sass-ts", "../../../../../temp/image-typings"],
 
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",

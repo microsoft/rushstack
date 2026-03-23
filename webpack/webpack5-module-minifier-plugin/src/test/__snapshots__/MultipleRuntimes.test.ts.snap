@@ -3,15 +3,30 @@
 exports[`ModuleMinifierPlugin Handles multiple runtimes (mock): Content 1`] = `
 Object {
   "/release/async-1.js": "/*! For license information please see async-1.js.LICENSE.txt */
-// Begin Asset Hash=d3dd357ff5604782de8f7aed57c80fd4889703211ded3df7ebccbecc0b77e7b7
+// Begin Asset Hash=085012829ea4cae1a903bd58aaadebd847ce0c282dc4eebe4c2d3e3be29033fa
 \\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[527],{
 
-/***/ 541:
+/***/ 923
 
-// Begin Module Hash=445eb01e9f53ea96b925fbefbc4d13fdd2ca421fb980991639b16dcabad2679e
+// Begin Module Hash=522ee27cac2edf706f26b73b1e5ec4bc44feefe1107c5e303f671547dff3b8d1
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   async1: () => (/* binding */ async1)
+/* harmony export */ });
+// @license BAR
+function async1() { console.log('async-1'); }
+
+/***/ }
+// End Module
+
+,
+
+/***/ 541
+
+// Begin Module Hash=14a0bb00c5013f9feddec4295e04895cfcfa3097bb63589ab295671d5160d6d7
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   async1: () => (/* reexport safe */ _async_1__WEBPACK_IMPORTED_MODULE_0__.async1)
@@ -21,43 +36,25 @@ Object {
 
 
 
-/***/ })
-
+/***/ }
 // End Module
-,
 
-/***/ 923:
-
-// Begin Module Hash=31deeb0dddada3c4c2ce60ec899fb438accf459a77ae4ab6aff9eb31d8abc99c
-
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   async1: () => (/* binding */ async1)
-/* harmony export */ });
-// @license BAR
-function async1() { console.log('async-1'); }
-
-/***/ })
-
-// End Module
 
 
 }]);
 // End Asset",
-  "/release/async-1.js.LICENSE.txt": "// @license MIT
-// @license BAR
+  "/release/async-1.js.LICENSE.txt": "// @license BAR
+// @license MIT
 ",
   "/release/async-2.js": "/*! For license information please see async-2.js.LICENSE.txt */
-// Begin Asset Hash=c83021cbfe98b687fccd5fd189d90a20f236b2adedd285a2373d676742b4925b
+// Begin Asset Hash=8b416dc2fd2e47bba393fe80905d8387a2191ab33a079e6a9f31cef8099e7fb7
 \\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[324],{
 
-/***/ 454:
+/***/ 454
 
-// Begin Module Hash=d781e53f1975f44cc5a79d7999a4fa2cdc304aed3d6ecec61a749c395c39e1bd
-
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+// Begin Module Hash=9fa9db01a39f213b0bad42889493581d8a3cc9d76f3b77543aa34e2cfc6622ed
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   a2: () => (/* binding */ a2)
@@ -65,16 +62,15 @@ function async1() { console.log('async-1'); }
 // @license BAZ
 function a2() { console.log('async-2'); }
 
-/***/ })
-
+/***/ }
 // End Module
+
 ,
 
-/***/ 541:
+/***/ 541
 
-// Begin Module Hash=f2cc8ece05d708e198919711a30fc938469874987e096021c0ce8f0461b2995f
-
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+// Begin Module Hash=3fec3b0c7ee16396d8ef12681a9752d11a86a589b744cebb7451ad0a1b16a50b
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   a2: () => (/* reexport safe */ _async_2__WEBPACK_IMPORTED_MODULE_1__.a2)
@@ -84,9 +80,9 @@ function a2() { console.log('async-2'); }
 
 
 
-/***/ })
-
+/***/ }
 // End Module
+
 
 
 }]);
@@ -610,39 +606,39 @@ Object {
     },
     "async-1.js" => Object {
       "positionByModuleId": Map {
-        541 => Object {
-          "charLength": 497,
-          "charOffset": 242,
-        },
         923 => Object {
-          "charLength": 406,
-          "charOffset": 754,
+          "charLength": 394,
+          "charOffset": 241,
+        },
+        541 => Object {
+          "charLength": 485,
+          "charOffset": 649,
         },
       },
     },
     "async-2.js" => Object {
       "positionByModuleId": Map {
         454 => Object {
-          "charLength": 394,
-          "charOffset": 242,
+          "charLength": 382,
+          "charOffset": 241,
         },
         541 => Object {
-          "charLength": 489,
-          "charOffset": 651,
+          "charLength": 477,
+          "charOffset": 637,
         },
       },
     },
   },
   "byModule": Map {
     923 => Map {
-      527 => 406,
+      527 => 394,
     },
     541 => Map {
-      527 => 497,
-      324 => 489,
+      527 => 485,
+      324 => 477,
     },
     454 => Map {
-      324 => 394,
+      324 => 382,
     },
   },
 }
@@ -653,15 +649,15 @@ exports[`ModuleMinifierPlugin Handles multiple runtimes (mock): Warnings 1`] = `
 exports[`ModuleMinifierPlugin Handles multiple runtimes (terser): Content 1`] = `
 Object {
   "/release/async-1.js": "/*! For license information please see async-1.js.LICENSE.txt */
-\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[527],{541:(e,t,n)=>{n.d(t,{async1:()=>a.async1});var a=n(923)}
-,923:(e,t,n)=>{function a(){console.log(\\"async-1\\")}n.d(t,{async1:()=>a})}
+\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[527],{923(e,t,n){function a(){console.log(\\"async-1\\")}n.d(t,{async1:()=>a})}
+,541(e,t,n){n.d(t,{async1:()=>a.async1});var a=n(923)}
 }]);",
-  "/release/async-1.js.LICENSE.txt": "// @license MIT
-// @license BAR
+  "/release/async-1.js.LICENSE.txt": "// @license BAR
+// @license MIT
 ",
   "/release/async-2.js": "/*! For license information please see async-2.js.LICENSE.txt */
-\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[324],{454:(e,t,n)=>{function a(){console.log(\\"async-2\\")}n.d(t,{a2:()=>a})}
-,541:(e,t,n)=>{n.d(t,{a2:()=>a.a2});var a=n(454)}
+\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[324],{454(e,t,n){function a(){console.log(\\"async-2\\")}n.d(t,{a2:()=>a})}
+,541(e,t,n){n.d(t,{a2:()=>a.a2});var a=n(454)}
 }]);",
   "/release/async-2.js.LICENSE.txt": "// @license BAZ
 // @license MIT
@@ -684,39 +680,39 @@ Object {
     },
     "async-1.js" => Object {
       "positionByModuleId": Map {
-        541 => Object {
-          "charLength": 52,
-          "charOffset": 137,
-        },
         923 => Object {
-          "charLength": 68,
-          "charOffset": 195,
+          "charLength": 66,
+          "charOffset": 136,
+        },
+        541 => Object {
+          "charLength": 50,
+          "charOffset": 207,
         },
       },
     },
     "async-2.js" => Object {
       "positionByModuleId": Map {
         454 => Object {
-          "charLength": 64,
-          "charOffset": 137,
+          "charLength": 62,
+          "charOffset": 136,
         },
         541 => Object {
-          "charLength": 44,
-          "charOffset": 207,
+          "charLength": 42,
+          "charOffset": 203,
         },
       },
     },
   },
   "byModule": Map {
     923 => Map {
-      527 => 68,
+      527 => 66,
     },
     541 => Map {
-      527 => 52,
-      324 => 44,
+      527 => 50,
+      324 => 42,
     },
     454 => Map {
-      324 => 64,
+      324 => 62,
     },
   },
 }

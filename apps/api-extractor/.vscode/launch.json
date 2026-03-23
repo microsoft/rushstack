@@ -79,7 +79,7 @@
         "run",
         "--local",
         "--config",
-        "./temp/configs/api-extractor-spanSorting.json"
+        "./temp/configs/api-extractor-destructuredParameters.json"
       ],
       "sourceMaps": true
     }

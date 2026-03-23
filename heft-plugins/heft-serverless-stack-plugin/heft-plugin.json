@@ -4,7 +4,7 @@
   "taskPlugins": [
     {
       "pluginName": "serverless-stack-plugin",
-      "entryPoint": "./lib/ServerlessStackPlugin",
+      "entryPoint": "./lib-commonjs/ServerlessStackPlugin",
 
       "parameterScope": "serverless-stack",
       "parameters": [

@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import type * as rushLib from '@microsoft/rush-lib';
+import type { ILaunchOptions } from '@microsoft/rush-lib/lib/index';
 import { Colorize } from '@rushstack/terminal';
 
 type CommandName = 'rush' | 'rush-pnpm' | 'rushx' | undefined;
@@ -27,11 +27,10 @@ export class RushCommandSelector {
 
   public static execute(
     launcherVersion: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    selectedRushLib: any,
-    options: rushLib.ILaunchOptions
+    selectedRushLib: typeof import('@microsoft/rush-lib'),
+    options: ILaunchOptions
   ): void {
-    const Rush: typeof rushLib.Rush = selectedRushLib.Rush;
+    const { Rush } = selectedRushLib;
 
     if (!Rush) {
       // This should be impossible unless we somehow loaded an unexpected version

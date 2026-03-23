@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-lib",
-  "version": "5.166.0",
+  "version": "5.171.0",
   "description": "A library for writing scripts that interact with the Rush tool",
   "repository": {
     "type": "git",
@@ -12,12 +12,24 @@
   },
   "engineStrict": true,
   "homepage": "https://rushjs.io",
-  "main": "lib/index.js",
-  "typings": "dist/rush-lib.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "types": "./dist/rush-lib.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/rush-lib.d.ts",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
   "typesVersions": {
     "*": {
-      "lib-esnext/*": [
-        "lib/*"
+      "lib/*": [
+        "lib-dts/*"
       ]
     }
   },
@@ -66,7 +78,7 @@
     "ssri": "~8.0.0",
     "strict-uri-encode": "~2.0.0",
     "tapable": "2.2.1",
-    "tar": "~6.2.1",
+    "tar": "~7.5.6",
     "true-case-path": "~2.2.1"
   },
   "devDependencies": {
@@ -85,11 +97,10 @@
     "@types/semver": "7.5.0",
     "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
-    "@types/tar": "6.1.6",
     "@types/webpack-env": "1.18.8",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
-    "webpack": "~5.103.0"
+    "webpack": "~5.105.2"
   },
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
@@ -97,9 +108,13 @@
     "@rushstack/rush-http-build-cache-plugin": "workspace:*"
   },
   "sideEffects": [
-    "lib-esnext/start-pnpm.js",
-    "lib-esnext/start.js",
-    "lib-esnext/startx.js",
-    "lib-esnext/utilities/SetRushLibPath.js"
+    "lib-esm/start-pnpm.js",
+    "lib-esm/start.js",
+    "lib-esm/startx.js",
+    "lib-esm/utilities/SetRushLibPath.js",
+    "lib-commonjs/start-pnpm.js",
+    "lib-commonjs/start.js",
+    "lib-commonjs/startx.js",
+    "lib-commonjs/utilities/SetRushLibPath.js"
   ]
 }

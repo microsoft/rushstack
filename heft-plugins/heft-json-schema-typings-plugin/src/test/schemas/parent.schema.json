@@ -1,0 +1,22 @@
+{
+  "title": "Parent Config",
+  "type": "object",
+  "properties": {
+    "label": {
+      "description": "A label for the parent.",
+      "type": "string"
+    },
+    "child": {
+      "$ref": "./child.schema.json"
+    },
+    "children": {
+      "description": "A list of children.",
+      "type": "array",
+      "items": {
+        "$ref": "./child.schema.json"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": ["label", "child"]
+}

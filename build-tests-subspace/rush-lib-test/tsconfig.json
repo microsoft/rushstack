@@ -2,7 +2,8 @@
   "$schema": "http://json.schemastore.org/tsconfig",
 
   "compilerOptions": {
-    "outDir": "lib",
+    "outDir": "lib-commonjs",
+    "declarationDir": "lib-dts",
     "rootDir": "src",
 
     "module": "commonjs",

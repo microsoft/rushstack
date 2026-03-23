@@ -3,8 +3,29 @@
   "description": "Building this project is a regression test for api-extractor",
   "version": "1.0.0",
   "private": true,
-  "main": "lib/index.js",
-  "typings": "dist/api-extractor-lib2-test.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/api-extractor-lib2-test.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/api-extractor-lib2-test.d.ts",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean"

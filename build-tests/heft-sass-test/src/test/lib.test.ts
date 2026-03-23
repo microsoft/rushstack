@@ -5,7 +5,7 @@ import * as path from 'node:path';
 import { validateSnapshots, getScssFiles } from './validateSnapshots';
 
 describe('SASS ESM Shims', () => {
-  const libFolder: string = path.join(__dirname, '../../lib');
+  const libFolder: string = path.join(__dirname, '../../lib-esm');
   getScssFiles().forEach((fileName: string) => {
     it(fileName, () => {
       validateSnapshots(libFolder, fileName);

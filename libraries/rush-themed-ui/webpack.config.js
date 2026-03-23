@@ -10,6 +10,10 @@ module.exports = function createConfig(env, argv) {
 
     // Documentation: https://webpack.js.org/configuration/
     configOverride: {
+      entry: {
+        ['rush-themed-ui']: `${__dirname}/lib-esm/index.js`
+      },
+
       externals: ['react', 'react-dom', 'tslib'],
 
       performance: {

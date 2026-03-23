@@ -10,9 +10,9 @@ function generateConfiguration(mode, outputFolderName, webpack) {
   return {
     mode: mode,
     entry: {
-      'localization-test-A': `${__dirname}/lib/indexA.js`,
-      'localization-test-B': `${__dirname}/lib/indexB.js`,
-      'localization-test-C': `${__dirname}/lib/indexC.js`
+      'localization-test-A': `${__dirname}/lib-esm/indexA.js`,
+      'localization-test-B': `${__dirname}/lib-esm/indexB.js`,
+      'localization-test-C': `${__dirname}/lib-esm/indexC.js`
     },
     output: {
       path: `${__dirname}/${outputFolderName}`,

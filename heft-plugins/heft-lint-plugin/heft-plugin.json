@@ -4,8 +4,8 @@
   "taskPlugins": [
     {
       "pluginName": "lint-plugin",
-      "entryPoint": "./lib/LintPlugin",
-      "optionsSchema": "./lib/schemas/heft-lint-plugin.schema.json",
+      "entryPoint": "./lib-commonjs/LintPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/heft-lint-plugin.schema.json",
 
       "parameterScope": "lint",
       "parameters": [

@@ -1,6 +1,76 @@
 # Change Log - @rushstack/webpack4-localization-plugin
 
-This log was last generated on Thu, 08 Jan 2026 01:12:30 GMT and should not be manually modified.
+This log was last generated on Mon, 09 Mar 2026 15:14:08 GMT and should not be manually modified.
+
+## 0.20.7
+Mon, 09 Mar 2026 15:14:08 GMT
+
+### Patches
+
+- Bump `minimatch` version from `10.2.1` to `10.2.3` to address CVE-2026-27903.
+
+## 0.20.6
+Wed, 25 Feb 2026 21:39:42 GMT
+
+_Version update only_
+
+## 0.20.5
+Wed, 25 Feb 2026 00:34:30 GMT
+
+_Version update only_
+
+## 0.20.4
+Tue, 24 Feb 2026 01:13:27 GMT
+
+_Version update only_
+
+## 0.20.3
+Mon, 23 Feb 2026 00:42:21 GMT
+
+_Version update only_
+
+## 0.20.2
+Fri, 20 Feb 2026 16:14:49 GMT
+
+### Patches
+
+- Bump minimatch from 10.1.2 to 10.2.1
+
+## 0.20.1
+Fri, 20 Feb 2026 00:15:04 GMT
+
+### Patches
+
+- Add `"node"` condition before `"import"` in the `"exports"` map so that Node.js uses the CJS output (which handles extensionless imports), while bundlers still use ESM via `"import"`. Fixes https://github.com/microsoft/rushstack/issues/5644.
+
+## 0.20.0
+Thu, 19 Feb 2026 00:04:53 GMT
+
+### Minor changes
+
+- Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `"exports"` field in `package.json`.
+
+## 0.19.14
+Sat, 07 Feb 2026 01:13:26 GMT
+
+_Version update only_
+
+## 0.19.13
+Wed, 04 Feb 2026 20:42:47 GMT
+
+### Patches
+
+- Update minimatch dependency from 10.0.3 to 10.1.2
+
+## 0.19.12
+Wed, 04 Feb 2026 16:13:27 GMT
+
+_Version update only_
+
+## 0.19.11
+Fri, 30 Jan 2026 01:16:13 GMT
+
+_Version update only_
 
 ## 0.19.10
 Thu, 08 Jan 2026 01:12:30 GMT

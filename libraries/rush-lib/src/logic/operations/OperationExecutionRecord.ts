@@ -114,6 +114,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     preventAutoclose: true
   });
   public readonly problemCollector: ProblemCollector = new ProblemCollector({
+    // Allow writing to this object after transforms have been closed. We clean it up manually in a finally block.
+    preventAutoclose: true,
     matcherJson: [
       {
         name: 'rushstack-file-error-unix',
@@ -307,7 +309,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
           logFilenameIdentifier: `${this._operationMetadataManager.logFilenameIdentifier}${logFileSuffix}`
         })
       : undefined;
-    this.logFilePaths = logFilePaths;
+    if (logFilePaths !== undefined) {
+      this.logFilePaths = logFilePaths;
+    }
 
     const projectLogWritable: TerminalWritable | undefined = logFilePaths
       ? await initializeProjectLogFilesAsync({
@@ -322,14 +326,21 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       //
       //                             +--> quietModeTransform? --> collatedWriter
       //                             |
-      // normalizeNewlineTransform --1--> stderrLineTransform --2--> projectLogWritable
+      // normalizeNewlineTransform --1--> stderrLineTransform --2--> projectLogWritable?
       //                                                        |
       //                                                        +--> stdioSummarizer
-      const destination: TerminalWritable = projectLogWritable
-        ? new SplitterTransform({
-            destinations: [projectLogWritable, stdioSummarizer, problemCollector]
-          })
-        : stdioSummarizer;
+      //                                                        |
+      //                                                        +--> removeColorsTransform --> problemCollector
+      const removeColorsTransform: TextRewriterTransform = new TextRewriterTransform({
+        destination: problemCollector,
+        removeColors: true
+      });
+
+      const destination: TerminalWritable = new SplitterTransform({
+        destinations: projectLogWritable
+          ? [projectLogWritable, stdioSummarizer, removeColorsTransform]
+          : [stdioSummarizer, removeColorsTransform]
+      });
 
       const stderrLineTransform: StderrLineTransform = new StderrLineTransform({
         destination,

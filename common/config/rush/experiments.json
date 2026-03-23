@@ -76,7 +76,7 @@
    * Enable this experiment if you want "rush" and "rushx" commands to resync injected dependencies
    * by invoking "pnpm-sync" during the build.
    */
-  "usePnpmSyncForInjectedDependencies": true
+  "usePnpmSyncForInjectedDependencies": true,
 
   /**
    * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
@@ -107,7 +107,7 @@
    * By default, rush perform a full scan of the entire repository. For example, Rush runs `git status` to check for local file changes.
    * When this toggle is enabled, Rush will only scan specific paths, significantly speeding up Git operations.
    */
-  // "enableSubpathScan": true
+  // "enableSubpathScan": true,
 
   /**
    * Rush has a policy that normally requires Rush projects to specify `workspace:*` in package.json when depending
@@ -116,5 +116,13 @@
    * subspace.  This is useful for large product groups who work in separate subspaces and generally prefer to consume
    * each other's packages via the NPM registry.
    */
-  //  "exemptDecoupledDependenciesBetweenSubspaces": true
+  // "exemptDecoupledDependenciesBetweenSubspaces": true,
+
+  /**
+   * If true, when running on macOS, Rush will omit AppleDouble files (._*) from build cache archives
+   * when a companion file exists in the same directory. AppleDouble files are automatically created by
+   * macOS to store extended attributes on filesystems that don't support them, and should generally not
+   * be included in the shared build cache.
+   */
+  "omitAppleDoubleFilesFromBuildCache": true
 }

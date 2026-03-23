@@ -4,8 +4,8 @@
   "taskPlugins": [
     {
       "pluginName": "jest-plugin",
-      "entryPoint": "./lib/JestPlugin",
-      "optionsSchema": "./lib/schemas/heft-jest-plugin.schema.json",
+      "entryPoint": "./lib-commonjs/JestPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/heft-jest-plugin.schema.json",
 
       "parameterScope": "jest",
       "parameters": [

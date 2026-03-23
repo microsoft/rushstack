@@ -23,7 +23,7 @@
               "copyOperations": [
                 {
                   "sourcePath": "src",
-                  "destinationFolders": ["lib"],
+                  "destinationFolders": ["lib-commonjs"],
                   "includeGlobs": ["**/test/test-data/**/*"]
                 }
               ]

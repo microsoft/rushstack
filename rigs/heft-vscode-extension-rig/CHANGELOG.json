@@ -2,6 +2,383 @@
   "name": "@rushstack/heft-vscode-extension-rig",
   "entries": [
     {
+      "version": "1.1.29",
+      "tag": "@rushstack/heft-vscode-extension-rig_v1.1.29",
+      "date": "Mon, 09 Mar 2026 15:14:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.57.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-vscode-extension-plugin\" to `1.1.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.3.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.12.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.2.6` to `1.2.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.28",
+      "tag": "@rushstack/heft-vscode-extension-rig_v1.1.28",
+      "date": "Wed, 25 Feb 2026 21:39:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.57.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-vscode-extension-plugin\" to `1.1.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.3.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.12.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.2.5` to `1.2.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.27",
+      "tag": "@rushstack/heft-vscode-extension-rig_v1.1.27",
+      "date": "Wed, 25 Feb 2026 00:34:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.57.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-vscode-extension-plugin\" to `1.1.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.12.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.2.4` to `1.2.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.26",
+      "tag": "@rushstack/heft-vscode-extension-rig_v1.1.26",
+      "date": "Tue, 24 Feb 2026 01:13:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.57.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-vscode-extension-plugin\" to `1.1.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.12.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.2.3` to `1.2.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.25",
+      "tag": "@rushstack/heft-vscode-extension-rig_v1.1.25",
+      "date": "Mon, 23 Feb 2026 00:42:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.57.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-vscode-extension-plugin\" to `1.1.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.3.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.12.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.2.2` to `1.2.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.24",
+      "tag": "@rushstack/heft-vscode-extension-rig_v1.1.24",
+      "date": "Fri, 20 Feb 2026 16:14:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.57.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-vscode-extension-plugin\" to `1.1.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.12.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.2.1` to `1.2.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.23",
+      "tag": "@rushstack/heft-vscode-extension-rig_v1.1.23",
+      "date": "Fri, 20 Feb 2026 00:15:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.57.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-vscode-extension-plugin\" to `1.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.12.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.2.0` to `1.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.22",
+      "tag": "@rushstack/heft-vscode-extension-rig_v1.1.22",
+      "date": "Thu, 19 Feb 2026 01:30:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.12.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.21",
+      "tag": "@rushstack/heft-vscode-extension-rig_v1.1.21",
+      "date": "Thu, 19 Feb 2026 00:04:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add `sideEffects` field to package.json."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.57.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-vscode-extension-plugin\" to `1.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.14` to `1.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.20",
+      "tag": "@rushstack/heft-vscode-extension-rig_v1.1.20",
+      "date": "Sat, 07 Feb 2026 01:13:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.56.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-vscode-extension-plugin\" to `1.0.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.2.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.11.125`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.13` to `1.1.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.19",
+      "tag": "@rushstack/heft-vscode-extension-rig_v1.1.19",
+      "date": "Wed, 04 Feb 2026 20:42:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.56.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-vscode-extension-plugin\" to `1.0.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.2.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.11.124`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.12` to `1.1.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.18",
+      "tag": "@rushstack/heft-vscode-extension-rig_v1.1.18",
+      "date": "Wed, 04 Feb 2026 16:13:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.56.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-vscode-extension-plugin\" to `1.0.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.2.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.11.123`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.11` to `1.1.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.17",
+      "tag": "@rushstack/heft-vscode-extension-rig_v1.1.17",
+      "date": "Fri, 30 Jan 2026 01:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.56.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.11.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-vscode-extension-plugin\" to `1.0.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.2.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.11.122`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.1.10` to `1.1.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.16",
       "tag": "@rushstack/heft-vscode-extension-rig_v1.1.16",
       "date": "Thu, 08 Jan 2026 01:12:30 GMT",

@@ -1,6 +1,9 @@
 {
   "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json",
 
+  "roots": ["<rootDir>/lib-commonjs"],
+  "testMatch": ["<rootDir>/lib-commonjs/**/*.test.js"],
+
   "coverageThreshold": {
     "global": {
       "branches": 50,

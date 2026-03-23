@@ -20,13 +20,13 @@ module.exports = {
       }
     ]
   },
-  target: ['web', 'es2020'],
+  target: ['web', 'es5'],
   resolve: {
     extensions: ['.js', '.json']
   },
   entry: {
-    'heft-test-A': path.join(__dirname, 'lib', 'indexA.js'),
-    'heft-test-B': path.join(__dirname, 'lib', 'indexB.js')
+    'heft-test-A': path.join(__dirname, 'lib-esm', 'indexA.js'),
+    'heft-test-B': path.join(__dirname, 'lib-esm', 'indexB.js')
   },
   output: {
     path: path.join(__dirname, 'dist'),
@@ -41,7 +41,7 @@ module.exports = {
       new ModuleMinifierPlugin({
         minifier: new WorkerPoolMinifier({
           terserOptions: {
-            ecma: 2020,
+            ecma: 5,
             mangle: true
           },
           verbose: true

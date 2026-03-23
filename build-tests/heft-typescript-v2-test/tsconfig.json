@@ -2,7 +2,8 @@
   "$schema": "http://json.schemastore.org/tsconfig",
 
   "compilerOptions": {
-    "outDir": "lib",
+    "outDir": "lib-commonjs",
+    "declarationDir": "lib-dts",
     "rootDir": "src",
 
     "forceConsistentCasingInFileNames": true,
@@ -23,6 +24,5 @@
     // TODO: REVERT THIS AFTER WE UPGRADE heft-typescript-v2-test TO A NEWER VERSION
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "lib"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

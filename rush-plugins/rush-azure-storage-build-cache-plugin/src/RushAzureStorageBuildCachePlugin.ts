@@ -38,6 +38,13 @@ interface IAzureBlobStorageConfigurationJson {
   readonly loginFlowFailover?: LoginFlowFailoverMap;
 
   /**
+   * An optional custom endpoint URL for the Azure Blob Storage account.
+   * Use this to connect to Azurite, private endpoints, or storage emulators.
+   * Overrides the default endpoint derived from storageAccountName.
+   */
+  readonly storageEndpoint?: string;
+
+  /**
    * An optional prefix for cache item blob names.
    */
   readonly blobPrefix?: string;
@@ -70,6 +77,7 @@ export class RushAzureStorageBuildCachePlugin implements IRushPlugin {
         return new AzureStorageBuildCacheProvider({
           storageAccountName: azureBlobStorageConfiguration.storageAccountName,
           storageContainerName: azureBlobStorageConfiguration.storageContainerName,
+          storageEndpoint: azureBlobStorageConfiguration.storageEndpoint,
           azureEnvironment: azureBlobStorageConfiguration.azureEnvironment,
           blobPrefix: azureBlobStorageConfiguration.blobPrefix,
           loginFlow: azureBlobStorageConfiguration.loginFlow,

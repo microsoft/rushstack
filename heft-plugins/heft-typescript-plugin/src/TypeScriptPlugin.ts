@@ -45,6 +45,7 @@ export interface IEmitModuleKind {
   moduleKind: 'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext';
   outFolderName: string;
   jsExtensionOverride?: string;
+  emitModulePackageJson?: boolean;
 }
 
 /**

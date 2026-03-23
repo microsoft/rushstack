@@ -1,6 +1,84 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 08 Jan 2026 01:12:30 GMT and should not be manually modified.
+This log was last generated on Mon, 09 Mar 2026 15:14:07 GMT and should not be manually modified.
+
+## 7.57.7
+Mon, 09 Mar 2026 15:14:07 GMT
+
+### Patches
+
+- Bump `minimatch` version from `10.2.1` to `10.2.3` to address CVE-2026-27903.
+
+## 7.57.6
+Wed, 25 Feb 2026 21:39:42 GMT
+
+### Patches
+
+- Bump `@microsoft/tsdoc-config` to `~0.18.1` to mitigate CVE-2025-69873.
+
+## 7.57.5
+Wed, 25 Feb 2026 00:34:29 GMT
+
+_Version update only_
+
+## 7.57.4
+Tue, 24 Feb 2026 01:13:27 GMT
+
+_Version update only_
+
+## 7.57.3
+Mon, 23 Feb 2026 00:42:21 GMT
+
+### Patches
+
+- Add missing "./extends/*.json" to the package.json "exports" field so that "@microsoft/api-extractor/extends/tsdoc-base.json" is importable.
+
+## 7.57.2
+Fri, 20 Feb 2026 16:14:49 GMT
+
+### Patches
+
+- Bump minimatch from 10.1.2 to 10.2.1
+
+## 7.57.1
+Fri, 20 Feb 2026 00:15:03 GMT
+
+### Patches
+
+- Add `"node"` condition before `"import"` in the `"exports"` map so that Node.js uses the CJS output (which handles extensionless imports), while bundlers still use ESM via `"import"`. Fixes https://github.com/microsoft/rushstack/issues/5644.
+
+## 7.57.0
+Thu, 19 Feb 2026 00:04:52 GMT
+
+### Minor changes
+
+- Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `"exports"` field in `package.json`.
+
+## 7.56.3
+Sat, 07 Feb 2026 01:13:26 GMT
+
+### Patches
+
+- Upgrade `lodash` dependency from `~4.17.15` to `~4.17.23`.
+
+## 7.56.2
+Wed, 04 Feb 2026 20:42:47 GMT
+
+### Patches
+
+- Update minimatch dependency from 10.0.3 to 10.1.2
+
+## 7.56.1
+Wed, 04 Feb 2026 16:13:27 GMT
+
+_Version update only_
+
+## 7.56.0
+Fri, 30 Jan 2026 01:16:12 GMT
+
+### Minor changes
+
+- Fix an issue where destructured parameters produced an incorrect parameter name
 
 ## 7.55.5
 Thu, 08 Jan 2026 01:12:30 GMT

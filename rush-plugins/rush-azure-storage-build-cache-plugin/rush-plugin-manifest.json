@@ -4,14 +4,14 @@
     {
       "pluginName": "rush-azure-storage-build-cache-plugin",
       "description": "Rush plugin for Azure storage cloud build cache",
-      "entryPoint": "lib/index.js",
-      "optionsSchema": "lib/schemas/azure-blob-storage-config.schema.json"
+      "entryPoint": "./lib-commonjs/index.js",
+      "optionsSchema": "./lib-commonjs/schemas/azure-blob-storage-config.schema.json"
     },
     {
       "pluginName": "rush-azure-interactive-auth-plugin",
       "description": "Rush plugin for interactive authentication to Azure",
-      "entryPoint": "lib/RushAzureInteractiveAuthPlugin.js",
-      "optionsSchema": "lib/schemas/azure-interactive-auth.schema.json"
+      "entryPoint": "./lib-commonjs/RushAzureInteractiveAuthPlugin.js",
+      "optionsSchema": "./lib-commonjs/schemas/azure-interactive-auth.schema.json"
     }
   ]
 }

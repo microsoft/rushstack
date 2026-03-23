@@ -4,7 +4,7 @@
   "taskPlugins": [
     {
       "pluginName": "example-plugin-02",
-      "entryPoint": "./lib/index"
+      "entryPoint": "./lib-commonjs/index"
     }
   ]
 }

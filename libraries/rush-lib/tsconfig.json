@@ -4,6 +4,7 @@
     "types": ["heft-jest", "node", "webpack-env"],
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "outDir": "lib-commonjs"
+    "outDir": "lib-intermediate-commonjs",
+    "declarationDir": "lib-dts"
   }
 }

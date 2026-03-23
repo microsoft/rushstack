@@ -17,6 +17,18 @@
               "generatedTsFolders": ["temp/schema-dts"]
             }
           }
+        },
+
+        "json-schema-typings-formatted": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-json-schema-typings-plugin",
+            "pluginName": "json-schema-typings-plugin",
+            "options": {
+              "srcFolder": "node_modules/@rushstack/node-core-library/src/test/test-data/test-schemas",
+              "generatedTsFolders": ["temp/schema-dts-formatted"],
+              "formatWithPrettier": true
+            }
+          }
         }
       }
     }

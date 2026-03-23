@@ -173,7 +173,10 @@ function _resolvePackageVersion(
         sourceNpmrcFolder,
         targetNpmrcFolder: rushTempFolder,
         logger,
-        supportEnvVarFallbackSyntax: false
+        supportEnvVarFallbackSyntax: false,
+        // Always filter npm-incompatible properties in install-run scripts.
+        // Any warnings will be shown when running Rush commands directly.
+        filterNpmIncompatibleProperties: true
       });
 
       // This returns something that looks like:
@@ -459,7 +462,10 @@ export function installAndRun(
       sourceNpmrcFolder,
       targetNpmrcFolder: packageInstallFolder,
       logger,
-      supportEnvVarFallbackSyntax: false
+      supportEnvVarFallbackSyntax: false,
+      // Always filter npm-incompatible properties in install-run scripts.
+      // Any warnings will be shown when running Rush commands directly.
+      filterNpmIncompatibleProperties: true
     });
 
     _createPackageJson(packageInstallFolder, packageName, packageVersion);

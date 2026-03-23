@@ -2,8 +2,10 @@
   "$schema": "http://json.schemastore.org/tsconfig",
 
   "compilerOptions": {
-    "outDir": "lib",
-    "rootDir": "src",
+    "outDir": "lib-esm",
+    "declarationDir": "lib-dts",
+    "rootDirs": ["client", "server"],
+
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "sourceMap": true,
@@ -18,6 +20,6 @@
     "target": "es5",
     "lib": ["es5"]
   },
-  "include": ["client/**/*.ts", "client/**/*.tsx", "server/**/*.ts", "server/**/*.tsx"],
-  "exclude": ["node_modules", "lib"]
+
+  "include": ["client/**/*.ts", "client/**/*.tsx", "server/**/*.ts", "server/**/*.tsx"]
 }

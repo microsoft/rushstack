@@ -4,8 +4,8 @@
   "taskPlugins": [
     {
       "pluginName": "storybook-plugin",
-      "entryPoint": "./lib/StorybookPlugin",
-      "optionsSchema": "./lib/schemas/storybook.schema.json",
+      "entryPoint": "./lib-commonjs/StorybookPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/storybook.schema.json",
 
       "parameterScope": "storybook",
       "parameters": [

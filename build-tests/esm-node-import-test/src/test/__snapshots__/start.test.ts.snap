@@ -1,0 +1,6 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ESM Node Import Test should resolve @rushstack/node-core-library correctly under Node.js ESM 1`] = `
+"ESM import test PASSED: @rushstack/node-core-library resolved correctly under Node.js ESM.
+"
+`;

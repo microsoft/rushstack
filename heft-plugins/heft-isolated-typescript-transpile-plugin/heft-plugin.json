@@ -4,8 +4,8 @@
   "taskPlugins": [
     {
       "pluginName": "swc-isolated-transpile-plugin",
-      "entryPoint": "./lib/SwcIsolatedTranspilePlugin",
-      "optionsSchema": "./lib/schemas/swc-isolated-transpile-plugin.schema.json"
+      "entryPoint": "./lib-commonjs/SwcIsolatedTranspilePlugin",
+      "optionsSchema": "./lib-commonjs/schemas/swc-isolated-transpile-plugin.schema.json"
     }
   ]
 }

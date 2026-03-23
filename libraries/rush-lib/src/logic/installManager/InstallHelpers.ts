@@ -257,7 +257,10 @@ export class InstallHelpers {
         // In particular, we'll assume that two different NPM registries cannot have two
         // different implementations of the same version of the same package.
         // This was needed for: https://github.com/microsoft/rushstack/issues/691
-        commonRushConfigFolder: rushConfiguration.commonRushConfigFolder
+        commonRushConfigFolder: rushConfiguration.commonRushConfigFolder,
+        // Only filter npm-incompatible properties when the repo uses pnpm or yarn.
+        // If the repo uses npm, the .npmrc is already configured for npm, so don't filter.
+        filterNpmIncompatibleProperties: rushConfiguration.packageManager !== 'npm'
       });
 
       logIfConsoleOutputIsNotRestricted(

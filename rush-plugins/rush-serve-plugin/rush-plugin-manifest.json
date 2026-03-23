@@ -4,8 +4,8 @@
     {
       "pluginName": "rush-serve-plugin",
       "description": "Rush plugin for serving built files from localhost",
-      "entryPoint": "lib/index.js",
-      "optionsSchema": "lib/schemas/rush-serve-plugin-options.schema.json"
+      "entryPoint": "./lib-commonjs/index.js",
+      "optionsSchema": "./lib-commonjs/schemas/rush-serve-plugin-options.schema.json"
     }
   ]
 }

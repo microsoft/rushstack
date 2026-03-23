@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-rspack-plugin",
-  "version": "0.2.3",
+  "version": "0.3.7",
   "description": "Heft plugin for Rspack",
   "repository": {
     "type": "git",
@@ -8,8 +8,33 @@
     "directory": "heft-plugins/heft-rspack-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
-  "main": "lib/index.js",
-  "types": "dist/heft-rspack-plugin.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/heft-rspack-plugin.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/heft-rspack-plugin.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./heft-plugin.json": "./heft-plugin.json",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
@@ -18,7 +43,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^1.1.10",
+    "@rushstack/heft": "^1.2.7",
     "@rspack/core": "^1.6.0-beta.0"
   },
   "dependencies": {
@@ -27,7 +52,7 @@
     "tapable": "2.3.0",
     "@rspack/dev-server": "^1.1.4",
     "watchpack": "2.4.0",
-    "webpack": "~5.103.0"
+    "webpack": "~5.105.2"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
@@ -36,5 +61,6 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "@rspack/core": "~1.6.0-beta.0"
-  }
+  },
+  "sideEffects": false
 }

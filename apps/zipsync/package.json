@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/zipsync",
-  "version": "0.2.10",
+  "version": "0.3.7",
   "description": "CLI tool for creating and extracting ZIP archives with intelligent filesystem synchronization",
   "repository": {
     "type": "git",
@@ -27,5 +27,34 @@
     "@rushstack/heft": "workspace:*",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
-  }
+  },
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./lib-dts/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib-dts/index.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
+  "sideEffects": [
+    "lib-commonjs/start.js",
+    "lib-esm/start.js"
+  ]
 }

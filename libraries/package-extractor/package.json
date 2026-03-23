@@ -1,9 +1,32 @@
 {
   "name": "@rushstack/package-extractor",
-  "version": "0.11.11",
+  "version": "0.12.8",
   "description": "A library for bundling selected files and dependencies into a deployable package.",
-  "main": "lib/index.js",
-  "typings": "dist/package-extractor.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/package-extractor.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/package-extractor.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
@@ -23,8 +46,8 @@
     "@rushstack/ts-command-line": "workspace:*",
     "ignore": "~5.1.6",
     "jszip": "~3.8.0",
-    "minimatch": "10.0.3",
-    "npm-packlist": "~2.1.2",
+    "minimatch": "10.2.3",
+    "npm-packlist": "~5.1.3",
     "semver": "~7.5.4"
   },
   "devDependencies": {
@@ -35,7 +58,8 @@
     "@types/glob": "7.1.1",
     "@types/npm-packlist": "~1.1.1",
     "eslint": "~9.37.0",
-    "webpack": "~5.103.0",
+    "webpack": "~5.105.2",
     "@types/semver": "7.5.0"
-  }
+  },
+  "sideEffects": false
 }

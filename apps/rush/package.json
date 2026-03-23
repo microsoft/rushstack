@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "5.166.0",
+  "version": "5.171.0",
   "description": "A professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
@@ -50,5 +50,25 @@
     "@rushstack/rush-http-build-cache-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/semver": "7.5.0"
-  }
+  },
+  "exports": {
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
+  "sideEffects": [
+    "lib-commonjs/start.js",
+    "lib-esm/start.js"
+  ]
 }

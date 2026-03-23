@@ -45,7 +45,7 @@
             "options": {
               "copyOperations": [
                 {
-                  "sourcePath": "node_modules/@rushstack/lockfile-explorer-web/lib/packlets/lfx-shared",
+                  "sourcePath": "node_modules/@rushstack/lockfile-explorer-web/lib-dts/packlets/lfx-shared",
                   "destinationFolders": ["build/lfx-shared"],
                   "includeGlobs": ["*.d.ts"]
                 },

@@ -40,7 +40,7 @@ describe('webpack5-load-themed-style-loader', () => {
   it('it allows for and inserts override of load-themed-styles path', async () => {
     // It would error when I attempt to use the .ts mock in src/test/testData
     // beacuse I'm not setting up default support for webpack to load .ts files.
-    const expectedPath: string = '../../../lib/test/testData/LoadThemedStylesMock';
+    const expectedPath: string = '../../../lib-commonjs/test/testData/LoadThemedStylesMock';
     const stats = await getCompiler('./MockStyle1.css', { loadThemedStylesPath: expectedPath });
     if (!stats) {
       throw new Error(`Expected stats`);
@@ -92,7 +92,7 @@ describe('webpack5-load-themed-style-loader', () => {
     // We mock the path of the loader because the full resolved path can change between machines
     // IE: Different folder topology, etc. So we just used the mocked module and set it
     // to loadThemedStylesPath option from the loader.
-    const expectedPath: string = '../../../lib/test/testData/LoadThemedStylesMock';
+    const expectedPath: string = '../../../lib-commonjs/test/testData/LoadThemedStylesMock';
     const stats = await getCompiler('./MockStyle1.css', {
       loadThemedStylesPath: expectedPath,
       esModule: true
@@ -106,7 +106,7 @@ describe('webpack5-load-themed-style-loader', () => {
   });
 
   it('generates desired loader output snapshot', async () => {
-    const expectedPath: string = '../../../lib/test/testData/LoadThemedStylesMock';
+    const expectedPath: string = '../../../lib-commonjs/test/testData/LoadThemedStylesMock';
     const stats = await getCompiler('./MockStyle1.css', { loadThemedStylesPath: expectedPath });
     if (!stats) {
       throw new Error(`Expected stats`);

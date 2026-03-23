@@ -4,6 +4,8 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/typescript.schema.json",
 
+  "extends": "local-web-rig/profiles/library/config/typescript.json",
+
   /**
    * If provided, emit these module kinds in addition to the modules specified in the tsconfig.
    * Note that this option only applies to the main tsconfig.json configuration.
@@ -23,11 +25,6 @@
     {
       "moduleKind": "amd",
       "outFolderName": "lib-amd"
-    },
-
-    {
-      "moduleKind": "commonjs",
-      "outFolderName": "lib-commonjs"
     }
   ]
 }

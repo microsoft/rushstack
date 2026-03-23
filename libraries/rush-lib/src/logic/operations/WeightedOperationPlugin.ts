@@ -12,6 +12,7 @@ import type {
 import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
+import { parseParallelismPercent } from '../../cli/parsing/ParseParallelism';
 
 const PLUGIN_NAME: 'WeightedOperationPlugin' = 'WeightedOperationPlugin';
 
@@ -41,8 +42,18 @@ function weightOperations(
       const projectConfiguration: RushProjectConfiguration | undefined = projectConfigurations.get(project);
       const operationSettings: IOperationSettings | undefined =
         operation.settings ?? projectConfiguration?.operationSettingsByOperationName.get(phase.name);
-      if (operationSettings?.weight) {
-        operation.weight = operationSettings.weight;
+      if (operationSettings?.weight !== undefined) {
+        if (typeof operationSettings.weight === 'number') {
+          operation.weight = operationSettings.weight;
+        } else if (typeof operationSettings.weight === 'string') {
+          try {
+            operation.weight = parseParallelismPercent(operationSettings.weight);
+          } catch (error) {
+            throw new Error(
+              `${operation.name} (invalid weight: ${JSON.stringify(operationSettings.weight)}) ${(error as Error).message}`
+            );
+          }
+        }
       }
     }
     Async.validateWeightedIterable(operation);

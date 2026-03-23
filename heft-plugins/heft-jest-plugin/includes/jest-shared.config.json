@@ -53,7 +53,7 @@
     "printBasicPrototype": true
   },
 
-  "snapshotResolver": "../lib/exports/jest-source-map-snapshot-resolver.js",
+  "snapshotResolver": "../lib-commonjs/exports/jest-source-map-snapshot-resolver.js",
 
   // Instruct jest not to run the transformer pipeline by default on JS files. The output files from TypeScript
   // will already be fully transformed, so this avoids redundant file system operations.
@@ -63,9 +63,9 @@
   // jest-string-mock-transform returns the filename, relative to the current working directory, where Webpack would return a URL
   // When using the heft-jest-plugin, these will be replaced with the resolved module location
   "transform": {
-    "\\.(css|sass|scss)$": "../lib/exports/jest-identity-mock-transform.js",
+    "\\.(css|sass|scss)$": "../lib-commonjs/exports/jest-identity-mock-transform.js",
 
-    "\\.(aac|eot|gif|jpeg|jpg|m4a|mp3|mp4|oga|otf|png|svg|ttf|wav|webm|webp|woff|woff2)$": "../lib/exports/jest-string-mock-transform.js"
+    "\\.(aac|eot|gif|jpeg|jpg|m4a|mp3|mp4|oga|otf|png|svg|ttf|wav|webm|webp|woff|woff2)$": "../lib-commonjs/exports/jest-string-mock-transform.js"
   },
 
   // The modulePathIgnorePatterns below accepts these sorts of paths:
@@ -78,8 +78,8 @@
   "moduleFileExtensions": ["cjs", "js", "json", "node"],
 
   // When using the heft-jest-plugin, these will be replaced with the resolved module location
-  "setupFiles": ["../lib/exports/jest-global-setup.js"],
+  "setupFiles": ["../lib-commonjs/exports/jest-global-setup.js"],
 
   // When using the heft-jest-plugin, these will be replaced with the resolved module location
-  "resolver": "../lib/exports/jest-improved-resolver.js"
+  "resolver": "../lib-commonjs/exports/jest-improved-resolver.js"
 }

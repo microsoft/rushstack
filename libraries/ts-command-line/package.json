@@ -1,14 +1,37 @@
 {
   "name": "@rushstack/ts-command-line",
-  "version": "5.1.7",
+  "version": "5.3.3",
   "description": "An object-oriented command-line parser for TypeScript",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/ts-command-line"
   },
-  "main": "lib/index.js",
-  "typings": "dist/ts-command-line.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/ts-command-line.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/ts-command-line.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
@@ -22,9 +45,10 @@
     "string-argv": "~0.3.1"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.1.7",
+    "@rushstack/heft": "1.2.7",
     "@rushstack/node-core-library": "workspace:*",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
-  }
+  },
+  "sideEffects": false
 }

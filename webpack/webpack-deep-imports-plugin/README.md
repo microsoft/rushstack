@@ -32,12 +32,12 @@ const { DeepImportsPlugin } = require('@rushstack/webpack-deep-imports-plugin');
 
 const configuration = {
   entry: {
-    'my-project': `${__dirname}/lib-esnext/index.js`
+    'my-project': `${__dirname}/lib-esm/index.js`
   },
   plugins: [
     new DeepImportsPlugin({
       path: `${__dirname}/dist/my-project-manifest.json`, // From `DllPlugin`'s options
-      inFolderName: 'lib-esnext', // The folder containing the original loose files and the entrypoint
+      inFolderName: 'lib-esm', // The folder containing the original loose files and the entrypoint
       outFolderName: 'lib', // The folder where the bundle and commonJS files will be written
       pathsToIgnore: ['folder/not-included-in-bundle.js'],
       dTsFilesInputFolderName: 'lib-commonjs' // The folder containing loose .d.ts files

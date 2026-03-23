@@ -1,9 +1,32 @@
 {
   "name": "@rushstack/webpack4-localization-plugin",
-  "version": "0.19.10",
+  "version": "0.20.7",
   "description": "This plugin facilitates localization with Webpack.",
-  "main": "lib/index.js",
-  "typings": "dist/webpack4-localization-plugin.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/webpack4-localization-plugin.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/webpack4-localization-plugin.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -37,7 +60,7 @@
     "@rushstack/terminal": "workspace:*",
     "@types/tapable": "1.0.6",
     "loader-utils": "1.4.2",
-    "minimatch": "10.0.3"
+    "minimatch": "10.2.3"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
@@ -48,5 +71,6 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "webpack": "~4.47.0"
-  }
+  },
+  "sideEffects": false
 }

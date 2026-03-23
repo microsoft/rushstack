@@ -93,9 +93,19 @@ function tryStartLocalHeft(): boolean {
       // installed as "<projectFolder>/node_modules/@rushstack/heft".
       const heftFolder: string = path.join(projectFolder, 'node_modules', Constants.heftPackageName);
 
-      heftEntryPoint = path.join(heftFolder, 'lib', 'start.js');
-      if (!fs.existsSync(heftEntryPoint)) {
-        throw new Error('Unable to find Heft entry point: ' + heftEntryPoint);
+      // Try the new output layout first, then fall back to the legacy layout
+      const commonJsHeftEntryPoint: string = path.join(heftFolder, 'lib-commonjs', 'start.js');
+      if (!fs.existsSync(commonJsHeftEntryPoint)) {
+        const legacyHeftEntryPoint: string = path.join(heftFolder, 'lib', 'start.js');
+        if (!fs.existsSync(legacyHeftEntryPoint)) {
+          throw new Error(
+            `Unable to find Heft entry point: ${commonJsHeftEntryPoint} or ${legacyHeftEntryPoint}`
+          );
+        } else {
+          heftEntryPoint = legacyHeftEntryPoint;
+        }
+      } else {
+        heftEntryPoint = commonJsHeftEntryPoint;
       }
     } catch (error) {
       throw new Error('Error probing for local Heft version: ' + (error as Error).message);

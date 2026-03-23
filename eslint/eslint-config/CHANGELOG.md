@@ -1,6 +1,26 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Wed, 12 Nov 2025 01:57:54 GMT and should not be manually modified.
+This log was last generated on Wed, 25 Feb 2026 21:39:42 GMT and should not be manually modified.
+
+## 4.6.4
+Wed, 25 Feb 2026 21:39:42 GMT
+
+### Patches
+
+- Bump `eslint-plugin-tsdoc` to `~0.5.1` to mitigate CVE-2026-26996.
+- Bump `@typescript-eslint/*` dependencies to `~8.56.1`.
+
+## 4.6.3
+Fri, 20 Feb 2026 00:15:04 GMT
+
+_Version update only_
+
+## 4.6.2
+Thu, 19 Feb 2026 00:04:52 GMT
+
+### Patches
+
+- Add `sideEffects` field to package.json.
 
 ## 4.6.1
 Wed, 12 Nov 2025 01:57:54 GMT

@@ -2,6 +2,52 @@
   "name": "@rushstack/eslint-plugin-security",
   "entries": [
     {
+      "version": "0.14.2",
+      "tag": "@rushstack/eslint-plugin-security_v0.14.2",
+      "date": "Wed, 25 Feb 2026 21:39:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump `@typescript-eslint/*` dependencies to `~8.56.1`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.14.1",
+      "tag": "@rushstack/eslint-plugin-security_v0.14.1",
+      "date": "Fri, 20 Feb 2026 00:15:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add `\"node\"` condition before `\"import\"` in the `\"exports\"` map so that Node.js uses the CJS output (which handles extensionless imports), while bundlers still use ESM via `\"import\"`. Fixes https://github.com/microsoft/rushstack/issues/5644."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.14.0",
+      "tag": "@rushstack/eslint-plugin-security_v0.14.0",
+      "date": "Thu, 19 Feb 2026 00:04:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize package layout. CommonJS is now under `lib-commonjs`, DTS is now under `lib-dts`, and ESM is now under `lib-esm`. Imports to `lib` still work as before, handled by the `\"exports\"` field in `package.json`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.13.0",
       "tag": "@rushstack/eslint-plugin-security_v0.13.0",
       "date": "Mon, 13 Oct 2025 15:13:02 GMT",

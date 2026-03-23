@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-plugin-packlets",
-  "version": "0.14.0",
+  "version": "0.15.2",
   "description": "A lightweight alternative to NPM packages for organizing source files within a single project",
   "license": "MIT",
   "repository": {
@@ -15,8 +15,31 @@
     "packlets",
     "rules"
   ],
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./lib-dts/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib-dts/index.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
@@ -24,16 +47,17 @@
   },
   "dependencies": {
     "@rushstack/tree-pattern": "workspace:*",
-    "@typescript-eslint/utils": "~8.46.0"
+    "@typescript-eslint/utils": "~8.56.1"
   },
   "peerDependencies": {
     "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.1.7",
-    "@typescript-eslint/parser": "~8.46.0",
+    "@rushstack/heft": "1.2.7",
+    "@typescript-eslint/parser": "~8.56.1",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0",
     "typescript": "~5.9.3"
-  }
+  },
+  "sideEffects": false
 }

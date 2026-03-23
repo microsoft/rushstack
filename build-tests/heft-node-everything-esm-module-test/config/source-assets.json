@@ -1,0 +1,6 @@
+{
+  "fileExtensions": [".html"],
+  "cjsOutputFolders": ["lib-commonjs"],
+  "esmOutputFolders": ["lib-esm"],
+  "generatedTsFolders": ["temp/text-typings"]
+}

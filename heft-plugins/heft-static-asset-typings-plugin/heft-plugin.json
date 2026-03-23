@@ -1,0 +1,16 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
+  "taskPlugins": [
+    {
+      "pluginName": "resource-assets-plugin",
+      "entryPoint": "./lib-commonjs/ResourceAssetsPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/resource-assets-options.schema.json"
+    },
+    {
+      "pluginName": "source-assets-plugin",
+      "entryPoint": "./lib-commonjs/SourceAssetsPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/source-assets-options.schema.json"
+    }
+  ]
+}

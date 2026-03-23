@@ -3,7 +3,7 @@
   "description": "Building this project tests every task and config file for Heft when targeting the Node.js runtime when configured to use ESM module support",
   "version": "1.0.0",
   "private": true,
-  "main": "lib/index.js",
+  "main": "./lib/index.js",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -17,6 +17,7 @@
     "@rushstack/heft-api-extractor-plugin": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-static-asset-typings-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "20.17.19",

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft",
-  "version": "1.1.10",
+  "version": "1.2.7",
   "description": "Build all your JavaScript projects the same way: A way that works.",
   "keywords": [
     "toolchain",
@@ -21,8 +21,33 @@
     "node": ">=10.13.0"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
-  "main": "lib/index.js",
-  "types": "dist/heft.d.ts",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/heft.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/heft.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./heft-plugin.json": "./heft-plugin.json",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "bin": {
     "heft": "./bin/heft"
   },
@@ -49,9 +74,15 @@
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
-    "@rushstack/heft": "1.1.7",
+    "@rushstack/heft": "1.2.7",
     "@types/watchpack": "2.4.0",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
-  }
+  },
+  "sideEffects": [
+    "lib-commonjs/start.js",
+    "lib-commonjs/startWithVersionSelector.js",
+    "lib-esm/start.js",
+    "lib-esm/startWithVersionSelector.js"
+  ]
 }
