@@ -11,13 +11,17 @@ parameters:
   - name: NpmAuthToken
     type: string
     default: ''
+  - name: RepoPath
+    type: string
+    default: '$(Build.SourcesDirectory)'
 
 steps:
   - script: 'node common/scripts/install-run-rush.js ${{ parameters.Arguments }}'
     displayName: '${{ parameters.DisplayName }}'
+    workingDirectory: ${{ parameters.RepoPath }}
     ${{ if ne(parameters.Condition, '') }}:
       condition: ${{ parameters.Condition }}
     env:
-      INSTALL_RUN_RUSH_LOCKFILE_PATH: $(Build.SourcesDirectory)/common/config/validation/rush-package-lock.json
+      INSTALL_RUN_RUSH_LOCKFILE_PATH: ${{ parameters.RepoPath }}/common/config/validation/rush-package-lock.json
       ${{ if ne(parameters.NpmAuthToken, '') }}:
         NPM_AUTH_TOKEN: ${{ parameters.NpmAuthToken }}
