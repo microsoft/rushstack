@@ -525,7 +525,13 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
         storybookCliVersion === StorybookCliVersion.STORYBOOK8
       );
     } else {
-      await this._invokeAsSubprocessAsync(logger, resolvedModulePath, storybookArgs, workingDirectory, storybookEnv);
+      await this._invokeAsSubprocessAsync(
+        logger,
+        resolvedModulePath,
+        storybookArgs,
+        workingDirectory,
+        storybookEnv
+      );
     }
   }
 

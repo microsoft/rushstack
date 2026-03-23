@@ -29,7 +29,7 @@
     // Preferring it avoids errors for indirect dependencies that request it as a peer dependency.
     // It's also the newest supported compiler, used by most build tests and used as the bundled compiler
     // engine for API Extractor.
-    "typescript": "~5.8.2",
+    "typescript": "~5.9.3",
 
     // This should be the ESLint version that's used to build most of the projects in the repo.
     "eslint": "~9.37.0",
@@ -107,7 +107,7 @@
       "~4.9.5",
 
       // API Extractor bundles a specific TypeScript version because it calls internal APIs
-      "5.8.2"
+      "5.9.3"
     ],
     "source-map": [
       "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async

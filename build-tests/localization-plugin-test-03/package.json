@@ -20,7 +20,7 @@
     "html-webpack-plugin": "~4.5.2",
     "local-node-rig": "workspace:*",
     "ts-loader": "6.0.0",
-    "typescript": "~5.8.2",
+    "typescript": "~5.9.3",
     "webpack": "~4.47.0",
     "webpack-bundle-analyzer": "~4.5.0",
     "webpack-dev-server": "~4.9.3"

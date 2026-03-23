@@ -16,6 +16,6 @@
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/node": "20.17.19",
     "eslint": "~8.57.0",
-    "typescript": "~5.8.2"
+    "typescript": "~5.9.3"
   }
 }

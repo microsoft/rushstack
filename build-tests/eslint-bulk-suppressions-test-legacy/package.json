@@ -17,6 +17,6 @@
     "eslint-8.23": "npm:eslint@8.23.1",
     "eslint-oldest": "npm:eslint@8.6.0",
     "local-node-rig": "workspace:*",
-    "typescript": "~5.8.2"
+    "typescript": "~5.9.3"
   }
 }

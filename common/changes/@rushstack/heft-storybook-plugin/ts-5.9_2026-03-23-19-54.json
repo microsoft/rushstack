@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-storybook-plugin",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/heft-storybook-plugin"
+}

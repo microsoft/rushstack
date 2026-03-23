@@ -519,16 +519,13 @@ describe(OperationExecutionManager.name, () => {
       const opA: Operation = createWeightedOperation('heavy-A', 10, counters);
       const opB: Operation = createWeightedOperation('heavy-B', 10, counters);
 
-      const manager: OperationExecutionManager = new OperationExecutionManager(
-        new Set([opA, opB]),
-        {
-          quietMode: true,
-          debugMode: false,
-          parallelism: 4,
-          allowOversubscription: false,
-          destination: mockWritable
-        }
-      );
+      const manager: OperationExecutionManager = new OperationExecutionManager(new Set([opA, opB]), {
+        quietMode: true,
+        debugMode: false,
+        parallelism: 4,
+        allowOversubscription: false,
+        destination: mockWritable
+      });
 
       const abortController = new AbortController();
       const result: IExecutionResult = await manager.executeAsync(abortController);
@@ -545,16 +542,13 @@ describe(OperationExecutionManager.name, () => {
       const opA: Operation = createWeightedOperation('over-A', 7, counters);
       const opB: Operation = createWeightedOperation('over-B', 7, counters);
 
-      const manager: OperationExecutionManager = new OperationExecutionManager(
-        new Set([opA, opB]),
-        {
-          quietMode: true,
-          debugMode: false,
-          parallelism: 10,
-          allowOversubscription: true,
-          destination: mockWritable
-        }
-      );
+      const manager: OperationExecutionManager = new OperationExecutionManager(new Set([opA, opB]), {
+        quietMode: true,
+        debugMode: false,
+        parallelism: 10,
+        allowOversubscription: true,
+        destination: mockWritable
+      });
 
       const abortController = new AbortController();
       const result: IExecutionResult = await manager.executeAsync(abortController);
@@ -569,16 +563,13 @@ describe(OperationExecutionManager.name, () => {
       const opA: Operation = createWeightedOperation('strict-A', 7, counters);
       const opB: Operation = createWeightedOperation('strict-B', 7, counters);
 
-      const manager: OperationExecutionManager = new OperationExecutionManager(
-        new Set([opA, opB]),
-        {
-          quietMode: true,
-          debugMode: false,
-          parallelism: 10,
-          allowOversubscription: false,
-          destination: mockWritable
-        }
-      );
+      const manager: OperationExecutionManager = new OperationExecutionManager(new Set([opA, opB]), {
+        quietMode: true,
+        debugMode: false,
+        parallelism: 10,
+        allowOversubscription: false,
+        destination: mockWritable
+      });
 
       const abortController = new AbortController();
       const result: IExecutionResult = await manager.executeAsync(abortController);

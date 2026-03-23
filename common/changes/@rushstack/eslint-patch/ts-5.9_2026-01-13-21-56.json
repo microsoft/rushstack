@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch"
+}

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-lint-plugin",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/heft-lint-plugin"
+}
