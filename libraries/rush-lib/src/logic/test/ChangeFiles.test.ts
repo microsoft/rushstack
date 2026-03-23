@@ -34,7 +34,7 @@ describe(ChangeFiles.name, () => {
     expect(
       terminalProvider
         .getAllOutputAsChunks({ asLines: true })
-        .map((chunk) => chunk.replace(FORWARD_SLASH_DIRNAME, '<TEST DIR>'))
+        .map((chunk) => Path.convertToSlashes(chunk).replace(FORWARD_SLASH_DIRNAME, '<TEST DIR>'))
     ).toMatchSnapshot();
   });
 
@@ -176,7 +176,10 @@ describe(ChangeFiles.name, () => {
           });
           fail('Expected validateAsync to throw');
         } catch (error) {
-          const normalizedMessage: string = error.message.replace(FORWARD_SLASH_DIRNAME, '<TEST DIR>');
+          const normalizedMessage: string = Path.convertToSlashes(error.message).replace(
+            FORWARD_SLASH_DIRNAME,
+            '<TEST DIR>'
+          );
           expect(normalizedMessage).toMatchSnapshot();
         }
       });
@@ -204,7 +207,10 @@ describe(ChangeFiles.name, () => {
           });
           fail('Expected validateAsync to throw');
         } catch (error) {
-          const normalizedMessage: string = error.message.replace(FORWARD_SLASH_DIRNAME, '<TEST DIR>');
+          const normalizedMessage: string = Path.convertToSlashes(error.message).replace(
+            FORWARD_SLASH_DIRNAME,
+            '<TEST DIR>'
+          );
           expect(normalizedMessage).toMatchSnapshot();
         }
       });
