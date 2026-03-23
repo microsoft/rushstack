@@ -10,6 +10,7 @@ overrides:
   '@types/react@17.0.74>@types/scheduler': 0.16.8
   '@vscode/vsce>cheerio': 1.0.0-rc.12
   loader-utils@^2.0.0: 2.0.4
+  fast-xml-parser@^5.3.3: 5.3.5
 
 packageExtensionsChecksum: sha256-8fXYR9X9qRA57SZJJSADz6C9KMP6QQYYut4DHyehah0=
 
@@ -781,7 +782,7 @@ importers:
         version: 6.4.22(@types/react@17.0.74)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       '@storybook/cli':
         specifier: ~6.4.18
-        version: 6.4.22(eslint@9.37.0)(jest@29.3.1(@types/node@20.17.19))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.8.2)
+        version: 6.4.22(eslint@9.37.0)(jest@29.3.1(@types/node@20.17.19)(babel-plugin-macros@3.1.0))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.8.2)
       '@storybook/components':
         specifier: ~6.4.18
         version: 6.4.22(@types/react@17.0.74)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
@@ -817,7 +818,7 @@ importers:
         version: 5.2.7(webpack@4.47.0)
       jest:
         specifier: ~29.3.1
-        version: 29.3.1(@types/node@20.17.19)
+        version: 29.3.1(@types/node@20.17.19)(babel-plugin-macros@3.1.0)
       react:
         specifier: ~17.0.2
         version: 17.0.2
@@ -1003,7 +1004,7 @@ importers:
         version: 5.2.7(webpack@5.105.2)
       jest:
         specifier: ~29.3.1
-        version: 29.3.1(@types/node@20.17.19)
+        version: 29.3.1(@types/node@20.17.19)(babel-plugin-macros@3.1.0)
       react:
         specifier: ~19.2.3
         version: 19.2.4
@@ -13121,8 +13122,8 @@ packages:
     resolution: {integrity: sha512-pfX9uG9Ki0yekDHx2SiuRIyFdyAr1kMIMitPvb0YBo8SUfKvia7w7FIyd/l6av85pFYRhZscS75MwMnbvY+hcQ==}
     hasBin: true
 
-  fast-xml-parser@5.3.3:
-    resolution: {integrity: sha512-2O3dkPAAC6JavuMm8+4+pgTk+5hoAs+CjZ+sWcQLkX9+/tHRuTkQh/Oaifr8qDmZ8iEHb771Ea6G8CdwkrgvYA==}
+  fast-xml-parser@5.3.5:
+    resolution: {integrity: sha512-JeaA2Vm9ffQKp9VjvfzObuMCjUYAp5WDYhRYL5LrBPY/jUDlUtOvDfot0vKSkB9tuX885BDHjtw4fZadD95wnA==}
     hasBin: true
 
   fastify-error@0.3.1:
@@ -19355,7 +19356,7 @@ snapshots:
 
   '@azure/core-xml@1.5.0':
     dependencies:
-      fast-xml-parser: 5.3.3
+      fast-xml-parser: 5.3.5
       tslib: 2.8.1
 
   '@azure/identity@4.5.0':
@@ -22426,7 +22427,7 @@ snapshots:
       - supports-color
       - ts-node
 
-  '@jest/core@29.7.0':
+  '@jest/core@29.7.0(babel-plugin-macros@3.1.0)':
     dependencies:
       '@jest/console': 29.7.0
       '@jest/reporters': 29.7.0
@@ -22440,7 +22441,7 @@ snapshots:
       exit: 0.1.2
       graceful-fs: 4.2.11
       jest-changed-files: 29.7.0
-      jest-config: 29.7.0(@types/node@22.9.3)
+      jest-config: 29.7.0(@types/node@22.9.3)(babel-plugin-macros@3.1.0)
       jest-haste-map: 29.7.0
       jest-message-util: 29.7.0
       jest-regex-util: 29.6.3
@@ -25153,7 +25154,7 @@ snapshots:
       ts-dedent: 2.2.0
       util-deprecate: 1.0.2
 
-  '@storybook/cli@6.4.22(eslint@9.37.0)(jest@29.3.1(@types/node@20.17.19))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.8.2)':
+  '@storybook/cli@6.4.22(eslint@9.37.0)(jest@29.3.1(@types/node@20.17.19)(babel-plugin-macros@3.1.0))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.8.2)':
     dependencies:
       '@babel/core': 7.20.12
       '@babel/preset-env': 7.28.6(@babel/core@7.20.12)
@@ -25173,7 +25174,7 @@ snapshots:
       fs-extra: 9.1.0
       get-port: 5.1.1
       globby: 11.1.0
-      jest: 29.3.1(@types/node@20.17.19)
+      jest: 29.3.1(@types/node@20.17.19)(babel-plugin-macros@3.1.0)
       jscodeshift: 0.13.1(@babel/preset-env@7.28.6(@babel/core@7.20.12))
       json5: 2.2.3
       leven: 3.1.0
@@ -28766,13 +28767,13 @@ snapshots:
       safe-buffer: 5.2.1
       sha.js: 2.4.12
 
-  create-jest@29.7.0(@types/node@20.17.19):
+  create-jest@29.7.0(@types/node@20.17.19)(babel-plugin-macros@3.1.0):
     dependencies:
       '@jest/types': 29.6.3
       chalk: 4.1.2
       exit: 0.1.2
       graceful-fs: 4.2.11
-      jest-config: 29.7.0(@types/node@20.17.19)
+      jest-config: 29.7.0(@types/node@20.17.19)(babel-plugin-macros@3.1.0)
       jest-util: 29.7.0
       prompts: 2.4.2
     transitivePeerDependencies:
@@ -30666,7 +30667,7 @@ snapshots:
     dependencies:
       strnum: 2.1.2
 
-  fast-xml-parser@5.3.3:
+  fast-xml-parser@5.3.5:
     dependencies:
       strnum: 2.1.2
 
@@ -32144,16 +32145,16 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  jest-cli@29.7.0(@types/node@20.17.19):
+  jest-cli@29.7.0(@types/node@20.17.19)(babel-plugin-macros@3.1.0):
     dependencies:
-      '@jest/core': 29.7.0
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)
       '@jest/test-result': 29.7.0(@types/node@20.17.19)
       '@jest/types': 29.6.3
       chalk: 4.1.2
-      create-jest: 29.7.0(@types/node@20.17.19)
+      create-jest: 29.7.0(@types/node@20.17.19)(babel-plugin-macros@3.1.0)
       exit: 0.1.2
       import-local: 3.2.0
-      jest-config: 29.7.0(@types/node@20.17.19)
+      jest-config: 29.7.0(@types/node@20.17.19)(babel-plugin-macros@3.1.0)
       jest-util: 29.7.0
       jest-validate: 29.7.0
       yargs: 17.7.2
@@ -32223,7 +32224,7 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  jest-config@29.7.0(@types/node@20.17.19):
+  jest-config@29.7.0(@types/node@20.17.19)(babel-plugin-macros@3.1.0):
     dependencies:
       '@babel/core': 7.20.12
       '@jest/test-sequencer': 29.7.0(@types/node@20.17.19)
@@ -32253,7 +32254,7 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  jest-config@29.7.0(@types/node@22.9.3):
+  jest-config@29.7.0(@types/node@22.9.3)(babel-plugin-macros@3.1.0):
     dependencies:
       '@babel/core': 7.20.12
       '@jest/test-sequencer': 29.7.0(@types/node@22.9.3)
@@ -32641,12 +32642,12 @@ snapshots:
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
-  jest@29.3.1(@types/node@20.17.19):
+  jest@29.3.1(@types/node@20.17.19)(babel-plugin-macros@3.1.0):
     dependencies:
       '@jest/core': 29.5.0(babel-plugin-macros@3.1.0)
       '@jest/types': 29.5.0
       import-local: 3.2.0
-      jest-cli: 29.7.0(@types/node@20.17.19)
+      jest-cli: 29.7.0(@types/node@20.17.19)(babel-plugin-macros@3.1.0)
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
