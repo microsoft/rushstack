@@ -514,6 +514,8 @@ export interface IGetChangedProjectsOptions {
 
 // @beta
 export interface IGlobalCommand extends IRushCommand {
+    getCustomParametersByLongName<TParameter extends CommandLineParameter>(longName: string): TParameter;
+    setHandled(): void;
 }
 
 // @public
@@ -1434,6 +1436,7 @@ export class RushConstants {
     static readonly defaultWatchDebounceMs: 1000;
     static readonly experimentsFilename: 'experiments.json';
     static readonly globalCommandKind: 'global';
+    static readonly globalPluginCommandKind: 'globalPlugin';
     static readonly hashDelimiter: '|';
     static readonly lastLinkFlagFilename: 'last-link';
     static readonly mergeQueueIgnoreFileName: '.mergequeueignore';
@@ -1502,7 +1505,7 @@ export class RushLifecycleHooks {
     variant: string | undefined
     ]>;
     readonly beforeInstall: AsyncSeriesHook<[
-    command: IGlobalCommand,
+    command: IRushCommand,
     subspace: Subspace,
     variant: string | undefined
     ]>;

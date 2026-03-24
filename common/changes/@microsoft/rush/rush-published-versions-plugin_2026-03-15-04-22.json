@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add `getCustomParametersByLongName()` and `setHandled()` to `IGlobalCommand`, enabling Rush plugins to handle global command execution and access parsed command-line parameter values.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

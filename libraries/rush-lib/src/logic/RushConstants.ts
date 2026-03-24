@@ -276,6 +276,12 @@ export class RushConstants {
   public static readonly globalCommandKind: 'global' = 'global';
 
   /**
+   * The value of the "commandKind" property for a plugin-only global command in command-line.json.
+   * This command kind can only be used in command-line.json files provided by Rush plugins.
+   */
+  public static readonly globalPluginCommandKind: 'globalPlugin' = 'globalPlugin';
+
+  /**
    * The value of the "commandKind" property for a phased command in command-line.json
    */
   public static readonly phasedCommandKind: 'phased' = 'phased';
