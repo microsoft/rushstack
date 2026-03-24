@@ -691,6 +691,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "package-extractor-test-05",
+      "projectFolder": "build-tests/package-extractor-test-05",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "rush-mcp-example-plugin",
       "projectFolder": "build-tests/rush-mcp-example-plugin",
       "reviewCategory": "tests",

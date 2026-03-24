@@ -19,14 +19,17 @@ const project1PackageName: string = 'package-extractor-test-01';
 const project2PackageName: string = 'package-extractor-test-02';
 const project3PackageName: string = 'package-extractor-test-03';
 const project4PackageName: string = 'package-extractor-test-04';
+const project5PackageName: string = 'package-extractor-test-05';
 const project1RelativePath: string = path.join('build-tests', project1PackageName);
 const project2RelativePath: string = path.join('build-tests', project2PackageName);
 const project3RelativePath: string = path.join('build-tests', project3PackageName);
 const project4RelativePath: string = path.join('build-tests', project4PackageName);
+const project5RelativePath: string = path.join('build-tests', project5PackageName);
 const project1Path: string = path.join(repoRoot, project1RelativePath);
 const project2Path: string = path.resolve(repoRoot, project2RelativePath);
 const project3Path: string = path.resolve(repoRoot, project3RelativePath);
 const project4Path: string = path.resolve(repoRoot, project4RelativePath);
+const project5Path: string = path.resolve(repoRoot, project5RelativePath);
 
 function getDefaultProjectConfigurations(): IExtractorProjectConfiguration[] {
   return [
@@ -618,5 +621,13 @@ describe(PackageExtractor.name, () => {
     Sort.sortBy(metadata.links, (x) => x.linkPath);
     Sort.sortBy(metadata.projects, (x) => x.path);
     expect(metadata).toMatchSnapshot();
+  });
+
+  it('should normalize and remove duplicate file paths', async () => {
+    await FileSystem.writeFileAsync(path.join(project5Path, 'dist', 'index.js'), '', {
+      ensureFolderExists: true
+    });
+    const result = await PackageExtractor.getPackageIncludedFilesAsync(project5Path);
+    expect(result).toEqual(['dist/index.js', 'package.json']);
   });
 });

@@ -334,7 +334,14 @@ export class PackageExtractor {
       }
     );
     const npmPackFiles: string[] = await walkerPromise;
-    return npmPackFiles;
+
+    // npm-packlist@v5 (uses glob@v8) returns "./dist/index.js" for pattern: "./dist/index.js",
+    // whereas npm-packlist@v2 (uses glob@v7) returns an empty array.
+    // This may cause duplicate files in the result list, leading to copying conflicts
+    // in the AssetHandler.ts includeAssetAsync method.
+    // To avoid this issue, we will normalize the file paths to be relative to the package root and remove duplicates.
+    const normalizedFiles: string[] = Array.from(new Set(npmPackFiles.map((file) => path.normalize(file))));
+    return normalizedFiles;
   }
 
   /**
