@@ -628,6 +628,7 @@ describe(PackageExtractor.name, () => {
       ensureFolderExists: true
     });
     const result = await PackageExtractor.getPackageIncludedFilesAsync(project5Path);
-    expect(result).toEqual(['dist/index.js', 'package.json']);
+    // To make the test work on both Windows and *nix, need to normalize the paths to posix style
+    expect(result.map(path.posix.normalize)).toEqual(['dist/index.js', 'package.json']);
   });
 });
