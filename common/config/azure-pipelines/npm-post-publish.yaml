@@ -98,12 +98,17 @@ extends:
 
               - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
                 parameters:
-                  Arguments: 'install --to repo-toolbox'
+                  Arguments: >
+                    install
+                    --to repo-toolbox
                   DisplayName: 'Rush Install'
 
               - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
                 parameters:
-                  Arguments: 'build --to repo-toolbox --verbose'
+                  Arguments: >
+                    build
+                    --to repo-toolbox
+                    --verbose
                   DisplayName: 'Rush Build (repo-toolbox)'
 
               - script: 'node repo-scripts/repo-toolbox/lib-commonjs/start.js bump-decoupled-local-dependencies'
@@ -179,7 +184,10 @@ extends:
 
               - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
                 parameters:
-                  Arguments: 'build --to-except api.rushstack.io --verbose'
+                  Arguments: >
+                    build
+                    --to-except api.rushstack.io
+                    --verbose
                   DisplayName: 'Rush Build to-except api.rushstack.io (rushstack-websites)'
 
               # Download the api artifact from the triggering publish pipeline.

@@ -12,7 +12,9 @@ steps:
 
   - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
     parameters:
-      Arguments: 'change --verify'
+      Arguments: >
+        change
+        --verify
       DisplayName: 'Verify Change Logs'
 
   - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
@@ -28,7 +30,10 @@ steps:
 
   - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
     parameters:
-      Arguments: 'retest --verbose --production ${{ parameters.BuildParameters }}'
+      Arguments: >
+        retest
+        --verbose
+        --production ${{ parameters.BuildParameters }}
       DisplayName: 'Rush retest (install-run-rush)'
 
   - script: 'npm run test'
