@@ -26,12 +26,6 @@ export class PublishedVersionsJsonPlugin implements IRushPlugin {
     session.hooks.runGlobalCustomCommand
       .for('record-published-versions')
       .tapPromise(PLUGIN_NAME, async (command: IGlobalCommand) => {
-        if (typeof command.setHandled !== 'function') {
-          throw new Error(
-            `${PLUGIN_NAME} requires Rush version 5.171.0 or newer. ` +
-              'Please upgrade your Rush installation.'
-          );
-        }
         command.setHandled();
 
         const { terminal }: ILogger = session.getLogger(PLUGIN_NAME);

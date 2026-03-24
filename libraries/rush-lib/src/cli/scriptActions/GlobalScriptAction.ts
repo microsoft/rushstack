@@ -20,6 +20,7 @@ import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAct
 import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Autoinstaller } from '../../logic/Autoinstaller';
+import { RushConstants } from '../../logic/RushConstants';
 import type { IGlobalCommandConfig, IShellCommandTokenContext } from '../../api/CommandLineConfiguration';
 import { measureAsyncFn } from '../../utilities/performance';
 
@@ -29,6 +30,7 @@ import { measureAsyncFn } from '../../utilities/performance';
 export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions<IGlobalCommandConfig> {
   shellCommand: string;
   autoinstallerName: string | undefined;
+  isPluginOnly: boolean;
 }
 
 /**
@@ -45,14 +47,17 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
   private readonly _shellCommand: string;
   private readonly _autoinstallerName: string;
   private readonly _autoinstallerFullPath: string;
+  private readonly _isPluginOnly: boolean;
 
   private _customParametersByLongName: ReadonlyMap<string, CommandLineParameter> | undefined;
   private _isHandled: boolean = false;
 
   public constructor(options: IGlobalScriptActionOptions) {
     super(options);
-    this._shellCommand = options.shellCommand;
-    this._autoinstallerName = options.autoinstallerName || '';
+    const { shellCommand, isPluginOnly, autoinstallerName = '' } = options;
+    this._shellCommand = shellCommand;
+    this._isPluginOnly = isPluginOnly;
+    this._autoinstallerName = autoinstallerName;
 
     if (this._autoinstallerName) {
       Autoinstaller.validateName(this._autoinstallerName);
@@ -156,6 +161,15 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
     // Skip the default shell command execution.
     if (this._isHandled) {
       return;
+    }
+
+    if (this._isPluginOnly) {
+      throw new Error(
+        `The custom command "${this.actionName}" is a "${RushConstants.globalPluginCommandKind}" command, ` +
+          'meaning its implementation must be provided entirely by a Rush plugin. However, no plugin ' +
+          'called setHandled() for this command. Ensure that the plugin defining this command is ' +
+          'properly installed and that it handles this command.'
+      );
     }
 
     if (this._shellCommand === '') {

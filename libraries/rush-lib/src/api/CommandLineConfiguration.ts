@@ -127,7 +127,13 @@ export interface IPhasedCommandConfig extends IPhasedCommandWithoutPhasesJson, I
   alwaysInstall: boolean | undefined;
 }
 
-export interface IGlobalCommandConfig extends IGlobalCommandJson, ICommandWithParameters {}
+export interface IGlobalCommandConfig extends IGlobalCommandJson, ICommandWithParameters {
+  /**
+   * If true, this command was declared with commandKind "globalPlugin" and must be handled
+   * entirely by a Rush plugin. There is no shell command to execute.
+   */
+  isPluginOnly: boolean;
+}
 
 export type Command = IGlobalCommandConfig | IPhasedCommandConfig;
 
@@ -408,6 +414,20 @@ export class CommandLineConfiguration {
           case RushConstants.globalCommandKind: {
             normalizedCommand = {
               ...command,
+              isPluginOnly: false,
+              associatedParameters: new Set<IParameterJson>()
+            };
+            break;
+          }
+
+          case RushConstants.globalPluginCommandKind: {
+            // Normalize globalPlugin commands to global commands with an empty shellCommand,
+            // similar to how bulk commands are converted to phased commands.
+            normalizedCommand = {
+              ...command,
+              commandKind: RushConstants.globalCommandKind,
+              shellCommand: '',
+              isPluginOnly: true,
               associatedParameters: new Set<IParameterJson>()
             };
             break;
@@ -694,6 +714,17 @@ export class CommandLineConfiguration {
         this._applyBuildCommandDefaults(commandLineJson);
 
         CommandLineConfiguration._jsonSchema.validateObject(commandLineJson, jsonFilePath);
+
+        // Validate that globalPlugin commands are not used in the repo's command-line.json
+        for (const { commandKind, name } of commandLineJson.commands) {
+          if (commandKind === RushConstants.globalPluginCommandKind) {
+            throw new Error(
+              `${RushConstants.commandLineFilename} defines a command "${name}" using ` +
+                `the command kind "${RushConstants.globalPluginCommandKind}". This command kind can only ` +
+                `be used in command-line.json files provided by Rush plugins.`
+            );
+          }
+        }
       }
     }
 

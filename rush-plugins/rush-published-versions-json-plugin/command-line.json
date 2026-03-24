@@ -2,12 +2,10 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
   "commands": [
     {
-      "commandKind": "global",
+      "commandKind": "globalPlugin",
       "name": "record-published-versions",
       "summary": "Generates a JSON file recording the version numbers of all published packages.",
-      "safeForSimultaneousRushProcesses": true,
-      // The command is handled by the plugin, so we don't want Rush to attempt to execute anything.
-      "shellCommand": ""
+      "safeForSimultaneousRushProcesses": true
     }
   ],
   "parameters": [

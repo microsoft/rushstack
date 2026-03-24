@@ -1436,6 +1436,7 @@ export class RushConstants {
     static readonly defaultWatchDebounceMs: 1000;
     static readonly experimentsFilename: 'experiments.json';
     static readonly globalCommandKind: 'global';
+    static readonly globalPluginCommandKind: 'globalPlugin';
     static readonly hashDelimiter: '|';
     static readonly lastLinkFlagFilename: 'last-link';
     static readonly mergeQueueIgnoreFileName: '.mergequeueignore';
