@@ -30,7 +30,7 @@ import { measureAsyncFn } from '../../utilities/performance';
 export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions<IGlobalCommandConfig> {
   shellCommand: string;
   autoinstallerName: string | undefined;
-  isPluginOnly: boolean;
+  providedByPlugin: boolean;
 }
 
 /**
@@ -47,16 +47,16 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
   private readonly _shellCommand: string;
   private readonly _autoinstallerName: string;
   private readonly _autoinstallerFullPath: string;
-  private readonly _isPluginOnly: boolean;
+  private readonly _providedByPlugin: boolean;
 
   private _customParametersByLongName: ReadonlyMap<string, CommandLineParameter> | undefined;
   private _isHandled: boolean = false;
 
   public constructor(options: IGlobalScriptActionOptions) {
     super(options);
-    const { shellCommand, isPluginOnly, autoinstallerName = '' } = options;
+    const { shellCommand, providedByPlugin, autoinstallerName = '' } = options;
     this._shellCommand = shellCommand;
-    this._isPluginOnly = isPluginOnly;
+    this._providedByPlugin = providedByPlugin;
     this._autoinstallerName = autoinstallerName;
 
     if (this._autoinstallerName) {
@@ -163,7 +163,7 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
       return;
     }
 
-    if (this._isPluginOnly) {
+    if (this._providedByPlugin) {
       throw new Error(
         `The custom command "${this.actionName}" is a "${RushConstants.globalPluginCommandKind}" command, ` +
           'meaning its implementation must be provided entirely by a Rush plugin. However, no plugin ' +

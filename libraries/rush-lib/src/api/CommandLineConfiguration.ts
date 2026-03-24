@@ -129,10 +129,11 @@ export interface IPhasedCommandConfig extends IPhasedCommandWithoutPhasesJson, I
 
 export interface IGlobalCommandConfig extends IGlobalCommandJson, ICommandWithParameters {
   /**
-   * If true, this command was declared with commandKind "globalPlugin" and must be handled
-   * entirely by a Rush plugin. There is no shell command to execute.
+   * If true, this command was declared with commandKind "globalPlugin" and its implementation
+   * is provided by a Rush plugin via the `runGlobalCustomCommand` hook. There is no shell
+   * command to execute.
    */
-  isPluginOnly: boolean;
+  providedByPlugin: boolean;
 }
 
 export type Command = IGlobalCommandConfig | IPhasedCommandConfig;
@@ -414,7 +415,7 @@ export class CommandLineConfiguration {
           case RushConstants.globalCommandKind: {
             normalizedCommand = {
               ...command,
-              isPluginOnly: false,
+              providedByPlugin: false,
               associatedParameters: new Set<IParameterJson>()
             };
             break;
@@ -427,7 +428,7 @@ export class CommandLineConfiguration {
               ...command,
               commandKind: RushConstants.globalCommandKind,
               shellCommand: '',
-              isPluginOnly: true,
+              providedByPlugin: true,
               associatedParameters: new Set<IParameterJson>()
             };
             break;

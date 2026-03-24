@@ -442,7 +442,7 @@ export class RushCommandLineParser extends CommandLineParser {
     commandLineConfiguration: CommandLineConfiguration,
     command: IGlobalCommandConfig
   ): void {
-    const { name, shellCommand, autoinstallerName, isPluginOnly } = command;
+    const { name, shellCommand, autoinstallerName, providedByPlugin } = command;
 
     if (name === RushConstants.buildCommandName || name === RushConstants.rebuildCommandName) {
       throw new Error(
@@ -461,7 +461,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
         shellCommand,
         autoinstallerName,
-        isPluginOnly
+        providedByPlugin
       })
     );
   }
