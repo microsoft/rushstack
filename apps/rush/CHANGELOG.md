@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 21 Mar 2026 03:10:24 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Mar 2026 21:52:13 GMT and should not be manually modified.
+
+## 5.172.0
+Tue, 24 Mar 2026 21:52:13 GMT
+
+### Updates
+
+- Add `getCustomParametersByLongName()` and `setHandled()` to `IGlobalCommand`, enabling Rush plugins to handle global command execution and access parsed command-line parameter values.
+- Add a new "globalPlugin" command kind for command-line.json that allows Rush plugins to define global commands without a shellCommand. This command kind can only be used in plugin-provided command-line.json files.
 
 ## 5.171.0
 Sat, 21 Mar 2026 03:10:24 GMT
