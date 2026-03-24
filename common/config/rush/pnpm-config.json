@@ -252,7 +252,10 @@
     "loader-utils@^2.0.0": "2.0.4",
 
     // `fast-xml-parser@5.3.3` has a vulnerability
-    "fast-xml-parser@^5.3.3": "5.3.5"
+    "fast-xml-parser@^5.3.3": "5.3.5",
+
+    // `js-yaml@<=2.0.4` has a code execution vulnerability in the YAML deserializer
+    "js-yaml@<=2.0.4": "3.14.2"
   },
 
   /**

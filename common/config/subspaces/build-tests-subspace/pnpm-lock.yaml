@@ -11,6 +11,7 @@ overrides:
   '@vscode/vsce>cheerio': 1.0.0-rc.12
   loader-utils@^2.0.0: 2.0.4
   fast-xml-parser@^5.3.3: 5.3.5
+  js-yaml@<=2.0.4: 3.14.2
 
 packageExtensionsChecksum: sha256-8fXYR9X9qRA57SZJJSADz6C9KMP6QQYYut4DHyehah0=
 
