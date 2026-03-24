@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/rush-published-versions-json-plugin",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/rush-published-versions-json-plugin_v0.1.0",
+      "date": "Tue, 24 Mar 2026 21:51:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release."
+          }
+        ]
+      }
+    }
+  ]
+}
