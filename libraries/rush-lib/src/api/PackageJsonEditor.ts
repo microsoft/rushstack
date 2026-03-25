@@ -97,82 +97,89 @@ export class PackageJsonEditor {
     this._sourceData = data;
     this._modified = false;
 
-    this._dependencies = new Map<string, PackageJsonDependency>();
-    this._devDependencies = new Map<string, PackageJsonDependency>();
-    this._resolutions = new Map<string, PackageJsonDependency>();
-    this._dependenciesMeta = new Map<string, PackageJsonDependencyMeta>();
-
-    const dependencies: { [key: string]: string } = data.dependencies || {};
-    const optionalDependencies: { [key: string]: string } = data.optionalDependencies || {};
-    const peerDependencies: { [key: string]: string } = data.peerDependencies || {};
-
-    const devDependencies: { [key: string]: string } = data.devDependencies || {};
-    const resolutions: { [key: string]: string } = data.resolutions || {};
-
-    const dependenciesMeta: { [key: string]: { [key: string]: boolean } } = data.dependenciesMeta || {};
+    const {
+      dependencies = {},
+      optionalDependencies = {},
+      peerDependencies = {},
+      devDependencies = {},
+      resolutions = {},
+      dependenciesMeta = {}
+    } = data;
 
     const _onChange: () => void = this._onChange.bind(this);
 
+    const optionalDependenciesSet: Set<string> = new Set(Object.keys(optionalDependencies));
+    const peerDependenciesSet: Set<string> = new Set(Object.keys(peerDependencies));
     try {
-      Object.entries(dependencies || {}).forEach(([packageName, version]: [string, string]) => {
-        if (Object.prototype.hasOwnProperty.call(optionalDependencies, packageName)) {
-          throw new Error(
-            `The package "${packageName}" cannot be listed in both ` +
-              `"dependencies" and "optionalDependencies"`
-          );
-        }
-        if (Object.prototype.hasOwnProperty.call(peerDependencies, packageName)) {
-          throw new Error(
-            `The package "${packageName}" cannot be listed in both "dependencies" and "peerDependencies"`
-          );
-        }
+      const dependenciesMapEntries: [string, PackageJsonDependency][] = Object.entries(dependencies).map(
+        ([packageName, version]: [string, string]) => {
+          if (optionalDependenciesSet.has(packageName)) {
+            throw new Error(
+              `The package "${packageName}" cannot be listed in both ` +
+                `"dependencies" and "optionalDependencies"`
+            );
+          }
+          if (peerDependenciesSet.has(packageName)) {
+            throw new Error(
+              `The package "${packageName}" cannot be listed in both "dependencies" and "peerDependencies"`
+            );
+          }
 
-        this._dependencies.set(
-          packageName,
-          new PackageJsonDependency(packageName, version, DependencyType.Regular, _onChange)
-        );
-      });
+          return [
+            packageName,
+            new PackageJsonDependency(packageName, version, DependencyType.Regular, _onChange)
+          ];
+        }
+      );
 
-      Object.entries(optionalDependencies || {}).forEach(([packageName, version]: [string, string]) => {
-        if (Object.prototype.hasOwnProperty.call(peerDependencies, packageName)) {
+      const optionalDependenciesMapEntries: [string, PackageJsonDependency][] = Object.entries(
+        optionalDependencies
+      ).map(([packageName, version]) => {
+        if (peerDependenciesSet.has(packageName)) {
           throw new Error(
             `The package "${packageName}" cannot be listed in both ` +
               `"optionalDependencies" and "peerDependencies"`
           );
         }
-        this._dependencies.set(
+        return [
           packageName,
           new PackageJsonDependency(packageName, version, DependencyType.Optional, _onChange)
-        );
+        ];
       });
 
-      Object.entries(peerDependencies || {}).forEach(([packageName, version]: [string, string]) => {
-        this._dependencies.set(
-          packageName,
-          new PackageJsonDependency(packageName, version, DependencyType.Peer, _onChange)
-        );
-      });
+      const peerDependenciesMapEntries: [string, PackageJsonDependency][] = Object.entries(
+        peerDependencies
+      ).map(([packageName, version]) => [
+        packageName,
+        new PackageJsonDependency(packageName, version, DependencyType.Peer, _onChange)
+      ]);
 
-      Object.entries(devDependencies || {}).forEach(([packageName, version]: [string, string]) => {
-        this._devDependencies.set(
+      this._dependencies = new Map([
+        ...dependenciesMapEntries,
+        ...optionalDependenciesMapEntries,
+        ...peerDependenciesMapEntries
+      ]);
+
+      this._devDependencies = new Map(
+        Object.entries(devDependencies).map(([packageName, version]) => [
           packageName,
           new PackageJsonDependency(packageName, version, DependencyType.Dev, _onChange)
-        );
-      });
+        ])
+      );
 
-      Object.entries(resolutions || {}).forEach(([packageName, version]: [string, string]) => {
-        this._resolutions.set(
+      this._resolutions = new Map(
+        Object.entries(resolutions).map(([packageName, version]) => [
           packageName,
           new PackageJsonDependency(packageName, version, DependencyType.YarnResolutions, _onChange)
-        );
-      });
+        ])
+      );
 
-      Object.entries(dependenciesMeta || {}).forEach(([packageName, { injected = false }]) => {
-        this._dependenciesMeta.set(
+      this._dependenciesMeta = new Map(
+        Object.entries(dependenciesMeta).map(([packageName, { injected = false }]) => [
           packageName,
           new PackageJsonDependencyMeta(packageName, injected, _onChange)
-        );
-      });
+        ])
+      );
 
       // (Do not sort this._resolutions because order may be significant; the RFC is unclear about that.)
       Sort.sortMapKeys(this._dependencies);
