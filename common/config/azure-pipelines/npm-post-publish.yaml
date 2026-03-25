@@ -119,6 +119,11 @@ extends:
                   Arguments: 'update'
                   DisplayName: 'Rush Update'
 
+              - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+                parameters:
+                  Arguments: 'update-autoinstaller --name plugins'
+                  DisplayName: 'Rush Update Autoinstaller (plugins)'
+
               - bash: cp common/temp/install-run/@microsoft+rush@*/package-lock.json common/config/validation/rush-package-lock.json
                 displayName: 'Update rush-package-lock.json'
 

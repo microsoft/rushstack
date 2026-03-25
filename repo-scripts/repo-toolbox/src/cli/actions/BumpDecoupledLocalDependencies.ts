@@ -2,12 +2,18 @@
 // See LICENSE in the project root for license information.
 
 import type { ChildProcess } from 'node:child_process';
+import * as path from 'node:path';
 
-import { Async, Executable, JsonFile } from '@rushstack/node-core-library';
+import { Async, Executable, FileSystem, JsonFile } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { DependencyType, RushConfiguration } from '@microsoft/rush-lib';
 import type { IRushConfigurationJson } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import { CommandLineAction } from '@rushstack/ts-command-line';
+
+interface IPackageJson {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+}
 
 async function _getLatestPublishedVersionAsync(terminal: ITerminal, packageName: string): Promise<string> {
   return await new Promise((resolve: (result: string) => void, reject: (error: Error) => void) => {
@@ -45,15 +51,62 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
 
   protected override async onExecuteAsync(): Promise<void> {
     const terminal: ITerminal = this._terminal;
-    const { projects, rushJsonFile } = RushConfiguration.loadFromDefaultLocation({
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
       startingFolder: process.cwd()
     });
+    const { projects, rushJsonFile } = rushConfiguration;
 
     const cyclicDependencyNames: Set<string> = new Set<string>();
 
     for (const { decoupledLocalDependencies } of projects) {
       for (const decoupledLocalDependency of decoupledLocalDependencies) {
         cyclicDependencyNames.add(decoupledLocalDependency);
+      }
+    }
+
+    // Collect all package names published from this repo
+    const publishedPackageNames: Set<string> = new Set<string>();
+    for (const project of projects) {
+      if (project.shouldPublish || project.versionPolicy) {
+        publishedPackageNames.add(project.packageName);
+      }
+    }
+
+    // Scan autoinstaller package.json files for dependencies on packages published from this repo
+    const autoinstallersFolder: string = path.join(rushConfiguration.commonFolder, 'autoinstallers');
+    // Map of autoinstaller name -> { packageJsonPath, packageJson }
+    const autoinstallerInfoByName: Map<string, { packageJsonPath: string; packageJson: IPackageJson }> =
+      new Map();
+
+    let autoinstallerEntries: string[] = [];
+    try {
+      autoinstallerEntries = (await FileSystem.readFolderItemNamesAsync(autoinstallersFolder)).filter(
+        (entry) => !entry.startsWith('.')
+      );
+    } catch (error) {
+      if (!FileSystem.isNotExistError(error as Error)) {
+        throw error;
+      }
+    }
+
+    for (const autoinstallerName of autoinstallerEntries) {
+      const packageJsonPath: string = path.join(autoinstallersFolder, autoinstallerName, 'package.json');
+      try {
+        const packageJson: IPackageJson = await JsonFile.loadAsync(packageJsonPath);
+        autoinstallerInfoByName.set(autoinstallerName, { packageJsonPath, packageJson });
+
+        for (const depName of [
+          ...Object.keys(packageJson.dependencies ?? {}),
+          ...Object.keys(packageJson.devDependencies ?? {})
+        ]) {
+          if (publishedPackageNames.has(depName)) {
+            cyclicDependencyNames.add(depName);
+          }
+        }
+      } catch (error) {
+        if (!FileSystem.isNotExistError(error as Error)) {
+          throw error;
+        }
       }
     }
 
@@ -107,6 +160,27 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
 
       if (packageJsonEditor.saveIfModified()) {
         terminal.writeLine(`Updated ${packageName}`);
+      }
+    }
+
+    // Update autoinstaller package.json files
+    for (const [autoinstallerName, { packageJsonPath, packageJson }] of autoinstallerInfoByName) {
+      let modified: boolean = false;
+
+      for (const depSection of [packageJson.dependencies, packageJson.devDependencies]) {
+        if (!depSection) continue;
+        for (const depName of Object.keys(depSection)) {
+          const newVersion: string | undefined = decoupledLocalDependencyVersionsByName.get(depName);
+          if (newVersion && depSection[depName] !== newVersion) {
+            depSection[depName] = newVersion;
+            modified = true;
+          }
+        }
+      }
+
+      if (modified) {
+        await JsonFile.saveAsync(packageJson, packageJsonPath, { updateExistingFile: true });
+        terminal.writeLine(`Updated autoinstaller ${autoinstallerName}`);
       }
     }
 
