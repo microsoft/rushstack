@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.172.1",
+      "tag": "@microsoft/rush_v5.172.1",
+      "date": "Wed, 25 Mar 2026 01:01:07 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush deploy\" could fail with EEXIST due to a \"npm-packlist\" regression (GitHub #5720)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.172.0",
       "tag": "@microsoft/rush_v5.172.0",
       "date": "Tue, 24 Mar 2026 21:52:13 GMT",

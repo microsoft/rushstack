@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 24 Mar 2026 21:52:13 GMT and should not be manually modified.
+This log was last generated on Wed, 25 Mar 2026 01:01:07 GMT and should not be manually modified.
+
+## 5.172.1
+Wed, 25 Mar 2026 01:01:07 GMT
+
+### Updates
+
+- Fix an issue where "rush deploy" could fail with EEXIST due to a "npm-packlist" regression (GitHub #5720)
 
 ## 5.172.0
 Tue, 24 Mar 2026 21:52:13 GMT
