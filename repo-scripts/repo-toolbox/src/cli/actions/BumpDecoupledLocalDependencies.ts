@@ -7,12 +7,12 @@ import {
   Async,
   Executable,
   FileSystem,
-  FolderItem,
+  type FolderItem,
   JsonFile,
   type IPackageJson
 } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import { DependencyType, PackageJsonEditor, RushConfiguration, Subspace } from '@microsoft/rush-lib';
+import { DependencyType, PackageJsonEditor, RushConfiguration, type Subspace } from '@microsoft/rush-lib';
 import type { IRushConfigurationJson } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 
@@ -84,11 +84,6 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
         publishedPackageNames.add(packageName);
       }
     }
-
-    // Scan autoinstaller package.json files for dependencies on packages published from this repo
-    // Map of autoinstaller name -> { packageJsonPath, packageJson }
-    const autoinstallerInfoByName: Map<string, { packageJsonPath: string; packageJson: IPackageJson }> =
-      new Map();
 
     let autoinstallerEntries: FolderItem[] = [];
     try {
