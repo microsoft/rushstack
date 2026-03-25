@@ -210,7 +210,7 @@ export class Autoinstaller {
     }
 
     // Detect a common mistake where PNPM prints "Already up-to-date" without creating a shrinkwrap file
-    const packageJsonEditor: PackageJsonEditor = PackageJsonEditor.load(this.packageJsonPath);
+    const packageJsonEditor: PackageJsonEditor = await PackageJsonEditor.loadAsync(this.packageJsonPath);
     if (packageJsonEditor.dependencyList.length === 0) {
       throw new Error(
         'You must add at least one dependency to the autoinstaller package' +

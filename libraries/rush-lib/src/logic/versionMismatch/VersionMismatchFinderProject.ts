@@ -48,7 +48,7 @@ export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
     return this._fileManager.removeDependency(packageName, dependencyType);
   }
 
-  public saveIfModified(): boolean {
-    return this._fileManager.saveIfModified();
+  public async saveIfModifiedAsync(): Promise<boolean> {
+    return await this._fileManager.saveIfModifiedAsync();
   }
 }

@@ -5,9 +5,9 @@ import { CommonVersionsConfiguration } from '../CommonVersionsConfiguration';
 import type { RushConfiguration } from '../RushConfiguration';
 
 describe(CommonVersionsConfiguration.name, () => {
-  it('can load the file', () => {
+  it('can load the file', async () => {
     const filename: string = `${__dirname}/jsonFiles/common-versions.json`;
-    const configuration: CommonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(
+    const configuration: CommonVersionsConfiguration = await CommonVersionsConfiguration.loadFromFileAsync(
       filename,
       {} as RushConfiguration
     );
@@ -16,33 +16,39 @@ describe(CommonVersionsConfiguration.name, () => {
     expect(configuration.allowedAlternativeVersions.get('library-3')).toEqual(['^1.2.3']);
   });
 
-  it('gets `ensureConsistentVersions` from the file if it provides that value', () => {
+  it('gets `ensureConsistentVersions` from the file if it provides that value', async () => {
     const filename: string = `${__dirname}/jsonFiles/common-versions-with-ensureConsistentVersionsTrue.json`;
-    const configuration: CommonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(filename, {
-      _ensureConsistentVersionsJsonValue: undefined,
-      ensureConsistentVersions: false
-    } as RushConfiguration);
+    const configuration: CommonVersionsConfiguration = await CommonVersionsConfiguration.loadFromFileAsync(
+      filename,
+      {
+        _ensureConsistentVersionsJsonValue: undefined,
+        ensureConsistentVersions: false
+      } as RushConfiguration
+    );
 
     expect(configuration.ensureConsistentVersions).toBe(true);
   });
 
-  it("gets `ensureConsistentVersions` from the rush configuration if common-versions.json doesn't provide that value", () => {
+  it("gets `ensureConsistentVersions` from the rush configuration if common-versions.json doesn't provide that value", async () => {
     const filename: string = `${__dirname}/jsonFiles/common-versions.json`;
-    const configuration: CommonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(filename, {
-      _ensureConsistentVersionsJsonValue: false,
-      ensureConsistentVersions: false
-    } as RushConfiguration);
+    const configuration: CommonVersionsConfiguration = await CommonVersionsConfiguration.loadFromFileAsync(
+      filename,
+      {
+        _ensureConsistentVersionsJsonValue: false,
+        ensureConsistentVersions: false
+      } as RushConfiguration
+    );
 
     expect(configuration.ensureConsistentVersions).toBe(false);
   });
 
-  it('Does not allow `ensureConsistentVersions` to be set in both rush.json and common-versions.json', () => {
+  it('Does not allow `ensureConsistentVersions` to be set in both rush.json and common-versions.json', async () => {
     const filename: string = `${__dirname}/jsonFiles/common-versions-with-ensureConsistentVersionsTrue.json`;
-    expect(() =>
-      CommonVersionsConfiguration.loadFromFile(filename, {
+    await expect(() =>
+      CommonVersionsConfiguration.loadFromFileAsync(filename, {
         _ensureConsistentVersionsJsonValue: false,
         ensureConsistentVersions: false
       } as RushConfiguration)
-    ).toThrowErrorMatchingSnapshot();
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 });

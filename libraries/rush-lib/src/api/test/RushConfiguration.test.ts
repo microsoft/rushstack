@@ -324,7 +324,7 @@ describe(RushConfiguration.name, () => {
         'dependencyProjects before'
       );
       project.packageJsonEditor.addOrUpdateDependency('project2', '1.0.0', DependencyType.Dev);
-      project.packageJsonEditor.saveIfModified();
+      await project.packageJsonEditor.saveIfModifiedAsync();
       expect(project.packageJson.devDependencies).toMatchSnapshot('devDependencies after');
       expect(Array.from(project.dependencyProjects.values()).map((x) => x.packageName)).toMatchSnapshot(
         'dependencyProjects after'

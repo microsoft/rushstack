@@ -415,7 +415,7 @@ describe(VersionMismatchFinder.name, () => {
     expect(mismatchFinder.getMismatches()).toHaveLength(0);
   });
 
-  it('handles the common-versions.json file correctly', () => {
+  it('handles the common-versions.json file correctly', async () => {
     const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
       packageJsonEditor: PackageJsonEditor.fromObject(
@@ -429,8 +429,10 @@ describe(VersionMismatchFinder.name, () => {
       ),
       decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
+    const commonVersionsConfiguration: CommonVersionsConfiguration =
+      await CommonVersionsConfiguration.loadFromFileAsync(`${__dirname}/jsonFiles/common-versions.json`);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderCommonVersions(
-      CommonVersionsConfiguration.loadFromFile(`${__dirname}/jsonFiles/common-versions.json`)
+      commonVersionsConfiguration
     );
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);

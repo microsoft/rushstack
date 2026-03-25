@@ -137,9 +137,13 @@ export class CommonVersionsConfiguration {
     getAllPreferredVersions(): Map<string, string>;
     getPreferredVersionsHash(): string;
     readonly implicitlyPreferredVersions: boolean | undefined;
+    // @deprecated (undocumented)
     static loadFromFile(jsonFilePath: string, rushConfiguration?: RushConfiguration): CommonVersionsConfiguration;
+    static loadFromFileAsync(jsonFilePath: string, rushConfiguration?: RushConfiguration): Promise<CommonVersionsConfiguration>;
     readonly preferredVersions: Map<string, string>;
+    // @deprecated (undocumented)
     save(): boolean;
+    saveAsync(): Promise<boolean>;
 }
 
 export { CredentialCache }
@@ -1097,15 +1101,19 @@ export class PackageJsonEditor {
     readonly filePath: string;
     // (undocumented)
     static fromObject(object: IPackageJson, filename: string): PackageJsonEditor;
-    // (undocumented)
+    // @deprecated (undocumented)
     static load(filePath: string): PackageJsonEditor;
+    // (undocumented)
+    static loadAsync(filePath: string): Promise<PackageJsonEditor>;
     // (undocumented)
     get name(): string;
     // (undocumented)
     removeDependency(packageName: string, dependencyType: DependencyType): void;
     get resolutionsList(): ReadonlyArray<PackageJsonDependency>;
-    // (undocumented)
+    // @deprecated (undocumented)
     saveIfModified(): boolean;
+    // (undocumented)
+    saveIfModifiedAsync(): Promise<boolean>;
     saveToObject(): IPackageJson;
     // (undocumented)
     tryGetDependency(packageName: string): PackageJsonDependency | undefined;
@@ -1648,8 +1656,12 @@ export abstract class VersionPolicy {
     // @internal
     static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
     get policyName(): string;
+    // @deprecated (undocumented)
     setDependenciesBeforeCommit(packageName: string, configuration: RushConfiguration): void;
+    setDependenciesBeforeCommitAsync(packageName: string, configuration: RushConfiguration): Promise<void>;
+    // @deprecated (undocumented)
     setDependenciesBeforePublish(packageName: string, configuration: RushConfiguration): void;
+    setDependenciesBeforePublishAsync(packageName: string, configuration: RushConfiguration): Promise<void>;
     abstract validate(versionString: string, packageName: string): void;
 }
 

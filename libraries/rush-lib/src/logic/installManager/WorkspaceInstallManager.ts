@@ -316,7 +316,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
 
       // Save the package.json if we modified the version references and warn that the package.json was modified
-      if (packageJson.saveIfModified()) {
+      const modified: boolean = await packageJson.saveIfModifiedAsync();
+      if (modified) {
         // eslint-disable-next-line no-console
         console.log(
           Colorize.yellow(

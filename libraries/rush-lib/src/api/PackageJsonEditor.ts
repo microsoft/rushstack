@@ -189,6 +189,9 @@ export class PackageJsonEditor {
     }
   }
 
+  /**
+   * @deprecated Use {@link PackageJsonEditor.loadAsync} method instead.
+   */
   public static load(filePath: string): PackageJsonEditor {
     const packageJson: IPackageJson = JsonFile.load(filePath);
     return new PackageJsonEditor(filePath, packageJson);
@@ -318,6 +321,9 @@ export class PackageJsonEditor {
     this._modified = true;
   }
 
+  /**
+   * @deprecated Use {@link PackageJsonEditor.saveIfModifiedAsync} method instead.
+   */
   public saveIfModified(): boolean {
     if (this._modified) {
       this._modified = false;

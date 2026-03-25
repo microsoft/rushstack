@@ -15,9 +15,10 @@ export abstract class VersionMismatchFinderEntity {
   public readonly skipRushCheck: boolean | undefined;
 
   public constructor(options: IVersionMismatchFinderEntityOptions) {
-    this.friendlyName = options.friendlyName;
-    this.decoupledLocalDependencies = options.decoupledLocalDependencies;
-    this.skipRushCheck = options.skipRushCheck;
+    const { friendlyName, decoupledLocalDependencies, skipRushCheck } = options;
+    this.friendlyName = friendlyName;
+    this.decoupledLocalDependencies = decoupledLocalDependencies;
+    this.skipRushCheck = skipRushCheck;
   }
 
   public abstract get filePath(): string;
@@ -31,5 +32,5 @@ export abstract class VersionMismatchFinderEntity {
     dependencyType: DependencyType
   ): void;
   public abstract removeDependency(packageName: string, dependencyType: DependencyType): void;
-  public abstract saveIfModified(): boolean;
+  public abstract saveIfModifiedAsync(): Promise<boolean>;
 }
