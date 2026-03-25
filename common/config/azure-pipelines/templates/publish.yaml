@@ -6,7 +6,14 @@ parameters:
     default: $(Build.SourceBranchName)
 
 steps:
-  - script: 'node common/scripts/install-run-rush.js publish --apply --publish --include-all --target-branch ${{ parameters.BranchName }} --add-commit-details --set-access-level public'
-    displayName: 'Rush Publish (Policy: ${{ parameters.VersionPolicyName }})'
-    env:
-      NPM_AUTH_TOKEN: $(npmToken)
+  - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+    parameters:
+      Arguments: >
+        publish
+        --apply
+        --publish
+        --include-all
+        --target-branch ${{ parameters.BranchName }}
+        --add-commit-details --set-access-level public
+      DisplayName: 'Rush Publish (Policy: ${{ parameters.VersionPolicyName }})'
+      NpmAuthToken: $(npmToken)

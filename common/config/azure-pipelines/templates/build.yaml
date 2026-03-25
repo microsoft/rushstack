@@ -10,11 +10,17 @@ steps:
   - script: 'git config --local user.name Rushbot'
     displayName: 'git config name'
 
-  - script: 'node common/scripts/install-run-rush.js change --verify'
-    displayName: 'Verify Change Logs'
+  - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+    parameters:
+      Arguments: >
+        change
+        --verify
+      DisplayName: 'Verify Change Logs'
 
-  - script: 'node common/scripts/install-run-rush.js install'
-    displayName: 'Rush Install'
+  - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+    parameters:
+      Arguments: 'install'
+      DisplayName: 'Rush Install'
 
   # - bash: |
   #     /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
@@ -22,8 +28,13 @@ steps:
   #   displayName: Start xvfb
   #   condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
 
-  - script: 'node common/scripts/install-run-rush.js retest --verbose --production ${{ parameters.BuildParameters }}'
-    displayName: 'Rush retest (install-run-rush)'
+  - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+    parameters:
+      Arguments: >
+        retest
+        --verbose
+        --production ${{ parameters.BuildParameters }}
+      DisplayName: 'Rush retest (install-run-rush)'
 
   - script: 'npm run test'
     workingDirectory: 'build-tests/rush-package-manager-integration-test'
