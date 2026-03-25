@@ -1,0 +1,8 @@
+{
+  "name": "plugins",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@rushstack/rush-published-versions-json-plugin": "0.1.0"
+  }
+}
