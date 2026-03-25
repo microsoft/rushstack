@@ -116,6 +116,24 @@ extends:
                   Arguments: 'bump-decoupled-local-dependencies'
                   DisplayName: 'Bump decoupled local dependencies'
 
+              # If Rush itself was updated by bump-decoupled-local-dependencies, we need to bootstrap
+              # the new version and update the checked-in lockfile before running `rush update`.
+              # Otherwise install-run-rush.js would fail lockfile validation when trying to install
+              # the new version of Rush (the checked-in lockfile still references the old version).
+              - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+                parameters:
+                  Arguments: '--help'
+                  DisplayName: 'Install new Rush version (skip lockfile validation)'
+                  DisableInstallRunRushLockfile: true
+                  Condition: "eq(variables['RushWasUpdated'], 'true')"
+
+              - bash: >
+                  cp
+                  "common/temp/install-run/@microsoft+rush@$(NewRushVersion)/package-lock.json"
+                  common/config/validation/rush-package-lock.json
+                displayName: 'Update rush-package-lock.json (new Rush version)'
+                condition: eq(variables['RushWasUpdated'], 'true')
+
               - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
                 parameters:
                   Arguments: 'update'
@@ -125,9 +143,6 @@ extends:
                 parameters:
                   Arguments: 'update-autoinstaller --name plugins'
                   DisplayName: 'Rush Update Autoinstaller (plugins)'
-
-              - bash: cp common/temp/install-run/@microsoft+rush@*/package-lock.json common/config/validation/rush-package-lock.json
-                displayName: 'Update rush-package-lock.json'
 
               - bash: |
                   set -e
@@ -188,6 +203,8 @@ extends:
                 parameters:
                   Arguments: 'install'
                   DisplayName: 'Rush Install (rushstack-websites)'
+                  # rushstack-websites doesn't have an `install-run-rush` lockfile checked in
+                  DisableInstallRunRushLockfile: true
 
               - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
                 parameters:
@@ -196,6 +213,8 @@ extends:
                     --to-except api.rushstack.io
                     --verbose
                   DisplayName: 'Rush Build to-except api.rushstack.io (rushstack-websites)'
+                  # rushstack-websites doesn't have an `install-run-rush` lockfile checked in
+                  DisableInstallRunRushLockfile: true
 
               # Download the api artifact from the triggering publish pipeline.
               # AzDO automatically resolves which pipeline resource triggered this run.
