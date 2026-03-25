@@ -180,8 +180,19 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
     // Update the Rush version in rush.json
     const latestRushVersion: string = await _getLatestPublishedVersionAsync(terminal, '@microsoft/rush');
     const rushJson: IRushConfigurationJson = await JsonFile.loadAsync(rushJsonFile);
-    rushJson.rushVersion = latestRushVersion;
-    await JsonFile.saveAsync(rushJson, rushJsonFile, { updateExistingFile: true });
-    terminal.writeLine(`Updated ${rushJsonFile}`);
+    const existingRushVersion: string = rushJson.rushVersion;
+    const rushWasUpdated: boolean = existingRushVersion !== latestRushVersion;
+    if (rushWasUpdated) {
+      rushJson.rushVersion = latestRushVersion;
+      await JsonFile.saveAsync(rushJson, rushJsonFile, { updateExistingFile: true });
+      terminal.writeLine(
+        `Updated ${rushJsonFile}: Rush version ${existingRushVersion} -> ${latestRushVersion}`
+      );
+    }
+
+    // Emit Azure Pipelines variables so subsequent pipeline steps can handle the Rush version change.
+    // These are no-ops when run outside of Azure Pipelines.
+    terminal.writeLine(`##vso[task.setvariable variable=NewRushVersion]${latestRushVersion}`);
+    terminal.writeLine(`##vso[task.setvariable variable=RushWasUpdated]${rushWasUpdated}`);
   }
 }
