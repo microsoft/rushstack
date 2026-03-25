@@ -111,10 +111,10 @@ extends:
                     --verbose
                   DisplayName: 'Rush Build (repo-toolbox)'
 
-              - script: >
-                  node repo-scripts/repo-toolbox/lib-commonjs/start.js
-                  bump-decoupled-local-dependencies
-                displayName: 'Bump decoupled local dependencies'
+              - template: /common/config/azure-pipelines/templates/run-repo-toolbox.yaml@self
+                parameters:
+                  Arguments: 'bump-decoupled-local-dependencies'
+                  DisplayName: 'Bump decoupled local dependencies'
 
               - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
                 parameters:

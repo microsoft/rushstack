@@ -1,15 +1,23 @@
 steps:
-  - script: 'node common/scripts/install-run-rush.js record-published-versions --output-path $(Build.ArtifactStagingDirectory)/published-versions/published-versions.json'
-    displayName: 'Record Published Versions'
+  - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+    parameters:
+      Arguments: >
+        record-published-versions
+        --output-path $(Build.ArtifactStagingDirectory)/published-versions/published-versions.json
+      DisplayName: 'Record Published Versions'
 
-  - script: >
-      node repo-scripts/repo-toolbox/lib-commonjs/start.js collect-project-files
-      --subfolder temp/json-schemas
-      --output-path $(Build.ArtifactStagingDirectory)/json-schemas
-    displayName: 'Collect JSON Schemas'
+  - template: /common/config/azure-pipelines/templates/run-repo-toolbox.yaml@self
+    parameters:
+      Arguments: >
+        collect-project-files
+        --subfolder temp/json-schemas
+        --output-path $(Build.ArtifactStagingDirectory)/json-schemas
+      DisplayName: 'Collect JSON Schemas'
 
-  - script: >
-      node repo-scripts/repo-toolbox/lib-commonjs/start.js collect-project-files
-      --subfolder temp/api
-      --output-path $(Build.ArtifactStagingDirectory)/api
-    displayName: 'Collect API review files'
+  - template: /common/config/azure-pipelines/templates/run-repo-toolbox.yaml@self
+    parameters:
+      Arguments: >
+        collect-project-files
+        --subfolder temp/api
+        --output-path $(Build.ArtifactStagingDirectory)/api
+      DisplayName: 'Collect API review files'
