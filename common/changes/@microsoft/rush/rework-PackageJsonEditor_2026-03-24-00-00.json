@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add async variants of disk-touching APIs in `PackageJsonEditor` (`loadAsync`, `saveIfModifiedAsync`), `CommonVersionsConfiguration` (`loadFromFileAsync`, `saveAsync`), and `VersionPolicy` (`setDependenciesBeforePublishAsync`, `setDependenciesBeforeCommitAsync`); deprecate corresponding sync methods.",
+      "type": "minor",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
