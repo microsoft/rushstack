@@ -1,0 +1,10 @@
+# Runs repo-toolbox with the specified CLI arguments.
+parameters:
+  - name: Arguments
+    type: string
+  - name: DisplayName
+    type: string
+
+steps:
+  - script: 'node repo-scripts/repo-toolbox/lib-commonjs/start.js ${{ parameters.Arguments }}'
+    displayName: '${{ parameters.DisplayName }}'

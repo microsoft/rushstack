@@ -1,0 +1,22 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "globalPlugin",
+      "name": "record-published-versions",
+      "summary": "Generates a JSON file recording the version numbers of all published packages.",
+      "safeForSimultaneousRushProcesses": true
+    }
+  ],
+  "parameters": [
+    {
+      "parameterKind": "string",
+      "longName": "--output-path",
+      "shortName": "-o",
+      "argumentName": "FILE_PATH",
+      "description": "The path to the output JSON file. Relative paths are resolved from the repo root.",
+      "associatedCommands": ["record-published-versions"],
+      "required": true
+    }
+  ]
+}

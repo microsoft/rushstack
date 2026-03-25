@@ -3,9 +3,9 @@
 
 import type { ChildProcess } from 'node:child_process';
 
-import { Async, Executable, JsonFile } from '@rushstack/node-core-library';
+import { Async, Executable, FileSystem, type FolderItem, JsonFile } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import { DependencyType, RushConfiguration } from '@microsoft/rush-lib';
+import { DependencyType, PackageJsonEditor, RushConfiguration, type Subspace } from '@microsoft/rush-lib';
 import type { IRushConfigurationJson } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 
@@ -30,6 +30,13 @@ async function _getLatestPublishedVersionAsync(terminal: ITerminal, packageName:
   });
 }
 
+interface IProjectLike {
+  packageName: string;
+  decoupledLocalDependencies: Iterable<string>;
+  subspace: Subspace | undefined;
+  packageJsonEditor: PackageJsonEditor;
+}
+
 export class BumpDecoupledLocalDependencies extends CommandLineAction {
   private readonly _terminal: ITerminal;
 
@@ -45,21 +52,78 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
 
   protected override async onExecuteAsync(): Promise<void> {
     const terminal: ITerminal = this._terminal;
-    const { projects, rushJsonFile } = RushConfiguration.loadFromDefaultLocation({
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
       startingFolder: process.cwd()
     });
+    const { projects, rushJsonFile, commonAutoinstallersFolder } = rushConfiguration;
 
-    const cyclicDependencyNames: Set<string> = new Set<string>();
+    const projectsToUpdate: IProjectLike[] = [];
 
-    for (const { decoupledLocalDependencies } of projects) {
+    const allDecoupledLocalDependencyNames: Set<string> = new Set();
+    for (const project of projects) {
+      const { decoupledLocalDependencies } = project;
       for (const decoupledLocalDependency of decoupledLocalDependencies) {
-        cyclicDependencyNames.add(decoupledLocalDependency);
+        allDecoupledLocalDependencyNames.add(decoupledLocalDependency);
+      }
+
+      projectsToUpdate.push(project);
+    }
+
+    // Collect all package names published from this repo
+    const publishedPackageNames: Set<string> = new Set();
+    for (const { shouldPublish, packageName } of projects) {
+      // Note that shouldPublish is also true here if the project is driven by a version policy
+      if (shouldPublish) {
+        publishedPackageNames.add(packageName);
       }
     }
 
-    const decoupledLocalDependencyVersionsByName: Map<string, string> = new Map<string, string>();
+    let autoinstallerEntries: FolderItem[] = [];
+    try {
+      autoinstallerEntries = await FileSystem.readFolderItemsAsync(commonAutoinstallersFolder);
+    } catch (error) {
+      if (!FileSystem.isNotExistError(error)) {
+        throw error;
+      }
+    }
+
     await Async.forEachAsync(
-      Array.from(cyclicDependencyNames),
+      autoinstallerEntries,
+      async (folderItem) => {
+        if (folderItem.isDirectory()) {
+          const autoinstallerName: string = folderItem.name;
+          const packageJsonPath: string = `${commonAutoinstallersFolder}/${autoinstallerName}/package.json`;
+          try {
+            const packageJsonEditor: PackageJsonEditor = PackageJsonEditor.load(packageJsonPath);
+
+            const { dependencyList, devDependencyList } = packageJsonEditor;
+            const decoupledLocalDependencies: Set<string> = new Set();
+            for (const { name } of [...dependencyList, ...devDependencyList]) {
+              if (publishedPackageNames.has(name)) {
+                allDecoupledLocalDependencyNames.add(name);
+                decoupledLocalDependencies.add(name);
+              }
+            }
+
+            projectsToUpdate.push({
+              packageName: `${autoinstallerName} (autoinstaller)`,
+              decoupledLocalDependencies,
+              subspace: undefined,
+              packageJsonEditor
+            });
+          } catch (error) {
+            if (!FileSystem.isNotExistError(error)) {
+              throw error;
+            }
+          }
+        }
+      },
+      { concurrency: 10 }
+    );
+
+    const decoupledLocalDependencyVersionsByName: Map<string, string> = new Map();
+    await Async.forEachAsync(
+      allDecoupledLocalDependencyNames,
       async (decoupledLocalDependencyName) => {
         const version: string = await _getLatestPublishedVersionAsync(terminal, decoupledLocalDependencyName);
         decoupledLocalDependencyVersionsByName.set(decoupledLocalDependencyName, version);
@@ -71,21 +135,17 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
 
     terminal.writeLine();
 
-    for (const {
-      packageName,
-      decoupledLocalDependencies,
-      subspace,
-      packageJson: { dependencies, devDependencies },
-      packageJsonEditor
-    } of projects) {
-      const { allowedAlternativeVersions } = subspace.getCommonVersions();
+    for (const { packageName, decoupledLocalDependencies, subspace, packageJsonEditor } of projectsToUpdate) {
+      const { allowedAlternativeVersions } = subspace?.getCommonVersions() ?? {};
 
       for (const cyclicDependencyProject of decoupledLocalDependencies) {
-        const existingVersion: string | undefined =
-          dependencies?.[cyclicDependencyProject] ?? devDependencies?.[cyclicDependencyProject];
+        const { version: existingVersion } =
+          packageJsonEditor.tryGetDependency(cyclicDependencyProject) ??
+          packageJsonEditor.tryGetDevDependency(cyclicDependencyProject) ??
+          {};
         if (
           existingVersion &&
-          allowedAlternativeVersions.get(cyclicDependencyProject)?.includes(existingVersion)
+          allowedAlternativeVersions?.get(cyclicDependencyProject)?.includes(existingVersion)
         ) {
           // Skip if the existing version is allowed by common-versions.json
           continue;

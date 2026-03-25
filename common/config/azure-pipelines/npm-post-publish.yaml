@@ -111,13 +111,20 @@ extends:
                     --verbose
                   DisplayName: 'Rush Build (repo-toolbox)'
 
-              - script: 'node repo-scripts/repo-toolbox/lib-commonjs/start.js bump-decoupled-local-dependencies'
-                displayName: 'Bump decoupled local dependencies'
+              - template: /common/config/azure-pipelines/templates/run-repo-toolbox.yaml@self
+                parameters:
+                  Arguments: 'bump-decoupled-local-dependencies'
+                  DisplayName: 'Bump decoupled local dependencies'
 
               - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
                 parameters:
                   Arguments: 'update'
                   DisplayName: 'Rush Update'
+
+              - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+                parameters:
+                  Arguments: 'update-autoinstaller --name plugins'
+                  DisplayName: 'Rush Update Autoinstaller (plugins)'
 
               - bash: cp common/temp/install-run/@microsoft+rush@*/package-lock.json common/config/validation/rush-package-lock.json
                 displayName: 'Update rush-package-lock.json'
@@ -206,7 +213,11 @@ extends:
               # Run api-documenter with the Docusaurus plugin from the
               # api.rushstack.io project directory so it picks up
               # config/api-documenter.json.
-              - script: 'npx @microsoft/api-documenter@latest generate --input-folder $(Pipeline.Workspace)/api --output-folder ./docs/pages'
+              - script: >
+                  npx @microsoft/api-documenter@latest
+                  generate
+                  --input-folder $(Pipeline.Workspace)/api
+                  --output-folder ./docs/pages
                 displayName: 'Generate API documentation'
                 workingDirectory: websites/api.rushstack.io
 
