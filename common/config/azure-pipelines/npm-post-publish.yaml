@@ -188,6 +188,8 @@ extends:
                 parameters:
                   Arguments: 'install'
                   DisplayName: 'Rush Install (rushstack-websites)'
+                  # rushstack-websites doesn't have an `install-run-rush` lockfile checked in
+                  DisableInstallRunRushLockfile: true
 
               - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
                 parameters:
@@ -196,6 +198,8 @@ extends:
                     --to-except api.rushstack.io
                     --verbose
                   DisplayName: 'Rush Build to-except api.rushstack.io (rushstack-websites)'
+                  # rushstack-websites doesn't have an `install-run-rush` lockfile checked in
+                  DisableInstallRunRushLockfile: true
 
               # Download the api artifact from the triggering publish pipeline.
               # AzDO automatically resolves which pipeline resource triggered this run.
