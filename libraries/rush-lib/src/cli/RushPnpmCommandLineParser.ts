@@ -432,16 +432,12 @@ export class RushPnpmCommandLineParser {
     const rushConfiguration: RushConfiguration = this._rushConfiguration;
     const workspaceFolder: string = this._subspace.getSubspaceTempFolderPath();
     const pnpmEnvironmentMap: EnvironmentMap = new EnvironmentMap(process.env);
-
-    // Pass pnpm configuration as CLI args rather than NPM_CONFIG_* environment variables.
-    // Using env vars like NPM_CONFIG_STORE_DIR would cause "Unknown env config" warnings
-    // when pnpm internally delegates to npm (e.g. during publish operations).
-    const pnpmConfigArgs: string[] = [`--config.workspaceDir=${workspaceFolder}`];
+    pnpmEnvironmentMap.set('NPM_CONFIG_WORKSPACE_DIR', workspaceFolder);
 
     if (rushConfiguration.pnpmOptions.pnpmStorePath) {
-      pnpmConfigArgs.push(`--store-dir=${rushConfiguration.pnpmOptions.pnpmStorePath}`);
-      pnpmConfigArgs.push(`--config.cacheDir=${rushConfiguration.pnpmOptions.pnpmStorePath}`);
-      pnpmConfigArgs.push(`--config.stateDir=${rushConfiguration.pnpmOptions.pnpmStorePath}`);
+      pnpmEnvironmentMap.set('NPM_CONFIG_STORE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
+      pnpmEnvironmentMap.set('NPM_CONFIG_CACHE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
+      pnpmEnvironmentMap.set('NPM_CONFIG_STATE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
     }
 
     if (rushConfiguration.pnpmOptions.environmentVariables) {
@@ -477,7 +473,7 @@ export class RushPnpmCommandLineParser {
     try {
       const { exitCode } = await Utilities.executeCommandAsync({
         command: rushConfiguration.packageManagerToolFilename,
-        args: [...pnpmConfigArgs, ...this._pnpmArgs],
+        args: this._pnpmArgs,
         workingDirectory: process.cwd(),
         environment: pnpmEnvironmentMap.toObject(),
         keepEnvironment: true,
