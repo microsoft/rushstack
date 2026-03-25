@@ -3,14 +3,7 @@
 
 import type { ChildProcess } from 'node:child_process';
 
-import {
-  Async,
-  Executable,
-  FileSystem,
-  type FolderItem,
-  JsonFile,
-  type IPackageJson
-} from '@rushstack/node-core-library';
+import { Async, Executable, FileSystem, type FolderItem, JsonFile } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { DependencyType, PackageJsonEditor, RushConfiguration, type Subspace } from '@microsoft/rush-lib';
 import type { IRushConfigurationJson } from '@microsoft/rush-lib/lib/api/RushConfiguration';
