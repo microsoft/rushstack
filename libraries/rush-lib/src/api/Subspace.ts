@@ -325,6 +325,7 @@ export class Subspace {
         this._rushConfiguration
       );
     }
+
     return this._commonVersionsConfiguration;
   }
 

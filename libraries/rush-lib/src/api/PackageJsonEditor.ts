@@ -97,97 +97,89 @@ export class PackageJsonEditor {
     this._sourceData = data;
     this._modified = false;
 
-    this._dependencies = new Map<string, PackageJsonDependency>();
-    this._devDependencies = new Map<string, PackageJsonDependency>();
-    this._resolutions = new Map<string, PackageJsonDependency>();
-    this._dependenciesMeta = new Map<string, PackageJsonDependencyMeta>();
-
-    const dependencies: { [key: string]: string } = data.dependencies || {};
-    const optionalDependencies: { [key: string]: string } = data.optionalDependencies || {};
-    const peerDependencies: { [key: string]: string } = data.peerDependencies || {};
-
-    const devDependencies: { [key: string]: string } = data.devDependencies || {};
-    const resolutions: { [key: string]: string } = data.resolutions || {};
-
-    const dependenciesMeta: { [key: string]: { [key: string]: boolean } } = data.dependenciesMeta || {};
+    const {
+      dependencies = {},
+      optionalDependencies = {},
+      peerDependencies = {},
+      devDependencies = {},
+      resolutions = {},
+      dependenciesMeta = {}
+    } = data;
 
     const _onChange: () => void = this._onChange.bind(this);
 
+    const optionalDependenciesSet: Set<string> = new Set(Object.keys(optionalDependencies));
+    const peerDependenciesSet: Set<string> = new Set(Object.keys(peerDependencies));
     try {
-      Object.keys(dependencies || {}).forEach((packageName: string) => {
-        if (Object.prototype.hasOwnProperty.call(optionalDependencies, packageName)) {
-          throw new Error(
-            `The package "${packageName}" cannot be listed in both ` +
-              `"dependencies" and "optionalDependencies"`
-          );
-        }
-        if (Object.prototype.hasOwnProperty.call(peerDependencies, packageName)) {
-          throw new Error(
-            `The package "${packageName}" cannot be listed in both "dependencies" and "peerDependencies"`
-          );
-        }
+      const dependenciesMapEntries: [string, PackageJsonDependency][] = Object.entries(dependencies).map(
+        ([packageName, version]: [string, string]) => {
+          if (optionalDependenciesSet.has(packageName)) {
+            throw new Error(
+              `The package "${packageName}" cannot be listed in both ` +
+                `"dependencies" and "optionalDependencies"`
+            );
+          }
+          if (peerDependenciesSet.has(packageName)) {
+            throw new Error(
+              `The package "${packageName}" cannot be listed in both "dependencies" and "peerDependencies"`
+            );
+          }
 
-        this._dependencies.set(
-          packageName,
-          new PackageJsonDependency(packageName, dependencies[packageName], DependencyType.Regular, _onChange)
-        );
-      });
+          return [
+            packageName,
+            new PackageJsonDependency(packageName, version, DependencyType.Regular, _onChange)
+          ];
+        }
+      );
 
-      Object.keys(optionalDependencies || {}).forEach((packageName: string) => {
-        if (Object.prototype.hasOwnProperty.call(peerDependencies, packageName)) {
+      const optionalDependenciesMapEntries: [string, PackageJsonDependency][] = Object.entries(
+        optionalDependencies
+      ).map(([packageName, version]) => {
+        if (peerDependenciesSet.has(packageName)) {
           throw new Error(
             `The package "${packageName}" cannot be listed in both ` +
               `"optionalDependencies" and "peerDependencies"`
           );
         }
-        this._dependencies.set(
+        return [
           packageName,
-          new PackageJsonDependency(
-            packageName,
-            optionalDependencies[packageName],
-            DependencyType.Optional,
-            _onChange
-          )
-        );
+          new PackageJsonDependency(packageName, version, DependencyType.Optional, _onChange)
+        ];
       });
 
-      Object.keys(peerDependencies || {}).forEach((packageName: string) => {
-        this._dependencies.set(
-          packageName,
-          new PackageJsonDependency(
-            packageName,
-            peerDependencies[packageName],
-            DependencyType.Peer,
-            _onChange
-          )
-        );
-      });
+      const peerDependenciesMapEntries: [string, PackageJsonDependency][] = Object.entries(
+        peerDependencies
+      ).map(([packageName, version]) => [
+        packageName,
+        new PackageJsonDependency(packageName, version, DependencyType.Peer, _onChange)
+      ]);
 
-      Object.keys(devDependencies || {}).forEach((packageName: string) => {
-        this._devDependencies.set(
-          packageName,
-          new PackageJsonDependency(packageName, devDependencies[packageName], DependencyType.Dev, _onChange)
-        );
-      });
+      this._dependencies = new Map([
+        ...dependenciesMapEntries,
+        ...optionalDependenciesMapEntries,
+        ...peerDependenciesMapEntries
+      ]);
 
-      Object.keys(resolutions || {}).forEach((packageName: string) => {
-        this._resolutions.set(
+      this._devDependencies = new Map(
+        Object.entries(devDependencies).map(([packageName, version]) => [
           packageName,
-          new PackageJsonDependency(
-            packageName,
-            resolutions[packageName],
-            DependencyType.YarnResolutions,
-            _onChange
-          )
-        );
-      });
+          new PackageJsonDependency(packageName, version, DependencyType.Dev, _onChange)
+        ])
+      );
 
-      Object.keys(dependenciesMeta || {}).forEach((packageName: string) => {
-        this._dependenciesMeta.set(
+      this._resolutions = new Map(
+        Object.entries(resolutions).map(([packageName, version]) => [
           packageName,
-          new PackageJsonDependencyMeta(packageName, dependenciesMeta[packageName].injected, _onChange)
-        );
-      });
+          new PackageJsonDependency(packageName, version, DependencyType.YarnResolutions, _onChange)
+        ])
+      );
+
+      this._dependenciesMeta = new Map(
+        Object.entries(dependenciesMeta).map(([packageName, { injected = false }]) => [
+          packageName,
+          new PackageJsonDependencyMeta(packageName, injected, _onChange)
+        ])
+      );
 
       // (Do not sort this._resolutions because order may be significant; the RFC is unclear about that.)
       Sort.sortMapKeys(this._dependencies);
@@ -197,8 +189,17 @@ export class PackageJsonEditor {
     }
   }
 
+  /**
+   * @deprecated Use {@link PackageJsonEditor.loadAsync} method instead.
+   */
   public static load(filePath: string): PackageJsonEditor {
-    return new PackageJsonEditor(filePath, JsonFile.load(filePath));
+    const packageJson: IPackageJson = JsonFile.load(filePath);
+    return new PackageJsonEditor(filePath, packageJson);
+  }
+
+  public static async loadAsync(filePath: string): Promise<PackageJsonEditor> {
+    const packageJson: IPackageJson = await JsonFile.loadAsync(filePath);
+    return new PackageJsonEditor(filePath, packageJson);
   }
 
   public static fromObject(object: IPackageJson, filename: string): PackageJsonEditor {
@@ -270,17 +271,24 @@ export class PackageJsonEditor {
     switch (dependencyType) {
       case DependencyType.Regular:
       case DependencyType.Optional:
-      case DependencyType.Peer:
+      case DependencyType.Peer: {
         this._dependencies.set(packageName, dependency);
         break;
-      case DependencyType.Dev:
+      }
+
+      case DependencyType.Dev: {
         this._devDependencies.set(packageName, dependency);
         break;
-      case DependencyType.YarnResolutions:
+      }
+
+      case DependencyType.YarnResolutions: {
         this._resolutions.set(packageName, dependency);
         break;
-      default:
+      }
+
+      default: {
         throw new InternalError('Unsupported DependencyType');
+      }
     }
 
     this._modified = true;
@@ -290,22 +298,32 @@ export class PackageJsonEditor {
     switch (dependencyType) {
       case DependencyType.Regular:
       case DependencyType.Optional:
-      case DependencyType.Peer:
+      case DependencyType.Peer: {
         this._dependencies.delete(packageName);
         break;
-      case DependencyType.Dev:
+      }
+
+      case DependencyType.Dev: {
         this._devDependencies.delete(packageName);
         break;
-      case DependencyType.YarnResolutions:
+      }
+
+      case DependencyType.YarnResolutions: {
         this._resolutions.delete(packageName);
         break;
-      default:
+      }
+
+      default: {
         throw new InternalError('Unsupported DependencyType');
+      }
     }
 
     this._modified = true;
   }
 
+  /**
+   * @deprecated Use {@link PackageJsonEditor.saveIfModifiedAsync} method instead.
+   */
   public saveIfModified(): boolean {
     if (this._modified) {
       this._modified = false;
@@ -316,6 +334,21 @@ export class PackageJsonEditor {
       });
       return true;
     }
+
+    return false;
+  }
+
+  public async saveIfModifiedAsync(): Promise<boolean> {
+    if (this._modified) {
+      this._modified = false;
+      this._sourceData = this._normalize(this._sourceData);
+      await JsonFile.saveAsync(this._sourceData, this.filePath, {
+        updateExistingFile: true,
+        jsonSyntax: JsonSyntax.Strict
+      });
+      return true;
+    }
+
     return false;
   }
 
@@ -353,53 +386,64 @@ export class PackageJsonEditor {
     const keys: string[] = [...this._dependencies.keys()].sort();
 
     for (const packageName of keys) {
-      const dependency: PackageJsonDependency = this._dependencies.get(packageName)!;
+      const { dependencyType, name, version }: PackageJsonDependency = this._dependencies.get(packageName)!;
 
-      switch (dependency.dependencyType) {
-        case DependencyType.Regular:
+      switch (dependencyType) {
+        case DependencyType.Regular: {
           if (!normalizedData.dependencies) {
             normalizedData.dependencies = {};
           }
-          normalizedData.dependencies[dependency.name] = dependency.version;
+
+          normalizedData.dependencies[name] = version;
           break;
-        case DependencyType.Optional:
+        }
+
+        case DependencyType.Optional: {
           if (!normalizedData.optionalDependencies) {
             normalizedData.optionalDependencies = {};
           }
-          normalizedData.optionalDependencies[dependency.name] = dependency.version;
+
+          normalizedData.optionalDependencies[name] = version;
           break;
-        case DependencyType.Peer:
+        }
+
+        case DependencyType.Peer: {
           if (!normalizedData.peerDependencies) {
             normalizedData.peerDependencies = {};
           }
-          normalizedData.peerDependencies[dependency.name] = dependency.version;
+
+          normalizedData.peerDependencies[name] = version;
           break;
+        }
+
         case DependencyType.Dev: // uses this._devDependencies instead
         case DependencyType.YarnResolutions: // uses this._resolutions instead
-        default:
+        default: {
           throw new InternalError('Unsupported DependencyType');
+        }
       }
     }
 
     const devDependenciesKeys: string[] = [...this._devDependencies.keys()].sort();
-
     for (const packageName of devDependenciesKeys) {
-      const dependency: PackageJsonDependency = this._devDependencies.get(packageName)!;
+      const { name, version }: PackageJsonDependency = this._devDependencies.get(packageName)!;
 
       if (!normalizedData.devDependencies) {
         normalizedData.devDependencies = {};
       }
-      normalizedData.devDependencies[dependency.name] = dependency.version;
+
+      normalizedData.devDependencies[name] = version;
     }
 
     // (Do not sort this._resolutions because order may be significant; the RFC is unclear about that.)
     for (const packageName of this._resolutions.keys()) {
-      const dependency: PackageJsonDependency = this._resolutions.get(packageName)!;
+      const { name, version }: PackageJsonDependency = this._resolutions.get(packageName)!;
 
       if (!normalizedData.resolutions) {
         normalizedData.resolutions = {};
       }
-      normalizedData.resolutions[dependency.name] = dependency.version;
+
+      normalizedData.resolutions[name] = version;
     }
 
     return normalizedData;

@@ -5,6 +5,7 @@ import * as semver from 'semver';
 
 import type { INpmCheckPackageSummary } from '@rushstack/npm-check-fork';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
+import { Async } from '@rushstack/node-core-library';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { BaseInstallManager } from './base/BaseInstallManager';
@@ -223,11 +224,16 @@ export class PackageJsonUpdater {
       }
     }
 
-    for (const [filePath, project] of allPackageUpdates) {
-      if (project.saveIfModified()) {
-        this._terminal.writeLine(Colorize.green('Wrote ') + filePath);
-      }
-    }
+    await Async.forEachAsync(
+      allPackageUpdates,
+      async ([filePath, project]) => {
+        const modified: boolean = await project.saveIfModifiedAsync();
+        if (modified) {
+          this._terminal.writeLine(Colorize.green('Wrote ') + filePath);
+        }
+      },
+      { concurrency: 10 }
+    );
 
     if (!skipUpdate) {
       if (this._rushConfiguration.subspacesFeatureEnabled) {
@@ -252,12 +258,18 @@ export class PackageJsonUpdater {
     } else {
       throw new Error('only accept "rush add" or "rush remove"');
     }
+
     const { skipUpdate, debugInstall, variant } = options;
-    for (const { project } of allPackageUpdates) {
-      if (project.saveIfModified()) {
-        this._terminal.writeLine(Colorize.green('Wrote'), project.filePath);
-      }
-    }
+    await Async.forEachAsync(
+      allPackageUpdates,
+      async ({ project }) => {
+        const modified: boolean = await project.saveIfModifiedAsync();
+        if (modified) {
+          this._terminal.writeLine(Colorize.green('Wrote'), project.filePath);
+        }
+      },
+      { concurrency: 10 }
+    );
 
     if (!skipUpdate) {
       if (this._rushConfiguration.subspacesFeatureEnabled) {

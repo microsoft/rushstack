@@ -10,7 +10,7 @@ import type {
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
-import { FileSystem } from '@rushstack/node-core-library';
+import { Async, FileSystem } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
 import { type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
@@ -24,12 +24,12 @@ import { ChangeManager } from '../../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import * as PolicyValidator from '../../logic/policy/PolicyValidator';
-import type { VersionPolicy } from '../../api/VersionPolicy';
 import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 import { Utilities } from '../../utilities/Utilities';
 import { Git } from '../../logic/Git';
 import { RushConstants } from '../../logic/RushConstants';
 import { IS_WINDOWS } from '../../utilities/executionUtilities';
+import type { RushConfiguration } from '../../api/RushConfiguration';
 
 export class PublishAction extends BaseRushAction {
   private readonly _addCommitDetails: CommandLineFlagParameter;
@@ -294,13 +294,13 @@ export class PublishAction extends BaseRushAction {
       // Make changes in temp branch.
       await publishGit.checkoutAsync(tempBranchName, true);
 
-      this._setDependenciesBeforePublish();
+      await this._setDependenciesBeforePublishAsync();
 
       // Make changes to package.json and change logs.
       changeManager.apply(this._apply.value);
       await changeManager.updateChangelogAsync(this._apply.value);
 
-      this._setDependenciesBeforeCommit();
+      await this._setDependenciesBeforeCommitAsync();
 
       if (await git.hasUncommittedChangesAsync()) {
         // Stage, commit, and push the changes to remote temp branch.
@@ -311,7 +311,7 @@ export class PublishAction extends BaseRushAction {
         );
         await publishGit.pushAsync(tempBranchName, !this._ignoreGitHooksParameter.value);
 
-        this._setDependenciesBeforePublish();
+        await this._setDependenciesBeforePublishAsync();
 
         // Override tag parameter if there is a hotfix change.
         for (const change of orderedChanges) {
@@ -339,7 +339,7 @@ export class PublishAction extends BaseRushAction {
           }
         }
 
-        this._setDependenciesBeforeCommit();
+        await this._setDependenciesBeforeCommitAsync();
 
         // Create and push appropriate Git tags.
         await this._gitAddTagsAsync(publishGit, orderedChanges);
@@ -560,28 +560,30 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _setDependenciesBeforePublish(): void {
-    for (const project of this.rushConfiguration.projects) {
-      if (!this._versionPolicy.value || this._versionPolicy.value === project.versionPolicyName) {
-        const versionPolicy: VersionPolicy | undefined = project.versionPolicy;
-
-        if (versionPolicy) {
-          versionPolicy.setDependenciesBeforePublish(project.packageName, this.rushConfiguration);
+  private async _setDependenciesBeforePublishAsync(): Promise<void> {
+    const rushConfiguration: RushConfiguration = this.rushConfiguration;
+    await Async.forEachAsync(
+      rushConfiguration.projects,
+      async ({ versionPolicy, versionPolicyName, packageName }) => {
+        if (!this._versionPolicy.value || this._versionPolicy.value === versionPolicyName) {
+          await versionPolicy?.setDependenciesBeforePublishAsync(packageName, rushConfiguration);
         }
-      }
-    }
+      },
+      { concurrency: 10 }
+    );
   }
 
-  private _setDependenciesBeforeCommit(): void {
-    for (const project of this.rushConfiguration.projects) {
-      if (!this._versionPolicy.value || this._versionPolicy.value === project.versionPolicyName) {
-        const versionPolicy: VersionPolicy | undefined = project.versionPolicy;
-
-        if (versionPolicy) {
-          versionPolicy.setDependenciesBeforePublish(project.packageName, this.rushConfiguration);
+  private async _setDependenciesBeforeCommitAsync(): Promise<void> {
+    const rushConfiguration: RushConfiguration = this.rushConfiguration;
+    await Async.forEachAsync(
+      rushConfiguration.projects,
+      async ({ versionPolicy, versionPolicyName, packageName }) => {
+        if (!this._versionPolicy.value || this._versionPolicy.value === versionPolicyName) {
+          await versionPolicy?.setDependenciesBeforeCommitAsync(packageName, rushConfiguration);
         }
-      }
-    }
+      },
+      { concurrency: 10 }
+    );
   }
 
   private _addNpmPublishHome(supportEnvVarFallbackSyntax: boolean): void {

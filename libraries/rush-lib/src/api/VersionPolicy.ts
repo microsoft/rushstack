@@ -53,6 +53,66 @@ export enum VersionPolicyDefinitionName {
 }
 
 /**
+ * Updates the dependencies in the package json editor to values used for publishing, if needed.
+ *
+ * @returns the updated package json editor if the version format for publish is 'exact', otherwise undefined.
+ */
+function updateDependenciesBeforePublish(
+  packageName: string,
+  configuration: RushConfiguration,
+  versionFormatForPublish: VersionFormatForPublish
+): PackageJsonEditor | undefined {
+  if (versionFormatForPublish === 'exact') {
+    const project: RushConfigurationProject = configuration.getProjectByName(packageName)!;
+
+    const packageJsonEditor: PackageJsonEditor = project.packageJsonEditor;
+
+    for (const dependency of packageJsonEditor.dependencyList) {
+      const rushDependencyProject: RushConfigurationProject | undefined = configuration.getProjectByName(
+        dependency.name
+      );
+
+      if (rushDependencyProject) {
+        const dependencyVersion: string = rushDependencyProject.packageJson.version;
+
+        dependency.setVersion(dependencyVersion);
+      }
+    }
+
+    return packageJsonEditor;
+  }
+}
+
+/**
+ * Updates the dependencies in the package json editor to values used for checked-in source, if needed.
+ *
+ * @returns the updated package json editor if the version format for commit is 'wildcard', otherwise undefined.
+ */
+function updateDependenciesBeforeCommit(
+  packageName: string,
+  configuration: RushConfiguration,
+  versionFormatForCommit: VersionFormatForCommit
+): PackageJsonEditor | undefined {
+  if (versionFormatForCommit === 'wildcard') {
+    const project: RushConfigurationProject = configuration.getProjectByName(packageName)!;
+
+    const packageJsonEditor: PackageJsonEditor = project.packageJsonEditor;
+
+    for (const dependency of packageJsonEditor.dependencyList) {
+      const rushDependencyProject: RushConfigurationProject | undefined = configuration.getProjectByName(
+        dependency.name
+      );
+
+      if (rushDependencyProject) {
+        dependency.setVersion('*');
+      }
+    }
+
+    return packageJsonEditor;
+  }
+}
+
+/**
  * This is the base class for version policy which controls how versions get bumped.
  * @public
  */
@@ -161,53 +221,63 @@ export abstract class VersionPolicy {
   public abstract validate(versionString: string, packageName: string): void;
 
   /**
+   * @deprecated Use {@link VersionPolicy.setDependenciesBeforePublishAsync} method instead.
+   */
+  public setDependenciesBeforePublish(packageName: string, configuration: RushConfiguration): void {
+    const packageJsonEditor: PackageJsonEditor | undefined = updateDependenciesBeforePublish(
+      packageName,
+      configuration,
+      this._versionFormatForPublish
+    );
+
+    packageJsonEditor?.saveIfModified();
+  }
+
+  /**
    * Tells the version policy to modify any dependencies in the target package
    * to values used for publishing.
    */
-  public setDependenciesBeforePublish(packageName: string, configuration: RushConfiguration): void {
-    if (this._versionFormatForPublish === 'exact') {
-      const project: RushConfigurationProject = configuration.getProjectByName(packageName)!;
+  public async setDependenciesBeforePublishAsync(
+    packageName: string,
+    configuration: RushConfiguration
+  ): Promise<void> {
+    const packageJsonEditor: PackageJsonEditor | undefined = updateDependenciesBeforePublish(
+      packageName,
+      configuration,
+      this._versionFormatForPublish
+    );
 
-      const packageJsonEditor: PackageJsonEditor = project.packageJsonEditor;
+    await packageJsonEditor?.saveIfModifiedAsync();
+  }
 
-      for (const dependency of packageJsonEditor.dependencyList) {
-        const rushDependencyProject: RushConfigurationProject | undefined = configuration.getProjectByName(
-          dependency.name
-        );
+  /**
+   * @deprecated Use {@link VersionPolicy.setDependenciesBeforeCommitAsync} method instead.
+   */
+  public setDependenciesBeforeCommit(packageName: string, configuration: RushConfiguration): void {
+    const packageJsonEditor: PackageJsonEditor | undefined = updateDependenciesBeforeCommit(
+      packageName,
+      configuration,
+      this._versionFormatForCommit
+    );
 
-        if (rushDependencyProject) {
-          const dependencyVersion: string = rushDependencyProject.packageJson.version;
-
-          dependency.setVersion(dependencyVersion);
-        }
-      }
-
-      packageJsonEditor.saveIfModified();
-    }
+    packageJsonEditor?.saveIfModified();
   }
 
   /**
    * Tells the version policy to modify any dependencies in the target package
    * to values used for checked-in source.
    */
-  public setDependenciesBeforeCommit(packageName: string, configuration: RushConfiguration): void {
-    if (this._versionFormatForCommit === 'wildcard') {
-      const project: RushConfigurationProject = configuration.getProjectByName(packageName)!;
+  public async setDependenciesBeforeCommitAsync(
+    packageName: string,
+    configuration: RushConfiguration
+  ): Promise<void> {
+    const packageJsonEditor: PackageJsonEditor | undefined = updateDependenciesBeforeCommit(
+      packageName,
+      configuration,
+      this._versionFormatForCommit
+    );
 
-      const packageJsonEditor: PackageJsonEditor = project.packageJsonEditor;
-
-      for (const dependency of packageJsonEditor.dependencyList) {
-        const rushDependencyProject: RushConfigurationProject | undefined = configuration.getProjectByName(
-          dependency.name
-        );
-
-        if (rushDependencyProject) {
-          dependency.setVersion('*');
-        }
-      }
-
-      packageJsonEditor.saveIfModified();
-    }
+    await packageJsonEditor?.saveIfModifiedAsync();
   }
 }
 

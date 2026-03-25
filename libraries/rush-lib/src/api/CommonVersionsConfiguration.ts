@@ -186,17 +186,42 @@ export class CommonVersionsConfiguration {
   }
 
   /**
-   * Loads the common-versions.json data from the specified file path.
-   * If the file has not been created yet, then an empty object is returned.
+   * @deprecated Use {@link CommonVersionsConfiguration.loadFromFileAsync} method instead.
    */
   public static loadFromFile(
     jsonFilePath: string,
     rushConfiguration?: RushConfiguration
   ): CommonVersionsConfiguration {
     let commonVersionsJson: ICommonVersionsJson | undefined = undefined;
-
-    if (FileSystem.exists(jsonFilePath)) {
+    try {
       commonVersionsJson = JsonFile.loadAndValidate(jsonFilePath, CommonVersionsConfiguration._jsonSchema);
+    } catch (error) {
+      if (!FileSystem.isNotExistError(error)) {
+        throw error;
+      }
+    }
+
+    return new CommonVersionsConfiguration(commonVersionsJson, jsonFilePath, rushConfiguration);
+  }
+
+  /**
+   * Loads the common-versions.json data from the specified file path.
+   * If the file has not been created yet, then an empty object is returned.
+   */
+  public static async loadFromFileAsync(
+    jsonFilePath: string,
+    rushConfiguration?: RushConfiguration
+  ): Promise<CommonVersionsConfiguration> {
+    let commonVersionsJson: ICommonVersionsJson | undefined = undefined;
+    try {
+      commonVersionsJson = await JsonFile.loadAndValidateAsync(
+        jsonFilePath,
+        CommonVersionsConfiguration._jsonSchema
+      );
+    } catch (error) {
+      if (!FileSystem.isNotExistError(error)) {
+        throw error;
+      }
     }
 
     return new CommonVersionsConfiguration(commonVersionsJson, jsonFilePath, rushConfiguration);
@@ -242,11 +267,27 @@ export class CommonVersionsConfiguration {
   }
 
   /**
-   * Writes the "common-versions.json" file to disk, using the filename that was passed to loadFromFile().
+   * @deprecated Use {@link CommonVersionsConfiguration.saveAsync} method instead.
    */
   public save(): boolean {
     if (this._modified) {
       JsonFile.save(this._serialize(), this.filePath, {
+        updateExistingFile: true,
+        ignoreUndefinedValues: true
+      });
+      this._modified = false;
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Writes the "common-versions.json" file to disk, using the filename that was passed to loadFromFile().
+   */
+  public async saveAsync(): Promise<boolean> {
+    if (this._modified) {
+      await JsonFile.saveAsync(this._serialize(), this.filePath, {
         updateExistingFile: true,
         ignoreUndefinedValues: true
       });

@@ -63,8 +63,8 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
     throw new Error('Not supported.');
   }
 
-  public saveIfModified(): boolean {
-    return this._fileManager.save();
+  public async saveIfModifiedAsync(): Promise<boolean> {
+    return await this._fileManager.saveAsync();
   }
 
   private _getPackageJsonDependency(dependencyName: string, version: string): PackageJsonDependency {
