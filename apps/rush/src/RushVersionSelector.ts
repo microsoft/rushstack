@@ -62,7 +62,10 @@ export class RushVersionSelector {
           // different implementations of the same version of the same package.
           // This was needed for: https://github.com/microsoft/rushstack/issues/691
           commonRushConfigFolder: configuration ? configuration.commonRushConfigFolder : undefined,
-          suppressOutput: true
+          suppressOutput: true,
+          // Filter out npm-incompatible properties (e.g. pnpm-specific settings) from .npmrc
+          // since this installation always uses npm regardless of the repo's package manager.
+          filterNpmIncompatibleProperties: true
         });
 
         console.log(`Successfully installed Rush version ${version} in ${expectedRushPath}.`);

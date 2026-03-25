@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix \"Unknown env config\" warnings from npm during rush-pnpm operations by passing pnpm configuration via CLI args instead of NPM_CONFIG_* environment variables.",
+      "comment": "Filter npm-incompatible properties from .npmrc when installing rush-lib via npm, to eliminate spurious \"Unknown env config\" and \"Unknown project config\" warnings.",
       "type": "none"
     }
   ],
