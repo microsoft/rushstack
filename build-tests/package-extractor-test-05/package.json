@@ -1,0 +1,16 @@
+{
+  "name": "package-extractor-test-05",
+  "description": "This project is used by tests in the @rushstack/package-extractor package.",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "_phase:build": ""
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*"
+  }
+}

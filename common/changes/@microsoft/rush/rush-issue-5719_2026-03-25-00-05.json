@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where \"rush deploy\" could fail with EEXIST due to a \"npm-packlist\" regression (GitHub #5720)",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
