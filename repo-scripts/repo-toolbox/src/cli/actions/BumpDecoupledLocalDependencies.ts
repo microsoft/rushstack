@@ -94,7 +94,7 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
           const autoinstallerName: string = folderItem.name;
           const packageJsonPath: string = `${commonAutoinstallersFolder}/${autoinstallerName}/package.json`;
           try {
-            const packageJsonEditor: PackageJsonEditor = PackageJsonEditor.load(packageJsonPath);
+            const packageJsonEditor: PackageJsonEditor = await PackageJsonEditor.loadAsync(packageJsonPath);
 
             const { dependencyList, devDependencyList } = packageJsonEditor;
             const decoupledLocalDependencies: Set<string> = new Set();
@@ -135,40 +135,45 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
 
     terminal.writeLine();
 
-    for (const { packageName, decoupledLocalDependencies, subspace, packageJsonEditor } of projectsToUpdate) {
-      const { allowedAlternativeVersions } = subspace?.getCommonVersions() ?? {};
+    await Async.forEachAsync(
+      projectsToUpdate,
+      async ({ packageName, decoupledLocalDependencies, subspace, packageJsonEditor }) => {
+        const { allowedAlternativeVersions } = subspace?.getCommonVersions() ?? {};
 
-      for (const cyclicDependencyProject of decoupledLocalDependencies) {
-        const { version: existingVersion } =
-          packageJsonEditor.tryGetDependency(cyclicDependencyProject) ??
-          packageJsonEditor.tryGetDevDependency(cyclicDependencyProject) ??
-          {};
-        if (
-          existingVersion &&
-          allowedAlternativeVersions?.get(cyclicDependencyProject)?.includes(existingVersion)
-        ) {
-          // Skip if the existing version is allowed by common-versions.json
-          continue;
+        for (const cyclicDependencyProject of decoupledLocalDependencies) {
+          const { version: existingVersion } =
+            packageJsonEditor.tryGetDependency(cyclicDependencyProject) ??
+            packageJsonEditor.tryGetDevDependency(cyclicDependencyProject) ??
+            {};
+          if (
+            existingVersion &&
+            allowedAlternativeVersions?.get(cyclicDependencyProject)?.includes(existingVersion)
+          ) {
+            // Skip if the existing version is allowed by common-versions.json
+            continue;
+          }
+
+          const newVersion: string = decoupledLocalDependencyVersionsByName.get(cyclicDependencyProject)!;
+          if (packageJsonEditor.tryGetDependency(cyclicDependencyProject)) {
+            packageJsonEditor.addOrUpdateDependency(
+              cyclicDependencyProject,
+              newVersion,
+              DependencyType.Regular
+            );
+          }
+
+          if (packageJsonEditor.tryGetDevDependency(cyclicDependencyProject)) {
+            packageJsonEditor.addOrUpdateDependency(cyclicDependencyProject, newVersion, DependencyType.Dev);
+          }
         }
 
-        const newVersion: string = decoupledLocalDependencyVersionsByName.get(cyclicDependencyProject)!;
-        if (packageJsonEditor.tryGetDependency(cyclicDependencyProject)) {
-          packageJsonEditor.addOrUpdateDependency(
-            cyclicDependencyProject,
-            newVersion,
-            DependencyType.Regular
-          );
+        const modified: boolean = await packageJsonEditor.saveIfModifiedAsync();
+        if (modified) {
+          terminal.writeLine(`Updated ${packageName}`);
         }
-
-        if (packageJsonEditor.tryGetDevDependency(cyclicDependencyProject)) {
-          packageJsonEditor.addOrUpdateDependency(cyclicDependencyProject, newVersion, DependencyType.Dev);
-        }
-      }
-
-      if (packageJsonEditor.saveIfModified()) {
-        terminal.writeLine(`Updated ${packageName}`);
-      }
-    }
+      },
+      { concurrency: 10 }
+    );
 
     terminal.writeLine();
 
