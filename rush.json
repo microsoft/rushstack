@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.171.0",
+  "rushVersion": "5.172.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -1591,6 +1591,12 @@
     {
       "packageName": "@rushstack/rush-mcp-docs-plugin",
       "projectFolder": "rush-plugins/rush-mcp-docs-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/rush-published-versions-json-plugin",
+      "projectFolder": "rush-plugins/rush-published-versions-json-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

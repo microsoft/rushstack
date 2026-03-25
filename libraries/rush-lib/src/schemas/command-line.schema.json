@@ -18,7 +18,7 @@
           "title": "Command Kind",
           "description": "Indicates the kind of command: \"bulk\" commands are run separately for each project; \"global\" commands are run once for the entire repository.",
           "type": "string",
-          "enum": ["bulk", "global", "phased"]
+          "enum": ["bulk", "global", "globalPlugin", "phased"]
         },
         "name": {
           "title": "Custom Command Name",
@@ -164,6 +164,34 @@
 
             "shellCommand": { "$ref": "#/definitions/anything" },
             "autoinstallerName": { "$ref": "#/definitions/anything" }
+          }
+        }
+      ]
+    },
+    "globalPluginCommand": {
+      "title": "Global Plugin Command",
+      "description": "A custom command that is run once for the entire repository, whose implementation is provided entirely by a Rush plugin. This command kind can only be used in command-line.json files provided by Rush plugins.",
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/baseCommand" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "commandKind": {
+              "enum": ["globalPlugin"]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "commandKind": { "$ref": "#/definitions/anything" },
+            "name": { "$ref": "#/definitions/anything" },
+            "summary": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" }
           }
         }
       ]
@@ -712,6 +740,7 @@
         "oneOf": [
           { "$ref": "#/definitions/bulkCommand" },
           { "$ref": "#/definitions/globalCommand" },
+          { "$ref": "#/definitions/globalPluginCommand" },
           { "$ref": "#/definitions/phasedCommand" }
         ]
       }

@@ -5,7 +5,7 @@
  * "baseCommand" from command-line.schema.json
  */
 export interface IBaseCommandJson {
-  commandKind: 'bulk' | 'global' | 'phased';
+  commandKind: 'bulk' | 'global' | 'globalPlugin' | 'phased';
   name: string;
   summary: string;
   /**
@@ -66,7 +66,20 @@ export interface IGlobalCommandJson extends IBaseCommandJson {
   shellCommand: string;
 }
 
-export type CommandJson = IBulkCommandJson | IGlobalCommandJson | IPhasedCommandJson;
+/**
+ * "globalPluginCommand" from command-line.schema.json.
+ * A global command whose implementation is provided entirely by a Rush plugin.
+ * This command kind can only be used in command-line.json files provided by Rush plugins.
+ */
+export interface IGlobalPluginCommandJson extends IBaseCommandJson {
+  commandKind: 'globalPlugin';
+}
+
+export type CommandJson =
+  | IBulkCommandJson
+  | IGlobalCommandJson
+  | IGlobalPluginCommandJson
+  | IPhasedCommandJson;
 
 /**
  * The dependencies of a phase.
