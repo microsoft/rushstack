@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Mon, 09 Mar 2026 15:14:08 GMT and should not be manually modified.
+This log was last generated on Wed, 25 Mar 2026 01:00:26 GMT and should not be manually modified.
+
+## 0.12.9
+Wed, 25 Mar 2026 01:00:26 GMT
+
+### Patches
+
+- preventing duplicate-copy conflicts across npm-packlist versions
 
 ## 0.12.8
 Mon, 09 Mar 2026 15:14:08 GMT

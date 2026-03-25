@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.12.9",
+      "tag": "@rushstack/package-extractor_v0.12.9",
+      "date": "Wed, 25 Mar 2026 01:00:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "preventing duplicate-copy conflicts across npm-packlist versions"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.8",
       "tag": "@rushstack/package-extractor_v0.12.8",
       "date": "Mon, 09 Mar 2026 15:14:08 GMT",
