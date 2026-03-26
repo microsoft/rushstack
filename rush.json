@@ -963,7 +963,8 @@
       "packageName": "heft-typescript-v3-test",
       "projectFolder": "build-tests/heft-typescript-v3-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@microsoft/api-extractor"]
     },
     {
       "packageName": "heft-typescript-v4-test",
