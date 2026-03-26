@@ -2323,8 +2323,8 @@ importers:
   ../../../build-tests/heft-typescript-v3-test:
     devDependencies:
       '@microsoft/api-extractor':
-        specifier: 7.57.7
-        version: 7.57.7(@types/node@17.0.41)
+        specifier: workspace:*
+        version: link:../../apps/api-extractor
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
@@ -22939,38 +22939,11 @@ snapshots:
 
   '@mdx-js/util@1.6.22': {}
 
-  '@microsoft/api-extractor-model@7.33.4(@types/node@17.0.41)':
-    dependencies:
-      '@microsoft/tsdoc': 0.16.0
-      '@microsoft/tsdoc-config': 0.18.1
-      '@rushstack/node-core-library': 5.20.3(@types/node@17.0.41)
-    transitivePeerDependencies:
-      - '@types/node'
-
   '@microsoft/api-extractor-model@7.33.4(@types/node@20.17.19)':
     dependencies:
       '@microsoft/tsdoc': 0.16.0
       '@microsoft/tsdoc-config': 0.18.1
       '@rushstack/node-core-library': 5.20.3(@types/node@20.17.19)
-    transitivePeerDependencies:
-      - '@types/node'
-
-  '@microsoft/api-extractor@7.57.7(@types/node@17.0.41)':
-    dependencies:
-      '@microsoft/api-extractor-model': 7.33.4(@types/node@17.0.41)
-      '@microsoft/tsdoc': 0.16.0
-      '@microsoft/tsdoc-config': 0.18.1
-      '@rushstack/node-core-library': 5.20.3(@types/node@17.0.41)
-      '@rushstack/rig-package': 0.7.2
-      '@rushstack/terminal': 0.22.3(@types/node@17.0.41)
-      '@rushstack/ts-command-line': 5.3.3(@types/node@17.0.41)
-      diff: 8.0.3
-      lodash: 4.17.23
-      minimatch: 10.2.3
-      resolve: 1.22.11
-      semver: 7.5.4
-      source-map: 0.6.1
-      typescript: 5.8.2
     transitivePeerDependencies:
       - '@types/node'
 
@@ -24234,19 +24207,6 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.9.3
 
-  '@rushstack/node-core-library@5.20.3(@types/node@17.0.41)':
-    dependencies:
-      ajv: 8.18.0
-      ajv-draft-04: 1.0.0(ajv@8.18.0)
-      ajv-formats: 3.0.1(ajv@8.18.0)
-      fs-extra: 11.3.3
-      import-lazy: 4.0.0
-      jju: 1.4.0
-      resolve: 1.22.11
-      semver: 7.5.4
-    optionalDependencies:
-      '@types/node': 17.0.41
-
   '@rushstack/node-core-library@5.20.3(@types/node@20.17.19)':
     dependencies:
       ajv: 8.18.0
@@ -24287,10 +24247,6 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.9.3
 
-  '@rushstack/problem-matcher@0.2.1(@types/node@17.0.41)':
-    optionalDependencies:
-      '@types/node': 17.0.41
-
   '@rushstack/problem-matcher@0.2.1(@types/node@20.17.19)':
     optionalDependencies:
       '@types/node': 20.17.19
@@ -24324,14 +24280,6 @@ snapshots:
       - '@types/node'
       - webpack
 
-  '@rushstack/terminal@0.22.3(@types/node@17.0.41)':
-    dependencies:
-      '@rushstack/node-core-library': 5.20.3(@types/node@17.0.41)
-      '@rushstack/problem-matcher': 0.2.1(@types/node@17.0.41)
-      supports-color: 8.1.1
-    optionalDependencies:
-      '@types/node': 17.0.41
-
   '@rushstack/terminal@0.22.3(@types/node@20.17.19)':
     dependencies:
       '@rushstack/node-core-library': 5.20.3(@types/node@20.17.19)
@@ -24351,15 +24299,6 @@ snapshots:
   '@rushstack/tree-pattern@0.3.4': {}
 
   '@rushstack/tree-pattern@0.4.1': {}
-
-  '@rushstack/ts-command-line@5.3.3(@types/node@17.0.41)':
-    dependencies:
-      '@rushstack/terminal': 0.22.3(@types/node@17.0.41)
-      '@types/argparse': 1.0.38
-      argparse: 1.0.10
-      string-argv: 0.3.2
-    transitivePeerDependencies:
-      - '@types/node'
 
   '@rushstack/ts-command-line@5.3.3(@types/node@20.17.19)':
     dependencies:

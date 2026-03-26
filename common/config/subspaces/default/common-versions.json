@@ -141,8 +141,6 @@
       "ts3.9",
       "ts4.9"
     ],
-    // This is used by the heft TS 3 build test
-    "@microsoft/api-extractor": ["7.57.7"],
     "@rushstack/eslint-config": [
       // This is used by the ESLint 7 build tests
       "3.7.1"
