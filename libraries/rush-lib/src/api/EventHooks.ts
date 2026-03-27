@@ -6,7 +6,7 @@ import { Enum } from '@rushstack/node-core-library';
 import type { IEventHooksJson } from './RushConfiguration';
 
 /**
- * Events happen during Rush runs.
+ * Events happen during Rush invocation.
  * @beta
  */
 export enum Event {

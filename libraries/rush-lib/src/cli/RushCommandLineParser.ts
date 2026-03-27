@@ -483,7 +483,8 @@ export class RushCommandLineParser extends CommandLineParser {
       watchPhases,
       watchDebounceMs = RushConstants.defaultWatchDebounceMs,
       alwaysWatch,
-      alwaysInstall
+      alwaysInstall,
+      includeAllProjectsInWatchGraph = false
     } = command;
     this.addAction(
       new PhasedScriptAction({
@@ -502,6 +503,7 @@ export class RushCommandLineParser extends CommandLineParser {
         originalPhases,
         watchPhases,
         watchDebounceMs,
+        includeAllProjectsInWatchGraph,
         phases: commandLineConfiguration.phases,
 
         alwaysWatch,
