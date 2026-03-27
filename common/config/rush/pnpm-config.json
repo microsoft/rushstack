@@ -252,7 +252,13 @@
     "loader-utils@^2.0.0": "2.0.4",
 
     // `fast-xml-parser@5.3.3` has a vulnerability
-    "fast-xml-parser@^5.3.3": "5.3.5"
+    "fast-xml-parser@^5.3.3": "5.3.5",
+
+    // `js-yaml@<3.13.1` has multiple vulnerabilities (CVE-2019-7177, CVE-2023-2251).
+    // 3.x is EOL but still pulled in transitively by eslint 7.x and tslint 5.x.
+    // Cannot override to 4.x because safeLoad() was removed (breaking API change).
+    // This floor prevents regression to any vulnerable 3.x version.
+    "js-yaml@^3": ">=3.14.2"
   },
 
   /**
