@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`VersionManager (workspace) bumpAsync bumps to prerelease version 1`] = `Array []`;
+
+exports[`VersionManager (workspace) ensure does not change packageJson if not needed by individual version policy 1`] = `Array []`;
+
+exports[`VersionManager (workspace) ensure fixes lock step versions 1`] = `Array []`;
+
+exports[`VersionManager (workspace) ensure fixes major version for individual version policy 1`] = `Array []`;
+
+exports[`VersionManager bumpAsync bumps a lockStepPolicy to prerelease version 1`] = `Array []`;
+
+exports[`VersionManager bumpAsync bumps a lockStepPolicy without bumpType to prerelease version 1`] = `Array []`;
+
+exports[`VersionManager ensure does not change packageJson if not needed by individual version policy 1`] = `Array []`;
+
+exports[`VersionManager ensure fixes lock step versions 1`] = `Array []`;
+
+exports[`VersionManager ensure fixes major version for individual version policy 1`] = `Array []`;

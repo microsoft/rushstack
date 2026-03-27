@@ -136,6 +136,14 @@ export interface IExperimentsJson {
    * be included in the shared build cache.
    */
   omitAppleDoubleFilesFromBuildCache?: boolean;
+
+  /**
+   * If true, `rush change --verify` will perform additional validation of change files. Specifically,
+   * it will report errors if change files reference projects that do not exist in the Rush configuration,
+   * or if change files target a project that belongs to a lockstepped version policy but is not the
+   * policy's main project.
+   */
+  strictChangefileValidation?: boolean;
 }
 
 const _EXPERIMENTS_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
