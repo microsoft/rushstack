@@ -1,0 +1,12 @@
+{
+  "name": "consumer",
+  "version": "1.0.0",
+  "dependencies": {
+    "provider": "workspace:*"
+  },
+  "dependenciesMeta": {
+    "provider": {
+      "injected": true
+    }
+  }
+}
