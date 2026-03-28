@@ -1,0 +1,5 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/subspaces.schema.json",
+  "subspacesEnabled": true,
+  "subspaceNames": ["project-change-analyzer-test-subspace"]
+}
