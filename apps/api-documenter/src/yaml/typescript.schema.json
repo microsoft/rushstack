@@ -262,6 +262,9 @@
         },
         "package": {
           "type": "string"
+        },
+        "defaultValue": {
+          "type": "string"
         }
       },
       "patternProperties": {

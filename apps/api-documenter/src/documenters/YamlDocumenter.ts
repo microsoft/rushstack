@@ -427,6 +427,18 @@ export class YamlDocumenter {
             yamlItem.example = [...(yamlItem.example || []), example];
           }
         }
+
+        // Write the @defaultValue block
+        const defaultValueBlocks: DocBlock[] = tsdocComment.customBlocks.filter(
+          (x) => x.blockTag.tagNameWithUpperCase === StandardTags.defaultValue.tagNameWithUpperCase
+        );
+
+        for (const defaultValueBlock of defaultValueBlocks) {
+          const defaultValueContent: string = this._renderMarkdown(defaultValueBlock.content, apiItem);
+          if (defaultValueContent) {
+            yamlItem.defaultValue = defaultValueContent.trim();
+          }
+        }
       }
 
       if (tsdocComment.deprecatedBlock) {
