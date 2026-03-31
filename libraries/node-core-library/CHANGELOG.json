@@ -2,6 +2,23 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.21.0",
+      "tag": "@rushstack/node-core-library_v5.21.0",
+      "date": "Tue, 31 Mar 2026 15:14:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the LockFile API sometimes incorrectly reported a dirty acquisition, causing Rush autoinstaller failures (GitHub #5684)"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Regression risk: This narrows when a lock is considered \"dirty\". Although the previous behavior was incorrect, the fix could break consumers that implicitly relied on those false positives."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.20.3",
       "tag": "@rushstack/node-core-library_v5.20.3",
       "date": "Wed, 25 Feb 2026 00:34:29 GMT",

@@ -1,6 +1,17 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 25 Feb 2026 00:34:29 GMT and should not be manually modified.
+This log was last generated on Tue, 31 Mar 2026 15:14:14 GMT and should not be manually modified.
+
+## 5.21.0
+Tue, 31 Mar 2026 15:14:14 GMT
+
+### Minor changes
+
+- Regression risk: This narrows when a lock is considered "dirty". Although the previous behavior was incorrect, the fix could break consumers that implicitly relied on those false positives.
+
+### Patches
+
+- Fix an issue where the LockFile API sometimes incorrectly reported a dirty acquisition, causing Rush autoinstaller failures (GitHub #5684)
 
 ## 5.20.3
 Wed, 25 Feb 2026 00:34:29 GMT
