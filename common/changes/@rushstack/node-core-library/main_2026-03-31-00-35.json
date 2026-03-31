@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Fix an issue where the LockFile API sometimes incorrectly reported a dirty acquisition, causing Rush autoinstaller failures (GitHub #5684)",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}
