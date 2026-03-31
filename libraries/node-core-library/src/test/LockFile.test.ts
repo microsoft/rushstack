@@ -244,7 +244,7 @@ describe(LockFile.name, () => {
         expect(lock).toBeUndefined();
       });
 
-      test('deletes other hanging lockfiles if corresponding processes are not running anymore', () => {
+      test('deletes other hanging lockfiles if corresponding processes are not running anymore and marks dirtyWhenAcquired', () => {
         // ensure test folder is clean
         const testFolder: string = path.join(libTestFolder, '4');
         FileSystem.ensureEmptyFolder(testFolder);
@@ -270,10 +270,19 @@ describe(LockFile.name, () => {
         });
 
         const deleteFileSpy = jest.spyOn(FileSystem, 'deleteFile');
-        LockFile.tryAcquire(testFolder, resourceName);
+
+        const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+        expect(lock).toBeDefined();
+        expect(lock!.dirtyWhenAcquired).toEqual(true);
+        expect(lock!.isReleased).toEqual(false);
 
         expect(deleteFileSpy).toHaveBeenCalledTimes(1);
-        expect(deleteFileSpy).toHaveBeenNthCalledWith(1, otherPidLockFileName);
+        expect(deleteFileSpy).toHaveBeenNthCalledWith(1, otherPidLockFileName, {
+          throwIfNotExists: false
+        });
+
+        lock!.release();
       });
 
       test("doesn't attempt deleting other process lockfile if it is released in the middle of acquiring process", () => {
@@ -302,7 +311,7 @@ describe(LockFile.name, () => {
           return pid === otherPid ? otherPidStartTime : getProcessStartTime(pid);
         });
 
-        const originalReadFile = FileSystem.readFile;
+        const originalReadFile: typeof FileSystem.readFile = FileSystem.readFile;
         jest.spyOn(FileSystem, 'readFile').mockImplementation((filePath: string) => {
           if (filePath === otherPidLockFileName) {
             // simulate other process lock release right before the current process reads
@@ -315,13 +324,19 @@ describe(LockFile.name, () => {
 
         const deleteFileSpy = jest.spyOn(FileSystem, 'deleteFile');
 
-        LockFile.tryAcquire(testFolder, resourceName);
+        const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+        expect(lock).toBeDefined();
+        expect(lock!.dirtyWhenAcquired).toEqual(false);
+        expect(lock!.isReleased).toEqual(false);
 
         // Ensure there were no other FileSystem.deleteFile calls after our lock release simulation.
         // An extra attempt to delete the lockfile might lead to unexpectedly deleting a new lockfile
         // created by another process right after releasing/deleting the previous lockfile
         expect(deleteFileSpy).toHaveBeenCalledTimes(1);
         expect(deleteFileSpy).toHaveBeenNthCalledWith(1, otherPidLockFileName);
+
+        lock!.release();
       });
     });
   }
