@@ -130,6 +130,8 @@ describe(LockFile.name, () => {
 
     const lock2Exists: boolean = await FileSystem.existsAsync(lock2.filePath);
     expect(lock2Exists).toEqual(true);
+    // The second lock should not be dirty since it is acquired after the first lock is released
+    expect(lock2.dirtyWhenAcquired).toEqual(false);
     expect(lock2.isReleased).toEqual(false);
 
     expect(lock2Acquired).toEqual(true);
