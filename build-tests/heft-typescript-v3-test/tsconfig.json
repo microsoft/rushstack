@@ -16,6 +16,8 @@
     "strictNullChecks": true,
     "noUnusedLocals": true,
     "types": ["jest", "node"],
+    // Skips lib check to suppress api-extractor Uint8Array generic type incompatibility with @types/node@17.0.41
+    "skipLibCheck": true,
 
     "module": "commonjs",
     "target": "es2017",
