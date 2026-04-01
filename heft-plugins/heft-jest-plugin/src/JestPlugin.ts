@@ -142,7 +142,6 @@ interface IPendingTestRun {
  */
 export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   private static _jestConfigurationFileLoader: ProjectConfigurationFile<IHeftJestConfiguration> | undefined;
-  private static _includedJestEnvironmentJsdomPath: string | undefined;
 
   private _jestPromise: Promise<unknown> | undefined;
   private _pendingTestRuns: Set<IPendingTestRun> = new Set();
@@ -991,27 +990,11 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
             });
 
           case 'testEnvironment':
-            const testEnvironment: string = resolveTestEnvironment({
+            return resolveTestEnvironment({
               rootDir: configDir,
               testEnvironment: propertyValue,
               requireResolveFunction
             });
-
-            if (propertyValue === JEST_CONFIG_JSDOM_PACKAGE_NAME) {
-              // If the testEnvironment is the included jest-environment-jsdom,
-              // redirect to the version that injects punycode for Node >= 22.
-              if (!JestPlugin._includedJestEnvironmentJsdomPath) {
-                JestPlugin._includedJestEnvironmentJsdomPath = require.resolve(
-                  JEST_CONFIG_JSDOM_PACKAGE_NAME
-                );
-              }
-
-              if (JestPlugin._includedJestEnvironmentJsdomPath === testEnvironment) {
-                return `${__dirname}/exports/patched-jest-environment-jsdom.js`;
-              }
-            }
-
-            return testEnvironment;
 
           case 'watchPlugins':
             return resolveWatchPlugin(/*resolver:*/ undefined, {

@@ -22,7 +22,7 @@
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "eslint": "~9.37.0",
-    "jest-environment-node": "~29.5.0",
+    "jest-environment-node": "~30.3.0",
     "typescript": "~5.8.2",
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*"
   },
