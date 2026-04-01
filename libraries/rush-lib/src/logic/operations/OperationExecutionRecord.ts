@@ -42,6 +42,7 @@ import {
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
   onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
+  yieldPriority?: (record: OperationExecutionRecord) => void;
   createEnvironment?: (record: OperationExecutionRecord) => IEnvironment;
   inputsSnapshot: IInputsSnapshot | undefined;
 
@@ -232,6 +233,14 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   public get silent(): boolean {
     return !this.operation.enabled || this.runner.silent;
+  }
+
+  /**
+   * Moves this operation to the back of the execution queue so that other operations
+   * are assigned first.
+   */
+  public yieldPriority(): void {
+    this._context.yieldPriority?.(this);
   }
 
   public getStateHash(): string {

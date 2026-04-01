@@ -168,4 +168,77 @@ describe(AsyncOperationQueue.name, () => {
     const result: IteratorResult<OperationExecutionRecord> = await iterator.next();
     expect(result.done).toEqual(true);
   });
+
+  it('yieldPriority moves an operation to the back of the queue', async () => {
+    // Three independent operations: A, B, C (all Ready).
+    // A is assigned first. Calling yieldPriority + setting Ready should move it to the back,
+    // so B and C are assigned before A on the next pass.
+    const opA = createRecord('a');
+    const opB = createRecord('b');
+    const opC = createRecord('c');
+
+    const queue: AsyncOperationQueue = new AsyncOperationQueue([opA, opB, opC], nullSort);
+
+    // Assign one operation
+    const r1: IteratorResult<OperationExecutionRecord> = await queue.next();
+    const firstAssigned: OperationExecutionRecord = r1.value;
+
+    // Simulate cobuild retry: yield priority then re-ready the operation
+    queue.yieldPriority(firstAssigned);
+    firstAssigned.status = OperationStatus.Ready;
+
+    // Now assign the remaining — untried operations should come before the retry
+    const results: OperationExecutionRecord[] = [];
+    const r2: IteratorResult<OperationExecutionRecord> = await queue.next();
+    results.push(r2.value);
+    const r3: IteratorResult<OperationExecutionRecord> = await queue.next();
+    results.push(r3.value);
+    const r4: IteratorResult<OperationExecutionRecord> = await queue.next();
+    results.push(r4.value);
+
+    // The yielded operation should be last
+    expect(results[2]).toBe(firstAssigned);
+  });
+
+  it('yieldPriority assigns freshly unblocked operations first', async () => {
+    // A (no deps), B (depends on C), C (no deps)
+    // A is assigned and yields priority (cobuild retry).
+    // C completes, unblocking B. B should be assigned before A.
+    const opA = createRecord('a');
+    const opB = createRecord('b');
+    const opC = createRecord('c');
+
+    addDependency(opB, opC);
+
+    const queue: AsyncOperationQueue = new AsyncOperationQueue([opA, opB, opC], nullSort);
+
+    // Pull both initially ready operations (A and C)
+    const r1: IteratorResult<OperationExecutionRecord> = await queue.next();
+    const r2: IteratorResult<OperationExecutionRecord> = await queue.next();
+    expect(new Set([r1.value, r2.value])).toEqual(new Set([opA, opC]));
+
+    // Simulate: A fails cobuild lock
+    queue.yieldPriority(opA);
+    opA.status = OperationStatus.Ready;
+
+    // C succeeds, which unblocks B
+    opC.status = OperationStatus.Success;
+    queue.complete(opC);
+
+    // B is freshly unblocked, A yielded priority — B should be assigned first
+    const r3: IteratorResult<OperationExecutionRecord> = await queue.next();
+    expect(r3.value).toBe(opB);
+
+    const r4: IteratorResult<OperationExecutionRecord> = await queue.next();
+    expect(r4.value).toBe(opA);
+
+    // Complete remaining
+    opA.status = OperationStatus.Success;
+    queue.complete(opA);
+    opB.status = OperationStatus.Success;
+    queue.complete(opB);
+
+    const rEnd: IteratorResult<OperationExecutionRecord> = await queue.next();
+    expect(rEnd.done).toBe(true);
+  });
 });

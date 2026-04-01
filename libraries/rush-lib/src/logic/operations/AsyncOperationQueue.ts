@@ -87,6 +87,19 @@ export class AsyncOperationQueue
   }
 
   /**
+   * Moves an operation to the back of the queue (lowest priority).
+   * Used when a cobuild lock acquisition fails, so that locally-executable operations are
+   * assigned before this operation is retried.
+   */
+  public yieldPriority(record: OperationExecutionRecord): void {
+    const index: number = this._queue.indexOf(record);
+    if (index > 0) {
+      this._queue.splice(index, 1);
+      this._queue.unshift(record);
+    }
+  }
+
+  /**
    * Routes ready operations with 0 dependencies to waiting iterators. Normally invoked as part of `next()`, but
    * if the caller does not update operation dependencies prior to calling `next()`, may need to be invoked manually.
    */
