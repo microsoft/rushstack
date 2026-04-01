@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/debug-certificate-manager",
-  "version": "1.7.8",
+  "version": "1.7.9",
   "description": "Cross-platform functionality to create debug ssl certificates.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
