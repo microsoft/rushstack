@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Fixed empty lines for removed lines",
+      "comment": "Fix an issue where empty lines were included in DTS rollups in place of API items that were trimmed.",
       "type": "patch"
     }
   ],
