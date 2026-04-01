@@ -17,8 +17,8 @@
   },
   "peerDependencies": {
     "@rushstack/heft": "^1.2.12",
-    "jest-environment-jsdom": "^29.5.0",
-    "jest-environment-node": "^29.5.0"
+    "jest-environment-jsdom": "^30.3.0",
+    "jest-environment-node": "^30.3.0"
   },
   "peerDependenciesMeta": {
     "jest-environment-jsdom": {
@@ -29,27 +29,27 @@
     }
   },
   "dependencies": {
-    "@jest/core": "~29.5.0",
-    "@jest/reporters": "~29.5.0",
-    "@jest/transform": "~29.5.0",
+    "@jest/core": "~30.3.0",
+    "@jest/reporters": "~30.3.0",
+    "@jest/transform": "~30.3.0",
     "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "jest-config": "~29.5.0",
-    "jest-resolve": "~29.5.0",
-    "jest-snapshot": "~29.5.0",
+    "jest-config": "~30.3.0",
+    "jest-resolve": "~30.3.0",
+    "jest-snapshot": "~30.3.0",
     "lodash": "~4.18.1",
     "punycode": "~2.3.1"
   },
   "devDependencies": {
-    "@jest/types": "29.5.0",
+    "@jest/types": "30.3.0",
     "@rushstack/heft": "workspace:*",
     "@types/lodash": "4.17.23",
     "@types/node": "20.17.19",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0",
-    "jest-environment-jsdom": "~29.5.0",
-    "jest-environment-node": "~29.5.0",
+    "jest-environment-jsdom": "~30.3.0",
+    "jest-environment-node": "~30.3.0",
     "jest-watch-select-projects": "2.0.0"
   },
   "exports": {
