@@ -3728,15 +3728,15 @@ importers:
         specifier: workspace:*
         version: link:../terminal
       node-forge:
-        specifier: 1.4.0
+        specifier: ~1.4.0
         version: 1.4.0
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
       '@types/node-forge':
-        specifier: 1.0.4
-        version: 1.0.4
+        specifier: 1.3.14
+        version: 1.3.14
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
@@ -10143,9 +10143,6 @@ packages:
 
   '@types/node-fetch@2.6.13':
     resolution: {integrity: sha512-QGpRVpzSaUs30JBSGPjOg4Uveu384erbHBoT1zeONvyCfwQxIkUshLAOqN/k9EjGviPRmWTTe6aH2qySWKTVSw==}
-
-  '@types/node-forge@1.0.4':
-    resolution: {integrity: sha512-UpX8LTRrarEZPQvQqF5/6KQAqZolOVckH7txWdlsWIJrhBFFtwEUTcqeDouhrJl6t0F7Wg5cyUOAqqF8a6hheg==}
 
   '@types/node-forge@1.3.14':
     resolution: {integrity: sha512-mhVF2BnD4BO+jtOp7z1CdzaK4mbuK0LLQYAvdOLqHTavxFNq4zA1EmYkpnFjP8HOUzedfQkRnp0E2ulSAYSzAw==}
@@ -26266,10 +26263,6 @@ snapshots:
     dependencies:
       '@types/node': 22.9.3
       form-data: 4.0.5
-
-  '@types/node-forge@1.0.4':
-    dependencies:
-      '@types/node': 22.9.3
 
   '@types/node-forge@1.3.14':
     dependencies:

@@ -380,7 +380,7 @@ export class CertificateManager {
     ]);
 
     // self-sign certificate
-    certificate.sign(keys.privateKey, forge.md.sha256.create());
+    certificate.sign(keys.privateKey as pki.rsa.PrivateKey, forge.md.sha256.create());
 
     return {
       certificate,
@@ -475,7 +475,7 @@ export class CertificateManager {
     ]);
 
     // Sign certificate with CA
-    certificate.sign(caPrivateKey, forge.md.sha256.create());
+    certificate.sign(caPrivateKey as pki.rsa.PrivateKey, forge.md.sha256.create());
 
     // convert a Forge certificate to PEM
     const caPem: string = forge.pki.certificateToPem(caCertificate);
