@@ -2,6 +2,18 @@
   "name": "@rushstack/module-minifier",
   "entries": [
     {
+      "version": "0.9.11",
+      "tag": "@rushstack/module-minifier_v0.9.11",
+      "date": "Thu, 02 Apr 2026 00:14:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump serialize-javascript 7.0.5 to address CVE GHSA-qj8w-gfj5-8c6v"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.10",
       "tag": "@rushstack/module-minifier_v0.9.10",
       "date": "Wed, 01 Apr 2026 15:13:38 GMT",

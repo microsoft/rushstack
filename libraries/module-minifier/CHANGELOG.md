@@ -1,6 +1,13 @@
 # Change Log - @rushstack/module-minifier
 
-This log was last generated on Wed, 01 Apr 2026 15:13:38 GMT and should not be manually modified.
+This log was last generated on Thu, 02 Apr 2026 00:14:38 GMT and should not be manually modified.
+
+## 0.9.11
+Thu, 02 Apr 2026 00:14:38 GMT
+
+### Patches
+
+- Bump serialize-javascript 7.0.5 to address CVE GHSA-qj8w-gfj5-8c6v
 
 ## 0.9.10
 Wed, 01 Apr 2026 15:13:38 GMT

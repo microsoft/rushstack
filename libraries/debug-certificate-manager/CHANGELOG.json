@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.7.10",
+      "tag": "@rushstack/debug-certificate-manager_v1.7.10",
+      "date": "Thu, 02 Apr 2026 00:14:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump node-forge to 1.4.0 to address CVEs GHSA-2328-f5f3-gj25, GHSA-q67f-28xg-22rw, GHSA-5m6q-g25r-mvwx, GHSA-ppp5-5v6c-4jwp\""
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.9",
       "tag": "@rushstack/debug-certificate-manager_v1.7.9",
       "date": "Wed, 01 Apr 2026 15:13:38 GMT",

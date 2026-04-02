@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Wed, 01 Apr 2026 15:13:38 GMT and should not be manually modified.
+This log was last generated on Thu, 02 Apr 2026 00:14:38 GMT and should not be manually modified.
+
+## 1.7.10
+Thu, 02 Apr 2026 00:14:38 GMT
+
+### Patches
+
+- Bump node-forge to 1.4.0 to address CVEs GHSA-2328-f5f3-gj25, GHSA-q67f-28xg-22rw, GHSA-5m6q-g25r-mvwx, GHSA-ppp5-5v6c-4jwp"
 
 ## 1.7.9
 Wed, 01 Apr 2026 15:13:38 GMT
