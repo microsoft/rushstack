@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`AmazonS3Client Does not allow upload without credentials 1`] = `[Error: Credentials are required to upload objects to S3.]`;
 

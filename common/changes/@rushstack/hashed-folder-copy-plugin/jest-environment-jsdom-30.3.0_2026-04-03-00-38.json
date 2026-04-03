@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/hashed-folder-copy-plugin",
+      "comment": "Bump jest to 30.x, address changes",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/hashed-folder-copy-plugin"
+}

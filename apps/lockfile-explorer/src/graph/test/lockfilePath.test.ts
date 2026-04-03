@@ -9,7 +9,7 @@ describe('lockfilePath', () => {
     expect(lockfilePath.getBaseNameOf('.')).toBe('.');
     expect(lockfilePath.getBaseNameOf('')).toBe('');
 
-    expect(() => lockfilePath.getParentOf('/a/')).toThrowError('has a trailing slash');
+    expect(() => lockfilePath.getParentOf('/a/')).toThrow('has a trailing slash');
   });
 
   it('getParentOf', () => {
@@ -19,10 +19,10 @@ describe('lockfilePath', () => {
     expect(lockfilePath.getParentOf('/a')).toBe('/');
     expect(lockfilePath.getParentOf('a')).toBe('.');
 
-    expect(() => lockfilePath.getParentOf('')).toThrowError('has no parent');
-    expect(() => lockfilePath.getParentOf('/')).toThrowError('has no parent');
-    expect(() => lockfilePath.getParentOf('.')).toThrowError('has no parent');
-    expect(() => lockfilePath.getParentOf('/a/')).toThrowError('has a trailing slash');
+    expect(() => lockfilePath.getParentOf('')).toThrow('has no parent');
+    expect(() => lockfilePath.getParentOf('/')).toThrow('has no parent');
+    expect(() => lockfilePath.getParentOf('.')).toThrow('has no parent');
+    expect(() => lockfilePath.getParentOf('/a/')).toThrow('has a trailing slash');
   });
 
   it('getAbsolute', () => {
@@ -35,7 +35,7 @@ describe('lockfilePath', () => {
     expect(lockfilePath.getAbsolute('C:/a/b', '../d')).toBe('C:/a/d');
 
     // Error case
-    expect(() => lockfilePath.getAbsolute('a/b/c', '../../../..')).toThrowError('goes above the root folder');
+    expect(() => lockfilePath.getAbsolute('a/b/c', '../../../..')).toThrow('goes above the root folder');
 
     // Degenerate cases
     expect(lockfilePath.getAbsolute('a/b/c/', 'd/')).toBe('a/b/c/d');

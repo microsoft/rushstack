@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`StringValuesTypingsGenerator default exports overrides for individual files with exportAsDefault filled overriding with { exportAsDefault: false } should generate typings 1`] = `
 Object {

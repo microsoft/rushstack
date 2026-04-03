@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Bump jest to 30.x, address changes",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
