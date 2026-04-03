@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Bump jest to 30.x, address changes",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter"
+}

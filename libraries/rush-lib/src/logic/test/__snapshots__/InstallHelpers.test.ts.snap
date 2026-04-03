@@ -1,3 +1,3 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`InstallHelpers generateCommonPackageJson generates correct package json with pnpm configurations: Terminal Output 1`] = `Array []`;

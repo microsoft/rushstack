@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`WebpackOutputFormats Captures code sent to minifier with methodShorthand=false, arrowFunction=false: Errors 1`] = `Array []`;
 

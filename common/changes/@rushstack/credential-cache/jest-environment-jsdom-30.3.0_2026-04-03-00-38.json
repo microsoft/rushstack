@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/credential-cache",
+      "comment": "Bump jest to 30.x, address changes",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/credential-cache"
+}

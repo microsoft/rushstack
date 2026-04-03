@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/typings-generator",
+      "comment": "Bump jest to 30.x, address changes",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator"
+}

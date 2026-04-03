@@ -10,14 +10,10 @@ const jestResolvePackageFolder: string = path.dirname(require.resolve('jest-reso
 const jestUtilPackageFolder: string = path.dirname(
   require.resolve('jest-util/package.json', { paths: [jestResolvePackageFolder] })
 );
-const jestUtilTryRealpathPath: string = path.resolve(jestUtilPackageFolder, './build/tryRealpath.js');
 
 const { realNodeModulePath }: RealNodeModulePathResolver = new RealNodeModulePathResolver();
 
-const tryRealpathModule: {
-  default: (filePath: string) => string;
-} = require(jestUtilTryRealpathPath);
-tryRealpathModule.default = (input: string): string => {
+const customTryRealpath = (input: string): string => {
   try {
     return realNodeModulePath(input);
   } catch (error) {
@@ -30,3 +26,31 @@ tryRealpathModule.default = (input: string): string => {
   }
   return input;
 };
+
+const jestUtilPackageJson: { version: string } = require(path.join(jestUtilPackageFolder, 'package.json'));
+const jestUtilMajorVersion: number = parseInt(jestUtilPackageJson.version.split('.')[0], 10);
+
+if (jestUtilMajorVersion >= 30) {
+  // jest-util 30+: everything is bundled in index.js.
+  // tryRealpath is exported as a non-configurable getter, so we can't set it directly.
+  // Instead, replace the require-cache entry with an object that shadows the getter.
+  const jestUtilIndexPath: string = require.resolve('jest-util', {
+    paths: [jestResolvePackageFolder]
+  });
+  const jestUtilExports: object = require(jestUtilIndexPath);
+  const patchedExports: object = Object.create(jestUtilExports);
+  Object.defineProperty(patchedExports, 'tryRealpath', {
+    value: customTryRealpath,
+    writable: true,
+    enumerable: true,
+    configurable: true
+  });
+  require.cache[jestUtilIndexPath]!.exports = patchedExports;
+} else {
+  // jest-util < 30: tryRealpath is a standalone module; replace its default export.
+  const jestUtilTryRealpathPath: string = path.resolve(jestUtilPackageFolder, './build/tryRealpath.js');
+  const tryRealpathModule: {
+    default: (filePath: string) => string;
+  } = require(jestUtilTryRealpathPath);
+  tryRealpathModule.default = customTryRealpath;
+}

@@ -41,8 +41,8 @@ describe('PublishGit Test', () => {
       undefined,
       undefined // This is undefined to simulate `rush publish ...` without --prerelease-name
     );
-    expect(execCommand).toBeCalledTimes(1);
-    expect(execCommand).toBeCalledWith({
+    expect(execCommand).toHaveBeenCalledTimes(1);
+    expect(execCommand).toHaveBeenCalledWith({
       shouldExecute: false,
       command: gitPath,
       args: ['tag', '-a', `project1_v2`, '-m', 'project1 v2']
@@ -57,8 +57,8 @@ describe('PublishGit Test', () => {
       undefined,
       'new_version_prerelease' // Simulates `rush publish ... --prerelease-name new_version_prerelease`
     );
-    expect(execCommand).toBeCalledTimes(1);
-    expect(execCommand).toBeCalledWith({
+    expect(execCommand).toHaveBeenCalledTimes(1);
+    expect(execCommand).toHaveBeenCalledWith({
       shouldExecute: false,
       command: gitPath,
       args: ['tag', '-a', `project1_v2-new_version_prerelease`, '-m', 'project1 v2-new_version_prerelease']

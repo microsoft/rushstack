@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`minifySingleFileAsync uses consistent identifiers for webpack vars 1`] = `
 Object {

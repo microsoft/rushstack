@@ -545,7 +545,7 @@ snapshots:
             project.rushConfiguration.defaultSubspace,
             terminal
           )
-        ).toThrowError(AlreadyReportedError);
+        ).toThrow(AlreadyReportedError);
         expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
       });
     });

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`_addTsDocReleaseTagToExports creates a new JSDoc block for an export without a preceding comment 1`] = `
 "/**
