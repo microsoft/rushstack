@@ -19,7 +19,7 @@
     "@types/webpack-env": "1.18.8",
     "eslint": "~9.37.0",
     "html-webpack-plugin": "~4.5.2",
-    "lodash": "~4.17.23",
+    "lodash": "~4.18.1",
     "local-node-rig": "workspace:*",
     "webpack": "~4.47.0",
     "webpack-bundle-analyzer": "~4.5.0",

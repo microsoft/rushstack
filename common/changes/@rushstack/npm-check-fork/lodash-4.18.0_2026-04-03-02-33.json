@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/npm-check-fork",
+      "comment": "Bump lodash 4.18.1 to address CVEs GHSA-r5fr-rjxr-66jc, GHSA-f23m-r3pf-42rh",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/npm-check-fork"
+}
