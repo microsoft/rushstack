@@ -148,9 +148,6 @@ export class OperationExecutionManager {
     const executionRecordContext: IOperationExecutionRecordContext = {
       streamCollator: this._streamCollator,
       onOperationStatusChanged: this._onOperationStatusChanged,
-      yieldPriority: (record: OperationExecutionRecord) => {
-        this._executionQueue.yieldPriority(record);
-      },
       createEnvironment: this._createEnvironmentForOperation,
       inputsSnapshot,
       debugMode,

@@ -411,7 +411,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               periodicCallback.start();
             } else {
               setTimeout(() => {
-                record.yieldPriority();
                 record.status = OperationStatus.Ready;
               }, 500);
               return OperationStatus.Executing;

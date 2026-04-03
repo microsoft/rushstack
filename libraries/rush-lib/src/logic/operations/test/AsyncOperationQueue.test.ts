@@ -169,10 +169,11 @@ describe(AsyncOperationQueue.name, () => {
     expect(result.done).toEqual(true);
   });
 
-  it('yieldPriority moves an operation to the back of the queue', async () => {
+  it('sorts cobuild retries after untried operations', async () => {
     // Three independent operations: A, B, C (all Ready).
-    // A is assigned first. Calling yieldPriority + setting Ready should move it to the back,
-    // so B and C are assigned before A on the next pass.
+    // A is assigned first, then returns to Ready (cobuild lock failed).
+    // On the next pass, B and C should be assigned before A because A
+    // has a recent lastAssignedAt timestamp.
     const opA = createRecord('a');
     const opB = createRecord('b');
     const opC = createRecord('c');
@@ -183,11 +184,10 @@ describe(AsyncOperationQueue.name, () => {
     const r1: IteratorResult<OperationExecutionRecord> = await queue.next();
     const firstAssigned: OperationExecutionRecord = r1.value;
 
-    // Simulate cobuild retry: yield priority then re-ready the operation
-    queue.yieldPriority(firstAssigned);
+    // Simulate cobuild retry: operation returns to Ready
     firstAssigned.status = OperationStatus.Ready;
 
-    // Now assign the remaining — untried operations should come before the retry
+    // Assign all three — untried operations should come before the retry
     const results: OperationExecutionRecord[] = [];
     const r2: IteratorResult<OperationExecutionRecord> = await queue.next();
     results.push(r2.value);
@@ -196,13 +196,13 @@ describe(AsyncOperationQueue.name, () => {
     const r4: IteratorResult<OperationExecutionRecord> = await queue.next();
     results.push(r4.value);
 
-    // The yielded operation should be last
+    // The cobuild retry should be last
     expect(results[2]).toBe(firstAssigned);
   });
 
-  it('yieldPriority assigns freshly unblocked operations first', async () => {
+  it('assigns freshly unblocked operations before cobuild retries', async () => {
     // A (no deps), B (depends on C), C (no deps)
-    // A is assigned and yields priority (cobuild retry).
+    // A is assigned and returns to Ready (cobuild retry).
     // C completes, unblocking B. B should be assigned before A.
     const opA = createRecord('a');
     const opB = createRecord('b');
@@ -217,15 +217,14 @@ describe(AsyncOperationQueue.name, () => {
     const r2: IteratorResult<OperationExecutionRecord> = await queue.next();
     expect(new Set([r1.value, r2.value])).toEqual(new Set([opA, opC]));
 
-    // Simulate: A fails cobuild lock
-    queue.yieldPriority(opA);
+    // Simulate: A fails cobuild lock and returns to Ready
     opA.status = OperationStatus.Ready;
 
     // C succeeds, which unblocks B
     opC.status = OperationStatus.Success;
     queue.complete(opC);
 
-    // B is freshly unblocked, A yielded priority — B should be assigned first
+    // B is freshly unblocked (never assigned), A is a cobuild retry — B should be first
     const r3: IteratorResult<OperationExecutionRecord> = await queue.next();
     expect(r3.value).toBe(opB);
 

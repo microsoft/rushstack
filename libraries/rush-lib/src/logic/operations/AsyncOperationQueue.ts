@@ -22,6 +22,11 @@ export class AsyncOperationQueue
   private readonly _totalOperations: number;
   private readonly _completedOperations: Set<OperationExecutionRecord>;
 
+  // Tracks how many times each operation has been assigned to an execution slot.
+  // Operations that have been assigned more times (e.g. cobuild retries) are sorted
+  // after operations with fewer attempts, so untried work is preferred.
+  private readonly _timesQueued: Map<OperationExecutionRecord, number>;
+
   private _isDone: boolean;
 
   /**
@@ -37,6 +42,7 @@ export class AsyncOperationQueue
     this._totalOperations = this._queue.length;
     this._isDone = false;
     this._completedOperations = new Set<OperationExecutionRecord>();
+    this._timesQueued = new Map();
   }
 
   /**
@@ -63,6 +69,7 @@ export class AsyncOperationQueue
    */
   public complete(record: OperationExecutionRecord): void {
     this._completedOperations.add(record);
+    this._timesQueued.delete(record);
 
     // Apply status changes to direct dependents
     if (record.status !== OperationStatus.Failure && record.status !== OperationStatus.Blocked) {
@@ -87,24 +94,13 @@ export class AsyncOperationQueue
   }
 
   /**
-   * Moves an operation to the back of the queue (lowest priority).
-   * Used when a cobuild lock acquisition fails, so that locally-executable operations are
-   * assigned before this operation is retried.
-   */
-  public yieldPriority(record: OperationExecutionRecord): void {
-    const index: number = this._queue.indexOf(record);
-    if (index > 0) {
-      this._queue.splice(index, 1);
-      this._queue.unshift(record);
-    }
-  }
-
-  /**
    * Routes ready operations with 0 dependencies to waiting iterators. Normally invoked as part of `next()`, but
    * if the caller does not update operation dependencies prior to calling `next()`, may need to be invoked manually.
    */
   public assignOperations(): void {
-    const { _queue: queue, _pendingIterators: waitingIterators } = this;
+    const { _queue: queue, _pendingIterators: waitingIterators, _timesQueued: timesQueued } = this;
+
+    const readyOperations: OperationExecutionRecord[] = [];
 
     // By iterating in reverse order we do less array shuffling when removing operations
     for (let i: number = queue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {
@@ -122,6 +118,7 @@ export class AsyncOperationQueue
       ) {
         // It shouldn't be on the queue, remove it
         queue.splice(i, 1);
+        timesQueued.delete(record);
       } else if (record.status === OperationStatus.Queued || record.status === OperationStatus.Executing) {
         // This operation is currently executing
         // next one plz :)
@@ -133,15 +130,30 @@ export class AsyncOperationQueue
         // Sanity check
         throw new Error(`Unexpected status "${record.status}" for queued operation: ${record.name}`);
       } else {
-        // This task is ready to process, hand it to the iterator.
-        // Needs to have queue semantics, otherwise tools that iterate it get confused
-        record.status = OperationStatus.Queued;
-        waitingIterators.shift()!({
-          value: record,
-          done: false
-        });
+        readyOperations.push(record);
       }
       // Otherwise operation is still waiting
+    }
+
+    if (readyOperations.length > 1) {
+      // Sort by times queued ascending. Operations that have never been queued (0)
+      // come first, then operations with fewer attempts. This ensures cobuild retries
+      // (queued 1+ times, returned to Ready) are tried after untried operations.
+      readyOperations.sort((a, b) => (timesQueued.get(a) ?? 0) - (timesQueued.get(b) ?? 0));
+    }
+
+    for (const record of readyOperations) {
+      if (waitingIterators.length === 0) {
+        break;
+      }
+      // This task is ready to process, hand it to the iterator.
+      // Needs to have queue semantics, otherwise tools that iterate it get confused
+      timesQueued.set(record, (timesQueued.get(record) ?? 0) + 1);
+      record.status = OperationStatus.Queued;
+      waitingIterators.shift()!({
+        value: record,
+        done: false
+      });
     }
 
     // Since items only get removed from the queue when they have a final status, this should be safe.
