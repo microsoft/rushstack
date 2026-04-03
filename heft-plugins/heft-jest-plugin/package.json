@@ -38,7 +38,7 @@
     "jest-config": "~29.5.0",
     "jest-resolve": "~29.5.0",
     "jest-snapshot": "~29.5.0",
-    "lodash": "~4.17.23",
+    "lodash": "~4.18.1",
     "punycode": "~2.3.1"
   },
   "devDependencies": {
