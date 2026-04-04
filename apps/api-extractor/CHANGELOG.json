@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.58.1",
+      "tag": "@microsoft/api-extractor_v7.58.1",
+      "date": "Sat, 04 Apr 2026 00:14:00 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump lodash 4.18.1 to address CVEs GHSA-r5fr-rjxr-66jc, GHSA-f23m-r3pf-42rh"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.58.0",
       "tag": "@microsoft/api-extractor_v7.58.0",
       "date": "Wed, 01 Apr 2026 15:13:38 GMT",

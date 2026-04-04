@@ -1,6 +1,11 @@
 # Change Log - @rushstack/rush-pnpm-kit-v8
 
-This log was last generated on Wed, 01 Apr 2026 15:13:38 GMT and should not be manually modified.
+This log was last generated on Sat, 04 Apr 2026 00:14:00 GMT and should not be manually modified.
+
+## 0.2.11
+Sat, 04 Apr 2026 00:14:00 GMT
+
+_Version update only_
 
 ## 0.2.10
 Wed, 01 Apr 2026 15:13:38 GMT
