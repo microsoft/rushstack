@@ -3,6 +3,7 @@
 
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
+import { createReadStream } from 'node:fs';
 
 import { FileSystem, type FolderItem, InternalError, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
@@ -159,20 +160,40 @@ export class OperationBuildCache {
         'This project was not found in the local build cache. Querying the cloud build cache.'
       );
 
-      cacheEntryBuffer = await this._cloudBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(
-        terminal,
-        cacheId
-      );
-      if (cacheEntryBuffer) {
-        try {
-          localCacheEntryPath = await this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
-            terminal,
-            cacheId,
-            cacheEntryBuffer
-          );
-          updateLocalCacheSuccess = true;
-        } catch (e) {
-          updateLocalCacheSuccess = false;
+      if (this._cloudBuildCacheProvider.tryGetCacheEntryStreamByIdAsync) {
+        // Use streaming path to avoid loading the entire cache entry into memory
+        const cacheEntryStream = await this._cloudBuildCacheProvider.tryGetCacheEntryStreamByIdAsync(
+          terminal,
+          cacheId
+        );
+        if (cacheEntryStream) {
+          try {
+            localCacheEntryPath = await this._localBuildCacheProvider.trySetCacheEntryStreamAsync(
+              terminal,
+              cacheId,
+              cacheEntryStream
+            );
+            updateLocalCacheSuccess = true;
+          } catch (e) {
+            updateLocalCacheSuccess = false;
+          }
+        }
+      } else {
+        cacheEntryBuffer = await this._cloudBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(
+          terminal,
+          cacheId
+        );
+        if (cacheEntryBuffer) {
+          try {
+            localCacheEntryPath = await this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
+              terminal,
+              cacheId,
+              cacheEntryBuffer
+            );
+            updateLocalCacheSuccess = true;
+          } catch (e) {
+            updateLocalCacheSuccess = false;
+          }
         }
       }
     }
@@ -300,8 +321,6 @@ export class OperationBuildCache {
       return false;
     }
 
-    let cacheEntryBuffer: Buffer | undefined;
-
     let setCloudCacheEntryPromise: Promise<boolean> | undefined;
 
     // Note that "writeAllowed" settings (whether in config or environment) always apply to
@@ -309,17 +328,26 @@ export class OperationBuildCache {
     // write to the local build cache.
 
     if (this._cloudBuildCacheProvider?.isCacheWriteAllowed) {
-      if (localCacheEntryPath) {
-        cacheEntryBuffer = await FileSystem.readFileToBufferAsync(localCacheEntryPath);
-      } else {
+      if (!localCacheEntryPath) {
         throw new InternalError('Expected the local cache entry path to be set.');
       }
 
-      setCloudCacheEntryPromise = this._cloudBuildCacheProvider?.trySetCacheEntryBufferAsync(
-        terminal,
-        cacheId,
-        cacheEntryBuffer
-      );
+      if (this._cloudBuildCacheProvider.trySetCacheEntryStreamAsync) {
+        // Use streaming upload to avoid loading the entire cache entry into memory
+        const entryStream = createReadStream(localCacheEntryPath);
+        setCloudCacheEntryPromise = this._cloudBuildCacheProvider.trySetCacheEntryStreamAsync(
+          terminal,
+          cacheId,
+          entryStream
+        );
+      } else {
+        const cacheEntryBuffer: Buffer = await FileSystem.readFileToBufferAsync(localCacheEntryPath);
+        setCloudCacheEntryPromise = this._cloudBuildCacheProvider.trySetCacheEntryBufferAsync(
+          terminal,
+          cacheId,
+          cacheEntryBuffer
+        );
+      }
     }
 
     const updateCloudCacheSuccess: boolean | undefined = (await setCloudCacheEntryPromise) ?? true;

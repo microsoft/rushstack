@@ -3,7 +3,13 @@
 
 import * as os from 'node:os';
 import * as process from 'node:process';
-import { request as httpRequest, type IncomingMessage, type Agent as HttpAgent } from 'node:http';
+import type { Readable } from 'node:stream';
+import {
+  request as httpRequest,
+  type IncomingMessage,
+  type ClientRequest,
+  type Agent as HttpAgent
+} from 'node:http';
 import { request as httpsRequest, type RequestOptions } from 'node:https';
 
 import { Import, LegacyAdapters } from '@rushstack/node-core-library';
@@ -22,6 +28,19 @@ export interface IWebClientResponse {
   getTextAsync: () => Promise<string>;
   getJsonAsync: <TJson>() => Promise<TJson>;
   getBufferAsync: () => Promise<Buffer>;
+}
+
+/**
+ * A response from {@link WebClient.fetchStreamAsync} that provides the response body as a
+ * readable stream, avoiding buffering the entire response in memory.
+ */
+export interface IWebClientStreamResponse {
+  ok: boolean;
+  status: number;
+  statusText?: string;
+  redirected: boolean;
+  headers: Record<string, string | string[] | undefined>;
+  stream: Readable;
 }
 
 /**
@@ -49,7 +68,7 @@ export interface IGetFetchOptions extends IWebFetchOptionsBase {
  */
 export interface IFetchOptionsWithBody extends IWebFetchOptionsBase {
   verb: 'PUT' | 'POST' | 'PATCH';
-  body?: Buffer;
+  body?: Buffer | Readable;
 }
 
 /**
@@ -91,7 +110,7 @@ const makeRequestAsync: FetchFn = async (
       const requestFunction: typeof httpRequest | typeof httpsRequest =
         parsedUrl.protocol === 'https:' ? httpsRequest : httpRequest;
 
-      requestFunction(url, options, (response: IncomingMessage) => {
+      const req: ClientRequest = requestFunction(url, options, (response: IncomingMessage) => {
         const responseBuffers: (Buffer | Uint8Array)[] = [];
         response.on('data', (chunk: string | Buffer | Uint8Array) => {
           responseBuffers.push(Buffer.from(chunk));
@@ -197,20 +216,103 @@ const makeRequestAsync: FetchFn = async (
           };
           resolve(result);
         });
-      })
-        .on('error', (error: Error) => {
-          reject(error);
-        })
-        .end(body);
+      }).on('error', (error: Error) => {
+        reject(error);
+      });
+
+      _sendRequestBody(req, body, reject);
     }
   );
 };
+
+type StreamFetchFn = (
+  url: string,
+  options: IRequestOptions,
+  isRedirect?: boolean
+) => Promise<IWebClientStreamResponse>;
+
+/**
+ * Makes an HTTP request that resolves as soon as headers are received, providing the
+ * response body as a readable stream. This avoids buffering the entire response in memory.
+ */
+const makeStreamRequestAsync: StreamFetchFn = async (
+  url: string,
+  options: IRequestOptions,
+  redirected: boolean = false
+) => {
+  const { body, redirect } = options;
+
+  return await new Promise(
+    (resolve: (result: IWebClientStreamResponse) => void, reject: (error: Error) => void) => {
+      const parsedUrl: URL = typeof url === 'string' ? new URL(url) : url;
+      const requestFunction: typeof httpRequest | typeof httpsRequest =
+        parsedUrl.protocol === 'https:' ? httpsRequest : httpRequest;
+
+      const req: ClientRequest = requestFunction(url, options, (response: IncomingMessage) => {
+        const statusCode: number | undefined = response.statusCode;
+
+        // Handle redirects
+        if (statusCode === 301 || statusCode === 302) {
+          // Consume/drain the redirect response before following
+          response.resume();
+          switch (redirect) {
+            case 'follow': {
+              const redirectUrl: string | string[] | undefined = response.headers.location;
+              if (redirectUrl) {
+                makeStreamRequestAsync(redirectUrl, options, true).then(resolve).catch(reject);
+              } else {
+                reject(
+                  new Error(`Received status code ${response.statusCode} with no location header: ${url}`)
+                );
+              }
+              return;
+            }
+            case 'error':
+              reject(new Error(`Received status code ${response.statusCode}: ${url}`));
+              return;
+          }
+        }
+
+        const status: number = response.statusCode || 0;
+        const statusText: string | undefined = response.statusMessage;
+        const headers: Record<string, string | string[] | undefined> = response.headers;
+
+        resolve({
+          ok: status >= 200 && status < 300,
+          status,
+          statusText,
+          redirected,
+          headers,
+          stream: response
+        });
+      }).on('error', (error: Error) => {
+        reject(error);
+      });
+
+      _sendRequestBody(req, body, reject);
+    }
+  );
+};
+
+function _sendRequestBody(
+  req: ClientRequest,
+  body: Buffer | Readable | undefined,
+  reject: (error: Error) => void
+): void {
+  if (body && typeof (body as Readable).pipe === 'function') {
+    (body as Readable).on('error', reject);
+    (body as Readable).pipe(req);
+  } else {
+    req.end(body as Buffer | undefined);
+  }
+}
 
 /**
  * A helper for issuing HTTP requests.
  */
 export class WebClient {
   private static _requestFn: FetchFn = makeRequestAsync;
+  private static _streamRequestFn: StreamFetchFn = makeStreamRequestAsync;
 
   public readonly standardHeaders: Record<string, string> = {};
 
@@ -225,6 +327,14 @@ export class WebClient {
 
   public static resetMockRequestFn(): void {
     WebClient._requestFn = makeRequestAsync;
+  }
+
+  public static mockStreamRequestFn(fn: StreamFetchFn): void {
+    WebClient._streamRequestFn = fn;
+  }
+
+  public static resetMockStreamRequestFn(): void {
+    WebClient._streamRequestFn = makeStreamRequestAsync;
   }
 
   public static mergeHeaders(target: Record<string, string>, source: Record<string, string>): void {
@@ -242,6 +352,23 @@ export class WebClient {
     url: string,
     options?: IGetFetchOptions | IFetchOptionsWithBody
   ): Promise<IWebClientResponse> {
+    const requestInit: IRequestOptions = this._buildRequestOptions(options);
+    return await WebClient._requestFn(url, requestInit);
+  }
+
+  /**
+   * Makes an HTTP request that resolves as soon as headers are received, providing the
+   * response body as a readable stream. This avoids buffering the entire response in memory.
+   */
+  public async fetchStreamAsync(
+    url: string,
+    options?: IGetFetchOptions | IFetchOptionsWithBody
+  ): Promise<IWebClientStreamResponse> {
+    const requestInit: IRequestOptions = this._buildRequestOptions(options);
+    return await WebClient._streamRequestFn(url, requestInit);
+  }
+
+  private _buildRequestOptions(options?: IGetFetchOptions | IFetchOptionsWithBody): IRequestOptions {
     const {
       headers: optionsHeaders,
       timeoutMs = 15 * 1000,
@@ -291,7 +418,7 @@ export class WebClient {
       agent = createHttpsProxyAgent(proxyUrl);
     }
 
-    const requestInit: IRequestOptions = {
+    return {
       method: verb,
       headers,
       agent,
@@ -300,7 +427,5 @@ export class WebClient {
       body,
       noDecode
     };
-
-    return await WebClient._requestFn(url, requestInit);
   }
 }

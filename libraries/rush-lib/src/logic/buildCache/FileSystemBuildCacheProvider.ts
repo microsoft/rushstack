@@ -2,6 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+import { createWriteStream } from 'node:fs';
+import { pipeline } from 'node:stream/promises';
+import type { Readable } from 'node:stream';
 
 import { FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
@@ -72,6 +75,22 @@ export class FileSystemBuildCacheProvider {
   ): Promise<string> {
     const cacheEntryFilePath: string = this.getCacheEntryPath(cacheId);
     await FileSystem.writeFileAsync(cacheEntryFilePath, entryBuffer, { ensureFolderExists: true });
+    terminal.writeVerboseLine(`Wrote cache entry to "${cacheEntryFilePath}".`);
+    return cacheEntryFilePath;
+  }
+
+  /**
+   * Writes the specified stream to the corresponding file system path for the cache id.
+   * This avoids loading the entire cache entry into memory.
+   */
+  public async trySetCacheEntryStreamAsync(
+    terminal: ITerminal,
+    cacheId: string,
+    entryStream: Readable
+  ): Promise<string> {
+    const cacheEntryFilePath: string = this.getCacheEntryPath(cacheId);
+    await FileSystem.ensureFolderAsync(path.dirname(cacheEntryFilePath));
+    await pipeline(entryStream, createWriteStream(cacheEntryFilePath));
     terminal.writeVerboseLine(`Wrote cache entry to "${cacheEntryFilePath}".`);
     return cacheEntryFilePath;
   }

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { SpawnSyncReturns } from 'node:child_process';
+import type { Readable } from 'node:stream';
 
 import { type ICredentialCacheEntry, CredentialCache } from '@rushstack/credential-cache';
 import { Executable, Async } from '@rushstack/node-core-library';
@@ -11,7 +12,11 @@ import {
   type RushSession,
   EnvironmentConfiguration
 } from '@rushstack/rush-sdk';
-import { WebClient, type IWebClientResponse } from '@rushstack/rush-sdk/lib/utilities/WebClient';
+import {
+  WebClient,
+  type IWebClientResponse,
+  type IWebClientStreamResponse
+} from '@rushstack/rush-sdk/lib/utilities/WebClient';
 
 enum CredentialsOptions {
   Optional,
@@ -143,6 +148,61 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         maxAttempts: MAX_HTTP_CACHE_ATTEMPTS
       });
 
+      return result !== false;
+    } catch (e) {
+      terminal.writeWarningLine(`Error uploading cache entry: ${e}`);
+      return false;
+    }
+  }
+
+  public async tryGetCacheEntryStreamByIdAsync(
+    terminal: ITerminal,
+    cacheId: string
+  ): Promise<Readable | undefined> {
+    try {
+      const result: IWebClientStreamResponse | false = await this._makeHttpStreamRequestAsync({
+        terminal: terminal,
+        relUrl: `${this._cacheKeyPrefix}${cacheId}`,
+        method: 'GET',
+        body: undefined,
+        warningText: 'Could not get cache entry',
+        maxAttempts: MAX_HTTP_CACHE_ATTEMPTS
+      });
+
+      return result !== false ? result.stream : undefined;
+    } catch (e) {
+      terminal.writeWarningLine(`Error getting cache entry: ${e}`);
+      return undefined;
+    }
+  }
+
+  public async trySetCacheEntryStreamAsync(
+    terminal: ITerminal,
+    cacheId: string,
+    entryStream: Readable
+  ): Promise<boolean> {
+    if (!this.isCacheWriteAllowed) {
+      terminal.writeErrorLine('Writing to cache is not allowed in the current configuration.');
+      return false;
+    }
+
+    terminal.writeDebugLine('Uploading object with cacheId: ', cacheId);
+
+    try {
+      const result: IWebClientStreamResponse | false = await this._makeHttpStreamRequestAsync({
+        terminal: terminal,
+        relUrl: `${this._cacheKeyPrefix}${cacheId}`,
+        method: this._uploadMethod,
+        body: entryStream,
+        warningText: 'Could not write cache entry',
+        // Streaming uploads cannot be retried because the stream is consumed
+        maxAttempts: 1
+      });
+
+      if (result !== false) {
+        // Drain the response body
+        result.stream.resume();
+      }
       return result !== false;
     } catch (e) {
       terminal.writeWarningLine(`Error uploading cache entry: ${e}`);
@@ -309,6 +369,78 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     return result;
   }
 
+  private async _makeHttpStreamRequestAsync(options: {
+    terminal: ITerminal;
+    relUrl: string;
+    method: 'GET' | UploadMethod;
+    body: Readable | undefined;
+    warningText: string;
+    maxAttempts: number;
+    credentialOptions?: CredentialsOptions;
+  }): Promise<IWebClientStreamResponse | false> {
+    const { terminal, relUrl, method, body, warningText, credentialOptions } = options;
+    const safeCredentialOptions: CredentialsOptions = credentialOptions ?? CredentialsOptions.Optional;
+    const credentials: string | undefined = await this._tryGetCredentialsAsync(safeCredentialOptions);
+    const url: string = new URL(relUrl, this._url).href;
+
+    const headers: Record<string, string> = {};
+    if (typeof credentials === 'string') {
+      headers.Authorization = credentials;
+    }
+
+    for (const [key, value] of Object.entries(this._headers)) {
+      if (typeof value === 'string') {
+        headers[key] = value;
+      }
+    }
+
+    terminal.writeDebugLine(`[http-build-cache] stream request: ${method} ${url}`);
+
+    const webClient: WebClient = new WebClient();
+    const response: IWebClientStreamResponse = await webClient.fetchStreamAsync(url, {
+      verb: method,
+      headers: headers,
+      body: body,
+      redirect: 'follow',
+      timeoutMs: 0 // Use the default timeout
+    });
+
+    if (!response.ok) {
+      // Drain the response body so the connection can be reused
+      response.stream.resume();
+
+      const isNonCredentialResponse: boolean = response.status >= 500 && response.status < 600;
+
+      if (
+        !isNonCredentialResponse &&
+        typeof credentials !== 'string' &&
+        safeCredentialOptions === CredentialsOptions.Optional
+      ) {
+        return await this._makeHttpStreamRequestAsync({
+          ...options,
+          credentialOptions: CredentialsOptions.Required
+        });
+      }
+
+      if (options.maxAttempts > 1) {
+        const factor: number = 1.0 + Math.random();
+        const retryDelay: number = Math.floor(factor * this._minHttpRetryDelayMs);
+        await Async.sleepAsync(retryDelay);
+        return await this._makeHttpStreamRequestAsync({
+          ...options,
+          maxAttempts: options.maxAttempts - 1
+        });
+      }
+
+      this._reportFailure(terminal, method, response, false, warningText);
+      return false;
+    }
+
+    terminal.writeDebugLine(`[http-build-cache] stream response: ${response.status} ${url}`);
+
+    return response;
+  }
+
   private async _tryGetCredentialsAsync(options: CredentialsOptions.Required): Promise<string>;
   private async _tryGetCredentialsAsync(options: CredentialsOptions.Optional): Promise<string | undefined>;
   private async _tryGetCredentialsAsync(options: CredentialsOptions.Omit): Promise<undefined>;
@@ -363,7 +495,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
   private _getFailureType(
     requestMethod: string,
-    response: IWebClientResponse,
+    response: IWebClientResponse | IWebClientStreamResponse,
     isRedirect: boolean
   ): FailureType {
     if (response.ok) {
@@ -415,7 +547,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   private _reportFailure(
     terminal: ITerminal,
     requestMethod: string,
-    response: IWebClientResponse,
+    response: IWebClientResponse | IWebClientStreamResponse,
     isRedirect: boolean,
     message: string
   ): void {
