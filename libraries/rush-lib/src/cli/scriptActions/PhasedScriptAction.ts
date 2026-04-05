@@ -350,6 +350,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   public async runAsync(): Promise<void> {
     const stopwatch: Stopwatch = Stopwatch.start();
 
+    const {
+      defaultSubspace,
+      subspacesFeatureEnabled,
+      pnpmOptions: { useWorkspaces }
+    } = this.rushConfiguration;
     if (this._alwaysInstall || this._installParameter?.value) {
       await measureAsyncFn(`${PERF_PREFIX}:install`, async () => {
         const { doBasicInstallAsync } = await import(
@@ -373,7 +378,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           afterInstallAsync: (subspace: Subspace) =>
             this.rushSession.hooks.afterInstall.promise(this, subspace, variant),
           // Eventually we may want to allow a subspace to be selected here
-          subspace: this.rushConfiguration.defaultSubspace
+          subspace: defaultSubspace
         });
       });
     }
@@ -382,14 +387,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       await measureAsyncFn(`${PERF_PREFIX}:checkInstallFlag`, async () => {
         // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are removed
         const lastLinkFlag: FlagFile = new FlagFile(
-          this.rushConfiguration.defaultSubspace.getSubspaceTempFolderPath(),
+          defaultSubspace.getSubspaceTempFolderPath(),
           RushConstants.lastLinkFlagFilename,
           {}
         );
         // Only check for a valid link flag when subspaces is not enabled
-        if (!(await lastLinkFlag.isValidAsync()) && !this.rushConfiguration.subspacesFeatureEnabled) {
-          const useWorkspaces: boolean =
-            this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
+        if (!(await lastLinkFlag.isValidAsync()) && !subspacesFeatureEnabled) {
           if (useWorkspaces) {
             throw new Error('Link flag invalid.\nDid you run "rush install" or "rush update"?');
           } else {
@@ -513,20 +516,27 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           ).IPCOperationRunnerPlugin().apply(this.hooks);
         }
 
+        const {
+          experimentsConfiguration: {
+            configuration: {
+              buildCacheWithAllowWarningsInSuccessfulBuild = false,
+              buildSkipWithAllowWarningsInSuccessfulBuild,
+              omitAppleDoubleFilesFromBuildCache: excludeAppleDoubleFiles = false,
+              useStreamingBuildCache = false,
+              usePnpmSyncForInjectedDependencies
+            }
+          },
+          isPnpm
+        } = this.rushConfiguration;
         if (buildCacheConfiguration?.buildCacheEnabled) {
           terminal.writeVerboseLine(`Incremental strategy: cache restoration`);
           new CacheableOperationPlugin({
-            allowWarningsInSuccessfulBuild:
-              !!this.rushConfiguration.experimentsConfiguration.configuration
-                .buildCacheWithAllowWarningsInSuccessfulBuild,
+            allowWarningsInSuccessfulBuild: buildCacheWithAllowWarningsInSuccessfulBuild,
             buildCacheConfiguration,
             cobuildConfiguration,
             terminal,
-            excludeAppleDoubleFiles:
-              !!this.rushConfiguration.experimentsConfiguration.configuration
-                .omitAppleDoubleFilesFromBuildCache,
-            useStreamingBuildCache:
-              !!this.rushConfiguration.experimentsConfiguration.configuration.useStreamingBuildCache
+            excludeAppleDoubleFiles,
+            useStreamingBuildCache
           }).apply(this.hooks);
 
           if (this._debugBuildCacheIdsParameter.value) {
@@ -536,9 +546,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           terminal.writeVerboseLine(`Incremental strategy: output preservation`);
           // Explicitly disabling the build cache also disables legacy skip detection.
           new LegacySkipPlugin({
-            allowWarningsInSuccessfulBuild:
-              this.rushConfiguration.experimentsConfiguration.configuration
-                .buildSkipWithAllowWarningsInSuccessfulBuild,
+            allowWarningsInSuccessfulBuild: buildSkipWithAllowWarningsInSuccessfulBuild,
             terminal,
             changedProjectsOnly,
             isIncrementalBuildAllowed: this._isIncrementalBuildAllowed
@@ -553,12 +561,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           if (!buildCacheConfiguration?.buildCacheEnabled) {
             throw new Error('You must have build cache enabled to use this option.');
           }
+
           const { BuildPlanPlugin } = await import('../../logic/operations/BuildPlanPlugin');
           new BuildPlanPlugin(terminal).apply(this.hooks);
         }
 
-        const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
-        if (this.rushConfiguration?.isPnpm && experiments?.usePnpmSyncForInjectedDependencies) {
+        if (isPnpm && usePnpmSyncForInjectedDependencies) {
           const { PnpmSyncCopyOperationPlugin } = await import(
             '../../logic/operations/PnpmSyncCopyOperationPlugin'
           );
