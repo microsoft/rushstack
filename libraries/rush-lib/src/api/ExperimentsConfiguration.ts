@@ -136,6 +136,14 @@ export interface IExperimentsJson {
    * be included in the shared build cache.
    */
   omitAppleDoubleFilesFromBuildCache?: boolean;
+
+  /**
+   * If true, the build cache will use streaming APIs to transfer cache entries to and from cloud
+   * storage. This avoids loading the entire cache entry into memory, which can prevent out-of-memory
+   * errors for large build outputs. The cloud cache provider plugin must implement the optional
+   * streaming methods for this to take effect; otherwise it falls back to the buffer-based approach.
+   */
+  useStreamingBuildCache?: boolean;
 }
 
 const _EXPERIMENTS_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);

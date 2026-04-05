@@ -59,7 +59,8 @@ describe(OperationBuildCache.name, () => {
       operationStateHash: '1926f30e8ed24cb47be89aea39e7efd70fcda075',
       terminal,
       phaseName: 'build',
-      excludeAppleDoubleFiles: !!options.excludeAppleDoubleFiles
+      excludeAppleDoubleFiles: !!options.excludeAppleDoubleFiles,
+      useStreamingBuildCache: false
     });
 
     return subject;

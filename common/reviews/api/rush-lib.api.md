@@ -490,6 +490,7 @@ export interface IExperimentsJson {
     usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
     usePnpmSyncForInjectedDependencies?: boolean;
+    useStreamingBuildCache?: boolean;
 }
 
 // @beta
@@ -598,6 +599,7 @@ export interface _IOperationBuildCacheOptions {
     buildCacheConfiguration: BuildCacheConfiguration;
     excludeAppleDoubleFiles: boolean;
     terminal: ITerminal;
+    useStreamingBuildCache: boolean;
 }
 
 // @alpha

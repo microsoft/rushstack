@@ -39,6 +39,11 @@ export interface IOperationBuildCacheOptions {
    * and a companion file exists in the same directory.
    */
   excludeAppleDoubleFiles: boolean;
+  /**
+   * If true, use streaming APIs (when available) to transfer cache entries to and from the
+   * cloud provider, avoiding buffering the entire entry in memory.
+   */
+  useStreamingBuildCache: boolean;
 }
 
 /**
@@ -82,6 +87,7 @@ export class OperationBuildCache {
   private readonly _projectOutputFolderNames: ReadonlyArray<string>;
   private readonly _cacheId: string | undefined;
   private readonly _excludeAppleDoubleFiles: boolean;
+  private readonly _useStreamingBuildCache: boolean;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
     const {
@@ -93,7 +99,8 @@ export class OperationBuildCache {
       },
       project,
       projectOutputFolderNames,
-      excludeAppleDoubleFiles
+      excludeAppleDoubleFiles,
+      useStreamingBuildCache
     } = options;
     this._project = project;
     this._localBuildCacheProvider = localCacheProvider;
@@ -103,6 +110,7 @@ export class OperationBuildCache {
     this._projectOutputFolderNames = projectOutputFolderNames || [];
     this._cacheId = cacheId;
     this._excludeAppleDoubleFiles = excludeAppleDoubleFiles && process.platform === 'darwin';
+    this._useStreamingBuildCache = useStreamingBuildCache;
   }
 
   private static _tryGetTarUtility(terminal: ITerminal): Promise<TarExecutable | undefined> {
@@ -126,7 +134,7 @@ export class OperationBuildCache {
     executionResult: IOperationExecutionResult,
     options: IOperationBuildCacheOptions
   ): OperationBuildCache {
-    const { buildCacheConfiguration, terminal, excludeAppleDoubleFiles } = options;
+    const { buildCacheConfiguration, terminal, excludeAppleDoubleFiles, useStreamingBuildCache } = options;
     const outputFolders: string[] = [...(executionResult.operation.settings?.outputFolderNames ?? [])];
     if (executionResult.metadataFolderPath) {
       outputFolders.push(executionResult.metadataFolderPath);
@@ -139,7 +147,8 @@ export class OperationBuildCache {
       phaseName: executionResult.operation.associatedPhase.name,
       projectOutputFolderNames: outputFolders,
       operationStateHash: executionResult.getStateHash(),
-      excludeAppleDoubleFiles
+      excludeAppleDoubleFiles,
+      useStreamingBuildCache
     };
     const cacheId: string | undefined = OperationBuildCache._getCacheId(buildCacheOptions);
     return new OperationBuildCache(cacheId, buildCacheOptions);
@@ -166,7 +175,10 @@ export class OperationBuildCache {
         'This project was not found in the local build cache. Querying the cloud build cache.'
       );
 
-      if (this._cloudBuildCacheProvider.tryGetCacheEntryStreamByIdAsync) {
+      if (
+        this._useStreamingBuildCache &&
+        this._cloudBuildCacheProvider.tryGetCacheEntryStreamByIdAsync
+      ) {
         // Use streaming path to avoid loading the entire cache entry into memory
         const cacheEntryStream: Readable | undefined =
           await this._cloudBuildCacheProvider.tryGetCacheEntryStreamByIdAsync(terminal, cacheId);
@@ -336,7 +348,10 @@ export class OperationBuildCache {
         throw new InternalError('Expected the local cache entry path to be set.');
       }
 
-      if (this._cloudBuildCacheProvider.trySetCacheEntryStreamAsync) {
+      if (
+        this._useStreamingBuildCache &&
+        this._cloudBuildCacheProvider.trySetCacheEntryStreamAsync
+      ) {
         // Use streaming upload to avoid loading the entire cache entry into memory
         const entryStream: FileSystemReadStream = FileSystem.createReadStream(localCacheEntryPath);
         setCloudCacheEntryPromise = this._cloudBuildCacheProvider.trySetCacheEntryStreamAsync(

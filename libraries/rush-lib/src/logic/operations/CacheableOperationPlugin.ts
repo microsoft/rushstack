@@ -77,6 +77,7 @@ export interface ICacheableOperationPluginOptions {
   cobuildConfiguration: CobuildConfiguration | undefined;
   terminal: ITerminal;
   excludeAppleDoubleFiles: boolean;
+  useStreamingBuildCache: boolean;
 }
 
 interface ITryGetOperationBuildCacheOptionsBase<TRecord> {
@@ -84,6 +85,7 @@ interface ITryGetOperationBuildCacheOptionsBase<TRecord> {
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
   terminal: ITerminal;
   excludeAppleDoubleFiles: boolean;
+  useStreamingBuildCache: boolean;
   record: TRecord;
 }
 
@@ -108,7 +110,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       allowWarningsInSuccessfulBuild,
       buildCacheConfiguration,
       cobuildConfiguration,
-      excludeAppleDoubleFiles
+      excludeAppleDoubleFiles,
+      useStreamingBuildCache
     } = this._options;
 
     hooks.beforeExecuteOperations.tap(
@@ -272,7 +275,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             buildCacheConfiguration,
             terminal: buildCacheTerminal,
             record,
-            excludeAppleDoubleFiles
+            excludeAppleDoubleFiles,
+            useStreamingBuildCache
           });
 
           // Try to acquire the cobuild lock
@@ -291,7 +295,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 buildCacheContext,
                 record,
                 terminal: buildCacheTerminal,
-                excludeAppleDoubleFiles
+                excludeAppleDoubleFiles,
+                useStreamingBuildCache
               });
               if (operationBuildCache) {
                 buildCacheTerminal.writeVerboseLine(
@@ -585,7 +590,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
   private _tryGetOperationBuildCache(
     options: ITryGetOperationBuildCacheOptions
   ): OperationBuildCache | undefined {
-    const { buildCacheConfiguration, buildCacheContext, terminal, record, excludeAppleDoubleFiles } = options;
+    const {
+      buildCacheConfiguration,
+      buildCacheContext,
+      terminal,
+      record,
+      excludeAppleDoubleFiles,
+      useStreamingBuildCache
+    } = options;
     if (!buildCacheContext.operationBuildCache) {
       const { cacheDisabledReason } = buildCacheContext;
       if (cacheDisabledReason && !record.operation.settings?.allowCobuildWithoutCache) {
@@ -601,7 +613,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       buildCacheContext.operationBuildCache = OperationBuildCache.forOperation(record, {
         buildCacheConfiguration,
         terminal,
-        excludeAppleDoubleFiles
+        excludeAppleDoubleFiles,
+        useStreamingBuildCache
       });
     }
 
@@ -618,7 +631,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       cobuildConfiguration,
       record,
       terminal,
-      excludeAppleDoubleFiles
+      excludeAppleDoubleFiles,
+      useStreamingBuildCache
     } = options;
 
     if (!buildCacheConfiguration?.buildCacheEnabled) {
@@ -649,7 +663,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       terminal,
       operationStateHash,
       phaseName: associatedPhase.name,
-      excludeAppleDoubleFiles
+      excludeAppleDoubleFiles,
+      useStreamingBuildCache
     });
 
     buildCacheContext.operationBuildCache = operationBuildCache;
