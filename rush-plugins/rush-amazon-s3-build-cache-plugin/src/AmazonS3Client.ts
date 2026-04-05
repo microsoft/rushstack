@@ -128,42 +128,14 @@ export class AmazonS3Client {
   public async getObjectAsync(objectName: string): Promise<Buffer | undefined> {
     this._writeDebugLine('Reading object from S3');
     return await this._sendCacheRequestWithRetriesAsync(async () => {
-      const response: IWebClientResponse = await this._makeRequestAsync('GET', objectName);
-      if (response.ok) {
-        return {
-          hasNetworkError: false,
-          response: await response.getBufferAsync()
-        };
-      } else if (response.status === 404) {
-        return {
-          hasNetworkError: false,
-          response: undefined
-        };
-      } else if (
-        (response.status === 400 || response.status === 401 || response.status === 403) &&
-        !this._credentials
-      ) {
-        // unauthorized due to not providing credentials,
-        // silence error for better DX when e.g. running locally without credentials
-        this._writeWarningLine(
-          `No credentials found and received a ${response.status}`,
-          ' response code from the cloud storage.',
-          ' Maybe run rush update-cloud-credentials',
-          ' or set the RUSH_BUILD_CACHE_CREDENTIAL env'
-        );
-        return {
-          hasNetworkError: false,
-          response: undefined
-        };
-      } else if (response.status === 400 || response.status === 401 || response.status === 403) {
-        throw await this._getS3ErrorAsync(response);
-      } else {
-        const error: Error = await this._getS3ErrorAsync(response);
-        return {
-          hasNetworkError: true,
-          error
-        };
-      }
+      const response: IWebClientResponse = await this._makeSignedRequestAsync('GET', objectName);
+      return this._handleGetResponseAsync(
+        response.status,
+        response.statusText,
+        response.ok,
+        async () => await response.getBufferAsync(),
+        async () => await this._getS3ErrorAsync(response)
+      );
     });
   }
 
@@ -173,7 +145,11 @@ export class AmazonS3Client {
     }
 
     await this._sendCacheRequestWithRetriesAsync(async () => {
-      const response: IWebClientResponse = await this._makeRequestAsync('PUT', objectName, objectBuffer);
+      const response: IWebClientResponse = await this._makeSignedRequestAsync(
+        'PUT',
+        objectName,
+        objectBuffer
+      );
       if (!response.ok) {
         return {
           hasNetworkError: true,
@@ -190,47 +166,25 @@ export class AmazonS3Client {
   public async getObjectStreamAsync(objectName: string): Promise<Readable | undefined> {
     this._writeDebugLine('Reading object stream from S3');
     return await this._sendCacheRequestWithRetriesAsync(async () => {
-      const response: IWebClientStreamResponse = await this._makeStreamRequestAsync('GET', objectName);
-      if (response.ok) {
-        return {
-          hasNetworkError: false,
-          response: response.stream
-        };
-      } else if (response.status === 404) {
-        response.stream.resume();
-        return {
-          hasNetworkError: false,
-          response: undefined
-        };
-      } else if (
-        (response.status === 400 || response.status === 401 || response.status === 403) &&
-        !this._credentials
-      ) {
-        response.stream.resume();
-        this._writeWarningLine(
-          `No credentials found and received a ${response.status}`,
-          ' response code from the cloud storage.',
-          ' Maybe run rush update-cloud-credentials',
-          ' or set the RUSH_BUILD_CACHE_CREDENTIAL env'
-        );
-        return {
-          hasNetworkError: false,
-          response: undefined
-        };
-      } else if (response.status === 400 || response.status === 401 || response.status === 403) {
-        response.stream.resume();
-        throw new Error(
-          `Amazon S3 responded with status code ${response.status} (${response.statusText})`
-        );
-      } else {
-        response.stream.resume();
-        return {
-          hasNetworkError: true,
-          error: new Error(
+      const response: IWebClientStreamResponse = await this._makeSignedRequestAsync(
+        'GET',
+        objectName,
+        undefined,
+        true
+      );
+      return this._handleGetResponseAsync(
+        response.status,
+        response.statusText,
+        response.ok,
+        () => response.stream,
+        async () => {
+          response.stream.resume();
+          return new Error(
             `Amazon S3 responded with status code ${response.status} (${response.statusText})`
-          )
-        };
-      }
+          );
+        },
+        () => response.stream.resume()
+      );
     });
   }
 
@@ -245,10 +199,11 @@ export class AmazonS3Client {
     }
 
     // Streaming uploads cannot be retried because the stream is consumed after the first attempt.
-    const response: IWebClientStreamResponse = await this._makeStreamRequestAsync(
+    const response: IWebClientStreamResponse = await this._makeSignedRequestAsync(
       'PUT',
       objectName,
-      objectStream
+      objectStream,
+      true
     );
     if (!response.ok) {
       response.stream.resume();
@@ -277,34 +232,83 @@ export class AmazonS3Client {
     }
   }
 
-  private async _makeRequestAsync(
+  /**
+   * Shared response handling for GET requests (both buffer and stream).
+   * The `getSuccessResult` callback extracts the response payload (Buffer or Readable).
+   * The `getError` callback constructs an error from the response.
+   * The optional `cleanup` callback drains stream responses on non-success paths.
+   */
+  private async _handleGetResponseAsync<T>(
+    status: number,
+    statusText: string | undefined,
+    ok: boolean,
+    getSuccessResult: () => T | Promise<T>,
+    getError: () => Promise<Error>,
+    cleanup?: () => void
+  ): Promise<RetryableRequestResponse<T | undefined>> {
+    if (ok) {
+      return {
+        hasNetworkError: false,
+        response: await getSuccessResult()
+      };
+    } else if (status === 404) {
+      cleanup?.();
+      return {
+        hasNetworkError: false,
+        response: undefined
+      };
+    } else if (
+      (status === 400 || status === 401 || status === 403) &&
+      !this._credentials
+    ) {
+      cleanup?.();
+      // unauthorized due to not providing credentials,
+      // silence error for better DX when e.g. running locally without credentials
+      this._writeWarningLine(
+        `No credentials found and received a ${status}`,
+        ' response code from the cloud storage.',
+        ' Maybe run rush update-cloud-credentials',
+        ' or set the RUSH_BUILD_CACHE_CREDENTIAL env'
+      );
+      return {
+        hasNetworkError: false,
+        response: undefined
+      };
+    } else if (status === 400 || status === 401 || status === 403) {
+      cleanup?.();
+      throw await getError();
+    } else {
+      cleanup?.();
+      const error: Error = await getError();
+      return {
+        hasNetworkError: true,
+        error
+      };
+    }
+  }
+
+  private async _makeSignedRequestAsync(
     verb: 'GET' | 'PUT',
     objectName: string,
     body?: Buffer
-  ): Promise<IWebClientResponse> {
-    const bodyHash: string = this._getSha256(body);
-    const { url, headers } = this._buildSignedRequest(verb, objectName, bodyHash);
-
-    const webFetchOptions: IGetFetchOptions | IFetchOptionsWithBody = {
-      verb,
-      headers
-    };
-    if (verb === 'PUT') {
-      (webFetchOptions as IFetchOptionsWithBody).body = body;
-    }
-
-    const response: IWebClientResponse = await this._webClient.fetchAsync(url, webFetchOptions);
-
-    return response;
-  }
-
-  private async _makeStreamRequestAsync(
+  ): Promise<IWebClientResponse>;
+  private async _makeSignedRequestAsync(
     verb: 'GET' | 'PUT',
     objectName: string,
-    body?: Readable
-  ): Promise<IWebClientStreamResponse> {
+    body: Readable | undefined,
+    stream: true
+  ): Promise<IWebClientStreamResponse>;
+  private async _makeSignedRequestAsync(
+    verb: 'GET' | 'PUT',
+    objectName: string,
+    body?: Buffer | Readable,
+    stream?: boolean
+  ): Promise<IWebClientResponse | IWebClientStreamResponse> {
     // For streaming uploads, the body cannot be hashed upfront, so we use UNSIGNED-PAYLOAD.
-    const bodyHash: string = body ? UNSIGNED_PAYLOAD : this._getSha256(undefined);
+    const isStreamBody: boolean = !!body && typeof (body as Readable).pipe === 'function';
+    const bodyHash: string = isStreamBody
+      ? UNSIGNED_PAYLOAD
+      : this._getSha256(body as Buffer | undefined);
     const { url, headers } = this._buildSignedRequest(verb, objectName, bodyHash);
 
     const webFetchOptions: IGetFetchOptions | IFetchOptionsWithBody = {
@@ -315,7 +319,11 @@ export class AmazonS3Client {
       (webFetchOptions as IFetchOptionsWithBody).body = body;
     }
 
-    return await this._webClient.fetchStreamAsync(url, webFetchOptions);
+    if (stream) {
+      return await this._webClient.fetchStreamAsync(url, webFetchOptions);
+    } else {
+      return await this._webClient.fetchAsync(url, webFetchOptions);
+    }
   }
 
   /**

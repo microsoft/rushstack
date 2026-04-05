@@ -95,134 +95,6 @@ const ACCEPT_HEADER_NAME: 'accept' = 'accept';
 const USER_AGENT_HEADER_NAME: 'user-agent' = 'user-agent';
 const CONTENT_ENCODING_HEADER_NAME: 'content-encoding' = 'content-encoding';
 
-const makeRequestAsync: FetchFn = async (
-  url: string,
-  options: IRequestOptions,
-  redirected: boolean = false
-) => {
-  const { body, redirect, noDecode } = options;
-
-  return await new Promise(
-    (resolve: (result: IWebClientResponse) => void, reject: (error: Error) => void) => {
-      const parsedUrl: URL = typeof url === 'string' ? new URL(url) : url;
-      const requestFunction: typeof httpRequest | typeof httpsRequest =
-        parsedUrl.protocol === 'https:' ? httpsRequest : httpRequest;
-
-      const req: ClientRequest = requestFunction(url, options, (response: IncomingMessage) => {
-        const responseBuffers: (Buffer | Uint8Array)[] = [];
-        response.on('data', (chunk: string | Buffer | Uint8Array) => {
-          responseBuffers.push(Buffer.from(chunk));
-        });
-        response.on('end', () => {
-          // Handle retries by calling the method recursively with the redirect URL
-          const statusCode: number | undefined = response.statusCode;
-          if (statusCode === 301 || statusCode === 302) {
-            switch (redirect) {
-              case 'follow': {
-                const redirectUrl: string | string[] | undefined = response.headers.location;
-                if (redirectUrl) {
-                  makeRequestAsync(redirectUrl, options, true).then(resolve).catch(reject);
-                } else {
-                  reject(
-                    new Error(`Received status code ${response.statusCode} with no location header: ${url}`)
-                  );
-                }
-
-                break;
-              }
-              case 'error':
-                reject(new Error(`Received status code ${response.statusCode}: ${url}`));
-                return;
-            }
-          }
-
-          const responseData: Buffer = Buffer.concat(responseBuffers);
-          const status: number = response.statusCode || 0;
-          const statusText: string | undefined = response.statusMessage;
-          const headers: Record<string, string | string[] | undefined> = response.headers;
-
-          let bodyString: string | undefined;
-          let bodyJson: unknown | undefined;
-          let decodedBuffer: Buffer | undefined;
-          const result: IWebClientResponse = {
-            ok: status >= 200 && status < 300,
-            status,
-            statusText,
-            redirected,
-            headers,
-            getTextAsync: async () => {
-              if (bodyString === undefined) {
-                const buffer: Buffer = await result.getBufferAsync();
-                // eslint-disable-next-line require-atomic-updates
-                bodyString = buffer.toString();
-              }
-
-              return bodyString;
-            },
-            getJsonAsync: async <TJson>() => {
-              if (bodyJson === undefined) {
-                const text: string = await result.getTextAsync();
-                // eslint-disable-next-line require-atomic-updates
-                bodyJson = JSON.parse(text);
-              }
-
-              return bodyJson as TJson;
-            },
-            getBufferAsync: async () => {
-              // Determine if the buffer is compressed and decode it if necessary
-              if (decodedBuffer === undefined) {
-                let encodings: string | string[] | undefined = headers[CONTENT_ENCODING_HEADER_NAME];
-                if (!noDecode && encodings !== undefined) {
-                  const zlib: typeof import('zlib') = await import('node:zlib');
-                  if (!Array.isArray(encodings)) {
-                    encodings = encodings.split(',');
-                  }
-
-                  let buffer: Buffer = responseData;
-                  for (const encoding of encodings) {
-                    let decompressFn: (buffer: Buffer, callback: import('zlib').CompressCallback) => void;
-                    switch (encoding.trim()) {
-                      case DEFLATE_ENCODING: {
-                        decompressFn = zlib.inflate.bind(zlib);
-                        break;
-                      }
-                      case GZIP_ENCODING: {
-                        decompressFn = zlib.gunzip.bind(zlib);
-                        break;
-                      }
-                      case BROTLI_ENCODING: {
-                        decompressFn = zlib.brotliDecompress.bind(zlib);
-                        break;
-                      }
-                      default: {
-                        throw new Error(`Unsupported content-encoding: ${encodings}`);
-                      }
-                    }
-
-                    buffer = await LegacyAdapters.convertCallbackToPromise(decompressFn, buffer);
-                  }
-
-                  // eslint-disable-next-line require-atomic-updates
-                  decodedBuffer = buffer;
-                } else {
-                  decodedBuffer = responseData;
-                }
-              }
-
-              return decodedBuffer;
-            }
-          };
-          resolve(result);
-        });
-      }).on('error', (error: Error) => {
-        reject(error);
-      });
-
-      _sendRequestBody(req, body, reject);
-    }
-  );
-};
-
 type StreamFetchFn = (
   url: string,
   options: IRequestOptions,
@@ -230,18 +102,27 @@ type StreamFetchFn = (
 ) => Promise<IWebClientStreamResponse>;
 
 /**
- * Makes an HTTP request that resolves as soon as headers are received, providing the
- * response body as a readable stream. This avoids buffering the entire response in memory.
+ * Shared HTTP request core used by both buffer-based and streaming request functions.
+ * Handles URL parsing, protocol selection, redirect following, body sending, and error handling.
+ * The `handleResponse` callback is responsible for processing the response and calling
+ * `resolve`/`reject` to complete the outer promise.
  */
-const makeStreamRequestAsync: StreamFetchFn = async (
+function _makeRawRequestAsync<TResponse>(
   url: string,
   options: IRequestOptions,
-  redirected: boolean = false
-) => {
+  redirected: boolean,
+  handleResponse: (
+    response: IncomingMessage,
+    redirected: boolean,
+    resolve: (result: TResponse | PromiseLike<TResponse>) => void,
+    reject: (error: Error) => void
+  ) => void,
+  selfFn: (url: string, options: IRequestOptions, isRedirect?: boolean) => Promise<TResponse>
+): Promise<TResponse> {
   const { body, redirect } = options;
 
-  return await new Promise(
-    (resolve: (result: IWebClientStreamResponse) => void, reject: (error: Error) => void) => {
+  return new Promise(
+    (resolve: (result: TResponse | PromiseLike<TResponse>) => void, reject: (error: Error) => void) => {
       const parsedUrl: URL = typeof url === 'string' ? new URL(url) : url;
       const requestFunction: typeof httpRequest | typeof httpsRequest =
         parsedUrl.protocol === 'https:' ? httpsRequest : httpRequest;
@@ -249,15 +130,14 @@ const makeStreamRequestAsync: StreamFetchFn = async (
       const req: ClientRequest = requestFunction(url, options, (response: IncomingMessage) => {
         const statusCode: number | undefined = response.statusCode;
 
-        // Handle redirects
         if (statusCode === 301 || statusCode === 302) {
-          // Consume/drain the redirect response before following
+          // Drain the redirect response before following
           response.resume();
           switch (redirect) {
             case 'follow': {
               const redirectUrl: string | string[] | undefined = response.headers.location;
-              if (redirectUrl) {
-                makeStreamRequestAsync(redirectUrl, options, true).then(resolve).catch(reject);
+              if (typeof redirectUrl === 'string') {
+                resolve(selfFn(redirectUrl, options, true));
               } else {
                 reject(
                   new Error(`Received status code ${response.statusCode} with no location header: ${url}`)
@@ -271,40 +151,156 @@ const makeStreamRequestAsync: StreamFetchFn = async (
           }
         }
 
-        const status: number = response.statusCode || 0;
-        const statusText: string | undefined = response.statusMessage;
-        const headers: Record<string, string | string[] | undefined> = response.headers;
-
-        resolve({
-          ok: status >= 200 && status < 300,
-          status,
-          statusText,
-          redirected,
-          headers,
-          stream: response
-        });
+        handleResponse(response, redirected, resolve, reject);
       }).on('error', (error: Error) => {
         reject(error);
       });
 
-      _sendRequestBody(req, body, reject);
+      const isStream: boolean = !!body && typeof (body as Readable).pipe === 'function';
+      if (isStream) {
+        (body as Readable).on('error', reject);
+        (body as Readable).pipe(req);
+      } else {
+        req.end(body as Buffer | undefined);
+      }
     }
+  );
+}
+
+const makeRequestAsync: FetchFn = async (
+  url: string,
+  options: IRequestOptions,
+  redirected: boolean = false
+) => {
+  const { noDecode } = options;
+
+  return _makeRawRequestAsync(
+    url,
+    options,
+    redirected,
+    (
+      response: IncomingMessage,
+      wasRedirected: boolean,
+      resolve: (result: IWebClientResponse | PromiseLike<IWebClientResponse>) => void
+    ): void => {
+      const responseBuffers: (Buffer | Uint8Array)[] = [];
+      response.on('data', (chunk: string | Buffer | Uint8Array) => {
+        responseBuffers.push(Buffer.from(chunk));
+      });
+      response.on('end', () => {
+        const responseData: Buffer = Buffer.concat(responseBuffers);
+        const status: number = response.statusCode || 0;
+        const statusText: string | undefined = response.statusMessage;
+        const headers: Record<string, string | string[] | undefined> = response.headers;
+
+        let bodyString: string | undefined;
+        let bodyJson: unknown | undefined;
+        let decodedBuffer: Buffer | undefined;
+        const result: IWebClientResponse = {
+          ok: status >= 200 && status < 300,
+          status,
+          statusText,
+          redirected: wasRedirected,
+          headers,
+          getTextAsync: async () => {
+            if (bodyString === undefined) {
+              const buffer: Buffer = await result.getBufferAsync();
+              // eslint-disable-next-line require-atomic-updates
+              bodyString = buffer.toString();
+            }
+
+            return bodyString;
+          },
+          getJsonAsync: async <TJson>() => {
+            if (bodyJson === undefined) {
+              const text: string = await result.getTextAsync();
+              // eslint-disable-next-line require-atomic-updates
+              bodyJson = JSON.parse(text);
+            }
+
+            return bodyJson as TJson;
+          },
+          getBufferAsync: async () => {
+            // Determine if the buffer is compressed and decode it if necessary
+            if (decodedBuffer === undefined) {
+              let encodings: string | string[] | undefined = headers[CONTENT_ENCODING_HEADER_NAME];
+              if (!noDecode && encodings !== undefined) {
+                const zlib: typeof import('zlib') = await import('node:zlib');
+                if (!Array.isArray(encodings)) {
+                  encodings = encodings.split(',');
+                }
+
+                let buffer: Buffer = responseData;
+                for (const encoding of encodings) {
+                  let decompressFn: (buffer: Buffer, callback: import('zlib').CompressCallback) => void;
+                  switch (encoding.trim()) {
+                    case DEFLATE_ENCODING: {
+                      decompressFn = zlib.inflate.bind(zlib);
+                      break;
+                    }
+                    case GZIP_ENCODING: {
+                      decompressFn = zlib.gunzip.bind(zlib);
+                      break;
+                    }
+                    case BROTLI_ENCODING: {
+                      decompressFn = zlib.brotliDecompress.bind(zlib);
+                      break;
+                    }
+                    default: {
+                      throw new Error(`Unsupported content-encoding: ${encodings}`);
+                    }
+                  }
+
+                  buffer = await LegacyAdapters.convertCallbackToPromise(decompressFn, buffer);
+                }
+
+                // eslint-disable-next-line require-atomic-updates
+                decodedBuffer = buffer;
+              } else {
+                decodedBuffer = responseData;
+              }
+            }
+
+            return decodedBuffer;
+          }
+        };
+        resolve(result);
+      });
+    },
+    makeRequestAsync
   );
 };
 
-function _sendRequestBody(
-  req: ClientRequest,
-  body: Buffer | Readable | undefined,
-  reject: (error: Error) => void
-): void {
-  const isStream: boolean = !!body && typeof (body as Readable).pipe === 'function';
-  if (isStream) {
-    (body as Readable).on('error', reject);
-    (body as Readable).pipe(req);
-  } else {
-    req.end(body as Buffer | undefined);
-  }
-}
+const makeStreamRequestAsync: StreamFetchFn = async (
+  url: string,
+  options: IRequestOptions,
+  redirected: boolean = false
+) => {
+  return _makeRawRequestAsync(
+    url,
+    options,
+    redirected,
+    (
+      response: IncomingMessage,
+      wasRedirected: boolean,
+      resolve: (result: IWebClientStreamResponse | PromiseLike<IWebClientStreamResponse>) => void
+    ): void => {
+      const status: number = response.statusCode || 0;
+      const statusText: string | undefined = response.statusMessage;
+      const headers: Record<string, string | string[] | undefined> = response.headers;
+
+      resolve({
+        ok: status >= 200 && status < 300,
+        status,
+        statusText,
+        redirected: wasRedirected,
+        headers,
+        stream: response
+      });
+    },
+    makeStreamRequestAsync
+  );
+};
 
 /**
  * A helper for issuing HTTP requests.

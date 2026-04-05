@@ -14,6 +14,8 @@ import {
 } from '@rushstack/rush-sdk';
 import {
   WebClient,
+  type IGetFetchOptions,
+  type IFetchOptionsWithBody,
   type IWebClientResponse,
   type IWebClientStreamResponse
 } from '@rushstack/rush-sdk/lib/utilities/WebClient';
@@ -294,74 +296,20 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     maxAttempts: number;
     credentialOptions?: CredentialsOptions;
   }): Promise<Buffer | boolean> {
-    const { terminal, relUrl, method, body, warningText, readBody, credentialOptions } = options;
-    const safeCredentialOptions: CredentialsOptions = credentialOptions ?? CredentialsOptions.Optional;
-    const credentials: string | undefined = await this._tryGetCredentialsAsync(safeCredentialOptions);
-    const url: string = new URL(relUrl, this._url).href;
+    const { readBody } = options;
+    // The stream: false flag ensures the response is an IWebClientResponse
+    const response: IWebClientResponse | false = (await this._makeHttpCoreRequestAsync({
+      ...options,
+      stream: false
+    })) as IWebClientResponse | false;
 
-    const headers: Record<string, string> = {};
-    if (typeof credentials === 'string') {
-      headers.Authorization = credentials;
-    }
-
-    for (const [key, value] of Object.entries(this._headers)) {
-      if (typeof value === 'string') {
-        headers[key] = value;
-      }
-    }
-
-    const bodyLength: number | 'unknown' = (body as { length: number })?.length || 'unknown';
-
-    terminal.writeDebugLine(`[http-build-cache] request: ${method} ${url} ${bodyLength} bytes`);
-
-    const webClient: WebClient = new WebClient();
-    const response: IWebClientResponse = await webClient.fetchAsync(url, {
-      verb: method,
-      headers: headers,
-      body: body,
-      redirect: 'follow',
-      timeoutMs: 0 // Use the default timeout
-    });
-
-    if (!response.ok) {
-      const isNonCredentialResponse: boolean = response.status >= 500 && response.status < 600;
-
-      if (
-        !isNonCredentialResponse &&
-        typeof credentials !== 'string' &&
-        safeCredentialOptions === CredentialsOptions.Optional
-      ) {
-        // If we don't already have credentials yet, and we got a response from the server
-        // that is a "normal" failure (4xx), then we assume that credentials are probably
-        // required. Re-attempt the request, requiring credentials this time.
-        //
-        // This counts as part of the "first attempt", so it is not included in the max attempts
-        return await this._makeHttpRequestAsync({
-          ...options,
-          credentialOptions: CredentialsOptions.Required
-        });
-      }
-
-      if (options.maxAttempts > 1) {
-        // Pause a bit before retrying in case the server is busy
-        // Add some random jitter to the retry so we can spread out load on the remote service
-        // A proper solution might add exponential back off in case the retry count is high (10 or more)
-        const factor: number = 1.0 + Math.random(); // A random number between 1.0 and 2.0
-        const retryDelay: number = Math.floor(factor * this._minHttpRetryDelayMs);
-
-        await Async.sleepAsync(retryDelay);
-
-        return await this._makeHttpRequestAsync({ ...options, maxAttempts: options.maxAttempts - 1 });
-      }
-
-      this._reportFailure(terminal, method, response, false, warningText);
+    if (response === false) {
       return false;
     }
 
     const result: Buffer | boolean = readBody ? await response.getBufferAsync() : true;
-
-    terminal.writeDebugLine(
-      `[http-build-cache] actual response: ${response.status} ${url} ${
+    options.terminal.writeDebugLine(
+      `[http-build-cache] actual response: ${response.status} ${new URL(options.relUrl, this._url).href} ${
         result === true ? 'true' : result.length
       } bytes`
     );
@@ -378,7 +326,38 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     maxAttempts: number;
     credentialOptions?: CredentialsOptions;
   }): Promise<IWebClientStreamResponse | false> {
-    const { terminal, relUrl, method, body, warningText, credentialOptions } = options;
+    // The stream: true flag ensures the response is an IWebClientStreamResponse
+    const response: IWebClientStreamResponse | false = (await this._makeHttpCoreRequestAsync({
+      ...options,
+      stream: true
+    })) as IWebClientStreamResponse | false;
+
+    if (response === false) {
+      return false;
+    }
+
+    options.terminal.writeDebugLine(
+      `[http-build-cache] stream response: ${response.status} ${new URL(options.relUrl, this._url).href}`
+    );
+
+    return response;
+  }
+
+  /**
+   * Shared request core for both buffer-based and streaming HTTP requests.
+   * Handles credentials resolution, header construction, retry logic, and failure reporting.
+   */
+  private async _makeHttpCoreRequestAsync(options: {
+    terminal: ITerminal;
+    relUrl: string;
+    method: 'GET' | UploadMethod;
+    body: Buffer | Readable | undefined;
+    warningText: string;
+    maxAttempts: number;
+    credentialOptions?: CredentialsOptions;
+    stream: boolean;
+  }): Promise<IWebClientResponse | IWebClientStreamResponse | false> {
+    const { terminal, relUrl, method, body, warningText, credentialOptions, stream } = options;
     const safeCredentialOptions: CredentialsOptions = credentialOptions ?? CredentialsOptions.Optional;
     const credentials: string | undefined = await this._tryGetCredentialsAsync(safeCredentialOptions);
     const url: string = new URL(relUrl, this._url).href;
@@ -394,20 +373,28 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
       }
     }
 
-    terminal.writeDebugLine(`[http-build-cache] stream request: ${method} ${url}`);
+    const bodyLength: number | string = (body as Buffer | undefined)?.length ?? 'unknown';
+
+    terminal.writeDebugLine(`[http-build-cache] request: ${method} ${url} ${bodyLength} bytes`);
 
     const webClient: WebClient = new WebClient();
-    const response: IWebClientStreamResponse = await webClient.fetchStreamAsync(url, {
+    const fetchOptions: IGetFetchOptions | IFetchOptionsWithBody = {
       verb: method,
       headers: headers,
       body: body,
       redirect: 'follow',
       timeoutMs: 0 // Use the default timeout
-    });
+    };
+
+    const response: IWebClientResponse | IWebClientStreamResponse = stream
+      ? await webClient.fetchStreamAsync(url, fetchOptions)
+      : await webClient.fetchAsync(url, fetchOptions);
 
     if (!response.ok) {
-      // Drain the response body so the connection can be reused
-      response.stream.resume();
+      // Drain the response body on stream responses so the connection can be reused
+      if ('stream' in response) {
+        response.stream.resume();
+      }
 
       const isNonCredentialResponse: boolean = response.status >= 500 && response.status < 600;
 
@@ -416,27 +403,32 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         typeof credentials !== 'string' &&
         safeCredentialOptions === CredentialsOptions.Optional
       ) {
-        return await this._makeHttpStreamRequestAsync({
+        // If we don't already have credentials yet, and we got a response from the server
+        // that is a "normal" failure (4xx), then we assume that credentials are probably
+        // required. Re-attempt the request, requiring credentials this time.
+        //
+        // This counts as part of the "first attempt", so it is not included in the max attempts
+        return await this._makeHttpCoreRequestAsync({
           ...options,
           credentialOptions: CredentialsOptions.Required
         });
       }
 
       if (options.maxAttempts > 1) {
-        const factor: number = 1.0 + Math.random();
+        // Pause a bit before retrying in case the server is busy
+        // Add some random jitter to the retry so we can spread out load on the remote service
+        // A proper solution might add exponential back off in case the retry count is high (10 or more)
+        const factor: number = 1.0 + Math.random(); // A random number between 1.0 and 2.0
         const retryDelay: number = Math.floor(factor * this._minHttpRetryDelayMs);
+
         await Async.sleepAsync(retryDelay);
-        return await this._makeHttpStreamRequestAsync({
-          ...options,
-          maxAttempts: options.maxAttempts - 1
-        });
+
+        return await this._makeHttpCoreRequestAsync({ ...options, maxAttempts: options.maxAttempts - 1 });
       }
 
       this._reportFailure(terminal, method, response, false, warningText);
       return false;
     }
-
-    terminal.writeDebugLine(`[http-build-cache] stream response: ${response.status} ${url}`);
 
     return response;
   }
