@@ -50,6 +50,7 @@ export { type IFileErrorOptions, type IFileErrorFormattingOptions, FileError } f
 export {
   AlreadyExistsBehavior,
   FileSystem,
+  type IFileSystemWriteFileOptionsBase,
   type FileSystemCopyFilesAsyncFilter,
   type FileSystemCopyFilesFilter,
   type FileSystemReadStream,

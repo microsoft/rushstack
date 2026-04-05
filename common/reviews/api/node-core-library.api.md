@@ -174,6 +174,7 @@ export class FileSystem {
     static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void;
     static createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createWriteStream(filePath: string, options?: IFileSystemCreateWriteStreamOptions): FileSystemWriteStream;
+    static createWriteStreamAsync(filePath: string, options?: IFileSystemCreateWriteStreamOptions): Promise<FileSystemWriteStream>;
     static deleteFile(filePath: string, options?: IFileSystemDeleteFileOptions): void;
     static deleteFileAsync(filePath: string, options?: IFileSystemDeleteFileOptions): Promise<void>;
     static deleteFolder(folderPath: string): void;
@@ -345,8 +346,7 @@ export interface IFileSystemCreateLinkOptions {
 }
 
 // @public
-export interface IFileSystemCreateWriteStreamOptions {
-    ensureFolderExists?: boolean;
+export interface IFileSystemCreateWriteStreamOptions extends IFileSystemWriteFileOptionsBase {
 }
 
 // @public
@@ -355,9 +355,8 @@ export interface IFileSystemDeleteFileOptions {
 }
 
 // @public
-export interface IFileSystemMoveOptions {
+export interface IFileSystemMoveOptions extends IFileSystemWriteFileOptionsBase {
     destinationPath: string;
-    ensureFolderExists?: boolean;
     overwrite?: boolean;
     sourcePath: string;
 }
@@ -380,14 +379,18 @@ export interface IFileSystemUpdateTimeParameters {
 }
 
 // @public
-export interface IFileSystemWriteBinaryFileOptions {
-    ensureFolderExists?: boolean;
+export interface IFileSystemWriteBinaryFileOptions extends IFileSystemWriteFileOptionsBase {
 }
 
 // @public
 export interface IFileSystemWriteFileOptions extends IFileSystemWriteBinaryFileOptions {
     convertLineEndings?: NewlineKind;
     encoding?: Encoding;
+}
+
+// @public (undocumented)
+export interface IFileSystemWriteFileOptionsBase {
+    ensureFolderExists?: boolean;
 }
 
 // @public

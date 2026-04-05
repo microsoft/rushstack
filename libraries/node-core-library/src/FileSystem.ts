@@ -62,16 +62,21 @@ export interface IFileSystemReadFolderOptions {
 }
 
 /**
- * The options for {@link FileSystem.writeBuffersToFile}
  * @public
  */
-export interface IFileSystemWriteBinaryFileOptions {
+export interface IFileSystemWriteFileOptionsBase {
   /**
    * If true, will ensure the folder is created before writing the file.
    * @defaultValue false
    */
   ensureFolderExists?: boolean;
 }
+
+/**
+ * The options for {@link FileSystem.writeBuffersToFile}
+ * @public
+ */
+export interface IFileSystemWriteBinaryFileOptions extends IFileSystemWriteFileOptionsBase {}
 
 /**
  * The options for {@link FileSystem.writeFile}
@@ -113,7 +118,7 @@ export interface IFileSystemReadFileOptions {
  * The options for {@link FileSystem.move}
  * @public
  */
-export interface IFileSystemMoveOptions {
+export interface IFileSystemMoveOptions extends IFileSystemWriteFileOptionsBase {
   /**
    * The path of the existing object to be moved.
    * The path may be absolute or relative.
@@ -131,12 +136,6 @@ export interface IFileSystemMoveOptions {
    * @defaultValue true
    */
   overwrite?: boolean;
-
-  /**
-   * If true, will ensure the folder is created before writing the file.
-   * @defaultValue false
-   */
-  ensureFolderExists?: boolean;
 }
 
 /**
@@ -280,13 +279,7 @@ export interface IFileSystemCopyFilesOptions extends IFileSystemCopyFilesAsyncOp
  * The options for {@link FileSystem.createWriteStream}
  * @public
  */
-export interface IFileSystemCreateWriteStreamOptions {
-  /**
-   * If true, will ensure the folder is created before writing the file.
-   * @defaultValue false
-   */
-  ensureFolderExists?: boolean;
-}
+export interface IFileSystemCreateWriteStreamOptions extends IFileSystemWriteFileOptionsBase {}
 
 /**
  * The options for {@link FileSystem.deleteFile}
@@ -780,10 +773,11 @@ export class FileSystem {
    * Writes a text string to a file on disk, overwriting the file if it already exists.
    * Behind the scenes it uses `fs.writeFileSync()`.
    * @remarks
-   * Throws an error if the folder doesn't exist, unless ensureFolder=true.
+   * Throws an error if the folder doesn't exist, unless {@link IFileSystemWriteFileOptionsBase.ensureFolderExists}
+   * is set to `true`.
    * @param filePath - The absolute or relative path of the file.
    * @param contents - The text that should be written to the file.
-   * @param options - Optional settings that can change the behavior. Type: `IWriteFileOptions`
+   * @param options - Optional settings that can change the behavior.
    */
   public static writeFile(
     filePath: string,
@@ -826,7 +820,8 @@ export class FileSystem {
    * multiple sources.
    *
    * @remarks
-   * Throws an error if the folder doesn't exist, unless ensureFolder=true.
+   * Throws an error if the folder doesn't exist, unless {@link IFileSystemWriteFileOptionsBase.ensureFolderExists}
+   * is set to `true`.
    * @param filePath - The absolute or relative path of the file.
    * @param contents - The content that should be written to the file.
    * @param options - Optional settings that can change the behavior.
@@ -986,10 +981,11 @@ export class FileSystem {
    * Writes a text string to a file on disk, appending to the file if it already exists.
    * Behind the scenes it uses `fs.appendFileSync()`.
    * @remarks
-   * Throws an error if the folder doesn't exist, unless ensureFolder=true.
+   * Throws an error if the folder doesn't exist, unless {@link IFileSystemWriteFileOptionsBase.ensureFolderExists}
+   * is set to `true`.
    * @param filePath - The absolute or relative path of the file.
    * @param contents - The text that should be written to the file.
-   * @param options - Optional settings that can change the behavior. Type: `IWriteFileOptions`
+   * @param options - Optional settings that can change the behavior.
    */
   public static appendToFile(
     filePath: string,
@@ -1283,7 +1279,7 @@ export class FileSystem {
    * Behind the scenes it uses `fs.createWriteStream()`.
    *
    * @remarks
-   * Throws an error if the folder doesn't exist, unless {@link IFileSystemCreateWriteStreamOptions.ensureFolderExists}
+   * Throws an error if the folder doesn't exist, unless {@link IFileSystemWriteFileOptionsBase.ensureFolderExists}
    * is set to `true`.
    * @param filePath - The path to the file. The path may be absolute or relative.
    * @param options - Optional settings that can change the behavior.
@@ -1297,6 +1293,22 @@ export class FileSystem {
       const folderPath: string = nodeJsPath.dirname(filePath);
       FileSystem.ensureFolder(folderPath);
     }
+
+    return fs.createWriteStream(filePath);
+  }
+
+  /**
+   * An async version of {@link FileSystem.createWriteStream}.
+   */
+  public static async createWriteStreamAsync(
+    filePath: string,
+    options?: IFileSystemCreateWriteStreamOptions
+  ): Promise<FileSystemWriteStream> {
+    if (options?.ensureFolderExists) {
+      const folderPath: string = nodeJsPath.dirname(filePath);
+      await FileSystem.ensureFolderAsync(folderPath);
+    }
+
     return fs.createWriteStream(filePath);
   }
 
