@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import { createWriteStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import type { Readable } from 'node:stream';
 
@@ -90,7 +89,7 @@ export class FileSystemBuildCacheProvider {
   ): Promise<string> {
     const cacheEntryFilePath: string = this.getCacheEntryPath(cacheId);
     await FileSystem.ensureFolderAsync(path.dirname(cacheEntryFilePath));
-    await pipeline(entryStream, createWriteStream(cacheEntryFilePath));
+    await pipeline(entryStream, FileSystem.createWriteStream(cacheEntryFilePath));
     terminal.writeVerboseLine(`Wrote cache entry to "${cacheEntryFilePath}".`);
     return cacheEntryFilePath;
   }

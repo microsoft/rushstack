@@ -3,10 +3,15 @@
 
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
-import { type ReadStream, createReadStream } from 'node:fs';
 import type { Readable } from 'node:stream';
 
-import { FileSystem, type FolderItem, InternalError, Async } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  type FileSystemReadStream,
+  type FolderItem,
+  InternalError,
+  Async
+} from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -333,7 +338,7 @@ export class OperationBuildCache {
 
       if (this._cloudBuildCacheProvider.trySetCacheEntryStreamAsync) {
         // Use streaming upload to avoid loading the entire cache entry into memory
-        const entryStream: ReadStream = createReadStream(localCacheEntryPath);
+        const entryStream: FileSystemReadStream = FileSystem.createReadStream(localCacheEntryPath);
         setCloudCacheEntryPromise = this._cloudBuildCacheProvider.trySetCacheEntryStreamAsync(
           terminal,
           cacheId,
