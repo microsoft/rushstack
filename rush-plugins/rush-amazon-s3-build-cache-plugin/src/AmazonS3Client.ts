@@ -234,6 +234,11 @@ export class AmazonS3Client {
     });
   }
 
+  /**
+   * Uploads a readable stream to S3. Unlike {@link AmazonS3Client.uploadObjectAsync}, this method
+   * does not use retry logic because the stream is consumed after the first attempt and cannot be
+   * replayed. The caller should handle failures accordingly.
+   */
   public async uploadObjectStreamAsync(objectName: string, objectStream: Readable): Promise<void> {
     if (!this._credentials) {
       throw new Error('Credentials are required to upload objects to S3.');

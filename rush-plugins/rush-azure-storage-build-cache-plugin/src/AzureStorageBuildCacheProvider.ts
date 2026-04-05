@@ -206,6 +206,9 @@ export class AzureStorageBuildCacheProvider
         const readableStreamBody: NodeJS.ReadableStream | undefined =
           downloadResponse.readableStreamBody;
         if (readableStreamBody) {
+          // The Azure SDK types readableStreamBody as NodeJS.ReadableStream, which is a minimal
+          // interface. In practice, the underlying implementation is a Node.js Readable stream
+          // (http.IncomingMessage), so this assertion is safe.
           return readableStreamBody as unknown as Readable;
         }
         return undefined;

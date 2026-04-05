@@ -28,7 +28,6 @@ export class AmazonS3Client {
     static tryDeserializeCredentials(credentialString: string | undefined): IAmazonS3Credentials | undefined;
     // (undocumented)
     uploadObjectAsync(objectName: string, objectBuffer: Buffer): Promise<void>;
-    // (undocumented)
     uploadObjectStreamAsync(objectName: string, objectStream: Readable): Promise<void>;
     // (undocumented)
     static UriEncode(input: string): string;
