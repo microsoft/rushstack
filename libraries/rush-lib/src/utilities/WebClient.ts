@@ -351,7 +351,7 @@ export class WebClient {
     url: string,
     options?: IGetFetchOptions | IFetchOptionsWithBody
   ): Promise<IWebClientResponse> {
-    const requestInit: IRequestOptions = this._buildRequestOptions(options);
+    const requestInit: IRequestOptions = buildRequestOptions(this, options);
     return await WebClient._requestFn(url, requestInit);
   }
 
@@ -363,68 +363,71 @@ export class WebClient {
     url: string,
     options?: IGetFetchOptions | IFetchOptionsWithBody
   ): Promise<IWebClientStreamResponse> {
-    const requestInit: IRequestOptions = this._buildRequestOptions(options);
+    const requestInit: IRequestOptions = buildRequestOptions(this, options);
     return await WebClient._streamRequestFn(url, requestInit);
   }
+}
 
-  private _buildRequestOptions(options?: IGetFetchOptions | IFetchOptionsWithBody): IRequestOptions {
-    const {
-      headers: optionsHeaders,
-      timeoutMs = 15 * 1000,
-      verb,
-      redirect,
-      body,
-      noDecode
-    } = (options as IFetchOptionsWithBody | undefined) ?? {};
+function buildRequestOptions(
+  client: WebClient,
+  options?: IGetFetchOptions | IFetchOptionsWithBody
+): IRequestOptions {
+  const {
+    headers: optionsHeaders,
+    timeoutMs = 15 * 1000,
+    verb,
+    redirect,
+    body,
+    noDecode
+  } = (options as IFetchOptionsWithBody | undefined) ?? {};
 
-    const headers: Record<string, string> = {};
+  const headers: Record<string, string> = {};
 
-    WebClient.mergeHeaders(headers, this.standardHeaders);
+  WebClient.mergeHeaders(headers, client.standardHeaders);
 
-    if (optionsHeaders) {
-      WebClient.mergeHeaders(headers, optionsHeaders);
-    }
-
-    if (this.userAgent) {
-      headers[USER_AGENT_HEADER_NAME] = this.userAgent;
-    }
-
-    if (this.accept) {
-      headers[ACCEPT_HEADER_NAME] = this.accept;
-    }
-
-    let proxyUrl: string = '';
-
-    switch (this.proxy) {
-      case WebClientProxy.Detect:
-        if (process.env.HTTPS_PROXY) {
-          proxyUrl = process.env.HTTPS_PROXY;
-        } else if (process.env.HTTP_PROXY) {
-          proxyUrl = process.env.HTTP_PROXY;
-        }
-        break;
-
-      case WebClientProxy.Fiddler:
-        // For debugging, disable cert validation
-        // eslint-disable-next-line
-        process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-        proxyUrl = 'http://localhost:8888/';
-        break;
-    }
-
-    let agent: HttpAgent | undefined = undefined;
-    if (proxyUrl) {
-      agent = createHttpsProxyAgent(proxyUrl);
-    }
-
-    return {
-      method: verb,
-      headers,
-      agent,
-      timeout: timeoutMs,
-      redirect,
-      body,
-      noDecode
-    };
+  if (optionsHeaders) {
+    WebClient.mergeHeaders(headers, optionsHeaders);
   }
+
+  if (client.userAgent) {
+    headers[USER_AGENT_HEADER_NAME] = client.userAgent;
+  }
+
+  if (client.accept) {
+    headers[ACCEPT_HEADER_NAME] = client.accept;
+  }
+
+  let proxyUrl: string = '';
+
+  switch (client.proxy) {
+    case WebClientProxy.Detect:
+      if (process.env.HTTPS_PROXY) {
+        proxyUrl = process.env.HTTPS_PROXY;
+      } else if (process.env.HTTP_PROXY) {
+        proxyUrl = process.env.HTTP_PROXY;
+      }
+      break;
+
+    case WebClientProxy.Fiddler:
+      // For debugging, disable cert validation
+      // eslint-disable-next-line
+      process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+      proxyUrl = 'http://localhost:8888/';
+      break;
+  }
+
+  let agent: HttpAgent | undefined = undefined;
+  if (proxyUrl) {
+    agent = createHttpsProxyAgent(proxyUrl);
+  }
+
+  return {
+    method: verb,
+    headers,
+    agent,
+    timeout: timeoutMs,
+    redirect,
+    body,
+    noDecode
+  };
 }
