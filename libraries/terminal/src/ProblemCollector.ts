@@ -47,22 +47,17 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
   public constructor(options: IProblemCollectorOptions) {
     super(options);
 
-    const { matchers, matcherJson, onProblem } = options;
-    if (
-      !options ||
-      ((!matchers || matchers.length === 0) &&
-        (!matcherJson || matcherJson.length === 0))
-    ) {
-      throw new Error('ProblemCollector requires at least one problem matcher.');
+    const { matchers = [], matcherJson = [], onProblem } = options;
+    let fromJson: IProblemMatcher[] = [];
+    if (matcherJson.length !== 0) {
+      fromJson = parseProblemMatchersJson(matcherJson);
     }
 
-    const fromJson: IProblemMatcher[] = matcherJson
-      ? parseProblemMatchersJson(matcherJson)
-      : [];
-    this._matchers = [...(matchers || []), ...fromJson];
+    this._matchers = [...matchers, ...fromJson];
     if (this._matchers.length === 0) {
       throw new Error('ProblemCollector requires at least one problem matcher.');
     }
+
     this._onProblem = onProblem;
   }
 

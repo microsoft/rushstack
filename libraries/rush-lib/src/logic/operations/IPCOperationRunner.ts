@@ -66,13 +66,19 @@ export class IPCOperationRunner implements IOperationRunner {
   private _processReadyPromise: Promise<void> | undefined;
 
   public constructor(options: IIPCOperationRunnerOptions) {
-    const { name, phase, project, commandToRun, commandForHash, persist, requestRun, ignoredParameterValues } =
-      options;
+    const {
+      name,
+      phase: { allowWarningsOnSuccess = false },
+      project,
+      commandToRun,
+      commandForHash,
+      persist,
+      requestRun,
+      ignoredParameterValues
+    } = options;
     this.name = name;
     this.warningsAreAllowed =
-      EnvironmentConfiguration.allowWarningsInSuccessfulBuild ||
-      phase.allowWarningsOnSuccess ||
-      false;
+      EnvironmentConfiguration.allowWarningsInSuccessfulBuild || allowWarningsOnSuccess;
     this._rushProject = project;
     this._commandToRun = commandToRun;
     this._commandForHash = commandForHash;

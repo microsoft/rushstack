@@ -139,8 +139,8 @@ export class ExtractorMessage {
       sourceFilePath,
       sourceFileLine,
       sourceFileColumn,
-      properties,
-      logLevel
+      properties = {},
+      logLevel = ExtractorLogLevel.None
     } = options;
     this.category = category;
     this.messageId = messageId;
@@ -148,10 +148,10 @@ export class ExtractorMessage {
     this.sourceFilePath = sourceFilePath;
     this.sourceFileLine = sourceFileLine;
     this.sourceFileColumn = sourceFileColumn;
-    this.properties = properties || {};
+    this.properties = properties;
 
     this._handled = false;
-    this._logLevel = logLevel || ExtractorLogLevel.None;
+    this._logLevel = logLevel;
   }
 
   /**

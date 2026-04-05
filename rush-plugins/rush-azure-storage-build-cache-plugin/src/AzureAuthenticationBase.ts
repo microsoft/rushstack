@@ -104,6 +104,16 @@ export type LoginFlowFailoverMap = {
   readonly [LoginFlow in LoginFlowType]?: Exclude<LoginFlowType, LoginFlow>;
 };
 
+const DEFAULT_LOGIN_FLOW_FAILOVER: LoginFlowFailoverMap = {
+  AdoCodespacesAuth: 'VisualStudioCode',
+  VisualStudioCode: 'AzureCli',
+  AzureCli: 'AzureDeveloperCli',
+  AzureDeveloperCli: 'AzurePowerShell',
+  AzurePowerShell: 'InteractiveBrowser',
+  InteractiveBrowser: 'DeviceCode',
+  DeviceCode: undefined
+};
+
 /**
  * @public
  */
@@ -180,15 +190,7 @@ export abstract class AzureAuthenticationBase {
       azureEnvironment = 'AzurePublicCloud',
       credentialUpdateCommandForLogging,
       loginFlow = process.env.CODESPACES === 'true' ? 'AdoCodespacesAuth' : 'VisualStudioCode',
-      loginFlowFailover = {
-        AdoCodespacesAuth: 'VisualStudioCode',
-        VisualStudioCode: 'AzureCli',
-        AzureCli: 'AzureDeveloperCli',
-        AzureDeveloperCli: 'AzurePowerShell',
-        AzurePowerShell: 'InteractiveBrowser',
-        InteractiveBrowser: 'DeviceCode',
-        DeviceCode: undefined
-      }
+      loginFlowFailover = DEFAULT_LOGIN_FLOW_FAILOVER
     } = options;
     this._azureEnvironment = azureEnvironment;
     this._credentialUpdateCommandForLogging = credentialUpdateCommandForLogging;

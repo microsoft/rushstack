@@ -109,8 +109,8 @@ export class TypingsGenerator<TFileContents = string> {
   public constructor(options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>);
   public constructor(options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>) {
     const {
-      readFile = ((filePath: string, relativePath: string): Promise<TFileContents> =>
-        FileSystem.readFileAsync(filePath) as Promise<TFileContents>) as typeof options.readFile,
+      readFile = (filePath: string, relativePath: string): Promise<TFileContents> =>
+        FileSystem.readFileAsync(filePath) as Promise<TFileContents>,
       generatedTsFolder,
       srcFolder,
       fileExtensions,
@@ -198,7 +198,7 @@ export class TypingsGenerator<TFileContents = string> {
         this._reprocessFilesAsync(toProcess, false)
           .then(() => {
             processing = false;
-            // If the timeout was invoked again, immediately reexecute with the changed files.
+            // If the timeout was invoked again, immediately re-execute with the changed files.
             if (flushAfterCompletion) {
               flushAfterCompletion = false;
               flushInternal();

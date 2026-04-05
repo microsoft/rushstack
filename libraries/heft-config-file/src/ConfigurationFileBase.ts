@@ -451,9 +451,9 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     const {
       jsonSchemaObject,
       jsonSchemaPath,
-      jsonPathMetadata,
-      propertyInheritance,
-      propertyInheritanceDefaults,
+      jsonPathMetadata = {},
+      propertyInheritance = {},
+      propertyInheritanceDefaults = {},
       customValidationFunction
     } = options;
     if (jsonSchemaObject) {
@@ -462,9 +462,9 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
       this._getSchema = () => JsonSchema.fromFile(jsonSchemaPath);
     }
 
-    this._jsonPathMetadata = Object.entries(jsonPathMetadata || {});
-    this._propertyInheritanceTypes = propertyInheritance || {};
-    this._defaultPropertyInheritance = propertyInheritanceDefaults || {};
+    this._jsonPathMetadata = Object.entries(jsonPathMetadata);
+    this._propertyInheritanceTypes = propertyInheritance;
+    this._defaultPropertyInheritance = propertyInheritanceDefaults;
     this._customValidationFunction = customValidationFunction;
   }
 
