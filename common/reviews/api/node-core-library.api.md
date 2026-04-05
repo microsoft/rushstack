@@ -173,7 +173,7 @@ export class FileSystem {
     static createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void;
     static createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
-    static createWriteStream(filePath: string): FileSystemWriteStream;
+    static createWriteStream(filePath: string, options?: IFileSystemCreateWriteStreamOptions): FileSystemWriteStream;
     static deleteFile(filePath: string, options?: IFileSystemDeleteFileOptions): void;
     static deleteFileAsync(filePath: string, options?: IFileSystemDeleteFileOptions): Promise<void>;
     static deleteFolder(folderPath: string): void;
@@ -342,6 +342,11 @@ export interface IFileSystemCreateLinkOptions {
     alreadyExistsBehavior?: AlreadyExistsBehavior;
     linkTargetPath: string;
     newLinkPath: string;
+}
+
+// @public
+export interface IFileSystemCreateWriteStreamOptions {
+    ensureFolderExists?: boolean;
 }
 
 // @public

@@ -61,6 +61,7 @@ export {
   type IFileSystemCopyFilesAsyncOptions,
   type IFileSystemCopyFilesOptions,
   type IFileSystemCreateLinkOptions,
+  type IFileSystemCreateWriteStreamOptions,
   type IFileSystemDeleteFileOptions,
   type IFileSystemMoveOptions,
   type IFileSystemReadFileOptions,

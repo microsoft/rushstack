@@ -277,6 +277,18 @@ export interface IFileSystemCopyFilesOptions extends IFileSystemCopyFilesAsyncOp
 }
 
 /**
+ * The options for {@link FileSystem.createWriteStream}
+ * @public
+ */
+export interface IFileSystemCreateWriteStreamOptions {
+  /**
+   * If true, will ensure the folder is created before writing the file.
+   * @defaultValue false
+   */
+  ensureFolderExists?: boolean;
+}
+
+/**
  * The options for {@link FileSystem.deleteFile}
  * @public
  */
@@ -1270,10 +1282,21 @@ export class FileSystem {
    * Creates a writable stream for writing to a file.
    * Behind the scenes it uses `fs.createWriteStream()`.
    *
+   * @remarks
+   * Throws an error if the folder doesn't exist, unless {@link IFileSystemCreateWriteStreamOptions.ensureFolderExists}
+   * is set to `true`.
    * @param filePath - The path to the file. The path may be absolute or relative.
+   * @param options - Optional settings that can change the behavior.
    * @returns A new writable stream for the file.
    */
-  public static createWriteStream(filePath: string): FileSystemWriteStream {
+  public static createWriteStream(
+    filePath: string,
+    options?: IFileSystemCreateWriteStreamOptions
+  ): FileSystemWriteStream {
+    if (options?.ensureFolderExists) {
+      const folderPath: string = nodeJsPath.dirname(filePath);
+      FileSystem.ensureFolder(folderPath);
+    }
     return fs.createWriteStream(filePath);
   }
 
