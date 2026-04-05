@@ -299,7 +299,8 @@ function _sendRequestBody(
   body: Buffer | Readable | undefined,
   reject: (error: Error) => void
 ): void {
-  if (body && typeof (body as Readable).pipe === 'function') {
+  const isStream: boolean = !!body && typeof (body as Readable).pipe === 'function';
+  if (isStream) {
     (body as Readable).on('error', reject);
     (body as Readable).pipe(req);
   } else {

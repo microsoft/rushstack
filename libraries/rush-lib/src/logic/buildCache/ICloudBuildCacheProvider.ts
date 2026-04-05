@@ -24,6 +24,11 @@ export interface ICloudBuildCacheProvider {
    * If implemented, the build cache will prefer to use this method over
    * {@link ICloudBuildCacheProvider.trySetCacheEntryBufferAsync} to avoid loading the entire
    * cache entry into memory.
+   *
+   * @remarks
+   * Because the provided stream can only be consumed once, implementations should not
+   * attempt to retry the upload using the same stream. If retry logic is needed,
+   * consider buffering internally or returning `false` so the caller can retry.
    */
   trySetCacheEntryStreamAsync?(
     terminal: ITerminal,
