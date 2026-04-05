@@ -144,7 +144,7 @@ export function createContextSerializer(
   commonPathPrefix: string
 ): (entry: [string, IResolverContext]) => ISerializedResolveContext {
   return ([descriptionFileRoot, context]: [string, IResolverContext]): ISerializedResolveContext => {
-    const { deps } = context;
+    const { deps, name, nestedPackageDirs } = context;
 
     let hasAnyDeps: boolean = false;
     const serializedDeps: ISerializedResolveContext['deps'] = {};
@@ -161,14 +161,14 @@ export function createContextSerializer(
       hasAnyDeps = true;
     }
 
-    if (!context.name) {
+    if (!name) {
       throw new Error(`Missing name for ${descriptionFileRoot}`);
     }
 
     const serializedContext: ISerializedResolveContext = {
-      name: context.name,
+      name,
       root: descriptionFileRoot.slice(commonPathPrefix.length),
-      dirInfoFiles: context.nestedPackageDirs?.length ? context.nestedPackageDirs : undefined,
+      dirInfoFiles: nestedPackageDirs?.length ? nestedPackageDirs : undefined,
       deps: hasAnyDeps ? serializedDeps : undefined
     };
 

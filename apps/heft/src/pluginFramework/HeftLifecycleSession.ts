@@ -230,20 +230,22 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
 
   public constructor(options: IHeftLifecycleSessionOptions) {
     this._options = options;
-    this.logger = options.logger;
-    this.metricsCollector = options.metricsCollector;
-    this.hooks = options.lifecycleHooks;
-    this.parameters = options.lifecycleParameters;
-    this.debug = options.debug;
+    const { logger, metricsCollector, lifecycleHooks, lifecycleParameters, debug, pluginDefinition, heftConfiguration, pluginHost } =
+      options;
+    this.logger = logger;
+    this.metricsCollector = metricsCollector;
+    this.hooks = lifecycleHooks;
+    this.parameters = lifecycleParameters;
+    this.debug = debug;
 
     // Guranteed to be unique since phases are forbidden from using the name 'lifecycle'
     // and lifecycle plugin names are enforced to be unique.
-    const uniquePluginFolderName: string = `lifecycle.${options.pluginDefinition.pluginName}`;
+    const uniquePluginFolderName: string = `lifecycle.${pluginDefinition.pluginName}`;
 
     // <projectFolder>/temp/<phaseName>.<taskName>
-    this.tempFolderPath = path.join(options.heftConfiguration.tempFolderPath, uniquePluginFolderName);
+    this.tempFolderPath = path.join(heftConfiguration.tempFolderPath, uniquePluginFolderName);
 
-    this._pluginHost = options.pluginHost;
+    this._pluginHost = pluginHost;
   }
 
   public requestAccessToPluginByName<T extends object>(
