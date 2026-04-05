@@ -16,15 +16,18 @@ import { Import, LegacyAdapters } from '@rushstack/node-core-library';
 
 const createHttpsProxyAgent: typeof import('https-proxy-agent') = Import.lazy('https-proxy-agent', require);
 
-/**
- * For use with {@link WebClient}.
- */
-export interface IWebClientResponse {
+export interface IWebClientResponseBase {
   ok: boolean;
   status: number;
   statusText?: string;
   redirected: boolean;
   headers: Record<string, string | string[] | undefined>;
+}
+
+/**
+ * For use with {@link WebClient}.
+ */
+export interface IWebClientResponse extends IWebClientResponseBase {
   getTextAsync: () => Promise<string>;
   getJsonAsync: <TJson>() => Promise<TJson>;
   getBufferAsync: () => Promise<Buffer>;
@@ -34,12 +37,7 @@ export interface IWebClientResponse {
  * A response from {@link WebClient.fetchStreamAsync} that provides the response body as a
  * readable stream, avoiding buffering the entire response in memory.
  */
-export interface IWebClientStreamResponse {
-  ok: boolean;
-  status: number;
-  statusText?: string;
-  redirected: boolean;
-  headers: Record<string, string | string[] | undefined>;
+export interface IWebClientStreamResponse extends IWebClientResponseBase {
   stream: Readable;
 }
 
