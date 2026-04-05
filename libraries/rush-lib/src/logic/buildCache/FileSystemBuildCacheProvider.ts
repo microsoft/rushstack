@@ -88,8 +88,10 @@ export class FileSystemBuildCacheProvider {
     entryStream: Readable
   ): Promise<string> {
     const cacheEntryFilePath: string = this.getCacheEntryPath(cacheId);
-    await FileSystem.ensureFolderAsync(path.dirname(cacheEntryFilePath));
-    await pipeline(entryStream, FileSystem.createWriteStream(cacheEntryFilePath));
+    await pipeline(
+      entryStream,
+      FileSystem.createWriteStream(cacheEntryFilePath, { ensureFolderExists: true })
+    );
     terminal.writeVerboseLine(`Wrote cache entry to "${cacheEntryFilePath}".`);
     return cacheEntryFilePath;
   }
