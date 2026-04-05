@@ -143,12 +143,20 @@ export type {
   IRushConfigurationProjectForSnapshot
 } from './logic/incremental/InputsSnapshot';
 
-export type { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
 export type {
+  IOperationRunner,
+  IOperationRunnerContext,
+  IOperationLastState
+} from './logic/operations/IOperationRunner';
+export type {
+  IConfigurableOperation,
+  IBaseOperationExecutionResult,
   IExecutionResult,
-  IOperationExecutionResult
+  IOperationExecutionResult,
+  IOperationStateHashComponents
 } from './logic/operations/IOperationExecutionResult';
-export { type IOperationOptions, Operation } from './logic/operations/Operation';
+export { type IOperationOptions, type OperationEnabledState, Operation } from './logic/operations/Operation';
+export { type IParallelismScalar, type Parallelism } from './logic/operations/ParseParallelism';
 export { OperationStatus } from './logic/operations/OperationStatus';
 export type { ILogFilePaths } from './logic/operations/ProjectLogWritable';
 
@@ -168,9 +176,12 @@ export {
 
 export {
   type ICreateOperationsContext,
-  type IExecuteOperationsContext,
+  type IOperationGraphContext,
+  type IPhasedCommandPlugin,
   PhasedCommandHooks
 } from './pluginFramework/PhasedCommandHooks';
+export type { IOperationGraph, IOperationGraphIterationOptions } from './logic/operations/IOperationGraph';
+export { OperationGraphHooks } from './pluginFramework/OperationGraphHooks';
 
 export type { IRushPlugin } from './pluginFramework/IRushPlugin';
 export type { IBuiltInPluginConfiguration as _IBuiltInPluginConfiguration } from './pluginFramework/PluginLoader/BuiltInPluginLoader';
