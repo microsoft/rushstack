@@ -74,7 +74,7 @@ export class TextRewriterTransform extends TerminalTransform {
       normalizeNewlines,
       ensureNewlineAtEnd
     } = options;
-    const textRewriters: TextRewriter[] = [...inputTextRewriters];
+    const textRewriters: TextRewriter[] = inputTextRewriters;
 
     if (removeColors) {
       textRewriters.push(new RemoveColorsTextRewriter());
