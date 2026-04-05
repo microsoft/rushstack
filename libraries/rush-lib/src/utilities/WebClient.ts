@@ -25,7 +25,7 @@ export interface IWebClientResponseBase {
 }
 
 /**
- * For use with {@link WebClient}.
+ * A response from {@link WebClient.fetchAsync}.
  */
 export interface IWebClientResponse extends IWebClientResponseBase {
   getTextAsync: () => Promise<string>;
@@ -117,7 +117,7 @@ function _makeRawRequestAsync<TResponse>(
     resolve: (result: TResponse | PromiseLike<TResponse>) => void,
     reject: (error: Error) => void
   ) => void,
-  selfFn: (url: string, options: IRequestOptions, isRedirect?: boolean) => Promise<TResponse>
+  requestFnAsync: (url: string, options: IRequestOptions, isRedirect?: boolean) => Promise<TResponse>
 ): Promise<TResponse> {
   const { body, redirect } = options;
 
@@ -128,25 +128,25 @@ function _makeRawRequestAsync<TResponse>(
         parsedUrl.protocol === 'https:' ? httpsRequest : httpRequest;
 
       const req: ClientRequest = requestFunction(url, options, (response: IncomingMessage) => {
-        const statusCode: number | undefined = response.statusCode;
-
+        const {
+          statusCode,
+          headers: { location: redirectUrl }
+        } = response;
         if (statusCode === 301 || statusCode === 302) {
           // Drain the redirect response before following
           response.resume();
           switch (redirect) {
             case 'follow': {
-              const redirectUrl: string | string[] | undefined = response.headers.location;
-              if (typeof redirectUrl === 'string') {
-                resolve(selfFn(redirectUrl, options, true));
+              if (redirectUrl) {
+                requestFnAsync(redirectUrl, options, true).then(resolve).catch(reject);
               } else {
-                reject(
-                  new Error(`Received status code ${response.statusCode} with no location header: ${url}`)
-                );
+                reject(new Error(`Received status code ${statusCode} with no location header: ${url}`));
               }
               return;
             }
+
             case 'error':
-              reject(new Error(`Received status code ${response.statusCode}: ${url}`));
+              reject(new Error(`Received status code ${statusCode}: ${url}`));
               return;
           }
         }
@@ -188,10 +188,8 @@ const makeRequestAsync: FetchFn = async (
         responseBuffers.push(Buffer.from(chunk));
       });
       response.on('end', () => {
+        const { statusCode: status = 0, statusMessage: statusText, headers } = response;
         const responseData: Buffer = Buffer.concat(responseBuffers);
-        const status: number = response.statusCode || 0;
-        const statusText: string | undefined = response.statusMessage;
-        const headers: Record<string, string | string[] | undefined> = response.headers;
 
         let bodyString: string | undefined;
         let bodyJson: unknown | undefined;
@@ -285,10 +283,7 @@ const makeStreamRequestAsync: StreamFetchFn = async (
       wasRedirected: boolean,
       resolve: (result: IWebClientStreamResponse | PromiseLike<IWebClientStreamResponse>) => void
     ): void => {
-      const status: number = response.statusCode || 0;
-      const statusText: string | undefined = response.statusMessage;
-      const headers: Record<string, string | string[] | undefined> = response.headers;
-
+      const { statusCode: status = 0, statusMessage: statusText, headers } = response;
       resolve({
         ok: status >= 200 && status < 300,
         status,
@@ -306,8 +301,8 @@ const makeStreamRequestAsync: StreamFetchFn = async (
  * A helper for issuing HTTP requests.
  */
 export class WebClient {
-  private static _requestFn: FetchFn = makeRequestAsync;
-  private static _streamRequestFn: StreamFetchFn = makeStreamRequestAsync;
+  private static _requestFnAsync: FetchFn = makeRequestAsync;
+  private static _streamRequestFnAsync: StreamFetchFn = makeStreamRequestAsync;
 
   public readonly standardHeaders: Record<string, string> = {};
 
@@ -317,19 +312,19 @@ export class WebClient {
   public proxy: WebClientProxy = WebClientProxy.Detect;
 
   public static mockRequestFn(fn: FetchFn): void {
-    WebClient._requestFn = fn;
+    WebClient._requestFnAsync = fn;
   }
 
   public static resetMockRequestFn(): void {
-    WebClient._requestFn = makeRequestAsync;
+    WebClient._requestFnAsync = makeRequestAsync;
   }
 
   public static mockStreamRequestFn(fn: StreamFetchFn): void {
-    WebClient._streamRequestFn = fn;
+    WebClient._streamRequestFnAsync = fn;
   }
 
   public static resetMockStreamRequestFn(): void {
-    WebClient._streamRequestFn = makeStreamRequestAsync;
+    WebClient._streamRequestFnAsync = makeStreamRequestAsync;
   }
 
   public static mergeHeaders(target: Record<string, string>, source: Record<string, string>): void {
@@ -347,8 +342,8 @@ export class WebClient {
     url: string,
     options?: IGetFetchOptions | IFetchOptionsWithBody
   ): Promise<IWebClientResponse> {
-    const requestInit: IRequestOptions = buildRequestOptions(this, options);
-    return await WebClient._requestFn(url, requestInit);
+    const requestInit: IRequestOptions = this._buildRequestOptions(options);
+    return await WebClient._requestFnAsync(url, requestInit);
   }
 
   /**
@@ -359,71 +354,70 @@ export class WebClient {
     url: string,
     options?: IGetFetchOptions | IFetchOptionsWithBody
   ): Promise<IWebClientStreamResponse> {
-    const requestInit: IRequestOptions = buildRequestOptions(this, options);
-    return await WebClient._streamRequestFn(url, requestInit);
-  }
-}
-
-function buildRequestOptions(
-  client: WebClient,
-  options?: IGetFetchOptions | IFetchOptionsWithBody
-): IRequestOptions {
-  const {
-    headers: optionsHeaders,
-    timeoutMs = 15 * 1000,
-    verb,
-    redirect,
-    body,
-    noDecode
-  } = (options as IFetchOptionsWithBody | undefined) ?? {};
-
-  const headers: Record<string, string> = {};
-
-  WebClient.mergeHeaders(headers, client.standardHeaders);
-
-  if (optionsHeaders) {
-    WebClient.mergeHeaders(headers, optionsHeaders);
+    const requestInit: IRequestOptions = this._buildRequestOptions(options);
+    return await WebClient._streamRequestFnAsync(url, requestInit);
   }
 
-  if (client.userAgent) {
-    headers[USER_AGENT_HEADER_NAME] = client.userAgent;
+  private _buildRequestOptions(options?: IGetFetchOptions | IFetchOptionsWithBody): IRequestOptions {
+    const {
+      headers: optionsHeaders,
+      timeoutMs = 15 * 1000,
+      verb,
+      redirect,
+      body,
+      noDecode
+    } = (options as IFetchOptionsWithBody | undefined) ?? {};
+
+    const headers: Record<string, string> = {};
+
+    const { standardHeaders, userAgent, accept, proxy } = this;
+
+    WebClient.mergeHeaders(headers, standardHeaders);
+
+    if (optionsHeaders) {
+      WebClient.mergeHeaders(headers, optionsHeaders);
+    }
+
+    if (userAgent) {
+      headers[USER_AGENT_HEADER_NAME] = userAgent;
+    }
+
+    if (accept) {
+      headers[ACCEPT_HEADER_NAME] = accept;
+    }
+
+    let proxyUrl: string = '';
+
+    switch (proxy) {
+      case WebClientProxy.Detect:
+        if (process.env.HTTPS_PROXY) {
+          proxyUrl = process.env.HTTPS_PROXY;
+        } else if (process.env.HTTP_PROXY) {
+          proxyUrl = process.env.HTTP_PROXY;
+        }
+        break;
+
+      case WebClientProxy.Fiddler:
+        // For debugging, disable cert validation
+        // eslint-disable-next-line
+        process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+        proxyUrl = 'http://localhost:8888/';
+        break;
+    }
+
+    let agent: HttpAgent | undefined = undefined;
+    if (proxyUrl) {
+      agent = createHttpsProxyAgent(proxyUrl);
+    }
+
+    return {
+      method: verb,
+      headers,
+      agent,
+      timeout: timeoutMs,
+      redirect,
+      body,
+      noDecode
+    };
   }
-
-  if (client.accept) {
-    headers[ACCEPT_HEADER_NAME] = client.accept;
-  }
-
-  let proxyUrl: string = '';
-
-  switch (client.proxy) {
-    case WebClientProxy.Detect:
-      if (process.env.HTTPS_PROXY) {
-        proxyUrl = process.env.HTTPS_PROXY;
-      } else if (process.env.HTTP_PROXY) {
-        proxyUrl = process.env.HTTP_PROXY;
-      }
-      break;
-
-    case WebClientProxy.Fiddler:
-      // For debugging, disable cert validation
-      // eslint-disable-next-line
-      process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-      proxyUrl = 'http://localhost:8888/';
-      break;
-  }
-
-  let agent: HttpAgent | undefined = undefined;
-  if (proxyUrl) {
-    agent = createHttpsProxyAgent(proxyUrl);
-  }
-
-  return {
-    method: verb,
-    headers,
-    agent,
-    timeout: timeoutMs,
-    redirect,
-    body,
-    noDecode
-  };
 }
