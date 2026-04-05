@@ -36,9 +36,11 @@ export class FileSystemBuildCacheProvider {
   private readonly _cacheFolderPath: string;
 
   public constructor(options: IFileSystemBuildCacheProviderOptions) {
-    this._cacheFolderPath =
-      options.rushUserConfiguration.buildCacheFolder ||
-      path.join(options.rushConfiguration.commonTempFolder, DEFAULT_BUILD_CACHE_FOLDER_NAME);
+    const {
+      rushUserConfiguration: { buildCacheFolder },
+      rushConfiguration: { commonTempFolder }
+    } = options;
+    this._cacheFolderPath = buildCacheFolder || path.join(commonTempFolder, DEFAULT_BUILD_CACHE_FOLDER_NAME);
   }
 
   /**
@@ -56,7 +58,8 @@ export class FileSystemBuildCacheProvider {
     cacheId: string
   ): Promise<string | undefined> {
     const cacheEntryFilePath: string = this.getCacheEntryPath(cacheId);
-    if (await FileSystem.existsAsync(cacheEntryFilePath)) {
+    const cacheEntryExists: boolean = await FileSystem.existsAsync(cacheEntryFilePath);
+    if (cacheEntryExists) {
       return cacheEntryFilePath;
     } else {
       return undefined;
@@ -71,10 +74,13 @@ export class FileSystemBuildCacheProvider {
     cacheId: string,
     entryBuffer: Buffer
   ): Promise<string> {
-    const cacheEntryFilePath: string = this.getCacheEntryPath(cacheId);
-    await FileSystem.writeFileAsync(cacheEntryFilePath, entryBuffer, { ensureFolderExists: true });
-    terminal.writeVerboseLine(`Wrote cache entry to "${cacheEntryFilePath}".`);
-    return cacheEntryFilePath;
+    return await this._setCacheEntryAsync(
+      terminal,
+      cacheId,
+      async (cacheEntryFilePath: string): Promise<void> => {
+        await FileSystem.writeFileAsync(cacheEntryFilePath, entryBuffer, { ensureFolderExists: true });
+      }
+    );
   }
 
   /**
@@ -86,11 +92,28 @@ export class FileSystemBuildCacheProvider {
     cacheId: string,
     entryStream: NodeJS.ReadableStream
   ): Promise<string> {
+    return await this._setCacheEntryAsync(
+      terminal,
+      cacheId,
+      async (cacheEntryFilePath: string): Promise<void> => {
+        const writeStream: FileSystemWriteStream = await FileSystem.createWriteStreamAsync(
+          cacheEntryFilePath,
+          {
+            ensureFolderExists: true
+          }
+        );
+        await pipeline(entryStream, writeStream);
+      }
+    );
+  }
+
+  private async _setCacheEntryAsync(
+    terminal: ITerminal,
+    cacheId: string,
+    setEntryCallbackAsync: (cacheEntryFilePath: string) => Promise<void>
+  ): Promise<string> {
     const cacheEntryFilePath: string = this.getCacheEntryPath(cacheId);
-    const writeStream: FileSystemWriteStream = await FileSystem.createWriteStreamAsync(cacheEntryFilePath, {
-      ensureFolderExists: true
-    });
-    await pipeline(entryStream, writeStream);
+    await setEntryCallbackAsync(cacheEntryFilePath);
     terminal.writeVerboseLine(`Wrote cache entry to "${cacheEntryFilePath}".`);
     return cacheEntryFilePath;
   }
