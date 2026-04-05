@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Refactor repeated object property access to use destructuring",
+      "comment": "",
       "type": "none",
       "packageName": "@rushstack/typings-generator"
     }
