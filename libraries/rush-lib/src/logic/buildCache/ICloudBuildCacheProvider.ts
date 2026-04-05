@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { Readable } from 'node:stream';
+
 import type { ITerminal } from '@rushstack/terminal';
 
 /**

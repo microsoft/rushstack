@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-http-build-cache-plugin",
+      "comment": "Implement streaming cache entry download and upload to avoid loading entire cache entries into memory, preventing out-of-memory crashes with large build outputs.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-http-build-cache-plugin"
+}
