@@ -5,7 +5,7 @@ import * as path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import type { Readable } from 'node:stream';
 
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, type FileSystemWriteStream } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
@@ -88,10 +88,10 @@ export class FileSystemBuildCacheProvider {
     entryStream: Readable
   ): Promise<string> {
     const cacheEntryFilePath: string = this.getCacheEntryPath(cacheId);
-    await pipeline(
-      entryStream,
-      FileSystem.createWriteStream(cacheEntryFilePath, { ensureFolderExists: true })
-    );
+    const writeStream: FileSystemWriteStream = await FileSystem.createWriteStreamAsync(cacheEntryFilePath, {
+      ensureFolderExists: true
+    });
+    await pipeline(entryStream, writeStream);
     terminal.writeVerboseLine(`Wrote cache entry to "${cacheEntryFilePath}".`);
     return cacheEntryFilePath;
   }
