@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as crypto from 'node:crypto';
+import type { Readable } from 'node:stream';
 
 import { Async } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
@@ -9,6 +10,7 @@ import {
   type IGetFetchOptions,
   type IFetchOptionsWithBody,
   type IWebClientResponse,
+  type IWebClientStreamResponse,
   type WebClient,
   AUTHORIZATION_HEADER_NAME
 } from '@rushstack/rush-sdk/lib/utilities/WebClient';
@@ -20,6 +22,13 @@ const CONTENT_HASH_HEADER_NAME: 'x-amz-content-sha256' = 'x-amz-content-sha256';
 const DATE_HEADER_NAME: 'x-amz-date' = 'x-amz-date';
 const HOST_HEADER_NAME: 'host' = 'host';
 const SECURITY_TOKEN_HEADER_NAME: 'x-amz-security-token' = 'x-amz-security-token';
+
+/**
+ * AWS Signature V4 allows using this sentinel value as the content hash when the request
+ * payload is not signed. This is used for streaming uploads where the body cannot be hashed
+ * upfront.
+ */
+const UNSIGNED_PAYLOAD: 'UNSIGNED-PAYLOAD' = 'UNSIGNED-PAYLOAD';
 
 interface IIsoDateString {
   date: string;
@@ -178,6 +187,73 @@ export class AmazonS3Client {
     });
   }
 
+  public async getObjectStreamAsync(objectName: string): Promise<Readable | undefined> {
+    this._writeDebugLine('Reading object stream from S3');
+    return await this._sendCacheRequestWithRetriesAsync(async () => {
+      const response: IWebClientStreamResponse = await this._makeStreamRequestAsync('GET', objectName);
+      if (response.ok) {
+        return {
+          hasNetworkError: false,
+          response: response.stream
+        };
+      } else if (response.status === 404) {
+        response.stream.resume();
+        return {
+          hasNetworkError: false,
+          response: undefined
+        };
+      } else if (
+        (response.status === 400 || response.status === 401 || response.status === 403) &&
+        !this._credentials
+      ) {
+        response.stream.resume();
+        this._writeWarningLine(
+          `No credentials found and received a ${response.status}`,
+          ' response code from the cloud storage.',
+          ' Maybe run rush update-cloud-credentials',
+          ' or set the RUSH_BUILD_CACHE_CREDENTIAL env'
+        );
+        return {
+          hasNetworkError: false,
+          response: undefined
+        };
+      } else if (response.status === 400 || response.status === 401 || response.status === 403) {
+        response.stream.resume();
+        throw new Error(
+          `Amazon S3 responded with status code ${response.status} (${response.statusText})`
+        );
+      } else {
+        response.stream.resume();
+        return {
+          hasNetworkError: true,
+          error: new Error(
+            `Amazon S3 responded with status code ${response.status} (${response.statusText})`
+          )
+        };
+      }
+    });
+  }
+
+  public async uploadObjectStreamAsync(objectName: string, objectStream: Readable): Promise<void> {
+    if (!this._credentials) {
+      throw new Error('Credentials are required to upload objects to S3.');
+    }
+
+    // Streaming uploads cannot be retried because the stream is consumed after the first attempt.
+    const response: IWebClientStreamResponse = await this._makeStreamRequestAsync(
+      'PUT',
+      objectName,
+      objectStream
+    );
+    if (!response.ok) {
+      response.stream.resume();
+      throw new Error(
+        `Amazon S3 responded with status code ${response.status} (${response.statusText})`
+      );
+    }
+    response.stream.resume();
+  }
+
   private _writeDebugLine(...messageParts: string[]): void {
     // if the terminal has been closed then don't bother sending a debug message
     try {
@@ -201,8 +277,51 @@ export class AmazonS3Client {
     objectName: string,
     body?: Buffer
   ): Promise<IWebClientResponse> {
-    const isoDateString: IIsoDateString = this._getIsoDateString();
     const bodyHash: string = this._getSha256(body);
+    const { url, headers } = this._buildSignedRequest(verb, objectName, bodyHash);
+
+    const webFetchOptions: IGetFetchOptions | IFetchOptionsWithBody = {
+      verb,
+      headers
+    };
+    if (verb === 'PUT') {
+      (webFetchOptions as IFetchOptionsWithBody).body = body;
+    }
+
+    const response: IWebClientResponse = await this._webClient.fetchAsync(url, webFetchOptions);
+
+    return response;
+  }
+
+  private async _makeStreamRequestAsync(
+    verb: 'GET' | 'PUT',
+    objectName: string,
+    body?: Readable
+  ): Promise<IWebClientStreamResponse> {
+    // For streaming uploads, the body cannot be hashed upfront, so we use UNSIGNED-PAYLOAD.
+    const bodyHash: string = body ? UNSIGNED_PAYLOAD : this._getSha256(undefined);
+    const { url, headers } = this._buildSignedRequest(verb, objectName, bodyHash);
+
+    const webFetchOptions: IGetFetchOptions | IFetchOptionsWithBody = {
+      verb,
+      headers
+    };
+    if (verb === 'PUT' && body) {
+      (webFetchOptions as IFetchOptionsWithBody).body = body;
+    }
+
+    return await this._webClient.fetchStreamAsync(url, webFetchOptions);
+  }
+
+  /**
+   * Builds an AWS Signature V4 signed request, returning the URL and signed headers.
+   */
+  private _buildSignedRequest(
+    verb: 'GET' | 'PUT',
+    objectName: string,
+    bodyHash: string
+  ): { url: string; headers: Record<string, string> } {
+    const isoDateString: IIsoDateString = this._getIsoDateString();
     const headers: Record<string, string> = {};
     headers[DATE_HEADER_NAME] = isoDateString.dateTime;
     headers[CONTENT_HASH_HEADER_NAME] = bodyHash;
@@ -299,14 +418,6 @@ export class AmazonS3Client {
       }
     }
 
-    const webFetchOptions: IGetFetchOptions | IFetchOptionsWithBody = {
-      verb,
-      headers
-    };
-    if (verb === 'PUT') {
-      (webFetchOptions as IFetchOptionsWithBody).body = body;
-    }
-
     const url: string = `${this._s3Endpoint}${canonicalUri}`;
 
     this._writeDebugLine(Colorize.bold(Colorize.underline('Sending request to S3')));
@@ -316,9 +427,7 @@ export class AmazonS3Client {
       this._writeDebugLine(Colorize.cyan(`\t${name}: ${value}`));
     }
 
-    const response: IWebClientResponse = await this._webClient.fetchAsync(url, webFetchOptions);
-
-    return response;
+    return { url, headers };
   }
 
   public _getSha256Hmac(key: string | Buffer, data: string): Buffer;

@@ -8,6 +8,7 @@
 
 import type { IRushPlugin } from '@rushstack/rush-sdk';
 import { ITerminal } from '@rushstack/terminal';
+import type { Readable } from 'node:stream';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 import type { RushSession } from '@rushstack/rush-sdk';
 import { WebClient } from '@rushstack/rush-sdk/lib/utilities/WebClient';
@@ -18,6 +19,8 @@ export class AmazonS3Client {
     // (undocumented)
     getObjectAsync(objectName: string): Promise<Buffer | undefined>;
     // (undocumented)
+    getObjectStreamAsync(objectName: string): Promise<Readable | undefined>;
+    // (undocumented)
     _getSha256Hmac(key: string | Buffer, data: string): Buffer;
     // (undocumented)
     _getSha256Hmac(key: string | Buffer, data: string, encoding: 'hex'): string;
@@ -25,6 +28,8 @@ export class AmazonS3Client {
     static tryDeserializeCredentials(credentialString: string | undefined): IAmazonS3Credentials | undefined;
     // (undocumented)
     uploadObjectAsync(objectName: string, objectBuffer: Buffer): Promise<void>;
+    // (undocumented)
+    uploadObjectStreamAsync(objectName: string, objectStream: Readable): Promise<void>;
     // (undocumented)
     static UriEncode(input: string): string;
 }

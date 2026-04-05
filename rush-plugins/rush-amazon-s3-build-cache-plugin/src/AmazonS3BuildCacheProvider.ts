@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { Readable } from 'node:stream';
+
 import { type ICredentialCacheEntry, CredentialCache } from '@rushstack/credential-cache';
 import type { ITerminal } from '@rushstack/terminal';
 import {
@@ -178,6 +180,44 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
       return true;
     } catch (e) {
       terminal.writeWarningLine(`Error uploading cache entry to S3: ${e}`);
+      return false;
+    }
+  }
+
+  public async tryGetCacheEntryStreamByIdAsync(
+    terminal: ITerminal,
+    cacheId: string
+  ): Promise<Readable | undefined> {
+    try {
+      const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
+      return await client.getObjectStreamAsync(this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId);
+    } catch (e) {
+      terminal.writeWarningLine(`Error getting cache entry stream from S3: ${e}`);
+      return undefined;
+    }
+  }
+
+  public async trySetCacheEntryStreamAsync(
+    terminal: ITerminal,
+    cacheId: string,
+    entryStream: Readable
+  ): Promise<boolean> {
+    if (!this.isCacheWriteAllowed) {
+      terminal.writeErrorLine('Writing to S3 cache is not allowed in the current configuration.');
+      return false;
+    }
+
+    terminal.writeDebugLine('Uploading object stream with cacheId: ', cacheId);
+
+    try {
+      const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
+      await client.uploadObjectStreamAsync(
+        this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId,
+        entryStream
+      );
+      return true;
+    } catch (e) {
+      terminal.writeWarningLine(`Error uploading cache entry stream to S3: ${e}`);
       return false;
     }
   }
