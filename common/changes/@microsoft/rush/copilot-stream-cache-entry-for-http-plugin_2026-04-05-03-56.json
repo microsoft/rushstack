@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add optional streaming APIs to ICloudBuildCacheProvider and FileSystemBuildCacheProvider, allowing cache plugins to stream entries to and from the cloud cache without buffering entire contents in memory. Implement streaming in rush-http-build-cache-plugin.",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "198982749+Copilot@users.noreply.github.com"
+}
