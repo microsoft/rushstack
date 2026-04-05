@@ -103,14 +103,14 @@ export class RushAlerts {
       rushAlertsStateFilePath,
       rushAlertsConfigFilePath,
       rushAlertsConfig,
-      rushAlertsState
+      rushAlertsState = {}
     } = options;
     this._terminal = terminal;
     this._rushJsonFolder = rushJsonFolder;
     this.rushAlertsStateFilePath = rushAlertsStateFilePath;
     this.rushAlertsConfigFilePath = rushAlertsConfigFilePath;
     this._rushAlertsConfig = rushAlertsConfig;
-    this._rushAlertsState = rushAlertsState ?? {};
+    this._rushAlertsState = rushAlertsState;
   }
 
   public static async loadFromConfigurationAsync(

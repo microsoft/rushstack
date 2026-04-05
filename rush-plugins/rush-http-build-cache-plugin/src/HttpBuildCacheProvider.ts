@@ -78,11 +78,11 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
       rushJsonFolder,
       isCacheWriteAllowed,
       url,
-      uploadMethod,
-      headers,
+      uploadMethod = 'PUT',
+      headers = {},
       tokenHandler,
-      cacheKeyPrefix,
-      minHttpRetryDelayMs
+      cacheKeyPrefix = '',
+      minHttpRetryDelayMs = DEFAULT_MIN_HTTP_RETRY_DELAY_MS
     } = options;
 
     this._pluginName = pluginName;
@@ -91,11 +91,11 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
     this._isCacheWriteAllowedByConfiguration = isCacheWriteAllowed;
     this._url = new URL(url.endsWith('/') ? url : url + '/');
-    this._uploadMethod = uploadMethod ?? 'PUT';
-    this._headers = headers ?? {};
+    this._uploadMethod = uploadMethod;
+    this._headers = headers;
     this._tokenHandler = tokenHandler;
-    this._cacheKeyPrefix = cacheKeyPrefix ?? '';
-    this._minHttpRetryDelayMs = minHttpRetryDelayMs ?? DEFAULT_MIN_HTTP_RETRY_DELAY_MS;
+    this._cacheKeyPrefix = cacheKeyPrefix;
+    this._minHttpRetryDelayMs = minHttpRetryDelayMs;
   }
 
   public async tryGetCacheEntryBufferByIdAsync(

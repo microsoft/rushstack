@@ -108,13 +108,18 @@ export class TypingsGenerator<TFileContents = string> {
   );
   public constructor(options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>);
   public constructor(options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>) {
-    const { readFile, generatedTsFolder, srcFolder, fileExtensions, globsToIgnore, terminal } = options;
+    const {
+      readFile = ((filePath: string, relativePath: string): Promise<TFileContents> =>
+        FileSystem.readFileAsync(filePath) as Promise<TFileContents>) as typeof options.readFile,
+      generatedTsFolder,
+      srcFolder,
+      fileExtensions,
+      globsToIgnore = [],
+      terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: true }))
+    } = options;
     this._options = {
       ...options,
-      readFile:
-        readFile ??
-        ((filePath: string, relativePath: string): Promise<TFileContents> =>
-          FileSystem.readFileAsync(filePath) as Promise<TFileContents>)
+      readFile
     };
 
     if (!generatedTsFolder) {
@@ -138,9 +143,9 @@ export class TypingsGenerator<TFileContents = string> {
       throw new Error('At least one file extension must be provided.');
     }
 
-    this.ignoredFileGlobs = globsToIgnore || [];
+    this.ignoredFileGlobs = globsToIgnore;
 
-    this.terminal = terminal ?? new Terminal(new ConsoleTerminalProvider({ verboseEnabled: true }));
+    this.terminal = terminal;
 
     this._options.fileExtensions = this._normalizeFileExtensions(fileExtensions);
 

@@ -63,9 +63,9 @@ export class AliasCommandLineAction extends CommandLineAction {
   private _parameterKeyMap: Map<string, string> = new Map();
 
   public constructor(options: IAliasCommandLineActionOptions) {
-    const { toolFilename, targetAction, defaultParameters: defaultParams, aliasName } = options;
+    const { toolFilename, targetAction, defaultParameters: defaultParams = [], aliasName } = options;
     const targetActionName: string = targetAction.actionName;
-    const defaultParametersString: string = (defaultParams || []).join(' ');
+    const defaultParametersString: string = defaultParams.join(' ');
     const summary: string = `An alias for "${toolFilename} ${targetActionName}${
       defaultParametersString ? ` ${defaultParametersString}` : ''
     }".`;
@@ -79,7 +79,7 @@ export class AliasCommandLineAction extends CommandLineAction {
     });
 
     this.targetAction = targetAction;
-    this.defaultParameters = defaultParams || [];
+    this.defaultParameters = defaultParams;
   }
 
   /** @internal */

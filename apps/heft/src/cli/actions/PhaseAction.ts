@@ -20,19 +20,20 @@ export class PhaseAction extends CommandLineAction implements IHeftAction {
   private _selectedPhases: Set<HeftPhase> | undefined;
 
   public constructor(options: IPhaseActionOptions) {
-    const { phase, watch } = options;
+    const { phase, watch = false } = options;
+    const { phaseName, phaseDescription } = phase;
     super({
-      actionName: `${phase.phaseName}${watch ? '-watch' : ''}`,
+      actionName: `${phaseName}${watch ? '-watch' : ''}`,
       documentation:
-        `Runs to the ${phase.phaseName} phase, including all transitive dependencies` +
+        `Runs to the ${phaseName} phase, including all transitive dependencies` +
         (watch ? ', in watch mode.' : '.') +
-        (phase.phaseDescription ? `  ${phase.phaseDescription}` : ''),
+        (phaseDescription ? `  ${phaseDescription}` : ''),
       summary:
-        `Runs to the ${phase.phaseName} phase, including all transitive dependencies` +
+        `Runs to the ${phaseName} phase, including all transitive dependencies` +
         (watch ? ', in watch mode.' : '.')
     });
 
-    this.watch = watch ?? false;
+    this.watch = watch;
     this._phase = phase;
     this._actionRunner = new HeftActionRunner({ action: this, ...options });
     this._actionRunner.defineParameters();

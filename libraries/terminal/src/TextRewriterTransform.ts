@@ -68,8 +68,13 @@ export class TextRewriterTransform extends TerminalTransform {
   public constructor(options: ITextRewriterTransformOptions) {
     super(options);
 
-    const { textRewriters: inputTextRewriters, removeColors, normalizeNewlines, ensureNewlineAtEnd } = options;
-    const textRewriters: TextRewriter[] = inputTextRewriters || [];
+    const {
+      textRewriters: inputTextRewriters = [],
+      removeColors,
+      normalizeNewlines,
+      ensureNewlineAtEnd
+    } = options;
+    const textRewriters: TextRewriter[] = [...inputTextRewriters];
 
     if (removeColors) {
       textRewriters.push(new RemoveColorsTextRewriter());

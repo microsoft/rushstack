@@ -182,7 +182,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       originalPhases,
       initialPhases,
       watchPhases,
-      watchDebounceMs,
+      watchDebounceMs = RushConstants.defaultWatchDebounceMs,
       alwaysWatch,
       alwaysInstall,
       phases
@@ -194,7 +194,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     this._originalPhases = originalPhases;
     this._initialPhases = initialPhases;
     this._watchPhases = watchPhases;
-    this._watchDebounceMs = watchDebounceMs ?? RushConstants.defaultWatchDebounceMs;
+    this._watchDebounceMs = watchDebounceMs;
     this._alwaysWatch = alwaysWatch;
     this._alwaysInstall = alwaysInstall;
     this._runsBeforeInstall = false;

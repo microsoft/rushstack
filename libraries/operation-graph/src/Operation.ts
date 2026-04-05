@@ -198,12 +198,12 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
   public readonly metadata: TMetadata;
 
   public constructor(options: IOperationOptions<TMetadata, TGroupMetadata>) {
-    const { group, runner, weight, name, metadata } = options;
+    const { group, runner, weight = 1, name, metadata = {} as TMetadata } = options;
     this.group = group;
     this.runner = runner;
-    this.weight = weight ?? 1;
+    this.weight = weight;
     this.name = name;
-    this.metadata = metadata || ({} as TMetadata);
+    this.metadata = metadata;
 
     if (this.group) {
       this.group.addOperation(this);

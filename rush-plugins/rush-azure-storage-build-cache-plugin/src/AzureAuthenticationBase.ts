@@ -180,20 +180,20 @@ export abstract class AzureAuthenticationBase {
       azureEnvironment = 'AzurePublicCloud',
       credentialUpdateCommandForLogging,
       loginFlow = process.env.CODESPACES === 'true' ? 'AdoCodespacesAuth' : 'VisualStudioCode',
-      loginFlowFailover
+      loginFlowFailover = {
+        AdoCodespacesAuth: 'VisualStudioCode',
+        VisualStudioCode: 'AzureCli',
+        AzureCli: 'AzureDeveloperCli',
+        AzureDeveloperCli: 'AzurePowerShell',
+        AzurePowerShell: 'InteractiveBrowser',
+        InteractiveBrowser: 'DeviceCode',
+        DeviceCode: undefined
+      }
     } = options;
     this._azureEnvironment = azureEnvironment;
     this._credentialUpdateCommandForLogging = credentialUpdateCommandForLogging;
     this._loginFlow = loginFlow;
-    this._failoverOrder = loginFlowFailover || {
-      AdoCodespacesAuth: 'VisualStudioCode',
-      VisualStudioCode: 'AzureCli',
-      AzureCli: 'AzureDeveloperCli',
-      AzureDeveloperCli: 'AzurePowerShell',
-      AzurePowerShell: 'InteractiveBrowser',
-      InteractiveBrowser: 'DeviceCode',
-      DeviceCode: undefined
-    };
+    this._failoverOrder = loginFlowFailover;
   }
 
   public async updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void> {
