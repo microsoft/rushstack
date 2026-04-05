@@ -52,6 +52,8 @@ export {
   FileSystem,
   type FileSystemCopyFilesAsyncFilter,
   type FileSystemCopyFilesFilter,
+  type FileSystemReadStream,
+  type FileSystemWriteStream,
   type FolderItem,
   type FileSystemStats,
   type IFileSystemCopyFileBaseOptions,

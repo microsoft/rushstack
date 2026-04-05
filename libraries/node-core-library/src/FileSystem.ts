@@ -28,6 +28,24 @@ export type FileSystemStats = fs.Stats;
  */
 export type FolderItem = fs.Dirent;
 
+/**
+ * An alias for the Node.js `fs.ReadStream` object.
+ *
+ * @remarks
+ * This avoids the need to import the `fs` package when using the {@link FileSystem} API.
+ * @public
+ */
+export type FileSystemReadStream = fs.ReadStream;
+
+/**
+ * An alias for the Node.js `fs.WriteStream` object.
+ *
+ * @remarks
+ * This avoids the need to import the `fs` package when using the {@link FileSystem} API.
+ * @public
+ */
+export type FileSystemWriteStream = fs.WriteStream;
+
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */
 
@@ -1235,6 +1253,28 @@ export class FileSystem {
         }
       }
     });
+  }
+
+  /**
+   * Creates a readable stream for an existing file.
+   * Behind the scenes it uses `fs.createReadStream()`.
+   *
+   * @param filePath - The path to the file. The path may be absolute or relative.
+   * @returns A new readable stream for the file.
+   */
+  public static createReadStream(filePath: string): FileSystemReadStream {
+    return fs.createReadStream(filePath);
+  }
+
+  /**
+   * Creates a writable stream for writing to a file.
+   * Behind the scenes it uses `fs.createWriteStream()`.
+   *
+   * @param filePath - The path to the file. The path may be absolute or relative.
+   * @returns A new writable stream for the file.
+   */
+  public static createWriteStream(filePath: string): FileSystemWriteStream {
+    return fs.createWriteStream(filePath);
   }
 
   // ===============

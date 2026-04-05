@@ -166,12 +166,14 @@ export class FileSystem {
     static copyFilesAsync(options: IFileSystemCopyFilesAsyncOptions): Promise<void>;
     static createHardLink(options: IFileSystemCreateLinkOptions): void;
     static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
+    static createReadStream(filePath: string): FileSystemReadStream;
     static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
     static createSymbolicLinkFileAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createSymbolicLinkFolder(options: IFileSystemCreateLinkOptions): void;
     static createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void;
     static createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
+    static createWriteStream(filePath: string): FileSystemWriteStream;
     static deleteFile(filePath: string, options?: IFileSystemDeleteFileOptions): void;
     static deleteFileAsync(filePath: string, options?: IFileSystemDeleteFileOptions): Promise<void>;
     static deleteFolder(folderPath: string): void;
@@ -226,7 +228,13 @@ export type FileSystemCopyFilesAsyncFilter = (sourcePath: string, destinationPat
 export type FileSystemCopyFilesFilter = (sourcePath: string, destinationPath: string) => boolean;
 
 // @public
+export type FileSystemReadStream = fs.ReadStream;
+
+// @public
 export type FileSystemStats = fs.Stats;
+
+// @public
+export type FileSystemWriteStream = fs.WriteStream;
 
 // @public
 export class FileWriter {
