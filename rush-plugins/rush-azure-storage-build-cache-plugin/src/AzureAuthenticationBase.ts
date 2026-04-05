@@ -178,12 +178,14 @@ export abstract class AzureAuthenticationBase {
   public constructor(options: IAzureAuthenticationBaseOptions) {
     const {
       azureEnvironment = 'AzurePublicCloud',
-      loginFlow = process.env.CODESPACES === 'true' ? 'AdoCodespacesAuth' : 'VisualStudioCode'
+      credentialUpdateCommandForLogging,
+      loginFlow = process.env.CODESPACES === 'true' ? 'AdoCodespacesAuth' : 'VisualStudioCode',
+      loginFlowFailover
     } = options;
     this._azureEnvironment = azureEnvironment;
-    this._credentialUpdateCommandForLogging = options.credentialUpdateCommandForLogging;
+    this._credentialUpdateCommandForLogging = credentialUpdateCommandForLogging;
     this._loginFlow = loginFlow;
-    this._failoverOrder = options.loginFlowFailover || {
+    this._failoverOrder = loginFlowFailover || {
       AdoCodespacesAuth: 'VisualStudioCode',
       VisualStudioCode: 'AzureCli',
       AzureCli: 'AzureDeveloperCli',
