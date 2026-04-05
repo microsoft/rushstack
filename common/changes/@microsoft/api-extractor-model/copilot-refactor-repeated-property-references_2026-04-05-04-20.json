@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Refactor repeated object property access to use destructuring",
+      "type": "none",
+      "packageName": "@microsoft/api-extractor-model"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model",
+  "email": "198982749+Copilot@users.noreply.github.com"
+}
