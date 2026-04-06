@@ -328,7 +328,7 @@ const makeStreamRequestAsync: StreamFetchFn = async (
                   break;
                 }
                 default: {
-                  throw new Error(`Unsupported content-encoding: ${encodings}`);
+                  throw new Error(`Unsupported content-encoding: ${encoding.trim()}`);
                 }
               }
             }
