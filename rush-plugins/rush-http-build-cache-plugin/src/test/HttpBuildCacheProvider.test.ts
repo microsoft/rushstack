@@ -8,6 +8,7 @@ jest.mock('@rushstack/rush-sdk/lib/utilities/WebClient', () => {
 import { Readable } from 'node:stream';
 
 import { type RushSession, EnvironmentConfiguration } from '@rushstack/rush-sdk';
+import { type ICredentialCacheEntry, CredentialCache } from '@rushstack/credential-cache';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { WebClient } from '@rushstack/rush-sdk/lib/utilities/WebClient';
 
@@ -113,7 +114,7 @@ Array [
       });
       mocked(fetchFn).mockResolvedValueOnce({
         status: 504,
-        statusText: 'BadGateway',
+        statusText: 'Gateway Timeout',
         ok: false
       });
 
@@ -149,7 +150,7 @@ Array [
   "[  debug] [http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown bytes[n]",
   "[  debug] [http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown bytes[n]",
   "[  debug] [http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown bytes[n]",
-  "[warning] Could not get cache entry: HTTP 504: BadGateway[n]",
+  "[warning] Could not get cache entry: HTTP 504: Gateway Timeout[n]",
 ]
 `);
     });
@@ -183,11 +184,7 @@ Array [
       const session: RushSession = {} as RushSession;
       const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session); // write not allowed
 
-      const result = await provider.trySetCacheEntryBufferAsync(
-        terminal,
-        'some-key',
-        Buffer.from('data')
-      );
+      const result = await provider.trySetCacheEntryBufferAsync(terminal, 'some-key', Buffer.from('data'));
 
       expect(result).toBe(false);
       expect(fetchFn).not.toHaveBeenCalled();
@@ -235,11 +232,7 @@ Array [
         ok: false
       });
 
-      const result = await provider.trySetCacheEntryBufferAsync(
-        terminal,
-        'some-key',
-        Buffer.from('data')
-      );
+      const result = await provider.trySetCacheEntryBufferAsync(terminal, 'some-key', Buffer.from('data'));
 
       expect(result).toBe(false);
       expect(fetchFn).toHaveBeenCalledTimes(3);
@@ -316,7 +309,7 @@ Array [
       });
       mocked(streamFetchFn).mockResolvedValueOnce({
         status: 504,
-        statusText: 'BadGateway',
+        statusText: 'Gateway Timeout',
         ok: false,
         stream: createMockStream()
       });
@@ -393,7 +386,19 @@ Array [
     });
 
     it('skips credential fallback for stream bodies on 4xx', async () => {
+      // No credential in env for the first attempt
       jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue(undefined);
+      // But credentials ARE available in the credential cache — without the stream-body
+      // guard, the credential fallback would resolve these and make a second HTTP request
+      // with the already-consumed stream body.
+      jest
+        .spyOn(CredentialCache, 'usingAsync')
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        .mockImplementation(async (_options, fn) => {
+          await (fn as (cache: CredentialCache) => Promise<void>)({
+            tryGetCacheEntry: (): ICredentialCacheEntry => ({ credential: 'cached-token' })
+          } as unknown as CredentialCache);
+        });
 
       const session: RushSession = {} as RushSession;
       const provider = new HttpBuildCacheProvider(WRITE_ALLOWED_OPTIONS, session);
@@ -412,7 +417,7 @@ Array [
       const result = await provider.trySetCacheEntryStreamAsync(terminal, 'some-key', entryStream);
 
       expect(result).toBe(false);
-      // Should only be called once (no credential fallback retry)
+      // Should only be called once (no credential fallback retry with consumed stream)
       expect(streamFetchFn).toHaveBeenCalledTimes(1);
     });
   });

@@ -5,6 +5,8 @@ jest.mock('@rushstack/rush-sdk/lib/utilities/WebClient', () => {
   return jest.requireActual('@microsoft/rush-lib/lib/utilities/WebClient');
 });
 
+import { Readable } from 'node:stream';
+
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 import { WebClient } from '@rushstack/rush-sdk/lib/utilities/WebClient';
 
@@ -664,21 +666,18 @@ describe(AmazonS3Client.name, () => {
         status: number,
         statusText?: string
       ): Promise<{ result: NodeJS.ReadableStream | undefined; spy: jest.SpyInstance }> {
-        const { Readable } = await import('node:stream');
         const mockStream = new Readable({ read() {} });
 
-        const spy: jest.SpyInstance = jest
-          .spyOn(WebClient.prototype, 'fetchStreamAsync')
-          .mockReturnValue(
-            Promise.resolve({
-              stream: mockStream,
-              headers: {},
-              status,
-              statusText,
-              ok: status >= 200 && status < 300,
-              redirected: false
-            })
-          );
+        const spy: jest.SpyInstance = jest.spyOn(WebClient.prototype, 'fetchStreamAsync').mockReturnValue(
+          Promise.resolve({
+            stream: mockStream,
+            headers: {},
+            status,
+            statusText,
+            ok: status >= 200 && status < 300,
+            redirected: false
+          })
+        );
 
         const s3Client: AmazonS3Client = new AmazonS3Client(credentials, options, webClient, terminal);
         const result = await s3Client.getObjectStreamAsync(objectName);
@@ -722,7 +721,6 @@ describe(AmazonS3Client.name, () => {
 
     describe('Uploading an object stream', () => {
       it('Throws an error if credentials are not provided', async () => {
-        const { Readable } = await import('node:stream');
         const s3Client: AmazonS3Client = new AmazonS3Client(
           undefined,
           { s3Endpoint: 'http://foo.bar.baz', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
@@ -731,31 +729,25 @@ describe(AmazonS3Client.name, () => {
         );
 
         const mockStream = new Readable({ read() {} });
-        try {
-          await s3Client.uploadObjectStreamAsync('temp', mockStream);
-          fail('Expected an exception to be thrown');
-        } catch (e) {
-          expect(e).toMatchSnapshot();
-        }
+        await expect(s3Client.uploadObjectStreamAsync('temp', mockStream)).rejects.toThrow(
+          'Credentials are required to upload objects to S3.'
+        );
       });
 
       it('Uploads a stream successfully', async () => {
-        const { Readable } = await import('node:stream');
         const mockStream = new Readable({ read() {} });
         const responseStream = new Readable({ read() {} });
 
-        const spy: jest.SpyInstance = jest
-          .spyOn(WebClient.prototype, 'fetchStreamAsync')
-          .mockReturnValue(
-            Promise.resolve({
-              stream: responseStream,
-              headers: {},
-              status: 200,
-              statusText: 'OK',
-              ok: true,
-              redirected: false
-            })
-          );
+        const spy: jest.SpyInstance = jest.spyOn(WebClient.prototype, 'fetchStreamAsync').mockReturnValue(
+          Promise.resolve({
+            stream: responseStream,
+            headers: {},
+            status: 200,
+            statusText: 'OK',
+            ok: true,
+            redirected: false
+          })
+        );
 
         const s3Client: AmazonS3Client = new AmazonS3Client(
           {
@@ -771,27 +763,33 @@ describe(AmazonS3Client.name, () => {
         await s3Client.uploadObjectStreamAsync('abc123', mockStream);
 
         expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy.mock.calls[0]).toMatchSnapshot();
+        // Assert on URL and request options without snapshotting Readable internals,
+        // which are fragile across Node.js versions
+        const [url, options] = spy.mock.calls[0];
+        expect(url).toBe('http://localhost:9000/abc123');
+        expect(options.verb).toBe('PUT');
+        expect(options.body).toBe(mockStream);
+        expect(options.headers['x-amz-content-sha256']).toBe('UNSIGNED-PAYLOAD');
+        expect(options.headers['x-amz-date']).toBe('20200418T123242Z');
+        // eslint-disable-next-line dot-notation
+        expect(options.headers['Authorization']).toContain('AWS4-HMAC-SHA256');
         spy.mockRestore();
       });
 
       it('Does not retry on failure (stream consumed)', async () => {
-        const { Readable } = await import('node:stream');
         const mockStream = new Readable({ read() {} });
         const responseStream = new Readable({ read() {} });
 
-        const spy: jest.SpyInstance = jest
-          .spyOn(WebClient.prototype, 'fetchStreamAsync')
-          .mockReturnValue(
-            Promise.resolve({
-              stream: responseStream,
-              headers: {},
-              status: 500,
-              statusText: 'InternalServerError',
-              ok: false,
-              redirected: false
-            })
-          );
+        const spy: jest.SpyInstance = jest.spyOn(WebClient.prototype, 'fetchStreamAsync').mockReturnValue(
+          Promise.resolve({
+            stream: responseStream,
+            headers: {},
+            status: 500,
+            statusText: 'InternalServerError',
+            ok: false,
+            redirected: false
+          })
+        );
 
         const s3Client: AmazonS3Client = new AmazonS3Client(
           {
@@ -804,12 +802,7 @@ describe(AmazonS3Client.name, () => {
           terminal
         );
 
-        try {
-          await s3Client.uploadObjectStreamAsync('abc123', mockStream);
-          fail('Expected an exception to be thrown');
-        } catch (e) {
-          expect((e as Error).message).toContain('500');
-        }
+        await expect(s3Client.uploadObjectStreamAsync('abc123', mockStream)).rejects.toThrow('500');
 
         // Only 1 call - no retry for streams
         expect(spy).toHaveBeenCalledTimes(1);
