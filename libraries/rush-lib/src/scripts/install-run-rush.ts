@@ -13,10 +13,13 @@ const {
   runWithErrorAndStatusCode
 }: typeof import('./install-run') = __non_webpack_require__('./install-run');
 import type { ILogger } from '../utilities/npmrcUtilities';
+import {
+  EnvironmentConfiguration,
+  EnvironmentVariableNames
+} from '../api/EnvironmentConfiguration';
 
 const PACKAGE_NAME: string = '@microsoft/rush';
 const RUSH_PREVIEW_VERSION_ENV_VAR_NAME: string = 'RUSH_PREVIEW_VERSION';
-const RUSH_QUIET_MODE_ENV_VAR_NAME: string = 'RUSH_QUIET_MODE';
 const INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE: 'INSTALL_RUN_RUSH_LOCKFILE_PATH' =
   'INSTALL_RUN_RUSH_LOCKFILE_PATH';
 
@@ -76,10 +79,11 @@ function _run(): void {
 
   let commandFound: boolean = false;
 
-  // This is a bootstrap script that runs before rush-lib is loaded. EnvironmentConfiguration is not
-  // available here, so we read the environment variable directly.
-  const quietModeEnvValue: string | undefined = process.env[RUSH_QUIET_MODE_ENV_VAR_NAME];
-  let quiet: boolean = quietModeEnvValue === '1' || quietModeEnvValue === 'true';
+  // This is a bootstrap script that runs before rush-lib is loaded. EnvironmentConfiguration has not
+  // been validated yet, so we use its static helper to parse the raw environment variable value.
+  let quiet: boolean = EnvironmentConfiguration.parseQuietModeEnvVar(
+    process.env[EnvironmentVariableNames.RUSH_QUIET_MODE]
+  );
 
   for (const arg of packageBinArgs) {
     if (arg === '-q' || arg === '--quiet') {

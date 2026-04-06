@@ -625,19 +625,7 @@ export class EnvironmentConfiguration {
           }
 
           case EnvironmentVariableNames.RUSH_QUIET_MODE: {
-            // Accept "true"/"false" string values in addition to the standard "1"/"0" values because
-            // install-run-rush.ts, RushCommandLineParser, and RushXCommandLine read this variable
-            // directly from process.env (before EnvironmentConfiguration is initialized) and also
-            // accept "true" as a truthy value. The two code paths must agree on accepted values.
-            if (value === 'true' || value === 'false') {
-              EnvironmentConfiguration._quietMode = value === 'true';
-            } else {
-              EnvironmentConfiguration._quietMode =
-                EnvironmentConfiguration.parseBooleanEnvironmentVariable(
-                  EnvironmentVariableNames.RUSH_QUIET_MODE,
-                  value
-                ) ?? false;
-            }
+            EnvironmentConfiguration._quietMode = EnvironmentConfiguration.parseQuietModeEnvVar(value);
             break;
           }
 
@@ -723,6 +711,19 @@ export class EnvironmentConfiguration {
         `Invalid value "${value}" for the environment variable ${name}. Valid choices are 0 or 1.`
       );
     }
+  }
+
+  /**
+   * Parses the raw string value of the {@link EnvironmentVariableNames.RUSH_QUIET_MODE} environment
+   * variable. This method does not require `EnvironmentConfiguration` to be initialized, making it safe
+   * to call in early-startup code paths before dotenv files are loaded and before `validate()` is called.
+   *
+   * @remarks
+   * Accepts `"1"` or `"true"` as truthy; all other values (including `"0"`, `"false"`, and undefined)
+   * are treated as falsy.
+   */
+  public static parseQuietModeEnvVar(value: string | undefined): boolean {
+    return value === '1' || value === 'true';
   }
 
   /**

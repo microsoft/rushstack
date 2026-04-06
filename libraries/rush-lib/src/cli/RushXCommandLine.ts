@@ -24,7 +24,7 @@ import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { RushStartupBanner } from './RushStartupBanner';
 import { EventHooksManager } from '../logic/EventHooksManager';
 import { Event } from '../api/EventHooks';
-import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 import { PnpmSyncUtilities } from '../utilities/PnpmSyncUtilities';
 import { initializeDotEnv } from '../logic/dotenv';
@@ -297,9 +297,7 @@ export class RushXCommandLine {
 
     // This method is called at the start of launchRushXAsync(), before RushConfiguration.loadFromConfigurationFile()
     // initializes EnvironmentConfiguration. We must read process.env directly here.
-    const quietModeValue: string | undefined =
-      process.env[EnvironmentVariableNames.RUSH_QUIET_MODE];
-    if (quietModeValue === '1' || quietModeValue === 'true') {
+    if (EnvironmentConfiguration.parseQuietModeEnvVar(process.env[EnvironmentVariableNames.RUSH_QUIET_MODE])) {
       quiet = true;
     }
 

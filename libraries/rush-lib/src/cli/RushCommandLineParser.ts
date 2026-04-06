@@ -221,18 +221,11 @@ export class RushCommandLineParser extends CommandLineParser {
       }
     }
 
-    // If EnvironmentConfiguration has already been initialized, use it to get the quiet mode value.
-    // Otherwise, read directly from process.env because this method may be called before dotenv
-    // files are loaded and EnvironmentConfiguration is validated (e.g. from Rush.launch()).
-    if (EnvironmentConfiguration.hasBeenValidated) {
-      if (EnvironmentConfiguration.quietMode) {
-        return true;
-      }
-    } else {
-      const quietModeValue: string | undefined = process.env[EnvironmentVariableNames.RUSH_QUIET_MODE];
-      if (quietModeValue === '1' || quietModeValue === 'true') {
-        return true;
-      }
+    // Read directly from process.env rather than EnvironmentConfiguration.quietMode because
+    // this method is called before dotenv files are loaded and EnvironmentConfiguration is
+    // validated (e.g. from Rush.launch()).
+    if (EnvironmentConfiguration.parseQuietModeEnvVar(process.env[EnvironmentVariableNames.RUSH_QUIET_MODE])) {
+      return true;
     }
 
     return false;
