@@ -64,16 +64,17 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
   public constructor(options: ICommandLineActionOptions) {
     super();
 
-    if (!ACTION_NAME_REGEXP.test(options.actionName)) {
+    const { actionName, summary, documentation } = options;
+    if (!ACTION_NAME_REGEXP.test(actionName)) {
       throw new Error(
-        `Invalid action name "${options.actionName}". ` +
+        `Invalid action name "${actionName}". ` +
           `The name must be comprised of lower-case words optionally separated by hyphens or colons.`
       );
     }
 
-    this.actionName = options.actionName;
-    this.summary = options.summary;
-    this.documentation = options.documentation;
+    this.actionName = actionName;
+    this.summary = summary;
+    this.documentation = documentation;
 
     this._argumentParser = undefined;
   }

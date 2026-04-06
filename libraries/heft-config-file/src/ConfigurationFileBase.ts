@@ -448,16 +448,24 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
   > = new Map();
 
   public constructor(options: IConfigurationFileOptions<TConfigurationFile, TExtraOptions>) {
-    if (options.jsonSchemaObject) {
-      this._getSchema = () => JsonSchema.fromLoadedObject(options.jsonSchemaObject);
+    const {
+      jsonSchemaObject,
+      jsonSchemaPath,
+      jsonPathMetadata = {},
+      propertyInheritance = {},
+      propertyInheritanceDefaults = {},
+      customValidationFunction
+    } = options;
+    if (jsonSchemaObject) {
+      this._getSchema = () => JsonSchema.fromLoadedObject(jsonSchemaObject);
     } else {
-      this._getSchema = () => JsonSchema.fromFile(options.jsonSchemaPath);
+      this._getSchema = () => JsonSchema.fromFile(jsonSchemaPath);
     }
 
-    this._jsonPathMetadata = Object.entries(options.jsonPathMetadata || {});
-    this._propertyInheritanceTypes = options.propertyInheritance || {};
-    this._defaultPropertyInheritance = options.propertyInheritanceDefaults || {};
-    this._customValidationFunction = options.customValidationFunction;
+    this._jsonPathMetadata = Object.entries(jsonPathMetadata);
+    this._propertyInheritanceTypes = propertyInheritance;
+    this._defaultPropertyInheritance = propertyInheritanceDefaults;
+    this._customValidationFunction = customValidationFunction;
   }
 
   /**

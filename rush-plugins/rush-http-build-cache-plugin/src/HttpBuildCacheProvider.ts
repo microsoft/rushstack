@@ -73,17 +73,29 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   }
 
   public constructor(options: IHttpBuildCacheProviderOptions, rushSession: RushSession) {
-    this._pluginName = options.pluginName;
-    this._rushProjectRoot = options.rushJsonFolder;
+    const {
+      pluginName,
+      rushJsonFolder,
+      isCacheWriteAllowed,
+      url,
+      uploadMethod = 'PUT',
+      headers = {},
+      tokenHandler,
+      cacheKeyPrefix = '',
+      minHttpRetryDelayMs = DEFAULT_MIN_HTTP_RETRY_DELAY_MS
+    } = options;
+
+    this._pluginName = pluginName;
+    this._rushProjectRoot = rushJsonFolder;
 
     this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
-    this._isCacheWriteAllowedByConfiguration = options.isCacheWriteAllowed;
-    this._url = new URL(options.url.endsWith('/') ? options.url : options.url + '/');
-    this._uploadMethod = options.uploadMethod ?? 'PUT';
-    this._headers = options.headers ?? {};
-    this._tokenHandler = options.tokenHandler;
-    this._cacheKeyPrefix = options.cacheKeyPrefix ?? '';
-    this._minHttpRetryDelayMs = options.minHttpRetryDelayMs ?? DEFAULT_MIN_HTTP_RETRY_DELAY_MS;
+    this._isCacheWriteAllowedByConfiguration = isCacheWriteAllowed;
+    this._url = new URL(url.endsWith('/') ? url : url + '/');
+    this._uploadMethod = uploadMethod;
+    this._headers = headers;
+    this._tokenHandler = tokenHandler;
+    this._cacheKeyPrefix = cacheKeyPrefix;
+    this._minHttpRetryDelayMs = minHttpRetryDelayMs;
   }
 
   public async tryGetCacheEntryBufferByIdAsync(

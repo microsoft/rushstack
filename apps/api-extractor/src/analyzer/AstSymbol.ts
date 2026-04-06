@@ -117,12 +117,20 @@ export class AstSymbol extends AstEntity {
   public constructor(options: IAstSymbolOptions) {
     super();
 
-    this.followedSymbol = options.followedSymbol;
-    this.localName = options.localName;
-    this.isExternal = options.isExternal;
-    this.nominalAnalysis = options.nominalAnalysis;
-    this.parentAstSymbol = options.parentAstSymbol;
-    this.rootAstSymbol = options.rootAstSymbol || this;
+    const {
+      followedSymbol,
+      localName,
+      isExternal,
+      nominalAnalysis,
+      parentAstSymbol,
+      rootAstSymbol = this
+    } = options;
+    this.followedSymbol = followedSymbol;
+    this.localName = localName;
+    this.isExternal = isExternal;
+    this.nominalAnalysis = nominalAnalysis;
+    this.parentAstSymbol = parentAstSymbol;
+    this.rootAstSymbol = rootAstSymbol;
     this._astDeclarations = [];
   }
 

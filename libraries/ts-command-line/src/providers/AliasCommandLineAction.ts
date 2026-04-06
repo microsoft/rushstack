@@ -63,23 +63,23 @@ export class AliasCommandLineAction extends CommandLineAction {
   private _parameterKeyMap: Map<string, string> = new Map();
 
   public constructor(options: IAliasCommandLineActionOptions) {
-    const toolFilename: string = options.toolFilename;
-    const targetActionName: string = options.targetAction.actionName;
-    const defaultParametersString: string = (options.defaultParameters || []).join(' ');
+    const { toolFilename, targetAction, defaultParameters: defaultParams = [], aliasName } = options;
+    const targetActionName: string = targetAction.actionName;
+    const defaultParametersString: string = defaultParams.join(' ');
     const summary: string = `An alias for "${toolFilename} ${targetActionName}${
       defaultParametersString ? ` ${defaultParametersString}` : ''
     }".`;
 
     super({
-      actionName: options.aliasName,
+      actionName: aliasName,
       summary,
       documentation:
         `${summary} For more information on the aliased command, use ` +
         `"${toolFilename} ${targetActionName} --help".`
     });
 
-    this.targetAction = options.targetAction;
-    this.defaultParameters = options.defaultParameters || [];
+    this.targetAction = targetAction;
+    this.defaultParameters = defaultParams;
   }
 
   /** @internal */

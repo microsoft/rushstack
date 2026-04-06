@@ -108,40 +108,46 @@ export class TypingsGenerator<TFileContents = string> {
   );
   public constructor(options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>);
   public constructor(options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>) {
+    const {
+      readFile = (filePath: string, relativePath: string): Promise<TFileContents> =>
+        FileSystem.readFileAsync(filePath) as Promise<TFileContents>,
+      generatedTsFolder,
+      srcFolder,
+      fileExtensions,
+      globsToIgnore = [],
+      terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: true }))
+    } = options;
     this._options = {
       ...options,
-      readFile:
-        options.readFile ??
-        ((filePath: string, relativePath: string): Promise<TFileContents> =>
-          FileSystem.readFileAsync(filePath) as Promise<TFileContents>)
+      readFile
     };
 
-    if (!options.generatedTsFolder) {
+    if (!generatedTsFolder) {
       throw new Error('generatedTsFolder must be provided');
     }
 
-    if (!options.srcFolder) {
+    if (!srcFolder) {
       throw new Error('srcFolder must be provided');
     }
-    this.sourceFolderPath = options.srcFolder;
+    this.sourceFolderPath = srcFolder;
 
-    if (Path.isUnder(options.srcFolder, options.generatedTsFolder)) {
+    if (Path.isUnder(srcFolder, generatedTsFolder)) {
       throw new Error('srcFolder must not be under generatedTsFolder');
     }
 
-    if (Path.isUnder(options.generatedTsFolder, options.srcFolder)) {
+    if (Path.isUnder(generatedTsFolder, srcFolder)) {
       throw new Error('generatedTsFolder must not be under srcFolder');
     }
 
-    if (!options.fileExtensions || options.fileExtensions.length === 0) {
+    if (!fileExtensions || fileExtensions.length === 0) {
       throw new Error('At least one file extension must be provided.');
     }
 
-    this.ignoredFileGlobs = options.globsToIgnore || [];
+    this.ignoredFileGlobs = globsToIgnore;
 
-    this.terminal = options.terminal ?? new Terminal(new ConsoleTerminalProvider({ verboseEnabled: true }));
+    this.terminal = terminal;
 
-    this._options.fileExtensions = this._normalizeFileExtensions(options.fileExtensions);
+    this._options.fileExtensions = this._normalizeFileExtensions(fileExtensions);
 
     this._dependenciesOfFile = new Map();
     this._consumersOfFile = new Map();
@@ -192,7 +198,7 @@ export class TypingsGenerator<TFileContents = string> {
         this._reprocessFilesAsync(toProcess, false)
           .then(() => {
             processing = false;
-            // If the timeout was invoked again, immediately reexecute with the changed files.
+            // If the timeout was invoked again, immediately re-execute with the changed files.
             if (flushAfterCompletion) {
               flushAfterCompletion = false;
               flushInternal();

@@ -97,12 +97,20 @@ export class RushAlerts {
   ];
 
   public constructor(options: IRushAlertsOptions) {
-    this._terminal = options.terminal;
-    this._rushJsonFolder = options.rushJsonFolder;
-    this.rushAlertsStateFilePath = options.rushAlertsStateFilePath;
-    this.rushAlertsConfigFilePath = options.rushAlertsConfigFilePath;
-    this._rushAlertsConfig = options.rushAlertsConfig;
-    this._rushAlertsState = options.rushAlertsState ?? {};
+    const {
+      terminal,
+      rushJsonFolder,
+      rushAlertsStateFilePath,
+      rushAlertsConfigFilePath,
+      rushAlertsConfig,
+      rushAlertsState = {}
+    } = options;
+    this._terminal = terminal;
+    this._rushJsonFolder = rushJsonFolder;
+    this.rushAlertsStateFilePath = rushAlertsStateFilePath;
+    this.rushAlertsConfigFilePath = rushAlertsConfigFilePath;
+    this._rushAlertsConfig = rushAlertsConfig;
+    this._rushAlertsState = rushAlertsState;
   }
 
   public static async loadFromConfigurationAsync(

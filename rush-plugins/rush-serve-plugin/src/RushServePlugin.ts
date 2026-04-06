@@ -61,11 +61,18 @@ export class RushServePlugin implements IRushPlugin {
   private readonly _buildStatusWebSocketPath: string | undefined;
 
   public constructor(options: IRushServePluginOptions) {
-    this._phasedCommands = new Set(options.phasedCommands);
-    this._portParameterLongName = options.portParameterLongName;
-    this._globalRoutingRules = options.globalRouting ?? [];
-    this._logServePath = options.logServePath;
-    this._buildStatusWebSocketPath = options.buildStatusWebSocketPath;
+    const {
+      phasedCommands,
+      portParameterLongName,
+      globalRouting = [],
+      logServePath,
+      buildStatusWebSocketPath
+    } = options;
+    this._phasedCommands = new Set(phasedCommands);
+    this._portParameterLongName = portParameterLongName;
+    this._globalRoutingRules = globalRouting;
+    this._logServePath = logServePath;
+    this._buildStatusWebSocketPath = buildStatusWebSocketPath;
   }
 
   public apply(rushSession: RushSession, rushConfiguration: RushConfiguration): void {

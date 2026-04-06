@@ -48,15 +48,15 @@ export class ShellOperationRunner implements IOperationRunner {
   private readonly _ignoredParameterValues: ReadonlyArray<string>;
 
   public constructor(options: IShellOperationRunnerOptions) {
-    const { phase } = options;
+    const { phase, displayName, rushProject, commandToRun, commandForHash, ignoredParameterValues } = options;
 
-    this.name = options.displayName;
+    this.name = displayName;
     this.warningsAreAllowed =
       EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
-    this._rushProject = options.rushProject;
-    this.commandToRun = options.commandToRun;
-    this._commandForHash = options.commandForHash;
-    this._ignoredParameterValues = options.ignoredParameterValues;
+    this._rushProject = rushProject;
+    this.commandToRun = commandToRun;
+    this._commandForHash = commandForHash;
+    this._ignoredParameterValues = ignoredParameterValues;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {

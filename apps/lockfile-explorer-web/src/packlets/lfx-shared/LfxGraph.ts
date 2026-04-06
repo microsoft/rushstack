@@ -67,14 +67,16 @@ export class LfxGraphDependency {
   public resolvedEntry: LfxGraphEntry | undefined = undefined;
 
   public constructor(options: ILfxGraphDependencyOptions) {
-    this.name = options.name;
-    this.versionPath = options.versionPath;
-    this.entryId = options.entryId;
-    this.originalSpecifier = options.originalSpecifier;
-    this.dependencyKind = options.dependencyKind;
-    this.peerDependencyMeta = options.peerDependencyMeta;
+    const { name, versionPath, entryId, originalSpecifier, dependencyKind, peerDependencyMeta, containingEntry } =
+      options;
+    this.name = name;
+    this.versionPath = versionPath;
+    this.entryId = entryId;
+    this.originalSpecifier = originalSpecifier;
+    this.dependencyKind = dependencyKind;
+    this.peerDependencyMeta = peerDependencyMeta;
 
-    this.containingEntry = options.containingEntry;
+    this.containingEntry = containingEntry;
   }
 }
 
@@ -154,14 +156,24 @@ export class LfxGraphEntry {
   public readonly referrers: LfxGraphEntry[] = [];
 
   public constructor(options: ILfxGraphEntryOptions) {
-    this.kind = options.kind;
-    this.entryId = options.entryId;
-    this.rawEntryId = options.rawEntryId;
-    this.packageJsonFolderPath = options.packageJsonFolderPath;
-    this.entryPackageName = options.entryPackageName;
-    this.displayText = options.displayText;
-    this.entryPackageVersion = options.entryPackageVersion;
-    this.entrySuffix = options.entrySuffix;
+    const {
+      kind,
+      entryId,
+      rawEntryId,
+      packageJsonFolderPath,
+      entryPackageName,
+      displayText,
+      entryPackageVersion,
+      entrySuffix
+    } = options;
+    this.kind = kind;
+    this.entryId = entryId;
+    this.rawEntryId = rawEntryId;
+    this.packageJsonFolderPath = packageJsonFolderPath;
+    this.entryPackageName = entryPackageName;
+    this.displayText = displayText;
+    this.entryPackageVersion = entryPackageVersion;
+    this.entrySuffix = entrySuffix;
   }
 }
 

@@ -174,18 +174,31 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
-    this._enableParallelism = options.enableParallelism;
-    this._allowOversubscription = options.allowOversubscription;
-    this._isIncrementalBuildAllowed = options.incremental;
-    this._disableBuildCache = options.disableBuildCache;
-    this._originalPhases = options.originalPhases;
-    this._initialPhases = options.initialPhases;
-    this._watchPhases = options.watchPhases;
-    this._watchDebounceMs = options.watchDebounceMs ?? RushConstants.defaultWatchDebounceMs;
-    this._alwaysWatch = options.alwaysWatch;
-    this._alwaysInstall = options.alwaysInstall;
+    const {
+      enableParallelism,
+      allowOversubscription,
+      incremental,
+      disableBuildCache,
+      originalPhases,
+      initialPhases,
+      watchPhases,
+      watchDebounceMs = RushConstants.defaultWatchDebounceMs,
+      alwaysWatch,
+      alwaysInstall,
+      phases
+    } = options;
+    this._enableParallelism = enableParallelism;
+    this._allowOversubscription = allowOversubscription;
+    this._isIncrementalBuildAllowed = incremental;
+    this._disableBuildCache = disableBuildCache;
+    this._originalPhases = originalPhases;
+    this._initialPhases = initialPhases;
+    this._watchPhases = watchPhases;
+    this._watchDebounceMs = watchDebounceMs;
+    this._alwaysWatch = alwaysWatch;
+    this._alwaysInstall = alwaysInstall;
     this._runsBeforeInstall = false;
-    this._knownPhases = options.phases;
+    this._knownPhases = phases;
     this._changedProjectsOnly = false;
     this.sessionAbortController = new AbortController();
     this._executionAbortController = undefined;

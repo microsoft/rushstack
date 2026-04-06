@@ -104,6 +104,16 @@ export type LoginFlowFailoverMap = {
   readonly [LoginFlow in LoginFlowType]?: Exclude<LoginFlowType, LoginFlow>;
 };
 
+const DEFAULT_LOGIN_FLOW_FAILOVER: LoginFlowFailoverMap = {
+  AdoCodespacesAuth: 'VisualStudioCode',
+  VisualStudioCode: 'AzureCli',
+  AzureCli: 'AzureDeveloperCli',
+  AzureDeveloperCli: 'AzurePowerShell',
+  AzurePowerShell: 'InteractiveBrowser',
+  InteractiveBrowser: 'DeviceCode',
+  DeviceCode: undefined
+};
+
 /**
  * @public
  */
@@ -178,20 +188,14 @@ export abstract class AzureAuthenticationBase {
   public constructor(options: IAzureAuthenticationBaseOptions) {
     const {
       azureEnvironment = 'AzurePublicCloud',
-      loginFlow = process.env.CODESPACES === 'true' ? 'AdoCodespacesAuth' : 'VisualStudioCode'
+      credentialUpdateCommandForLogging,
+      loginFlow = process.env.CODESPACES === 'true' ? 'AdoCodespacesAuth' : 'VisualStudioCode',
+      loginFlowFailover = DEFAULT_LOGIN_FLOW_FAILOVER
     } = options;
     this._azureEnvironment = azureEnvironment;
-    this._credentialUpdateCommandForLogging = options.credentialUpdateCommandForLogging;
+    this._credentialUpdateCommandForLogging = credentialUpdateCommandForLogging;
     this._loginFlow = loginFlow;
-    this._failoverOrder = options.loginFlowFailover || {
-      AdoCodespacesAuth: 'VisualStudioCode',
-      VisualStudioCode: 'AzureCli',
-      AzureCli: 'AzureDeveloperCli',
-      AzureDeveloperCli: 'AzurePowerShell',
-      AzurePowerShell: 'InteractiveBrowser',
-      InteractiveBrowser: 'DeviceCode',
-      DeviceCode: undefined
-    };
+    this._failoverOrder = loginFlowFailover;
   }
 
   public async updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void> {

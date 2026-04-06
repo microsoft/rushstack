@@ -107,11 +107,12 @@ export class Collector {
   public constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
 
-    this._program = options.program;
-    this.extractorConfig = options.extractorConfig;
-    this.sourceMapper = options.sourceMapper;
+    const { program, extractorConfig, sourceMapper, messageRouter } = options;
+    this._program = program;
+    this.extractorConfig = extractorConfig;
+    this.sourceMapper = sourceMapper;
 
-    const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(
+    const entryPointSourceFile: ts.SourceFile | undefined = program.getSourceFile(
       this.extractorConfig.mainEntryPointFilePath
     );
 
@@ -131,10 +132,10 @@ export class Collector {
       entryPointSourceFile
     });
 
-    this.messageRouter = options.messageRouter;
+    this.messageRouter = messageRouter;
 
-    this.program = options.program;
-    this.typeChecker = options.program.getTypeChecker();
+    this.program = program;
+    this.typeChecker = program.getTypeChecker();
     this.globalVariableAnalyzer = TypeScriptInternals.getGlobalVariableAnalyzer(this.program);
 
     this._tsdocParser = new tsdoc.TSDocParser(this.extractorConfig.tsdocConfiguration);

@@ -153,12 +153,14 @@ export class ExtractorResult {
 
   /** @internal */
   public constructor(properties: ExtractorResult) {
-    this.compilerState = properties.compilerState;
-    this.extractorConfig = properties.extractorConfig;
-    this.succeeded = properties.succeeded;
-    this.apiReportChanged = properties.apiReportChanged;
-    this.errorCount = properties.errorCount;
-    this.warningCount = properties.warningCount;
+    const { compilerState, extractorConfig, succeeded, apiReportChanged, errorCount, warningCount } =
+      properties;
+    this.compilerState = compilerState;
+    this.extractorConfig = extractorConfig;
+    this.succeeded = succeeded;
+    this.apiReportChanged = apiReportChanged;
+    this.errorCount = errorCount;
+    this.warningCount = warningCount;
   }
 }
 
