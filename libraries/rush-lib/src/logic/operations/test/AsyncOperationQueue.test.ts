@@ -190,7 +190,8 @@ describe(AsyncOperationQueue.name, () => {
     // Assign all three — untried operations should come before the retry
     const results: OperationExecutionRecord[] = [];
     for await (const item of queue) {
-      result.push(item);
+      results.push(item);
+      queue.complete(item);
     }
 
     // The cobuild retry should be last
