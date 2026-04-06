@@ -95,6 +95,22 @@ const ACCEPT_HEADER_NAME: 'accept' = 'accept';
 const USER_AGENT_HEADER_NAME: 'user-agent' = 'user-agent';
 const CONTENT_ENCODING_HEADER_NAME: 'content-encoding' = 'content-encoding';
 
+/**
+ * Parses the Content-Encoding header into an array of encoding names,
+ * or returns `undefined` if decoding should be skipped.
+ */
+function _getContentEncodings(
+  headers: Record<string, string | string[] | undefined>,
+  noDecode: boolean | undefined
+): string[] | undefined {
+  if (!noDecode) {
+    const encodings: string | string[] | undefined = headers[CONTENT_ENCODING_HEADER_NAME];
+    if (encodings) {
+      return Array.isArray(encodings) ? encodings : encodings.split(',');
+    }
+  }
+}
+
 type StreamFetchFn = (
   url: string,
   options: IRequestOptions,
@@ -222,15 +238,12 @@ const makeRequestAsync: FetchFn = async (
           getBufferAsync: async () => {
             // Determine if the buffer is compressed and decode it if necessary
             if (decodedBuffer === undefined) {
-              let encodings: string | string[] | undefined = headers[CONTENT_ENCODING_HEADER_NAME];
-              if (!noDecode && encodings !== undefined) {
+              const contentEncodings: string[] | undefined = _getContentEncodings(headers, noDecode);
+              if (contentEncodings) {
                 const zlib: typeof import('zlib') = await import('node:zlib');
-                if (!Array.isArray(encodings)) {
-                  encodings = encodings.split(',');
-                }
 
                 let buffer: Buffer = responseData;
-                for (const encoding of encodings) {
+                for (const encoding of contentEncodings) {
                   let decompressFn: (buffer: Buffer, callback: import('zlib').CompressCallback) => void;
                   switch (encoding.trim()) {
                     case DEFLATE_ENCODING: {
@@ -299,22 +312,16 @@ const makeStreamRequestAsync: StreamFetchFn = async (
 
       // Handle Content-Encoding decompression for streaming responses,
       // matching the buffer-based path's behavior in getBufferAsync()
-      let encodings: string | string[] | undefined;
-      if (!noDecode) {
-        encodings = headers[CONTENT_ENCODING_HEADER_NAME];
-      }
+      const contentEncodings: string[] | undefined = _getContentEncodings(headers, noDecode);
 
-      if (encodings !== undefined) {
+      if (contentEncodings) {
         // Resolve with a promise so we can lazily import zlib (same pattern as buffer path)
         resolve(
           (async () => {
             const zlib: typeof import('zlib') = await import('node:zlib');
-            if (!Array.isArray(encodings)) {
-              encodings = encodings!.split(',');
-            }
 
             let resultStream: Readable = response;
-            for (const encoding of encodings) {
+            for (const encoding of contentEncodings) {
               switch (encoding.trim()) {
                 case DEFLATE_ENCODING: {
                   resultStream = resultStream.pipe(zlib.createInflate());
