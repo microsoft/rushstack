@@ -274,6 +274,8 @@ const makeStreamRequestAsync: StreamFetchFn = async (
   options: IRequestOptions,
   redirected: boolean = false
 ) => {
+  const { noDecode } = options;
+
   return _makeRawRequestAsync(
     url,
     options,
@@ -284,14 +286,59 @@ const makeStreamRequestAsync: StreamFetchFn = async (
       resolve: (result: IWebClientStreamResponse | PromiseLike<IWebClientStreamResponse>) => void
     ): void => {
       const { statusCode: status = 0, statusMessage: statusText, headers } = response;
-      resolve({
+
+      const buildResult = (stream: Readable): IWebClientStreamResponse => ({
         ok: status >= 200 && status < 300,
         status,
         statusText,
         redirected: wasRedirected,
         headers,
-        stream: response
+        stream
       });
+
+      // Handle Content-Encoding decompression for streaming responses,
+      // matching the buffer-based path's behavior in getBufferAsync()
+      let encodings: string | string[] | undefined;
+      if (!noDecode) {
+        encodings = headers[CONTENT_ENCODING_HEADER_NAME];
+      }
+
+      if (encodings !== undefined) {
+        // Resolve with a promise so we can lazily import zlib (same pattern as buffer path)
+        resolve(
+          (async () => {
+            const zlib: typeof import('zlib') = await import('node:zlib');
+            if (!Array.isArray(encodings)) {
+              encodings = encodings!.split(',');
+            }
+
+            let resultStream: Readable = response;
+            for (const encoding of encodings) {
+              switch (encoding.trim()) {
+                case DEFLATE_ENCODING: {
+                  resultStream = resultStream.pipe(zlib.createInflate());
+                  break;
+                }
+                case GZIP_ENCODING: {
+                  resultStream = resultStream.pipe(zlib.createGunzip());
+                  break;
+                }
+                case BROTLI_ENCODING: {
+                  resultStream = resultStream.pipe(zlib.createBrotliDecompress());
+                  break;
+                }
+                default: {
+                  throw new Error(`Unsupported content-encoding: ${encodings}`);
+                }
+              }
+            }
+
+            return buildResult(resultStream);
+          })()
+        );
+      } else {
+        resolve(buildResult(response));
+      }
     },
     makeStreamRequestAsync
   );
