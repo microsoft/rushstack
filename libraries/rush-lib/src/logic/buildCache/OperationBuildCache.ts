@@ -167,21 +167,19 @@ export class OperationBuildCache {
 
     let localCacheEntryPath: string | undefined =
       await this._localBuildCacheProvider.tryGetCacheEntryPathByIdAsync(terminal, cacheId);
-    let cacheEntryBuffer: Buffer | undefined;
+    let cloudCacheHit: boolean = false;
     let updateLocalCacheSuccess: boolean | undefined;
     if (!localCacheEntryPath && this._cloudBuildCacheProvider) {
       terminal.writeVerboseLine(
         'This project was not found in the local build cache. Querying the cloud build cache.'
       );
 
-      if (
-        this._useStreamingBuildCache &&
-        this._cloudBuildCacheProvider.tryGetCacheEntryStreamByIdAsync
-      ) {
+      if (this._useStreamingBuildCache && this._cloudBuildCacheProvider.tryGetCacheEntryStreamByIdAsync) {
         // Use streaming path to avoid loading the entire cache entry into memory
         const cacheEntryStream: NodeJS.ReadableStream | undefined =
           await this._cloudBuildCacheProvider.tryGetCacheEntryStreamByIdAsync(terminal, cacheId);
         if (cacheEntryStream) {
+          cloudCacheHit = true;
           try {
             localCacheEntryPath = await this._localBuildCacheProvider.trySetCacheEntryStreamAsync(
               terminal,
@@ -195,11 +193,10 @@ export class OperationBuildCache {
           }
         }
       } else {
-        cacheEntryBuffer = await this._cloudBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(
-          terminal,
-          cacheId
-        );
+        const cacheEntryBuffer: Buffer | undefined =
+          await this._cloudBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(terminal, cacheId);
         if (cacheEntryBuffer) {
+          cloudCacheHit = true;
           try {
             localCacheEntryPath = await this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
               terminal,
@@ -215,7 +212,7 @@ export class OperationBuildCache {
       }
     }
 
-    if (!localCacheEntryPath && !cacheEntryBuffer) {
+    if (!localCacheEntryPath && !cloudCacheHit) {
       terminal.writeVerboseLine('This project was not found in the build cache.');
       return false;
     }
@@ -349,10 +346,7 @@ export class OperationBuildCache {
         throw new InternalError('Expected the local cache entry path to be set.');
       }
 
-      if (
-        this._useStreamingBuildCache &&
-        this._cloudBuildCacheProvider.trySetCacheEntryStreamAsync
-      ) {
+      if (this._useStreamingBuildCache && this._cloudBuildCacheProvider.trySetCacheEntryStreamAsync) {
         // Use streaming upload to avoid loading the entire cache entry into memory
         const entryStream: FileSystemReadStream = FileSystem.createReadStream(localCacheEntryPath);
         setCloudCacheEntryPromise = this._cloudBuildCacheProvider
