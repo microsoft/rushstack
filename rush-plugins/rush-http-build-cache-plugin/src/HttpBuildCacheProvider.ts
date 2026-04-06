@@ -132,12 +132,9 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     cacheId: string,
     objectBuffer: Buffer
   ): Promise<boolean> {
-    if (!this.isCacheWriteAllowed) {
-      terminal.writeErrorLine('Writing to cache is not allowed in the current configuration.');
+    if (!this._validateWriteAllowed(terminal, cacheId)) {
       return false;
     }
-
-    terminal.writeDebugLine('Uploading object with cacheId: ', cacheId);
 
     try {
       const result: boolean | Buffer = await this._makeHttpRequestAsync({
@@ -183,12 +180,9 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     cacheId: string,
     entryStream: NodeJS.ReadableStream
   ): Promise<boolean> {
-    if (!this.isCacheWriteAllowed) {
-      terminal.writeErrorLine('Writing to cache is not allowed in the current configuration.');
+    if (!this._validateWriteAllowed(terminal, cacheId)) {
       return false;
     }
-
-    terminal.writeDebugLine('Uploading object with cacheId: ', cacheId);
 
     try {
       const result: IWebClientStreamResponse | false = await this._makeHttpStreamRequestAsync({
@@ -284,6 +278,20 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     }
 
     return this.__credentialCacheId;
+  }
+
+  /**
+   * Common validation for write operations. Returns `true` if writing is allowed,
+   * `false` if it is not (and logs an error to the terminal).
+   */
+  private _validateWriteAllowed(terminal: ITerminal, cacheId: string): boolean {
+    if (!this.isCacheWriteAllowed) {
+      terminal.writeErrorLine('Writing to cache is not allowed in the current configuration.');
+      return false;
+    }
+
+    terminal.writeDebugLine('Uploading object with cacheId: ', cacheId);
+    return true;
   }
 
   private async _makeHttpRequestAsync(options: {
