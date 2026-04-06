@@ -634,4 +634,187 @@ describe(AmazonS3Client.name, () => {
       );
     });
   });
+
+  describe('Streaming requests', () => {
+    let realDate: typeof Date;
+    let realSetTimeout: typeof setTimeout;
+    beforeEach(() => {
+      // mock date
+      realDate = global.Date;
+      global.Date = MockedDate as typeof Date;
+
+      // mock setTimeout
+      realSetTimeout = global.setTimeout;
+      global.setTimeout = ((callback: () => void, time: number) => {
+        return realSetTimeout(callback, 1);
+      }).bind(global) as typeof global.setTimeout;
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      global.Date = realDate;
+      global.setTimeout = realSetTimeout.bind(global);
+    });
+
+    describe('Getting an object stream', () => {
+      async function makeStreamGetRequestAsync(
+        credentials: IAmazonS3Credentials | undefined,
+        options: IAmazonS3BuildCacheProviderOptionsAdvanced,
+        objectName: string,
+        status: number,
+        statusText?: string
+      ): Promise<{ result: NodeJS.ReadableStream | undefined; spy: jest.SpyInstance }> {
+        const { Readable } = await import('node:stream');
+        const mockStream = new Readable({ read() {} });
+
+        const spy: jest.SpyInstance = jest
+          .spyOn(WebClient.prototype, 'fetchStreamAsync')
+          .mockReturnValue(
+            Promise.resolve({
+              stream: mockStream,
+              headers: {},
+              status,
+              statusText,
+              ok: status >= 200 && status < 300,
+              redirected: false
+            })
+          );
+
+        const s3Client: AmazonS3Client = new AmazonS3Client(credentials, options, webClient, terminal);
+        const result = await s3Client.getObjectStreamAsync(objectName);
+        return { result, spy };
+      }
+
+      it('Can get an object stream', async () => {
+        const { result, spy } = await makeStreamGetRequestAsync(
+          {
+            accessKeyId: 'accessKeyId',
+            secretAccessKey: 'secretAccessKey',
+            sessionToken: undefined
+          },
+          DUMMY_OPTIONS,
+          'abc123',
+          200
+        );
+        expect(result).toBeDefined();
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy.mock.calls[0]).toMatchSnapshot();
+        spy.mockRestore();
+      });
+
+      it('Returns undefined for a 404 (missing) object stream', async () => {
+        const { result, spy } = await makeStreamGetRequestAsync(
+          {
+            accessKeyId: 'accessKeyId',
+            secretAccessKey: 'secretAccessKey',
+            sessionToken: undefined
+          },
+          DUMMY_OPTIONS,
+          'abc123',
+          404,
+          'Not Found'
+        );
+        expect(result).toBeUndefined();
+        expect(spy).toHaveBeenCalledTimes(1);
+        spy.mockRestore();
+      });
+    });
+
+    describe('Uploading an object stream', () => {
+      it('Throws an error if credentials are not provided', async () => {
+        const { Readable } = await import('node:stream');
+        const s3Client: AmazonS3Client = new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://foo.bar.baz', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        );
+
+        const mockStream = new Readable({ read() {} });
+        try {
+          await s3Client.uploadObjectStreamAsync('temp', mockStream);
+          fail('Expected an exception to be thrown');
+        } catch (e) {
+          expect(e).toMatchSnapshot();
+        }
+      });
+
+      it('Uploads a stream successfully', async () => {
+        const { Readable } = await import('node:stream');
+        const mockStream = new Readable({ read() {} });
+        const responseStream = new Readable({ read() {} });
+
+        const spy: jest.SpyInstance = jest
+          .spyOn(WebClient.prototype, 'fetchStreamAsync')
+          .mockReturnValue(
+            Promise.resolve({
+              stream: responseStream,
+              headers: {},
+              status: 200,
+              statusText: 'OK',
+              ok: true,
+              redirected: false
+            })
+          );
+
+        const s3Client: AmazonS3Client = new AmazonS3Client(
+          {
+            accessKeyId: 'accessKeyId',
+            secretAccessKey: 'secretAccessKey',
+            sessionToken: undefined
+          },
+          DUMMY_OPTIONS,
+          webClient,
+          terminal
+        );
+
+        await s3Client.uploadObjectStreamAsync('abc123', mockStream);
+
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy.mock.calls[0]).toMatchSnapshot();
+        spy.mockRestore();
+      });
+
+      it('Does not retry on failure (stream consumed)', async () => {
+        const { Readable } = await import('node:stream');
+        const mockStream = new Readable({ read() {} });
+        const responseStream = new Readable({ read() {} });
+
+        const spy: jest.SpyInstance = jest
+          .spyOn(WebClient.prototype, 'fetchStreamAsync')
+          .mockReturnValue(
+            Promise.resolve({
+              stream: responseStream,
+              headers: {},
+              status: 500,
+              statusText: 'InternalServerError',
+              ok: false,
+              redirected: false
+            })
+          );
+
+        const s3Client: AmazonS3Client = new AmazonS3Client(
+          {
+            accessKeyId: 'accessKeyId',
+            secretAccessKey: 'secretAccessKey',
+            sessionToken: undefined
+          },
+          DUMMY_OPTIONS,
+          webClient,
+          terminal
+        );
+
+        try {
+          await s3Client.uploadObjectStreamAsync('abc123', mockStream);
+          fail('Expected an exception to be thrown');
+        } catch (e) {
+          expect((e as Error).message).toContain('500');
+        }
+
+        // Only 1 call - no retry for streams
+        expect(spy).toHaveBeenCalledTimes(1);
+        spy.mockRestore();
+      });
+    });
+  });
 });

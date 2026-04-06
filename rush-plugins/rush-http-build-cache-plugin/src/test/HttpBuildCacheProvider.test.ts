@@ -5,6 +5,8 @@ jest.mock('@rushstack/rush-sdk/lib/utilities/WebClient', () => {
   return jest.requireActual('@microsoft/rush-lib/lib/utilities/WebClient');
 });
 
+import { Readable } from 'node:stream';
+
 import { type RushSession, EnvironmentConfiguration } from '@rushstack/rush-sdk';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { WebClient } from '@rushstack/rush-sdk/lib/utilities/WebClient';
@@ -24,23 +26,36 @@ const EXAMPLE_OPTIONS: IHttpBuildCacheProviderOptions = {
   minHttpRetryDelayMs: 1
 };
 
+const WRITE_ALLOWED_OPTIONS: IHttpBuildCacheProviderOptions = {
+  ...EXAMPLE_OPTIONS,
+  isCacheWriteAllowed: true
+};
+
 type FetchFnType = Parameters<typeof WebClient.mockRequestFn>[0];
+type StreamFetchFnType = Parameters<typeof WebClient.mockStreamRequestFn>[0];
 
 describe('HttpBuildCacheProvider', () => {
   let terminalBuffer: StringBufferTerminalProvider;
   let terminal!: Terminal;
   let fetchFn: jest.Mock;
+  let streamFetchFn: jest.Mock;
 
   beforeEach(() => {
     terminalBuffer = new StringBufferTerminalProvider();
     terminal = new Terminal(terminalBuffer);
     fetchFn = jest.fn();
+    streamFetchFn = jest.fn();
     WebClient.mockRequestFn(fetchFn as unknown as FetchFnType);
+    WebClient.mockStreamRequestFn(streamFetchFn as unknown as StreamFetchFnType);
   });
 
   afterEach(() => {
     WebClient.resetMockRequestFn();
+    WebClient.resetMockStreamRequestFn();
+    jest.restoreAllMocks();
   });
+
+  // ── Buffer-based GET ──────────────────────────────────────────────────────
 
   describe('tryGetCacheEntryBufferByIdAsync', () => {
     it('prints warning if read credentials are not available', async () => {
@@ -137,6 +152,268 @@ Array [
   "[warning] Could not get cache entry: HTTP 504: BadGateway[n]",
 ]
 `);
+    });
+
+    it('returns a buffer on a successful response', async () => {
+      jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue('token123');
+
+      const session: RushSession = {} as RushSession;
+      const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session);
+      const expectedBuffer = Buffer.from('cache-contents');
+
+      mocked(fetchFn).mockResolvedValue({
+        status: 200,
+        statusText: 'OK',
+        ok: true,
+        redirected: false,
+        headers: {},
+        getBufferAsync: () => Promise.resolve(expectedBuffer)
+      });
+
+      const result = await provider.tryGetCacheEntryBufferByIdAsync(terminal, 'some-key');
+      expect(result).toEqual(expectedBuffer);
+      expect(fetchFn).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // ── Buffer-based SET ──────────────────────────────────────────────────────
+
+  describe('trySetCacheEntryBufferAsync', () => {
+    it('returns false when cache write is not allowed', async () => {
+      const session: RushSession = {} as RushSession;
+      const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session); // write not allowed
+
+      const result = await provider.trySetCacheEntryBufferAsync(
+        terminal,
+        'some-key',
+        Buffer.from('data')
+      );
+
+      expect(result).toBe(false);
+      expect(fetchFn).not.toHaveBeenCalled();
+    });
+
+    it('uploads a buffer successfully', async () => {
+      jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue('token123');
+
+      const session: RushSession = {} as RushSession;
+      const provider = new HttpBuildCacheProvider(WRITE_ALLOWED_OPTIONS, session);
+
+      mocked(fetchFn).mockResolvedValue({
+        status: 200,
+        statusText: 'OK',
+        ok: true,
+        redirected: false,
+        headers: {}
+      });
+
+      const result = await provider.trySetCacheEntryBufferAsync(
+        terminal,
+        'some-key',
+        Buffer.from('cache-data')
+      );
+
+      expect(result).toBe(true);
+      expect(fetchFn).toHaveBeenCalledTimes(1);
+      expect(fetchFn).toHaveBeenCalledWith(
+        'https://buildcache.example.acme.com/some-key',
+        expect.objectContaining({
+          method: 'POST'
+        })
+      );
+    });
+
+    it('retries up to 3 times on server error', async () => {
+      jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue('token123');
+
+      const session: RushSession = {} as RushSession;
+      const provider = new HttpBuildCacheProvider(WRITE_ALLOWED_OPTIONS, session);
+
+      mocked(fetchFn).mockResolvedValue({
+        status: 500,
+        statusText: 'InternalServerError',
+        ok: false
+      });
+
+      const result = await provider.trySetCacheEntryBufferAsync(
+        terminal,
+        'some-key',
+        Buffer.from('data')
+      );
+
+      expect(result).toBe(false);
+      expect(fetchFn).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  // ── Stream-based GET ──────────────────────────────────────────────────────
+
+  describe('tryGetCacheEntryStreamByIdAsync', () => {
+    it('returns a stream on a successful response', async () => {
+      jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue('token123');
+
+      const session: RushSession = {} as RushSession;
+      const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session);
+      const mockStream = new Readable({ read() {} });
+
+      mocked(streamFetchFn).mockResolvedValue({
+        status: 200,
+        statusText: 'OK',
+        ok: true,
+        redirected: false,
+        headers: {},
+        stream: mockStream
+      });
+
+      const result = await provider.tryGetCacheEntryStreamByIdAsync(terminal, 'some-key');
+      expect(result).toBe(mockStream);
+      expect(streamFetchFn).toHaveBeenCalledTimes(1);
+      expect(streamFetchFn).toHaveBeenCalledWith(
+        'https://buildcache.example.acme.com/some-key',
+        expect.objectContaining({
+          method: 'GET',
+          redirect: 'follow'
+        })
+      );
+    });
+
+    it('returns undefined on credential failure', async () => {
+      jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue(undefined);
+
+      const session: RushSession = {} as RushSession;
+      const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session);
+      const mockStream = new Readable({ read() {} });
+
+      mocked(streamFetchFn).mockResolvedValue({
+        status: 401,
+        statusText: 'Unauthorized',
+        ok: false,
+        stream: mockStream
+      });
+
+      const result = await provider.tryGetCacheEntryStreamByIdAsync(terminal, 'some-key');
+      expect(result).toBe(undefined);
+    });
+
+    it('retries up to 3 times on server error', async () => {
+      jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue(undefined);
+
+      const session: RushSession = {} as RushSession;
+      const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session);
+      const createMockStream = (): Readable => new Readable({ read() {} });
+
+      mocked(streamFetchFn).mockResolvedValueOnce({
+        status: 500,
+        statusText: 'InternalServiceError',
+        ok: false,
+        stream: createMockStream()
+      });
+      mocked(streamFetchFn).mockResolvedValueOnce({
+        status: 503,
+        statusText: 'ServiceUnavailable',
+        ok: false,
+        stream: createMockStream()
+      });
+      mocked(streamFetchFn).mockResolvedValueOnce({
+        status: 504,
+        statusText: 'BadGateway',
+        ok: false,
+        stream: createMockStream()
+      });
+
+      const result = await provider.tryGetCacheEntryStreamByIdAsync(terminal, 'some-key');
+      expect(result).toBe(undefined);
+      expect(streamFetchFn).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  // ── Stream-based SET ──────────────────────────────────────────────────────
+
+  describe('trySetCacheEntryStreamAsync', () => {
+    it('returns false when cache write is not allowed', async () => {
+      const session: RushSession = {} as RushSession;
+      const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session); // write not allowed
+
+      const entryStream = new Readable({ read() {} });
+      const result = await provider.trySetCacheEntryStreamAsync(terminal, 'some-key', entryStream);
+
+      expect(result).toBe(false);
+      expect(streamFetchFn).not.toHaveBeenCalled();
+    });
+
+    it('uploads a stream successfully', async () => {
+      jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue('token123');
+
+      const session: RushSession = {} as RushSession;
+      const provider = new HttpBuildCacheProvider(WRITE_ALLOWED_OPTIONS, session);
+      const entryStream = new Readable({ read() {} });
+      const responseStream = new Readable({ read() {} });
+
+      mocked(streamFetchFn).mockResolvedValue({
+        status: 200,
+        statusText: 'OK',
+        ok: true,
+        redirected: false,
+        headers: {},
+        stream: responseStream
+      });
+
+      const result = await provider.trySetCacheEntryStreamAsync(terminal, 'some-key', entryStream);
+
+      expect(result).toBe(true);
+      expect(streamFetchFn).toHaveBeenCalledTimes(1);
+      expect(streamFetchFn).toHaveBeenCalledWith(
+        'https://buildcache.example.acme.com/some-key',
+        expect.objectContaining({
+          method: 'POST'
+        })
+      );
+    });
+
+    it('does not retry on failure (stream consumed)', async () => {
+      jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue('token123');
+
+      const session: RushSession = {} as RushSession;
+      const provider = new HttpBuildCacheProvider(WRITE_ALLOWED_OPTIONS, session);
+      const entryStream = new Readable({ read() {} });
+      const responseStream = new Readable({ read() {} });
+
+      mocked(streamFetchFn).mockResolvedValue({
+        status: 500,
+        statusText: 'InternalServerError',
+        ok: false,
+        stream: responseStream
+      });
+
+      const result = await provider.trySetCacheEntryStreamAsync(terminal, 'some-key', entryStream);
+
+      expect(result).toBe(false);
+      // maxAttempts is 1 for stream uploads, so only 1 call
+      expect(streamFetchFn).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips credential fallback for stream bodies on 4xx', async () => {
+      jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue(undefined);
+
+      const session: RushSession = {} as RushSession;
+      const provider = new HttpBuildCacheProvider(WRITE_ALLOWED_OPTIONS, session);
+      const entryStream = new Readable({ read() {} });
+      const responseStream = new Readable({ read() {} });
+
+      mocked(streamFetchFn).mockResolvedValue({
+        status: 401,
+        statusText: 'Unauthorized',
+        ok: false,
+        stream: responseStream
+      });
+
+      // Even though credentials are optional and we got a 4xx, the stream body
+      // should prevent the credential fallback retry since the stream is consumed
+      const result = await provider.trySetCacheEntryStreamAsync(terminal, 'some-key', entryStream);
+
+      expect(result).toBe(false);
+      // Should only be called once (no credential fallback retry)
+      expect(streamFetchFn).toHaveBeenCalledTimes(1);
     });
   });
 });

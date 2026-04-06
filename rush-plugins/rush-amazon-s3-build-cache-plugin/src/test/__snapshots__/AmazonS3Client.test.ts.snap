@@ -548,3 +548,55 @@ exports[`AmazonS3Client Rejects invalid S3 endpoint values 9`] = `"Invalid S3 en
 exports[`AmazonS3Client Rejects invalid S3 endpoint values 10`] = `"Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long"`;
 
 exports[`AmazonS3Client Rejects invalid S3 endpoint values 11`] = `"Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long"`;
+
+exports[`AmazonS3Client Streaming requests Getting an object stream Can get an object stream 1`] = `
+Array [
+  "http://localhost:9000/abc123",
+  Object {
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
+    },
+    "verb": "GET",
+  },
+]
+`;
+
+exports[`AmazonS3Client Streaming requests Uploading an object stream Throws an error if credentials are not provided 1`] = `[Error: Credentials are required to upload objects to S3.]`;
+
+exports[`AmazonS3Client Streaming requests Uploading an object stream Uploads a stream successfully 1`] = `
+Array [
+  "http://localhost:9000/abc123",
+  Object {
+    "body": Readable {
+      "_events": Object {
+        "close": undefined,
+        "data": undefined,
+        "end": undefined,
+        "error": undefined,
+        "readable": undefined,
+      },
+      "_maxListeners": undefined,
+      "_read": [Function],
+      "_readableState": ReadableState {
+        "awaitDrainWriters": null,
+        "buffer": Array [],
+        "bufferIndex": 0,
+        "highWaterMark": 65536,
+        "length": 0,
+        "pipes": Array [],
+        Symbol(kState): 1052940,
+      },
+      Symbol(shapeMode): true,
+      Symbol(kCapture): false,
+    },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=bfc5ee97ccfdb44b7f351c0b550a1ac9c2cdb661606dbba8a74c11be6b5b2b72",
+      "x-amz-content-sha256": "UNSIGNED-PAYLOAD",
+      "x-amz-date": "20200418T123242Z",
+    },
+    "verb": "PUT",
+  },
+]
+`;
