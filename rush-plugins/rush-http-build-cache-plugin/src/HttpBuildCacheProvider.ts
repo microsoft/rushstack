@@ -73,6 +73,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   private readonly _cacheKeyPrefix: string;
   private readonly _tokenHandler: IHttpBuildCacheTokenHandler | undefined;
   private readonly _minHttpRetryDelayMs: number;
+  private readonly _webClient: WebClient = new WebClient();
   private __credentialCacheId: string | undefined;
 
   public get isCacheWriteAllowed(): boolean {
@@ -385,7 +386,6 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
     terminal.writeDebugLine(`[http-build-cache] request: ${method} ${url} ${bodyLength} bytes`);
 
-    const webClient: WebClient = new WebClient();
     const fetchOptions: IGetFetchOptions | IFetchOptionsWithBody = {
       verb: method,
       headers: headers,
@@ -395,8 +395,8 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     };
 
     const response: IWebClientResponse | IWebClientStreamResponse = stream
-      ? await webClient.fetchStreamAsync(url, fetchOptions)
-      : await webClient.fetchAsync(url, fetchOptions);
+      ? await this._webClient.fetchStreamAsync(url, fetchOptions)
+      : await this._webClient.fetchAsync(url, fetchOptions);
 
     if (!response.ok) {
       // Drain the response body on stream responses so the connection can be reused
