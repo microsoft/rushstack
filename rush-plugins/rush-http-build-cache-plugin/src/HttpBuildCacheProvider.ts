@@ -112,7 +112,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   ): Promise<Buffer | undefined> {
     try {
       const result: boolean | Buffer = await this._makeHttpRequestAsync({
-        terminal: terminal,
+        terminal,
         relUrl: `${this._cacheKeyPrefix}${cacheId}`,
         method: 'GET',
         body: undefined,
@@ -139,7 +139,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
     try {
       const result: boolean | Buffer = await this._makeHttpRequestAsync({
-        terminal: terminal,
+        terminal,
         relUrl: `${this._cacheKeyPrefix}${cacheId}`,
         method: this._uploadMethod,
         body: objectBuffer,
@@ -161,7 +161,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   ): Promise<NodeJS.ReadableStream | undefined> {
     try {
       const result: IWebClientStreamResponse | false = await this._makeHttpStreamRequestAsync({
-        terminal: terminal,
+        terminal,
         relUrl: `${this._cacheKeyPrefix}${cacheId}`,
         method: 'GET',
         body: undefined,
@@ -187,7 +187,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
     try {
       const result: IWebClientStreamResponse | false = await this._makeHttpStreamRequestAsync({
-        terminal: terminal,
+        terminal,
         relUrl: `${this._cacheKeyPrefix}${cacheId}`,
         method: this._uploadMethod,
         body: entryStream as Readable,
@@ -214,7 +214,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
       },
       async (credentialsCache: CredentialCache) => {
         credentialsCache.setCacheEntry(this._credentialCacheId, {
-          credential: credential
+          credential
         });
         await credentialsCache.saveIfModifiedAsync();
       }
@@ -388,8 +388,8 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
     const fetchOptions: IGetFetchOptions | IFetchOptionsWithBody = {
       verb: method,
-      headers: headers,
-      body: body,
+      headers,
+      body,
       redirect: 'follow',
       timeoutMs: 0 // Disable timeout for streaming transfers of large cache entries
     };
