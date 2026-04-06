@@ -27,7 +27,7 @@ export class AsyncOperationQueue
    * Operations that have been assigned more times (e.g. cobuild retries) are sorted
    * after operations with fewer attempts, so untried work is preferred.
    */
-  private readonly _timesQueued: Map<OperationExecutionRecord, number>;
+  private readonly _numberOfTimesQueuedByOperation: Map<OperationExecutionRecord, number>;
 
   private _isDone: boolean;
 
@@ -44,7 +44,7 @@ export class AsyncOperationQueue
     this._totalOperations = this._queue.length;
     this._isDone = false;
     this._completedOperations = new Set<OperationExecutionRecord>();
-    this._timesQueued = new Map();
+    this._numberOfTimesQueuedByOperation = new Map();
   }
 
   /**
@@ -71,7 +71,7 @@ export class AsyncOperationQueue
    */
   public complete(record: OperationExecutionRecord): void {
     this._completedOperations.add(record);
-    this._timesQueued.delete(record);
+    this._numberOfTimesQueuedByOperation.delete(record);
 
     // Apply status changes to direct dependents
     if (record.status !== OperationStatus.Failure && record.status !== OperationStatus.Blocked) {
@@ -100,7 +100,11 @@ export class AsyncOperationQueue
    * if the caller does not update operation dependencies prior to calling `next()`, may need to be invoked manually.
    */
   public assignOperations(): void {
-    const { _queue: queue, _pendingIterators: waitingIterators, _timesQueued: timesQueued } = this;
+    const {
+      _queue: queue,
+      _pendingIterators: waitingIterators,
+      _numberOfTimesQueuedByOperation: timesQueued
+    } = this;
 
     const readyOperations: OperationExecutionRecord[] = [];
 
