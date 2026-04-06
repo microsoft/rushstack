@@ -36,6 +36,53 @@ export interface IReadonlyPathTrieNode<TItem extends {}> {
   readonly children: ReadonlyMap<string, IReadonlyPathTrieNode<TItem>> | undefined;
 }
 
+/**
+ * JSON-serializable representation of a node in a {@link LookupByPath} trie.
+ *
+ * @beta
+ */
+export interface ISerializedPathTrieNode {
+  /**
+   * Index into the `values` array of the containing {@link ILookupByPathJson}.
+   * If `undefined`, this node has no associated value.
+   */
+  valueIndex?: number;
+
+  /**
+   * Child nodes keyed by path segment.
+   */
+  children?: Record<string, ISerializedPathTrieNode>;
+}
+
+/**
+ * JSON-serializable representation of a {@link LookupByPath} instance.
+ *
+ * @remarks
+ * The `values` array stores each unique value exactly once (by reference identity).
+ * Nodes in the tree reference values by their index in this array, which ensures that
+ * reference equality is preserved across serialization and deserialization.
+ *
+ * @beta
+ */
+export interface ILookupByPathJson<TSerialized> {
+  /**
+   * The path delimiter used by the serialized trie.
+   */
+  delimiter: string;
+
+  /**
+   * Array of serialized values. Nodes in the tree reference values by their index in this array.
+   * Using an array with index-based references preserves reference equality: if multiple nodes
+   * share the same value (by reference), they will reference the same index.
+   */
+  values: TSerialized[];
+
+  /**
+   * The serialized tree structure.
+   */
+  tree: ISerializedPathTrieNode;
+}
+
 interface IPrefixEntry {
   /**
    * The prefix that was matched
@@ -195,6 +242,18 @@ export interface IReadonlyLookupByPath<TItem extends {}> extends Iterable<[strin
    * @returns The trie node at the specified prefix, or `undefined` if no node was found
    */
   getNodeAtPrefix(query: string, delimiter?: string): IReadonlyPathTrieNode<TItem> | undefined;
+
+  /**
+   * Serializes this `LookupByPath` instance to a JSON-compatible representation.
+   *
+   * @param serializeValue - A function that converts a value of type `TItem` to a JSON-serializable form.
+   * @returns A JSON-serializable representation of this trie.
+   *
+   * @remarks
+   * Values that are reference-equal will be serialized once and referenced by index, ensuring
+   * that reference equality is preserved when deserialized via {@link LookupByPath.fromJson}.
+   */
+  toJson<TSerialized>(serializeValue: (value: TItem) => TSerialized): ILookupByPathJson<TSerialized>;
 }
 
 /**
@@ -543,6 +602,100 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
     delimiter: string = this.delimiter
   ): IReadonlyPathTrieNode<TItem> | undefined {
     return this._findNodeAtPrefix(query, delimiter);
+  }
+
+  /**
+   * {@inheritdoc IReadonlyLookupByPath.toJson}
+   */
+  public toJson<TSerialized>(
+    serializeValue: (value: TItem) => TSerialized
+  ): ILookupByPathJson<TSerialized> {
+    const valueToIndex: Map<TItem, number> = new Map();
+    const values: TSerialized[] = [];
+
+    const getOrAddValueIndex: (value: TItem) => number = (value: TItem) => {
+      let index: number | undefined = valueToIndex.get(value);
+      if (index === undefined) {
+        index = values.length;
+        valueToIndex.set(value, index);
+        values.push(serializeValue(value));
+      }
+      return index;
+    };
+
+    const serializeNode: (node: IPathTrieNode<TItem>) => ISerializedPathTrieNode = (
+      node: IPathTrieNode<TItem>
+    ) => {
+      const result: ISerializedPathTrieNode = {};
+
+      if (node.value !== undefined) {
+        result.valueIndex = getOrAddValueIndex(node.value);
+      }
+
+      if (node.children && node.children.size > 0) {
+        const children: Record<string, ISerializedPathTrieNode> = {};
+        for (const [segment, child] of node.children) {
+          children[segment] = serializeNode(child);
+        }
+        result.children = children;
+      }
+
+      return result;
+    };
+
+    return {
+      delimiter: this.delimiter,
+      values,
+      tree: serializeNode(this._root)
+    };
+  }
+
+  /**
+   * Deserializes a `LookupByPath` instance from a JSON representation previously
+   * created by {@link LookupByPath.toJson}.
+   *
+   * @param json - The JSON representation to deserialize.
+   * @param deserializeValue - A function that converts a serialized value back to its original type.
+   * @returns A new `LookupByPath` instance.
+   *
+   * @remarks
+   * Reference equality is preserved: if multiple nodes in the serialized trie pointed at the same
+   * value (i.e., the same index in the `values` array), the deserialized nodes will share the same
+   * object reference.
+   */
+  public static fromJson<TItem extends {}, TSerialized>(
+    json: ILookupByPathJson<TSerialized>,
+    deserializeValue: (serialized: TSerialized) => TItem
+  ): LookupByPath<TItem> {
+    const deserializedValues: TItem[] = json.values.map(deserializeValue);
+
+    const result: LookupByPath<TItem> = new LookupByPath<TItem>(undefined, json.delimiter);
+
+    const deserializeNode: (
+      jsonNode: ISerializedPathTrieNode,
+      targetNode: IPathTrieNode<TItem>
+    ) => void = (jsonNode: ISerializedPathTrieNode, targetNode: IPathTrieNode<TItem>) => {
+      if (jsonNode.valueIndex !== undefined) {
+        targetNode.value = deserializedValues[jsonNode.valueIndex];
+        result._size++;
+      }
+
+      if (jsonNode.children) {
+        targetNode.children = new Map();
+        for (const [segment, childJson] of Object.entries(jsonNode.children)) {
+          const childNode: IPathTrieNode<TItem> = {
+            value: undefined,
+            children: undefined
+          };
+          targetNode.children.set(segment, childNode);
+          deserializeNode(childJson, childNode);
+        }
+      }
+    };
+
+    deserializeNode(json.tree, result._root);
+
+    return result;
   }
 
   /**
