@@ -22,9 +22,11 @@ export class AsyncOperationQueue
   private readonly _totalOperations: number;
   private readonly _completedOperations: Set<OperationExecutionRecord>;
 
-  // Tracks how many times each operation has been assigned to an execution slot.
-  // Operations that have been assigned more times (e.g. cobuild retries) are sorted
-  // after operations with fewer attempts, so untried work is preferred.
+  /**
+   * Tracks how many times each operation has been assigned to an execution slot.
+   * Operations that have been assigned more times (e.g. cobuild retries) are sorted
+   * after operations with fewer attempts, so untried work is preferred.
+   */
   private readonly _timesQueued: Map<OperationExecutionRecord, number>;
 
   private _isDone: boolean;

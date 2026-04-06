@@ -189,12 +189,9 @@ describe(AsyncOperationQueue.name, () => {
 
     // Assign all three — untried operations should come before the retry
     const results: OperationExecutionRecord[] = [];
-    const r2: IteratorResult<OperationExecutionRecord> = await queue.next();
-    results.push(r2.value);
-    const r3: IteratorResult<OperationExecutionRecord> = await queue.next();
-    results.push(r3.value);
-    const r4: IteratorResult<OperationExecutionRecord> = await queue.next();
-    results.push(r4.value);
+    for await (const item of queue) {
+      result.push(item);
+    }
 
     // The cobuild retry should be last
     expect(results[2]).toBe(firstAssigned);
