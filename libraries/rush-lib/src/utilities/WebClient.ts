@@ -344,13 +344,93 @@ const makeStreamRequestAsync: StreamFetchFn = async (
   );
 };
 
+// Module-level mutable state for mock injection. These must NOT be private members
+// of WebClient because rush-sdk re-exports WebClient as a separate type declaration,
+// and TypeScript's structural typing treats private members nominally, causing type
+// incompatibility between the rush-lib and rush-sdk versions.
+let _requestFnAsync: FetchFn = makeRequestAsync;
+let _streamRequestFnAsync: StreamFetchFn = makeStreamRequestAsync;
+
+function _mergeHeaders(target: Record<string, string>, source: Record<string, string>): void {
+  for (const [name, value] of Object.entries(source)) {
+    target[name] = value;
+  }
+}
+
+/**
+ * Builds the low-level IRequestOptions from WebClient instance state and caller-provided options.
+ * This is a module-level function (not a private method) to avoid the rush-sdk type mismatch.
+ */
+function buildRequestOptions(
+  webClient: WebClient,
+  options?: IGetFetchOptions | IFetchOptionsWithBody
+): IRequestOptions {
+  const {
+    headers: optionsHeaders,
+    timeoutMs = 15 * 1000,
+    verb,
+    redirect,
+    body,
+    noDecode
+  } = (options as IFetchOptionsWithBody | undefined) ?? {};
+
+  const headers: Record<string, string> = {};
+
+  const { standardHeaders, userAgent, accept, proxy } = webClient;
+
+  _mergeHeaders(headers, standardHeaders);
+
+  if (optionsHeaders) {
+    _mergeHeaders(headers, optionsHeaders);
+  }
+
+  if (userAgent) {
+    headers[USER_AGENT_HEADER_NAME] = userAgent;
+  }
+
+  if (accept) {
+    headers[ACCEPT_HEADER_NAME] = accept;
+  }
+
+  let proxyUrl: string = '';
+
+  switch (proxy) {
+    case WebClientProxy.Detect:
+      if (process.env.HTTPS_PROXY) {
+        proxyUrl = process.env.HTTPS_PROXY;
+      } else if (process.env.HTTP_PROXY) {
+        proxyUrl = process.env.HTTP_PROXY;
+      }
+      break;
+
+    case WebClientProxy.Fiddler:
+      // For debugging, disable cert validation
+      // eslint-disable-next-line
+      process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+      proxyUrl = 'http://localhost:8888/';
+      break;
+  }
+
+  let agent: HttpAgent | undefined = undefined;
+  if (proxyUrl) {
+    agent = createHttpsProxyAgent(proxyUrl);
+  }
+
+  return {
+    method: verb,
+    headers,
+    agent,
+    timeout: timeoutMs,
+    redirect,
+    body,
+    noDecode
+  };
+}
+
 /**
  * A helper for issuing HTTP requests.
  */
 export class WebClient {
-  private static _requestFnAsync: FetchFn = makeRequestAsync;
-  private static _streamRequestFnAsync: StreamFetchFn = makeStreamRequestAsync;
-
   public readonly standardHeaders: Record<string, string> = {};
 
   public accept: string | undefined = '*/*';
@@ -359,25 +439,23 @@ export class WebClient {
   public proxy: WebClientProxy = WebClientProxy.Detect;
 
   public static mockRequestFn(fn: FetchFn): void {
-    WebClient._requestFnAsync = fn;
+    _requestFnAsync = fn;
   }
 
   public static resetMockRequestFn(): void {
-    WebClient._requestFnAsync = makeRequestAsync;
+    _requestFnAsync = makeRequestAsync;
   }
 
   public static mockStreamRequestFn(fn: StreamFetchFn): void {
-    WebClient._streamRequestFnAsync = fn;
+    _streamRequestFnAsync = fn;
   }
 
   public static resetMockStreamRequestFn(): void {
-    WebClient._streamRequestFnAsync = makeStreamRequestAsync;
+    _streamRequestFnAsync = makeStreamRequestAsync;
   }
 
   public static mergeHeaders(target: Record<string, string>, source: Record<string, string>): void {
-    for (const [name, value] of Object.entries(source)) {
-      target[name] = value;
-    }
+    _mergeHeaders(target, source);
   }
 
   public addBasicAuthHeader(userName: string, password: string): void {
@@ -389,8 +467,8 @@ export class WebClient {
     url: string,
     options?: IGetFetchOptions | IFetchOptionsWithBody
   ): Promise<IWebClientResponse> {
-    const requestInit: IRequestOptions = this._buildRequestOptions(options);
-    return await WebClient._requestFnAsync(url, requestInit);
+    const requestInit: IRequestOptions = buildRequestOptions(this, options);
+    return await _requestFnAsync(url, requestInit);
   }
 
   /**
@@ -401,70 +479,7 @@ export class WebClient {
     url: string,
     options?: IGetFetchOptions | IFetchOptionsWithBody
   ): Promise<IWebClientStreamResponse> {
-    const requestInit: IRequestOptions = this._buildRequestOptions(options);
-    return await WebClient._streamRequestFnAsync(url, requestInit);
-  }
-
-  private _buildRequestOptions(options?: IGetFetchOptions | IFetchOptionsWithBody): IRequestOptions {
-    const {
-      headers: optionsHeaders,
-      timeoutMs = 15 * 1000,
-      verb,
-      redirect,
-      body,
-      noDecode
-    } = (options as IFetchOptionsWithBody | undefined) ?? {};
-
-    const headers: Record<string, string> = {};
-
-    const { standardHeaders, userAgent, accept, proxy } = this;
-
-    WebClient.mergeHeaders(headers, standardHeaders);
-
-    if (optionsHeaders) {
-      WebClient.mergeHeaders(headers, optionsHeaders);
-    }
-
-    if (userAgent) {
-      headers[USER_AGENT_HEADER_NAME] = userAgent;
-    }
-
-    if (accept) {
-      headers[ACCEPT_HEADER_NAME] = accept;
-    }
-
-    let proxyUrl: string = '';
-
-    switch (proxy) {
-      case WebClientProxy.Detect:
-        if (process.env.HTTPS_PROXY) {
-          proxyUrl = process.env.HTTPS_PROXY;
-        } else if (process.env.HTTP_PROXY) {
-          proxyUrl = process.env.HTTP_PROXY;
-        }
-        break;
-
-      case WebClientProxy.Fiddler:
-        // For debugging, disable cert validation
-        // eslint-disable-next-line
-        process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-        proxyUrl = 'http://localhost:8888/';
-        break;
-    }
-
-    let agent: HttpAgent | undefined = undefined;
-    if (proxyUrl) {
-      agent = createHttpsProxyAgent(proxyUrl);
-    }
-
-    return {
-      method: verb,
-      headers,
-      agent,
-      timeout: timeoutMs,
-      redirect,
-      body,
-      noDecode
-    };
+    const requestInit: IRequestOptions = buildRequestOptions(this, options);
+    return await _streamRequestFnAsync(url, requestInit);
   }
 }
