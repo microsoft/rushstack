@@ -391,7 +391,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
       headers: headers,
       body: body,
       redirect: 'follow',
-      timeoutMs: 0 // Use the default timeout
+      timeoutMs: 0 // Disable timeout for streaming transfers of large cache entries
     };
 
     const response: IWebClientResponse | IWebClientStreamResponse = stream
@@ -411,15 +411,20 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         typeof credentials !== 'string' &&
         safeCredentialOptions === CredentialsOptions.Optional
       ) {
-        // If we don't already have credentials yet, and we got a response from the server
-        // that is a "normal" failure (4xx), then we assume that credentials are probably
-        // required. Re-attempt the request, requiring credentials this time.
-        //
-        // This counts as part of the "first attempt", so it is not included in the max attempts
-        return await this._makeHttpCoreRequestAsync({
-          ...options,
-          credentialOptions: CredentialsOptions.Required
-        });
+        // Skip credential fallback for stream bodies since the stream has already been consumed
+        // by the first attempt and cannot be replayed.
+        const isStreamBody: boolean = !!body && typeof (body as Readable).pipe === 'function';
+        if (!isStreamBody) {
+          // If we don't already have credentials yet, and we got a response from the server
+          // that is a "normal" failure (4xx), then we assume that credentials are probably
+          // required. Re-attempt the request, requiring credentials this time.
+          //
+          // This counts as part of the "first attempt", so it is not included in the max attempts
+          return await this._makeHttpCoreRequestAsync({
+            ...options,
+            credentialOptions: CredentialsOptions.Required
+          });
+        }
       }
 
       if (options.maxAttempts > 1) {

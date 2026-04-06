@@ -190,6 +190,7 @@ export class OperationBuildCache {
             );
             updateLocalCacheSuccess = true;
           } catch (e) {
+            terminal.writeVerboseLine(`Failed to update local cache: ${e}`);
             updateLocalCacheSuccess = false;
           }
         }
@@ -207,6 +208,7 @@ export class OperationBuildCache {
             );
             updateLocalCacheSuccess = true;
           } catch (e) {
+            terminal.writeVerboseLine(`Failed to update local cache: ${e}`);
             updateLocalCacheSuccess = false;
           }
         }
@@ -353,11 +355,12 @@ export class OperationBuildCache {
       ) {
         // Use streaming upload to avoid loading the entire cache entry into memory
         const entryStream: FileSystemReadStream = FileSystem.createReadStream(localCacheEntryPath);
-        setCloudCacheEntryPromise = this._cloudBuildCacheProvider.trySetCacheEntryStreamAsync(
-          terminal,
-          cacheId,
-          entryStream
-        );
+        setCloudCacheEntryPromise = this._cloudBuildCacheProvider
+          .trySetCacheEntryStreamAsync(terminal, cacheId, entryStream)
+          .catch((e: Error) => {
+            entryStream.destroy();
+            throw e;
+          });
       } else {
         const cacheEntryBuffer: Buffer = await FileSystem.readFileToBufferAsync(localCacheEntryPath);
         setCloudCacheEntryPromise = this._cloudBuildCacheProvider.trySetCacheEntryBufferAsync(

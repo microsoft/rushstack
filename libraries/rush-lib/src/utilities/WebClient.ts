@@ -133,10 +133,10 @@ function _makeRawRequestAsync<TResponse>(
           headers: { location: redirectUrl }
         } = response;
         if (statusCode === 301 || statusCode === 302) {
-          // Drain the redirect response before following
-          response.resume();
           switch (redirect) {
             case 'follow': {
+              // Drain the redirect response since we're discarding it
+              response.resume();
               if (redirectUrl) {
                 requestFnAsync(redirectUrl, options, true).then(resolve).catch(reject);
               } else {
@@ -146,6 +146,7 @@ function _makeRawRequestAsync<TResponse>(
             }
 
             case 'error':
+              response.resume();
               reject(new Error(`Received status code ${statusCode}: ${url}`));
               return;
           }

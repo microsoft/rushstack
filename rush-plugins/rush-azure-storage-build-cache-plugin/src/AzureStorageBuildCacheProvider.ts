@@ -86,10 +86,10 @@ export class AzureStorageBuildCacheProvider
   public async trySetCacheEntryBufferAsync(
     terminal: ITerminal,
     cacheId: string,
-    entryStream: Buffer
+    entryBuffer: Buffer
   ): Promise<boolean> {
     return await this._trySetBlobDataAsync(terminal, cacheId, async (blockBlobClient: BlockBlobClient) => {
-      await blockBlobClient.upload(entryStream, entryStream.length);
+      await blockBlobClient.upload(entryBuffer, entryBuffer.length);
     });
   }
 
