@@ -155,7 +155,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
   ): Promise<Buffer | undefined> {
     try {
       const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
-      return await client.getObjectAsync(this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId);
+      return await client.getObjectAsync(this._getObjectName(cacheId));
     } catch (e) {
       terminal.writeWarningLine(`Error getting cache entry from S3: ${e}`);
       return undefined;
@@ -167,16 +167,13 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     cacheId: string,
     objectBuffer: Buffer
   ): Promise<boolean> {
-    if (!this.isCacheWriteAllowed) {
-      terminal.writeErrorLine('Writing to S3 cache is not allowed in the current configuration.');
+    if (!this._validateWriteAllowed(terminal, cacheId)) {
       return false;
     }
 
-    terminal.writeDebugLine('Uploading object with cacheId: ', cacheId);
-
     try {
       const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
-      await client.uploadObjectAsync(this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId, objectBuffer);
+      await client.uploadObjectAsync(this._getObjectName(cacheId), objectBuffer);
       return true;
     } catch (e) {
       terminal.writeWarningLine(`Error uploading cache entry to S3: ${e}`);
@@ -190,7 +187,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
   ): Promise<NodeJS.ReadableStream | undefined> {
     try {
       const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
-      return await client.getObjectStreamAsync(this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId);
+      return await client.getObjectStreamAsync(this._getObjectName(cacheId));
     } catch (e) {
       terminal.writeWarningLine(`Error getting cache entry stream from S3: ${e}`);
       return undefined;
@@ -202,24 +199,32 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     cacheId: string,
     entryStream: NodeJS.ReadableStream
   ): Promise<boolean> {
-    if (!this.isCacheWriteAllowed) {
-      terminal.writeErrorLine('Writing to S3 cache is not allowed in the current configuration.');
+    if (!this._validateWriteAllowed(terminal, cacheId)) {
       return false;
     }
 
-    terminal.writeDebugLine('Uploading object stream with cacheId: ', cacheId);
-
     try {
       const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
-      await client.uploadObjectStreamAsync(
-        this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId,
-        entryStream as Readable
-      );
+      await client.uploadObjectStreamAsync(this._getObjectName(cacheId), entryStream as Readable);
       return true;
     } catch (e) {
       terminal.writeWarningLine(`Error uploading cache entry stream to S3: ${e}`);
       return false;
     }
+  }
+
+  private _getObjectName(cacheId: string): string {
+    return this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId;
+  }
+
+  private _validateWriteAllowed(terminal: ITerminal, cacheId: string): boolean {
+    if (!this.isCacheWriteAllowed) {
+      terminal.writeErrorLine('Writing to S3 cache is not allowed in the current configuration.');
+      return false;
+    }
+
+    terminal.writeDebugLine('Uploading object with cacheId: ', cacheId);
+    return true;
   }
 
   public async updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void> {
