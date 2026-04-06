@@ -160,7 +160,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   public async tryGetCacheEntryStreamByIdAsync(
     terminal: ITerminal,
     cacheId: string
-  ): Promise<Readable | undefined> {
+  ): Promise<NodeJS.ReadableStream | undefined> {
     try {
       const result: IWebClientStreamResponse | false = await this._makeHttpStreamRequestAsync({
         terminal: terminal,
@@ -181,7 +181,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   public async trySetCacheEntryStreamAsync(
     terminal: ITerminal,
     cacheId: string,
-    entryStream: Readable
+    entryStream: NodeJS.ReadableStream
   ): Promise<boolean> {
     if (!this.isCacheWriteAllowed) {
       terminal.writeErrorLine('Writing to cache is not allowed in the current configuration.');
@@ -195,7 +195,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         terminal: terminal,
         relUrl: `${this._cacheKeyPrefix}${cacheId}`,
         method: this._uploadMethod,
-        body: entryStream,
+        body: entryStream as Readable,
         warningText: 'Could not write cache entry',
         // Streaming uploads cannot be retried because the stream is consumed
         maxAttempts: 1

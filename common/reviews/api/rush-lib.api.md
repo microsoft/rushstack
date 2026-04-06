@@ -28,7 +28,6 @@ import { JsonObject } from '@rushstack/node-core-library';
 import { LookupByPath } from '@rushstack/lookup-by-path';
 import { PackageNameParser } from '@rushstack/node-core-library';
 import type { PerformanceEntry as PerformanceEntry_2 } from 'node:perf_hooks';
-import type { Readable } from 'node:stream';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
 import { SyncWaterfallHook } from 'tapable';
@@ -316,7 +315,7 @@ export class FileSystemBuildCacheProvider {
     getCacheEntryPath(cacheId: string): string;
     tryGetCacheEntryPathByIdAsync(terminal: ITerminal, cacheId: string): Promise<string | undefined>;
     trySetCacheEntryBufferAsync(terminal: ITerminal, cacheId: string, entryBuffer: Buffer): Promise<string>;
-    trySetCacheEntryStreamAsync(terminal: ITerminal, cacheId: string, entryStream: Readable): Promise<string>;
+    trySetCacheEntryStreamAsync(terminal: ITerminal, cacheId: string, entryStream: NodeJS.ReadableStream): Promise<string>;
 }
 
 // @internal
@@ -349,10 +348,10 @@ export interface ICloudBuildCacheProvider {
     readonly isCacheWriteAllowed: boolean;
     // (undocumented)
     tryGetCacheEntryBufferByIdAsync(terminal: ITerminal, cacheId: string): Promise<Buffer | undefined>;
-    tryGetCacheEntryStreamByIdAsync?(terminal: ITerminal, cacheId: string): Promise<Readable | undefined>;
+    tryGetCacheEntryStreamByIdAsync?(terminal: ITerminal, cacheId: string): Promise<NodeJS.ReadableStream | undefined>;
     // (undocumented)
     trySetCacheEntryBufferAsync(terminal: ITerminal, cacheId: string, entryBuffer: Buffer): Promise<boolean>;
-    trySetCacheEntryStreamAsync?(terminal: ITerminal, cacheId: string, entryStream: Readable): Promise<boolean>;
+    trySetCacheEntryStreamAsync?(terminal: ITerminal, cacheId: string, entryStream: NodeJS.ReadableStream): Promise<boolean>;
     // (undocumented)
     updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void>;
     // (undocumented)

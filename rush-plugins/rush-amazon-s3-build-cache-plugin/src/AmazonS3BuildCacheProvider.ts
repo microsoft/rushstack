@@ -187,7 +187,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
   public async tryGetCacheEntryStreamByIdAsync(
     terminal: ITerminal,
     cacheId: string
-  ): Promise<Readable | undefined> {
+  ): Promise<NodeJS.ReadableStream | undefined> {
     try {
       const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
       return await client.getObjectStreamAsync(this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId);
@@ -200,7 +200,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
   public async trySetCacheEntryStreamAsync(
     terminal: ITerminal,
     cacheId: string,
-    entryStream: Readable
+    entryStream: NodeJS.ReadableStream
   ): Promise<boolean> {
     if (!this.isCacheWriteAllowed) {
       terminal.writeErrorLine('Writing to S3 cache is not allowed in the current configuration.');
@@ -213,7 +213,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
       const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
       await client.uploadObjectStreamAsync(
         this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId,
-        entryStream
+        entryStream as Readable
       );
       return true;
     } catch (e) {

@@ -3,7 +3,6 @@
 
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
-import type { Readable } from 'node:stream';
 
 import {
   FileSystem,
@@ -180,7 +179,7 @@ export class OperationBuildCache {
         this._cloudBuildCacheProvider.tryGetCacheEntryStreamByIdAsync
       ) {
         // Use streaming path to avoid loading the entire cache entry into memory
-        const cacheEntryStream: Readable | undefined =
+        const cacheEntryStream: NodeJS.ReadableStream | undefined =
           await this._cloudBuildCacheProvider.tryGetCacheEntryStreamByIdAsync(terminal, cacheId);
         if (cacheEntryStream) {
           try {

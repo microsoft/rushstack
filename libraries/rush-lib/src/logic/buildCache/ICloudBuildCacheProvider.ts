@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { Readable } from 'node:stream';
-
 import type { ITerminal } from '@rushstack/terminal';
 
 /**
@@ -19,7 +17,10 @@ export interface ICloudBuildCacheProvider {
    * {@link ICloudBuildCacheProvider.tryGetCacheEntryBufferByIdAsync} to avoid loading the entire
    * cache entry into memory.
    */
-  tryGetCacheEntryStreamByIdAsync?(terminal: ITerminal, cacheId: string): Promise<Readable | undefined>;
+  tryGetCacheEntryStreamByIdAsync?(
+    terminal: ITerminal,
+    cacheId: string
+  ): Promise<NodeJS.ReadableStream | undefined>;
   /**
    * If implemented, the build cache will prefer to use this method over
    * {@link ICloudBuildCacheProvider.trySetCacheEntryBufferAsync} to avoid loading the entire
@@ -33,7 +34,7 @@ export interface ICloudBuildCacheProvider {
   trySetCacheEntryStreamAsync?(
     terminal: ITerminal,
     cacheId: string,
-    entryStream: Readable
+    entryStream: NodeJS.ReadableStream
   ): Promise<boolean>;
 
   updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void>;

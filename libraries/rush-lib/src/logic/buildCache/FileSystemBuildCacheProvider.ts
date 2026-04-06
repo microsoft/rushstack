@@ -3,7 +3,6 @@
 
 import * as path from 'node:path';
 import { pipeline } from 'node:stream/promises';
-import type { Readable } from 'node:stream';
 
 import { FileSystem, type FileSystemWriteStream } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
@@ -85,7 +84,7 @@ export class FileSystemBuildCacheProvider {
   public async trySetCacheEntryStreamAsync(
     terminal: ITerminal,
     cacheId: string,
-    entryStream: Readable
+    entryStream: NodeJS.ReadableStream
   ): Promise<string> {
     const cacheEntryFilePath: string = this.getCacheEntryPath(cacheId);
     const writeStream: FileSystemWriteStream = await FileSystem.createWriteStreamAsync(cacheEntryFilePath, {

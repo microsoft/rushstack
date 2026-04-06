@@ -196,22 +196,14 @@ export class AzureStorageBuildCacheProvider
   public async tryGetCacheEntryStreamByIdAsync(
     terminal: ITerminal,
     cacheId: string
-  ): Promise<Readable | undefined> {
+  ): Promise<NodeJS.ReadableStream | undefined> {
     const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId, terminal);
 
     try {
       const blobExists: boolean = await blobClient.exists();
       if (blobExists) {
         const downloadResponse: BlobDownloadResponseParsed = await blobClient.download();
-        const readableStreamBody: NodeJS.ReadableStream | undefined =
-          downloadResponse.readableStreamBody;
-        if (readableStreamBody) {
-          // The Azure SDK types readableStreamBody as NodeJS.ReadableStream, which is a minimal
-          // interface. In practice, the underlying implementation is a Node.js Readable stream
-          // (http.IncomingMessage), so this assertion is safe.
-          return readableStreamBody as unknown as Readable;
-        }
-        return undefined;
+        return downloadResponse.readableStreamBody;
       } else {
         return undefined;
       }
@@ -224,7 +216,7 @@ export class AzureStorageBuildCacheProvider
   public async trySetCacheEntryStreamAsync(
     terminal: ITerminal,
     cacheId: string,
-    entryStream: Readable
+    entryStream: NodeJS.ReadableStream
   ): Promise<boolean> {
     if (!this.isCacheWriteAllowed) {
       terminal.writeErrorLine(
@@ -258,7 +250,7 @@ export class AzureStorageBuildCacheProvider
       return true;
     } else {
       try {
-        await blockBlobClient.uploadStream(entryStream);
+        await blockBlobClient.uploadStream(entryStream as Readable);
         return true;
       } catch (e) {
         if ((e as IBlobError).statusCode === 409 /* conflict */) {

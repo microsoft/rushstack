@@ -163,7 +163,7 @@ export class AmazonS3Client {
     });
   }
 
-  public async getObjectStreamAsync(objectName: string): Promise<Readable | undefined> {
+  public async getObjectStreamAsync(objectName: string): Promise<NodeJS.ReadableStream | undefined> {
     this._writeDebugLine('Reading object stream from S3');
     return await this._sendCacheRequestWithRetriesAsync(async () => {
       const response: IWebClientStreamResponse = await this._makeSignedRequestAsync(
@@ -193,7 +193,10 @@ export class AmazonS3Client {
    * does not use retry logic because the stream is consumed after the first attempt and cannot be
    * replayed. The caller should handle failures accordingly.
    */
-  public async uploadObjectStreamAsync(objectName: string, objectStream: Readable): Promise<void> {
+  public async uploadObjectStreamAsync(
+    objectName: string,
+    objectStream: NodeJS.ReadableStream
+  ): Promise<void> {
     if (!this._credentials) {
       throw new Error('Credentials are required to upload objects to S3.');
     }
@@ -202,7 +205,7 @@ export class AmazonS3Client {
     const response: IWebClientStreamResponse = await this._makeSignedRequestAsync(
       'PUT',
       objectName,
-      objectStream,
+      objectStream as Readable,
       true
     );
     if (!response.ok) {
