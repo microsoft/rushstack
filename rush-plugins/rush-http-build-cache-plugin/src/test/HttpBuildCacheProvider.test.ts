@@ -10,6 +10,7 @@ jest.mock('node:stream/promises', () => ({
 }));
 
 import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 import { type RushSession, EnvironmentConfiguration } from '@rushstack/rush-sdk';
 import { type ICredentialCacheEntry, CredentialCache } from '@rushstack/credential-cache';
@@ -284,6 +285,30 @@ Array [
           redirect: 'follow'
         })
       );
+      expect(pipeline).toHaveBeenCalledWith(mockStream, expect.anything());
+    });
+
+    it('returns false on 404 cache miss', async () => {
+      jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue('token123');
+
+      const session: RushSession = {} as RushSession;
+      const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session);
+      const mockStream = new Readable({ read() {} });
+
+      mocked(streamFetchFn).mockResolvedValue({
+        status: 404,
+        statusText: 'Not Found',
+        ok: false,
+        stream: mockStream
+      });
+
+      const result = await provider.tryDownloadCacheEntryToFileAsync(
+        terminal,
+        'some-key',
+        '/tmp/cache-entry'
+      );
+      expect(result).toBe(false);
+      expect(pipeline).not.toHaveBeenCalled();
     });
 
     it('returns false on credential failure', async () => {

@@ -10,6 +10,7 @@ jest.mock('node:stream/promises', () => ({
 }));
 
 import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 import { FileSystem } from '@rushstack/node-core-library';
@@ -716,6 +717,7 @@ describe(AmazonS3Client.name, () => {
         expect(result).toBe(true);
         expect(spy).toHaveBeenCalledTimes(1);
         expect(spy.mock.calls[0]).toMatchSnapshot();
+        expect(pipeline).toHaveBeenCalled();
         spy.mockRestore();
       });
 
@@ -733,6 +735,52 @@ describe(AmazonS3Client.name, () => {
         );
         expect(result).toBe(false);
         expect(spy).toHaveBeenCalledTimes(1);
+        expect(pipeline).not.toHaveBeenCalled();
+        spy.mockRestore();
+      });
+
+      it('Retries on transient server errors', async () => {
+        let callCount: number = 0;
+        const spy: jest.SpyInstance = jest
+          .spyOn(WebClient.prototype, 'fetchStreamAsync')
+          .mockImplementation(async () => {
+            callCount++;
+            const mockStream = new Readable({ read() {} });
+            if (callCount < 3) {
+              return {
+                stream: mockStream,
+                headers: {},
+                status: 500,
+                statusText: 'InternalServerError',
+                ok: false,
+                redirected: false
+              };
+            }
+            return {
+              stream: mockStream,
+              headers: {},
+              status: 200,
+              statusText: 'OK',
+              ok: true,
+              redirected: false
+            };
+          });
+
+        const s3Client: AmazonS3Client = new AmazonS3Client(
+          {
+            accessKeyId: 'accessKeyId',
+            secretAccessKey: 'secretAccessKey',
+            sessionToken: undefined
+          },
+          DUMMY_OPTIONS,
+          webClient,
+          terminal
+        );
+
+        const result = await s3Client.downloadObjectToFileAsync('abc123', '/tmp/cache-entry');
+        expect(result).toBe(true);
+        // First two attempts fail with 500, third succeeds
+        expect(spy).toHaveBeenCalledTimes(3);
         spy.mockRestore();
       });
     });
