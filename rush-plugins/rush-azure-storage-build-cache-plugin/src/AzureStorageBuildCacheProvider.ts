@@ -1,11 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { Readable } from 'node:stream';
-
 import {
   type BlobClient,
-  type BlobDownloadResponseParsed,
   BlobServiceClient,
   type BlockBlobClient,
   type ContainerClient
@@ -93,32 +90,31 @@ export class AzureStorageBuildCacheProvider
     });
   }
 
-  public async tryGetCacheEntryStreamByIdAsync(
-    terminal: ITerminal,
-    cacheId: string
-  ): Promise<NodeJS.ReadableStream | undefined> {
-    return await this._tryGetBlobDataAsync(terminal, cacheId, async (blobClient: BlobClient) => {
-      const downloadResponse: BlobDownloadResponseParsed = await blobClient.download();
-      return downloadResponse.readableStreamBody;
-    });
-  }
-
-  public async trySetCacheEntryStreamAsync(
+  public async tryGetCacheEntryToFileAsync(
     terminal: ITerminal,
     cacheId: string,
-    entryStream: NodeJS.ReadableStream
+    localFilePath: string
   ): Promise<boolean> {
-    return await this._trySetBlobDataAsync(
+    const result: boolean | undefined = await this._tryGetBlobDataAsync(
       terminal,
       cacheId,
-      async (blockBlobClient: BlockBlobClient) => {
-        await blockBlobClient.uploadStream(entryStream as Readable);
-      },
-      () => {
-        // Drain the incoming stream since we won't consume it
-        entryStream.resume();
+      async (blobClient: BlobClient) => {
+        await blobClient.downloadToFile(localFilePath);
+        return true;
       }
     );
+
+    return result ?? false;
+  }
+
+  public async trySetCacheEntryFromFileAsync(
+    terminal: ITerminal,
+    cacheId: string,
+    localFilePath: string
+  ): Promise<boolean> {
+    return await this._trySetBlobDataAsync(terminal, cacheId, async (blockBlobClient: BlockBlobClient) => {
+      await blockBlobClient.uploadFile(localFilePath);
+    });
   }
 
   /**

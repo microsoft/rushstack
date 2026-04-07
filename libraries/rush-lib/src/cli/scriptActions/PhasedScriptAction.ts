@@ -522,7 +522,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
               buildCacheWithAllowWarningsInSuccessfulBuild = false,
               buildSkipWithAllowWarningsInSuccessfulBuild,
               omitAppleDoubleFilesFromBuildCache: excludeAppleDoubleFiles = false,
-              useStreamingBuildCache = false,
+              useDirectFileTransfersForBuildCache = false,
               usePnpmSyncForInjectedDependencies
             }
           },
@@ -536,7 +536,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
             cobuildConfiguration,
             terminal,
             excludeAppleDoubleFiles,
-            useStreamingBuildCache
+            useDirectFileTransfersForBuildCache
           }).apply(this.hooks);
 
           if (this._debugBuildCacheIdsParameter.value) {

@@ -15,26 +15,25 @@ export interface ICloudBuildCacheProvider {
   /**
    * If implemented, the build cache will prefer to use this method over
    * {@link ICloudBuildCacheProvider.tryGetCacheEntryBufferByIdAsync} to avoid loading the entire
-   * cache entry into memory.
+   * cache entry into memory, if possible. The implementation should download the cache entry and write it
+   * to the specified local file path.
+   *
+   * @returns `true` if the cache entry was found and written to the file, `false` if it was
+   * not found. Throws on errors.
    */
-  tryGetCacheEntryStreamByIdAsync?(
-    terminal: ITerminal,
-    cacheId: string
-  ): Promise<NodeJS.ReadableStream | undefined>;
+  tryGetCacheEntryToFileAsync?(terminal: ITerminal, cacheId: string, localFilePath: string): Promise<boolean>;
   /**
    * If implemented, the build cache will prefer to use this method over
    * {@link ICloudBuildCacheProvider.trySetCacheEntryBufferAsync} to avoid loading the entire
-   * cache entry into memory.
+   * cache entry into memory, if possible. The implementation should read the cache entry from
+   * the specified local file path and upload it.
    *
-   * @remarks
-   * Because the provided stream can only be consumed once, implementations should not
-   * attempt to retry the upload using the same stream. If retry logic is needed,
-   * consider buffering internally or returning `false` so the caller can retry.
+   * @returns `true` if the cache entry was written to the cache, otherwise `false`.
    */
-  trySetCacheEntryStreamAsync?(
+  trySetCacheEntryFromFileAsync?(
     terminal: ITerminal,
     cacheId: string,
-    entryStream: NodeJS.ReadableStream
+    localFilePath: string
   ): Promise<boolean>;
 
   updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void>;

@@ -312,10 +312,9 @@ export class ExperimentsConfiguration {
 // @beta
 export class FileSystemBuildCacheProvider {
     constructor(options: IFileSystemBuildCacheProviderOptions);
-    getCacheEntryPath(cacheId: string): string;
+    readonly getCacheEntryPath: (cacheId: string) => string;
     tryGetCacheEntryPathByIdAsync(terminal: ITerminal, cacheId: string): Promise<string | undefined>;
     trySetCacheEntryBufferAsync(terminal: ITerminal, cacheId: string, entryBuffer: Buffer): Promise<string>;
-    trySetCacheEntryStreamAsync(terminal: ITerminal, cacheId: string, entryStream: NodeJS.ReadableStream): Promise<string>;
 }
 
 // @internal
@@ -348,10 +347,10 @@ export interface ICloudBuildCacheProvider {
     readonly isCacheWriteAllowed: boolean;
     // (undocumented)
     tryGetCacheEntryBufferByIdAsync(terminal: ITerminal, cacheId: string): Promise<Buffer | undefined>;
-    tryGetCacheEntryStreamByIdAsync?(terminal: ITerminal, cacheId: string): Promise<NodeJS.ReadableStream | undefined>;
+    tryGetCacheEntryToFileAsync?(terminal: ITerminal, cacheId: string, localFilePath: string): Promise<boolean>;
     // (undocumented)
     trySetCacheEntryBufferAsync(terminal: ITerminal, cacheId: string, entryBuffer: Buffer): Promise<boolean>;
-    trySetCacheEntryStreamAsync?(terminal: ITerminal, cacheId: string, entryStream: NodeJS.ReadableStream): Promise<boolean>;
+    trySetCacheEntryFromFileAsync?(terminal: ITerminal, cacheId: string, localFilePath: string): Promise<boolean>;
     // (undocumented)
     updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void>;
     // (undocumented)
@@ -484,12 +483,12 @@ export interface IExperimentsJson {
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     printEventHooksOutputToConsole?: boolean;
     rushAlerts?: boolean;
+    useDirectFileTransfersForBuildCache?: boolean;
     useIPCScriptsInWatchMode?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
     usePnpmSyncForInjectedDependencies?: boolean;
-    useStreamingBuildCache?: boolean;
 }
 
 // @beta
@@ -598,7 +597,7 @@ export interface _IOperationBuildCacheOptions {
     buildCacheConfiguration: BuildCacheConfiguration;
     excludeAppleDoubleFiles: boolean;
     terminal: ITerminal;
-    useStreamingBuildCache: boolean;
+    useDirectFileTransfersForBuildCache: boolean;
 }
 
 // @alpha

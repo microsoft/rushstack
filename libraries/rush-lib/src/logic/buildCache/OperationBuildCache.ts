@@ -4,13 +4,7 @@
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
 
-import {
-  FileSystem,
-  type FileSystemReadStream,
-  type FolderItem,
-  InternalError,
-  Async
-} from '@rushstack/node-core-library';
+import { FileSystem, type FolderItem, InternalError, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -39,10 +33,10 @@ export interface IOperationBuildCacheOptions {
    */
   excludeAppleDoubleFiles: boolean;
   /**
-   * If true, use streaming APIs (when available) to transfer cache entries to and from the
+   * If true, use file-based APIs (when available) to transfer cache entries to and from the
    * cloud provider, avoiding buffering the entire entry in memory.
    */
-  useStreamingBuildCache: boolean;
+  useDirectFileTransfersForBuildCache: boolean;
 }
 
 /**
@@ -86,7 +80,7 @@ export class OperationBuildCache {
   private readonly _projectOutputFolderNames: ReadonlyArray<string>;
   private readonly _cacheId: string | undefined;
   private readonly _excludeAppleDoubleFiles: boolean;
-  private readonly _useStreamingBuildCache: boolean;
+  private readonly _useDirectFileTransfersForBuildCache: boolean;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
     const {
@@ -99,7 +93,7 @@ export class OperationBuildCache {
       project,
       projectOutputFolderNames,
       excludeAppleDoubleFiles,
-      useStreamingBuildCache
+      useDirectFileTransfersForBuildCache
     } = options;
     this._project = project;
     this._localBuildCacheProvider = localCacheProvider;
@@ -109,7 +103,7 @@ export class OperationBuildCache {
     this._projectOutputFolderNames = projectOutputFolderNames || [];
     this._cacheId = cacheId;
     this._excludeAppleDoubleFiles = excludeAppleDoubleFiles && process.platform === 'darwin';
-    this._useStreamingBuildCache = useStreamingBuildCache;
+    this._useDirectFileTransfersForBuildCache = useDirectFileTransfersForBuildCache;
   }
 
   private static _tryGetTarUtility(terminal: ITerminal): Promise<TarExecutable | undefined> {
@@ -133,7 +127,12 @@ export class OperationBuildCache {
     executionResult: IOperationExecutionResult,
     options: IOperationBuildCacheOptions
   ): OperationBuildCache {
-    const { buildCacheConfiguration, terminal, excludeAppleDoubleFiles, useStreamingBuildCache } = options;
+    const {
+      buildCacheConfiguration,
+      terminal,
+      excludeAppleDoubleFiles,
+      useDirectFileTransfersForBuildCache
+    } = options;
     const outputFolders: string[] = [...(executionResult.operation.settings?.outputFolderNames ?? [])];
     if (executionResult.metadataFolderPath) {
       outputFolders.push(executionResult.metadataFolderPath);
@@ -147,7 +146,7 @@ export class OperationBuildCache {
       projectOutputFolderNames: outputFolders,
       operationStateHash: executionResult.getStateHash(),
       excludeAppleDoubleFiles,
-      useStreamingBuildCache
+      useDirectFileTransfersForBuildCache
     };
     const cacheId: string | undefined = OperationBuildCache._getCacheId(buildCacheOptions);
     return new OperationBuildCache(cacheId, buildCacheOptions);
@@ -174,23 +173,26 @@ export class OperationBuildCache {
         'This project was not found in the local build cache. Querying the cloud build cache.'
       );
 
-      if (this._useStreamingBuildCache && this._cloudBuildCacheProvider.tryGetCacheEntryStreamByIdAsync) {
-        // Use streaming path to avoid loading the entire cache entry into memory
-        const cacheEntryStream: NodeJS.ReadableStream | undefined =
-          await this._cloudBuildCacheProvider.tryGetCacheEntryStreamByIdAsync(terminal, cacheId);
-        if (cacheEntryStream) {
-          cloudCacheHit = true;
-          try {
-            localCacheEntryPath = await this._localBuildCacheProvider.trySetCacheEntryStreamAsync(
-              terminal,
-              cacheId,
-              cacheEntryStream
-            );
+      if (
+        this._useDirectFileTransfersForBuildCache &&
+        this._cloudBuildCacheProvider.tryGetCacheEntryToFileAsync
+      ) {
+        // Use file-based path to avoid loading the entire cache entry into memory.
+        // The provider downloads directly to the local cache file.
+        const targetPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
+        try {
+          cloudCacheHit = await this._cloudBuildCacheProvider.tryGetCacheEntryToFileAsync(
+            terminal,
+            cacheId,
+            targetPath
+          );
+          if (cloudCacheHit) {
+            localCacheEntryPath = targetPath;
             updateLocalCacheSuccess = true;
-          } catch (e) {
-            terminal.writeVerboseLine(`Failed to update local cache: ${e}`);
-            updateLocalCacheSuccess = false;
           }
+        } catch (e) {
+          terminal.writeVerboseLine(`Failed to update local cache: ${e}`);
+          updateLocalCacheSuccess = false;
         }
       } else {
         const cacheEntryBuffer: Buffer | undefined =
@@ -346,15 +348,17 @@ export class OperationBuildCache {
         throw new InternalError('Expected the local cache entry path to be set.');
       }
 
-      if (this._useStreamingBuildCache && this._cloudBuildCacheProvider.trySetCacheEntryStreamAsync) {
-        // Use streaming upload to avoid loading the entire cache entry into memory
-        const entryStream: FileSystemReadStream = FileSystem.createReadStream(localCacheEntryPath);
-        setCloudCacheEntryPromise = this._cloudBuildCacheProvider
-          .trySetCacheEntryStreamAsync(terminal, cacheId, entryStream)
-          .catch((e: Error) => {
-            entryStream.destroy();
-            throw e;
-          });
+      if (
+        this._useDirectFileTransfersForBuildCache &&
+        this._cloudBuildCacheProvider.trySetCacheEntryFromFileAsync
+      ) {
+        // Use file-based upload to avoid loading the entire cache entry into memory.
+        // The provider reads from the local cache file directly.
+        setCloudCacheEntryPromise = this._cloudBuildCacheProvider.trySetCacheEntryFromFileAsync(
+          terminal,
+          cacheId,
+          localCacheEntryPath
+        );
       } else {
         const cacheEntryBuffer: Buffer = await FileSystem.readFileToBufferAsync(localCacheEntryPath);
         setCloudCacheEntryPromise = this._cloudBuildCacheProvider.trySetCacheEntryBufferAsync(

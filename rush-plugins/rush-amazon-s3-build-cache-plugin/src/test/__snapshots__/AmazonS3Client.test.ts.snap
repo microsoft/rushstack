@@ -549,7 +549,7 @@ exports[`AmazonS3Client Rejects invalid S3 endpoint values 10`] = `"Invalid S3 e
 
 exports[`AmazonS3Client Rejects invalid S3 endpoint values 11`] = `"Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long"`;
 
-exports[`AmazonS3Client Streaming requests Getting an object stream Can get an object stream 1`] = `
+exports[`AmazonS3Client File-based requests Downloading an object to file Can download an object to file 1`] = `
 Array [
   "http://localhost:9000/abc123",
   Object {

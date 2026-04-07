@@ -60,7 +60,7 @@ describe(OperationBuildCache.name, () => {
       terminal,
       phaseName: 'build',
       excludeAppleDoubleFiles: !!options.excludeAppleDoubleFiles,
-      useStreamingBuildCache: false
+      useDirectFileTransfersForBuildCache: false
     });
 
     return subject;

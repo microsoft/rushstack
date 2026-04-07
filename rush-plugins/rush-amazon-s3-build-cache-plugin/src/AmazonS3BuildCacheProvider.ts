@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { Readable } from 'node:stream';
-
 import { type ICredentialCacheEntry, CredentialCache } from '@rushstack/credential-cache';
 import type { ITerminal } from '@rushstack/terminal';
 import {
@@ -181,23 +179,24 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     }
   }
 
-  public async tryGetCacheEntryStreamByIdAsync(
+  public async tryGetCacheEntryToFileAsync(
     terminal: ITerminal,
-    cacheId: string
-  ): Promise<NodeJS.ReadableStream | undefined> {
+    cacheId: string,
+    localFilePath: string
+  ): Promise<boolean> {
     try {
       const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
-      return await client.getObjectStreamAsync(this._getObjectName(cacheId));
+      return await client.downloadObjectToFileAsync(this._getObjectName(cacheId), localFilePath);
     } catch (e) {
-      terminal.writeWarningLine(`Error getting cache entry stream from S3: ${e}`);
-      return undefined;
+      terminal.writeWarningLine(`Error downloading cache entry from S3: ${e}`);
+      return false;
     }
   }
 
-  public async trySetCacheEntryStreamAsync(
+  public async trySetCacheEntryFromFileAsync(
     terminal: ITerminal,
     cacheId: string,
-    entryStream: NodeJS.ReadableStream
+    localFilePath: string
   ): Promise<boolean> {
     if (!this._validateWriteAllowed(terminal, cacheId)) {
       return false;
@@ -205,10 +204,10 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
 
     try {
       const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
-      await client.uploadObjectStreamAsync(this._getObjectName(cacheId), entryStream as Readable);
+      await client.uploadObjectFromFileAsync(this._getObjectName(cacheId), localFilePath);
       return true;
     } catch (e) {
-      terminal.writeWarningLine(`Error uploading cache entry stream to S3: ${e}`);
+      terminal.writeWarningLine(`Error uploading cache entry to S3: ${e}`);
       return false;
     }
   }

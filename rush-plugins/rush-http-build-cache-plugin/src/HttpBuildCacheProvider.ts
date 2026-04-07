@@ -3,9 +3,16 @@
 
 import type { SpawnSyncReturns } from 'node:child_process';
 import type { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 import { type ICredentialCacheEntry, CredentialCache } from '@rushstack/credential-cache';
-import { Executable, Async } from '@rushstack/node-core-library';
+import {
+  Executable,
+  Async,
+  FileSystem,
+  type FileSystemWriteStream,
+  type FileSystemReadStream
+} from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import {
   type ICloudBuildCacheProvider,
@@ -155,10 +162,11 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     }
   }
 
-  public async tryGetCacheEntryStreamByIdAsync(
+  public async tryGetCacheEntryToFileAsync(
     terminal: ITerminal,
-    cacheId: string
-  ): Promise<NodeJS.ReadableStream | undefined> {
+    cacheId: string,
+    localFilePath: string
+  ): Promise<boolean> {
     try {
       const result: IWebClientStreamResponse | false = await this._makeHttpStreamRequestAsync({
         terminal,
@@ -169,28 +177,37 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         maxAttempts: MAX_HTTP_CACHE_ATTEMPTS
       });
 
-      return result !== false ? result.stream : undefined;
+      if (result === false) {
+        return false;
+      }
+
+      const writeStream: FileSystemWriteStream = await FileSystem.createWriteStreamAsync(localFilePath, {
+        ensureFolderExists: true
+      });
+      await pipeline(result.stream, writeStream);
+      return true;
     } catch (e) {
       terminal.writeWarningLine(`Error getting cache entry: ${e}`);
-      return undefined;
+      return false;
     }
   }
 
-  public async trySetCacheEntryStreamAsync(
+  public async trySetCacheEntryFromFileAsync(
     terminal: ITerminal,
     cacheId: string,
-    entryStream: NodeJS.ReadableStream
+    localFilePath: string
   ): Promise<boolean> {
     if (!this._validateWriteAllowed(terminal, cacheId)) {
       return false;
     }
 
     try {
+      const entryStream: FileSystemReadStream = FileSystem.createReadStream(localFilePath);
       const result: IWebClientStreamResponse | false = await this._makeHttpStreamRequestAsync({
         terminal,
         relUrl: `${this._cacheKeyPrefix}${cacheId}`,
         method: this._uploadMethod,
-        body: entryStream as Readable,
+        body: entryStream,
         warningText: 'Could not write cache entry',
         // Streaming uploads cannot be retried because the stream is consumed
         maxAttempts: 1

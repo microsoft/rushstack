@@ -3,8 +3,14 @@
 
 import * as crypto from 'node:crypto';
 import type { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
-import { Async } from '@rushstack/node-core-library';
+import {
+  Async,
+  FileSystem,
+  type FileSystemReadStream,
+  type FileSystemWriteStream
+} from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 import {
   type IGetFetchOptions,
@@ -18,17 +24,11 @@ import {
 import type { IAmazonS3BuildCacheProviderOptionsAdvanced } from './AmazonS3BuildCacheProvider';
 import { type IAmazonS3Credentials, fromRushEnv } from './AmazonS3Credentials';
 
-const CONTENT_HASH_HEADER_NAME: 'x-amz-content-sha256' = 'x-amz-content-sha256';
+const HASH_ALGORITHM: 'sha256' = 'sha256';
+const CONTENT_HASH_HEADER_NAME: `x-amz-content-${typeof HASH_ALGORITHM}` = `x-amz-content-${HASH_ALGORITHM}`;
 const DATE_HEADER_NAME: 'x-amz-date' = 'x-amz-date';
 const HOST_HEADER_NAME: 'host' = 'host';
 const SECURITY_TOKEN_HEADER_NAME: 'x-amz-security-token' = 'x-amz-security-token';
-
-/**
- * AWS Signature V4 allows using this sentinel value as the content hash when the request
- * payload is not signed. This is used for streaming uploads where the body cannot be hashed
- * upfront.
- */
-const UNSIGNED_PAYLOAD: 'UNSIGNED-PAYLOAD' = 'UNSIGNED-PAYLOAD';
 
 interface IIsoDateString {
   date: string;
@@ -69,6 +69,18 @@ const storageRetryOptions: IStorageRetryOptions = {
   retryPolicyType: StorageRetryPolicyType.EXPONENTIAL
 };
 
+/**
+ * Computes the SHA-256 hash of a file on disk using streaming reads.
+ */
+async function _hashFileAsync(filePath: string): Promise<string> {
+  return await new Promise<string>((resolve, reject) => {
+    const hash: crypto.Hash = crypto.createHash(HASH_ALGORITHM);
+    const stream: FileSystemReadStream = FileSystem.createReadStream(filePath);
+    stream.on('data', (chunk: string | Buffer) => hash.update(chunk));
+    stream.on('end', () => resolve(hash.digest('hex')));
+    stream.on('error', reject);
+  });
+}
 /**
  * A helper for reading and updating objects on Amazon S3
  *
@@ -163,20 +175,32 @@ export class AmazonS3Client {
     });
   }
 
-  public async getObjectStreamAsync(objectName: string): Promise<NodeJS.ReadableStream | undefined> {
-    this._writeDebugLine('Reading object stream from S3');
-    return await this._sendCacheRequestWithRetriesAsync(async () => {
+  /**
+   * Downloads an S3 object directly to a local file path, using streaming to avoid
+   * buffering the entire object in memory. Retries on transient network errors.
+   *
+   * @returns `true` if the object was found and written to the file, `false` if not found.
+   */
+  public async downloadObjectToFileAsync(objectName: string, localFilePath: string): Promise<boolean> {
+    this._writeDebugLine('Downloading object from S3 to file');
+    const result: boolean | undefined = await this._sendCacheRequestWithRetriesAsync(async () => {
       const response: IWebClientStreamResponse = await this._makeSignedRequestAsync(
         'GET',
         objectName,
         undefined,
         true
       );
-      return this._handleGetResponseAsync(
+      return this._handleGetResponseAsync<boolean>(
         response.status,
         response.statusText,
         response.ok,
-        () => response.stream,
+        async () => {
+          const writeStream: FileSystemWriteStream = await FileSystem.createWriteStreamAsync(localFilePath, {
+            ensureFolderExists: true
+          });
+          await pipeline(response.stream, writeStream);
+          return true;
+        },
         async () => {
           response.stream.resume();
           return new Error(
@@ -186,33 +210,35 @@ export class AmazonS3Client {
         () => response.stream.resume()
       );
     });
+
+    return result ?? false;
   }
 
   /**
-   * Uploads a readable stream to S3. Unlike {@link AmazonS3Client.uploadObjectAsync}, this method
-   * does not use retry logic because the stream is consumed after the first attempt and cannot be
-   * replayed. The caller should handle failures accordingly.
+   * Uploads a local file to S3 using streaming, with the file's SHA-256 hash included in
+   * the AWS Signature V4 request for payload integrity verification. Does not retry
+   * because the stream is consumed after the first attempt.
    */
-  public async uploadObjectStreamAsync(
-    objectName: string,
-    objectStream: NodeJS.ReadableStream
-  ): Promise<void> {
+  public async uploadObjectFromFileAsync(objectName: string, localFilePath: string): Promise<void> {
     if (!this._credentials) {
       throw new Error('Credentials are required to upload objects to S3.');
     }
+
+    // Compute SHA-256 hash of the file before uploading so we can sign the payload
+    const contentHash: string = await _hashFileAsync(localFilePath);
+    const entryStream: FileSystemReadStream = FileSystem.createReadStream(localFilePath);
 
     // Streaming uploads cannot be retried because the stream is consumed after the first attempt.
     const response: IWebClientStreamResponse = await this._makeSignedRequestAsync(
       'PUT',
       objectName,
-      objectStream as Readable,
-      true
+      entryStream as Readable,
+      true,
+      contentHash
     );
     if (!response.ok) {
       response.stream.resume();
-      throw new Error(
-        `Amazon S3 responded with status code ${response.status} (${response.statusText})`
-      );
+      throw new Error(`Amazon S3 responded with status code ${response.status} (${response.statusText})`);
     }
     response.stream.resume();
   }
@@ -260,10 +286,7 @@ export class AmazonS3Client {
         hasNetworkError: false,
         response: undefined
       };
-    } else if (
-      (status === 400 || status === 401 || status === 403) &&
-      !this._credentials
-    ) {
+    } else if ((status === 400 || status === 401 || status === 403) && !this._credentials) {
       cleanup?.();
       // unauthorized due to not providing credentials,
       // silence error for better DX when e.g. running locally without credentials
@@ -299,19 +322,19 @@ export class AmazonS3Client {
     verb: 'GET' | 'PUT',
     objectName: string,
     body: Readable | undefined,
-    stream: true
+    stream: true,
+    contentHash?: string
   ): Promise<IWebClientStreamResponse>;
   private async _makeSignedRequestAsync(
     verb: 'GET' | 'PUT',
     objectName: string,
     body?: Buffer | Readable,
-    stream?: boolean
+    stream?: boolean,
+    contentHash?: string
   ): Promise<IWebClientResponse | IWebClientStreamResponse> {
-    // For streaming uploads, the body cannot be hashed upfront, so we use UNSIGNED-PAYLOAD.
-    const isStreamBody: boolean = !!body && typeof (body as Readable).pipe === 'function';
-    const bodyHash: string = isStreamBody
-      ? UNSIGNED_PAYLOAD
-      : this._getSha256(body as Buffer | undefined);
+    // Use the provided content hash if available (e.g. pre-computed from a file on disk),
+    // otherwise compute from the buffer body, or use the empty hash for GET requests.
+    const bodyHash: string = contentHash ?? this._getBufferSha256(Buffer.isBuffer(body) ? body : undefined);
     const { url, headers } = this._buildSignedRequest(verb, objectName, bodyHash);
 
     const webFetchOptions: IGetFetchOptions | IFetchOptionsWithBody = {
@@ -401,7 +424,7 @@ export class AmazonS3Client {
         signedHeaderNamesString,
         bodyHash
       ].join('\n');
-      const canonicalRequestHash: string = this._getSha256(canonicalRequest);
+      const canonicalRequestHash: string = this._getBufferSha256(canonicalRequest);
 
       const scope: string = `${isoDateString.date}/${this._s3Region}/s3/aws4_request`;
       // The string to sign looks like this:
@@ -458,9 +481,9 @@ export class AmazonS3Client {
     }
   }
 
-  private _getSha256(data?: string | Buffer): string {
+  private _getBufferSha256(data?: string | Buffer): string {
     if (data) {
-      const hash: crypto.Hash = crypto.createHash('sha256');
+      const hash: crypto.Hash = crypto.createHash(HASH_ALGORITHM);
       hash.update(data);
       return hash.digest('hex');
     } else {

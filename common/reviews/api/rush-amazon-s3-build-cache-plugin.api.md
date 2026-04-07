@@ -15,10 +15,9 @@ import { WebClient } from '@rushstack/rush-sdk/lib/utilities/WebClient';
 // @public
 export class AmazonS3Client {
     constructor(credentials: IAmazonS3Credentials | undefined, options: IAmazonS3BuildCacheProviderOptionsAdvanced, webClient: WebClient, terminal: ITerminal);
+    downloadObjectToFileAsync(objectName: string, localFilePath: string): Promise<boolean>;
     // (undocumented)
     getObjectAsync(objectName: string): Promise<Buffer | undefined>;
-    // (undocumented)
-    getObjectStreamAsync(objectName: string): Promise<NodeJS.ReadableStream | undefined>;
     // (undocumented)
     _getSha256Hmac(key: string | Buffer, data: string): Buffer;
     // (undocumented)
@@ -27,7 +26,7 @@ export class AmazonS3Client {
     static tryDeserializeCredentials(credentialString: string | undefined): IAmazonS3Credentials | undefined;
     // (undocumented)
     uploadObjectAsync(objectName: string, objectBuffer: Buffer): Promise<void>;
-    uploadObjectStreamAsync(objectName: string, objectStream: NodeJS.ReadableStream): Promise<void>;
+    uploadObjectFromFileAsync(objectName: string, localFilePath: string): Promise<void>;
     // (undocumented)
     static UriEncode(input: string): string;
 }
