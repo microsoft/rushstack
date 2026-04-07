@@ -633,7 +633,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
       }
 
       if (node.children && node.children.size > 0) {
-        const children: Record<string, ISerializedPathTrieNode> = {};
+        const children: Record<string, ISerializedPathTrieNode> = Object.create(null);
         for (const [segment, child] of node.children) {
           children[segment] = serializeNode(child);
         }
