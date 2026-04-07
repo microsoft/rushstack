@@ -600,7 +600,7 @@ export class AmazonS3Client {
           }
           delay = Math.min(maxRetryDelayInMs, delay);
 
-          log(`Will retry request in ${delay}s...`);
+          log(`Will retry request in ${delay}ms...`);
           await Async.sleepAsync(delay);
           const retryResponse: RetryableRequestResponse<T> = await sendRequest();
 
