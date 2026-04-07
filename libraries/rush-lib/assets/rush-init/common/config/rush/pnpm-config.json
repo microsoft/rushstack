@@ -100,6 +100,49 @@
   /*[LINE "HYPOTHETICAL"]*/ "minimumReleaseAgeExclude": ["@myorg/*"],
 
   /**
+   * The trust policy controls whether pnpm should block installation of package versions where
+   * the trust level has decreased (e.g., a package previously published with provenance is now
+   * published without it). Setting this to `"no-downgrade"` enables the protection.
+   *
+   * (SUPPORTED ONLY IN PNPM 10.21.0 AND NEWER)
+   *
+   * PNPM documentation: https://pnpm.io/settings#trustpolicy
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "trustPolicy": "no-downgrade",
+
+  /**
+   * An array of package names or patterns to exclude from the trust policy check.
+   * These packages will be allowed to install even if their trust level has decreased.
+   * Patterns are supported using glob syntax (e.g., "@myorg/*" to exclude all packages
+   * from an organization).
+   *
+   * For example:
+   *
+   * "trustPolicyExclude": ["webpack", "react", "@myorg/*"]
+   *
+   * (SUPPORTED ONLY IN PNPM 10.22.0 AND NEWER)
+   *
+   * PNPM documentation: https://pnpm.io/settings#trustpolicyexclude
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "trustPolicyExclude": ["@myorg/*"],
+
+  /**
+   * The number of minutes after which pnpm will ignore trust level downgrades. Packages
+   * published longer ago than this threshold will not be blocked even if their trust level
+   * has decreased.
+   *
+   * For example, the following setting ignores trust level changes for packages published
+   * more than one day ago:
+   *
+   * "trustPolicyIgnoreAfter": 1440
+   *
+   * (SUPPORTED ONLY IN PNPM 10.27.0 AND NEWER)
+   *
+   * PNPM documentation: https://pnpm.io/settings#trustpolicyignoreafter
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "trustPolicyIgnoreAfter": 1440,
+
+  /**
    * If true, then Rush will add the `--strict-peer-dependencies` command-line parameter when
    * invoking PNPM.  This causes `rush update` to fail if there are unsatisfied peer dependencies,
    * which is an invalid state that can cause build failures or incompatible dependency versions.

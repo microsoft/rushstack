@@ -214,6 +214,26 @@
       }
     },
 
+    "trustPolicy": {
+      "description": "The trust policy controls whether pnpm should block installation of package versions where the trust level has decreased (e.g., a package previously published with provenance is now published without it). Setting this to \"no-downgrade\" enables the protection.\n\n(SUPPORTED ONLY IN PNPM 10.21.0 AND NEWER)\n\nPNPM documentation: https://pnpm.io/settings#trustpolicy",
+      "type": "string",
+      "enum": ["no-downgrade", "off"]
+    },
+
+    "trustPolicyExclude": {
+      "description": "List of package names or patterns that are excluded from the trust policy check. These packages will be allowed to install even if their trust level has decreased. Supports glob patterns (e.g., \"@myorg/*\").\n\n(SUPPORTED ONLY IN PNPM 10.22.0 AND NEWER)\n\nPNPM documentation: https://pnpm.io/settings#trustpolicyexclude\n\nExample: [\"webpack\", \"react\", \"@myorg/*\"]",
+      "type": "array",
+      "items": {
+        "description": "Package name or pattern",
+        "type": "string"
+      }
+    },
+
+    "trustPolicyIgnoreAfter": {
+      "description": "The number of minutes after which pnpm will ignore trust level downgrades. Packages published longer ago than this threshold will not be blocked even if their trust level has decreased.\n\n(SUPPORTED ONLY IN PNPM 10.27.0 AND NEWER)\n\nPNPM documentation: https://pnpm.io/settings#trustpolicyignoreafter",
+      "type": "number"
+    },
+
     "alwaysFullInstall": {
       "description": "(EXPERIMENTAL) If 'true', then filtered installs ('rush install --to my-project') * will be disregarded, instead always performing a full installation of the lockfile.",
       "type": "boolean"

@@ -1,0 +1,5 @@
+{
+  "trustPolicy": "no-downgrade",
+  "trustPolicyExclude": ["webpack", "@myorg/*"],
+  "trustPolicyIgnoreAfter": 1440
+}

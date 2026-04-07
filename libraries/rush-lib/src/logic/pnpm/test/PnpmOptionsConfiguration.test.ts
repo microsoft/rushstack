@@ -100,6 +100,20 @@ describe(PnpmOptionsConfiguration.name, () => {
     ]);
   });
 
+  it('loads trustPolicy', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-trustPolicy.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(pnpmConfiguration.trustPolicy).toEqual('no-downgrade');
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.trustPolicyExclude)).toEqual([
+      'webpack',
+      '@myorg/*'
+    ]);
+    expect(pnpmConfiguration.trustPolicyIgnoreAfter).toEqual(1440);
+  });
+
   it('loads catalog and catalogs', () => {
     const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
       `${__dirname}/jsonFiles/pnpm-config-catalog.json`,

@@ -767,6 +767,9 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     preventManualShrinkwrapChanges?: boolean;
     resolutionMode?: PnpmResolutionMode;
     strictPeerDependencies?: boolean;
+    trustPolicy?: PnpmTrustPolicy;
+    trustPolicyExclude?: string[];
+    trustPolicyIgnoreAfter?: number;
     unsupportedPackageJsonSettings?: unknown;
     useWorkspaces?: boolean;
 }
@@ -1194,6 +1197,9 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly preventManualShrinkwrapChanges: boolean;
     readonly resolutionMode: PnpmResolutionMode | undefined;
     readonly strictPeerDependencies: boolean;
+    readonly trustPolicy: PnpmTrustPolicy | undefined;
+    readonly trustPolicyExclude: string[] | undefined;
+    readonly trustPolicyIgnoreAfter: number | undefined;
     readonly unsupportedPackageJsonSettings: unknown | undefined;
     updateGlobalOnlyBuiltDependencies(onlyBuiltDependencies: string[] | undefined): void;
     updateGlobalPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void;
@@ -1208,6 +1214,9 @@ export type PnpmStoreLocation = 'local' | 'global';
 
 // @public @deprecated (undocumented)
 export type PnpmStoreOptions = PnpmStoreLocation;
+
+// @public
+export type PnpmTrustPolicy = 'no-downgrade' | 'off';
 
 // @beta (undocumented)
 export class ProjectChangeAnalyzer {
