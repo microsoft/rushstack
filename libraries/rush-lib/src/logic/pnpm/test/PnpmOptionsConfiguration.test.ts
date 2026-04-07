@@ -108,10 +108,12 @@ describe(PnpmOptionsConfiguration.name, () => {
 
     expect(pnpmConfiguration.trustPolicy).toEqual('no-downgrade');
     expect(TestUtilities.stripAnnotations(pnpmConfiguration.trustPolicyExclude)).toEqual([
-      'webpack',
-      '@myorg/*'
+      '@myorg/*',
+      'chokidar@4.0.3',
+      'webpack@4.47.0 || 5.102.1',
+      '@babel/core@7.28.5'
     ]);
-    expect(pnpmConfiguration.trustPolicyIgnoreAfter).toEqual(1440);
+    expect(pnpmConfiguration.trustPolicyIgnoreAfter).toEqual(20160);
   });
 
   it('loads catalog and catalogs', () => {
