@@ -102,6 +102,7 @@ export class AzureStorageBuildCacheProvider
       terminal,
       cacheId,
       async (blobClient: BlobClient) => {
+        // TODO: Determine if this is necessary, or if the Azure Storage SDK handles this internally.
         await FileSystem.ensureFolderAsync(path.dirname(localFilePath));
         await blobClient.downloadToFile(localFilePath);
         return true;
