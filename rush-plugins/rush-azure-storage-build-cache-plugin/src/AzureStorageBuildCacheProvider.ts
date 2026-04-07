@@ -154,8 +154,7 @@ export class AzureStorageBuildCacheProvider
   private async _trySetBlobDataAsync(
     terminal: ITerminal,
     cacheId: string,
-    uploadAsync: (blockBlobClient: BlockBlobClient) => Promise<void>,
-    onBlobAlreadyExists?: () => void
+    uploadAsync: (blockBlobClient: BlockBlobClient) => Promise<void>
   ): Promise<boolean> {
     if (!this.isCacheWriteAllowed) {
       terminal.writeErrorLine(
@@ -188,7 +187,6 @@ export class AzureStorageBuildCacheProvider
 
     if (blobAlreadyExists) {
       terminal.writeVerboseLine('Build cache entry blob already exists.');
-      onBlobAlreadyExists?.();
       return true;
     } else {
       try {
