@@ -399,9 +399,9 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
       }
     }
 
-    const bodyLength: number | string = Buffer.isBuffer(body) ? body.length : 'unknown';
+    const bodyLengthDesc: string = Buffer.isBuffer(body) ? `${body.length} bytes` : 'unknown length';
 
-    terminal.writeDebugLine(`[http-build-cache] request: ${method} ${url} ${bodyLength} bytes`);
+    terminal.writeDebugLine(`[http-build-cache] request: ${method} ${url} ${bodyLengthDesc}`);
 
     const fetchOptions: IGetFetchOptions | IFetchOptionsWithBody = {
       verb: method,
