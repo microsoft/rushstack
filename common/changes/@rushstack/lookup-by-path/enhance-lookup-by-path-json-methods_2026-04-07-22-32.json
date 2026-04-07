@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add toJson/fromJson methods for serialization/deserialization; use Object.create(null) for dictionary initialization",
+      "type": "minor",
+      "packageName": "@rushstack/lookup-by-path"
+    }
+  ],
+  "packageName": "@rushstack/lookup-by-path",
+  "email": "198982749+Copilot@users.noreply.github.com"
+}
