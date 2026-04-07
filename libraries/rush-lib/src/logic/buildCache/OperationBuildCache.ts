@@ -191,7 +191,15 @@ export class OperationBuildCache {
             updateLocalCacheSuccess = true;
           }
         } catch (e) {
-          terminal.writeVerboseLine(`Failed to update local cache: ${e}`);
+          terminal.writeVerboseLine(`Failed to download cache entry to local cache: ${e}`);
+          // Clean up any partial file left by the failed download so it isn't
+          // mistaken for a valid cache entry on the next build.
+          try {
+            await FileSystem.deleteFileAsync(targetPath);
+          } catch {
+            // Ignore cleanup errors (file may not have been created)
+          }
+
           updateLocalCacheSuccess = false;
         }
       } else {
