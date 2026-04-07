@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'node:path';
+
 import {
   type BlobClient,
   BlobServiceClient,
@@ -9,6 +11,7 @@ import {
 } from '@azure/storage-blob';
 import { AzureAuthorityHosts } from '@azure/identity';
 
+import { FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import {
   type ICloudBuildCacheProvider,
@@ -99,6 +102,7 @@ export class AzureStorageBuildCacheProvider
       terminal,
       cacheId,
       async (blobClient: BlobClient) => {
+        await FileSystem.ensureFolderAsync(path.dirname(localFilePath));
         await blobClient.downloadToFile(localFilePath);
         return true;
       }
