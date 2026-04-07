@@ -252,7 +252,7 @@ Array [
 
   // ── File-based GET ──────────────────────────────────────────────────────
 
-  describe('tryGetCacheEntryToFileAsync', () => {
+  describe('tryDownloadCacheEntryToFileAsync', () => {
     it('downloads to file on a successful response', async () => {
       jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue('token123');
 
@@ -269,7 +269,11 @@ Array [
         stream: mockStream
       });
 
-      const result = await provider.tryGetCacheEntryToFileAsync(terminal, 'some-key', '/tmp/cache-entry');
+      const result = await provider.tryDownloadCacheEntryToFileAsync(
+        terminal,
+        'some-key',
+        '/tmp/cache-entry'
+      );
       expect(result).toBe(true);
       expect(streamFetchFn).toHaveBeenCalledTimes(1);
       expect(streamFetchFn).toHaveBeenCalledWith(
@@ -295,7 +299,11 @@ Array [
         stream: mockStream
       });
 
-      const result = await provider.tryGetCacheEntryToFileAsync(terminal, 'some-key', '/tmp/cache-entry');
+      const result = await provider.tryDownloadCacheEntryToFileAsync(
+        terminal,
+        'some-key',
+        '/tmp/cache-entry'
+      );
       expect(result).toBe(false);
     });
 
@@ -325,7 +333,11 @@ Array [
         stream: createMockStream()
       });
 
-      const result = await provider.tryGetCacheEntryToFileAsync(terminal, 'some-key', '/tmp/cache-entry');
+      const result = await provider.tryDownloadCacheEntryToFileAsync(
+        terminal,
+        'some-key',
+        '/tmp/cache-entry'
+      );
       expect(result).toBe(false);
       expect(streamFetchFn).toHaveBeenCalledTimes(3);
     });
@@ -333,12 +345,16 @@ Array [
 
   // ── File-based SET ──────────────────────────────────────────────────────
 
-  describe('trySetCacheEntryFromFileAsync', () => {
+  describe('tryUploadCacheEntryFromFileAsync', () => {
     it('returns false when cache write is not allowed', async () => {
       const session: RushSession = {} as RushSession;
       const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session); // write not allowed
 
-      const result = await provider.trySetCacheEntryFromFileAsync(terminal, 'some-key', '/tmp/cache-entry');
+      const result = await provider.tryUploadCacheEntryFromFileAsync(
+        terminal,
+        'some-key',
+        '/tmp/cache-entry'
+      );
 
       expect(result).toBe(false);
       expect(streamFetchFn).not.toHaveBeenCalled();
@@ -360,7 +376,11 @@ Array [
         stream: responseStream
       });
 
-      const result = await provider.trySetCacheEntryFromFileAsync(terminal, 'some-key', '/tmp/cache-entry');
+      const result = await provider.tryUploadCacheEntryFromFileAsync(
+        terminal,
+        'some-key',
+        '/tmp/cache-entry'
+      );
 
       expect(result).toBe(true);
       expect(streamFetchFn).toHaveBeenCalledTimes(1);
@@ -386,7 +406,11 @@ Array [
         stream: responseStream
       });
 
-      const result = await provider.trySetCacheEntryFromFileAsync(terminal, 'some-key', '/tmp/cache-entry');
+      const result = await provider.tryUploadCacheEntryFromFileAsync(
+        terminal,
+        'some-key',
+        '/tmp/cache-entry'
+      );
 
       expect(result).toBe(false);
       // maxAttempts is 1 for file-based uploads, so only 1 call
@@ -421,7 +445,11 @@ Array [
 
       // Even though credentials are optional and we got a 4xx, the stream body
       // should prevent the credential fallback retry since the stream is consumed
-      const result = await provider.trySetCacheEntryFromFileAsync(terminal, 'some-key', '/tmp/cache-entry');
+      const result = await provider.tryUploadCacheEntryFromFileAsync(
+        terminal,
+        'some-key',
+        '/tmp/cache-entry'
+      );
 
       expect(result).toBe(false);
       // Should only be called once (no credential fallback retry with consumed stream)

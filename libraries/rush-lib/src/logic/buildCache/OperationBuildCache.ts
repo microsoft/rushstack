@@ -175,13 +175,13 @@ export class OperationBuildCache {
 
       if (
         this._useDirectFileTransfersForBuildCache &&
-        this._cloudBuildCacheProvider.tryGetCacheEntryToFileAsync
+        this._cloudBuildCacheProvider.tryDownloadCacheEntryToFileAsync
       ) {
         // Use file-based path to avoid loading the entire cache entry into memory.
         // The provider downloads directly to the local cache file.
         const targetPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
         try {
-          cloudCacheHit = await this._cloudBuildCacheProvider.tryGetCacheEntryToFileAsync(
+          cloudCacheHit = await this._cloudBuildCacheProvider.tryDownloadCacheEntryToFileAsync(
             terminal,
             cacheId,
             targetPath
@@ -350,11 +350,11 @@ export class OperationBuildCache {
 
       if (
         this._useDirectFileTransfersForBuildCache &&
-        this._cloudBuildCacheProvider.trySetCacheEntryFromFileAsync
+        this._cloudBuildCacheProvider.tryUploadCacheEntryFromFileAsync
       ) {
         // Use file-based upload to avoid loading the entire cache entry into memory.
         // The provider reads from the local cache file directly.
-        setCloudCacheEntryPromise = this._cloudBuildCacheProvider.trySetCacheEntryFromFileAsync(
+        setCloudCacheEntryPromise = this._cloudBuildCacheProvider.tryUploadCacheEntryFromFileAsync(
           terminal,
           cacheId,
           localCacheEntryPath

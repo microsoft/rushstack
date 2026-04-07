@@ -90,7 +90,7 @@ export class AzureStorageBuildCacheProvider
     });
   }
 
-  public async tryGetCacheEntryToFileAsync(
+  public async tryDownloadCacheEntryToFileAsync(
     terminal: ITerminal,
     cacheId: string,
     localFilePath: string
@@ -107,7 +107,7 @@ export class AzureStorageBuildCacheProvider
     return result ?? false;
   }
 
-  public async trySetCacheEntryFromFileAsync(
+  public async tryUploadCacheEntryFromFileAsync(
     terminal: ITerminal,
     cacheId: string,
     localFilePath: string

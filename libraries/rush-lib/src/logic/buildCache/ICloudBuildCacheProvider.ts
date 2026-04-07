@@ -21,7 +21,11 @@ export interface ICloudBuildCacheProvider {
    * @returns `true` if the cache entry was found and written to the file, `false` if it was
    * not found. Throws on errors.
    */
-  tryGetCacheEntryToFileAsync?(terminal: ITerminal, cacheId: string, localFilePath: string): Promise<boolean>;
+  tryDownloadCacheEntryToFileAsync?(
+    terminal: ITerminal,
+    cacheId: string,
+    localFilePath: string
+  ): Promise<boolean>;
   /**
    * If implemented, the build cache will prefer to use this method over
    * {@link ICloudBuildCacheProvider.trySetCacheEntryBufferAsync} to avoid loading the entire
@@ -30,7 +34,7 @@ export interface ICloudBuildCacheProvider {
    *
    * @returns `true` if the cache entry was written to the cache, otherwise `false`.
    */
-  trySetCacheEntryFromFileAsync?(
+  tryUploadCacheEntryFromFileAsync?(
     terminal: ITerminal,
     cacheId: string,
     localFilePath: string

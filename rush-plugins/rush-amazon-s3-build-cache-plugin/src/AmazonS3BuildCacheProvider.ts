@@ -179,7 +179,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     }
   }
 
-  public async tryGetCacheEntryToFileAsync(
+  public async tryDownloadCacheEntryToFileAsync(
     terminal: ITerminal,
     cacheId: string,
     localFilePath: string
@@ -193,7 +193,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     }
   }
 
-  public async trySetCacheEntryFromFileAsync(
+  public async tryUploadCacheEntryFromFileAsync(
     terminal: ITerminal,
     cacheId: string,
     localFilePath: string
