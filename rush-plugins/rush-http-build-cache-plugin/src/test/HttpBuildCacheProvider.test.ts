@@ -9,11 +9,6 @@ jest.mock('node:stream/promises', () => ({
   pipeline: jest.fn().mockResolvedValue(undefined)
 }));
 
-jest.mock('node:fs', () => ({
-  createReadStream: jest.fn().mockReturnValue({ pipe: jest.fn() }),
-  createWriteStream: jest.fn().mockReturnValue({})
-}));
-
 import { Readable } from 'node:stream';
 
 import { type RushSession, EnvironmentConfiguration } from '@rushstack/rush-sdk';
@@ -58,6 +53,12 @@ describe('HttpBuildCacheProvider', () => {
     streamFetchFn = jest.fn();
     WebClient.mockRequestFn(fetchFn as unknown as FetchFnType);
     WebClient.mockStreamRequestFn(streamFetchFn as unknown as StreamFetchFnType);
+    jest
+      .spyOn(FileSystem, 'createReadStream')
+      .mockReturnValue({ pipe: jest.fn() } as unknown as ReturnType<typeof FileSystem.createReadStream>);
+    jest
+      .spyOn(FileSystem, 'createWriteStreamAsync')
+      .mockResolvedValue({} as unknown as Awaited<ReturnType<typeof FileSystem.createWriteStreamAsync>>);
     jest.spyOn(FileSystem, 'ensureFolderAsync').mockResolvedValue();
   });
 

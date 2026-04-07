@@ -9,21 +9,6 @@ jest.mock('node:stream/promises', () => ({
   pipeline: jest.fn().mockResolvedValue(undefined)
 }));
 
-jest.mock('node:fs', () => {
-  const { Readable: ReadableImpl } = jest.requireActual('node:stream');
-  return {
-    createReadStream: jest.fn().mockImplementation(() => {
-      // Return a Readable that emits empty data then ends, so _hashFileAsync completes
-      return new ReadableImpl({
-        read() {
-          this.push(null);
-        }
-      });
-    }),
-    createWriteStream: jest.fn().mockReturnValue({})
-  };
-});
-
 import { Readable } from 'node:stream';
 
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
@@ -672,6 +657,17 @@ describe(AmazonS3Client.name, () => {
       }).bind(global) as typeof global.setTimeout;
 
       jest.spyOn(FileSystem, 'ensureFolderAsync').mockResolvedValue();
+      jest
+        .spyOn(FileSystem, 'createWriteStreamAsync')
+        .mockResolvedValue({} as unknown as Awaited<ReturnType<typeof FileSystem.createWriteStreamAsync>>);
+      // Return a Readable that immediately ends, so _hashFileAsync completes with the null hash
+      jest.spyOn(FileSystem, 'createReadStream').mockReturnValue(
+        new Readable({
+          read() {
+            this.push(null);
+          }
+        }) as unknown as ReturnType<typeof FileSystem.createReadStream>
+      );
     });
 
     afterEach(() => {
