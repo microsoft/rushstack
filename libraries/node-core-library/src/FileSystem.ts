@@ -1271,7 +1271,9 @@ export class FileSystem {
    * @returns A new readable stream for the file.
    */
   public static createReadStream(filePath: string): FileSystemReadStream {
-    return fs.createReadStream(filePath);
+    return FileSystem._wrapException(() => {
+      return fs.createReadStream(filePath);
+    });
   }
 
   /**
@@ -1289,12 +1291,14 @@ export class FileSystem {
     filePath: string,
     options?: IFileSystemCreateWriteStreamOptions
   ): FileSystemWriteStream {
-    if (options?.ensureFolderExists) {
-      const folderPath: string = nodeJsPath.dirname(filePath);
-      FileSystem.ensureFolder(folderPath);
-    }
+    return FileSystem._wrapException(() => {
+      if (options?.ensureFolderExists) {
+        const folderPath: string = nodeJsPath.dirname(filePath);
+        FileSystem.ensureFolder(folderPath);
+      }
 
-    return fs.createWriteStream(filePath);
+      return fs.createWriteStream(filePath);
+    });
   }
 
   /**
@@ -1304,12 +1308,14 @@ export class FileSystem {
     filePath: string,
     options?: IFileSystemCreateWriteStreamOptions
   ): Promise<FileSystemWriteStream> {
-    if (options?.ensureFolderExists) {
-      const folderPath: string = nodeJsPath.dirname(filePath);
-      await FileSystem.ensureFolderAsync(folderPath);
-    }
+    return await FileSystem._wrapExceptionAsync(async () => {
+      if (options?.ensureFolderExists) {
+        const folderPath: string = nodeJsPath.dirname(filePath);
+        await FileSystem.ensureFolderAsync(folderPath);
+      }
 
-    return fs.createWriteStream(filePath);
+      return fs.createWriteStream(filePath);
+    });
   }
 
   // ===============
