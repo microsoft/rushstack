@@ -393,7 +393,7 @@ Array [
       );
     });
 
-    it('does not retry on failure (stream consumed)', async () => {
+    it('does not retry on failure (file stream already consumed)', async () => {
       jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue('token123');
 
       const session: RushSession = {} as RushSession;
@@ -418,7 +418,7 @@ Array [
       expect(streamFetchFn).toHaveBeenCalledTimes(1);
     });
 
-    it('skips credential fallback for stream bodies on 4xx', async () => {
+    it('skips credential fallback for file-based uploads on 4xx', async () => {
       // No credential in env for the first attempt
       jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue(undefined);
       // But credentials ARE available in the credential cache — without the stream-body

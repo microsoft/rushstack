@@ -123,7 +123,7 @@ export class AzureStorageBuildCacheProvider
   }
 
   /**
-   * Shared logic for both buffer and stream GET operations.
+   * Shared logic for both buffer-based and file-based GET operations.
    * Checks if the blob exists, retrieves data via the provided callback, and handles errors.
    */
   private async _tryGetBlobDataAsync<T>(
@@ -147,7 +147,7 @@ export class AzureStorageBuildCacheProvider
   }
 
   /**
-   * Shared logic for both buffer and stream SET operations.
+   * Shared logic for both buffer-based and file-based SET operations.
    * Checks write permission, whether the blob already exists, uploads via the provided callback,
    * and handles 409 conflict errors.
    */
