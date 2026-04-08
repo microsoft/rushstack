@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`toJson and fromJson snapshot: serialized JSON for a simple tree 1`] = `
+Object {
+  "delimiter": "/",
+  "tree": Object {
+    "children": Object {
+      "baz": Object {
+        "valueIndex": 2,
+      },
+      "foo": Object {
+        "children": Object {
+          "bar": Object {
+            "valueIndex": 1,
+          },
+        },
+        "valueIndex": 0,
+      },
+    },
+  },
+  "values": Array [
+    1,
+    2,
+    3,
+  ],
+}
+`;
+
+exports[`toJson and fromJson snapshot: serialized JSON with intermediate nodes and custom delimiter 1`] = `
+Object {
+  "delimiter": ",",
+  "tree": Object {
+    "children": Object {
+      "a": Object {
+        "children": Object {
+          "b": Object {
+            "children": Object {
+              "c": Object {
+                "valueIndex": 1,
+              },
+            },
+            "valueIndex": 0,
+          },
+        },
+      },
+      "x": Object {
+        "valueIndex": 2,
+      },
+    },
+  },
+  "values": Array [
+    "mid",
+    "deep",
+    "top",
+  ],
+}
+`;

@@ -675,7 +675,7 @@ describe(LookupByPath.prototype.groupByChild.name, () => {
   });
 });
 
-describe('toJson and fromJson', () => {
+describe(`${LookupByPath.prototype.toJson.name} and ${LookupByPath.fromJson.name}`, () => {
   it('round-trips an empty trie', () => {
     const original = new LookupByPath<number>();
     const json: ILookupByPathJson<number> = original.toJson((v) => v);
@@ -700,6 +700,31 @@ describe('toJson and fromJson', () => {
     expect(restored.get('foo/bar')).toEqual(2);
     expect(restored.get('baz')).toEqual(3);
     expect(restored.get('missing')).toEqual(undefined);
+  });
+
+  it('snapshot: serialized JSON for a simple tree', () => {
+    const original = new LookupByPath<number>([
+      ['foo', 1],
+      ['foo/bar', 2],
+      ['baz', 3]
+    ]);
+
+    const json: ILookupByPathJson<number> = original.toJson((v) => v);
+    expect(json).toMatchSnapshot();
+  });
+
+  it('snapshot: serialized JSON with intermediate nodes and custom delimiter', () => {
+    const original = new LookupByPath<string>(
+      [
+        ['a,b,c', 'deep'],
+        ['a,b', 'mid'],
+        ['x', 'top']
+      ],
+      ','
+    );
+
+    const json: ILookupByPathJson<string> = original.toJson((v) => v);
+    expect(json).toMatchSnapshot();
   });
 
   it('round-trips with string values', () => {
