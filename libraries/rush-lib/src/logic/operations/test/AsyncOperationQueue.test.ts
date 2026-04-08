@@ -168,4 +168,74 @@ describe(AsyncOperationQueue.name, () => {
     const result: IteratorResult<OperationExecutionRecord> = await iterator.next();
     expect(result.done).toEqual(true);
   });
+
+  it('sorts cobuild retries after untried operations', async () => {
+    // Three independent operations: A, B, C (all Ready).
+    // A is assigned first, then returns to Ready (cobuild lock failed).
+    // On the next pass, B and C should be assigned before A because A
+    // has a recent lastAssignedAt timestamp.
+    const opA = createRecord('a');
+    const opB = createRecord('b');
+    const opC = createRecord('c');
+
+    const queue: AsyncOperationQueue = new AsyncOperationQueue([opA, opB, opC], nullSort);
+
+    // Assign one operation
+    const r1: IteratorResult<OperationExecutionRecord> = await queue.next();
+    const firstAssigned: OperationExecutionRecord = r1.value;
+
+    // Simulate cobuild retry: operation returns to Ready
+    firstAssigned.status = OperationStatus.Ready;
+
+    // Assign all three — untried operations should come before the retry
+    const results: OperationExecutionRecord[] = [];
+    for await (const item of queue) {
+      results.push(item);
+      queue.complete(item);
+    }
+
+    // The cobuild retry should be last
+    expect(results[2]).toBe(firstAssigned);
+  });
+
+  it('assigns freshly unblocked operations before cobuild retries', async () => {
+    // A (no deps), B (depends on C), C (no deps)
+    // A is assigned and returns to Ready (cobuild retry).
+    // C completes, unblocking B. B should be assigned before A.
+    const opA = createRecord('a');
+    const opB = createRecord('b');
+    const opC = createRecord('c');
+
+    addDependency(opB, opC);
+
+    const queue: AsyncOperationQueue = new AsyncOperationQueue([opA, opB, opC], nullSort);
+
+    // Pull both initially ready operations (A and C)
+    const r1: IteratorResult<OperationExecutionRecord> = await queue.next();
+    const r2: IteratorResult<OperationExecutionRecord> = await queue.next();
+    expect(new Set([r1.value, r2.value])).toEqual(new Set([opA, opC]));
+
+    // Simulate: A fails cobuild lock and returns to Ready
+    opA.status = OperationStatus.Ready;
+
+    // C succeeds, which unblocks B
+    opC.status = OperationStatus.Success;
+    queue.complete(opC);
+
+    // B is freshly unblocked (never assigned), A is a cobuild retry — B should be first
+    const r3: IteratorResult<OperationExecutionRecord> = await queue.next();
+    expect(r3.value).toBe(opB);
+
+    const r4: IteratorResult<OperationExecutionRecord> = await queue.next();
+    expect(r4.value).toBe(opA);
+
+    // Complete remaining
+    opA.status = OperationStatus.Success;
+    queue.complete(opA);
+    opB.status = OperationStatus.Success;
+    queue.complete(opB);
+
+    const rEnd: IteratorResult<OperationExecutionRecord> = await queue.next();
+    expect(rEnd.done).toBe(true);
+  });
 });
