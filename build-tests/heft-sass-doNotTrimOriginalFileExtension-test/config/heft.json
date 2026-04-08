@@ -1,0 +1,34 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [{ "includeGlobs": ["lib-commonjs", "lib-css", "temp"] }],
+
+      "tasksByName": {
+        "sass": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-sass-plugin"
+          }
+        },
+        "typescript": {
+          "taskDependencies": ["sass"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-typescript-plugin"
+          }
+        }
+      }
+    },
+
+    "test": {
+      "phaseDependencies": ["build"],
+      "tasksByName": {
+        "jest": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-jest-plugin"
+          }
+        }
+      }
+    }
+  }
+}

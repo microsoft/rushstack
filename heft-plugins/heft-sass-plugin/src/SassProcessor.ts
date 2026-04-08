@@ -41,7 +41,7 @@ const SIMPLE_IDENTIFIER_REGEX: RegExp = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
  */
 export interface ICssOutputFolder {
   folder: string;
-  shimModuleFormat: 'commonjs' | 'esnext' | undefined;
+  shimModuleFormat?: 'commonjs' | 'esnext';
 }
 
 /**
@@ -113,6 +113,13 @@ export interface ISassProcessorOptions {
    * A list of deprecation codes to silence.  This is useful for suppressing warnings from deprecated Sass features that are used in the project and known not to be a problem.
    */
   silenceDeprecations?: readonly string[];
+
+  /**
+   * If true, the original file extension will not be trimmed when generating the output CSS file. The generated CSS
+   * file will retain its original extension. For example, "styles.scss" will generate "styles.scss.css"
+   * instead of "styles.css".
+   */
+  doNotTrimOriginalFileExtension?: boolean;
 
   /**
    * A callback to further modify the raw CSS text after it has been generated. Only relevant if emitting CSS files.
@@ -738,8 +745,14 @@ export class SassProcessor {
     }
 
     record.cssVersion = contentHash;
-    const { cssOutputFolders, dtsOutputFolders, srcFolder, exportAsDefault, postProcessCssAsync } =
-      this._options;
+    const {
+      cssOutputFolders,
+      dtsOutputFolders,
+      srcFolder,
+      exportAsDefault,
+      doNotTrimOriginalFileExtension,
+      postProcessCssAsync
+    } = this._options;
 
     // Handle CSS modules
     let moduleMap: JsonObject | undefined;
@@ -779,16 +792,26 @@ export class SassProcessor {
       );
     }
 
-    const filename: string = path.basename(relativeFilePath);
-    const extensionStart: number = filename.lastIndexOf('.');
-    const cssPathFromJs: string = `./${filename.slice(0, extensionStart)}.css`;
-    const relativeCssPath: string = `${relativeFilePath.slice(0, relativeFilePath.lastIndexOf('.'))}.css`;
-
     if (cssOutputFolders && cssOutputFolders.length > 0) {
       if (!exportAsDefault) {
         throw new Error(`The "cssOutputFolders" option is not supported when "exportAsDefault" is false.`);
       }
 
+      const filename: string = path.basename(relativeFilePath);
+      let cssFilename: string;
+      let relativeCssPath: string;
+      if (doNotTrimOriginalFileExtension) {
+        cssFilename = `${filename}.css`;
+        relativeCssPath = `${relativeFilePath}.css`;
+      } else {
+        const extensionStart: number = filename.lastIndexOf('.');
+        cssFilename = `${filename.slice(0, extensionStart)}.css`;
+
+        const relativeFilePathStart: number = relativeFilePath.lastIndexOf('.');
+        relativeCssPath = `${relativeFilePath.slice(0, relativeFilePathStart)}.css`;
+      }
+
+      const cssPathFromJs: string = `./${cssFilename}`;
       for (const cssOutputFolder of cssOutputFolders) {
         const { folder, shimModuleFormat } = cssOutputFolder;
 
