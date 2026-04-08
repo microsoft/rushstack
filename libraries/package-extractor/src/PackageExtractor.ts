@@ -109,7 +109,7 @@ export interface IExtractorSubspace {
    */
   transformPackageJson?: (packageJson: IPackageJson) => IPackageJson;
   /**
-   * Whether PNPM's `node-modules.hoisting` is enabled for this subspace. When set to `false`,
+   * Whether PNPM hoisting is enabled for this subspace. When set to `false`,
    * the extractor will skip looking for hoisted packages in the PNPM virtual store, since no
    * hoisting symlinks will exist. Default is `true`.
    */
