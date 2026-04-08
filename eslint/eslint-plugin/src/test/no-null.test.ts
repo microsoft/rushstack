@@ -49,6 +49,11 @@ ruleTester.run('no-null', noNullRule, {
       // Computed property access: Object["create"](null) is NOT exempted
       code: 'Object["create"](null);',
       errors: [{ messageId: 'error-usage-of-null' }]
+    },
+    {
+      // null on a non-__proto__ property is still flagged
+      code: 'const x = { foo: null };',
+      errors: [{ messageId: 'error-usage-of-null' }]
     }
   ],
   valid: [
@@ -79,6 +84,14 @@ ruleTester.run('no-null', noNullRule, {
     {
       // Object.create(null) inside a function
       code: 'function createDict() { return Object.create(null); }'
+    },
+    {
+      // __proto__: null is allowed in object literals
+      code: 'const obj = { __proto__: null, a: 1 };'
+    },
+    {
+      // __proto__: null as string key is also allowed
+      code: 'const obj = { "__proto__": null, a: 1 };'
     }
   ]
 });

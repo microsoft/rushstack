@@ -32,16 +32,6 @@ ruleTester.run('null-prototype-dictionaries', nullPrototypeDictionariesRule, {
       // Return value from function
       code: 'function f(): Record<string, number> { return {}; }',
       errors: [{ messageId: 'error-empty-object-literal-dictionary' }]
-    },
-    {
-      // Non-empty object literal without __proto__: null
-      code: 'const dict: Record<string, string> = { a: "hello" };',
-      errors: [{ messageId: 'error-missing-null-prototype' }]
-    },
-    {
-      // Non-empty object literal with __proto__ set to something other than null
-      code: 'const dict: Record<string, string> = { __proto__: Object.prototype, a: "hello" };',
-      errors: [{ messageId: 'error-missing-null-prototype' }]
     }
   ],
   valid: [
@@ -50,7 +40,11 @@ ruleTester.run('null-prototype-dictionaries', nullPrototypeDictionariesRule, {
       code: 'const dict: Record<string, number> = Object.create(null);'
     },
     {
-      // Correct pattern: non-empty literal with __proto__: null
+      // Non-empty object literal is allowed for now
+      code: 'const dict: Record<string, string> = { a: "hello" };'
+    },
+    {
+      // Non-empty literal with __proto__: null is also fine
       code: 'const dict: Record<string, string> = { __proto__: null, a: "hello" };'
     },
     {

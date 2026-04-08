@@ -50,6 +50,20 @@ const noNullRule: TSESLint.RuleModule<MessageIds, Options> = {
             return;
           }
 
+          // Is this "__proto__: null" inside an object literal?  This is used to create
+          // an object literal that does not inherit from Object.prototype.
+          if (
+            node.parent &&
+            node.parent.type === AST_NODE_TYPES.Property &&
+            !node.parent.computed &&
+            ((node.parent.key.type === AST_NODE_TYPES.Identifier &&
+              node.parent.key.name === '__proto__') ||
+              (node.parent.key.type === AST_NODE_TYPES.Literal &&
+                node.parent.key.value === '__proto__'))
+          ) {
+            return;
+          }
+
           context.report({ node, messageId: 'error-usage-of-null' });
         }
       }
