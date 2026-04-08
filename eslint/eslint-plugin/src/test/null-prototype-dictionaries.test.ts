@@ -13,17 +13,12 @@ ruleTester.run('null-prototype-dictionaries', nullPrototypeDictionariesRule, {
     {
       // Empty object literal assigned to Record<string, number>
       code: 'const dict: Record<string, number> = {};',
-      errors: [{ messageId: 'error-object-literal-dictionary' }]
+      errors: [{ messageId: 'error-empty-object-literal-dictionary' }]
     },
     {
       // Empty object literal assigned to index signature type
       code: 'const dict: { [key: string]: number } = {};',
-      errors: [{ messageId: 'error-object-literal-dictionary' }]
-    },
-    {
-      // Non-empty object literal assigned to Record type
-      code: 'const dict: Record<string, string> = { a: "hello" };',
-      errors: [{ messageId: 'error-object-literal-dictionary' }]
+      errors: [{ messageId: 'error-empty-object-literal-dictionary' }]
     },
     {
       // Reassignment to empty object literal
@@ -31,18 +26,32 @@ ruleTester.run('null-prototype-dictionaries', nullPrototypeDictionariesRule, {
         'let dict: Record<string, number>;',
         'dict = {};'
       ].join('\n'),
-      errors: [{ messageId: 'error-object-literal-dictionary' }]
+      errors: [{ messageId: 'error-empty-object-literal-dictionary' }]
     },
     {
       // Return value from function
       code: 'function f(): Record<string, number> { return {}; }',
-      errors: [{ messageId: 'error-object-literal-dictionary' }]
+      errors: [{ messageId: 'error-empty-object-literal-dictionary' }]
+    },
+    {
+      // Non-empty object literal without __proto__: null
+      code: 'const dict: Record<string, string> = { a: "hello" };',
+      errors: [{ messageId: 'error-missing-null-prototype' }]
+    },
+    {
+      // Non-empty object literal with __proto__ set to something other than null
+      code: 'const dict: Record<string, string> = { __proto__: Object.prototype, a: "hello" };',
+      errors: [{ messageId: 'error-missing-null-prototype' }]
     }
   ],
   valid: [
     {
-      // Correct pattern: Object.create(null) for dictionary
+      // Correct pattern: Object.create(null) for empty dictionary
       code: 'const dict: Record<string, number> = Object.create(null);'
+    },
+    {
+      // Correct pattern: non-empty literal with __proto__: null
+      code: 'const dict: Record<string, string> = { __proto__: null, a: "hello" };'
     },
     {
       // Regular object type with named properties (not a dictionary)

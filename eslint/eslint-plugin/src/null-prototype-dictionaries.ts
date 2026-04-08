@@ -4,7 +4,7 @@
 import type { TSESTree, TSESLint, ParserServices } from '@typescript-eslint/utils';
 import type * as ts from 'typescript';
 
-type MessageIds = 'error-object-literal-dictionary';
+type MessageIds = 'error-empty-object-literal-dictionary' | 'error-missing-null-prototype';
 type Options = [];
 
 const nullPrototypeDictionariesRule: TSESLint.RuleModule<MessageIds, Options> = {
@@ -12,12 +12,15 @@ const nullPrototypeDictionariesRule: TSESLint.RuleModule<MessageIds, Options> = 
   meta: {
     type: 'problem',
     messages: {
-      'error-object-literal-dictionary':
+      'error-empty-object-literal-dictionary':
         'Dictionary objects typed as Record<string, T> should be created using Object.create(null)' +
-        ' instead of an object literal. This avoids prototype pollution, collisions with' +
+        ' instead of an empty object literal. This avoids prototype pollution, collisions with' +
         ' Object.prototype members such as "toString", and enables higher performance since runtimes' +
         ' such as V8 process Object.create(null) as opting out of having a hidden class and going' +
-        ' directly to dictionary mode.'
+        ' directly to dictionary mode.',
+      'error-missing-null-prototype':
+        'Dictionary object literals typed as Record<string, T> should include "__proto__: null"' +
+        ' to avoid prototype pollution and collisions with Object.prototype members such as "toString".'
     },
     schema: [],
     docs: {
@@ -76,10 +79,34 @@ const nullPrototypeDictionariesRule: TSESLint.RuleModule<MessageIds, Options> = 
           return;
         }
 
-        if (isStringKeyedDictionaryType(contextualType)) {
+        if (!isStringKeyedDictionaryType(contextualType)) {
+          return;
+        }
+
+        // For empty object literals, recommend Object.create(null) which is more performant
+        if (node.properties.length === 0) {
           context.report({
             node,
-            messageId: 'error-object-literal-dictionary'
+            messageId: 'error-empty-object-literal-dictionary'
+          });
+          return;
+        }
+
+        // For non-empty object literals, check whether "__proto__: null" is present
+        const hasNullProto: boolean = node.properties.some(
+          (prop) =>
+            prop.type === 'Property' &&
+            !prop.computed &&
+            ((prop.key.type === 'Identifier' && prop.key.name === '__proto__') ||
+              (prop.key.type === 'Literal' && prop.key.value === '__proto__')) &&
+            prop.value.type === 'Literal' &&
+            prop.value.value === null
+        );
+
+        if (!hasNullProto) {
+          context.report({
+            node,
+            messageId: 'error-missing-null-prototype'
           });
         }
       }
