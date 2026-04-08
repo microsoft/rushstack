@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as nodeJsOs from 'node:os';
 import fs from 'node:fs';
 
 import { FileSystem } from '../FileSystem';
 import { PosixModeBits } from '../PosixModeBits';
+
+// Use a deterministic path inside the project's output folder for temp files
+const testTempFolder: string = `${__dirname}/temp`;
 
 describe(FileSystem.name, () => {
   test(FileSystem.formatPosixModeBits.name, () => {
@@ -54,109 +56,108 @@ describe(FileSystem.name, () => {
   });
 
   describe(FileSystem.createReadStream.name, () => {
-    let tempDir: string;
+    const tempDir: string = `${testTempFolder}/createReadStream`;
 
-    beforeEach(() => {
-      tempDir = fs.mkdtempSync(`${nodeJsOs.tmpdir()}/filesystem-test-`);
+    beforeEach(async () => {
+      await FileSystem.ensureFolderAsync(tempDir);
     });
 
-    afterEach(() => {
-      fs.rmSync(tempDir, { recursive: true, force: true });
+    afterEach(async () => {
+      await FileSystem.deleteFolderAsync(tempDir);
     });
 
-    test('returns a readable stream for an existing file', (done) => {
+    test('returns a readable stream for an existing file', async () => {
       const filePath: string = `${tempDir}/test.txt`;
-      fs.writeFileSync(filePath, 'hello world');
+      await FileSystem.writeFileAsync(filePath, 'hello world');
 
       const stream: fs.ReadStream = FileSystem.createReadStream(filePath);
       const chunks: Buffer[] = [];
 
-      stream.on('data', (chunk: string | Buffer) => {
+      for await (const chunk of stream) {
         chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-      });
+      }
 
-      stream.on('end', () => {
-        const result: string = Buffer.concat(chunks).toString();
-        expect(result).toBe('hello world');
-        done();
-      });
-
-      stream.on('error', done);
+      const result: string = Buffer.concat(chunks).toString();
+      expect(result).toBe('hello world');
     });
 
-    test('stream emits an error for a nonexistent file', (done) => {
+    test('stream emits an error for a nonexistent file', async () => {
       const filePath: string = `${tempDir}/nonexistent.txt`;
       const stream: fs.ReadStream = FileSystem.createReadStream(filePath);
 
-      stream.on('error', (error: NodeJS.ErrnoException) => {
-        expect(error.code).toBe('ENOENT');
-        done();
-      });
+      await expect(async () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for await (const _chunk of stream) {
+          fail();
+        }
+      }).rejects.toThrow(/ENOENT/);
     });
   });
 
   describe(FileSystem.createWriteStream.name, () => {
-    let tempDir: string;
+    const tempDir: string = `${testTempFolder}/createWriteStream`;
 
-    beforeEach(() => {
-      tempDir = fs.mkdtempSync(`${nodeJsOs.tmpdir()}/filesystem-test-`);
+    beforeEach(async () => {
+      await FileSystem.ensureFolderAsync(tempDir);
     });
 
-    afterEach(() => {
-      fs.rmSync(tempDir, { recursive: true, force: true });
+    afterEach(async () => {
+      await FileSystem.deleteFolderAsync(tempDir);
     });
 
-    test('creates a writable stream that writes data to a file', (done) => {
+    test('creates a writable stream that writes data to a file', async () => {
       const filePath: string = `${tempDir}/output.txt`;
       const stream: fs.WriteStream = FileSystem.createWriteStream(filePath);
 
-      stream.write('hello ');
-      stream.write('world');
-      stream.end(() => {
-        const result: string = fs.readFileSync(filePath, 'utf-8');
-        expect(result).toBe('hello world');
-        done();
+      await new Promise<void>((resolve, reject) => {
+        stream.on('error', reject);
+        stream.write('hello ');
+        stream.write('world');
+        stream.end(() => resolve());
       });
 
-      stream.on('error', done);
+      const result: string = await FileSystem.readFileAsync(filePath);
+      expect(result).toBe('hello world');
     });
 
-    test('emits an error when the parent folder does not exist and ensureFolderExists is not set', (done) => {
+    test('emits an error when the parent folder does not exist and ensureFolderExists is not set', async () => {
       const filePath: string = `${tempDir}/nonexistent-folder/output.txt`;
       const stream: fs.WriteStream = FileSystem.createWriteStream(filePath);
 
-      stream.on('error', (error: NodeJS.ErrnoException) => {
-        expect(error.code).toBe('ENOENT');
-        done();
-      });
+      await expect(
+        new Promise<void>((resolve, reject) => {
+          stream.on('error', reject);
+          stream.on('open', () => resolve());
+        })
+      ).rejects.toThrow(/ENOENT/);
     });
 
-    test('creates the parent folder when ensureFolderExists is true', (done) => {
+    test('creates the parent folder when ensureFolderExists is true', async () => {
       const filePath: string = `${tempDir}/new-folder/output.txt`;
       const stream: fs.WriteStream = FileSystem.createWriteStream(filePath, {
         ensureFolderExists: true
       });
 
-      stream.write('test data');
-      stream.end(() => {
-        const result: string = fs.readFileSync(filePath, 'utf-8');
-        expect(result).toBe('test data');
-        done();
+      await new Promise<void>((resolve, reject) => {
+        stream.on('error', reject);
+        stream.write('test data');
+        stream.end(() => resolve());
       });
 
-      stream.on('error', done);
+      const result: string = await FileSystem.readFileAsync(filePath);
+      expect(result).toBe('test data');
     });
   });
 
-  describe('createWriteStreamAsync', () => {
-    let tempDir: string;
+  describe(FileSystem.createWriteStreamAsync.name, () => {
+    const tempDir: string = `${testTempFolder}/createWriteStreamAsync`;
 
-    beforeEach(() => {
-      tempDir = fs.mkdtempSync(`${nodeJsOs.tmpdir()}/filesystem-test-`);
+    beforeEach(async () => {
+      await FileSystem.ensureFolderAsync(tempDir);
     });
 
-    afterEach(() => {
-      fs.rmSync(tempDir, { recursive: true, force: true });
+    afterEach(async () => {
+      await FileSystem.deleteFolderAsync(tempDir);
     });
 
     test('creates a writable stream that writes data to a file', async () => {
@@ -169,7 +170,7 @@ describe(FileSystem.name, () => {
         stream.end(() => resolve());
       });
 
-      const result: string = fs.readFileSync(filePath, 'utf-8');
+      const result: string = await FileSystem.readFileAsync(filePath);
       expect(result).toBe('async hello');
     });
 
@@ -185,7 +186,7 @@ describe(FileSystem.name, () => {
         stream.end(() => resolve());
       });
 
-      const result: string = fs.readFileSync(filePath, 'utf-8');
+      const result: string = await FileSystem.readFileAsync(filePath);
       expect(result).toBe('async test data');
     });
   });
