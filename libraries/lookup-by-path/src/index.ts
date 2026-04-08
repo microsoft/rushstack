@@ -7,7 +7,13 @@
  * @packageDocumentation
  */
 
-export type { IPrefixMatch, IReadonlyLookupByPath, IReadonlyPathTrieNode } from './LookupByPath';
+export type {
+  ILookupByPathJson,
+  IPrefixMatch,
+  IReadonlyLookupByPath,
+  IReadonlyPathTrieNode,
+  ISerializedPathTrieNode
+} from './LookupByPath';
 export { LookupByPath } from './LookupByPath';
 export type { IGetFirstDifferenceInCommonNodesOptions } from './getFirstDifferenceInCommonNodes';
 export { getFirstDifferenceInCommonNodes } from './getFirstDifferenceInCommonNodes';
