@@ -716,7 +716,13 @@ describe(AmazonS3Client.name, () => {
         );
         expect(result).toBe(true);
         expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy.mock.calls[0]).toMatchSnapshot();
+        const [url, options] = spy.mock.calls[0];
+        expect(url).toBe('http://localhost:9000/abc123');
+        expect(options.verb).toBe('GET');
+        expect(options.headers['x-amz-content-sha256']).toMatch(/^[0-9a-f]{64}$/);
+        expect(options.headers['x-amz-date']).toBe('20200418T123242Z');
+        // eslint-disable-next-line dot-notation
+        expect(options.headers['Authorization']).toContain('AWS4-HMAC-SHA256');
         expect(pipeline).toHaveBeenCalled();
         spy.mockRestore();
       });

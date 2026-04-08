@@ -209,7 +209,9 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         method: this._uploadMethod,
         body: entryStream,
         warningText: 'Could not write cache entry',
-        // Streaming uploads cannot be retried because the stream is consumed
+        // maxAttempts is 1 because the file read stream is consumed after the first attempt
+        // and cannot be replayed. Downloads use MAX_HTTP_CACHE_ATTEMPTS since each retry
+        // issues a fresh GET with no request body.
         maxAttempts: 1
       });
 

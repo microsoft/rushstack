@@ -97,7 +97,7 @@ describe('HttpBuildCacheProvider', () => {
       );
       expect(terminalBuffer.getAllOutputAsChunks({ asLines: true })).toMatchInlineSnapshot(`
 Array [
-  "[  debug] [http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown bytes[n]",
+  "[  debug] [http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown length[n]",
   "[warning] Error getting cache entry: Error: Credentials for https://buildcache.example.acme.com/ have not been provided.[n]",
   "[warning] In CI, verify that RUSH_BUILD_CACHE_CREDENTIAL contains a valid Authorization header value.[n]",
   "[warning] [n]",
@@ -160,9 +160,9 @@ Array [
       );
       expect(terminalBuffer.getAllOutputAsChunks({ asLines: true })).toMatchInlineSnapshot(`
 Array [
-  "[  debug] [http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown bytes[n]",
-  "[  debug] [http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown bytes[n]",
-  "[  debug] [http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown bytes[n]",
+  "[  debug] [http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown length[n]",
+  "[  debug] [http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown length[n]",
+  "[  debug] [http-build-cache] request: GET https://buildcache.example.acme.com/some-key unknown length[n]",
   "[warning] Could not get cache entry: HTTP 504: Gateway Timeout[n]",
 ]
 `);
