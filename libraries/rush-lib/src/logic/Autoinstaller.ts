@@ -14,6 +14,7 @@ import {
 } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
+import { AsyncRecycler } from '../utilities/AsyncRecycler';
 import { Utilities } from '../utilities/Utilities';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { PackageJsonEditor } from '../api/PackageJsonEditor';
@@ -131,7 +132,11 @@ export class Autoinstaller {
       if (isLastInstallFlagDirty || lock.dirtyWhenAcquired) {
         if (FileSystem.exists(nodeModulesFolder)) {
           this._logIfConsoleOutputIsNotRestricted('Deleting old files from ' + nodeModulesFolder);
-          FileSystem.ensureEmptyFolder(nodeModulesFolder);
+          const recycler = new AsyncRecycler(
+            path.join(this._rushConfiguration.commonTempFolder, RushConstants.rushRecyclerFolderName)
+          );
+          recycler.moveFolder(nodeModulesFolder);
+          await recycler.startDeleteAllAsync();
         }
 
         // Copy: .../common/autoinstallers/my-task/.npmrc
