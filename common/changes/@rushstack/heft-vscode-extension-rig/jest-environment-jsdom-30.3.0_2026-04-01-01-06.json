@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-vscode-extension-rig",
-      "comment": "Bump jest-environment-jsdom to 30.3.0 to address CVE GHSA-vpq2-c234-7xj6",
-      "type": "minor"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@rushstack/heft-vscode-extension-rig"
