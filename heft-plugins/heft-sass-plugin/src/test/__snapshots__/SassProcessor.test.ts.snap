@@ -1,0 +1,209 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SassProcessor classes-and-exports.module.scss generates correct .d.ts with both class names and :export values 1`] = `
+"declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;"
+`;
+
+exports[`SassProcessor classes-and-exports.module.scss preserves the :export block in CSS when preserveIcssExports is true 1`] = `
+".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}
+
+:export {
+  themeColor: blue;
+  spacing: 8px;
+}"
+`;
+
+exports[`SassProcessor classes-and-exports.module.scss strips the :export block from CSS when preserveIcssExports is false 1`] = `
+".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}"
+`;
+
+exports[`SassProcessor export-only.module.scss generates the same .d.ts regardless of preserveIcssExports 1`] = `
+"declare interface IStyles {
+  primaryColor: string;
+  fontFamily: string;
+}
+declare const styles: IStyles;
+export default styles;"
+`;
+
+exports[`SassProcessor export-only.module.scss preserves the :export block in CSS when preserveIcssExports is true 1`] = `
+":export {
+  primaryColor: #0078d4;
+  fontFamily: \\"Segoe UI\\";
+}"
+`;
+
+exports[`SassProcessor export-only.module.scss strips the :export block from CSS when preserveIcssExports is false 1`] = `""`;
+
+exports[`SassProcessor extend-with-exports.module.scss (Sass @extend / placeholder selectors) generates .d.ts with class names and :export values for @extend file 1`] = `
+"declare interface IStyles {
+  colorPrimary: string;
+  colorDanger: string;
+  dangerButton: string;
+  primaryButton: string;
+}
+declare const styles: IStyles;
+export default styles;"
+`;
+
+exports[`SassProcessor extend-with-exports.module.scss (Sass @extend / placeholder selectors) merges @extend selectors and strips :export when preserveIcssExports is false 1`] = `
+".dangerButton, .primaryButton {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 2px;
+}
+
+.primaryButton {
+  background-color: #0078d4;
+  color: white;
+}
+
+.dangerButton {
+  background-color: #d13438;
+  color: white;
+}"
+`;
+
+exports[`SassProcessor extend-with-exports.module.scss (Sass @extend / placeholder selectors) preserves :export alongside @extend-merged output when preserveIcssExports is true 1`] = `
+".dangerButton, .primaryButton {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 2px;
+}
+
+.primaryButton {
+  background-color: #0078d4;
+  color: white;
+}
+
+.dangerButton {
+  background-color: #d13438;
+  color: white;
+}
+
+:export {
+  colorPrimary: #0078d4;
+  colorDanger: #d13438;
+}"
+`;
+
+exports[`SassProcessor mixin-with-exports.module.scss (Sass @mixin) expands @mixin calls in CSS output 1`] = `
+".card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.card--vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}"
+`;
+
+exports[`SassProcessor mixin-with-exports.module.scss (Sass @mixin) generates .d.ts with :export values and class names from @mixin-using file 1`] = `
+"declare interface IStyles {
+  cardRadius: string;
+  animationDuration: string;
+  card: string;
+  \\"card--vertical\\": string;
+}
+declare const styles: IStyles;
+export default styles;"
+`;
+
+exports[`SassProcessor mixin-with-exports.module.scss (Sass @mixin) preserves :export alongside expanded @mixin output when preserveIcssExports is true 1`] = `
+".card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.card--vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+:export {
+  cardRadius: 4px;
+  animationDuration: 200ms;
+}"
+`;
+
+exports[`SassProcessor sass-variables-and-exports.module.scss (Sass variables, nesting, BEM) generates .d.ts with resolved :export keys as typed properties 1`] = `
+"declare interface IStyles {
+  primaryColor: string;
+  secondaryColor: string;
+  baseSpacing: string;
+  container: string;
+  container__title: string;
+}
+declare const styles: IStyles;
+export default styles;"
+`;
+
+exports[`SassProcessor sass-variables-and-exports.module.scss (Sass variables, nesting, BEM) resolves Sass variables and expands nested rules in CSS output 1`] = `
+".container {
+  color: #0078d4;
+  padding: 8px;
+}
+.container:hover {
+  color: #106ebe;
+}
+.container__title {
+  font-size: 16px;
+  margin-bottom: 16px;
+}"
+`;
+
+exports[`SassProcessor sass-variables-and-exports.module.scss (Sass variables, nesting, BEM) resolves Sass variables inside the :export block when preserveIcssExports is true 1`] = `
+".container {
+  color: #0078d4;
+  padding: 8px;
+}
+.container:hover {
+  color: #106ebe;
+}
+.container__title {
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+:export {
+  primaryColor: #0078d4;
+  secondaryColor: #106ebe;
+  baseSpacing: 8px;
+}"
+`;

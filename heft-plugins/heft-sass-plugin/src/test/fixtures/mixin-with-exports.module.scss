@@ -1,0 +1,24 @@
+// Tests that @mixin expansion works correctly alongside :export.
+@mixin flex-center($direction: row) {
+  display: flex;
+  flex-direction: $direction;
+  align-items: center;
+  justify-content: center;
+}
+
+$card-radius: 4px;
+$animation-duration: 200ms;
+
+.card {
+  @include flex-center;
+  border-radius: $card-radius;
+}
+
+.card--vertical {
+  @include flex-center(column);
+}
+
+:export {
+  cardRadius: #{$card-radius};
+  animationDuration: #{$animation-duration};
+}
