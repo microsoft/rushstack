@@ -1,0 +1,15 @@
+// Non-module global stylesheet — processed as plain CSS, not a CSS module.
+// Used to verify that global files produce no class exports and generate correct shims.
+$body-font: 'Segoe UI', sans-serif;
+$heading-color: #333;
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: $body-font;
+}
+
+h1 {
+  font-size: 24px;
+  color: $heading-color;
+}
