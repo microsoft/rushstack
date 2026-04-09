@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'node:path';
-
 import './mockRushCommandLineParser';
 
 import { FileSystem } from '@rushstack/node-core-library';
@@ -34,23 +32,21 @@ describe(Autoinstaller.name, () => {
       'pluginWithBuildCommandRepo',
       'update'
     );
-  const autoinstallerPath: string = `${repoPath}/common/autoinstallers/plugins`;
-  const nodeModulesFolder: string = `${autoinstallerPath}/${RushConstants.nodeModulesFolderName}`;
-  const staleFilePath: string = `${nodeModulesFolder}/stale-package/index.js`;
-  const recyclerFolder: string = `${parser.rushConfiguration.commonTempFolder}/${RushConstants.rushRecyclerFolderName}`;
+    const autoinstallerPath: string = `${repoPath}/common/autoinstallers/plugins`;
+    const nodeModulesFolder: string = `${autoinstallerPath}/${RushConstants.nodeModulesFolderName}`;
+    const staleFilePath: string = `${nodeModulesFolder}/stale-package/index.js`;
+    const recyclerFolder: string = `${parser.rushConfiguration.commonTempFolder}/${RushConstants.rushRecyclerFolderName}`;
 
     await FileSystem.writeFileAsync(staleFilePath, 'stale', {
       ensureFolderExists: true
     });
 
-    const recyclerEntriesBefore: Set<string> = FileSystem.exists(recyclerFolder)
-      ? new Set(FileSystem.readFolderItemNames(recyclerFolder))
     let recyclerEntriesBefore: Set<string>;
     try {
-      recyclerEntriesBefore =new Set(await FileSystem.readFolderItemNamesAsync(recyclerFolder));
+      recyclerEntriesBefore = new Set(await FileSystem.readFolderItemNamesAsync(recyclerFolder));
     } catch (error) {
       if (FileSystem.isNotExistError(error)) {
-        recyclerEntriesBefore= new Set();
+        recyclerEntriesBefore = new Set();
       } else {
         throw error;
       }
@@ -61,7 +57,9 @@ describe(Autoinstaller.name, () => {
     jest
       .spyOn(Utilities, 'executeCommandAsync')
       .mockImplementation(async (options: Parameters<typeof Utilities.executeCommandAsync>[0]) => {
-        await FileSystem.ensureFolderAsync(`${options.workingDirectory}/${RushConstants.nodeModulesFolderName}`);
+        await FileSystem.ensureFolderAsync(
+          `${options.workingDirectory}/${RushConstants.nodeModulesFolderName}`
+        );
       });
 
     const autoinstaller: Autoinstaller = new Autoinstaller({
