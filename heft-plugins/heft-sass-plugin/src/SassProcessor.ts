@@ -122,6 +122,15 @@ export interface ISassProcessorOptions {
   doNotTrimOriginalFileExtension?: boolean;
 
   /**
+   * If true, the ICSS `:export` block will be preserved in the emitted CSS output. This is necessary
+   * when the CSS is consumed by a webpack loader (e.g. css-loader's icssParser) that extracts `:export`
+   * values at bundle time to generate JavaScript exports.
+   *
+   * Defaults to false.
+   */
+  preserveIcssExports?: boolean;
+
+  /**
    * A callback to further modify the raw CSS text after it has been generated. Only relevant if emitting CSS files.
    */
   postProcessCssAsync?: (cssText: string) => Promise<string>;
@@ -751,7 +760,8 @@ export class SassProcessor {
       srcFolder,
       exportAsDefault,
       doNotTrimOriginalFileExtension,
-      postProcessCssAsync
+      postProcessCssAsync,
+      preserveIcssExports
     } = this._options;
 
     // Handle CSS modules
@@ -769,7 +779,14 @@ export class SassProcessor {
       const postCssResult: postcss.Result = await postcss
         .default([postCssModules])
         .process(css, { from: sourceFilePath });
-      css = postCssResult.css;
+
+      if (!preserveIcssExports) {
+        // Default behavior: use the transformed CSS output, which has the :export block stripped.
+        css = postCssResult.css;
+      }
+      // If preserveIcssExports is true, we discard the transformed CSS and keep the original so
+      // that the :export block remains in the output for downstream webpack loaders (e.g.
+      // css-loader's icssParser) that extract :export values at bundle time.
     }
 
     if (postProcessCssAsync) {
