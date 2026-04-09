@@ -89,17 +89,13 @@ function applyPatch(): void {
     }
     // Load the module
     const targetModule: IBaseWorkerPoolModule = require(targetPath);
-    // Obtain the metadata for the module
-    let targetModuleMetadata: NodeModule | undefined = undefined;
-    for (const childModule of module.children) {
-      // Match by full path to avoid false positives (e.g. many modules named index.js)
-      if (childModule.filename === targetPath) {
-        if (targetModuleMetadata) {
-          throw new Error('More than one child module matched while detecting Node.js module metadata');
-        }
-        targetModuleMetadata = childModule;
-      }
-    }
+    // Obtain the metadata for the module from require.cache.
+    // We can't use module.children because if the module was already in the cache before this
+    // require() call (loaded transitively by something else), Node.js returns the cached result
+    // without appending it to module.children.
+    // require.resolve() gives us the exact key Node.js uses in require.cache.
+    const resolvedTargetPath: string = require.resolve(targetPath);
+    const targetModuleMetadata: NodeModule | undefined = require.cache[resolvedTargetPath];
     if (!targetModuleMetadata) {
       throw new Error(`Failed to detect the Node.js module metadata for ${path.basename(targetPath)}`);
     }
