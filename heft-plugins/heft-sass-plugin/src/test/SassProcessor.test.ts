@@ -102,10 +102,7 @@ describe(SassProcessor.name, () => {
 
     writtenFiles = new Map();
     jest.spyOn(FileSystem, 'writeFileAsync').mockImplementation(async (filePath, content) => {
-      // Normalize to forward slashes and strip any Windows drive letter (e.g. "C:") so that
-      // path lookups and snapshots are consistent across platforms.
-      const normalizedPath: string = (filePath as string).replace(/\\/g, '/').replace(/^[A-Z]:/, '');
-      writtenFiles.set(normalizedPath, content as string);
+      writtenFiles.set(filePath as string, content as string);
     });
   });
 
