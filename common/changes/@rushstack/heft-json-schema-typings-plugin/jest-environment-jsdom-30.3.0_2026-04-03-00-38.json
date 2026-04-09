@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-json-schema-typings-plugin",
-      "comment": "Bump jest to 30.x, address changes",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@rushstack/heft-json-schema-typings-plugin"
