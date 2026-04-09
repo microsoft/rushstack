@@ -2136,6 +2136,30 @@ importers:
         specifier: ~5.8.2
         version: 5.8.2
 
+  ../../../build-tests/heft-sass-doNotTrimOriginalFileExtension-test:
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/heft-jest-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-sass-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-sass-plugin
+      '@rushstack/heft-typescript-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-typescript-plugin
+      '@types/heft-jest':
+        specifier: 1.0.1
+        version: 1.0.1
+      '@types/node':
+        specifier: 20.17.19
+        version: 20.17.19
+      typescript:
+        specifier: ~5.8.2
+        version: 5.8.2
+
   ../../../build-tests/heft-sass-test:
     dependencies:
       buttono:

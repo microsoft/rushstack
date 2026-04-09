@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add a `doNotTrimOriginalFileExtension` option. When enabled, the original file extension is preserved in the CSS output filename (e.g. `styles.scss` emits `styles.scss.css` instead of `styles.css`)",
+      "type": "minor",
+      "packageName": "@rushstack/heft-sass-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-sass-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

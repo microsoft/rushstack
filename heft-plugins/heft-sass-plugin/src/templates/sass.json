@@ -87,5 +87,14 @@
    *
    * Default value: []
    */
-  // "silenceDeprecations": ["mixed-decls"]
+  // "silenceDeprecations": ["mixed-decls"],
+
+  /**
+   * If true, the original file extension will not be trimmed when generating the output CSS file.
+   * The generated CSS file will retain its original extension. For example, "styles.scss" will generate
+   * "styles.scss.css" instead of "styles.css".
+   *
+   * Default value: false
+   */
+  // "doNotTrimOriginalFileExtension": true
 }

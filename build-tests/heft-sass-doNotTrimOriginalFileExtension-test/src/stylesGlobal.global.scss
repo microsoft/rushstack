@@ -1,0 +1,8 @@
+/**
+ * Test non-module SCSS for verifying doNotTrimOriginalFileExtension output.
+ * Expected output: stylesGlobal.global.scss.css (not stylesGlobal.global.css)
+ */
+
+.globalWrapper {
+  font-size: 16px;
+}

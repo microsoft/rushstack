@@ -1,0 +1,12 @@
+/**
+ * Test SCSS module for verifying doNotTrimOriginalFileExtension output.
+ * Expected output: styles.module.scss.css (not styles.module.css)
+ */
+
+.label {
+  color: royalblue;
+}
+
+.container {
+  padding: 16px;
+}
