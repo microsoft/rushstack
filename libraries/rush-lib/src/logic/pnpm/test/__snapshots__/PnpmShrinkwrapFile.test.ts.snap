@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`PnpmShrinkwrapFile Check is workspace project modified pnpm lockfile major version 9 sha1 integrity can be handled when disallowInsecureSha1 1`] = `
 Array [

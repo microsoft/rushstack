@@ -144,7 +144,7 @@ describe(RedisCobuildLockProvider.name, () => {
     const subject: RedisCobuildLockProvider = prepareSubject();
     const cacheId: string = 'foo';
     const status: ICobuildCompletedState['status'] = OperationStatus.SuccessWithWarning;
-    expect(() => subject.setCompletedStateAsync(context, { status, cacheId })).not.toThrowError();
+    expect(() => subject.setCompletedStateAsync(context, { status, cacheId })).not.toThrow();
     const actualState: ICobuildCompletedState | undefined = await subject.getCompletedStateAsync(context);
     expect(actualState?.cacheId).toBe(cacheId);
     expect(actualState?.status).toBe(status);

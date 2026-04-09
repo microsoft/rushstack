@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`createBase32Hash hashes: (eslint@8.57.0)(typescript@5.4.5) 1`] = `"2nt7x5y4npubskzl4nixybkqqi"`;
 

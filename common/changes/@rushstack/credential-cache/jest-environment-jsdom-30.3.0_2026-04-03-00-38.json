@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/credential-cache",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/credential-cache"
+}

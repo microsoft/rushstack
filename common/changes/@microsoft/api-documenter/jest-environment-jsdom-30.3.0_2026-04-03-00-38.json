@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter"
+}
