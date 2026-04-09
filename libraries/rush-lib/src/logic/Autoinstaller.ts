@@ -133,7 +133,7 @@ export class Autoinstaller {
         if (FileSystem.exists(nodeModulesFolder)) {
           this._logIfConsoleOutputIsNotRestricted('Deleting old files from ' + nodeModulesFolder);
           const recycler: AsyncRecycler = new AsyncRecycler(
-            path.join(this._rushConfiguration.commonTempFolder, RushConstants.rushRecyclerFolderName)
+            `${this._rushConfiguration.commonTempFolder}/${RushConstants.rushRecyclerFolderName}`
           );
           recycler.moveFolder(nodeModulesFolder);
           await recycler.startDeleteAllAsync();

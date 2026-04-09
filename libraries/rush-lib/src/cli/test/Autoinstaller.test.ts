@@ -17,7 +17,7 @@ import {
   type IEnvironmentConfigIsolation
 } from './TestUtils';
 
-describe('Autoinstaller', () => {
+describe(Autoinstaller.name, () => {
   let _envIsolation: IEnvironmentConfigIsolation;
 
   beforeEach(() => {
@@ -34,28 +34,34 @@ describe('Autoinstaller', () => {
       'pluginWithBuildCommandRepo',
       'update'
     );
-    const autoinstallerPath: string = path.join(repoPath, 'common/autoinstallers/plugins');
-    const nodeModulesFolder: string = path.join(autoinstallerPath, RushConstants.nodeModulesFolderName);
-    const staleFilePath: string = path.join(nodeModulesFolder, 'stale-package/index.js');
-    const recyclerFolder: string = path.join(
-      parser.rushConfiguration.commonTempFolder,
-      RushConstants.rushRecyclerFolderName
-    );
+  const autoinstallerPath: string = `${repoPath}/common/autoinstallers/plugins`;
+  const nodeModulesFolder: string = `${autoinstallerPath}/${RushConstants.nodeModulesFolderName}`;
+  const staleFilePath: string = `${nodeModulesFolder}/stale-package/index.js`;
+  const recyclerFolder: string = `${parser.rushConfiguration.commonTempFolder}/${RushConstants.rushRecyclerFolderName}`;
 
-    FileSystem.writeFile(staleFilePath, 'stale', {
+    await FileSystem.writeFileAsync(staleFilePath, 'stale', {
       ensureFolderExists: true
     });
 
     const recyclerEntriesBefore: Set<string> = FileSystem.exists(recyclerFolder)
       ? new Set(FileSystem.readFolderItemNames(recyclerFolder))
-      : new Set();
+    let recyclerEntriesBefore: Set<string>;
+    try {
+      recyclerEntriesBefore =new Set(await FileSystem.readFolderItemNamesAsync(recyclerFolder));
+    } catch (error) {
+      if (FileSystem.isNotExistError(error)) {
+        recyclerEntriesBefore= new Set();
+      } else {
+        throw error;
+      }
+    }
 
     jest.spyOn(InstallHelpers, 'ensureLocalPackageManagerAsync').mockResolvedValue(undefined);
     jest.spyOn(Utilities, 'syncNpmrc').mockImplementation(() => undefined);
     jest
       .spyOn(Utilities, 'executeCommandAsync')
       .mockImplementation(async (options: Parameters<typeof Utilities.executeCommandAsync>[0]) => {
-        FileSystem.ensureFolder(path.join(options.workingDirectory, RushConstants.nodeModulesFolderName));
+        await FileSystem.ensureFolderAsync(`${options.workingDirectory}/${RushConstants.nodeModulesFolderName}`);
       });
 
     const autoinstaller: Autoinstaller = new Autoinstaller({
@@ -66,16 +72,16 @@ describe('Autoinstaller', () => {
 
     await autoinstaller.prepareAsync();
 
-    const recyclerEntriesAfter: string[] = FileSystem.readFolderItemNames(recyclerFolder).filter(
+    const recyclerEntriesAfter: string[] = (await FileSystem.readFolderItemNamesAsync(recyclerFolder)).filter(
       (entry: string) => !recyclerEntriesBefore.has(entry)
     );
 
     expect(recyclerEntriesAfter).toHaveLength(1);
-    expect(
-      FileSystem.exists(path.join(recyclerFolder, recyclerEntriesAfter[0], 'stale-package/index.js'))
-    ).toBe(true);
-    expect(FileSystem.exists(staleFilePath)).toBe(false);
-    expect(FileSystem.exists(path.join(nodeModulesFolder, 'rush-autoinstaller.flag'))).toBe(true);
+    await expect(
+      FileSystem.existsAsync(`${recyclerFolder}/${recyclerEntriesAfter[0]}/stale-package/index.js`)
+    ).resolves.toBe(true);
+    await expect(FileSystem.existsAsync(staleFilePath)).resolves.toBe(false);
+    await expect(FileSystem.existsAsync(`${nodeModulesFolder}/rush-autoinstaller.flag`)).resolves.toBe(true);
 
     if (process.platform === 'win32') {
       expect(spawnMock).toHaveBeenCalledWith(
