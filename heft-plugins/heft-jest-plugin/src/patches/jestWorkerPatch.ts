@@ -6,7 +6,7 @@
 import * as path from 'node:path';
 import { createRequire } from 'node:module';
 
-import { Import, FileSystem } from '@rushstack/node-core-library';
+import { Import, FileSystem, type IPackageJson } from '@rushstack/node-core-library';
 
 // This patch is a fix for a problem where Jest reports this error spuriously on a machine that is under heavy load:
 //
@@ -66,23 +66,29 @@ function applyPatch(): void {
     // jest-worker 30.x switched to a webpack-bundled single-file architecture.
     // For 29.x and earlier, patch build/base/BaseWorkerPool.js directly.
     // For 30.x and later, patch build/index.js (the webpack bundle).
-    const jestWorkerPackageJson: { version: string } = require(path.join(jestWorkerFolder, 'package.json'));
-    const jestWorkerMajorVersion: number = parseInt(jestWorkerPackageJson.version.split('.')[0], 10);
+    const jestWorkerPackageJson: IPackageJson = require(`${jestWorkerFolder}/package.json`);
+    const jestWorkerMajorVersion: number = parseInt(jestWorkerPackageJson.version, 10);
     const isBundled: boolean = jestWorkerMajorVersion >= 30;
 
     const targetPath: string = isBundled
-      ? path.join(jestWorkerFolder, 'build/index.js')
-      : path.join(jestWorkerFolder, 'build/base/BaseWorkerPool.js');
+      ? `${jestWorkerFolder}/build/index.js`
+      : `${jestWorkerFolder}/build/base/BaseWorkerPool.js`;
 
-    if (!FileSystem.exists(targetPath)) {
-      throw new Error(
-        `The ${path.basename(targetPath)} file was not found in the expected location:\n` + targetPath
-      );
+    // Load the original file contents
+    let originalFileContent: string;
+    try {
+      originalFileContent = FileSystem.readFile(targetPath);
+    } catch (e) {
+      if (FileSystem.isNotExistError(e)) {
+        throw new Error(
+          `The ${path.basename(targetPath)} file was not found in the expected location:\n` + targetPath
+        );
+      } else {
+        throw e;
+      }
     }
-
     // Load the module
     const targetModule: IBaseWorkerPoolModule = require(targetPath);
-
     // Obtain the metadata for the module
     let targetModuleMetadata: NodeModule | undefined = undefined;
     for (const childModule of module.children) {
@@ -94,13 +100,9 @@ function applyPatch(): void {
         targetModuleMetadata = childModule;
       }
     }
-
     if (!targetModuleMetadata) {
       throw new Error(`Failed to detect the Node.js module metadata for ${path.basename(targetPath)}`);
     }
-
-    // Load the original file contents
-    const originalFileContent: string = FileSystem.readFile(targetPath);
 
     // Apply the patch.  We will replace this:
     //

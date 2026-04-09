@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/webpack-preserve-dynamic-require-plugin",
-      "comment": "Bump jest to 30.x, address changes",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@rushstack/webpack-preserve-dynamic-require-plugin"

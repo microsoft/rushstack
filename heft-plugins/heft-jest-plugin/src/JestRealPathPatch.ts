@@ -4,6 +4,7 @@
 import * as path from 'node:path';
 
 import { RealNodeModulePathResolver } from '@rushstack/node-core-library/lib/RealNodeModulePath';
+import type { IPackageJson } from '@rushstack/node-core-library';
 
 const jestResolvePackageFolder: string = path.dirname(require.resolve('jest-resolve/package.json'));
 
@@ -27,8 +28,8 @@ const customTryRealpath = (input: string): string => {
   return input;
 };
 
-const jestUtilPackageJson: { version: string } = require(path.join(jestUtilPackageFolder, 'package.json'));
-const jestUtilMajorVersion: number = parseInt(jestUtilPackageJson.version.split('.')[0], 10);
+const jestUtilPackageJson: IPackageJson = require(path.join(`${jestUtilPackageFolder}/package.json`));
+const jestUtilMajorVersion: number = parseInt(jestUtilPackageJson.version, 10);
 
 if (jestUtilMajorVersion >= 30) {
   // jest-util 30+: everything is bundled in index.js.
@@ -48,7 +49,7 @@ if (jestUtilMajorVersion >= 30) {
   require.cache[jestUtilIndexPath]!.exports = patchedExports;
 } else {
   // jest-util < 30: tryRealpath is a standalone module; replace its default export.
-  const jestUtilTryRealpathPath: string = path.resolve(jestUtilPackageFolder, './build/tryRealpath.js');
+  const jestUtilTryRealpathPath: string = `${jestUtilPackageFolder}/build/tryRealpath.js`;
   const tryRealpathModule: {
     default: (filePath: string) => string;
   } = require(jestUtilTryRealpathPath);
