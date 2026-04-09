@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Thu, 09 Apr 2026 00:15:07 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Apr 2026 23:00:20 GMT and should not be manually modified.
+
+## 1.3.0
+Thu, 09 Apr 2026 23:00:20 GMT
+
+### Minor changes
+
+- Add `preserveIcssExports` option to keep the ICSS `:export` block in emitted CSS output, required when downstream webpack loaders (e.g. `css-loader` icssParser) need to extract `:export` values at bundle time.
+- Add a `doNotTrimOriginalFileExtension` option. When enabled, the original file extension is preserved in the CSS output filename (e.g. `styles.scss` emits `styles.scss.css` instead of `styles.css`)
 
 ## 1.2.11
 Thu, 09 Apr 2026 00:15:07 GMT
