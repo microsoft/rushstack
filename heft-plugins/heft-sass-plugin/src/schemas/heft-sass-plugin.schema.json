@@ -111,6 +111,11 @@
     "doNotTrimOriginalFileExtension": {
       "type": "boolean",
       "description": "If true, the original file extension will not be trimmed when generating the output CSS file. The generated CSS file will retain its original extension. For example, \"styles.scss\" will generate \"styles.scss.css\" instead of \"styles.css\"."
+    },
+
+    "preserveIcssExports": {
+      "type": "boolean",
+      "description": "If true, the ICSS `:export` block will be preserved in the emitted CSS output. This is necessary when the CSS is consumed by a webpack loader (e.g. css-loader's icssParser) that extracts `:export` values at bundle time to generate JavaScript exports. Defaults to false."
     }
   }
 }

@@ -1,0 +1,24 @@
+// Tests that Sass variables are resolved in both class rules and the :export block.
+$primary-color: #0078d4;
+$secondary-color: #106ebe;
+$base-spacing: 8px;
+
+.container {
+  color: $primary-color;
+  padding: $base-spacing;
+
+  &:hover {
+    color: $secondary-color;
+  }
+
+  &__title {
+    font-size: 16px;
+    margin-bottom: $base-spacing * 2;
+  }
+}
+
+:export {
+  primaryColor: #{$primary-color};
+  secondaryColor: #{$secondary-color};
+  baseSpacing: #{$base-spacing};
+}

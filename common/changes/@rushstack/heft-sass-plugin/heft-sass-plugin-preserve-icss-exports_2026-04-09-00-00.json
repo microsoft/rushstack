@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-sass-plugin",
+      "comment": "Add `preserveIcssExports` option to keep the ICSS `:export` block in emitted CSS output, required when downstream webpack loaders (e.g. `css-loader` icssParser) need to extract `:export` values at bundle time.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-sass-plugin"
+}

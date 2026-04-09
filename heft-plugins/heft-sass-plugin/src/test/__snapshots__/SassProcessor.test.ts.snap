@@ -1,0 +1,955 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SassProcessor JS shim files does not emit a shim when shimModuleFormat is undefined: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files does not emit a shim when shimModuleFormat is undefined: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+}
+`;
+
+exports[`SassProcessor JS shim files emits a CommonJS shim for a module file: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files emits a CommonJS shim for a module file: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+  "/fake/output/css/classes-and-exports.module.scss.js" => "module.exports = require(\\"./classes-and-exports.module.css\\");
+module.exports.default = module.exports;",
+}
+`;
+
+exports[`SassProcessor JS shim files emits a CommonJS shim for a non-module (global) file: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files emits a CommonJS shim for a non-module (global) file: written-files 1`] = `
+Map {
+  "/fake/output/dts/global-styles.global.scss.d.ts" => "export {};",
+  "/fake/output/css/global-styles.global.css" => "body {
+  margin: 0;
+  padding: 0;
+  font-family: \\"Segoe UI\\", sans-serif;
+}
+
+h1 {
+  font-size: 24px;
+  color: #333;
+}",
+  "/fake/output/css/global-styles.global.scss.js" => "require(\\"./global-styles.global.css\\");",
+}
+`;
+
+exports[`SassProcessor JS shim files emits an ESM shim for a module file: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files emits an ESM shim for a module file: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+  "/fake/output/css/classes-and-exports.module.scss.js" => "export { default } from \\"./classes-and-exports.module.css\\";",
+}
+`;
+
+exports[`SassProcessor JS shim files emits an ESM shim for a non-module (global) file: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files emits an ESM shim for a non-module (global) file: written-files 1`] = `
+Map {
+  "/fake/output/dts/global-styles.global.scss.d.ts" => "export {};",
+  "/fake/output/css/global-styles.global.css" => "body {
+  margin: 0;
+  padding: 0;
+  font-family: \\"Segoe UI\\", sans-serif;
+}
+
+h1 {
+  font-size: 24px;
+  color: #333;
+}",
+  "/fake/output/css/global-styles.global.scss.js" => "import \\"./global-styles.global.css\\";export {};",
+}
+`;
+
+exports[`SassProcessor JS shim files writes shims to each configured cssOutputFolder independently: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files writes shims to each configured cssOutputFolder independently: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css-esm/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+  "/fake/output/css-esm/classes-and-exports.module.scss.js" => "export { default } from \\"./classes-and-exports.module.css\\";",
+  "/fake/output/css-cjs/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+  "/fake/output/css-cjs/classes-and-exports.module.scss.js" => "module.exports = require(\\"./classes-and-exports.module.css\\");
+module.exports.default = module.exports;",
+}
+`;
+
+exports[`SassProcessor classes-and-exports.module.scss generates correct .d.ts with both class names and :export values: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor classes-and-exports.module.scss generates correct .d.ts with both class names and :export values: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+}
+`;
+
+exports[`SassProcessor classes-and-exports.module.scss generates named exports in .d.ts when exportAsDefault is false: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor classes-and-exports.module.scss generates named exports in .d.ts when exportAsDefault is false: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "export const themeColor: string;
+export const spacing: string;
+export const root: string;
+export const highlighted: string;",
+}
+`;
+
+exports[`SassProcessor classes-and-exports.module.scss preserves the :export block in CSS when preserveIcssExports is true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor classes-and-exports.module.scss preserves the :export block in CSS when preserveIcssExports is true: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}
+
+:export {
+  themeColor: blue;
+  spacing: 8px;
+}",
+}
+`;
+
+exports[`SassProcessor classes-and-exports.module.scss strips the :export block from CSS when preserveIcssExports is false: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor classes-and-exports.module.scss strips the :export block from CSS when preserveIcssExports is false: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+}
+`;
+
+exports[`SassProcessor doNotTrimOriginalFileExtension preserves the source extension when doNotTrimOriginalFileExtension is true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor doNotTrimOriginalFileExtension preserves the source extension when doNotTrimOriginalFileExtension is true: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.scss.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+}
+`;
+
+exports[`SassProcessor doNotTrimOriginalFileExtension strips the source extension by default (doNotTrimOriginalFileExtension: false): terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor doNotTrimOriginalFileExtension strips the source extension by default (doNotTrimOriginalFileExtension: false): written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+}
+`;
+
+exports[`SassProcessor doNotTrimOriginalFileExtension the CSS content is the same regardless of doNotTrimOriginalFileExtension: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor doNotTrimOriginalFileExtension the CSS content is the same regardless of doNotTrimOriginalFileExtension: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.scss.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+}
+`;
+
+exports[`SassProcessor doNotTrimOriginalFileExtension uses the .scss.css filename in JS shims when doNotTrimOriginalFileExtension is true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor doNotTrimOriginalFileExtension uses the .scss.css filename in JS shims when doNotTrimOriginalFileExtension is true: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.scss.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+  "/fake/output/css/classes-and-exports.module.scss.js" => "module.exports = require(\\"./classes-and-exports.module.scss.css\\");
+module.exports.default = module.exports;",
+}
+`;
+
+exports[`SassProcessor error reporting emits an error for invalid SCSS syntax: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor error reporting emits an error for invalid SCSS syntax: written-files 1`] = `Map {}`;
+
+exports[`SassProcessor export-only.module.scss generates the same .d.ts regardless of preserveIcssExports: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor export-only.module.scss generates the same .d.ts regardless of preserveIcssExports: written-files 1`] = `
+Map {
+  "/fake/output/dts/export-only.module.scss.d.ts" => "declare interface IStyles {
+  primaryColor: string;
+  fontFamily: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/export-only.module.css" => ":export {
+  primaryColor: #0078d4;
+  fontFamily: \\"Segoe UI\\";
+}",
+}
+`;
+
+exports[`SassProcessor export-only.module.scss preserves the :export block in CSS when preserveIcssExports is true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor export-only.module.scss preserves the :export block in CSS when preserveIcssExports is true: written-files 1`] = `
+Map {
+  "/fake/output/dts/export-only.module.scss.d.ts" => "declare interface IStyles {
+  primaryColor: string;
+  fontFamily: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/export-only.module.css" => ":export {
+  primaryColor: #0078d4;
+  fontFamily: \\"Segoe UI\\";
+}",
+}
+`;
+
+exports[`SassProcessor export-only.module.scss strips the :export block from CSS when preserveIcssExports is false: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor export-only.module.scss strips the :export block from CSS when preserveIcssExports is false: written-files 1`] = `
+Map {
+  "/fake/output/dts/export-only.module.scss.d.ts" => "declare interface IStyles {
+  primaryColor: string;
+  fontFamily: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/export-only.module.css" => "",
+}
+`;
+
+exports[`SassProcessor extend-with-exports.module.scss (Sass @extend / placeholder selectors) generates .d.ts with class names and :export values for @extend file: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor extend-with-exports.module.scss (Sass @extend / placeholder selectors) generates .d.ts with class names and :export values for @extend file: written-files 1`] = `
+Map {
+  "/fake/output/dts/extend-with-exports.module.scss.d.ts" => "declare interface IStyles {
+  colorPrimary: string;
+  colorDanger: string;
+  dangerButton: string;
+  primaryButton: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/extend-with-exports.module.css" => ".dangerButton, .primaryButton {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 2px;
+}
+
+.primaryButton {
+  background-color: #0078d4;
+  color: white;
+}
+
+.dangerButton {
+  background-color: #d13438;
+  color: white;
+}",
+}
+`;
+
+exports[`SassProcessor extend-with-exports.module.scss (Sass @extend / placeholder selectors) merges @extend selectors and strips :export when preserveIcssExports is false: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor extend-with-exports.module.scss (Sass @extend / placeholder selectors) merges @extend selectors and strips :export when preserveIcssExports is false: written-files 1`] = `
+Map {
+  "/fake/output/dts/extend-with-exports.module.scss.d.ts" => "declare interface IStyles {
+  colorPrimary: string;
+  colorDanger: string;
+  dangerButton: string;
+  primaryButton: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/extend-with-exports.module.css" => ".dangerButton, .primaryButton {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 2px;
+}
+
+.primaryButton {
+  background-color: #0078d4;
+  color: white;
+}
+
+.dangerButton {
+  background-color: #d13438;
+  color: white;
+}",
+}
+`;
+
+exports[`SassProcessor extend-with-exports.module.scss (Sass @extend / placeholder selectors) preserves :export alongside @extend-merged output when preserveIcssExports is true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor extend-with-exports.module.scss (Sass @extend / placeholder selectors) preserves :export alongside @extend-merged output when preserveIcssExports is true: written-files 1`] = `
+Map {
+  "/fake/output/dts/extend-with-exports.module.scss.d.ts" => "declare interface IStyles {
+  colorPrimary: string;
+  colorDanger: string;
+  dangerButton: string;
+  primaryButton: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/extend-with-exports.module.css" => ".dangerButton, .primaryButton {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 2px;
+}
+
+.primaryButton {
+  background-color: #0078d4;
+  color: white;
+}
+
+.dangerButton {
+  background-color: #d13438;
+  color: white;
+}
+
+:export {
+  colorPrimary: #0078d4;
+  colorDanger: #d13438;
+}",
+}
+`;
+
+exports[`SassProcessor mixin-with-exports.module.scss (Sass @mixin) expands @mixin calls in CSS output: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor mixin-with-exports.module.scss (Sass @mixin) expands @mixin calls in CSS output: written-files 1`] = `
+Map {
+  "/fake/output/dts/mixin-with-exports.module.scss.d.ts" => "declare interface IStyles {
+  cardRadius: string;
+  animationDuration: string;
+  card: string;
+  \\"card--vertical\\": string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/mixin-with-exports.module.css" => ".card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.card--vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}",
+}
+`;
+
+exports[`SassProcessor mixin-with-exports.module.scss (Sass @mixin) generates .d.ts with :export values and class names from @mixin-using file: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor mixin-with-exports.module.scss (Sass @mixin) generates .d.ts with :export values and class names from @mixin-using file: written-files 1`] = `
+Map {
+  "/fake/output/dts/mixin-with-exports.module.scss.d.ts" => "declare interface IStyles {
+  cardRadius: string;
+  animationDuration: string;
+  card: string;
+  \\"card--vertical\\": string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/mixin-with-exports.module.css" => ".card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.card--vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}",
+}
+`;
+
+exports[`SassProcessor mixin-with-exports.module.scss (Sass @mixin) preserves :export alongside expanded @mixin output when preserveIcssExports is true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor mixin-with-exports.module.scss (Sass @mixin) preserves :export alongside expanded @mixin output when preserveIcssExports is true: written-files 1`] = `
+Map {
+  "/fake/output/dts/mixin-with-exports.module.scss.d.ts" => "declare interface IStyles {
+  cardRadius: string;
+  animationDuration: string;
+  card: string;
+  \\"card--vertical\\": string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/mixin-with-exports.module.css" => ".card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.card--vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+:export {
+  cardRadius: 4px;
+  animationDuration: 200ms;
+}",
+}
+`;
+
+exports[`SassProcessor multiple output folders writes .d.ts to every configured dtsOutputFolder: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor multiple output folders writes .d.ts to every configured dtsOutputFolder: written-files 1`] = `
+Map {
+  "/fake/output/dts-a/export-only.module.scss.d.ts" => "declare interface IStyles {
+  primaryColor: string;
+  fontFamily: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/dts-b/export-only.module.scss.d.ts" => "declare interface IStyles {
+  primaryColor: string;
+  fontFamily: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/export-only.module.css" => "",
+}
+`;
+
+exports[`SassProcessor multiple output folders writes CSS to every configured cssOutputFolder: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor multiple output folders writes CSS to every configured cssOutputFolder: written-files 1`] = `
+Map {
+  "/fake/output/dts/export-only.module.scss.d.ts" => "declare interface IStyles {
+  primaryColor: string;
+  fontFamily: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css-a/export-only.module.css" => "",
+  "/fake/output/css-b/export-only.module.css" => "",
+}
+`;
+
+exports[`SassProcessor non-module (global) files emits export {}; in the .d.ts for a non-module file: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor non-module (global) files emits export {}; in the .d.ts for a non-module file: written-files 1`] = `
+Map {
+  "/fake/output/dts/global-styles.global.scss.d.ts" => "export {};",
+  "/fake/output/css/global-styles.global.css" => "body {
+  margin: 0;
+  padding: 0;
+  font-family: \\"Segoe UI\\", sans-serif;
+}
+
+h1 {
+  font-size: 24px;
+  color: #333;
+}",
+}
+`;
+
+exports[`SassProcessor non-module (global) files emits plain compiled CSS for a .global.scss file: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor non-module (global) files emits plain compiled CSS for a .global.scss file: written-files 1`] = `
+Map {
+  "/fake/output/dts/global-styles.global.scss.d.ts" => "export {};",
+  "/fake/output/css/global-styles.global.css" => "body {
+  margin: 0;
+  padding: 0;
+  font-family: \\"Segoe UI\\", sans-serif;
+}
+
+h1 {
+  font-size: 24px;
+  color: #333;
+}",
+}
+`;
+
+exports[`SassProcessor postProcessCssAsync passes compiled CSS through the post-processor callback: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor postProcessCssAsync passes compiled CSS through the post-processor callback: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.css" => ".root {
+  color: /* post-processed */ red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: /* post-processed */ yellow;
+}",
+}
+`;
+
+exports[`SassProcessor postProcessCssAsync post-processor receives the original CSS including :export when preserveIcssExports is true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor postProcessCssAsync post-processor receives the original CSS including :export when preserveIcssExports is true: written-files 1`] = `
+Map {
+  "/fake/output/dts/export-only.module.scss.d.ts" => "declare interface IStyles {
+  primaryColor: string;
+  fontFamily: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/export-only.module.css" => ":export {
+  primaryColor: #0078d4;
+  fontFamily: \\"Segoe UI\\";
+}",
+}
+`;
+
+exports[`SassProcessor postProcessCssAsync post-processor runs after postcss-modules strips :export: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor postProcessCssAsync post-processor runs after postcss-modules strips :export: written-files 1`] = `
+Map {
+  "/fake/output/dts/export-only.module.scss.d.ts" => "declare interface IStyles {
+  primaryColor: string;
+  fontFamily: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/export-only.module.css" => "",
+}
+`;
+
+exports[`SassProcessor sass-variables-and-exports.module.scss (Sass variables, nesting, BEM) generates .d.ts with resolved :export keys as typed properties: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor sass-variables-and-exports.module.scss (Sass variables, nesting, BEM) generates .d.ts with resolved :export keys as typed properties: written-files 1`] = `
+Map {
+  "/fake/output/dts/sass-variables-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  primaryColor: string;
+  secondaryColor: string;
+  baseSpacing: string;
+  container: string;
+  container__title: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/sass-variables-and-exports.module.css" => ".container {
+  color: #0078d4;
+  padding: 8px;
+}
+.container:hover {
+  color: #106ebe;
+}
+.container__title {
+  font-size: 16px;
+  margin-bottom: 16px;
+}",
+}
+`;
+
+exports[`SassProcessor sass-variables-and-exports.module.scss (Sass variables, nesting, BEM) resolves Sass variables and expands nested rules in CSS output: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor sass-variables-and-exports.module.scss (Sass variables, nesting, BEM) resolves Sass variables and expands nested rules in CSS output: written-files 1`] = `
+Map {
+  "/fake/output/dts/sass-variables-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  primaryColor: string;
+  secondaryColor: string;
+  baseSpacing: string;
+  container: string;
+  container__title: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/sass-variables-and-exports.module.css" => ".container {
+  color: #0078d4;
+  padding: 8px;
+}
+.container:hover {
+  color: #106ebe;
+}
+.container__title {
+  font-size: 16px;
+  margin-bottom: 16px;
+}",
+}
+`;
+
+exports[`SassProcessor sass-variables-and-exports.module.scss (Sass variables, nesting, BEM) resolves Sass variables inside the :export block when preserveIcssExports is true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor sass-variables-and-exports.module.scss (Sass variables, nesting, BEM) resolves Sass variables inside the :export block when preserveIcssExports is true: written-files 1`] = `
+Map {
+  "/fake/output/dts/sass-variables-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  primaryColor: string;
+  secondaryColor: string;
+  baseSpacing: string;
+  container: string;
+  container__title: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/sass-variables-and-exports.module.css" => ".container {
+  color: #0078d4;
+  padding: 8px;
+}
+.container:hover {
+  color: #106ebe;
+}
+.container__title {
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+:export {
+  primaryColor: #0078d4;
+  secondaryColor: #106ebe;
+  baseSpacing: 8px;
+}",
+}
+`;
