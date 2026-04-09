@@ -1,6 +1,13 @@
 # Change Log - @rushstack/lookup-by-path
 
-This log was last generated on Sat, 04 Apr 2026 00:14:00 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Apr 2026 00:15:07 GMT and should not be manually modified.
+
+## 0.10.0
+Thu, 09 Apr 2026 00:15:07 GMT
+
+### Minor changes
+
+- Add `toJson`/`fromJson` methods to `LookupByPath` for serialization/deserialization
 
 ## 0.9.10
 Sat, 04 Apr 2026 00:14:00 GMT

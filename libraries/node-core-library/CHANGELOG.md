@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 31 Mar 2026 15:14:14 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Apr 2026 00:15:07 GMT and should not be manually modified.
+
+## 5.22.0
+Thu, 09 Apr 2026 00:15:07 GMT
+
+### Minor changes
+
+- Add `FileSystem.createReadStream`, `FileSystem.createWriteStream`, and `FileSystem.createWriteStreamAsync` APIs for creating read and write filesystem streams.
 
 ## 5.21.0
 Tue, 31 Mar 2026 15:14:14 GMT
