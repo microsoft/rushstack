@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import { MockScopedLogger } from '@rushstack/heft/lib/pluginFramework/logging/MockScopedLogger';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { type ICssOutputFolder, type ISassProcessorOptions, SassProcessor } from '../SassProcessor';
 
-const projectFolder: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
-const fixturesFolder: string = `${projectFolder}/src/test/fixtures`;
+const projectFolder: string = `${__dirname}/../..`;
+const fixturesFolder: string = `${__dirname}/fixtures`;
 
 // Fake output folder paths — never actually written to disk because FileSystem.writeFileAsync is mocked.
 const CSS_OUTPUT_FOLDER: string = '/fake/output/css';
