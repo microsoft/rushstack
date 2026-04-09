@@ -9,19 +9,18 @@ import { SassProcessor } from '../SassProcessor';
 
 const projectFolder: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
 const fixturesFolder: string = `${projectFolder}/src/test/fixtures`;
-const testOutputFolder: string = `${projectFolder}/temp/test-output`;
 
-function createProcessor(preserveIcssExports: boolean): {
+// Fake output folder paths — never actually written to disk because FileSystem.writeFileAsync is mocked.
+const CSS_OUTPUT_FOLDER: string = '/fake/output/css';
+const DTS_OUTPUT_FOLDER: string = '/fake/output/dts';
+
+function createProcessor(
+  terminalProvider: StringBufferTerminalProvider,
+  preserveIcssExports: boolean
+): {
   processor: SassProcessor;
-  dtsOutputFolder: string;
-  cssOutputFolder: string;
   logger: MockScopedLogger;
 } {
-  const suffix: string = preserveIcssExports ? 'preserve' : 'strip';
-  const dtsOutputFolder: string = `${testOutputFolder}/${suffix}/dts`;
-  const cssOutputFolder: string = `${testOutputFolder}/${suffix}/css`;
-
-  const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(false);
   const terminal: Terminal = new Terminal(terminalProvider);
   const logger: MockScopedLogger = new MockScopedLogger(terminal);
 
@@ -30,91 +29,115 @@ function createProcessor(preserveIcssExports: boolean): {
     buildFolder: projectFolder,
     concurrency: 1,
     srcFolder: fixturesFolder,
-    dtsOutputFolders: [dtsOutputFolder],
-    cssOutputFolders: [{ folder: cssOutputFolder, shimModuleFormat: undefined }],
+    dtsOutputFolders: [DTS_OUTPUT_FOLDER],
+    cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: undefined }],
     exportAsDefault: true,
     preserveIcssExports
   });
 
-  return { processor, dtsOutputFolder, cssOutputFolder, logger };
+  return { processor, logger };
 }
 
 async function compileFixtureAsync(processor: SassProcessor, fixtureFilename: string): Promise<void> {
-  const absolutePath: string = `${fixturesFolder}/${fixtureFilename}`;
-  await processor.compileFilesAsync(new Set([absolutePath]));
-}
-
-async function readCssOutputAsync(cssOutputFolder: string, fixtureFilename: string): Promise<string> {
-  // Strip last extension (.scss/.sass), append .css
-  const withoutExt: string = fixtureFilename.slice(0, fixtureFilename.lastIndexOf('.'));
-  return await FileSystem.readFileAsync(`${cssOutputFolder}/${withoutExt}.css`);
-}
-
-async function readDtsOutputAsync(dtsOutputFolder: string, fixtureFilename: string): Promise<string> {
-  return await FileSystem.readFileAsync(`${dtsOutputFolder}/${fixtureFilename}.d.ts`);
+  await processor.compileFilesAsync(new Set([`${fixturesFolder}/${fixtureFilename}`]));
 }
 
 describe(SassProcessor.name, () => {
-  beforeEach(async () => {
-    await FileSystem.ensureEmptyFolderAsync(testOutputFolder);
+  let terminalProvider: StringBufferTerminalProvider;
+  /** Files captured by the mocked FileSystem.writeFileAsync, keyed by absolute path. */
+  let writtenFiles: Map<string, string>;
+
+  /** Returns the content written to a path whose last segment matches the given filename. */
+  function getWrittenFile(filename: string): string {
+    for (const [filePath, content] of writtenFiles) {
+      if (filePath.endsWith(`/${filename}`)) {
+        return content;
+      }
+    }
+
+    throw new Error(
+      `No file written matching ".../${filename}". Written paths:\n${[...writtenFiles.keys()].join('\n')}`
+    );
+  }
+
+  function getCssOutput(fixtureFilename: string): string {
+    // SassProcessor strips the last extension then appends .css
+    // export-only.module.scss → export-only.module.css
+    const withoutExt: string = fixtureFilename.slice(0, fixtureFilename.lastIndexOf('.'));
+    return getWrittenFile(`${withoutExt}.css`);
+  }
+
+  function getDtsOutput(fixtureFilename: string): string {
+    return getWrittenFile(`${fixtureFilename}.d.ts`);
+  }
+
+  beforeEach(() => {
+    terminalProvider = new StringBufferTerminalProvider();
+
+    writtenFiles = new Map();
+    jest.spyOn(FileSystem, 'writeFileAsync').mockImplementation(async (filePath, content) => {
+      writtenFiles.set(filePath as string, content as string);
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+
+    expect(writtenFiles).toMatchSnapshot('written-files');
+    expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot('terminal-output');
   });
 
   describe('export-only.module.scss', () => {
     it('strips the :export block from CSS when preserveIcssExports is false', async () => {
-      const { processor, cssOutputFolder } = createProcessor(false);
+      const { processor } = createProcessor(terminalProvider, false);
       await compileFixtureAsync(processor, 'export-only.module.scss');
-      const css: string = await readCssOutputAsync(cssOutputFolder, 'export-only.module.scss');
-      expect(css).toMatchSnapshot();
+      const css: string = getCssOutput('export-only.module.scss');
       expect(css).not.toContain(':export');
     });
 
     it('preserves the :export block in CSS when preserveIcssExports is true', async () => {
-      const { processor, cssOutputFolder } = createProcessor(true);
+      const { processor } = createProcessor(terminalProvider, true);
       await compileFixtureAsync(processor, 'export-only.module.scss');
-      const css: string = await readCssOutputAsync(cssOutputFolder, 'export-only.module.scss');
-      expect(css).toMatchSnapshot();
+      const css: string = getCssOutput('export-only.module.scss');
       expect(css).toContain(':export');
     });
 
     it('generates the same .d.ts regardless of preserveIcssExports', async () => {
-      const { processor: processorFalse, dtsOutputFolder: dtsFalseFolder } = createProcessor(false);
-      const { processor: processorTrue, dtsOutputFolder: dtsTrueFolder } = createProcessor(true);
-
+      const { processor: processorFalse } = createProcessor(terminalProvider, false);
       await compileFixtureAsync(processorFalse, 'export-only.module.scss');
+      const dtsFalse: string = getDtsOutput('export-only.module.scss');
+
+      writtenFiles.clear();
+
+      const { processor: processorTrue } = createProcessor(terminalProvider, true);
       await compileFixtureAsync(processorTrue, 'export-only.module.scss');
+      const dtsTrue: string = getDtsOutput('export-only.module.scss');
 
-      const dtsFalse: string = await readDtsOutputAsync(dtsFalseFolder, 'export-only.module.scss');
-      const dtsTrue: string = await readDtsOutputAsync(dtsTrueFolder, 'export-only.module.scss');
-
-      expect(dtsFalse).toMatchSnapshot();
       expect(dtsFalse).toEqual(dtsTrue);
     });
   });
 
   describe('classes-and-exports.module.scss', () => {
     it('strips the :export block from CSS when preserveIcssExports is false', async () => {
-      const { processor, cssOutputFolder } = createProcessor(false);
+      const { processor } = createProcessor(terminalProvider, false);
       await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
-      const css: string = await readCssOutputAsync(cssOutputFolder, 'classes-and-exports.module.scss');
-      expect(css).toMatchSnapshot();
+      const css: string = getCssOutput('classes-and-exports.module.scss');
       expect(css).not.toContain(':export');
       expect(css).toContain('.root');
     });
 
     it('preserves the :export block in CSS when preserveIcssExports is true', async () => {
-      const { processor, cssOutputFolder } = createProcessor(true);
+      const { processor } = createProcessor(terminalProvider, true);
       await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
-      const css: string = await readCssOutputAsync(cssOutputFolder, 'classes-and-exports.module.scss');
-      expect(css).toMatchSnapshot();
+      const css: string = getCssOutput('classes-and-exports.module.scss');
       expect(css).toContain(':export');
       expect(css).toContain('.root');
     });
 
     it('generates correct .d.ts with both class names and :export values', async () => {
-      const { processor, dtsOutputFolder } = createProcessor(false);
+      const { processor } = createProcessor(terminalProvider, false);
       await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
-      const dts: string = await readDtsOutputAsync(dtsOutputFolder, 'classes-and-exports.module.scss');
-      expect(dts).toMatchSnapshot();
+      const dts: string = getDtsOutput('classes-and-exports.module.scss');
       expect(dts).toContain('root');
       expect(dts).toContain('highlighted');
       expect(dts).toContain('themeColor');
@@ -124,10 +147,9 @@ describe(SassProcessor.name, () => {
 
   describe('sass-variables-and-exports.module.scss (Sass variables, nesting, BEM)', () => {
     it('resolves Sass variables and expands nested rules in CSS output', async () => {
-      const { processor, cssOutputFolder } = createProcessor(false);
+      const { processor } = createProcessor(terminalProvider, false);
       await compileFixtureAsync(processor, 'sass-variables-and-exports.module.scss');
-      const css: string = await readCssOutputAsync(cssOutputFolder, 'sass-variables-and-exports.module.scss');
-      expect(css).toMatchSnapshot();
+      const css: string = getCssOutput('sass-variables-and-exports.module.scss');
       // Sass variables should be resolved to literal values
       expect(css).toContain('#0078d4');
       expect(css).toContain('#106ebe');
@@ -139,21 +161,19 @@ describe(SassProcessor.name, () => {
     });
 
     it('resolves Sass variables inside the :export block when preserveIcssExports is true', async () => {
-      const { processor, cssOutputFolder } = createProcessor(true);
+      const { processor } = createProcessor(terminalProvider, true);
       await compileFixtureAsync(processor, 'sass-variables-and-exports.module.scss');
-      const css: string = await readCssOutputAsync(cssOutputFolder, 'sass-variables-and-exports.module.scss');
-      expect(css).toMatchSnapshot();
-      // The :export block should contain the resolved variable values, not the variable names
+      const css: string = getCssOutput('sass-variables-and-exports.module.scss');
+      // The :export block should contain resolved values, not Sass variable names
       expect(css).toContain(':export');
       expect(css).toContain('#0078d4');
       expect(css).not.toContain('$primary-color');
     });
 
     it('generates .d.ts with resolved :export keys as typed properties', async () => {
-      const { processor, dtsOutputFolder } = createProcessor(false);
+      const { processor } = createProcessor(terminalProvider, false);
       await compileFixtureAsync(processor, 'sass-variables-and-exports.module.scss');
-      const dts: string = await readDtsOutputAsync(dtsOutputFolder, 'sass-variables-and-exports.module.scss');
-      expect(dts).toMatchSnapshot();
+      const dts: string = getDtsOutput('sass-variables-and-exports.module.scss');
       expect(dts).toContain('container');
       expect(dts).toContain('primaryColor');
       expect(dts).toContain('secondaryColor');
@@ -163,10 +183,9 @@ describe(SassProcessor.name, () => {
 
   describe('mixin-with-exports.module.scss (Sass @mixin)', () => {
     it('expands @mixin calls in CSS output', async () => {
-      const { processor, cssOutputFolder } = createProcessor(false);
+      const { processor } = createProcessor(terminalProvider, false);
       await compileFixtureAsync(processor, 'mixin-with-exports.module.scss');
-      const css: string = await readCssOutputAsync(cssOutputFolder, 'mixin-with-exports.module.scss');
-      expect(css).toMatchSnapshot();
+      const css: string = getCssOutput('mixin-with-exports.module.scss');
       // Mixin output should be inlined — no @mixin or @include in the output
       expect(css).not.toContain('@mixin');
       expect(css).not.toContain('@include');
@@ -176,20 +195,18 @@ describe(SassProcessor.name, () => {
     });
 
     it('preserves :export alongside expanded @mixin output when preserveIcssExports is true', async () => {
-      const { processor, cssOutputFolder } = createProcessor(true);
+      const { processor } = createProcessor(terminalProvider, true);
       await compileFixtureAsync(processor, 'mixin-with-exports.module.scss');
-      const css: string = await readCssOutputAsync(cssOutputFolder, 'mixin-with-exports.module.scss');
-      expect(css).toMatchSnapshot();
+      const css: string = getCssOutput('mixin-with-exports.module.scss');
       expect(css).toContain(':export');
       expect(css).toContain('display: flex');
       expect(css).not.toContain('@mixin');
     });
 
     it('generates .d.ts with :export values and class names from @mixin-using file', async () => {
-      const { processor, dtsOutputFolder } = createProcessor(false);
+      const { processor } = createProcessor(terminalProvider, false);
       await compileFixtureAsync(processor, 'mixin-with-exports.module.scss');
-      const dts: string = await readDtsOutputAsync(dtsOutputFolder, 'mixin-with-exports.module.scss');
-      expect(dts).toMatchSnapshot();
+      const dts: string = getDtsOutput('mixin-with-exports.module.scss');
       expect(dts).toContain('card');
       expect(dts).toContain('cardRadius');
       expect(dts).toContain('animationDuration');
@@ -198,12 +215,10 @@ describe(SassProcessor.name, () => {
 
   describe('extend-with-exports.module.scss (Sass @extend / placeholder selectors)', () => {
     it('merges @extend selectors and strips :export when preserveIcssExports is false', async () => {
-      const { processor, cssOutputFolder } = createProcessor(false);
+      const { processor } = createProcessor(terminalProvider, false);
       await compileFixtureAsync(processor, 'extend-with-exports.module.scss');
-      const css: string = await readCssOutputAsync(cssOutputFolder, 'extend-with-exports.module.scss');
-      expect(css).toMatchSnapshot();
-      // Placeholder %button-base should not appear literally; its rules should be merged into the
-      // selectors that @extend it
+      const css: string = getCssOutput('extend-with-exports.module.scss');
+      // Placeholder %button-base should not appear literally; its rules should be merged
       expect(css).not.toContain('%button-base');
       expect(css).toContain('.primaryButton');
       expect(css).toContain('.dangerButton');
@@ -211,20 +226,18 @@ describe(SassProcessor.name, () => {
     });
 
     it('preserves :export alongside @extend-merged output when preserveIcssExports is true', async () => {
-      const { processor, cssOutputFolder } = createProcessor(true);
+      const { processor } = createProcessor(terminalProvider, true);
       await compileFixtureAsync(processor, 'extend-with-exports.module.scss');
-      const css: string = await readCssOutputAsync(cssOutputFolder, 'extend-with-exports.module.scss');
-      expect(css).toMatchSnapshot();
+      const css: string = getCssOutput('extend-with-exports.module.scss');
       expect(css).toContain(':export');
       expect(css).toContain('.primaryButton');
       expect(css).not.toContain('%button-base');
     });
 
     it('generates .d.ts with class names and :export values for @extend file', async () => {
-      const { processor, dtsOutputFolder } = createProcessor(false);
+      const { processor } = createProcessor(terminalProvider, false);
       await compileFixtureAsync(processor, 'extend-with-exports.module.scss');
-      const dts: string = await readDtsOutputAsync(dtsOutputFolder, 'extend-with-exports.module.scss');
-      expect(dts).toMatchSnapshot();
+      const dts: string = getDtsOutput('extend-with-exports.module.scss');
       expect(dts).toContain('primaryButton');
       expect(dts).toContain('dangerButton');
       expect(dts).toContain('colorPrimary');
@@ -234,17 +247,8 @@ describe(SassProcessor.name, () => {
 
   describe('error reporting', () => {
     it('emits an error for invalid SCSS syntax', async () => {
-      // Write a temporary invalid fixture to disk, compile it, then clean up.
-      const invalidFixturePath: string = `${fixturesFolder}/invalid.module.scss`;
-      await FileSystem.writeFileAsync(invalidFixturePath, '.broken { color: ; }');
-
-      const { processor, logger } = createProcessor(false);
-      try {
-        await processor.compileFilesAsync(new Set([invalidFixturePath]));
-      } finally {
-        await FileSystem.deleteFileAsync(invalidFixturePath);
-      }
-
+      const { processor, logger } = createProcessor(terminalProvider, false);
+      await compileFixtureAsync(processor, 'invalid.module.scss');
       expect(logger.errors.length).toBeGreaterThan(0);
     });
   });
