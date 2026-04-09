@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import path from 'node:path';
+import nodeJsPath from 'node:path';
 
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, Path } from '@rushstack/node-core-library';
 import { MockScopedLogger } from '@rushstack/heft/lib/pluginFramework/logging/MockScopedLogger';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
@@ -13,8 +14,12 @@ const projectFolder: string = path.resolve(__dirname, '../..');
 const fixturesFolder: string = path.resolve(__dirname, '../../src/test/fixtures');
 
 // Fake output folder paths — never actually written to disk because FileSystem.writeFileAsync is mocked.
-const CSS_OUTPUT_FOLDER: string = '/fake/output/css';
-const DTS_OUTPUT_FOLDER: string = '/fake/output/dts';
+const FAKE_OUTPUT_BASE_FOLDER: string = '/fake/output';
+const NORMALIZED_PLATFORM_FAKE_OUTPUT_BASE_FOLDER: string = Path.convertToSlashes(
+  nodeJsPath.resolve(FAKE_OUTPUT_BASE_FOLDER)
+);
+const CSS_OUTPUT_FOLDER: string = `${FAKE_OUTPUT_BASE_FOLDER}/css`;
+const DTS_OUTPUT_FOLDER: string = `${FAKE_OUTPUT_BASE_FOLDER}/dts`;
 
 type ICreateProcessorOptions = Partial<
   Pick<
@@ -102,7 +107,11 @@ describe(SassProcessor.name, () => {
 
     writtenFiles = new Map();
     jest.spyOn(FileSystem, 'writeFileAsync').mockImplementation(async (filePath, content) => {
-      writtenFiles.set(filePath as string, content as string);
+      filePath = Path.convertToSlashes(filePath).replace(
+        NORMALIZED_PLATFORM_FAKE_OUTPUT_BASE_FOLDER,
+        FAKE_OUTPUT_BASE_FOLDER
+      );
+      writtenFiles.set(filePath, String(content));
     });
   });
 
