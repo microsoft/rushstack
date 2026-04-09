@@ -1,14 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import path from 'node:path';
+
 import { FileSystem } from '@rushstack/node-core-library';
 import { MockScopedLogger } from '@rushstack/heft/lib/pluginFramework/logging/MockScopedLogger';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { type ICssOutputFolder, type ISassProcessorOptions, SassProcessor } from '../SassProcessor';
 
-const projectFolder: string = `${__dirname}/../..`;
-const fixturesFolder: string = `${__dirname}/fixtures`;
+const projectFolder: string = path.resolve(__dirname, '../..');
+const fixturesFolder: string = path.resolve(__dirname, '../../src/test/fixtures');
 
 // Fake output folder paths — never actually written to disk because FileSystem.writeFileAsync is mocked.
 const CSS_OUTPUT_FOLDER: string = '/fake/output/css';
@@ -18,6 +20,7 @@ type ICreateProcessorOptions = Partial<
   Pick<
     ISassProcessorOptions,
     | 'cssOutputFolders'
+    | 'doNotTrimOriginalFileExtension'
     | 'dtsOutputFolders'
     | 'exportAsDefault'
     | 'fileExtensions'
@@ -464,6 +467,54 @@ describe(SassProcessor.name, () => {
       await compileFixtureAsync(processor, 'export-only.module.scss');
 
       expect(seenCss[0]).toContain(':export');
+    });
+  });
+
+  describe('doNotTrimOriginalFileExtension', () => {
+    it('strips the source extension by default (doNotTrimOriginalFileExtension: false)', async () => {
+      const { processor } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
+      // Default: "classes-and-exports.module.scss" → "classes-and-exports.module.css"
+      const css: string = writtenFiles.get(`${CSS_OUTPUT_FOLDER}/classes-and-exports.module.css`)!;
+      expect(css).toBeDefined();
+      expect(writtenFiles.has(`${CSS_OUTPUT_FOLDER}/classes-and-exports.module.scss.css`)).toBe(false);
+    });
+
+    it('preserves the source extension when doNotTrimOriginalFileExtension is true', async () => {
+      const { processor } = createProcessor(terminalProvider, { doNotTrimOriginalFileExtension: true });
+      await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
+      // "classes-and-exports.module.scss" → "classes-and-exports.module.scss.css"
+      const css: string = writtenFiles.get(`${CSS_OUTPUT_FOLDER}/classes-and-exports.module.scss.css`)!;
+      expect(css).toBeDefined();
+      expect(writtenFiles.has(`${CSS_OUTPUT_FOLDER}/classes-and-exports.module.css`)).toBe(false);
+    });
+
+    it('uses the .scss.css filename in JS shims when doNotTrimOriginalFileExtension is true', async () => {
+      const { processor } = createProcessor(terminalProvider, {
+        doNotTrimOriginalFileExtension: true,
+        cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: 'commonjs' }]
+      });
+      await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
+      const shim: string = writtenFiles.get(`${CSS_OUTPUT_FOLDER}/classes-and-exports.module.scss.js`)!;
+      expect(shim).toContain(`require("./classes-and-exports.module.scss.css")`);
+    });
+
+    it('the CSS content is the same regardless of doNotTrimOriginalFileExtension', async () => {
+      const { processor: processorDefault } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processorDefault, 'classes-and-exports.module.scss');
+      const cssDefault: string = writtenFiles.get(`${CSS_OUTPUT_FOLDER}/classes-and-exports.module.css`)!;
+
+      writtenFiles.clear();
+
+      const { processor: processorPreserve } = createProcessor(terminalProvider, {
+        doNotTrimOriginalFileExtension: true
+      });
+      await compileFixtureAsync(processorPreserve, 'classes-and-exports.module.scss');
+      const cssPreserve: string = writtenFiles.get(
+        `${CSS_OUTPUT_FOLDER}/classes-and-exports.module.scss.css`
+      )!;
+
+      expect(cssDefault).toEqual(cssPreserve);
     });
   });
 

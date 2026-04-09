@@ -279,6 +279,122 @@ export default styles;",
 }
 `;
 
+exports[`SassProcessor doNotTrimOriginalFileExtension preserves the source extension when doNotTrimOriginalFileExtension is true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor doNotTrimOriginalFileExtension preserves the source extension when doNotTrimOriginalFileExtension is true: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.scss.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+}
+`;
+
+exports[`SassProcessor doNotTrimOriginalFileExtension strips the source extension by default (doNotTrimOriginalFileExtension: false): terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor doNotTrimOriginalFileExtension strips the source extension by default (doNotTrimOriginalFileExtension: false): written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+}
+`;
+
+exports[`SassProcessor doNotTrimOriginalFileExtension the CSS content is the same regardless of doNotTrimOriginalFileExtension: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor doNotTrimOriginalFileExtension the CSS content is the same regardless of doNotTrimOriginalFileExtension: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.scss.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+}
+`;
+
+exports[`SassProcessor doNotTrimOriginalFileExtension uses the .scss.css filename in JS shims when doNotTrimOriginalFileExtension is true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor doNotTrimOriginalFileExtension uses the .scss.css filename in JS shims when doNotTrimOriginalFileExtension is true: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.scss.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+  "/fake/output/css/classes-and-exports.module.scss.js" => "module.exports = require(\\"./classes-and-exports.module.scss.css\\");
+module.exports.default = module.exports;",
+}
+`;
+
 exports[`SassProcessor error reporting emits an error for invalid SCSS syntax: terminal-output 1`] = `
 Array [
   "[verbose] Checking for changes to 1 files...[n]",
