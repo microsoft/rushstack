@@ -849,7 +849,7 @@ packages:
   '@rushstack/heft-api-extractor-plugin@file:../../../heft-plugins/heft-api-extractor-plugin':
     resolution: {directory: ../../../heft-plugins/heft-api-extractor-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': 1.2.10
+      '@rushstack/heft': 1.2.11
 
   '@rushstack/heft-config-file@file:../../../libraries/heft-config-file':
     resolution: {directory: ../../../libraries/heft-config-file, type: directory}
@@ -858,7 +858,7 @@ packages:
   '@rushstack/heft-jest-plugin@file:../../../heft-plugins/heft-jest-plugin':
     resolution: {directory: ../../../heft-plugins/heft-jest-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': ^1.2.10
+      '@rushstack/heft': ^1.2.11
       jest-environment-jsdom: ^30.3.0
       jest-environment-node: ^30.3.0
     peerDependenciesMeta:
@@ -870,17 +870,17 @@ packages:
   '@rushstack/heft-lint-plugin@file:../../../heft-plugins/heft-lint-plugin':
     resolution: {directory: ../../../heft-plugins/heft-lint-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': 1.2.10
+      '@rushstack/heft': 1.2.11
 
   '@rushstack/heft-node-rig@file:../../../rigs/heft-node-rig':
     resolution: {directory: ../../../rigs/heft-node-rig, type: directory}
     peerDependencies:
-      '@rushstack/heft': ^1.2.10
+      '@rushstack/heft': ^1.2.11
 
   '@rushstack/heft-typescript-plugin@file:../../../heft-plugins/heft-typescript-plugin':
     resolution: {directory: ../../../heft-plugins/heft-typescript-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': 1.2.10
+      '@rushstack/heft': 1.2.11
 
   '@rushstack/heft@file:../../../apps/heft':
     resolution: {directory: ../../../apps/heft, type: directory}
@@ -4766,7 +4766,6 @@ snapshots:
       jest-resolve: 30.3.0
       jest-snapshot: 30.3.0
       lodash: 4.18.1
-      punycode: 2.3.1
     optionalDependencies:
       jest-environment-node: 30.3.0
     transitivePeerDependencies:
