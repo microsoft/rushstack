@@ -37,6 +37,9 @@ interface ICommonPackageJson extends IPackageJson {
     patchedDependencies?: typeof PnpmOptionsConfiguration.prototype.globalPatchedDependencies;
     minimumReleaseAge?: typeof PnpmOptionsConfiguration.prototype.minimumReleaseAge;
     minimumReleaseAgeExclude?: typeof PnpmOptionsConfiguration.prototype.minimumReleaseAgeExclude;
+    trustPolicy?: typeof PnpmOptionsConfiguration.prototype.trustPolicy;
+    trustPolicyExclude?: typeof PnpmOptionsConfiguration.prototype.trustPolicyExclude;
+    trustPolicyIgnoreAfter?: typeof PnpmOptionsConfiguration.prototype.trustPolicyIgnoreAfter;
   };
 }
 
@@ -143,6 +146,60 @@ export class InstallHelpers {
         if (pnpmOptions.minimumReleaseAgeExclude) {
           commonPackageJson.pnpm.minimumReleaseAgeExclude = pnpmOptions.minimumReleaseAgeExclude;
         }
+      }
+
+      if (pnpmOptions.trustPolicy !== undefined) {
+        if (
+          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.21.0')
+        ) {
+          terminal.writeWarningLine(
+            Colorize.yellow(
+              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+                `doesn't support the "trustPolicy" field in ` +
+                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+                'Remove this field or upgrade to pnpm 10.21.0 or newer.'
+            )
+          );
+        }
+
+        commonPackageJson.pnpm.trustPolicy = pnpmOptions.trustPolicy;
+      }
+
+      if (pnpmOptions.trustPolicyExclude) {
+        if (
+          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.22.0')
+        ) {
+          terminal.writeWarningLine(
+            Colorize.yellow(
+              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+                `doesn't support the "trustPolicyExclude" field in ` +
+                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+                'Remove this field or upgrade to pnpm 10.22.0 or newer.'
+            )
+          );
+        }
+
+        commonPackageJson.pnpm.trustPolicyExclude = pnpmOptions.trustPolicyExclude;
+      }
+
+      if (pnpmOptions.trustPolicyIgnoreAfter !== undefined) {
+        if (
+          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.27.0')
+        ) {
+          terminal.writeWarningLine(
+            Colorize.yellow(
+              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+                `doesn't support the "trustPolicyIgnoreAfter" field in ` +
+                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+                'Remove this field or upgrade to pnpm 10.27.0 or newer.'
+            )
+          );
+        }
+
+        commonPackageJson.pnpm.trustPolicyIgnoreAfter = pnpmOptions.trustPolicyIgnoreAfter;
       }
 
       if (pnpmOptions.unsupportedPackageJsonSettings) {

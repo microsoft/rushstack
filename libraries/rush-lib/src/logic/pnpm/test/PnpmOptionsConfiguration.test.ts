@@ -100,6 +100,22 @@ describe(PnpmOptionsConfiguration.name, () => {
     ]);
   });
 
+  it('loads trustPolicy', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-trustPolicy.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(pnpmConfiguration.trustPolicy).toEqual('no-downgrade');
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.trustPolicyExclude)).toEqual([
+      '@myorg/*',
+      'chokidar@4.0.3',
+      'webpack@4.47.0 || 5.102.1',
+      '@babel/core@7.28.5'
+    ]);
+    expect(pnpmConfiguration.trustPolicyIgnoreAfter).toEqual(20160);
+  });
+
   it('loads catalog and catalogs', () => {
     const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
       `${__dirname}/jsonFiles/pnpm-config-catalog.json`,
