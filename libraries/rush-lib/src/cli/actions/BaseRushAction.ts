@@ -115,7 +115,7 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
     return this._eventHooksManager;
   }
 
-  protected readonly rushConfiguration!: RushConfiguration;
+  protected declare readonly rushConfiguration: RushConfiguration;
 
   protected override async onExecuteAsync(): Promise<void> {
     if (!this.rushConfiguration) {
