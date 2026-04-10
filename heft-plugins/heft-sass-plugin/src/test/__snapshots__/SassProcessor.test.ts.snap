@@ -279,6 +279,93 @@ export default styles;",
 }
 `;
 
+exports[`SassProcessor css-module.module.css (plain CSS as CSS module input) does not emit a JS shim for a .module.css input file: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor css-module.module.css (plain CSS as CSS module input) does not emit a JS shim for a .module.css input file: written-files 1`] = `
+Map {
+  "/fake/output/dts/css-module.module.css.d.ts" => "declare interface IStyles {
+  root: string;
+  header: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/css-module.module.css" => "/* Plain CSS file treated as a CSS module via fileExtensions: ['.module.css'].
+   Verifies that CSS input (not SCSS/Sass) is processed correctly. */
+.root {
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  font-size: 16px;
+  font-weight: bold;
+}",
+}
+`;
+
+exports[`SassProcessor css-module.module.css (plain CSS as CSS module input) generates .d.ts with class names from a .module.css input file: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor css-module.module.css (plain CSS as CSS module input) generates .d.ts with class names from a .module.css input file: written-files 1`] = `
+Map {
+  "/fake/output/dts/css-module.module.css.d.ts" => "declare interface IStyles {
+  root: string;
+  header: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/css-module.module.css" => "/* Plain CSS file treated as a CSS module via fileExtensions: ['.module.css'].
+   Verifies that CSS input (not SCSS/Sass) is processed correctly. */
+.root {
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  font-size: 16px;
+  font-weight: bold;
+}",
+}
+`;
+
+exports[`SassProcessor css-module.module.css (plain CSS as CSS module input) passes CSS through the pipeline unchanged for a .module.css input file: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor css-module.module.css (plain CSS as CSS module input) passes CSS through the pipeline unchanged for a .module.css input file: written-files 1`] = `
+Map {
+  "/fake/output/dts/css-module.module.css.d.ts" => "declare interface IStyles {
+  root: string;
+  header: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/css-module.module.css" => "/* Plain CSS file treated as a CSS module via fileExtensions: ['.module.css'].
+   Verifies that CSS input (not SCSS/Sass) is processed correctly. */
+.root {
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  font-size: 16px;
+  font-weight: bold;
+}",
+}
+`;
+
 exports[`SassProcessor doNotTrimOriginalFileExtension preserves the source extension when doNotTrimOriginalFileExtension is true: terminal-output 1`] = `
 Array [
   "[verbose] Checking for changes to 1 files...[n]",
@@ -663,6 +750,73 @@ Map {
 }
 `;
 
+exports[`SassProcessor global-styles.global.sass (.global.sass non-module file) compiles indented Sass syntax to plain CSS for a .global.sass file: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor global-styles.global.sass (.global.sass non-module file) compiles indented Sass syntax to plain CSS for a .global.sass file: written-files 1`] = `
+Map {
+  "/fake/output/dts/global-styles.global.sass.d.ts" => "export {};",
+  "/fake/output/css/global-styles.global.css" => "body {
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  font-size: 24px;
+  color: #333;
+}",
+}
+`;
+
+exports[`SassProcessor global-styles.global.sass (.global.sass non-module file) emits a side-effect ESM shim for a .global.sass file: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor global-styles.global.sass (.global.sass non-module file) emits a side-effect ESM shim for a .global.sass file: written-files 1`] = `
+Map {
+  "/fake/output/dts/global-styles.global.sass.d.ts" => "export {};",
+  "/fake/output/css/global-styles.global.css" => "body {
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  font-size: 24px;
+  color: #333;
+}",
+  "/fake/output/css/global-styles.global.sass.js" => "import \\"./global-styles.global.css\\";export {};",
+}
+`;
+
+exports[`SassProcessor global-styles.global.sass (.global.sass non-module file) emits export {}; in the .d.ts for a .global.sass file: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor global-styles.global.sass (.global.sass non-module file) emits export {}; in the .d.ts for a .global.sass file: written-files 1`] = `
+Map {
+  "/fake/output/dts/global-styles.global.sass.d.ts" => "export {};",
+  "/fake/output/css/global-styles.global.css" => "body {
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  font-size: 24px;
+  color: #333;
+}",
+}
+`;
+
 exports[`SassProcessor mixin-with-exports.module.scss (Sass @mixin) expands @mixin calls in CSS output: terminal-output 1`] = `
 Array [
   "[verbose] Checking for changes to 1 files...[n]",
@@ -1028,6 +1182,144 @@ export default styles;",
   primaryColor: #0078d4;
   secondaryColor: #106ebe;
   baseSpacing: 8px;
+}",
+}
+`;
+
+exports[`SassProcessor silenceDeprecations option throws at construction time when given an unknown deprecation code: terminal-output 1`] = `Array []`;
+
+exports[`SassProcessor silenceDeprecations option throws at construction time when given an unknown deprecation code: written-files 1`] = `Map {}`;
+
+exports[`SassProcessor simple.module.sass (indented Sass syntax) compiles indented Sass syntax to CSS correctly: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor simple.module.sass (indented Sass syntax) compiles indented Sass syntax to CSS correctly: written-files 1`] = `
+Map {
+  "/fake/output/dts/simple.module.sass.d.ts" => "declare interface IStyles {
+  exampleClass: string;
+  exampleHeading: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/simple.module.css" => ".exampleClass {
+  color: red;
+  font-size: 14px;
+}
+
+.exampleHeading {
+  font-weight: bold;
+  color: navy;
+}",
+}
+`;
+
+exports[`SassProcessor simple.module.sass (indented Sass syntax) emits an ESM shim for an indented Sass module file: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor simple.module.sass (indented Sass syntax) emits an ESM shim for an indented Sass module file: written-files 1`] = `
+Map {
+  "/fake/output/dts/simple.module.sass.d.ts" => "declare interface IStyles {
+  exampleClass: string;
+  exampleHeading: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/simple.module.css" => ".exampleClass {
+  color: red;
+  font-size: 14px;
+}
+
+.exampleHeading {
+  font-weight: bold;
+  color: navy;
+}",
+  "/fake/output/css/simple.module.sass.js" => "export { default } from \\"./simple.module.css\\";",
+}
+`;
+
+exports[`SassProcessor simple.module.sass (indented Sass syntax) generates .d.ts with class names from indented Sass: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor simple.module.sass (indented Sass syntax) generates .d.ts with class names from indented Sass: written-files 1`] = `
+Map {
+  "/fake/output/dts/simple.module.sass.d.ts" => "declare interface IStyles {
+  exampleClass: string;
+  exampleHeading: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/simple.module.css" => ".exampleClass {
+  color: red;
+  font-size: 14px;
+}
+
+.exampleHeading {
+  font-weight: bold;
+  color: navy;
+}",
+}
+`;
+
+exports[`SassProcessor use-with-partial.module.scss (@use with local partial) generates .d.ts with class names from a file using @use: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor use-with-partial.module.scss (@use with local partial) generates .d.ts with class names from a file using @use: written-files 1`] = `
+Map {
+  "/fake/output/dts/use-with-partial.module.scss.d.ts" => "declare interface IStyles {
+  container: string;
+  header: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/use-with-partial.module.css" => ".container {
+  color: #0078d4;
+  padding: 8px;
+}
+
+.header {
+  border-bottom: 1px solid #0078d4;
+}",
+}
+`;
+
+exports[`SassProcessor use-with-partial.module.scss (@use with local partial) resolves variables from a @use partial in CSS output: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor use-with-partial.module.scss (@use with local partial) resolves variables from a @use partial in CSS output: written-files 1`] = `
+Map {
+  "/fake/output/dts/use-with-partial.module.scss.d.ts" => "declare interface IStyles {
+  container: string;
+  header: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/use-with-partial.module.css" => ".container {
+  color: #0078d4;
+  padding: 8px;
+}
+
+.header {
+  border-bottom: 1px solid #0078d4;
 }",
 }
 `;
