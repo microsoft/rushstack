@@ -795,7 +795,11 @@ export class SassProcessor {
 
     const relativeFilePath: string = path.relative(srcFolder, sourceFilePath);
 
-    const dtsContent: string = this._createDTS(moduleMap);
+    // A module file with no local class exports (e.g. only :global styles) has no
+    // default export at runtime, so treat it as a side-effect-only import just like
+    // a non-module file.
+    const hasModuleExports: boolean | undefined = moduleMap && Object.keys(moduleMap).length > 0;
+    const dtsContent: string = createDTS(moduleMap, exportAsDefault, hasModuleExports);
 
     const writeFileOptions: IFileSystemWriteFileOptions = {
       ensureFolderExists: true
@@ -840,48 +844,58 @@ export class SassProcessor {
           const jsShimContent: string = generateJsShimContent(
             shimModuleFormat,
             cssPathFromJs,
-            record.isModule
+            hasModuleExports
           );
           await FileSystem.writeFileAsync(jsFilePath, jsShimContent, writeFileOptions);
         }
       }
     }
   }
+}
 
-  private _createDTS(moduleMap: JsonObject | undefined): string {
+function createDTS(
+  moduleMap: JsonObject | undefined,
+  exportAsDefault: boolean,
+  hasModuleExports: boolean | undefined
+): string;
+function createDTS(moduleMap: JsonObject, exportAsDefault: boolean, hasModuleExports: true): string;
+function createDTS(
+  moduleMap: JsonObject | undefined,
+  exportAsDefault: boolean,
+  hasModuleExports: boolean | undefined
+): string {
+  if (hasModuleExports) {
     // Create a source file.
     const source: string[] = [];
 
-    if (moduleMap) {
-      if (this._options.exportAsDefault) {
-        source.push(`declare interface IStyles {`);
-        for (const className of Object.keys(moduleMap)) {
-          const safeClassName: string = SIMPLE_IDENTIFIER_REGEX.test(className)
-            ? className
-            : JSON.stringify(className);
-          // Quote and escape class names as needed.
-          source.push(`  ${safeClassName}: string;`);
+    if (exportAsDefault) {
+      source.push(`declare interface IStyles {`);
+      for (const className of Object.keys(moduleMap)) {
+        const safeClassName: string = SIMPLE_IDENTIFIER_REGEX.test(className)
+          ? className
+          : JSON.stringify(className);
+        // Quote and escape class names as needed.
+        source.push(`  ${safeClassName}: string;`);
+      }
+
+      source.push(`}`);
+      source.push(`declare const styles: IStyles;`);
+      source.push(`export default styles;`);
+    } else {
+      for (const className of Object.keys(moduleMap)) {
+        if (!SIMPLE_IDENTIFIER_REGEX.test(className)) {
+          throw new Error(
+            `Class name "${className}" is not a valid identifier and may only be exported using "exportAsDefault: true"`
+          );
         }
-        source.push(`}`);
-        source.push(`declare const styles: IStyles;`);
-        source.push(`export default styles;`);
-      } else {
-        for (const className of Object.keys(moduleMap)) {
-          if (!SIMPLE_IDENTIFIER_REGEX.test(className)) {
-            throw new Error(
-              `Class name "${className}" is not a valid identifier and may only be exported using "exportAsDefault: true"`
-            );
-          }
-          source.push(`export const ${className}: string;`);
-        }
+
+        source.push(`export const ${className}: string;`);
       }
     }
 
-    if (source.length === 0 || !moduleMap) {
-      return `export {};`;
-    }
-
     return source.join('\n');
+  } else {
+    return `export {};`;
   }
 }
 
@@ -1021,7 +1035,7 @@ function determineSyntaxFromFilePath(filePath: string): Syntax {
 function generateJsShimContent(
   format: 'commonjs' | 'esnext',
   relativePathToCss: string,
-  isModule: boolean
+  isModule: boolean | undefined
 ): string {
   const pathString: string = JSON.stringify(relativePathToCss);
   switch (format) {

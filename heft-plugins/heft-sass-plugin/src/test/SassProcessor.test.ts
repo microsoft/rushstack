@@ -370,6 +370,41 @@ describe(SassProcessor.name, () => {
     });
   });
 
+  describe('global-only.module.scss (module file with only :global styles)', () => {
+    it('emits export {}; in the .d.ts when all styles are :global', async () => {
+      const { processor } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'global-only.module.scss');
+      const dts: string = getDtsOutput('global-only.module.scss');
+      expect(dts).toBe('export {};');
+    });
+
+    it('emits a side-effect ESM shim (no default re-export) when all styles are :global', async () => {
+      const { processor } = createProcessor(terminalProvider, {
+        cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: 'esnext' }]
+      });
+      await compileFixtureAsync(processor, 'global-only.module.scss');
+      const shim: string = getJsShimOutput('global-only.module.scss');
+      expect(shim).toBe(`import "./global-only.module.css";export {};`);
+    });
+
+    it('emits a side-effect CJS shim (no module.exports assignment) when all styles are :global', async () => {
+      const { processor } = createProcessor(terminalProvider, {
+        cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: 'commonjs' }]
+      });
+      await compileFixtureAsync(processor, 'global-only.module.scss');
+      const shim: string = getJsShimOutput('global-only.module.scss');
+      expect(shim).toBe(`require("./global-only.module.css");`);
+    });
+
+    it('emits compiled CSS with the :global styles applied', async () => {
+      const { processor } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'global-only.module.scss');
+      const css: string = getCssOutput('global-only.module.scss');
+      expect(css).toContain('.ms-Nav-group');
+      expect(css).toContain('.ms-Nav-link');
+    });
+  });
+
   describe('non-module (global) files', () => {
     it('emits plain compiled CSS for a .global.scss file', async () => {
       const { processor } = createProcessor(terminalProvider, {
