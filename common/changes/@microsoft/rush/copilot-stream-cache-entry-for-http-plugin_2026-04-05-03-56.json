@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add optional file-based transfer APIs (`tryDownloadCacheEntryToFileAsync`, `tryUploadCacheEntryFromFileAsync`) to `ICloudBuildCacheProvider`, allowing cache plugins to transfer cache entries directly to and from files on disk without buffering entire contents in memory. Implement in `@rushstack/rush-http-build-cache-plugin`, `@rushstack/rush-amazon-s3-build-cache-plugin`, and `@rushstack/rush-azure-storage-build-cache-plugin`. Gated behind the `useDirectFileTransfersForBuildCache` experiment.",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "198982749+Copilot@users.noreply.github.com"
+}

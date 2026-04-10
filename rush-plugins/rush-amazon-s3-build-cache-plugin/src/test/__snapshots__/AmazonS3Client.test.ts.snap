@@ -548,3 +548,4 @@ exports[`AmazonS3Client Rejects invalid S3 endpoint values 9`] = `"Invalid S3 en
 exports[`AmazonS3Client Rejects invalid S3 endpoint values 10`] = `"Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long"`;
 
 exports[`AmazonS3Client Rejects invalid S3 endpoint values 11`] = `"Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long"`;
+
