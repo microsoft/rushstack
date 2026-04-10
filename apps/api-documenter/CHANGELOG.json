@@ -2,6 +2,23 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.30.0",
+      "tag": "@microsoft/api-documenter_v7.30.0",
+      "date": "Fri, 10 Apr 2026 22:46:34 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for @defaultValue in Markdown and Yaml documenters"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.12`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.29.11",
       "tag": "@microsoft/api-documenter_v7.29.11",
       "date": "Thu, 09 Apr 2026 00:15:07 GMT",

@@ -1,6 +1,11 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Thu, 09 Apr 2026 00:15:07 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Apr 2026 22:46:34 GMT and should not be manually modified.
+
+## 1.4.6
+Fri, 10 Apr 2026 22:46:34 GMT
+
+_Version update only_
 
 ## 1.4.5
 Thu, 09 Apr 2026 00:15:07 GMT
