@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import { Sort, Import, Path } from '@rushstack/node-core-library';
+import { FileSystem, Sort, Import, Path } from '@rushstack/node-core-library';
 
 import { BaseWorkspaceFile } from '../base/BaseWorkspaceFile';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
@@ -29,7 +29,7 @@ const globEscape: (unescaped: string) => string = require('glob-escape'); // No 
 interface IPnpmWorkspaceYaml {
   /** The list of local package directories */
   packages: string[];
-  /** Catalog definitions for centralized version management */
+  /** Named catalog definitions for centralized version management */
   catalogs?: Record<string, Record<string, string>>;
 }
 
@@ -54,6 +54,33 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     // If we need to support manual customization, that should be an additional parameter for "base file"
     this._workspacePackages = new Set<string>();
     this._catalogs = undefined;
+  }
+
+  /**
+   * Loads and returns the catalogs section from an existing pnpm-workspace.yaml file.
+   * This method handles both the singular 'catalog' field (for the default catalog) and
+   * the plural 'catalogs' field (for named catalogs), merging them into a single object.
+   *
+   * @param workspaceYamlFilename - The path to the pnpm-workspace.yaml file
+   * @returns The catalogs object, or undefined if the file doesn't exist or has no catalogs
+   */
+  public static async loadCatalogsFromFileAsync(
+    workspaceYamlFilename: string
+  ): Promise<Record<string, Record<string, string>> | undefined> {
+    let content: string;
+    try {
+      content = await FileSystem.readFileAsync(workspaceYamlFilename);
+    } catch (error) {
+      if (FileSystem.isNotExistError(error)) {
+        return undefined;
+      } else {
+        throw error;
+      }
+    }
+
+    const parsed: IPnpmWorkspaceYaml | undefined = yamlModule.load(content) as IPnpmWorkspaceYaml | undefined;
+
+    return parsed?.catalogs;
   }
 
   /**
