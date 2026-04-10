@@ -2,6 +2,29 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.173.0",
+      "tag": "@microsoft/rush_v5.173.0",
+      "date": "Fri, 10 Apr 2026 22:46:54 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Move stale autoinstaller `node_modules` folders into Rush's recycler before asynchronously deleting them, instead of synchronously deleting them in place."
+          },
+          {
+            "comment": "Filter npm-incompatible properties from .npmrc when installing rush-lib via npm, to eliminate spurious \"Unknown env config\" and \"Unknown project config\" warnings."
+          },
+          {
+            "comment": "When cobuilds are remote executing, check them after locally executable tasks."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add async variants of disk-touching APIs in `PackageJsonEditor` (`loadAsync`, `saveIfModifiedAsync`), `CommonVersionsConfiguration` (`loadFromFileAsync`, `saveAsync`), and `VersionPolicy` (`setDependenciesBeforePublishAsync`, `setDependenciesBeforeCommitAsync`); deprecate corresponding sync methods."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.172.1",
       "tag": "@microsoft/rush_v5.172.1",
       "date": "Wed, 25 Mar 2026 01:01:07 GMT",

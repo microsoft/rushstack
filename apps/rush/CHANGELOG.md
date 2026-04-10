@@ -1,6 +1,19 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 25 Mar 2026 01:01:07 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Apr 2026 22:46:54 GMT and should not be manually modified.
+
+## 5.173.0
+Fri, 10 Apr 2026 22:46:54 GMT
+
+### Minor changes
+
+- Add async variants of disk-touching APIs in `PackageJsonEditor` (`loadAsync`, `saveIfModifiedAsync`), `CommonVersionsConfiguration` (`loadFromFileAsync`, `saveAsync`), and `VersionPolicy` (`setDependenciesBeforePublishAsync`, `setDependenciesBeforeCommitAsync`); deprecate corresponding sync methods.
+
+### Updates
+
+- Move stale autoinstaller `node_modules` folders into Rush's recycler before asynchronously deleting them, instead of synchronously deleting them in place.
+- Filter npm-incompatible properties from .npmrc when installing rush-lib via npm, to eliminate spurious "Unknown env config" and "Unknown project config" warnings.
+- When cobuilds are remote executing, check them after locally executable tasks.
 
 ## 5.172.1
 Wed, 25 Mar 2026 01:01:07 GMT
