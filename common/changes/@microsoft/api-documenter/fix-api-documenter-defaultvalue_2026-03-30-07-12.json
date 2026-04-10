@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add support for @defaultValue in Markdown and Yaml documenters",
+      "type": "minor",
+      "packageName": "@microsoft/api-documenter"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "40660121+colinaaa@users.noreply.github.com"
+}

@@ -327,6 +327,12 @@ export interface IYamlItem {
    * NOTE: This is an extension and corresponds to `ItemViewModel.Metadata` in DocFX.
    */
   package?: string;
+
+  /**
+   * The default value for the item.
+   * NOTE: This is an extension and corresponds to `ItemViewModel.Metadata` in DocFX.
+   */
+  defaultValue?: string;
 }
 
 /**

@@ -304,6 +304,10 @@ function convertCommonYamlModel(
     result.example = [];
   }
 
+  if (element.defaultValue) {
+    result.defaultValue = element.defaultValue;
+  }
+
   result.isPreview = element.isPreview;
   if (!result.isPreview) {
     result.isPreview = false;
