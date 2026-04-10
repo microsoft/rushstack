@@ -482,7 +482,7 @@ describe(InputsSnapshot.name, () => {
         ])
       };
 
-      // Same major, different minor — should produce the same hash
+      // Same major, different minor - should produce the same hash
       const input1: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
@@ -500,7 +500,7 @@ describe(InputsSnapshot.name, () => {
 
       expect(result1).toEqual(result2);
 
-      // Different major — should produce a different hash
+      // Different major - should produce a different hash
       const input3: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
@@ -527,7 +527,7 @@ describe(InputsSnapshot.name, () => {
         ])
       };
 
-      // Same major.minor, different patch — should produce the same hash
+      // Same major.minor, different patch - should produce the same hash
       const input1: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
@@ -545,7 +545,7 @@ describe(InputsSnapshot.name, () => {
 
       expect(result1).toEqual(result2);
 
-      // Different minor — should produce a different hash
+      // Different minor - should produce a different hash
       const input3: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
@@ -602,7 +602,7 @@ describe(InputsSnapshot.name, () => {
 
       expect(resultPatch).toEqual(resultTrue);
 
-      // Different patch — should produce a different hash
+      // Different patch - should produce a different hash
       const input2: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),

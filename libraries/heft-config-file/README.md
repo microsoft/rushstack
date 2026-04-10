@@ -87,7 +87,7 @@ config file using the `"$<propertyName>.inheritanceType"` annotation:
 }
 ```
 
-These annotations work at any nesting level — you can annotate a nested property the same way:
+These annotations work at any nesting level - you can annotate a nested property the same way:
 
 ```json
 {
@@ -320,7 +320,7 @@ const loader = new ProjectConfigurationFile<IMyConfig>({
 ```
 
 The function receives `(childValue, parentValue)` and must return the merged result. It is not called if the
-child sets the property to `null` — in that case the property is simply deleted.
+child sets the property to `null` - in that case the property is simply deleted.
 
 ### Inheritance precedence
 

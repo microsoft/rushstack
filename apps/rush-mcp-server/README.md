@@ -1,6 +1,6 @@
 # @rushstack/mcp-server
 
-With the rapid advancement of LLMs, AI applications like Trae, Cursor, Cline, Windsurf, and others have been thriving. However, due to the large scale of monorepos and the context limitations of LLMs, it’s difficult for these models to fully understand your monorepo. This is where @rushstack/mcp-server comes in — by providing a suite of MCP tools, it enables LLMs to better comprehend your monorepo and assist you more effectively with daily development tasks in a Rush-based monorepo environment.
+With the rapid advancement of LLMs, AI applications like Trae, Cursor, Cline, Windsurf, and others have been thriving. However, due to the large scale of monorepos and the context limitations of LLMs, it’s difficult for these models to fully understand your monorepo. This is where @rushstack/mcp-server comes in - by providing a suite of MCP tools, it enables LLMs to better comprehend your monorepo and assist you more effectively with daily development tasks in a Rush-based monorepo environment.
 
 ## Usage
 
@@ -19,7 +19,7 @@ With the rapid advancement of LLMs, AI applications like Trae, Cursor, Cline, Wi
 }
 ```
 
-3. Congratulations 🎉 You’ve completed the setup — Rush MCP is now ready to use!
+3. Congratulations 🎉 You’ve completed the setup - Rush MCP is now ready to use!
 
 ## Available Tools
 

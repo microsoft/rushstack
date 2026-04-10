@@ -75,9 +75,9 @@ export interface IRushPhaseSharding {
 /**
  * The granularity at which the Node.js version is included in the build cache hash.
  *
- * - `"major"` — includes only the major version (e.g. `18`)
- * - `"minor"` — includes the major and minor version (e.g. `18.17`)
- * - `"patch"` — includes the full version (e.g. `18.17.1`)
+ * - `"major"` - includes only the major version (e.g. `18`)
+ * - `"minor"` - includes the major and minor version (e.g. `18.17`)
+ * - `"patch"` - includes the full version (e.g. `18.17.1`)
  *
  * @alpha
  */
@@ -130,10 +130,10 @@ export interface IOperationSettings {
    * projects that produce Node.js-version-specific outputs, such as native module builds.
    *
    * Allowed values:
-   * - `true` — alias for `"patch"`, includes the full version (e.g. `18.17.1`)
-   * - `"major"` — includes only the major version (e.g. `18`)
-   * - `"minor"` — includes the major and minor version (e.g. `18.17`)
-   * - `"patch"` — includes the full version (e.g. `18.17.1`)
+   * - `true` - alias for `"patch"`, includes the full version (e.g. `18.17.1`)
+   * - `"major"` - includes only the major version (e.g. `18`)
+   * - `"minor"` - includes the major and minor version (e.g. `18.17`)
+   * - `"patch"` - includes the full version (e.g. `18.17.1`)
    */
   dependsOnNodeVersion?: boolean | NodeVersionGranularity;
 
