@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Move stale autoinstaller `node_modules` folders into Rush's recycler before asynchronously deleting them, instead of synchronously deleting them in place.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
