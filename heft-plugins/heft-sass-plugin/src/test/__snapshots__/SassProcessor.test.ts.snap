@@ -585,6 +585,84 @@ export default styles;",
 }
 `;
 
+exports[`SassProcessor global-only.module.scss (module file with only :global styles) emits a side-effect CJS shim (no module.exports assignment) when all styles are :global: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor global-only.module.scss (module file with only :global styles) emits a side-effect CJS shim (no module.exports assignment) when all styles are :global: written-files 1`] = `
+Map {
+  "/fake/output/dts/global-only.module.scss.d.ts" => "export {};",
+  "/fake/output/css/global-only.module.css" => ".ms-Nav-group {
+  overflow: hidden;
+}
+.ms-Nav-link {
+  height: 30px;
+}",
+  "/fake/output/css/global-only.module.scss.js" => "require(\\"./global-only.module.css\\");",
+}
+`;
+
+exports[`SassProcessor global-only.module.scss (module file with only :global styles) emits a side-effect ESM shim (no default re-export) when all styles are :global: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor global-only.module.scss (module file with only :global styles) emits a side-effect ESM shim (no default re-export) when all styles are :global: written-files 1`] = `
+Map {
+  "/fake/output/dts/global-only.module.scss.d.ts" => "export {};",
+  "/fake/output/css/global-only.module.css" => ".ms-Nav-group {
+  overflow: hidden;
+}
+.ms-Nav-link {
+  height: 30px;
+}",
+  "/fake/output/css/global-only.module.scss.js" => "import \\"./global-only.module.css\\";export {};",
+}
+`;
+
+exports[`SassProcessor global-only.module.scss (module file with only :global styles) emits compiled CSS with the :global styles applied: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor global-only.module.scss (module file with only :global styles) emits compiled CSS with the :global styles applied: written-files 1`] = `
+Map {
+  "/fake/output/dts/global-only.module.scss.d.ts" => "export {};",
+  "/fake/output/css/global-only.module.css" => ".ms-Nav-group {
+  overflow: hidden;
+}
+.ms-Nav-link {
+  height: 30px;
+}",
+}
+`;
+
+exports[`SassProcessor global-only.module.scss (module file with only :global styles) emits export {}; in the .d.ts when all styles are :global: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor global-only.module.scss (module file with only :global styles) emits export {}; in the .d.ts when all styles are :global: written-files 1`] = `
+Map {
+  "/fake/output/dts/global-only.module.scss.d.ts" => "export {};",
+  "/fake/output/css/global-only.module.css" => ".ms-Nav-group {
+  overflow: hidden;
+}
+.ms-Nav-link {
+  height: 30px;
+}",
+}
+`;
+
 exports[`SassProcessor mixin-with-exports.module.scss (Sass @mixin) expands @mixin calls in CSS output: terminal-output 1`] = `
 Array [
   "[verbose] Checking for changes to 1 files...[n]",

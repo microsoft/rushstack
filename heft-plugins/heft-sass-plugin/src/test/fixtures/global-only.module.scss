@@ -1,0 +1,11 @@
+// A module SCSS file that contains only :global styles and no local CSS module class exports.
+// This pattern is used for applying global overrides from a file named .module.scss.
+:global {
+  .ms-Nav-group {
+    overflow: hidden;
+  }
+
+  .ms-Nav-link {
+    height: 30px;
+  }
+}
