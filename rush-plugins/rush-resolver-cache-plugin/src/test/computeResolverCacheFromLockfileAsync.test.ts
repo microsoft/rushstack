@@ -10,7 +10,8 @@ import {
   computeResolverCacheFromLockfileAsync,
   type IComputeResolverCacheFromLockfileOptions,
   type IPartialRushProject,
-  type IPlatformInfo
+  type IPlatformInfo,
+  type PnpmMajorVersion
 } from '../computeResolverCacheFromLockfileAsync';
 import type { IResolverContext } from '../types';
 
@@ -18,6 +19,7 @@ interface ITestCase {
   workspaceRoot: string;
   commonPrefixToTrim: string;
   lockfileName: string;
+  pnpmVersion?: PnpmMajorVersion;
   afterExternalPackagesAsync?: IComputeResolverCacheFromLockfileOptions['afterExternalPackagesAsync'];
 }
 
@@ -80,6 +82,20 @@ const TEST_CASES: readonly ITestCase[] = [
         ];
       }
     }
+  },
+  {
+    // v9 lockfile with pnpm 9 helpers (v9 key format, MD5 base32 hash, v3 store)
+    workspaceRoot: '/$root/common/temp/build-tests',
+    commonPrefixToTrim: '/$root/',
+    lockfileName: 'build-tests-subspace-v9.yaml',
+    pnpmVersion: 9
+  },
+  {
+    // Same v9 lockfile with pnpm 10 helpers (v9 key format, SHA-256 hash, v10 store)
+    workspaceRoot: '/$root/common/temp/build-tests',
+    commonPrefixToTrim: '/$root/',
+    lockfileName: 'build-tests-subspace-v9.yaml',
+    pnpmVersion: 10
   }
 ];
 
@@ -94,7 +110,8 @@ describe(computeResolverCacheFromLockfileAsync.name, () => {
     };
 
     for (const testCase of TEST_CASES) {
-      const { workspaceRoot, commonPrefixToTrim, lockfileName, afterExternalPackagesAsync } = testCase;
+      const { workspaceRoot, commonPrefixToTrim, lockfileName, pnpmVersion, afterExternalPackagesAsync } =
+        testCase;
 
       const lockfile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
         `${collateralFolder}/${lockfileName}`,
@@ -116,17 +133,20 @@ describe(computeResolverCacheFromLockfileAsync.name, () => {
         });
       }
 
+      const snapshotName: string = pnpmVersion ? `${lockfileName} (pnpm ${pnpmVersion})` : lockfileName;
+
       const resolverCacheFile = await computeResolverCacheFromLockfileAsync({
         workspaceRoot,
         commonPrefixToTrim,
         lockfile,
         platformInfo,
         projectByImporterPath,
+        pnpmVersion,
         afterExternalPackagesAsync
       });
 
       // Trim undefined properties
-      expect(JSON.parse(JSON.stringify(resolverCacheFile))).toMatchSnapshot(lockfileName);
+      expect(JSON.parse(JSON.stringify(resolverCacheFile))).toMatchSnapshot(snapshotName);
     }
   });
 });

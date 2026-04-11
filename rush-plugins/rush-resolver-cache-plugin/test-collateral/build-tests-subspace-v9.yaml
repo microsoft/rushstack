@@ -1,0 +1,99 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+  .: {}
+
+  ../../../build-tests-subspace/rush-lib-test:
+    dependencies:
+      autoprefixer:
+        specifier: ^9.8.8
+        version: 9.8.8
+      '@babel/code-frame':
+        specifier: ^7.24.2
+        version: 7.24.2
+    devDependencies:
+      typescript:
+        specifier: ~5.4.2
+        version: 5.4.5
+
+  ../../../build-tests-subspace/rush-sdk-test:
+    dependencies:
+      '@scope/bar':
+        specifier: ^2.0.0
+        version: 2.0.0(typescript@5.4.5)
+    devDependencies:
+      typescript:
+        specifier: ~5.4.2
+        version: 5.4.5
+
+packages:
+  autoprefixer@9.8.8:
+    resolution:
+      {
+        integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==
+      }
+
+  browserslist@4.22.1:
+    resolution:
+      {
+        integrity: sha512-FEVc202+2iuClEhZhrWy6ZiAcRLvNMyYcxZ8raemul1DYVOVdFsbqckWLdsixQZCpJlwe77Z3UTalE7jsjnKfQ==
+      }
+
+  '@babel/code-frame@7.24.2':
+    resolution:
+      {
+        integrity: sha512-y5+tLQyV8pg3fsiln67BVLD1P13Eg4lh5RW9mF0zUuvLrv9uIQ4MCL+CRT+FTsBlBjcIan6PGsLcBN0m3ClUyQ==
+      }
+    engines: { node: '>=6.9.0' }
+
+  '@babel/highlight@7.24.5':
+    resolution:
+      {
+        integrity: sha512-8lLMua6AVh/8SLJRRVD6V8p73Hir9w5mJrhE+IPpILG31KKlI9iz5zmBYKcWPS59qSfgP9RaSBQSHHE81WKuEw==
+      }
+    engines: { node: '>=6.9.0' }
+
+  picocolors@1.0.1:
+    resolution:
+      {
+        integrity: sha512-YLPHc8yASwT2u8HKHzcmMaYaR2gKQLmFLErA4gTMaJxRrCK6FPHQhpmCaGQBHRUqoYoHqs2a7MFxGpEbRHLzQ==
+      }
+
+  typescript@5.4.5:
+    resolution:
+      {
+        integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==
+      }
+    engines: { node: '>=14.17' }
+    hasBin: true
+
+  '@scope/bar@2.0.0':
+    resolution: { integrity: sha512-fakeintegrityhash1234567890abcdefghijklmnopqrstuvwxyz== }
+    peerDependencies:
+      typescript: '>=5.0'
+
+snapshots:
+  autoprefixer@9.8.8:
+    dependencies:
+      browserslist: 4.22.1
+
+  browserslist@4.22.1: {}
+
+  '@babel/code-frame@7.24.2':
+    dependencies:
+      '@babel/highlight': 7.24.5
+      picocolors: 1.0.1
+
+  '@babel/highlight@7.24.5': {}
+
+  picocolors@1.0.1: {}
+
+  typescript@5.4.5: {}
+
+  '@scope/bar@2.0.0(typescript@5.4.5)':
+    dependencies:
+      typescript: 5.4.5

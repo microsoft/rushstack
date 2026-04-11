@@ -6,34 +6,72 @@ exports[`createBase32Hash hashes: a 1`] = `"btaxlooa6g3kqmodthrgs5zgme"`;
 
 exports[`createBase32Hash hashes: abracadabra 1`] = `"5rjiprc7bzyoyiwvf2f4x3vwia"`;
 
-exports[`depPathToFilename formats: /@some/package@1.2.3(@azure/msal-browser@2.28.1)(@azure/msal-common@6.4.0)(@fluentui/merge-styles@8.6.2)(@fluentui/react@8.117.5)(@fluentui/theme@2.6.45)(@fluentui/utilities@8.15.2)(chart.js@2.9.4)(lodash@4.17.21)(moment@2.29.4)(prop-types@15.8.1)(react-dnd-html5-backend@14.1.0)(react-dnd@14.0.5)(react-dom@17.0.1)(react-intersection-observer@8.34.0)(react@17.0.1) 1`] = `"@some+package@1.2.3_@azure+msal-browser@2.28.1_@azure+msal-common@6.4.0_@fluentui+merge-style_yt7yh6tpppbzu7nx3lzx3f3ife"`;
+exports[`createShortSha256Hash hashes: (eslint@8.57.0)(typescript@5.4.5) 1`] = `"395951816c5613fa894c6f81441c9d08"`;
 
-exports[`depPathToFilename formats: /@storybook/core@6.5.15(@storybook/builder-webpack5@6.5.15)(@storybook/manager-webpack5@6.5.15)(eslint@8.57.0)(react-dom@17.0.1)(react@17.0.1)(typescript@5.3.3)(webpack@5.88.1) 1`] = `"@storybook+core@6.5.15_@storybook+builder-webpack5@6.5.15_@storybook+manager-webpack5@6.5.15__wnqw6tyxzeiksxiymflshxscdq"`;
+exports[`createShortSha256Hash hashes: a 1`] = `"ca978112ca1bbdcafac231b39a23dc4d"`;
 
-exports[`depPathToFilename formats: /@typescript-eslint/utils@6.19.1(eslint@7.7.0)(typescript@5.4.2) 1`] = `"@typescript-eslint+utils@6.19.1_eslint@7.7.0_typescript@5.4.2"`;
+exports[`createShortSha256Hash hashes: abracadabra 1`] = `"045babdcd2118960e8c8b8e0ecf65b73"`;
 
-exports[`depPathToFilename formats: /autoprefixer@9.8.8 1`] = `"autoprefixer@9.8.8"`;
+exports[`depPathToFilename formats v6 keys (leading /) with pnpm 8 hashing: /@some/package@1.2.3(@azure/msal-browser@2.28.1)(@azure/msal-common@6.4.0)(@fluentui/merge-styles@8.6.2)(@fluentui/react@8.117.5)(@fluentui/theme@2.6.45)(@fluentui/utilities@8.15.2)(chart.js@2.9.4)(lodash@4.17.21)(moment@2.29.4)(prop-types@15.8.1)(react-dnd-html5-backend@14.1.0)(react-dnd@14.0.5)(react-dom@17.0.1)(react-intersection-observer@8.34.0)(react@17.0.1) 1`] = `"@some@package@1.2.3_@azure+msal-browser@2.28.1_@azure+msal-common@6.4.0_@fluentui+merge-style_3kee2y3j2qzem4qx6r5g3egslq"`;
 
-exports[`depPathToFilename formats: /autoprefixer@10.4.18(postcss@8.4.36) 1`] = `"autoprefixer@10.4.18_postcss@8.4.36"`;
+exports[`depPathToFilename formats v6 keys (leading /) with pnpm 8 hashing: /@storybook/core@6.5.15(@storybook/builder-webpack5@6.5.15)(@storybook/manager-webpack5@6.5.15)(eslint@8.57.0)(react-dom@17.0.1)(react@17.0.1)(typescript@5.3.3)(webpack@5.88.1) 1`] = `"@storybook@core@6.5.15_@storybook+builder-webpack5@6.5.15_@storybook+manager-webpack5@6.5.15__duzi6dxgagtu2t36j3iu5orzaa"`;
 
-exports[`depPathToFilename formats: /react-transition-group@4.4.5(react-dom@17.0.2)(react@17.0.2) 1`] = `"react-transition-group@4.4.5_react-dom@17.0.2_react@17.0.2"`;
+exports[`depPathToFilename formats v6 keys (leading /) with pnpm 8 hashing: /@typescript-eslint/utils@6.19.1(eslint@7.7.0)(typescript@5.4.2) 1`] = `"@typescript-eslint@utils@6.19.1_eslint@7.7.0_typescript@5.4.2"`;
 
-exports[`depPathToFilename formats: file:../../../libraries/ts-command-line(@types/node@18.17.15) 1`] = `"file+..+..+..+libraries+ts-command-line_@types+node@18.17.15"`;
+exports[`depPathToFilename formats v6 keys (leading /) with pnpm 8 hashing: /autoprefixer@9.8.8 1`] = `"autoprefixer@9.8.8"`;
 
-exports[`depPathToFilename formats: file:../../../rigs/local-node-rig 1`] = `"file+..+..+..+rigs+local-node-rig"`;
+exports[`depPathToFilename formats v6 keys (leading /) with pnpm 8 hashing: /autoprefixer@10.4.18(postcss@8.4.36) 1`] = `"autoprefixer@10.4.18_postcss@8.4.36"`;
 
-exports[`getDescriptionFileRootFromKey parses: "/@some/package@1.2.3(@azure/msal-browser@2.28.1)(@azure/msal-common@6.4.0)(@fluentui/merge-styles@8.6.2)(@fluentui/react@8.117.5)(@fluentui/theme@2.6.45)(@fluentui/utilities@8.15.2)(chart.js@2.9.4)(lodash@4.17.21)(moment@2.29.4)(prop-types@15.8.1)(react-dnd-html5-backend@14.1.0)(react-dnd@14.0.5)(react-dom@17.0.1)(react-intersection-observer@8.34.0)(react@17.0.1)",undefined 1`] = `"/$/node_modules/.pnpm/@some+package@1.2.3_@azure+msal-browser@2.28.1_@azure+msal-common@6.4.0_@fluentui+merge-style_yt7yh6tpppbzu7nx3lzx3f3ife/node_modules/@some/package"`;
+exports[`depPathToFilename formats v6 keys (leading /) with pnpm 8 hashing: /react-transition-group@4.4.5(react-dom@17.0.2)(react@17.0.2) 1`] = `"react-transition-group@4.4.5_react-dom@17.0.2_react@17.0.2"`;
 
-exports[`getDescriptionFileRootFromKey parses: "/@storybook/core@6.5.15(@storybook/builder-webpack5@6.5.15)(@storybook/manager-webpack5@6.5.15)(eslint@8.57.0)(react-dom@17.0.1)(react@17.0.1)(typescript@5.3.3)(webpack@5.88.1)",undefined 1`] = `"/$/node_modules/.pnpm/@storybook+core@6.5.15_@storybook+builder-webpack5@6.5.15_@storybook+manager-webpack5@6.5.15__wnqw6tyxzeiksxiymflshxscdq/node_modules/@storybook/core"`;
+exports[`depPathToFilename formats v6 keys (leading /) with pnpm 8 hashing: file:../../../libraries/ts-command-line(@types/node@18.17.15) 1`] = `"file+..+..+..+libraries+ts-command-line_@types+node@18.17.15"`;
 
-exports[`getDescriptionFileRootFromKey parses: "/@typescript-eslint/utils@6.19.1(eslint@7.7.0)(typescript@5.4.2)",undefined 1`] = `"/$/node_modules/.pnpm/@typescript-eslint+utils@6.19.1_eslint@7.7.0_typescript@5.4.2/node_modules/@typescript-eslint/utils"`;
+exports[`depPathToFilename formats v6 keys (leading /) with pnpm 8 hashing: file:../../../rigs/local-node-rig 1`] = `"file+..+..+..+rigs+local-node-rig"`;
 
-exports[`getDescriptionFileRootFromKey parses: "/autoprefixer@9.8.8",undefined 1`] = `"/$/node_modules/.pnpm/autoprefixer@9.8.8/node_modules/autoprefixer"`;
+exports[`depPathToFilename formats v9 keys (no leading /) with pnpm 9 hashing (same as v8): @some/package@1.2.3(@azure/msal-browser@2.28.1)(@azure/msal-common@6.4.0) 1`] = `"@some+package@1.2.3_@azure+msal-browser@2.28.1_@azure+msal-common@6.4.0"`;
 
-exports[`getDescriptionFileRootFromKey parses: "/autoprefixer@10.4.18(postcss@8.4.36)",undefined 1`] = `"/$/node_modules/.pnpm/autoprefixer@10.4.18_postcss@8.4.36/node_modules/autoprefixer"`;
+exports[`depPathToFilename formats v9 keys (no leading /) with pnpm 9 hashing (same as v8): @typescript-eslint/utils@6.19.1(eslint@7.7.0)(typescript@5.4.2) 1`] = `"@typescript-eslint+utils@6.19.1_eslint@7.7.0_typescript@5.4.2"`;
 
-exports[`getDescriptionFileRootFromKey parses: "/react-transition-group@4.4.5(react-dom@17.0.2)(react@17.0.2)",undefined 1`] = `"/$/node_modules/.pnpm/react-transition-group@4.4.5_react-dom@17.0.2_react@17.0.2/node_modules/react-transition-group"`;
+exports[`depPathToFilename formats v9 keys (no leading /) with pnpm 9 hashing (same as v8): autoprefixer@9.8.8 1`] = `"autoprefixer@9.8.8"`;
 
-exports[`getDescriptionFileRootFromKey parses: "file:../../../libraries/ts-command-line(@types/node@18.17.15)",@rushstack/ts-command-line 1`] = `"/$/node_modules/.pnpm/file+..+..+..+libraries+ts-command-line_@types+node@18.17.15/node_modules/@rushstack/ts-command-line"`;
+exports[`depPathToFilename formats v9 keys (no leading /) with pnpm 9 hashing (same as v8): autoprefixer@10.4.18(postcss@8.4.36) 1`] = `"autoprefixer@10.4.18_postcss@8.4.36"`;
 
-exports[`getDescriptionFileRootFromKey parses: "file:../../../rigs/local-node-rig",local-node-rig 1`] = `"/$/node_modules/.pnpm/file+..+..+..+rigs+local-node-rig/node_modules/local-node-rig"`;
+exports[`depPathToFilename formats v9 keys (no leading /) with pnpm 10 hashing: @fluentui/react-migration-v8-v9@9.9.7(@types/react-dom@17.0.17)(@types/react@17.0.45)(react-dom@17.0.1)(react@17.0.1) 1`] = `"@fluentui+react-migration-v8-v9@9.9.7_@types+react-dom@17.0.17_@types+react@17.0.45_react-dom@17.0.1_react@17.0.1"`;
+
+exports[`depPathToFilename formats v9 keys (no leading /) with pnpm 10 hashing: @some/package@1.2.3(@azure/msal-browser@2.28.1)(@azure/msal-common@6.4.0) 1`] = `"@some+package@1.2.3_@azure+msal-browser@2.28.1_@azure+msal-common@6.4.0"`;
+
+exports[`depPathToFilename formats v9 keys (no leading /) with pnpm 10 hashing: @typescript-eslint/utils@6.19.1(eslint@7.7.0)(typescript@5.4.2) 1`] = `"@typescript-eslint+utils@6.19.1_eslint@7.7.0_typescript@5.4.2"`;
+
+exports[`depPathToFilename formats v9 keys (no leading /) with pnpm 10 hashing: autoprefixer@9.8.8 1`] = `"autoprefixer@9.8.8"`;
+
+exports[`depPathToFilename formats v9 keys (no leading /) with pnpm 10 hashing: autoprefixer@10.4.18(postcss@8.4.36) 1`] = `"autoprefixer@10.4.18_postcss@8.4.36"`;
+
+exports[`getDescriptionFileRootFromKey parses v6 keys (leading /): "/@some/package@1.2.3(@azure/msal-browser@2.28.1)(@azure/msal-common@6.4.0)(@fluentui/merge-styles@8.6.2)(@fluentui/react@8.117.5)(@fluentui/theme@2.6.45)(@fluentui/utilities@8.15.2)(chart.js@2.9.4)(lodash@4.17.21)(moment@2.29.4)(prop-types@15.8.1)(react-dnd-html5-backend@14.1.0)(react-dnd@14.0.5)(react-dom@17.0.1)(react-intersection-observer@8.34.0)(react@17.0.1)", 1`] = `"/$/node_modules/.pnpm/@some@package@1.2.3_@azure+msal-browser@2.28.1_@azure+msal-common@6.4.0_@fluentui+merge-style_3kee2y3j2qzem4qx6r5g3egslq/node_modules/@some/package"`;
+
+exports[`getDescriptionFileRootFromKey parses v6 keys (leading /): "/@storybook/core@6.5.15(@storybook/builder-webpack5@6.5.15)(@storybook/manager-webpack5@6.5.15)(eslint@8.57.0)(react-dom@17.0.1)(react@17.0.1)(typescript@5.3.3)(webpack@5.88.1)", 1`] = `"/$/node_modules/.pnpm/@storybook@core@6.5.15_@storybook+builder-webpack5@6.5.15_@storybook+manager-webpack5@6.5.15__duzi6dxgagtu2t36j3iu5orzaa/node_modules/@storybook/core"`;
+
+exports[`getDescriptionFileRootFromKey parses v6 keys (leading /): "/@typescript-eslint/utils@6.19.1(eslint@7.7.0)(typescript@5.4.2)", 1`] = `"/$/node_modules/.pnpm/@typescript-eslint@utils@6.19.1_eslint@7.7.0_typescript@5.4.2/node_modules/@typescript-eslint/utils"`;
+
+exports[`getDescriptionFileRootFromKey parses v6 keys (leading /): "/autoprefixer@9.8.8", 1`] = `"/$/node_modules/.pnpm/autoprefixer@9.8.8/node_modules/autoprefixer"`;
+
+exports[`getDescriptionFileRootFromKey parses v6 keys (leading /): "/autoprefixer@10.4.18(postcss@8.4.36)", 1`] = `"/$/node_modules/.pnpm/autoprefixer@10.4.18_postcss@8.4.36/node_modules/autoprefixer"`;
+
+exports[`getDescriptionFileRootFromKey parses v6 keys (leading /): "/react-transition-group@4.4.5(react-dom@17.0.2)(react@17.0.2)", 1`] = `"/$/node_modules/.pnpm/react-transition-group@4.4.5_react-dom@17.0.2_react@17.0.2/node_modules/react-transition-group"`;
+
+exports[`getDescriptionFileRootFromKey parses v6 keys (leading /): "file:../../../libraries/ts-command-line(@types/node@18.17.15)",@rushstack/ts-command-line 1`] = `"/$/node_modules/.pnpm/file+..+..+..+libraries+ts-command-line_@types+node@18.17.15/node_modules/@rushstack/ts-command-line"`;
+
+exports[`getDescriptionFileRootFromKey parses v6 keys (leading /): "file:../../../rigs/local-node-rig",local-node-rig 1`] = `"/$/node_modules/.pnpm/file+..+..+..+rigs+local-node-rig/node_modules/local-node-rig"`;
+
+exports[`getDescriptionFileRootFromKey parses v9 keys (no leading /): "@some/package@1.2.3(@azure/msal-browser@2.28.1)(@azure/msal-common@6.4.0)", 1`] = `"/$/node_modules/.pnpm/@some+package@1.2.3_@azure+msal-browser@2.28.1_@azure+msal-common@6.4.0/node_modules/@some/package"`;
+
+exports[`getDescriptionFileRootFromKey parses v9 keys (no leading /): "@typescript-eslint/utils@6.19.1(eslint@7.7.0)(typescript@5.4.2)", 1`] = `"/$/node_modules/.pnpm/@typescript-eslint+utils@6.19.1_eslint@7.7.0_typescript@5.4.2/node_modules/@typescript-eslint/utils"`;
+
+exports[`getDescriptionFileRootFromKey parses v9 keys (no leading /): "autoprefixer@9.8.8", 1`] = `"/$/node_modules/.pnpm/autoprefixer@9.8.8/node_modules/autoprefixer"`;
+
+exports[`getDescriptionFileRootFromKey parses v9 keys (no leading /): "autoprefixer@10.4.18(postcss@8.4.36)", 1`] = `"/$/node_modules/.pnpm/autoprefixer@10.4.18_postcss@8.4.36/node_modules/autoprefixer"`;
+
+exports[`getDescriptionFileRootFromKey parses v9 keys (no leading /): "file:../../../libraries/ts-command-line(@types/node@18.17.15)",@rushstack/ts-command-line 1`] = `"/$/node_modules/.pnpm/file+..+..+..+libraries+ts-command-line_@types+node@18.17.15/node_modules/@rushstack/ts-command-line"`;
+
+exports[`getDescriptionFileRootFromKey parses v9 keys (no leading /): "file:../../../rigs/local-node-rig",local-node-rig 1`] = `"/$/node_modules/.pnpm/file+..+..+..+rigs+local-node-rig/node_modules/local-node-rig"`;
+
+exports[`getDescriptionFileRootFromKey parses v9 keys (no leading /): "react-transition-group@4.4.5(react-dom@17.0.2)(react@17.0.2)", 1`] = `"/$/node_modules/.pnpm/react-transition-group@4.4.5_react-dom@17.0.2_react@17.0.2/node_modules/react-transition-group"`;
