@@ -13,7 +13,7 @@ import { type ICssOutputFolder, type ISassProcessorOptions, SassProcessor } from
 const projectFolder: string = path.resolve(__dirname, '../..');
 const fixturesFolder: string = path.resolve(__dirname, '../../src/test/fixtures');
 
-// Fake output folder paths — never actually written to disk because FileSystem.writeFileAsync is mocked.
+// Fake output folder paths - never actually written to disk because FileSystem.writeFileAsync is mocked.
 const FAKE_OUTPUT_BASE_FOLDER: string = '/fake/output';
 const NORMALIZED_PLATFORM_FAKE_OUTPUT_BASE_FOLDER: string = Path.convertToSlashes(
   nodeJsPath.resolve(FAKE_OUTPUT_BASE_FOLDER)
@@ -238,7 +238,7 @@ describe(SassProcessor.name, () => {
       const { processor } = createProcessor(terminalProvider);
       await compileFixtureAsync(processor, 'mixin-with-exports.module.scss');
       const css: string = getCssOutput('mixin-with-exports.module.scss');
-      // Mixin output should be inlined — no @mixin or @include in the output
+      // Mixin output should be inlined - no @mixin or @include in the output
       expect(css).not.toContain('@mixin');
       expect(css).not.toContain('@include');
       expect(css).toContain('display: flex');
@@ -347,7 +347,7 @@ describe(SassProcessor.name, () => {
         cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: undefined }]
       });
       await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
-      // Only the CSS and DTS files should be written — no .js shim
+      // Only the CSS and DTS files should be written - no .js shim
       const shimPaths: string[] = getAllWrittenPathsMatching('.module.scss.js');
       expect(shimPaths).toHaveLength(0);
     });

@@ -142,7 +142,7 @@ import(
 #### Notes
 
 - If your bundler does not understand Webpack magic comments (e.g. plain Node ESM loader), disable this rule for that project.
-- Choose stable, descriptive chunk names—avoid including hashes, timestamps, or environment‑specific tokens.
+- Choose stable, descriptive chunk names-avoid including hashes, timestamps, or environment‑specific tokens.
 - Chunk names share a global namespace in the final bundle; avoid collisions to keep analysis clear.
 
 #### Rationale
@@ -531,14 +531,14 @@ unmountComponentAtNode(b);
 
 ```ts
 // No legacy ReactDOM render/unmount usage in this file
-// (e.g. uses React 18 createRoot API or just defines components) — rule passes
+// (e.g. uses React 18 createRoot API or just defines components) - rule passes
 ```
 
 #### Notes
 
 - The rule does not attempt dataflow analysis to verify the same container node is passed; it only enforces count parity.
 - Modern React apps using `createRoot()` should migrate to pairing `root.unmount()`. This legacy rule helps older code until migration is complete.
-- Multiple files can coordinate unmounting (e.g. via a shared cleanup utility); in that case this rule will flag the imbalance—consider colocating the unmount or disabling the rule for that file.
+- Multiple files can coordinate unmounting (e.g. via a shared cleanup utility); in that case this rule will flag the imbalance-consider colocating the unmount or disabling the rule for that file.
 
 #### Rationale
 

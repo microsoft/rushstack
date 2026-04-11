@@ -10,7 +10,7 @@
    *
    * To delete an inherited setting, set it to `null` in this file.
    */
-  // "extends": "base-project/config/serve-command.json",
+  // "extends": "base-project/config/sass.json",
 
   /**
    * The root directory for project source code.
@@ -27,74 +27,88 @@
   // "generatedTsFolder": "temp/sass-ts/",
 
   /**
-   * Optional additional folders to which Sass typings should be output.
+   * Optional additional folders to which Sass typings should be output. Useful when publishing typings
+   * alongside compiled output (e.g. "lib-dts").
    */
   // "secondaryGeneratedTsFolders": [],
 
   /**
-   * Determines whether export values are wrapped in a default property, or not.
+   * Determines whether CSS module exports are wrapped in a typed default interface (true) or emitted as
+   * individual named exports (false).
+   *
+   * Note: setting this to false is incompatible with cssOutputFolders.
    *
    * Default value: true
    */
   // "exportAsDefault": false,
 
   /**
-   * If specified, folders where compiled CSS files will be emitted to. They will be named by appending
-   * ".css" to the source file name for ease of reference translation, unless "preserveSCSSExtension" is set.
+   * If specified, folders where compiled CSS files will be emitted. Each entry is either a folder path string,
+   * or an object with a "folder" property and an optional "shimModuleFormat" property. When "shimModuleFormat"
+   * is set to "commonjs" or "esnext", a JavaScript shim file is emitted alongside each CSS file to re-export it
+   * in the specified module format.
    *
    * Default value: undefined
    */
-  // "cssOutputFolders": [],
+  // "cssOutputFolders": [
+  //   { "folder": "lib-esm", "shimModuleFormat": "esnext" },
+  //   { "folder": "lib-commonjs", "shimModuleFormat": "commonjs" }
+  // ],
 
   /**
-   * If set, when emitting compiled CSS from a file with a ".scss" extension, the emitted CSS will have
-   * the extension ".scss" instead of ".scss.css".
-   *
-   * Default value: false
-   */
-  // "preserveSCSSExtension": true,
-
-  /**
-   * Files with these extensions will pass through the Sass transpiler for typings generation.
+   * Files with these extensions will be treated as CSS modules and pass through the Sass transpiler for
+   * typings generation and/or CSS emit.
    *
    * Default value: [".sass", ".scss", ".css"]
    */
-  // "fileExtensions": [".sass", ".scss"],
+  // "fileExtensions": [".module.scss", ".module.sass"],
 
   /**
-   * A list of paths used when resolving Sass imports.  The paths should be relative to the project root.
+   * Files with these extensions will be treated as non-module (global) stylesheets and pass through the Sass
+   * transpiler for typings generation and/or CSS emit. The generated typings are side-effect-only (export {}).
    *
-   * Default value: ["node_modules", "src"]
+   * Default value: [".global.sass", ".global.scss", ".global.css"]
    */
-  // "importIncludePaths": ["node_modules", "src"],
+  // "nonModuleFileExtensions": [".global.scss", ".global.sass"],
 
   /**
-   * A list of file paths relative to the "src" folder that should be excluded from typings generation.
+   * A list of file paths relative to the "src" folder that should be excluded from typings generation
+   * and/or CSS emit.
    *
    * Default value: undefined
    */
   // "excludeFiles": [],
 
   /**
-   * If set, deprecation warnings from dependencies will be suppressed.
+   * If true, the original file extension will not be trimmed when generating the output CSS filename.
+   * For example, "styles.scss" will generate "styles.scss.css" instead of "styles.css".
+   *
+   * Default value: false
+   */
+  // "doNotTrimOriginalFileExtension": true,
+
+  /**
+   * If true, the ICSS ":export" block will be preserved in the emitted CSS output. This is necessary when
+   * the CSS is consumed by a webpack loader (e.g. css-loader's icssParser) that extracts ":export" values
+   * at bundle time. Has no effect on the generated ".d.ts" file.
+   *
+   * Default value: false
+   */
+  // "preserveIcssExports": true,
+
+  /**
+   * If set, deprecation warnings that originate from dependencies will be suppressed.
    *
    * Default value: false
    */
   // "ignoreDeprecationsInDependencies": true,
 
   /**
-   * If set, the specified deprecation warnings will be suppressed.
+   * A list of Sass deprecation codes to silence. Useful for suppressing known warnings from deprecated
+   * features that are not yet actionable. Common values: "mixed-decls", "import", "global-builtin",
+   * "color-functions".
    *
    * Default value: []
    */
-  // "silenceDeprecations": ["mixed-decls"],
-
-  /**
-   * If true, the original file extension will not be trimmed when generating the output CSS file.
-   * The generated CSS file will retain its original extension. For example, "styles.scss" will generate
-   * "styles.scss.css" instead of "styles.css".
-   *
-   * Default value: false
-   */
-  // "doNotTrimOriginalFileExtension": true
+  // "silenceDeprecations": ["mixed-decls"]
 }
