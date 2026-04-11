@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Fri, 10 Apr 2026 22:46:34 GMT and should not be manually modified.
+This log was last generated on Sat, 11 Apr 2026 00:31:13 GMT and should not be manually modified.
+
+## 1.3.2
+Sat, 11 Apr 2026 00:31:13 GMT
+
+### Patches
+
+- Fix generated JS shims and `.d.ts` for `.module.scss` files that contain only `:global` styles and have no local CSS class exports
+- Improve project README.
 
 ## 1.3.1
 Fri, 10 Apr 2026 22:46:34 GMT
