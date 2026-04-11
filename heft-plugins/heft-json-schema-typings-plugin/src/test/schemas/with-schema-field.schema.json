@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Config With Schema Field",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "The JSON schema URL.",
+      "type": "string"
+    },
+    "name": {
+      "description": "The name.",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}
