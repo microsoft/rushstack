@@ -1,0 +1,8 @@
+{
+  "name": "a",
+  "version": "1.0.0",
+  "description": "Test package a to test subspace pnpmfile shim with preferred versions",
+  "dependencies": {
+    "@rushstack/terminal": "~0.19.0"
+  }
+}
