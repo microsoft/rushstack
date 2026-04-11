@@ -342,9 +342,10 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: change 1`] = `
-"usage: rush change [-h] [-v] [--no-fetch] [-b BRANCH] [--overwrite] [-c]
-                   [--commit-message COMMIT_MESSAGE] [--email EMAIL] [--bulk]
-                   [--message MESSAGE] [--bump-type {major,minor,patch,none}]
+"usage: rush change [-h] [-v] [--verify-all] [--no-fetch] [-b BRANCH]
+                   [--overwrite] [-c] [--commit-message COMMIT_MESSAGE]
+                   [--email EMAIL] [--bulk] [--message MESSAGE]
+                   [--bump-type {major,minor,patch,none}]
                    
 
 Asks a series of questions and then generates a <branchname>-<timestamp>.json 
@@ -370,6 +371,12 @@ Optional arguments:
   -h, --help            Show this help message and exit.
   -v, --verify          Verify the change file has been generated and that it 
                         is a valid JSON file
+  --verify-all          Validate all change files in the repository, not just 
+                        those added in the current branch. Reports errors for 
+                        change files that reference nonexistent projects or 
+                        target non-main projects in a lockstepped version 
+                        policy. Requires the \\"strictChangefileValidation\\" 
+                        experiment to be enabled.
   --no-fetch            Skips fetching the baseline branch before running 
                         \\"git diff\\" to detect changes.
   -b BRANCH, --target-branch BRANCH

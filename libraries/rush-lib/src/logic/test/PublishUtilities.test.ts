@@ -7,6 +7,10 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 import { PublishUtilities, type IChangeRequests } from '../PublishUtilities';
 import { ChangeFiles } from '../ChangeFiles';
 
+function createChangeFiles(changesFolder: string): ChangeFiles {
+  return new ChangeFiles({ changesFolder } as unknown as RushConfiguration);
+}
+
 function generateChangeSnapshot(
   allPackages: ReadonlyMap<string, RushConfigurationProject>,
   allChanges: IChangeRequests
@@ -85,7 +89,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/noChange`)
+      createChangeFiles(`${__dirname}/noChange`)
     );
 
     expect(allChanges.packageChanges.size).toEqual(0);
@@ -98,7 +102,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/leafChange`)
+      createChangeFiles(`${__dirname}/leafChange`)
     );
 
     expect(allChanges.packageChanges.size).toEqual(1);
@@ -114,7 +118,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/rootPatchChange`)
+      createChangeFiles(`${__dirname}/rootPatchChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -148,7 +152,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/rootHotfixChange`)
+      createChangeFiles(`${__dirname}/rootHotfixChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -180,7 +184,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/rootMajorChange`)
+      createChangeFiles(`${__dirname}/rootMajorChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -214,7 +218,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/lockstepWithoutNextBump`)
+      createChangeFiles(`${__dirname}/lockstepWithoutNextBump`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -248,7 +252,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/cyclicDeps`)
+      createChangeFiles(`${__dirname}/cyclicDeps`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -282,7 +286,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
         await PublishUtilities.findChangeRequestsAsync(
           allPackages,
           packagesRushConfiguration,
-          new ChangeFiles(`${__dirname}/hotfixWithPatchChanges`)
+          createChangeFiles(`${__dirname}/hotfixWithPatchChanges`)
         )
     ).rejects.toThrow('Cannot apply hotfix alongside patch change on same package');
   });
@@ -298,7 +302,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
         await PublishUtilities.findChangeRequestsAsync(
           allPackages,
           packagesRushConfiguration,
-          new ChangeFiles(`${__dirname}/rootHotfixChange`)
+          createChangeFiles(`${__dirname}/rootHotfixChange`)
         )
     ).rejects.toThrow('Cannot add hotfix change; hotfixChangeEnabled is false in configuration.');
   });
@@ -309,7 +313,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/multipleChanges`)
+      createChangeFiles(`${__dirname}/multipleChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -343,7 +347,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/orderedChanges`)
+      createChangeFiles(`${__dirname}/orderedChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -377,7 +381,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/multipleHotfixChanges`)
+      createChangeFiles(`${__dirname}/multipleHotfixChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -409,7 +413,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/explicitVersionChange`)
+      createChangeFiles(`${__dirname}/explicitVersionChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -440,7 +444,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       repoRushConfiguration,
-      new ChangeFiles(`${__dirname}/repo/changes`),
+      createChangeFiles(`${__dirname}/repo/changes`),
       false,
       undefined,
       new Set<string>(['a', 'b', 'e'])
@@ -480,7 +484,7 @@ describe(PublishUtilities.sortChangeRequests.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       rushConfiguration,
-      new ChangeFiles(`${__dirname}/multipleChanges`)
+      createChangeFiles(`${__dirname}/multipleChanges`)
     );
     const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges.packageChanges);
 
@@ -569,7 +573,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/noChange`)
+      createChangeFiles(`${__dirname}/noChange`)
     );
 
     expect(allChanges.packageChanges.size).toEqual(0);
@@ -582,7 +586,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/leafChange`)
+      createChangeFiles(`${__dirname}/leafChange`)
     );
 
     expect(allChanges.packageChanges.size).toEqual(1);
@@ -598,7 +602,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/rootPatchChange`)
+      createChangeFiles(`${__dirname}/rootPatchChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -632,7 +636,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/rootHotfixChange`)
+      createChangeFiles(`${__dirname}/rootHotfixChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -664,7 +668,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/rootMajorChange`)
+      createChangeFiles(`${__dirname}/rootMajorChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -698,7 +702,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/cyclicDeps`)
+      createChangeFiles(`${__dirname}/cyclicDeps`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -732,7 +736,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
         await PublishUtilities.findChangeRequestsAsync(
           allPackages,
           packagesRushConfiguration,
-          new ChangeFiles(`${__dirname}/hotfixWithPatchChanges`)
+          createChangeFiles(`${__dirname}/hotfixWithPatchChanges`)
         )
     ).rejects.toThrow('Cannot apply hotfix alongside patch change on same package');
   });
@@ -748,7 +752,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
         await PublishUtilities.findChangeRequestsAsync(
           allPackages,
           packagesRushConfiguration,
-          new ChangeFiles(`${__dirname}/rootHotfixChange`)
+          createChangeFiles(`${__dirname}/rootHotfixChange`)
         )
     ).rejects.toThrow('Cannot add hotfix change; hotfixChangeEnabled is false in configuration.');
   });
@@ -759,7 +763,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/multipleChanges`)
+      createChangeFiles(`${__dirname}/multipleChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -793,7 +797,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/orderedChanges`)
+      createChangeFiles(`${__dirname}/orderedChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -827,7 +831,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/multipleHotfixChanges`)
+      createChangeFiles(`${__dirname}/multipleHotfixChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -859,7 +863,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(`${__dirname}/explicitVersionChange`)
+      createChangeFiles(`${__dirname}/explicitVersionChange`)
     );
 
     expect(allChanges.packageChanges.size).toEqual(2);
@@ -877,7 +881,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       repoRushConfiguration,
-      new ChangeFiles(`${__dirname}/repo/changes`),
+      createChangeFiles(`${__dirname}/repo/changes`),
       false,
       undefined,
       new Set<string>(['a', 'b', 'e'])

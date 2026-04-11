@@ -11,11 +11,12 @@ import type {
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
-import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, AlreadyReportedError } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 import { getRepoRoot } from '@rushstack/package-deps-hash';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { IRushConfigurationJson } from '../../api/RushConfiguration';
 import { type IChangeFile, type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
 import { ChangeFile } from '../../api/ChangeFile';
 import { BaseRushAction } from './BaseRushAction';
@@ -38,6 +39,7 @@ const BULK_BUMP_TYPE_LONG_NAME: string = '--bump-type';
 export class ChangeAction extends BaseRushAction {
   private readonly _git: Git;
   private readonly _verifyParameter: CommandLineFlagParameter;
+  private readonly _verifyAllParameter: CommandLineFlagParameter;
   private readonly _noFetchParameter: CommandLineFlagParameter;
   private readonly _targetBranchParameter: CommandLineStringParameter;
   private readonly _changeEmailParameter: CommandLineStringParameter;
@@ -96,6 +98,14 @@ export class ChangeAction extends BaseRushAction {
       parameterLongName: '--verify',
       parameterShortName: '-v',
       description: 'Verify the change file has been generated and that it is a valid JSON file'
+    });
+
+    this._verifyAllParameter = this.defineFlagParameter({
+      parameterLongName: '--verify-all',
+      description:
+        'Validate all change files in the repository, not just those added in the current branch. ' +
+        'Reports errors for change files that reference nonexistent projects or target non-main projects ' +
+        'in a lockstepped version policy. Requires the "strictChangefileValidation" experiment to be enabled.'
     });
 
     this._noFetchParameter = this.defineFlagParameter({
@@ -162,29 +172,63 @@ export class ChangeAction extends BaseRushAction {
   }
 
   public async runAsync(): Promise<void> {
-    const targetBranch: string = await this._getTargetBranchAsync();
-    // eslint-disable-next-line no-console
-    console.log(`The target branch is ${targetBranch}`);
-
-    if (this._verifyParameter.value) {
-      const errors: string[] = [
+    if (this._verifyAllParameter.value) {
+      const incompatibleParameters: (
+        | CommandLineFlagParameter
+        | CommandLineStringParameter
+        | CommandLineChoiceParameter
+      )[] = [
+        this._verifyParameter,
         this._bulkChangeParameter,
         this._bulkChangeMessageParameter,
         this._bulkChangeBumpTypeParameter,
         this._overwriteFlagParameter,
         this._commitChangesFlagParameter
-      ]
+      ];
+      const errors: string[] = incompatibleParameters
+        .filter((parameter) => parameter.value)
+        .map(
+          (parameter) =>
+            `The ${parameter.longName} parameter cannot be provided with the ` +
+            `${this._verifyAllParameter.longName} parameter`
+        );
+      if (errors.length > 0) {
+        errors.forEach((error) => {
+          this.terminal.writeErrorLine(error);
+        });
+        throw new AlreadyReportedError();
+      }
+
+      await this._validateAllChangeFilesAsync();
+      return;
+    }
+
+    const targetBranch: string = await this._getTargetBranchAsync();
+    this.terminal.writeLine(`The target branch is ${targetBranch}`);
+
+    if (this._verifyParameter.value) {
+      const incompatibleParameters: (
+        | CommandLineFlagParameter
+        | CommandLineStringParameter
+        | CommandLineChoiceParameter
+      )[] = [
+        this._bulkChangeParameter,
+        this._bulkChangeMessageParameter,
+        this._bulkChangeBumpTypeParameter,
+        this._overwriteFlagParameter,
+        this._commitChangesFlagParameter
+      ];
+      const errors: string[] = incompatibleParameters
         .map((parameter) => {
           return parameter.value
-            ? `The {${this._bulkChangeParameter.longName} parameter cannot be provided with the ` +
+            ? `The ${parameter.longName} parameter cannot be provided with the ` +
                 `${this._verifyParameter.longName} parameter`
             : '';
         })
         .filter((error) => error !== '');
       if (errors.length > 0) {
         errors.forEach((error) => {
-          // eslint-disable-next-line no-console
-          console.error(error);
+          this.terminal.writeErrorLine(error);
         });
         throw new AlreadyReportedError();
       }
@@ -261,8 +305,7 @@ export class ChangeAction extends BaseRushAction {
 
       if (errors.length > 0) {
         for (const error of errors) {
-          // eslint-disable-next-line no-console
-          console.error(error);
+          this.terminal.writeErrorLine(error);
         }
 
         throw new AlreadyReportedError();
@@ -276,7 +319,8 @@ export class ChangeAction extends BaseRushAction {
       interactiveMode = true;
 
       const existingChangeComments: Map<string, string[]> = ChangeFiles.getChangeComments(
-        await this._getChangeFilesAsync()
+        this.terminal,
+        await this._getChangeFilesSinceBaseBranchAsync()
       );
       changeFileData = await this._promptForChangeFileDataAsync(
         promptModule,
@@ -338,9 +382,31 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private async _verifyAsync(): Promise<void> {
-    const changedPackages: string[] = await this._getChangedProjectNamesAsync();
-    if (changedPackages.length > 0) {
-      await this._validateChangeFileAsync(changedPackages);
+    const changedProjectNames: string[] = await this._getChangedProjectNamesAsync();
+    const strictValidation: boolean | undefined =
+      this.rushConfiguration.experimentsConfiguration.configuration.strictChangefileValidation;
+
+    // When strict validation is enabled, validate ALL change files to catch references to
+    // deleted or nonexistent projects. Otherwise, only validate change files added on this branch.
+    const changeFilesInstance: ChangeFiles = new ChangeFiles(this.rushConfiguration);
+    let filesToValidate: string[];
+    if (strictValidation) {
+      filesToValidate = await changeFilesInstance.getAllChangeFilesAsync();
+    } else {
+      filesToValidate = await this._getChangeFilesSinceBaseBranchAsync();
+    }
+
+    if (changedProjectNames.length > 0 || filesToValidate.length > 0) {
+      const deletedProjectNames: Set<string> | undefined = strictValidation
+        ? await this._getDeletedProjectNamesAsync()
+        : undefined;
+
+      await changeFilesInstance.validateAsync({
+        terminal: this.terminal,
+        filesToValidate,
+        changedProjectNames,
+        deletedProjectNames
+      });
     } else {
       this._logNoChangeFileRequired();
     }
@@ -385,12 +451,61 @@ export class ChangeAction extends BaseRushAction {
     return Array.from(changedProjectNames);
   }
 
-  private async _validateChangeFileAsync(changedPackages: string[]): Promise<void> {
-    const files: string[] = await this._getChangeFilesAsync();
-    ChangeFiles.validate(files, changedPackages, this.rushConfiguration);
+  private async _validateAllChangeFilesAsync(): Promise<void> {
+    if (!this.rushConfiguration.experimentsConfiguration.configuration.strictChangefileValidation) {
+      throw new Error(
+        `The ${this._verifyAllParameter.longName} parameter requires the ` +
+          '"strictChangefileValidation" experiment to be enabled.'
+      );
+    }
+
+    const changeFiles: ChangeFiles = new ChangeFiles(this.rushConfiguration);
+    const allChangeFiles: string[] = await changeFiles.getAllChangeFilesAsync();
+    const deletedProjectNames: Set<string> = await this._getDeletedProjectNamesAsync();
+    await changeFiles.validateAsync({
+      terminal: this.terminal,
+      filesToValidate: allChangeFiles,
+      changedProjectNames: [],
+      deletedProjectNames
+    });
   }
 
-  private async _getChangeFilesAsync(): Promise<string[]> {
+  /**
+   * Compares the current rush.json project list against the target branch to find
+   * projects that were removed.
+   */
+  private async _getDeletedProjectNamesAsync(): Promise<Set<string>> {
+    const repoRoot: string = getRepoRoot(this.rushConfiguration.rushJsonFolder);
+    const targetBranch: string = await this._getTargetBranchAsync();
+    const mergeBase: string = await this._git.getMergeBaseAsync(targetBranch, this.terminal);
+
+    let oldRushJsonContent: string;
+    try {
+      const rushJsonRelativePath: string = path.relative(repoRoot, this.rushConfiguration.rushJsonFile);
+      oldRushJsonContent = await this._git.getBlobContentAsync({
+        blobSpec: `${mergeBase}:${rushJsonRelativePath}`,
+        repositoryRoot: repoRoot
+      });
+    } catch {
+      // If rush.json didn't exist on the target branch, no projects were deleted
+      return new Set();
+    }
+
+    const oldRushJson: IRushConfigurationJson = JsonFile.parseString(oldRushJsonContent);
+    const currentProjectsByName: ReadonlyMap<string, RushConfigurationProject> =
+      this.rushConfiguration.projectsByName;
+
+    const deletedProjectNames: Set<string> = new Set<string>();
+    for (const { packageName } of oldRushJson.projects) {
+      if (!currentProjectsByName.has(packageName)) {
+        deletedProjectNames.add(packageName);
+      }
+    }
+
+    return deletedProjectNames;
+  }
+
+  private async _getChangeFilesSinceBaseBranchAsync(): Promise<string[]> {
     const repoRoot: string = getRepoRoot(this.rushConfiguration.rushJsonFolder);
     const relativeChangesFolder: string = path.relative(repoRoot, this.rushConfiguration.changesFolder);
     const targetBranch: string = await this._getTargetBranchAsync();
@@ -452,15 +567,12 @@ export class ChangeAction extends BaseRushAction {
     packageName: string,
     existingChangeComments: Map<string, string[]>
   ): Promise<IChangeInfo | undefined> {
-    // eslint-disable-next-line no-console
-    console.log(`\n${packageName}`);
+    this.terminal.writeLine(`\n${packageName}`);
     const comments: string[] | undefined = existingChangeComments.get(packageName);
     if (comments) {
-      // eslint-disable-next-line no-console
-      console.log(`Found existing comments:`);
+      this.terminal.writeLine(`Found existing comments:`);
       comments.forEach((comment) => {
-        // eslint-disable-next-line no-console
-        console.log(`    > ${comment}`);
+        this.terminal.writeLine(`    > ${comment}`);
       });
       const { appendComment }: { appendComment: 'skip' | 'append' } = await promptModule({
         name: 'appendComment',
@@ -595,8 +707,7 @@ export class ChangeAction extends BaseRushAction {
         .toString()
         .replace(/(\r\n|\n|\r)/gm, '');
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log('There was an issue detecting your Git email...');
+      this.terminal.writeLine('There was an issue detecting your Git email...');
       return undefined;
     }
   }
@@ -646,8 +757,7 @@ export class ChangeAction extends BaseRushAction {
     try {
       const hasUnstagedChanges: boolean = await this._git.hasUnstagedChangesAsync();
       if (hasUnstagedChanges) {
-        // eslint-disable-next-line no-console
-        console.log(
+        this.terminal.writeLine(
           '\n' +
             Colorize.yellow(
               'Warning: You have unstaged changes, which do not trigger prompting for change ' +
@@ -656,8 +766,7 @@ export class ChangeAction extends BaseRushAction {
         );
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(`An error occurred when detecting unstaged changes: ${error}`);
+      this.terminal.writeLine(`An error occurred when detecting unstaged changes: ${error}`);
     }
   }
 
@@ -726,8 +835,7 @@ export class ChangeAction extends BaseRushAction {
     if (overwrite) {
       return true;
     } else {
-      // eslint-disable-next-line no-console
-      console.log(`Not overwriting ${filePath}`);
+      this.terminal.writeLine(`Not overwriting ${filePath}`);
       return false;
     }
   }
@@ -738,16 +846,13 @@ export class ChangeAction extends BaseRushAction {
   private _writeFile(fileName: string, output: string, isOverwrite: boolean): void {
     FileSystem.writeFile(fileName, output, { ensureFolderExists: true });
     if (isOverwrite) {
-      // eslint-disable-next-line no-console
-      console.log(`Overwrote file: ${fileName}`);
+      this.terminal.writeLine(`Overwrote file: ${fileName}`);
     } else {
-      // eslint-disable-next-line no-console
-      console.log(`Created file: ${fileName}`);
+      this.terminal.writeLine(`Created file: ${fileName}`);
     }
   }
 
   private _logNoChangeFileRequired(): void {
-    // eslint-disable-next-line no-console
-    console.log('No changes were detected to relevant packages on this branch. Nothing to do.');
+    this.terminal.writeLine('No changes were detected to relevant packages on this branch. Nothing to do.');
   }
 }
