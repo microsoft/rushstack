@@ -16,6 +16,7 @@ import {
   computeResolverCacheFromLockfileAsync,
   type IPlatformInfo
 } from './computeResolverCacheFromLockfileAsync';
+import { type PnpmMajorVersion, type IPnpmVersionHelpers, getPnpmVersionHelpersAsync } from './pnpm';
 import type { IResolverContext } from './types';
 
 /**
@@ -79,10 +80,19 @@ export async function afterInstallAsync(
 
   const lockFilePath: string = subspace.getCommittedShrinkwrapFilePath(variant);
 
-  const pnpmStoreDir: string = `${rushConfiguration.pnpmOptions.pnpmStorePath}/v3/files/`;
+  const pnpmStorePath: string = rushConfiguration.pnpmOptions.pnpmStorePath;
+
+  const pnpmMajorVersion: PnpmMajorVersion = (() => {
+    const major: number = parseInt(rushConfiguration.packageManagerToolVersion, 10);
+    if (major >= 10) return 10;
+    if (major >= 9) return 9;
+    return 8;
+  })() as PnpmMajorVersion;
+
+  const pnpmHelpers: IPnpmVersionHelpers = await getPnpmVersionHelpersAsync(pnpmMajorVersion);
 
   terminal.writeLine(`Using pnpm-lock from: ${lockFilePath}`);
-  terminal.writeLine(`Using pnpm store folder: ${pnpmStoreDir}`);
+  terminal.writeLine(`Using pnpm ${pnpmMajorVersion} store at: ${pnpmStorePath}`);
 
   const workspaceRoot: string = subspace.getSubspaceTempFolderPath();
   const cacheFilePath: string = `${workspaceRoot}/resolver-cache.json`;
@@ -166,10 +176,7 @@ export async function afterInstallAsync(
       const prefixIndex: number = descriptionFileHash.indexOf('-');
       const hash: string = Buffer.from(descriptionFileHash.slice(prefixIndex + 1), 'base64').toString('hex');
 
-      // The pnpm store directory has index files of package contents at paths:
-      // <store>/v3/files/<hash (0-2)>/<hash (2-)>-index.json
-      // See https://github.com/pnpm/pnpm/blob/f394cfccda7bc519ceee8c33fc9b68a0f4235532/store/cafs/src/getFilePathInCafs.ts#L33
-      const indexPath: string = `${pnpmStoreDir}${hash.slice(0, 2)}/${hash.slice(2)}-index.json`;
+      const indexPath: string = pnpmHelpers.getStoreIndexPath(pnpmStorePath, context, hash);
 
       try {
         const indexContent: string = await FileSystem.readFileAsync(indexPath);
@@ -254,6 +261,7 @@ export async function afterInstallAsync(
     platformInfo: getPlatformInfo(),
     projectByImporterPath,
     lockfile: lockFile,
+    pnpmVersion: pnpmMajorVersion,
     afterExternalPackagesAsync
   });
 

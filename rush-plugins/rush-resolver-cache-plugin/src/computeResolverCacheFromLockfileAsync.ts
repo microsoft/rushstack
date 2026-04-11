@@ -9,7 +9,13 @@ import type {
 } from '@rushstack/webpack-workspace-resolve-plugin';
 
 import type { PnpmShrinkwrapFile } from './externals';
-import { getDescriptionFileRootFromKey, resolveDependencies, createContextSerializer } from './helpers';
+import {
+  getDescriptionFileRootFromKey,
+  resolveDependencies,
+  createContextSerializer,
+  extractNameAndVersionFromKey
+} from './helpers';
+import { type PnpmMajorVersion, type IPnpmVersionHelpers, getPnpmVersionHelpersAsync } from './pnpm';
 import type { IResolverContext } from './types';
 
 /**
@@ -105,6 +111,9 @@ function extractBundledDependencies(
   }
 }
 
+// Re-export for downstream consumers
+export type { PnpmMajorVersion, IPnpmVersionHelpers } from './pnpm';
+
 /**
  * Options for computing the resolver cache from a lockfile.
  */
@@ -130,6 +139,13 @@ export interface IComputeResolverCacheFromLockfileOptions {
    */
   lockfile: PnpmShrinkwrapFile;
   /**
+   * The major version of pnpm configured in rush.json (e.g. `"10.27.0"` → 10).
+   * Used to select the correct dep-path hashing algorithm and store layout.
+   * When omitted, the version is inferred from the lockfile format (v6 → pnpm 8,
+   * v9 → pnpm 9).
+   */
+  pnpmVersion?: PnpmMajorVersion;
+  /**
    * A callback to process external packages after they have been enumerated.
    * Broken out as a separate function to facilitate testing without hitting the disk.
    * @remarks This is useful for fetching additional data from the pnpm store
@@ -153,6 +169,44 @@ function convertToSlashes(path: string): string {
 }
 
 /**
+ * Detects the pnpm major version from the lockfile format and an optional
+ * caller-supplied version (derived from rush.json `pnpmVersion`).
+ *
+ * @param lockfile - The parsed shrinkwrap / lockfile
+ * @param configuredPnpmVersion - The pnpm major version from rush.json, if available.
+ *   When provided this takes precedence, because the lockfile alone cannot distinguish
+ *   pnpm 9 from pnpm 10 (both use lockfile v9).
+ */
+export function detectPnpmMajorVersion(
+  lockfile: PnpmShrinkwrapFile,
+  configuredPnpmVersion?: PnpmMajorVersion
+): PnpmMajorVersion {
+  if (configuredPnpmVersion !== undefined) {
+    return configuredPnpmVersion;
+  }
+
+  // Detect from lockfile version
+  if (lockfile.shrinkwrapFileMajorVersion >= 9) {
+    // Lockfile v9 is shared by pnpm 9 and pnpm 10.
+    // Without the configured version we cannot tell them apart; default to 9
+    // (v8 dep-path algorithm, v3 store, v9 key format).
+    return 9;
+  }
+
+  if (lockfile.shrinkwrapFileMajorVersion > 0) {
+    return 8;
+  }
+
+  // Fallback for lockfiles where version parsing failed: inspect the first non-file package key.
+  for (const key of lockfile.packages.keys()) {
+    if (!key.startsWith('file:')) {
+      return key.startsWith('/') ? 8 : 9;
+    }
+  }
+  return 8;
+}
+
+/**
  * Given a lockfile and information about the workspace and platform, computes the resolver cache file.
  * @param params - The options for computing the resolver cache
  * @returns A promise that resolves with the resolver cache file
@@ -169,10 +223,19 @@ export async function computeResolverCacheFromLockfileAsync(
   const contexts: Map<string, IResolverContext> = new Map();
   const missingOptionalDependencies: Set<string> = new Set();
 
+  const pnpmVersion: PnpmMajorVersion = detectPnpmMajorVersion(lockfile, params.pnpmVersion);
+
+  const helpers: IPnpmVersionHelpers = await getPnpmVersionHelpersAsync(pnpmVersion);
+
   // Enumerate external dependencies first, to simplify looping over them for store data
   for (const [key, pack] of lockfile.packages) {
     let name: string | undefined = pack.name;
-    const descriptionFileRoot: string = getDescriptionFileRootFromKey(workspaceRoot, key, name);
+    const descriptionFileRoot: string = getDescriptionFileRootFromKey(
+      workspaceRoot,
+      key,
+      helpers.depPathToFilename,
+      name
+    );
 
     // Skip optional dependencies that are incompatible with the current environment
     if (pack.optional && !isPackageCompatible(pack, platformInfo)) {
@@ -182,9 +245,12 @@ export async function computeResolverCacheFromLockfileAsync(
 
     const integrity: string | undefined = pack.resolution?.integrity;
 
-    if (!name && key.startsWith('/')) {
-      const versionIndex: number = key.indexOf('@', 2);
-      name = key.slice(1, versionIndex);
+    // Extract name and version from the key if not already provided
+    const parsed: { name: string; version: string } | undefined = extractNameAndVersionFromKey(key);
+    if (parsed) {
+      if (!name) {
+        name = parsed.name;
+      }
     }
 
     if (!name) {
@@ -196,6 +262,7 @@ export async function computeResolverCacheFromLockfileAsync(
       descriptionFileHash: integrity,
       isProject: false,
       name,
+      version: parsed?.version,
       deps: new Map(),
       ordinal: -1,
       optional: pack.optional
@@ -204,10 +271,10 @@ export async function computeResolverCacheFromLockfileAsync(
     contexts.set(descriptionFileRoot, context);
 
     if (pack.dependencies) {
-      resolveDependencies(workspaceRoot, pack.dependencies, context);
+      resolveDependencies(workspaceRoot, pack.dependencies, context, helpers, lockfile.packages);
     }
     if (pack.optionalDependencies) {
-      resolveDependencies(workspaceRoot, pack.optionalDependencies, context);
+      resolveDependencies(workspaceRoot, pack.optionalDependencies, context, helpers, lockfile.packages);
     }
   }
 
@@ -248,13 +315,13 @@ export async function computeResolverCacheFromLockfileAsync(
     contexts.set(descriptionFileRoot, context);
 
     if (importer.dependencies) {
-      resolveDependencies(workspaceRoot, importer.dependencies, context);
+      resolveDependencies(workspaceRoot, importer.dependencies, context, helpers, lockfile.packages);
     }
     if (importer.devDependencies) {
-      resolveDependencies(workspaceRoot, importer.devDependencies, context);
+      resolveDependencies(workspaceRoot, importer.devDependencies, context, helpers, lockfile.packages);
     }
     if (importer.optionalDependencies) {
-      resolveDependencies(workspaceRoot, importer.optionalDependencies, context);
+      resolveDependencies(workspaceRoot, importer.optionalDependencies, context, helpers, lockfile.packages);
     }
   }
 
