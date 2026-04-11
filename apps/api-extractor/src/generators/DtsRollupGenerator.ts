@@ -449,6 +449,10 @@ export class DtsRollupGenerator {
               }
             }
 
+            if (/^\s*$/.test(modification.suffix) && /^\s*$/.test(modification.prefix)) {
+              modification.suffix = modification.prefix = '';
+            }
+
             trimmed = true;
           }
         }
