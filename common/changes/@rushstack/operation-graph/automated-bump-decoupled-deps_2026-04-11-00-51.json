@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/operation-graph"
+    }
+  ],
+  "packageName": "@rushstack/operation-graph",
+  "email": "rushbot@users.noreply.github.com"
+}
