@@ -1,9 +1,0 @@
-{
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-sass-plugin.schema.json",
-
-  "cssOutputFolders": ["lib-css"],
-  "fileExtensions": [".module.scss"],
-  "nonModuleFileExtensions": [".global.scss"],
-  "doNotTrimOriginalFileExtension": true,
-  "silenceDeprecations": ["mixed-decls", "import", "global-builtin", "color-functions"]
-}

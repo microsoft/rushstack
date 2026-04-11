@@ -32,6 +32,7 @@ type ICreateProcessorOptions = Partial<
     | 'nonModuleFileExtensions'
     | 'postProcessCssAsync'
     | 'preserveIcssExports'
+    | 'silenceDeprecations'
     | 'srcFolder'
   >
 >;
@@ -402,6 +403,126 @@ describe(SassProcessor.name, () => {
       const css: string = getCssOutput('global-only.module.scss');
       expect(css).toContain('.ms-Nav-group');
       expect(css).toContain('.ms-Nav-link');
+    });
+  });
+
+  describe('simple.module.sass (indented Sass syntax)', () => {
+    it('compiles indented Sass syntax to CSS correctly', async () => {
+      const { processor } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'simple.module.sass');
+      const css: string = getCssOutput('simple.module.sass');
+      expect(css).toContain('.exampleClass');
+      expect(css).toContain('color: red');
+      expect(css).toContain('.exampleHeading');
+      expect(css).toContain('font-weight: bold');
+    });
+
+    it('generates .d.ts with class names from indented Sass', async () => {
+      const { processor } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'simple.module.sass');
+      const dts: string = getDtsOutput('simple.module.sass');
+      expect(dts).toContain('exampleClass');
+      expect(dts).toContain('exampleHeading');
+      expect(dts).toContain('export default styles');
+    });
+
+    it('emits an ESM shim for an indented Sass module file', async () => {
+      const { processor } = createProcessor(terminalProvider, {
+        cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: 'esnext' }]
+      });
+      await compileFixtureAsync(processor, 'simple.module.sass');
+      const shim: string = getJsShimOutput('simple.module.sass');
+      expect(shim).toBe(`export { default } from "./simple.module.css";`);
+    });
+  });
+
+  describe('use-with-partial.module.scss (@use with local partial)', () => {
+    it('resolves variables from a @use partial in CSS output', async () => {
+      const { processor } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'use-with-partial.module.scss');
+      const css: string = getCssOutput('use-with-partial.module.scss');
+      // $brand-color from the partial should be resolved to its value
+      expect(css).toContain('#0078d4');
+      // $spacing-unit * 2 = 8px
+      expect(css).toContain('8px');
+      expect(css).toContain('.container');
+      expect(css).toContain('.header');
+    });
+
+    it('generates .d.ts with class names from a file using @use', async () => {
+      const { processor } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'use-with-partial.module.scss');
+      const dts: string = getDtsOutput('use-with-partial.module.scss');
+      expect(dts).toContain('container');
+      expect(dts).toContain('header');
+      expect(dts).toContain('export default styles');
+    });
+  });
+
+  describe('global-styles.global.sass (.global.sass non-module file)', () => {
+    it('compiles indented Sass syntax to plain CSS for a .global.sass file', async () => {
+      const { processor } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'global-styles.global.sass');
+      const css: string = getCssOutput('global-styles.global.sass');
+      expect(css).toContain('body');
+      expect(css).toContain('h1');
+      // $heading-size should be resolved to its value
+      expect(css).toContain('24px');
+      expect(css).toContain('#333');
+    });
+
+    it('emits export {}; in the .d.ts for a .global.sass file', async () => {
+      const { processor } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'global-styles.global.sass');
+      const dts: string = getDtsOutput('global-styles.global.sass');
+      expect(dts).toBe('export {};');
+    });
+
+    it('emits a side-effect ESM shim for a .global.sass file', async () => {
+      const { processor } = createProcessor(terminalProvider, {
+        cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: 'esnext' }]
+      });
+      await compileFixtureAsync(processor, 'global-styles.global.sass');
+      const shim: string = getJsShimOutput('global-styles.global.sass');
+      expect(shim).toBe(`import "./global-styles.global.css";export {};`);
+    });
+  });
+
+  describe('css-module.module.css (plain CSS as CSS module input)', () => {
+    it('generates .d.ts with class names from a .module.css input file', async () => {
+      const { processor } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'css-module.module.css');
+      const dts: string = getDtsOutput('css-module.module.css');
+      expect(dts).toContain('root');
+      expect(dts).toContain('header');
+      expect(dts).toContain('export default styles');
+    });
+
+    it('passes CSS through the pipeline unchanged for a .module.css input file', async () => {
+      const { processor } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'css-module.module.css');
+      const css: string = getCssOutput('css-module.module.css');
+      expect(css).toContain('.root');
+      expect(css).toContain('.header');
+      expect(css).toContain('display: flex');
+    });
+
+    it('does not emit a JS shim for a .module.css input file', async () => {
+      const { processor } = createProcessor(terminalProvider, {
+        cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: 'esnext' }]
+      });
+      await compileFixtureAsync(processor, 'css-module.module.css');
+      // .css inputs cannot have a shim (the shim would reference itself)
+      const shimPaths: string[] = getAllWrittenPathsMatching('.module.css.js');
+      expect(shimPaths).toHaveLength(0);
+    });
+  });
+
+  describe('silenceDeprecations option', () => {
+    it('throws at construction time when given an unknown deprecation code', () => {
+      expect(() =>
+        createProcessor(terminalProvider, { silenceDeprecations: ['not-a-real-deprecation-code'] })
+      ).toThrow('Unknown deprecation code: not-a-real-deprecation-code');
     });
   });
 
