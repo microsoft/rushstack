@@ -5,6 +5,7 @@ export interface IResolverContext {
   descriptionFileRoot: string;
   descriptionFileHash: string | undefined;
   name: string;
+  version?: string;
   deps: Map<string, string>;
   isProject: boolean;
   ordinal: number;
