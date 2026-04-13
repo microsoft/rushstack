@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`SassProcessor JS shim files does not emit a shim when shimModuleFormat is undefined: terminal-output 1`] = `
 Array [
