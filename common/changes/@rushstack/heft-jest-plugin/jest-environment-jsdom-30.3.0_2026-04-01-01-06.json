@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-jest-plugin",
-      "comment": "Bump jest-environment-jsdom to 30.3.0 to address CVE GHSA-vpq2-c234-7xj6",
+      "comment": "Bump jest to 30.3.0 to address CVE GHSA-vpq2-c234-7xj6",
       "type": "major"
     }
   ],
