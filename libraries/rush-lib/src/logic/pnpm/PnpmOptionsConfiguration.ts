@@ -169,7 +169,7 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    */
   trustPolicyExclude?: string[];
   /**
-   * {@inheritDoc PnpmOptionsConfiguration.trustPolicyIgnoreAfter}
+   * {@inheritDoc PnpmOptionsConfiguration.trustPolicyIgnoreAfterMinutes}
    */
   trustPolicyIgnoreAfterMinutes?: number;
   /**
