@@ -229,7 +229,7 @@
       }
     },
 
-    "trustPolicyIgnoreAfter": {
+    "trustPolicyIgnoreAfterMinutes": {
       "description": "The number of minutes after which pnpm will ignore trust level downgrades. Packages published longer ago than this threshold will not be blocked even if their trust level has decreased.\n\n(SUPPORTED ONLY IN PNPM 10.27.0 AND NEWER)\n\nPNPM documentation: https://pnpm.io/settings#trustpolicyignoreafter",
       "type": "number"
     },

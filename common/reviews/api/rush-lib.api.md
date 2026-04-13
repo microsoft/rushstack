@@ -769,7 +769,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     strictPeerDependencies?: boolean;
     trustPolicy?: PnpmTrustPolicy;
     trustPolicyExclude?: string[];
-    trustPolicyIgnoreAfter?: number;
+    trustPolicyIgnoreAfterMinutes?: number;
     unsupportedPackageJsonSettings?: unknown;
     useWorkspaces?: boolean;
 }
@@ -1199,7 +1199,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly strictPeerDependencies: boolean;
     readonly trustPolicy: PnpmTrustPolicy | undefined;
     readonly trustPolicyExclude: string[] | undefined;
-    readonly trustPolicyIgnoreAfter: number | undefined;
+    readonly trustPolicyIgnoreAfterMinutes: number | undefined;
     readonly unsupportedPackageJsonSettings: unknown | undefined;
     updateGlobalOnlyBuiltDependencies(onlyBuiltDependencies: string[] | undefined): void;
     updateGlobalPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void;

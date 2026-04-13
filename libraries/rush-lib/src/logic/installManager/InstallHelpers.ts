@@ -39,7 +39,7 @@ interface ICommonPackageJson extends IPackageJson {
     minimumReleaseAgeExclude?: typeof PnpmOptionsConfiguration.prototype.minimumReleaseAgeExclude;
     trustPolicy?: typeof PnpmOptionsConfiguration.prototype.trustPolicy;
     trustPolicyExclude?: typeof PnpmOptionsConfiguration.prototype.trustPolicyExclude;
-    trustPolicyIgnoreAfter?: typeof PnpmOptionsConfiguration.prototype.trustPolicyIgnoreAfter;
+    trustPolicyIgnoreAfter?: typeof PnpmOptionsConfiguration.prototype.trustPolicyIgnoreAfterMinutes;
   };
 }
 
@@ -184,7 +184,7 @@ export class InstallHelpers {
         commonPackageJson.pnpm.trustPolicyExclude = pnpmOptions.trustPolicyExclude;
       }
 
-      if (pnpmOptions.trustPolicyIgnoreAfter !== undefined) {
+      if (pnpmOptions.trustPolicyIgnoreAfterMinutes !== undefined) {
         if (
           rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
           semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.27.0')
@@ -192,14 +192,15 @@ export class InstallHelpers {
           terminal.writeWarningLine(
             Colorize.yellow(
               `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-                `doesn't support the "trustPolicyIgnoreAfter" field in ` +
+                `doesn't support the "trustPolicyIgnoreAfterMinutes" field in ` +
                 `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
                 'Remove this field or upgrade to pnpm 10.27.0 or newer.'
             )
           );
         }
 
-        commonPackageJson.pnpm.trustPolicyIgnoreAfter = pnpmOptions.trustPolicyIgnoreAfter;
+        // NOTE: the pnpm setting is `trustPolicyIgnoreAfter`, but the rush pnpm setting is `trustPolicyIgnoreAfterMinutes`
+        commonPackageJson.pnpm.trustPolicyIgnoreAfter = pnpmOptions.trustPolicyIgnoreAfterMinutes;
       }
 
       if (pnpmOptions.unsupportedPackageJsonSettings) {

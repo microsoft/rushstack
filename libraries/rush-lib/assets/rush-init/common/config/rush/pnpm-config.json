@@ -141,7 +141,7 @@
    * For example, the following setting ignores trust level changes for packages published
    * more than 14 days ago:
    *
-   * "trustPolicyIgnoreAfter": 20160
+   * "trustPolicyIgnoreAfterMinutes": 20160
    *
    * (SUPPORTED ONLY IN PNPM 10.27.0 AND NEWER)
    *
@@ -149,7 +149,7 @@
    *
    * The default value is undefined (no exclusion).
    */
-  /*[LINE "HYPOTHETICAL"]*/ "trustPolicyIgnoreAfter": 20160,
+  /*[LINE "HYPOTHETICAL"]*/ "trustPolicyIgnoreAfterMinutes": 20160,
 
   /**
    * If true, then Rush will add the `--strict-peer-dependencies` command-line parameter when

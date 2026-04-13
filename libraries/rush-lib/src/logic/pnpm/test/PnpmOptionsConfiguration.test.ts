@@ -113,7 +113,7 @@ describe(PnpmOptionsConfiguration.name, () => {
       'webpack@4.47.0 || 5.102.1',
       '@babel/core@7.28.5'
     ]);
-    expect(pnpmConfiguration.trustPolicyIgnoreAfter).toEqual(20160);
+    expect(pnpmConfiguration.trustPolicyIgnoreAfterMinutes).toEqual(20160);
   });
 
   it('loads catalog and catalogs', () => {

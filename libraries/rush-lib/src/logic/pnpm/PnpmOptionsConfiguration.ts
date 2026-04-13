@@ -171,7 +171,7 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
   /**
    * {@inheritDoc PnpmOptionsConfiguration.trustPolicyIgnoreAfter}
    */
-  trustPolicyIgnoreAfter?: number;
+  trustPolicyIgnoreAfterMinutes?: number;
   /**
    * {@inheritDoc PnpmOptionsConfiguration.alwaysInjectDependenciesFromOtherSubspaces}
    */
@@ -357,7 +357,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    *
    * PNPM documentation: https://pnpm.io/settings#trustpolicyignoreafter
    */
-  public readonly trustPolicyIgnoreAfter: number | undefined;
+  public readonly trustPolicyIgnoreAfterMinutes: number | undefined;
 
   /**
    * If true, then `rush update` add injected install options for all cross-subspace
@@ -555,7 +555,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.minimumReleaseAgeExclude = json.minimumReleaseAgeExclude;
     this.trustPolicy = json.trustPolicy;
     this.trustPolicyExclude = json.trustPolicyExclude;
-    this.trustPolicyIgnoreAfter = json.trustPolicyIgnoreAfter;
+    this.trustPolicyIgnoreAfterMinutes = json.trustPolicyIgnoreAfterMinutes;
     this.alwaysInjectDependenciesFromOtherSubspaces = json.alwaysInjectDependenciesFromOtherSubspaces;
     this.alwaysFullInstall = json.alwaysFullInstall;
     this.pnpmLockfilePolicies = json.pnpmLockfilePolicies;
