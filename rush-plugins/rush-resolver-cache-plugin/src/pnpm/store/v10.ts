@@ -5,9 +5,11 @@
 // {storeDir}/v10/index/{hash[0:2]}/{hash[2:64]}-{name}@{version}.json
 // Falls back to directory scan when the primary path doesn't exist.
 
-import { existsSync, readdirSync } from 'node:fs';
+import { type Dirent, existsSync, readdirSync } from 'node:fs';
 
 import type { IResolverContext } from '../../types';
+
+const SCOPE_SEPARATOR_REGEX: RegExp = /\//g;
 
 export function getStoreIndexPath(pnpmStorePath: string, context: IResolverContext, hash: string): string {
   // pnpm 10 truncates integrity hashes to 32 bytes (64 hex chars) for index paths.
@@ -15,7 +17,7 @@ export function getStoreIndexPath(pnpmStorePath: string, context: IResolverConte
   const hashDir: string = truncHash.slice(0, 2);
   const hashRest: string = truncHash.slice(2);
   // pnpm 10 index path format: <hash (0-2)>/<hash (2-64)>-<name>@<version>.json
-  const pkgName: string = (context.name || '').replace(/\//g, '+');
+  const pkgName: string = (context.name || '').replace(SCOPE_SEPARATOR_REGEX, '+');
   const nameVer: string = context.version ? `${pkgName}@${context.version}` : pkgName;
   let indexPath: string = `${pnpmStorePath}/v10/index/${hashDir}/${hashRest}-${nameVer}.json`;
   // For truncated/hashed folder names, nameVer from the key may be wrong.
@@ -24,10 +26,8 @@ export function getStoreIndexPath(pnpmStorePath: string, context: IResolverConte
     const dir: string = `${pnpmStorePath}/v10/index/${hashDir}/`;
     const filePrefix: string = `${hashRest}-`;
     try {
-      const entries: import('node:fs').Dirent[] = readdirSync(dir, { withFileTypes: true });
-      const match: import('node:fs').Dirent | undefined = entries.find(
-        (e) => e.isFile() && e.name.startsWith(filePrefix)
-      );
+      const entries: Dirent[] = readdirSync(dir, { withFileTypes: true });
+      const match: Dirent | undefined = entries.find((e) => e.isFile() && e.name.startsWith(filePrefix));
       if (match) {
         indexPath = dir + match.name;
       }

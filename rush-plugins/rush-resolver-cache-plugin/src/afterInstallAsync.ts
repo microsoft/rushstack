@@ -16,7 +16,11 @@ import {
   computeResolverCacheFromLockfileAsync,
   type IPlatformInfo
 } from './computeResolverCacheFromLockfileAsync';
-import { type PnpmMajorVersion, type IPnpmVersionHelpers, getPnpmVersionHelpersAsync } from './pnpm';
+import {
+  type PnpmMajorVersion,
+  type IPnpmVersionHelpers,
+  getPnpmVersionHelpersAsync
+} from './pnpm/pnpmVersionHelpers';
 import type { IResolverContext } from './types';
 
 /**
@@ -84,10 +88,17 @@ export async function afterInstallAsync(
 
   const pnpmMajorVersion: PnpmMajorVersion = (() => {
     const major: number = parseInt(rushConfiguration.packageManagerToolVersion, 10);
-    if (major >= 10) return 10;
-    if (major >= 9) return 9;
-    return 8;
-  })() as PnpmMajorVersion;
+    switch (major) {
+      case 10:
+        return 10;
+      case 9:
+        return 9;
+      case 8:
+        return 8;
+      default:
+        throw new Error(`Unsupported pnpm major version: ${major}`);
+    }
+  })();
 
   const pnpmHelpers: IPnpmVersionHelpers = await getPnpmVersionHelpersAsync(pnpmMajorVersion);
 

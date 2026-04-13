@@ -6,7 +6,7 @@ import * as path from 'node:path';
 import type { ISerializedResolveContext } from '@rushstack/webpack-workspace-resolve-plugin';
 
 import type { IDependencyEntry, IResolverContext } from './types';
-import type { IPnpmVersionHelpers } from './pnpm';
+import type { IPnpmVersionHelpers } from './pnpm/pnpmVersionHelpers';
 
 /**
  * Computes the root folder for a dependency from a reference to it in another package
@@ -26,19 +26,17 @@ export function resolveDependencyKey(
   packageKeys?: { has(key: string): boolean }
 ): string {
   if (specifier.startsWith('link:')) {
-    if (context.isProject) {
-      return path.posix.join(context.descriptionFileRoot, specifier.slice(5));
-    } else {
-      return path.posix.join(lockfileFolder, specifier.slice(5));
-    }
+    return path.posix.join(
+      context.isProject ? context.descriptionFileRoot : lockfileFolder,
+      specifier.slice(5)
+    );
   } else if (specifier.startsWith('file:')) {
     return getDescriptionFileRootFromKey(lockfileFolder, specifier, helpers.depPathToFilename, key);
-  } else if (packageKeys?.has(specifier)) {
-    // The specifier is a full package key (v6: '/pkg@ver', v9: 'pkg@ver')
-    return getDescriptionFileRootFromKey(lockfileFolder, specifier, helpers.depPathToFilename);
   } else {
-    const fullKey: string = helpers.buildDependencyKey(key, specifier);
-    return getDescriptionFileRootFromKey(lockfileFolder, fullKey, helpers.depPathToFilename);
+    const resolvedKey: string = packageKeys?.has(specifier)
+      ? specifier
+      : helpers.buildDependencyKey(key, specifier);
+    return getDescriptionFileRootFromKey(lockfileFolder, resolvedKey, helpers.depPathToFilename);
   }
 }
 

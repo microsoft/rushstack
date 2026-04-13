@@ -3,7 +3,7 @@
 
 // pnpm 8: lockfile v6 (keys start with '/'), store v3, MD5 base32 hash
 
-import type { IPnpmVersionHelpers } from '.';
+import type { IPnpmVersionHelpers } from './pnpmVersionHelpers';
 import { depPathToFilename } from './depPath/v8';
 import { buildDependencyKey } from './keys/v6';
 import { getStoreIndexPath } from './store/v3';

@@ -15,7 +15,11 @@ import {
   createContextSerializer,
   extractNameAndVersionFromKey
 } from './helpers';
-import { type PnpmMajorVersion, type IPnpmVersionHelpers, getPnpmVersionHelpersAsync } from './pnpm';
+import {
+  type PnpmMajorVersion,
+  type IPnpmVersionHelpers,
+  getPnpmVersionHelpersAsync
+} from './pnpm/pnpmVersionHelpers';
 import type { IResolverContext } from './types';
 
 /**
@@ -112,7 +116,7 @@ function extractBundledDependencies(
 }
 
 // Re-export for downstream consumers
-export type { PnpmMajorVersion, IPnpmVersionHelpers } from './pnpm';
+export type { PnpmMajorVersion, IPnpmVersionHelpers } from './pnpm/pnpmVersionHelpers';
 
 /**
  * Options for computing the resolver cache from a lockfile.
@@ -157,13 +161,15 @@ export interface IComputeResolverCacheFromLockfileOptions {
   ) => Promise<void>;
 }
 
+const BACKSLASH_REGEX: RegExp = /\\/g;
+
 /**
  * Copied from `@rushstack/node-core-library/src/Path.ts` to avoid expensive dependency
  * @param path - Path using backslashes as path separators
  * @returns The same string using forward slashes as path separators
  */
 function convertToSlashes(path: string): string {
-  return path.replace(/\\/g, '/');
+  return path.replace(BACKSLASH_REGEX, '/');
 }
 
 /**
@@ -183,12 +189,12 @@ export async function computeResolverCacheFromLockfileAsync(
   const contexts: Map<string, IResolverContext> = new Map();
   const missingOptionalDependencies: Set<string> = new Set();
 
-  const pnpmVersion: PnpmMajorVersion = params.pnpmVersion;
+  const helpers: IPnpmVersionHelpers = await getPnpmVersionHelpersAsync(params.pnpmVersion);
 
-  const helpers: IPnpmVersionHelpers = await getPnpmVersionHelpersAsync(pnpmVersion);
+  const { packages } = lockfile;
 
   // Enumerate external dependencies first, to simplify looping over them for store data
-  for (const [key, pack] of lockfile.packages) {
+  for (const [key, pack] of packages) {
     let name: string | undefined = pack.name;
     const descriptionFileRoot: string = getDescriptionFileRootFromKey(
       workspaceRoot,
@@ -208,9 +214,7 @@ export async function computeResolverCacheFromLockfileAsync(
     // Extract name and version from the key if not already provided
     const parsed: { name: string; version: string } | undefined = extractNameAndVersionFromKey(key);
     if (parsed) {
-      if (!name) {
-        name = parsed.name;
-      }
+      name ||= parsed.name;
     }
 
     if (!name) {
@@ -231,10 +235,10 @@ export async function computeResolverCacheFromLockfileAsync(
     contexts.set(descriptionFileRoot, context);
 
     if (pack.dependencies) {
-      resolveDependencies(workspaceRoot, pack.dependencies, context, helpers, lockfile.packages);
+      resolveDependencies(workspaceRoot, pack.dependencies, context, helpers, packages);
     }
     if (pack.optionalDependencies) {
-      resolveDependencies(workspaceRoot, pack.optionalDependencies, context, helpers, lockfile.packages);
+      resolveDependencies(workspaceRoot, pack.optionalDependencies, context, helpers, packages);
     }
   }
 
@@ -275,13 +279,13 @@ export async function computeResolverCacheFromLockfileAsync(
     contexts.set(descriptionFileRoot, context);
 
     if (importer.dependencies) {
-      resolveDependencies(workspaceRoot, importer.dependencies, context, helpers, lockfile.packages);
+      resolveDependencies(workspaceRoot, importer.dependencies, context, helpers, packages);
     }
     if (importer.devDependencies) {
-      resolveDependencies(workspaceRoot, importer.devDependencies, context, helpers, lockfile.packages);
+      resolveDependencies(workspaceRoot, importer.devDependencies, context, helpers, packages);
     }
     if (importer.optionalDependencies) {
-      resolveDependencies(workspaceRoot, importer.optionalDependencies, context, helpers, lockfile.packages);
+      resolveDependencies(workspaceRoot, importer.optionalDependencies, context, helpers, packages);
     }
   }
 

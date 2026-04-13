@@ -13,7 +13,7 @@ import {
 import { helpers as v8Helpers } from '../pnpm/v8';
 import { helpers as v9Helpers } from '../pnpm/v9';
 import { helpers as v10Helpers } from '../pnpm/v10';
-import { getPnpmVersionHelpersAsync, type IPnpmVersionHelpers } from '../pnpm';
+import { getPnpmVersionHelpersAsync, type IPnpmVersionHelpers } from '../pnpm/pnpmVersionHelpers';
 import type { IResolverContext } from '../types';
 
 describe(createBase32Hash.name, () => {

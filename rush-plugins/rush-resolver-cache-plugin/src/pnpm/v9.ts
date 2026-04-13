@@ -3,7 +3,7 @@
 
 // pnpm 9: lockfile v9 (keys have no leading '/'), store v3, MD5 base32 hash
 
-import type { IPnpmVersionHelpers } from '.';
+import type { IPnpmVersionHelpers } from './pnpmVersionHelpers';
 // pnpm 9 uses the same dep-path hashing algorithm as pnpm 8 (MD5 base32)
 // but a different depPathToFilenameUnescaped (indexOf('@') vs lastIndexOf('/'))
 import { depPathToFilename } from './depPath/v9';
