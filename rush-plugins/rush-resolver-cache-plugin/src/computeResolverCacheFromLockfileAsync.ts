@@ -141,10 +141,8 @@ export interface IComputeResolverCacheFromLockfileOptions {
   /**
    * The major version of pnpm configured in rush.json (e.g. `"10.27.0"` → 10).
    * Used to select the correct dep-path hashing algorithm and store layout.
-   * When omitted, the version is inferred from the lockfile format (v6 → pnpm 8,
-   * v9 → pnpm 9).
    */
-  pnpmVersion?: PnpmMajorVersion;
+  pnpmVersion: PnpmMajorVersion;
   /**
    * A callback to process external packages after they have been enumerated.
    * Broken out as a separate function to facilitate testing without hitting the disk.
@@ -169,44 +167,6 @@ function convertToSlashes(path: string): string {
 }
 
 /**
- * Detects the pnpm major version from the lockfile format and an optional
- * caller-supplied version (derived from rush.json `pnpmVersion`).
- *
- * @param lockfile - The parsed shrinkwrap / lockfile
- * @param configuredPnpmVersion - The pnpm major version from rush.json, if available.
- *   When provided this takes precedence, because the lockfile alone cannot distinguish
- *   pnpm 9 from pnpm 10 (both use lockfile v9).
- */
-export function detectPnpmMajorVersion(
-  lockfile: PnpmShrinkwrapFile,
-  configuredPnpmVersion?: PnpmMajorVersion
-): PnpmMajorVersion {
-  if (configuredPnpmVersion !== undefined) {
-    return configuredPnpmVersion;
-  }
-
-  // Detect from lockfile version
-  if (lockfile.shrinkwrapFileMajorVersion >= 9) {
-    // Lockfile v9 is shared by pnpm 9 and pnpm 10.
-    // Without the configured version we cannot tell them apart; default to 9
-    // (v8 dep-path algorithm, v3 store, v9 key format).
-    return 9;
-  }
-
-  if (lockfile.shrinkwrapFileMajorVersion > 0) {
-    return 8;
-  }
-
-  // Fallback for lockfiles where version parsing failed: inspect the first non-file package key.
-  for (const key of lockfile.packages.keys()) {
-    if (!key.startsWith('file:')) {
-      return key.startsWith('/') ? 8 : 9;
-    }
-  }
-  return 8;
-}
-
-/**
  * Given a lockfile and information about the workspace and platform, computes the resolver cache file.
  * @param params - The options for computing the resolver cache
  * @returns A promise that resolves with the resolver cache file
@@ -223,7 +183,7 @@ export async function computeResolverCacheFromLockfileAsync(
   const contexts: Map<string, IResolverContext> = new Map();
   const missingOptionalDependencies: Set<string> = new Set();
 
-  const pnpmVersion: PnpmMajorVersion = detectPnpmMajorVersion(lockfile, params.pnpmVersion);
+  const pnpmVersion: PnpmMajorVersion = params.pnpmVersion;
 
   const helpers: IPnpmVersionHelpers = await getPnpmVersionHelpersAsync(pnpmVersion);
 

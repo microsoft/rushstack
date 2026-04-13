@@ -14,9 +14,7 @@ import { helpers as v8Helpers } from '../pnpm/v8';
 import { helpers as v9Helpers } from '../pnpm/v9';
 import { helpers as v10Helpers } from '../pnpm/v10';
 import { getPnpmVersionHelpersAsync, type IPnpmVersionHelpers } from '../pnpm';
-import { detectPnpmMajorVersion } from '../computeResolverCacheFromLockfileAsync';
 import type { IResolverContext } from '../types';
-import type { PnpmShrinkwrapFile } from '../externals';
 
 describe(createBase32Hash.name, () => {
   it('hashes', () => {
@@ -242,48 +240,6 @@ describe('getStoreIndexPath', () => {
     expect(result).toBe(
       '/store/v10/index/aa/bbccddeeff00112233445566778899aabbccddeeff00112233445566778899-@scope+pkg@1.0.0.json'
     );
-  });
-});
-
-describe(detectPnpmMajorVersion.name, () => {
-  function makeLockfileStub(majorVersion: number, packageKeys: string[] = []): PnpmShrinkwrapFile {
-    return {
-      shrinkwrapFileMajorVersion: majorVersion,
-      packages: new Map(packageKeys.map((k) => [k, {} as never]))
-    } as unknown as PnpmShrinkwrapFile;
-  }
-
-  it('returns configured version when provided', () => {
-    // Configured version should take precedence over lockfile heuristics
-    expect(detectPnpmMajorVersion(makeLockfileStub(9), 10)).toBe(10);
-    expect(detectPnpmMajorVersion(makeLockfileStub(6), 8)).toBe(8);
-    expect(detectPnpmMajorVersion(makeLockfileStub(9), 9)).toBe(9);
-  });
-
-  it('returns 9 for lockfile v9+', () => {
-    expect(detectPnpmMajorVersion(makeLockfileStub(9))).toBe(9);
-    expect(detectPnpmMajorVersion(makeLockfileStub(10))).toBe(9);
-  });
-
-  it('returns 8 for lockfile v6', () => {
-    expect(detectPnpmMajorVersion(makeLockfileStub(6))).toBe(8);
-    expect(detectPnpmMajorVersion(makeLockfileStub(5))).toBe(8);
-  });
-
-  it('falls back to key inspection when shrinkwrapFileMajorVersion is 0', () => {
-    // v6 keys start with /
-    expect(detectPnpmMajorVersion(makeLockfileStub(0, ['/foo@1.0.0']))).toBe(8);
-    // v9 keys have no leading /
-    expect(detectPnpmMajorVersion(makeLockfileStub(0, ['foo@1.0.0']))).toBe(9);
-  });
-
-  it('skips file: keys during fallback inspection', () => {
-    expect(detectPnpmMajorVersion(makeLockfileStub(0, ['file:../local', '/foo@1.0.0']))).toBe(8);
-    expect(detectPnpmMajorVersion(makeLockfileStub(0, ['file:../local', 'foo@1.0.0']))).toBe(9);
-  });
-
-  it('returns 8 when no packages exist', () => {
-    expect(detectPnpmMajorVersion(makeLockfileStub(0, []))).toBe(8);
   });
 });
 

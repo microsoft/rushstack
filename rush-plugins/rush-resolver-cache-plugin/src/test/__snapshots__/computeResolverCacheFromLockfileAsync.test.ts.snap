@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`computeResolverCacheFromLockfileAsync matches snapshot behavior: build-tests-subspace.yaml 1`] = `
+exports[`computeResolverCacheFromLockfileAsync matches snapshot behavior: build-tests-subspace.yaml (pnpm 8) 1`] = `
 Object {
   "basePath": "/$root/",
   "contexts": Array [
@@ -6606,7 +6606,7 @@ Object {
 }
 `;
 
-exports[`computeResolverCacheFromLockfileAsync matches snapshot behavior: bundled-dependencies.yaml 1`] = `
+exports[`computeResolverCacheFromLockfileAsync matches snapshot behavior: bundled-dependencies.yaml (pnpm 8) 1`] = `
 Object {
   "basePath": "/$root/",
   "contexts": Array [
@@ -6780,7 +6780,7 @@ Object {
 }
 `;
 
-exports[`computeResolverCacheFromLockfileAsync matches snapshot behavior: default-subspace.yaml 1`] = `
+exports[`computeResolverCacheFromLockfileAsync matches snapshot behavior: default-subspace.yaml (pnpm 8) 1`] = `
 Object {
   "basePath": "/$root/",
   "contexts": Array [

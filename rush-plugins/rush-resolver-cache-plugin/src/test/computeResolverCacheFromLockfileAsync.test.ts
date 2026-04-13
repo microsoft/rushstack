@@ -19,7 +19,7 @@ interface ITestCase {
   workspaceRoot: string;
   commonPrefixToTrim: string;
   lockfileName: string;
-  pnpmVersion?: PnpmMajorVersion;
+  pnpmVersion: PnpmMajorVersion;
   afterExternalPackagesAsync?: IComputeResolverCacheFromLockfileOptions['afterExternalPackagesAsync'];
 }
 
@@ -28,18 +28,21 @@ const TEST_CASES: readonly ITestCase[] = [
     // Validate with POSIX-style path inputs
     workspaceRoot: '/$root/common/temp/build-tests',
     commonPrefixToTrim: '/$root/',
-    lockfileName: 'build-tests-subspace.yaml'
+    lockfileName: 'build-tests-subspace.yaml',
+    pnpmVersion: 8
   },
   {
     // Validate that it works with Windows-style path inputs
     workspaceRoot: '\\$root\\common\\temp\\default',
     commonPrefixToTrim: '\\$root\\',
-    lockfileName: 'default-subspace.yaml'
+    lockfileName: 'default-subspace.yaml',
+    pnpmVersion: 8
   },
   {
     workspaceRoot: '/$root/common/temp/bundled-dependencies',
     commonPrefixToTrim: '/$root/',
     lockfileName: 'bundled-dependencies.yaml',
+    pnpmVersion: 8,
     afterExternalPackagesAsync: async (contexts: Map<string, IResolverContext>) => {
       for (const context of contexts.values()) {
         context.nestedPackageDirs = [
@@ -133,7 +136,7 @@ describe(computeResolverCacheFromLockfileAsync.name, () => {
         });
       }
 
-      const snapshotName: string = pnpmVersion ? `${lockfileName} (pnpm ${pnpmVersion})` : lockfileName;
+      const snapshotName: string = `${lockfileName} (pnpm ${pnpmVersion})`;
 
       const resolverCacheFile = await computeResolverCacheFromLockfileAsync({
         workspaceRoot,
