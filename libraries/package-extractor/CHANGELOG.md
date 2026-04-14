@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Fri, 10 Apr 2026 22:46:34 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Apr 2026 15:19:52 GMT and should not be manually modified.
+
+## 0.13.0
+Tue, 14 Apr 2026 15:19:52 GMT
+
+### Minor changes
+
+- Update `_collectFoldersAsync` to process all starting folders in a single shared queue instead of serially. Add `pnpmNodeModulesHoistingEnabled` option to `IExtractorSubspace` to skip virtual store hoisting lookup when hoisting is disabled.
 
 ## 0.12.15
 Fri, 10 Apr 2026 22:46:34 GMT

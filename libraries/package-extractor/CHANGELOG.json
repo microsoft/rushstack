@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.13.0",
+      "tag": "@rushstack/package-extractor_v0.13.0",
+      "date": "Tue, 14 Apr 2026 15:19:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update `_collectFoldersAsync` to process all starting folders in a single shared queue instead of serially. Add `pnpmNodeModulesHoistingEnabled` option to `IExtractorSubspace` to skip virtual store hoisting lookup when hoisting is disabled."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.15",
       "tag": "@rushstack/package-extractor_v0.12.15",
       "date": "Fri, 10 Apr 2026 22:46:34 GMT",
