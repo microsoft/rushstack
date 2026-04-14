@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "2.0.0",
+      "tag": "@rushstack/heft-jest-plugin_v2.0.0",
+      "date": "Tue, 14 Apr 2026 01:25:46 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Bump jest to 30.3.0 to address CVE GHSA-vpq2-c234-7xj6"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.12",
       "tag": "@rushstack/heft-jest-plugin_v1.2.12",
       "date": "Fri, 10 Apr 2026 22:46:34 GMT",
