@@ -1,58 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { createHash } from 'node:crypto';
 import * as path from 'node:path';
 
 import type { ISerializedResolveContext } from '@rushstack/webpack-workspace-resolve-plugin';
 
 import type { IDependencyEntry, IResolverContext } from './types';
-
-const MAX_LENGTH_WITHOUT_HASH: number = 120 - 26 - 1;
-const BASE32: string[] = 'abcdefghijklmnopqrstuvwxyz234567'.split('');
-
-// https://github.com/swansontec/rfc4648.js/blob/ead9c9b4b68e5d4a529f32925da02c02984e772c/src/codec.ts#L82-L118
-export function createBase32Hash(input: string): string {
-  const data: Buffer = createHash('md5').update(input).digest();
-
-  const mask: 0x1f = 0x1f;
-  let out: string = '';
-
-  let bits: number = 0; // Number of bits currently in the buffer
-  let buffer: number = 0; // Bits waiting to be written out, MSB first
-  for (let i: number = 0; i < data.length; ++i) {
-    // eslint-disable-next-line no-bitwise
-    buffer = (buffer << 8) | (0xff & data[i]);
-    bits += 8;
-
-    // Write out as much as we can:
-    while (bits > 5) {
-      bits -= 5;
-      // eslint-disable-next-line no-bitwise
-      out += BASE32[mask & (buffer >> bits)];
-    }
-  }
-
-  // Partial character:
-  if (bits) {
-    // eslint-disable-next-line no-bitwise
-    out += BASE32[mask & (buffer << (5 - bits))];
-  }
-
-  return out;
-}
-
-// https://github.com/pnpm/pnpm/blob/f394cfccda7bc519ceee8c33fc9b68a0f4235532/packages/dependency-path/src/index.ts#L167-L189
-export function depPathToFilename(depPath: string): string {
-  let filename: string = depPathToFilenameUnescaped(depPath).replace(/[\\/:*?"<>|]/g, '+');
-  if (filename.includes('(')) {
-    filename = filename.replace(/(\)\()|\(/g, '_').replace(/\)$/, '');
-  }
-  if (filename.length > 120 || (filename !== filename.toLowerCase() && !filename.startsWith('file+'))) {
-    return `${filename.substring(0, MAX_LENGTH_WITHOUT_HASH)}_${createBase32Hash(filename)}`;
-  }
-  return filename;
-}
+import type { IPnpmVersionHelpers } from './pnpm/pnpmVersionHelpers';
 
 /**
  * Computes the root folder for a dependency from a reference to it in another package
@@ -60,26 +14,29 @@ export function depPathToFilename(depPath: string): string {
  * @param key - The key of the dependency
  * @param specifier - The specifier in the lockfile for the dependency
  * @param context - The owning package
+ * @param helpers - Version-specific pnpm helpers
  * @returns The identifier for the dependency
  */
 export function resolveDependencyKey(
   lockfileFolder: string,
   key: string,
   specifier: string,
-  context: IResolverContext
+  context: IResolverContext,
+  helpers: IPnpmVersionHelpers,
+  packageKeys?: { has(key: string): boolean }
 ): string {
-  if (specifier.startsWith('/')) {
-    return getDescriptionFileRootFromKey(lockfileFolder, specifier);
-  } else if (specifier.startsWith('link:')) {
-    if (context.isProject) {
-      return path.posix.join(context.descriptionFileRoot, specifier.slice(5));
-    } else {
-      return path.posix.join(lockfileFolder, specifier.slice(5));
-    }
+  if (specifier.startsWith('link:')) {
+    return path.posix.join(
+      context.isProject ? context.descriptionFileRoot : lockfileFolder,
+      specifier.slice(5)
+    );
   } else if (specifier.startsWith('file:')) {
-    return getDescriptionFileRootFromKey(lockfileFolder, specifier, key);
+    return getDescriptionFileRootFromKey(lockfileFolder, specifier, helpers.depPathToFilename, key);
   } else {
-    return getDescriptionFileRootFromKey(lockfileFolder, `/${key}@${specifier}`);
+    const resolvedKey: string = packageKeys?.has(specifier)
+      ? specifier
+      : helpers.buildDependencyKey(key, specifier);
+    return getDescriptionFileRootFromKey(lockfileFolder, resolvedKey, helpers.depPathToFilename);
   }
 }
 
@@ -87,12 +44,19 @@ export function resolveDependencyKey(
  * Computes the physical path to a dependency based on its entry
  * @param lockfileFolder - The folder that contains the lockfile during installation
  * @param key - The key of the dependency
+ * @param depPathToFilename - Version-specific function to convert dep paths to filenames
  * @param name - The name of the dependency, if provided
  * @returns The physical path to the dependency
  */
-export function getDescriptionFileRootFromKey(lockfileFolder: string, key: string, name?: string): string {
-  if (!key.startsWith('file:')) {
-    name = key.slice(1, key.indexOf('@', 2));
+export function getDescriptionFileRootFromKey(
+  lockfileFolder: string,
+  key: string,
+  depPathToFilename: (depPath: string) => string,
+  name?: string
+): string {
+  if (!key.startsWith('file:') && !name) {
+    const offset: number = key.startsWith('/') ? 1 : 0;
+    name = key.slice(offset, key.indexOf('@', offset + 1));
   }
   if (!name) {
     throw new Error(`Missing package name for ${key}`);
@@ -106,29 +70,44 @@ export function getDescriptionFileRootFromKey(lockfileFolder: string, key: strin
 export function resolveDependencies(
   lockfileFolder: string,
   collection: Record<string, IDependencyEntry>,
-  context: IResolverContext
+  context: IResolverContext,
+  helpers: IPnpmVersionHelpers,
+  packageKeys?: { has(key: string): boolean }
 ): void {
   for (const [key, value] of Object.entries(collection)) {
     const version: string = typeof value === 'string' ? value : value.version;
-    const resolved: string = resolveDependencyKey(lockfileFolder, key, version, context);
+    const resolved: string = resolveDependencyKey(
+      lockfileFolder,
+      key,
+      version,
+      context,
+      helpers,
+      packageKeys
+    );
 
     context.deps.set(key, resolved);
   }
 }
 
 /**
- *
- * @param depPath - The path to the dependency
- * @returns The folder name for the dependency
+ * Extracts the package name and version from a lockfile package key.
+ * @param key - The lockfile package key (e.g. '/autoprefixer\@9.8.8', '\@scope/name\@1.0.0(peer\@2.0.0)')
+ * @returns The extracted name and version, or undefined for file: keys
  */
-export function depPathToFilenameUnescaped(depPath: string): string {
-  if (depPath.indexOf('file:') !== 0) {
-    if (depPath.startsWith('/')) {
-      depPath = depPath.slice(1);
-    }
-    return depPath;
+export function extractNameAndVersionFromKey(key: string): { name: string; version: string } | undefined {
+  if (key.startsWith('file:')) {
+    return undefined;
   }
-  return depPath.replace(':', '+');
+  const offset: number = key.startsWith('/') ? 1 : 0;
+  const versionAtIndex: number = key.indexOf('@', offset + 1);
+  if (versionAtIndex === -1) {
+    return undefined;
+  }
+  const name: string = key.slice(offset, versionAtIndex);
+  const parenIndex: number = key.indexOf('(', versionAtIndex);
+  const version: string =
+    parenIndex !== -1 ? key.slice(versionAtIndex + 1, parenIndex) : key.slice(versionAtIndex + 1);
+  return { name, version };
 }
 
 /**

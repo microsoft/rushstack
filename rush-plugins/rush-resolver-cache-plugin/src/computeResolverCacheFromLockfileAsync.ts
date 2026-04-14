@@ -9,7 +9,17 @@ import type {
 } from '@rushstack/webpack-workspace-resolve-plugin';
 
 import type { PnpmShrinkwrapFile } from './externals';
-import { getDescriptionFileRootFromKey, resolveDependencies, createContextSerializer } from './helpers';
+import {
+  getDescriptionFileRootFromKey,
+  resolveDependencies,
+  createContextSerializer,
+  extractNameAndVersionFromKey
+} from './helpers';
+import {
+  type PnpmMajorVersion,
+  type IPnpmVersionHelpers,
+  getPnpmVersionHelpersAsync
+} from './pnpm/pnpmVersionHelpers';
 import type { IResolverContext } from './types';
 
 /**
@@ -105,6 +115,9 @@ function extractBundledDependencies(
   }
 }
 
+// Re-export for downstream consumers
+export type { PnpmMajorVersion, IPnpmVersionHelpers } from './pnpm/pnpmVersionHelpers';
+
 /**
  * Options for computing the resolver cache from a lockfile.
  */
@@ -130,6 +143,11 @@ export interface IComputeResolverCacheFromLockfileOptions {
    */
   lockfile: PnpmShrinkwrapFile;
   /**
+   * The major version of pnpm configured in rush.json (e.g. `"10.27.0"` → 10).
+   * Used to select the correct dep-path hashing algorithm and store layout.
+   */
+  pnpmVersion: PnpmMajorVersion;
+  /**
    * A callback to process external packages after they have been enumerated.
    * Broken out as a separate function to facilitate testing without hitting the disk.
    * @remarks This is useful for fetching additional data from the pnpm store
@@ -143,13 +161,15 @@ export interface IComputeResolverCacheFromLockfileOptions {
   ) => Promise<void>;
 }
 
+const BACKSLASH_REGEX: RegExp = /\\/g;
+
 /**
  * Copied from `@rushstack/node-core-library/src/Path.ts` to avoid expensive dependency
  * @param path - Path using backslashes as path separators
  * @returns The same string using forward slashes as path separators
  */
 function convertToSlashes(path: string): string {
-  return path.replace(/\\/g, '/');
+  return path.replace(BACKSLASH_REGEX, '/');
 }
 
 /**
@@ -169,10 +189,19 @@ export async function computeResolverCacheFromLockfileAsync(
   const contexts: Map<string, IResolverContext> = new Map();
   const missingOptionalDependencies: Set<string> = new Set();
 
+  const helpers: IPnpmVersionHelpers = await getPnpmVersionHelpersAsync(params.pnpmVersion);
+
+  const { packages } = lockfile;
+
   // Enumerate external dependencies first, to simplify looping over them for store data
-  for (const [key, pack] of lockfile.packages) {
+  for (const [key, pack] of packages) {
     let name: string | undefined = pack.name;
-    const descriptionFileRoot: string = getDescriptionFileRootFromKey(workspaceRoot, key, name);
+    const descriptionFileRoot: string = getDescriptionFileRootFromKey(
+      workspaceRoot,
+      key,
+      helpers.depPathToFilename,
+      name
+    );
 
     // Skip optional dependencies that are incompatible with the current environment
     if (pack.optional && !isPackageCompatible(pack, platformInfo)) {
@@ -182,9 +211,10 @@ export async function computeResolverCacheFromLockfileAsync(
 
     const integrity: string | undefined = pack.resolution?.integrity;
 
-    if (!name && key.startsWith('/')) {
-      const versionIndex: number = key.indexOf('@', 2);
-      name = key.slice(1, versionIndex);
+    // Extract name and version from the key if not already provided
+    const parsed: { name: string; version: string } | undefined = extractNameAndVersionFromKey(key);
+    if (parsed) {
+      name ||= parsed.name;
     }
 
     if (!name) {
@@ -196,6 +226,7 @@ export async function computeResolverCacheFromLockfileAsync(
       descriptionFileHash: integrity,
       isProject: false,
       name,
+      version: parsed?.version,
       deps: new Map(),
       ordinal: -1,
       optional: pack.optional
@@ -204,10 +235,10 @@ export async function computeResolverCacheFromLockfileAsync(
     contexts.set(descriptionFileRoot, context);
 
     if (pack.dependencies) {
-      resolveDependencies(workspaceRoot, pack.dependencies, context);
+      resolveDependencies(workspaceRoot, pack.dependencies, context, helpers, packages);
     }
     if (pack.optionalDependencies) {
-      resolveDependencies(workspaceRoot, pack.optionalDependencies, context);
+      resolveDependencies(workspaceRoot, pack.optionalDependencies, context, helpers, packages);
     }
   }
 
@@ -248,13 +279,13 @@ export async function computeResolverCacheFromLockfileAsync(
     contexts.set(descriptionFileRoot, context);
 
     if (importer.dependencies) {
-      resolveDependencies(workspaceRoot, importer.dependencies, context);
+      resolveDependencies(workspaceRoot, importer.dependencies, context, helpers, packages);
     }
     if (importer.devDependencies) {
-      resolveDependencies(workspaceRoot, importer.devDependencies, context);
+      resolveDependencies(workspaceRoot, importer.devDependencies, context, helpers, packages);
     }
     if (importer.optionalDependencies) {
-      resolveDependencies(workspaceRoot, importer.optionalDependencies, context);
+      resolveDependencies(workspaceRoot, importer.optionalDependencies, context, helpers, packages);
     }
   }
 

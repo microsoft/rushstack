@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`computeResolverCacheFromLockfileAsync matches snapshot behavior: build-tests-subspace.yaml 1`] = `
+exports[`computeResolverCacheFromLockfileAsync matches snapshot behavior: build-tests-subspace.yaml (pnpm 8) 1`] = `
 Object {
   "basePath": "/$root/",
   "contexts": Array [
@@ -6392,7 +6392,221 @@ Object {
 }
 `;
 
-exports[`computeResolverCacheFromLockfileAsync matches snapshot behavior: bundled-dependencies.yaml 1`] = `
+exports[`computeResolverCacheFromLockfileAsync matches snapshot behavior: build-tests-subspace-v9.yaml (pnpm 9) 1`] = `
+Object {
+  "basePath": "/$root/",
+  "contexts": Array [
+    Object {
+      "deps": Object {
+        "browserslist": 1,
+      },
+      "name": "autoprefixer",
+      "root": "common/temp/build-tests/node_modules/.pnpm/autoprefixer@9.8.8/node_modules/autoprefixer",
+    },
+    Object {
+      "name": "browserslist",
+      "root": "common/temp/build-tests/node_modules/.pnpm/browserslist@4.22.1/node_modules/browserslist",
+    },
+    Object {
+      "deps": Object {
+        "@babel/highlight": 3,
+        "picocolors": 4,
+      },
+      "name": "@babel/code-frame",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@babel+code-frame@7.24.2/node_modules/@babel/code-frame",
+    },
+    Object {
+      "name": "@babel/highlight",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@babel+highlight@7.24.5/node_modules/@babel/highlight",
+    },
+    Object {
+      "name": "picocolors",
+      "root": "common/temp/build-tests/node_modules/.pnpm/picocolors@1.0.1/node_modules/picocolors",
+    },
+    Object {
+      "name": "typescript",
+      "root": "common/temp/build-tests/node_modules/.pnpm/typescript@5.4.5/node_modules/typescript",
+    },
+    Object {
+      "deps": Object {
+        "typescript": 5,
+      },
+      "name": "@scope/bar",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@scope+bar@2.0.0_typescript@5.4.5/node_modules/@scope/bar",
+    },
+    Object {
+      "deps": Object {
+        "@azure/msal-browser": 8,
+        "@azure/msal-common": 9,
+        "@fluentui/merge-styles": 10,
+        "@fluentui/react": 11,
+        "react": 13,
+        "react-dom": 12,
+      },
+      "name": "@some/package",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@some+package@1.2.3_@azure+msal-browser@2.28.1_@azure+msal-common@6.4.0_@fluentui+merge-style_dvlowrxgl5etiz7ddf7v4yxvgm/node_modules/@some/package",
+    },
+    Object {
+      "name": "@azure/msal-browser",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@azure+msal-browser@2.28.1/node_modules/@azure/msal-browser",
+    },
+    Object {
+      "name": "@azure/msal-common",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@azure+msal-common@6.4.0/node_modules/@azure/msal-common",
+    },
+    Object {
+      "name": "@fluentui/merge-styles",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@fluentui+merge-styles@8.6.2/node_modules/@fluentui/merge-styles",
+    },
+    Object {
+      "deps": Object {
+        "react": 13,
+        "react-dom": 12,
+      },
+      "name": "@fluentui/react",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@fluentui+react@8.117.5_react-dom@17.0.1_react@17.0.1/node_modules/@fluentui/react",
+    },
+    Object {
+      "deps": Object {
+        "react": 13,
+      },
+      "name": "react-dom",
+      "root": "common/temp/build-tests/node_modules/.pnpm/react-dom@17.0.1_react@17.0.1/node_modules/react-dom",
+    },
+    Object {
+      "name": "react",
+      "root": "common/temp/build-tests/node_modules/.pnpm/react@17.0.1/node_modules/react",
+    },
+    Object {
+      "deps": Object {
+        "@babel/code-frame": 2,
+        "autoprefixer": 0,
+        "typescript": 5,
+      },
+      "name": "@local/build-tests-subspace+rush-lib-test",
+      "root": "build-tests-subspace/rush-lib-test",
+    },
+    Object {
+      "deps": Object {
+        "@scope/bar": 6,
+        "@some/package": 7,
+        "typescript": 5,
+      },
+      "name": "@local/build-tests-subspace+rush-sdk-test",
+      "root": "build-tests-subspace/rush-sdk-test",
+    },
+  ],
+}
+`;
+
+exports[`computeResolverCacheFromLockfileAsync matches snapshot behavior: build-tests-subspace-v9.yaml (pnpm 10) 1`] = `
+Object {
+  "basePath": "/$root/",
+  "contexts": Array [
+    Object {
+      "deps": Object {
+        "browserslist": 1,
+      },
+      "name": "autoprefixer",
+      "root": "common/temp/build-tests/node_modules/.pnpm/autoprefixer@9.8.8/node_modules/autoprefixer",
+    },
+    Object {
+      "name": "browserslist",
+      "root": "common/temp/build-tests/node_modules/.pnpm/browserslist@4.22.1/node_modules/browserslist",
+    },
+    Object {
+      "deps": Object {
+        "@babel/highlight": 3,
+        "picocolors": 4,
+      },
+      "name": "@babel/code-frame",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@babel+code-frame@7.24.2/node_modules/@babel/code-frame",
+    },
+    Object {
+      "name": "@babel/highlight",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@babel+highlight@7.24.5/node_modules/@babel/highlight",
+    },
+    Object {
+      "name": "picocolors",
+      "root": "common/temp/build-tests/node_modules/.pnpm/picocolors@1.0.1/node_modules/picocolors",
+    },
+    Object {
+      "name": "typescript",
+      "root": "common/temp/build-tests/node_modules/.pnpm/typescript@5.4.5/node_modules/typescript",
+    },
+    Object {
+      "deps": Object {
+        "typescript": 5,
+      },
+      "name": "@scope/bar",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@scope+bar@2.0.0_typescript@5.4.5/node_modules/@scope/bar",
+    },
+    Object {
+      "deps": Object {
+        "@azure/msal-browser": 8,
+        "@azure/msal-common": 9,
+        "@fluentui/merge-styles": 10,
+        "@fluentui/react": 11,
+        "react": 13,
+        "react-dom": 12,
+      },
+      "name": "@some/package",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@some+package@1.2.3_@azure+msal-browser@2.28.1_@azure+msal-common@6.4.0_@fluentui+merge_b3ef11fe8e724aa2061fb1a9adef96be/node_modules/@some/package",
+    },
+    Object {
+      "name": "@azure/msal-browser",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@azure+msal-browser@2.28.1/node_modules/@azure/msal-browser",
+    },
+    Object {
+      "name": "@azure/msal-common",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@azure+msal-common@6.4.0/node_modules/@azure/msal-common",
+    },
+    Object {
+      "name": "@fluentui/merge-styles",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@fluentui+merge-styles@8.6.2/node_modules/@fluentui/merge-styles",
+    },
+    Object {
+      "deps": Object {
+        "react": 13,
+        "react-dom": 12,
+      },
+      "name": "@fluentui/react",
+      "root": "common/temp/build-tests/node_modules/.pnpm/@fluentui+react@8.117.5_react-dom@17.0.1_react@17.0.1/node_modules/@fluentui/react",
+    },
+    Object {
+      "deps": Object {
+        "react": 13,
+      },
+      "name": "react-dom",
+      "root": "common/temp/build-tests/node_modules/.pnpm/react-dom@17.0.1_react@17.0.1/node_modules/react-dom",
+    },
+    Object {
+      "name": "react",
+      "root": "common/temp/build-tests/node_modules/.pnpm/react@17.0.1/node_modules/react",
+    },
+    Object {
+      "deps": Object {
+        "@babel/code-frame": 2,
+        "autoprefixer": 0,
+        "typescript": 5,
+      },
+      "name": "@local/build-tests-subspace+rush-lib-test",
+      "root": "build-tests-subspace/rush-lib-test",
+    },
+    Object {
+      "deps": Object {
+        "@scope/bar": 6,
+        "@some/package": 7,
+        "typescript": 5,
+      },
+      "name": "@local/build-tests-subspace+rush-sdk-test",
+      "root": "build-tests-subspace/rush-sdk-test",
+    },
+  ],
+}
+`;
+
+exports[`computeResolverCacheFromLockfileAsync matches snapshot behavior: bundled-dependencies.yaml (pnpm 8) 1`] = `
 Object {
   "basePath": "/$root/",
   "contexts": Array [
@@ -6566,7 +6780,7 @@ Object {
 }
 `;
 
-exports[`computeResolverCacheFromLockfileAsync matches snapshot behavior: default-subspace.yaml 1`] = `
+exports[`computeResolverCacheFromLockfileAsync matches snapshot behavior: default-subspace.yaml (pnpm 8) 1`] = `
 Object {
   "basePath": "/$root/",
   "contexts": Array [
