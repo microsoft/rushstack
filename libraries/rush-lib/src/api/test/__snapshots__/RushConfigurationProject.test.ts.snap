@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`validateRelativePathField should throw an error if the path contains backslashes 1`] = `"The value \\"path\\\\to\\\\project\\" in the \\"someField\\" field in \\"/repo/rush.json\\" may not contain backslashes ('\\\\'), since they are interpreted differently on POSIX and Windows. Paths must use '/' as the path separator."`;
 

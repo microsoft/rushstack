@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/module-minifier",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier"
+}

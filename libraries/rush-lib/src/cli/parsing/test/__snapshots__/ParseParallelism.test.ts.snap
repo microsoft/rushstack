@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`parseParallelism throwsErrorOnInvalidParallelism 1`] = `"Invalid parallelism value of \\"tequila\\": expected a number, a percentage string, or \\"max\\""`;
 

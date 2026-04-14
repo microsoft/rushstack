@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`lfxGraph-website-sample-1-v9.0 loads a workspace 1`] = `
 "entries:

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`webpack5-load-themed-style-loader generates desired loader output snapshot: LoaderContent 1`] = `
 "var content = require(\\"!!../../../../../common/temp/default/node_modules/.pnpm/css-loader@6.6.0_webpack@5.105.4/node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[0].use[1]!./MockStyle1.css\\");

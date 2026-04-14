@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`npmrcUtilities trimNpmrcFileLines With npm-incompatible properties filtering does not filter when filterNpmIncompatibleProperties is false 1`] = `
 Array [

@@ -5,7 +5,7 @@
 
 const EventEmitter = require('node:events');
 
-const childProcess: any = jest.genMockFromModule('node:child_process');
+const childProcess: any = jest.createMockFromModule('node:child_process');
 const childProcessActual = jest.requireActual('node:child_process');
 childProcess.spawn.mockImplementation(spawn);
 childProcess.__setSpawnMockConfig = setSpawnMockConfig;
@@ -38,7 +38,7 @@ function setSpawnMockConfig(spawnConfig: any) {
 function spawn(file: string, args: string[], options: {}) {
   const cpMock = new childProcess.ChildProcess();
 
-  // Add working event emitters ourselves since `genMockFromModule` does not add them because they
+  // Add working event emitters ourselves since `createMockFromModule` does not add them because they
   // are dynamically added by `spawn`.
   const cpEmitter = new EventEmitter();
   const cp = Object.assign({}, cpMock, {

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`RushProjectConfiguration getCacheDisabledReason Indicates if the build cache is completely disabled 1`] = `"Caching has been disabled for this project."`;
 

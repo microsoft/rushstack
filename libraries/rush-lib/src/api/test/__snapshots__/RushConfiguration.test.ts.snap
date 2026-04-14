@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`RushConfiguration RushConfigurationProject correctly updates the packageJson property after the packageJson is edited by packageJsonEditor: dependencyProjects after 1`] = `
 Array [

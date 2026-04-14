@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`@rushstack/rush-sdk Should load via env when Rush has loaded (for child processes): stderr 1`] = `""`;
 

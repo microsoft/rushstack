@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/webpack5-load-themed-styles-loader",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/webpack5-load-themed-styles-loader"
+}
