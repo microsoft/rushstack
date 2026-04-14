@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/package-extractor",
-      "comment": "Update _collectFoldersAsync to process all starting folders in a single shared queue instead of serially. Add pnpmNodeModulesHoistingEnabled option to IExtractorSubspace to skip virtual store hoisting lookup when hoisting is disabled.",
+      "comment": "Update `_collectFoldersAsync` to process all starting folders in a single shared queue instead of serially. Add `pnpmNodeModulesHoistingEnabled` option to `IExtractorSubspace` to skip virtual store hoisting lookup when hoisting is disabled.",
       "type": "minor"
     }
   ],
