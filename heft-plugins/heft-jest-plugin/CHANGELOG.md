@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Fri, 10 Apr 2026 22:46:34 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Apr 2026 01:25:46 GMT and should not be manually modified.
+
+## 2.0.0
+Tue, 14 Apr 2026 01:25:46 GMT
+
+### Breaking changes
+
+- Bump jest to 30.3.0 to address CVE GHSA-vpq2-c234-7xj6
 
 ## 1.2.12
 Fri, 10 Apr 2026 22:46:34 GMT
