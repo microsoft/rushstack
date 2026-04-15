@@ -18,7 +18,7 @@ import { SoundPlayerConsumer } from './SoundPlayerConsumer';
 import { SoundPlayer } from './SoundPlayer';
 
 beforeEach(() => {
-  mocked(SoundPlayer).mockClear();
+  jest.mocked(SoundPlayer).mockClear();
   mockPlaySoundFile.mockClear();
 });
 
