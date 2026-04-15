@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-vscode-extension-plugin",
+      "comment": "Bump `@vscode/vsce` dependency to `3.8.1`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-vscode-extension-plugin"
+}
