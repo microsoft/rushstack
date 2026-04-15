@@ -20,7 +20,7 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
-    "@types/heft-jest": "1.0.1",
+    "@types/jest": "30.0.0",
     "@types/node": "20.17.19",
     "eslint": "~9.37.0",
     "local-eslint-config": "workspace:*",
