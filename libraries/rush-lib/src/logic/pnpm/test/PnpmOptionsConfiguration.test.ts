@@ -87,17 +87,35 @@ describe(PnpmOptionsConfiguration.name, () => {
     ]);
   });
 
-  it('loads minimumReleaseAge', () => {
+  it('loads minimumReleaseAgeMinutes', () => {
     const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
       `${__dirname}/jsonFiles/pnpm-config-minimumReleaseAge.json`,
       fakeCommonTempFolder
     );
 
-    expect(pnpmConfiguration.minimumReleaseAge).toEqual(1440);
+    expect(pnpmConfiguration.minimumReleaseAgeMinutes).toEqual(1440);
     expect(TestUtilities.stripAnnotations(pnpmConfiguration.minimumReleaseAgeExclude)).toEqual([
       'webpack',
       '@myorg/*'
     ]);
+  });
+
+  it('loads deprecated minimumReleaseAge as minimumReleaseAgeMinutes', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-minimumReleaseAge-deprecated.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(pnpmConfiguration.minimumReleaseAgeMinutes).toEqual(720);
+  });
+
+  it('throws if both minimumReleaseAge and minimumReleaseAgeMinutes are specified', () => {
+    expect(() =>
+      PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+        `${__dirname}/jsonFiles/pnpm-config-minimumReleaseAge-both.json`,
+        fakeCommonTempFolder
+      )
+    ).toThrow(/Both settings cannot be specified together/);
   });
 
   it('loads trustPolicy', () => {
