@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Tue, 14 Apr 2026 01:25:46 GMT and should not be manually modified.
+This log was last generated on Wed, 15 Apr 2026 15:14:48 GMT and should not be manually modified.
+
+## 1.4.13
+Wed, 15 Apr 2026 15:14:48 GMT
+
+### Patches
+
+- Include `temp/image-typings` in the build clean folders.
 
 ## 1.4.12
 Tue, 14 Apr 2026 01:25:46 GMT

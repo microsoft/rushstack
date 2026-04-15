@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "1.4.13",
+      "tag": "@rushstack/heft-web-rig_v1.4.13",
+      "date": "Wed, 15 Apr 2026 15:14:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include `temp/image-typings` in the build clean folders."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.12",
       "tag": "@rushstack/heft-web-rig_v1.4.12",
       "date": "Tue, 14 Apr 2026 01:25:46 GMT",
