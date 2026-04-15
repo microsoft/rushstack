@@ -176,7 +176,7 @@ describe(`Conflicting ${CommandLineParser.name}`, () => {
         '--scope:arg',
         'value'
       ])
-    ).rejects.toThrowError(/The parameter "--arg" is defined multiple times with the same long name/);
+    ).rejects.toThrow(/The parameter "--arg" is defined multiple times with the same long name/);
   });
 
   it('fails to execute an action with conflicting parameters with the same scope', async () => {
@@ -190,6 +190,6 @@ describe(`Conflicting ${CommandLineParser.name}`, () => {
         '--scope:arg',
         'value'
       ])
-    ).rejects.toThrowError(/argument "\-\-scope:arg": Conflicting option string\(s\): \-\-scope:arg/);
+    ).rejects.toThrow(/argument "\-\-scope:arg": Conflicting option string\(s\): \-\-scope:arg/);
   });
 });

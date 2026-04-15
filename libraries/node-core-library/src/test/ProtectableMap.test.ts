@@ -77,6 +77,6 @@ describe(ProtectableMap.name, () => {
     const exampleApi: ExampleApi = new ExampleApi();
     expect(() => {
       exampleApi.studentAgesByName.set('Jane', 23);
-    }).toThrowError('The key must be all upper case: Jane');
+    }).toThrow('The key must be all upper case: Jane');
   });
 });

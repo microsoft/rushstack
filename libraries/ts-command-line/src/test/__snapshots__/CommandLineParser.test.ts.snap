@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`CommandLineParser renders help text: do:the-job 1`] = `
 "usage: example do:the-job [-h] [--flag]

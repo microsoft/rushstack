@@ -334,7 +334,7 @@ describe(`${FileError.name} using unsupported base folder token`, () => {
       line: 5,
       column: 12
     });
-    expect(() => error1.getFormattedErrorMessage({ format: 'Unix' })).toThrowError();
+    expect(() => error1.getFormattedErrorMessage({ format: 'Unix' })).toThrow();
   });
 });
 

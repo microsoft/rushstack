@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Ambiguous CommandLineParser can execute the non-ambiguous scoped long names 1`] = `
 "usage: example do:the-job [-h] [--short1 ARG] [--short2 ARG]

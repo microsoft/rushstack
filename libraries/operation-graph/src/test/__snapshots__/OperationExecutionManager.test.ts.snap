@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`OperationExecutionManager constructor throws if a dependency is not in the set 1`] = `"Operation \\"alpha\\" declares a dependency on operation \\"beta\\" that is not in the set of operations to execute."`;
 

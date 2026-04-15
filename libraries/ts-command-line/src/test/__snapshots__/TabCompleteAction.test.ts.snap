@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`TabCompleteAction renders help text: add 1`] = `
 "usage: rush add [-h] -p PACKAGE [--exact] [--caret] [--dev] [-m] [-s] [--all]
