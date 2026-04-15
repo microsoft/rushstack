@@ -43,8 +43,8 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@azure/identity": "~4.5.0",
-    "@azure/storage-blob": "~12.26.0",
+    "@azure/identity": "~4.13.1",
+    "@azure/storage-blob": "~12.31.0",
     "@rushstack/credential-cache": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
