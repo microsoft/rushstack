@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "Include `es2015.symbol.wellknown` in the default included `lib`s in `tsconfig-base.json`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig"
+}

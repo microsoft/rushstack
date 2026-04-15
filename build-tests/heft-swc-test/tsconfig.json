@@ -17,7 +17,7 @@
     "moduleResolution": "node",
     "strictNullChecks": true,
     "noUnusedLocals": true,
-    "types": ["heft-jest", "webpack-env"],
+    "types": ["jest", "webpack-env"],
 
     "module": "esnext",
     "target": "esnext",

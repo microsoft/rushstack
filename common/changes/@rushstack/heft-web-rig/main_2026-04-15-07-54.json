@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "Replace the `@types/heft-jest` types package with `@types/jest`. The `@types/jest` package now correctly includes the mocking typings.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig"
+}

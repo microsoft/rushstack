@@ -11,7 +11,7 @@ import { SoundPlayerConsumer } from './SoundPlayerConsumer';
 
 beforeEach(() => {
   // Clear all instances and calls to constructor and all methods:
-  mocked(SoundPlayer).mockClear();
+  jest.mocked(SoundPlayer).mockClear();
 });
 
 it('We can check if the consumer called the class constructor', () => {
@@ -31,9 +31,9 @@ it('We can check if the consumer called a method on the class instance', () => {
   soundPlayerConsumer.playSomethingCool();
 
   // mock.instances is available with automatic mocks:
-  const mockSoundPlayerInstance: SoundPlayer = mocked(SoundPlayer).mock.instances[0];
+  const mockSoundPlayerInstance: SoundPlayer = jest.mocked(SoundPlayer).mock.instances[0];
 
-  const mockPlaySoundFile = mocked(mockSoundPlayerInstance.playSoundFile);
+  const mockPlaySoundFile = jest.mocked(mockSoundPlayerInstance.playSoundFile);
   expect(mockPlaySoundFile.mock.calls[0][0]).toEqual(coolSoundFileName);
 
   // Equivalent to above check:

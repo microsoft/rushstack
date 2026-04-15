@@ -12,7 +12,7 @@ import { SoundPlayerConsumer } from './SoundPlayerConsumer';
 
 beforeEach(() => {
   // Clear all instances and calls to constructor and all methods:
-  mocked(SoundPlayer).mockClear();
+  jest.mocked(SoundPlayer).mockClear();
   mockPlaySoundFile.mockClear();
 });
 

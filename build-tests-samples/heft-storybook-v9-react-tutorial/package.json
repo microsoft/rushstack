@@ -27,7 +27,7 @@
     "@rushstack/webpack5-module-minifier-plugin": "workspace:*",
     "@storybook/react-webpack5": "~9.1.6",
     "@storybook/react": "~9.1.6",
-    "@types/heft-jest": "1.0.1",
+    "@types/jest": "30.0.0",
     "@types/node": "20.17.19",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",

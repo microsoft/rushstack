@@ -49,7 +49,7 @@ describe('HttpBuildCacheProvider', () => {
       const session: RushSession = {} as RushSession;
       const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session);
 
-      mocked(fetchFn).mockResolvedValue({
+      jest.mocked(fetchFn).mockResolvedValue({
         status: 401,
         statusText: 'Unauthorized',
         ok: false
@@ -86,17 +86,17 @@ Array [
       const session: RushSession = {} as RushSession;
       const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session);
 
-      mocked(fetchFn).mockResolvedValueOnce({
+      jest.mocked(fetchFn).mockResolvedValueOnce({
         status: 500,
         statusText: 'InternalServiceError',
         ok: false
       });
-      mocked(fetchFn).mockResolvedValueOnce({
+      jest.mocked(fetchFn).mockResolvedValueOnce({
         status: 503,
         statusText: 'ServiceUnavailable',
         ok: false
       });
-      mocked(fetchFn).mockResolvedValueOnce({
+      jest.mocked(fetchFn).mockResolvedValueOnce({
         status: 504,
         statusText: 'BadGateway',
         ok: false

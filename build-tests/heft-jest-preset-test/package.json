@@ -15,7 +15,7 @@
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
-    "@types/heft-jest": "1.0.1",
+    "@types/jest": "30.0.0",
     "eslint": "~9.37.0",
     "local-eslint-config": "workspace:*",
     "typescript": "~5.8.2"

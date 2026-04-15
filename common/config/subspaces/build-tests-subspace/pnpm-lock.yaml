@@ -859,9 +859,12 @@ packages:
     resolution: {directory: ../../../heft-plugins/heft-jest-plugin, type: directory}
     peerDependencies:
       '@rushstack/heft': ^1.2.12
+      '@types/jest': ^30.0.0
       jest-environment-jsdom: ^30.3.0
       jest-environment-node: ^30.3.0
     peerDependenciesMeta:
+      '@types/jest':
+        optional: true
       jest-environment-jsdom:
         optional: true
       jest-environment-node:
@@ -995,9 +998,6 @@ packages:
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
-
-  '@types/heft-jest@1.0.1':
-    resolution: {integrity: sha512-cF2iEUpvGh2WgLowHVAdjI05xuDo+GwCA8hGV3Q5PBl8apjd6BTcpPFQ2uPlfUM7BLpgur2xpYo8VeBXopMI4A==}
 
   '@types/html-minifier-terser@6.1.0':
     resolution: {integrity: sha512-oh/6byDPnL1zeNXFrDXFLyZjkr1MsBG667IM792caf1L2UPOOMf65NFzjUH/ltyfwjAGfs1rsX1eftK0jC/KIg==}
@@ -4753,7 +4753,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft-jest-plugin@file:../../../heft-plugins/heft-jest-plugin(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/node@20.17.19)(jest-environment-node@30.3.0)':
+  '@rushstack/heft-jest-plugin@file:../../../heft-plugins/heft-jest-plugin(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(jest-environment-node@30.3.0)':
     dependencies:
       '@jest/core': 30.3.0
       '@jest/reporters': 30.3.0
@@ -4767,6 +4767,7 @@ snapshots:
       jest-snapshot: 30.3.0
       lodash: 4.18.1
     optionalDependencies:
+      '@types/jest': 30.0.0
       jest-environment-node: 30.3.0
     transitivePeerDependencies:
       - '@types/node'
@@ -4791,10 +4792,10 @@ snapshots:
       '@rushstack/eslint-config': file:../../../eslint/eslint-config(eslint@9.37.0)(typescript@5.8.3)
       '@rushstack/heft': file:../../../apps/heft(@types/node@20.17.19)
       '@rushstack/heft-api-extractor-plugin': file:../../../heft-plugins/heft-api-extractor-plugin(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/node@20.17.19)
-      '@rushstack/heft-jest-plugin': file:../../../heft-plugins/heft-jest-plugin(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/node@20.17.19)(jest-environment-node@30.3.0)
+      '@rushstack/heft-jest-plugin': file:../../../heft-plugins/heft-jest-plugin(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(jest-environment-node@30.3.0)
       '@rushstack/heft-lint-plugin': file:../../../heft-plugins/heft-lint-plugin(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/node@20.17.19)
       '@rushstack/heft-typescript-plugin': file:../../../heft-plugins/heft-typescript-plugin(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/node@20.17.19)
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 30.0.0
       eslint: 9.37.0
       jest-environment-node: 30.3.0
       typescript: 5.8.3
@@ -5003,10 +5004,6 @@ snapshots:
       '@types/json-schema': 7.0.15
 
   '@types/estree@1.0.8': {}
-
-  '@types/heft-jest@1.0.1':
-    dependencies:
-      '@types/jest': 30.0.0
 
   '@types/html-minifier-terser@6.1.0': {}
 
@@ -7233,7 +7230,7 @@ snapshots:
       '@rushstack/eslint-patch': file:../../../eslint/eslint-patch
       '@rushstack/heft': file:../../../apps/heft(@types/node@20.17.19)
       '@rushstack/heft-node-rig': file:../../../rigs/heft-node-rig(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/node@20.17.19)
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 30.0.0
       '@types/node': 20.17.19
       eslint: 9.37.0
       jest-junit: 12.3.0
