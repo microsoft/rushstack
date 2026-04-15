@@ -196,13 +196,13 @@ describe('Executable process tests', () => {
     if (os.platform() === 'win32') {
       expect(() => {
         executeNpmBinaryWrapper(['abc%123']);
-      }).toThrowError(
+      }).toThrow(
         'The command line argument "abc%123" contains a special character "%"' +
           ' that cannot be escaped for the Windows shell'
       );
       expect(() => {
         executeNpmBinaryWrapper(['abc<>123']);
-      }).toThrowError(
+      }).toThrow(
         'The command line argument "abc<>123" contains a special character "<"' +
           ' that cannot be escaped for the Windows shell'
       );
@@ -332,7 +332,7 @@ describe('Executable process tests', () => {
     });
     await expect(
       Executable.waitForExitAsync(childProcess, { encoding: 'utf8', throwOnNonZeroExitCode: true })
-    ).rejects.toThrowError(/exited with code 1/);
+    ).rejects.toThrow(/exited with code 1/);
   });
 
   test('Executable.runToCompletion(Executable.spawn("no-terminate")) failure with throw on signal', async () => {
@@ -348,7 +348,7 @@ describe('Executable process tests', () => {
     childProcess.kill('SIGTERM');
     await expect(
       Executable.waitForExitAsync(childProcess, { encoding: 'utf8', throwOnSignal: true })
-    ).rejects.toThrowError(/Process terminated by SIGTERM/);
+    ).rejects.toThrow(/Process terminated by SIGTERM/);
   });
 });
 

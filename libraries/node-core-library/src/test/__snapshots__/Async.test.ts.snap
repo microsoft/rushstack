@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Async runWithRetriesAsync Correctly handles a sync function that always throws and allows several retries 1`] = `"error"`;
 

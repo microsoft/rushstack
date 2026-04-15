@@ -131,7 +131,7 @@ describe(RigConfig.name, () => {
 
       expect(rigConfig.rigFound).toBe(true);
 
-      expect(() => rigConfig.getResolvedProfileFolder()).toThrowError(
+      expect(() => rigConfig.getResolvedProfileFolder()).toThrow(
         'The rig profile "missing-profile" is not defined by the rig package "example-rig"'
       );
     });
@@ -145,7 +145,7 @@ describe(RigConfig.name, () => {
         }
       });
 
-      await expect(rigConfig.getResolvedProfileFolderAsync()).rejects.toThrowError(
+      await expect(rigConfig.getResolvedProfileFolderAsync()).rejects.toThrow(
         'The rig profile "missing-profile" is not defined by the rig package "example-rig"'
       );
     });
