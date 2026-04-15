@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/rush-azure-storage-build-cache-plugin",
-      "comment": "Bump `@azure/identity` to `~4.13.1` and align related Azure SDK dependency versions.",
+      "comment": "Bump `@azure/identity` to `~4.13.1` and `@azure/storage-blob` to `~12.31.0`.",
       "type": "patch"
     }
   ],
