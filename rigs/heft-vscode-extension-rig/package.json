@@ -20,7 +20,7 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft-vscode-extension-plugin": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
-    "@types/heft-jest": "1.0.1",
+    "@types/jest": "30.0.0",
     "eslint": "~9.37.0",
     "jest-environment-node": "~30.3.0",
     "typescript": "~5.8.2",

@@ -13,7 +13,7 @@
     "experimentalDecorators": true,
     "strictNullChecks": true,
     "noUnusedLocals": true,
-    "types": ["heft-jest"],
+    "types": ["jest"],
 
     "module": "esnext",
     "moduleResolution": "node",

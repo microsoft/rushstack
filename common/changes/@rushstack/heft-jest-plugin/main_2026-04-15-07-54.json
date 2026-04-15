@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "Remove the built-in `jest-global-setup` script as Jest 30 ships with the `mocked` function as `jest.mocked`, so including it as a global is now nonstandard.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin"
+}

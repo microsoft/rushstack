@@ -23,7 +23,7 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
     "@rushstack/webpack5-module-minifier-plugin": "workspace:*",
-    "@types/heft-jest": "1.0.1",
+    "@types/jest": "30.0.0",
     "@types/node": "20.17.19",
     "@types/webpack-env": "1.18.8",
     "eslint": "~9.37.0",

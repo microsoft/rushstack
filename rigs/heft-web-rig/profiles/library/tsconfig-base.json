@@ -20,7 +20,7 @@
     "allowUnreachableCode": false,
     "importHelpers": true,
 
-    "types": ["heft-jest"],
+    "types": ["jest"],
     "typeRoots": ["../../../../../node_modules/@types", "../../node_modules/@types"],
 
     "module": "esnext",
