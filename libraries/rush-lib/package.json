@@ -67,6 +67,7 @@
     "glob-escape": "~0.0.2",
     "https-proxy-agent": "~5.0.0",
     "ignore": "~5.1.6",
+    "@inquirer/core": "~11.1.8",
     "inquirer": "~8.2.7",
     "js-yaml": "~4.1.0",
     "npm-package-arg": "~6.1.0",

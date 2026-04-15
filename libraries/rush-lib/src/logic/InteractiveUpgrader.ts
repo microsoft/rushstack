@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import Prompt from 'inquirer/lib/ui/prompt';
-
 import { NpmCheck, type INpmCheckState, type INpmCheckPackageSummary } from '@rushstack/npm-check-fork';
 import { Colorize } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { upgradeInteractive, type IDepsToUpgradeAnswers } from '../utilities/InteractiveUpgradeUI';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { SearchListPrompt } from '../utilities/prompts/SearchListPrompt';
+import { searchListPrompt } from '../utilities/prompts/SearchListPrompt';
 
 interface IUpgradeInteractiveDeps {
   projects: RushConfigurationProject[];
@@ -42,24 +40,17 @@ export class InteractiveUpgrader {
 
   private async _getUserSelectedProjectForUpgradeAsync(): Promise<RushConfigurationProject> {
     const projects: RushConfigurationProject[] | undefined = this._rushConfiguration.projects;
-    const ui: Prompt = new Prompt({
-      list: SearchListPrompt
-    });
 
-    const { selectProject } = await ui.run([
-      {
-        name: 'selectProject',
-        message: 'Select a project you would like to upgrade',
-        type: 'list',
-        choices: projects.map((project) => {
-          return {
-            name: Colorize.green(project.packageName),
-            value: project
-          };
-        }),
-        pageSize: 12
-      }
-    ]);
+    const selectProject: RushConfigurationProject = await searchListPrompt({
+      message: 'Select a project you would like to upgrade',
+      choices: projects.map((project) => {
+        return {
+          name: Colorize.green(project.packageName),
+          value: project
+        };
+      }),
+      pageSize: 12
+    });
 
     return selectProject;
   }
