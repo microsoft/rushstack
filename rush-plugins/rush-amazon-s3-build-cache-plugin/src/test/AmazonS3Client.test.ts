@@ -5,7 +5,15 @@ jest.mock('@rushstack/rush-sdk/lib/utilities/WebClient', () => {
   return jest.requireActual('@microsoft/rush-lib/lib/utilities/WebClient');
 });
 
+jest.mock('node:stream/promises', () => ({
+  pipeline: jest.fn().mockResolvedValue(undefined)
+}));
+
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
+import { FileSystem } from '@rushstack/node-core-library';
 import { WebClient } from '@rushstack/rush-sdk/lib/utilities/WebClient';
 
 import type { IAmazonS3BuildCacheProviderOptionsAdvanced } from '../AmazonS3BuildCacheProvider';
@@ -632,6 +640,241 @@ describe(AmazonS3Client.name, () => {
       ).toBe(
         '/%40rushstack%2Brush-azure-storage-build-cache-plugin-_phase_test-5d4149e2298bc927fd33355fb168e6a89ba88fa6'
       );
+    });
+  });
+
+  describe('File-based requests', () => {
+    let realDate: typeof Date;
+    let realSetTimeout: typeof setTimeout;
+    beforeEach(() => {
+      // mock date
+      realDate = global.Date;
+      global.Date = MockedDate as typeof Date;
+
+      // mock setTimeout
+      realSetTimeout = global.setTimeout;
+      global.setTimeout = ((callback: () => void, time: number) => {
+        return realSetTimeout(callback, 1);
+      }).bind(global) as typeof global.setTimeout;
+
+      jest.spyOn(FileSystem, 'ensureFolderAsync').mockResolvedValue();
+      jest
+        .spyOn(FileSystem, 'createWriteStreamAsync')
+        .mockResolvedValue({} as unknown as Awaited<ReturnType<typeof FileSystem.createWriteStreamAsync>>);
+      // Return a Readable that immediately ends, so _hashFileAsync completes with the null hash
+      jest.spyOn(FileSystem, 'createReadStream').mockReturnValue(
+        new Readable({
+          read() {
+            this.push(null);
+          }
+        }) as unknown as ReturnType<typeof FileSystem.createReadStream>
+      );
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      global.Date = realDate;
+      global.setTimeout = realSetTimeout.bind(global);
+    });
+
+    describe('Downloading an object to file', () => {
+      async function makeFileGetRequestAsync(
+        credentials: IAmazonS3Credentials | undefined,
+        options: IAmazonS3BuildCacheProviderOptionsAdvanced,
+        objectName: string,
+        status: number,
+        statusText?: string
+      ): Promise<{ result: boolean; spy: jest.SpyInstance }> {
+        const mockStream = new Readable({ read() {} });
+
+        const spy: jest.SpyInstance = jest.spyOn(WebClient.prototype, 'fetchStreamAsync').mockReturnValue(
+          Promise.resolve({
+            stream: mockStream,
+            headers: {},
+            status,
+            statusText,
+            ok: status >= 200 && status < 300,
+            redirected: false
+          })
+        );
+
+        const s3Client: AmazonS3Client = new AmazonS3Client(credentials, options, webClient, terminal);
+        const result = await s3Client.downloadObjectToFileAsync(objectName, '/tmp/cache-entry');
+        return { result, spy };
+      }
+
+      it('Can download an object to file', async () => {
+        const { result, spy } = await makeFileGetRequestAsync(
+          {
+            accessKeyId: 'accessKeyId',
+            secretAccessKey: 'secretAccessKey',
+            sessionToken: undefined
+          },
+          DUMMY_OPTIONS,
+          'abc123',
+          200
+        );
+        expect(result).toBe(true);
+        expect(spy).toHaveBeenCalledTimes(1);
+        const [url, options] = spy.mock.calls[0];
+        expect(url).toBe('http://localhost:9000/abc123');
+        expect(options.verb).toBe('GET');
+        expect(options.headers['x-amz-content-sha256']).toMatch(/^[0-9a-f]{64}$/);
+        expect(options.headers['x-amz-date']).toBe('20200418T123242Z');
+        // eslint-disable-next-line dot-notation
+        expect(options.headers['Authorization']).toContain('AWS4-HMAC-SHA256');
+        expect(pipeline).toHaveBeenCalled();
+        spy.mockRestore();
+      });
+
+      it('Returns false for a 404 (missing) object', async () => {
+        const { result, spy } = await makeFileGetRequestAsync(
+          {
+            accessKeyId: 'accessKeyId',
+            secretAccessKey: 'secretAccessKey',
+            sessionToken: undefined
+          },
+          DUMMY_OPTIONS,
+          'abc123',
+          404,
+          'Not Found'
+        );
+        expect(result).toBe(false);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(pipeline).not.toHaveBeenCalled();
+        spy.mockRestore();
+      });
+
+      it('Retries on transient server errors', async () => {
+        let callCount: number = 0;
+        const spy: jest.SpyInstance = jest
+          .spyOn(WebClient.prototype, 'fetchStreamAsync')
+          .mockImplementation(async () => {
+            callCount++;
+            const mockStream = new Readable({ read() {} });
+            if (callCount < 3) {
+              return {
+                stream: mockStream,
+                headers: {},
+                status: 500,
+                statusText: 'InternalServerError',
+                ok: false,
+                redirected: false
+              };
+            }
+            return {
+              stream: mockStream,
+              headers: {},
+              status: 200,
+              statusText: 'OK',
+              ok: true,
+              redirected: false
+            };
+          });
+
+        const s3Client: AmazonS3Client = new AmazonS3Client(
+          {
+            accessKeyId: 'accessKeyId',
+            secretAccessKey: 'secretAccessKey',
+            sessionToken: undefined
+          },
+          DUMMY_OPTIONS,
+          webClient,
+          terminal
+        );
+
+        const result = await s3Client.downloadObjectToFileAsync('abc123', '/tmp/cache-entry');
+        expect(result).toBe(true);
+        // First two attempts fail with 500, third succeeds
+        expect(spy).toHaveBeenCalledTimes(3);
+        spy.mockRestore();
+      });
+    });
+
+    describe('Uploading an object from file', () => {
+      it('Throws an error if credentials are not provided', async () => {
+        const s3Client: AmazonS3Client = new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://foo.bar.baz', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        );
+
+        await expect(s3Client.uploadObjectFromFileAsync('temp', '/tmp/cache-entry')).rejects.toThrow(
+          'Credentials are required to upload objects to S3.'
+        );
+      });
+
+      it('Uploads from file with signed payload hash', async () => {
+        const responseStream = new Readable({ read() {} });
+
+        const spy: jest.SpyInstance = jest.spyOn(WebClient.prototype, 'fetchStreamAsync').mockReturnValue(
+          Promise.resolve({
+            stream: responseStream,
+            headers: {},
+            status: 200,
+            statusText: 'OK',
+            ok: true,
+            redirected: false
+          })
+        );
+
+        const s3Client: AmazonS3Client = new AmazonS3Client(
+          {
+            accessKeyId: 'accessKeyId',
+            secretAccessKey: 'secretAccessKey',
+            sessionToken: undefined
+          },
+          DUMMY_OPTIONS,
+          webClient,
+          terminal
+        );
+
+        await s3Client.uploadObjectFromFileAsync('abc123', '/tmp/cache-entry');
+
+        expect(spy).toHaveBeenCalledTimes(1);
+        const [url, options] = spy.mock.calls[0];
+        expect(url).toBe('http://localhost:9000/abc123');
+        expect(options.verb).toBe('PUT');
+        // Verify the content hash is a real SHA-256 hex string, NOT UNSIGNED-PAYLOAD
+        expect(options.headers['x-amz-content-sha256']).toMatch(/^[0-9a-f]{64}$/);
+        expect(options.headers['x-amz-date']).toBe('20200418T123242Z');
+        // eslint-disable-next-line dot-notation
+        expect(options.headers['Authorization']).toContain('AWS4-HMAC-SHA256');
+        spy.mockRestore();
+      });
+
+      it('Does not retry on failure (stream consumed)', async () => {
+        const responseStream = new Readable({ read() {} });
+
+        const spy: jest.SpyInstance = jest.spyOn(WebClient.prototype, 'fetchStreamAsync').mockReturnValue(
+          Promise.resolve({
+            stream: responseStream,
+            headers: {},
+            status: 500,
+            statusText: 'InternalServerError',
+            ok: false,
+            redirected: false
+          })
+        );
+
+        const s3Client: AmazonS3Client = new AmazonS3Client(
+          {
+            accessKeyId: 'accessKeyId',
+            secretAccessKey: 'secretAccessKey',
+            sessionToken: undefined
+          },
+          DUMMY_OPTIONS,
+          webClient,
+          terminal
+        );
+
+        await expect(s3Client.uploadObjectFromFileAsync('abc123', '/tmp/cache-entry')).rejects.toThrow('500');
+
+        // Only 1 call - no retry for file-based uploads
+        expect(spy).toHaveBeenCalledTimes(1);
+        spy.mockRestore();
+      });
     });
   });
 });

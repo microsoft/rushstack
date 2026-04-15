@@ -312,7 +312,7 @@ export class ExperimentsConfiguration {
 // @beta
 export class FileSystemBuildCacheProvider {
     constructor(options: IFileSystemBuildCacheProviderOptions);
-    getCacheEntryPath(cacheId: string): string;
+    readonly getCacheEntryPath: (cacheId: string) => string;
     tryGetCacheEntryPathByIdAsync(terminal: ITerminal, cacheId: string): Promise<string | undefined>;
     trySetCacheEntryBufferAsync(terminal: ITerminal, cacheId: string, entryBuffer: Buffer): Promise<string>;
 }
@@ -345,10 +345,12 @@ export interface ICloudBuildCacheProvider {
     deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void>;
     // (undocumented)
     readonly isCacheWriteAllowed: boolean;
+    tryDownloadCacheEntryToFileAsync?(terminal: ITerminal, cacheId: string, localFilePath: string): Promise<boolean>;
     // (undocumented)
     tryGetCacheEntryBufferByIdAsync(terminal: ITerminal, cacheId: string): Promise<Buffer | undefined>;
     // (undocumented)
     trySetCacheEntryBufferAsync(terminal: ITerminal, cacheId: string, entryBuffer: Buffer): Promise<boolean>;
+    tryUploadCacheEntryFromFileAsync?(terminal: ITerminal, cacheId: string, localFilePath: string): Promise<boolean>;
     // (undocumented)
     updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void>;
     // (undocumented)
@@ -481,6 +483,7 @@ export interface IExperimentsJson {
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     printEventHooksOutputToConsole?: boolean;
     rushAlerts?: boolean;
+    useDirectFileTransfersForBuildCache?: boolean;
     useIPCScriptsInWatchMode?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
@@ -594,6 +597,7 @@ export interface _IOperationBuildCacheOptions {
     buildCacheConfiguration: BuildCacheConfiguration;
     excludeAppleDoubleFiles: boolean;
     terminal: ITerminal;
+    useDirectFileTransfersForBuildCache: boolean;
 }
 
 // @alpha
