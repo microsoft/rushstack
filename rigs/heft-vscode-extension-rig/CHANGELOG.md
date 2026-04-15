@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-vscode-extension-rig
 
-This log was last generated on Tue, 14 Apr 2026 01:25:46 GMT and should not be manually modified.
+This log was last generated on Wed, 15 Apr 2026 17:59:12 GMT and should not be manually modified.
+
+## 1.1.37
+Wed, 15 Apr 2026 17:59:12 GMT
+
+### Patches
+
+- Replace the `@types/heft-jest` types package with `@types/jest`. The `@types/jest` package now correctly includes the mocking typings.
 
 ## 1.1.36
 Tue, 14 Apr 2026 01:25:46 GMT

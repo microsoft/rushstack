@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Tue, 14 Apr 2026 01:25:46 GMT and should not be manually modified.
+This log was last generated on Wed, 15 Apr 2026 17:59:12 GMT and should not be manually modified.
+
+## 2.11.34
+Wed, 15 Apr 2026 17:59:12 GMT
+
+### Patches
+
+- Replace the `@types/heft-jest` types package with `@types/jest`. The `@types/jest` package now correctly includes the mocking typings.
 
 ## 2.11.33
 Tue, 14 Apr 2026 01:25:46 GMT

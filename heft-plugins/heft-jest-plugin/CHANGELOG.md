@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Tue, 14 Apr 2026 01:25:46 GMT and should not be manually modified.
+This log was last generated on Wed, 15 Apr 2026 17:59:12 GMT and should not be manually modified.
+
+## 2.0.1
+Wed, 15 Apr 2026 17:59:12 GMT
+
+### Patches
+
+- Remove the built-in `jest-global-setup` script as Jest 30 ships with the `mocked` function as `jest.mocked`, so including it as a global is now nonstandard.
 
 ## 2.0.0
 Tue, 14 Apr 2026 01:25:46 GMT

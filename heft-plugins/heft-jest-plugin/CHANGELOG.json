@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "2.0.1",
+      "tag": "@rushstack/heft-jest-plugin_v2.0.1",
+      "date": "Wed, 15 Apr 2026 17:59:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove the built-in `jest-global-setup` script as Jest 30 ships with the `mocked` function as `jest.mocked`, so including it as a global is now nonstandard."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.0",
       "tag": "@rushstack/heft-jest-plugin_v2.0.0",
       "date": "Tue, 14 Apr 2026 01:25:46 GMT",

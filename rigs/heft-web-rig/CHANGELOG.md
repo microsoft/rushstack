@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Wed, 15 Apr 2026 15:14:48 GMT and should not be manually modified.
+This log was last generated on Wed, 15 Apr 2026 17:59:12 GMT and should not be manually modified.
+
+## 1.4.14
+Wed, 15 Apr 2026 17:59:12 GMT
+
+### Patches
+
+- Include `es2015.symbol.wellknown` in the default included `lib`s in `tsconfig-base.json`.
+- Replace the `@types/heft-jest` types package with `@types/jest`. The `@types/jest` package now correctly includes the mocking typings.
 
 ## 1.4.13
 Wed, 15 Apr 2026 15:14:48 GMT
