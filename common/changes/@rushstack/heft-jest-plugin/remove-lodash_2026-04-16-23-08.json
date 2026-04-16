@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "Remove dependecy on `lodash`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin"
+}
