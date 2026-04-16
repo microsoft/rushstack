@@ -38,7 +38,7 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "@vscode/vsce": "3.8.1"
+    "@vscode/vsce": "3.2.1"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
