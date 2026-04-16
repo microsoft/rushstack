@@ -199,10 +199,6 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@rushstack/heft-static-asset-typings-plugin",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
       "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
       "allowedCategories": [ "tests" ]
     },
@@ -241,6 +237,10 @@
     {
       "name": "@rushstack/heft-serverless-stack-plugin",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/heft-static-asset-typings-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/heft-storybook-plugin",
@@ -869,10 +869,6 @@
     {
       "name": "local-web-rig",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
-    },
-    {
-      "name": "lodash",
-      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "long",

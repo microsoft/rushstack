@@ -34,7 +34,7 @@ export async function testYarnModeAsync(terminal: ITerminal): Promise<void> {
     testRepoPath,
     'test-project-a',
     '1.0.0',
-    { lodash: '^4.17.21' },
+    { semver: '^7.5.4' },
     `node -e "const fs = require('fs'); fs.mkdirSync('lib', {recursive: true}); fs.writeFileSync('lib/index.js', 'module.exports = { greet: () => \\"Hello from A\\" };');"`
   );
 
@@ -65,7 +65,7 @@ export async function testYarnModeAsync(terminal: ITerminal): Promise<void> {
   await helper.executeRushAsync(['install'], testRepoPath);
 
   // Verify node_modules were populated correctly
-  await helper.verifyDependenciesAsync(testRepoPath, 'test-project-a', ['lodash']);
+  await helper.verifyDependenciesAsync(testRepoPath, 'test-project-a', ['semver']);
   await helper.verifyDependenciesAsync(testRepoPath, 'test-project-b', ['test-project-a']);
 
   // Run rush build
