@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * Customizer function for {@link mergeWith}.
+ * Customizer function for use with `mergeWith`.
  * Return `undefined` to fall back to the default deep-merge behavior for that property.
  * @public
  */
@@ -23,14 +23,13 @@ export type MergeWithCustomizer = (objValue: unknown, srcValue: unknown, key: st
 export function mergeWith<TTarget extends object, TSource extends object>(
   target: TTarget,
   source: TSource,
-  customizer: MergeWithCustomizer
+  customizer?: MergeWithCustomizer
 ): TTarget {
   const targetRecord: Record<string, unknown> = target as unknown as Record<string, unknown>;
   const sourceRecord: Record<string, unknown> = source as unknown as Record<string, unknown>;
-  for (const key of Object.keys(sourceRecord)) {
-    const srcValue: unknown = sourceRecord[key];
+  for (const [key, srcValue] of Object.entries(sourceRecord)) {
     const objValue: unknown = targetRecord[key];
-    const customized: unknown = customizer(objValue, srcValue, key);
+    const customized: unknown = customizer?.(objValue, srcValue, key);
     if (customized !== undefined) {
       targetRecord[key] = customized;
     } else if (
@@ -46,5 +45,6 @@ export function mergeWith<TTarget extends object, TSource extends object>(
       targetRecord[key] = srcValue;
     }
   }
+
   return target;
 }
