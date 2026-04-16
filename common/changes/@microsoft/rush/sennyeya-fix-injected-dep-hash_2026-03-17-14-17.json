@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Fixes a bug where the injected dependency state hash updated on devDependency changes that wouldn't impact the lockfile.",
+      "comment": "Fix a bug where the injected dependency state hash updated on devDependency changes that don't impact the lockfile.",
       "type": "none",
       "packageName": "@microsoft/rush"
     }
