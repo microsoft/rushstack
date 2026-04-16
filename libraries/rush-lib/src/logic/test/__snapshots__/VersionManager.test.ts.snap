@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`VersionManager (workspace) bumpAsync bumps to prerelease version 1`] = `Array []`;
 
