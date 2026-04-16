@@ -35,11 +35,11 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@inquirer/core",
+      "name": "@inquirer/input",
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@inquirer/input",
+      "name": "@inquirer/search",
       "allowedCategories": [ "libraries" ]
     },
     {

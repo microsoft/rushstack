@@ -6,7 +6,7 @@
 // Extended to use one type of text table
 
 import CliTable from 'cli-table';
-import type { Separator } from '@inquirer/core';
+import type { Separator } from '@inquirer/checkbox';
 
 import { AnsiEscape, Colorize } from '@rushstack/terminal';
 import type { INpmCheckPackageSummary } from '@rushstack/npm-check-fork';
