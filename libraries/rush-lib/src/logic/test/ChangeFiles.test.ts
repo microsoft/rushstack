@@ -45,7 +45,7 @@ describe(ChangeFiles.name, () => {
         changesFolder: changesPath
       } as unknown as RushConfiguration);
       const expectedPath: string = Path.convertToSlashes(`${changesPath}/change1.json`);
-      expect(await changeFiles.getAllChangeFilesAsync()).toEqual([expectedPath]);
+      await expect(changeFiles.getAllChangeFilesAsync()).resolves.toEqual([expectedPath]);
     });
 
     it('returns empty array when no change files', async () => {
@@ -53,7 +53,7 @@ describe(ChangeFiles.name, () => {
       const changeFiles: ChangeFiles = new ChangeFiles({
         changesFolder: changesPath
       } as unknown as RushConfiguration);
-      expect(await changeFiles.getAllChangeFilesAsync()).toHaveLength(0);
+      await expect(changeFiles.getAllChangeFilesAsync()).resolves.toHaveLength(0);
     });
 
     it('returns correctly when change files are categorized', async () => {
@@ -281,7 +281,7 @@ describe(ChangeFiles.name, () => {
       const changeFiles: ChangeFiles = new ChangeFiles({
         changesFolder: changesPath
       } as unknown as RushConfiguration);
-      expect(await changeFiles.deleteAllAsync(terminal, false)).toEqual(3);
+      await expect(changeFiles.deleteAllAsync(terminal, false)).resolves.toEqual(3);
     });
 
     it('does not delete change files for package whose change logs do not get updated. ', async () => {
@@ -299,7 +299,7 @@ describe(ChangeFiles.name, () => {
           entries: []
         }
       ];
-      expect(await changeFiles.deleteAllAsync(terminal, false, updatedChangelogs)).toEqual(2);
+      await expect(changeFiles.deleteAllAsync(terminal, false, updatedChangelogs)).resolves.toEqual(2);
     });
 
     it('delete all files when there are hotfixes', async () => {
@@ -307,7 +307,7 @@ describe(ChangeFiles.name, () => {
       const changeFiles: ChangeFiles = new ChangeFiles({
         changesFolder: changesPath
       } as unknown as RushConfiguration);
-      expect(await changeFiles.deleteAllAsync(terminal, false)).toEqual(3);
+      await expect(changeFiles.deleteAllAsync(terminal, false)).resolves.toEqual(3);
     });
   });
 });
