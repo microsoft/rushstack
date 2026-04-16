@@ -1,6 +1,21 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 10 Apr 2026 22:46:54 GMT and should not be manually modified.
+This log was last generated on Thu, 16 Apr 2026 05:25:41 GMT and should not be manually modified.
+
+## 5.174.0
+Thu, 16 Apr 2026 05:25:41 GMT
+
+### Minor changes
+
+- Add support for pnpm `trustPolicy`, `trustPolicyExclude`, and `trustPolicyIgnoreAfterMinutes` settings in `pnpm-config.json`.
+
+### Updates
+
+- rush-resolver-cache-plugin: add pnpm 10 / lockfile v9 compatibility
+- Deprecate `minimumReleaseAge` in `common/config/rush/pnpm-config.json`; use `minimumReleaseAgeMinutes` instead
+- Add support for pnpm global catalog detection to `rush change`. Now, when a dependencyis changed in the pnpm global catalog, changelogs will be required for affected published packages.
+- Fix a bug where the injected dependency state hash updated on devDependency changes that don't impact the lockfile.
+- Add "strictChangefileValidation" experiment and "--verify-all" flag for "rush change". When the experiment is enabled, "rush change --verify" and "rush change --verify-all" will report errors if change files reference nonexistent projects or target non-main projects in a lockstepped version policy.
 
 ## 5.173.0
 Fri, 10 Apr 2026 22:46:54 GMT
