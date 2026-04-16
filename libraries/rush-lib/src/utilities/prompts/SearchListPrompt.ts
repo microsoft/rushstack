@@ -46,7 +46,7 @@ export async function searchListPrompt<Value>(config: ISearchListConfig<Value>):
     isDownKey
   } = await import('@inquirer/core');
 
-  const impl: (config: ISearchListConfig<unknown>) => Promise<unknown> =
+  const promptFactory: (config: ISearchListConfig<unknown>) => Promise<unknown> =
     createPrompt<unknown, ISearchListConfig<unknown>>((promptConfig, done) => {
       const pageSize: number = promptConfig.pageSize ?? 12;
 
@@ -164,5 +164,5 @@ export async function searchListPrompt<Value>(config: ISearchListConfig<Value>):
       ];
     });
 
-  return impl(config as ISearchListConfig<unknown>) as Promise<Value>;
+  return promptFactory(config as ISearchListConfig<unknown>) as Promise<Value>;
 }
