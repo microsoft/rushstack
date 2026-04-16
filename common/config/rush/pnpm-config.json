@@ -74,7 +74,7 @@
    *
    * For example, the following setting ensures that only packages released at least one day ago can be installed:
    *
-   * "minimumReleaseAge": 1440
+   * "minimumReleaseAgeMinutes": 1440
    *
    * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
    *
@@ -82,10 +82,10 @@
    *
    * The default value is 0 (disabled).
    */
-  // "minimumReleaseAge": 1440,
+  // "minimumReleaseAgeMinutes": 1440,
 
   /**
-   * An array of package names or patterns to exclude from the minimumReleaseAge check.
+   * An array of package names or patterns to exclude from the minimumReleaseAgeMinutes check.
    * This allows certain trusted packages to be installed immediately after publication.
    * Patterns are supported using glob syntax (e.g., "@myorg/*" to exclude all packages from an organization).
    *

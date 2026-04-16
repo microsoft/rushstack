@@ -153,7 +153,11 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    */
   autoInstallPeers?: boolean;
   /**
-   * {@inheritDoc PnpmOptionsConfiguration.minimumReleaseAge}
+   * {@inheritDoc PnpmOptionsConfiguration.minimumReleaseAgeMinutes}
+   */
+  minimumReleaseAgeMinutes?: number;
+  /**
+   * @deprecated Use `minimumReleaseAgeMinutes` instead.
    */
   minimumReleaseAge?: number;
   /**
@@ -308,11 +312,18 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    *
    * The default value is 0 (disabled).
    */
-  public readonly minimumReleaseAge: number | undefined;
+  public readonly minimumReleaseAgeMinutes: number | undefined;
+
+  /**
+   * @deprecated Use {@link PnpmOptionsConfiguration.minimumReleaseAgeMinutes} instead.
+   */
+  public get minimumReleaseAge(): number | undefined {
+    return this.minimumReleaseAgeMinutes;
+  }
 
   /**
    * List of package names or patterns that are excluded from the minimumReleaseAge check.
-   * These packages will always install the newest version immediately, even if minimumReleaseAge is set.
+   * These packages will always install the newest version immediately, even if minimumReleaseAgeMinutes is set.
    *
    * @remarks
    * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
@@ -551,7 +562,15 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this._globalPatchedDependencies = json.globalPatchedDependencies;
     this.resolutionMode = json.resolutionMode;
     this.autoInstallPeers = json.autoInstallPeers;
-    this.minimumReleaseAge = json.minimumReleaseAge;
+
+    if (json.minimumReleaseAge !== undefined && json.minimumReleaseAgeMinutes !== undefined) {
+      throw new Error(
+        'The "minimumReleaseAge" setting is deprecated. Use "minimumReleaseAgeMinutes" instead.' +
+          ' Both settings cannot be specified together in pnpm-config.json.'
+      );
+    }
+    this.minimumReleaseAgeMinutes = json.minimumReleaseAgeMinutes ?? json.minimumReleaseAge;
+
     this.minimumReleaseAgeExclude = json.minimumReleaseAgeExclude;
     this.trustPolicy = json.trustPolicy;
     this.trustPolicyExclude = json.trustPolicyExclude;
