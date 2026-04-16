@@ -41,13 +41,11 @@
     "@rushstack/terminal": "workspace:*",
     "jest-config": "~30.3.0",
     "jest-resolve": "~30.3.0",
-    "jest-snapshot": "~30.3.0",
-    "lodash": "~4.18.1"
+    "jest-snapshot": "~30.3.0"
   },
   "devDependencies": {
     "@jest/types": "30.3.0",
     "@rushstack/heft": "workspace:*",
-    "@types/lodash": "4.17.23",
     "@types/node": "20.17.19",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0",

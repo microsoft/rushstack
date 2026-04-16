@@ -807,6 +807,12 @@ export class MapExtensions {
 }
 
 // @public
+function mergeWith<TTarget extends object, TSource extends object>(target: TTarget, source: TSource, customizer: MergeWithCustomizer): TTarget;
+
+// @public
+type MergeWithCustomizer = (objValue: unknown, srcValue: unknown, key: string) => unknown;
+
+// @public
 export class MinimumHeap<T> {
     constructor(comparator: (a: T, b: T) => number);
     peek(): T | undefined;
@@ -824,7 +830,9 @@ export enum NewlineKind {
 
 declare namespace Objects {
     export {
-        areDeepEqual
+        areDeepEqual,
+        MergeWithCustomizer,
+        mergeWith
     }
 }
 export { Objects }

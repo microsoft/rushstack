@@ -4,7 +4,6 @@
 import * as path from 'node:path';
 
 import * as resolve from 'resolve';
-import lodash = require('lodash');
 
 import { EnumMemberOrder, ReleaseTag } from '@microsoft/api-extractor-model';
 import { TSDocConfiguration, TSDocTagDefinition } from '@microsoft/tsdoc';
@@ -14,6 +13,7 @@ import {
   JsonFile,
   JsonSchema,
   FileSystem,
+  Objects,
   PackageJsonLookup,
   type INodePackageJson,
   PackageName,
@@ -629,10 +629,10 @@ export class ExtractorConfig {
     let currentConfigFilePath: string = path.resolve(jsonFilePath);
     let configObject: Partial<IConfigFile> = {};
 
-    // Lodash merges array values by default, which is unintuitive for config files (and makes it impossible for derived configurations to overwrite arrays).
-    // For example, given a base config containing an array property with value ["foo", "bar"] and a derived config that specifies ["baz"] for that property, lodash will produce ["baz", "bar"], which is unintuitive.
-    // This customizer function ensures that arrays are always overwritten.
-    const mergeCustomizer: lodash.MergeWithCustomizer = (objValue, srcValue) => {
+    // Arrays are overwritten rather than merged, which is the intuitive behavior for config files.
+    // For example, given a base config containing an array property with value ["foo", "bar"] and a
+    // derived config that specifies ["baz"] for that property, the result is ["baz"] (not ["baz", "bar"]).
+    const mergeCustomizer: Objects.MergeWithCustomizer = (objValue, srcValue) => {
       if (Array.isArray(srcValue)) {
         return srcValue;
       }
@@ -680,11 +680,11 @@ export class ExtractorConfig {
         }
 
         // This step has to be performed in advance, since the currentConfigFolderPath information will be lost
-        // after lodash.merge() is performed.
+        // after the merge is performed.
         ExtractorConfig._resolveConfigFileRelativePaths(baseConfig, currentConfigFolderPath);
 
         // Merge extractorConfig into baseConfig, mutating baseConfig
-        lodash.mergeWith(baseConfig, configObject, mergeCustomizer);
+        Objects.mergeWith(baseConfig, configObject, mergeCustomizer);
         configObject = baseConfig;
 
         currentConfigFilePath = extendsField;
@@ -694,11 +694,11 @@ export class ExtractorConfig {
     }
 
     // Lastly, apply the defaults
-    configObject = lodash.mergeWith(
-      lodash.cloneDeep(ExtractorConfig._defaultConfig),
+    configObject = Objects.mergeWith(
+      structuredClone(ExtractorConfig._defaultConfig),
       configObject,
       mergeCustomizer
-    );
+    ) as Partial<IConfigFile>;
 
     ExtractorConfig.jsonSchema.validateObject(configObject, jsonFilePath);
 

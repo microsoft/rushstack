@@ -1,7 +1,6 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-import _ from 'lodash';
 import semver from 'semver';
 
 import type { INpmCheckState, INpmCheckPackageJson } from './interfaces/INpmCheck.ts';
@@ -83,7 +82,7 @@ export default async function createPackageSummary(
       packageJson: packageJsonVersion ?? '',
 
       // meta
-      devDependency: _.has(cwdPackageJson?.devDependencies, moduleName),
+      devDependency: Object.hasOwn(cwdPackageJson?.devDependencies ?? {}, moduleName),
       mismatch:
         packageJsonVersion !== undefined &&
         versionToUse !== null &&

@@ -10,8 +10,6 @@ import * as path from 'node:path';
 import type { AggregatedResult } from '@jest/reporters';
 import type { Config } from '@jest/types';
 import { resolveRunner, resolveSequencer, resolveTestEnvironment, resolveWatchPlugin } from 'jest-resolve';
-import { mergeWith, isObject } from 'lodash';
-
 import type {
   HeftConfiguration,
   IScopedLogger,
@@ -31,7 +29,7 @@ import {
   InheritanceType,
   PathResolutionMethod
 } from '@rushstack/heft-config-file';
-import { FileSystem, Path, Import, JsonFile, PackageName } from '@rushstack/node-core-library';
+import { FileSystem, Path, Import, JsonFile, Objects, PackageName } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { IHeftJestReporterOptions } from './HeftJestReporter';
@@ -702,11 +700,11 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         currentObject: T,
         parentObject: T
       ) => T = <T>(currentObject: T, parentObject: T): T => {
-        return mergeWith(parentObject || {}, currentObject || {}, (value: T, source: T) => {
+        return Objects.mergeWith(parentObject || {}, currentObject || {}, (value, source) => {
           // Need to use a custom inheritance function instead of "InheritanceType.merge" since
           // some properties are allowed to have different types which may be incompatible with
           // merging.
-          if (!isObject(source)) {
+          if (source === null || typeof source !== 'object') {
             return source;
           }
           return Array.isArray(value) ? [...value, ...(source as Array<unknown>)] : { ...value, ...source };
