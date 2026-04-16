@@ -10,6 +10,7 @@ import * as path from 'node:path';
 import type { AggregatedResult } from '@jest/reporters';
 import type { Config } from '@jest/types';
 import { resolveRunner, resolveSequencer, resolveTestEnvironment, resolveWatchPlugin } from 'jest-resolve';
+
 import type {
   HeftConfiguration,
   IScopedLogger,
@@ -707,7 +708,13 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
           if (source === null || typeof source !== 'object') {
             return source;
           }
-          return Array.isArray(value) ? [...value, ...(source as Array<unknown>)] : { ...value, ...source };
+          if (Array.isArray(source)) {
+            return Array.isArray(value) ? [...value, ...source] : source;
+          }
+          if (Objects.isRecord(source)) {
+            return { ...(Objects.isRecord(value) ? value : {}), ...source };
+          }
+          return source;
         }) as T;
       };
 

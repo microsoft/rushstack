@@ -680,6 +680,9 @@ export interface IRunWithTimeoutOptions<TResult> {
 }
 
 // @public
+function isRecord(value: unknown): value is Record<string, unknown>;
+
+// @public
 export interface IStringBuilder {
     append(text: string): void;
     toString(): string;
@@ -807,7 +810,7 @@ export class MapExtensions {
 }
 
 // @public
-function mergeWith<TTarget extends object, TSource extends object>(target: TTarget, source: TSource, customizer: MergeWithCustomizer): TTarget;
+function mergeWith<TTarget extends object, TSource extends object>(target: TTarget, source: TSource, customizer?: MergeWithCustomizer): TTarget;
 
 // @public
 type MergeWithCustomizer = (objValue: unknown, srcValue: unknown, key: string) => unknown;
@@ -831,6 +834,7 @@ export enum NewlineKind {
 declare namespace Objects {
     export {
         areDeepEqual,
+        isRecord,
         MergeWithCustomizer,
         mergeWith
     }

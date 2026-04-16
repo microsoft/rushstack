@@ -82,7 +82,8 @@ export default async function createPackageSummary(
       packageJson: packageJsonVersion ?? '',
 
       // meta
-      devDependency: Object.hasOwn(cwdPackageJson?.devDependencies ?? {}, moduleName),
+      // TODO: Replace with Object.hasOwn() when the TypeScript target library is upgraded to es2022+
+      devDependency: Object.prototype.hasOwnProperty.call(cwdPackageJson?.devDependencies, moduleName),
       mismatch:
         packageJsonVersion !== undefined &&
         versionToUse !== null &&

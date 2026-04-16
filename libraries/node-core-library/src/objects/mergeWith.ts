@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { isRecord } from './isRecord';
+
 /**
  * Customizer function for use with `mergeWith`.
  * Return `undefined` to fall back to the default deep-merge behavior for that property.
@@ -32,15 +34,8 @@ export function mergeWith<TTarget extends object, TSource extends object>(
     const customized: unknown = customizer?.(objValue, srcValue, key);
     if (customized !== undefined) {
       targetRecord[key] = customized;
-    } else if (
-      srcValue !== null &&
-      typeof srcValue === 'object' &&
-      !Array.isArray(srcValue) &&
-      objValue !== null &&
-      typeof objValue === 'object' &&
-      !Array.isArray(objValue)
-    ) {
-      mergeWith(objValue as Record<string, unknown>, srcValue as Record<string, unknown>, customizer);
+    } else if (isRecord(srcValue) && isRecord(objValue)) {
+      mergeWith(objValue, srcValue, customizer);
     } else {
       targetRecord[key] = srcValue;
     }
