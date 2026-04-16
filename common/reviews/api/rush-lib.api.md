@@ -1191,6 +1191,8 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     static loadFromJsonFileOrThrow(jsonFilePath: string, commonTempFolder: string): PnpmOptionsConfiguration;
     // @internal (undocumented)
     static loadFromJsonObject(json: _IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration;
+    // @deprecated (undocumented)
+    get minimumReleaseAge(): number | undefined;
     readonly minimumReleaseAgeExclude: string[] | undefined;
     readonly minimumReleaseAgeMinutes: number | undefined;
     readonly pnpmLockfilePolicies: IPnpmLockfilePolicies | undefined;

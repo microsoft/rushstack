@@ -315,6 +315,13 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public readonly minimumReleaseAgeMinutes: number | undefined;
 
   /**
+   * @deprecated Use {@link PnpmOptionsConfiguration.minimumReleaseAgeMinutes} instead.
+   */
+  public get minimumReleaseAge(): number | undefined {
+    return this.minimumReleaseAgeMinutes;
+  }
+
+  /**
    * List of package names or patterns that are excluded from the minimumReleaseAge check.
    * These packages will always install the newest version immediately, even if minimumReleaseAgeMinutes is set.
    *
