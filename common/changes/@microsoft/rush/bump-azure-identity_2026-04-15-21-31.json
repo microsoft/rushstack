@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Bump the Azure cache plugin dependencies to use `@azure/identity` `~4.13.1` and `@azure/storage-blob` `~12.31.0`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
