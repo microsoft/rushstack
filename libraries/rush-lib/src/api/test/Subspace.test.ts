@@ -74,4 +74,70 @@ describe(Subspace.name, () => {
       expect(hashWithCatalogs).toBeDefined();
     });
   });
+
+  describe(Subspace.prototype.getPackageJsonInjectedDependenciesHash.name, () => {
+    it('returns undefined when no injected dependencies exist', () => {
+      const rushJsonFilename: string = `${__dirname}/repo/rush-pnpm.json`;
+      const rushConfiguration: RushConfiguration =
+        RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
+      const defaultSubspace: Subspace = rushConfiguration.defaultSubspace;
+
+      const hash: string | undefined = defaultSubspace.getPackageJsonInjectedDependenciesHash();
+      expect(hash).toBeUndefined();
+    });
+
+    it('computes a hash when injected dependencies exist', () => {
+      const rushJsonFilename: string = `${__dirname}/repoInjectedDeps/rush.json`;
+      const rushConfiguration: RushConfiguration =
+        RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
+      const defaultSubspace: Subspace = rushConfiguration.defaultSubspace;
+
+      const hash: string | undefined = defaultSubspace.getPackageJsonInjectedDependenciesHash();
+      expect(hash).toMatchSnapshot();
+    });
+
+    it('does not change when devDependencies of the injected package change', () => {
+      const rushJsonFilename: string = `${__dirname}/repoInjectedDeps/rush.json`;
+      const rushConfiguration: RushConfiguration =
+        RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
+      const defaultSubspace: Subspace = rushConfiguration.defaultSubspace;
+
+      const hashBefore: string | undefined = defaultSubspace.getPackageJsonInjectedDependenciesHash();
+
+      // Mutate devDependencies of the injected provider package
+      const providerProject = rushConfiguration.getProjectByName('provider')!;
+      providerProject.packageJson.devDependencies = {
+        ...providerProject.packageJson.devDependencies,
+        jest: '^29.0.0'
+      };
+
+      const hashAfter: string | undefined = defaultSubspace.getPackageJsonInjectedDependenciesHash();
+
+      expect(hashBefore).toBeDefined();
+      expect(hashAfter).toBeDefined();
+      expect(hashBefore).toBe(hashAfter);
+    });
+
+    it('changes when production dependencies of the injected package change', () => {
+      const rushJsonFilename: string = `${__dirname}/repoInjectedDeps/rush.json`;
+      const rushConfiguration: RushConfiguration =
+        RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
+      const defaultSubspace: Subspace = rushConfiguration.defaultSubspace;
+
+      const hashBefore: string | undefined = defaultSubspace.getPackageJsonInjectedDependenciesHash();
+
+      // Mutate dependencies of the injected provider package
+      const providerProject = rushConfiguration.getProjectByName('provider')!;
+      providerProject.packageJson.dependencies = {
+        ...providerProject.packageJson.dependencies,
+        axios: '^1.6.0'
+      };
+
+      const hashAfter: string | undefined = defaultSubspace.getPackageJsonInjectedDependenciesHash();
+
+      expect(hashBefore).toBeDefined();
+      expect(hashAfter).toBeDefined();
+      expect(hashBefore).not.toBe(hashAfter);
+    });
+  });
 });

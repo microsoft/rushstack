@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix a bug where the injected dependency state hash updated on devDependency changes that don't impact the lockfile.",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "aramissennyeydd@users.noreply.github.com"
+}
