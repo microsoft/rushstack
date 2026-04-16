@@ -5,9 +5,8 @@
 // https://github.com/dylang/npm-check/blob/master/lib/out/interactive-update.js
 // Extended to use one type of text table
 
-import inquirer from 'inquirer';
 import CliTable from 'cli-table';
-import type Separator from 'inquirer/lib/objects/separator';
+import type { Separator } from '@inquirer/core';
 
 import { AnsiEscape, Colorize } from '@rushstack/terminal';
 import type { INpmCheckPackageSummary } from '@rushstack/npm-check-fork';
@@ -123,71 +122,73 @@ function getChoice(dep: INpmCheckPackageSummary): IUpgradeInteractiveDepChoice |
   };
 }
 
-function unselectable(options?: { title: string }): Separator {
-  return new inquirer.Separator(AnsiEscape.removeCodes(options ? options.title : ''));
-}
-
-function createChoices(packages: INpmCheckPackageSummary[], options: IUIGroup): ChoiceTable {
-  const { filter } = options;
-  const filteredChoices: INpmCheckPackageSummary[] = packages.filter((pkg: INpmCheckPackageSummary) => {
-    if ('mismatch' in filter && pkg.mismatch !== filter.mismatch) {
-      return false;
-    } else if ('bump' in filter && pkg.bump !== filter.bump) {
-      return false;
-    } else if ('notInstalled' in filter && pkg.notInstalled !== filter.notInstalled) {
-      return false;
-    } else {
-      return true;
-    }
-  }) as INpmCheckPackageSummary[];
-
-  const choices: (IUpgradeInteractiveDepChoice | Separator | boolean)[] = filteredChoices
-    .map(getChoice)
-    .filter(Boolean);
-
-  const cliTable: CliTable = new CliTable({
-    chars: {
-      top: '',
-      'top-mid': '',
-      'top-left': '',
-      'top-right': '',
-      bottom: '',
-      'bottom-mid': '',
-      'bottom-left': '',
-      'bottom-right': '',
-      left: '',
-      'left-mid': '',
-      mid: '',
-      'mid-mid': '',
-      right: '',
-      'right-mid': '',
-      middle: ' '
-    },
-    colWidths: [50, 10, 3, 10, 100]
-  });
-
-  for (const choice of choices) {
-    if (typeof choice === 'object' && 'name' in choice) {
-      cliTable.push(choice.name);
-    }
-  }
-
-  const choicesAsATable: string[] = cliTable.toString().split('\n');
-  for (let i: number = 0; i < choices.length; i++) {
-    const choice: IUpgradeInteractiveDepChoice | Separator | boolean | undefined = choices[i];
-    if (typeof choice === 'object' && 'name' in choice) {
-      choice.name = choicesAsATable[i];
-    }
-  }
-
-  if (choices.length > 0) {
-    choices.unshift(unselectable(options));
-    choices.unshift(unselectable());
-    return choices;
-  }
-}
-
 export const upgradeInteractive = async (pkgs: INpmCheckPackageSummary[]): Promise<IDepsToUpgradeAnswers> => {
+  const { default: checkbox, Separator } = await import('@inquirer/checkbox');
+
+  function unselectable(options?: { title: string }): Separator {
+    return new Separator(AnsiEscape.removeCodes(options ? options.title : ''));
+  }
+
+  function createChoices(packages: INpmCheckPackageSummary[], options: IUIGroup): ChoiceTable {
+    const { filter } = options;
+    const filteredChoices: INpmCheckPackageSummary[] = packages.filter((pkg: INpmCheckPackageSummary) => {
+      if ('mismatch' in filter && pkg.mismatch !== filter.mismatch) {
+        return false;
+      } else if ('bump' in filter && pkg.bump !== filter.bump) {
+        return false;
+      } else if ('notInstalled' in filter && pkg.notInstalled !== filter.notInstalled) {
+        return false;
+      } else {
+        return true;
+      }
+    }) as INpmCheckPackageSummary[];
+
+    const choices: (IUpgradeInteractiveDepChoice | Separator | boolean)[] = filteredChoices
+      .map(getChoice)
+      .filter(Boolean);
+
+    const cliTable: CliTable = new CliTable({
+      chars: {
+        top: '',
+        'top-mid': '',
+        'top-left': '',
+        'top-right': '',
+        bottom: '',
+        'bottom-mid': '',
+        'bottom-left': '',
+        'bottom-right': '',
+        left: '',
+        'left-mid': '',
+        mid: '',
+        'mid-mid': '',
+        right: '',
+        'right-mid': '',
+        middle: ' '
+      },
+      colWidths: [50, 10, 3, 10, 100]
+    });
+
+    for (const choice of choices) {
+      if (typeof choice === 'object' && 'name' in choice) {
+        cliTable.push(choice.name);
+      }
+    }
+
+    const choicesAsATable: string[] = cliTable.toString().split('\n');
+    for (let i: number = 0; i < choices.length; i++) {
+      const choice: IUpgradeInteractiveDepChoice | Separator | boolean | undefined = choices[i];
+      if (typeof choice === 'object' && 'name' in choice) {
+        choice.name = choicesAsATable[i];
+      }
+    }
+
+    if (choices.length > 0) {
+      choices.unshift(unselectable(options));
+      choices.unshift(unselectable());
+      return choices;
+    }
+  }
+
   const choicesGrouped: ChoiceTable[] = UI_GROUPS.map((group) => createChoices(pkgs, group)).filter(Boolean);
 
   const choices: ChoiceTable = [];
@@ -206,17 +207,15 @@ export const upgradeInteractive = async (pkgs: INpmCheckPackageSummary[]): Promi
   choices.push(unselectable());
   choices.push(unselectable({ title: 'Space to select. Enter to start upgrading. Control-C to cancel.' }));
 
-  const promptQuestions: inquirer.QuestionCollection = [
-    {
-      name: 'packages',
-      message: 'Choose which packages to upgrade',
-      type: 'checkbox',
-      choices: choices.concat(unselectable()),
-      pageSize: process.stdout.rows - 2
-    }
-  ];
+  const packages: INpmCheckPackageSummary[] = await checkbox<INpmCheckPackageSummary>({
+    message: 'Choose which packages to upgrade',
+    // At this point choices only contains Separator and IUpgradeInteractiveDepChoice items
+    // with their `name` fields already set to strings by createChoices.
+    choices: choices.concat(unselectable()) as unknown as ReadonlyArray<
+      Separator | { value: INpmCheckPackageSummary; name: string; short: string }
+    >,
+    pageSize: process.stdout.rows - 2
+  });
 
-  const answers: IDepsToUpgradeAnswers = (await inquirer.prompt(promptQuestions)) as IDepsToUpgradeAnswers;
-
-  return answers;
+  return { packages };
 };

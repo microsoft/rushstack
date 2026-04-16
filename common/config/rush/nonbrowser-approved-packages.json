@@ -27,6 +27,26 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@inquirer/checkbox",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@inquirer/confirm",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@inquirer/core",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@inquirer/input",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@inquirer/select",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@jest/core",
       "allowedCategories": [ "libraries" ]
     },
@@ -792,10 +812,6 @@
     },
     {
       "name": "import-lazy",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "inquirer",
       "allowedCategories": [ "libraries" ]
     },
     {
