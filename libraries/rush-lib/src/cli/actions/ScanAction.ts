@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-
-import builtinPackageNames from 'builtin-modules';
+import * as module from 'node:module';
 
 import { Colorize } from '@rushstack/terminal';
 import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
@@ -149,7 +148,7 @@ export class ScanAction extends BaseConfiglessRushAction {
     const detectedPackageNames: string[] = [];
 
     packageMatches.forEach((packageName: string) => {
-      if (builtinPackageNames.indexOf(packageName) < 0) {
+      if (!module.isBuiltin(packageName)) {
         detectedPackageNames.push(packageName);
       }
     });

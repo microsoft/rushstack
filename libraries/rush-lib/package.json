@@ -57,7 +57,6 @@
     "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@yarnpkg/lockfile": "~1.0.2",
-    "builtin-modules": "~3.1.0",
     "dependency-path": "~9.2.8",
     "dotenv": "~16.4.7",
     "fast-glob": "~3.3.1",
