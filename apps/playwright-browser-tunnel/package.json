@@ -55,7 +55,7 @@
     "@rushstack/heft": "workspace:*",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
-    "@types/semver": "7.5.0",
+    "@types/semver": "7.7.1",
     "@types/ws": "8.5.5",
     "playwright-core": "~1.56.1",
     "@playwright/test": "~1.56.1",

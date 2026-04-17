@@ -42,12 +42,12 @@
   },
   "dependencies": {
     "giturl": "^2.0.0",
-    "semver": "~7.5.4",
+    "semver": "~7.7.4",
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@types/semver": "7.5.0",
+    "@types/semver": "7.7.1",
     "local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
   },

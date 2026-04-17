@@ -57,7 +57,7 @@
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
-    "@types/semver": "7.5.0",
+    "@types/semver": "7.7.1",
     "@types/webpack-env": "1.18.8",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
