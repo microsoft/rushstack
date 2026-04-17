@@ -4,7 +4,6 @@
 import * as path from 'node:path';
 import * as child_process from 'node:child_process';
 
-import type * as InquirerType from 'inquirer';
 
 import type {
   CommandLineFlagParameter,
@@ -246,8 +245,6 @@ export class ChangeAction extends BaseRushAction {
 
     await this._warnUnstagedChangesAsync();
 
-    const inquirer: typeof InquirerType = await import('inquirer');
-    const promptModule: InquirerType.PromptModule = inquirer.createPromptModule();
     let changeFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
     let interactiveMode: boolean = false;
     if (this._bulkChangeParameter.value) {
@@ -323,7 +320,6 @@ export class ChangeAction extends BaseRushAction {
         await this._getChangeFilesSinceBaseBranchAsync()
       );
       changeFileData = await this._promptForChangeFileDataAsync(
-        promptModule,
         sortedProjectList,
         existingChangeComments
       );
@@ -331,7 +327,7 @@ export class ChangeAction extends BaseRushAction {
       if (this._isEmailRequired(changeFileData)) {
         const email: string = this._changeEmailParameter.value
           ? this._changeEmailParameter.value
-          : await this._detectOrAskForEmailAsync(promptModule);
+          : await this._detectOrAskForEmailAsync();
         changeFileData.forEach((changeFile: IChangeFile) => {
           changeFile.email = this.rushConfiguration.getProjectByName(changeFile.packageName)?.versionPolicy
             ?.includeEmailInChangeFile
@@ -343,7 +339,6 @@ export class ChangeAction extends BaseRushAction {
     let changefiles: string[];
     try {
       changefiles = await this._writeChangeFilesAsync(
-        promptModule,
         changeFileData,
         this._overwriteFlagParameter.value,
         interactiveMode
@@ -528,7 +523,6 @@ export class ChangeAction extends BaseRushAction {
    * The main loop which prompts the user for information on changed projects.
    */
   private async _promptForChangeFileDataAsync(
-    promptModule: InquirerType.PromptModule,
     sortedProjectList: string[],
     existingChangeComments: Map<string, string[]>
   ): Promise<Map<string, IChangeFile>> {
@@ -536,7 +530,6 @@ export class ChangeAction extends BaseRushAction {
 
     for (const projectName of sortedProjectList) {
       const changeInfo: IChangeInfo | undefined = await this._askQuestionsAsync(
-        promptModule,
         projectName,
         existingChangeComments
       );
@@ -563,7 +556,6 @@ export class ChangeAction extends BaseRushAction {
    * Asks all questions which are needed to generate changelist for a project.
    */
   private async _askQuestionsAsync(
-    promptModule: InquirerType.PromptModule,
     packageName: string,
     existingChangeComments: Map<string, string[]>
   ): Promise<IChangeInfo | undefined> {
@@ -574,11 +566,10 @@ export class ChangeAction extends BaseRushAction {
       comments.forEach((comment) => {
         this.terminal.writeLine(`    > ${comment}`);
       });
-      const { appendComment }: { appendComment: 'skip' | 'append' } = await promptModule({
-        name: 'appendComment',
-        type: 'list',
-        default: 'skip',
+      const { default: select } = await import('@inquirer/select');
+      const appendComment: 'skip' | 'append' = await select<'skip' | 'append'>({
         message: 'Append to existing comments or skip?',
+        default: 'skip',
         choices: [
           {
             name: 'Skip',
@@ -594,23 +585,19 @@ export class ChangeAction extends BaseRushAction {
       if (appendComment === 'skip') {
         return undefined;
       } else {
-        return await this._promptForCommentsAsync(promptModule, packageName);
+        return await this._promptForCommentsAsync(packageName);
       }
     } else {
-      return await this._promptForCommentsAsync(promptModule, packageName);
+      return await this._promptForCommentsAsync(packageName);
     }
   }
 
   private async _promptForCommentsAsync(
-    promptModule: InquirerType.PromptModule,
     packageName: string
   ): Promise<IChangeInfo | undefined> {
     const bumpOptions: { [type: string]: string } = this._getBumpOptions(packageName);
-    const { comment }: { comment: string } = await promptModule({
-      name: 'comment',
-      type: 'input',
-      message: `Describe changes, or ENTER if no changes:`
-    });
+    const { default: input } = await import('@inquirer/input');
+    const comment: string = await input({ message: `Describe changes, or ENTER if no changes:` });
 
     if (Object.keys(bumpOptions).length === 0 || !comment) {
       return {
@@ -619,7 +606,8 @@ export class ChangeAction extends BaseRushAction {
         type: ChangeType[ChangeType.none]
       } as IChangeInfo;
     } else {
-      const { bumpType }: { bumpType: string } = await promptModule({
+      const { default: select } = await import('@inquirer/select');
+      const bumpType: string = await select<string>({
         choices: Object.keys(bumpOptions).map((option) => {
           return {
             value: option,
@@ -627,9 +615,7 @@ export class ChangeAction extends BaseRushAction {
           };
         }),
         default: 'patch',
-        message: 'Select the type of change:',
-        name: 'bumpType',
-        type: 'list'
+        message: 'Select the type of change:'
       });
 
       return {
@@ -693,10 +679,10 @@ export class ChangeAction extends BaseRushAction {
    * Will determine a user's email by first detecting it from their Git config,
    * or will ask for it if it is not found or the Git config is wrong.
    */
-  private async _detectOrAskForEmailAsync(promptModule: InquirerType.PromptModule): Promise<string> {
+  private async _detectOrAskForEmailAsync(): Promise<string> {
     return (
-      (await this._detectAndConfirmEmailAsync(promptModule)) ||
-      (await this._promptForEmailAsync(promptModule))
+      (await this._detectAndConfirmEmailAsync()) ||
+      (await this._promptForEmailAsync())
     );
   }
 
@@ -716,20 +702,15 @@ export class ChangeAction extends BaseRushAction {
    * Detects the user's email address from their Git configuration, prompts the user to approve the
    * detected email. It returns undefined if it cannot be detected.
    */
-  private async _detectAndConfirmEmailAsync(
-    promptModule: InquirerType.PromptModule
-  ): Promise<string | undefined> {
+  private async _detectAndConfirmEmailAsync(): Promise<string | undefined> {
     const email: string | undefined = this._detectEmail();
 
     if (email) {
-      const { isCorrectEmail }: { isCorrectEmail: boolean } = await promptModule([
-        {
-          type: 'confirm',
-          name: 'isCorrectEmail',
-          default: 'Y',
-          message: `Is your email address ${email}?`
-        }
-      ]);
+      const { default: confirm } = await import('@inquirer/confirm');
+      const isCorrectEmail: boolean = await confirm({
+        message: `Is your email address ${email}?`,
+        default: true
+      });
       return isCorrectEmail ? email : undefined;
     } else {
       return undefined;
@@ -739,18 +720,14 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Asks the user for their email address
    */
-  private async _promptForEmailAsync(promptModule: InquirerType.PromptModule): Promise<string> {
-    const { email }: { email: string } = await promptModule([
-      {
-        type: 'input',
-        name: 'email',
-        message: 'What is your email address?',
-        validate: (input: string) => {
-          return true; // @todo should be an email
-        }
+  private async _promptForEmailAsync(): Promise<string> {
+    const { default: input } = await import('@inquirer/input');
+    return await input({
+      message: 'What is your email address?',
+      validate: (value: string) => {
+        return true; // @todo should be an email
       }
-    ]);
-    return email;
+    });
   }
 
   private async _warnUnstagedChangesAsync(): Promise<void> {
@@ -774,7 +751,6 @@ export class ChangeAction extends BaseRushAction {
    * Writes change files to the common/changes folder. Will prompt for overwrite if file already exists.
    */
   private async _writeChangeFilesAsync(
-    promptModule: InquirerType.PromptModule,
     changeFileData: Map<string, IChangeFile>,
     overwrite: boolean,
     interactiveMode: boolean
@@ -782,7 +758,6 @@ export class ChangeAction extends BaseRushAction {
     const writtenFiles: string[] = [];
     await changeFileData.forEach(async (changeFile: IChangeFile) => {
       const writtenFile: string | undefined = await this._writeChangeFileAsync(
-        promptModule,
         changeFile,
         overwrite,
         interactiveMode
@@ -795,7 +770,6 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private async _writeChangeFileAsync(
-    promptModule: InquirerType.PromptModule,
     changeFileData: IChangeFile,
     overwrite: boolean,
     interactiveMode: boolean
@@ -808,7 +782,7 @@ export class ChangeAction extends BaseRushAction {
     const shouldWrite: boolean =
       !fileExists ||
       overwrite ||
-      (interactiveMode ? await this._promptForOverwriteAsync(promptModule, filePath) : false);
+      (interactiveMode ? await this._promptForOverwriteAsync(filePath) : false);
 
     if (!interactiveMode && fileExists && !overwrite) {
       throw new Error(`Changefile ${filePath} already exists`);
@@ -821,16 +795,12 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private async _promptForOverwriteAsync(
-    promptModule: InquirerType.PromptModule,
     filePath: string
   ): Promise<boolean> {
-    const overwrite: boolean = await promptModule([
-      {
-        name: 'overwrite',
-        type: 'confirm',
-        message: `Overwrite ${filePath}?`
-      }
-    ]);
+    const { default: confirm } = await import('@inquirer/confirm');
+    const overwrite: boolean = await confirm({
+      message: `Overwrite ${filePath}?`
+    });
 
     if (overwrite) {
       return true;
