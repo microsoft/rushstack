@@ -603,10 +603,6 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "builtin-modules",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "buttono",
       "allowedCategories": [ "tests" ]
     },
@@ -711,10 +707,6 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "figures",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "file-loader",
       "allowedCategories": [ "tests" ]
     },
@@ -733,10 +725,6 @@
     {
       "name": "glob",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
-    },
-    {
-      "name": "glob-escape",
-      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "heft-action-plugin",
@@ -931,10 +919,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "open",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "package-extractor-test-02",
       "allowedCategories": [ "tests" ]
     },
@@ -1039,10 +1023,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "strip-json-comments",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "style-loader",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -1101,10 +1081,6 @@
     {
       "name": "typescript",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
-    },
-    {
-      "name": "update-notifier",
-      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "url-loader",
