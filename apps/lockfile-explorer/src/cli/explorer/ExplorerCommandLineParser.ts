@@ -3,14 +3,19 @@
 
 import process from 'node:process';
 import * as path from 'node:path';
+import type { ChildProcess } from 'node:child_process';
 
 import express from 'express';
 import yaml from 'js-yaml';
 import cors from 'cors';
-import open from 'open';
-import updateNotifier from 'update-notifier';
 
-import { FileSystem, type IPackageJson, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
+import {
+  Executable,
+  FileSystem,
+  type IPackageJson,
+  JsonFile,
+  PackageJsonLookup
+} from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
 import {
   type CommandLineFlagParameter,
@@ -79,18 +84,6 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       Colorize.bold(`\nRush Lockfile Explorer ${appVersion}`) +
         Colorize.cyan(' - https://lfx.rushstack.io/\n')
     );
-
-    updateNotifier({
-      pkg: lockfileExplorerPackageJson,
-      // Normally update-notifier waits a day or so before it starts displaying upgrade notices.
-      // In debug mode, show the notice right away.
-      updateCheckInterval: this.isDebug ? 0 : undefined
-    }).notify({
-      // Make sure it says "-g" in the "npm install" example command line
-      isGlobal: true,
-      // Show the notice immediately, rather than waiting for process.onExit()
-      defer: false
-    });
 
     const PORT: number = 8091;
     // Must not have a trailing slash
@@ -251,8 +244,36 @@ export class ExplorerCommandLineParser extends CommandLineParser {
 
       if (!appState.debugMode) {
         try {
-          // Launch the web browser
-          await open(SERVICE_URL);
+          // Launch the default web browser using the platform-native open command.
+          let browserCmd: string;
+          let browserArgs: string[];
+          switch (process.platform) {
+            case 'win32': {
+              // "start" is a cmd.exe built-in, not a standalone executable.
+              // The empty string is the required [title] argument; without it,
+              // cmd interprets the URL as the title and ignores it.
+              browserCmd = 'cmd';
+              browserArgs = ['/c', 'start', '', SERVICE_URL];
+              break;
+            }
+
+            case 'darwin': {
+              browserCmd = 'open';
+              browserArgs = [SERVICE_URL];
+              break;
+            }
+
+            default: {
+              // Linux and other Unix-like systems
+              browserCmd = 'xdg-open';
+              browserArgs = [SERVICE_URL];
+              break;
+            }
+          }
+
+          const browserProcess: ChildProcess = Executable.spawn(browserCmd, browserArgs, { stdio: 'ignore' });
+          // Detach from our Node.js process so the browser stays open after we exit
+          browserProcess.unref();
         } catch (e) {
           this.globalTerminal.writeError('Error launching browser: ' + e.toString());
         }
