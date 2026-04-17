@@ -1,7 +1,5 @@
 import path from 'node:path';
 
-import _ from 'lodash';
-
 import {
   DefaultNpmCheckOptions,
   type INpmCheckPackageJson,
@@ -10,7 +8,7 @@ import {
 import readPackageJson from './ReadPackageJson';
 
 export default async function initializeState(initialOptions?: INpmCheckState): Promise<INpmCheckState> {
-  const state: INpmCheckState = _.extend(DefaultNpmCheckOptions, initialOptions);
+  const state: INpmCheckState = Object.assign(DefaultNpmCheckOptions, initialOptions ?? {});
 
   if (state.cwd) {
     const cwd: string = path.resolve(state.cwd);

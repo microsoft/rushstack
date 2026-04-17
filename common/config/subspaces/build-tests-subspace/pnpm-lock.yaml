@@ -4274,7 +4274,6 @@ snapshots:
       '@rushstack/terminal': file:../../../libraries/terminal(@types/node@20.17.19)
       '@rushstack/ts-command-line': file:../../../libraries/ts-command-line(@types/node@20.17.19)
       diff: 8.0.4
-      lodash: 4.18.1
       minimatch: 10.2.3
       resolve: 1.22.11
       semver: 7.5.4
@@ -4765,7 +4764,6 @@ snapshots:
       jest-config: 30.3.0(@types/node@20.17.19)
       jest-resolve: 30.3.0
       jest-snapshot: 30.3.0
-      lodash: 4.18.1
     optionalDependencies:
       '@types/jest': 30.0.0
       jest-environment-node: 30.3.0
@@ -4858,7 +4856,6 @@ snapshots:
     dependencies:
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
       giturl: 2.0.0
-      lodash: 4.18.1
       semver: 7.5.4
     transitivePeerDependencies:
       - '@types/node'

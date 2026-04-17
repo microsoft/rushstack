@@ -613,7 +613,7 @@ describe(ProjectChangeAnalyzer.name, () => {
         mockPnpmConfigChanged();
         // react version bumped in the default catalog
         mockOldCatalogs({
-          default: { react: '^17.0.0', lodash: '^4.17.21' },
+          default: { react: '^17.0.0', semver: '^7.5.4' },
           tools: { typescript: '~5.3.0', eslint: '^8.50.0' }
         });
 
@@ -627,9 +627,9 @@ describe(ProjectChangeAnalyzer.name, () => {
           terminal
         });
 
-        // 'a' uses "catalog:" (default) for react (changed) and lodash
+        // 'a' uses "catalog:" (default) for react (changed) and semver
         expect(changedProjects.has(rushConfiguration.getProjectByName('a')!)).toBe(true);
-        // 'd' uses "catalog:" (default) for lodash only (unchanged) — should NOT be detected
+        // 'd' uses "catalog:" (default) for semver only (unchanged) — should NOT be detected
         expect(changedProjects.has(rushConfiguration.getProjectByName('d')!)).toBe(false);
         // 'b' uses "catalog:tools" only — tools catalog is unchanged
         expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(false);
@@ -644,7 +644,7 @@ describe(ProjectChangeAnalyzer.name, () => {
         mockPnpmConfigChanged();
         // typescript version bumped in the tools catalog
         mockOldCatalogs({
-          default: { react: '^18.0.0', lodash: '^4.17.21' },
+          default: { react: '^18.0.0', semver: '^7.5.4' },
           tools: { typescript: '~5.2.0', eslint: '^8.50.0' }
         });
 
@@ -664,7 +664,7 @@ describe(ProjectChangeAnalyzer.name, () => {
         expect(changedProjects.has(rushConfiguration.getProjectByName('e')!)).toBe(false);
         // 'a' uses "catalog:" (default) — default catalog is unchanged
         expect(changedProjects.has(rushConfiguration.getProjectByName('a')!)).toBe(false);
-        // 'd' uses "catalog:" (default) for lodash — default catalog is unchanged
+        // 'd' uses "catalog:" (default) for semver — default catalog is unchanged
         expect(changedProjects.has(rushConfiguration.getProjectByName('d')!)).toBe(false);
         // 'c' has no catalog deps
         expect(changedProjects.has(rushConfiguration.getProjectByName('c')!)).toBe(false);
@@ -675,7 +675,7 @@ describe(ProjectChangeAnalyzer.name, () => {
         mockPnpmConfigChanged();
         // Old catalogs are identical to current
         mockOldCatalogs({
-          default: { react: '^18.0.0', lodash: '^4.17.21' },
+          default: { react: '^18.0.0', semver: '^7.5.4' },
           tools: { typescript: '~5.3.0', eslint: '^8.50.0' }
         });
 
@@ -695,9 +695,9 @@ describe(ProjectChangeAnalyzer.name, () => {
       it('only marks projects whose specific catalog package changed, not all projects in the same catalog namespace', async () => {
         const rushConfiguration: RushConfiguration = getCatalogRushConfiguration();
         mockPnpmConfigChanged();
-        // Only react changed in the default catalog; lodash is unchanged
+        // Only react changed in the default catalog; semver is unchanged
         mockOldCatalogs({
-          default: { react: '^17.0.0', lodash: '^4.17.21' },
+          default: { react: '^17.0.0', semver: '^7.5.4' },
           tools: { typescript: '~5.3.0', eslint: '^8.50.0' }
         });
 
@@ -711,9 +711,9 @@ describe(ProjectChangeAnalyzer.name, () => {
           terminal
         });
 
-        // 'a' uses "catalog:" for react (changed) and lodash (unchanged) — should be detected
+        // 'a' uses "catalog:" for react (changed) and semver (unchanged) — should be detected
         expect(changedProjects.has(rushConfiguration.getProjectByName('a')!)).toBe(true);
-        // 'd' uses "catalog:" for lodash only (unchanged) — should NOT be detected
+        // 'd' uses "catalog:" for semver only (unchanged) — should NOT be detected
         expect(changedProjects.has(rushConfiguration.getProjectByName('d')!)).toBe(false);
         // 'b' uses "catalog:tools" for typescript — tools catalog is unchanged
         expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(false);
@@ -726,9 +726,9 @@ describe(ProjectChangeAnalyzer.name, () => {
       it('marks project when its specific package version changed in catalog, even if other packages in same catalog are unchanged', async () => {
         const rushConfiguration: RushConfiguration = getCatalogRushConfiguration();
         mockPnpmConfigChanged();
-        // Only lodash changed in the default catalog; react is unchanged
+        // Only semver changed in the default catalog; react is unchanged
         mockOldCatalogs({
-          default: { react: '^18.0.0', lodash: '^4.16.0' },
+          default: { react: '^18.0.0', semver: '^7.4.0' },
           tools: { typescript: '~5.3.0', eslint: '^8.50.0' }
         });
 
@@ -742,9 +742,9 @@ describe(ProjectChangeAnalyzer.name, () => {
           terminal
         });
 
-        // 'a' uses "catalog:" for react (unchanged) and lodash (changed) — should be detected
+        // 'a' uses "catalog:" for react (unchanged) and semver (changed) — should be detected
         expect(changedProjects.has(rushConfiguration.getProjectByName('a')!)).toBe(true);
-        // 'd' uses "catalog:" for lodash (changed) — should be detected
+        // 'd' uses "catalog:" for semver (changed) — should be detected
         expect(changedProjects.has(rushConfiguration.getProjectByName('d')!)).toBe(true);
         // 'b' uses "catalog:tools" for typescript — tools catalog is unchanged
         expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(false);
@@ -759,7 +759,7 @@ describe(ProjectChangeAnalyzer.name, () => {
         mockPnpmConfigChanged();
         // Only typescript changed in the tools catalog; eslint is unchanged
         mockOldCatalogs({
-          default: { react: '^18.0.0', lodash: '^4.17.21' },
+          default: { react: '^18.0.0', semver: '^7.5.4' },
           tools: { typescript: '~5.2.0', eslint: '^8.50.0' }
         });
 
@@ -790,7 +790,7 @@ describe(ProjectChangeAnalyzer.name, () => {
         mockPnpmConfigChanged();
         // Only eslint changed in the tools catalog; typescript is unchanged
         mockOldCatalogs({
-          default: { react: '^18.0.0', lodash: '^4.17.21' },
+          default: { react: '^18.0.0', semver: '^7.5.4' },
           tools: { typescript: '~5.3.0', eslint: '^8.40.0' }
         });
 
@@ -834,7 +834,7 @@ describe(ProjectChangeAnalyzer.name, () => {
           terminal
         });
 
-        // All catalog-using projects detected: 'a' (default: react, lodash), 'b' (tools: typescript), 'd' (default: lodash), 'e' (tools: eslint)
+        // All catalog-using projects detected: 'a' (default: react, semver), 'b' (tools: typescript), 'd' (default: semver), 'e' (tools: eslint)
         expect(changedProjects.has(rushConfiguration.getProjectByName('a')!)).toBe(true);
         expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(true);
         expect(changedProjects.has(rushConfiguration.getProjectByName('d')!)).toBe(true);

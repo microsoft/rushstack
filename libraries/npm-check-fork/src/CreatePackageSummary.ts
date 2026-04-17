@@ -1,7 +1,6 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-import _ from 'lodash';
 import semver from 'semver';
 
 import type { INpmCheckState, INpmCheckPackageJson } from './interfaces/INpmCheck.ts';
@@ -83,7 +82,8 @@ export default async function createPackageSummary(
       packageJson: packageJsonVersion ?? '',
 
       // meta
-      devDependency: _.has(cwdPackageJson?.devDependencies, moduleName),
+      // TODO: Replace with Object.hasOwn() when the TypeScript target library is upgraded to es2022+
+      devDependency: Object.prototype.hasOwnProperty.call(cwdPackageJson?.devDependencies, moduleName),
       mismatch:
         packageJsonVersion !== undefined &&
         versionToUse !== null &&
