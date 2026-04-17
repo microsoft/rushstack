@@ -219,10 +219,10 @@ Choose the correct command tool based on different scenarios:
      - `--no-link`: Don't create project symlinks
      - `--network-concurrency COUNT`: Limit concurrent network requests
    - Use cases:
-     - Run only when `rush install` explicitly reports that `rush update` is required (do not run it preemptively)
+     - Run only when `rush install` fails and explicitly reports that `rush update` is required (for example, lockfile out-of-sync errors); do not run it preemptively
    - Commit hygiene:
      - Commit files modified by `rush update` in a dedicated commit named `(chore) rush update`
-     - During a rebase, drop all `(chore) rush update` commits, rerun `rush update`, and create a fresh `(chore) rush update` commit
+     - During a rebase, drop all `(chore) rush update` commits, rerun `rush update`, and create a fresh `(chore) rush update` commit so lockfile updates are regenerated from the rebased dependency state
 
 3. `rush build`
    - Function: Incremental project build
