@@ -39,7 +39,7 @@
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "semver": "~7.5.4"
+    "semver": "~7.7.4"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
@@ -48,7 +48,7 @@
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
     "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:*",
     "@rushstack/rush-http-build-cache-plugin": "workspace:*",
-    "@types/semver": "7.5.0"
+    "@types/semver": "7.7.1"
   },
   "exports": {
     "./lib/*": {
