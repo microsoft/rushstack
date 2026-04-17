@@ -449,8 +449,10 @@ export class DtsRollupGenerator {
               }
             }
 
-            if (/^\s*$/.test(modification.suffix) && /^\s*$/.test(modification.prefix)) {
-              modification.suffix = modification.prefix = '';
+            if (modification.suffix.trim().length === 0 && modification.prefix.trim().length === 0) {
+              // In case of blank prefix and suffix, remove indentation to avoid blank lines in place of removed members
+              modification.suffix = '';
+              modification.prefix = '';
             }
 
             trimmed = true;
