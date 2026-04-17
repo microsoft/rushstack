@@ -140,7 +140,7 @@ The standard directory structure for a Rush monorepo is as follows:
 
        // Allow certain dependencies to use multiple different versions
        "allowedAlternativeVersions": {
-         "typescript": ["~4.5.0", "~4.6.0"]
+         "typescript": ["~4.6.0"]
        }
      }
      ```
@@ -193,22 +193,10 @@ Choose the correct command tool based on different scenarios:
 
 ## 3.2 Common Commands Explained
 
-1. `rush update`
-   - Function: Install and update dependencies
-   - Important parameters:
-     - `-p, --purge`: Clean before installation
-     - `--bypass-policy`: Bypass gitPolicy rules
-     - `--no-link`: Don't create project symlinks
-     - `--network-concurrency COUNT`: Limit concurrent network requests
-   - Use cases:
-     - After first cloning repository
-     - After pulling new Git changes
-     - After modifying package.json
-     - When dependencies need updating
-
-2. `rush install`
+1. `rush install`
    - Function: Install dependencies based on existing shrinkwrap file
    - Features:
+     - Most common day-to-day dependency command
      - Read-only operation, won't modify shrinkwrap file
      - Suitable for CI environment
    - Important parameters:
@@ -216,9 +204,25 @@ Choose the correct command tool based on different scenarios:
      - `--bypass-policy`: Bypass gitPolicy rules
      - `--no-link`: Don't create project symlinks
    - Use cases:
+     - After first cloning repository
+     - After pulling new Git changes
+     - After switching branches
      - CI/CD pipeline
      - Ensuring dependency version consistency
      - Avoiding accidental shrinkwrap file updates
+
+2. `rush update`
+   - Function: Update dependencies and lockfiles
+   - Important parameters:
+     - `-p, --purge`: Clean before installation
+     - `--bypass-policy`: Bypass gitPolicy rules
+     - `--no-link`: Don't create project symlinks
+     - `--network-concurrency COUNT`: Limit concurrent network requests
+   - Use cases:
+     - Run only when `rush install` explicitly reports that `rush update` is required (do not run it preemptively)
+   - Commit hygiene:
+     - Commit files modified by `rush update` in a dedicated commit named `(chore) rush update`
+     - During a rebase, drop all `(chore) rush update` commits, rerun `rush update`, and create a fresh `(chore) rush update` commit
 
 3. `rush build`
    - Function: Incremental project build
@@ -290,7 +294,7 @@ Specify in `rush.json`:
 
     // Allow certain dependencies to use multiple versions
     "allowedAlternativeVersions": {
-      "typescript": ["~4.5.0", "~4.6.0"]
+      "typescript": ["~4.6.0"]
     }
   }
   ```
@@ -398,7 +402,7 @@ When running commands like `install`, `update`, `build`, `rebuild`, etc., by def
 1. Dependency Issue Handling
    - Avoid directly using `npm`, `pnpm`, `yarn` package managers
    - Use `rush purge` to clean all temporary files
-   - Run `rush update --recheck` to force check all dependencies
+   - Run `rush install` first; only run `rush update` if `rush install` explicitly tells you to do so
 
 2. Build Issue Handling
    - Use `rush rebuild` to skip cache and perform complete build
