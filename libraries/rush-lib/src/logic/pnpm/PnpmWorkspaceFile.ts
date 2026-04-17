@@ -3,14 +3,14 @@
 
 import * as path from 'node:path';
 
+import { escapePath as globEscape } from 'fast-glob';
+
 import { Sort, Import, Path } from '@rushstack/node-core-library';
 
 import { BaseWorkspaceFile } from '../base/BaseWorkspaceFile';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
-
-const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 
 /**
  * This interface represents the raw pnpm-workspace.YAML file
