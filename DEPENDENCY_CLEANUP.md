@@ -9,6 +9,8 @@
 - [x] **`open`** (`lockfile-explorer`) — Replaced with `Executable.spawn()` from `node-core-library`.
 - [x] **`update-notifier`** (`lockfile-explorer`) — Removed entirely.
 - [x] **`builtin-modules`** (`rush-lib`) — Replaced with `module.isBuiltin()` (Node 18+).
+- [x] **`giturl`** (`npm-check-fork`) — Replaced with original `toHttpsUrl()` implementation using native `URL` class.
+- [x] **`scheduler@0.19.0`** (`rush-vscode-command-webview`) — Explicit pin removed; `0.27.0` (transitive via react-dom) satisfies the `>=0.19.0` peer dep range.
 
 ---
 
@@ -155,7 +157,7 @@ Scope: all packages under `apps/`, `libraries/`, `heft-plugins/`, `rigs/`, `rush
 | `redux` | ~5.0.1 | R | lockfile-explorer-web, rush-vscode-command-webview | Redux state container |
 | `prism-react-renderer` | ~2.4.1 | R | lockfile-explorer-web | Syntax-highlighted code rendering |
 | `react-hook-form` | ~7.69.0 | R | rush-vscode-command-webview | Form handling for parameter forms in command webview |
-| `scheduler` | 0.19.0 | R | rush-vscode-command-webview | React internal task scheduler (transitive React dep) |
+| ~~`scheduler`~~ | ~~0.19.0~~ | ~~R~~ | ~~rush-vscode-command-webview~~ | ~~React internal task scheduler (explicit pin removed; transitive via react-dom)~~ |
 | `@fluentui/react-components` | ~9.72.9 | R | rush-vscode-command-webview | Fluent UI React v9 components for VS Code webview |
 | `@fluentui/react` | ~8.125.3 | R | rush-vscode-command-webview | Fluent UI React v8 (additional UI components) |
 | `playwright-core` | ~1.56.1 | R | playwright-local-browser-server-vscode-extension | Playwright browser automation (browser tunnel) |
@@ -173,10 +175,8 @@ Scope: all packages under `apps/`, `libraries/`, `heft-plugins/`, `rigs/`, `rush
 
 | Package | Rationale |
 |---|---|
-| `giturl` | Only in `npm-check-fork`; simple git URL parsing that could be replaced with native `URL` or inlined |
 | `xmldoc` | Only in `localization-utilities`; could evaluate replacing with a lighter parser or native DOM |
 | `inquirer` | Heavy interactive prompt library in `rush-lib`; could be replaced with Node `readline` for simple cases |
 | `cli-table` | Very old (0.3.x) in `rush-lib`; could be replaced with a maintained alternative or custom formatter |
-| `scheduler` | Transitive React dep pinned explicitly in `rush-vscode-command-webview`; worth checking if the explicit pin is still needed |
 | `loader-utils` | Webpack 1.x-era utility; webpack4 loaders that use it may have native alternatives in their webpack version |
 | `@fluentui/react` (v8) | `rush-vscode-command-webview` has both v8 and v9 Fluent UI; worth investigating if v8 can be dropped |
