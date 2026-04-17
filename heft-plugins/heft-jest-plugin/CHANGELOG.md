@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Wed, 15 Apr 2026 17:59:12 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Apr 2026 15:14:57 GMT and should not be manually modified.
+
+## 2.0.2
+Fri, 17 Apr 2026 15:14:57 GMT
+
+### Patches
+
+- Remove dependecy on `lodash`.
 
 ## 2.0.1
 Wed, 15 Apr 2026 17:59:12 GMT

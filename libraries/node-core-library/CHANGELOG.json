@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.23.0",
+      "tag": "@rushstack/node-core-library_v5.23.0",
+      "date": "Fri, 17 Apr 2026 15:14:57 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add two new APIs: `Object.isRecord` asserts if an object is a `Record<string, unknown>` object and `Object.mergeWith` is a customizable deep object merge."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.22.0",
       "tag": "@rushstack/node-core-library_v5.22.0",
       "date": "Thu, 09 Apr 2026 00:15:07 GMT",

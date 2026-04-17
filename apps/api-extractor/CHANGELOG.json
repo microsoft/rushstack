@@ -2,6 +2,32 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.58.3",
+      "tag": "@microsoft/api-extractor_v7.58.3",
+      "date": "Fri, 17 Apr 2026 15:14:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove dependecy on `lodash`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.22.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.58.2",
       "tag": "@microsoft/api-extractor_v7.58.2",
       "date": "Thu, 09 Apr 2026 00:15:07 GMT",

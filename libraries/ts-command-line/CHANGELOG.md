@@ -1,6 +1,11 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Thu, 09 Apr 2026 00:15:07 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Apr 2026 15:14:57 GMT and should not be manually modified.
+
+## 5.3.6
+Fri, 17 Apr 2026 15:14:57 GMT
+
+_Version update only_
 
 ## 5.3.5
 Thu, 09 Apr 2026 00:15:07 GMT

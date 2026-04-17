@@ -2,6 +2,18 @@
   "name": "@rushstack/rush-pnpm-kit-v10",
   "entries": [
     {
+      "version": "0.2.14",
+      "tag": "@rushstack/rush-pnpm-kit-v10_v0.2.14",
+      "date": "Fri, 17 Apr 2026 15:14:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.13",
       "tag": "@rushstack/rush-pnpm-kit-v10_v0.2.13",
       "date": "Fri, 10 Apr 2026 22:46:35 GMT",
