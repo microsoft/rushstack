@@ -220,6 +220,7 @@ Choose the correct command tool based on different scenarios:
      - `--network-concurrency COUNT`: Limit concurrent network requests
    - Use cases:
      - Run only when `rush install` fails and explicitly reports that `rush update` is required (for example, lockfile out-of-sync errors); do not run it preemptively
+     - Use `rush update --recheck` when you have modified `pnpm-config.json` or `.pnpmfile.cjs` and expect lockfile changes that bare `rush update` does not produce
    - Commit hygiene:
      - Commit files modified by `rush update` in a dedicated commit named `(chore) rush update`
      - During a rebase, drop all `(chore) rush update` commits, rerun `rush update`, and create a fresh `(chore) rush update` commit so lockfile updates are regenerated from the rebased dependency state
