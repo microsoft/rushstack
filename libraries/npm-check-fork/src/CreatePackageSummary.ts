@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-import semver from 'semver';
+import semver, { type ReleaseType } from 'semver';
 
 import type { INpmCheckState, INpmCheckPackageJson } from './interfaces/INpmCheck.ts';
 import type { INpmCheckPackageSummary, INpmCheckVersionBumpType } from './interfaces/INpmCheckPackageSummary';
@@ -47,25 +47,19 @@ export default async function createPackageSummary(
     if (packageJsonVersion) {
       versionWanted = semver.maxSatisfying(versions, packageJsonVersion);
     }
-    const versionToUse: string | undefined | null = installedVersion || versionWanted;
-    const usingNonSemver: boolean | '' | null =
-      latest !== undefined && semver.valid(latest) && semver.lt(latest, '1.0.0-pre');
 
+    const versionToUse: string | undefined | null = installedVersion || versionWanted;
     let bump: INpmCheckVersionBumpType;
-    const bumpRaw: INpmCheckVersionBumpType =
-      semver.valid(latest) &&
-      semver.valid(versionToUse) &&
-      (usingNonSemver && versionToUse && latest
-        ? semver.diff(versionToUse, latest)
-          ? 'nonSemver'
-          : semver.diff(versionToUse, latest)
-        : versionToUse && latest
-          ? semver.diff(versionToUse, latest)
-          : undefined);
-    if (bumpRaw && bumpRaw !== null) {
-      bump = bumpRaw as INpmCheckVersionBumpType;
-    } else {
-      bump = undefined;
+    if (versionToUse && latest && semver.valid(latest) && semver.valid(versionToUse)) {
+      const diff: ReleaseType | null = semver.diff(versionToUse, latest);
+      if (diff) {
+        const usingNonSemver: boolean = semver.lt(latest, '1.0.0-pre');
+        if (usingNonSemver) {
+          bump = 'nonSemver';
+        } else {
+          bump = diff;
+        }
+      }
     }
 
     return {

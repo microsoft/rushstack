@@ -8,6 +8,7 @@ export type INpmCheckVersionBumpType =
   | 'patch'
   | 'prepatch'
   | 'prerelease'
+  | 'release'
   | 'nonSemver'
   | undefined
   // eslint-disable-next-line @rushstack/no-new-null
