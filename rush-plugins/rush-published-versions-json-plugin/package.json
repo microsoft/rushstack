@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-published-versions-json-plugin",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A Rush plugin for generating a JSON file containing the versions of all published packages in the monorepo.",
   "license": "MIT",
   "repository": {
