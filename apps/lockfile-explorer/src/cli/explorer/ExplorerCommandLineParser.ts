@@ -8,6 +8,7 @@ import type { ChildProcess } from 'node:child_process';
 import express from 'express';
 import yaml from 'js-yaml';
 import cors from 'cors';
+import updateNotifier from 'update-notifier';
 
 import {
   Executable,
@@ -84,6 +85,18 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       Colorize.bold(`\nRush Lockfile Explorer ${appVersion}`) +
         Colorize.cyan(' - https://lfx.rushstack.io/\n')
     );
+
+    updateNotifier({
+      pkg: lockfileExplorerPackageJson,
+      // Normally update-notifier waits a day or so before it starts displaying upgrade notices.
+      // In debug mode, show the notice right away.
+      updateCheckInterval: this.isDebug ? 0 : undefined
+    }).notify({
+      // Make sure it says "-g" in the "npm install" example command line
+      isGlobal: true,
+      // Show the notice immediately, rather than waiting for process.onExit()
+      defer: false
+    });
 
     const PORT: number = 8091;
     // Must not have a trailing slash

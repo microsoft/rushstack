@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/lockfile-explorer",
-      "comment": "Remove open and `update-notifier` dependencies; use `Executable.spawn()` from `node-core-library` to launch the browser.",
+      "comment": "Remove open dependency; use `Executable.spawn()` from `node-core-library` to launch the browser.",
       "type": "patch"
     }
   ],
