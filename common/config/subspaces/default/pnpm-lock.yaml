@@ -4112,9 +4112,6 @@ importers:
       builtin-modules:
         specifier: ~3.1.0
         version: 3.1.0
-      cli-table:
-        specifier: ~0.3.1
-        version: 0.3.11
       dependency-path:
         specifier: ~9.2.8
         version: 9.2.8
@@ -4191,9 +4188,6 @@ importers:
       '@rushstack/webpack-preserve-dynamic-require-plugin':
         specifier: workspace:*
         version: link:../../webpack/preserve-dynamic-require-plugin
-      '@types/cli-table':
-        specifier: 0.3.0
-        version: 0.3.0
       '@types/js-yaml':
         specifier: 4.0.9
         version: 4.0.9
@@ -10129,9 +10123,6 @@ packages:
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
 
-  '@types/cli-table@0.3.0':
-    resolution: {integrity: sha512-QnZUISJJXyhyD6L1e5QwXDV/A5i2W1/gl6D6YMc8u0ncPepbv/B4w3S+izVvtAg60m6h+JP09+Y/0zF2mojlFQ==}
-
   '@types/color-convert@2.0.4':
     resolution: {integrity: sha512-Ub1MmDdyZ7mX//g25uBAoH/mWGd9swVbt8BseymnaE18SU4po/PjmCrHxqIIRjBo3hV/vh1KGr0eMxUhp+t+dQ==}
 
@@ -11924,10 +11915,6 @@ packages:
     resolution: {integrity: sha512-+W/5efTR7y5HRD7gACw9yQjqMVvEMLBHmboM/kPWam+H+Hmyrgjh6YncVKK122YZkXrLudzTuAukUw9FnMf7IQ==}
     engines: {node: 10.* || >= 12.*}
 
-  cli-table@0.3.11:
-    resolution: {integrity: sha512-IqLQi4lO0nIB4tcdTpN4LCB9FI3uqrJZK7RC515EnhZ6qBaglkIgICb1wjeAqpdoOabm1+SuQtkXIPdYC93jhQ==}
-    engines: {node: '>= 0.2.0'}
-
   cli-width@4.1.0:
     resolution: {integrity: sha512-ouuZd4/dm2Sw5Gmqy6bGyNNNe1qt9RpmxveLSO7KcgsTnU7RXfsw+/bukWGo1abgBiMAic068rclZsO4IWmmxQ==}
     engines: {node: '>= 12'}
@@ -12010,10 +11997,6 @@ packages:
 
   colorjs.io@0.5.2:
     resolution: {integrity: sha512-twmVoizEW7ylZSN32OgKdXRmo1qg+wT5/6C3xu5b9QsWzSFAhHLn2xd8ro0diCsKfCj1RdaTP/nrcW+vAoQPIw==}
-
-  colors@1.0.3:
-    resolution: {integrity: sha512-pFGrxThWcWQ2MsAz6RtgeWe4NK2kUE1WfsrvvlctdII745EW9I0yflqhe7++M5LEc7bV2c/9/5zc8sFcpL0Drw==}
-    engines: {node: '>=0.1.90'}
 
   colors@1.2.5:
     resolution: {integrity: sha512-erNRLao/Y3Fv54qUa0LBB+//Uf3YwMUmdJinN20yMXm9zdKKqH9wt7R9IIVZ+K7ShzfpLV/Zg8+VyrBJYB4lpg==}
@@ -26706,8 +26689,6 @@ snapshots:
       '@types/deep-eql': 4.0.2
       assertion-error: 2.0.1
 
-  '@types/cli-table@0.3.0': {}
-
   '@types/color-convert@2.0.4':
     dependencies:
       '@types/color-name': 1.1.5
@@ -29221,10 +29202,6 @@ snapshots:
     optionalDependencies:
       '@colors/colors': 1.5.0
 
-  cli-table@0.3.11:
-    dependencies:
-      colors: 1.0.3
-
   cli-width@4.1.0: {}
 
   cliui@6.0.0:
@@ -29301,8 +29278,6 @@ snapshots:
   colorette@2.0.20: {}
 
   colorjs.io@0.5.2: {}
-
-  colors@1.0.3: {}
 
   colors@1.2.5: {}
 
