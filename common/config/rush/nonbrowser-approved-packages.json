@@ -615,10 +615,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "cli-table",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "compression",
       "allowedCategories": [ "libraries" ]
     },

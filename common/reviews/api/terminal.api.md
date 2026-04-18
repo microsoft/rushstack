@@ -247,6 +247,33 @@ export interface ITerminalStreamWritableOptions {
 }
 
 // @public
+export interface ITerminalTableChars {
+    bottom: string;
+    bottomCenter: string;
+    bottomLeft: string;
+    bottomRight: string;
+    centerCenter: string;
+    horizontalCenter: string;
+    left: string;
+    leftCenter: string;
+    right: string;
+    rightCenter: string;
+    top: string;
+    topCenter: string;
+    topLeft: string;
+    topRight: string;
+    verticalCenter: string;
+}
+
+// @public
+export interface ITerminalTableOptions {
+    borderCharacters?: Partial<ITerminalTableChars>;
+    borderless?: boolean;
+    colWidths?: number[];
+    head?: string[];
+}
+
+// @public
 export interface ITerminalTransformOptions extends ITerminalWritableOptions {
     destination: TerminalWritable;
     preventDestinationAutoclose?: boolean;
@@ -457,6 +484,15 @@ export class TerminalStreamWritable extends Writable {
     constructor(options: ITerminalStreamWritableOptions);
     // (undocumented)
     _write(chunk: string | Buffer | Uint8Array, encoding: string, callback: (error?: Error | null) => void): void;
+}
+
+// @public
+export class TerminalTable {
+    constructor(options?: ITerminalTableOptions);
+    // (undocumented)
+    getLines(): string[];
+    push(...rows: string[][]): void;
+    toString(): string;
 }
 
 // @public

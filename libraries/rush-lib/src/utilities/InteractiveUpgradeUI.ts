@@ -5,10 +5,9 @@
 // https://github.com/dylang/npm-check/blob/master/lib/out/interactive-update.js
 // Extended to use one type of text table
 
-import CliTable from 'cli-table';
 import type { Separator } from '@inquirer/checkbox';
 
-import { AnsiEscape, Colorize } from '@rushstack/terminal';
+import { AnsiEscape, Colorize, TerminalTable } from '@rushstack/terminal';
 import type { INpmCheckPackageSummary } from '@rushstack/npm-check-fork';
 
 export interface IUIGroup {
@@ -147,34 +146,20 @@ export const upgradeInteractive = async (pkgs: INpmCheckPackageSummary[]): Promi
       .map(getChoice)
       .filter(Boolean);
 
-    const cliTable: CliTable = new CliTable({
-      chars: {
-        top: '',
-        'top-mid': '',
-        'top-left': '',
-        'top-right': '',
-        bottom: '',
-        'bottom-mid': '',
-        'bottom-left': '',
-        'bottom-right': '',
-        left: '',
-        'left-mid': '',
-        mid: '',
-        'mid-mid': '',
-        right: '',
-        'right-mid': '',
-        middle: ' '
-      },
+    const cliTable: TerminalTable = new TerminalTable({
+      borderless: true,
       colWidths: [50, 10, 3, 10, 100]
     });
 
     for (const choice of choices) {
       if (typeof choice === 'object' && 'name' in choice) {
-        cliTable.push(choice.name);
+        // choice.name is string[] at this point (set by label()); it is only replaced
+        // with a string after the table is rendered below.
+        cliTable.push(choice.name as string[]);
       }
     }
 
-    const choicesAsATable: string[] = cliTable.toString().split('\n');
+    const choicesAsATable: string[] = cliTable.getLines();
     for (let i: number = 0; i < choices.length; i++) {
       const choice: IUpgradeInteractiveDepChoice | Separator | boolean | undefined = choices[i];
       if (typeof choice === 'object' && 'name' in choice) {

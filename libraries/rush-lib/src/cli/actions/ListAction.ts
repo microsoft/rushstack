@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Sort } from '@rushstack/node-core-library';
-import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
+import { ConsoleTerminalProvider, Terminal, TerminalTable } from '@rushstack/terminal';
 import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
@@ -220,8 +220,7 @@ export class ListAction extends BaseRushAction {
       tableHeader.push('Tags');
     }
 
-    const { default: CliTable } = await import('cli-table');
-    const table: import('cli-table') = new CliTable({
+    const table: TerminalTable = new TerminalTable({
       head: tableHeader
     });
 
