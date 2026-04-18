@@ -1554,10 +1554,6 @@ packages:
     resolution: {integrity: sha512-wxXCdllwGhI2kCC0MnvTGYTMvnVZTvqgypkiTI8Pa5tcz2i6VqsqwYGgqwXji+4RgCzms6EajE4IxiUH6HH8nQ==}
     engines: {node: '>=0.10.0'}
 
-  builtin-modules@3.1.0:
-    resolution: {integrity: sha512-k0KL0aWZuBt2lrxrcASWDfwOLMnodeQjodT/1SxEQAXsHANgo6ZC/VEaSEHCXt7aSTZ4/4H5LKa+tBXmW7Vtvw==}
-    engines: {node: '>=6'}
-
   builtins@1.0.3:
     resolution: {integrity: sha512-uYBjakWipfaO/bXI7E8rq6kpwHRZK5cNYrUv2OzZSI/FvmdMyXJ2tG9dKcjEC5YHmHpUAwsargWIZNWdxb/bnQ==}
 
@@ -2145,14 +2141,6 @@ packages:
   git-repo-info@2.1.1:
     resolution: {integrity: sha512-8aCohiDo4jwjOwma4FmYFd3i97urZulL8XL24nIPxuE+GZnfsAyy/g2Shqx6OjUiFKUXZM+Yy+KHnOmmA3FVcg==}
     engines: {node: '>= 4.0'}
-
-  giturl@2.0.0:
-    resolution: {integrity: sha512-FB0MmghWLcqsyrBZyqsLCNeS2kIzYymT34t/6BxM5R0/9Pxvj0K1eK25SBbwRHMjKMLgQ7nYqBSduF6XyfkgFg==}
-    engines: {node: '>= 14.17.0'}
-
-  glob-escape@0.0.2:
-    resolution: {integrity: sha512-L/cXYz8x7qer1HAyUQ+mbjcUsJVdpRxpAf7CwqHoNBs9vTpABlGfNN4tzkDxt+u3Z7ZncVyKlCNPtzb0R/7WbA==}
-    engines: {node: '>= 0.10'}
 
   glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
@@ -4335,12 +4323,10 @@ snapshots:
       '@rushstack/terminal': file:../../../libraries/terminal(@types/node@20.17.19)
       '@rushstack/ts-command-line': file:../../../libraries/ts-command-line(@types/node@20.17.19)
       '@yarnpkg/lockfile': 1.0.2
-      builtin-modules: 3.1.0
       dependency-path: 9.2.8
       dotenv: 16.4.7
       fast-glob: 3.3.3
       git-repo-info: 2.1.1
-      glob-escape: 0.0.2
       https-proxy-agent: 5.0.1
       ignore: 5.1.9
       js-yaml: 4.1.1
@@ -4779,7 +4765,6 @@ snapshots:
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
       '@rushstack/rig-package': file:../../../libraries/rig-package
       '@rushstack/terminal': file:../../../libraries/terminal(@types/node@20.17.19)
-      '@ungap/structured-clone': 1.3.0
       jsonpath-plus: 10.3.0
     transitivePeerDependencies:
       - '@types/node'
@@ -4887,7 +4872,6 @@ snapshots:
   '@rushstack/npm-check-fork@file:../../../libraries/npm-check-fork(@types/node@20.17.19)':
     dependencies:
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
-      giturl: 2.0.0
       semver: 7.7.4
     transitivePeerDependencies:
       - '@types/node'
@@ -4925,8 +4909,8 @@ snapshots:
 
   '@rushstack/rig-package@file:../../../libraries/rig-package':
     dependencies:
+      jju: 1.4.0
       resolve: 1.22.11
-      strip-json-comments: 3.1.1
 
   '@rushstack/rush-pnpm-kit-v10@file:../../../libraries/rush-pnpm-kit-v10':
     dependencies:
@@ -5695,8 +5679,6 @@ snapshots:
 
   builtin-modules@1.1.1: {}
 
-  builtin-modules@3.1.0: {}
-
   builtins@1.0.3: {}
 
   call-bind-apply-helpers@1.0.2:
@@ -6461,10 +6443,6 @@ snapshots:
       get-intrinsic: 1.3.0
 
   git-repo-info@2.1.1: {}
-
-  giturl@2.0.0: {}
-
-  glob-escape@0.0.2: {}
 
   glob-parent@5.1.2:
     dependencies:
