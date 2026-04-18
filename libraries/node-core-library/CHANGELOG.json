@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.23.1",
+      "tag": "@rushstack/node-core-library_v5.23.1",
+      "date": "Sat, 18 Apr 2026 00:15:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump semver."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.23.0",
       "tag": "@rushstack/node-core-library_v5.23.0",
       "date": "Fri, 17 Apr 2026 15:14:57 GMT",

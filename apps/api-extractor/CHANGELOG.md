@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 17 Apr 2026 15:14:57 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Apr 2026 00:15:16 GMT and should not be manually modified.
+
+## 7.58.4
+Sat, 18 Apr 2026 00:15:16 GMT
+
+### Patches
+
+- Bump semver.
 
 ## 7.58.3
 Fri, 17 Apr 2026 15:14:57 GMT
