@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`TerminalTable auto-sizes columns to the widest content 1`] = `
+"┌───────┬────────────────────────┐
+│ A     │ B                      │
+├───────┼────────────────────────┤
+│ short │ a very long value here │
+└───────┴────────────────────────┘"
+`;
+
+exports[`TerminalTable renders a table with a header and rows 1`] = `
+"┌─────────────────────┬─────────┐
+│ Name                │ Version │
+├─────────────────────┼─────────┤
+│ @rushstack/terminal │ 1.0.0   │
+│ @rushstack/heft     │ 2.0.0   │
+└─────────────────────┴─────────┘"
+`;
+
+exports[`TerminalTable renders a table without a header 1`] = `
+"┌─────┬─────┐
+│ foo │ bar │
+│ baz │ qux │
+└─────┴─────┘"
+`;
+
+exports[`TerminalTable respects fixed colWidths 1`] = `
+"┌──────────┬────────┐
+│ hi       │ there  │
+└──────────┴────────┘"
+`;
+
+exports[`TerminalTable strips ANSI codes when calculating column widths 1`] = `
+"┌────────────┐
+│ Package    │
+├────────────┤
+│ [33mmy-package[0m │
+└────────────┘"
+`;
+
+exports[`TerminalTable supports empty border chars (invisible borders) 1`] = `
+" alpha      beta     g    
+ longer text  x        y    "
+`;

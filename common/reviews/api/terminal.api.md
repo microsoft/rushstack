@@ -247,6 +247,47 @@ export interface ITerminalStreamWritableOptions {
 }
 
 // @public
+export interface ITerminalTableChars {
+    // (undocumented)
+    'bottom-left': string;
+    // (undocumented)
+    'bottom-mid': string;
+    // (undocumented)
+    'bottom-right': string;
+    // (undocumented)
+    'left-mid': string;
+    // (undocumented)
+    'mid-mid': string;
+    // (undocumented)
+    'right-mid': string;
+    // (undocumented)
+    'top-left': string;
+    // (undocumented)
+    'top-mid': string;
+    // (undocumented)
+    'top-right': string;
+    // (undocumented)
+    bottom: string;
+    // (undocumented)
+    left: string;
+    // (undocumented)
+    mid: string;
+    // (undocumented)
+    middle: string;
+    // (undocumented)
+    right: string;
+    // (undocumented)
+    top: string;
+}
+
+// @public
+export interface ITerminalTableOptions {
+    chars?: Partial<ITerminalTableChars>;
+    colWidths?: number[];
+    head?: string[];
+}
+
+// @public
 export interface ITerminalTransformOptions extends ITerminalWritableOptions {
     destination: TerminalWritable;
     preventDestinationAutoclose?: boolean;
@@ -457,6 +498,13 @@ export class TerminalStreamWritable extends Writable {
     constructor(options: ITerminalStreamWritableOptions);
     // (undocumented)
     _write(chunk: string | Buffer | Uint8Array, encoding: string, callback: (error?: Error | null) => void): void;
+}
+
+// @public
+export class TerminalTable {
+    constructor(options?: ITerminalTableOptions);
+    push(...rows: string[][]): void;
+    toString(): string;
 }
 
 // @public
