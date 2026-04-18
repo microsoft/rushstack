@@ -504,6 +504,8 @@ export class TerminalTable {
     constructor(options?: ITerminalTableOptions);
     // (undocumented)
     getLines(): string[];
+    // Warning: (ae-incompatible-release-tags) The symbol "printToTerminal" is marked as @public, but its signature references "ITerminal" which is marked as @beta
+    printToTerminal(terminal: ITerminal): void;
     push(...rows: string[][]): void;
     toString(): string;
 }

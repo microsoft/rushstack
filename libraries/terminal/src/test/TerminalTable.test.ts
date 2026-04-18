@@ -3,6 +3,8 @@
 
 import { AnsiEscape } from '../AnsiEscape';
 import { Colorize } from '../Colorize';
+import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
+import { Terminal } from '../Terminal';
 import { TerminalTable } from '../TerminalTable';
 
 function expectSnapshot(table: TerminalTable): void {
@@ -145,5 +147,14 @@ describe(TerminalTable.name, () => {
     table.push(['x', 'y']);
     table.push(['z', 'w']);
     expectSnapshot(table);
+  });
+
+  it('printToTerminal writes each line to the terminal', () => {
+    const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
+    const terminal: Terminal = new Terminal(terminalProvider);
+    const table: TerminalTable = new TerminalTable({ head: ['Name', 'Version'] });
+    table.push(['@rushstack/terminal', '1.0.0']);
+    table.printToTerminal(terminal);
+    expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
   });
 });

@@ -41,6 +41,16 @@ exports[`TerminalTable headingColor is applied to header cell text but not to bo
 └──────┴─────────┘"
 `;
 
+exports[`TerminalTable printToTerminal writes each line to the terminal 1`] = `
+Array [
+  "[    log] ┌─────────────────────┬─────────┐[n]",
+  "[    log] │ Name                │ Version │[n]",
+  "[    log] ├─────────────────────┼─────────┤[n]",
+  "[    log] │ @rushstack/terminal │ 1.0.0   │[n]",
+  "[    log] └─────────────────────┴─────────┘[n]",
+]
+`;
+
 exports[`TerminalTable renders a header with no data rows 1`] = `
 "┌──────┬─────────┐
 │ Name │ Version │

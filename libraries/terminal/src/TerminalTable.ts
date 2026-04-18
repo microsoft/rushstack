@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AnsiEscape } from './AnsiEscape';
+import type { ITerminal } from './ITerminal';
 
 /**
  * The set of characters used to draw table borders.
@@ -325,5 +326,14 @@ export class TerminalTable {
   public toString(): string {
     const lines: string[] = this.getLines();
     return lines.join('\n');
+  }
+
+  /**
+   * Writes the rendered table to the provided terminal, one line at a time.
+   */
+  public printToTerminal(terminal: ITerminal): void {
+    for (const line of this.getLines()) {
+      terminal.writeLine(line);
+    }
   }
 }
