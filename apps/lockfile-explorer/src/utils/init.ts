@@ -12,14 +12,16 @@ import type { Subspace } from '@microsoft/rush-lib/lib/api/Subspace';
 
 import * as lockfilePath from '../graph/lockfilePath';
 import type { IAppState } from '../state';
+import { LFX_PACKAGE_ROOT } from './constants';
 
-export const init = (options: {
-  lockfileExplorerProjectRoot: string;
+export interface IInitOptions {
   appVersion: string;
   debugMode: boolean;
   subspaceName: string;
-}): Omit<IAppState, 'graph'> => {
-  const { lockfileExplorerProjectRoot, appVersion, debugMode, subspaceName } = options;
+}
+
+export const init = (options: IInitOptions): Omit<IAppState, 'graph'> => {
+  const { appVersion, debugMode, subspaceName } = options;
   const currentWorkingDirectory: string = path.resolve(process.cwd());
 
   let appState: IAppState | undefined;
@@ -51,7 +53,7 @@ export const init = (options: {
         currentWorkingDirectory,
         appVersion,
         debugMode,
-        lockfileExplorerProjectRoot,
+        lockfileExplorerProjectRoot: LFX_PACKAGE_ROOT,
         pnpmLockfileLocation: pnpmLockfileAbsolutePath,
         pnpmfileLocation: commonTempFolder + '/.pnpmfile.cjs',
         projectRoot: currentFolder,
@@ -73,7 +75,7 @@ export const init = (options: {
         currentWorkingDirectory,
         appVersion,
         debugMode,
-        lockfileExplorerProjectRoot,
+        lockfileExplorerProjectRoot: LFX_PACKAGE_ROOT,
         pnpmLockfileLocation: currentFolder + '/pnpm-lock.yaml',
         pnpmfileLocation: currentFolder + '/.pnpmfile.cjs',
         projectRoot: currentFolder,

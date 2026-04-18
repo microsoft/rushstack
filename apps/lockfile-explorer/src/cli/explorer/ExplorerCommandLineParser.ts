@@ -75,11 +75,6 @@ export class ExplorerCommandLineParser extends CommandLineParser {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    const lockfileExplorerProjectRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
-    const lockfileExplorerPackageJson: IPackageJson = JsonFile.load(
-      `${lockfileExplorerProjectRoot}/package.json`
-    );
-    const appVersion: string = lockfileExplorerPackageJson.version;
 
     this.globalTerminal.writeLine(
       Colorize.bold(`\nRush Lockfile Explorer ${appVersion}`) +
@@ -103,8 +98,7 @@ export class ExplorerCommandLineParser extends CommandLineParser {
     const SERVICE_URL: string = `http://localhost:${PORT}`;
 
     const appState: IAppState = init({
-      lockfileExplorerProjectRoot,
-      appVersion,
+      appVersion: LFX_VERSION,
       debugMode: this.isDebug,
       subspaceName: this._subspaceParameter.value
     });
