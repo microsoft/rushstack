@@ -77,7 +77,7 @@
     "typescript": "5.9.3"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.2.12",
+    "@rushstack/heft": "1.2.15",
     "@types/resolve": "1.20.2",
     "@types/semver": "7.7.1",
     "decoupled-local-node-rig": "workspace:*",

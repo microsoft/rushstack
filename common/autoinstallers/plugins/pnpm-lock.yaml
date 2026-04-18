@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@rushstack/rush-published-versions-json-plugin':
-        specifier: 0.1.5
-        version: 0.1.5
+        specifier: 0.1.8
+        version: 0.1.8
 
 packages:
 
@@ -26,27 +26,27 @@ packages:
     resolution: {integrity: sha512-GucC9h/EVbU03Kl7M/FqVes1s5RCQaGCW2f41lFA7VqqHWQElR6k1q33iF6f6fXDUSCdzB1IUxSq9ghP2J+8Pw==}
     engines: {node: '>=18.12'}
 
-  '@rushstack/credential-cache@0.2.12':
-    resolution: {integrity: sha512-/VFPBGtmdLC488tJZxb/s9TjuqYRV5Vpn7g9Xc5fFFvBY96t9/6cBWcQ7fbkq8TtuDtJqalqgeZ18KvPfAxTUg==}
+  '@rushstack/credential-cache@0.2.15':
+    resolution: {integrity: sha512-Wl6xTWYRA0vWi4zzbBfXV6kmwNpdHMaYpr6hueDtEfoo5NujfPoL2RFeGmQr5Vy4cB5xY7LJDh/A4fJRx1qKFA==}
 
-  '@rushstack/lookup-by-path@0.10.1':
-    resolution: {integrity: sha512-djLQhYxWTMiiesgVoikTeO5wDLntxsR82B0dfF8erlF4Gw096ngqFPNttWYw40EOQOrmhsJVhTiuPWPFNoMi1g==}
+  '@rushstack/lookup-by-path@0.10.4':
+    resolution: {integrity: sha512-tOUFYpiaOWGkYM+pSOYjlmgHjHVmuldjq9duRa3IQv0Ho0/vZZUg2v8D65ydnQ1WK4MkqnkLeZU85jkV6275Tw==}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
       '@types/node':
         optional: true
 
-  '@rushstack/node-core-library@5.22.0':
-    resolution: {integrity: sha512-S/Dm/N+8tkbasS6yM5cF6q4iDFt14mQQniiVIwk1fd0zpPwWESspO4qtPyIl8szEaN86XOYC1HRRzZrOowxjtw==}
+  '@rushstack/node-core-library@5.23.1':
+    resolution: {integrity: sha512-wlKmIKIYCKuCASbITvOxLZXepPbwXvrv7S6ig6XNWFchSyhL/E2txmVXspHY49Wu2dzf7nI27a2k/yV5BA3EiA==}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
       '@types/node':
         optional: true
 
-  '@rushstack/package-deps-hash@4.7.12':
-    resolution: {integrity: sha512-kE8f6AFUTfxgnGZsRIDc3TWvgds3FC+6KNNd3OovJ8mJpUq7txn4dyhgq/Yp9XcXvxCEEDrynCBJ6xSFk0YxgA==}
+  '@rushstack/package-deps-hash@4.7.15':
+    resolution: {integrity: sha512-2P+/X5K8l+Hjqa2nyjNOD8DY3uvu3Y7SP8iTfRudnV13voi4Wmwbw6Jh8Inif+v+pLj/tcZS9M3uweU2jDuRUg==}
 
   '@rushstack/problem-matcher@0.2.1':
     resolution: {integrity: sha512-gulfhBs6n+I5b7DvjKRfhMGyUejtSgOHTclF/eONr8hcgF1APEDjhxIsfdUYYMzC3rvLwGluqLjbwCFZ8nxrog==}
@@ -56,14 +56,14 @@ packages:
       '@types/node':
         optional: true
 
-  '@rushstack/rush-published-versions-json-plugin@0.1.5':
-    resolution: {integrity: sha512-vuleyYxtRCt1RNFh0vqRQ2N+d41VYFdzmZqhNiWVMTaVvQYWDbC+GaRlY7QqznIBf/RR1yFJyrMhCnNFMiDCgg==}
+  '@rushstack/rush-published-versions-json-plugin@0.1.8':
+    resolution: {integrity: sha512-ryE4+uZVYGLwP71lj3ac/174auFhZ9bhV23iw78P2pPxlVPOw5JgIbGLnxewZT5wGcghEzMAawPcknwLtvwN8Q==}
 
-  '@rushstack/rush-sdk@5.173.0':
-    resolution: {integrity: sha512-PXyT+Jn9BEmtwE3c/5Xk/B/iodO+Pw9T3DVdiqPxw55oXFJjknOJDYB41UrGLm+M2NdisY8q72xQ3M/oZs3GEw==}
+  '@rushstack/rush-sdk@5.175.0':
+    resolution: {integrity: sha512-Fs7Q2Rb378QH8zIeAD5r0Uud5+6Ntop85PUm+sJwe6vQant6pytsdJz4QIRKyecRzdQ9R2CAcfLilC14CClykQ==}
 
-  '@rushstack/terminal@0.22.5':
-    resolution: {integrity: sha512-umej8J6A+WRbfQV1G/uNfnz4bMa8CzFU9IJzQb/ZcH4j7Ybg3BQ8UBKOCF3o5U3/2yah1TDU/zE71ugg2JJv+Q==}
+  '@rushstack/terminal@0.23.0':
+    resolution: {integrity: sha512-7FfI9irLqnBDxCvMEXdEXLDjaouZsGbKkeGfmW8IOn8aYi7DV9aaXaEQHCcVxWMvEDOkuTf4y6RMDgIY5CFuUQ==}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -113,8 +113,8 @@ packages:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
 
-  hasown@2.0.2:
-    resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
+  hasown@2.0.3:
+    resolution: {integrity: sha512-ej4AhfhfL2Q2zpMmLo7U1Uv9+PyhIZpgQLGT1F9miIGmiCJIoCgSmczFdrc97mWT4kVY72KA+WnnhJ5pghSvSg==}
     engines: {node: '>= 0.4'}
 
   import-lazy@4.0.0:
@@ -134,10 +134,6 @@ packages:
   jsonfile@6.2.0:
     resolution: {integrity: sha512-FGuPw30AdOIUTRMC2OMRtQV+jkVj2cfPqSeWXv1NEAJ1qZ5zb1X6z1mFhbfOB/iy3ssJCD+3KuZ8r8C3uVFlAg==}
 
-  lru-cache@6.0.0:
-    resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
-    engines: {node: '>=10'}
-
   path-parse@1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
 
@@ -150,8 +146,8 @@ packages:
     engines: {node: '>= 0.4'}
     hasBin: true
 
-  semver@7.5.4:
-    resolution: {integrity: sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==}
+  semver@7.7.4:
+    resolution: {integrity: sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -171,9 +167,6 @@ packages:
     resolution: {integrity: sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==}
     engines: {node: '>= 10.0.0'}
 
-  yallist@4.0.0:
-    resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
-
 snapshots:
 
   '@pnpm/lockfile.types@900.0.0':
@@ -185,15 +178,15 @@ snapshots:
 
   '@pnpm/types@900.0.0': {}
 
-  '@rushstack/credential-cache@0.2.12':
+  '@rushstack/credential-cache@0.2.15':
     dependencies:
-      '@rushstack/node-core-library': 5.22.0
+      '@rushstack/node-core-library': 5.23.1
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/lookup-by-path@0.10.1': {}
+  '@rushstack/lookup-by-path@0.10.4': {}
 
-  '@rushstack/node-core-library@5.22.0':
+  '@rushstack/node-core-library@5.23.1':
     dependencies:
       ajv: 8.18.0
       ajv-draft-04: 1.0.0(ajv@8.18.0)
@@ -202,39 +195,39 @@ snapshots:
       import-lazy: 4.0.0
       jju: 1.4.0
       resolve: 1.22.12
-      semver: 7.5.4
+      semver: 7.7.4
 
-  '@rushstack/package-deps-hash@4.7.12':
+  '@rushstack/package-deps-hash@4.7.15':
     dependencies:
-      '@rushstack/node-core-library': 5.22.0
+      '@rushstack/node-core-library': 5.23.1
     transitivePeerDependencies:
       - '@types/node'
 
   '@rushstack/problem-matcher@0.2.1': {}
 
-  '@rushstack/rush-published-versions-json-plugin@0.1.5':
+  '@rushstack/rush-published-versions-json-plugin@0.1.8':
     dependencies:
-      '@rushstack/node-core-library': 5.22.0
-      '@rushstack/rush-sdk': 5.173.0
-      '@rushstack/terminal': 0.22.5
+      '@rushstack/node-core-library': 5.23.1
+      '@rushstack/rush-sdk': 5.175.0
+      '@rushstack/terminal': 0.23.0
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/rush-sdk@5.173.0':
+  '@rushstack/rush-sdk@5.175.0':
     dependencies:
       '@pnpm/lockfile.types-900': '@pnpm/lockfile.types@900.0.0'
-      '@rushstack/credential-cache': 0.2.12
-      '@rushstack/lookup-by-path': 0.10.1
-      '@rushstack/node-core-library': 5.22.0
-      '@rushstack/package-deps-hash': 4.7.12
-      '@rushstack/terminal': 0.22.5
+      '@rushstack/credential-cache': 0.2.15
+      '@rushstack/lookup-by-path': 0.10.4
+      '@rushstack/node-core-library': 5.23.1
+      '@rushstack/package-deps-hash': 4.7.15
+      '@rushstack/terminal': 0.23.0
       tapable: 2.2.1
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/terminal@0.22.5':
+  '@rushstack/terminal@0.23.0':
     dependencies:
-      '@rushstack/node-core-library': 5.22.0
+      '@rushstack/node-core-library': 5.23.1
       '@rushstack/problem-matcher': 0.2.1
       supports-color: 8.1.1
 
@@ -271,7 +264,7 @@ snapshots:
 
   has-flag@4.0.0: {}
 
-  hasown@2.0.2:
+  hasown@2.0.3:
     dependencies:
       function-bind: 1.1.2
 
@@ -279,7 +272,7 @@ snapshots:
 
   is-core-module@2.16.1:
     dependencies:
-      hasown: 2.0.2
+      hasown: 2.0.3
 
   jju@1.4.0: {}
 
@@ -290,10 +283,6 @@ snapshots:
       universalify: 2.0.1
     optionalDependencies:
       graceful-fs: 4.2.11
-
-  lru-cache@6.0.0:
-    dependencies:
-      yallist: 4.0.0
 
   path-parse@1.0.7: {}
 
@@ -306,9 +295,7 @@ snapshots:
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 
-  semver@7.5.4:
-    dependencies:
-      lru-cache: 6.0.0
+  semver@7.7.4: {}
 
   supports-color@8.1.1:
     dependencies:
@@ -319,5 +306,3 @@ snapshots:
   tapable@2.2.1: {}
 
   universalify@2.0.1: {}
-
-  yallist@4.0.0: {}
