@@ -248,35 +248,20 @@ export interface ITerminalStreamWritableOptions {
 
 // @public
 export interface ITerminalTableChars {
-    // (undocumented)
     bottom: string;
-    // (undocumented)
     bottomCenter: string;
-    // (undocumented)
     bottomLeft: string;
-    // (undocumented)
     bottomRight: string;
-    // (undocumented)
     centerCenter: string;
-    // (undocumented)
     horizontalCenter: string;
-    // (undocumented)
     left: string;
-    // (undocumented)
     leftCenter: string;
-    // (undocumented)
     right: string;
-    // (undocumented)
     rightCenter: string;
-    // (undocumented)
     top: string;
-    // (undocumented)
     topCenter: string;
-    // (undocumented)
     topLeft: string;
-    // (undocumented)
     topRight: string;
-    // (undocumented)
     verticalCenter: string;
 }
 

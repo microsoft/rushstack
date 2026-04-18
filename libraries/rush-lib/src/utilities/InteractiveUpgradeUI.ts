@@ -159,7 +159,7 @@ export const upgradeInteractive = async (pkgs: INpmCheckPackageSummary[]): Promi
       }
     }
 
-    const choicesAsATable: string[] = cliTable.toString().split('\n');
+    const choicesAsATable: string[] = cliTable.getLines();
     for (let i: number = 0; i < choices.length; i++) {
       const choice: IUpgradeInteractiveDepChoice | Separator | boolean | undefined = choices[i];
       if (typeof choice === 'object' && 'name' in choice) {
