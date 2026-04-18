@@ -277,7 +277,6 @@ export class ListAction extends BaseRushAction {
       table.push(packageRow);
     }
 
-    // eslint-disable-next-line no-console
-    console.log(table.toString());
+    table.printToTerminal(this.terminal);
   }
 }
