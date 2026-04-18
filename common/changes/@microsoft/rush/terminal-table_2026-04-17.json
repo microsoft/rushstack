@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Replace cli-table dependency with TerminalTable from @rushstack/terminal.",
+      "comment": "Replace `cli-table` dependency with `TerminalTable` from `@rushstack/terminal`.",
       "type": "patch"
     }
   ],
