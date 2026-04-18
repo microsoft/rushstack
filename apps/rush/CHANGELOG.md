@@ -1,6 +1,20 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 16 Apr 2026 05:25:41 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Apr 2026 03:47:29 GMT and should not be manually modified.
+
+## 5.175.0
+Sat, 18 Apr 2026 03:47:29 GMT
+
+### Patches
+
+- Bump the Azure cache plugin dependencies to use `@azure/identity` `~4.13.1` and `@azure/storage-blob` `~12.31.0`.
+- Remove unused dependencies: replace `glob-escape` with `fast-glob`'s `escapePath`, replace `figures.pointer` with a named const, replace `builtin-modules` with `node:module.isBuiltin()`.
+- Replace `cli-table` dependency with `TerminalTable` from `@rushstack/terminal`.
+
+### Updates
+
+- Bump semver.
+- Replace deprecated `inquirer` packages with modern per-prompt `@inquirer/*` family of packages.
 
 ## 5.174.0
 Thu, 16 Apr 2026 05:25:41 GMT

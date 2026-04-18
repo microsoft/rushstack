@@ -2,6 +2,32 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.175.0",
+      "tag": "@microsoft/rush_v5.175.0",
+      "date": "Sat, 18 Apr 2026 03:47:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump the Azure cache plugin dependencies to use `@azure/identity` `~4.13.1` and `@azure/storage-blob` `~12.31.0`."
+          },
+          {
+            "comment": "Remove unused dependencies: replace `glob-escape` with `fast-glob`'s `escapePath`, replace `figures.pointer` with a named const, replace `builtin-modules` with `node:module.isBuiltin()`."
+          },
+          {
+            "comment": "Replace `cli-table` dependency with `TerminalTable` from `@rushstack/terminal`."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Bump semver."
+          },
+          {
+            "comment": "Replace deprecated `inquirer` packages with modern per-prompt `@inquirer/*` family of packages."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.174.0",
       "tag": "@microsoft/rush_v5.174.0",
       "date": "Thu, 16 Apr 2026 05:25:41 GMT",
