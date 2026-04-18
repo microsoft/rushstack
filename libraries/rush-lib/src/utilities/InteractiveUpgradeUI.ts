@@ -5,10 +5,9 @@
 // https://github.com/dylang/npm-check/blob/master/lib/out/interactive-update.js
 // Extended to use one type of text table
 
-import CliTable from 'cli-table';
 import type { Separator } from '@inquirer/checkbox';
 
-import { AnsiEscape, Colorize } from '@rushstack/terminal';
+import { AnsiEscape, Colorize, TerminalTable } from '@rushstack/terminal';
 import type { INpmCheckPackageSummary } from '@rushstack/npm-check-fork';
 
 export interface IUIGroup {
@@ -147,7 +146,7 @@ export const upgradeInteractive = async (pkgs: INpmCheckPackageSummary[]): Promi
       .map(getChoice)
       .filter(Boolean);
 
-    const cliTable: CliTable = new CliTable({
+    const cliTable: TerminalTable = new TerminalTable({
       chars: {
         top: '',
         'top-mid': '',
