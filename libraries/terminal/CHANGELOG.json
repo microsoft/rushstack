@@ -2,6 +2,18 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.23.0",
+      "tag": "@rushstack/terminal_v0.23.0",
+      "date": "Sat, 18 Apr 2026 03:47:09 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `TerminalTable` class for rendering fixed-column tables in terminal output, with correct handling of ANSI escape sequences when calculating column widths."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.22.7",
       "tag": "@rushstack/terminal_v0.22.7",
       "date": "Sat, 18 Apr 2026 00:15:17 GMT",

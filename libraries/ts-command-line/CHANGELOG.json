@@ -2,6 +2,18 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "5.3.8",
+      "tag": "@rushstack/ts-command-line_v5.3.8",
+      "date": "Sat, 18 Apr 2026 03:47:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.23.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.3.7",
       "tag": "@rushstack/ts-command-line_v5.3.7",
       "date": "Sat, 18 Apr 2026 00:15:17 GMT",

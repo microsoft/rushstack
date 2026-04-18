@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rig-package
 
-This log was last generated on Wed, 25 Feb 2026 00:34:29 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Apr 2026 03:47:09 GMT and should not be manually modified.
+
+## 0.7.3
+Sat, 18 Apr 2026 03:47:09 GMT
+
+### Patches
+
+- Replace `strip-json-comments` with `jju.parse()` for JSONC parsing.
 
 ## 0.7.2
 Wed, 25 Feb 2026 00:34:29 GMT

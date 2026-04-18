@@ -1,6 +1,13 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Sat, 18 Apr 2026 00:15:16 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Apr 2026 03:47:09 GMT and should not be manually modified.
+
+## 2.2.16
+Sat, 18 Apr 2026 03:47:09 GMT
+
+### Patches
+
+- Remove open dependency; use `Executable.spawn()` from `node-core-library` to launch the browser.
 
 ## 2.2.15
 Sat, 18 Apr 2026 00:15:16 GMT

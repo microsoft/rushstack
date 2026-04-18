@@ -1,6 +1,13 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Sat, 18 Apr 2026 00:15:17 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Apr 2026 03:47:09 GMT and should not be manually modified.
+
+## 0.23.0
+Sat, 18 Apr 2026 03:47:09 GMT
+
+### Minor changes
+
+- Add `TerminalTable` class for rendering fixed-column tables in terminal output, with correct handling of ANSI escape sequences when calculating column widths.
 
 ## 0.22.7
 Sat, 18 Apr 2026 00:15:17 GMT
