@@ -100,6 +100,58 @@
   // "minimumReleaseAgeExclude": ["@myorg/*"],
 
   /**
+   * The trust policy controls whether pnpm should block installation of package versions where
+   * the trust level has decreased (e.g., a package previously published with provenance is now
+   * published without it). Setting this to `"no-downgrade"` enables the protection.
+   *
+   * (SUPPORTED ONLY IN PNPM 10.21.0 AND NEWER)
+   *
+   * PNPM documentation: https://pnpm.io/settings#trustpolicy
+   *
+   * Possible values are: `off` and `no-downgrade`.
+   * The default is `off`.
+   */
+  // "trustPolicy": "no-downgrade",
+
+  /**
+   * An array of package names or patterns to exclude from the trust policy check.
+   * These packages will be allowed to install even if their trust level has decreased.
+   * Patterns are supported using glob syntax (e.g., "@myorg/*" to exclude all packages
+   * from an organization).
+   *
+   * For example:
+   *
+   * "trustPolicyExclude": ["@babel/core@7.28.5", "chokidar@4.0.3", "@myorg/*"]
+   *
+   * (SUPPORTED ONLY IN PNPM 10.22.0 AND NEWER)
+   *
+   * PNPM documentation: https://pnpm.io/settings#trustpolicyexclude
+   *
+   * The default value is [].
+   */
+  // "trustPolicyExclude": ["@myorg/*"],
+
+  /**
+   * The number of minutes after which pnpm will ignore trust level downgrades. Packages
+   * published longer ago than this threshold will not be blocked even if their trust level
+   * has decreased. This is useful when enabling strict trust policies, as it allows older versions
+   * of packages (which may lack a process for publishing with signatures or provenance) to be
+   * installed without manual exclusion, assuming they are safe due to their age.
+   *
+   * For example, the following setting ignores trust level changes for packages published
+   * more than 14 days ago:
+   *
+   * "trustPolicyIgnoreAfterMinutes": 20160
+   *
+   * (SUPPORTED ONLY IN PNPM 10.27.0 AND NEWER)
+   *
+   * PNPM documentation: https://pnpm.io/settings#trustpolicyignoreafter
+   *
+   * The default value is undefined (no exclusion).
+   */
+  // "trustPolicyIgnoreAfterMinutes": 20160,
+
+  /**
    * If true, then Rush will add the `--strict-peer-dependencies` command-line parameter when
    * invoking PNPM.  This causes `rush update` to fail if there are unsatisfied peer dependencies,
    * which is an invalid state that can cause build failures or incompatible dependency versions.
@@ -292,6 +344,19 @@
    * PNPM documentation: https://pnpm.io/package_json#pnpmpackageextensions
    */
   "globalPackageExtensions": {
+    // "fork-ts-checker-webpack-plugin": {
+    //   "dependencies": {
+    //     "@babel/core": "1"
+    //   },
+    //   "peerDependencies": {
+    //     "eslint": ">= 6"
+    //   },
+    //   "peerDependenciesMeta": {
+    //     "eslint": {
+    //       "optional": true
+    //     }
+    //   }
+    // }
     "@emotion/core": {
       "peerDependencies": {
         "@types/react": ">=16"
