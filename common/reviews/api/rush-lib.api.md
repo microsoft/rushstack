@@ -1206,7 +1206,8 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly trustPolicyExclude: string[] | undefined;
     readonly trustPolicyIgnoreAfterMinutes: number | undefined;
     readonly unsupportedPackageJsonSettings: unknown | undefined;
-    updateGlobalOnlyBuiltDependencies(onlyBuiltDependencies: string[] | undefined): void;
+    updateGlobalCatalogsAsync(catalogs: Record<string, Record<string, string>> | undefined): Promise<void>;
+    updateGlobalOnlyBuiltDependenciesAsync(onlyBuiltDependencies: string[] | undefined): Promise<void>;
     updateGlobalPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void;
     readonly useWorkspaces: boolean;
 }
