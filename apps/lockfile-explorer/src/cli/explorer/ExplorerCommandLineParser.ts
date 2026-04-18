@@ -66,8 +66,7 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       defaultValue: 'default'
     });
 
-    this._terminalProvider = new ConsoleTerminalProvider();
-    this.globalTerminal = new Terminal(this._terminalProvider);
+    this.globalTerminal = terminal;
   }
 
   public get isDebug(): boolean {

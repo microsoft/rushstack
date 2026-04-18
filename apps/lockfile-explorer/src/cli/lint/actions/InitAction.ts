@@ -8,13 +8,12 @@ import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { RushConfiguration } from '@rushstack/rush-sdk';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import type { LintCommandLineParser } from '../LintCommandLineParser';
 import { LOCKFILE_EXPLORER_FOLDERNAME, LOCKFILE_LINT_JSON_FILENAME } from '../../../constants/common';
 
 export class InitAction extends CommandLineAction {
   private readonly _terminal: ITerminal;
 
-  public constructor(parser: LintCommandLineParser) {
+  public constructor(terminal: ITerminal) {
     super({
       actionName: 'init',
       summary: `Create a new ${LOCKFILE_LINT_JSON_FILENAME} config file`,
@@ -22,7 +21,7 @@ export class InitAction extends CommandLineAction {
         `This command initializes a new ${LOCKFILE_LINT_JSON_FILENAME} config file.` +
         `  The created template file includes source code comments that document the settings.`
     });
-    this._terminal = parser.globalTerminal;
+    this._terminal = terminal;
   }
 
   protected override async onExecuteAsync(): Promise<void> {
