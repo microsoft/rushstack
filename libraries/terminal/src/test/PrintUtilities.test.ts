@@ -3,17 +3,11 @@
 
 import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
 import { Terminal } from '../Terminal';
+import { AnsiEscape } from '../AnsiEscape';
+import { Colorize } from '../Colorize';
 import { PrintUtilities } from '../PrintUtilities';
 
 describe(PrintUtilities.name, () => {
-  let terminalProvider: StringBufferTerminalProvider;
-  let terminal: Terminal;
-
-  beforeEach(() => {
-    terminalProvider = new StringBufferTerminalProvider(false);
-    terminal = new Terminal(terminalProvider);
-  });
-
   afterEach(() => {
     jest.resetAllMocks();
   });
@@ -97,13 +91,27 @@ describe(PrintUtilities.name, () => {
   });
 
   describe(PrintUtilities.printMessageInBox.name, () => {
+    let terminalProvider: StringBufferTerminalProvider;
+    let terminal: Terminal;
+
+    beforeEach(() => {
+      terminalProvider = new StringBufferTerminalProvider(true);
+      terminal = new Terminal(terminalProvider);
+    });
+
+    afterEach(() => {
+      expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
+    });
+
     function validateOutput(expectedWidth: number): void {
       const outputLines: string[] = terminalProvider
         .getOutput({ normalizeSpecialCharacters: false })
         .split('\n');
-      expect(outputLines).toMatchSnapshot();
-
-      expect(outputLines.every((x) => x.length <= expectedWidth));
+      expect(
+        outputLines.every((x) => {
+          return AnsiEscape.removeCodes(x).length <= expectedWidth;
+        })
+      );
     }
 
     const MESSAGE: string =
@@ -148,6 +156,29 @@ describe(PrintUtilities.name, () => {
 
       PrintUtilities.printMessageInBox(userMessage, terminal, 50);
       validateOutput(50);
+    });
+
+    it('applies borderColor to all box border characters', () => {
+      PrintUtilities.printMessageInBox('Hello world', terminal, 30, { borderColor: Colorize.cyan });
+      validateOutput(30);
+    });
+
+    it('applies messageColor to message text inside the box', () => {
+      PrintUtilities.printMessageInBox('Hello world', terminal, 30, { messageColor: Colorize.bold });
+      validateOutput(30);
+    });
+
+    it('applies borderColor and messageColor together', () => {
+      PrintUtilities.printMessageInBox('Hello world', terminal, 30, {
+        borderColor: Colorize.gray,
+        messageColor: Colorize.bold
+      });
+      validateOutput(30);
+    });
+
+    it('applies borderColor in the banner (wide-content) fallback layout', () => {
+      PrintUtilities.printMessageInBox('Hello world', terminal, 5, { borderColor: Colorize.cyan });
+      validateOutput(5);
     });
 
     it('word-wraps a message with a trailing fragment', () => {

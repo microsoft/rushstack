@@ -2,95 +2,126 @@
 
 exports[`PrintUtilities printMessageInBox Handles a case where there is a word longer than the boxwidth 1`] = `
 Array [
-  " ══════════════════════════════════════════════════",
-  " Annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
-  " error occurred while pushing commits to",
-  " git remote. Please make sure you have",
-  " installed and enabled git lfs. The",
-  " easiest way to do that is run the",
-  " provided setup script:",
-  " ",
-  "     common/scripts/setup.sh",
-  " ",
-  " ══════════════════════════════════════════════════",
-  "",
+  "[    log]  ══════════════════════════════════════════════════[n]",
+  "[    log]  Annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn[n]",
+  "[    log]  error occurred while pushing commits to[n]",
+  "[    log]  git remote. Please make sure you have[n]",
+  "[    log]  installed and enabled git lfs. The[n]",
+  "[    log]  easiest way to do that is run the[n]",
+  "[    log]  provided setup script:[n]",
+  "[    log]  [n]",
+  "[    log]      common/scripts/setup.sh[n]",
+  "[    log]  [n]",
+  "[    log]  ══════════════════════════════════════════════════[n]",
+]
+`;
+
+exports[`PrintUtilities printMessageInBox applies borderColor and messageColor together 1`] = `
+Array [
+  "[    log]  [gray]╔════════════════════════════╗[default][n]",
+  "[    log]  [gray]║[default]        [bold]Hello world[normal]         [gray]║[default][n]",
+  "[    log]  [gray]╚════════════════════════════╝[default][n]",
+]
+`;
+
+exports[`PrintUtilities printMessageInBox applies borderColor in the banner (wide-content) fallback layout 1`] = `
+Array [
+  "[    log]  [cyan]═════[default][n]",
+  "[    log]  Hello[n]",
+  "[    log]   [n]",
+  "[    log]  world[n]",
+  "[    log]  [cyan]═════[default][n]",
+]
+`;
+
+exports[`PrintUtilities printMessageInBox applies borderColor to all box border characters 1`] = `
+Array [
+  "[    log]  [cyan]╔════════════════════════════╗[default][n]",
+  "[    log]  [cyan]║[default]        Hello world         [cyan]║[default][n]",
+  "[    log]  [cyan]╚════════════════════════════╝[default][n]",
+]
+`;
+
+exports[`PrintUtilities printMessageInBox applies messageColor to message text inside the box 1`] = `
+Array [
+  "[    log]  ╔════════════════════════════╗[n]",
+  "[    log]  ║        [bold]Hello world[normal]         ║[n]",
+  "[    log]  ╚════════════════════════════╝[n]",
 ]
 `;
 
 exports[`PrintUtilities printMessageInBox prints a long message wrapped in a box using the console width 1`] = `
 Array [
-  " ╔══════════════════════════════╗",
-  " ║    Lorem ipsum dolor sit     ║",
-  " ║      amet, consectetuer      ║",
-  " ║       adipiscing elit.       ║",
-  " ║      Maecenas porttitor      ║",
-  " ║     congue massa. Fusce      ║",
-  " ║      posuere, magna sed      ║",
-  " ║     pulvinar ultricies,      ║",
-  " ║    purus lectus malesuada    ║",
-  " ║       libero, sit amet       ║",
-  " ║      commodo magna eros      ║",
-  " ║          quis urna.          ║",
-  " ╚══════════════════════════════╝",
-  "",
+  "[    log]  ╔══════════════════════════════╗[n]",
+  "[    log]  ║    Lorem ipsum dolor sit     ║[n]",
+  "[    log]  ║      amet, consectetuer      ║[n]",
+  "[    log]  ║       adipiscing elit.       ║[n]",
+  "[    log]  ║      Maecenas porttitor      ║[n]",
+  "[    log]  ║     congue massa. Fusce      ║[n]",
+  "[    log]  ║      posuere, magna sed      ║[n]",
+  "[    log]  ║     pulvinar ultricies,      ║[n]",
+  "[    log]  ║    purus lectus malesuada    ║[n]",
+  "[    log]  ║       libero, sit amet       ║[n]",
+  "[    log]  ║      commodo magna eros      ║[n]",
+  "[    log]  ║          quis urna.          ║[n]",
+  "[    log]  ╚══════════════════════════════╝[n]",
 ]
 `;
 
 exports[`PrintUtilities printMessageInBox prints a long message wrapped in a wide box 1`] = `
 Array [
-  " ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗",
-  " ║                                              Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.                                               ║",
-  " ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝",
-  "",
+  "[    log]  ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗[n]",
+  "[    log]  ║                                              Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.                                               ║[n]",
+  "[    log]  ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝[n]",
 ]
 `;
 
 exports[`PrintUtilities printMessageInBox prints a long message wrapped in narrow box 1`] = `
 Array [
-  " ╔══════════════════╗",
-  " ║      Lorem       ║",
-  " ║      ipsum       ║",
-  " ║    dolor sit     ║",
-  " ║      amet,       ║",
-  " ║   consectetuer   ║",
-  " ║ adipiscing elit. ║",
-  " ║     Maecenas     ║",
-  " ║    porttitor     ║",
-  " ║      congue      ║",
-  " ║      massa.      ║",
-  " ║      Fusce       ║",
-  " ║     posuere,     ║",
-  " ║    magna sed     ║",
-  " ║     pulvinar     ║",
-  " ║    ultricies,    ║",
-  " ║      purus       ║",
-  " ║      lectus      ║",
-  " ║    malesuada     ║",
-  " ║     libero,      ║",
-  " ║     sit amet     ║",
-  " ║     commodo      ║",
-  " ║    magna eros    ║",
-  " ║    quis urna.    ║",
-  " ╚══════════════════╝",
-  "",
+  "[    log]  ╔══════════════════╗[n]",
+  "[    log]  ║      Lorem       ║[n]",
+  "[    log]  ║      ipsum       ║[n]",
+  "[    log]  ║    dolor sit     ║[n]",
+  "[    log]  ║      amet,       ║[n]",
+  "[    log]  ║   consectetuer   ║[n]",
+  "[    log]  ║ adipiscing elit. ║[n]",
+  "[    log]  ║     Maecenas     ║[n]",
+  "[    log]  ║    porttitor     ║[n]",
+  "[    log]  ║      congue      ║[n]",
+  "[    log]  ║      massa.      ║[n]",
+  "[    log]  ║      Fusce       ║[n]",
+  "[    log]  ║     posuere,     ║[n]",
+  "[    log]  ║    magna sed     ║[n]",
+  "[    log]  ║     pulvinar     ║[n]",
+  "[    log]  ║    ultricies,    ║[n]",
+  "[    log]  ║      purus       ║[n]",
+  "[    log]  ║      lectus      ║[n]",
+  "[    log]  ║    malesuada     ║[n]",
+  "[    log]  ║     libero,      ║[n]",
+  "[    log]  ║     sit amet     ║[n]",
+  "[    log]  ║     commodo      ║[n]",
+  "[    log]  ║    magna eros    ║[n]",
+  "[    log]  ║    quis urna.    ║[n]",
+  "[    log]  ╚══════════════════╝[n]",
 ]
 `;
 
 exports[`PrintUtilities printMessageInBox respects spaces and newlines in a pre-formatted message 1`] = `
 Array [
-  " ╔════════════════════════════════════════════════╗",
-  " ║    An error occurred while pushing commits     ║",
-  " ║    to git remote. Please make sure you have    ║",
-  " ║       installed and enabled git lfs. The       ║",
-  " ║       easiest way to do that is run the        ║",
-  " ║             provided setup script:             ║",
-  " ║                                                ║",
-  " ║            common/scripts/setup.sh             ║",
-  " ║                                                ║",
-  " ╚════════════════════════════════════════════════╝",
-  "",
+  "[    log]  ╔════════════════════════════════════════════════╗[n]",
+  "[    log]  ║    An error occurred while pushing commits     ║[n]",
+  "[    log]  ║    to git remote. Please make sure you have    ║[n]",
+  "[    log]  ║       installed and enabled git lfs. The       ║[n]",
+  "[    log]  ║       easiest way to do that is run the        ║[n]",
+  "[    log]  ║             provided setup script:             ║[n]",
+  "[    log]  ║                                                ║[n]",
+  "[    log]  ║            common/scripts/setup.sh             ║[n]",
+  "[    log]  ║                                                ║[n]",
+  "[    log]  ╚════════════════════════════════════════════════╝[n]",
 ]
 `;
+
+exports[`PrintUtilities printMessageInBox word-wraps a message with a trailing fragment 2`] = `Array []`;
 
 exports[`PrintUtilities wrapWordsToLines with prefix="| " applies pre-existing indents on both margins 1`] = `
 Array [
