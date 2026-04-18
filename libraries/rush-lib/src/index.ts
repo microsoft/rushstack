@@ -211,9 +211,3 @@ export type {
   IOperationBuildCacheOptions as _IOperationBuildCacheOptions,
   IProjectBuildCacheOptions as _IProjectBuildCacheOptions
 } from './logic/buildCache/OperationBuildCache';
-
-export {
-  PackageUpdateChecker as _PackageUpdateChecker,
-  type IPackageUpdateCheckerOptions as _IPackageUpdateCheckerOptions,
-  type IPackageUpdateResult as _IPackageUpdateResult
-} from './utilities/PackageUpdateChecker';

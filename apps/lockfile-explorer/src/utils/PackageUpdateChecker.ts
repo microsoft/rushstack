@@ -8,6 +8,11 @@ import semver from 'semver';
 import { type IPackageJson, JsonFile } from '@rushstack/node-core-library';
 
 /**
+ * TODO: If we end up expecting to use this elsewhere, we should move this to
+ * either its own package or into `@rushstack/node-core-library`.
+ */
+
+/**
  * Options for {@link _PackageUpdateChecker}.
  *
  * @internal

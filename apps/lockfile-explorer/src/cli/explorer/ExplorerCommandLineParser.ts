@@ -9,10 +9,6 @@ import express from 'express';
 import yaml from 'js-yaml';
 import cors from 'cors';
 
-import {
-  _PackageUpdateChecker as PackageUpdateChecker,
-  type _IPackageUpdateResult as IPackageUpdateResult
-} from '@microsoft/rush-lib';
 import { Executable, FileSystem, type IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import { type ITerminal, Colorize } from '@rushstack/terminal';
 import {
@@ -34,6 +30,7 @@ import { init } from '../../utils/init';
 import { PnpmfileRunner } from '../../graph/PnpmfileRunner';
 import * as lfxGraphLoader from '../../graph/lfxGraphLoader';
 import { LFX_PACKAGE_NAME, LFX_VERSION } from '../../utils/constants';
+import { type IPackageUpdateResult, PackageUpdateChecker } from '../../utils/PackageUpdateChecker';
 
 const EXPLORER_TOOL_FILENAME: 'lockfile-explorer' = 'lockfile-explorer';
 

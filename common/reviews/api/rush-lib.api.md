@@ -711,21 +711,6 @@ export interface IPackageManagerOptionsJsonBase {
     environmentVariables?: IConfigurationEnvironment;
 }
 
-// @internal
-export interface _IPackageUpdateCheckerOptions {
-    cacheExpiryMs?: number;
-    currentVersion: string;
-    forceCheck?: boolean;
-    packageName: string;
-    skip?: boolean;
-}
-
-// @internal
-export interface _IPackageUpdateResult {
-    isOutdated: boolean;
-    latestVersion: string;
-}
-
 // @alpha
 export interface IPhase {
     allowWarningsOnSuccess: boolean;
@@ -1161,12 +1146,6 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
     // @internal
     protected constructor(json: IPackageManagerOptionsJsonBase);
     readonly environmentVariables?: IConfigurationEnvironment;
-}
-
-// @internal
-export class _PackageUpdateChecker {
-    constructor(options: _IPackageUpdateCheckerOptions);
-    tryGetUpdateAsync(): Promise<_IPackageUpdateResult | undefined>;
 }
 
 // @alpha
