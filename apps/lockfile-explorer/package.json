@@ -70,7 +70,6 @@
     "cors": "~2.8.5",
     "express": "4.21.1",
     "js-yaml": "~4.1.0",
-    "open": "~8.4.0",
     "semver": "~7.7.4",
     "update-notifier": "~5.1.0"
   },

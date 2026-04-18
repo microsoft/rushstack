@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rig-package",
+      "comment": "Replace `strip-json-comments` with `jju.parse()` for JSONC parsing.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rig-package"
+}

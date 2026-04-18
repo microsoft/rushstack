@@ -603,10 +603,6 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "builtin-modules",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "buttono",
       "allowedCategories": [ "tests" ]
     },
@@ -711,10 +707,6 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "figures",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "file-loader",
       "allowedCategories": [ "tests" ]
     },
@@ -727,16 +719,8 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "giturl",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "glob",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
-    },
-    {
-      "name": "glob-escape",
-      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "heft-action-plugin",
@@ -931,10 +915,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "open",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "package-extractor-test-02",
       "allowedCategories": [ "tests" ]
     },
@@ -1036,10 +1016,6 @@
     },
     {
       "name": "string-argv",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "strip-json-comments",
       "allowedCategories": [ "libraries" ]
     },
     {
