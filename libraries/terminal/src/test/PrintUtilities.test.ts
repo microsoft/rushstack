@@ -118,12 +118,12 @@ describe(PrintUtilities.name, () => {
       'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.';
 
     it('prints a long message wrapped in narrow box', () => {
-      PrintUtilities.printMessageInBox(MESSAGE, terminal, 20);
+      PrintUtilities.printMessageInBox(MESSAGE, terminal, { boxWidth: 20 });
       validateOutput(20);
     });
 
     it('prints a long message wrapped in a wide box', () => {
-      PrintUtilities.printMessageInBox(MESSAGE, terminal, 300);
+      PrintUtilities.printMessageInBox(MESSAGE, terminal, { boxWidth: 300 });
       validateOutput(300);
     });
 
@@ -142,7 +142,7 @@ describe(PrintUtilities.name, () => {
         ''
       ].join('\n');
 
-      PrintUtilities.printMessageInBox(userMessage, terminal, 50);
+      PrintUtilities.printMessageInBox(userMessage, terminal, { boxWidth: 50 });
       validateOutput(50);
     });
 
@@ -154,30 +154,35 @@ describe(PrintUtilities.name, () => {
         ''
       ].join('\n');
 
-      PrintUtilities.printMessageInBox(userMessage, terminal, 50);
+      PrintUtilities.printMessageInBox(userMessage, terminal, { boxWidth: 50 });
       validateOutput(50);
     });
 
     it('applies borderColor to all box border characters', () => {
-      PrintUtilities.printMessageInBox('Hello world', terminal, 30, { borderColor: Colorize.cyan });
+      PrintUtilities.printMessageInBox('Hello world', terminal, { boxWidth: 30, borderColor: Colorize.cyan });
       validateOutput(30);
     });
 
     it('applies messageColor to message text inside the box', () => {
-      PrintUtilities.printMessageInBox('Hello world', terminal, 30, { messageColor: Colorize.bold });
-      validateOutput(30);
-    });
-
-    it('applies borderColor and messageColor together', () => {
-      PrintUtilities.printMessageInBox('Hello world', terminal, 30, {
-        borderColor: Colorize.gray,
+      PrintUtilities.printMessageInBox('Hello world', terminal, {
+        boxWidth: 30,
         messageColor: Colorize.bold
       });
       validateOutput(30);
     });
 
+    it('applies borderColor and messageColor together', () => {
+      PrintUtilities.printMessageInBox('Hello world', terminal, {
+        boxWidth: 30,
+        borderColor: Colorize.gray,
+        messageColor: Colorize.bold
+      });
+
+      validateOutput(30);
+    });
+
     it('applies borderColor in the banner (wide-content) fallback layout', () => {
-      PrintUtilities.printMessageInBox('Hello world', terminal, 5, { borderColor: Colorize.cyan });
+      PrintUtilities.printMessageInBox('Hello world', terminal, { boxWidth: 5, borderColor: Colorize.cyan });
       validateOutput(5);
     });
 

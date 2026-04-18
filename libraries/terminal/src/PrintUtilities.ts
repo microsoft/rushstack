@@ -6,18 +6,23 @@ import { Text } from '@rushstack/node-core-library';
 import type { ITerminal } from './ITerminal';
 
 /**
- * Options for {@link PrintUtilities.printMessageInBox}.
+ * Options for {@link PrintUtilities.(printMessageInBox:1)}.
  *
  * @public
  */
 export interface IPrintMessageInBoxOptions {
+  /**
+   * The width of the box in characters. Defaults to half of the console width.
+   */
+  boxWidth?: number;
+
   /**
    * A function to apply styling to the box border characters.
    *
    * @example
    * ```typescript
    * import { Colorize } from '@rushstack/terminal';
-   * PrintUtilities.printMessageInBox('Hello!', terminal, undefined, { borderColor: Colorize.cyan })
+   * PrintUtilities.printMessageInBox('Hello!', terminal, { borderColor: Colorize.cyan })
    * ```
    */
   borderColor?: (text: string) => string;
@@ -28,7 +33,7 @@ export interface IPrintMessageInBoxOptions {
    * @example
    * ```typescript
    * import { Colorize } from '@rushstack/terminal';
-   * PrintUtilities.printMessageInBox('Hello!', terminal, undefined, { messageColor: Colorize.bold })
+   * PrintUtilities.printMessageInBox('Hello!', terminal, { messageColor: Colorize.bold })
    * ```
    */
   messageColor?: (text: string) => string;
@@ -215,21 +220,42 @@ export class PrintUtilities {
    *
    * @param message - The message to display.
    * @param terminal - The terminal to write the message to.
-   * @param boxWidth - The width of the box, defaults to half of the console width.
-   * @param options - Optional styling for the border and message text.
+   * @param options - Controls the box width and optional styling for the border and message text.
+   * {@label WITH_OPTIONS}
    */
   public static printMessageInBox(
     message: string,
     terminal: ITerminal,
-    boxWidth?: number,
     options?: IPrintMessageInBoxOptions
+  ): void;
+  /**
+   * @deprecated Use the {@link PrintUtilities.(printMessageInBox:1)} overload instead.
+   * Pass `boxWidth` via the {@link IPrintMessageInBoxOptions.boxWidth} property.
+   */
+  public static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number): void;
+  public static printMessageInBox(
+    message: string,
+    terminal: ITerminal,
+    optionsOrBoxWidth?: IPrintMessageInBoxOptions | number
   ): void {
-    if (!boxWidth) {
-      const consoleWidth: number = PrintUtilities.getConsoleWidth() || DEFAULT_CONSOLE_WIDTH;
-      boxWidth = Math.floor(consoleWidth / 2);
+    let options: IPrintMessageInBoxOptions;
+    if (typeof optionsOrBoxWidth === 'number') {
+      options = {
+        boxWidth: optionsOrBoxWidth
+      };
+    } else {
+      options = optionsOrBoxWidth ?? {};
     }
 
-    const { borderColor, messageColor } = options ?? {};
+    const { borderColor, messageColor, boxWidth: optionsBoxWidth } = options ?? {};
+    let boxWidth: number;
+    if (!optionsBoxWidth) {
+      const consoleWidth: number = PrintUtilities.getConsoleWidth() || DEFAULT_CONSOLE_WIDTH;
+      boxWidth = Math.floor(consoleWidth / 2);
+    } else {
+      boxWidth = optionsBoxWidth;
+    }
+
     const styleBorder = (s: string): string => borderColor?.(s) ?? s;
     const styleMessage = (s: string): string => messageColor?.(s) ?? s;
 

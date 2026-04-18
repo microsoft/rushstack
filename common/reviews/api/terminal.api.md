@@ -167,6 +167,13 @@ export interface IPrefixProxyTerminalProviderOptionsBase {
     terminalProvider: ITerminalProvider;
 }
 
+// @public
+export interface IPrintMessageInBoxOptions {
+    borderColor?: (text: string) => string;
+    boxWidth?: number;
+    messageColor?: (text: string) => string;
+}
+
 // @beta
 export interface IProblemCollector {
     get problems(): ReadonlySet<IProblem>;
@@ -348,9 +355,12 @@ export class PrefixProxyTerminalProvider implements ITerminalProvider {
 // @public
 export class PrintUtilities {
     static getConsoleWidth(): number | undefined;
-    // Warning: (ae-forgotten-export) The symbol "IPrintMessageInBoxOptions" needs to be exported by the entry point index.d.ts
     // Warning: (ae-incompatible-release-tags) The symbol "printMessageInBox" is marked as @public, but its signature references "ITerminal" which is marked as @beta
-    static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number, options?: IPrintMessageInBoxOptions): void;
+    static printMessageInBox(message: string, terminal: ITerminal, options?: IPrintMessageInBoxOptions): void;
+    // Warning: (ae-incompatible-release-tags) The symbol "printMessageInBox" is marked as @public, but its signature references "ITerminal" which is marked as @beta
+    //
+    // @deprecated (undocumented)
+    static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number): void;
     static wrapWords(text: string, maxLineLength?: number, indent?: number): string;
     static wrapWords(text: string, maxLineLength?: number, linePrefix?: string): string;
     static wrapWords(text: string, maxLineLength?: number, indentOrLinePrefix?: number | string): string;
