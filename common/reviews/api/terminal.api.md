@@ -249,41 +249,41 @@ export interface ITerminalStreamWritableOptions {
 // @public
 export interface ITerminalTableChars {
     // (undocumented)
-    'bottom-left': string;
-    // (undocumented)
-    'bottom-mid': string;
-    // (undocumented)
-    'bottom-right': string;
-    // (undocumented)
-    'left-mid': string;
-    // (undocumented)
-    'mid-mid': string;
-    // (undocumented)
-    'right-mid': string;
-    // (undocumented)
-    'top-left': string;
-    // (undocumented)
-    'top-mid': string;
-    // (undocumented)
-    'top-right': string;
-    // (undocumented)
     bottom: string;
+    // (undocumented)
+    bottomCenter: string;
+    // (undocumented)
+    bottomLeft: string;
+    // (undocumented)
+    bottomRight: string;
+    // (undocumented)
+    centerCenter: string;
+    // (undocumented)
+    horizontalCenter: string;
     // (undocumented)
     left: string;
     // (undocumented)
-    mid: string;
-    // (undocumented)
-    middle: string;
+    leftCenter: string;
     // (undocumented)
     right: string;
     // (undocumented)
+    rightCenter: string;
+    // (undocumented)
     top: string;
+    // (undocumented)
+    topCenter: string;
+    // (undocumented)
+    topLeft: string;
+    // (undocumented)
+    topRight: string;
+    // (undocumented)
+    verticalCenter: string;
 }
 
 // @public
 export interface ITerminalTableOptions {
+    borderCharacters?: Partial<ITerminalTableChars>;
     borderless?: boolean;
-    chars?: Partial<ITerminalTableChars>;
     colWidths?: number[];
     head?: string[];
 }
@@ -504,6 +504,8 @@ export class TerminalStreamWritable extends Writable {
 // @public
 export class TerminalTable {
     constructor(options?: ITerminalTableOptions);
+    // (undocumented)
+    getLines(): string[];
     push(...rows: string[][]): void;
     toString(): string;
 }

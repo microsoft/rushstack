@@ -44,8 +44,3 @@ exports[`TerminalTable strips ANSI codes when calculating column widths 1`] = `
 │ [33mmy-package[0m │
 └────────────┘"
 `;
-
-exports[`TerminalTable supports empty border chars (invisible borders) 1`] = `
-" alpha      beta     g    
- longer text  x        y    "
-`;

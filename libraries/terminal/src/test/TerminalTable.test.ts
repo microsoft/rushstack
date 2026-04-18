@@ -62,7 +62,7 @@ describe(TerminalTable.name, () => {
   it('chars overrides are applied on top of borderless', () => {
     const table: TerminalTable = new TerminalTable({
       borderless: true,
-      chars: { middle: ' | ' },
+      borderCharacters: { verticalCenter: ' | ' },
       colWidths: [10, 8]
     });
     table.push(['hello', 'world']);

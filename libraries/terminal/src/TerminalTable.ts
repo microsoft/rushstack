@@ -6,24 +6,48 @@ import { AnsiEscape } from './AnsiEscape';
 /**
  * The set of characters used to draw table borders.
  *
+ * Visual reference (default Unicode box-drawing characters):
+ * ```
+ * ┌─────────┬─────────┐  ← topLeft, top (fill), topCenter, topRight
+ * │ header  │ header  │  ← left, verticalCenter, right
+ * ├─────────┼─────────┤  ← leftCenter, horizontalCenter (fill), centerCenter, rightCenter
+ * │ data    │ data    │  ← left, verticalCenter, right
+ * └─────────┴─────────┘  ← bottomLeft, bottom (fill), bottomCenter, bottomRight
+ * ```
+ *
  * @public
  */
 export interface ITerminalTableChars {
+  /** Fill character for the top border row. Default: `─` */
   top: string;
-  'top-mid': string;
-  'top-left': string;
-  'top-right': string;
+  /** Junction where a column divider meets the top border. Default: `┬` */
+  topCenter: string;
+  /** Top-left corner. Default: `┌` */
+  topLeft: string;
+  /** Top-right corner. Default: `┐` */
+  topRight: string;
+  /** Fill character for the bottom border row. Default: `─` */
   bottom: string;
-  'bottom-mid': string;
-  'bottom-left': string;
-  'bottom-right': string;
+  /** Junction where a column divider meets the bottom border. Default: `┴` */
+  bottomCenter: string;
+  /** Bottom-left corner. Default: `└` */
+  bottomLeft: string;
+  /** Bottom-right corner. Default: `┘` */
+  bottomRight: string;
+  /** Left border character for data rows. Default: `│` */
   left: string;
-  'left-mid': string;
-  mid: string;
-  'mid-mid': string;
+  /** Left end of the header/body separator row. Default: `├` */
+  leftCenter: string;
+  /** Fill character for the header/body separator row. Default: `─` */
+  horizontalCenter: string;
+  /** Junction where a column divider crosses the header/body separator. Default: `┼` */
+  centerCenter: string;
+  /** Right border character for data rows. Default: `│` */
   right: string;
-  'right-mid': string;
-  middle: string;
+  /** Right end of the header/body separator row. Default: `┤` */
+  rightCenter: string;
+  /** Column separator character within data rows. Default: `│` */
+  verticalCenter: string;
 }
 
 /**
@@ -56,43 +80,43 @@ export interface ITerminalTableOptions {
    * Applied after `borderless`, so individual characters can be restored even in
    * borderless mode.
    */
-  chars?: Partial<ITerminalTableChars>;
+  borderCharacters?: Partial<ITerminalTableChars>;
 }
 
 const BORDERLESS_CHARS: ITerminalTableChars = {
   top: '',
-  'top-mid': '',
-  'top-left': '',
-  'top-right': '',
+  topCenter: '',
+  topLeft: '',
+  topRight: '',
   bottom: '',
-  'bottom-mid': '',
-  'bottom-left': '',
-  'bottom-right': '',
+  bottomCenter: '',
+  bottomLeft: '',
+  bottomRight: '',
   left: '',
-  'left-mid': '',
-  mid: '',
-  'mid-mid': '',
+  leftCenter: '',
+  horizontalCenter: '',
+  centerCenter: '',
   right: '',
-  'right-mid': '',
-  middle: ''
+  rightCenter: '',
+  verticalCenter: ''
 };
 
 const DEFAULT_CHARS: ITerminalTableChars = {
   top: '─',
-  'top-mid': '┬',
-  'top-left': '┌',
-  'top-right': '┐',
+  topCenter: '┬',
+  topLeft: '┌',
+  topRight: '┐',
   bottom: '─',
-  'bottom-mid': '┴',
-  'bottom-left': '└',
-  'bottom-right': '┘',
+  bottomCenter: '┴',
+  bottomLeft: '└',
+  bottomRight: '┘',
   left: '│',
-  'left-mid': '├',
-  mid: '─',
-  'mid-mid': '┼',
+  leftCenter: '├',
+  horizontalCenter: '─',
+  centerCenter: '┼',
   right: '│',
-  'right-mid': '┤',
-  middle: '│'
+  rightCenter: '┤',
+  verticalCenter: '│'
 };
 
 /**
@@ -114,16 +138,16 @@ const DEFAULT_CHARS: ITerminalTableChars = {
 export class TerminalTable {
   private readonly _head: string[];
   private readonly _specifiedColWidths: (number | undefined)[];
-  private readonly _chars: ITerminalTableChars;
+  private readonly _borderCharacters: ITerminalTableChars;
   private readonly _rows: string[][];
 
-  public constructor(options?: ITerminalTableOptions) {
-    this._head = options?.head ?? [];
-    this._specifiedColWidths = options?.colWidths ?? [];
-    this._chars = {
-      ...DEFAULT_CHARS,
-      ...(options?.borderless ? BORDERLESS_CHARS : undefined),
-      ...options?.chars
+  public constructor(options: ITerminalTableOptions = {}) {
+    const { head, colWidths, borderless, borderCharacters } = options;
+    this._head = head ?? [];
+    this._specifiedColWidths = colWidths ?? [];
+    this._borderCharacters = {
+      ...(borderless ? BORDERLESS_CHARS : DEFAULT_CHARS),
+      ...borderCharacters
     };
     this._rows = [];
   }
@@ -137,32 +161,55 @@ export class TerminalTable {
     }
   }
 
-  /**
-   * Renders the table to a string.
-   */
-  public toString(): string {
-    const allRows: string[][] = this._head.length > 0 ? [this._head, ...this._rows] : this._rows;
-    const colCount: number = Math.max(0, ...allRows.map((r) => r.length));
-    if (colCount === 0) {
-      return '';
+  public getLines(): string[] {
+    const {
+      _head: head,
+      _rows: rows,
+      _specifiedColWidths: specifiedColWidths,
+      _borderCharacters: {
+        top: topSeparator,
+        topCenter: topCenterSeparator,
+        topLeft: topLeftSeparator,
+        topRight: topRightSeparator,
+        bottom: bottomSeparator,
+        bottomCenter: bottomCenterSeparator,
+        bottomLeft: bottomLeftSeparator,
+        bottomRight: bottomRightSeparator,
+        left: leftSeparator,
+        leftCenter: leftCenterSeparator,
+        horizontalCenter: horizontalCenterSeparator,
+        centerCenter: centerCenterSeparator,
+        right: rightSeparator,
+        rightCenter: rightCenterSeparator,
+        verticalCenter: verticalCenterSeparator
+      }
+    } = this;
+
+    const allRows: string[][] = [head, ...rows];
+    const columnCount: number = Math.max(0, ...allRows.map((r) => r.length));
+    if (columnCount === 0) {
+      return [];
     }
 
     // Resolve final column widths: use specified width if provided, otherwise auto-size from content.
-    const colWidths: number[] = [];
-    for (let col: number = 0; col < colCount; col++) {
-      const specified: number | undefined = this._specifiedColWidths[col];
+    const columnWidths: number[] = [];
+    for (let columnIndex: number = 0; columnIndex < columnCount; columnIndex++) {
+      const specified: number | undefined = specifiedColWidths[columnIndex];
       if (specified !== undefined) {
-        colWidths.push(specified);
+        columnWidths.push(specified);
       } else {
         let maxContent: number = 0;
         for (const row of allRows) {
-          if (col < row.length) {
-            const w: number = AnsiEscape.removeCodes(row[col]).length;
-            if (w > maxContent) maxContent = w;
+          if (columnIndex < row.length) {
+            const width: number = AnsiEscape.removeCodes(row[columnIndex]).length;
+            if (width > maxContent) {
+              maxContent = width;
+            }
           }
         }
+
         // +2 for one character of padding on each side
-        colWidths.push(maxContent + 2);
+        columnWidths.push(maxContent + 2);
       }
     }
 
@@ -173,44 +220,48 @@ export class TerminalTable {
       midChar: string,
       rightChar: string
     ): string | undefined => {
-      const line: string = leftChar + colWidths.map((w) => fillChar.repeat(w)).join(midChar) + rightChar;
+      const line: string = leftChar + columnWidths.map((w) => fillChar.repeat(w)).join(midChar) + rightChar;
       return line.length > 0 ? line : undefined;
     };
 
     // Renders a single data row.
     const renderRow = (row: string[]): string => {
       const cells: string[] = [];
-      for (let col: number = 0; col < colCount; col++) {
+      for (let col: number = 0; col < columnCount; col++) {
         const content: string = col < row.length ? row[col] : '';
         const visualWidth: number = AnsiEscape.removeCodes(content).length;
         // 1 char of left-padding; right-padding fills the remainder of the column width.
-        const padRight: number = Math.max(colWidths[col] - 1 - visualWidth, 0);
+        const padRight: number = Math.max(columnWidths[col] - 1 - visualWidth, 0);
         cells.push(' ' + content + ' '.repeat(padRight));
       }
-      return this._chars.left + cells.join(this._chars.middle) + this._chars.right;
+      return leftSeparator + cells.join(verticalCenterSeparator) + rightSeparator;
     };
 
     const lines: string[] = [];
 
     // Top border
     const topLine: string | undefined = renderSeparator(
-      this._chars['top-left'],
-      this._chars.top,
-      this._chars['top-mid'],
-      this._chars['top-right']
+      topLeftSeparator,
+      topSeparator,
+      topCenterSeparator,
+      topRightSeparator
     );
-    if (topLine !== undefined) lines.push(topLine);
+    if (topLine !== undefined) {
+      lines.push(topLine);
+    }
 
     // Header row + separator
-    if (this._head.length > 0) {
-      lines.push(renderRow(this._head));
+    if (head.length > 0) {
+      lines.push(renderRow(head));
       const headerSep: string | undefined = renderSeparator(
-        this._chars['left-mid'],
-        this._chars.mid,
-        this._chars['mid-mid'],
-        this._chars['right-mid']
+        leftCenterSeparator,
+        horizontalCenterSeparator,
+        centerCenterSeparator,
+        rightCenterSeparator
       );
-      if (headerSep !== undefined) lines.push(headerSep);
+      if (headerSep !== undefined) {
+        lines.push(headerSep);
+      }
     }
 
     // Data rows (no separator between them)
@@ -220,15 +271,23 @@ export class TerminalTable {
 
     // Bottom border
     const bottomLine: string | undefined = renderSeparator(
-      this._chars['bottom-left'],
-      this._chars.bottom,
-      this._chars['bottom-mid'],
-      this._chars['bottom-right']
+      bottomLeftSeparator,
+      bottomSeparator,
+      bottomCenterSeparator,
+      bottomRightSeparator
     );
     if (bottomLine !== undefined) {
       lines.push(bottomLine);
     }
 
+    return lines;
+  }
+
+  /**
+   * Renders the table to a string.
+   */
+  public toString(): string {
+    const lines: string[] = this.getLines();
     return lines.join('\n');
   }
 }
