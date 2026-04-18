@@ -87,4 +87,32 @@ describe(TerminalTable.name, () => {
     const table: TerminalTable = new TerminalTable();
     expect(table.toString()).toBe('');
   });
+
+  it('renders a table with more than two columns', () => {
+    const table: TerminalTable = new TerminalTable({ head: ['Name', 'Version', 'License'] });
+    table.push(['@rushstack/terminal', '1.0.0', 'MIT']);
+    table.push(['@rushstack/heft', '2.0.0', 'MIT']);
+    expect(table.toString()).toMatchSnapshot();
+  });
+
+  it('renders a single data row with no spurious trailing separator', () => {
+    const table: TerminalTable = new TerminalTable();
+    table.push(['only', 'row']);
+    expect(table.toString()).toMatchSnapshot();
+  });
+
+  it('renders a header with no data rows', () => {
+    const table: TerminalTable = new TerminalTable({ head: ['Name', 'Version'] });
+    expect(table.toString()).toMatchSnapshot();
+  });
+
+  it('setting horizontalCenter to empty suppresses row and header separators', () => {
+    const table: TerminalTable = new TerminalTable({
+      head: ['A', 'B'],
+      borderCharacters: { horizontalCenter: '' }
+    });
+    table.push(['x', 'y']);
+    table.push(['z', 'w']);
+    expect(table.toString()).toMatchSnapshot();
+  });
 });

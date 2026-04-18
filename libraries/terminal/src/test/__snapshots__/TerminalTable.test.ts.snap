@@ -15,18 +15,43 @@ exports[`TerminalTable borderless: true suppresses all borders 1`] = `
 
 exports[`TerminalTable chars overrides are applied on top of borderless 1`] = `" hello     |  world  "`;
 
+exports[`TerminalTable renders a header with no data rows 1`] = `
+"┌──────┬─────────┐
+│ Name │ Version │
+├──────┼─────────┤
+└──────┴─────────┘"
+`;
+
+exports[`TerminalTable renders a single data row with no spurious trailing separator 1`] = `
+"┌──────┬─────┐
+│ only │ row │
+└──────┴─────┘"
+`;
+
 exports[`TerminalTable renders a table with a header and rows 1`] = `
 "┌─────────────────────┬─────────┐
 │ Name                │ Version │
 ├─────────────────────┼─────────┤
 │ @rushstack/terminal │ 1.0.0   │
+├─────────────────────┼─────────┤
 │ @rushstack/heft     │ 2.0.0   │
 └─────────────────────┴─────────┘"
+`;
+
+exports[`TerminalTable renders a table with more than two columns 1`] = `
+"┌─────────────────────┬─────────┬─────────┐
+│ Name                │ Version │ License │
+├─────────────────────┼─────────┼─────────┤
+│ @rushstack/terminal │ 1.0.0   │ MIT     │
+├─────────────────────┼─────────┼─────────┤
+│ @rushstack/heft     │ 2.0.0   │ MIT     │
+└─────────────────────┴─────────┴─────────┘"
 `;
 
 exports[`TerminalTable renders a table without a header 1`] = `
 "┌─────┬─────┐
 │ foo │ bar │
+├─────┼─────┤
 │ baz │ qux │
 └─────┴─────┘"
 `;
@@ -35,6 +60,14 @@ exports[`TerminalTable respects fixed colWidths 1`] = `
 "┌──────────┬────────┐
 │ hi       │ there  │
 └──────────┴────────┘"
+`;
+
+exports[`TerminalTable setting horizontalCenter to empty suppresses row and header separators 1`] = `
+"┌───┬───┐
+│ A │ B │
+│ x │ y │
+│ z │ w │
+└───┴───┘"
 `;
 
 exports[`TerminalTable strips ANSI codes when calculating column widths 1`] = `

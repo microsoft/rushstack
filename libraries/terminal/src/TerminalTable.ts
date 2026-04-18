@@ -122,9 +122,6 @@ const DEFAULT_CHARS: ITerminalTableChars = {
 /**
  * Renders text data as a fixed-column table suitable for terminal output.
  *
- * Designed as a drop-in replacement for the `cli-table` and `cli-table3` npm packages,
- * with correct handling of ANSI escape sequences when calculating column widths.
- *
  * @example
  * ```typescript
  * const table = new TerminalTable({ head: ['Name', 'Version'] });
@@ -221,7 +218,7 @@ export class TerminalTable {
       rightChar: string
     ): string | undefined => {
       const line: string = leftChar + columnWidths.map((w) => fillChar.repeat(w)).join(midChar) + rightChar;
-      return line.length > 0 ? line : undefined;
+      return fillChar.length > 0 ? line : undefined;
     };
 
     // Renders a single data row.
@@ -264,9 +261,20 @@ export class TerminalTable {
       }
     }
 
-    // Data rows (no separator between them)
-    for (const row of this._rows) {
-      lines.push(renderRow(row));
+    // Data rows with separators between them
+    for (let i: number = 0; i < this._rows.length; i++) {
+      lines.push(renderRow(this._rows[i]));
+      if (i < this._rows.length - 1) {
+        const rowSep: string | undefined = renderSeparator(
+          leftCenterSeparator,
+          horizontalCenterSeparator,
+          centerCenterSeparator,
+          rightCenterSeparator
+        );
+        if (rowSep !== undefined) {
+          lines.push(rowSep);
+        }
+      }
     }
 
     // Bottom border
