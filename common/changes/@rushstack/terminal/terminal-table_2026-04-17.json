@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Add TerminalTable class: a drop-in replacement for the cli-table and cli-table3 npm packages that correctly handles ANSI escape sequences when calculating column widths.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}
