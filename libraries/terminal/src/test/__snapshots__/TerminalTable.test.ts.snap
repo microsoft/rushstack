@@ -8,6 +8,13 @@ exports[`TerminalTable auto-sizes columns to the widest content 1`] = `
 └───────┴────────────────────────┘"
 `;
 
+exports[`TerminalTable borderless: true suppresses all borders 1`] = `
+" alpha     beta    g    
+ longer text x       y    "
+`;
+
+exports[`TerminalTable chars overrides are applied on top of borderless 1`] = `" hello     |  world  "`;
+
 exports[`TerminalTable renders a table with a header and rows 1`] = `
 "┌─────────────────────┬─────────┐
 │ Name                │ Version │

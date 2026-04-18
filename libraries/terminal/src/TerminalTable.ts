@@ -44,11 +44,38 @@ export interface ITerminalTableOptions {
   colWidths?: number[];
 
   /**
+   * If `true`, all border and separator lines are suppressed. Columns are visually
+   * separated only by the built-in one-character left-padding of each cell.
+   * This is a convenient shorthand for setting every entry in `chars` to `''`.
+   */
+  borderless?: boolean;
+
+  /**
    * Overrides for individual border characters.
    * Pass an empty string for any character to suppress that part of the border.
+   * Applied after `borderless`, so individual characters can be restored even in
+   * borderless mode.
    */
   chars?: Partial<ITerminalTableChars>;
 }
+
+const BORDERLESS_CHARS: ITerminalTableChars = {
+  top: '',
+  'top-mid': '',
+  'top-left': '',
+  'top-right': '',
+  bottom: '',
+  'bottom-mid': '',
+  'bottom-left': '',
+  'bottom-right': '',
+  left: '',
+  'left-mid': '',
+  mid: '',
+  'mid-mid': '',
+  right: '',
+  'right-mid': '',
+  middle: ''
+};
 
 const DEFAULT_CHARS: ITerminalTableChars = {
   top: '─',
@@ -93,7 +120,11 @@ export class TerminalTable {
   public constructor(options?: ITerminalTableOptions) {
     this._head = options?.head ?? [];
     this._specifiedColWidths = options?.colWidths ?? [];
-    this._chars = { ...DEFAULT_CHARS, ...options?.chars };
+    this._chars = {
+      ...DEFAULT_CHARS,
+      ...(options?.borderless ? BORDERLESS_CHARS : undefined),
+      ...options?.chars
+    };
     this._rows = [];
   }
 

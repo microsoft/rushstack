@@ -37,25 +37,9 @@ describe(TerminalTable.name, () => {
     expect(row).toMatchSnapshot();
   });
 
-  it('supports empty border chars (invisible borders)', () => {
+  it('borderless: true suppresses all borders', () => {
     const table: TerminalTable = new TerminalTable({
-      chars: {
-        top: '',
-        'top-mid': '',
-        'top-left': '',
-        'top-right': '',
-        bottom: '',
-        'bottom-mid': '',
-        'bottom-left': '',
-        'bottom-right': '',
-        left: '',
-        'left-mid': '',
-        mid: '',
-        'mid-mid': '',
-        right: '',
-        'right-mid': '',
-        middle: ' '
-      },
+      borderless: true,
       colWidths: [10, 8, 6]
     });
     table.push(['alpha', 'beta', 'g']);
@@ -63,25 +47,9 @@ describe(TerminalTable.name, () => {
     expect(table.toString()).toMatchSnapshot();
   });
 
-  it('produces one line per row when borders are empty (for inquirer-style usage)', () => {
+  it('produces one line per row when borderless (for inquirer-style usage)', () => {
     const table: TerminalTable = new TerminalTable({
-      chars: {
-        top: '',
-        'top-mid': '',
-        'top-left': '',
-        'top-right': '',
-        bottom: '',
-        'bottom-mid': '',
-        'bottom-left': '',
-        'bottom-right': '',
-        left: '',
-        'left-mid': '',
-        mid: '',
-        'mid-mid': '',
-        right: '',
-        'right-mid': '',
-        middle: ' '
-      },
+      borderless: true,
       colWidths: [20, 10]
     });
     table.push(['row one', 'v1']);
@@ -89,6 +57,18 @@ describe(TerminalTable.name, () => {
     table.push(['row three', 'v3']);
     const lines: string[] = table.toString().split('\n');
     expect(lines.length).toBe(3);
+  });
+
+  it('chars overrides are applied on top of borderless', () => {
+    const table: TerminalTable = new TerminalTable({
+      borderless: true,
+      chars: { middle: ' | ' },
+      colWidths: [10, 8]
+    });
+    table.push(['hello', 'world']);
+    const row: string = table.toString();
+    expect(row).toContain(' | ');
+    expect(table.toString()).toMatchSnapshot();
   });
 
   it('strips ANSI codes when calculating column widths', () => {

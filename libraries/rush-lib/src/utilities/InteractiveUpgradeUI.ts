@@ -147,29 +147,15 @@ export const upgradeInteractive = async (pkgs: INpmCheckPackageSummary[]): Promi
       .filter(Boolean);
 
     const cliTable: TerminalTable = new TerminalTable({
-      chars: {
-        top: '',
-        'top-mid': '',
-        'top-left': '',
-        'top-right': '',
-        bottom: '',
-        'bottom-mid': '',
-        'bottom-left': '',
-        'bottom-right': '',
-        left: '',
-        'left-mid': '',
-        mid: '',
-        'mid-mid': '',
-        right: '',
-        'right-mid': '',
-        middle: ' '
-      },
+      borderless: true,
       colWidths: [50, 10, 3, 10, 100]
     });
 
     for (const choice of choices) {
       if (typeof choice === 'object' && 'name' in choice) {
-        cliTable.push(choice.name);
+        // choice.name is string[] at this point (set by label()); it is only replaced
+        // with a string after the table is rendered below.
+        cliTable.push(choice.name as string[]);
       }
     }
 
