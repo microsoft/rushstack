@@ -268,9 +268,11 @@ export interface ITerminalTableChars {
 // @public
 export interface ITerminalTableOptions {
     borderCharacters?: Partial<ITerminalTableChars>;
+    borderColor?: (text: string) => string;
     borderless?: boolean;
     colWidths?: number[];
     head?: string[];
+    headingColor?: (text: string) => string;
 }
 
 // @public

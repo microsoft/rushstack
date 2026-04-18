@@ -8,12 +8,38 @@ exports[`TerminalTable auto-sizes columns to the widest content 1`] = `
 └───────┴────────────────────────┘"
 `;
 
+exports[`TerminalTable borderColor and headingColor can be combined 1`] = `
+"[gray]┌──────┬─────────┐[default]
+[gray]│[default] [bold]Name[normal] [gray]│[default] [bold]Version[normal] [gray]│[default]
+[gray]├──────┼─────────┤[default]
+[gray]│[default] foo  [gray]│[default] 1.0.0   [gray]│[default]
+[gray]└──────┴─────────┘[default]"
+`;
+
+exports[`TerminalTable borderColor is applied to all border characters 1`] = `
+"[cyan]┌──────┬─────────┐[default]
+[cyan]│[default] Name [cyan]│[default] Version [cyan]│[default]
+[cyan]├──────┼─────────┤[default]
+[cyan]│[default] foo  [cyan]│[default] 1.0.0   [cyan]│[default]
+[cyan]├──────┼─────────┤[default]
+[cyan]│[default] bar  [cyan]│[default] 2.0.0   [cyan]│[default]
+[cyan]└──────┴─────────┘[default]"
+`;
+
 exports[`TerminalTable borderless: true suppresses all borders 1`] = `
 " alpha     beta    g    
  longer text x       y    "
 `;
 
 exports[`TerminalTable chars overrides are applied on top of borderless 1`] = `" hello     |  world  "`;
+
+exports[`TerminalTable headingColor is applied to header cell text but not to borders or data rows 1`] = `
+"┌──────┬─────────┐
+│ [bold]Name[normal] │ [bold]Version[normal] │
+├──────┼─────────┤
+│ foo  │ 1.0.0   │
+└──────┴─────────┘"
+`;
 
 exports[`TerminalTable renders a header with no data rows 1`] = `
 "┌──────┬─────────┐
@@ -74,6 +100,6 @@ exports[`TerminalTable strips ANSI codes when calculating column widths 1`] = `
 "┌────────────┐
 │ Package    │
 ├────────────┤
-│ [33mmy-package[0m │
+│ [yellow]my-package[default] │
 └────────────┘"
 `;
