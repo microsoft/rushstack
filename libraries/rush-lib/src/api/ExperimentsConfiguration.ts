@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
-import type { IExperimentsJson } from '@rushstack/rush-schemas/lib/experiments.zod';
+import type { IExperimentsJson } from '@rushstack/rush-schemas';
 import { Colorize } from '@rushstack/terminal';
 
 import schemaJson from '../schemas/experiments.schema.json';

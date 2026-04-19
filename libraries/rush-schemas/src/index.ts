@@ -21,10 +21,6 @@ export {
 
 export { cobuildSchema, type ICobuildJson, default as defaultCobuildSchema } from './cobuild.zod';
 
-export {
-  repoStateSchema,
-  type IRepoStateJson,
-  default as defaultRepoStateSchema
-} from './repo-state.zod';
+export { repoStateSchema, default as defaultRepoStateSchema } from './repo-state.zod';
 
 export { buildCacheSchema, default as defaultBuildCacheSchema } from './build-cache.zod';

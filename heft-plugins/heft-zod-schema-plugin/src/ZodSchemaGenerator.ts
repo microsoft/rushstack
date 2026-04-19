@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import { FileSystem, NewlineKind } from '@rushstack/node-core-library';
+import { FileSystem, NewlineKind, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import {
@@ -20,20 +20,20 @@ import {
  */
 export interface IZodSchemaGeneratorOptions {
   /**
-   * The project root folder. All `inputGlobs` and `outputFolder` paths are resolved
-   * relative to this folder.
+   * The project root folder. Relative `inputGlobs` and `outputFolder` paths are resolved
+   * relative to this folder; absolute paths are accepted as-is.
    */
   buildFolderPath: string;
 
   /**
-   * Globs (relative to `buildFolderPath`) identifying the compiled JavaScript modules
-   * that export zod schemas.
+   * Globs identifying the compiled JavaScript modules that export zod schemas.
+   * May be relative to `buildFolderPath` or absolute.
    */
   inputGlobs: string[];
 
   /**
-   * Folder (relative to `buildFolderPath`) where the generated `*.schema.json` files
-   * will be written.
+   * Folder where the generated `*.schema.json` files will be written. May be
+   * relative to `buildFolderPath` or absolute.
    */
   outputFolder: string;
 
@@ -108,7 +108,12 @@ export class ZodSchemaGenerator {
     // Defer requiring fast-glob until use to keep startup cheap when the plugin
     // is loaded but no work is needed.
     const glob: typeof import('fast-glob') = require('fast-glob');
-    const matches: string[] = await glob(this._options.inputGlobs, {
+    // fast-glob requires forward-slash patterns; convert any platform-specific
+    // separators (Windows backslashes from `__dirname`-rooted patterns, etc.).
+    const normalizedGlobs: string[] = this._options.inputGlobs.map((pattern) =>
+      Path.convertToSlashes(pattern)
+    );
+    const matches: string[] = await glob(normalizedGlobs, {
       cwd: this._options.buildFolderPath,
       absolute: true,
       onlyFiles: true
@@ -170,7 +175,7 @@ export class ZodSchemaGenerator {
         exportName === 'default'
           ? `${baseName}${SCHEMA_FILE_EXTENSION}`
           : `${baseName}.${exportName}${SCHEMA_FILE_EXTENSION}`;
-      const outputFilePath: string = path.join(
+      const outputFilePath: string = path.resolve(
         this._options.buildFolderPath,
         this._options.outputFolder,
         outputFileName

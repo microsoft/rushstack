@@ -60,13 +60,4 @@ export const repoStateSchema = withSchemaMeta(
   }
 );
 
-/**
- * Raw shape of `repo-state.json`. This file is internal state managed by Rush
- * and is not part of the public API surface, so the `z.infer` form is used
- * directly as the source of truth.
- *
- * @internal
- */
-export type IRepoStateJson = Omit<z.infer<typeof repoStateSchema>, '$schema'>;
-
 export default repoStateSchema;

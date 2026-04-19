@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'node:path';
-
 import { FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { ZodSchemaGenerator, type IGeneratedSchema } from '../ZodSchemaGenerator';
 
 const projectFolder: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
-const compiledFixturesFolder: string = path.join(__dirname, 'fixtures');
-const outputFolder: string = path.join(projectFolder, 'temp/test-zod-schema-output');
+const compiledFixturesFolder: string = `${__dirname}/fixtures`;
+const outputFolder: string = `${projectFolder}/temp/test-zod-schema-output`;
 
 async function readJsonAsync(absolutePath: string): Promise<unknown> {
   const text: string = await FileSystem.readFileAsync(absolutePath);
@@ -24,8 +22,8 @@ describe(ZodSchemaGenerator.name, () => {
   it('emits a JSON schema for a basic zod default export', async () => {
     const generator: ZodSchemaGenerator = new ZodSchemaGenerator({
       buildFolderPath: projectFolder,
-      inputGlobs: [path.relative(projectFolder, path.join(compiledFixturesFolder, 'basic.zod.js'))],
-      outputFolder: path.relative(projectFolder, outputFolder),
+      inputGlobs: [`${compiledFixturesFolder}/basic.zod.js`],
+      outputFolder,
       exportName: 'default',
       indent: 2
     });
@@ -41,10 +39,8 @@ describe(ZodSchemaGenerator.name, () => {
   it('applies withSchemaMeta() metadata, including the TSDoc release tag', async () => {
     const generator: ZodSchemaGenerator = new ZodSchemaGenerator({
       buildFolderPath: projectFolder,
-      inputGlobs: [
-        path.relative(projectFolder, path.join(compiledFixturesFolder, 'with-tsdoc-tag.zod.js'))
-      ],
-      outputFolder: path.relative(projectFolder, outputFolder),
+      inputGlobs: [`${compiledFixturesFolder}/with-tsdoc-tag.zod.js`],
+      outputFolder,
       exportName: 'default',
       indent: 2
     });
@@ -64,25 +60,23 @@ describe(ZodSchemaGenerator.name, () => {
   it('emits one schema file per named ZodType export when exportName is "*"', async () => {
     const generator: ZodSchemaGenerator = new ZodSchemaGenerator({
       buildFolderPath: projectFolder,
-      inputGlobs: [
-        path.relative(projectFolder, path.join(compiledFixturesFolder, 'named-exports.zod.js'))
-      ],
-      outputFolder: path.relative(projectFolder, outputFolder),
+      inputGlobs: [`${compiledFixturesFolder}/named-exports.zod.js`],
+      outputFolder,
       exportName: '*',
       indent: 2
     });
 
     const results: IGeneratedSchema[] = await generator.generateAsync();
     expect(results).toHaveLength(2);
-    const fileNames: string[] = results.map((r) => path.basename(r.outputFilePath)).sort();
+    const fileNames: string[] = results.map((r) => r.outputFilePath.split(/[\\/]/).pop()!).sort();
     expect(fileNames).toEqual(['named-exports.alphaSchema.schema.json', 'named-exports.betaSchema.schema.json']);
   });
 
   it('produces deterministic output and skips writes when contents are unchanged', async () => {
     const generator: ZodSchemaGenerator = new ZodSchemaGenerator({
       buildFolderPath: projectFolder,
-      inputGlobs: [path.relative(projectFolder, path.join(compiledFixturesFolder, 'basic.zod.js'))],
-      outputFolder: path.relative(projectFolder, outputFolder),
+      inputGlobs: [`${compiledFixturesFolder}/basic.zod.js`],
+      outputFolder,
       exportName: 'default',
       indent: 2
     });
@@ -98,8 +92,8 @@ describe(ZodSchemaGenerator.name, () => {
   it('throws a clear error when the requested export is not a zod schema', async () => {
     const generator: ZodSchemaGenerator = new ZodSchemaGenerator({
       buildFolderPath: projectFolder,
-      inputGlobs: [path.relative(projectFolder, path.join(compiledFixturesFolder, 'basic.zod.js'))],
-      outputFolder: path.relative(projectFolder, outputFolder),
+      inputGlobs: [`${compiledFixturesFolder}/basic.zod.js`],
+      outputFolder,
       exportName: 'doesNotExist',
       indent: 2
     });

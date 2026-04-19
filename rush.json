@@ -1312,7 +1312,7 @@
       "packageName": "@rushstack/rush-schemas",
       "projectFolder": "libraries/rush-schemas",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "rush"
     },
     {
       "packageName": "@rushstack/rush-sdk",

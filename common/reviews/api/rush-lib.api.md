@@ -17,7 +17,7 @@ import { CredentialCache } from '@rushstack/credential-cache';
 import { HookMap } from 'tapable';
 import { ICredentialCacheEntry } from '@rushstack/credential-cache';
 import { ICredentialCacheOptions } from '@rushstack/credential-cache';
-import type { IExperimentsJson } from '@rushstack/rush-schemas/lib/experiments.zod';
+import type { IExperimentsJson } from '@rushstack/rush-schemas';
 import { IFileDiffStatus } from '@rushstack/package-deps-hash';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { IPrefixMatch } from '@rushstack/lookup-by-path';
