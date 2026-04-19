@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ZodSchemaGenerator applies withSchemaMeta() metadata, including the TSDoc release tag 1`] = `
+Object {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": Object {
+    "value": Object {
+      "description": "A value.",
+      "type": "string",
+    },
+  },
+  "title": "Public Config",
+  "type": "object",
+  "x-tsdoc-release-tag": "@public",
+}
+`;
+
+exports[`ZodSchemaGenerator emits a JSON schema for a basic zod default export 1`] = `
+Object {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": Object {
+    "count": Object {
+      "description": "The number of items.",
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer",
+    },
+    "enabled": Object {
+      "description": "Whether the feature is enabled.",
+      "type": "boolean",
+    },
+    "name": Object {
+      "description": "The name of the item.",
+      "type": "string",
+    },
+  },
+  "required": Array [
+    "name",
+  ],
+  "type": "object",
+}
+`;

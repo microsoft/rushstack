@@ -1,0 +1,52 @@
+{
+  "name": "@rushstack/heft-zod-schema-plugin",
+  "version": "0.1.0",
+  "description": "A Heft plugin for generating JSON Schema files (*.schema.json) from zod validators.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "heft-plugins/heft-zod-schema-plugin"
+  },
+  "homepage": "https://rushstack.io/pages/heft/overview/",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean",
+    "start": "heft build-watch",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "1.2.15",
+    "zod": ">=4.0.0"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "fast-glob": "~3.3.1"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*",
+    "zod": "~4.3.6"
+  },
+  "exports": {
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./heft-plugin.json": "./heft-plugin.json",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
+  "sideEffects": false
+}

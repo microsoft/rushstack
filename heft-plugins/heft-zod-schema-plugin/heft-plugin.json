@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
+  "taskPlugins": [
+    {
+      "pluginName": "zod-schema-plugin",
+      "entryPoint": "./lib-commonjs/HeftZodSchemaPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/heft-zod-schema-plugin.schema.json"
+    }
+  ]
+}
