@@ -175,19 +175,20 @@ export const experimentsSchema = withSchemaMeta(
 
       usePnpmFrozenLockfileForRushInstall: booleanFlag(
         "By default, 'rush install' passes --no-prefer-frozen-lockfile to 'pnpm install'. " +
-          "Set this option to true to pass '--frozen-lockfile' instead."
+          "Set this option to true to pass '--frozen-lockfile' instead for faster installs."
       ),
       usePnpmPreferFrozenLockfileForRushUpdate: booleanFlag(
         "By default, 'rush update' passes --no-prefer-frozen-lockfile to 'pnpm install'. " +
-          "Set this option to true to pass '--prefer-frozen-lockfile' instead."
+          "Set this option to true to pass '--prefer-frozen-lockfile' instead to minimize shrinkwrap changes."
       ),
       usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate: booleanFlag(
         "By default, 'rush update' runs as a single operation. Set this option to true to instead update the lockfile with `--lockfile-only`, then perform a `--frozen-lockfile` install. " +
           'Necessary when using the `afterAllResolved` hook in .pnpmfile.cjs.'
       ),
       omitImportersFromPreventManualShrinkwrapChanges: booleanFlag(
-        "If using the 'preventManualShrinkwrapChanges' option, only prevent manual changes to the total set of external dependencies referenced by the repository, not which projects reference which dependencies. " +
-          'This offers a balance between lockfile integrity and merge conflicts.'
+        "If using the 'preventManualShrinkwrapChanges' option, restricts the hash to only include the layout of " +
+          'external dependencies. Used to allow links between workspace projects or the addition/removal of ' +
+          'references to existing dependency versions to not cause hash changes.'
       ),
       noChmodFieldInTarHeaderNormalization: booleanFlag(
         'If true, the chmod field in temporary project tar headers will not be normalized. This normalization can help ensure consistent tarball integrity across platforms.'
@@ -220,7 +221,9 @@ export const experimentsSchema = withSchemaMeta(
         'If true, when running in watch mode, Rush will check for phase scripts named `_phase:<name>:ipc` and run them instead of `_phase:<name>` if they exist. The created child process will be provided with an IPC channel and expected to persist across invocations.'
       ),
       allowCobuildWithoutCache: booleanFlag(
-        'When using cobuilds, this experiment allows uncacheable operations to benefit from cobuild orchestration without using the build cache.'
+        'Allow cobuilds without using the build cache to store previous execution info. When setting up ' +
+          'distributed builds, Rush will allow uncacheable projects to still leverage the cobuild feature. ' +
+          "This is useful when you want to speed up operations that can't (or shouldn't) be cached."
       ),
       rushAlerts: booleanFlag(
         "(UNDER DEVELOPMENT) The Rush alerts feature provides a way to send announcements to engineers working in the monorepo, by printing directly in the user's shell window when they invoke Rush commands. This ensures that important notices will be seen by anyone doing active development, since people often ignore normal discussion group messages or don't know to subscribe."

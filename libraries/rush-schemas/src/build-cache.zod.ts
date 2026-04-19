@@ -126,7 +126,7 @@ const amazonS3Configuration: z.ZodObject<{
     .describe(
       '(Required unless s3Bucket is specified) The Amazon S3 endpoint of the bucket to use for build cache ' +
         '(e.g. "my-bucket.s3.us-east-2.amazonaws.com" or "http://localhost:9000").\n' +
-        'This shold not include any path, use the s3Prefix to set the path.'
+        'This should not include any path, use the s3Prefix to set the path.'
     )
     .optional(),
   s3Region: z
