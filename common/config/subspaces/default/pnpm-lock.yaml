@@ -4113,6 +4113,9 @@ importers:
       '@rushstack/rush-pnpm-kit-v9':
         specifier: workspace:*
         version: link:../rush-pnpm-kit-v9
+      '@rushstack/rush-schemas':
+        specifier: workspace:*
+        version: link:../rush-schemas
       '@rushstack/stream-collator':
         specifier: workspace:*
         version: link:../stream-collator
@@ -4189,9 +4192,6 @@ importers:
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-webpack5-plugin
-      '@rushstack/heft-zod-schema-plugin':
-        specifier: workspace:*
-        version: link:../../heft-plugins/heft-zod-schema-plugin
       '@rushstack/operation-graph':
         specifier: workspace:*
         version: link:../operation-graph
@@ -4234,9 +4234,6 @@ importers:
       webpack:
         specifier: ~5.105.2
         version: 5.105.4
-      zod:
-        specifier: ~4.3.6
-        version: 4.3.6
 
   ../../../libraries/rush-pnpm-kit-v10:
     dependencies:
@@ -4291,6 +4288,25 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
+  ../../../libraries/rush-schemas:
+    dependencies:
+      '@rushstack/heft-zod-schema-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-zod-schema-plugin
+      zod:
+        specifier: ~4.3.6
+        version: 4.3.6
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      eslint:
+        specifier: ~9.37.0
+        version: 9.37.0
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig

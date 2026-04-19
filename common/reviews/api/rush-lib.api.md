@@ -17,6 +17,7 @@ import { CredentialCache } from '@rushstack/credential-cache';
 import { HookMap } from 'tapable';
 import { ICredentialCacheEntry } from '@rushstack/credential-cache';
 import { ICredentialCacheOptions } from '@rushstack/credential-cache';
+import type { IExperimentsJson } from '@rushstack/rush-schemas/lib/experiments.zod';
 import { IFileDiffStatus } from '@rushstack/package-deps-hash';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { IPrefixMatch } from '@rushstack/lookup-by-path';
@@ -466,28 +467,7 @@ export interface IExecutionResult {
     readonly status: OperationStatus;
 }
 
-// @beta
-export interface IExperimentsJson {
-    allowCobuildWithoutCache?: boolean;
-    buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
-    buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
-    cleanInstallAfterNpmrcChanges?: boolean;
-    enableSubpathScan?: boolean;
-    exemptDecoupledDependenciesBetweenSubspaces?: boolean;
-    forbidPhantomResolvableNodeModulesFolders?: boolean;
-    generateProjectImpactGraphDuringRushUpdate?: boolean;
-    noChmodFieldInTarHeaderNormalization?: boolean;
-    omitAppleDoubleFilesFromBuildCache?: boolean;
-    omitImportersFromPreventManualShrinkwrapChanges?: boolean;
-    printEventHooksOutputToConsole?: boolean;
-    rushAlerts?: boolean;
-    strictChangefileValidation?: boolean;
-    useIPCScriptsInWatchMode?: boolean;
-    usePnpmFrozenLockfileForRushInstall?: boolean;
-    usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
-    usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
-    usePnpmSyncForInjectedDependencies?: boolean;
-}
+export { IExperimentsJson }
 
 // @beta
 export interface IFileSystemBuildCacheProviderOptions {

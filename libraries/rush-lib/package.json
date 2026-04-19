@@ -74,6 +74,7 @@
     "pnpm-sync-lib": "0.3.3",
     "read-package-tree": "~5.1.5",
     "rxjs": "~6.6.7",
+    "@rushstack/rush-schemas": "workspace:*",
     "semver": "~7.7.4",
     "ssri": "~8.0.0",
     "strict-uri-encode": "~2.0.0",
@@ -84,7 +85,6 @@
   "devDependencies": {
     "@pnpm/lockfile.types-900": "npm:@pnpm/lockfile.types@~900.0.0",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
-    "@rushstack/heft-zod-schema-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/operation-graph": "workspace:*",
     "@rushstack/webpack-deep-imports-plugin": "workspace:*",
@@ -99,8 +99,7 @@
     "@types/webpack-env": "1.18.8",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
-    "webpack": "~5.105.2",
-    "zod": "~4.3.6"
+    "webpack": "~5.105.2"
   },
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",

@@ -1,0 +1,30 @@
+/**
+ * Defines configuration used by core Heft.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
+  "extends": "local-node-rig/profiles/default/config/heft.json",
+
+  "phasesByName": {
+    "build": {
+      "tasksByName": {
+        // Generate one *.schema.json file per *.zod.ts module by reading the
+        // compiled JavaScript form. Schemas are written alongside their .js so
+        // they can be consumed via the package's `./lib/<name>.schema.json`
+        // exports map.
+        "zod-schemas": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-zod-schema-plugin",
+            "pluginName": "zod-schema-plugin",
+            "options": {
+              "inputGlobs": ["lib-commonjs/*.zod.js"],
+              "outputFolder": "lib-commonjs"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush-lib",
-      "comment": "Pilot for @rushstack/heft-zod-schema-plugin: introduce experiments.zod.ts as a parallel zod-based source of truth for experiments.json. The hand-authored IExperimentsJson interface and experiments.schema.json remain unchanged; a compile-time assertion now guarantees the zod schema stays in sync with the interface.",
+      "comment": "Move the IExperimentsJson interface declaration to the new @rushstack/rush-schemas package. rush-lib re-exports the interface so existing imports remain stable.",
       "type": "none"
     }
   ],

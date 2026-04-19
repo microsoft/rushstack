@@ -97,23 +97,6 @@
               ]
             }
           }
-        },
-
-        // PILOT (heft-zod-schema-plugin): generate the experiments.json
-        // JSON Schema from the colocated experiments.zod.ts source file.
-        // Writes to temp/zod-schemas to avoid colliding with the legacy
-        // hand-authored schema in src/schemas/. The generated file is for
-        // review during the pilot; the runtime still uses the legacy schema.
-        "zod-schemas": {
-          "taskDependencies": ["typescript"],
-          "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-zod-schema-plugin",
-            "pluginName": "zod-schema-plugin",
-            "options": {
-              "inputGlobs": ["lib-intermediate-commonjs/schemas/*.zod.js"],
-              "outputFolder": "temp/zod-schemas"
-            }
-          }
         }
       }
     }

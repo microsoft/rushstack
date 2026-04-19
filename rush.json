@@ -1309,6 +1309,12 @@
       "versionPolicyName": "rush"
     },
     {
+      "packageName": "@rushstack/rush-schemas",
+      "projectFolder": "libraries/rush-schemas",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/rush-sdk",
       "projectFolder": "libraries/rush-sdk",
       "reviewCategory": "libraries",
