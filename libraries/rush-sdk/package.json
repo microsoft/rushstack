@@ -47,6 +47,7 @@
     "@rushstack/lookup-by-path": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/package-deps-hash": "workspace:*",
+    "@rushstack/rush-schemas": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "tapable": "2.2.1"
   },

@@ -4328,6 +4328,9 @@ importers:
       '@rushstack/package-deps-hash':
         specifier: workspace:*
         version: link:../package-deps-hash
+      '@rushstack/rush-schemas':
+        specifier: workspace:*
+        version: link:../rush-schemas
       '@rushstack/terminal':
         specifier: workspace:*
         version: link:../terminal

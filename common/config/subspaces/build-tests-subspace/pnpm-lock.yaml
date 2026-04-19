@@ -55,7 +55,7 @@ importers:
     dependencies:
       '@rushstack/rush-sdk':
         specifier: file:../../libraries/rush-sdk
-        version: file:../../../libraries/rush-sdk(@types/node@20.17.19)
+        version: file:../../../libraries/rush-sdk(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/node@20.17.19)
     dependenciesMeta:
       '@microsoft/rush-lib':
         injected: true
@@ -4961,16 +4961,18 @@ snapshots:
       - '@rushstack/heft'
       - '@types/node'
 
-  '@rushstack/rush-sdk@file:../../../libraries/rush-sdk(@types/node@20.17.19)':
+  '@rushstack/rush-sdk@file:../../../libraries/rush-sdk(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/node@20.17.19)':
     dependencies:
       '@pnpm/lockfile.types-900': '@pnpm/lockfile.types@900.0.0'
       '@rushstack/credential-cache': file:../../../libraries/credential-cache(@types/node@20.17.19)
       '@rushstack/lookup-by-path': file:../../../libraries/lookup-by-path(@types/node@20.17.19)
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
       '@rushstack/package-deps-hash': file:../../../libraries/package-deps-hash(@types/node@20.17.19)
+      '@rushstack/rush-schemas': file:../../../libraries/rush-schemas(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/node@20.17.19)
       '@rushstack/terminal': file:../../../libraries/terminal(@types/node@20.17.19)
       tapable: 2.2.1
     transitivePeerDependencies:
+      - '@rushstack/heft'
       - '@types/node'
 
   '@rushstack/stream-collator@file:../../../libraries/stream-collator(@types/node@20.17.19)':
