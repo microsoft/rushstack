@@ -39,6 +39,10 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/heft-zod-schema-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/problem-matcher",
       "allowedCategories": [ "libraries" ]
     },

@@ -4189,6 +4189,9 @@ importers:
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-webpack5-plugin
+      '@rushstack/heft-zod-schema-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-zod-schema-plugin
       '@rushstack/operation-graph':
         specifier: workspace:*
         version: link:../operation-graph
@@ -4231,6 +4234,9 @@ importers:
       webpack:
         specifier: ~5.105.2
         version: 5.105.4
+      zod:
+        specifier: ~4.3.6
+        version: 4.3.6
 
   ../../../libraries/rush-pnpm-kit-v10:
     dependencies:
