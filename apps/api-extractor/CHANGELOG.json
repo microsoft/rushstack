@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.58.6",
+      "tag": "@microsoft/api-extractor_v7.58.6",
+      "date": "Mon, 20 Apr 2026 15:15:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where empty lines were included in DTS rollups in place of API items that were trimmed."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.58.5",
       "tag": "@microsoft/api-extractor_v7.58.5",
       "date": "Sat, 18 Apr 2026 03:47:10 GMT",
