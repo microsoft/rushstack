@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 18 Apr 2026 03:47:29 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Apr 2026 23:31:34 GMT and should not be manually modified.
+
+## 5.175.1
+Mon, 20 Apr 2026 23:31:34 GMT
+
+### Updates
+
+- Fix an issue where `rush list --detailed` did not print horizontal table separators.
 
 ## 5.175.0
 Sat, 18 Apr 2026 03:47:29 GMT

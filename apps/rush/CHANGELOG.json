@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.175.1",
+      "tag": "@microsoft/rush_v5.175.1",
+      "date": "Mon, 20 Apr 2026 23:31:34 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush list --detailed` did not print horizontal table separators."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.175.0",
       "tag": "@microsoft/rush_v5.175.0",
       "date": "Sat, 18 Apr 2026 03:47:29 GMT",
