@@ -1,0 +1,32 @@
+lockfileVersion: '6.0'
+
+overrides:
+  foo>typescript: 5.0.4
+
+importers:
+  .: {}
+
+  ../../apps/foo:
+    dependencies:
+      tslib:
+        specifier: ~2.3.1
+        version: 2.3.1
+    devDependencies:
+      typescript:
+        specifier: 5.0.4
+        version: 5.0.4
+
+packages:
+  /typescript/5.0.4:
+    resolution:
+      {
+        integrity: sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==
+      }
+    engines: { node: '>=12.20' }
+    hasBin: true
+
+  /tslib/2.3.1:
+    resolution:
+      {
+        integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==
+      }
