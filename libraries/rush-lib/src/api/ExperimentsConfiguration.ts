@@ -26,7 +26,7 @@ export class ExperimentsConfiguration {
    */
   public constructor(jsonFilePath: string) {
     try {
-      this.configuration = JsonFile.loadAndParse(jsonFilePath, experimentsSchema) as IExperimentsJson;
+      this.configuration = JsonFile.loadAndParse(jsonFilePath, experimentsSchema);
     } catch (e) {
       if (FileSystem.isNotExistError(e)) {
         this.configuration = {};

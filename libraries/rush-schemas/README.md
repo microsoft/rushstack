@@ -35,18 +35,18 @@ in one place.
 
 ## Per-schema authoring strategy
 
-Two reasonable ways to derive the TypeScript types from a zod schema are in use
-in this package, picked per-schema based on what the type is for:
+The TypeScript types for each schema are derived from the zod schema rather
+than hand-authored, to keep the runtime validator and the static type from
+drifting:
 
-| Strategy                                  | When to pick                                                                                   |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `export type X = z.infer<typeof xSchema>` | The interface is internal, or its TSDoc fidelity is not part of the published API surface.    |
-| Hand-authored `interface X` + drift check | The interface is part of the public Rush API surface and per-property TSDoc must be preserved. |
+```ts
+export type IMyConfigJson = Omit<z.infer<typeof myConfigSchema>, '$schema'>;
+```
 
-The drift-check pattern (compile-time bidirectional `extends` assertion against
-the hand-authored interface) keeps the schema and the interface from diverging
-without forcing all callers to materialize `import { z } from 'zod'` in their
-emitted `.d.ts` files. See `experiments.zod.ts` for the canonical example.
+For schemas whose JSON shape (e.g. a discriminated `oneOf` on `provider`)
+intentionally differs from the runtime TypeScript shape consumed inside
+`rush-lib`, omit the `z.infer` alias entirely and let `rush-lib` define its
+own runtime interface; see `build-cache.zod.ts` for the canonical example.
 
 ## Authoring a new schema
 

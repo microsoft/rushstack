@@ -40,13 +40,6 @@ export const cobuildSchema = withSchemaMeta(
  * pointer. The shape is derived from {@link cobuildSchema} via `z.infer` to
  * keep the schema and the type from drifting.
  *
- * @remarks
- * For tiny `@beta` interfaces like this, the `z.infer` form is the source of
- * truth and the published `.d.ts` will reference zod's type computation. For
- * marquee public interfaces such as {@link IExperimentsJson}, prefer the
- * hand-authored interface + drift-check pattern instead so that per-property
- * TSDoc is preserved.
- *
  * @beta
  */
 export type ICobuildJson = Omit<z.infer<typeof cobuildSchema>, '$schema'>;
