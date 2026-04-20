@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/package-deps-hash",
-  "version": "4.7.16",
+  "version": "4.7.17",
   "description": "",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
