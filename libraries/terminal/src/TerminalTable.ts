@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AnsiEscape } from './AnsiEscape';
+import type { ITerminal } from './ITerminal';
 
 /**
  * The set of characters used to draw table borders.
@@ -81,6 +82,28 @@ export interface ITerminalTableOptions {
    * borderless mode.
    */
   borderCharacters?: Partial<ITerminalTableChars>;
+
+  /**
+   * A function to apply styling to all border and grid line characters.
+   *
+   * @example
+   * ```typescript
+   * import { Colorize } from '@rushstack/terminal';
+   * new TerminalTable({ borderColor: Colorize.gray })
+   * ```
+   */
+  borderColor?: (text: string) => string;
+
+  /**
+   * A function to apply styling to the text within header row cells.
+   *
+   * @example
+   * ```typescript
+   * import { Colorize } from '@rushstack/terminal';
+   * new TerminalTable({ headingColor: Colorize.bold })
+   * ```
+   */
+  headingColor?: (text: string) => string;
 }
 
 const BORDERLESS_CHARS: ITerminalTableChars = {
@@ -122,9 +145,6 @@ const DEFAULT_CHARS: ITerminalTableChars = {
 /**
  * Renders text data as a fixed-column table suitable for terminal output.
  *
- * Designed as a drop-in replacement for the `cli-table` and `cli-table3` npm packages,
- * with correct handling of ANSI escape sequences when calculating column widths.
- *
  * @example
  * ```typescript
  * const table = new TerminalTable({ head: ['Name', 'Version'] });
@@ -139,16 +159,20 @@ export class TerminalTable {
   private readonly _head: string[];
   private readonly _specifiedColWidths: (number | undefined)[];
   private readonly _borderCharacters: ITerminalTableChars;
+  private readonly _borderColor: ((text: string) => string) | undefined;
+  private readonly _headingColor: ((text: string) => string) | undefined;
   private readonly _rows: string[][];
 
   public constructor(options: ITerminalTableOptions = {}) {
-    const { head, colWidths, borderless, borderCharacters } = options;
+    const { head, colWidths, borderless, borderCharacters, borderColor, headingColor } = options;
     this._head = head ?? [];
     this._specifiedColWidths = colWidths ?? [];
     this._borderCharacters = {
       ...(borderless ? BORDERLESS_CHARS : DEFAULT_CHARS),
       ...borderCharacters
     };
+    this._borderColor = borderColor;
+    this._headingColor = headingColor;
     this._rows = [];
   }
 
@@ -166,6 +190,8 @@ export class TerminalTable {
       _head: head,
       _rows: rows,
       _specifiedColWidths: specifiedColWidths,
+      _borderColor: borderColor,
+      _headingColor: headingColor,
       _borderCharacters: {
         top: topSeparator,
         topCenter: topCenterSeparator,
@@ -213,69 +239,80 @@ export class TerminalTable {
       }
     }
 
-    // Renders a horizontal separator line. Returns undefined if the result would be empty.
-    const renderSeparator = (
+    // Builds a styled horizontal separator line; returns undefined if fillChar is empty (suppressed).
+    const buildSepLine = (
       leftChar: string,
       fillChar: string,
       midChar: string,
       rightChar: string
     ): string | undefined => {
+      if (fillChar.length === 0) {
+        return undefined;
+      }
       const line: string = leftChar + columnWidths.map((w) => fillChar.repeat(w)).join(midChar) + rightChar;
-      return line.length > 0 ? line : undefined;
+      return borderColor ? borderColor(line) : line;
     };
 
-    // Renders a single data row.
-    const renderRow = (row: string[]): string => {
+    // Pre-compute all separator lines (borderColor applied once per line, not per character).
+    const topLine: string | undefined = buildSepLine(
+      topLeftSeparator,
+      topSeparator,
+      topCenterSeparator,
+      topRightSeparator
+    );
+    const centerLine: string | undefined = buildSepLine(
+      leftCenterSeparator,
+      horizontalCenterSeparator,
+      centerCenterSeparator,
+      rightCenterSeparator
+    );
+    const bottomLine: string | undefined = buildSepLine(
+      bottomLeftSeparator,
+      bottomSeparator,
+      bottomCenterSeparator,
+      bottomRightSeparator
+    );
+
+    // Pre-colorize vertical border chars used in data rows.
+    const styledLeft: string = borderColor && leftSeparator ? borderColor(leftSeparator) : leftSeparator;
+    const styledMid: string =
+      borderColor && verticalCenterSeparator ? borderColor(verticalCenterSeparator) : verticalCenterSeparator;
+    const styledRight: string = borderColor && rightSeparator ? borderColor(rightSeparator) : rightSeparator;
+
+    // Renders a single data row. If contentColor is provided, it is applied to each cell's text.
+    const renderRow = (row: string[], contentColor?: (text: string) => string): string => {
       const cells: string[] = [];
       for (let col: number = 0; col < columnCount; col++) {
         const content: string = col < row.length ? row[col] : '';
         const visualWidth: number = AnsiEscape.removeCodes(content).length;
         // 1 char of left-padding; right-padding fills the remainder of the column width.
         const padRight: number = Math.max(columnWidths[col] - 1 - visualWidth, 0);
-        cells.push(' ' + content + ' '.repeat(padRight));
+        const styledContent: string = content && contentColor ? contentColor(content) : content;
+        cells.push(' ' + styledContent + ' '.repeat(padRight));
       }
-      return leftSeparator + cells.join(verticalCenterSeparator) + rightSeparator;
+      return styledLeft + cells.join(styledMid) + styledRight;
     };
 
     const lines: string[] = [];
 
-    // Top border
-    const topLine: string | undefined = renderSeparator(
-      topLeftSeparator,
-      topSeparator,
-      topCenterSeparator,
-      topRightSeparator
-    );
     if (topLine !== undefined) {
       lines.push(topLine);
     }
 
-    // Header row + separator
     if (head.length > 0) {
-      lines.push(renderRow(head));
-      const headerSep: string | undefined = renderSeparator(
-        leftCenterSeparator,
-        horizontalCenterSeparator,
-        centerCenterSeparator,
-        rightCenterSeparator
-      );
-      if (headerSep !== undefined) {
-        lines.push(headerSep);
+      lines.push(renderRow(head, headingColor));
+      if (centerLine !== undefined) {
+        lines.push(centerLine);
       }
     }
 
-    // Data rows (no separator between them)
-    for (const row of this._rows) {
-      lines.push(renderRow(row));
+    for (let i: number = 0; i < this._rows.length; i++) {
+      lines.push(renderRow(this._rows[i]));
+      if (i < this._rows.length - 1 && centerLine !== undefined) {
+        lines.push(centerLine);
+      }
     }
 
-    // Bottom border
-    const bottomLine: string | undefined = renderSeparator(
-      bottomLeftSeparator,
-      bottomSeparator,
-      bottomCenterSeparator,
-      bottomRightSeparator
-    );
     if (bottomLine !== undefined) {
       lines.push(bottomLine);
     }
@@ -289,5 +326,14 @@ export class TerminalTable {
   public toString(): string {
     const lines: string[] = this.getLines();
     return lines.join('\n');
+  }
+
+  /**
+   * Writes the rendered table to the provided terminal, one line at a time.
+   */
+  public printToTerminal(terminal: ITerminal): void {
+    for (const line of this.getLines()) {
+      terminal.writeLine(line);
+    }
   }
 }

@@ -6,6 +6,40 @@ import { Text } from '@rushstack/node-core-library';
 import type { ITerminal } from './ITerminal';
 
 /**
+ * Options for {@link PrintUtilities.(printMessageInBox:1)}.
+ *
+ * @public
+ */
+export interface IPrintMessageInBoxOptions {
+  /**
+   * The width of the box in characters. Defaults to half of the console width.
+   */
+  boxWidth?: number;
+
+  /**
+   * A function to apply styling to the box border characters.
+   *
+   * @example
+   * ```typescript
+   * import { Colorize } from '@rushstack/terminal';
+   * PrintUtilities.printMessageInBox('Hello!', terminal, { borderColor: Colorize.cyan })
+   * ```
+   */
+  borderColor?: (text: string) => string;
+
+  /**
+   * A function to apply styling to the message text inside the box.
+   *
+   * @example
+   * ```typescript
+   * import { Colorize } from '@rushstack/terminal';
+   * PrintUtilities.printMessageInBox('Hello!', terminal, { messageColor: Colorize.bold })
+   * ```
+   */
+  messageColor?: (text: string) => string;
+}
+
+/**
  * A sensible fallback column width for consoles.
  *
  * @public
@@ -186,13 +220,44 @@ export class PrintUtilities {
    *
    * @param message - The message to display.
    * @param terminal - The terminal to write the message to.
-   * @param boxWidth - The width of the box, defaults to half of the console width.
+   * @param options - Controls the box width and optional styling for the border and message text.
+   * {@label WITH_OPTIONS}
    */
-  public static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number): void {
-    if (!boxWidth) {
+  public static printMessageInBox(
+    message: string,
+    terminal: ITerminal,
+    options?: IPrintMessageInBoxOptions
+  ): void;
+  /**
+   * @deprecated Use the {@link PrintUtilities.(printMessageInBox:1)} overload instead.
+   * Pass `boxWidth` via the {@link IPrintMessageInBoxOptions.boxWidth} property.
+   */
+  public static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number): void;
+  public static printMessageInBox(
+    message: string,
+    terminal: ITerminal,
+    optionsOrBoxWidth?: IPrintMessageInBoxOptions | number
+  ): void {
+    let options: IPrintMessageInBoxOptions;
+    if (typeof optionsOrBoxWidth === 'number') {
+      options = {
+        boxWidth: optionsOrBoxWidth
+      };
+    } else {
+      options = optionsOrBoxWidth ?? {};
+    }
+
+    const { borderColor, messageColor, boxWidth: optionsBoxWidth } = options ?? {};
+    let boxWidth: number;
+    if (!optionsBoxWidth) {
       const consoleWidth: number = PrintUtilities.getConsoleWidth() || DEFAULT_CONSOLE_WIDTH;
       boxWidth = Math.floor(consoleWidth / 2);
+    } else {
+      boxWidth = optionsBoxWidth;
     }
+
+    const styleBorder = (s: string): string => borderColor?.(s) ?? s;
+    const styleMessage = (s: string): string => messageColor?.(s) ?? s;
 
     const maxLineLength: number = boxWidth - 10;
     const wrappedMessageLines: string[] = PrintUtilities.wrapWordsToLines(message, maxLineLength);
@@ -209,25 +274,29 @@ export class PrintUtilities {
       // ═════════════
       //  Message
       // ═════════════
-      const headerAndFooter: string = ` ${'═'.repeat(boxWidth)}`;
+      const headerAndFooter: string = ` ${styleBorder('═'.repeat(boxWidth))}`;
       terminal.writeLine(headerAndFooter);
       for (const line of wrappedMessageLines) {
-        terminal.writeLine(` ${line}`);
+        terminal.writeLine(` ${styleMessage(line)}`);
       }
 
       terminal.writeLine(headerAndFooter);
     } else {
+      const verticalBorder: string = styleBorder('║');
+
       // ╔═══════════╗
       // ║  Message  ║
       // ╚═══════════╝
-      terminal.writeLine(` ╔${'═'.repeat(boxWidth - 2)}╗`);
+      terminal.writeLine(` ${styleBorder(`╔${'═'.repeat(boxWidth - 2)}╗`)}`);
       for (const trimmedLine of trimmedLines) {
         const padding: number = boxWidth - trimmedLine.length - 2;
         const leftPadding: number = Math.floor(padding / 2);
         const rightPadding: number = padding - leftPadding;
-        terminal.writeLine(` ║${' '.repeat(leftPadding)}${trimmedLine}${' '.repeat(rightPadding)}║`);
+        terminal.writeLine(
+          ` ${verticalBorder}${' '.repeat(leftPadding)}${styleMessage(trimmedLine)}${' '.repeat(rightPadding)}${verticalBorder}`
+        );
       }
-      terminal.writeLine(` ╚${'═'.repeat(boxWidth - 2)}╝`);
+      terminal.writeLine(` ${styleBorder(`╚${'═'.repeat(boxWidth - 2)}╝`)}`);
     }
   }
 }

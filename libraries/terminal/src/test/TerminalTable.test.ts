@@ -1,21 +1,29 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { AnsiEscape } from '../AnsiEscape';
+import { Colorize } from '../Colorize';
+import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
+import { Terminal } from '../Terminal';
 import { TerminalTable } from '../TerminalTable';
+
+function expectSnapshot(table: TerminalTable): void {
+  expect(AnsiEscape.formatForTests(table.toString())).toMatchSnapshot();
+}
 
 describe(TerminalTable.name, () => {
   it('renders a table with a header and rows', () => {
     const table: TerminalTable = new TerminalTable({ head: ['Name', 'Version'] });
     table.push(['@rushstack/terminal', '1.0.0']);
     table.push(['@rushstack/heft', '2.0.0']);
-    expect(table.toString()).toMatchSnapshot();
+    expectSnapshot(table);
   });
 
   it('renders a table without a header', () => {
     const table: TerminalTable = new TerminalTable();
     table.push(['foo', 'bar']);
     table.push(['baz', 'qux']);
-    expect(table.toString()).toMatchSnapshot();
+    expectSnapshot(table);
   });
 
   it('auto-sizes columns to the widest content', () => {
@@ -26,15 +34,13 @@ describe(TerminalTable.name, () => {
     const lines: string[] = output.split('\n');
     const dataRow: string = lines.find((l) => l.includes('short'))!;
     expect(dataRow).toContain('a very long value here');
-    expect(output).toMatchSnapshot();
+    expectSnapshot(table);
   });
 
   it('respects fixed colWidths', () => {
     const table: TerminalTable = new TerminalTable({ colWidths: [10, 8] });
     table.push(['hi', 'there']);
-    const row: string = table.toString();
-    // Cell 0 padded to 10, cell 1 padded to 8
-    expect(row).toMatchSnapshot();
+    expectSnapshot(table);
   });
 
   it('borderless: true suppresses all borders', () => {
@@ -44,7 +50,7 @@ describe(TerminalTable.name, () => {
     });
     table.push(['alpha', 'beta', 'g']);
     table.push(['longer text', 'x', 'y']);
-    expect(table.toString()).toMatchSnapshot();
+    expectSnapshot(table);
   });
 
   it('produces one line per row when borderless (for inquirer-style usage)', () => {
@@ -66,25 +72,89 @@ describe(TerminalTable.name, () => {
       colWidths: [10, 8]
     });
     table.push(['hello', 'world']);
-    const row: string = table.toString();
-    expect(row).toContain(' | ');
-    expect(table.toString()).toMatchSnapshot();
+    expect(table.toString()).toContain(' | ');
+    expectSnapshot(table);
   });
 
   it('strips ANSI codes when calculating column widths', () => {
     const table: TerminalTable = new TerminalTable({ head: ['Package'] });
     // Simulate a colored package name — ANSI codes should not inflate the column width
-    const colored: string = '\x1b[33mmy-package\x1b[0m'; // yellow "my-package" (10 chars visible)
+    const colored: string = Colorize.yellow('my-package'); // yellow "my-package" (10 chars visible)
     table.push([colored]);
-    const output: string = table.toString();
     // Column width should be 10 + 2 = 12 (not inflated by escape codes)
-    const dataRow: string = output.split('\n').find((l) => l.includes('my-package'))!;
+    const dataRow: string = table.getLines().find((l) => l.includes('my-package'))!;
     expect(dataRow).toBeDefined();
-    expect(output).toMatchSnapshot();
+    expectSnapshot(table);
   });
 
   it('returns empty string for an empty table', () => {
     const table: TerminalTable = new TerminalTable();
     expect(table.toString()).toBe('');
+  });
+
+  it('renders a table with more than two columns', () => {
+    const table: TerminalTable = new TerminalTable({ head: ['Name', 'Version', 'License'] });
+    table.push(['@rushstack/terminal', '1.0.0', 'MIT']);
+    table.push(['@rushstack/heft', '2.0.0', 'MIT']);
+    expectSnapshot(table);
+  });
+
+  it('renders a single data row with no spurious trailing separator', () => {
+    const table: TerminalTable = new TerminalTable();
+    table.push(['only', 'row']);
+    expectSnapshot(table);
+  });
+
+  it('renders a header with no data rows', () => {
+    const table: TerminalTable = new TerminalTable({ head: ['Name', 'Version'] });
+    expectSnapshot(table);
+  });
+
+  it('borderColor is applied to all border characters', () => {
+    const table: TerminalTable = new TerminalTable({
+      head: ['Name', 'Version'],
+      borderColor: Colorize.cyan
+    });
+    table.push(['foo', '1.0.0']);
+    table.push(['bar', '2.0.0']);
+    expectSnapshot(table);
+  });
+
+  it('headingColor is applied to header cell text but not to borders or data rows', () => {
+    const table: TerminalTable = new TerminalTable({
+      head: ['Name', 'Version'],
+      headingColor: Colorize.bold
+    });
+    table.push(['foo', '1.0.0']);
+    expectSnapshot(table);
+  });
+
+  it('borderColor and headingColor can be combined', () => {
+    const table: TerminalTable = new TerminalTable({
+      head: ['Name', 'Version'],
+      borderColor: Colorize.gray,
+      headingColor: Colorize.bold
+    });
+    table.push(['foo', '1.0.0']);
+    expectSnapshot(table);
+  });
+
+  it('setting horizontalCenter to empty suppresses row and header separators', () => {
+    const table: TerminalTable = new TerminalTable({
+      head: ['A', 'B'],
+      borderCharacters: { horizontalCenter: '' }
+    });
+    table.push(['x', 'y']);
+    table.push(['z', 'w']);
+    expectSnapshot(table);
+  });
+
+  it('printToTerminal writes each line to the terminal', () => {
+    const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
+    const terminal: Terminal = new Terminal(terminalProvider);
+    const table: TerminalTable = new TerminalTable({ head: ['Name', 'Version'] });
+    table.push(['@rushstack/terminal', '1.0.0']);
+    table.printToTerminal(terminal);
+    expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
   });
 });

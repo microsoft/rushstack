@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix `TerminalTable` rendering spurious border lines when separator characters are set to empty strings",
+      "type": "patch",
+      "packageName": "@rushstack/terminal"
+    }
+  ],
+  "packageName": "@rushstack/terminal",
+  "email": "iclanton@users.noreply.github.com"
+}
