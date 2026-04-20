@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-zod-schema-plugin",
+      "comment": "Initial release. A Heft task plugin that converts zod validators into *.schema.json build outputs using zod 4's built-in z.toJSONSchema(). Includes a withSchemaMeta() helper for attaching $schema/title/description/x-tsdoc-release-tag metadata to a zod schema.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-zod-schema-plugin"
+}

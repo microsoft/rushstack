@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-schemas",
+      "comment": "Initial release. Pilots a dedicated home for zod-authored Rush configuration schemas (experiments, cobuild, repo-state, build-cache) that emits both runtime validators and *.schema.json artifacts.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-schemas"
+}

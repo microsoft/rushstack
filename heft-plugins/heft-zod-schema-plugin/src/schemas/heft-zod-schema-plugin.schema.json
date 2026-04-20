@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+
+  "type": "object",
+  "additionalProperties": false,
+
+  "properties": {
+    "inputGlobs": {
+      "type": "array",
+      "description": "Globs (relative to the project folder) identifying compiled JavaScript modules that export zod schemas. Defaults to [\"lib/schemas/*.zod.js\"].",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "outputFolder": {
+      "type": "string",
+      "description": "Folder (relative to the project folder) where the generated *.schema.json files will be written. Defaults to \"lib/schemas\".",
+      "pattern": "[^\\\\]"
+    },
+
+    "exportName": {
+      "type": "string",
+      "description": "The name of the export to read from each module. Use \"default\" to read the default export, or \"*\" to emit one schema file per named ZodType export. Defaults to \"default\"."
+    },
+
+    "indent": {
+      "type": "integer",
+      "description": "Number of spaces to indent the generated JSON. Defaults to 2.",
+      "minimum": 0,
+      "maximum": 10
+    }
+  }
+}

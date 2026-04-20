@@ -125,6 +125,25 @@ export interface IJsonFileParseOptions {
 export interface IJsonFileLoadAndValidateOptions extends IJsonFileParseOptions, IJsonSchemaValidateOptions {}
 
 /**
+ * A structural validator interface that matches the parse/safeParse contract of
+ * popular schema libraries such as zod.
+ *
+ * @remarks
+ * `JsonFile.loadAndParse()` accepts any object whose `parse()` method takes an
+ * `unknown` input and returns a typed value (throwing on validation failure).
+ * Using a structural type here avoids forcing `node-core-library` to take a
+ * runtime dependency on a specific schema-validation library or major version.
+ *
+ * @public
+ */
+export interface IJsonFileTypeValidator<T> {
+  /**
+   * Validate `input` and return it as the validated type, or throw if validation fails.
+   */
+  parse(input: unknown): T;
+}
+
+/**
  * Options for {@link JsonFile.stringify}
  *
  * @public
@@ -317,6 +336,45 @@ export class JsonFile {
     jsonSchema.validateObjectWithCallback(jsonObject, errorCallback);
 
     return jsonObject;
+  }
+
+  /**
+   * Loads a JSON file and validates it using a structural validator (such as a
+   * zod schema), returning the strongly-typed result.
+   *
+   * @remarks
+   * `validator` is any object exposing a `parse(input: unknown): T` method.
+   * The validator is responsible for both runtime validation and the resulting
+   * TypeScript type.  This indirection lets `node-core-library` accept zod
+   * schemas without taking a runtime dependency on zod.
+   *
+   * @example
+   * ```ts
+   * import { z } from 'zod';
+   * const schema = z.object({ name: z.string() });
+   * const data = JsonFile.loadAndParse('config.json', schema);
+   * // data is typed as { name: string }
+   * ```
+   */
+  public static loadAndParse<T>(
+    jsonFilename: string,
+    validator: IJsonFileTypeValidator<T>,
+    options?: IJsonFileParseOptions
+  ): T {
+    const jsonObject: JsonObject = JsonFile.load(jsonFilename, options);
+    return validator.parse(jsonObject);
+  }
+
+  /**
+   * An async version of {@link JsonFile.loadAndParse}.
+   */
+  public static async loadAndParseAsync<T>(
+    jsonFilename: string,
+    validator: IJsonFileTypeValidator<T>,
+    options?: IJsonFileParseOptions
+  ): Promise<T> {
+    const jsonObject: JsonObject = await JsonFile.loadAsync(jsonFilename, options);
+    return validator.parse(jsonObject);
   }
 
   /**

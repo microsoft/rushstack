@@ -1121,6 +1121,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-zod-schema-plugin",
+      "projectFolder": "heft-plugins/heft-zod-schema-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-lint-plugin",
       "projectFolder": "heft-plugins/heft-lint-plugin",
       "reviewCategory": "libraries",
@@ -1299,6 +1305,12 @@
     {
       "packageName": "@microsoft/rush-lib",
       "projectFolder": "libraries/rush-lib",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
+      "packageName": "@rushstack/rush-schemas",
+      "projectFolder": "libraries/rush-schemas",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },

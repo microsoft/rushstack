@@ -458,6 +458,11 @@ export interface IJsonFileStringifyOptions extends IJsonFileParseOptions {
 }
 
 // @public
+export interface IJsonFileTypeValidator<T> {
+    parse(input: unknown): T;
+}
+
+// @public
 export interface IJsonSchemaCustomFormat<T extends string | number> {
     type: T extends string ? 'string' : T extends number ? 'number' : never;
     validate: (data: T) => boolean;
@@ -732,6 +737,8 @@ export class JsonFile {
     // @internal (undocumented)
     static _formatPathForError: (path: string) => string;
     static load(jsonFilename: string, options?: IJsonFileParseOptions): JsonObject;
+    static loadAndParse<T>(jsonFilename: string, validator: IJsonFileTypeValidator<T>, options?: IJsonFileParseOptions): T;
+    static loadAndParseAsync<T>(jsonFilename: string, validator: IJsonFileTypeValidator<T>, options?: IJsonFileParseOptions): Promise<T>;
     static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonFileLoadAndValidateOptions): JsonObject;
     static loadAndValidateAsync(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonFileLoadAndValidateOptions): Promise<JsonObject>;
     static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void, options?: IJsonFileLoadAndValidateOptions): JsonObject;

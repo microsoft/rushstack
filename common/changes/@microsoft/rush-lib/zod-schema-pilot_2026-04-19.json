@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-lib",
+      "comment": "Move the IExperimentsJson interface declaration to the new @rushstack/rush-schemas package. rush-lib re-exports the interface so existing imports remain stable.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush-lib"
+}

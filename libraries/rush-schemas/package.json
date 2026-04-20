@@ -1,0 +1,51 @@
+{
+  "name": "@rushstack/rush-schemas",
+  "version": "0.1.0",
+  "description": "JSON Schema validators for Rush configuration files, authored as zod schemas. Emits both runtime validators and *.schema.json files.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "libraries/rush-schemas"
+  },
+  "homepage": "https://rushjs.io",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "test": "heft test --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "main": "./lib-commonjs/index.js",
+  "types": "./lib-dts/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib-dts/index.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
+  "dependencies": {
+    "@rushstack/heft-zod-schema-plugin": "workspace:*",
+    "zod": "~4.3.6"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
+  },
+  "sideEffects": false
+}

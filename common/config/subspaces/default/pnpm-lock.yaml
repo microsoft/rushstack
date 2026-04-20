@@ -3654,6 +3654,31 @@ importers:
         specifier: ~5.105.2
         version: 5.105.4
 
+  ../../../heft-plugins/heft-zod-schema-plugin:
+    dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      fast-glob:
+        specifier: ~3.3.1
+        version: 3.3.3
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
+      eslint:
+        specifier: ~9.37.0
+        version: 9.37.0
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+      zod:
+        specifier: ~4.3.6
+        version: 4.3.6
+
   ../../../libraries/api-extractor-model:
     dependencies:
       '@microsoft/tsdoc':
@@ -4088,6 +4113,9 @@ importers:
       '@rushstack/rush-pnpm-kit-v9':
         specifier: workspace:*
         version: link:../rush-pnpm-kit-v9
+      '@rushstack/rush-schemas':
+        specifier: workspace:*
+        version: link:../rush-schemas
       '@rushstack/stream-collator':
         specifier: workspace:*
         version: link:../stream-collator
@@ -4264,6 +4292,25 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
 
+  ../../../libraries/rush-schemas:
+    dependencies:
+      '@rushstack/heft-zod-schema-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-zod-schema-plugin
+      zod:
+        specifier: ~4.3.6
+        version: 4.3.6
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      eslint:
+        specifier: ~9.37.0
+        version: 9.37.0
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../libraries/rush-sdk:
     dependencies:
       '@pnpm/lockfile.types-900':
@@ -4281,6 +4328,9 @@ importers:
       '@rushstack/package-deps-hash':
         specifier: workspace:*
         version: link:../package-deps-hash
+      '@rushstack/rush-schemas':
+        specifier: workspace:*
+        version: link:../rush-schemas
       '@rushstack/terminal':
         specifier: workspace:*
         version: link:../terminal
@@ -19107,6 +19157,9 @@ packages:
 
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
   zwitch@1.0.5:
     resolution: {integrity: sha512-V50KMwwzqJV0NpZIZFwfOD5/lyny3WlSzRiXgA0G7VUnRlqttta1L6UQIHzd6EuBY/cHGfwTIck7w1yH6Q5zUw==}
@@ -38490,5 +38543,7 @@ snapshots:
       zod: 3.25.76
 
   zod@3.25.76: {}
+
+  zod@4.3.6: {}
 
   zwitch@1.0.5: {}

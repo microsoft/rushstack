@@ -3,7 +3,8 @@
 
 import { randomUUID } from 'node:crypto';
 
-import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { type ICobuildJson, cobuildSchema } from '@rushstack/rush-schemas';
 import type { ITerminal } from '@rushstack/terminal';
 
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
@@ -11,15 +12,8 @@ import type { CobuildLockProviderFactory, RushSession } from '../pluginFramework
 import { RushConstants } from '../logic/RushConstants';
 import type { ICobuildLockProvider } from '../logic/cobuild/ICobuildLockProvider';
 import type { RushConfiguration } from './RushConfiguration';
-import schemaJson from '../schemas/cobuild.schema.json';
 
-/**
- * @beta
- */
-export interface ICobuildJson {
-  cobuildFeatureEnabled: boolean;
-  cobuildLockProvider: string;
-}
+export type { ICobuildJson };
 
 /**
  * @beta
@@ -37,8 +31,6 @@ export interface ICobuildConfigurationOptions {
  * @beta
  */
 export class CobuildConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   /**
    * Indicates whether the cobuild feature is enabled.
    * Typically it is enabled in the cobuild.json config file.
@@ -126,7 +118,7 @@ export class CobuildConfiguration {
   ): Promise<CobuildConfiguration | undefined> {
     let cobuildJson: ICobuildJson | undefined;
     try {
-      cobuildJson = await JsonFile.loadAndValidateAsync(jsonFilePath, CobuildConfiguration._jsonSchema);
+      cobuildJson = await JsonFile.loadAndParseAsync(jsonFilePath, cobuildSchema);
     } catch (e) {
       if (FileSystem.isNotExistError(e)) {
         return undefined;
