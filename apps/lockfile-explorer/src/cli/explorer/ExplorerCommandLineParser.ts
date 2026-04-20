@@ -8,16 +8,9 @@ import type { ChildProcess } from 'node:child_process';
 import express from 'express';
 import yaml from 'js-yaml';
 import cors from 'cors';
-import updateNotifier from 'update-notifier';
 
-import {
-  Executable,
-  FileSystem,
-  type IPackageJson,
-  JsonFile,
-  PackageJsonLookup
-} from '@rushstack/node-core-library';
-import { ConsoleTerminalProvider, type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
+import { Executable, FileSystem, type IPackageJson, JsonFile } from '@rushstack/node-core-library';
+import { type ITerminal, Colorize } from '@rushstack/terminal';
 import {
   type CommandLineFlagParameter,
   CommandLineParser,
@@ -36,17 +29,32 @@ import type { IAppState } from '../../state';
 import { init } from '../../utils/init';
 import { PnpmfileRunner } from '../../graph/PnpmfileRunner';
 import * as lfxGraphLoader from '../../graph/lfxGraphLoader';
+import { LFX_PACKAGE_NAME, LFX_VERSION } from '../../utils/constants';
+import { type IPackageUpdateResult, PackageUpdateChecker } from '../../utils/PackageUpdateChecker';
 
 const EXPLORER_TOOL_FILENAME: 'lockfile-explorer' = 'lockfile-explorer';
 
+function printUpdateNotification(
+  result: { latestVersion: string; isOutdated: boolean } | undefined,
+  terminal: ITerminal
+): void {
+  if (result?.isOutdated) {
+    terminal.writeLine(
+      Colorize.yellow(
+        `\nUpdate available: ${LFX_VERSION} → ${result.latestVersion}\n` +
+          `Run: npm install -g ${LFX_PACKAGE_NAME}\n`
+      )
+    );
+  }
+}
+
 export class ExplorerCommandLineParser extends CommandLineParser {
   public readonly globalTerminal: ITerminal;
-  private readonly _terminalProvider: ConsoleTerminalProvider;
-  private readonly _debugParameter: CommandLineFlagParameter;
 
+  private readonly _debugParameter: CommandLineFlagParameter;
   private readonly _subspaceParameter: IRequiredCommandLineStringParameter;
 
-  public constructor() {
+  public constructor(terminal: ITerminal) {
     super({
       toolFilename: EXPLORER_TOOL_FILENAME,
       toolDescription:
@@ -66,8 +74,7 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       defaultValue: 'default'
     });
 
-    this._terminalProvider = new ConsoleTerminalProvider();
-    this.globalTerminal = new Terminal(this._terminalProvider);
+    this.globalTerminal = terminal;
   }
 
   public get isDebug(): boolean {
@@ -75,36 +82,29 @@ export class ExplorerCommandLineParser extends CommandLineParser {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    const lockfileExplorerProjectRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
-    const lockfileExplorerPackageJson: IPackageJson = JsonFile.load(
-      `${lockfileExplorerProjectRoot}/package.json`
-    );
-    const appVersion: string = lockfileExplorerPackageJson.version;
+    const terminal: ITerminal = this.globalTerminal;
 
-    this.globalTerminal.writeLine(
-      Colorize.bold(`\nRush Lockfile Explorer ${appVersion}`) +
+    terminal.writeLine(
+      Colorize.bold(`\nRush Lockfile Explorer ${LFX_VERSION}`) +
         Colorize.cyan(' - https://lfx.rushstack.io/\n')
     );
 
-    updateNotifier({
-      pkg: lockfileExplorerPackageJson,
-      // Normally update-notifier waits a day or so before it starts displaying upgrade notices.
-      // In debug mode, show the notice right away.
-      updateCheckInterval: this.isDebug ? 0 : undefined
-    }).notify({
-      // Make sure it says "-g" in the "npm install" example command line
-      isGlobal: true,
-      // Show the notice immediately, rather than waiting for process.onExit()
-      defer: false
+    // Start the update check now so it runs concurrently with server setup.
+    // The result is awaited and displayed inside app.listen once the server is ready.
+    const updateChecker: PackageUpdateChecker = new PackageUpdateChecker({
+      packageName: LFX_PACKAGE_NAME,
+      currentVersion: LFX_VERSION,
+      // In debug mode, bypass the cache so the notice appears immediately.
+      forceCheck: this.isDebug
     });
+    const updateCheckPromise: Promise<IPackageUpdateResult | undefined> = updateChecker.tryGetUpdateAsync();
 
     const PORT: number = 8091;
     // Must not have a trailing slash
     const SERVICE_URL: string = `http://localhost:${PORT}`;
 
     const appState: IAppState = init({
-      lockfileExplorerProjectRoot,
-      appVersion,
+      appVersion: LFX_VERSION,
       debugMode: this.isDebug,
       subspaceName: this._subspaceParameter.value
     });
@@ -125,8 +125,8 @@ export class ExplorerCommandLineParser extends CommandLineParser {
     let disconnected: boolean = false;
     setInterval(() => {
       if (!isClientConnected && !awaitingFirstConnect && !disconnected) {
-        console.log(Colorize.red('The client has disconnected!'));
-        console.log(`Please open a browser window at http://localhost:${PORT}/app`);
+        terminal.writeLine(Colorize.red('The client has disconnected!'));
+        terminal.writeLine(`Please open a browser window at http://localhost:${PORT}/app`);
         disconnected = true;
       } else if (!awaitingFirstConnect) {
         isClientConnected = false;
@@ -157,7 +157,7 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       isClientConnected = true;
       if (disconnected) {
         disconnected = false;
-        console.log(Colorize.green('The client has reconnected!'));
+        terminal.writeLine(Colorize.green('The client has reconnected!'));
       }
       res.status(200).send();
     });
@@ -253,7 +253,9 @@ export class ExplorerCommandLineParser extends CommandLineParser {
     );
 
     app.listen(PORT, async () => {
-      console.log(`App launched on ${SERVICE_URL}`);
+      terminal.writeLine(`App launched on ${SERVICE_URL}`);
+
+      printUpdateNotification(await updateCheckPromise, terminal);
 
       if (!appState.debugMode) {
         try {
@@ -288,7 +290,7 @@ export class ExplorerCommandLineParser extends CommandLineParser {
           // Detach from our Node.js process so the browser stays open after we exit
           browserProcess.unref();
         } catch (e) {
-          this.globalTerminal.writeError('Error launching browser: ' + e.toString());
+          terminal.writeError('Error launching browser: ' + e.toString());
         }
       }
     });

@@ -230,9 +230,6 @@ importers:
       tslib:
         specifier: ~2.8.1
         version: 2.8.1
-      update-notifier:
-        specifier: ~5.1.0
-        version: 5.1.0
     devDependencies:
       '@pnpm/lockfile.types':
         specifier: 1002.0.1
@@ -258,9 +255,6 @@ importers:
       '@types/semver':
         specifier: 7.7.1
         version: 7.7.1
-      '@types/update-notifier':
-        specifier: ~6.0.1
-        version: 6.0.8
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
@@ -694,7 +688,7 @@ importers:
         version: link:../../webpack/webpack4-module-minifier-plugin
       '@storybook/react':
         specifier: ~6.4.18
-        version: 6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@2.19.0)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1)
+        version: 6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@0.21.3)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1)
       '@types/jest':
         specifier: 30.0.0
         version: 30.0.0
@@ -764,7 +758,7 @@ importers:
         version: 6.4.22(@types/react@17.0.74)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       '@storybook/addon-essentials':
         specifier: ~6.4.18
-        version: 6.4.22(@babel/core@7.20.12)(@storybook/react@6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@2.19.0)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1))(@types/react@17.0.74)(babel-loader@8.2.5(@babel/core@7.20.12)(webpack@4.47.0))(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)
+        version: 6.4.22(@babel/core@7.20.12)(@storybook/react@6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@0.21.3)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1))(@types/react@17.0.74)(babel-loader@8.2.5(@babel/core@7.20.12)(webpack@4.47.0))(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)
       '@storybook/addon-links':
         specifier: ~6.4.18
         version: 6.4.22(@types/react@17.0.74)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
@@ -779,7 +773,7 @@ importers:
         version: 6.4.22
       '@storybook/react':
         specifier: ~6.4.18
-        version: 6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@2.19.0)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1)
+        version: 6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@0.21.3)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1)
       '@storybook/theming':
         specifier: ~6.4.18
         version: 6.4.22(@types/react@17.0.74)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
@@ -10116,9 +10110,6 @@ packages:
     peerDependencies:
       '@types/express': '*'
 
-  '@types/configstore@6.0.2':
-    resolution: {integrity: sha512-OS//b51j9uyR3zvwD04Kfs5kHpve2qalQ18JhY/ho3voGYUTPLEG90/ocfKPI48hyHH8T04f7KEEbK6Ue60oZQ==}
-
   '@types/connect-history-api-fallback@1.5.4':
     resolution: {integrity: sha512-n6Cr2xS1h4uAulPRdlw6Jl6s1oG8KrVilPN2yUITEs+K48EzMJJ3W1xy8K5eWuFvjp3R74AOIGSmp2UfBJ8HFw==}
 
@@ -10420,9 +10411,6 @@ packages:
 
   '@types/unist@2.0.11':
     resolution: {integrity: sha512-CmBKiL6NNo/OqgmMn95Fk9Whlp2mtvIv+KNpQKN2F4SjvrEesubTRWGYSg+BnWZOnlCaSTU1sMpsBOzgbYhnsA==}
-
-  '@types/update-notifier@6.0.8':
-    resolution: {integrity: sha512-IlDFnfSVfYQD+cKIg63DEXn3RFmd7W1iYtKQsJodcHK9R1yr8aKbKaPKfBxzPpcHCq2DU8zUq4PIPmy19Thjfg==}
 
   '@types/use-sync-external-store@0.0.6':
     resolution: {integrity: sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg==}
@@ -11580,10 +11568,6 @@ packages:
     resolution: {integrity: sha512-9gYgQKXx+1nP8mP7CzFyaUARhg7D3n1dF/FnErWmu9l6JvGpNUN278h0aSb+QjoiKSWG+iZ3uHrcqk0qrY9RQQ==}
     engines: {node: '>=10'}
 
-  boxen@7.1.1:
-    resolution: {integrity: sha512-2hCgjEmP8YLWQ130n2FerGv7rYpfBmnmp9Uy2Le1vge6X3gZIfSmEzP5QTDElFxcvVcXlEn8Aq6MU/PZygIOog==}
-    engines: {node: '>=14.16'}
-
   brace-expansion@1.1.13:
     resolution: {integrity: sha512-9ZLprWS6EENmhEOpjCYW2c8VkmOvckIJZfkr7rBW6dObmfgJ/L1GpSYW5Hpo9lDz4D1+n0Ckz8rU7FwHDQiG/w==}
 
@@ -11748,10 +11732,6 @@ packages:
     resolution: {integrity: sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==}
     engines: {node: '>=10'}
 
-  camelcase@7.0.1:
-    resolution: {integrity: sha512-xlx1yCK2Oc1APsPXDL2LdlNP6+uu8OCDdhOBSVT279M/S+y75O30C2VuD8T2ogdePBBl7PfPF4504tnLgX3zfw==}
-    engines: {node: '>=14.16'}
-
   caniuse-api@3.0.0:
     resolution: {integrity: sha512-bsTwuIg/BZZK/vreVTYYbSWoe2F+71P7K5QGEX+pT250DZbfU1MQ5prOKpPR+LL6uWKK3KMwMCAS74QB3Um1uw==}
 
@@ -11787,10 +11767,6 @@ packages:
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
-
-  chalk@5.6.2:
-    resolution: {integrity: sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==}
-    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
 
   char-regex@1.0.2:
     resolution: {integrity: sha512-kWWXztvZ5SBQV+eRgKFeh8q5sLuZY2+8WUIzlxWVTg+oGwY14qylx1KbKzHd8P6ZYkAg0xyIDU9JMHhyJMZ1jw==}
@@ -11881,10 +11857,6 @@ packages:
   cli-boxes@2.2.1:
     resolution: {integrity: sha512-y4coMcylgSCdVinjiDBuR8PCC2bLjyGTwEmPb9NHR/QaNU6EUOXcTY/s6VjGMD6ENSEaeQYHCY0GNGS5jfMwPw==}
     engines: {node: '>=6'}
-
-  cli-boxes@3.0.0:
-    resolution: {integrity: sha512-/lzGpEWL/8PfI0BmBOPRwp0c/wFNX1RdUML3jK/RcSBA9T8mZDdQpqYBKtCFTOfQbwPqWEOpjqW+Fnayc0969g==}
-    engines: {node: '>=10'}
 
   cli-table3@0.6.5:
     resolution: {integrity: sha512-+W/5efTR7y5HRD7gACw9yQjqMVvEMLBHmboM/kPWam+H+Hmyrgjh6YncVKK122YZkXrLudzTuAukUw9FnMf7IQ==}
@@ -18319,10 +18291,6 @@ packages:
     resolution: {integrity: sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==}
     engines: {node: '>=8'}
 
-  type-fest@2.19.0:
-    resolution: {integrity: sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==}
-    engines: {node: '>=12.20'}
-
   type-is@1.6.18:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}
     engines: {node: '>= 0.6'}
@@ -18880,10 +18848,6 @@ packages:
   widest-line@3.1.0:
     resolution: {integrity: sha512-NsmoXalsWVDMGupxZ5R08ka9flZjjiLvHVAWYOKtiKM8ujtZWr9cRffak+uSE48+Ob8ObalXpwyeUiyDD6QFgg==}
     engines: {node: '>=8'}
-
-  widest-line@4.0.1:
-    resolution: {integrity: sha512-o0cyEG0e8GPzT4iGHphIOh0cJOV8fivsXxddQasHPHfoZf1ZexrfeA21w2NaEN1RHE+fXlfISmOE8R9N3u3Qig==}
-    engines: {node: '>=12'}
 
   wildcard@2.0.1:
     resolution: {integrity: sha512-CC1bOL87PIWSBhDcTrdeLo6eGT7mCFtrg0uIJtqJUFyK+eJnzl8A1niH56uu7KMa5XFrtiV+AQuHO3n7DsHnLQ==}
@@ -23756,7 +23720,7 @@ snapshots:
     dependencies:
       playwright: 1.56.1
 
-  '@pmmmwh/react-refresh-webpack-plugin@0.5.17(@types/webpack@4.41.32)(react-refresh@0.11.0)(type-fest@2.19.0)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1)(webpack@4.47.0)':
+  '@pmmmwh/react-refresh-webpack-plugin@0.5.17(@types/webpack@4.41.32)(react-refresh@0.11.0)(type-fest@0.21.3)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1)(webpack@4.47.0)':
     dependencies:
       ansi-html: 0.0.9
       core-js-pure: 3.49.0
@@ -23769,7 +23733,7 @@ snapshots:
       webpack: 4.47.0
     optionalDependencies:
       '@types/webpack': 4.41.32
-      type-fest: 2.19.0
+      type-fest: 0.21.3
       webpack-dev-server: 5.2.3(@types/webpack@4.41.32)(webpack@4.47.0)
       webpack-hot-middleware: 2.26.1
 
@@ -25404,7 +25368,7 @@ snapshots:
       - webpack-cli
       - webpack-command
 
-  '@storybook/addon-docs@6.4.22(@storybook/react@6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@2.19.0)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1))(@types/react@17.0.74)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)':
+  '@storybook/addon-docs@6.4.22(@storybook/react@6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@0.21.3)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1))(@types/react@17.0.74)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)':
     dependencies:
       '@babel/core': 7.20.12
       '@babel/generator': 7.29.1
@@ -25453,7 +25417,7 @@ snapshots:
       ts-dedent: 2.2.0
       util-deprecate: 1.0.2
     optionalDependencies:
-      '@storybook/react': 6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@2.19.0)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1)
+      '@storybook/react': 6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@0.21.3)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1)
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
       webpack: 4.47.0
@@ -25471,13 +25435,13 @@ snapshots:
       - webpack-cli
       - webpack-command
 
-  '@storybook/addon-essentials@6.4.22(@babel/core@7.20.12)(@storybook/react@6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@2.19.0)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1))(@types/react@17.0.74)(babel-loader@8.2.5(@babel/core@7.20.12)(webpack@4.47.0))(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)':
+  '@storybook/addon-essentials@6.4.22(@babel/core@7.20.12)(@storybook/react@6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@0.21.3)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1))(@types/react@17.0.74)(babel-loader@8.2.5(@babel/core@7.20.12)(webpack@4.47.0))(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)':
     dependencies:
       '@babel/core': 7.20.12
       '@storybook/addon-actions': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       '@storybook/addon-backgrounds': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       '@storybook/addon-controls': 6.4.22(@types/react@17.0.74)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.8.2)
-      '@storybook/addon-docs': 6.4.22(@storybook/react@6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@2.19.0)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1))(@types/react@17.0.74)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)
+      '@storybook/addon-docs': 6.4.22(@storybook/react@6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@0.21.3)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1))(@types/react@17.0.74)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)
       '@storybook/addon-measure': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       '@storybook/addon-outline': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       '@storybook/addon-toolbars': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
@@ -26326,11 +26290,11 @@ snapshots:
       - uglify-js
       - webpack-cli
 
-  '@storybook/react@6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@2.19.0)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1)':
+  '@storybook/react@6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(@types/webpack@4.41.32)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(type-fest@0.21.3)(typescript@5.8.2)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1)':
     dependencies:
       '@babel/preset-flow': 7.27.1(@babel/core@7.20.12)
       '@babel/preset-react': 7.28.5(@babel/core@7.20.12)
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.32)(react-refresh@0.11.0)(type-fest@2.19.0)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1)(webpack@4.47.0)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.32)(react-refresh@0.11.0)(type-fest@0.21.3)(webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@4.47.0))(webpack-hot-middleware@2.26.1)(webpack@4.47.0)
       '@storybook/addons': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       '@storybook/core': 6.4.22(@types/react@17.0.74)(encoding@0.1.13)(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)
       '@storybook/core-common': 6.4.22(eslint@9.37.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.8.2)
@@ -26658,8 +26622,6 @@ snapshots:
   '@types/compression@1.7.5(@types/express@4.17.21)':
     dependencies:
       '@types/express': 4.17.21
-
-  '@types/configstore@6.0.2': {}
 
   '@types/connect-history-api-fallback@1.5.4':
     dependencies:
@@ -26990,11 +26952,6 @@ snapshots:
       source-map: 0.6.1
 
   '@types/unist@2.0.11': {}
-
-  '@types/update-notifier@6.0.8':
-    dependencies:
-      '@types/configstore': 6.0.2
-      boxen: 7.1.1
 
   '@types/use-sync-external-store@0.0.6': {}
 
@@ -28744,17 +28701,6 @@ snapshots:
       widest-line: 3.1.0
       wrap-ansi: 7.0.0
 
-  boxen@7.1.1:
-    dependencies:
-      ansi-align: 3.0.1
-      camelcase: 7.0.1
-      chalk: 5.6.2
-      cli-boxes: 3.0.0
-      string-width: 5.1.2
-      type-fest: 2.19.0
-      widest-line: 4.0.1
-      wrap-ansi: 8.1.0
-
   brace-expansion@1.1.13:
     dependencies:
       balanced-match: 1.0.2
@@ -28996,8 +28942,6 @@ snapshots:
 
   camelcase@6.3.0: {}
 
-  camelcase@7.0.1: {}
-
   caniuse-api@3.0.0:
     dependencies:
       browserslist: 4.28.2
@@ -29042,8 +28986,6 @@ snapshots:
     dependencies:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
-
-  chalk@5.6.2: {}
 
   char-regex@1.0.2: {}
 
@@ -29149,8 +29091,6 @@ snapshots:
   clean-stack@2.2.0: {}
 
   cli-boxes@2.2.1: {}
-
-  cli-boxes@3.0.0: {}
 
   cli-table3@0.6.5:
     dependencies:
@@ -37480,8 +37420,6 @@ snapshots:
 
   type-fest@0.8.1: {}
 
-  type-fest@2.19.0: {}
-
   type-is@1.6.18:
     dependencies:
       media-typer: 0.3.0
@@ -38272,10 +38210,6 @@ snapshots:
   widest-line@3.1.0:
     dependencies:
       string-width: 4.2.3
-
-  widest-line@4.0.1:
-    dependencies:
-      string-width: 5.1.2
 
   wildcard@2.0.1: {}
 

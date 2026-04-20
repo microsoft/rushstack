@@ -1079,10 +1079,6 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
-      "name": "update-notifier",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "url-loader",
       "allowedCategories": [ "libraries" ]
     },
