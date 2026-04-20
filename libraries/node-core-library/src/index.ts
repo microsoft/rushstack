@@ -105,6 +105,7 @@ export {
   type IJsonFileLoadAndValidateOptions,
   type IJsonFileStringifyOptions,
   type IJsonFileSaveOptions,
+  type IJsonFileTypeValidator,
   JsonFile
 } from './JsonFile';
 
