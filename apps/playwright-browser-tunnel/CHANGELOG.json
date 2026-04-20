@@ -2,6 +2,24 @@
   "name": "@rushstack/playwright-browser-tunnel",
   "entries": [
     {
+      "version": "0.3.19",
+      "tag": "@rushstack/playwright-browser-tunnel_v0.3.19",
+      "date": "Mon, 20 Apr 2026 23:31:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.17`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.18",
       "tag": "@rushstack/playwright-browser-tunnel_v0.3.18",
       "date": "Mon, 20 Apr 2026 15:15:25 GMT",

@@ -2,6 +2,32 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.24.0",
+      "tag": "@rushstack/terminal_v0.24.0",
+      "date": "Mon, 20 Apr 2026 23:31:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix `TerminalTable` rendering spurious border lines when separator characters are set to empty strings"
+          },
+          {
+            "comment": "Add row separators between data rows in `TerminalTable`."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add borderColor and headingColor styling options to `TerminalTable`"
+          },
+          {
+            "comment": "Add borderColor and messageColor styling options to `PrintUtilities.printMessageInBox`"
+          },
+          {
+            "comment": "Add `TerminalTable.printToTerminal()` function."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.23.0",
       "tag": "@rushstack/terminal_v0.23.0",
       "date": "Sat, 18 Apr 2026 03:47:09 GMT",

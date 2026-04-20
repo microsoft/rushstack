@@ -1,6 +1,20 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Sat, 18 Apr 2026 03:47:09 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Apr 2026 23:31:13 GMT and should not be manually modified.
+
+## 0.24.0
+Mon, 20 Apr 2026 23:31:13 GMT
+
+### Minor changes
+
+- Add borderColor and headingColor styling options to `TerminalTable`
+- Add borderColor and messageColor styling options to `PrintUtilities.printMessageInBox`
+- Add `TerminalTable.printToTerminal()` function.
+
+### Patches
+
+- Fix `TerminalTable` rendering spurious border lines when separator characters are set to empty strings
+- Add row separators between data rows in `TerminalTable`.
 
 ## 0.23.0
 Sat, 18 Apr 2026 03:47:09 GMT

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Mon, 20 Apr 2026 15:15:24 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Apr 2026 23:31:13 GMT and should not be manually modified.
+
+## 2.2.18
+Mon, 20 Apr 2026 23:31:13 GMT
+
+### Patches
+
+- Replace `update-notifier` with a simpler built-in solution.
 
 ## 2.2.17
 Mon, 20 Apr 2026 15:15:24 GMT
