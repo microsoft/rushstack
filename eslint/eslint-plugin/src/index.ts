@@ -8,6 +8,7 @@ import { noBackslashImportsRule } from './no-backslash-imports';
 import { noExternalLocalImportsRule } from './no-external-local-imports';
 import { noNewNullRule } from './no-new-null';
 import { noNullRule } from './no-null';
+import { nullPrototypeDictionariesRule } from './null-prototype-dictionaries';
 import { noTransitiveDependencyImportsRule } from './no-transitive-dependency-imports';
 import { noUntypedUnderscoreRule } from './no-untyped-underscore';
 import { normalizedImportsRule } from './normalized-imports';
@@ -35,6 +36,9 @@ const plugin: IPlugin = {
 
     // Full name: "@rushstack/no-null"
     'no-null': noNullRule,
+
+    // Full name: "@rushstack/null-prototype-dictionaries"
+    'null-prototype-dictionaries': nullPrototypeDictionariesRule,
 
     // Full name: "@rushstack/no-transitive-dependency-imports"
     'no-transitive-dependency-imports': noTransitiveDependencyImportsRule,
