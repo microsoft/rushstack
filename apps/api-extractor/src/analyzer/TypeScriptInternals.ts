@@ -17,7 +17,7 @@ export interface IGlobalVariableAnalyzer {
 export class TypeScriptInternals {
   public static getImmediateAliasedSymbol(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v5.9.3/src/compiler/checker.ts
+    // https://github.com/microsoft/TypeScript/blob/v6.0.3/src/compiler/checker.ts
     return (typeChecker as any).getImmediateAliasedSymbol(symbol);
   }
 
@@ -61,7 +61,7 @@ export class TypeScriptInternals {
    */
   public static getJSDocCommentRanges(node: ts.Node, text: string): ts.CommentRange[] | undefined {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v5.9.3/src/compiler/utilities.ts#L2710
+    // https://github.com/microsoft/TypeScript/blob/v6.0.3/src/compiler/utilities.ts#L2763
 
     return (ts as any).getJSDocCommentRanges.apply(this, arguments);
   }
@@ -73,7 +73,7 @@ export class TypeScriptInternals {
     node: ts.Identifier | ts.StringLiteralLike | ts.NumericLiteral
   ): string {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v5.9.3/src/compiler/utilities.ts#L5368
+    // https://github.com/microsoft/TypeScript/blob/v6.0.3/src/compiler/utilities.ts#L5439
 
     return (ts as any).getTextOfIdentifierOrLiteral(node);
   }
@@ -89,7 +89,7 @@ export class TypeScriptInternals {
     mode: ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined
   ): ts.ResolvedModuleFull | undefined {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v5.9.3/src/compiler/types.ts#L5064
+    // https://github.com/microsoft/TypeScript/blob/v6.0.3/src/compiler/types.ts#L5056
     const result: ts.ResolvedModuleWithFailedLookupLocations | undefined = (program as any).getResolvedModule(
       sourceFile,
       moduleNameText,
@@ -107,7 +107,7 @@ export class TypeScriptInternals {
     compilerOptions: ts.CompilerOptions
   ): ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v5.9.3/src/compiler/program.ts#L932
+    // https://github.com/microsoft/TypeScript/blob/v6.0.3/src/compiler/program.ts#L932
 
     return ts.getModeForUsageLocation?.(file, usage, compilerOptions);
   }
