@@ -911,7 +911,7 @@ packages:
   '@rushstack/heft-api-extractor-plugin@file:../../../heft-plugins/heft-api-extractor-plugin':
     resolution: {directory: ../../../heft-plugins/heft-api-extractor-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': 1.2.16
+      '@rushstack/heft': 1.2.17
 
   '@rushstack/heft-config-file@file:../../../libraries/heft-config-file':
     resolution: {directory: ../../../libraries/heft-config-file, type: directory}
@@ -920,7 +920,7 @@ packages:
   '@rushstack/heft-jest-plugin@file:../../../heft-plugins/heft-jest-plugin':
     resolution: {directory: ../../../heft-plugins/heft-jest-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': ^1.2.16
+      '@rushstack/heft': ^1.2.17
       '@types/jest': ^30.0.0
       jest-environment-jsdom: ^30.3.0
       jest-environment-node: ^30.3.0
@@ -935,17 +935,17 @@ packages:
   '@rushstack/heft-lint-plugin@file:../../../heft-plugins/heft-lint-plugin':
     resolution: {directory: ../../../heft-plugins/heft-lint-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': 1.2.16
+      '@rushstack/heft': 1.2.17
 
   '@rushstack/heft-node-rig@file:../../../rigs/heft-node-rig':
     resolution: {directory: ../../../rigs/heft-node-rig, type: directory}
     peerDependencies:
-      '@rushstack/heft': ^1.2.16
+      '@rushstack/heft': ^1.2.17
 
   '@rushstack/heft-typescript-plugin@file:../../../heft-plugins/heft-typescript-plugin':
     resolution: {directory: ../../../heft-plugins/heft-typescript-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': 1.2.16
+      '@rushstack/heft': 1.2.17
 
   '@rushstack/heft@file:../../../apps/heft':
     resolution: {directory: ../../../apps/heft, type: directory}
@@ -3533,8 +3533,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  typescript@5.9.3:
-    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+  typescript@6.0.3:
+    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -4296,7 +4296,7 @@ snapshots:
       resolve: 1.22.11
       semver: 7.7.4
       source-map: 0.6.1
-      typescript: 5.9.3
+      typescript: 6.0.3
     transitivePeerDependencies:
       - '@types/node'
 
@@ -8127,7 +8127,7 @@ snapshots:
 
   typescript@5.8.3: {}
 
-  typescript@5.9.3: {}
+  typescript@6.0.3: {}
 
   unbox-primitive@1.1.0:
     dependencies:
