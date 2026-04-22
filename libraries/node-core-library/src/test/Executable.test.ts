@@ -386,13 +386,51 @@ describe('Executable process list', () => {
     '   1     3   process1\n'
   ];
 
+  test('captures command line when present (win32)', () => {
+    const processListMap: Map<number, IProcessInfo> = parseProcessListOutput(
+      [
+        'PPID PID NAME\r\n',
+        '0 100 node.exe\tC:\\Program Files\\nodejs\\node.exe --foo --bar=baz\r\n',
+        '100 101 helper.exe\thelper.exe --opt arg\r\n'
+      ],
+      'win32'
+    );
+    const results: IProcessInfo[] = [...processListMap.values()].sort((a, b) => a.processId - b.processId);
+    expect(results.length).toBe(3);
+    expect(results).toMatchSnapshot();
+  });
+
+  test('captures command line when present (linux)', () => {
+    const processListMap: Map<number, IProcessInfo> = parseProcessListOutput(
+      [
+        'PPID   PID   COMMAND\n',
+        '0 10 node /usr/bin/node --foo --bar=baz\n',
+        '10 11 child /tmp/child.sh arg1\n'
+      ],
+      'linux'
+    );
+    const results: IProcessInfo[] = [...processListMap.values()].sort((a, b) => a.processId - b.processId);
+    expect(results.length).toBe(3);
+    expect(results).toMatchSnapshot();
+  });
+
+  test('contains the current command line (sync)', () => {
+    const results: ReadonlyMap<number, IProcessInfo> = Executable.getProcessInfoById();
+    const currentProcessInfo: IProcessInfo | undefined = results.get(process.pid);
+    expect(currentProcessInfo).toBeDefined();
+    // Ensure we recorded some command line text for the current process
+    expect(currentProcessInfo?.commandLine?.length ?? 0).toBeGreaterThan(0);
+  });
+
   test('contains the current pid (sync)', () => {
     const results: ReadonlyMap<number, IProcessInfo> = Executable.getProcessInfoById();
     const currentProcessInfo: IProcessInfo | undefined = results.get(process.pid);
     expect(currentProcessInfo).toBeDefined();
     expect(currentProcessInfo?.parentProcessInfo?.processId).toEqual(process.ppid);
-    // TODO: Fix parsing of process name as "MainThread" for Node 24
-    expect(currentProcessInfo?.processName).toMatch(/(node(\.exe)|MainThread)?$/i);
+    const processIdentity: string = `${currentProcessInfo?.processName ?? ''} ${
+      currentProcessInfo?.commandLine ?? ''
+    }`;
+    expect(processIdentity).toMatch(/node(\.exe)?/i);
   });
 
   test('contains the current pid (async)', async () => {
@@ -400,8 +438,10 @@ describe('Executable process list', () => {
     const currentProcessInfo: IProcessInfo | undefined = results.get(process.pid);
     expect(currentProcessInfo).toBeDefined();
     expect(currentProcessInfo?.parentProcessInfo?.processId).toEqual(process.ppid);
-    // TODO: Fix parsing of process name as "MainThread" for Node 24
-    expect(currentProcessInfo?.processName).toMatch(/(node(\.exe)|MainThread)?$/i);
+    const processIdentity: string = `${currentProcessInfo?.processName ?? ''} ${
+      currentProcessInfo?.commandLine ?? ''
+    }`;
+    expect(processIdentity).toMatch(/node(\.exe)?/i);
   });
 
   test('parses win32 output', () => {
