@@ -430,6 +430,9 @@ importers:
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../../libraries/ts-command-line
+      ws:
+        specifier: ~8.14.1
+        version: 8.14.2
       zod:
         specifier: ~3.25.76
         version: 3.25.76
@@ -440,6 +443,9 @@ importers:
       '@types/node':
         specifier: 20.17.19
         version: 20.17.19
+      '@types/ws':
+        specifier: 8.5.5
+        version: 8.5.5
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
