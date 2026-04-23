@@ -326,7 +326,7 @@ importers:
         specifier: ~0.3.1
         version: 0.3.2
       ws:
-        specifier: 8.20.0
+        specifier: ~8.20.0
         version: 8.20.0
     devDependencies:
       '@playwright/test':
@@ -5162,7 +5162,7 @@ importers:
         specifier: ~1.0.7
         version: 1.0.7(@types/express@4.17.21)
       ws:
-        specifier: 8.20.0
+        specifier: ~8.20.0
         version: 8.20.0
     devDependencies:
       '@rushstack/heft':
