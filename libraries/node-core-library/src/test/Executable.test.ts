@@ -350,6 +350,30 @@ describe('Executable process tests', () => {
       Executable.waitForExitAsync(childProcess, { encoding: 'utf8', throwOnSignal: true })
     ).rejects.toThrow(/Process terminated by SIGTERM/);
   });
+
+  test('Executable.waitForExitAsync() handles multi-byte UTF-8 characters correctly', async () => {
+    // Test that multi-byte characters are properly decoded even when split across chunks
+    const executablePath: string = path.join(executableFolder, 'multibyte', 'output-multibyte.js');
+    const childProcess: child_process.ChildProcess = Executable.spawn(process.argv0, [executablePath], {
+      environment,
+      currentWorkingDirectory: executableFolder,
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+
+    const result: IWaitForExitResult<string> = await Executable.waitForExitAsync(childProcess, {
+      encoding: 'utf8'
+    });
+
+    expect(result.exitCode).toEqual(0);
+    expect(result.signal).toBeNull();
+    expect(typeof result.stdout).toEqual('string');
+
+    // The output should contain properly decoded multi-byte characters
+    // Chinese characters (世界) and emoji (🎉)
+    expect(result.stdout).toContain('Hello, 世界! 🎉');
+    // Ensure no replacement characters (�) which would indicate improper decoding
+    expect(result.stdout).not.toContain('�');
+  });
 });
 
 describe('Executable process list', () => {
