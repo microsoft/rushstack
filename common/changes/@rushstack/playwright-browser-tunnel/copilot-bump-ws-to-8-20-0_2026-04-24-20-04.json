@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Bump the `ws` dependency to `~8.20.0`.",
+      "type": "patch",
+      "packageName": "@rushstack/playwright-browser-tunnel"
+    }
+  ],
+  "packageName": "@rushstack/playwright-browser-tunnel",
+  "email": "198982749+Copilot@users.noreply.github.com"
+}
