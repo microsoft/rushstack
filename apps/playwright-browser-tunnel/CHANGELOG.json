@@ -2,6 +2,18 @@
   "name": "@rushstack/playwright-browser-tunnel",
   "entries": [
     {
+      "version": "0.3.20",
+      "tag": "@rushstack/playwright-browser-tunnel_v0.3.20",
+      "date": "Sat, 25 Apr 2026 00:15:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump the `ws` dependency to `~8.20.0`."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.19",
       "tag": "@rushstack/playwright-browser-tunnel_v0.3.19",
       "date": "Mon, 20 Apr 2026 23:31:13 GMT",

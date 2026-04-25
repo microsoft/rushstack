@@ -1,6 +1,13 @@
 # Change Log - @rushstack/playwright-browser-tunnel
 
-This log was last generated on Mon, 20 Apr 2026 23:31:13 GMT and should not be manually modified.
+This log was last generated on Sat, 25 Apr 2026 00:15:59 GMT and should not be manually modified.
+
+## 0.3.20
+Sat, 25 Apr 2026 00:15:59 GMT
+
+### Patches
+
+- Bump the `ws` dependency to `~8.20.0`.
 
 ## 0.3.19
 Mon, 20 Apr 2026 23:31:13 GMT
