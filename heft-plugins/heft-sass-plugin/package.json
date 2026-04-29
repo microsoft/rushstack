@@ -48,7 +48,7 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@types/tapable": "1.0.6",
-    "postcss": "~8.4.6",
+    "postcss": "~8.5.10",
     "postcss-modules": "~6.0.0",
     "sass-embedded": "~1.85.1",
     "tapable": "1.1.3"
