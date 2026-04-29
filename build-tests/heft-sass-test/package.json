@@ -29,7 +29,7 @@
     "eslint": "~9.37.0",
     "html-webpack-plugin": "~4.5.2",
     "postcss-loader": "~4.1.0",
-    "postcss": "~8.4.6",
+    "postcss": "~8.5.10",
     "react-dom": "~19.2.3",
     "react": "~19.2.3",
     "style-loader": "~2.0.0",
