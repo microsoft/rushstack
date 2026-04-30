@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Mon, 20 Apr 2026 23:31:13 GMT and should not be manually modified.
+This log was last generated on Thu, 30 Apr 2026 00:15:22 GMT and should not be manually modified.
+
+## 1.3.8
+Thu, 30 Apr 2026 00:15:22 GMT
+
+### Patches
+
+- Bump postcss@~8.5.10 to address CVE GHSA-qx2v-qp2m-jg93
 
 ## 1.3.7
 Mon, 20 Apr 2026 23:31:13 GMT
