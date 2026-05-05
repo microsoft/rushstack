@@ -180,4 +180,24 @@ describe(PnpmWorkspaceFile.name, () => {
       expect(content).toMatchSnapshot();
     });
   });
+
+  describe('settings functionality', () => {
+    it('generates workspace file with additional settings', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.setSettings({
+        overrides: {
+          foo: '1.2.3'
+        },
+        allowBuilds: {
+          esbuild: true,
+          fsevents: false
+        }
+      });
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toMatchSnapshot();
+    });
+  });
 });

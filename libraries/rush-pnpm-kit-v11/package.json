@@ -1,0 +1,47 @@
+{
+  "name": "@rushstack/rush-pnpm-kit-v11",
+  "version": "0.2.18",
+  "description": "rush pnpm kit v11",
+  "license": "MIT",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/rush-pnpm-kit-v11.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/rush-pnpm-kit-v11.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
+  "scripts": {
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "test": "heft test --clean"
+  },
+  "dependencies": {
+    "@pnpm/dependency-path-pnpm-v11": "npm:@pnpm/dependency-path@~1001.1.10",
+    "@pnpm/lockfile.fs-pnpm-lock-v9": "npm:@pnpm/lockfile.fs@~1100.0.4",
+    "@pnpm/logger": "~1100.0.0"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "local-node-rig": "workspace:*"
+  },
+  "sideEffects": false
+}

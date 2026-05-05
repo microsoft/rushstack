@@ -9,6 +9,7 @@ import {
   FileConstants,
   FileSystem,
   type IPackageJson,
+  type JsonObject,
   JsonFile,
   LockFile
 } from '@rushstack/node-core-library';
@@ -43,12 +44,23 @@ interface ICommonPackageJson extends IPackageJson {
   };
 }
 
+export interface IPnpmInstallConfiguration {
+  commonPackageJsonExtraSettings?: JsonObject;
+  commonPackageJsonPnpmSettings?: ICommonPackageJson['pnpm'];
+  workspaceYamlSettings?: JsonObject;
+}
+
 export class InstallHelpers {
   public static generateCommonPackageJson(
     rushConfiguration: RushConfiguration,
     subspace: Subspace,
     dependencies: Map<string, string> = new Map<string, string>(),
-    terminal: ITerminal
+    terminal: ITerminal,
+    pnpmInstallConfiguration: IPnpmInstallConfiguration | undefined = InstallHelpers.getPnpmInstallConfiguration(
+      rushConfiguration,
+      subspace,
+      terminal
+    )
   ): void {
     const commonPackageJson: ICommonPackageJson = {
       dependencies: {},
@@ -58,155 +70,12 @@ export class InstallHelpers {
       version: '0.0.0'
     };
 
-    if (rushConfiguration.isPnpm) {
-      const pnpmOptions: PnpmOptionsConfiguration =
-        subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
-      if (!commonPackageJson.pnpm) {
-        commonPackageJson.pnpm = {};
-      }
+    if (pnpmInstallConfiguration?.commonPackageJsonExtraSettings) {
+      merge(commonPackageJson, pnpmInstallConfiguration.commonPackageJsonExtraSettings);
+    }
 
-      if (pnpmOptions.globalOverrides) {
-        commonPackageJson.pnpm.overrides = pnpmOptions.globalOverrides;
-      }
-
-      if (pnpmOptions.globalPackageExtensions) {
-        commonPackageJson.pnpm.packageExtensions = pnpmOptions.globalPackageExtensions;
-      }
-      if (pnpmOptions.globalPeerDependencyRules) {
-        commonPackageJson.pnpm.peerDependencyRules = pnpmOptions.globalPeerDependencyRules;
-      }
-
-      if (pnpmOptions.globalNeverBuiltDependencies) {
-        commonPackageJson.pnpm.neverBuiltDependencies = pnpmOptions.globalNeverBuiltDependencies;
-      }
-
-      if (pnpmOptions.globalOnlyBuiltDependencies) {
-        if (
-          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.1.0')
-        ) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-                `doesn't support the "globalOnlyBuiltDependencies" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to pnpm 10.1.0 or newer.'
-            )
-          );
-        }
-
-        commonPackageJson.pnpm.onlyBuiltDependencies = pnpmOptions.globalOnlyBuiltDependencies;
-      }
-
-      if (pnpmOptions.globalIgnoredOptionalDependencies) {
-        if (
-          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '9.0.0')
-        ) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-                `doesn't support the "globalIgnoredOptionalDependencies" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to pnpm 9.'
-            )
-          );
-        }
-
-        commonPackageJson.pnpm.ignoredOptionalDependencies = pnpmOptions.globalIgnoredOptionalDependencies;
-      }
-
-      if (pnpmOptions.globalAllowedDeprecatedVersions) {
-        commonPackageJson.pnpm.allowedDeprecatedVersions = pnpmOptions.globalAllowedDeprecatedVersions;
-      }
-
-      if (pnpmOptions.globalPatchedDependencies) {
-        commonPackageJson.pnpm.patchedDependencies = pnpmOptions.globalPatchedDependencies;
-      }
-
-      if (pnpmOptions.minimumReleaseAgeMinutes !== undefined || pnpmOptions.minimumReleaseAgeExclude) {
-        if (
-          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.16.0')
-        ) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-                `doesn't support the "minimumReleaseAgeMinutes" or "minimumReleaseAgeExclude" fields in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove these fields or upgrade to pnpm 10.16.0 or newer.'
-            )
-          );
-        }
-
-        if (pnpmOptions.minimumReleaseAgeMinutes !== undefined) {
-          // NOTE: the pnpm setting is `minimumReleaseAge`, but the Rush setting is `minimumReleaseAgeMinutes`
-          commonPackageJson.pnpm.minimumReleaseAge = pnpmOptions.minimumReleaseAgeMinutes;
-        }
-
-        if (pnpmOptions.minimumReleaseAgeExclude) {
-          commonPackageJson.pnpm.minimumReleaseAgeExclude = pnpmOptions.minimumReleaseAgeExclude;
-        }
-      }
-
-      if (pnpmOptions.trustPolicy !== undefined) {
-        if (
-          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.21.0')
-        ) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-                `doesn't support the "trustPolicy" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to pnpm 10.21.0 or newer.'
-            )
-          );
-        }
-
-        commonPackageJson.pnpm.trustPolicy = pnpmOptions.trustPolicy;
-      }
-
-      if (pnpmOptions.trustPolicyExclude) {
-        if (
-          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.22.0')
-        ) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-                `doesn't support the "trustPolicyExclude" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to pnpm 10.22.0 or newer.'
-            )
-          );
-        }
-
-        commonPackageJson.pnpm.trustPolicyExclude = pnpmOptions.trustPolicyExclude;
-      }
-
-      if (pnpmOptions.trustPolicyIgnoreAfterMinutes !== undefined) {
-        if (
-          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.27.0')
-        ) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-                `doesn't support the "trustPolicyIgnoreAfterMinutes" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to pnpm 10.27.0 or newer.'
-            )
-          );
-        }
-
-        // NOTE: the pnpm setting is `trustPolicyIgnoreAfter`, but the rush pnpm setting is `trustPolicyIgnoreAfterMinutes`
-        commonPackageJson.pnpm.trustPolicyIgnoreAfter = pnpmOptions.trustPolicyIgnoreAfterMinutes;
-      }
-
-      if (pnpmOptions.unsupportedPackageJsonSettings) {
-        merge(commonPackageJson, pnpmOptions.unsupportedPackageJsonSettings);
-      }
+    if (rushConfiguration.isPnpm && !InstallHelpers._writePnpmSettingsToWorkspace(rushConfiguration)) {
+      commonPackageJson.pnpm = pnpmInstallConfiguration?.commonPackageJsonPnpmSettings || {};
     }
 
     // Add any preferred versions to the top of the commonPackageJson
@@ -224,6 +93,227 @@ export class InstallHelpers {
     // Don't update the file timestamp unless the content has changed, since "rush install"
     // will consider this timestamp
     JsonFile.save(commonPackageJson, commonPackageJsonFilename, { onlyIfChanged: true });
+  }
+
+  public static getPnpmInstallConfiguration(
+    rushConfiguration: RushConfiguration,
+    subspace: Subspace,
+    terminal: ITerminal
+  ): IPnpmInstallConfiguration | undefined {
+    if (!rushConfiguration.isPnpm) {
+      return undefined;
+    }
+
+    const pnpmOptions: PnpmOptionsConfiguration = subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
+    const commonPackageJsonPnpmSettings: NonNullable<ICommonPackageJson['pnpm']> = {};
+    const workspaceYamlSettings: JsonObject = {};
+    const commonPackageJsonExtraSettings: JsonObject = {};
+    const writePnpmSettingsToWorkspace: boolean = InstallHelpers._writePnpmSettingsToWorkspace(rushConfiguration);
+
+    const applyPnpmSetting = (packageJsonKey: keyof NonNullable<ICommonPackageJson['pnpm']>, value: unknown): void => {
+      if (value === undefined) {
+        return;
+      }
+
+      if (writePnpmSettingsToWorkspace) {
+        workspaceYamlSettings[packageJsonKey] = value;
+      } else {
+        (commonPackageJsonPnpmSettings as Record<string, unknown>)[packageJsonKey] = value;
+      }
+    };
+
+    const getAllowBuilds = (): Record<string, boolean> => {
+      const allowBuilds: Record<string, boolean> = (workspaceYamlSettings.allowBuilds as
+        | Record<string, boolean>
+        | undefined) || {};
+      workspaceYamlSettings.allowBuilds = allowBuilds;
+      return allowBuilds;
+    };
+
+    if (pnpmOptions.globalOverrides) {
+      applyPnpmSetting('overrides', pnpmOptions.globalOverrides);
+    }
+
+    if (pnpmOptions.globalPackageExtensions) {
+      applyPnpmSetting('packageExtensions', pnpmOptions.globalPackageExtensions);
+    }
+
+    if (pnpmOptions.globalPeerDependencyRules) {
+      applyPnpmSetting('peerDependencyRules', pnpmOptions.globalPeerDependencyRules);
+    }
+
+    if (pnpmOptions.globalNeverBuiltDependencies) {
+      if (writePnpmSettingsToWorkspace) {
+        const allowBuilds: Record<string, boolean> = getAllowBuilds();
+        for (const dependency of pnpmOptions.globalNeverBuiltDependencies) {
+          allowBuilds[dependency] = false;
+        }
+      } else {
+        commonPackageJsonPnpmSettings.neverBuiltDependencies = pnpmOptions.globalNeverBuiltDependencies;
+      }
+    }
+
+    if (pnpmOptions.globalOnlyBuiltDependencies) {
+      if (
+        rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+        semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.1.0')
+      ) {
+        terminal.writeWarningLine(
+          Colorize.yellow(
+            `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `doesn't support the "globalOnlyBuiltDependencies" field in ` +
+              `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+              'Remove this field or upgrade to pnpm 10.1.0 or newer.'
+          )
+        );
+      }
+
+      if (writePnpmSettingsToWorkspace) {
+        const allowBuilds: Record<string, boolean> = getAllowBuilds();
+        for (const dependency of pnpmOptions.globalOnlyBuiltDependencies) {
+          allowBuilds[dependency] = true;
+        }
+      } else {
+        commonPackageJsonPnpmSettings.onlyBuiltDependencies = pnpmOptions.globalOnlyBuiltDependencies;
+      }
+    }
+
+    if (pnpmOptions.globalIgnoredOptionalDependencies) {
+      if (
+        rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+        semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '9.0.0')
+      ) {
+        terminal.writeWarningLine(
+          Colorize.yellow(
+            `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `doesn't support the "globalIgnoredOptionalDependencies" field in ` +
+              `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+              'Remove this field or upgrade to pnpm 9.'
+          )
+        );
+      }
+
+      applyPnpmSetting('ignoredOptionalDependencies', pnpmOptions.globalIgnoredOptionalDependencies);
+    }
+
+    if (pnpmOptions.globalAllowedDeprecatedVersions) {
+      applyPnpmSetting('allowedDeprecatedVersions', pnpmOptions.globalAllowedDeprecatedVersions);
+    }
+
+    if (pnpmOptions.globalPatchedDependencies) {
+      applyPnpmSetting('patchedDependencies', pnpmOptions.globalPatchedDependencies);
+    }
+
+    if (pnpmOptions.minimumReleaseAgeMinutes !== undefined || pnpmOptions.minimumReleaseAgeExclude) {
+      if (
+        rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+        semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.16.0')
+      ) {
+        terminal.writeWarningLine(
+          Colorize.yellow(
+            `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `doesn't support the "minimumReleaseAgeMinutes" or "minimumReleaseAgeExclude" fields in ` +
+              `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+              'Remove these fields or upgrade to pnpm 10.16.0 or newer.'
+          )
+        );
+      }
+
+      if (pnpmOptions.minimumReleaseAgeMinutes !== undefined) {
+        applyPnpmSetting('minimumReleaseAge', pnpmOptions.minimumReleaseAgeMinutes);
+      }
+
+      if (pnpmOptions.minimumReleaseAgeExclude) {
+        applyPnpmSetting('minimumReleaseAgeExclude', pnpmOptions.minimumReleaseAgeExclude);
+      }
+    }
+
+    if (pnpmOptions.trustPolicy !== undefined) {
+      if (
+        rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+        semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.21.0')
+      ) {
+        terminal.writeWarningLine(
+          Colorize.yellow(
+            `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `doesn't support the "trustPolicy" field in ` +
+              `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+              'Remove this field or upgrade to pnpm 10.21.0 or newer.'
+          )
+        );
+      }
+
+      applyPnpmSetting('trustPolicy', pnpmOptions.trustPolicy);
+    }
+
+    if (pnpmOptions.trustPolicyExclude) {
+      if (
+        rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+        semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.22.0')
+      ) {
+        terminal.writeWarningLine(
+          Colorize.yellow(
+            `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `doesn't support the "trustPolicyExclude" field in ` +
+              `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+              'Remove this field or upgrade to pnpm 10.22.0 or newer.'
+          )
+        );
+      }
+
+      applyPnpmSetting('trustPolicyExclude', pnpmOptions.trustPolicyExclude);
+    }
+
+    if (pnpmOptions.trustPolicyIgnoreAfterMinutes !== undefined) {
+      if (
+        rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+        semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.27.0')
+      ) {
+        terminal.writeWarningLine(
+          Colorize.yellow(
+            `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `doesn't support the "trustPolicyIgnoreAfterMinutes" field in ` +
+              `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+              'Remove this field or upgrade to pnpm 10.27.0 or newer.'
+          )
+        );
+      }
+
+      applyPnpmSetting('trustPolicyIgnoreAfter', pnpmOptions.trustPolicyIgnoreAfterMinutes);
+    }
+
+    if (pnpmOptions.unsupportedPackageJsonSettings) {
+      if (
+        writePnpmSettingsToWorkspace &&
+        typeof pnpmOptions.unsupportedPackageJsonSettings === 'object' &&
+        !Array.isArray(pnpmOptions.unsupportedPackageJsonSettings)
+      ) {
+        const {
+          pnpm: unsupportedPnpmSettings,
+          ...unsupportedPackageJsonSettings
+        } = pnpmOptions.unsupportedPackageJsonSettings as JsonObject;
+
+        if (
+          unsupportedPnpmSettings &&
+          typeof unsupportedPnpmSettings === 'object' &&
+          !Array.isArray(unsupportedPnpmSettings)
+        ) {
+          merge(workspaceYamlSettings, unsupportedPnpmSettings as JsonObject);
+        }
+
+        merge(commonPackageJsonExtraSettings, unsupportedPackageJsonSettings);
+      } else {
+        merge(commonPackageJsonExtraSettings, pnpmOptions.unsupportedPackageJsonSettings);
+      }
+    }
+
+    return {
+      commonPackageJsonExtraSettings:
+        Object.keys(commonPackageJsonExtraSettings).length > 0 ? commonPackageJsonExtraSettings : undefined,
+      commonPackageJsonPnpmSettings:
+        Object.keys(commonPackageJsonPnpmSettings).length > 0 ? commonPackageJsonPnpmSettings : undefined,
+      workspaceYamlSettings: Object.keys(workspaceYamlSettings).length > 0 ? workspaceYamlSettings : undefined
+    };
   }
 
   public static getPackageManagerEnvironment(
@@ -249,6 +339,13 @@ export class InstallHelpers {
     }
 
     return InstallHelpers._mergeEnvironmentVariables(process.env, configurationEnvironment, options);
+  }
+
+  private static _writePnpmSettingsToWorkspace(rushConfiguration: RushConfiguration): boolean {
+    return (
+      rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+      semver.gte(rushConfiguration.rushConfigurationJson.pnpmVersion, '11.0.0')
+    );
   }
 
   /**

@@ -28,7 +28,7 @@ const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
  */
 interface IPnpmWorkspaceYaml {
   /** The list of local package directories */
-  packages: string[];
+  packages?: string[];
   /** Catalog definitions for centralized version management */
   catalogs?: Record<string, Record<string, string>>;
 }
@@ -41,6 +41,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
 
   private _workspacePackages: Set<string>;
   private _catalogs: Record<string, Record<string, string>> | undefined;
+  private _settings: Record<string, unknown> | undefined;
 
   /**
    * The PNPM workspace file is used to specify the location of workspaces relative to the root
@@ -54,6 +55,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     // If we need to support manual customization, that should be an additional parameter for "base file"
     this._workspacePackages = new Set<string>();
     this._catalogs = undefined;
+    this._settings = undefined;
   }
 
   /**
@@ -62,6 +64,13 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
    */
   public setCatalogs(catalogs: Record<string, Record<string, string>> | undefined): void {
     this._catalogs = catalogs;
+  }
+
+  /**
+   * Sets additional workspace-level PNPM settings.
+   */
+  public setSettings(settings: Record<string, unknown> | undefined): void {
+    this._settings = settings;
   }
 
   /** @override */
@@ -82,8 +91,12 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     Sort.sortSet(this._workspacePackages);
 
     const workspaceYaml: IPnpmWorkspaceYaml = {
-      packages: Array.from(this._workspacePackages)
+      ...(this._settings || {})
     };
+
+    if (this._workspacePackages.size > 0) {
+      workspaceYaml.packages = Array.from(this._workspacePackages);
+    }
 
     if (this._catalogs && Object.keys(this._catalogs).length > 0) {
       workspaceYaml.catalogs = this._catalogs;

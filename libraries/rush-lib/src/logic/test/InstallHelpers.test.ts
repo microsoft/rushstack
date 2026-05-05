@@ -72,5 +72,51 @@ describe('InstallHelpers', () => {
         })
       );
     });
+
+    it('moves pnpm 11 settings to the workspace configuration', () => {
+      const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfigV11/rush.json`;
+      const rushConfiguration: RushConfiguration =
+        RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+      const pnpmInstallConfiguration = InstallHelpers.getPnpmInstallConfiguration(
+        rushConfiguration,
+        rushConfiguration.defaultSubspace,
+        terminal
+      );
+
+      InstallHelpers.generateCommonPackageJson(
+        rushConfiguration,
+        rushConfiguration.defaultSubspace,
+        undefined,
+        terminal,
+        pnpmInstallConfiguration
+      );
+
+      const packageJson: IPackageJson = mockJsonFileSave.mock.calls[0][0];
+      expect(TestUtilities.stripAnnotations(packageJson)).not.toHaveProperty('pnpm');
+      expect(pnpmInstallConfiguration?.workspaceYamlSettings).toEqual(
+        expect.objectContaining({
+          overrides: {
+            foo: '^2.0.0',
+            quux: 'npm:@myorg/quux@^1.0.0',
+            'bar@^2.1.0': '3.0.0',
+            'qar@1>zoo': '2'
+          },
+          packageExtensions: {
+            'react-redux': {
+              peerDependencies: {
+                'react-dom': '*'
+              }
+            }
+          },
+          allowBuilds: {
+            esbuild: true,
+            playwright: true,
+            fsevents: false,
+            level: false
+          },
+          pnpmFutureFeature: true
+        })
+      );
+    });
   });
 });

@@ -33,6 +33,7 @@ import {
 } from '../../api/PackageJsonEditor';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { InstallHelpers } from './InstallHelpers';
+import type { IPnpmInstallConfiguration } from './InstallHelpers';
 import { TempProjectHelper } from '../TempProjectHelper';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import type { RushConfiguration } from '../..';
@@ -40,6 +41,7 @@ import type { PurgeManager } from '../PurgeManager';
 import { LinkManagerFactory } from '../LinkManagerFactory';
 import type { BaseLinkManager } from '../base/BaseLinkManager';
 import type { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from '../pnpm/PnpmShrinkwrapFile';
+import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 import type { Subspace } from '../../api/Subspace';
 
 /**
@@ -367,17 +369,29 @@ export class RushInstallManager extends BaseInstallManager {
       }
     }
 
+    const pnpmInstallConfiguration: IPnpmInstallConfiguration | undefined = InstallHelpers.getPnpmInstallConfiguration(
+      this.rushConfiguration,
+      this.rushConfiguration.defaultSubspace,
+      this._terminal
+    );
+
     // Remove the workspace file if it exists
     if (this.rushConfiguration.isPnpm) {
       const workspaceFilePath: string = path.join(
         this.rushConfiguration.commonTempFolder,
         'pnpm-workspace.yaml'
       );
-      try {
-        await FileSystem.deleteFileAsync(workspaceFilePath);
-      } catch (e) {
-        if (!FileSystem.isNotExistError(e as Error)) {
-          throw e;
+      if (pnpmInstallConfiguration?.workspaceYamlSettings) {
+        const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+        workspaceFile.setSettings(pnpmInstallConfiguration.workspaceYamlSettings);
+        workspaceFile.save(workspaceFile.workspaceFilename, { onlyIfChanged: true });
+      } else {
+        try {
+          await FileSystem.deleteFileAsync(workspaceFilePath);
+        } catch (e) {
+          if (!FileSystem.isNotExistError(e as Error)) {
+            throw e;
+          }
         }
       }
     }
@@ -387,7 +401,8 @@ export class RushInstallManager extends BaseInstallManager {
       this.rushConfiguration,
       this.rushConfiguration.defaultSubspace,
       commonDependencies,
-      this._terminal
+      this._terminal,
+      pnpmInstallConfiguration
     );
 
     stopwatch.stop();

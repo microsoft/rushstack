@@ -45,6 +45,7 @@ import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 import { FlagFile } from '../../api/FlagFile';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
+import type { IPnpmInstallConfiguration } from './InstallHelpers';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -201,6 +202,42 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // get the relative path from common temp folder to repo root folder
     const relativeFromTempFolderToRootFolder: string = path.relative(commonTempFolder, rushJsonFolder);
 
+    const workspaceProjectsToProcess: RushConfigurationProject[] = [...subspace.getProjects()];
+    const workspaceProjectsAdded: Set<string> = new Set<string>();
+
+    while (workspaceProjectsToProcess.length > 0) {
+      const workspaceProject: RushConfigurationProject = workspaceProjectsToProcess.pop()!;
+      if (workspaceProjectsAdded.has(workspaceProject.packageName)) {
+        continue;
+      }
+
+      workspaceProjectsAdded.add(workspaceProject.packageName);
+      workspaceFile.addPackage(workspaceProject.projectFolder);
+
+      for (const { name, version, dependencyType } of [
+        ...workspaceProject.packageJsonEditor.dependencyList,
+        ...workspaceProject.packageJsonEditor.devDependencyList
+      ]) {
+        if (dependencyType === DependencyType.Peer || workspaceProject.decoupledLocalDependencies.has(name)) {
+          continue;
+        }
+
+        const dependencySpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(name, version);
+        if (dependencySpecifier.specifierType !== DependencySpecifierType.Workspace) {
+          continue;
+        }
+
+        const referencedWorkspaceProject: RushConfigurationProject | undefined =
+          this.rushConfiguration.getProjectByName(name);
+        if (
+          referencedWorkspaceProject &&
+          !workspaceProjectsAdded.has(referencedWorkspaceProject.packageName)
+        ) {
+          workspaceProjectsToProcess.push(referencedWorkspaceProject);
+        }
+      }
+    }
+
     // Loop through the projects and add them to the workspace file. While we're at it, also validate that
     // referenced workspace projects are valid, and check if the shrinkwrap file is already up-to-date.
     for (const rushProject of this.rushConfiguration.projects) {
@@ -209,7 +246,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         continue;
       }
       const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;
-      workspaceFile.addPackage(rushProject.projectFolder);
 
       for (const { name, version, dependencyType } of [
         ...packageJson.dependencyList,
@@ -388,6 +424,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Check if overrides and globalOverrides are the same
     const pnpmOptions: PnpmOptionsConfiguration =
       subspace.getPnpmOptions() || this.rushConfiguration.pnpmOptions;
+    const pnpmInstallConfiguration: IPnpmInstallConfiguration | undefined =
+      InstallHelpers.getPnpmInstallConfiguration(this.rushConfiguration, subspace, this._terminal);
 
     const overridesAreEqual: boolean = Objects.areDeepEqual<Record<string, string>>(
       pnpmOptions.globalOverrides ?? {},
@@ -442,10 +480,18 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // Write the common package.json
-    InstallHelpers.generateCommonPackageJson(this.rushConfiguration, subspace, undefined, this._terminal);
+    InstallHelpers.generateCommonPackageJson(
+      this.rushConfiguration,
+      subspace,
+      undefined,
+      this._terminal,
+      pnpmInstallConfiguration
+    );
+
+    workspaceFile.setSettings(pnpmInstallConfiguration?.workspaceYamlSettings);
 
     // Set catalog definitions in the workspace file if specified
-    if (pnpmOptions.globalCatalogs) {
+    if (pnpmOptions.globalCatalogs && pnpmInstallConfiguration?.workspaceYamlSettings?.catalogs === undefined) {
       if (
         this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
         semver.lt(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '9.5.0')
@@ -462,7 +508,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       const catalogs: Record<string, Record<string, string>> = {};
 
-      if (pnpmOptions.globalCatalogs) {
+      if (pnpmOptions.globalCatalogs && pnpmInstallConfiguration?.workspaceYamlSettings?.catalogs === undefined) {
         Object.assign(catalogs, pnpmOptions.globalCatalogs);
       }
 

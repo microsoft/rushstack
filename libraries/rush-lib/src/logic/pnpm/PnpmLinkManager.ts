@@ -326,6 +326,26 @@ export class PnpmLinkManager extends BaseLinkManager {
         folderName,
         RushConstants.nodeModulesFolderName
       );
+    } else if (this._pnpmVersion.major >= 11) {
+      const pnpmKitV11: typeof import('@rushstack/rush-pnpm-kit-v10') = require(
+        '@rushstack/rush-pnpm-kit-v11'
+      );
+
+      // project@file+projects+presentation-integration-tests.tgz_jsdom@11.12.0
+      // The second parameter is max length of virtual store dir,
+      // for v11 default is 120 on Linux/MacOS and 60 on Windows.
+      // TODO Read virtual-store-dir-max-length from .npmrc
+      const folderName: string = pnpmKitV11.dependencyPath.depPathToFilename(
+        tempProjectDependencyKey,
+        IS_WINDOWS ? 60 : 120
+      );
+      return path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.nodeModulesFolderName,
+        '.pnpm',
+        folderName,
+        RushConstants.nodeModulesFolderName
+      );
     } else if (this._pnpmVersion.major >= 10) {
       const pnpmKitV10: typeof import('@rushstack/rush-pnpm-kit-v10') = await import(
         '@rushstack/rush-pnpm-kit-v10'

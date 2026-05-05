@@ -43,6 +43,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/rush-pnpm-kit-v11",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rush-themed-ui",
       "allowedCategories": [ "libraries" ]
     },
