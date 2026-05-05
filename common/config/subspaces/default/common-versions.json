@@ -155,7 +155,7 @@
       // For pnpm kit v9, v10
       "~1001.0.0",
       // For pnpm kit v11
-      "~1100.0.0"
+      "~1001.0.0"
     ],
     "@pnpm/lockfile.fs": [
       // For pnpm kit v11

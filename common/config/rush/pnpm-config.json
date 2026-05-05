@@ -573,9 +573,16 @@
    *     "@swc/core"
    *   ]
    */
-  // "globalOnlyBuiltDependencies": [
-  //   "esbuild"
-  // ],
+  "globalOnlyBuiltDependencies": [
+    "@swc/core",
+    "@vscode/vsce-sign",
+    "aws-sdk",
+    "core-js",
+    "core-js-pure",
+    "esbuild",
+    "keytar",
+    "unrs-resolver"
+  ],
 
   /**
    * The `globalIgnoredOptionalDependencies` setting suppresses the installation of optional NPM

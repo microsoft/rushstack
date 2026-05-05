@@ -19,6 +19,17 @@ import type { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
  * optionally utilizing a pnpmfile shim to inject preferred versions.
  */
 export class SubspacePnpmfileConfiguration {
+  private static _getSemverPath(rushConfiguration: RushConfiguration): string {
+    return Import.resolveModule({
+      modulePath: 'semver',
+      baseFolderPath: path.join(
+        path.dirname(path.dirname(rushConfiguration.packageManagerToolFilename)),
+        'pnpm',
+        'dist'
+      )
+    });
+  }
+
   /**
    * Split workspace use global pnpmfile, because in split workspace, user may set `shared-workspace-lockfile=false`.
    * That means each project owns their individual pnpmfile under project folder. While the global pnpmfile could be
@@ -83,7 +94,7 @@ export class SubspacePnpmfileConfiguration {
     const settings: ISubspacePnpmfileShimSettings = {
       workspaceProjects,
       subspaceProjects,
-      semverPath: Import.resolveModule({ modulePath: 'semver', baseFolderPath: __dirname })
+      semverPath: SubspacePnpmfileConfiguration._getSemverPath(rushConfiguration)
     };
 
     // common/config/subspaces/<subspace_name>/.pnpmfile.cjs

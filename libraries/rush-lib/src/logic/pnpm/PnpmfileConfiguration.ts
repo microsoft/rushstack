@@ -28,6 +28,17 @@ export class PnpmfileConfiguration {
     this._context = context;
   }
 
+  private static _getSemverPath(rushConfiguration: RushConfiguration): string {
+    return Import.resolveModule({
+      modulePath: 'semver',
+      baseFolderPath: path.join(
+        path.dirname(path.dirname(rushConfiguration.packageManagerToolFilename)),
+        'pnpm',
+        'dist'
+      )
+    });
+  }
+
   public static async initializeAsync(
     rushConfiguration: RushConfiguration,
     subspace: Subspace,
@@ -121,7 +132,7 @@ export class PnpmfileConfiguration {
       allPreferredVersions,
       allowedAlternativeVersions,
       workspaceVersions,
-      semverPath: Import.resolveModule({ modulePath: 'semver', baseFolderPath: __dirname })
+      semverPath: PnpmfileConfiguration._getSemverPath(rushConfiguration)
     };
 
     // Use the provided path if available. Otherwise, use the default path.

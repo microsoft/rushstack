@@ -37,7 +37,7 @@
   "dependencies": {
     "@pnpm/dependency-path-pnpm-v11": "npm:@pnpm/dependency-path@~1001.1.10",
     "@pnpm/lockfile.fs-pnpm-lock-v9": "npm:@pnpm/lockfile.fs@~1100.0.4",
-    "@pnpm/logger": "~1100.0.0"
+    "@pnpm/logger": "~1001.0.0"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
