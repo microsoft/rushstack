@@ -162,8 +162,16 @@
    *
    * The default value is false to avoid legacy compatibility issues.
    * It is strongly recommended to set `strictPeerDependencies=true`.
+   *
+   * NOTE (pnpm 11 compatibility): This is temporarily set to false because pnpm 11 moved
+   * workspace-level settings (including `peerDependencyRules`) from `package.json` to
+   * `pnpm-workspace.yaml`, but the bootstrap version of Rush (5.175.1) writes
+   * `globalPeerDependencyRules` to `package.json` only.  The known peer dependency exceptions
+   * are documented in `globalPeerDependencyRules` below.  Once a version of Rush that supports
+   * writing settings to `pnpm-workspace.yaml` for pnpm 11 is released, this should be reverted
+   * to `true`.
    */
-  "strictPeerDependencies": true,
+  "strictPeerDependencies": false,
 
   /**
    * Environment variables that will be provided to PNPM.
