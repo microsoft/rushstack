@@ -89,6 +89,8 @@ export async function afterInstallAsync(
   const pnpmMajorVersion: PnpmMajorVersion = (() => {
     const major: number = parseInt(rushConfiguration.packageManagerToolVersion, 10);
     switch (major) {
+      case 11:
+        return 11;
       case 10:
         return 10;
       case 9:

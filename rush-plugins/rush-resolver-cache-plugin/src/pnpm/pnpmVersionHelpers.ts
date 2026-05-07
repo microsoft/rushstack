@@ -9,8 +9,9 @@ import type { IResolverContext } from '../types';
  * - pnpm 8: lockfile v6, store v3, MD5 base32 hash for dep paths
  * - pnpm 9: lockfile v9, store v3, MD5 base32 hash for dep paths
  * - pnpm 10: lockfile v9, store v10, SHA-256 hex hash for dep paths
+ * - pnpm 11: lockfile v9, store v11, SHA-256 hex hash for dep paths (same algorithm as pnpm 10)
  */
-export type PnpmMajorVersion = 8 | 9 | 10;
+export type PnpmMajorVersion = 8 | 9 | 10 | 11;
 
 /**
  * Version-specific helpers for resolving pnpm dependency paths, lockfile keys,
@@ -19,13 +20,13 @@ export type PnpmMajorVersion = 8 | 9 | 10;
 export interface IPnpmVersionHelpers {
   /**
    * Converts a pnpm dependency path to its on-disk folder name.
-   * Uses MD5 base32 hashing for pnpm 8/9 and SHA-256 hex hashing for pnpm 10.
+   * Uses MD5 base32 hashing for pnpm 8/9 and SHA-256 hex hashing for pnpm 10/11.
    */
   depPathToFilename(depPath: string): string;
 
   /**
    * Constructs the full lockfile package key from a package name and version specifier.
-   * pnpm 8 uses `/{name}\@{specifier}` (v6 key format); pnpm 9/10 use `{name}\@{specifier}` (v9 key format).
+   * pnpm 8 uses `/{name}\@{specifier}` (v6 key format); pnpm 9/10/11 use `{name}\@{specifier}` (v9 key format).
    */
   buildDependencyKey(name: string, specifier: string): string;
 
@@ -50,6 +51,8 @@ export async function getPnpmVersionHelpersAsync(version: PnpmMajorVersion): Pro
       return (await import('./v9')).helpers;
     case 10:
       return (await import('./v10')).helpers;
+    case 11:
+      return (await import('./v11')).helpers;
     default:
       throw new Error(`Unsupported pnpm major version: ${version}`);
   }

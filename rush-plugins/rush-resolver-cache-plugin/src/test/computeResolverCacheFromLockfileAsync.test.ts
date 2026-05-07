@@ -99,6 +99,14 @@ const TEST_CASES: readonly ITestCase[] = [
     commonPrefixToTrim: '/$root/',
     lockfileName: 'build-tests-subspace-v9.yaml',
     pnpmVersion: 10
+  },
+  {
+    // Same v9 lockfile with pnpm 11 helpers (v9 key format, SHA-256 hash, v11 store)
+    // pnpm 11 uses the same dep-path algorithm as pnpm 10; only the store path changes.
+    workspaceRoot: '/$root/common/temp/build-tests',
+    commonPrefixToTrim: '/$root/',
+    lockfileName: 'build-tests-subspace-v9.yaml',
+    pnpmVersion: 11
   }
 ];
 

@@ -13,6 +13,7 @@ import {
 import { helpers as v8Helpers } from '../pnpm/v8';
 import { helpers as v9Helpers } from '../pnpm/v9';
 import { helpers as v10Helpers } from '../pnpm/v10';
+import { helpers as v11Helpers } from '../pnpm/v11';
 import { getPnpmVersionHelpersAsync, type IPnpmVersionHelpers } from '../pnpm/pnpmVersionHelpers';
 import type { IResolverContext } from '../types';
 
@@ -188,6 +189,11 @@ describe('buildDependencyKey', () => {
     expect(v10Helpers.buildDependencyKey('autoprefixer', '9.8.8')).toBe('autoprefixer@9.8.8');
     expect(v10Helpers.buildDependencyKey('@scope/pkg', '1.0.0')).toBe('@scope/pkg@1.0.0');
   });
+
+  it('pnpm 11 does not prefix with /', () => {
+    expect(v11Helpers.buildDependencyKey('autoprefixer', '9.8.8')).toBe('autoprefixer@9.8.8');
+    expect(v11Helpers.buildDependencyKey('@scope/pkg', '1.0.0')).toBe('@scope/pkg@1.0.0');
+  });
 });
 
 describe('getStoreIndexPath', () => {
@@ -241,18 +247,43 @@ describe('getStoreIndexPath', () => {
       '/store/v10/index/aa/bbccddeeff00112233445566778899aabbccddeeff00112233445566778899-@scope+pkg@1.0.0.json'
     );
   });
+
+  it('pnpm 11 uses v11/index/ store layout with name@version suffix', () => {
+    const result: string = v11Helpers.getStoreIndexPath(
+      '/store',
+      makeContext('autoprefixer', '9.8.8'),
+      'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890'
+    );
+    // hash is truncated to 64 chars, then split at 2 chars
+    expect(result).toBe(
+      '/store/v11/index/ab/cdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890-autoprefixer@9.8.8.json'
+    );
+  });
+
+  it('pnpm 11 replaces / with + in scoped package names', () => {
+    const result: string = v11Helpers.getStoreIndexPath(
+      '/store',
+      makeContext('@scope/pkg', '1.0.0'),
+      'aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899'
+    );
+    expect(result).toBe(
+      '/store/v11/index/aa/bbccddeeff00112233445566778899aabbccddeeff00112233445566778899-@scope+pkg@1.0.0.json'
+    );
+  });
 });
 
 describe(getPnpmVersionHelpersAsync.name, () => {
-  it('returns helpers for pnpm 8, 9, 10', async () => {
+  it('returns helpers for pnpm 8, 9, 10, 11', async () => {
     const h8: IPnpmVersionHelpers = await getPnpmVersionHelpersAsync(8);
     const h9: IPnpmVersionHelpers = await getPnpmVersionHelpersAsync(9);
     const h10: IPnpmVersionHelpers = await getPnpmVersionHelpersAsync(10);
+    const h11: IPnpmVersionHelpers = await getPnpmVersionHelpersAsync(11);
     // v8 keys have leading /
     expect(h8.buildDependencyKey('foo', '1.0.0')).toBe('/foo@1.0.0');
-    // v9/v10 keys have no leading /
+    // v9/v10/v11 keys have no leading /
     expect(h9.buildDependencyKey('foo', '1.0.0')).toBe('foo@1.0.0');
     expect(h10.buildDependencyKey('foo', '1.0.0')).toBe('foo@1.0.0');
+    expect(h11.buildDependencyKey('foo', '1.0.0')).toBe('foo@1.0.0');
   });
 
   it('throws for unsupported version', async () => {
