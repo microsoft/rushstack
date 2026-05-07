@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/rush-redis-cobuild-plugin",
-      "comment": "Detect half-dead Redis connections via `socketTimeout` and `keepAlive`, and replace the `count * 1000` reconnect backoff (0ms on first attempt) with exponential backoff plus jitter, capped at 10s.",
+      "comment": "Set Redis `connectTimeout` and `socketTimeout` so half-dead TCP connections (NAT/firewall) surface in seconds instead of stalling in-flight commands for many minutes while the kernel waits to give up.",
       "type": "patch"
     }
   ],
