@@ -50,11 +50,20 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
 
   public constructor(options: IRedisCobuildLockProviderOptions, rushSession: RushSession) {
     this._options = RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(options);
-    // Provide a default reconnect strategy that prevents more than 5 reconnect attempts.
+    // Provide socket defaults that detect half-dead connections and reconnect with
+    // backoff.
     this._options.socket = {
+      connectTimeout: 10_000,
+      socketTimeout: 30_000,
       reconnectStrategy: (count: number) => {
         this._terminal.writeErrorLine(`Redis client reconnecting attempt #${count}`);
-        return count < 5 ? count * 1000 : false;
+        if (count >= 5) {
+          return false;
+        }
+        // Exponential backoff with jitter, capped at 10s. Avoids the previous
+        // `count * 1000` formula which produced a 0ms delay on the first attempt.
+        const jitter: number = Math.floor(Math.random() * 200);
+        return Math.min(500 * 2 ** count, 10_000) + jitter;
       },
       ...this._options.socket
     };

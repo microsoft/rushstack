@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-redis-cobuild-plugin",
+      "comment": "Detect half-dead Redis connections via `socketTimeout` and `keepAlive`, and replace the `count * 1000` reconnect backoff (0ms on first attempt) with exponential backoff plus jitter, capped at 10s.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-redis-cobuild-plugin"
+}
