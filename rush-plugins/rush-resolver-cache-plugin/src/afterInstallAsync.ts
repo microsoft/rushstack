@@ -21,6 +21,7 @@ import {
   type IPnpmVersionHelpers,
   getPnpmVersionHelpersAsync
 } from './pnpm/pnpmVersionHelpers';
+import { findNestedPackageJsonDirsFromSqlite } from './pnpm/store/v11SqliteIndex';
 import type { IResolverContext } from './types';
 
 /**
@@ -159,15 +160,41 @@ export async function afterInstallAsync(
     // Ignore
   }
 
+  // pnpm 11 stores the package file index in a SQLite database (index.db) instead of
+  // per-package JSON files. Open the database once here and share it across all contexts.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let pnpm11StoreDb: any | undefined;
+  if (pnpmMajorVersion === 11) {
+    const dbPath: string = `${pnpmStorePath}/v11/index.db`;
+    try {
+      // node:sqlite is available from Node.js 22.5.0+ (experimental) and is the same
+      // module used by pnpm 11 itself to write the index.db.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { DatabaseSync } = (await import('node:sqlite')) as any;
+      pnpm11StoreDb = new DatabaseSync(dbPath, { open: true });
+    } catch {
+      terminal.writeWarningLine(
+        `Unable to open pnpm 11 store index database at ${dbPath}. ` +
+          `Nested package.json detection will be skipped for this install.`
+      );
+    }
+  }
+
   async function afterExternalPackagesAsync(
     contexts: Map<string, IResolverContext>,
     missingOptionalDependencies: Set<string>
   ): Promise<void> {
     /**
-     * Loads the index file from the pnpm store to discover nested package.json files in an external package
-     * For internal packages, assumes there are no nested package.json files.
+     * Loads the package file index from the pnpm store to discover nested package.json files
+     * in an external package. For internal packages, assumes there are no nested package.json files.
+     *
+     * For pnpm ≤10 the index is a JSON file on disk; for pnpm 11 it is a row in an SQLite
+     * database (`index.db`) using msgpackr encoding.
+     *
      * @param context - The context to find nested package.json files for
-     * @returns A promise that resolves to the nested package.json paths, false if the package fails to load, or true if the package has no nested package.json files.
+     * @returns A promise that resolves to the nested package.json directory paths,
+     *          `false` if the package fails to load (missing optional dep),
+     *          or `true` if the package has no nested package.json files.
      */
     async function tryFindNestedPackageJsonsForContextAsync(
       context: IResolverContext
@@ -182,6 +209,22 @@ export async function afterInstallAsync(
         return true;
       }
 
+      if (pnpmMajorVersion === 11) {
+        // pnpm 11 uses a SQLite database (index.db) instead of per-package JSON files.
+        // The key in the database is "{integrity}\t{name}@{version}".
+        if (!pnpm11StoreDb) {
+          // Database could not be opened – degrade gracefully.
+          return true;
+        }
+        return findNestedPackageJsonDirsFromSqlite(
+          pnpm11StoreDb,
+          descriptionFileHash,
+          context.name,
+          context.version
+        );
+      }
+
+      // pnpm ≤10: the index is stored as a JSON file on disk.
       // Convert an integrity hash like
       // sha512-C6uiGQJ+Gt4RyHXXYt+v9f+SN1v83x68URwgxNQ98cvH8kxiuywWGP4XeNZ1paOzZ63aY3cTciCEQJNFUljlLw==
       // To its hex representation, e.g.
@@ -277,6 +320,10 @@ export async function afterInstallAsync(
     pnpmVersion: pnpmMajorVersion,
     afterExternalPackagesAsync
   });
+
+  // Close the pnpm 11 SQLite database now that all packages have been processed.
+  pnpm11StoreDb?.close();
+  pnpm11StoreDb = undefined;
 
   const extendedCacheFile: IExtendedResolverCacheFile = {
     version: RESOLVER_CACHE_FILE_VERSION,

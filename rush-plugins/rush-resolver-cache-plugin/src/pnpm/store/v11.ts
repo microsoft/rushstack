@@ -1,10 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// Store v11 index path format (used by pnpm 11):
+// NOTE: pnpm 11 does NOT use per-package JSON index files.  Instead the entire store index
+// is stored in a single SQLite database at `{storeDir}/v11/index.db`, encoded with msgpackr.
+// The `getStoreIndexPath` function below exists only to satisfy the `IPnpmVersionHelpers`
+// interface; at runtime, `afterInstallAsync.ts` detects pnpm 11 and queries the SQLite
+// database directly instead of reading the path returned here.
+//
+// Historical store v11 path format (never actually used by pnpm 11):
 // {storeDir}/v11/index/{hash[0:2]}/{hash[2:64]}-{name}@{version}.json
-// Falls back to directory scan when the primary path doesn't exist.
-// Same structure as store v10 but under the v11 subdirectory.
 
 import { type Dirent, existsSync, readdirSync } from 'node:fs';
 

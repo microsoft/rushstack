@@ -15,6 +15,7 @@ import { helpers as v9Helpers } from '../pnpm/v9';
 import { helpers as v10Helpers } from '../pnpm/v10';
 import { helpers as v11Helpers } from '../pnpm/v11';
 import { getPnpmVersionHelpersAsync, type IPnpmVersionHelpers } from '../pnpm/pnpmVersionHelpers';
+import { findNestedPackageJsonDirsInMsgpackBlob } from '../pnpm/store/v11SqliteIndex';
 import type { IResolverContext } from '../types';
 
 describe(createBase32Hash.name, () => {
@@ -398,5 +399,54 @@ describe(resolveDependencyKey.name, () => {
     );
     expect(result).toContain('/node_modules/.pnpm/');
     expect(result).toContain('/node_modules/autoprefixer');
+  });
+});
+
+describe(findNestedPackageJsonDirsInMsgpackBlob.name, () => {
+  /**
+   * Constructs a minimal fake msgpack buffer that contains a `/package.json` occurrence
+   * preceded by the given directory path bytes.
+   */
+  function makeBlobWithPaths(...paths: string[]): Uint8Array {
+    // Build a flat binary containing each path string (with a non-path byte prefix to
+    // simulate the msgpack length byte) followed by '/package.json'.
+    const parts: Buffer[] = [];
+    for (const dir of paths) {
+      // The byte before the path must NOT be a valid path character.
+      // 0x00 simulates the msgpack string-length marker boundary.
+      parts.push(Buffer.from([0x00]));
+      if (dir) {
+        parts.push(Buffer.from(dir, 'utf8'));
+      }
+      parts.push(Buffer.from('/package.json', 'utf8'));
+    }
+    return Buffer.concat(parts);
+  }
+
+  it('returns true when no nested package.json files exist', () => {
+    // A blob that only has a root package.json (dir === '')
+    const blob: Uint8Array = makeBlobWithPaths('');
+    expect(findNestedPackageJsonDirsInMsgpackBlob(blob)).toBe(true);
+  });
+
+  it('returns true for non-node_modules nested paths (e.g. dist/esm)', () => {
+    const blob: Uint8Array = makeBlobWithPaths('dist/esm', '');
+    expect(findNestedPackageJsonDirsInMsgpackBlob(blob)).toBe(true);
+  });
+
+  it('returns array of node_modules paths when bundled deps are present', () => {
+    const blob: Uint8Array = makeBlobWithPaths('node_modules/react', 'node_modules/react-dom', '');
+    const result: string[] | true = findNestedPackageJsonDirsInMsgpackBlob(blob);
+    expect(result).toEqual(['node_modules/react', 'node_modules/react-dom']);
+  });
+
+  it('handles scoped packages under node_modules', () => {
+    const blob: Uint8Array = makeBlobWithPaths('node_modules/@scope/pkg', '');
+    const result: string[] | true = findNestedPackageJsonDirsInMsgpackBlob(blob);
+    expect(result).toEqual(['node_modules/@scope/pkg']);
+  });
+
+  it('returns true for empty blob', () => {
+    expect(findNestedPackageJsonDirsInMsgpackBlob(new Uint8Array(0))).toBe(true);
   });
 });
