@@ -35,8 +35,6 @@ interface ICommonPackageJson extends IPackageJson {
     ignoredOptionalDependencies?: typeof PnpmOptionsConfiguration.prototype.globalIgnoredOptionalDependencies;
     allowedDeprecatedVersions?: typeof PnpmOptionsConfiguration.prototype.globalAllowedDeprecatedVersions;
     patchedDependencies?: typeof PnpmOptionsConfiguration.prototype.globalPatchedDependencies;
-    minimumReleaseAge?: typeof PnpmOptionsConfiguration.prototype.minimumReleaseAgeMinutes;
-    minimumReleaseAgeExclude?: typeof PnpmOptionsConfiguration.prototype.minimumReleaseAgeExclude;
     trustPolicy?: typeof PnpmOptionsConfiguration.prototype.trustPolicy;
     trustPolicyExclude?: typeof PnpmOptionsConfiguration.prototype.trustPolicyExclude;
     trustPolicyIgnoreAfter?: typeof PnpmOptionsConfiguration.prototype.trustPolicyIgnoreAfterMinutes;
@@ -122,31 +120,6 @@ export class InstallHelpers {
 
       if (pnpmOptions.globalPatchedDependencies) {
         commonPackageJson.pnpm.patchedDependencies = pnpmOptions.globalPatchedDependencies;
-      }
-
-      if (pnpmOptions.minimumReleaseAgeMinutes !== undefined || pnpmOptions.minimumReleaseAgeExclude) {
-        if (
-          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.16.0')
-        ) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-                `doesn't support the "minimumReleaseAgeMinutes" or "minimumReleaseAgeExclude" fields in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove these fields or upgrade to pnpm 10.16.0 or newer.'
-            )
-          );
-        }
-
-        if (pnpmOptions.minimumReleaseAgeMinutes !== undefined) {
-          // NOTE: the pnpm setting is `minimumReleaseAge`, but the Rush setting is `minimumReleaseAgeMinutes`
-          commonPackageJson.pnpm.minimumReleaseAge = pnpmOptions.minimumReleaseAgeMinutes;
-        }
-
-        if (pnpmOptions.minimumReleaseAgeExclude) {
-          commonPackageJson.pnpm.minimumReleaseAgeExclude = pnpmOptions.minimumReleaseAgeExclude;
-        }
       }
 
       if (pnpmOptions.trustPolicy !== undefined) {
