@@ -1,3 +1,5 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`InstallHelpers generateCommonPackageJson generates correct package json with pnpm configurations: Terminal Output 1`] = `Array []`;
+
+exports[`InstallHelpers generateCommonPackageJson moves pnpm 11 settings to the workspace configuration: Terminal Output 1`] = `Array []`;
