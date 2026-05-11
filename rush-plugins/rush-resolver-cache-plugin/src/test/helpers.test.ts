@@ -317,6 +317,25 @@ describe(resolveDependencyKey.name, () => {
     expect(result).toContain('/node_modules/my-rig');
   });
 
+  it('resolves file: specifier using canonical dependency key shape', () => {
+    const specifier: string =
+      'file:../../a/b/c/my-local-package-1.0.0.tgz(react-dom@17.0.1(react@17.0.1))(react@17.0.1)';
+    const result: string = resolveDependencyKey(
+      lockfileFolder,
+      'my-local-package',
+      specifier,
+      makeProjectContext(),
+      v9Helpers
+    );
+    const expected: string = getDescriptionFileRootFromKey(
+      lockfileFolder,
+      v9Helpers.buildDependencyKey('my-local-package', specifier),
+      v9Helpers.depPathToFilename,
+      'my-local-package'
+    );
+    expect(result).toBe(expected);
+  });
+
   it('resolves specifier found in packageKeys (v6)', () => {
     const packageKeys: Set<string> = new Set(['/autoprefixer@9.8.8']);
     const result: string = resolveDependencyKey(
