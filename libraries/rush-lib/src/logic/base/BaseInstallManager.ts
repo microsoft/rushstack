@@ -883,8 +883,11 @@ ${gitLfsHookHandling}
           // On pnpm@8, disable the "dedupe-peer-dependents" feature when doing a filtered CI install so that filters take effect.
           args.push('--config.dedupe-peer-dependents=false');
         }
-      } else if (experiments.usePnpmPreferFrozenLockfileForRushUpdate) {
-        // In workspaces, we want to avoid unnecessary lockfile churn
+      } else if (experiments.usePnpmPreferFrozenLockfileForRushUpdate && !onlyShrinkwrap) {
+        // In workspaces, we want to avoid unnecessary lockfile churn.
+        // Do NOT use --prefer-frozen-lockfile during the --lockfile-only phase: pnpm v10
+        // omits the packages:/snapshots: sections when this combination is used, producing
+        // a broken lockfile that fails the subsequent --frozen-lockfile install phase.
         args.push('--prefer-frozen-lockfile');
       } else {
         // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.

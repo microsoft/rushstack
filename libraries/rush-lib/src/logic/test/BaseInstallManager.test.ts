@@ -129,4 +129,46 @@ describe('BaseInstallManager Test', () => {
       );
     }
   });
+
+  it('usePnpmPreferFrozenLockfileForRushUpdate should not add --prefer-frozen-lockfile when onlyShrinkwrap is true', () => {
+    const rushJsonFile: string = path.resolve(__dirname, 'ignoreCompatibilityDb/rush3.json');
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
+    const purgeManager: typeof PurgeManager.prototype = new PurgeManager(rushConfiguration, rushGlobalFolder);
+
+    // Enable the usePnpmPreferFrozenLockfileForRushUpdate experiment
+    Object.defineProperty(rushConfiguration.experimentsConfiguration, 'configuration', {
+      value: { usePnpmPreferFrozenLockfileForRushUpdate: true },
+      writable: false,
+      configurable: true
+    });
+
+    const fakeBaseInstallManager: FakeBaseInstallManager = new FakeBaseInstallManager(
+      rushConfiguration,
+      rushGlobalFolder,
+      purgeManager,
+      { subspace: rushConfiguration.defaultSubspace } as IInstallManagerOptions
+    );
+
+    // When onlyShrinkwrap is true (Phase 1 of two-phase install), --prefer-frozen-lockfile must NOT be added.
+    // pnpm v10 omits packages:/snapshots: sections when --prefer-frozen-lockfile and --lockfile-only are
+    // combined, producing a broken lockfile that fails the subsequent --frozen-lockfile install phase.
+    const argsWithOnlyShrinkwrap: string[] = [];
+    fakeBaseInstallManager.pushConfigurationArgs(
+      argsWithOnlyShrinkwrap,
+      { onlyShrinkwrap: true, pnpmFilterArgumentValues: [] } as unknown as IInstallManagerOptions,
+      rushConfiguration.defaultSubspace
+    );
+    expect(argsWithOnlyShrinkwrap).not.toContain('--prefer-frozen-lockfile');
+    expect(argsWithOnlyShrinkwrap).toContain('--lockfile-only');
+
+    // When onlyShrinkwrap is false (single-phase or Phase 2), --prefer-frozen-lockfile should be added.
+    const argsWithoutOnlyShrinkwrap: string[] = [];
+    fakeBaseInstallManager.pushConfigurationArgs(
+      argsWithoutOnlyShrinkwrap,
+      { onlyShrinkwrap: false, pnpmFilterArgumentValues: [] } as unknown as IInstallManagerOptions,
+      rushConfiguration.defaultSubspace
+    );
+    expect(argsWithoutOnlyShrinkwrap).toContain('--prefer-frozen-lockfile');
+    expect(argsWithoutOnlyShrinkwrap).not.toContain('--lockfile-only');
+  });
 });
