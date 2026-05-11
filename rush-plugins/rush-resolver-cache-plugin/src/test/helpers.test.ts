@@ -282,10 +282,11 @@ describe(resolveDependencyKey.name, () => {
   });
 
   it('resolves link: specifier for project context', () => {
+    const specifier: string = 'link:../bar';
     const result: string = resolveDependencyKey(
       lockfileFolder,
       'bar',
-      'link:../bar',
+      specifier,
       makeProjectContext(),
       v9Helpers
     );
@@ -294,10 +295,11 @@ describe(resolveDependencyKey.name, () => {
   });
 
   it('resolves link: specifier for non-project context', () => {
+    const specifier: string = 'link:../bar';
     const result: string = resolveDependencyKey(
       lockfileFolder,
       'bar',
-      'link:../bar',
+      specifier,
       makePackageContext(),
       v9Helpers
     );
@@ -306,10 +308,11 @@ describe(resolveDependencyKey.name, () => {
   });
 
   it('resolves file: specifier', () => {
+    const specifier: string = 'file:../../../rigs/local-node-rig';
     const result: string = resolveDependencyKey(
       lockfileFolder,
       'my-rig',
-      'file:../../../rigs/local-node-rig',
+      specifier,
       makeProjectContext(),
       v9Helpers
     );
@@ -375,11 +378,12 @@ describe(resolveDependencyKey.name, () => {
   });
 
   it('resolves specifier found in packageKeys (v6)', () => {
-    const packageKeys: Set<string> = new Set(['/autoprefixer@9.8.8']);
+    const specifier: string = '/autoprefixer@9.8.8';
+    const packageKeys: Set<string> = new Set([specifier]);
     const result: string = resolveDependencyKey(
       lockfileFolder,
       'autoprefixer',
-      '/autoprefixer@9.8.8',
+      specifier,
       makeProjectContext(),
       v8Helpers,
       packageKeys
@@ -389,11 +393,12 @@ describe(resolveDependencyKey.name, () => {
   });
 
   it('resolves specifier found in packageKeys (v9)', () => {
-    const packageKeys: Set<string> = new Set(['autoprefixer@9.8.8']);
+    const specifier: string = 'autoprefixer@9.8.8';
+    const packageKeys: Set<string> = new Set([specifier]);
     const result: string = resolveDependencyKey(
       lockfileFolder,
       'autoprefixer',
-      'autoprefixer@9.8.8',
+      specifier,
       makeProjectContext(),
       v9Helpers,
       packageKeys
@@ -403,10 +408,11 @@ describe(resolveDependencyKey.name, () => {
   });
 
   it('builds dependency key for plain version specifiers (v9)', () => {
+    const specifier: string = '9.8.8';
     const result: string = resolveDependencyKey(
       lockfileFolder,
       'autoprefixer',
-      '9.8.8',
+      specifier,
       makeProjectContext(),
       v9Helpers
     );
@@ -415,10 +421,11 @@ describe(resolveDependencyKey.name, () => {
   });
 
   it('builds dependency key for plain version specifiers (v8)', () => {
+    const specifier: string = '9.8.8';
     const result: string = resolveDependencyKey(
       lockfileFolder,
       'autoprefixer',
-      '9.8.8',
+      specifier,
       makeProjectContext(),
       v8Helpers
     );
