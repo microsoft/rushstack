@@ -336,6 +336,44 @@ describe(resolveDependencyKey.name, () => {
     expect(result).toBe(expected);
   });
 
+  it('resolves file: specifier using canonical dependency key shape (v8)', () => {
+    const specifier: string = 'file:../../../rigs/local-node-rig';
+    const result: string = resolveDependencyKey(
+      lockfileFolder,
+      'my-rig',
+      specifier,
+      makeProjectContext(),
+      v8Helpers
+    );
+    const expected: string = getDescriptionFileRootFromKey(
+      lockfileFolder,
+      v8Helpers.buildDependencyKey('my-rig', specifier),
+      v8Helpers.depPathToFilename,
+      'my-rig'
+    );
+    expect(result).toBe(expected);
+  });
+
+  it('uses file: specifier directly when packageKeys already contains it', () => {
+    const specifier: string = 'file:../../../rigs/local-node-rig';
+    const packageKeys: Set<string> = new Set([specifier]);
+    const result: string = resolveDependencyKey(
+      lockfileFolder,
+      'my-rig',
+      specifier,
+      makeProjectContext(),
+      v9Helpers,
+      packageKeys
+    );
+    const expected: string = getDescriptionFileRootFromKey(
+      lockfileFolder,
+      specifier,
+      v9Helpers.depPathToFilename,
+      'my-rig'
+    );
+    expect(result).toBe(expected);
+  });
+
   it('resolves specifier found in packageKeys (v6)', () => {
     const packageKeys: Set<string> = new Set(['/autoprefixer@9.8.8']);
     const result: string = resolveDependencyKey(
