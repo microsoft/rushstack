@@ -87,6 +87,29 @@ describe(PnpmOptionsConfiguration.name, () => {
     ]);
   });
 
+  it('loads allowBuilds', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-allowBuilds.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.globalAllowBuilds)).toEqual({
+      esbuild: true,
+      playwright: true,
+      'core-js': false,
+      '@swc/core': true
+    });
+  });
+
+  it('throws if both globalNeverBuiltDependencies and globalAllowBuilds are specified', () => {
+    expect(() =>
+      PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+        `${__dirname}/jsonFiles/pnpm-config-allowBuilds-conflict.json`,
+        fakeCommonTempFolder
+      )
+    ).toThrow(/Both settings cannot be specified together/);
+  });
+
   it('loads minimumReleaseAgeMinutes', () => {
     const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
       `${__dirname}/jsonFiles/pnpm-config-minimumReleaseAge.json`,

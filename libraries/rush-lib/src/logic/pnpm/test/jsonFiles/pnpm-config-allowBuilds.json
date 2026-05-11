@@ -1,0 +1,8 @@
+{
+  "globalAllowBuilds": {
+    "esbuild": true,
+    "playwright": true,
+    "core-js": false,
+    "@swc/core": true
+  }
+}
