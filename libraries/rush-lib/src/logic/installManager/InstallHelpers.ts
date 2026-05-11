@@ -85,7 +85,8 @@ export class InstallHelpers {
             Colorize.yellow(
               `The "globalNeverBuiltDependencies" field in ` +
                 `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename} ` +
-                `is deprecated and is not supported by pnpm ${rushConfiguration.rushConfigurationJson.pnpmVersion}. ` +
+                `is deprecated and will be ignored by pnpm ${rushConfiguration.rushConfigurationJson.pnpmVersion} ` +
+                `(pnpm 11+ no longer reads build settings from package.json). ` +
                 'Migrate to "globalAllowBuilds" instead. ' +
                 `For example, replace "globalNeverBuiltDependencies": ["pkg"] ` +
                 `with "globalAllowBuilds": { "pkg": false }.`
