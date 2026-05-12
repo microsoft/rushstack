@@ -243,4 +243,69 @@ describe(PnpmWorkspaceFile.name, () => {
       expect(content).toMatchSnapshot();
     });
   });
+
+  describe('strictDepBuilds functionality', () => {
+    it('generates workspace file with strictDepBuilds enabled', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setStrictDepBuilds(true);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toMatchSnapshot();
+    });
+
+    it('generates workspace file with strictDepBuilds disabled', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setStrictDepBuilds(false);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toMatchSnapshot();
+    });
+
+    it('does not include strictDepBuilds when undefined', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setStrictDepBuilds(undefined);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toMatchSnapshot();
+    });
+  });
+
+  describe('dangerouslyAllowAllBuilds functionality', () => {
+    it('generates workspace file with dangerouslyAllowAllBuilds enabled', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setDangerouslyAllowAllBuilds(true);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toMatchSnapshot();
+    });
+
+    it('generates workspace file with all build-related settings combined', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setStrictDepBuilds(true);
+      workspaceFile.setAllowBuilds({ esbuild: true, 'core-js': false });
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toMatchSnapshot();
+    });
+  });
 });

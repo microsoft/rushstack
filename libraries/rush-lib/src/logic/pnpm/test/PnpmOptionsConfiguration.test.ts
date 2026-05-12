@@ -87,6 +87,15 @@ describe(PnpmOptionsConfiguration.name, () => {
     ]);
   });
 
+  it('loads strictDepBuilds', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-strictDepBuilds.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(pnpmConfiguration.globalStrictDepBuilds).toBe(true);
+  });
+
   it('loads allowBuilds', () => {
     const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
       `${__dirname}/jsonFiles/pnpm-config-allowBuilds.json`,
@@ -108,6 +117,15 @@ describe(PnpmOptionsConfiguration.name, () => {
         fakeCommonTempFolder
       )
     ).toThrow(/Both settings cannot be specified together/);
+  });
+
+  it('loads dangerouslyAllowAllBuilds', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-dangerouslyAllowAllBuilds.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(pnpmConfiguration.globalDangerouslyAllowAllBuilds).toBe(true);
   });
 
   it('loads minimumReleaseAgeMinutes', () => {

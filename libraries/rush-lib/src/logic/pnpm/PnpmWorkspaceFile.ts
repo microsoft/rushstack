@@ -31,8 +31,18 @@ interface IPnpmWorkspaceYaml {
   packages: string[];
   /** Catalog definitions for centralized version management */
   catalogs?: Record<string, Record<string, string>>;
-  /** Per-package build permission map. True permits build scripts, false blocks them. (pnpm 11+) */
+  /** Per-package build permission map. True permits build scripts, false blocks them. (pnpm 10.26.0+) */
   allowBuilds?: Record<string, boolean>;
+  /**
+   * When true, installation exits with non-zero if any dependencies have unreviewed build scripts.
+   * (pnpm 10.3.0+)
+   */
+  strictDepBuilds?: boolean;
+  /**
+   * When true, all build scripts from dependencies run automatically without requiring approval.
+   * (pnpm 10.9.0+)
+   */
+  dangerouslyAllowAllBuilds?: boolean;
 }
 
 export class PnpmWorkspaceFile extends BaseWorkspaceFile {
@@ -44,6 +54,8 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
   private _workspacePackages: Set<string>;
   private _catalogs: Record<string, Record<string, string>> | undefined;
   private _allowBuilds: Record<string, boolean> | undefined;
+  private _strictDepBuilds: boolean | undefined;
+  private _dangerouslyAllowAllBuilds: boolean | undefined;
 
   /**
    * The PNPM workspace file is used to specify the location of workspaces relative to the root
@@ -58,6 +70,8 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     this._workspacePackages = new Set<string>();
     this._catalogs = undefined;
     this._allowBuilds = undefined;
+    this._strictDepBuilds = undefined;
+    this._dangerouslyAllowAllBuilds = undefined;
   }
 
   /**
@@ -73,12 +87,39 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
    * is `true` (permit build scripts) or `false` (block build scripts).
    *
    * @remarks
-   * This writes to the `allowBuilds` field in `pnpm-workspace.yaml`, which requires pnpm 11.0.0+.
+   * This writes to the `allowBuilds` field in `pnpm-workspace.yaml`, which requires pnpm 10.26.0+.
    *
    * @param allowBuilds - A map of package name to boolean permission flag
    */
   public setAllowBuilds(allowBuilds: Record<string, boolean> | undefined): void {
     this._allowBuilds = allowBuilds;
+  }
+
+  /**
+   * Sets the `strictDepBuilds` flag for the workspace. When `true`, installation exits with a
+   * non-zero exit code if any dependencies have unreviewed build scripts.
+   *
+   * @remarks
+   * This writes to the `strictDepBuilds` field in `pnpm-workspace.yaml`, which requires pnpm 10.3.0+.
+   *
+   * @param strictDepBuilds - Whether to enforce strict build script review
+   */
+  public setStrictDepBuilds(strictDepBuilds: boolean | undefined): void {
+    this._strictDepBuilds = strictDepBuilds;
+  }
+
+  /**
+   * Sets the `dangerouslyAllowAllBuilds` flag for the workspace. When `true`, all build scripts
+   * from all dependencies run automatically without requiring approval.
+   *
+   * @remarks
+   * This writes to the `dangerouslyAllowAllBuilds` field in `pnpm-workspace.yaml`, which requires
+   * pnpm 10.9.0+.
+   *
+   * @param dangerouslyAllowAllBuilds - Whether to allow all build scripts unconditionally
+   */
+  public setDangerouslyAllowAllBuilds(dangerouslyAllowAllBuilds: boolean | undefined): void {
+    this._dangerouslyAllowAllBuilds = dangerouslyAllowAllBuilds;
   }
 
   /** @override */
@@ -108,6 +149,14 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
 
     if (this._allowBuilds && Object.keys(this._allowBuilds).length > 0) {
       workspaceYaml.allowBuilds = this._allowBuilds;
+    }
+
+    if (this._strictDepBuilds !== undefined) {
+      workspaceYaml.strictDepBuilds = this._strictDepBuilds;
+    }
+
+    if (this._dangerouslyAllowAllBuilds !== undefined) {
+      workspaceYaml.dangerouslyAllowAllBuilds = this._dangerouslyAllowAllBuilds;
     }
 
     return yamlModule.dump(workspaceYaml, PNPM_SHRINKWRAP_YAML_FORMAT);
