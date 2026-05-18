@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Route the \"Lockfile was created or deleted\" warning to stderr so that machine-readable output (e.g. `rush list --json`) remains parseable when the lockfile was added or removed in the diff range.",
+      "type": "patch",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "sshaurya914@gmail.com"
+}

@@ -220,11 +220,13 @@ export class ProjectChangeAnalyzer {
         if (shrinkwrapStatus) {
           if (shrinkwrapStatus.status !== 'M') {
             if (rushConfiguration.subspacesFeatureEnabled) {
-              terminal.writeLine(
+              terminal.writeWarningLine(
                 `"${subspace.subspaceName}" subspace lockfile was created or deleted. Assuming all projects are affected.`
               );
             } else {
-              terminal.writeLine(`Lockfile was created or deleted. Assuming all projects are affected.`);
+              terminal.writeWarningLine(
+                `Lockfile was created or deleted. Assuming all projects are affected.`
+              );
             }
             for (const project of subspaceProjects) {
               changedProjects.add(project);
