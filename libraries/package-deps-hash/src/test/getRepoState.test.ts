@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { parseGitStatus, parseGitVersion } from '../getRepoState';
+import { isWindowsReservedPath, parseGitStatus, parseGitVersion } from '../getRepoState';
 
 describe(parseGitVersion.name, () => {
   it('Can parse valid git version responses', () => {
@@ -85,5 +85,34 @@ describe(parseGitStatus.name, () => {
     expect(result.get(files[0])).toEqual(false);
     expect(result.get(files[1])).toEqual(false);
     expect(result.get(files[2])).toEqual(true);
+  });
+});
+
+describe(isWindowsReservedPath.name, () => {
+  it('detects bare reserved basenames', () => {
+    expect(isWindowsReservedPath('nul')).toBe(true);
+    expect(isWindowsReservedPath('NUL')).toBe(true);
+    expect(isWindowsReservedPath('Con')).toBe(true);
+    expect(isWindowsReservedPath('com1')).toBe(true);
+    expect(isWindowsReservedPath('LPT9')).toBe(true);
+  });
+
+  it('detects reserved basenames with an extension', () => {
+    expect(isWindowsReservedPath('nul.txt')).toBe(true);
+    expect(isWindowsReservedPath('aux.log.bak')).toBe(true);
+  });
+
+  it('matches the final segment of nested paths with either slash style', () => {
+    expect(isWindowsReservedPath('apps/admin/nul')).toBe(true);
+    expect(isWindowsReservedPath('apps\\admin\\nul')).toBe(true);
+    expect(isWindowsReservedPath('apps/admin/sub/CON.tmp')).toBe(true);
+  });
+
+  it('does not match non-reserved names', () => {
+    expect(isWindowsReservedPath('null')).toBe(false);
+    expect(isWindowsReservedPath('console.ts')).toBe(false);
+    expect(isWindowsReservedPath('com.ts')).toBe(false);
+    expect(isWindowsReservedPath('lpt10')).toBe(false);
+    expect(isWindowsReservedPath('packages/nul-suffix/index.ts')).toBe(false);
   });
 });
