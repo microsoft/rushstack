@@ -1327,7 +1327,7 @@ export default styles;",
 }
 /*# sourceMappingURL=classes-and-exports.module.css.map */
 ",
-  "/fake/output/css/classes-and-exports.module.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"../../../cm-rushstack/rushstack/heft-plugins/heft-sass-plugin/src/test/fixtures/classes-and-exports.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AACA;EACE;EACA;;;AAGF;EACE;;;AAGF;EACE;EACA\\",\\"sourcesContent\\":[\\"// A CSS module that exports both class names and ICSS :export values.\\\\r\\\\n.root {\\\\r\\\\n  color: red;\\\\r\\\\n  font-size: 14px;\\\\r\\\\n}\\\\r\\\\n\\\\r\\\\n.highlighted {\\\\r\\\\n  background-color: yellow;\\\\r\\\\n}\\\\r\\\\n\\\\r\\\\n:export {\\\\r\\\\n  themeColor: blue;\\\\r\\\\n  spacing: 8px;\\\\r\\\\n}\\\\r\\\\n\\"],\\"file\\":\\"classes-and-exports.module.css\\"}",
+  "/fake/output/css/classes-and-exports.module.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/classes-and-exports.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AACA;EACE;EACA;;;AAGF;EACE;;;AAGF;EACE;EACA\\",\\"sourcesContent\\":[\\"// A CSS module that exports both class names and ICSS :export values.\\\\n.root {\\\\n  color: red;\\\\n  font-size: 14px;\\\\n}\\\\n\\\\n.highlighted {\\\\n  background-color: yellow;\\\\n}\\\\n\\\\n:export {\\\\n  themeColor: blue;\\\\n  spacing: 8px;\\\\n}\\\\n\\"],\\"file\\":\\"classes-and-exports.module.css\\"}",
 }
 `;
 
@@ -1358,7 +1358,7 @@ export default styles;",
 }
 /*# sourceMappingURL=classes-and-exports.module.scss.css.map */
 ",
-  "/fake/output/css/classes-and-exports.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"../../../cm-rushstack/rushstack/heft-plugins/heft-sass-plugin/src/test/fixtures/classes-and-exports.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AACA;EACE;EACA;;;AAGF;EACE;;;AAGF;EACE;EACA\\",\\"sourcesContent\\":[\\"// A CSS module that exports both class names and ICSS :export values.\\\\r\\\\n.root {\\\\r\\\\n  color: red;\\\\r\\\\n  font-size: 14px;\\\\r\\\\n}\\\\r\\\\n\\\\r\\\\n.highlighted {\\\\r\\\\n  background-color: yellow;\\\\r\\\\n}\\\\r\\\\n\\\\r\\\\n:export {\\\\r\\\\n  themeColor: blue;\\\\r\\\\n  spacing: 8px;\\\\r\\\\n}\\\\r\\\\n\\"],\\"file\\":\\"classes-and-exports.module.scss.css\\"}",
+  "/fake/output/css/classes-and-exports.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/classes-and-exports.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AACA;EACE;EACA;;;AAGF;EACE;;;AAGF;EACE;EACA\\",\\"sourcesContent\\":[\\"// A CSS module that exports both class names and ICSS :export values.\\\\n.root {\\\\n  color: red;\\\\n  font-size: 14px;\\\\n}\\\\n\\\\n.highlighted {\\\\n  background-color: yellow;\\\\n}\\\\n\\\\n:export {\\\\n  themeColor: blue;\\\\n  spacing: 8px;\\\\n}\\\\n\\"],\\"file\\":\\"classes-and-exports.module.scss.css\\"}",
 }
 `;
 

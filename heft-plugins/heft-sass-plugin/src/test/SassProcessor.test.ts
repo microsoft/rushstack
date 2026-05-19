@@ -66,6 +66,40 @@ async function compileFixtureAsync(processor: SassProcessor, fixtureFilename: st
   await processor.compileFilesAsync(new Set([`${fixturesFolder}/${fixtureFilename}`]));
 }
 
+/**
+ * Replaces OS-/checkout-dependent fields in a source map JSON string with stable placeholders so
+ * the test can snapshot the result on any machine. Specifically, rewrites `sources[]` entries that
+ * point at the fixtures folder to a `fixtures/<name>` form, and normalizes `sourcesContent[]`
+ * line endings to LF.
+ */
+function normalizeSourceMapForSnapshot(json: string): string {
+  const map: {
+    sources?: string[];
+    sourcesContent?: string[];
+    [key: string]: unknown;
+  } = JSON.parse(json);
+
+  if (map.sources) {
+    map.sources = map.sources.map((source) => {
+      const normalized: string = Path.convertToSlashes(source);
+      // sources[] are stored as paths relative to the .css.map output file, so they include a
+      // checkout-specific prefix like "../../../user/rushstack/heft-plugins/...". Strip everything
+      // before the well-known "/fixtures/" segment to get a stable suffix.
+      const fixturesIndex: number = normalized.indexOf('/fixtures/');
+      if (fixturesIndex >= 0) {
+        return normalized.slice(fixturesIndex + 1);
+      }
+      const lastSlash: number = normalized.lastIndexOf('/');
+      return `fixtures/${lastSlash >= 0 ? normalized.slice(lastSlash + 1) : normalized}`;
+    });
+  }
+  if (map.sourcesContent) {
+    map.sourcesContent = map.sourcesContent.map((entry) => entry.replace(/\r\n/g, '\n'));
+  }
+
+  return JSON.stringify(map);
+}
+
 describe(SassProcessor.name, () => {
   let terminalProvider: StringBufferTerminalProvider;
   /** Files captured by the mocked FileSystem.writeFileAsync, keyed by absolute path. */
@@ -113,7 +147,14 @@ describe(SassProcessor.name, () => {
         NORMALIZED_PLATFORM_FAKE_OUTPUT_BASE_FOLDER,
         FAKE_OUTPUT_BASE_FOLDER
       );
-      writtenFiles.set(filePath, String(content));
+      let serialized: string = String(content);
+      // Source map contents include the absolute-relative path back to the source file and the
+      // verbatim source file bytes. Both vary by checkout location and OS line endings, which makes
+      // raw snapshots non-portable. Normalize them to stable forms before storing.
+      if (filePath.endsWith('.css.map')) {
+        serialized = normalizeSourceMapForSnapshot(serialized);
+      }
+      writtenFiles.set(filePath, serialized);
     });
   });
 
