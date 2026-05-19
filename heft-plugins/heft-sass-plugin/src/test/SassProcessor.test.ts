@@ -33,6 +33,7 @@ type ICreateProcessorOptions = Partial<
     | 'postProcessCssAsync'
     | 'preserveIcssExports'
     | 'silenceDeprecations'
+    | 'sourceMap'
     | 'srcFolder'
   >
 >;
@@ -688,6 +689,54 @@ describe(SassProcessor.name, () => {
       const { processor, logger } = createProcessor(terminalProvider);
       await compileFixtureAsync(processor, 'invalid.module.scss');
       expect(logger.errors.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('sourceMap option', () => {
+    it('emits .css.map and sourceMappingURL comment when sourceMap is true', async () => {
+      const { processor } = createProcessor(terminalProvider, { sourceMap: true });
+      await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
+
+      const mapPaths: string[] = getAllWrittenPathsMatching('.css.map');
+      expect(mapPaths).toHaveLength(1);
+
+      const css: string = getCssOutput('classes-and-exports.module.scss');
+      expect(css).toMatch(/\/\*# sourceMappingURL=classes-and-exports\.module\.css\.map \*\//);
+
+      const mapJson: string = getWrittenFile('classes-and-exports.module.css.map');
+      const parsedMap: {
+        version: number;
+        mappings: string;
+        sources: string[];
+      } = JSON.parse(mapJson);
+      expect(parsedMap.version).toBe(3);
+      expect(parsedMap.mappings).toBeTruthy();
+      expect(parsedMap.sources).toHaveLength(1);
+      expect(parsedMap.sources[0]).toMatch(/classes-and-exports\.module\.scss$/);
+    });
+
+    it('does not emit .css.map or sourceMappingURL comment by default', async () => {
+      const { processor } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
+
+      expect(getAllWrittenPathsMatching('.css.map')).toHaveLength(0);
+      expect(getCssOutput('classes-and-exports.module.scss')).not.toContain('sourceMappingURL');
+    });
+
+    it('uses the correct map filename when doNotTrimOriginalFileExtension is true', async () => {
+      const { processor } = createProcessor(terminalProvider, {
+        sourceMap: true,
+        doNotTrimOriginalFileExtension: true
+      });
+      await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
+
+      // With doNotTrimOriginalFileExtension the CSS file is foo.scss.css, so the map is foo.scss.css.map
+      const mapPaths: string[] = getAllWrittenPathsMatching('.css.map');
+      expect(mapPaths).toHaveLength(1);
+      expect(mapPaths[0]).toMatch(/classes-and-exports\.module\.scss\.css\.map$/);
+
+      const css: string = getWrittenFile('classes-and-exports.module.scss.css');
+      expect(css).toMatch(/\/\*# sourceMappingURL=classes-and-exports\.module\.scss\.css\.map \*\//);
     });
   });
 });
