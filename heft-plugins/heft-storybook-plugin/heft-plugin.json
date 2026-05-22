@@ -23,6 +23,11 @@
           "longName": "--docs",
           "description": "Execute storybook in docs mode.",
           "parameterKind": "flag"
+        },
+        {
+          "longName": "--no-open",
+          "description": "Pass --no-open to the storybook CLI so it does not automatically open a browser window in serve mode.",
+          "parameterKind": "flag"
         }
       ]
     }

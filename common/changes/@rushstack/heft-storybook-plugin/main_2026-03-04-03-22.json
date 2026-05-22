@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-storybook-plugin",
-      "comment": "add option to control whether to pass --quiet flag",
+      "comment": "Add `quiet` option to control whether --quiet is passed to the Storybook CLI, and add `--no-open` flag to suppress automatic browser launch in serve mode",
       "type": "minor"
     }
   ],
