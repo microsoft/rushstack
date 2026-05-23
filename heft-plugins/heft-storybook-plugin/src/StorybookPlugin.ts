@@ -164,6 +164,13 @@ export interface IStorybookPluginOptions {
    * which disables Storybook's telemetry data collection.
    */
   disableTelemetry?: boolean;
+
+  /**
+   * Specifies whether to run storybook in quiet mode (--quiet).
+   *
+   * @defaultValue `true`
+   */
+  quiet?: boolean;
 }
 
 interface IRunStorybookOptions extends IPrepareStorybookOptions {
@@ -183,6 +190,7 @@ interface IPrepareStorybookOptions extends IStorybookPluginOptions {
   isServeMode: boolean;
   isTestMode: boolean;
   isDocsMode: boolean;
+  isNoOpenMode: boolean;
 }
 
 const DEFAULT_STORYBOOK_VERSION: StorybookCliVersion = StorybookCliVersion.STORYBOOK7;
@@ -220,6 +228,7 @@ const DEFAULT_STORYBOOK_CLI_CONFIG: Record<StorybookCliVersion, IStorybookCliCal
 const STORYBOOK_FLAG_NAME: '--storybook' = '--storybook';
 const STORYBOOK_TEST_FLAG_NAME: '--storybook-test' = '--storybook-test';
 const DOCS_FLAG_NAME: '--docs' = '--docs';
+const NO_OPEN_FLAG_NAME: '--no-open' = '--no-open';
 
 /** @public */
 export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPluginOptions> {
@@ -237,6 +246,8 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     const storybookTestParameter: CommandLineFlagParameter =
       taskSession.parameters.getFlagParameter(STORYBOOK_TEST_FLAG_NAME);
     const docsParameter: CommandLineFlagParameter = taskSession.parameters.getFlagParameter(DOCS_FLAG_NAME);
+    const noOpenParameter: CommandLineFlagParameter =
+      taskSession.parameters.getFlagParameter(NO_OPEN_FLAG_NAME);
 
     const parseResult: IParsedPackageNameOrError = PackageName.tryParse(options.storykitPackageName);
     if (parseResult.error) {
@@ -300,6 +311,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
           isServeMode,
           isTestMode: storybookTestParameter.value,
           isDocsMode: docsParameter.value,
+          isNoOpenMode: noOpenParameter.value,
           ...options
         });
         await this._runStorybookAsync(runStorybookOptions, options);
@@ -458,7 +470,8 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     runStorybookOptions: IRunStorybookOptions,
     options: IStorybookPluginOptions
   ): Promise<void> {
-    const { logger, resolvedModulePath, verbose, isServeMode, isTestMode, isDocsMode } = runStorybookOptions;
+    const { logger, resolvedModulePath, verbose, isServeMode, isTestMode, isDocsMode, isNoOpenMode } =
+      runStorybookOptions;
     let { workingDirectory, outputFolder } = runStorybookOptions;
     logger.terminal.writeLine('Running Storybook compilation');
     logger.terminal.writeVerboseLine(`Loading Storybook module "${resolvedModulePath}"`);
@@ -493,7 +506,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       storybookArgs.push('--webpack-stats-json');
     }
 
-    if (!verbose) {
+    if (options.quiet !== false && !verbose) {
       storybookArgs.push('--quiet');
     }
 
@@ -503,6 +516,10 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
 
     if (isDocsMode) {
       storybookArgs.push('--docs');
+    }
+
+    if (isServeMode && isNoOpenMode) {
+      storybookArgs.push('--no-open');
     }
 
     const storybookEnv: NodeJS.ProcessEnv = {
@@ -525,7 +542,13 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
         storybookCliVersion === StorybookCliVersion.STORYBOOK8
       );
     } else {
-      await this._invokeAsSubprocessAsync(logger, resolvedModulePath, storybookArgs, workingDirectory, storybookEnv);
+      await this._invokeAsSubprocessAsync(
+        logger,
+        resolvedModulePath,
+        storybookArgs,
+        workingDirectory,
+        storybookEnv
+      );
     }
   }
 
