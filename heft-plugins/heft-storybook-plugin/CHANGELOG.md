@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Mon, 20 Apr 2026 23:31:13 GMT and should not be manually modified.
+This log was last generated on Mon, 25 May 2026 15:14:31 GMT and should not be manually modified.
+
+## 1.5.0
+Mon, 25 May 2026 15:14:31 GMT
+
+### Minor changes
+
+- Add `quiet` option to control whether --quiet is passed to the Storybook CLI, and add `--no-open` flag to suppress automatic browser launch in serve mode
 
 ## 1.4.11
 Mon, 20 Apr 2026 23:31:13 GMT

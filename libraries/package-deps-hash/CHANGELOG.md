@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Mon, 20 Apr 2026 23:31:13 GMT and should not be manually modified.
+This log was last generated on Mon, 25 May 2026 15:14:32 GMT and should not be manually modified.
+
+## 4.7.18
+Mon, 25 May 2026 15:14:32 GMT
+
+### Patches
+
+- Skip untracked files whose basename is a Windows reserved device name (e.g. `nul`, `con`, `aux`, `com1`-`com9`, `lpt1`-`lpt9`) when computing repo state on Windows. `git hash-object` cannot open such paths and otherwise aborts the entire repo-state calculation.
 
 ## 4.7.17
 Mon, 20 Apr 2026 23:31:13 GMT

@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "1.5.0",
+      "tag": "@rushstack/heft-storybook-plugin_v1.5.0",
+      "date": "Mon, 25 May 2026 15:14:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `quiet` option to control whether --quiet is passed to the Storybook CLI, and add `--no-open` flag to suppress automatic browser launch in serve mode"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.11",
       "tag": "@rushstack/heft-storybook-plugin_v1.4.11",
       "date": "Mon, 20 Apr 2026 23:31:13 GMT",
