@@ -1110,7 +1110,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         if (!foundDependency) {
           return true;
         }
-        const resolvedVersion: string = this.overrides.get(importerPackageName) ?? foundDependency.version;
+        const resolvedVersion: string =
+          this._resolveOverrideVersion(importerPackageName, foundDependency.version) ??
+          foundDependency.version;
         if (resolvedVersion !== importerVersionSpecifier) {
           return true;
         }
@@ -1167,7 +1169,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
           if (this.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V9) {
             // TODO: Emit an error message when someone tries to override a version of something in one of their
             // local repo packages.
-            let resolvedVersion: string = this.overrides.get(name) ?? version;
+            let resolvedVersion: string = this._resolveOverrideVersion(name, version) ?? version;
             // convert path in posix style, otherwise pnpm install will fail in subspace case
             resolvedVersion = Path.convertToSlashes(resolvedVersion);
             const specifier: string = importer.specifiers[name];
@@ -1183,7 +1185,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
             } else {
               // TODO: Emit an error message when someone tries to override a version of something in one of their
               // local repo packages.
-              let resolvedVersion: string = this.overrides.get(name) ?? version;
+              let resolvedVersion: string = this._resolveOverrideVersion(name, version) ?? version;
               // convert path in posix style, otherwise pnpm install will fail in subspace case
               resolvedVersion = Path.convertToSlashes(resolvedVersion);
               if (
@@ -1216,6 +1218,57 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     return false;
+  }
+
+  /**
+   * Look up the override value for a given package name and version.
+   * Handles versioned selectors like "webpack@5" and nested dependency selectors like
+   * "consumer>webpack" or "consumer@1>webpack@5" in addition to simple "webpack" keys.
+   */
+  private _resolveOverrideVersion(name: string, version: string): string | undefined {
+    // First, try exact match by package name
+    const exactMatch: string | undefined = this.overrides.get(name);
+    if (exactMatch !== undefined) {
+      return exactMatch;
+    }
+
+    // Then try versioned selectors (e.g., "webpack@5" or "@scope/pkg@^2.0.0")
+    // and nested dependency selectors (e.g., "consumer>webpack" or "consumer@1>webpack@5")
+    for (const [key, value] of this.overrides) {
+      // For nested dependency selectors (contain '>'), extract the dependency portion after '>'.
+      // For example: "bar@1>foo@2" -> dependency selector is "foo@2"
+      const isNested: boolean = key.includes('>');
+      const depSelector: string = isNested ? key.substring(key.indexOf('>') + 1) : key;
+
+      // Parse the package name and version range from the selector.
+      // Handle scoped packages (@scope/pkg@range) by finding the '@' after the scope prefix.
+      const atIndex: number = depSelector.startsWith('@')
+        ? depSelector.indexOf('@', 1)
+        : depSelector.indexOf('@');
+      if (atIndex === -1) {
+        // No version selector; for non-nested keys this was already handled by exact match above.
+        // For nested keys (e.g. "consumer>webpack"), check if the dependency name matches.
+        if (isNested && depSelector === name) {
+          return value;
+        }
+        continue;
+      }
+
+      const packageName: string = depSelector.substring(0, atIndex);
+      const rangeStr: string = depSelector.substring(atIndex + 1);
+
+      if (packageName === name) {
+        try {
+          if (semver.intersects(version, rangeStr)) {
+            return value;
+          }
+        } catch {
+          // If semver parsing fails (e.g. for non-semver versions), skip this override
+        }
+      }
+    }
+
+    return undefined;
   }
 
   private _getIntegrityForPackage(specifier: string, optional: boolean): Map<string, string> {
