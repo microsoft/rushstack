@@ -977,12 +977,21 @@ export class ExportAnalyzer {
       if (importSymbol) {
         const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(importSymbol, this._typeChecker);
 
-        astImport.astSymbol = this._astSymbolTable.fetchAstSymbol({
-          followedSymbol: followedSymbol,
-          isExternal: true,
-          includeNominalAnalysis: false,
-          addIfMissing: true
-        });
+        // If the import resolves to an entire module rather than a declaration within a module, then there
+        // is no AstSymbol to associate with it.  This happens when a dependency re-exports a module as a
+        // namespace (e.g. `export * as ns from './module'`) and we import that namespace by name.  Following
+        // the alias chain lands on the module's source file symbol, which API Extractor cannot represent as
+        // an AstSymbol (a SourceFile is not a supported declaration kind).  This mirrors the handling of
+        // `import * as ns from '...'` star imports, where `importSymbol` is undefined.
+        // See https://github.com/microsoft/rushstack/issues/4963
+        if (!ExportAnalyzer._isExternalModuleSymbol(followedSymbol)) {
+          astImport.astSymbol = this._astSymbolTable.fetchAstSymbol({
+            followedSymbol: followedSymbol,
+            isExternal: true,
+            includeNominalAnalysis: false,
+            addIfMissing: true
+          });
+        }
       }
     } else {
       // If we encounter at least one import that does not use the type-only form,
@@ -1010,5 +1019,15 @@ export class ExportAnalyzer {
     }
 
     return moduleSpecifier;
+  }
+
+  /**
+   * Returns true if the symbol represents an entire module (i.e. its declaration is a source file),
+   * as opposed to a declaration appearing within a module.
+   */
+  private static _isExternalModuleSymbol(symbol: ts.Symbol): boolean {
+    // eslint-disable-next-line no-bitwise
+    const isValueModule: boolean = !!(symbol.flags & ts.SymbolFlags.ValueModule);
+    return isValueModule && symbol.valueDeclaration !== undefined && ts.isSourceFile(symbol.valueDeclaration);
   }
 }
