@@ -120,7 +120,7 @@
 
     "sourceMap": {
       "type": "boolean",
-      "description": "If true, a .css.map source map file will be written next to each emitted .css file, and a sourceMappingURL comment will be appended to the .css. Defaults to false."
+      "description": "If true, a `.css.map` source map file will be written next to each emitted `.css` file, and a `sourceMappingURL` comment will be appended to the `.css`. Defaults to `false`."
     }
   }
 }

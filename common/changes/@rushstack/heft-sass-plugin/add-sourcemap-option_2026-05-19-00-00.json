@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Add opt-in sourceMap option to emit .css.map files and sourceMappingURL comments alongside compiled CSS",
+      "comment": "Add opt-in sourceMap option to emit `.css.map` files and `sourceMappingURL` comments alongside compiled CSS.",
       "type": "minor",
       "packageName": "@rushstack/heft-sass-plugin"
     }

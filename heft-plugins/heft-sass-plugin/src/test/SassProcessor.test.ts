@@ -4,7 +4,7 @@
 import path from 'node:path';
 import nodeJsPath from 'node:path';
 
-import { FileSystem, Path } from '@rushstack/node-core-library';
+import { FileSystem, Path, Text } from '@rushstack/node-core-library';
 import { MockScopedLogger } from '@rushstack/heft/lib/pluginFramework/logging/MockScopedLogger';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
@@ -80,11 +80,14 @@ function normalizeSourceMapForSnapshot(json: string): string {
   } = JSON.parse(json);
 
   if (map.sources) {
+    // sources[] are relative paths from the .css.map output file back to the source .scss.
+    // In real use both ends live on disk in the same project so this is stable; in this test
+    // the output folder is the mocked /fake/output/css/ while the source is the real fixture
+    // on disk, so the relative path traverses the entire checkout-specific path from /fake up
+    // to the real fixtures folder. Strip everything before the "/fixtures/" segment so the
+    // snapshot is checkout-independent.
     map.sources = map.sources.map((source) => {
       const normalized: string = Path.convertToSlashes(source);
-      // sources[] are stored as paths relative to the .css.map output file, so they include a
-      // checkout-specific prefix like "../../../user/rushstack/heft-plugins/...". Strip everything
-      // before the well-known "/fixtures/" segment to get a stable suffix.
       const fixturesIndex: number = normalized.indexOf('/fixtures/');
       if (fixturesIndex >= 0) {
         return normalized.slice(fixturesIndex + 1);
@@ -94,7 +97,7 @@ function normalizeSourceMapForSnapshot(json: string): string {
     });
   }
   if (map.sourcesContent) {
-    map.sourcesContent = map.sourcesContent.map((entry) => entry.replace(/\r\n/g, '\n'));
+    map.sourcesContent = map.sourcesContent.map(Text.convertToLf);
   }
 
   return JSON.stringify(map);
