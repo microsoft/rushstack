@@ -116,6 +116,11 @@
     "preserveIcssExports": {
       "type": "boolean",
       "description": "If true, the ICSS `:export` block will be preserved in the emitted CSS output. This is necessary when the CSS is consumed by a webpack loader (e.g. css-loader's icssParser) that extracts `:export` values at bundle time to generate JavaScript exports. Defaults to false."
+    },
+
+    "sourceMap": {
+      "type": "boolean",
+      "description": "If true, a `.css.map` source map file will be written next to each emitted `.css` file, and a `sourceMappingURL` comment will be appended to the `.css`. Defaults to `false`."
     }
   }
 }

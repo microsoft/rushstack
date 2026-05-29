@@ -131,6 +131,12 @@ export interface ISassProcessorOptions {
   preserveIcssExports?: boolean;
 
   /**
+   * If true, a .css.map source map file will be written next to each emitted .css, and a
+   * sourceMappingURL comment will be appended to the .css. Defaults to false.
+   */
+  sourceMap?: boolean;
+
+  /**
    * A callback to further modify the raw CSS text after it has been generated. Only relevant if emitting CSS files.
    */
   postProcessCssAsync?: (cssText: string) => Promise<string>;
@@ -261,7 +267,8 @@ export class SassProcessor {
           load: loadAsync
         }
       ],
-      silenceDeprecations: deprecationsToSilence
+      silenceDeprecations: deprecationsToSilence,
+      ...(options.sourceMap && { sourceMap: true, sourceMapIncludeSources: true })
     };
   }
 
@@ -761,7 +768,8 @@ export class SassProcessor {
       exportAsDefault,
       doNotTrimOriginalFileExtension,
       postProcessCssAsync,
-      preserveIcssExports
+      preserveIcssExports,
+      sourceMap
     } = this._options;
 
     // Handle CSS modules
@@ -833,11 +841,34 @@ export class SassProcessor {
       }
 
       const cssPathFromJs: string = `./${cssFilename}`;
+
+      // When sourceMap is enabled, prepare the annotated CSS and map basename once —
+      // cssFilename is identical across all output folders.
+      const cssMapBasename: string | undefined =
+        sourceMap && result.sourceMap ? `${cssFilename}.map` : undefined;
+      const finalCss: string = cssMapBasename ? `${css}\n/*# sourceMappingURL=${cssMapBasename} */\n` : css;
+
       for (const cssOutputFolder of cssOutputFolders) {
         const { folder, shimModuleFormat } = cssOutputFolder;
 
         const cssFilePath: string = path.resolve(folder, relativeCssPath);
-        await FileSystem.writeFileAsync(cssFilePath, css, writeFileOptions);
+        await FileSystem.writeFileAsync(cssFilePath, finalCss, writeFileOptions);
+
+        if (cssMapBasename && result.sourceMap) {
+          const mapFilePath: string = `${cssFilePath}.map`;
+          const mapDir: string = path.dirname(cssFilePath);
+          // Rewrite heft: URL sources to paths relative to the map file's directory
+          // so that source-map-loader can resolve them back to the original .scss.
+          const rewrittenSources: string[] = result.sourceMap.sources.map((source) => {
+            const absoluteSourcePath: string = heftUrlToPath(source);
+            return Path.convertToSlashes(path.relative(mapDir, absoluteSourcePath));
+          });
+          await FileSystem.writeFileAsync(
+            mapFilePath,
+            JSON.stringify({ ...result.sourceMap, file: cssFilename, sources: rewrittenSources }),
+            writeFileOptions
+          );
+        }
 
         if (shimModuleFormat && !filename.endsWith('.css')) {
           const jsFilePath: string = path.resolve(folder, `${relativeFilePath}.js`);
