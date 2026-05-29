@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Thu, 30 Apr 2026 00:15:22 GMT and should not be manually modified.
+This log was last generated on Fri, 29 May 2026 18:25:51 GMT and should not be manually modified.
+
+## 1.4.0
+Fri, 29 May 2026 18:25:51 GMT
+
+### Minor changes
+
+- Add opt-in sourceMap option to emit `.css.map` files and `sourceMappingURL` comments alongside compiled CSS.
 
 ## 1.3.8
 Thu, 30 Apr 2026 00:15:22 GMT

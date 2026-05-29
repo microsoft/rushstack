@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "1.4.0",
+      "tag": "@rushstack/heft-sass-plugin_v1.4.0",
+      "date": "Fri, 29 May 2026 18:25:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add opt-in sourceMap option to emit `.css.map` files and `sourceMappingURL` comments alongside compiled CSS."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.8",
       "tag": "@rushstack/heft-sass-plugin_v1.3.8",
       "date": "Thu, 30 Apr 2026 00:15:22 GMT",
