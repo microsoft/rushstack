@@ -984,7 +984,7 @@ export class ExportAnalyzer {
         // an AstSymbol (a SourceFile is not a supported declaration kind).  This mirrors the handling of
         // `import * as ns from '...'` star imports, where `importSymbol` is undefined.
         // See https://github.com/microsoft/rushstack/issues/4963
-        if (!ExportAnalyzer._isExternalModuleSymbol(followedSymbol)) {
+        if (!TypeScriptHelpers.isExternalModuleSymbol(followedSymbol)) {
           astImport.astSymbol = this._astSymbolTable.fetchAstSymbol({
             followedSymbol: followedSymbol,
             isExternal: true,
@@ -1019,15 +1019,5 @@ export class ExportAnalyzer {
     }
 
     return moduleSpecifier;
-  }
-
-  /**
-   * Returns true if the symbol represents an entire module (i.e. its declaration is a source file),
-   * as opposed to a declaration appearing within a module.
-   */
-  private static _isExternalModuleSymbol(symbol: ts.Symbol): boolean {
-    // eslint-disable-next-line no-bitwise
-    const isValueModule: boolean = !!(symbol.flags & ts.SymbolFlags.ValueModule);
-    return isValueModule && symbol.valueDeclaration !== undefined && ts.isSourceFile(symbol.valueDeclaration);
   }
 }
