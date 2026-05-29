@@ -1124,6 +1124,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       const importerDevDependencies: Set<string> = new Set(Object.keys(importer.devDependencies ?? {}));
       const importerDependenciesMeta: Set<string> = new Set(Object.keys(importer.dependenciesMeta ?? {}));
 
+      const regularDependencyNames: Set<string> = new Set(dependencyList.map(({ name }) => name));
+
       for (const { dependencyType, name, version } of allDependencies) {
         let isOptional: boolean = false;
         let specifierFromLockfile: IPnpmVersionSpecifier | undefined;
@@ -1147,6 +1149,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
               // so fall through
               importerDevDependencies.delete(name);
               break;
+            }
+            // If not a peer and not also a regular dependency, the lockfile is stale.
+            if (!isOptional && !regularDependencyNames.has(name)) {
+              return true;
             }
             // If fall through, there is a chance the package declares an inconsistent version, ignore it.
             isDevDepFallThrough = true;
