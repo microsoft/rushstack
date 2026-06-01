@@ -242,7 +242,10 @@ export class SassProcessor {
 
       return {
         contents: record.content,
-        syntax: determineSyntaxFromFilePath(absolutePath)
+        syntax: determineSyntaxFromFilePath(absolutePath),
+        // Without sourceMapUrl, sass-embedded falls back to a data: URL for this file in the
+        // source map. data: URLs crash heftUrlToPath on Linux/macOS (non-empty URL host).
+        sourceMapUrl: url
       };
     };
 
@@ -860,6 +863,7 @@ export class SassProcessor {
           // Rewrite heft: URL sources to paths relative to the map file's directory
           // so that source-map-loader can resolve them back to the original .scss.
           const rewrittenSources: string[] = result.sourceMap.sources.map((source) => {
+            if (!source.startsWith('heft:')) return source;
             const absoluteSourcePath: string = heftUrlToPath(source);
             return Path.convertToSlashes(path.relative(mapDir, absoluteSourcePath));
           });
