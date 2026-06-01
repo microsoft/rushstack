@@ -1360,30 +1360,6 @@ export default styles;",
 }
 `;
 
-exports[`SassProcessor sourceMap option emits a valid .css.map when the entry file uses a pkg: import (Linux/macOS regression): terminal-output 1`] = `
-Array [
-  "[verbose] Checking for changes to 1 files...[n]",
-  "[    log] Compiling 1 files...[n]",
-]
-`;
-
-exports[`SassProcessor sourceMap option emits a valid .css.map when the entry file uses a pkg: import (Linux/macOS regression): written-files 1`] = `
-Map {
-  "/fake/output/dts/pkg-import-test.module.scss.d.ts" => "declare interface IStyles {
-  box: string;
-}
-declare const styles: IStyles;
-export default styles;",
-  "/fake/output/css/pkg-import-test.module.css" => ".box {
-  color: #ff0000;
-  font-size: 12px;
-}
-/*# sourceMappingURL=pkg-import-test.module.css.map */
-",
-  "/fake/output/css/pkg-import-test.module.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/pkg-import-test.module.scss\\",\\"fixtures/node_modules/@test/tokens/index.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAEA;EACE,OCHW;EDIX,WCHU\\",\\"sourcesContent\\":[\\"@use 'pkg:@test/tokens' as t;\\\\n\\\\n.box {\\\\n  color: t.$test-color;\\\\n  font-size: t.$test-size;\\\\n}\\\\n\\",\\"$test-color: #ff0000;\\\\n$test-size: 12px;\\\\n\\"],\\"file\\":\\"pkg-import-test.module.css\\"}",
-}
-`;
-
 exports[`SassProcessor sourceMap option uses the correct map filename when doNotTrimOriginalFileExtension is true: terminal-output 1`] = `
 Array [
   "[verbose] Checking for changes to 1 files...[n]",

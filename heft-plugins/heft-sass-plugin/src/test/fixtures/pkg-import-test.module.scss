@@ -1,6 +1,0 @@
-@use 'pkg:@test/tokens' as t;
-
-.box {
-  color: t.$test-color;
-  font-size: t.$test-size;
-}

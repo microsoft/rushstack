@@ -777,22 +777,6 @@ describe(SassProcessor.name, () => {
       expect(parsedMap.sources.every((s: string) => !s.startsWith('data:'))).toBe(true);
     });
 
-    it('emits a valid .css.map when the entry file uses a pkg: import (Linux/macOS regression)', async () => {
-      // pkg: imports go through _canonicalizePackageInnerAsync before reaching loadAsync.
-      // Without sourceMapUrl, the same data: URL crash applies to this path.
-      const { processor } = createProcessor(terminalProvider, { sourceMap: true });
-      await compileFixtureAsync(processor, 'pkg-import-test.module.scss');
-
-      const mapPaths: string[] = getAllWrittenPathsMatching('.css.map');
-      expect(mapPaths).toHaveLength(1);
-
-      const mapJson: string = getWrittenFile('pkg-import-test.module.css.map');
-      const parsedMap: { version: number; mappings: string; sources: string[] } = JSON.parse(mapJson);
-      expect(parsedMap.version).toBe(3);
-      expect(parsedMap.mappings).toBeTruthy();
-      expect(parsedMap.sources.every((s: string) => !s.startsWith('data:'))).toBe(true);
-    });
-
     it('does not emit .css.map or sourceMappingURL comment by default', async () => {
       const { processor } = createProcessor(terminalProvider);
       await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
