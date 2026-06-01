@@ -576,6 +576,46 @@
           ]
         },
         {
+          "kind": "Namespace",
+          "canonicalReference": "api-extractor-scenarios!n2:namespace",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare namespace n2 "
+            }
+          ],
+          "fileUrlPath": "src/apiItemKinds/namespaces.ts",
+          "releaseTag": "Public",
+          "name": "n2",
+          "preserveMemberOrder": false,
+          "members": [
+            {
+              "kind": "Variable",
+              "canonicalReference": "api-extractor-scenarios!n2.name2:var",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "name2: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "SomeType",
+                  "canonicalReference": "api-extractor-scenarios!SomeOtherType:type"
+                }
+              ],
+              "isReadonly": true,
+              "releaseTag": "Public",
+              "name": "name2",
+              "variableTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ]
+        },
+        {
           "kind": "Variable",
           "canonicalReference": "api-extractor-scenarios!nonConstVariable:var",
           "docComment": "/**\n * @public\n */\n",
@@ -927,6 +967,32 @@
           "overloadIndex": 1,
           "parameters": [],
           "name": "someFunction"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "api-extractor-scenarios!SomeOtherType:type",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "type SomeType = "
+            },
+            {
+              "kind": "Content",
+              "text": "string"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/apiItemKinds/namespaces.ts",
+          "releaseTag": "Public",
+          "name": "SomeOtherType",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
         },
         {
           "kind": "TypeAlias",
