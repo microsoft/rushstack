@@ -20,6 +20,12 @@ export async function runAsync(runScriptOptions: IRunScriptOptions): Promise<voi
             logLevel: 'warning',
             addToApiReportFile: true
           }
+        },
+        tsdocMessageReporting: {
+          'tsdoc-characters-after-block-tag': {
+            logLevel: 'warning',
+            addToApiReportFile: true
+          }
         }
       }
     }
