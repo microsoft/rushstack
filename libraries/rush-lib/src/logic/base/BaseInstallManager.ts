@@ -53,7 +53,7 @@ import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
 import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
-import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
+import type { PnpmOptionsConfiguration, PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
 import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfiguration';
 import type { Subspace } from '../../api/Subspace';
 import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
@@ -542,6 +542,53 @@ export abstract class BaseInstallManager {
       );
     }
 
+    // Build lines to append to the generated .npmrc so they take precedence over user-committed values.
+    // pnpm does not read minimumReleaseAge/minimumReleaseAgeExclude from package.json, so we inject
+    // them here as minimum-release-age / minimum-release-age-exclude .npmrc settings instead.
+    const pnpmNpmrcAppendLines: string[] = [];
+    if (this.rushConfiguration.isPnpm) {
+      const pnpmOptions: PnpmOptionsConfiguration =
+        subspace.getPnpmOptions() ?? this.rushConfiguration.pnpmOptions;
+
+      if (pnpmOptions.minimumReleaseAgeMinutes !== undefined || pnpmOptions.minimumReleaseAgeExclude) {
+        if (
+          this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+          semver.lt(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '10.16.0')
+        ) {
+          terminal.writeWarningLine(
+            Colorize.yellow(
+              `Your version of pnpm (${this.rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+                `doesn't support the "minimumReleaseAgeMinutes" or "minimumReleaseAgeExclude" fields in ` +
+                `${this.rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+                'Remove these fields or upgrade to pnpm 10.16.0 or newer.'
+            )
+          );
+        }
+
+        if (pnpmOptions.minimumReleaseAgeMinutes !== undefined) {
+          if (
+            isVariableSetInNpmrcFile(
+              subspace.getSubspaceConfigFolderPath(),
+              'minimum-release-age',
+              this.rushConfiguration.isPnpm
+            )
+          ) {
+            terminal.writeWarningLine(
+              `Warning: PNPM's minimum-release-age is specified in both .npmrc and pnpm-config.json. ` +
+                `The value in pnpm-config.json will take precedence.`
+            );
+          }
+          pnpmNpmrcAppendLines.push(`minimum-release-age=${pnpmOptions.minimumReleaseAgeMinutes}`);
+        }
+
+        if (pnpmOptions.minimumReleaseAgeExclude) {
+          for (const packageName of pnpmOptions.minimumReleaseAgeExclude) {
+            pnpmNpmrcAppendLines.push(`minimum-release-age-exclude[]=${packageName}`);
+          }
+        }
+      }
+    }
+
     // Also copy down the committed .npmrc file, if there is one
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     // Also ensure that we remove any old one that may be hanging around
@@ -549,6 +596,7 @@ export abstract class BaseInstallManager {
       sourceNpmrcFolder: subspace.getSubspaceConfigFolderPath(),
       targetNpmrcFolder: subspace.getSubspaceTempFolderPath(),
       linesToPrepend: extraNpmrcLines,
+      linesToAppend: pnpmNpmrcAppendLines.length > 0 ? pnpmNpmrcAppendLines : undefined,
       createIfMissing: this.rushConfiguration.subspacesFeatureEnabled,
       supportEnvVarFallbackSyntax: this.rushConfiguration.isPnpm
     });
