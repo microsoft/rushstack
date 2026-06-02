@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Fri, 29 May 2026 18:25:51 GMT and should not be manually modified.
+This log was last generated on Tue, 02 Jun 2026 07:30:20 GMT and should not be manually modified.
+
+## 1.4.1
+Tue, 02 Jun 2026 07:30:20 GMT
+
+### Patches
+
+- Fix sourceMap: true crashing on Linux/macOS when compiled .scss files use @use or @import
 
 ## 1.4.0
 Fri, 29 May 2026 18:25:51 GMT

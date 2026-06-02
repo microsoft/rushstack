@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "1.4.1",
+      "tag": "@rushstack/heft-sass-plugin_v1.4.1",
+      "date": "Tue, 02 Jun 2026 07:30:20 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix sourceMap: true crashing on Linux/macOS when compiled .scss files use @use or @import"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.0",
       "tag": "@rushstack/heft-sass-plugin_v1.4.0",
       "date": "Fri, 29 May 2026 18:25:51 GMT",
