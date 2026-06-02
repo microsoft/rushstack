@@ -759,6 +759,24 @@ describe(SassProcessor.name, () => {
       expect(parsedMap.sources[0]).toMatch(/classes-and-exports\.module\.scss$/);
     });
 
+    it('emits a valid .css.map when the entry file @uses a partial (Linux/macOS regression)', async () => {
+      // use-with-partial.module.scss uses @use 'partial', which goes through loadAsync.
+      // Without sourceMapUrl on the ImporterResult, sass-embedded falls back to a data: URL
+      // for the partial in the source map; heftUrlToPath then crashes on Linux/macOS.
+      const { processor } = createProcessor(terminalProvider, { sourceMap: true });
+      await compileFixtureAsync(processor, 'use-with-partial.module.scss');
+
+      const mapPaths: string[] = getAllWrittenPathsMatching('.css.map');
+      expect(mapPaths).toHaveLength(1);
+
+      const mapJson: string = getWrittenFile('use-with-partial.module.css.map');
+      const parsedMap: { version: number; mappings: string; sources: string[] } = JSON.parse(mapJson);
+      expect(parsedMap.version).toBe(3);
+      expect(parsedMap.mappings).toBeTruthy();
+      // Both the entry file and the partial must resolve to real paths, not data: URLs
+      expect(parsedMap.sources.every((s: string) => !s.startsWith('data:'))).toBe(true);
+    });
+
     it('does not emit .css.map or sourceMappingURL comment by default', async () => {
       const { processor } = createProcessor(terminalProvider);
       await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
