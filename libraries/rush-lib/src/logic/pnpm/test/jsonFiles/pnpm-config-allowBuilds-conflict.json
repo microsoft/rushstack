@@ -1,0 +1,6 @@
+{
+  "globalNeverBuiltDependencies": ["fsevents"],
+  "globalAllowBuilds": {
+    "esbuild": true
+  }
+}

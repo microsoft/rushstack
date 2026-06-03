@@ -87,6 +87,47 @@ describe(PnpmOptionsConfiguration.name, () => {
     ]);
   });
 
+  it('loads strictDepBuilds', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-strictDepBuilds.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(pnpmConfiguration.globalStrictDepBuilds).toBe(true);
+  });
+
+  it('loads allowBuilds', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-allowBuilds.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.globalAllowBuilds)).toEqual({
+      esbuild: true,
+      playwright: true,
+      'core-js': false,
+      '@swc/core': true
+    });
+  });
+
+  it('throws if both globalNeverBuiltDependencies and globalAllowBuilds are specified', () => {
+    expect(() =>
+      PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+        `${__dirname}/jsonFiles/pnpm-config-allowBuilds-conflict.json`,
+        fakeCommonTempFolder
+      )
+    ).toThrow(/Both settings cannot be specified together/);
+  });
+
+  it('loads dangerouslyAllowAllBuilds', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-dangerouslyAllowAllBuilds.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(pnpmConfiguration.globalDangerouslyAllowAllBuilds).toBe(true);
+  });
+
   it('loads minimumReleaseAgeMinutes', () => {
     const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
       `${__dirname}/jsonFiles/pnpm-config-minimumReleaseAge.json`,

@@ -469,6 +469,63 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       workspaceFile.setCatalogs(catalogs);
     }
 
+    // Set strictDepBuilds in the workspace file if specified (requires pnpm 10.3.0+)
+    if (pnpmOptions.globalStrictDepBuilds !== undefined) {
+      if (
+        this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+        semver.lt(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '10.3.0')
+      ) {
+        this._terminal.writeWarningLine(
+          Colorize.yellow(
+            `Your version of pnpm (${this.rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `doesn't support the "globalStrictDepBuilds" field in ` +
+              `${this.rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+              'Remove this field or upgrade to pnpm 10.3.0 or newer.'
+          )
+        );
+      }
+
+      workspaceFile.setStrictDepBuilds(pnpmOptions.globalStrictDepBuilds);
+    }
+
+    // Set allowBuilds in the workspace file if specified (requires pnpm 10.26.0+)
+    if (pnpmOptions.globalAllowBuilds) {
+      if (
+        this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+        semver.lt(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '10.26.0')
+      ) {
+        this._terminal.writeWarningLine(
+          Colorize.yellow(
+            `Your version of pnpm (${this.rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `doesn't support the "globalAllowBuilds" field in ` +
+              `${this.rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+              'Remove this field or upgrade to pnpm 10.26.0 or newer.'
+          )
+        );
+      }
+
+      workspaceFile.setAllowBuilds(pnpmOptions.globalAllowBuilds);
+    }
+
+    // Set dangerouslyAllowAllBuilds in the workspace file if specified (requires pnpm 10.9.0+)
+    if (pnpmOptions.globalDangerouslyAllowAllBuilds !== undefined) {
+      if (
+        this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+        semver.lt(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '10.9.0')
+      ) {
+        this._terminal.writeWarningLine(
+          Colorize.yellow(
+            `Your version of pnpm (${this.rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `doesn't support the "globalDangerouslyAllowAllBuilds" field in ` +
+              `${this.rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+              'Remove this field or upgrade to pnpm 10.9.0 or newer.'
+          )
+        );
+      }
+
+      workspaceFile.setDangerouslyAllowAllBuilds(pnpmOptions.globalDangerouslyAllowAllBuilds);
+    }
+
     // Save the generated workspace file. Don't update the file timestamp unless the content has changed,
     // since "rush install" will consider this timestamp
     workspaceFile.save(workspaceFile.workspaceFilename, { onlyIfChanged: true });

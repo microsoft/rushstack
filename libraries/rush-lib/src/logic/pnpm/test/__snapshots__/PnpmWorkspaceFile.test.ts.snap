@@ -65,3 +65,39 @@ exports[`PnpmWorkspaceFile catalog functionality handles undefined catalog 1`] =
   - projects/app1
 "
 `;
+
+exports[`PnpmWorkspaceFile allowBuilds functionality generates workspace file with allowBuilds 1`] = `
+"allowBuilds:
+  core-js: false
+  esbuild: true
+  playwright: true
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile allowBuilds functionality generates workspace file with both catalogs and allowBuilds 1`] = `
+"allowBuilds:
+  core-js: false
+  esbuild: true
+catalogs:
+  default:
+    react: ^18.0.0
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile allowBuilds functionality handles empty allowBuilds object 1`] = `
+"packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile allowBuilds functionality handles undefined allowBuilds 1`] = `
+"packages:
+  - projects/app1
+"
+`;
+
+

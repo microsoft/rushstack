@@ -77,7 +77,33 @@ export class InstallHelpers {
       }
 
       if (pnpmOptions.globalNeverBuiltDependencies) {
-        commonPackageJson.pnpm.neverBuiltDependencies = pnpmOptions.globalNeverBuiltDependencies;
+        if (
+          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+          semver.gte(rushConfiguration.rushConfigurationJson.pnpmVersion, '11.0.0')
+        ) {
+          terminal.writeWarningLine(
+            Colorize.yellow(
+              `The "globalNeverBuiltDependencies" field in ` +
+                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename} ` +
+                `is deprecated and will be ignored by pnpm ${rushConfiguration.rushConfigurationJson.pnpmVersion} ` +
+                `(pnpm 11+ no longer reads build settings from package.json). ` +
+                'Migrate to "globalAllowBuilds" instead. ' +
+                `For example, replace "globalNeverBuiltDependencies": ["pkg"] ` +
+                `with "globalAllowBuilds": { "pkg": false }.`
+            )
+          );
+        } else {
+          terminal.writeWarningLine(
+            Colorize.yellow(
+              `The "globalNeverBuiltDependencies" field in ` +
+                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename} ` +
+                'is deprecated. Migrate to "globalAllowBuilds" instead. ' +
+                `For example, replace "globalNeverBuiltDependencies": ["pkg"] ` +
+                `with "globalAllowBuilds": { "pkg": false }.`
+            )
+          );
+          commonPackageJson.pnpm!.neverBuiltDependencies = pnpmOptions.globalNeverBuiltDependencies;
+        }
       }
 
       if (pnpmOptions.globalOnlyBuiltDependencies) {
