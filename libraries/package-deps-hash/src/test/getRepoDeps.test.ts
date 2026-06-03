@@ -45,6 +45,24 @@ describe(getRepoRoot.name, () => {
     const expectedRoot: string = path.resolve(__dirname, '../../../..').replace(/\\/g, '/');
     expect(root).toEqual(expectedRoot);
   });
+
+  it(`ignores GIT_DIR set by git hooks in linked worktrees`, () => {
+    // GIT_DIR pointing to a non-existent path causes git rev-parse to fail unless stripped.
+    const originalGitDir: string | undefined = process.env.GIT_DIR;
+    try {
+      process.env.GIT_DIR = '/nonexistent-fake-gitdir-worktrees-for-testing';
+      const testCwd: string = path.resolve(SOURCE_PATH, '..');
+      const root: string = getRepoRoot(testCwd);
+      const expectedRoot: string = path.resolve(__dirname, '../../../..').replace(/\\/g, '/');
+      expect(root).toEqual(expectedRoot);
+    } finally {
+      if (originalGitDir === undefined) {
+        delete process.env.GIT_DIR;
+      } else {
+        process.env.GIT_DIR = originalGitDir;
+      }
+    }
+  });
 });
 
 describe(parseGitLsTree.name, () => {
