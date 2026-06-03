@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix build cache failures when running inside a git linked worktree via a pre-commit hook, caused by GIT_DIR being set to the per-worktree metadata directory",
+      "type": "patch",
+      "packageName": "@rushstack/package-deps-hash"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash",
+  "email": "kfleischman@squarespace.com"
+}
