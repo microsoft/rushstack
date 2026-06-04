@@ -3,25 +3,16 @@
 
 import * as path from 'node:path';
 
-import * as semver from 'semver';
-
-import {
-  FileSystem,
-  Import,
-  JsonFile,
-  MapExtensions,
-  type IDependenciesMetaTable
-} from '@rushstack/node-core-library';
+import { FileSystem, type IDependenciesMetaTable } from '@rushstack/node-core-library';
 
 import { subspacePnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants';
 import type { ISubspacePnpmfileShimSettings, IWorkspaceProjectInfo } from './IPnpmfile';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
-import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import { RushConstants } from '../RushConstants';
 import type { Subspace } from '../../api/Subspace';
 import type { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
+import { PnpmfileSettingsFile } from './PnpmfileSettingsFile';
 
 /**
  * Loads PNPM's pnpmfile.js configuration, and invokes it to preprocess package.json files,
@@ -57,13 +48,7 @@ export class SubspacePnpmfileConfiguration {
       SubspacePnpmfileConfiguration.getSubspacePnpmfileShimSettings(rushConfiguration, subspace, variant);
 
     // Write the settings file used by the shim
-    await JsonFile.saveAsync(
-      subspaceGlobalPnpmfileShimSettings,
-      path.join(targetDir, 'pnpmfileSettings.json'),
-      {
-        ensureFolderExists: true
-      }
-    );
+    await PnpmfileSettingsFile.writeSettingsFileAsync(subspaceGlobalPnpmfileShimSettings, targetDir);
   }
 
   public static getSubspacePnpmfileShimSettings(
@@ -89,46 +74,11 @@ export class SubspacePnpmfileConfiguration {
       (subspace.contains(project) ? subspaceProjects : workspaceProjects)[packageName] = workspaceProjectInfo;
     }
 
-    let allPreferredVersions: { [dependencyName: string]: string } = {};
-    let allowedAlternativeVersions: { [dependencyName: string]: readonly string[] } = {};
-
-    // Populate preferred versions from subspace's common-versions.json (same as non-subspace pnpmfile shim)
-    const pnpmOptions: PnpmOptionsConfiguration =
-      rushConfiguration.packageManagerOptions as PnpmOptionsConfiguration;
-    if (pnpmOptions?.useWorkspaces) {
-      const commonVersionsConfiguration: CommonVersionsConfiguration = subspace.getCommonVersions(variant);
-      const preferredVersions: Map<string, string> = new Map();
-      MapExtensions.mergeFromMap(
-        preferredVersions,
-        rushConfiguration.getImplicitlyPreferredVersions(subspace, variant)
-      );
-      for (const [name, version] of commonVersionsConfiguration.getAllPreferredVersions()) {
-        if (!preferredVersions.has(name) || semver.subset(version, preferredVersions.get(name)!)) {
-          preferredVersions.set(name, version);
-        }
-      }
-      allPreferredVersions = MapExtensions.toObject(preferredVersions);
-      allowedAlternativeVersions = MapExtensions.toObject(
-        commonVersionsConfiguration.allowedAlternativeVersions
-      );
-    }
-
     const settings: ISubspacePnpmfileShimSettings = {
+      ...PnpmfileSettingsFile.getCommonPnpmfileShimSettings(rushConfiguration, subspace, variant),
       workspaceProjects,
-      subspaceProjects,
-      allPreferredVersions,
-      allowedAlternativeVersions,
-      semverPath: Import.resolveModule({ modulePath: 'semver', baseFolderPath: __dirname })
+      subspaceProjects
     };
-
-    // common/config/subspaces/<subspace_name>/.pnpmfile.cjs
-    const userPnpmfilePath: string = path.join(
-      subspace.getVariantDependentSubspaceConfigFolderPath(variant),
-      (rushConfiguration.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
-    );
-    if (FileSystem.exists(userPnpmfilePath)) {
-      settings.userPnpmfilePath = userPnpmfilePath;
-    }
 
     return settings;
   }
