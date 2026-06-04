@@ -87,6 +87,19 @@ describe(PnpmOptionsConfiguration.name, () => {
     ]);
   });
 
+  it('loads allowBuilds', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-allowBuilds.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.globalAllowBuilds)).toEqual({
+      esbuild: true,
+      '@parcel/watcher': true,
+      fsevents: false
+    });
+  });
+
   it('loads minimumReleaseAgeMinutes', () => {
     const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
       `${__dirname}/jsonFiles/pnpm-config-minimumReleaseAge.json`,

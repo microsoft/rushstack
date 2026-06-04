@@ -363,7 +363,8 @@ export class RushPnpmCommandLineParser {
           const semver: typeof import('semver') = await import('semver');
           /**
            * The "approve-builds" command was introduced in pnpm version 10.1.0
-           * to approve packages for running build scripts when onlyBuiltDependencies is used
+           * to approve packages for running build scripts when onlyBuiltDependencies is used.
+           * In pnpm 11.0.0, it was updated to use allowBuilds in pnpm-workspace.yaml.
            */
           if (semver.lt(this._rushConfiguration.packageManagerToolVersion, '10.1.0')) {
             this._terminal.writeErrorLine(
@@ -572,26 +573,56 @@ export class RushPnpmCommandLineParser {
           break;
         }
 
-        // Example: "C:\MyRepo\common\temp\package.json"
-        const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
-        const commonPackageJson: JsonObject = await JsonFile.loadAsync(commonPackageJsonFilename);
-        const newGlobalOnlyBuiltDependencies: string[] | undefined =
-          commonPackageJson?.pnpm?.onlyBuiltDependencies;
         const pnpmOptions: PnpmOptionsConfiguration | undefined = this._subspace.getPnpmOptions();
-        const currentGlobalOnlyBuiltDependencies: string[] | undefined =
-          pnpmOptions?.globalOnlyBuiltDependencies;
+        const pnpmVersion: string = this._rushConfiguration.packageManagerToolVersion;
+        const semver: typeof import('semver') = await import('semver');
 
-        if (!Objects.areDeepEqual(currentGlobalOnlyBuiltDependencies, newGlobalOnlyBuiltDependencies)) {
-          // Update onlyBuiltDependencies to pnpm configuration file
-          pnpmOptions?.updateGlobalOnlyBuiltDependencies(newGlobalOnlyBuiltDependencies);
+        if (semver.gte(pnpmVersion, '11.0.0')) {
+          // pnpm 11+ uses allowBuilds in pnpm-workspace.yaml instead of onlyBuiltDependencies in package.json
+          const workspaceYamlFilename: string = `${subspaceTempFolder}/pnpm-workspace.yaml`;
+          const yamlModule: typeof import('js-yaml') = await import('js-yaml');
+          const workspaceYamlContent: string = await FileSystem.readFileAsync(workspaceYamlFilename);
+          const workspaceYaml: { allowBuilds?: Record<string, boolean> } = (yamlModule.load(
+            workspaceYamlContent
+          ) ?? {}) as { allowBuilds?: Record<string, boolean> };
+          const newGlobalAllowBuilds: Record<string, boolean> | undefined = workspaceYaml?.allowBuilds;
+          const currentGlobalAllowBuilds: Record<string, boolean> | undefined =
+            pnpmOptions?.globalAllowBuilds;
 
-          // Rerun installation to update
-          await this._doRushUpdateAsync();
+          if (!Objects.areDeepEqual(currentGlobalAllowBuilds, newGlobalAllowBuilds)) {
+            // Update allowBuilds to pnpm configuration file
+            pnpmOptions?.updateGlobalAllowBuilds(newGlobalAllowBuilds);
 
-          this._terminal.writeWarningLine(
-            `Rush refreshed the ${RushConstants.pnpmConfigFilename} and shrinkwrap file.\n` +
-              '  Please commit this change to Git.'
-          );
+            // Rerun installation to update
+            await this._doRushUpdateAsync();
+
+            this._terminal.writeWarningLine(
+              `Rush refreshed the ${RushConstants.pnpmConfigFilename} and shrinkwrap file.\n` +
+                '  Please commit this change to Git.'
+            );
+          }
+        } else {
+          // pnpm 10.x uses onlyBuiltDependencies in package.json
+          // Example: "C:\MyRepo\common\temp\package.json"
+          const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
+          const commonPackageJson: JsonObject = await JsonFile.loadAsync(commonPackageJsonFilename);
+          const newGlobalOnlyBuiltDependencies: string[] | undefined =
+            commonPackageJson?.pnpm?.onlyBuiltDependencies;
+          const currentGlobalOnlyBuiltDependencies: string[] | undefined =
+            pnpmOptions?.globalOnlyBuiltDependencies;
+
+          if (!Objects.areDeepEqual(currentGlobalOnlyBuiltDependencies, newGlobalOnlyBuiltDependencies)) {
+            // Update onlyBuiltDependencies to pnpm configuration file
+            pnpmOptions?.updateGlobalOnlyBuiltDependencies(newGlobalOnlyBuiltDependencies);
+
+            // Rerun installation to update
+            await this._doRushUpdateAsync();
+
+            this._terminal.writeWarningLine(
+              `Rush refreshed the ${RushConstants.pnpmConfigFilename} and shrinkwrap file.\n` +
+                '  Please commit this change to Git.'
+            );
+          }
         }
         break;
       }

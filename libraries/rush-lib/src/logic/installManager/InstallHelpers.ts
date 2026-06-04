@@ -77,25 +77,53 @@ export class InstallHelpers {
       }
 
       if (pnpmOptions.globalNeverBuiltDependencies) {
-        commonPackageJson.pnpm.neverBuiltDependencies = pnpmOptions.globalNeverBuiltDependencies;
+        if (
+          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+          semver.gte(rushConfiguration.rushConfigurationJson.pnpmVersion, '11.0.0')
+        ) {
+          terminal.writeWarningLine(
+            Colorize.yellow(
+              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+                `no longer supports the "globalNeverBuiltDependencies" field in ` +
+                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+                'Use "globalAllowBuilds" instead (with a value of false to deny build scripts).'
+            )
+          );
+        } else {
+          commonPackageJson.pnpm.neverBuiltDependencies = pnpmOptions.globalNeverBuiltDependencies;
+        }
       }
 
       if (pnpmOptions.globalOnlyBuiltDependencies) {
         if (
           rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.1.0')
+          semver.gte(rushConfiguration.rushConfigurationJson.pnpmVersion, '11.0.0')
         ) {
           terminal.writeWarningLine(
             Colorize.yellow(
               `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-                `doesn't support the "globalOnlyBuiltDependencies" field in ` +
+                `no longer supports the "globalOnlyBuiltDependencies" field in ` +
                 `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to pnpm 10.1.0 or newer.'
+                'Use "globalAllowBuilds" instead (with a value of true to allow build scripts).'
             )
           );
-        }
+        } else {
+          if (
+            rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+            semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.1.0')
+          ) {
+            terminal.writeWarningLine(
+              Colorize.yellow(
+                `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+                  `doesn't support the "globalOnlyBuiltDependencies" field in ` +
+                  `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+                  'Remove this field or upgrade to pnpm 10.1.0 or newer.'
+              )
+            );
+          }
 
-        commonPackageJson.pnpm.onlyBuiltDependencies = pnpmOptions.globalOnlyBuiltDependencies;
+          commonPackageJson.pnpm.onlyBuiltDependencies = pnpmOptions.globalOnlyBuiltDependencies;
+        }
       }
 
       if (pnpmOptions.globalIgnoredOptionalDependencies) {

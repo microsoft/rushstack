@@ -180,4 +180,66 @@ describe(PnpmWorkspaceFile.name, () => {
       expect(content).toMatchSnapshot();
     });
   });
+
+  describe('allowBuilds functionality', () => {
+    it('generates workspace file with allowBuilds', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setAllowBuilds({
+        esbuild: true,
+        '@parcel/watcher': true,
+        fsevents: false
+      });
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toMatchSnapshot();
+    });
+
+    it('generates workspace file with allowBuilds and catalogs', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setCatalogs({
+        default: {
+          react: '^18.0.0'
+        }
+      });
+
+      workspaceFile.setAllowBuilds({
+        esbuild: true
+      });
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toMatchSnapshot();
+    });
+
+    it('handles empty allowBuilds object', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setAllowBuilds({});
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).not.toContain('allowBuilds');
+    });
+
+    it('handles undefined allowBuilds', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setAllowBuilds(undefined);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).not.toContain('allowBuilds');
+    });
+  });
 });
