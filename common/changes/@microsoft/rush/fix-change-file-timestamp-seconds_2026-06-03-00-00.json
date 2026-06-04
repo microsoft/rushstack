@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Include seconds in the generated change file name so that running \"rush change\" more than once in the same minute no longer silently overwrites the previously generated change file.",
+      "type": "patch",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "sshaurya914@gmail.com"
+}
