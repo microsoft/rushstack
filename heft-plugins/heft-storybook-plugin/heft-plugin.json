@@ -28,6 +28,12 @@
           "longName": "--no-open",
           "description": "Pass --no-open to the storybook CLI so it does not automatically open a browser window in serve mode.",
           "parameterKind": "flag"
+        },
+        {
+          "longName": "--port",
+          "description": "Pass --port to the storybook CLI to bind the dev server to a specific port in serve mode.",
+          "parameterKind": "string",
+          "argumentName": "PORT"
         }
       ]
     }
