@@ -6,7 +6,7 @@ import * as path from 'node:path';
 import ignore, { type Ignore } from 'ignore';
 
 import type { IReadonlyLookupByPath, LookupByPath, IPrefixMatch } from '@rushstack/lookup-by-path';
-import { Path, FileSystem, Async, AlreadyReportedError, Sort } from '@rushstack/node-core-library';
+import { Path, FileSystem, Async, AlreadyReportedError, Sort, JsonFile } from '@rushstack/node-core-library';
 import {
   getRepoChanges,
   getRepoRoot,
@@ -545,16 +545,16 @@ export class ProjectChangeAnalyzer {
         blobSpec: `${mergeCommit}:${pnpmConfigRelativePath}`,
         repositoryRoot: repoRoot
       });
-      const oldPnpmConfig: IPnpmOptionsJson = JSON.parse(oldPnpmConfigText);
+      const oldPnpmConfig: IPnpmOptionsJson = JsonFile.parseString(oldPnpmConfigText);
       oldCatalogs = oldPnpmConfig.globalCatalogs ?? {};
     } catch {
       // Old file didn't exist or was unparseable — treat all packages in all current catalogs as changed
       if (rushConfiguration.subspacesFeatureEnabled) {
-        terminal.writeLine(
+        terminal.writeWarningLine(
           `"${subspace.subspaceName}" subspace pnpm-config.json was created or unparseable. Assuming all projects are affected.`
         );
       } else {
-        terminal.writeLine(
+        terminal.writeWarningLine(
           `pnpm-config.json was created or unparseable. Assuming all projects are affected.`
         );
       }
@@ -608,8 +608,7 @@ export class ProjectChangeAnalyzer {
       // Check each project in the subspace to see if it depends on a changed catalog package
       const subspaceProjects: RushConfigurationProject[] = subspace.getProjects();
       subspaceProjects.forEach((project) => {
-        const { dependencies, devDependencies, optionalDependencies, peerDependencies } =
-          project.packageJson;
+        const { dependencies, devDependencies, optionalDependencies, peerDependencies } = project.packageJson;
         const allDependencies: Set<[string, string]> = new Set(
           [dependencies, devDependencies, optionalDependencies, peerDependencies].flatMap((deps) =>
             Object.entries(deps ?? {})
