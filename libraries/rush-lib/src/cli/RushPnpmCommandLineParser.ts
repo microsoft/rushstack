@@ -362,9 +362,9 @@ export class RushPnpmCommandLineParser {
         case 'approve-builds': {
           const semver: typeof import('semver') = await import('semver');
           /**
-           * The "approve-builds" command was introduced in pnpm version 10.1.0
+           * The "approve-builds" command was introduced in PNPM version 10.1.0
            * to approve packages for running build scripts when onlyBuiltDependencies is used.
-           * In pnpm 11.0.0, it was updated to use allowBuilds in pnpm-workspace.yaml.
+           * In PNPM 11.0.0, it was updated to use allowBuilds in pnpm-workspace.yaml.
            */
           if (semver.lt(this._rushConfiguration.packageManagerToolVersion, '10.1.0')) {
             this._terminal.writeErrorLine(
@@ -578,7 +578,7 @@ export class RushPnpmCommandLineParser {
         const semver: typeof import('semver') = await import('semver');
 
         if (semver.gte(pnpmVersion, '11.0.0')) {
-          // pnpm 11+ uses allowBuilds in pnpm-workspace.yaml instead of onlyBuiltDependencies in package.json
+          // PNPM 11+ uses allowBuilds in pnpm-workspace.yaml instead of onlyBuiltDependencies in package.json
           const workspaceYamlFilename: string = `${subspaceTempFolder}/pnpm-workspace.yaml`;
           const yamlModule: typeof import('js-yaml') = await import('js-yaml');
           const workspaceYamlContent: string = await FileSystem.readFileAsync(workspaceYamlFilename);
@@ -602,7 +602,7 @@ export class RushPnpmCommandLineParser {
             );
           }
         } else {
-          // pnpm 10.x uses onlyBuiltDependencies in package.json
+          // PNPM 10.x uses onlyBuiltDependencies in package.json
           // Example: "C:\MyRepo\common\temp\package.json"
           const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
           const commonPackageJson: JsonObject = await JsonFile.loadAsync(commonPackageJsonFilename);

@@ -573,6 +573,12 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.globalPeerDependencyRules = json.globalPeerDependencyRules;
     this.globalPackageExtensions = json.globalPackageExtensions;
     this.globalNeverBuiltDependencies = json.globalNeverBuiltDependencies;
+    if (json.globalOnlyBuiltDependencies !== undefined && json.globalAllowBuilds !== undefined) {
+      throw new Error(
+        'The "globalOnlyBuiltDependencies" and "globalAllowBuilds" settings cannot both be specified' +
+          ' in pnpm-config.json. Use "globalAllowBuilds" for PNPM 11.0.0 and newer.'
+      );
+    }
     this.globalOnlyBuiltDependencies = json.globalOnlyBuiltDependencies;
     this.globalAllowBuilds = json.globalAllowBuilds;
     this.globalIgnoredOptionalDependencies = json.globalIgnoredOptionalDependencies;
