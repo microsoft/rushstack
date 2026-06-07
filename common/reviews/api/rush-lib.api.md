@@ -752,6 +752,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     alwaysFullInstall?: boolean;
     alwaysInjectDependenciesFromOtherSubspaces?: boolean;
     autoInstallPeers?: boolean;
+    globalAllowBuilds?: Record<string, boolean>;
     globalAllowedDeprecatedVersions?: Record<string, string>;
     globalCatalogs?: Record<string, Record<string, string>>;
     globalIgnoredOptionalDependencies?: string[];
@@ -1177,6 +1178,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly alwaysFullInstall: boolean | undefined;
     readonly alwaysInjectDependenciesFromOtherSubspaces: boolean | undefined;
     readonly autoInstallPeers: boolean | undefined;
+    readonly globalAllowBuilds: Record<string, boolean> | undefined;
     readonly globalAllowedDeprecatedVersions: Record<string, string> | undefined;
     readonly globalCatalogs: Record<string, Record<string, string>> | undefined;
     readonly globalIgnoredOptionalDependencies: string[] | undefined;
@@ -1206,6 +1208,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly trustPolicyExclude: string[] | undefined;
     readonly trustPolicyIgnoreAfterMinutes: number | undefined;
     readonly unsupportedPackageJsonSettings: unknown | undefined;
+    updateGlobalAllowBuilds(allowBuilds: Record<string, boolean> | undefined): void;
     updateGlobalOnlyBuiltDependencies(onlyBuiltDependencies: string[] | undefined): void;
     updateGlobalPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void;
     readonly useWorkspaces: boolean;
