@@ -23,6 +23,7 @@ import type {
   IScopedLogger,
   IHeftTaskPlugin,
   CommandLineFlagParameter,
+  CommandLineStringParameter,
   IHeftTaskRunHookOptions
 } from '@rushstack/heft';
 import type {
@@ -191,6 +192,7 @@ interface IPrepareStorybookOptions extends IStorybookPluginOptions {
   isTestMode: boolean;
   isDocsMode: boolean;
   isNoOpenMode: boolean;
+  port: string | undefined;
 }
 
 const DEFAULT_STORYBOOK_VERSION: StorybookCliVersion = StorybookCliVersion.STORYBOOK7;
@@ -229,6 +231,7 @@ const STORYBOOK_FLAG_NAME: '--storybook' = '--storybook';
 const STORYBOOK_TEST_FLAG_NAME: '--storybook-test' = '--storybook-test';
 const DOCS_FLAG_NAME: '--docs' = '--docs';
 const NO_OPEN_FLAG_NAME: '--no-open' = '--no-open';
+const PORT_FLAG_NAME: '--port' = '--port';
 
 /** @public */
 export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPluginOptions> {
@@ -248,6 +251,8 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     const docsParameter: CommandLineFlagParameter = taskSession.parameters.getFlagParameter(DOCS_FLAG_NAME);
     const noOpenParameter: CommandLineFlagParameter =
       taskSession.parameters.getFlagParameter(NO_OPEN_FLAG_NAME);
+    const portParameter: CommandLineStringParameter =
+      taskSession.parameters.getStringParameter(PORT_FLAG_NAME);
 
     const parseResult: IParsedPackageNameOrError = PackageName.tryParse(options.storykitPackageName);
     if (parseResult.error) {
@@ -312,6 +317,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
           isTestMode: storybookTestParameter.value,
           isDocsMode: docsParameter.value,
           isNoOpenMode: noOpenParameter.value,
+          port: portParameter.value,
           ...options
         });
         await this._runStorybookAsync(runStorybookOptions, options);
@@ -470,7 +476,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     runStorybookOptions: IRunStorybookOptions,
     options: IStorybookPluginOptions
   ): Promise<void> {
-    const { logger, resolvedModulePath, verbose, isServeMode, isTestMode, isDocsMode, isNoOpenMode } =
+    const { logger, resolvedModulePath, verbose, isServeMode, isTestMode, isDocsMode, isNoOpenMode, port } =
       runStorybookOptions;
     let { workingDirectory, outputFolder } = runStorybookOptions;
     logger.terminal.writeLine('Running Storybook compilation');
@@ -520,6 +526,10 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
 
     if (isServeMode && isNoOpenMode) {
       storybookArgs.push('--no-open');
+    }
+
+    if (isServeMode && port) {
+      storybookArgs.push('--port', port);
     }
 
     const storybookEnv: NodeJS.ProcessEnv = {
