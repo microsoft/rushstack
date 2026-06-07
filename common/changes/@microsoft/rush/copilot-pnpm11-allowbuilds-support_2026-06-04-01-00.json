@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add support for pnpm 11's `allowBuilds` field in `pnpm-workspace.yaml`. Rush now correctly handles the pnpm 11 security model where build scripts must be explicitly approved. The new `globalAllowBuilds` field in `pnpm-config.json` replaces the deprecated `globalOnlyBuiltDependencies` and `globalNeverBuiltDependencies` fields for pnpm 11+. The `rush-pnpm approve-builds` command is also updated to work correctly with pnpm 11.",
+      "type": "minor",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "198982749+Copilot@users.noreply.github.com"
+}

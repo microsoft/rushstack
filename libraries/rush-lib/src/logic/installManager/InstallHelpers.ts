@@ -76,39 +76,57 @@ export class InstallHelpers {
         commonPackageJson.pnpm.peerDependencyRules = pnpmOptions.globalPeerDependencyRules;
       }
 
+      const pnpmVersion: string = rushConfiguration.packageManagerToolVersion;
+
       if (pnpmOptions.globalNeverBuiltDependencies) {
-        commonPackageJson.pnpm.neverBuiltDependencies = pnpmOptions.globalNeverBuiltDependencies;
+        if (semver.gte(pnpmVersion, '11.0.0')) {
+          terminal.writeWarningLine(
+            Colorize.yellow(
+              `Your version of PNPM (${pnpmVersion}) ` +
+                `no longer supports the "globalNeverBuiltDependencies" field in ` +
+                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+                'Use "globalAllowBuilds" instead (with a value of false to deny build scripts).'
+            )
+          );
+        } else {
+          commonPackageJson.pnpm.neverBuiltDependencies = pnpmOptions.globalNeverBuiltDependencies;
+        }
       }
 
       if (pnpmOptions.globalOnlyBuiltDependencies) {
-        if (
-          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.1.0')
-        ) {
+        if (semver.gte(pnpmVersion, '11.0.0')) {
           terminal.writeWarningLine(
             Colorize.yellow(
-              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-                `doesn't support the "globalOnlyBuiltDependencies" field in ` +
+              `Your version of PNPM (${pnpmVersion}) ` +
+                `no longer supports the "globalOnlyBuiltDependencies" field in ` +
                 `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to pnpm 10.1.0 or newer.'
+                'Use "globalAllowBuilds" instead (with a value of true to allow build scripts).'
             )
           );
-        }
+        } else {
+          if (semver.lt(pnpmVersion, '10.1.0')) {
+            terminal.writeWarningLine(
+              Colorize.yellow(
+                `Your version of PNPM (${pnpmVersion}) ` +
+                  `doesn't support the "globalOnlyBuiltDependencies" field in ` +
+                  `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+                  'Remove this field or upgrade to PNPM 10.1.0 or newer.'
+              )
+            );
+          }
 
-        commonPackageJson.pnpm.onlyBuiltDependencies = pnpmOptions.globalOnlyBuiltDependencies;
+          commonPackageJson.pnpm.onlyBuiltDependencies = pnpmOptions.globalOnlyBuiltDependencies;
+        }
       }
 
       if (pnpmOptions.globalIgnoredOptionalDependencies) {
-        if (
-          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '9.0.0')
-        ) {
+        if (semver.lt(pnpmVersion, '9.0.0')) {
           terminal.writeWarningLine(
             Colorize.yellow(
-              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `Your version of PNPM (${pnpmVersion}) ` +
                 `doesn't support the "globalIgnoredOptionalDependencies" field in ` +
                 `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to pnpm 9.'
+                'Remove this field or upgrade to PNPM 9.'
             )
           );
         }
@@ -125,16 +143,13 @@ export class InstallHelpers {
       }
 
       if (pnpmOptions.minimumReleaseAgeMinutes !== undefined || pnpmOptions.minimumReleaseAgeExclude) {
-        if (
-          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.16.0')
-        ) {
+        if (semver.lt(pnpmVersion, '10.16.0')) {
           terminal.writeWarningLine(
             Colorize.yellow(
-              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `Your version of PNPM (${pnpmVersion}) ` +
                 `doesn't support the "minimumReleaseAgeMinutes" or "minimumReleaseAgeExclude" fields in ` +
                 `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove these fields or upgrade to pnpm 10.16.0 or newer.'
+                'Remove these fields or upgrade to PNPM 10.16.0 or newer.'
             )
           );
         }
@@ -150,16 +165,13 @@ export class InstallHelpers {
       }
 
       if (pnpmOptions.trustPolicy !== undefined) {
-        if (
-          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.21.0')
-        ) {
+        if (semver.lt(pnpmVersion, '10.21.0')) {
           terminal.writeWarningLine(
             Colorize.yellow(
-              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `Your version of PNPM (${pnpmVersion}) ` +
                 `doesn't support the "trustPolicy" field in ` +
                 `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to pnpm 10.21.0 or newer.'
+                'Remove this field or upgrade to PNPM 10.21.0 or newer.'
             )
           );
         }
@@ -168,16 +180,13 @@ export class InstallHelpers {
       }
 
       if (pnpmOptions.trustPolicyExclude) {
-        if (
-          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.22.0')
-        ) {
+        if (semver.lt(pnpmVersion, '10.22.0')) {
           terminal.writeWarningLine(
             Colorize.yellow(
-              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `Your version of PNPM (${pnpmVersion}) ` +
                 `doesn't support the "trustPolicyExclude" field in ` +
                 `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to pnpm 10.22.0 or newer.'
+                'Remove this field or upgrade to PNPM 10.22.0 or newer.'
             )
           );
         }
@@ -186,16 +195,13 @@ export class InstallHelpers {
       }
 
       if (pnpmOptions.trustPolicyIgnoreAfterMinutes !== undefined) {
-        if (
-          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '10.27.0')
-        ) {
+        if (semver.lt(pnpmVersion, '10.27.0')) {
           terminal.writeWarningLine(
             Colorize.yellow(
-              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `Your version of PNPM (${pnpmVersion}) ` +
                 `doesn't support the "trustPolicyIgnoreAfterMinutes" field in ` +
                 `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to pnpm 10.27.0 or newer.'
+                'Remove this field or upgrade to PNPM 10.27.0 or newer.'
             )
           );
         }
