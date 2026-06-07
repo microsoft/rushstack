@@ -2,7 +2,7 @@
   "changes": [
     {
       "comment": "Default `rush-pnpm outdated` and `rush-pnpm why` to recursive workspace queries.",
-      "type": "patch",
+      "type": "minor",
       "packageName": "@microsoft/rush"
     }
   ],
