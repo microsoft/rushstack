@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Default `rush-pnpm outdated` and `rush-pnpm why` to recursive workspace queries.",
+      "type": "patch",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "262980978+kiranmagic7@users.noreply.github.com"
+}
