@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Fix `rush update` not syncing pnpm-lock.yaml when a workspace dependency moves from `dependencies` to `devDependencies`.",
+      "comment": "Fix `rush update` not syncing `pnpm-lock.yaml` when a workspace dependency moves from `dependencies` to `devDependencies`.",
       "type": "patch",
       "packageName": "@microsoft/rush"
     }
