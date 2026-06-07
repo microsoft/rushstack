@@ -36,6 +36,25 @@ import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { initializeDotEnv } from '../logic/dotenv';
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
+const RUSH_PNPM_RECURSIVE_DEFAULT_COMMANDS: Set<string> = new Set(['outdated', 'why']);
+
+function _hasRecursiveFlag(pnpmArgs: string[]): boolean {
+  return pnpmArgs.some((arg) => arg === '-r' || arg === '--recursive' || arg.startsWith('--recursive='));
+}
+
+function _hasGlobalFlag(pnpmArgs: string[]): boolean {
+  return pnpmArgs.some((arg) => arg === '-g' || arg === '--global' || arg.startsWith('--global='));
+}
+
+function _addDefaultRecursiveFlagIfNeeded(commandName: string, pnpmArgs: string[]): void {
+  if (
+    RUSH_PNPM_RECURSIVE_DEFAULT_COMMANDS.has(commandName) &&
+    !_hasRecursiveFlag(pnpmArgs) &&
+    !_hasGlobalFlag(pnpmArgs)
+  ) {
+    pnpmArgs.splice(1, 0, '--recursive');
+  }
+}
 
 /**
  * Options for RushPnpmCommandLineParser
@@ -253,6 +272,7 @@ export class RushPnpmCommandLineParser {
       }
 
       this._commandName = commandName;
+      _addDefaultRecursiveFlagIfNeeded(commandName, pnpmArgs);
 
       // Warn about commands known not to work
       /* eslint-disable no-fallthrough */
