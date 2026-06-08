@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "No-op change to trigger changeset for rush publish for package-deps-hash changes.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
