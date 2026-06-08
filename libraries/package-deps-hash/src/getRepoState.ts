@@ -275,9 +275,6 @@ const repoRootCache: Map<string, string> = new Map();
 
 // Strip GIT_DIR/GIT_WORK_TREE: git hooks in linked worktrees set GIT_DIR to the per-worktree metadata dir, causing rev-parse --show-toplevel to return CWD instead of the worktree root.
 function getCleanGitEnvironment(): NodeJS.ProcessEnv {
-  const env: NodeJS.ProcessEnv = { ...process.env };
-  delete env.GIT_DIR;
-  delete env.GIT_WORK_TREE;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { GIT_DIR, GIT_WORK_TREE, ...trimmedEnv } = process.env;
   return trimmedEnv;
