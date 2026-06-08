@@ -25,7 +25,7 @@ describe(ChangeFile.name, () => {
       {
         packageName: 'a',
         changes: [],
-        email: 'fake@microsoft.com'
+        email: 'fake@example.com'
       },
       rushConfiguration
     );
