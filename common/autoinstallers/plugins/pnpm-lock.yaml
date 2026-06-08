@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@rushstack/rush-published-versions-json-plugin':
-        specifier: 0.1.10
-        version: 0.1.10
+        specifier: 0.1.11
+        version: 0.1.11
 
 packages:
 
@@ -56,8 +56,8 @@ packages:
       '@types/node':
         optional: true
 
-  '@rushstack/rush-published-versions-json-plugin@0.1.10':
-    resolution: {integrity: sha512-xULrbFQXlHlVv4KXigqdk8Up74WwrzDOki9L360ukMMNYDy20V3dXTwFL08s5dSXiylWOGOrDc54F4USPNFizw==}
+  '@rushstack/rush-published-versions-json-plugin@0.1.11':
+    resolution: {integrity: sha512-tLxpZCSUbwfmR3uzLeKT+KPB26PSbAuv+cCCj6qhC04AyZcxFZLsHcIxhOGiF6fIEye5H9Y4ToAp+PCQdSmw6Q==}
 
   '@rushstack/rush-sdk@5.175.1':
     resolution: {integrity: sha512-xdQezHpM/1mJ5SvLpgXCwM6OJqAr9ecoRzQHWjbS3WodC72FfZsAzSNusUazn5qcWFiC5UvaBvBhJAiLJBbvmQ==}
@@ -205,7 +205,7 @@ snapshots:
 
   '@rushstack/problem-matcher@0.2.1': {}
 
-  '@rushstack/rush-published-versions-json-plugin@0.1.10':
+  '@rushstack/rush-published-versions-json-plugin@0.1.11':
     dependencies:
       '@rushstack/node-core-library': 5.23.1
       '@rushstack/rush-sdk': 5.175.1
