@@ -278,7 +278,9 @@ function getCleanGitEnvironment(): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = { ...process.env };
   delete env.GIT_DIR;
   delete env.GIT_WORK_TREE;
-  return env;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { GIT_DIR, GIT_WORK_TREE, ...trimmedEnv } = process.env;
+  return trimmedEnv;
 }
 
 /**
