@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'node:path';
+import type { GitRepoInfo } from 'git-repo-info';
 
 import { ChangeFile } from '../ChangeFile';
 import { RushConfiguration } from '../RushConfiguration';
@@ -14,42 +14,27 @@ describe(ChangeFile.name, () => {
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
     // Pin the branch name so the generated filename is deterministic.
-    const getGitInfoSpy: jest.SpyInstance = jest
-      .spyOn(Git.prototype, 'getGitInfo')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .mockReturnValue({ branch: 'my-branch' } as any);
+    jest.spyOn(Git.prototype, 'getGitInfo').mockReturnValue({ branch: 'my-branch' } as Readonly<GitRepoInfo>);
 
     // Pin the clock to 2017-05-01 20:20:30 UTC so the timestamp is deterministic.
-    const fixedDate: Date = new Date('2017-05-01T20:20:30.000Z');
-    const dateSpy: jest.SpyInstance = jest
-      .spyOn(global, 'Date')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .mockImplementation(() => fixedDate as any);
+    jest.useFakeTimers({
+      now: new Date('2017-05-01T20:20:30.000Z').getTime()
+    });
 
-    try {
-      const changeFile: ChangeFile = new ChangeFile(
-        {
-          packageName: 'a',
-          changes: [],
-          email: 'fake@microsoft.com'
-        },
-        rushConfiguration
-      );
+    const changeFile: ChangeFile = new ChangeFile(
+      {
+        packageName: 'a',
+        changes: [],
+        email: 'fake@microsoft.com'
+      },
+      rushConfiguration
+    );
 
-      const generatedPath: string = changeFile.generatePath();
-      const filename: string = path.basename(generatedPath);
-
-      // The seconds must be present and the filename must be fully dash-separated
-      // (no leftover colons from the time portion).
-      // Check toContain on the forward-slash-normalised path so it works on Windows too.
-      expect(generatedPath.replace(/\\/g, '/')).toContain('my-branch_2017-05-01-20-20-30.json');
-      // Only check the filename for colons, not the full path: on Windows the path
-      // includes a drive letter (e.g. "D:\...") which legitimately contains a colon.
-      expect(filename).not.toContain(':');
-    } finally {
-      dateSpy.mockRestore();
-      getGitInfoSpy.mockRestore();
-    }
+    const generatedPath: string = changeFile.generatePath();
+    // The seconds must be present and the filename must be fully dash-separated
+    // (no leftover colons from the time portion).
+    // Check toContain on the forward-slash-normalised path so it works on Windows too.
+    expect(generatedPath.replace(/\\/g, '/').endsWith('my-branch_2017-05-01-20-20-30.json')).toBe(true);
   });
 
   it('can add a change', () => {
