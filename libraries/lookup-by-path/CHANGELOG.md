@@ -1,6 +1,11 @@
 # Change Log - @rushstack/lookup-by-path
 
-This log was last generated on Mon, 20 Apr 2026 23:31:13 GMT and should not be manually modified.
+This log was last generated on Mon, 08 Jun 2026 15:15:50 GMT and should not be manually modified.
+
+## 0.10.7
+Mon, 08 Jun 2026 15:15:50 GMT
+
+_Version update only_
 
 ## 0.10.6
 Mon, 20 Apr 2026 23:31:13 GMT

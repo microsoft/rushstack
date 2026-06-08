@@ -1,6 +1,11 @@
 # Change Log - @rushstack/playwright-browser-tunnel
 
-This log was last generated on Sat, 25 Apr 2026 00:15:59 GMT and should not be manually modified.
+This log was last generated on Mon, 08 Jun 2026 15:15:50 GMT and should not be manually modified.
+
+## 0.3.21
+Mon, 08 Jun 2026 15:15:50 GMT
+
+_Version update only_
 
 ## 0.3.20
 Sat, 25 Apr 2026 00:15:59 GMT

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Mon, 25 May 2026 15:14:31 GMT and should not be manually modified.
+This log was last generated on Mon, 08 Jun 2026 15:15:49 GMT and should not be manually modified.
+
+## 1.6.0
+Mon, 08 Jun 2026 15:15:49 GMT
+
+### Minor changes
+
+- Add `--port` flag to pass a specific dev server port through to the Storybook CLI in serve mode
 
 ## 1.5.0
 Mon, 25 May 2026 15:14:31 GMT
