@@ -586,13 +586,21 @@ export class SassProcessor {
    * @returns The canonical URL of the target file, or null if it does not resolve
    */
   private async _canonicalizeHeftInnerAsync(url: string, context: CanonicalizeContext): AsyncResolution {
-    if (url.endsWith('.sass') || url.endsWith('.scss')) {
+    if (url.endsWith('.sass') || url.endsWith('.scss') || url.endsWith('.css')) {
       // Extension is already present, so only try the exact URL or the corresponding partial
       return await this._canonicalizeFileAsync(url, context);
     }
 
-    // Spec says prefer .sass, but we don't use that extension
-    for (const candidate of [`${url}.scss`, `${url}.sass`, `${url}/index.scss`, `${url}/index.sass`]) {
+    // Spec says prefer .sass, but we don't use that extension.
+    // Plain `.css` is tried last, matching dart-sass's resolution order.
+    for (const candidate of [
+      `${url}.scss`,
+      `${url}.sass`,
+      `${url}.css`,
+      `${url}/index.scss`,
+      `${url}/index.sass`,
+      `${url}/index.css`
+    ]) {
       const result: SyncResolution = await this._canonicalizeFileAsync(candidate, context);
       if (result) {
         return result;
