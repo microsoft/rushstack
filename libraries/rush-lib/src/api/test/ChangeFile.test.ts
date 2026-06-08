@@ -20,10 +20,11 @@ describe(ChangeFile.name, () => {
       .mockReturnValue({ branch: 'my-branch' } as any);
 
     // Pin the clock to 2017-05-01 20:20:30 UTC so the timestamp is deterministic.
-    // Use Jest fake timers so new Date() is intercepted at the engine level, which is
-    // more reliable than spying on the Date constructor (the spy approach is fragile on
-    // Windows with Node.js v24 because the V8 Date fast-path can bypass the spy).
-    jest.useFakeTimers().setSystemTime(new Date('2017-05-01T20:20:30.000Z'));
+    const fixedDate: Date = new Date('2017-05-01T20:20:30.000Z');
+    const dateSpy: jest.SpyInstance = jest
+      .spyOn(global, 'Date')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .mockImplementation(() => fixedDate as any);
 
     try {
       const changeFile: ChangeFile = new ChangeFile(
@@ -46,7 +47,7 @@ describe(ChangeFile.name, () => {
       // includes a drive letter (e.g. "D:\...") which legitimately contains a colon.
       expect(filename).not.toContain(':');
     } finally {
-      jest.useRealTimers();
+      dateSpy.mockRestore();
       getGitInfoSpy.mockRestore();
     }
   });
