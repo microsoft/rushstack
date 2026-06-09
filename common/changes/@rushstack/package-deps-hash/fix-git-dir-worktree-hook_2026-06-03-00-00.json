@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Fix build cache failures when running inside a git linked worktree via a pre-commit hook, caused by GIT_DIR being set to the per-worktree metadata directory",
+      "comment": "Strip GIT_DIR and GIT_WORK_TREE Node env variables to fix issues with miscalculating the git repo root when working in a linked worktree",
       "type": "patch",
       "packageName": "@rushstack/package-deps-hash"
     }

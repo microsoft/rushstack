@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "No-op change to trigger changeset for rush publish for package-deps-hash changes.",
+      "comment": "Fix build cache failures when running inside a git linked worktree via a pre-commit hook, caused by GIT_DIR being set to the per-worktree metadata directory",
       "type": "none"
     }
   ],
