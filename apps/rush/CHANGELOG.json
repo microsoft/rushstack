@@ -2,6 +2,40 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.176.0",
+      "tag": "@microsoft/rush_v5.176.0",
+      "date": "Tue, 09 Jun 2026 02:02:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Bump the `ws` dependency to `~8.20.0`."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add support for pnpm 11's `allowBuilds` field in `pnpm-workspace.yaml`. Rush now correctly handles the pnpm 11 security model where build scripts must be explicitly approved. The new `globalAllowBuilds` field in `pnpm-config.json` replaces the deprecated `globalOnlyBuiltDependencies` and `globalNeverBuiltDependencies` fields for pnpm 11+. The `rush-pnpm approve-builds` command is also updated to work correctly with pnpm 11."
+          },
+          {
+            "comment": "Include seconds in the generated change file name so that running `rush change` more than once in the same minute no longer silently overwrites the previously generated change file."
+          },
+          {
+            "comment": "Default `rush-pnpm outdated` and `rush-pnpm why` to recursive workspace queries."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix a regression where Rush change-detection treated any `pnpm-config.json` containing comments as unparseable, causing every project to be flagged as impacted."
+          },
+          {
+            "comment": "Route the \"Lockfile was created or deleted\" warning to stderr so that machine-readable output (e.g. `rush list --json`) remains parseable when the lockfile was added or removed in the diff range."
+          },
+          {
+            "comment": "Fix `rush update` not syncing `pnpm-lock.yaml` when a workspace dependency moves from `dependencies` to `devDependencies`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.175.1",
       "tag": "@microsoft/rush_v5.175.1",
       "date": "Mon, 20 Apr 2026 23:31:34 GMT",
