@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Mon, 08 Jun 2026 15:15:50 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Jun 2026 00:15:42 GMT and should not be manually modified.
+
+## 2.0.8
+Wed, 10 Jun 2026 00:15:42 GMT
+
+### Patches
+
+- Fix an issue where the `--test-path-pattern` parameter was ignored, causing all tests to run. In Jest 30 the `Config.Argv` field was renamed from `testPathPattern` to `testPathPatterns`.
 
 ## 2.0.7
 Mon, 08 Jun 2026 15:15:50 GMT
