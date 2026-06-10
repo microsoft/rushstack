@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix allPreferredVersions and allowedAlternativeVersions missing in subspace pnpmfileSettings.json",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

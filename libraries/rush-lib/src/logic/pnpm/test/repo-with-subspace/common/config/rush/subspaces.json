@@ -1,0 +1,10 @@
+/**
+ * This configuration file manages the experimental "subspaces" feature for Rush,
+ * which allows multiple PNPM lockfiles to be used in a single Rush workspace.
+ * For full documentation, please see https://rushjs.io
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/subspaces.schema.json",
+  "subspacesEnabled": true,
+  "subspaceNames": ["default"]
+}
