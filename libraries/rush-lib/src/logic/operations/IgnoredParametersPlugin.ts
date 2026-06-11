@@ -20,20 +20,22 @@ export const RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR: 'RUSHSTACK_CLI_IGNOR
  */
 export class IgnoredParametersPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.createEnvironmentForOperation.tap(
-      PLUGIN_NAME,
-      (env: IEnvironment, record: IOperationExecutionResult) => {
-        const { settings } = record.operation;
+    hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph) => {
+      graph.hooks.createEnvironmentForOperation.tap(
+        PLUGIN_NAME,
+        (env: IEnvironment, record: IOperationExecutionResult) => {
+          const { settings } = record.operation;
 
-        // If there are parameter names to ignore, set the environment variable
-        if (settings?.parameterNamesToIgnore && settings.parameterNamesToIgnore.length > 0) {
-          env[RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR] = JSON.stringify(
-            settings.parameterNamesToIgnore
-          );
+          // If there are parameter names to ignore, set the environment variable
+          if (settings?.parameterNamesToIgnore && settings.parameterNamesToIgnore.length > 0) {
+            env[RUSHSTACK_CLI_IGNORED_PARAMETER_NAMES_ENV_VAR] = JSON.stringify(
+              settings.parameterNamesToIgnore
+            );
+          }
+
+          return env;
         }
-
-        return env;
-      }
-    );
+      );
+    });
   }
 }

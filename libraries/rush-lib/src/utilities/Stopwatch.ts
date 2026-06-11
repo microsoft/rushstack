@@ -63,8 +63,8 @@ export class Stopwatch implements IStopwatchResult {
   /**
    * Static helper function which creates a stopwatch which is immediately started
    */
-  public static start(): Stopwatch {
-    return new Stopwatch().start();
+  public static start(startTimeOverride?: number): Stopwatch {
+    return new Stopwatch().start(startTimeOverride);
   }
 
   public get state(): StopwatchState {
@@ -75,11 +75,11 @@ export class Stopwatch implements IStopwatchResult {
    * Starts the stopwatch. Note that if end() has been called,
    * reset() should be called before calling start() again.
    */
-  public start(): Stopwatch {
+  public start(startTimeOverride?: number): Stopwatch {
     if (this._startTime !== undefined) {
       throw new Error('Call reset() before starting the Stopwatch');
     }
-    this._startTime = this._getTime();
+    this._startTime = startTimeOverride ?? this._getTime();
     this._endTime = undefined;
     this._state = StopwatchState.Started;
     return this;
