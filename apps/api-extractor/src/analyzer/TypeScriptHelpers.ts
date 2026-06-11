@@ -76,6 +76,18 @@ export class TypeScriptHelpers {
   }
 
   /**
+   * Returns true if the symbol represents an entire module (i.e. its declaration is a source file),
+   * as opposed to a declaration appearing within a module.
+   */
+  public static isExternalModuleSymbol(symbol: ts.Symbol): boolean {
+    return (
+      !!(symbol.flags & ts.SymbolFlags.ValueModule) &&
+      symbol.valueDeclaration !== undefined &&
+      ts.isSourceFile(symbol.valueDeclaration)
+    );
+  }
+
+  /**
    * Returns true if the specified symbol is an ambient declaration.
    */
   public static isAmbient(symbol: ts.Symbol, typeChecker: ts.TypeChecker): boolean {

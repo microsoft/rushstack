@@ -71,14 +71,6 @@ export class DeclarationReferenceGenerator {
     }
   }
 
-  private static _isExternalModuleSymbol(symbol: ts.Symbol): boolean {
-    return (
-      !!(symbol.flags & ts.SymbolFlags.ValueModule) &&
-      symbol.valueDeclaration !== undefined &&
-      ts.isSourceFile(symbol.valueDeclaration)
-    );
-  }
-
   private static _isSameSymbol(left: ts.Symbol | undefined, right: ts.Symbol): boolean {
     return (
       left === right ||
@@ -125,7 +117,7 @@ export class DeclarationReferenceGenerator {
     // If its parent symbol is not a source file, then use either Exports or Members. If the parent symbol
     // is a source file, but it wasn't exported from the package entry point (in the check above), then the
     // symbol is a local, so fall through below.
-    if (parent && !DeclarationReferenceGenerator._isExternalModuleSymbol(parent)) {
+    if (parent && !TypeScriptHelpers.isExternalModuleSymbol(parent)) {
       if (
         parent.members &&
         DeclarationReferenceGenerator._isSameSymbol(parent.members.get(symbol.escapedName), symbol)
@@ -214,7 +206,7 @@ export class DeclarationReferenceGenerator {
       }
     }
 
-    if (DeclarationReferenceGenerator._isExternalModuleSymbol(followedSymbol)) {
+    if (TypeScriptHelpers.isExternalModuleSymbol(followedSymbol)) {
       if (!includeModuleSymbols) {
         return undefined;
       }
