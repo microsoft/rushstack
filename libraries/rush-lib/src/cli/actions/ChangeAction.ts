@@ -4,7 +4,6 @@
 import * as path from 'node:path';
 import * as child_process from 'node:child_process';
 
-
 import type {
   CommandLineFlagParameter,
   CommandLineStringParameter,
@@ -30,6 +29,7 @@ import {
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { Git } from '../../logic/Git';
 import { RushConstants } from '../../logic/RushConstants';
+import * as PolicyValidator from '../../logic/policy/PolicyValidator';
 
 const BULK_LONG_NAME: string = '--bulk';
 const BULK_MESSAGE_LONG_NAME: string = '--message';
@@ -171,6 +171,15 @@ export class ChangeAction extends BaseRushAction {
   }
 
   public async runAsync(): Promise<void> {
+    await PolicyValidator.validatePolicyAsync(
+      this.rushConfiguration,
+      this.rushConfiguration.defaultSubspace,
+      undefined,
+      {
+        allowShrinkwrapUpdates: true
+      }
+    );
+
     if (this._verifyAllParameter.value) {
       const incompatibleParameters: (
         | CommandLineFlagParameter
@@ -319,10 +328,7 @@ export class ChangeAction extends BaseRushAction {
         this.terminal,
         await this._getChangeFilesSinceBaseBranchAsync()
       );
-      changeFileData = await this._promptForChangeFileDataAsync(
-        sortedProjectList,
-        existingChangeComments
-      );
+      changeFileData = await this._promptForChangeFileDataAsync(sortedProjectList, existingChangeComments);
 
       if (this._isEmailRequired(changeFileData)) {
         const email: string = this._changeEmailParameter.value
@@ -592,9 +598,7 @@ export class ChangeAction extends BaseRushAction {
     }
   }
 
-  private async _promptForCommentsAsync(
-    packageName: string
-  ): Promise<IChangeInfo | undefined> {
+  private async _promptForCommentsAsync(packageName: string): Promise<IChangeInfo | undefined> {
     const bumpOptions: { [type: string]: string } = this._getBumpOptions(packageName);
     const { default: input } = await import('@inquirer/input');
     const comment: string = await input({ message: `Describe changes, or ENTER if no changes:` });
@@ -680,10 +684,7 @@ export class ChangeAction extends BaseRushAction {
    * or will ask for it if it is not found or the Git config is wrong.
    */
   private async _detectOrAskForEmailAsync(): Promise<string> {
-    return (
-      (await this._detectAndConfirmEmailAsync()) ||
-      (await this._promptForEmailAsync())
-    );
+    return (await this._detectAndConfirmEmailAsync()) || (await this._promptForEmailAsync());
   }
 
   private _detectEmail(): string | undefined {
@@ -780,9 +781,7 @@ export class ChangeAction extends BaseRushAction {
 
     const fileExists: boolean = FileSystem.exists(filePath);
     const shouldWrite: boolean =
-      !fileExists ||
-      overwrite ||
-      (interactiveMode ? await this._promptForOverwriteAsync(filePath) : false);
+      !fileExists || overwrite || (interactiveMode ? await this._promptForOverwriteAsync(filePath) : false);
 
     if (!interactiveMode && fileExists && !overwrite) {
       throw new Error(`Changefile ${filePath} already exists`);
@@ -794,9 +793,7 @@ export class ChangeAction extends BaseRushAction {
     }
   }
 
-  private async _promptForOverwriteAsync(
-    filePath: string
-  ): Promise<boolean> {
+  private async _promptForOverwriteAsync(filePath: string): Promise<boolean> {
     const { default: confirm } = await import('@inquirer/confirm');
     const overwrite: boolean = await confirm({
       message: `Overwrite ${filePath}?`
