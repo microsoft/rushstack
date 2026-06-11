@@ -298,47 +298,81 @@ export class InstallHelpers {
       node: process.versions.node
     });
 
+    if (
+      (await packageManagerMarker.isValidAsync()) &&
+      !InstallHelpers._doesPackageManagerInstallLockFileExist(rushUserFolder, packageManagerAndVersion)
+    ) {
+      logIfConsoleOutputIsNotRestricted(
+        `Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`
+      );
+      InstallHelpers._ensureLocalPackageManagerSymlink(
+        rushConfiguration,
+        packageManager,
+        packageManagerToolFolder,
+        logIfConsoleOutputIsNotRestricted
+      );
+      return;
+    }
+
     logIfConsoleOutputIsNotRestricted(`Trying to acquire lock for ${packageManagerAndVersion}`);
 
     const lock: LockFile = await LockFile.acquireAsync(rushUserFolder, packageManagerAndVersion);
 
     logIfConsoleOutputIsNotRestricted(`Acquired lock for ${packageManagerAndVersion}`);
 
-    if (!(await packageManagerMarker.isValidAsync()) || lock.dirtyWhenAcquired) {
-      logIfConsoleOutputIsNotRestricted(
-        Colorize.bold(`Installing ${packageManager} version ${packageManagerVersion}\n`)
-      );
+    try {
+      if (!(await packageManagerMarker.isValidAsync()) || lock.dirtyWhenAcquired) {
+        logIfConsoleOutputIsNotRestricted(
+          Colorize.bold(`Installing ${packageManager} version ${packageManagerVersion}\n`)
+        );
 
-      // note that this will remove the last-install flag from the directory
-      await Utilities.installPackageInDirectoryAsync({
-        directory: packageManagerToolFolder,
-        packageName: packageManager,
-        version: rushConfiguration.packageManagerToolVersion,
-        tempPackageTitle: `${packageManager}-local-install`,
-        maxInstallAttempts: maxInstallAttempts,
-        // This is using a local configuration to install a package in a shared global location.
-        // Generally that's a bad practice, but in this case if we can successfully install
-        // the package at all, we can reasonably assume it's good for all the repositories.
-        // In particular, we'll assume that two different NPM registries cannot have two
-        // different implementations of the same version of the same package.
-        // This was needed for: https://github.com/microsoft/rushstack/issues/691
-        commonRushConfigFolder: rushConfiguration.commonRushConfigFolder,
-        // Only filter npm-incompatible properties when the repo uses pnpm or yarn.
-        // If the repo uses npm, the .npmrc is already configured for npm, so don't filter.
-        filterNpmIncompatibleProperties: rushConfiguration.packageManager !== 'npm'
-      });
+        // note that this will remove the last-install flag from the directory
+        await Utilities.installPackageInDirectoryAsync({
+          directory: packageManagerToolFolder,
+          packageName: packageManager,
+          version: rushConfiguration.packageManagerToolVersion,
+          tempPackageTitle: `${packageManager}-local-install`,
+          maxInstallAttempts: maxInstallAttempts,
+          // This is using a local configuration to install a package in a shared global location.
+          // Generally that's a bad practice, but in this case if we can successfully install
+          // the package at all, we can reasonably assume it's good for all the repositories.
+          // In particular, we'll assume that two different NPM registries cannot have two
+          // different implementations of the same version of the same package.
+          // This was needed for: https://github.com/microsoft/rushstack/issues/691
+          commonRushConfigFolder: rushConfiguration.commonRushConfigFolder,
+          // Only filter npm-incompatible properties when the repo uses pnpm or yarn.
+          // If the repo uses npm, the .npmrc is already configured for npm, so don't filter.
+          filterNpmIncompatibleProperties: rushConfiguration.packageManager !== 'npm'
+        });
 
-      logIfConsoleOutputIsNotRestricted(
-        `Successfully installed ${packageManager} version ${packageManagerVersion}`
+        logIfConsoleOutputIsNotRestricted(
+          `Successfully installed ${packageManager} version ${packageManagerVersion}`
+        );
+      } else {
+        logIfConsoleOutputIsNotRestricted(
+          `Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`
+        );
+      }
+
+      await packageManagerMarker.createAsync();
+
+      InstallHelpers._ensureLocalPackageManagerSymlink(
+        rushConfiguration,
+        packageManager,
+        packageManagerToolFolder,
+        logIfConsoleOutputIsNotRestricted
       );
-    } else {
-      logIfConsoleOutputIsNotRestricted(
-        `Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`
-      );
+    } finally {
+      lock.release();
     }
+  }
 
-    await packageManagerMarker.createAsync();
-
+  private static _ensureLocalPackageManagerSymlink(
+    rushConfiguration: RushConfiguration,
+    packageManager: PackageManagerName,
+    packageManagerToolFolder: string,
+    logIfConsoleOutputIsNotRestricted: (message?: string) => void
+  ): void {
     // Example: "C:\MyRepo\common\temp"
     FileSystem.ensureFolder(rushConfiguration.commonTempFolder);
 
@@ -365,8 +399,23 @@ export class InstallHelpers {
       linkTargetPath: packageManagerToolFolder,
       newLinkPath: localPackageManagerToolFolder
     });
+  }
 
-    lock.release();
+  private static _doesPackageManagerInstallLockFileExist(
+    rushUserFolder: string,
+    packageManagerAndVersion: string
+  ): boolean {
+    for (const itemName of FileSystem.readFolderItemNames(rushUserFolder)) {
+      if (itemName === `${packageManagerAndVersion}.lock`) {
+        return true;
+      }
+
+      if (itemName.startsWith(`${packageManagerAndVersion}#`) && itemName.endsWith('.lock')) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   // Helper for getPackageManagerEnvironment

@@ -189,6 +189,10 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    */
   alwaysFullInstall?: boolean;
   /**
+   * {@inheritDoc PnpmOptionsConfiguration.enableGlobalVirtualStore}
+   */
+  enableGlobalVirtualStore?: boolean;
+  /**
    * {@inheritDoc PnpmOptionsConfiguration.pnpmLockfilePolicies}
    */
   pnpmLockfilePolicies?: IPnpmLockfilePolicies;
@@ -531,6 +535,26 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public readonly alwaysFullInstall: boolean | undefined;
 
   /**
+   * When true, Rush will configure PNPM to use a global virtual store for workspace installs.
+   *
+   * @remarks
+   * This causes PNPM to place the virtual store under the configured PNPM store instead of under
+   * `node_modules/.pnpm` in the workspace.  This can significantly reduce setup and cleanup costs
+   * when multiple Git worktrees share the same PNPM store.
+   *
+   * This option only affects workspace installs. It requires PNPM 10.12.1 or newer and a shared
+   * PNPM store, configured using either `pnpmStore: "global"` or the `RUSH_PNPM_STORE_PATH`
+   * environment variable. If `RUSH_PNPM_STORE_PATH` is used, it must point outside the Rush repo.
+   * It is not currently compatible with the
+   * `usePnpmSyncForInjectedDependencies` experiment.
+   *
+   * PNPM documentation: https://pnpm.io/settings#enableglobalvirtualstore
+   *
+   * The default value is false.
+   */
+  public readonly enableGlobalVirtualStore: boolean;
+
+  /**
    * The `globalCatalogs` setting provides named catalogs for organizing dependency versions.
    * Each catalog can be referenced using the `catalog:catalogName` protocol in package.json files
    * (e.g., `catalog:react18`). The settings are written to the `catalogs` field of the
@@ -602,6 +626,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.trustPolicyIgnoreAfterMinutes = json.trustPolicyIgnoreAfterMinutes;
     this.alwaysInjectDependenciesFromOtherSubspaces = json.alwaysInjectDependenciesFromOtherSubspaces;
     this.alwaysFullInstall = json.alwaysFullInstall;
+    this.enableGlobalVirtualStore = !!json.enableGlobalVirtualStore;
     this.pnpmLockfilePolicies = json.pnpmLockfilePolicies;
     this.globalCatalogs = json.globalCatalogs;
   }

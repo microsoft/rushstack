@@ -1,6 +1,6 @@
 # Rush Package Manager Integration Tests
 
-This directory contains integration tests for verifying Rush works correctly with different package managers after the tar 7.x upgrade.
+This directory contains integration tests for verifying Rush works correctly with different package managers.
 
 ## Background
 
@@ -9,6 +9,8 @@ Rush's npm and yarn modes use temp project tarballs (stored in `common/temp/proj
 2. **Extract** tarballs during the linking process (`NpmLinkManager._linkProjectAsync`)
 
 These tests ensure the tar 7.x upgrade works correctly with these workflows.
+
+The PNPM test additionally verifies Rush's workspace install integration with PNPM's global virtual store.
 
 ## Tests
 
@@ -29,6 +31,14 @@ Tests Rush yarn mode by:
 - Running `rush update`
 - Running `rush install`
 - Running `rush build` (verifies everything works end-to-end)
+
+### testPnpmGlobalVirtualStore.ts
+Tests Rush pnpm workspace mode with global virtual store by:
+- Initializing a Rush repo with `pnpmVersion` configured
+- Enabling `useWorkspaces` and `enableGlobalVirtualStore`
+- Running `rush update`
+- Running `rush install`
+- Verifying the generated workspace file, shared PNPM store, dependency links, and build output
 
 ## Prerequisites
 
@@ -62,6 +72,7 @@ These integration tests verify:
 - ✓ Tarballs are extracted correctly during `rush install`
 - ✓ File permissions are preserved (tar filter function works)
 - ✓ Dependencies are linked properly between projects
+- ✓ PNPM global virtual store is passed through to a real workspace install
 - ✓ The complete workflow (update → install → build) succeeds
 - ✓ Built code executes correctly
 
@@ -70,6 +81,7 @@ These integration tests verify:
 Each test creates a temporary Rush repository in `/tmp/rush-package-manager-test/`:
 - `/tmp/rush-package-manager-test/npm-test-repo/` - npm mode test repository
 - `/tmp/rush-package-manager-test/yarn-test-repo/` - yarn mode test repository
+- `/tmp/rush-package-manager-test/pnpm-global-virtual-store-test-repo/` - pnpm global virtual store test repository
 
 These directories are cleaned up at the start of each test run.
 
@@ -86,6 +98,7 @@ The tests use:
 The tar library is used in:
 - `libraries/rush-lib/src/logic/TempProjectHelper.ts` - Creates tarballs
 - `libraries/rush-lib/src/logic/npm/NpmLinkManager.ts` - Extracts tarballs
+- `libraries/rush-lib/src/logic/installManager/WorkspaceInstallManager.ts` - Generates PNPM workspace files
 
 ## Troubleshooting
 
