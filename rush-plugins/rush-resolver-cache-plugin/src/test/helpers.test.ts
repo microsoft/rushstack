@@ -282,10 +282,11 @@ describe(resolveDependencyKey.name, () => {
   });
 
   it('resolves link: specifier for project context', () => {
+    const specifier: string = 'link:../bar';
     const result: string = resolveDependencyKey(
       lockfileFolder,
       'bar',
-      'link:../bar',
+      specifier,
       makeProjectContext(),
       v9Helpers
     );
@@ -294,10 +295,11 @@ describe(resolveDependencyKey.name, () => {
   });
 
   it('resolves link: specifier for non-project context', () => {
+    const specifier: string = 'link:../bar';
     const result: string = resolveDependencyKey(
       lockfileFolder,
       'bar',
-      'link:../bar',
+      specifier,
       makePackageContext(),
       v9Helpers
     );
@@ -306,10 +308,11 @@ describe(resolveDependencyKey.name, () => {
   });
 
   it('resolves file: specifier', () => {
+    const specifier: string = 'file:../../../rigs/local-node-rig';
     const result: string = resolveDependencyKey(
       lockfileFolder,
       'my-rig',
-      'file:../../../rigs/local-node-rig',
+      specifier,
       makeProjectContext(),
       v9Helpers
     );
@@ -317,12 +320,70 @@ describe(resolveDependencyKey.name, () => {
     expect(result).toContain('/node_modules/my-rig');
   });
 
+  it('resolves file: specifier using canonical dependency key shape', () => {
+    const specifier: string =
+      'file:../../a/b/c/my-local-package-1.0.0.tgz(react-dom@17.0.1(react@17.0.1))(react@17.0.1)';
+    const result: string = resolveDependencyKey(
+      lockfileFolder,
+      'my-local-package',
+      specifier,
+      makeProjectContext(),
+      v9Helpers
+    );
+    const expected: string = getDescriptionFileRootFromKey(
+      lockfileFolder,
+      v9Helpers.buildDependencyKey('my-local-package', specifier),
+      v9Helpers.depPathToFilename,
+      'my-local-package'
+    );
+    expect(result).toBe(expected);
+  });
+
+  it('resolves file: specifier using canonical dependency key shape (v8)', () => {
+    const specifier: string = 'file:../../../rigs/local-node-rig';
+    const result: string = resolveDependencyKey(
+      lockfileFolder,
+      'my-rig',
+      specifier,
+      makeProjectContext(),
+      v8Helpers
+    );
+    const expected: string = getDescriptionFileRootFromKey(
+      lockfileFolder,
+      v8Helpers.buildDependencyKey('my-rig', specifier),
+      v8Helpers.depPathToFilename,
+      'my-rig'
+    );
+    expect(result).toBe(expected);
+  });
+
+  it('uses file: specifier directly when packageKeys already contains it', () => {
+    const specifier: string = 'file:../../../rigs/local-node-rig';
+    const packageKeys: Set<string> = new Set([specifier]);
+    const result: string = resolveDependencyKey(
+      lockfileFolder,
+      'my-rig',
+      specifier,
+      makeProjectContext(),
+      v9Helpers,
+      packageKeys
+    );
+    const expected: string = getDescriptionFileRootFromKey(
+      lockfileFolder,
+      specifier,
+      v9Helpers.depPathToFilename,
+      'my-rig'
+    );
+    expect(result).toBe(expected);
+  });
+
   it('resolves specifier found in packageKeys (v6)', () => {
-    const packageKeys: Set<string> = new Set(['/autoprefixer@9.8.8']);
+    const specifier: string = '/autoprefixer@9.8.8';
+    const packageKeys: Set<string> = new Set([specifier]);
     const result: string = resolveDependencyKey(
       lockfileFolder,
       'autoprefixer',
-      '/autoprefixer@9.8.8',
+      specifier,
       makeProjectContext(),
       v8Helpers,
       packageKeys
@@ -332,11 +393,12 @@ describe(resolveDependencyKey.name, () => {
   });
 
   it('resolves specifier found in packageKeys (v9)', () => {
-    const packageKeys: Set<string> = new Set(['autoprefixer@9.8.8']);
+    const specifier: string = 'autoprefixer@9.8.8';
+    const packageKeys: Set<string> = new Set([specifier]);
     const result: string = resolveDependencyKey(
       lockfileFolder,
       'autoprefixer',
-      'autoprefixer@9.8.8',
+      specifier,
       makeProjectContext(),
       v9Helpers,
       packageKeys
@@ -346,10 +408,11 @@ describe(resolveDependencyKey.name, () => {
   });
 
   it('builds dependency key for plain version specifiers (v9)', () => {
+    const specifier: string = '9.8.8';
     const result: string = resolveDependencyKey(
       lockfileFolder,
       'autoprefixer',
-      '9.8.8',
+      specifier,
       makeProjectContext(),
       v9Helpers
     );
@@ -358,10 +421,11 @@ describe(resolveDependencyKey.name, () => {
   });
 
   it('builds dependency key for plain version specifiers (v8)', () => {
+    const specifier: string = '9.8.8';
     const result: string = resolveDependencyKey(
       lockfileFolder,
       'autoprefixer',
-      '9.8.8',
+      specifier,
       makeProjectContext(),
       v8Helpers
     );
