@@ -597,6 +597,13 @@ export class Executable {
     const { exitCode, signal } = await new Promise<ISignalAndExitCode>(
       (resolve: (result: ISignalAndExitCode) => void, reject: (error: Error) => void) => {
         if (encoding) {
+          // Set the encoding on the streams to ensure proper handling of multi-byte characters.
+          // When encoding is set, Node.js uses StringDecoder internally which properly handles
+          // character boundaries that may be split across chunks.
+          if (encoding !== 'buffer') {
+            childProcess.stdout!.setEncoding(encoding);
+            childProcess.stderr!.setEncoding(encoding);
+          }
           childProcess.stdout!.on('data', (chunk: Buffer | string) => {
             collectedStdout.push(normalizeChunk(chunk));
           });
@@ -667,6 +674,8 @@ export class Executable {
     if (process.stdout === null) {
       throw new InternalError('Child process did not provide stdout');
     }
+    // Set the encoding to ensure proper handling of multi-byte characters
+    process.stdout.setEncoding('utf8');
     const [processInfoByIdMap] = await Promise.all([
       parseProcessListOutputAsync(process.stdout),
       // Don't collect output in the result since we process it directly
