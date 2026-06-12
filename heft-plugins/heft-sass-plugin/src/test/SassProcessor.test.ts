@@ -504,6 +504,31 @@ describe(SassProcessor.name, () => {
     });
   });
 
+  describe('use-plain-css.module.scss (@use of a plain .css file)', () => {
+    it('resolves a plain .css file referenced via @use with an explicit extension', async () => {
+      const { processor, logger } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'use-plain-css.module.scss');
+      // The @use must resolve without "Can't find stylesheet to import."
+      expect(logger.errors).toHaveLength(0);
+      const css: string = getCssOutput('use-plain-css.module.scss');
+      // Rules from the plain .css file should be inlined into the output
+      expect(css).toContain('.token-base');
+      expect(css).toContain('#0078d4');
+      expect(css).toContain('.container');
+    });
+
+    it('resolves a plain .css file referenced via @use without an explicit extension', async () => {
+      const { processor, logger } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'use-plain-css-extensionless.module.scss');
+      // Extensionless loads must fall back to the `.css` candidate, matching dart-sass
+      expect(logger.errors).toHaveLength(0);
+      const css: string = getCssOutput('use-plain-css-extensionless.module.scss');
+      expect(css).toContain('.token-base');
+      expect(css).toContain('#0078d4');
+      expect(css).toContain('.container');
+    });
+  });
+
   describe('global-styles.global.sass (.global.sass non-module file)', () => {
     it('compiles indented Sass syntax to plain CSS for a .global.sass file', async () => {
       const { processor } = createProcessor(terminalProvider);
