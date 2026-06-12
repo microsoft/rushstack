@@ -27,7 +27,8 @@ const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
  *    "allowBuilds": {
  *      "esbuild": true,
  *      "fsevents": false
- *    }
+ *    },
+ *    "enableGlobalVirtualStore": true
  *  }
  */
 interface IPnpmWorkspaceYaml {
@@ -42,6 +43,12 @@ interface IPnpmWorkspaceYaml {
    * (SUPPORTED ONLY IN PNPM 11.0.0 AND NEWER)
    */
   allowBuilds?: Record<string, boolean>;
+  /**
+   * Places the virtual store under the configured PNPM store instead of under the workspace
+   * node_modules folder.
+   * (SUPPORTED ONLY IN PNPM 10.12.1 AND NEWER)
+   */
+  enableGlobalVirtualStore?: boolean;
 }
 
 export class PnpmWorkspaceFile extends BaseWorkspaceFile {
@@ -53,6 +60,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
   private _workspacePackages: Set<string>;
   private _catalogs: Record<string, Record<string, string>> | undefined;
   private _allowBuilds: Record<string, boolean> | undefined;
+  private _enableGlobalVirtualStore: boolean | undefined;
 
   /**
    * The PNPM workspace file is used to specify the location of workspaces relative to the root
@@ -67,6 +75,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     this._workspacePackages = new Set<string>();
     this._catalogs = undefined;
     this._allowBuilds = undefined;
+    this._enableGlobalVirtualStore = undefined;
   }
 
   /**
@@ -84,6 +93,13 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
    */
   public setAllowBuilds(allowBuilds: Record<string, boolean> | undefined): void {
     this._allowBuilds = allowBuilds;
+  }
+
+  /**
+   * Sets whether PNPM should use the global virtual store for this workspace.
+   */
+  public setEnableGlobalVirtualStore(enableGlobalVirtualStore: boolean | undefined): void {
+    this._enableGlobalVirtualStore = enableGlobalVirtualStore;
   }
 
   /** @override */
@@ -113,6 +129,10 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
 
     if (this._allowBuilds && Object.keys(this._allowBuilds).length > 0) {
       workspaceYaml.allowBuilds = this._allowBuilds;
+    }
+
+    if (this._enableGlobalVirtualStore) {
+      workspaceYaml.enableGlobalVirtualStore = true;
     }
 
     return yamlModule.dump(workspaceYaml, PNPM_SHRINKWRAP_YAML_FORMAT);

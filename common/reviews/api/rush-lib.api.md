@@ -752,6 +752,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     alwaysFullInstall?: boolean;
     alwaysInjectDependenciesFromOtherSubspaces?: boolean;
     autoInstallPeers?: boolean;
+    enableGlobalVirtualStore?: boolean;
     globalAllowBuilds?: Record<string, boolean>;
     globalAllowedDeprecatedVersions?: Record<string, string>;
     globalCatalogs?: Record<string, Record<string, string>>;
@@ -1178,6 +1179,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly alwaysFullInstall: boolean | undefined;
     readonly alwaysInjectDependenciesFromOtherSubspaces: boolean | undefined;
     readonly autoInstallPeers: boolean | undefined;
+    readonly enableGlobalVirtualStore: boolean;
     readonly globalAllowBuilds: Record<string, boolean> | undefined;
     readonly globalAllowedDeprecatedVersions: Record<string, string> | undefined;
     readonly globalCatalogs: Record<string, Record<string, string>> | undefined;
