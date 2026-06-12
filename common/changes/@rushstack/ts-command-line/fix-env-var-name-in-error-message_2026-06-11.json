@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix EnvironmentVariableParser error messages to report the environment variable name instead of its value",
+      "type": "patch",
+      "packageName": "@rushstack/ts-command-line"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line",
+  "email": "sshaurya914@gmail.com"
+}
