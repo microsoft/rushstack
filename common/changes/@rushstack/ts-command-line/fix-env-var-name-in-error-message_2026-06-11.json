@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Fix EnvironmentVariableParser error messages to report the environment variable name instead of its value",
+      "comment": "Fix an issue where the error thrown for an unparseable environment variable mentions the value instead of the name.",
       "type": "patch",
       "packageName": "@rushstack/ts-command-line"
     }
