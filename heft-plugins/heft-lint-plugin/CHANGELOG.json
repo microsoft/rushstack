@@ -2,6 +2,24 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "1.2.19",
+      "tag": "@rushstack/heft-lint-plugin_v1.2.19",
+      "date": "Sat, 13 Jun 2026 00:16:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `1.3.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `1.2.18` to `1.2.19`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.18",
       "tag": "@rushstack/heft-lint-plugin_v1.2.18",
       "date": "Mon, 08 Jun 2026 15:15:50 GMT",

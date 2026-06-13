@@ -1,6 +1,11 @@
 # Change Log - @rushstack/zipsync
 
-This log was last generated on Mon, 08 Jun 2026 15:15:50 GMT and should not be manually modified.
+This log was last generated on Sat, 13 Jun 2026 00:16:19 GMT and should not be manually modified.
+
+## 0.3.19
+Sat, 13 Jun 2026 00:16:19 GMT
+
+_Version update only_
 
 ## 0.3.18
 Mon, 08 Jun 2026 15:15:50 GMT

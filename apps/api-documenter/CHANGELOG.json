@@ -2,6 +2,21 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.30.7",
+      "tag": "@microsoft/api-documenter_v7.30.7",
+      "date": "Sat, 13 Jun 2026 00:16:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.19`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.30.6",
       "tag": "@microsoft/api-documenter_v7.30.6",
       "date": "Mon, 08 Jun 2026 15:15:49 GMT",
