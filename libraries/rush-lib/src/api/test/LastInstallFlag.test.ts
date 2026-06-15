@@ -89,7 +89,7 @@ describe(LastInstallFlag.name, () => {
     await flag1.createAsync();
     await expect(async () => {
       await flag2.checkValidAndReportStoreIssuesAsync({ rushVerb: 'install' });
-    }).rejects.toThrowError(/PNPM store path/);
+    }).rejects.toThrow(/PNPM store path/);
   });
 
   it("doesn't throw an error if conditions for error aren't met", async () => {

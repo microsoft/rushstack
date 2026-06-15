@@ -1,0 +1,27 @@
+{
+  "pnpmVersion": "9.15.0",
+  "rushVersion": "1.0.5",
+
+  "projects": [
+    {
+      "packageName": "a",
+      "projectFolder": "a"
+    },
+    {
+      "packageName": "b",
+      "projectFolder": "b"
+    },
+    {
+      "packageName": "c",
+      "projectFolder": "c"
+    },
+    {
+      "packageName": "d",
+      "projectFolder": "d"
+    },
+    {
+      "packageName": "e",
+      "projectFolder": "e"
+    }
+  ]
+}

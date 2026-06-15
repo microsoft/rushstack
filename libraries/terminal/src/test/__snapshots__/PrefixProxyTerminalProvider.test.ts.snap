@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`PrefixProxyTerminalProvider With a dynamic prefix write writes a message with newlines: output 1`] = `
 Object {

@@ -20,7 +20,7 @@
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/heft-jest": "1.0.1",
+    "@types/jest": "30.0.0",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
     "@types/webpack-env": "1.18.8",

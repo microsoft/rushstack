@@ -18,7 +18,8 @@ describe(ChangeManager.name, () => {
 
   /* eslint-disable dot-notation */
   it('can apply changes to the package.json files in the dictionary', async () => {
-    await changeManager.loadAsync(`${__dirname}/multipleChanges`);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/multipleChanges`;
+    await changeManager.loadAsync();
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('2.0.0');
@@ -33,7 +34,8 @@ describe(ChangeManager.name, () => {
   });
 
   it('can update explicit version dependency', async () => {
-    await changeManager.loadAsync(`${__dirname}/explicitVersionChange`);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/explicitVersionChange`;
+    await changeManager.loadAsync();
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.1');
@@ -42,7 +44,8 @@ describe(ChangeManager.name, () => {
   });
 
   it('can update a project using lockStepVersion policy with no nextBump from changefiles', async () => {
-    await changeManager.loadAsync(`${__dirname}/lockstepWithoutNextBump`);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/lockstepWithoutNextBump`;
+    await changeManager.loadAsync();
     changeManager.apply(false);
 
     const policy: LockStepVersionPolicy = rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
@@ -55,7 +58,8 @@ describe(ChangeManager.name, () => {
   });
 
   it('can update explicit cyclic dependency', async () => {
-    await changeManager.loadAsync(`${__dirname}/cyclicDepsExplicit`);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/cyclicDepsExplicit`;
+    await changeManager.loadAsync();
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-explicit-1')!.packageJson.version).toEqual('2.0.0');
@@ -76,7 +80,8 @@ describe(ChangeManager.name, () => {
     const prereleaseName: string = 'alpha.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    await changeManager.loadAsync(`${__dirname}/rootPatchChange`, prereleaseToken);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/rootPatchChange`;
+    await changeManager.loadAsync(prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
@@ -95,7 +100,8 @@ describe(ChangeManager.name, () => {
     const prereleaseName: string = 'beta.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    await changeManager.loadAsync(`${__dirname}/explicitVersionChange`, prereleaseToken);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/explicitVersionChange`;
+    await changeManager.loadAsync(prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0');
@@ -112,7 +118,8 @@ describe(ChangeManager.name, () => {
     const prereleaseName: string = 'beta.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    await changeManager.loadAsync(`${__dirname}/cyclicDeps`, prereleaseToken);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/cyclicDeps`;
+    await changeManager.loadAsync(prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual(
@@ -133,7 +140,8 @@ describe(ChangeManager.name, () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    await changeManager.loadAsync(`${__dirname}/rootPatchChange`, prereleaseToken);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/rootPatchChange`;
+    await changeManager.loadAsync(prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0-' + suffix);
@@ -148,7 +156,8 @@ describe(ChangeManager.name, () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    await changeManager.loadAsync(`${__dirname}/explicitVersionChange`, prereleaseToken);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/explicitVersionChange`;
+    await changeManager.loadAsync(prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0');
@@ -163,7 +172,8 @@ describe(ChangeManager.name, () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    await changeManager.loadAsync(`${__dirname}/cyclicDeps`, prereleaseToken);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/cyclicDeps`;
+    await changeManager.loadAsync(prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual('1.0.0-' + suffix);
@@ -190,7 +200,8 @@ describe(`${ChangeManager.name} (workspace)`, () => {
 
   /* eslint-disable dot-notation */
   it('can apply changes to the package.json files in the dictionary', async () => {
-    await changeManager.loadAsync(`${__dirname}/multipleChanges`);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/multipleChanges`;
+    await changeManager.loadAsync();
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('2.0.0');
@@ -213,7 +224,8 @@ describe(`${ChangeManager.name} (workspace)`, () => {
   });
 
   it('can update explicit version dependency', async () => {
-    await changeManager.loadAsync(`${__dirname}/explicitVersionChange`);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/explicitVersionChange`;
+    await changeManager.loadAsync();
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.1');
@@ -222,7 +234,8 @@ describe(`${ChangeManager.name} (workspace)`, () => {
   });
 
   it('can update explicit cyclic dependency', async () => {
-    await changeManager.loadAsync(`${__dirname}/cyclicDepsExplicit`);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/cyclicDepsExplicit`;
+    await changeManager.loadAsync();
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-explicit-1')!.packageJson.version).toEqual('2.0.0');
@@ -243,7 +256,8 @@ describe(`${ChangeManager.name} (workspace)`, () => {
     const prereleaseName: string = 'alpha.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    await changeManager.loadAsync(`${__dirname}/rootPatchChange`, prereleaseToken);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/rootPatchChange`;
+    await changeManager.loadAsync(prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
@@ -262,7 +276,8 @@ describe(`${ChangeManager.name} (workspace)`, () => {
     const prereleaseName: string = 'beta.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    await changeManager.loadAsync(`${__dirname}/explicitVersionChange`, prereleaseToken);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/explicitVersionChange`;
+    await changeManager.loadAsync(prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0');
@@ -281,7 +296,8 @@ describe(`${ChangeManager.name} (workspace)`, () => {
     const prereleaseName: string = 'beta.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    await changeManager.loadAsync(`${__dirname}/cyclicDeps`, prereleaseToken);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/cyclicDeps`;
+    await changeManager.loadAsync(prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual(
@@ -302,7 +318,8 @@ describe(`${ChangeManager.name} (workspace)`, () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    await changeManager.loadAsync(`${__dirname}/rootPatchChange`, prereleaseToken);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/rootPatchChange`;
+    await changeManager.loadAsync(prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0-' + suffix);
@@ -321,7 +338,8 @@ describe(`${ChangeManager.name} (workspace)`, () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    await changeManager.loadAsync(`${__dirname}/explicitVersionChange`, prereleaseToken);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/explicitVersionChange`;
+    await changeManager.loadAsync(prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0');
@@ -340,7 +358,8 @@ describe(`${ChangeManager.name} (workspace)`, () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    await changeManager.loadAsync(`${__dirname}/cyclicDeps`, prereleaseToken);
+    (rushConfiguration as { changesFolder: string }).changesFolder = `${__dirname}/cyclicDeps`;
+    await changeManager.loadAsync(prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual('1.0.0-' + suffix);

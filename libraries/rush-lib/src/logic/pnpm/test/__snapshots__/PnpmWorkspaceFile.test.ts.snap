@@ -1,4 +1,25 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`PnpmWorkspaceFile allowBuilds functionality generates workspace file with allowBuilds 1`] = `
+"allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+  fsevents: false
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile allowBuilds functionality generates workspace file with allowBuilds and catalogs 1`] = `
+"allowBuilds:
+  esbuild: true
+catalogs:
+  default:
+    react: ^18.0.0
+packages:
+  - projects/app1
+"
+`;
 
 exports[`PnpmWorkspaceFile basic functionality generates workspace file with packages only 1`] = `
 "packages:

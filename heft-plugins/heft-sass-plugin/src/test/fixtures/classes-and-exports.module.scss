@@ -1,0 +1,14 @@
+// A CSS module that exports both class names and ICSS :export values.
+.root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}
+
+:export {
+  themeColor: blue;
+  spacing: 8px;
+}

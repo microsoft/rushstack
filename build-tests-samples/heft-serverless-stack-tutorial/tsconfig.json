@@ -20,7 +20,7 @@
 
     "skipLibCheck": true, // Some of the AWS dependencies have typings issues
 
-    "types": ["heft-jest", "node"],
+    "types": ["jest", "node"],
 
     "module": "commonjs",
     "target": "es2017",

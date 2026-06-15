@@ -21,7 +21,7 @@ export {
   type INormalizeNewlinesTextRewriterOptions,
   NormalizeNewlinesTextRewriter
 } from './NormalizeNewlinesTextRewriter';
-export { DEFAULT_CONSOLE_WIDTH, PrintUtilities } from './PrintUtilities';
+export { DEFAULT_CONSOLE_WIDTH, type IPrintMessageInBoxOptions, PrintUtilities } from './PrintUtilities';
 export { RemoveColorsTextRewriter } from './RemoveColorsTextRewriter';
 export { type ISplitterTransformOptions, SplitterTransform } from './SplitterTransform';
 export { type IStdioLineTransformOptions, StderrLineTransform } from './StdioLineTransform';
@@ -56,3 +56,4 @@ export { NoOpTerminalProvider } from './NoOpTerminalProvider';
 export { TerminalStreamWritable, type ITerminalStreamWritableOptions } from './TerminalStreamWritable';
 export { ProblemCollector, type IProblemCollectorOptions } from './ProblemCollector';
 export type { IProblemCollector } from './IProblemCollector';
+export { TerminalTable, type ITerminalTableOptions, type ITerminalTableChars } from './TerminalTable';

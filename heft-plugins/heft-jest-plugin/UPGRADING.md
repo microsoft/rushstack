@@ -1,5 +1,27 @@
 # Upgrade notes for @rushstack/heft-jest-plugin
 
+### Version 1.3.0 (jest-environment-jsdom 30.3.0)
+
+This release upgrades `jest-environment-jsdom` from 29.5.0 to 30.3.0, which ships with **jsdom 26** instead of jsdom 21. It also upgrades all other Jest packages (`@jest/core`, `jest-config`, etc.) to `~30.3.0`.
+
+The `punycode` injection workaround introduced in a prior release (which redirected `jest-environment-jsdom` through a patched wrapper to suppress `DEP0040` deprecation warnings on Node ≥ 22) has been removed. jsdom 26 no longer triggers `DEP0040`.
+
+**Breaking changes from Jest 29 → Jest 30 that may affect your tests:**
+
+- **`window.location` is now immutable.** `Object.defineProperty(window, 'location', { value: ... })` throws a `TypeError` in jsdom 26. Use `window.history.pushState()` or `window.history.replaceState()` to change the URL in tests instead.
+
+- **Deprecated matcher aliases have been removed.** Replace usages before upgrading:
+  - `expect(fn).toBeCalled()` → `expect(fn).toHaveBeenCalled()`
+  - `expect(fn).toBeCalledWith(...)` → `expect(fn).toHaveBeenCalledWith(...)`
+  - `expect(fn).toReturn()` → `expect(fn).toHaveReturned()`
+  - `expect(fn).toThrowError(msg)` → `expect(fn).toThrow(msg)`
+
+- **Snapshots must be regenerated.** The error `cause` property is now included in snapshot output. Run `jest --updateSnapshot` after upgrading.
+
+- **`toEqual()` no longer matches non-enumerable object properties** by default.
+
+- **Node.js minimum is 18** (drops Node 14, 16, 19, 21). TypeScript minimum is 5.4.
+
 ### Version 0.6.0
 BREAKING CHANGE: The `testFiles` option in `config/jest.config.json` should now specify the path to compiled CommonJS files, *not* TypeScript source files. Snapshot resolution depends on the presence of source maps in the output folder.
 

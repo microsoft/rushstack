@@ -42,8 +42,6 @@ import type { BaseLinkManager } from '../base/BaseLinkManager';
 import type { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from '../pnpm/PnpmShrinkwrapFile';
 import type { Subspace } from '../../api/Subspace';
 
-const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
-
 /**
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
  * As a temporary workaround, augment the type.
@@ -572,7 +570,9 @@ export class RushInstallManager extends BaseInstallManager {
           );
 
           const { default: glob } = await import('fast-glob');
-          const tempModulePaths: string[] = await glob(globEscape(normalizedPathToDeleteWithoutStar) + '/*');
+          const tempModulePaths: string[] = await glob(
+            glob.escapePath(normalizedPathToDeleteWithoutStar) + '/*'
+          );
           // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*"
           for (const tempModulePath of tempModulePaths) {
             // We could potentially use AsyncRecycler here, but in practice these folders tend
@@ -704,7 +704,7 @@ export class RushInstallManager extends BaseInstallManager {
 
     const { default: glob } = await import('fast-glob');
     const packageJsonPaths: string[] = await glob(
-      globEscape(normalizedPathToDeleteWithoutStar) + '/*/package.json'
+      glob.escapePath(normalizedPathToDeleteWithoutStar) + '/*/package.json'
     );
     // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*/package.json"
     for (const packageJsonPath of packageJsonPaths) {

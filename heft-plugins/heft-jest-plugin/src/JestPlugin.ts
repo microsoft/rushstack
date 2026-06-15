@@ -10,7 +10,6 @@ import * as path from 'node:path';
 import type { AggregatedResult } from '@jest/reporters';
 import type { Config } from '@jest/types';
 import { resolveRunner, resolveSequencer, resolveTestEnvironment, resolveWatchPlugin } from 'jest-resolve';
-import { mergeWith, isObject } from 'lodash';
 
 import type {
   HeftConfiguration,
@@ -31,7 +30,7 @@ import {
   InheritanceType,
   PathResolutionMethod
 } from '@rushstack/heft-config-file';
-import { FileSystem, Path, Import, JsonFile, PackageName } from '@rushstack/node-core-library';
+import { FileSystem, Path, Import, JsonFile, Objects, PackageName } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { IHeftJestReporterOptions } from './HeftJestReporter';
@@ -142,7 +141,6 @@ interface IPendingTestRun {
  */
 export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   private static _jestConfigurationFileLoader: ProjectConfigurationFile<IHeftJestConfiguration> | undefined;
-  private static _includedJestEnvironmentJsdomPath: string | undefined;
 
   private _jestPromise: Promise<unknown> | undefined;
   private _pendingTestRuns: Set<IPendingTestRun> = new Set();
@@ -629,7 +627,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
       testNamePattern: options.testNamePattern,
       testPathIgnorePatterns: options.testPathIgnorePatterns ? [options.testPathIgnorePatterns] : undefined,
-      testPathPattern: options.testPathPattern ? [options.testPathPattern] : undefined,
+      testPathPatterns: options.testPathPattern ? [options.testPathPattern] : undefined,
       testTimeout: options.testTimeout,
       maxWorkers: options.maxWorkers,
 
@@ -703,14 +701,20 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         currentObject: T,
         parentObject: T
       ) => T = <T>(currentObject: T, parentObject: T): T => {
-        return mergeWith(parentObject || {}, currentObject || {}, (value: T, source: T) => {
+        return Objects.mergeWith(parentObject || {}, currentObject || {}, (value, source) => {
           // Need to use a custom inheritance function instead of "InheritanceType.merge" since
           // some properties are allowed to have different types which may be incompatible with
           // merging.
-          if (!isObject(source)) {
+          if (source === null || typeof source !== 'object') {
             return source;
           }
-          return Array.isArray(value) ? [...value, ...(source as Array<unknown>)] : { ...value, ...source };
+          if (Array.isArray(source)) {
+            return Array.isArray(value) ? [...value, ...source] : source;
+          }
+          if (Objects.isRecord(source)) {
+            return { ...(Objects.isRecord(value) ? value : {}), ...source };
+          }
+          return source;
         }) as T;
       };
 
@@ -991,27 +995,11 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
             });
 
           case 'testEnvironment':
-            const testEnvironment: string = resolveTestEnvironment({
+            return resolveTestEnvironment({
               rootDir: configDir,
               testEnvironment: propertyValue,
               requireResolveFunction
             });
-
-            if (propertyValue === JEST_CONFIG_JSDOM_PACKAGE_NAME) {
-              // If the testEnvironment is the included jest-environment-jsdom,
-              // redirect to the version that injects punycode for Node >= 22.
-              if (!JestPlugin._includedJestEnvironmentJsdomPath) {
-                JestPlugin._includedJestEnvironmentJsdomPath = require.resolve(
-                  JEST_CONFIG_JSDOM_PACKAGE_NAME
-                );
-              }
-
-              if (JestPlugin._includedJestEnvironmentJsdomPath === testEnvironment) {
-                return `${__dirname}/exports/patched-jest-environment-jsdom.js`;
-              }
-            }
-
-            return testEnvironment;
 
           case 'watchPlugins':
             return resolveWatchPlugin(/*resolver:*/ undefined, {

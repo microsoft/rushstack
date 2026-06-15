@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`RedisCobuildLockProvider throws error with missing environment variables 1`] = `
 "The \\"RedisCobuildLockProvider\\" tries to access missing environment variable: REDIS_PASS

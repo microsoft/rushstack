@@ -41,7 +41,7 @@ const SIMPLE_IDENTIFIER_REGEX: RegExp = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
  */
 export interface ICssOutputFolder {
   folder: string;
-  shimModuleFormat: 'commonjs' | 'esnext' | undefined;
+  shimModuleFormat?: 'commonjs' | 'esnext';
 }
 
 /**
@@ -113,6 +113,28 @@ export interface ISassProcessorOptions {
    * A list of deprecation codes to silence.  This is useful for suppressing warnings from deprecated Sass features that are used in the project and known not to be a problem.
    */
   silenceDeprecations?: readonly string[];
+
+  /**
+   * If true, the original file extension will not be trimmed when generating the output CSS file. The generated CSS
+   * file will retain its original extension. For example, "styles.scss" will generate "styles.scss.css"
+   * instead of "styles.css".
+   */
+  doNotTrimOriginalFileExtension?: boolean;
+
+  /**
+   * If true, the ICSS `:export` block will be preserved in the emitted CSS output. This is necessary
+   * when the CSS is consumed by a webpack loader (e.g. css-loader's icssParser) that extracts `:export`
+   * values at bundle time to generate JavaScript exports.
+   *
+   * Defaults to false.
+   */
+  preserveIcssExports?: boolean;
+
+  /**
+   * If true, a .css.map source map file will be written next to each emitted .css, and a
+   * sourceMappingURL comment will be appended to the .css. Defaults to false.
+   */
+  sourceMap?: boolean;
 
   /**
    * A callback to further modify the raw CSS text after it has been generated. Only relevant if emitting CSS files.
@@ -220,7 +242,10 @@ export class SassProcessor {
 
       return {
         contents: record.content,
-        syntax: determineSyntaxFromFilePath(absolutePath)
+        syntax: determineSyntaxFromFilePath(absolutePath),
+        // Without sourceMapUrl, sass-embedded falls back to a data: URL for this file in the
+        // source map. data: URLs crash heftUrlToPath on Linux/macOS (non-empty URL host).
+        sourceMapUrl: url
       };
     };
 
@@ -245,7 +270,8 @@ export class SassProcessor {
           load: loadAsync
         }
       ],
-      silenceDeprecations: deprecationsToSilence
+      silenceDeprecations: deprecationsToSilence,
+      ...(options.sourceMap && { sourceMap: true, sourceMapIncludeSources: true })
     };
   }
 
@@ -560,13 +586,21 @@ export class SassProcessor {
    * @returns The canonical URL of the target file, or null if it does not resolve
    */
   private async _canonicalizeHeftInnerAsync(url: string, context: CanonicalizeContext): AsyncResolution {
-    if (url.endsWith('.sass') || url.endsWith('.scss')) {
+    if (url.endsWith('.sass') || url.endsWith('.scss') || url.endsWith('.css')) {
       // Extension is already present, so only try the exact URL or the corresponding partial
       return await this._canonicalizeFileAsync(url, context);
     }
 
-    // Spec says prefer .sass, but we don't use that extension
-    for (const candidate of [`${url}.scss`, `${url}.sass`, `${url}/index.scss`, `${url}/index.sass`]) {
+    // Spec says prefer .sass, but we don't use that extension.
+    // Plain `.css` is tried last, matching dart-sass's resolution order.
+    for (const candidate of [
+      `${url}.scss`,
+      `${url}.sass`,
+      `${url}.css`,
+      `${url}/index.scss`,
+      `${url}/index.sass`,
+      `${url}/index.css`
+    ]) {
       const result: SyncResolution = await this._canonicalizeFileAsync(candidate, context);
       if (result) {
         return result;
@@ -738,8 +772,16 @@ export class SassProcessor {
     }
 
     record.cssVersion = contentHash;
-    const { cssOutputFolders, dtsOutputFolders, srcFolder, exportAsDefault, postProcessCssAsync } =
-      this._options;
+    const {
+      cssOutputFolders,
+      dtsOutputFolders,
+      srcFolder,
+      exportAsDefault,
+      doNotTrimOriginalFileExtension,
+      postProcessCssAsync,
+      preserveIcssExports,
+      sourceMap
+    } = this._options;
 
     // Handle CSS modules
     let moduleMap: JsonObject | undefined;
@@ -756,7 +798,14 @@ export class SassProcessor {
       const postCssResult: postcss.Result = await postcss
         .default([postCssModules])
         .process(css, { from: sourceFilePath });
-      css = postCssResult.css;
+
+      if (!preserveIcssExports) {
+        // Default behavior: use the transformed CSS output, which has the :export block stripped.
+        css = postCssResult.css;
+      }
+      // If preserveIcssExports is true, we discard the transformed CSS and keep the original so
+      // that the :export block remains in the output for downstream webpack loaders (e.g.
+      // css-loader's icssParser) that extract :export values at bundle time.
     }
 
     if (postProcessCssAsync) {
@@ -765,7 +814,11 @@ export class SassProcessor {
 
     const relativeFilePath: string = path.relative(srcFolder, sourceFilePath);
 
-    const dtsContent: string = this._createDTS(moduleMap);
+    // A module file with no local class exports (e.g. only :global styles) has no
+    // default export at runtime, so treat it as a side-effect-only import just like
+    // a non-module file.
+    const hasModuleExports: boolean | undefined = moduleMap && Object.keys(moduleMap).length > 0;
+    const dtsContent: string = createDTS(moduleMap, exportAsDefault, hasModuleExports);
 
     const writeFileOptions: IFileSystemWriteFileOptions = {
       ensureFolderExists: true
@@ -779,69 +832,113 @@ export class SassProcessor {
       );
     }
 
-    const filename: string = path.basename(relativeFilePath);
-    const extensionStart: number = filename.lastIndexOf('.');
-    const cssPathFromJs: string = `./${filename.slice(0, extensionStart)}.css`;
-    const relativeCssPath: string = `${relativeFilePath.slice(0, relativeFilePath.lastIndexOf('.'))}.css`;
-
     if (cssOutputFolders && cssOutputFolders.length > 0) {
       if (!exportAsDefault) {
         throw new Error(`The "cssOutputFolders" option is not supported when "exportAsDefault" is false.`);
       }
 
+      const filename: string = path.basename(relativeFilePath);
+      let cssFilename: string;
+      let relativeCssPath: string;
+      if (doNotTrimOriginalFileExtension) {
+        cssFilename = `${filename}.css`;
+        relativeCssPath = `${relativeFilePath}.css`;
+      } else {
+        const extensionStart: number = filename.lastIndexOf('.');
+        cssFilename = `${filename.slice(0, extensionStart)}.css`;
+
+        const relativeFilePathStart: number = relativeFilePath.lastIndexOf('.');
+        relativeCssPath = `${relativeFilePath.slice(0, relativeFilePathStart)}.css`;
+      }
+
+      const cssPathFromJs: string = `./${cssFilename}`;
+
+      // When sourceMap is enabled, prepare the annotated CSS and map basename once —
+      // cssFilename is identical across all output folders.
+      const cssMapBasename: string | undefined =
+        sourceMap && result.sourceMap ? `${cssFilename}.map` : undefined;
+      const finalCss: string = cssMapBasename ? `${css}\n/*# sourceMappingURL=${cssMapBasename} */\n` : css;
+
       for (const cssOutputFolder of cssOutputFolders) {
         const { folder, shimModuleFormat } = cssOutputFolder;
 
         const cssFilePath: string = path.resolve(folder, relativeCssPath);
-        await FileSystem.writeFileAsync(cssFilePath, css, writeFileOptions);
+        await FileSystem.writeFileAsync(cssFilePath, finalCss, writeFileOptions);
+
+        if (cssMapBasename && result.sourceMap) {
+          const mapFilePath: string = `${cssFilePath}.map`;
+          const mapDir: string = path.dirname(cssFilePath);
+          // Rewrite heft: URL sources to paths relative to the map file's directory
+          // so that source-map-loader can resolve them back to the original .scss.
+          const rewrittenSources: string[] = result.sourceMap.sources.map((source) => {
+            if (!source.startsWith('heft:')) return source;
+            const absoluteSourcePath: string = heftUrlToPath(source);
+            return Path.convertToSlashes(path.relative(mapDir, absoluteSourcePath));
+          });
+          await FileSystem.writeFileAsync(
+            mapFilePath,
+            JSON.stringify({ ...result.sourceMap, file: cssFilename, sources: rewrittenSources }),
+            writeFileOptions
+          );
+        }
 
         if (shimModuleFormat && !filename.endsWith('.css')) {
           const jsFilePath: string = path.resolve(folder, `${relativeFilePath}.js`);
           const jsShimContent: string = generateJsShimContent(
             shimModuleFormat,
             cssPathFromJs,
-            record.isModule
+            hasModuleExports
           );
           await FileSystem.writeFileAsync(jsFilePath, jsShimContent, writeFileOptions);
         }
       }
     }
   }
+}
 
-  private _createDTS(moduleMap: JsonObject | undefined): string {
+function createDTS(
+  moduleMap: JsonObject | undefined,
+  exportAsDefault: boolean,
+  hasModuleExports: boolean | undefined
+): string;
+function createDTS(moduleMap: JsonObject, exportAsDefault: boolean, hasModuleExports: true): string;
+function createDTS(
+  moduleMap: JsonObject | undefined,
+  exportAsDefault: boolean,
+  hasModuleExports: boolean | undefined
+): string {
+  if (hasModuleExports) {
     // Create a source file.
     const source: string[] = [];
 
-    if (moduleMap) {
-      if (this._options.exportAsDefault) {
-        source.push(`declare interface IStyles {`);
-        for (const className of Object.keys(moduleMap)) {
-          const safeClassName: string = SIMPLE_IDENTIFIER_REGEX.test(className)
-            ? className
-            : JSON.stringify(className);
-          // Quote and escape class names as needed.
-          source.push(`  ${safeClassName}: string;`);
+    if (exportAsDefault) {
+      source.push(`declare interface IStyles {`);
+      for (const className of Object.keys(moduleMap)) {
+        const safeClassName: string = SIMPLE_IDENTIFIER_REGEX.test(className)
+          ? className
+          : JSON.stringify(className);
+        // Quote and escape class names as needed.
+        source.push(`  ${safeClassName}: string;`);
+      }
+
+      source.push(`}`);
+      source.push(`declare const styles: IStyles;`);
+      source.push(`export default styles;`);
+    } else {
+      for (const className of Object.keys(moduleMap)) {
+        if (!SIMPLE_IDENTIFIER_REGEX.test(className)) {
+          throw new Error(
+            `Class name "${className}" is not a valid identifier and may only be exported using "exportAsDefault: true"`
+          );
         }
-        source.push(`}`);
-        source.push(`declare const styles: IStyles;`);
-        source.push(`export default styles;`);
-      } else {
-        for (const className of Object.keys(moduleMap)) {
-          if (!SIMPLE_IDENTIFIER_REGEX.test(className)) {
-            throw new Error(
-              `Class name "${className}" is not a valid identifier and may only be exported using "exportAsDefault: true"`
-            );
-          }
-          source.push(`export const ${className}: string;`);
-        }
+
+        source.push(`export const ${className}: string;`);
       }
     }
 
-    if (source.length === 0 || !moduleMap) {
-      return `export {};`;
-    }
-
     return source.join('\n');
+  } else {
+    return `export {};`;
   }
 }
 
@@ -981,7 +1078,7 @@ function determineSyntaxFromFilePath(filePath: string): Syntax {
 function generateJsShimContent(
   format: 'commonjs' | 'esnext',
   relativePathToCss: string,
-  isModule: boolean
+  isModule: boolean | undefined
 ): string {
   const pathString: string = JSON.stringify(relativePathToCss);
   switch (format) {

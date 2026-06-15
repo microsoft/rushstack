@@ -19,7 +19,7 @@
     "allowUnreachableCode": false,
     "importHelpers": true,
 
-    "types": ["heft-jest", "webpack-env"],
+    "types": ["jest", "webpack-env"],
 
     "module": "esnext",
     "moduleResolution": "node",

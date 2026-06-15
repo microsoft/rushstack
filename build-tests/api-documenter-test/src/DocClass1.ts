@@ -219,6 +219,8 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
   /**
    * This is also an overloaded function.
    * @param x - the number
+   *
+   * @defaultValue 123
    */
   // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
   exampleFunction(x: number): number;
@@ -316,6 +318,8 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
 export interface IDocInterface5 {
   /**
    * Property of type string that does something
+   *
+   * @defaultValue "Hello World"
    */
   regularProperty: string;
 }

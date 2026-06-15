@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`CommandLineParameterBase allows an undocumented synonym 1`] = `
 Array [
@@ -30,7 +30,7 @@ Array [
 ]
 `;
 
-exports[`CommandLineParameterBase choice list raises an error if env var value is json containing non-scalars 1`] = `"The [{}] environment variable value looks like a JSON array but failed to parse: The [{}] environment variable value must be a JSON  array containing only strings, numbers, and booleans."`;
+exports[`CommandLineParameterBase choice list raises an error if env var value is json containing non-scalars 1`] = `"The ENV_COLOR environment variable value looks like a JSON array but failed to parse: The ENV_COLOR environment variable value must be a JSON  array containing only strings, numbers, and booleans."`;
 
 exports[`CommandLineParameterBase choice list raises an error if env var value is not a valid choice 1`] = `"Invalid value \\"oblong\\" for the environment variable ENV_COLOR.  Valid choices are: \\"purple\\", \\"yellow\\", \\"pizza\\""`;
 

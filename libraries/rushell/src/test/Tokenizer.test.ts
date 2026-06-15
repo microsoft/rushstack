@@ -39,7 +39,7 @@ test('01: white space tokens', () => {
 
 test('02: text with escapes', () => {
   matchSnapshot(' ab+56\\>qrst(abc\\))');
-  expect(() => tokenize('Unterminated: \\')).toThrowError();
+  expect(() => tokenize('Unterminated: \\')).toThrow();
 });
 
 test('03: The && operator', () => {
@@ -52,8 +52,8 @@ test('03: The && operator', () => {
 test('04: dollar variables', () => {
   matchSnapshot('$abc123.456');
   matchSnapshot('$ab$_90');
-  expect(() => tokenize('$')).toThrowError();
-  expect(() => tokenize('${abc}')).toThrowError();
+  expect(() => tokenize('$')).toThrow();
+  expect(() => tokenize('${abc}')).toThrow();
 });
 
 test('05: double-quoted strings', () => {
@@ -61,7 +61,7 @@ test('05: double-quoted strings', () => {
   matchSnapshot('what"is"is');
   matchSnapshot('what"is\\""is');
   matchSnapshot('no C-style escapes: "\\t\\r\\n"');
-  expect(() => tokenize('Unterminated: "')).toThrowError();
-  expect(() => tokenize('Unterminated: "abc')).toThrowError();
-  expect(() => tokenize('Unterminated: "abc\\')).toThrowError();
+  expect(() => tokenize('Unterminated: "')).toThrow();
+  expect(() => tokenize('Unterminated: "abc')).toThrow();
+  expect(() => tokenize('Unterminated: "abc\\')).toThrow();
 });

@@ -1,0 +1,12 @@
+// Uses the modern @use syntax to import variables from a local partial.
+// Verifies that SassProcessor resolves _partial.scss when @use 'partial' is written.
+@use 'partial' as tokens;
+
+.container {
+  color: tokens.$brand-color;
+  padding: tokens.$spacing-unit * 2;
+}
+
+.header {
+  border-bottom: 1px solid tokens.$brand-color;
+}

@@ -58,6 +58,7 @@ export interface IExtractorProjectConfiguration {
 // @public
 export interface IExtractorSubspace {
     pnpmInstallFolder?: string;
+    pnpmNodeModulesHoistingEnabled?: boolean;
     subspaceName: string;
     transformPackageJson?: (packageJson: IPackageJson) => IPackageJson;
 }

@@ -15,7 +15,6 @@ import { AlreadyReportedError, Async, FileSystem, JsonFile, JsonSchema } from '@
 
 import lockfileLintSchema from '../../../schemas/lockfile-lint.schema.json';
 import { LOCKFILE_EXPLORER_FOLDERNAME, LOCKFILE_LINT_JSON_FILENAME } from '../../../constants/common';
-import type { LintCommandLineParser } from '../LintCommandLineParser';
 import {
   getShrinkwrapFileMajorVersion,
   parseDependencyPath,
@@ -45,7 +44,7 @@ export class CheckAction extends CommandLineAction {
   private _checkedProjects: Set<RushConfigurationProject>;
   private _docMap: Map<string, lockfileTypes.LockfileObject>;
 
-  public constructor(parser: LintCommandLineParser) {
+  public constructor(terminal: ITerminal) {
     super({
       actionName: 'check',
       summary: 'Check and report dependency issues in your workspace',
@@ -55,7 +54,7 @@ export class CheckAction extends CommandLineAction {
         ', reporting any problems found in your PNPM workspace.'
     });
 
-    this._terminal = parser.globalTerminal;
+    this._terminal = terminal;
     this._checkedProjects = new Set();
     this._docMap = new Map();
   }

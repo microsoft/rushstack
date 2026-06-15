@@ -16,6 +16,7 @@ export type CommonYamlModel = IBaseYamlModel & {
   remarks?: string;
   example?: string[];
   customDeprecatedMessage?: string;
+  defaultValue?: string;
 };
 
 export type PackageYamlModel = CommonYamlModel & {

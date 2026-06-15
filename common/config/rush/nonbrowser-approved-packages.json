@@ -27,6 +27,26 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@inquirer/checkbox",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@inquirer/confirm",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@inquirer/input",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@inquirer/search",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@inquirer/select",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@jest/core",
       "allowedCategories": [ "libraries" ]
     },
@@ -199,10 +219,6 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@rushstack/heft-static-asset-typings-plugin",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
       "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
       "allowedCategories": [ "tests" ]
     },
@@ -241,6 +257,10 @@
     {
       "name": "@rushstack/heft-serverless-stack-plugin",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/heft-static-asset-typings-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/heft-storybook-plugin",
@@ -583,19 +603,11 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "builtin-modules",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "buttono",
       "allowedCategories": [ "tests" ]
     },
     {
       "name": "chokidar",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "cli-table",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -695,10 +707,6 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "figures",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "file-loader",
       "allowedCategories": [ "tests" ]
     },
@@ -711,16 +719,8 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "giturl",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "glob",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
-    },
-    {
-      "name": "glob-escape",
-      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "heft-action-plugin",
@@ -792,10 +792,6 @@
     },
     {
       "name": "import-lazy",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "inquirer",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -871,10 +867,6 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
-      "name": "lodash",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
       "name": "long",
       "allowedCategories": [ "tests" ]
     },
@@ -920,10 +912,6 @@
     },
     {
       "name": "object-hash",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "open",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -1031,10 +1019,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "strip-json-comments",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "style-loader",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -1093,10 +1077,6 @@
     {
       "name": "typescript",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
-    },
-    {
-      "name": "update-notifier",
-      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "url-loader",

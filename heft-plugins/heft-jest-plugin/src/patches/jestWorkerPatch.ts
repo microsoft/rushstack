@@ -4,8 +4,9 @@
 /* eslint-disable no-console */
 
 import * as path from 'node:path';
+import { createRequire } from 'node:module';
 
-import { Import, FileSystem } from '@rushstack/node-core-library';
+import { Import, FileSystem, type IPackageJson } from '@rushstack/node-core-library';
 
 // This patch is a fix for a problem where Jest reports this error spuriously on a machine that is under heavy load:
 //
@@ -62,41 +63,42 @@ function applyPatch(): void {
       useNodeJSResolver: true
     });
 
-    const baseWorkerPoolPath: string = path.join(jestWorkerFolder, 'build/base/BaseWorkerPool.js');
-    const baseWorkerPoolFilename: string = path.basename(baseWorkerPoolPath); // BaseWorkerPool.js
+    // jest-worker 30.x switched to a webpack-bundled single-file architecture.
+    // For 29.x and earlier, patch build/base/BaseWorkerPool.js directly.
+    // For 30.x and later, patch build/index.js (the webpack bundle).
+    const jestWorkerPackageJson: IPackageJson = require(`${jestWorkerFolder}/package.json`);
+    const jestWorkerMajorVersion: number = parseInt(jestWorkerPackageJson.version, 10);
+    const isBundled: boolean = jestWorkerMajorVersion >= 30;
 
-    if (!FileSystem.exists(baseWorkerPoolPath)) {
-      throw new Error(
-        'The BaseWorkerPool.js file was not found in the expected location:\n' + baseWorkerPoolPath
-      );
-    }
-
-    // Load the module
-    const baseWorkerPoolModule: IBaseWorkerPoolModule = require(baseWorkerPoolPath);
-
-    // Obtain the metadata for the module
-    let baseWorkerPoolModuleMetadata: NodeModule | undefined = undefined;
-    for (const childModule of module.children) {
-      if (path.basename(childModule.filename || '').toUpperCase() === baseWorkerPoolFilename.toUpperCase()) {
-        if (baseWorkerPoolModuleMetadata) {
-          throw new Error('More than one child module matched while detecting Node.js module metadata');
-        }
-        baseWorkerPoolModuleMetadata = childModule;
-      }
-    }
-
-    if (!baseWorkerPoolModuleMetadata) {
-      throw new Error('Failed to detect the Node.js module metadata for BaseWorkerPool.js');
-    }
+    const targetPath: string = isBundled
+      ? `${jestWorkerFolder}/build/index.js`
+      : `${jestWorkerFolder}/build/base/BaseWorkerPool.js`;
 
     // Load the original file contents
-    const originalFileContent: string = FileSystem.readFile(baseWorkerPoolPath);
-
-    // Add boilerplate so that eval() will return the exports
-    let patchedCode: string =
-      '// PATCHED BY HEFT USING eval()\n\nexports = {}\n' +
-      originalFileContent +
-      '\n// return value:\nexports';
+    let originalFileContent: string;
+    try {
+      originalFileContent = FileSystem.readFile(targetPath);
+    } catch (e) {
+      if (FileSystem.isNotExistError(e)) {
+        throw new Error(
+          `The ${path.basename(targetPath)} file was not found in the expected location:\n` + targetPath
+        );
+      } else {
+        throw e;
+      }
+    }
+    // Load the module
+    const targetModule: IBaseWorkerPoolModule = require(targetPath);
+    // Obtain the metadata for the module from require.cache.
+    // We can't use module.children because if the module was already in the cache before this
+    // require() call (loaded transitively by something else), Node.js returns the cached result
+    // without appending it to module.children.
+    // require.resolve() gives us the exact key Node.js uses in require.cache.
+    const resolvedTargetPath: string = require.resolve(targetPath);
+    const targetModuleMetadata: NodeModule | undefined = require.cache[resolvedTargetPath];
+    if (!targetModuleMetadata) {
+      throw new Error(`Failed to detect the Node.js module metadata for ${path.basename(targetPath)}`);
+    }
 
     // Apply the patch.  We will replace this:
     //
@@ -106,7 +108,7 @@ function applyPatch(): void {
     //
     //    const FORCE_EXIT_DELAY = 7000;
     let matched: boolean = false;
-    patchedCode = patchedCode.replace(
+    const patchedCode: string = originalFileContent.replace(
       /(const\s+FORCE_EXIT_DELAY\s*=\s*)(\d+)(\s*\;)/,
       (matchedString: string, leftPart: string, middlePart: string, rightPart: string): string => {
         matched = true;
@@ -115,24 +117,47 @@ function applyPatch(): void {
     );
 
     if (!matched) {
-      throw new Error('The expected pattern was not found in the file:\n' + baseWorkerPoolPath);
+      throw new Error('The expected pattern was not found in the file:\n' + targetPath);
     }
 
-    function evalInContext(): IBaseWorkerPoolModule {
-      // Remap the require() function for the eval() context
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      function require(modulePath: string): void {
-        return baseWorkerPoolModuleMetadata!.require(modulePath);
+    if (isBundled) {
+      // jest-worker 30.x: webpack bundle uses `module.exports = __webpack_exports__` at the top level.
+      // Shadow `module` with a shim so that assignment writes to our object, then copy the
+      // resulting exports over the already-cached module exports in-place.
+      function evalInContextBundled(): Record<string, unknown> {
+        // createRequire(targetPath) produces a proper require function with resolve/cache/etc.
+        // and the right module-resolution context (resolves relative to jest-worker's build dir).
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const require: NodeRequire = createRequire(targetPath);
+        // Shadow `module` so the bundle's `module.exports = ...` writes to our shim
+        const module: { exports: Record<string, unknown> } = { exports: {} };
+        // eslint-disable-next-line no-eval
+        eval(patchedCode);
+        return module.exports;
       }
 
-      // eslint-disable-next-line no-eval
-      return eval(patchedCode);
+      const patchedExports: Record<string, unknown> = evalInContextBundled();
+      // Can't mutate the cached exports in-place (webpack defines them as read-only getters).
+      // Replace the exports object in the require cache entirely so future require() calls
+      // return the patched version.
+      require.cache[targetModuleMetadata.filename]!.exports = patchedExports;
+    } else {
+      // jest-worker < 30: BaseWorkerPool.js uses bare `exports`, wrap for eval return value
+      const wrappedCode: string =
+        '// PATCHED BY HEFT USING eval()\n\nexports = {}\n' + patchedCode + '\n// return value:\nexports';
+
+      function evalInContext(): IBaseWorkerPoolModule {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        function require(modulePath: string): void {
+          return targetModuleMetadata!.require(modulePath);
+        }
+        // eslint-disable-next-line no-eval
+        return eval(wrappedCode);
+      }
+
+      const patchedModule: IBaseWorkerPoolModule = evalInContext();
+      targetModule.default = patchedModule.default;
     }
-
-    const patchedModule: IBaseWorkerPoolModule = evalInContext();
-
-    baseWorkerPoolModule.default = patchedModule.default;
   } catch (e) {
     console.error();
     console.error(`ERROR: ${patchName} failed to patch the "jest-worker" package:`);

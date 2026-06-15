@@ -1,0 +1,11 @@
+/* Plain CSS file treated as a CSS module via fileExtensions: ['.module.css'].
+   Verifies that CSS input (not SCSS/Sass) is processed correctly. */
+.root {
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  font-size: 16px;
+  font-weight: bold;
+}

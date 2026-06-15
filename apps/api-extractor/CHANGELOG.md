@@ -1,6 +1,54 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 04 Apr 2026 00:14:00 GMT and should not be manually modified.
+This log was last generated on Sat, 13 Jun 2026 00:16:18 GMT and should not be manually modified.
+
+## 7.58.9
+Sat, 13 Jun 2026 00:16:18 GMT
+
+_Version update only_
+
+## 7.58.8
+Mon, 08 Jun 2026 15:15:49 GMT
+
+### Patches
+
+- Add support for new d.ts extension format when using TS moduleResolution 'bundler' or 'nodenext'.
+
+## 7.58.7
+Mon, 20 Apr 2026 23:31:13 GMT
+
+_Version update only_
+
+## 7.58.6
+Mon, 20 Apr 2026 15:15:24 GMT
+
+### Patches
+
+- Fix an issue where empty lines were included in DTS rollups in place of API items that were trimmed.
+
+## 7.58.5
+Sat, 18 Apr 2026 03:47:10 GMT
+
+_Version update only_
+
+## 7.58.4
+Sat, 18 Apr 2026 00:15:16 GMT
+
+### Patches
+
+- Bump semver.
+
+## 7.58.3
+Fri, 17 Apr 2026 15:14:57 GMT
+
+### Patches
+
+- Remove dependecy on `lodash`.
+
+## 7.58.2
+Thu, 09 Apr 2026 00:15:07 GMT
+
+_Version update only_
 
 ## 7.58.1
 Sat, 04 Apr 2026 00:14:00 GMT

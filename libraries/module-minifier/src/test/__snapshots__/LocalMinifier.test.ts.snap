@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`LocalMinifier Includes terser package version in config hash: terser-5.9.1 1`] = `"4EVkVBAkdvF45JdRt44fWqn3HDW5t4dHo0zmzpQrWtc="`;
 

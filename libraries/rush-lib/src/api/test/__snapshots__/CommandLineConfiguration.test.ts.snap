@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`CommandLineConfiguration Detects a cycle among phases 1`] = `"In command-line.json, there exists a cycle within the set of _phase:b dependencies: _phase:b, _phase:c, _phase:a"`;
 

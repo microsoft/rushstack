@@ -73,7 +73,7 @@ describe(PackageName.name, () => {
   it(PackageName.parse.name, () => {
     expect(() => {
       PackageName.parse('@');
-    }).toThrowError('The scope must be followed by a slash');
+    }).toThrow('The scope must be followed by a slash');
   });
 
   it(PackageName.combineParts.name, () => {
@@ -85,14 +85,14 @@ describe(PackageName.name, () => {
   it(`${PackageName.combineParts.name} errors`, () => {
     expect(() => {
       PackageName.combineParts('', '@microsoft/example-package');
-    }).toThrowError('The unscopedName cannot start with an "@" character');
+    }).toThrow('The unscopedName cannot start with an "@" character');
 
     expect(() => {
       PackageName.combineParts('@micr!osoft', 'example-package');
-    }).toThrowError('The package name "@micr!osoft/example-package" contains an invalid character: "!"');
+    }).toThrow('The package name "@micr!osoft/example-package" contains an invalid character: "!"');
 
     expect(() => {
       PackageName.combineParts('', '');
-    }).toThrowError('The package name must not be empty');
+    }).toThrow('The package name must not be empty');
   });
 });

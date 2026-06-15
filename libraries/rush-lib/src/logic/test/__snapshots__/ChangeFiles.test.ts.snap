@@ -1,0 +1,115 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ChangeFiles deleteAllAsync delete all files when there are hotfixes 1`] = `
+Array [
+  "[    log] [n]",
+  "[    log] * DRYRUN: Deleting 3 change file(s).[n]",
+  "[    log]  - <TEST DIR>/multipleHotfixChanges/change1.json[n]",
+  "[    log]  - <TEST DIR>/multipleHotfixChanges/change2.json[n]",
+  "[    log]  - <TEST DIR>/multipleHotfixChanges/change3.json[n]",
+]
+`;
+
+exports[`ChangeFiles deleteAllAsync delete all files when there are no prerelease packages 1`] = `
+Array [
+  "[    log] [n]",
+  "[    log] * DRYRUN: Deleting 3 change file(s).[n]",
+  "[    log]  - <TEST DIR>/multipleChangeFiles/a.json[n]",
+  "[    log]  - <TEST DIR>/multipleChangeFiles/b.json[n]",
+  "[    log]  - <TEST DIR>/multipleChangeFiles/c.json[n]",
+]
+`;
+
+exports[`ChangeFiles deleteAllAsync does not delete change files for package whose change logs do not get updated.  1`] = `
+Array [
+  "[    log] [n]",
+  "[    log] * DRYRUN: Deleting 2 change file(s).[n]",
+  "[    log]  - <TEST DIR>/multipleChangeFiles/a.json[n]",
+  "[    log]  - <TEST DIR>/multipleChangeFiles/b.json[n]",
+]
+`;
+
+exports[`ChangeFiles getAllChangeFilesAsync returns correctly when change files are categorized 1`] = `Array []`;
+
+exports[`ChangeFiles getAllChangeFilesAsync returns correctly when there is one change file 1`] = `Array []`;
+
+exports[`ChangeFiles getAllChangeFilesAsync returns empty array when no change files 1`] = `Array []`;
+
+exports[`ChangeFiles validateAsync allows a hotfix in a hotfix branch. 1`] = `
+Array [
+  "[    log] Found change file: <TEST DIR>/multipleHotfixChanges/change1.json[n]",
+]
+`;
+
+exports[`ChangeFiles validateAsync does not throw when no missing packages from categorized changes 1`] = `
+Array [
+  "[    log] Found change file: <TEST DIR>/categorizedChanges/@ms/a/changeA.json[n]",
+  "[    log] Found change file: <TEST DIR>/categorizedChanges/@ms/b/changeB.json[n]",
+  "[    log] Found change file: <TEST DIR>/categorizedChanges/changeC.json[n]",
+]
+`;
+
+exports[`ChangeFiles validateAsync does not throw when there is no missing packages 1`] = `
+Array [
+  "[    log] Found change file: <TEST DIR>/verifyChanges/changes.json[n]",
+]
+`;
+
+exports[`ChangeFiles validateAsync throws when missing packages from categorized changes 1`] = `
+Array [
+  "[    log] Found change file: <TEST DIR>/categorizedChanges/@ms/a/changeA.json[n]",
+  "[    log] Found change file: <TEST DIR>/categorizedChanges/@ms/b/changeB.json[n]",
+]
+`;
+
+exports[`ChangeFiles validateAsync throws when there is a patch in a hotfix branch. 1`] = `
+Array [
+  "[    log] Found change file: <TEST DIR>/leafChange/change1.json[n]",
+]
+`;
+
+exports[`ChangeFiles validateAsync throws when there is any missing package. 1`] = `
+Array [
+  "[    log] Found change file: <TEST DIR>/verifyChanges/changes.json[n]",
+]
+`;
+
+exports[`ChangeFiles validateAsync with strictChangefileValidation does not throw when change file references a lockstep project with no mainProject 1`] = `
+Array [
+  "[    log] Found change file: <TEST DIR>/strictValidation/mainLockstep.json[n]",
+]
+`;
+
+exports[`ChangeFiles validateAsync with strictChangefileValidation does not throw when change file references the main lockstep project 1`] = `
+Array [
+  "[    log] Found change file: <TEST DIR>/strictValidation/mainLockstep.json[n]",
+]
+`;
+
+exports[`ChangeFiles validateAsync with strictChangefileValidation does not throw when experiment is disabled 1`] = `
+Array [
+  "[    log] Found change file: <TEST DIR>/strictValidation/nonexistentProject.json[n]",
+]
+`;
+
+exports[`ChangeFiles validateAsync with strictChangefileValidation throws when change file references a non-main lockstep project 1`] = `
+"Change file(s) reference the project \\"lockstep-secondary\\" which belongs to lockstepped version policy \\"myLockstep\\". Change files should be created for the policy's main project \\"lockstep-main\\" instead:
+  - <TEST DIR>/strictValidation/nonMainLockstep.json"
+`;
+
+exports[`ChangeFiles validateAsync with strictChangefileValidation throws when change file references a non-main lockstep project 2`] = `
+Array [
+  "[    log] Found change file: <TEST DIR>/strictValidation/nonMainLockstep.json[n]",
+]
+`;
+
+exports[`ChangeFiles validateAsync with strictChangefileValidation throws when change file references a nonexistent project 1`] = `
+"Change file(s) reference a project \\"nonexistent-package\\" that does not exist in the Rush configuration:
+  - <TEST DIR>/strictValidation/nonexistentProject.json"
+`;
+
+exports[`ChangeFiles validateAsync with strictChangefileValidation throws when change file references a nonexistent project 2`] = `
+Array [
+  "[    log] Found change file: <TEST DIR>/strictValidation/nonexistentProject.json[n]",
+]
+`;

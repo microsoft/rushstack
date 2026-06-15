@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`InputsSnapshot getOperationOwnStateHash Detects outputFileNames collisions 1`] = `"Configured output folder \\"lib\\" for operation \\"_phase:build\\" in project \\"a\\" contains tracked input file \\"a/lib/file3.js\\". If it is intended that this operation modifies its own input files, modify the build process to emit a warning if the output version differs from the input, and remove the directory from \\"outputFolderNames\\". This will ensure cache correctness. Otherwise, change the build process to output to a disjoint folder."`;
 

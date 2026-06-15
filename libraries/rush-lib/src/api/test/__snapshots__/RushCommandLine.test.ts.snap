@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`RushCommandLine Returns a spec 1`] = `
 Object {
@@ -90,6 +90,14 @@ Object {
           "longName": "--verify",
           "required": false,
           "shortName": "-v",
+        },
+        Object {
+          "description": "Validate all change files in the repository, not just those added in the current branch. Reports errors for change files that reference nonexistent projects or target non-main projects in a lockstepped version policy. Requires the \\"strictChangefileValidation\\" experiment to be enabled.",
+          "environmentVariable": undefined,
+          "kind": "Flag",
+          "longName": "--verify-all",
+          "required": false,
+          "shortName": undefined,
         },
         Object {
           "description": "Skips fetching the baseline branch before running \\"git diff\\" to detect changes.",

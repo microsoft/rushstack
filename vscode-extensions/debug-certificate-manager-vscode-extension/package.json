@@ -1,6 +1,6 @@
 {
   "name": "debug-certificate-manager",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
@@ -101,6 +101,11 @@
           "title": "Automatically Sync Certificates",
           "default": true,
           "description": "Check certificates when extension is activated. Extension is automatically activated when a `.vscode/debug-certificate-manager.json` file is present in the workspace."
+        },
+        "debugCertificateManager.homeDirectory": {
+          "type": "string",
+          "title": "Home Directory",
+          "description": "Absolute path to the home directory, used to resolve `~` in the workspace certificate store path. When set, this overrides the default behavior (`os.homedir()` for local workspaces, or running a command in a workspace terminal for remote workspaces like Codespaces, SSH, Dev Containers, WSL, or Tunnels). Note: this setting is recommended to be configured at the user level, not the workspace level."
         }
       }
     }

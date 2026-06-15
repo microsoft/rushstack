@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""packages""): Output file data 1`] = `
 "globalExcludedGlobs:

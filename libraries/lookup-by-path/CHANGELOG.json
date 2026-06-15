@@ -2,6 +2,119 @@
   "name": "@rushstack/lookup-by-path",
   "entries": [
     {
+      "version": "0.10.8",
+      "tag": "@rushstack/lookup-by-path_v0.10.8",
+      "date": "Sat, 13 Jun 2026 00:16:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.7",
+      "tag": "@rushstack/lookup-by-path_v0.10.7",
+      "date": "Mon, 08 Jun 2026 15:15:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.6",
+      "tag": "@rushstack/lookup-by-path_v0.10.6",
+      "date": "Mon, 20 Apr 2026 23:31:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.5",
+      "tag": "@rushstack/lookup-by-path_v0.10.5",
+      "date": "Mon, 20 Apr 2026 15:15:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.4",
+      "tag": "@rushstack/lookup-by-path_v0.10.4",
+      "date": "Sat, 18 Apr 2026 03:47:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.3",
+      "tag": "@rushstack/lookup-by-path_v0.10.3",
+      "date": "Sat, 18 Apr 2026 00:15:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.2",
+      "tag": "@rushstack/lookup-by-path_v0.10.2",
+      "date": "Fri, 17 Apr 2026 15:14:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.1",
+      "tag": "@rushstack/lookup-by-path_v0.10.1",
+      "date": "Fri, 10 Apr 2026 22:46:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.0",
+      "tag": "@rushstack/lookup-by-path_v0.10.0",
+      "date": "Thu, 09 Apr 2026 00:15:07 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `toJson`/`fromJson` methods to `LookupByPath` for serialization/deserialization"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.10",
       "tag": "@rushstack/lookup-by-path_v0.9.10",
       "date": "Sat, 04 Apr 2026 00:14:00 GMT",

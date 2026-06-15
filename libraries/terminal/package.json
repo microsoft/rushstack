@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/terminal",
-  "version": "0.22.4",
+  "version": "0.24.0",
   "description": "User interface primitives for console applications",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -44,7 +44,7 @@
     "supports-color": "~8.1.1"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.2.7",
+    "@rushstack/heft": "1.2.19",
     "@types/supports-color": "8.1.3",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"

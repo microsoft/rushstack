@@ -2,6 +2,141 @@
   "name": "@rushstack/webpack-workspace-resolve-plugin",
   "entries": [
     {
+      "version": "0.6.19",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.6.19",
+      "date": "Sat, 13 Jun 2026 00:16:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.10.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.18",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.6.18",
+      "date": "Mon, 08 Jun 2026 15:15:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.10.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.17",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.6.17",
+      "date": "Mon, 20 Apr 2026 23:31:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.10.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.16",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.6.16",
+      "date": "Mon, 20 Apr 2026 15:15:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.10.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.15",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.6.15",
+      "date": "Sat, 18 Apr 2026 03:47:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.10.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.14",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.6.14",
+      "date": "Sat, 18 Apr 2026 00:15:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.10.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.13",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.6.13",
+      "date": "Fri, 17 Apr 2026 15:14:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.10.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.12",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.6.12",
+      "date": "Fri, 10 Apr 2026 22:46:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.10.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.11",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.6.11",
+      "date": "Thu, 09 Apr 2026 00:15:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.10",
       "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.6.10",
       "date": "Sat, 04 Apr 2026 00:14:00 GMT",

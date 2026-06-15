@@ -1,6 +1,74 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Sat, 04 Apr 2026 00:14:00 GMT and should not be manually modified.
+This log was last generated on Sat, 13 Jun 2026 00:16:19 GMT and should not be manually modified.
+
+## 2.0.9
+Sat, 13 Jun 2026 00:16:19 GMT
+
+_Version update only_
+
+## 2.0.8
+Wed, 10 Jun 2026 00:15:42 GMT
+
+### Patches
+
+- Fix an issue where the `--test-path-pattern` parameter was ignored, causing all tests to run. In Jest 30 the `Config.Argv` field was renamed from `testPathPattern` to `testPathPatterns`.
+
+## 2.0.7
+Mon, 08 Jun 2026 15:15:50 GMT
+
+_Version update only_
+
+## 2.0.6
+Mon, 20 Apr 2026 23:31:13 GMT
+
+_Version update only_
+
+## 2.0.5
+Mon, 20 Apr 2026 15:15:24 GMT
+
+_Version update only_
+
+## 2.0.4
+Sat, 18 Apr 2026 03:47:10 GMT
+
+_Version update only_
+
+## 2.0.3
+Sat, 18 Apr 2026 00:15:17 GMT
+
+_Version update only_
+
+## 2.0.2
+Fri, 17 Apr 2026 15:14:57 GMT
+
+### Patches
+
+- Remove dependecy on `lodash`.
+
+## 2.0.1
+Wed, 15 Apr 2026 17:59:12 GMT
+
+### Patches
+
+- Remove the built-in `jest-global-setup` script as Jest 30 ships with the `mocked` function as `jest.mocked`, so including it as a global is now nonstandard.
+
+## 2.0.0
+Tue, 14 Apr 2026 01:25:46 GMT
+
+### Breaking changes
+
+- Bump jest to 30.3.0 to address CVE GHSA-vpq2-c234-7xj6
+
+## 1.2.12
+Fri, 10 Apr 2026 22:46:34 GMT
+
+_Version update only_
+
+## 1.2.11
+Thu, 09 Apr 2026 00:15:07 GMT
+
+_Version update only_
 
 ## 1.2.10
 Sat, 04 Apr 2026 00:14:00 GMT

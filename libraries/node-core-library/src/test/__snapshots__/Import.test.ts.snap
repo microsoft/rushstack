@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Import resolveModule allowSelfReference throws on an attempt to reference this package without allowSelfReference turned on 1`] = `"Cannot find module \\"@rushstack/node-core-library\\" from \\"<packageRoot>/lib-commonjs/test\\": Error: Cannot find module '@rushstack/node-core-library' from '<dirname>'"`;
 

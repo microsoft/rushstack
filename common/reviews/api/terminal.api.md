@@ -167,6 +167,13 @@ export interface IPrefixProxyTerminalProviderOptionsBase {
     terminalProvider: ITerminalProvider;
 }
 
+// @public
+export interface IPrintMessageInBoxOptions {
+    borderColor?: (text: string) => string;
+    boxWidth?: number;
+    messageColor?: (text: string) => string;
+}
+
 // @beta
 export interface IProblemCollector {
     get problems(): ReadonlySet<IProblem>;
@@ -247,6 +254,35 @@ export interface ITerminalStreamWritableOptions {
 }
 
 // @public
+export interface ITerminalTableChars {
+    bottom: string;
+    bottomCenter: string;
+    bottomLeft: string;
+    bottomRight: string;
+    centerCenter: string;
+    horizontalCenter: string;
+    left: string;
+    leftCenter: string;
+    right: string;
+    rightCenter: string;
+    top: string;
+    topCenter: string;
+    topLeft: string;
+    topRight: string;
+    verticalCenter: string;
+}
+
+// @public
+export interface ITerminalTableOptions {
+    borderCharacters?: Partial<ITerminalTableChars>;
+    borderColor?: (text: string) => string;
+    borderless?: boolean;
+    colWidths?: number[];
+    head?: string[];
+    headingColor?: (text: string) => string;
+}
+
+// @public
 export interface ITerminalTransformOptions extends ITerminalWritableOptions {
     destination: TerminalWritable;
     preventDestinationAutoclose?: boolean;
@@ -320,6 +356,10 @@ export class PrefixProxyTerminalProvider implements ITerminalProvider {
 export class PrintUtilities {
     static getConsoleWidth(): number | undefined;
     // Warning: (ae-incompatible-release-tags) The symbol "printMessageInBox" is marked as @public, but its signature references "ITerminal" which is marked as @beta
+    static printMessageInBox(message: string, terminal: ITerminal, options?: IPrintMessageInBoxOptions): void;
+    // Warning: (ae-incompatible-release-tags) The symbol "printMessageInBox" is marked as @public, but its signature references "ITerminal" which is marked as @beta
+    //
+    // @deprecated (undocumented)
     static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number): void;
     static wrapWords(text: string, maxLineLength?: number, indent?: number): string;
     static wrapWords(text: string, maxLineLength?: number, linePrefix?: string): string;
@@ -457,6 +497,17 @@ export class TerminalStreamWritable extends Writable {
     constructor(options: ITerminalStreamWritableOptions);
     // (undocumented)
     _write(chunk: string | Buffer | Uint8Array, encoding: string, callback: (error?: Error | null) => void): void;
+}
+
+// @public
+export class TerminalTable {
+    constructor(options?: ITerminalTableOptions);
+    // (undocumented)
+    getLines(): string[];
+    // Warning: (ae-incompatible-release-tags) The symbol "printToTerminal" is marked as @public, but its signature references "ITerminal" which is marked as @beta
+    printToTerminal(terminal: ITerminal): void;
+    push(...rows: string[][]): void;
+    toString(): string;
 }
 
 // @public

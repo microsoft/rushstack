@@ -2,6 +2,123 @@
   "name": "@rushstack/hashed-folder-copy-plugin",
   "entries": [
     {
+      "version": "1.3.19",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.3.19",
+      "date": "Sat, 13 Jun 2026 00:16:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.18",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.3.18",
+      "date": "Mon, 08 Jun 2026 15:15:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.17",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.3.17",
+      "date": "Mon, 20 Apr 2026 23:31:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.16",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.3.16",
+      "date": "Mon, 20 Apr 2026 15:15:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.15",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.3.15",
+      "date": "Sat, 18 Apr 2026 03:47:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.14",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.3.14",
+      "date": "Sat, 18 Apr 2026 00:15:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.13",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.3.13",
+      "date": "Fri, 17 Apr 2026 15:14:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.12",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.3.12",
+      "date": "Fri, 10 Apr 2026 22:46:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.11",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.3.11",
+      "date": "Thu, 09 Apr 2026 00:15:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.22.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.10",
       "tag": "@rushstack/hashed-folder-copy-plugin_v1.3.10",
       "date": "Sat, 04 Apr 2026 00:14:00 GMT",

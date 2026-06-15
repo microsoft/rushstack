@@ -592,7 +592,7 @@
             {
               "kind": "Method",
               "canonicalReference": "api-documenter-test!DocClass1#exampleFunction:member(2)",
-              "docComment": "/**\n * This is also an overloaded function.\n *\n * @param x - the number\n */\n",
+              "docComment": "/**\n * This is also an overloaded function.\n *\n * @param x - the number\n *\n * @defaultValue 123\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -2119,7 +2119,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "api-documenter-test!IDocInterface5#regularProperty:member",
-              "docComment": "/**\n * Property of type string that does something\n */\n",
+              "docComment": "/**\n * Property of type string that does something\n *\n * @defaultValue \"Hello World\"\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",

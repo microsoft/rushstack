@@ -187,7 +187,7 @@ describe(AsyncOperationQueue.name, () => {
     // Simulate cobuild retry: operation returns to Ready
     firstAssigned.status = OperationStatus.Ready;
 
-    // Assign all three — untried operations should come before the retry
+    // Assign all three - untried operations should come before the retry
     const results: OperationExecutionRecord[] = [];
     for await (const item of queue) {
       results.push(item);
@@ -222,7 +222,7 @@ describe(AsyncOperationQueue.name, () => {
     opC.status = OperationStatus.Success;
     queue.complete(opC);
 
-    // B is freshly unblocked (never assigned), A is a cobuild retry — B should be first
+    // B is freshly unblocked (never assigned), A is a cobuild retry - B should be first
     const r3: IteratorResult<OperationExecutionRecord> = await queue.next();
     expect(r3.value).toBe(opB);
 

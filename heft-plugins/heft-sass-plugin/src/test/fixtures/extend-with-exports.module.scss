@@ -1,0 +1,28 @@
+// Tests that @extend / placeholder selectors work alongside :export.
+%button-base {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 2px;
+}
+
+$color-primary: #0078d4;
+$color-danger: #d13438;
+
+.primaryButton {
+  @extend %button-base;
+  background-color: $color-primary;
+  color: white;
+}
+
+.dangerButton {
+  @extend %button-base;
+  background-color: $color-danger;
+  color: white;
+}
+
+:export {
+  colorPrimary: #{$color-primary};
+  colorDanger: #{$color-danger};
+}

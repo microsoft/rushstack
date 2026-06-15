@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 import type { INpmCheckPackageJson, INpmCheckState } from './interfaces/INpmCheck.ts';
 import type { INpmCheckPackageSummary } from './interfaces/INpmCheckPackageSummary';
 import createPackageSummary from './CreatePackageSummary';
@@ -30,5 +28,5 @@ function getDependencies(pkg: INpmCheckPackageJson | undefined): Record<string, 
     return undefined;
   }
 
-  return _.extend(pkg.dependencies, pkg.devDependencies);
+  return Object.assign(pkg.dependencies, pkg.devDependencies);
 }

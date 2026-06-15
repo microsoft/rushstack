@@ -159,7 +159,7 @@ describe(PackageExtractor.name, () => {
         projectConfigurations: [],
         linkCreation: 'default'
       })
-    ).rejects.toThrowError('Main project "project-that-not-exist" was not found in the list of projects');
+    ).rejects.toThrow('Main project "project-that-not-exist" was not found in the list of projects');
   });
 
   it('should throw error if contains symlink outsides targetRootFolder', async () => {
@@ -182,7 +182,7 @@ describe(PackageExtractor.name, () => {
         createArchiveOnly: false,
         includeNpmIgnoreFiles: true
       })
-    ).rejects.toThrowError(/Symlink targets not under folder/);
+    ).rejects.toThrow(/Symlink targets not under folder/);
   });
 
   it('should exclude specified dependencies', async () => {

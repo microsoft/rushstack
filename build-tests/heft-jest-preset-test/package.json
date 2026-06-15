@@ -10,12 +10,12 @@
     "_phase:test": "heft run --only test -- --clean && node ./config/verify-coverage.js"
   },
   "devDependencies": {
-    "@jest/types": "29.5.0",
+    "@jest/types": "30.3.0",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
-    "@types/heft-jest": "1.0.1",
+    "@types/jest": "30.0.0",
     "eslint": "~9.37.0",
     "local-eslint-config": "workspace:*",
     "typescript": "~5.8.2"

@@ -8,6 +8,7 @@ import type { ChangeFile } from '../../api/ChangeFile';
 import { ChangeType, type IChangeInfo } from '../../api/ChangeManagement';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionManager } from '../VersionManager';
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 function _getChanges(changeFiles: Map<string, ChangeFile>, packageName: string): IChangeInfo[] | undefined {
   const changeFile: ChangeFile | undefined = changeFiles.get(packageName);
@@ -22,12 +23,22 @@ describe(VersionManager.name, () => {
   const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
   let versionManager: VersionManager;
 
+  let terminalProvider: StringBufferTerminalProvider;
+  let terminal: Terminal;
+
   beforeEach(() => {
     versionManager = new VersionManager(
       rushConfiguration,
       'test@microsoft.com',
       rushConfiguration.versionPolicyConfiguration
     );
+
+    terminalProvider = new StringBufferTerminalProvider();
+    terminal = new Terminal(terminalProvider);
+  });
+
+  afterEach(() => {
+    expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
   });
 
   /* eslint-disable dot-notation */
@@ -88,7 +99,7 @@ describe(VersionManager.name, () => {
 
   describe(VersionManager.prototype.bumpAsync.name, () => {
     it('bumps a lockStepPolicy to prerelease version', async () => {
-      await versionManager.bumpAsync('testPolicy1', BumpType.prerelease, 'dev', false);
+      await versionManager.bumpAsync(terminal, 'testPolicy1', BumpType.prerelease, 'dev', false);
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
 
@@ -102,7 +113,7 @@ describe(VersionManager.name, () => {
     });
 
     it('bumps a lockStepPolicy without bumpType to prerelease version', async () => {
-      await versionManager.bumpAsync('lockStepWithoutNextBump', BumpType.prerelease, 'dev', false);
+      await versionManager.bumpAsync(terminal, 'lockStepWithoutNextBump', BumpType.prerelease, 'dev', false);
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
 
@@ -120,12 +131,22 @@ describe(`${VersionManager.name} (workspace)`, () => {
   const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
   let versionManager: VersionManager;
 
+  let terminalProvider: StringBufferTerminalProvider;
+  let terminal: Terminal;
+
   beforeEach(() => {
     versionManager = new VersionManager(
       rushConfiguration,
       'test@microsoft.com',
       rushConfiguration.versionPolicyConfiguration
     );
+
+    terminalProvider = new StringBufferTerminalProvider();
+    terminal = new Terminal(terminalProvider);
+  });
+
+  afterEach(() => {
+    expect(terminalProvider.getAllOutputAsChunks({ asLines: true })).toMatchSnapshot();
   });
 
   /* eslint-disable dot-notation */
@@ -186,7 +207,7 @@ describe(`${VersionManager.name} (workspace)`, () => {
 
   describe(VersionManager.prototype.bumpAsync.name, () => {
     it('bumps to prerelease version', async () => {
-      await versionManager.bumpAsync('testPolicy1', BumpType.prerelease, 'dev', false);
+      await versionManager.bumpAsync(terminal, 'testPolicy1', BumpType.prerelease, 'dev', false);
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       const expectedVersion: string = '10.10.1-dev.0';
 

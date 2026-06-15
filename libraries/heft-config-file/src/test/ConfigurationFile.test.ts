@@ -1789,7 +1789,7 @@ describe('ConfigurationFile', () => {
       // The synchronous code path on Windows somehow determines that the unexpected character is
       // a newline on Windows, and a curly brace on other platforms, even though the location is
       // accurate in both cases. Use a regex to match either.
-      expect(() => configFileLoader.loadConfigurationFileForProject(terminal, __dirname)).toThrowError(
+      expect(() => configFileLoader.loadConfigurationFileForProject(terminal, __dirname)).toThrow(
         /In configuration file "<project root>\/lib-commonjs\/test\/errorCases\/invalidJson\/config.json": SyntaxError: Unexpected token '(}|\\n)' at 2:19/
       );
 
@@ -1819,7 +1819,7 @@ describe('ConfigurationFile', () => {
 
       await expect(
         configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         /In configuration file "<project root>\/lib-commonjs\/test\/errorCases\/invalidJson\/config.json": SyntaxError: Unexpected token '(}|\\n)' at 2:19/
       );
 

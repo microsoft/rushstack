@@ -1,6 +1,60 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Sat, 04 Apr 2026 00:14:00 GMT and should not be manually modified.
+This log was last generated on Sat, 13 Jun 2026 00:16:19 GMT and should not be manually modified.
+
+## 1.6.1
+Sat, 13 Jun 2026 00:16:19 GMT
+
+_Version update only_
+
+## 1.6.0
+Mon, 08 Jun 2026 15:15:49 GMT
+
+### Minor changes
+
+- Add `--port` flag to pass a specific dev server port through to the Storybook CLI in serve mode
+
+## 1.5.0
+Mon, 25 May 2026 15:14:31 GMT
+
+### Minor changes
+
+- Add `quiet` option to control whether --quiet is passed to the Storybook CLI, and add `--no-open` flag to suppress automatic browser launch in serve mode
+
+## 1.4.11
+Mon, 20 Apr 2026 23:31:13 GMT
+
+_Version update only_
+
+## 1.4.10
+Mon, 20 Apr 2026 15:15:24 GMT
+
+_Version update only_
+
+## 1.4.9
+Sat, 18 Apr 2026 03:47:10 GMT
+
+_Version update only_
+
+## 1.4.8
+Sat, 18 Apr 2026 00:15:17 GMT
+
+_Version update only_
+
+## 1.4.7
+Fri, 17 Apr 2026 15:14:57 GMT
+
+_Version update only_
+
+## 1.4.6
+Fri, 10 Apr 2026 22:46:34 GMT
+
+_Version update only_
+
+## 1.4.5
+Thu, 09 Apr 2026 00:15:07 GMT
+
+_Version update only_
 
 ## 1.4.4
 Sat, 04 Apr 2026 00:14:00 GMT

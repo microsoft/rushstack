@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`CacheEntryId Invalid pattern names Throws an exception for an invalid pattern (/[hash]) 1`] = `"Cache entry name patterns may not start with a slash."`;
 

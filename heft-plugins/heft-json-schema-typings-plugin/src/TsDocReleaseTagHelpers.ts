@@ -5,7 +5,7 @@ export const X_TSDOC_RELEASE_TAG_KEY: 'x-tsdoc-release-tag' = 'x-tsdoc-release-t
 const RELEASE_TAG_PATTERN: RegExp = /^@[a-z]+$/;
 
 /**
- * Validates that a string looks like a TSDoc release tag — a single lowercase
+ * Validates that a string looks like a TSDoc release tag - a single lowercase
  * word starting with `@` (e.g. `@public`, `@beta`, `@internal`).
  */
 export function _validateTsDocReleaseTag(value: string, schemaPath: string): void {

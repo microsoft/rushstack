@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`CustomTipsConfiguration formatting (a long message with an indented line) _showErrorTip prints an expected message 1`] = `
 Array [

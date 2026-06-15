@@ -1,11 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as lodash from 'lodash';
+function htmlEscape(str: string): string {
+  return str.replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] ?? c
+  );
+}
 
 export class ChunkWithoutStringsClass {
   public doStuff(): void {
     // eslint-disable-next-line no-console
-    console.log(lodash.escape('STATIC STRING'));
+    console.log(htmlEscape('STATIC STRING'));
   }
 }

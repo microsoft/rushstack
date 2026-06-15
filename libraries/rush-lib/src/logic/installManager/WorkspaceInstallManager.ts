@@ -469,6 +469,46 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       workspaceFile.setCatalogs(catalogs);
     }
 
+    // Set allowBuilds in the workspace file for pnpm 11+ (replaces onlyBuiltDependencies/neverBuiltDependencies)
+    if (
+      this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+      semver.gte(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '11.0.0')
+    ) {
+      if (pnpmOptions.globalAllowBuilds) {
+        workspaceFile.setAllowBuilds(pnpmOptions.globalAllowBuilds);
+      } else if (
+        pnpmOptions.globalOnlyBuiltDependencies ||
+        pnpmOptions.globalNeverBuiltDependencies
+      ) {
+        // Backward compatibility: convert globalOnlyBuiltDependencies/globalNeverBuiltDependencies
+        // to allowBuilds format for pnpm 11+
+        const allowBuilds: Record<string, boolean> = {};
+        if (pnpmOptions.globalOnlyBuiltDependencies) {
+          for (const pkg of pnpmOptions.globalOnlyBuiltDependencies) {
+            allowBuilds[pkg] = true;
+          }
+        }
+        if (pnpmOptions.globalNeverBuiltDependencies) {
+          for (const pkg of pnpmOptions.globalNeverBuiltDependencies) {
+            allowBuilds[pkg] = false;
+          }
+        }
+        workspaceFile.setAllowBuilds(allowBuilds);
+      }
+    } else if (
+      pnpmOptions.globalAllowBuilds &&
+      this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined
+    ) {
+      this._terminal.writeWarningLine(
+        Colorize.yellow(
+          `Your version of pnpm (${this.rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+            `doesn't support the "globalAllowBuilds" field in ` +
+            `${this.rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+            'Remove this field or upgrade to pnpm 11.0.0 or newer.'
+        )
+      );
+    }
+
     // Save the generated workspace file. Don't update the file timestamp unless the content has changed,
     // since "rush install" will consider this timestamp
     workspaceFile.save(workspaceFile.workspaceFilename, { onlyIfChanged: true });

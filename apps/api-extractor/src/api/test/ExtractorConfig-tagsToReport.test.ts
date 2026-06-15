@@ -31,6 +31,6 @@ describe('ExtractorConfig-tagsToReport', () => {
       ExtractorConfig.loadFileAndPrepare(
         path.join(testDataFolder, 'invalid-tags-to-report/api-extractor.json')
       )
-    ).toThrowError(expectedErrorMessage);
+    ).toThrow(expectedErrorMessage);
   });
 });

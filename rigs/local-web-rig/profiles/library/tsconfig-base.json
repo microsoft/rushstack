@@ -12,7 +12,7 @@
     "rootDir": "${configDir}/src",
     "rootDirs": ["${configDir}/src", "${configDir}/temp/sass-ts"],
 
-    "types": ["heft-jest", "webpack-env"],
+    "types": ["jest", "webpack-env"],
     "typeRoots": ["${configDir}/node_modules/@types", "../../node_modules/@types"]
   },
   "include": ["${configDir}/src/**/*.ts", "${configDir}/src/**/*.tsx"]

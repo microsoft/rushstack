@@ -1,0 +1,8 @@
+{
+  "name": "d",
+  "version": "1.0.0",
+  "description": "Project D uses only semver from default catalog",
+  "dependencies": {
+    "semver": "catalog:"
+  }
+}

@@ -20,5 +20,6 @@ export const CONFIG_CA_CERTIFICATE_FILENAME: string = 'caCertificateFilename';
 export const CONFIG_CERTIFICATE_FILENAME: string = 'certificateFilename';
 export const CONFIG_KEY_FILENAME: string = 'keyFilename';
 export const CONFIG_STORE_PATH: string = 'storePath';
+export const CONFIG_HOME_DIRECTORY: string = 'homeDirectory';
 
 export const VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS: string = 'workbench.action.openSettings';

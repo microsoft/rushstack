@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "nonexistent-package",
+      "type": "patch",
+      "comment": "Change for a project that does not exist"
+    }
+  ]
+}

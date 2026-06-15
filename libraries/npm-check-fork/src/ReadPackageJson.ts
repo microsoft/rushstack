@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 import type { INpmCheckPackageJson } from './interfaces/INpmCheck.ts';
 
 export default function readPackageJson(filename: string): INpmCheckPackageJson {
@@ -14,5 +12,5 @@ export default function readPackageJson(filename: string): INpmCheckPackageJson 
       error = new Error(`A package.json was found at ${filename}, but it is not valid.`);
     }
   }
-  return _.extend({ devDependencies: {}, dependencies: {}, error: error }, pkg);
+  return { devDependencies: {}, dependencies: {}, error, ...pkg } as INpmCheckPackageJson;
 }

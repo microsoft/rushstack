@@ -21,6 +21,7 @@ import type { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 import type { IAstModuleExportInfo } from '../analyzer/AstModule';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
+import { SyntaxHelpers } from '../analyzer/SyntaxHelpers';
 import type { AstEntity } from '../analyzer/AstEntity';
 
 /**
@@ -216,7 +217,10 @@ export class DtsRollupGenerator {
           if (collectorEntity.nameForEmit === exportedName) {
             exportClauses.push(collectorEntity.nameForEmit);
           } else {
-            exportClauses.push(`${collectorEntity.nameForEmit} as ${exportedName}`);
+            const safeExportedName: string = SyntaxHelpers.isSafeUnquotedMemberIdentifier(exportedName)
+              ? exportedName
+              : JSON.stringify(exportedName);
+            exportClauses.push(`${collectorEntity.nameForEmit} as ${safeExportedName}`);
           }
         }
         writer.writeLine(exportClauses.join(',\n'));
@@ -447,6 +451,12 @@ export class DtsRollupGenerator {
                 modification.suffix += nodeToTrim.nextSibling.separator;
                 nodeToTrim.nextSibling.modification.skipAll();
               }
+            }
+
+            if (modification.suffix.trim().length === 0 && modification.prefix.trim().length === 0) {
+              // In case of blank prefix and suffix, remove indentation to avoid blank lines in place of removed members
+              modification.suffix = '';
+              modification.prefix = '';
             }
 
             trimmed = true;

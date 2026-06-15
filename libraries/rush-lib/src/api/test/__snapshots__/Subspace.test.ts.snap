@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Subspace getPackageJsonInjectedDependenciesHash computes a hash when injected dependencies exist 1`] = `"d0931e89ec05817885cbf2623217f99c90ab3ab4"`;

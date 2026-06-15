@@ -205,7 +205,7 @@ describe(Async.name, () => {
         if (item === 3) throw new Error('Something broke');
       });
 
-      await expect(() => Async.forEachAsync(array, fn, { concurrency: 3 })).rejects.toThrowError(
+      await expect(() => Async.forEachAsync(array, fn, { concurrency: 3 })).rejects.toThrow(
         'Something broke'
       );
       expect(fn).toHaveBeenCalledTimes(3);
@@ -222,7 +222,7 @@ describe(Async.name, () => {
         if (item === 3) throw new Error('Something broke');
       }) as unknown as (item: number) => Promise<void>;
 
-      await expect(() => Async.forEachAsync(array, fn, { concurrency: 3 })).rejects.toThrowError(
+      await expect(() => Async.forEachAsync(array, fn, { concurrency: 3 })).rejects.toThrow(
         'Something broke'
       );
       expect(fn).toHaveBeenCalledTimes(3);

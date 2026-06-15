@@ -136,13 +136,13 @@ extends:
 
               - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
                 parameters:
-                  Arguments: 'update'
-                  DisplayName: 'Rush Update'
+                  Arguments: 'update-autoinstaller --name plugins'
+                  DisplayName: 'Rush Update Autoinstaller (plugins)'
 
               - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
                 parameters:
-                  Arguments: 'update-autoinstaller --name plugins'
-                  DisplayName: 'Rush Update Autoinstaller (plugins)'
+                  Arguments: 'update'
+                  DisplayName: 'Rush Update'
 
               - bash: |
                   set -e

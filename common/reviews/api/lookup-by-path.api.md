@@ -17,6 +17,13 @@ export interface IGetFirstDifferenceInCommonNodesOptions<TItem extends {}> {
 }
 
 // @beta
+export interface ILookupByPathJson<TSerialized> {
+    delimiter: string;
+    tree: ISerializedPathTrieNode;
+    values: TSerialized[];
+}
+
+// @beta
 export interface IPrefixMatch<TItem extends {}> {
     index: number;
     lastMatch?: IPrefixMatch<TItem>;
@@ -35,6 +42,7 @@ export interface IReadonlyLookupByPath<TItem extends {}> extends Iterable<[strin
     groupByChild<TInfo>(infoByPath: Map<string, TInfo>, delimiter?: string): Map<TItem, Map<string, TInfo>>;
     has(query: string, delimiter?: string): boolean;
     get size(): number;
+    toJson<TSerialized>(serializeValue: (value: TItem) => TSerialized): ILookupByPathJson<TSerialized>;
     // (undocumented)
     get tree(): IReadonlyPathTrieNode<TItem>;
 }
@@ -43,6 +51,12 @@ export interface IReadonlyLookupByPath<TItem extends {}> extends Iterable<[strin
 export interface IReadonlyPathTrieNode<TItem extends {}> {
     readonly children: ReadonlyMap<string, IReadonlyPathTrieNode<TItem>> | undefined;
     readonly value: TItem | undefined;
+}
+
+// @beta
+export interface ISerializedPathTrieNode {
+    children?: Record<string, ISerializedPathTrieNode>;
+    valueIndex?: number;
 }
 
 // @beta
@@ -57,6 +71,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
     findChildPath(childPath: string, delimiter?: string): TItem | undefined;
     findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
     findLongestPrefixMatch(query: string, delimiter?: string): IPrefixMatch<TItem> | undefined;
+    static fromJson<TItem extends {}, TSerialized>(json: ILookupByPathJson<TSerialized>, deserializeValue: (serialized: TSerialized) => TItem): LookupByPath<TItem>;
     get(key: string, delimiter?: string): TItem | undefined;
     getNodeAtPrefix(query: string, delimiter?: string): IReadonlyPathTrieNode<TItem> | undefined;
     groupByChild<TInfo>(infoByPath: Map<string, TInfo>, delimiter?: string): Map<TItem, Map<string, TInfo>>;
@@ -65,6 +80,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
     setItem(serializedPath: string, value: TItem, delimiter?: string): this;
     setItemFromSegments(pathSegments: Iterable<string>, value: TItem): this;
     get size(): number;
+    toJson<TSerialized>(serializeValue: (value: TItem) => TSerialized): ILookupByPathJson<TSerialized>;
     // (undocumented)
     get tree(): IReadonlyPathTrieNode<TItem>;
 }

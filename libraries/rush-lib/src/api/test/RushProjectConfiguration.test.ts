@@ -123,14 +123,14 @@ describe(RushProjectConfiguration.name, () => {
       const rushProjectConfiguration: RushProjectConfiguration | undefined =
         await loadProjectConfigurationAsync('test-project-d');
 
-      expect(() => validateConfiguration(rushProjectConfiguration)).toThrowError();
+      expect(() => validateConfiguration(rushProjectConfiguration)).toThrow();
     });
 
     it('validates that parameters in parameterNamesToIgnore exist for the operation', async () => {
       const rushProjectConfiguration: RushProjectConfiguration | undefined =
         await loadProjectConfigurationAsync('test-project-e');
 
-      expect(() => validateConfiguration(rushProjectConfiguration)).toThrowError();
+      expect(() => validateConfiguration(rushProjectConfiguration)).toThrow();
     });
 
     it('validates nonexistent parameters when operation has valid parameters', async () => {
@@ -140,7 +140,7 @@ describe(RushProjectConfiguration.name, () => {
       // Provide some valid parameters for the operation
       expect(() =>
         validateConfigurationWithParameters(rushProjectConfiguration, ['--production', '--verbose'])
-      ).toThrowError();
+      ).toThrow();
     });
 
     it('validates mix of existent and nonexistent parameters', async () => {
@@ -150,7 +150,7 @@ describe(RushProjectConfiguration.name, () => {
       // Provide some valid parameters, test-project-g references both valid and invalid ones
       expect(() =>
         validateConfigurationWithParameters(rushProjectConfiguration, ['--production', '--verbose'])
-      ).toThrowError();
+      ).toThrow();
     });
   });
 

@@ -5,7 +5,7 @@ import * as path from 'node:path';
 import * as fs from 'node:fs';
 
 import * as nodeResolve from 'resolve';
-import stripJsonComments from 'strip-json-comments';
+import * as jju from 'jju';
 
 import { Helpers } from './Helpers';
 
@@ -309,7 +309,7 @@ export class RigConfig implements IRigConfig {
     try {
       if (!json) {
         const rigConfigFileContent: string = fs.readFileSync(rigConfigFilePath).toString();
-        json = JSON.parse(stripJsonComments(rigConfigFileContent)) as IRigConfigJson;
+        json = jju.parse(rigConfigFileContent) as IRigConfigJson;
       }
       RigConfig._validateSchema(json);
     } catch (error) {
@@ -353,7 +353,7 @@ export class RigConfig implements IRigConfig {
     try {
       if (!json) {
         const rigConfigFileContent: string = (await fs.promises.readFile(rigConfigFilePath)).toString();
-        json = JSON.parse(stripJsonComments(rigConfigFileContent)) as IRigConfigJson;
+        json = jju.parse(rigConfigFileContent) as IRigConfigJson;
       }
 
       RigConfig._validateSchema(json);

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { LookupByPath } from '../LookupByPath';
+import type { ILookupByPathJson } from '../LookupByPath';
 
 describe(LookupByPath.iteratePathSegments.name, () => {
   it('returns empty for an empty string', () => {
@@ -671,5 +672,244 @@ describe(LookupByPath.prototype.groupByChild.name, () => {
     ]);
 
     expect(falsyLookup.groupByChild(infoByPath)).toEqual(expected);
+  });
+});
+
+describe(`${LookupByPath.prototype.toJson.name} and ${LookupByPath.fromJson.name}`, () => {
+  it('round-trips an empty trie', () => {
+    const original = new LookupByPath<number>();
+    const json: ILookupByPathJson<number> = original.toJson((v) => v);
+    const restored: LookupByPath<number> = LookupByPath.fromJson(json, (v) => v);
+
+    expect(restored.size).toEqual(0);
+    expect([...restored]).toEqual([]);
+  });
+
+  it('round-trips with number values', () => {
+    const original = new LookupByPath<number>([
+      ['foo', 1],
+      ['foo/bar', 2],
+      ['baz', 3]
+    ]);
+
+    const json: ILookupByPathJson<number> = original.toJson((v) => v);
+    const restored: LookupByPath<number> = LookupByPath.fromJson(json, (v) => v);
+
+    expect(restored.size).toEqual(3);
+    expect(restored.get('foo')).toEqual(1);
+    expect(restored.get('foo/bar')).toEqual(2);
+    expect(restored.get('baz')).toEqual(3);
+    expect(restored.get('missing')).toEqual(undefined);
+  });
+
+  it('snapshot: serialized JSON for a simple tree', () => {
+    const original = new LookupByPath<number>([
+      ['foo', 1],
+      ['foo/bar', 2],
+      ['baz', 3]
+    ]);
+
+    const json: ILookupByPathJson<number> = original.toJson((v) => v);
+    expect(json).toMatchSnapshot();
+  });
+
+  it('snapshot: serialized JSON with intermediate nodes and custom delimiter', () => {
+    const original = new LookupByPath<string>(
+      [
+        ['a,b,c', 'deep'],
+        ['a,b', 'mid'],
+        ['x', 'top']
+      ],
+      ','
+    );
+
+    const json: ILookupByPathJson<string> = original.toJson((v) => v);
+    expect(json).toMatchSnapshot();
+  });
+
+  it('round-trips with string values', () => {
+    const original = new LookupByPath<string>([
+      ['a', 'alpha'],
+      ['a/b', 'bravo'],
+      ['c', 'charlie']
+    ]);
+
+    const json: ILookupByPathJson<string> = original.toJson((v) => v);
+    const restored: LookupByPath<string> = LookupByPath.fromJson(json, (v) => v);
+
+    expect(restored.size).toEqual(3);
+    expect(restored.get('a')).toEqual('alpha');
+    expect(restored.get('a/b')).toEqual('bravo');
+    expect(restored.get('c')).toEqual('charlie');
+  });
+
+  it('preserves reference equality for shared values', () => {
+    const sharedObj = { name: 'shared' };
+    const original = new LookupByPath<{ name: string }>([
+      ['foo', sharedObj],
+      ['bar', sharedObj],
+      ['baz/qux', sharedObj]
+    ]);
+
+    const json: ILookupByPathJson<{ name: string }> = original.toJson((v) => ({ ...v }));
+    // All three entries should point at the same index
+    expect(json.values.length).toEqual(1);
+    expect(json.values[0]).toEqual({ name: 'shared' });
+
+    const restored: LookupByPath<{ name: string }> = LookupByPath.fromJson(json, (v) => ({ ...v }));
+
+    expect(restored.size).toEqual(3);
+    const fooVal = restored.get('foo');
+    const barVal = restored.get('bar');
+    const bazQuxVal = restored.get('baz/qux');
+
+    // All deserialized values should be the same reference
+    expect(fooVal).toBe(barVal);
+    expect(barVal).toBe(bazQuxVal);
+    expect(fooVal).toEqual({ name: 'shared' });
+  });
+
+  it('keeps non-reference-equal objects with same JSON as separate entries', () => {
+    const obj1 = { name: 'same' };
+    const obj2 = { name: 'same' };
+    // Verify they are not reference-equal
+    expect(obj1).not.toBe(obj2);
+
+    const original = new LookupByPath<{ name: string }>([
+      ['foo', obj1],
+      ['bar', obj2]
+    ]);
+
+    const json: ILookupByPathJson<{ name: string }> = original.toJson((v) => ({ ...v }));
+    // Should have two separate entries even though the JSON is the same
+    expect(json.values.length).toEqual(2);
+
+    const restored: LookupByPath<{ name: string }> = LookupByPath.fromJson(json, (v) => ({ ...v }));
+
+    expect(restored.size).toEqual(2);
+    const fooVal = restored.get('foo');
+    const barVal = restored.get('bar');
+
+    // Values should be structurally equal
+    expect(fooVal).toEqual({ name: 'same' });
+    expect(barVal).toEqual({ name: 'same' });
+
+    // But NOT reference-equal
+    expect(fooVal).not.toBe(barVal);
+  });
+
+  it('round-trips a complex multi-level tree', () => {
+    const original = new LookupByPath<number>([
+      ['foo', 1],
+      ['foo/bar', 2],
+      ['foo/bar/baz', 3],
+      ['foo/bar/baz/qux', 4],
+      ['bar', 5],
+      ['bar/baz', 6]
+    ]);
+
+    const json: ILookupByPathJson<number> = original.toJson((v) => v);
+    const restored: LookupByPath<number> = LookupByPath.fromJson(json, (v) => v);
+
+    expect(restored.size).toEqual(original.size);
+    for (const [path, value] of original) {
+      expect(restored.get(path)).toEqual(value);
+    }
+  });
+
+  it('round-trips with a custom delimiter', () => {
+    const original = new LookupByPath<number>(
+      [
+        ['foo,bar', 1],
+        ['foo,bar,baz', 2],
+        ['qux', 3]
+      ],
+      ','
+    );
+
+    const json: ILookupByPathJson<number> = original.toJson((v) => v);
+    expect(json.delimiter).toEqual(',');
+
+    const restored: LookupByPath<number> = LookupByPath.fromJson(json, (v) => v);
+
+    expect(restored.delimiter).toEqual(',');
+    expect(restored.size).toEqual(3);
+    expect(restored.get('foo,bar')).toEqual(1);
+    expect(restored.get('foo,bar,baz')).toEqual(2);
+    expect(restored.get('qux')).toEqual(3);
+  });
+
+  it('uses custom serializer and deserializer', () => {
+    const original = new LookupByPath<{ id: number; label: string }>([
+      ['a', { id: 1, label: 'one' }],
+      ['b', { id: 2, label: 'two' }]
+    ]);
+
+    const json: ILookupByPathJson<string> = original.toJson((v) => JSON.stringify(v));
+    expect(json.values).toEqual(['{"id":1,"label":"one"}', '{"id":2,"label":"two"}']);
+
+    const restored: LookupByPath<{ id: number; label: string }> = LookupByPath.fromJson(
+      json,
+      (v) => JSON.parse(v) as { id: number; label: string }
+    );
+
+    expect(restored.size).toEqual(2);
+    expect(restored.get('a')).toEqual({ id: 1, label: 'one' });
+    expect(restored.get('b')).toEqual({ id: 2, label: 'two' });
+  });
+
+  it('produces valid JSON for the serialized form', () => {
+    const original = new LookupByPath<number>([
+      ['foo', 1],
+      ['foo/bar', 2]
+    ]);
+
+    const json: ILookupByPathJson<number> = original.toJson((v) => v);
+    const jsonString: string = JSON.stringify(json);
+    const parsed: ILookupByPathJson<number> = JSON.parse(jsonString) as ILookupByPathJson<number>;
+
+    const restored: LookupByPath<number> = LookupByPath.fromJson(parsed, (v) => v);
+    expect(restored.size).toEqual(2);
+    expect(restored.get('foo')).toEqual(1);
+    expect(restored.get('foo/bar')).toEqual(2);
+  });
+
+  it('preserves findChildPath behavior after round-trip', () => {
+    const original = new LookupByPath<number>([
+      ['foo', 1],
+      ['foo/bar', 2],
+      ['baz', 3]
+    ]);
+
+    const json: ILookupByPathJson<number> = original.toJson((v) => v);
+    const restored: LookupByPath<number> = LookupByPath.fromJson(json, (v) => v);
+
+    expect(restored.findChildPath('foo/baz')).toEqual(1);
+    expect(restored.findChildPath('foo/bar/baz')).toEqual(2);
+    expect(restored.findChildPath('baz/anything')).toEqual(3);
+    expect(restored.findChildPath('missing')).toEqual(undefined);
+  });
+
+  it('handles nodes with children but no value', () => {
+    const original = new LookupByPath<number>([
+      ['foo/bar/baz', 1],
+      ['foo/bar/qux', 2]
+    ]);
+
+    const json: ILookupByPathJson<number> = original.toJson((v) => v);
+    // The intermediate nodes 'foo' and 'foo/bar' should exist in the tree but have no valueIndex
+    const fooNode = json.tree.children!.foo;
+    const barNode = fooNode.children!.bar;
+    expect(fooNode.valueIndex).toBeUndefined();
+    expect(barNode.valueIndex).toBeUndefined();
+    expect(barNode.children!.baz.valueIndex).toEqual(0);
+    expect(barNode.children!.qux.valueIndex).toEqual(1);
+
+    const restored: LookupByPath<number> = LookupByPath.fromJson(json, (v) => v);
+    expect(restored.size).toEqual(2);
+    expect(restored.get('foo')).toEqual(undefined);
+    expect(restored.get('foo/bar')).toEqual(undefined);
+    expect(restored.get('foo/bar/baz')).toEqual(1);
+    expect(restored.get('foo/bar/qux')).toEqual(2);
   });
 });

@@ -48,7 +48,8 @@ export {
   type IPnpmPeerDependenciesMeta,
   type PnpmStoreOptions,
   PnpmOptionsConfiguration,
-  type PnpmResolutionMode
+  type PnpmResolutionMode,
+  type PnpmTrustPolicy
 } from './logic/pnpm/PnpmOptionsConfiguration';
 
 export { BuildCacheConfiguration } from './api/BuildCacheConfiguration';

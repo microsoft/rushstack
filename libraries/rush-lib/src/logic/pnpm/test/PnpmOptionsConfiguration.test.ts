@@ -87,17 +87,64 @@ describe(PnpmOptionsConfiguration.name, () => {
     ]);
   });
 
-  it('loads minimumReleaseAge', () => {
+  it('loads allowBuilds', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-allowBuilds.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.globalAllowBuilds)).toEqual({
+      esbuild: true,
+      '@parcel/watcher': true,
+      fsevents: false
+    });
+  });
+
+  it('loads minimumReleaseAgeMinutes', () => {
     const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
       `${__dirname}/jsonFiles/pnpm-config-minimumReleaseAge.json`,
       fakeCommonTempFolder
     );
 
-    expect(pnpmConfiguration.minimumReleaseAge).toEqual(1440);
+    expect(pnpmConfiguration.minimumReleaseAgeMinutes).toEqual(1440);
     expect(TestUtilities.stripAnnotations(pnpmConfiguration.minimumReleaseAgeExclude)).toEqual([
       'webpack',
       '@myorg/*'
     ]);
+  });
+
+  it('loads deprecated minimumReleaseAge as minimumReleaseAgeMinutes', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-minimumReleaseAge-deprecated.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(pnpmConfiguration.minimumReleaseAgeMinutes).toEqual(720);
+  });
+
+  it('throws if both minimumReleaseAge and minimumReleaseAgeMinutes are specified', () => {
+    expect(() =>
+      PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+        `${__dirname}/jsonFiles/pnpm-config-minimumReleaseAge-both.json`,
+        fakeCommonTempFolder
+      )
+    ).toThrow(/Both settings cannot be specified together/);
+  });
+
+  it('loads trustPolicy', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-trustPolicy.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(pnpmConfiguration.trustPolicy).toEqual('no-downgrade');
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.trustPolicyExclude)).toEqual([
+      '@myorg/*',
+      'chokidar@4.0.3',
+      'webpack@4.47.0 || 5.102.1',
+      '@babel/core@7.28.5'
+    ]);
+    expect(pnpmConfiguration.trustPolicyIgnoreAfterMinutes).toEqual(20160);
   });
 
   it('loads catalog and catalogs', () => {

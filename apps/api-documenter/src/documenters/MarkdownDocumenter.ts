@@ -273,6 +273,7 @@ export class MarkdownDocumenter {
       case ApiItemKind.Function:
         this._writeParameterTables(output, apiItem as ApiParameterListMixin);
         this._writeThrowsSection(output, apiItem);
+        this._writeDefaultValueSection(output, apiItem);
         break;
       case ApiItemKind.Namespace:
         this._writePackageOrNamespaceTables(output, apiItem as ApiNamespace);
@@ -285,10 +286,13 @@ export class MarkdownDocumenter {
         break;
       case ApiItemKind.Property:
       case ApiItemKind.PropertySignature:
+        this._writeDefaultValueSection(output, apiItem);
         break;
       case ApiItemKind.TypeAlias:
+        this._writeDefaultValueSection(output, apiItem);
         break;
       case ApiItemKind.Variable:
+        this._writeDefaultValueSection(output, apiItem);
         break;
       default:
         throw new Error('Unsupported API item kind: ' + apiItem.kind);
@@ -463,6 +467,30 @@ export class MarkdownDocumenter {
 
           for (const throwsBlock of throwsBlocks) {
             this._appendSection(output, throwsBlock.content);
+          }
+        }
+      }
+    }
+  }
+
+  private _writeDefaultValueSection(output: DocSection, apiItem: ApiItem): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+
+    if (apiItem instanceof ApiDocumentedItem) {
+      const tsdocComment: DocComment | undefined = apiItem.tsdocComment;
+
+      if (tsdocComment) {
+        // Write the @defaultValue blocks
+        const defaultValueBlocks: DocBlock[] = tsdocComment.customBlocks.filter(
+          (x) => x.blockTag.tagNameWithUpperCase === StandardTags.defaultValue.tagNameWithUpperCase
+        );
+
+        if (defaultValueBlocks.length > 0) {
+          const heading: string = 'Default Value';
+          output.appendNode(new DocHeading({ configuration, title: heading }));
+
+          for (const defaultValueBlock of defaultValueBlocks) {
+            this._appendSection(output, defaultValueBlock.content);
           }
         }
       }

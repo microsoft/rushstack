@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`LocalizationPlugin Handles localized compilation with no async chunks (minified): Content 1`] = `
 Object {

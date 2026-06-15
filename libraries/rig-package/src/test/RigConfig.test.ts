@@ -4,7 +4,7 @@
 import Ajv, { type ValidateFunction } from 'ajv';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import stripJsonComments from 'strip-json-comments';
+import * as jju from 'jju';
 
 import { RigConfig } from '../RigConfig';
 
@@ -131,7 +131,7 @@ describe(RigConfig.name, () => {
 
       expect(rigConfig.rigFound).toBe(true);
 
-      expect(() => rigConfig.getResolvedProfileFolder()).toThrowError(
+      expect(() => rigConfig.getResolvedProfileFolder()).toThrow(
         'The rig profile "missing-profile" is not defined by the rig package "example-rig"'
       );
     });
@@ -145,7 +145,7 @@ describe(RigConfig.name, () => {
         }
       });
 
-      await expect(rigConfig.getResolvedProfileFolderAsync()).rejects.toThrowError(
+      await expect(rigConfig.getResolvedProfileFolderAsync()).rejects.toThrow(
         'The rig profile "missing-profile" is not defined by the rig package "example-rig"'
       );
     });
@@ -203,7 +203,7 @@ describe(RigConfig.name, () => {
 
     // Load the rig.json file
     const rigConfigFileContent: string = fs.readFileSync(rigConfigFilePath).toString();
-    const rigConfigJsonObject: unknown = JSON.parse(stripJsonComments(rigConfigFileContent));
+    const rigConfigJsonObject: unknown = jju.parse(rigConfigFileContent);
 
     // Validate it against our schema
     const valid: boolean = validateRigFile(rigConfigJsonObject) as boolean;

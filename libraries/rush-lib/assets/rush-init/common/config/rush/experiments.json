@@ -125,5 +125,12 @@
    * macOS to store extended attributes on filesystems that don't support them, and should generally not
    * be included in the shared build cache.
    */
-  /*[LINE "HYPOTHETICAL"]*/ "omitAppleDoubleFilesFromBuildCache": true
+  /*[LINE "HYPOTHETICAL"]*/ "omitAppleDoubleFilesFromBuildCache": true,
+
+  /**
+   * If true, "rush change --verify" will report errors if change files reference projects that do not
+   * exist in the Rush configuration, or if change files target a project that belongs to a lockstepped
+   * version policy but is not the policy's main project.
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "strictChangefileValidation": true
 }

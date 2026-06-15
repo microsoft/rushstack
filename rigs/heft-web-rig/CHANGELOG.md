@@ -1,6 +1,103 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Sat, 04 Apr 2026 00:14:00 GMT and should not be manually modified.
+This log was last generated on Sat, 13 Jun 2026 00:16:19 GMT and should not be manually modified.
+
+## 1.4.25
+Sat, 13 Jun 2026 00:16:19 GMT
+
+_Version update only_
+
+## 1.4.24
+Wed, 10 Jun 2026 00:15:42 GMT
+
+_Version update only_
+
+## 1.4.23
+Mon, 08 Jun 2026 15:15:50 GMT
+
+_Version update only_
+
+## 1.4.22
+Tue, 02 Jun 2026 07:30:20 GMT
+
+_Version update only_
+
+## 1.4.21
+Fri, 29 May 2026 18:25:51 GMT
+
+_Version update only_
+
+## 1.4.20
+Thu, 30 Apr 2026 00:15:22 GMT
+
+### Patches
+
+- Bump postcss@~8.5.10 to address CVE GHSA-qx2v-qp2m-jg93
+
+## 1.4.19
+Mon, 20 Apr 2026 23:31:13 GMT
+
+_Version update only_
+
+## 1.4.18
+Mon, 20 Apr 2026 15:15:24 GMT
+
+_Version update only_
+
+## 1.4.17
+Sat, 18 Apr 2026 03:47:10 GMT
+
+_Version update only_
+
+## 1.4.16
+Sat, 18 Apr 2026 00:15:17 GMT
+
+_Version update only_
+
+## 1.4.15
+Fri, 17 Apr 2026 15:14:57 GMT
+
+_Version update only_
+
+## 1.4.14
+Wed, 15 Apr 2026 17:59:12 GMT
+
+### Patches
+
+- Include `es2015.symbol.wellknown` in the default included `lib`s in `tsconfig-base.json`.
+- Replace the `@types/heft-jest` types package with `@types/jest`. The `@types/jest` package now correctly includes the mocking typings.
+
+## 1.4.13
+Wed, 15 Apr 2026 15:14:48 GMT
+
+### Patches
+
+- Include `temp/image-typings` in the build clean folders.
+
+## 1.4.12
+Tue, 14 Apr 2026 01:25:46 GMT
+
+_Version update only_
+
+## 1.4.11
+Sat, 11 Apr 2026 00:31:13 GMT
+
+_Version update only_
+
+## 1.4.10
+Fri, 10 Apr 2026 22:46:34 GMT
+
+_Version update only_
+
+## 1.4.9
+Thu, 09 Apr 2026 23:00:20 GMT
+
+_Version update only_
+
+## 1.4.8
+Thu, 09 Apr 2026 00:15:07 GMT
+
+_Version update only_
 
 ## 1.4.7
 Sat, 04 Apr 2026 00:14:00 GMT

@@ -3,7 +3,6 @@
 
 import os from 'node:os';
 
-import _ from 'lodash';
 import semver from 'semver';
 
 import { Async } from '@rushstack/node-core-library';
@@ -47,11 +46,9 @@ export default async function getNpmInfo(packageName: string): Promise<INpmRegis
 
   const rawData: INpmRegistryPackageResponse = result.data!;
   const CRAZY_HIGH_SEMVER: string = '8000.0.0';
-  const sortedVersions: string[] = _(rawData.versions)
-    .keys()
-    .remove((version: string) => semver.gt(CRAZY_HIGH_SEMVER, version))
-    .sort(semver.compare)
-    .valueOf();
+  const sortedVersions: string[] = Object.keys(rawData.versions)
+    .filter((version: string) => semver.gt(CRAZY_HIGH_SEMVER, version))
+    .sort(semver.compare);
 
   const latest: string = rawData['dist-tags'].latest;
   const next: string = rawData['dist-tags'].next;

@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "lockstep-secondary",
+      "type": "patch",
+      "comment": "Change for a non-main lockstep project"
+    }
+  ]
+}

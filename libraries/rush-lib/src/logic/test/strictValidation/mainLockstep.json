@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "lockstep-main",
+      "type": "patch",
+      "comment": "Change for the main lockstep project"
+    }
+  ]
+}

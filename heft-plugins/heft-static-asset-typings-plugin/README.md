@@ -3,12 +3,12 @@
 This Heft plugin generates TypeScript `.d.ts` typings for static asset files, enabling type-safe
 `import` statements for non-TypeScript files. It provides two task plugins:
 
-- **`resource-assets-plugin`** — Generates `.d.ts` typings for _resource_ files such as images (`.png`,
+- **`resource-assets-plugin`** - Generates `.d.ts` typings for _resource_ files such as images (`.png`,
   `.jpg`, `.svg`, etc.) and fonts. These are opaque binary blobs whose content is not meaningful to
   JavaScript; the generated typing simply exports a default `string` representing the asset URL
   (e.g. as resolved by a bundler's asset loader).
 
-- **`source-assets-plugin`** — Generates `.d.ts` typings _and_ JavaScript module output for _source_
+- **`source-assets-plugin`** - Generates `.d.ts` typings _and_ JavaScript module output for _source_
   files (`.html`, `.css`, `.txt`, `.md`, etc.) whose textual content is consumed at runtime. The
   generated JS modules read the file and re-export its content as a default `string`, making these
   assets importable as ES modules.
@@ -31,7 +31,7 @@ Both plugins support incremental and watch-mode builds.
 
    ### Resource assets (images, fonts, etc.)
 
-   **Inline configuration** — specify options directly in heft.json:
+   **Inline configuration** - specify options directly in heft.json:
 
    ```jsonc
    {
@@ -62,7 +62,7 @@ Both plugins support incremental and watch-mode builds.
    }
    ```
 
-   **File configuration** — load settings from a riggable config file:
+   **File configuration** - load settings from a riggable config file:
 
    ```jsonc
    {
@@ -196,7 +196,7 @@ Provide configuration directly in heft.json under `options.config`:
 
 | Option              | Type       | Default                  | Description                                     |
 | ------------------- | ---------- | ------------------------ | ----------------------------------------------- |
-| `fileExtensions`    | `string[]` | —                        | **(required)** File extensions to generate typings for. |
+| `fileExtensions`    | `string[]` | -                        | **(required)** File extensions to generate typings for. |
 | `generatedTsFolders`| `string[]` | `["temp/static-asset-ts"]` | Folders where generated `.d.ts` files are written. The first entry should be listed in `rootDirs` so TypeScript can resolve the asset imports during type-checking. Additional entries are typically your project's published typings folder(s). |
 | `sourceFolderPath`  | `string`   | `"src"`                  | Source folder to scan for asset files.           |
 
@@ -206,7 +206,7 @@ Includes all the above, plus:
 
 | Option              | Type       | Default                  | Description                                          |
 | ------------------- | ---------- | ------------------------ | ---------------------------------------------------- |
-| `cjsOutputFolders`  | `string[]` | —                        | **(required)** Output folders for generated CommonJS `.js` modules. |
+| `cjsOutputFolders`  | `string[]` | -                        | **(required)** Output folders for generated CommonJS `.js` modules. |
 | `esmOutputFolders`   | `string[]` | `[]`                    | Output folders for generated ESM `.js` modules.      |
 
 ### File mode (`configType: "file"`)

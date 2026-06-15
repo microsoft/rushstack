@@ -439,7 +439,7 @@ describe(CommandLineParameterBase.name, () => {
       }
 
       expect(error).toMatch(
-        /^The \[u environment variable value looks like a JSON array but failed to parse: Unexpected token /
+        /^The ENV_COLOR environment variable value looks like a JSON array but failed to parse: Unexpected token /
       );
     });
 

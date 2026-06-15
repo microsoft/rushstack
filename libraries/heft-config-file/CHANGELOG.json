@@ -2,6 +2,95 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.20.10",
+      "tag": "@rushstack/heft-config-file_v0.20.10",
+      "date": "Mon, 20 Apr 2026 23:31:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.20.9",
+      "tag": "@rushstack/heft-config-file_v0.20.9",
+      "date": "Sat, 18 Apr 2026 03:47:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove `@ungap/structured-clone` polyfill; use native `structuredClone` (Node 18+)."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.7.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.23.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.20.8",
+      "tag": "@rushstack/heft-config-file_v0.20.8",
+      "date": "Sat, 18 Apr 2026 00:15:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.22.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.20.7",
+      "tag": "@rushstack/heft-config-file_v0.20.7",
+      "date": "Fri, 17 Apr 2026 15:14:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.22.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.20.6",
+      "tag": "@rushstack/heft-config-file_v0.20.6",
+      "date": "Fri, 10 Apr 2026 22:46:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve documentation in README."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.20.5",
+      "tag": "@rushstack/heft-config-file_v0.20.5",
+      "date": "Thu, 09 Apr 2026 00:15:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.22.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.22.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.20.4",
       "tag": "@rushstack/heft-config-file_v0.20.4",
       "date": "Tue, 31 Mar 2026 15:14:14 GMT",

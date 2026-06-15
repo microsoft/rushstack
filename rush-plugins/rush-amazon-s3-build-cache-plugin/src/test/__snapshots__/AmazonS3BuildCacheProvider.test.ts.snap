@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`AmazonS3BuildCacheProvider Has an expected cached credential name (write allowed) 1`] = `
 Array [

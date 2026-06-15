@@ -78,8 +78,5 @@
   "moduleFileExtensions": ["cjs", "js", "json", "node"],
 
   // When using the heft-jest-plugin, these will be replaced with the resolved module location
-  "setupFiles": ["../lib-commonjs/exports/jest-global-setup.js"],
-
-  // When using the heft-jest-plugin, these will be replaced with the resolved module location
   "resolver": "../lib-commonjs/exports/jest-improved-resolver.js"
 }

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Terminal 01 color enabled 01 basic terminal functions 01 write 01 writes a single message: output 1`] = `
 Object {

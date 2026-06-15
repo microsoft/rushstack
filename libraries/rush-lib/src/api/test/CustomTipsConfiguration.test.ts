@@ -25,7 +25,7 @@ describe(CustomTipsConfiguration.name, () => {
   it('reports an error for duplicate tips', () => {
     expect(() => {
       new CustomTipsConfiguration(`${__dirname}/jsonFiles/custom-tips.error.json`);
-    }).toThrowError('TIP_RUSH_INCONSISTENT_VERSIONS');
+    }).toThrow('TIP_RUSH_INCONSISTENT_VERSIONS');
   });
 
   function runFormattingTests(testName: string, customTipText: string): void {

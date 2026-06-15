@@ -483,6 +483,7 @@ export interface IExperimentsJson {
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     printEventHooksOutputToConsole?: boolean;
     rushAlerts?: boolean;
+    strictChangefileValidation?: boolean;
     useDirectFileTransfersForBuildCache?: boolean;
     useIPCScriptsInWatchMode?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
@@ -755,6 +756,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     alwaysFullInstall?: boolean;
     alwaysInjectDependenciesFromOtherSubspaces?: boolean;
     autoInstallPeers?: boolean;
+    globalAllowBuilds?: Record<string, boolean>;
     globalAllowedDeprecatedVersions?: Record<string, string>;
     globalCatalogs?: Record<string, Record<string, string>>;
     globalIgnoredOptionalDependencies?: string[];
@@ -764,13 +766,18 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalPackageExtensions?: Record<string, IPnpmPackageExtension>;
     globalPatchedDependencies?: Record<string, string>;
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
+    // @deprecated (undocumented)
     minimumReleaseAge?: number;
     minimumReleaseAgeExclude?: string[];
+    minimumReleaseAgeMinutes?: number;
     pnpmLockfilePolicies?: IPnpmLockfilePolicies;
     pnpmStore?: PnpmStoreLocation;
     preventManualShrinkwrapChanges?: boolean;
     resolutionMode?: PnpmResolutionMode;
     strictPeerDependencies?: boolean;
+    trustPolicy?: PnpmTrustPolicy;
+    trustPolicyExclude?: string[];
+    trustPolicyIgnoreAfterMinutes?: number;
     unsupportedPackageJsonSettings?: unknown;
     useWorkspaces?: boolean;
 }
@@ -1175,6 +1182,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly alwaysFullInstall: boolean | undefined;
     readonly alwaysInjectDependenciesFromOtherSubspaces: boolean | undefined;
     readonly autoInstallPeers: boolean | undefined;
+    readonly globalAllowBuilds: Record<string, boolean> | undefined;
     readonly globalAllowedDeprecatedVersions: Record<string, string> | undefined;
     readonly globalCatalogs: Record<string, Record<string, string>> | undefined;
     readonly globalIgnoredOptionalDependencies: string[] | undefined;
@@ -1190,15 +1198,21 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     static loadFromJsonFileOrThrow(jsonFilePath: string, commonTempFolder: string): PnpmOptionsConfiguration;
     // @internal (undocumented)
     static loadFromJsonObject(json: _IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration;
-    readonly minimumReleaseAge: number | undefined;
+    // @deprecated (undocumented)
+    get minimumReleaseAge(): number | undefined;
     readonly minimumReleaseAgeExclude: string[] | undefined;
+    readonly minimumReleaseAgeMinutes: number | undefined;
     readonly pnpmLockfilePolicies: IPnpmLockfilePolicies | undefined;
     readonly pnpmStore: PnpmStoreLocation;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;
     readonly resolutionMode: PnpmResolutionMode | undefined;
     readonly strictPeerDependencies: boolean;
+    readonly trustPolicy: PnpmTrustPolicy | undefined;
+    readonly trustPolicyExclude: string[] | undefined;
+    readonly trustPolicyIgnoreAfterMinutes: number | undefined;
     readonly unsupportedPackageJsonSettings: unknown | undefined;
+    updateGlobalAllowBuilds(allowBuilds: Record<string, boolean> | undefined): void;
     updateGlobalOnlyBuiltDependencies(onlyBuiltDependencies: string[] | undefined): void;
     updateGlobalPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void;
     readonly useWorkspaces: boolean;
@@ -1212,6 +1226,9 @@ export type PnpmStoreLocation = 'local' | 'global';
 
 // @public @deprecated (undocumented)
 export type PnpmStoreOptions = PnpmStoreLocation;
+
+// @public
+export type PnpmTrustPolicy = 'no-downgrade' | 'off';
 
 // @beta (undocumented)
 export class ProjectChangeAnalyzer {

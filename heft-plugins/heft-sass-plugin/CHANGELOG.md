@@ -1,6 +1,90 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Sat, 04 Apr 2026 00:14:00 GMT and should not be manually modified.
+This log was last generated on Sat, 13 Jun 2026 00:16:18 GMT and should not be manually modified.
+
+## 1.4.3
+Sat, 13 Jun 2026 00:16:18 GMT
+
+### Patches
+
+- Fix a regression where plain `.css` files referenced from another stylesheet via `@use`/`@import` could not be resolved by the importer.
+
+## 1.4.2
+Mon, 08 Jun 2026 15:15:50 GMT
+
+_Version update only_
+
+## 1.4.1
+Tue, 02 Jun 2026 07:30:20 GMT
+
+### Patches
+
+- Fix sourceMap: true crashing on Linux/macOS when compiled .scss files use @use or @import
+
+## 1.4.0
+Fri, 29 May 2026 18:25:51 GMT
+
+### Minor changes
+
+- Add opt-in sourceMap option to emit `.css.map` files and `sourceMappingURL` comments alongside compiled CSS.
+
+## 1.3.8
+Thu, 30 Apr 2026 00:15:22 GMT
+
+### Patches
+
+- Bump postcss@~8.5.10 to address CVE GHSA-qx2v-qp2m-jg93
+
+## 1.3.7
+Mon, 20 Apr 2026 23:31:13 GMT
+
+_Version update only_
+
+## 1.3.6
+Mon, 20 Apr 2026 15:15:24 GMT
+
+_Version update only_
+
+## 1.3.5
+Sat, 18 Apr 2026 03:47:10 GMT
+
+_Version update only_
+
+## 1.3.4
+Sat, 18 Apr 2026 00:15:17 GMT
+
+_Version update only_
+
+## 1.3.3
+Fri, 17 Apr 2026 15:14:57 GMT
+
+_Version update only_
+
+## 1.3.2
+Sat, 11 Apr 2026 00:31:13 GMT
+
+### Patches
+
+- Fix generated JS shims and `.d.ts` for `.module.scss` files that contain only `:global` styles and have no local CSS class exports
+- Improve project README.
+
+## 1.3.1
+Fri, 10 Apr 2026 22:46:34 GMT
+
+_Version update only_
+
+## 1.3.0
+Thu, 09 Apr 2026 23:00:20 GMT
+
+### Minor changes
+
+- Add `preserveIcssExports` option to keep the ICSS `:export` block in emitted CSS output, required when downstream webpack loaders (e.g. `css-loader` icssParser) need to extract `:export` values at bundle time.
+- Add a `doNotTrimOriginalFileExtension` option. When enabled, the original file extension is preserved in the CSS output filename (e.g. `styles.scss` emits `styles.scss.css` instead of `styles.css`)
+
+## 1.2.11
+Thu, 09 Apr 2026 00:15:07 GMT
+
+_Version update only_
 
 ## 1.2.10
 Sat, 04 Apr 2026 00:14:00 GMT
