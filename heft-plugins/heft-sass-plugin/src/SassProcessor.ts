@@ -211,7 +211,7 @@ export class SassProcessor {
   private _configFilePath: string | undefined;
 
   public constructor(options: ISassProcessorOptions) {
-    const { silenceDeprecations, excludeFiles } = options;
+    const { silenceDeprecations, excludeFiles, ignoreDeprecationsInDependencies } = options;
 
     const { isFileModule, allFileExtensions } = buildExtensionClassifier(options);
 
@@ -271,6 +271,7 @@ export class SassProcessor {
         }
       ],
       silenceDeprecations: deprecationsToSilence,
+      quietDeps: ignoreDeprecationsInDependencies,
       ...(options.sourceMap && { sourceMap: true, sourceMapIncludeSources: true })
     };
   }
