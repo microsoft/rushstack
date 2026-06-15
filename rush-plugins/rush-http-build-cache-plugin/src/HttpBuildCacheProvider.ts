@@ -212,7 +212,10 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         // maxAttempts is 1 because the file read stream is consumed after the first attempt
         // and cannot be replayed. Downloads use MAX_HTTP_CACHE_ATTEMPTS since each retry
         // issues a fresh GET with no request body.
-        maxAttempts: 1
+        maxAttempts: 1,
+        // Pre-resolve credentials for stream uploads because the credential fallback path
+        // in _makeHttpCoreRequestAsync cannot replay a consumed stream body.
+        credentialOptions: CredentialsOptions.Required
       });
 
       if (result !== false) {

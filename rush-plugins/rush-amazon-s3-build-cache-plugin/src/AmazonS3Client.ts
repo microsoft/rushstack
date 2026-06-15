@@ -16,6 +16,7 @@ import {
   type IGetFetchOptions,
   type IFetchOptionsWithBody,
   type IWebClientResponse,
+  type IWebClientResponseBase,
   type IWebClientStreamResponse,
   type WebClient,
   AUTHORIZATION_HEADER_NAME
@@ -141,13 +142,7 @@ export class AmazonS3Client {
     this._writeDebugLine('Reading object from S3');
     return await this._sendCacheRequestWithRetriesAsync(async () => {
       const response: IWebClientResponse = await this._makeSignedRequestAsync('GET', objectName);
-      return this._handleGetResponseAsync(
-        response.status,
-        response.statusText,
-        response.ok,
-        async () => await response.getBufferAsync(),
-        async () => await this._getS3ErrorAsync(response)
-      );
+      return this._handleGetResponseAsync(response, async () => await response.getBufferAsync());
     });
   }
 
@@ -191,21 +186,13 @@ export class AmazonS3Client {
         true
       );
       return this._handleGetResponseAsync<boolean>(
-        response.status,
-        response.statusText,
-        response.ok,
+        response,
         async () => {
           const writeStream: FileSystemWriteStream = await FileSystem.createWriteStreamAsync(localFilePath, {
             ensureFolderExists: true
           });
           await pipeline(response.stream, writeStream);
           return true;
-        },
-        async () => {
-          response.stream.resume();
-          return new Error(
-            `Amazon S3 responded with status code ${response.status} (${response.statusText})`
-          );
         },
         () => response.stream.resume()
       );
@@ -263,35 +250,34 @@ export class AmazonS3Client {
 
   /**
    * Shared response handling for GET requests (both buffer and stream).
-   * The `getSuccessResult` callback extracts the response payload (Buffer or Readable).
-   * The `getError` callback constructs an error from the response.
+   * The `getSuccessResult` callback extracts the response payload (Buffer or stream-to-file result).
    * The optional `cleanup` callback drains stream responses on non-success paths.
    */
   private async _handleGetResponseAsync<T>(
-    status: number,
-    statusText: string | undefined,
-    ok: boolean,
+    response: IWebClientResponseBase,
     getSuccessResult: () => T | Promise<T>,
-    getError: () => Promise<Error>,
     cleanup?: () => void
   ): Promise<RetryableRequestResponse<T | undefined>> {
-    if (ok) {
+    if (response.ok) {
       return {
         hasNetworkError: false,
         response: await getSuccessResult()
       };
-    } else if (status === 404) {
+    } else if (response.status === 404) {
       cleanup?.();
       return {
         hasNetworkError: false,
         response: undefined
       };
-    } else if ((status === 400 || status === 401 || status === 403) && !this._credentials) {
+    } else if (
+      (response.status === 400 || response.status === 401 || response.status === 403) &&
+      !this._credentials
+    ) {
       cleanup?.();
       // unauthorized due to not providing credentials,
       // silence error for better DX when e.g. running locally without credentials
       this._writeWarningLine(
-        `No credentials found and received a ${status}`,
+        `No credentials found and received a ${response.status}`,
         ' response code from the cloud storage.',
         ' Maybe run rush update-cloud-credentials',
         ' or set the RUSH_BUILD_CACHE_CREDENTIAL env'
@@ -300,15 +286,14 @@ export class AmazonS3Client {
         hasNetworkError: false,
         response: undefined
       };
-    } else if (status === 400 || status === 401 || status === 403) {
+    } else if (response.status === 400 || response.status === 401 || response.status === 403) {
       cleanup?.();
-      throw await getError();
+      throw new Error(`Amazon S3 responded with status code ${response.status} (${response.statusText})`);
     } else {
       cleanup?.();
-      const error: Error = await getError();
       return {
         hasNetworkError: true,
-        error
+        error: new Error(`Amazon S3 responded with status code ${response.status} (${response.statusText})`)
       };
     }
   }
