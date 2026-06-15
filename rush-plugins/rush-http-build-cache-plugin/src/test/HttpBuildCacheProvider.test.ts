@@ -175,7 +175,7 @@ Array [
       const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session);
       const expectedBuffer = Buffer.from('cache-contents');
 
-      mocked(fetchFn).mockResolvedValue({
+      jest.mocked(fetchFn).mockResolvedValue({
         status: 200,
         statusText: 'OK',
         ok: true,
@@ -209,7 +209,7 @@ Array [
       const session: RushSession = {} as RushSession;
       const provider = new HttpBuildCacheProvider(WRITE_ALLOWED_OPTIONS, session);
 
-      mocked(fetchFn).mockResolvedValue({
+      jest.mocked(fetchFn).mockResolvedValue({
         status: 200,
         statusText: 'OK',
         ok: true,
@@ -239,7 +239,7 @@ Array [
       const session: RushSession = {} as RushSession;
       const provider = new HttpBuildCacheProvider(WRITE_ALLOWED_OPTIONS, session);
 
-      mocked(fetchFn).mockResolvedValue({
+      jest.mocked(fetchFn).mockResolvedValue({
         status: 500,
         statusText: 'InternalServerError',
         ok: false
@@ -262,7 +262,7 @@ Array [
       const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session);
       const mockStream = new Readable({ read() {} });
 
-      mocked(streamFetchFn).mockResolvedValue({
+      jest.mocked(streamFetchFn).mockResolvedValue({
         status: 200,
         statusText: 'OK',
         ok: true,
@@ -295,7 +295,7 @@ Array [
       const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session);
       const mockStream = new Readable({ read() {} });
 
-      mocked(streamFetchFn).mockResolvedValue({
+      jest.mocked(streamFetchFn).mockResolvedValue({
         status: 404,
         statusText: 'Not Found',
         ok: false,
@@ -318,7 +318,7 @@ Array [
       const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session);
       const mockStream = new Readable({ read() {} });
 
-      mocked(streamFetchFn).mockResolvedValue({
+      jest.mocked(streamFetchFn).mockResolvedValue({
         status: 401,
         statusText: 'Unauthorized',
         ok: false,
@@ -340,19 +340,19 @@ Array [
       const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session);
       const createMockStream = (): Readable => new Readable({ read() {} });
 
-      mocked(streamFetchFn).mockResolvedValueOnce({
+      jest.mocked(streamFetchFn).mockResolvedValueOnce({
         status: 500,
         statusText: 'InternalServiceError',
         ok: false,
         stream: createMockStream()
       });
-      mocked(streamFetchFn).mockResolvedValueOnce({
+      jest.mocked(streamFetchFn).mockResolvedValueOnce({
         status: 503,
         statusText: 'ServiceUnavailable',
         ok: false,
         stream: createMockStream()
       });
-      mocked(streamFetchFn).mockResolvedValueOnce({
+      jest.mocked(streamFetchFn).mockResolvedValueOnce({
         status: 504,
         statusText: 'Gateway Timeout',
         ok: false,
@@ -393,7 +393,7 @@ Array [
       const provider = new HttpBuildCacheProvider(WRITE_ALLOWED_OPTIONS, session);
       const responseStream = new Readable({ read() {} });
 
-      mocked(streamFetchFn).mockResolvedValue({
+      jest.mocked(streamFetchFn).mockResolvedValue({
         status: 200,
         statusText: 'OK',
         ok: true,
@@ -425,7 +425,7 @@ Array [
       const provider = new HttpBuildCacheProvider(WRITE_ALLOWED_OPTIONS, session);
       const responseStream = new Readable({ read() {} });
 
-      mocked(streamFetchFn).mockResolvedValue({
+      jest.mocked(streamFetchFn).mockResolvedValue({
         status: 500,
         statusText: 'InternalServerError',
         ok: false,
@@ -462,7 +462,7 @@ Array [
       const provider = new HttpBuildCacheProvider(WRITE_ALLOWED_OPTIONS, session);
       const responseStream = new Readable({ read() {} });
 
-      mocked(streamFetchFn).mockResolvedValue({
+      jest.mocked(streamFetchFn).mockResolvedValue({
         status: 401,
         statusText: 'Unauthorized',
         ok: false,
