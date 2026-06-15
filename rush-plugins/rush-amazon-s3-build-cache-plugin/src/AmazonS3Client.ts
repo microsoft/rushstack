@@ -258,26 +258,24 @@ export class AmazonS3Client {
     getSuccessResult: () => T | Promise<T>,
     cleanup?: () => void
   ): Promise<RetryableRequestResponse<T | undefined>> {
-    if (response.ok) {
+    const { ok, status, statusText } = response;
+    if (ok) {
       return {
         hasNetworkError: false,
         response: await getSuccessResult()
       };
-    } else if (response.status === 404) {
+    } else if (status === 404) {
       cleanup?.();
       return {
         hasNetworkError: false,
         response: undefined
       };
-    } else if (
-      (response.status === 400 || response.status === 401 || response.status === 403) &&
-      !this._credentials
-    ) {
+    } else if ((status === 400 || status === 401 || status === 403) && !this._credentials) {
       cleanup?.();
       // unauthorized due to not providing credentials,
       // silence error for better DX when e.g. running locally without credentials
       this._writeWarningLine(
-        `No credentials found and received a ${response.status}`,
+        `No credentials found and received a ${status}`,
         ' response code from the cloud storage.',
         ' Maybe run rush update-cloud-credentials',
         ' or set the RUSH_BUILD_CACHE_CREDENTIAL env'
@@ -286,14 +284,14 @@ export class AmazonS3Client {
         hasNetworkError: false,
         response: undefined
       };
-    } else if (response.status === 400 || response.status === 401 || response.status === 403) {
+    } else if (status === 400 || status === 401 || status === 403) {
       cleanup?.();
-      throw new Error(`Amazon S3 responded with status code ${response.status} (${response.statusText})`);
+      throw new Error(`Amazon S3 responded with status code ${status} (${statusText})`);
     } else {
       cleanup?.();
       return {
         hasNetworkError: true,
-        error: new Error(`Amazon S3 responded with status code ${response.status} (${response.statusText})`)
+        error: new Error(`Amazon S3 responded with status code ${status} (${statusText})`)
       };
     }
   }
