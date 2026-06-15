@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-resolver-cache-plugin",
+      "comment": "Fix `file:` dependency context resolution to use canonical dependency keys for pnpm v9/v10.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-resolver-cache-plugin",
+  "email": "198982749+Copilot@users.noreply.github.com"
+}
