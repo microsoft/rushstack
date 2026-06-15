@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Set Redis `connectTimeout` and `socketTimeout` so half-dead TCP connections (NAT/firewall) surface in seconds instead of stalling in-flight commands for many minutes while the kernel waits to give up.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
