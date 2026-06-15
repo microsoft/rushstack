@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Strip GIT_DIR and GIT_WORK_TREE Node env variables to fix issues with miscalculating the git repo root when working in a linked worktree",
+      "type": "patch",
+      "packageName": "@rushstack/package-deps-hash"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash",
+  "email": "istateside@users.noreply.github.com"
+}

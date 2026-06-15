@@ -33,9 +33,28 @@ const STANDARD_GIT_OPTIONS: readonly string[] = [
 // `git hash-object` aborts the process. Such files are typically untracked artifacts left behind
 // by tooling (e.g. stray `nul` from a shell redirect).
 const WINDOWS_RESERVED_BASENAMES: ReadonlySet<string> = new Set([
-  'CON', 'PRN', 'AUX', 'NUL',
-  'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
-  'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
+  'CON',
+  'PRN',
+  'AUX',
+  'NUL',
+  'COM1',
+  'COM2',
+  'COM3',
+  'COM4',
+  'COM5',
+  'COM6',
+  'COM7',
+  'COM8',
+  'COM9',
+  'LPT1',
+  'LPT2',
+  'LPT3',
+  'LPT4',
+  'LPT5',
+  'LPT6',
+  'LPT7',
+  'LPT8',
+  'LPT9'
 ]);
 
 /**
@@ -254,6 +273,13 @@ export function parseGitStatus(output: string): Map<string, boolean> {
 
 const repoRootCache: Map<string, string> = new Map();
 
+// Strip GIT_DIR/GIT_WORK_TREE: git hooks in linked worktrees set GIT_DIR to the per-worktree metadata dir, causing rev-parse --show-toplevel to return CWD instead of the worktree root.
+function getCleanGitEnvironment(): NodeJS.ProcessEnv {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { GIT_DIR, GIT_WORK_TREE, ...trimmedEnv } = process.env;
+  return trimmedEnv;
+}
+
 /**
  * Finds the root of the current Git repository
  *
@@ -270,7 +296,8 @@ export function getRepoRoot(currentWorkingDirectory: string, gitPath?: string): 
       gitPath || 'git',
       ['--no-optional-locks', 'rev-parse', '--show-toplevel'],
       {
-        currentWorkingDirectory
+        currentWorkingDirectory,
+        environment: getCleanGitEnvironment()
       }
     );
 
@@ -305,7 +332,8 @@ async function spawnGitAsync(
 ): Promise<string> {
   const spawnOptions: IExecutableSpawnOptions = {
     currentWorkingDirectory,
-    stdio: ['pipe', 'pipe', 'pipe']
+    stdio: ['pipe', 'pipe', 'pipe'],
+    environment: getCleanGitEnvironment()
   };
 
   let stdout: string = '';
@@ -591,7 +619,8 @@ export function getRepoChanges(
       '--'
     ]),
     {
-      currentWorkingDirectory: rootDirectory
+      currentWorkingDirectory: rootDirectory,
+      environment: getCleanGitEnvironment()
     }
   );
 
