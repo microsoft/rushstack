@@ -722,8 +722,7 @@ export class FileSystem {
 
   /**
    * Deletes a folder, including all of its contents.
-   * Behind the scenes it uses `fs.rmSync()` with `recursive: true` and `force: true`,
-   * along with `maxRetries` to tolerate transient `EPERM`/`EBUSY`/`ENOTEMPTY` errors on windows.
+   * Behind the scenes it uses `fs.rmSync()`.
    * @remarks
    * Does not throw if the folderPath does not exist.
    * @param folderPath - The absolute or relative path to the folder which should be deleted.
@@ -745,7 +744,7 @@ export class FileSystem {
 
   /**
    * Deletes the content of a folder, but not the folder itself. Also ensures the folder exists.
-   * Behind the scenes it uses `fs-extra.emptyDirSync()`.
+   * Each child entry is removed via `fs.rmSync()`.
    * @remarks
    * This is a workaround for a common race condition, where the virus scanner holds a lock on the folder
    * for a brief period after it was deleted, causing EBUSY errors for any code that tries to recreate the folder.
@@ -753,7 +752,21 @@ export class FileSystem {
    */
   public static ensureEmptyFolder(folderPath: string): void {
     FileSystem._wrapException(() => {
-      fsx.emptyDirSync(folderPath);
+      let items: string[];
+      try {
+        items = fsx.readdirSync(folderPath);
+      } catch {
+        fsx.ensureDirSync(folderPath);
+        return;
+      }
+      for (const item of items) {
+        fs.rmSync(nodeJsPath.join(folderPath, item), {
+          recursive: true,
+          force: true,
+          maxRetries: 3,
+          retryDelay: 100
+        });
+      }
     });
   }
 
@@ -761,8 +774,24 @@ export class FileSystem {
    * An async version of {@link FileSystem.ensureEmptyFolder}.
    */
   public static async ensureEmptyFolderAsync(folderPath: string): Promise<void> {
-    await FileSystem._wrapExceptionAsync(() => {
-      return fsx.emptyDir(folderPath);
+    await FileSystem._wrapExceptionAsync(async () => {
+      let items: string[];
+      try {
+        items = await fsx.readdir(folderPath);
+      } catch {
+        await fsx.ensureDir(folderPath);
+        return;
+      }
+      await Promise.all(
+        items.map((item) =>
+          fsPromises.rm(nodeJsPath.join(folderPath, item), {
+            recursive: true,
+            force: true,
+            maxRetries: 3,
+            retryDelay: 100
+          })
+        )
+      );
     });
   }
 
