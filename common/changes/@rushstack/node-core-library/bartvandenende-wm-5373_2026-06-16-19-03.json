@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Make FileSystem.deleteFolder and FileSystem.deleteFolderAsync resilient to transient Windows EPERM/EBUSY/ENOTEMPTY errors by using native fs.rm with retries.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}
