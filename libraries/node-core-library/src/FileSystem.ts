@@ -722,14 +722,15 @@ export class FileSystem {
 
   /**
    * Deletes a folder, including all of its contents.
-   * Behind the scenes is uses `fs-extra.removeSync()`.
+   * Behind the scenes it uses `fs.rmSync()` with `recursive: true` and `force: true`,
+   * along with `maxRetries` to tolerate transient `EPERM`/`EBUSY`/`ENOTEMPTY` errors on windows.
    * @remarks
    * Does not throw if the folderPath does not exist.
    * @param folderPath - The absolute or relative path to the folder which should be deleted.
    */
   public static deleteFolder(folderPath: string): void {
     FileSystem._wrapException(() => {
-      fsx.removeSync(folderPath);
+      fs.rmSync(folderPath, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
     });
   }
 
@@ -738,7 +739,7 @@ export class FileSystem {
    */
   public static async deleteFolderAsync(folderPath: string): Promise<void> {
     await FileSystem._wrapExceptionAsync(() => {
-      return fsx.remove(folderPath);
+      return fsPromises.rm(folderPath, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
     });
   }
 
