@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix pnpm 11 silently ignoring the `globalOverrides`, `globalPackageExtensions`, `globalPeerDependencyRules`, `globalAllowedDeprecatedVersions`, and `globalPatchedDependencies` settings from pnpm-config.json. Because pnpm 11 no longer reads the `pnpm` field of package.json, Rush now writes these settings to the generated `common/temp/pnpm-workspace.yaml` for pnpm 11+ (matching the existing `allowBuilds` relocation). Behavior for pnpm 10 and earlier is unchanged.",
+      "type": "patch",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "brunojppb@users.noreply.github.com"
+}
