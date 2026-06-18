@@ -58,6 +58,7 @@ describe('InstallHelpers', () => {
               'bar@^2.1.0': '3.0.0',
               'qar@1>zoo': '2'
             },
+            // For pnpm < 11 all of these settings are still written into the package.json "pnpm" field.
             packageExtensions: {
               'react-redux': {
                 peerDependencies: {
@@ -65,12 +66,46 @@ describe('InstallHelpers', () => {
                 }
               }
             },
+            peerDependencyRules: {
+              allowedVersions: {
+                react: '18'
+              },
+              ignoreMissing: ['@babel/core']
+            },
+            allowedDeprecatedVersions: {
+              request: '*'
+            },
+            patchedDependencies: {
+              'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
+            },
             neverBuiltDependencies: ['fsevents', 'level'],
             onlyBuiltDependencies: ['esbuild', 'playwright'],
             pnpmFutureFeature: true
           }
         })
       );
+    });
+
+    it('omits the relocated pnpm settings for pnpm 11 (they belong in pnpm-workspace.yaml)', () => {
+      const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfigPnpm11/rush.json`;
+      const rushConfiguration: RushConfiguration =
+        RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+      InstallHelpers.generateCommonPackageJson(
+        rushConfiguration,
+        rushConfiguration.defaultSubspace,
+        undefined,
+        terminal
+      );
+      const packageJson: IPackageJson = mockJsonFileSave.mock.calls[0][0];
+      const pnpmField: Record<string, unknown> = (
+        TestUtilities.stripAnnotations(packageJson) as unknown as { pnpm: Record<string, unknown> }
+      ).pnpm;
+      // For pnpm >= 11 these are written to common/temp/pnpm-workspace.yaml instead of package.json.
+      expect(pnpmField).not.toHaveProperty('overrides');
+      expect(pnpmField).not.toHaveProperty('packageExtensions');
+      expect(pnpmField).not.toHaveProperty('peerDependencyRules');
+      expect(pnpmField).not.toHaveProperty('allowedDeprecatedVersions');
+      expect(pnpmField).not.toHaveProperty('patchedDependencies');
     });
   });
 });
