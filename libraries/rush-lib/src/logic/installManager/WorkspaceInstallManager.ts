@@ -476,10 +476,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     ) {
       if (pnpmOptions.globalAllowBuilds) {
         workspaceFile.setAllowBuilds(pnpmOptions.globalAllowBuilds);
-      } else if (
-        pnpmOptions.globalOnlyBuiltDependencies ||
-        pnpmOptions.globalNeverBuiltDependencies
-      ) {
+      } else if (pnpmOptions.globalOnlyBuiltDependencies || pnpmOptions.globalNeverBuiltDependencies) {
         // Backward compatibility: convert globalOnlyBuiltDependencies/globalNeverBuiltDependencies
         // to allowBuilds format for pnpm 11+
         const allowBuilds: Record<string, boolean> = {};
@@ -507,6 +504,30 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             'Remove this field or upgrade to pnpm 11.0.0 or newer.'
         )
       );
+    }
+
+    // For pnpm 11+, the following settings must be written to pnpm-workspace.yaml because pnpm 11
+    // no longer reads the "pnpm" field of package.json (where Rush writes them for older pnpm).
+    // See https://github.com/microsoft/rushstack/issues/5837
+    if (
+      this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+      semver.gte(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '11.0.0')
+    ) {
+      if (pnpmOptions.globalOverrides) {
+        workspaceFile.setOverrides(pnpmOptions.globalOverrides);
+      }
+      if (pnpmOptions.globalPackageExtensions) {
+        workspaceFile.setPackageExtensions(pnpmOptions.globalPackageExtensions);
+      }
+      if (pnpmOptions.globalPeerDependencyRules) {
+        workspaceFile.setPeerDependencyRules(pnpmOptions.globalPeerDependencyRules);
+      }
+      if (pnpmOptions.globalAllowedDeprecatedVersions) {
+        workspaceFile.setAllowedDeprecatedVersions(pnpmOptions.globalAllowedDeprecatedVersions);
+      }
+      if (pnpmOptions.globalPatchedDependencies) {
+        workspaceFile.setPatchedDependencies(pnpmOptions.globalPatchedDependencies);
+      }
     }
 
     // Save the generated workspace file. Don't update the file timestamp unless the content has changed,
