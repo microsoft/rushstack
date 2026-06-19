@@ -17,7 +17,7 @@ export interface IGlobalVariableAnalyzer {
 export class TypeScriptInternals {
   public static getImmediateAliasedSymbol(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v5.9.3/src/compiler/checker.ts
+    // https://github.com/microsoft/TypeScript/blob/v6.0.3/src/compiler/checker.ts#L33515
     return (typeChecker as any).getImmediateAliasedSymbol(symbol);
   }
 
@@ -61,7 +61,7 @@ export class TypeScriptInternals {
    */
   public static getJSDocCommentRanges(node: ts.Node, text: string): ts.CommentRange[] | undefined {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v5.9.3/src/compiler/utilities.ts#L2710
+    // https://github.com/microsoft/TypeScript/blob/v6.0.3/src/compiler/utilities.ts#L2763
 
     return (ts as any).getJSDocCommentRanges.apply(this, arguments);
   }
@@ -73,7 +73,7 @@ export class TypeScriptInternals {
     node: ts.Identifier | ts.StringLiteralLike | ts.NumericLiteral
   ): string {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v5.9.3/src/compiler/utilities.ts#L5368
+    // https://github.com/microsoft/TypeScript/blob/v6.0.3/src/compiler/utilities.ts#L5439
 
     return (ts as any).getTextOfIdentifierOrLiteral(node);
   }
@@ -89,7 +89,7 @@ export class TypeScriptInternals {
     mode: ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined
   ): ts.ResolvedModuleFull | undefined {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v5.9.3/src/compiler/types.ts#L5064
+    // https://github.com/microsoft/TypeScript/blob/v6.0.3/src/compiler/types.ts#L4732
     const result: ts.ResolvedModuleWithFailedLookupLocations | undefined = (program as any).getResolvedModule(
       sourceFile,
       moduleNameText,
@@ -107,7 +107,7 @@ export class TypeScriptInternals {
     compilerOptions: ts.CompilerOptions
   ): ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v5.9.3/src/compiler/program.ts#L932
+    // https://github.com/microsoft/TypeScript/blob/v6.0.3/src/compiler/program.ts#L932
 
     return ts.getModeForUsageLocation?.(file, usage, compilerOptions);
   }
@@ -128,14 +128,10 @@ export class TypeScriptInternals {
   }
 
   public static getGlobalVariableAnalyzer(program: ts.Program): IGlobalVariableAnalyzer {
-    const anyProgram: any = program;
-    const typeCheckerInstance: any =
-      anyProgram.getDiagnosticsProducingTypeChecker ?? anyProgram.getTypeChecker;
-
-    if (!typeCheckerInstance) {
-      throw new InternalError('Missing Program.getDiagnosticsProducingTypeChecker or Program.getTypeChecker');
-    }
-    const typeChecker: any = typeCheckerInstance();
+    // Compiler internals: `getEmitResolver` and `hasGlobalName` are accessed via `any` and
+    // guarded below at runtime.
+    // https://github.com/microsoft/TypeScript/blob/v6.0.3/src/compiler/checker.ts#L51221
+    const typeChecker: any = program.getTypeChecker();
     if (!typeChecker.getEmitResolver) {
       throw new InternalError('Missing TypeChecker.getEmitResolver');
     }
@@ -150,7 +146,7 @@ export class TypeScriptInternals {
    * Returns whether a variable is declared with the const keyword
    */
   public static isVarConst(node: ts.VariableDeclaration | ts.VariableDeclarationList): boolean {
-    // Compiler internal: https://github.com/microsoft/TypeScript/blob/71286e3d49c10e0e99faac360a6bbd40f12db7b6/src/compiler/utilities.ts#L925
+    // Compiler internal: https://github.com/microsoft/TypeScript/blob/v6.0.3/src/compiler/utilities.ts#L2677
     return (ts as any).isVarConst(node);
   }
 }

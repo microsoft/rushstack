@@ -99,8 +99,8 @@ importers:
         specifier: ~0.6.1
         version: 0.6.1
       typescript:
-        specifier: 5.9.3
-        version: 5.9.3
+        specifier: 6.0.3
+        version: 6.0.3
     devDependencies:
       '@rushstack/heft':
         specifier: 1.2.19
@@ -4580,7 +4580,7 @@ importers:
         version: 1.2.19(@types/node@20.17.19)
       '@rushstack/heft-node-rig':
         specifier: 2.11.42
-        version: 2.11.42(@rushstack/heft@1.2.19(@types/node@20.17.19))(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)
+        version: 2.11.42(@rushstack/heft@1.2.19(@types/node@20.17.19))(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)
       '@types/jest':
         specifier: 30.0.0
         version: 30.0.0
@@ -18353,6 +18353,11 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  typescript@6.0.3:
+    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   uc.micro@2.1.0:
     resolution: {integrity: sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A==}
 
@@ -24633,7 +24638,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft-jest-plugin@2.0.9(@rushstack/heft@1.2.19(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)':
+  '@rushstack/heft-jest-plugin@2.0.9(@rushstack/heft@1.2.19(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)':
     dependencies:
       '@jest/core': 30.3.0(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))
       '@jest/reporters': 30.3.0
@@ -24666,13 +24671,13 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft-node-rig@2.11.42(@rushstack/heft@1.2.19(@types/node@20.17.19))(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)':
+  '@rushstack/heft-node-rig@2.11.42(@rushstack/heft@1.2.19(@types/node@20.17.19))(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)':
     dependencies:
       '@microsoft/api-extractor': 7.58.9(@types/node@20.17.19)
       '@rushstack/eslint-config': 4.6.4(eslint@9.37.0)(typescript@5.8.2)
       '@rushstack/heft': 1.2.19(@types/node@20.17.19)
       '@rushstack/heft-api-extractor-plugin': 1.3.19(@rushstack/heft@1.2.19(@types/node@20.17.19))(@types/node@20.17.19)
-      '@rushstack/heft-jest-plugin': 2.0.9(@rushstack/heft@1.2.19(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)
+      '@rushstack/heft-jest-plugin': 2.0.9(@rushstack/heft@1.2.19(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)
       '@rushstack/heft-lint-plugin': 1.2.19(@rushstack/heft@1.2.19(@types/node@20.17.19))(@types/node@20.17.19)
       '@rushstack/heft-typescript-plugin': 1.3.14(@rushstack/heft@1.2.19(@types/node@20.17.19))(@types/node@20.17.19)
       '@types/jest': 30.0.0
@@ -37508,6 +37513,8 @@ snapshots:
   typescript@5.8.2: {}
 
   typescript@5.9.3: {}
+
+  typescript@6.0.3: {}
 
   uc.micro@2.1.0: {}
 
