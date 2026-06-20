@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 20 Jun 2026 00:16:15 GMT and should not be manually modified.
+This log was last generated on Sat, 20 Jun 2026 21:37:30 GMT and should not be manually modified.
+
+## 5.177.1
+Sat, 20 Jun 2026 21:37:30 GMT
+
+### Updates
+
+- Bump `ws` in `rush-serve-plugin` to mitigate CVE-2026-48779.
 
 ## 5.177.0
 Sat, 20 Jun 2026 00:16:15 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.177.1",
+      "tag": "@microsoft/rush_v5.177.1",
+      "date": "Sat, 20 Jun 2026 21:37:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Bump `ws` in `rush-serve-plugin` to mitigate CVE-2026-48779."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.177.0",
       "tag": "@microsoft/rush_v5.177.0",
       "date": "Sat, 20 Jun 2026 00:16:15 GMT",
