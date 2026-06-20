@@ -1,3 +1,10 @@
 {
-  "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json"
+  "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json",
+  "compilerOptions": {
+    // API Extractor analyzes this project with its own bundled TypeScript compiler (6.0+), whose
+    // default CommonJS moduleResolution ("bundler") cannot resolve the types of
+    // @modelcontextprotocol/sdk's subpath exports (they lack a "types" condition).  Pin "node10" --
+    // the resolution this project already compiles under -- so the analysis matches the build.
+    "moduleResolution": "node10"
+  }
 }
