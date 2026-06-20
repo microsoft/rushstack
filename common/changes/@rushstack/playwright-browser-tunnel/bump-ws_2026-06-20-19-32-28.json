@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/playwright-browser-tunnel",
+      "comment": "Bump `ws` in `rush-serve-plugin` to mitigate CVE-2026-48779.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/playwright-browser-tunnel"
+}
