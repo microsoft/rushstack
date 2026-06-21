@@ -35,3 +35,4 @@
 # DO NOT MODIFY ABOVE THIS LINE!  Add any project-specific overrides below.
 # ---------------------------------------------------------------------------
 !/extends/*.json
+!UPGRADING.md

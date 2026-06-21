@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Upgrade the bundled compiler engine to TypeScript 6.0.x",
+      "comment": "Upgrade the bundled compiler engine to TypeScript 6.0.x. TypeScript 6.0 changes the default `moduleResolution` for CommonJS projects from `node10` to `bundler`, which can surface new module-resolution errors when API Extractor analyzes projects that relied on the previous default; see [UPGRADING.md](https://github.com/microsoft/rushstack/blob/main/apps/api-extractor/UPGRADING.md) for migration guidance.",
       "type": "minor"
     }
   ],

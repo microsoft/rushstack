@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
-import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import type {
   CallToolResultSchema,
   ServerNotification,
   ServerRequest
-} from '@modelcontextprotocol/sdk/types';
+} from '@modelcontextprotocol/sdk/types.js';
 import type { z, ZodRawShape, ZodTypeAny } from 'zod';
 
 export type CallToolResult = z.infer<typeof CallToolResultSchema>;

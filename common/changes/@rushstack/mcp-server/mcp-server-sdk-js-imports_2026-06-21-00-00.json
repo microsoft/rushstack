@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/mcp-server",
+      "comment": "Fix resolution of `@modelcontextprotocol/sdk` subpath imports by using explicit \".js\" extensions, which the package's \"exports\" map requires under both Node's runtime module resolution and TypeScript's bundler resolution",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/mcp-server",
+  "email": "50554904+hl662@users.noreply.github.com"
+}
