@@ -2,6 +2,35 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.177.1",
+      "tag": "@microsoft/rush_v5.177.1",
+      "date": "Sat, 20 Jun 2026 21:37:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Bump `ws` in `rush-serve-plugin` to mitigate CVE-2026-48779."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.177.0",
+      "tag": "@microsoft/rush_v5.177.0",
+      "date": "Sat, 20 Jun 2026 00:16:15 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix build cache failures when running inside a git linked worktree via a pre-commit hook, caused by GIT_DIR being set to the per-worktree metadata directory"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Set Redis `connectTimeout` and `socketTimeout` so half-dead TCP connections (NAT/firewall) surface in seconds instead of stalling in-flight commands for many minutes while the kernel waits to give up."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.176.0",
       "tag": "@microsoft/rush_v5.176.0",
       "date": "Tue, 09 Jun 2026 02:02:32 GMT",
