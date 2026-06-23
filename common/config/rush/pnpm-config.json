@@ -191,23 +191,6 @@
   // "pnpmStore": "global",
 
   /**
-   * If true, Rush will configure PNPM workspace installs to use PNPM's global virtual store.
-   * This places the virtual store under the configured PNPM store instead of under
-   * `node_modules/.pnpm` in the workspace. This can significantly reduce setup and cleanup costs
-   * when multiple Git worktrees share the same PNPM store.
-   *
-   * This option only affects workspace installs. It requires PNPM 10.12.1 or newer and a shared
-   * PNPM store, configured using either `"pnpmStore": "global"` or the `RUSH_PNPM_STORE_PATH`
-   * environment variable. If `RUSH_PNPM_STORE_PATH` is used, it must point outside the Rush repo.
-   * It is not compatible with the `usePnpmSyncForInjectedDependencies` experiment.
-   *
-   * PNPM documentation: https://pnpm.io/settings#enableglobalvirtualstore
-   *
-   * The default value is false.
-   */
-  // "enableGlobalVirtualStore": true,
-
-  /**
    * If true, then `rush install` will report an error if manual modifications
    * were made to the PNPM shrinkwrap file without running `rush update` afterwards.
    *

@@ -7,7 +7,7 @@ import { JsonFile, Path, Text } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../RushConfiguration';
 import type { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
 import { RushConfigurationProject } from '../RushConfigurationProject';
-import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from '../EnvironmentConfiguration';
 import { DependencyType } from '../PackageJsonEditor';
 
 function normalizePathForComparison(pathToNormalize: string): string {
@@ -227,9 +227,11 @@ describe(RushConfiguration.name, () => {
   describe('PNPM Store Paths', () => {
     afterEach(() => {
       EnvironmentConfiguration['_pnpmStorePathOverride'] = undefined;
+      EnvironmentConfiguration['_pnpmGlobalVirtualStore'] = false;
+      EnvironmentConfiguration.reset();
     });
 
-    const PNPM_STORE_PATH_ENV: string = 'RUSH_PNPM_STORE_PATH';
+    const PNPM_STORE_PATH_ENV: string = EnvironmentVariableNames.RUSH_PNPM_STORE_PATH;
 
     describe('Loading repo/rush-pnpm-local.json', () => {
       const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-local.json');
@@ -258,6 +260,20 @@ describe(RushConfiguration.name, () => {
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
         expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(EXPECT_STORE_PATH);
         expect(path.isAbsolute(rushConfiguration.pnpmOptions.pnpmStorePath)).toEqual(true);
+      });
+
+      it(`loads the local store path when RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE is defined`, () => {
+        const EXPECT_STORE_PATH: string = path.resolve(__dirname, 'repo', 'common', 'temp', 'pnpm-store');
+        process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE] = '1';
+
+        const rushConfiguration: RushConfiguration =
+          RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+
+        expect(rushConfiguration.packageManager).toEqual('pnpm');
+        expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
+        expect(Path.convertToSlashes(rushConfiguration.pnpmOptions.pnpmStorePath)).toEqual(
+          Path.convertToSlashes(EXPECT_STORE_PATH)
+        );
       });
     });
 

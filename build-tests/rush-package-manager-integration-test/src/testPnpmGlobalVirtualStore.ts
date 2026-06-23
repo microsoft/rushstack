@@ -26,7 +26,8 @@ export async function testPnpmGlobalVirtualStoreAsync(terminal: ITerminal): Prom
     ...process.env,
     CI: 'false',
     PNPM_CONFIG_CI: 'false',
-    RUSH_PNPM_STORE_PATH: sharedStorePath
+    RUSH_PNPM_STORE_PATH: sharedStorePath,
+    RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE: '1'
   };
 
   terminal.writeLine('==========================================');
@@ -43,7 +44,6 @@ export async function testPnpmGlobalVirtualStoreAsync(terminal: ITerminal): Prom
   const pnpmConfigPath: string = path.join(testRepoPath, 'common/config/rush/pnpm-config.json');
   const pnpmConfigJson: JsonObject = await JsonFile.loadAsync(pnpmConfigPath);
   pnpmConfigJson.useWorkspaces = true;
-  pnpmConfigJson.enableGlobalVirtualStore = true;
   await JsonFile.saveAsync(pnpmConfigJson, pnpmConfigPath, { updateExistingFile: true });
 
   terminal.writeLine('Creating test-project-a...');

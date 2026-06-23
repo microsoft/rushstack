@@ -100,24 +100,6 @@ describe(PnpmOptionsConfiguration.name, () => {
     });
   });
 
-  it('loads enableGlobalVirtualStore', () => {
-    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
-      `${__dirname}/jsonFiles/pnpm-config-globalVirtualStore.json`,
-      fakeCommonTempFolder
-    );
-
-    expect(pnpmConfiguration.enableGlobalVirtualStore).toEqual(true);
-  });
-
-  it('defaults enableGlobalVirtualStore to false', () => {
-    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonObject(
-      {},
-      fakeCommonTempFolder
-    );
-
-    expect(pnpmConfiguration.enableGlobalVirtualStore).toEqual(false);
-  });
-
   it('loads minimumReleaseAgeMinutes', () => {
     const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
       `${__dirname}/jsonFiles/pnpm-config-minimumReleaseAge.json`,

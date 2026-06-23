@@ -241,6 +241,7 @@ export class EnvironmentConfiguration {
     static get hasBeenValidated(): boolean;
     // (undocumented)
     static parseBooleanEnvironmentVariable(name: string, value: string | undefined): boolean | undefined;
+    static get pnpmGlobalVirtualStore(): boolean;
     static get pnpmStorePathOverride(): string | undefined;
     static get pnpmVerifyStoreIntegrity(): boolean | undefined;
     static get quietMode(): boolean;
@@ -261,6 +262,7 @@ export const EnvironmentVariableNames: {
     readonly RUSH_PARALLELISM: "RUSH_PARALLELISM";
     readonly RUSH_ABSOLUTE_SYMLINKS: "RUSH_ABSOLUTE_SYMLINKS";
     readonly RUSH_PNPM_STORE_PATH: "RUSH_PNPM_STORE_PATH";
+    readonly RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE: "RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE";
     readonly RUSH_PNPM_VERIFY_STORE_INTEGRITY: "RUSH_PNPM_VERIFY_STORE_INTEGRITY";
     readonly RUSH_DEPLOY_TARGET_FOLDER: "RUSH_DEPLOY_TARGET_FOLDER";
     readonly RUSH_GLOBAL_FOLDER: "RUSH_GLOBAL_FOLDER";
@@ -752,7 +754,6 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     alwaysFullInstall?: boolean;
     alwaysInjectDependenciesFromOtherSubspaces?: boolean;
     autoInstallPeers?: boolean;
-    enableGlobalVirtualStore?: boolean;
     globalAllowBuilds?: Record<string, boolean>;
     globalAllowedDeprecatedVersions?: Record<string, string>;
     globalCatalogs?: Record<string, Record<string, string>>;
@@ -1179,7 +1180,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly alwaysFullInstall: boolean | undefined;
     readonly alwaysInjectDependenciesFromOtherSubspaces: boolean | undefined;
     readonly autoInstallPeers: boolean | undefined;
-    readonly enableGlobalVirtualStore: boolean;
     readonly globalAllowBuilds: Record<string, boolean> | undefined;
     readonly globalAllowedDeprecatedVersions: Record<string, string> | undefined;
     readonly globalCatalogs: Record<string, Record<string, string>> | undefined;

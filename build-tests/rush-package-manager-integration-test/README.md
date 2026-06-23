@@ -35,7 +35,7 @@ Tests Rush yarn mode by:
 ### testPnpmGlobalVirtualStore.ts
 Tests Rush pnpm workspace mode with global virtual store by:
 - Initializing a Rush repo with `pnpmVersion` configured
-- Enabling `useWorkspaces` and `enableGlobalVirtualStore`
+- Enabling `useWorkspaces` and setting `RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE=1`
 - Running `rush update`
 - Running `rush install`
 - Verifying the generated workspace file, shared PNPM store, dependency links, and build output

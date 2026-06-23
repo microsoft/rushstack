@@ -17,7 +17,6 @@ import type { PnpmStoreLocation } from '../pnpm/PnpmOptionsConfiguration';
 
 interface IGlobalVirtualStoreValidationOptions {
   pnpmVersion: string;
-  pnpmConfigFilename: string;
   rushJsonFolder: string;
   pnpmStore: PnpmStoreLocation;
   pnpmStorePath: string;
@@ -26,7 +25,7 @@ interface IGlobalVirtualStoreValidationOptions {
 }
 
 interface IWorkspaceInstallManagerWithValidation {
-  _validateGlobalVirtualStoreOptions(options: IGlobalVirtualStoreValidationOptions): void;
+  _validateGlobalVirtualStoreOptions(options: IGlobalVirtualStoreValidationOptions): string | undefined;
 }
 
 class TestWorkspaceInstallManager extends WorkspaceInstallManager {
@@ -37,29 +36,31 @@ class TestWorkspaceInstallManager extends WorkspaceInstallManager {
 
 describe(WorkspaceInstallManager.name, () => {
   describe('enableGlobalVirtualStore validation', () => {
-    const validateGlobalVirtualStoreOptions: (options: IGlobalVirtualStoreValidationOptions) => void = (
-      WorkspaceInstallManager as unknown as IWorkspaceInstallManagerWithValidation
-    )._validateGlobalVirtualStoreOptions;
+    const validateGlobalVirtualStoreOptions: (
+      options: IGlobalVirtualStoreValidationOptions
+    ) => string | undefined = (WorkspaceInstallManager as unknown as IWorkspaceInstallManagerWithValidation)
+      ._validateGlobalVirtualStoreOptions;
 
     it('throws if the configured PNPM version does not support global virtual store', () => {
       expect(() =>
         validateGlobalVirtualStoreOptions({
           pnpmVersion: '10.12.0',
-          pnpmConfigFilename: '/repo/common/config/rush/pnpm-config.json',
           rushJsonFolder: '/repo',
           pnpmStore: 'global',
           pnpmStorePath: '',
           pnpmStorePathOverride: undefined,
           usePnpmSyncForInjectedDependencies: undefined
         })
-      ).toThrow('Your version of PNPM (10.12.0) doesn\'t support the "enableGlobalVirtualStore" field');
+      ).toThrow(
+        `Your version of PNPM (10.12.0) doesn't support the ` +
+          `${EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE} environment variable`
+      );
     });
 
     it('throws if global virtual store is enabled with a worktree-local PNPM store', () => {
       expect(() =>
         validateGlobalVirtualStoreOptions({
           pnpmVersion: '10.12.1',
-          pnpmConfigFilename: '/repo/common/config/rush/pnpm-config.json',
           rushJsonFolder: '/repo',
           pnpmStore: 'local',
           pnpmStorePath: '/repo/common/temp/pnpm-store',
@@ -73,7 +74,6 @@ describe(WorkspaceInstallManager.name, () => {
       expect(() =>
         validateGlobalVirtualStoreOptions({
           pnpmVersion: '10.12.1',
-          pnpmConfigFilename: '/repo/common/config/rush/pnpm-config.json',
           rushJsonFolder: '/repo',
           pnpmStore: 'global',
           pnpmStorePath: '',
@@ -81,39 +81,39 @@ describe(WorkspaceInstallManager.name, () => {
           usePnpmSyncForInjectedDependencies: true
         })
       ).toThrow(
-        'The "enableGlobalVirtualStore" setting is not compatible with the ' +
+        `The ${EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE} environment ` +
+          `variable is not compatible with the ` +
           '"usePnpmSyncForInjectedDependencies" experiment'
       );
     });
 
-    it('throws if the PNPM store path override points inside the Rush repo', () => {
-      expect(() =>
+    it('warns if the PNPM store path override points inside the Rush repo', () => {
+      expect(
         validateGlobalVirtualStoreOptions({
           pnpmVersion: '10.12.1',
-          pnpmConfigFilename: '/repo/common/config/rush/pnpm-config.json',
           rushJsonFolder: '/repo',
           pnpmStore: 'local',
           pnpmStorePath: '/repo/common/temp/pnpm-store',
           pnpmStorePathOverride: '/repo/common/temp/shared-pnpm-store',
           usePnpmSyncForInjectedDependencies: undefined
         })
-      ).toThrow(
-        `The ${EnvironmentVariableNames.RUSH_PNPM_STORE_PATH} environment variable points inside the Rush repo`
+      ).toContain(
+        `The ${EnvironmentVariableNames.RUSH_PNPM_STORE_PATH} environment variable points inside ` +
+          `the Rush repo`
       );
     });
 
     it('allows global virtual store with a PNPM store path override', () => {
-      expect(() =>
+      expect(
         validateGlobalVirtualStoreOptions({
           pnpmVersion: '10.12.1',
-          pnpmConfigFilename: '/repo/common/config/rush/pnpm-config.json',
           rushJsonFolder: '/repo',
           pnpmStore: 'local',
           pnpmStorePath: '/repo/common/temp/pnpm-store',
           pnpmStorePathOverride: '/shared/pnpm-store',
           usePnpmSyncForInjectedDependencies: undefined
         })
-      ).not.toThrow();
+      ).toBeUndefined();
     });
   });
 
@@ -121,15 +121,22 @@ describe(WorkspaceInstallManager.name, () => {
     const fixtureRepoPath: string = path.resolve(__dirname, 'repoWithSubspacesCatalogs');
     const tempFolderPath: string = `${__dirname}/temp/${WorkspaceInstallManager.name}`;
     let originalPnpmStorePathOverride: string | undefined;
+    let originalPnpmGlobalVirtualStore: boolean;
     let originalPnpmStorePathEnvValue: string | undefined;
+    let originalPnpmGlobalVirtualStoreEnvValue: string | undefined;
 
     beforeEach(() => {
       originalPnpmStorePathEnvValue = process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH];
+      originalPnpmGlobalVirtualStoreEnvValue =
+        process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE];
       delete process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH];
+      delete process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE];
       EnvironmentConfiguration.reset();
       EnvironmentConfiguration.validate({ doNotNormalizePaths: true });
       originalPnpmStorePathOverride = EnvironmentConfiguration.pnpmStorePathOverride;
+      originalPnpmGlobalVirtualStore = EnvironmentConfiguration.pnpmGlobalVirtualStore;
       EnvironmentConfiguration['_pnpmStorePathOverride'] = undefined;
+      EnvironmentConfiguration['_pnpmGlobalVirtualStore'] = false;
       FileSystem.ensureEmptyFolder(tempFolderPath);
     });
 
@@ -139,7 +146,14 @@ describe(WorkspaceInstallManager.name, () => {
       } else {
         process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH] = originalPnpmStorePathEnvValue;
       }
+      if (originalPnpmGlobalVirtualStoreEnvValue === undefined) {
+        delete process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE];
+      } else {
+        process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE] =
+          originalPnpmGlobalVirtualStoreEnvValue;
+      }
       EnvironmentConfiguration['_pnpmStorePathOverride'] = originalPnpmStorePathOverride;
+      EnvironmentConfiguration['_pnpmGlobalVirtualStore'] = originalPnpmGlobalVirtualStore;
       EnvironmentConfiguration.reset();
       FileSystem.deleteFolder(tempFolderPath);
     });
@@ -164,11 +178,6 @@ describe(WorkspaceInstallManager.name, () => {
         delete commonPnpmConfigJson.pnpmStore;
       }
       JsonFile.save(commonPnpmConfigJson, commonPnpmConfigPath, { updateExistingFile: true });
-
-      const subspacePnpmConfigPath: string = `${repoPath}/common/config/subspaces/default/pnpm-config.json`;
-      const subspacePnpmConfigJson: Record<string, unknown> = JsonFile.load(subspacePnpmConfigPath);
-      subspacePnpmConfigJson.enableGlobalVirtualStore = true;
-      JsonFile.save(subspacePnpmConfigJson, subspacePnpmConfigPath, { updateExistingFile: true });
 
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonPath);
       FileSystem.ensureFolder(rushConfiguration.defaultSubspace.getSubspaceTempFolderPath());
@@ -195,6 +204,8 @@ describe(WorkspaceInstallManager.name, () => {
     }
 
     it('writes enableGlobalVirtualStore through the workspace install prepare path', async () => {
+      process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE] = '1';
+      EnvironmentConfiguration.reset();
       const rushConfiguration: RushConfiguration = prepareFixtureRepo({ pnpmStore: 'global' });
       const installManager: TestWorkspaceInstallManager = createInstallManager(rushConfiguration);
 
@@ -208,11 +219,13 @@ describe(WorkspaceInstallManager.name, () => {
     });
 
     it('throws from the workspace install prepare path when using a worktree-local PNPM store', async () => {
+      process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE] = '1';
+      EnvironmentConfiguration.reset();
       const rushConfiguration: RushConfiguration = prepareFixtureRepo({});
       const installManager: TestWorkspaceInstallManager = createInstallManager(rushConfiguration);
 
       expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
-      expect(rushConfiguration.defaultSubspace.getPnpmOptions()?.enableGlobalVirtualStore).toEqual(true);
+      expect(rushConfiguration.pnpmOptions.pnpmStorePath).not.toEqual('');
 
       await expect(
         installManager.prepareCommonTempForTestAsync(rushConfiguration.defaultSubspace)
