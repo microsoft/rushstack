@@ -545,8 +545,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * This option only affects workspace installs. It requires PNPM 10.12.1 or newer and a shared
    * PNPM store, configured using either `pnpmStore: "global"` or the `RUSH_PNPM_STORE_PATH`
    * environment variable. If `RUSH_PNPM_STORE_PATH` is used, it must point outside the Rush repo.
-   * It is not currently compatible with the
-   * `usePnpmSyncForInjectedDependencies` experiment.
+   * It is not compatible with the `usePnpmSyncForInjectedDependencies` experiment.
    *
    * PNPM documentation: https://pnpm.io/settings#enableglobalvirtualstore
    *
