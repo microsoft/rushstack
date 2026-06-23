@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add PNPM global virtual store support for workspace installs and avoid unnecessary global package manager lock acquisition.",
+      "comment": "Add PNPM global virtual store support for workspace installs.",
       "type": "minor"
     }
   ],
