@@ -42,6 +42,17 @@ function readPackage(packageJson, context) {
   }
 
   switch (packageJson.name) {
+    // CVE-2024-29180 (GHSA-wr3j-pwj9-hqq6): webpack-dev-middleware@3.7.3 is vulnerable to path
+    // traversal. These storybook v6 packages require ^3.7.3, but 5.3.4 is the lowest patched
+    // version and remains compatible with webpack 4 (supports webpack@^4.0.0 || ^5.0.0).
+    case '@storybook/builder-webpack4':
+    case '@storybook/manager-webpack4': {
+      if (packageJson.dependencies && packageJson.dependencies['webpack-dev-middleware']) {
+        packageJson.dependencies['webpack-dev-middleware'] = '^5.3.4';
+      }
+      break;
+    }
+
     case '@jest/test-result': {
       // The `@jest/test-result` package takes undeclared dependencies on `jest-haste-map`
       // and `jest-resolve`
