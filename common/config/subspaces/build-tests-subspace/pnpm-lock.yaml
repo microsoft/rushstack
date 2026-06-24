@@ -911,7 +911,7 @@ packages:
   '@rushstack/heft-api-extractor-plugin@file:../../../heft-plugins/heft-api-extractor-plugin':
     resolution: {directory: ../../../heft-plugins/heft-api-extractor-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': 1.2.18
+      '@rushstack/heft': 1.2.19
 
   '@rushstack/heft-config-file@file:../../../libraries/heft-config-file':
     resolution: {directory: ../../../libraries/heft-config-file, type: directory}
@@ -920,7 +920,7 @@ packages:
   '@rushstack/heft-jest-plugin@file:../../../heft-plugins/heft-jest-plugin':
     resolution: {directory: ../../../heft-plugins/heft-jest-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': ^1.2.18
+      '@rushstack/heft': ^1.2.19
       '@types/jest': ^30.0.0
       jest-environment-jsdom: ^30.3.0
       jest-environment-node: ^30.3.0
@@ -935,17 +935,17 @@ packages:
   '@rushstack/heft-lint-plugin@file:../../../heft-plugins/heft-lint-plugin':
     resolution: {directory: ../../../heft-plugins/heft-lint-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': 1.2.18
+      '@rushstack/heft': 1.2.19
 
   '@rushstack/heft-node-rig@file:../../../rigs/heft-node-rig':
     resolution: {directory: ../../../rigs/heft-node-rig, type: directory}
     peerDependencies:
-      '@rushstack/heft': ^1.2.18
+      '@rushstack/heft': ^1.2.19
 
   '@rushstack/heft-typescript-plugin@file:../../../heft-plugins/heft-typescript-plugin':
     resolution: {directory: ../../../heft-plugins/heft-typescript-plugin, type: directory}
     peerDependencies:
-      '@rushstack/heft': 1.2.18
+      '@rushstack/heft': 1.2.19
 
   '@rushstack/heft@file:../../../apps/heft':
     resolution: {directory: ../../../apps/heft, type: directory}
@@ -2591,6 +2591,10 @@ packages:
 
   js-yaml@4.1.1:
     resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
+    hasBin: true
+
+  js-yaml@4.2.0:
+    resolution: {integrity: sha512-ePWsvanv0DWuDRsW8dnt+R4jQ31SCRCQ7hhNcPXZPsoBZiemuZNYGf7adZdqX2D86j6rvKp3RpCxVTSb8WQlOw==}
     hasBin: true
 
   jsdoc-type-pratt-parser@4.1.0:
@@ -4329,7 +4333,7 @@ snapshots:
       git-repo-info: 2.1.1
       https-proxy-agent: 5.0.1
       ignore: 5.1.9
-      js-yaml: 4.1.1
+      js-yaml: 4.2.0
       npm-package-arg: 6.1.1
       object-hash: 3.0.0
       pnpm-sync-lib: 0.3.3
@@ -7080,6 +7084,10 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
+  js-yaml@4.2.0:
+    dependencies:
+      argparse: 2.0.1
+
   jsdoc-type-pratt-parser@4.1.0: {}
 
   jsep@1.4.0: {}
@@ -7605,7 +7613,7 @@ snapshots:
 
   read-yaml-file@2.1.0:
     dependencies:
-      js-yaml: 4.1.1
+      js-yaml: 4.2.0
       strip-bom: 4.0.0
 
   readable-stream@2.3.8:
@@ -8318,7 +8326,7 @@ snapshots:
 
   write-yaml-file@4.2.0:
     dependencies:
-      js-yaml: 4.1.1
+      js-yaml: 4.2.0
       write-file-atomic: 3.0.3
 
   xml@1.0.1: {}
