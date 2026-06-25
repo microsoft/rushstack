@@ -45,7 +45,7 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
   if (!settings) {
     // Initialize the settings from file
     if (!context.splitWorkspacePnpmfileShimSettings) {
-      context.splitWorkspacePnpmfileShimSettings = __non_webpack_require__('./pnpmfileSettings.json');
+      context.splitWorkspacePnpmfileShimSettings = __non_webpack_require__('./globalPnpmfileSettings.json');
     }
     settings = context.splitWorkspacePnpmfileShimSettings!;
   } else if (!context.splitWorkspacePnpmfileShimSettings) {
