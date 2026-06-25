@@ -105,6 +105,18 @@ export class AstImport extends AstSyntheticEntity {
   public isTypeOnlyEverywhere: boolean;
 
   /**
+   * Whether type errors on the import should be ignored, for example:
+   *
+   * ```ts
+   * /** \@ts-ignore *\/
+   * import type { X } from "y";
+   * ```
+   *
+   * This is set to true if the ignored form is used in *any* reference to this AstImport.
+   */
+  public isTsIgnored: boolean;
+
+  /**
    * If this import statement refers to an API from an external package that is tracked by API Extractor
    * (according to `PackageMetadataManager.isAedocSupportedFor()`), then this property will return the
    * corresponding AstSymbol.  Otherwise, it is undefined.
@@ -125,6 +137,7 @@ export class AstImport extends AstSyntheticEntity {
     this.importKind = options.importKind;
     this.modulePath = options.modulePath;
     this.exportName = options.exportName;
+    this.isTsIgnored = false;
 
     // We start with this assumption, but it may get changed later if non-type-only import is encountered.
     this.isTypeOnlyEverywhere = options.isTypeOnly;
