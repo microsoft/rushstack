@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/webpack-plugin-utilities": "workspace:*",
     "fast-glob": "~3.3.1"
   },
   "devDependencies": {

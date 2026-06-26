@@ -35,11 +35,14 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean"
+    "test": "heft run --only test",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "webpack-merge": "~5.8.0",
-    "memfs": "4.12.0"
+    "@types/estree": "1.0.8",
+    "memfs": "4.12.0",
+    "webpack-merge": "~5.8.0"
   },
   "peerDependencies": {
     "@types/webpack": "^4.39.8",
@@ -55,9 +58,9 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
+    "@types/tapable": "1.0.6",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
-    "@types/tapable": "1.0.6",
     "webpack": "~5.105.2"
   },
   "sideEffects": false
