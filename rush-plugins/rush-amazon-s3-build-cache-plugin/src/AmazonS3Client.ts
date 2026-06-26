@@ -74,13 +74,16 @@ const storageRetryOptions: IStorageRetryOptions = {
  * Computes the SHA-256 hash of a file on disk using streaming reads.
  */
 async function _hashFileAsync(filePath: string): Promise<string> {
-  return await new Promise<string>((resolve, reject) => {
-    const hash: crypto.Hash = crypto.createHash(HASH_ALGORITHM);
-    const stream: FileSystemReadStream = FileSystem.createReadStream(filePath);
-    stream.on('data', (chunk: string | Buffer) => hash.update(chunk));
-    stream.on('end', () => resolve(hash.digest('hex')));
-    stream.on('error', reject);
-  });
+  const hash: crypto.Hash = crypto.createHash(HASH_ALGORITHM);
+  const stream: FileSystemReadStream = FileSystem.createReadStream(filePath);
+
+  // If this becomes a hotspot, we can move the hashing work to a worker thread
+  // that reuses a preallocated buffer for the file reads.
+  for await (const chunk of stream) {
+    hash.update(chunk);
+  }
+
+  return hash.digest('hex');
 }
 /**
  * A helper for reading and updating objects on Amazon S3
@@ -223,11 +226,10 @@ export class AmazonS3Client {
       true,
       contentHash
     );
+    response.stream.resume();
     if (!response.ok) {
-      response.stream.resume();
       throw new Error(`Amazon S3 responded with status code ${response.status} (${response.statusText})`);
     }
-    response.stream.resume();
   }
 
   private _writeDebugLine(...messageParts: string[]): void {

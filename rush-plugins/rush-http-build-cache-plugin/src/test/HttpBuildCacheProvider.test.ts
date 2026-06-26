@@ -58,6 +58,9 @@ describe('HttpBuildCacheProvider', () => {
       .spyOn(FileSystem, 'createReadStream')
       .mockReturnValue({ pipe: jest.fn() } as unknown as ReturnType<typeof FileSystem.createReadStream>);
     jest
+      .spyOn(FileSystem, 'getStatisticsAsync')
+      .mockResolvedValue({ size: 123 } as Awaited<ReturnType<typeof FileSystem.getStatisticsAsync>>);
+    jest
       .spyOn(FileSystem, 'createWriteStreamAsync')
       .mockResolvedValue({} as unknown as Awaited<ReturnType<typeof FileSystem.createWriteStreamAsync>>);
     jest.spyOn(FileSystem, 'ensureFolderAsync').mockResolvedValue();
@@ -413,7 +416,10 @@ Array [
       expect(streamFetchFn).toHaveBeenCalledWith(
         'https://buildcache.example.acme.com/some-key',
         expect.objectContaining({
-          method: 'POST'
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Content-Length': '123'
+          })
         })
       );
     });

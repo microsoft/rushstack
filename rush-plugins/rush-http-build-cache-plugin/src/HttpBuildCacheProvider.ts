@@ -202,12 +202,16 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     }
 
     try {
+      const { size } = await FileSystem.getStatisticsAsync(localFilePath);
       const entryStream: FileSystemReadStream = FileSystem.createReadStream(localFilePath);
       const result: IWebClientStreamResponse | false = await this._makeHttpStreamRequestAsync({
         terminal,
         relUrl: `${this._cacheKeyPrefix}${cacheId}`,
         method: this._uploadMethod,
         body: entryStream,
+        headers: {
+          'Content-Length': `${size}`
+        },
         warningText: 'Could not write cache entry',
         // maxAttempts is 1 because the file read stream is consumed after the first attempt
         // and cannot be replayed. Downloads use MAX_HTTP_CACHE_ATTEMPTS since each retry
@@ -353,6 +357,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     relUrl: string;
     method: 'GET' | UploadMethod;
     body: Readable | undefined;
+    headers?: Record<string, string>;
     warningText: string;
     maxAttempts: number;
     credentialOptions?: CredentialsOptions;
@@ -383,12 +388,22 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     relUrl: string;
     method: 'GET' | UploadMethod;
     body: Buffer | Readable | undefined;
+    headers?: Record<string, string>;
     warningText: string;
     maxAttempts: number;
     credentialOptions?: CredentialsOptions;
     stream: boolean;
   }): Promise<IWebClientResponse | IWebClientStreamResponse | false> {
-    const { terminal, relUrl, method, body, warningText, credentialOptions, stream } = options;
+    const {
+      terminal,
+      relUrl,
+      method,
+      body,
+      headers: requestHeaders,
+      warningText,
+      credentialOptions,
+      stream
+    } = options;
     const safeCredentialOptions: CredentialsOptions = credentialOptions ?? CredentialsOptions.Optional;
     const credentials: string | undefined = await this._tryGetCredentialsAsync(safeCredentialOptions);
     const url: string = new URL(relUrl, this._url).href;
@@ -400,6 +415,12 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
     for (const [key, value] of Object.entries(this._headers)) {
       if (typeof value === 'string') {
+        headers[key] = value;
+      }
+    }
+
+    if (requestHeaders) {
+      for (const [key, value] of Object.entries(requestHeaders)) {
         headers[key] = value;
       }
     }
