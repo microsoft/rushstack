@@ -1,6 +1,13 @@
 # Change Log - @rushstack/playwright-browser-tunnel
 
-This log was last generated on Sat, 13 Jun 2026 00:16:19 GMT and should not be manually modified.
+This log was last generated on Sat, 20 Jun 2026 21:37:11 GMT and should not be manually modified.
+
+## 0.3.23
+Sat, 20 Jun 2026 21:37:11 GMT
+
+### Patches
+
+- Bump `ws` in `rush-serve-plugin` to mitigate CVE-2026-48779.
 
 ## 0.3.22
 Sat, 13 Jun 2026 00:16:19 GMT

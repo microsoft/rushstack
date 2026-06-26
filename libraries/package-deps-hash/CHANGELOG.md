@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Sat, 13 Jun 2026 00:16:19 GMT and should not be manually modified.
+This log was last generated on Mon, 15 Jun 2026 15:15:33 GMT and should not be manually modified.
+
+## 4.7.21
+Mon, 15 Jun 2026 15:15:33 GMT
+
+### Patches
+
+- Strip GIT_DIR and GIT_WORK_TREE Node env variables to fix issues with miscalculating the git repo root when working in a linked worktree
 
 ## 4.7.20
 Sat, 13 Jun 2026 00:16:19 GMT

@@ -50,8 +50,12 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
 
   public constructor(options: IRedisCobuildLockProviderOptions, rushSession: RushSession) {
     this._options = RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(options);
-    // Provide a default reconnect strategy that prevents more than 5 reconnect attempts.
+    // Detect half-dead connections quickly. Without `socketTimeout`, a silently-dropped
+    // TCP connection (NAT/firewall) can stall in-flight commands for many minutes while
+    // the kernel waits to surface the failure.
     this._options.socket = {
+      connectTimeout: 10_000,
+      socketTimeout: 30_000,
       reconnectStrategy: (count: number) => {
         this._terminal.writeErrorLine(`Redis client reconnecting attempt #${count}`);
         return count < 5 ? count * 1000 : false;
