@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'node:path';
-
 import * as vscode from 'vscode';
 
 import { FileSystem } from '@rushstack/node-core-library';
@@ -166,10 +164,10 @@ export class RushCommandWebViewPanel {
     // eslint-disable-next-line no-console
     console.log('loading rush command webview html and bundle');
     let html: string = await FileSystem.readFileAsync(
-      path.join(this._extensionPath, 'webview/rush-command-webview/index.html')
+      `${this._extensionPath}/webview/rush-command-webview/index.html`
     );
     const scriptSrc: vscode.Uri = this._panel!.webview.asWebviewUri(
-      vscode.Uri.file(path.join(this._extensionPath, 'webview/rush-command-webview/bundle.js'))
+      vscode.Uri.file(`${this._extensionPath}/webview/rush-command-webview/bundle.js`)
     );
 
     // replace bundled js with the correct path
