@@ -113,7 +113,8 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
     return element;
   }
 
-  public getChildren(element?: vscode.TreeItem): Thenable<RushCommand[]> {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public async getChildren(element?: vscode.TreeItem): Promise<RushCommand[]> {
     // eslint-disable-next-line no-console
     console.log('children: ', this._commandLineActions);
     // eslint-disable-next-line no-console
@@ -121,10 +122,10 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
     if (!this._commandLineActions) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       vscode.window.showInformationMessage('No RushProjects in empty workspace');
-      return Promise.resolve([]);
+      return [];
     }
 
-    return Promise.resolve([
+    return [
       {
         label: 'Test label',
         collapsibleState: vscode.TreeItemCollapsibleState.None
@@ -137,11 +138,11 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
         label: 'Test label3',
         collapsibleState: vscode.TreeItemCollapsibleState.None
       }
-    ]);
+    ];
 
     // top-level
     // if (!element) {
-    //   return Promise.resolve(
+    //   return (
     //     this._commandLineActions.map(
     //       (commandLineAction) =>
     //         new RushCommand({
@@ -153,6 +154,6 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
     //   );
     // }
 
-    // return Promise.resolve([]);
+    // return [];
   }
 }

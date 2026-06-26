@@ -12,8 +12,9 @@ export class RushCommandWebViewPanel {
   private static _instance: RushCommandWebViewPanel | undefined;
   private _panel: vscode.WebviewView | undefined;
   private _webViewProvider: vscode.WebviewViewProvider | undefined;
-  private _context: vscode.ExtensionContext;
-  private _extensionPath: string;
+  private readonly _context: vscode.ExtensionContext;
+  private readonly _extensionPath: string;
+
   private constructor(context: vscode.ExtensionContext) {
     this._extensionPath = context.extensionPath;
     this._context = context;
@@ -59,11 +60,11 @@ export class RushCommandWebViewPanel {
       }
     };
 
-    const resolveWebviewView = (
+    const resolveWebviewView = async (
       thisWebview: vscode.WebviewView,
       thisWebviewContext: vscode.WebviewViewResolveContext,
       thisToken: vscode.CancellationToken
-    ): void => {
+    ): Promise<void> => {
       this._panel = thisWebview;
 
       const message: IFromExtensionMessage = {
@@ -73,9 +74,9 @@ export class RushCommandWebViewPanel {
       // eslint-disable-next-line no-console
       console.log('message', message);
       thisWebview.webview.options = { enableScripts: true };
-      thisWebview.webview.html = this._getWebviewContent();
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      thisWebview.webview.postMessage(message);
+      // eslint-disable-next-line require-atomic-updates
+      thisWebview.webview.html = await this._getWebviewContentAsync();
+      await thisWebview.webview.postMessage(message);
     };
 
     const provider: vscode.WebviewViewProvider = {
@@ -153,17 +154,18 @@ export class RushCommandWebViewPanel {
     // }
   }
 
-  private _setWebviewContent(state: IRootState): void {
+  private async _setWebviewContentAsync(state: IRootState): Promise<void> {
     if (!this._panel) {
       return;
     }
-    this._panel.webview.html = this._getWebviewContent(state);
+
+    this._panel.webview.html = await this._getWebviewContentAsync(state);
   }
 
-  private _getWebviewContent(state: unknown = {}): string {
+  private async _getWebviewContentAsync(state: unknown = {}): Promise<string> {
     // eslint-disable-next-line no-console
     console.log('loading rush command webview html and bundle');
-    let html: string = FileSystem.readFile(
+    let html: string = await FileSystem.readFileAsync(
       path.join(this._extensionPath, 'webview/rush-command-webview/index.html')
     );
     const scriptSrc: vscode.Uri = this._panel!.webview.asWebviewUri(

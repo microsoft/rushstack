@@ -1,11 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import path from 'node:path';
-
 import * as vscode from 'vscode';
 
-import { JsonFile, type JsonObject } from '@rushstack/node-core-library';
 import type { RushConfiguration, RushConfigurationProject } from '@rushstack/rush-sdk';
 
 import { RushTaskProvider } from './TaskProvider';
@@ -148,13 +145,14 @@ export class RushProjectsProvider implements vscode.TreeDataProvider<RushProject
     return element;
   }
 
-  public getChildren(
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public async getChildren(
     element?: RushProject | RushProjectScript
-  ): Thenable<RushProject[] | RushProjectScript[]> {
+  ): Promise<RushProject[] | RushProjectScript[]> {
     if (!this._rushConfiguration) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       vscode.window.showInformationMessage('No RushProjects in empty workspace');
-      return Promise.resolve([]);
+      return [];
     }
 
     // top-level
@@ -167,31 +165,33 @@ export class RushProjectsProvider implements vscode.TreeDataProvider<RushProject
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed
           })
       );
-      return Promise.resolve(rushProjectTreeItems);
+      return rushProjectTreeItems;
     }
 
     if (element instanceof RushProject) {
       try {
-        const projectFolder: string = element.rushConfigurationProject.projectFolder;
-        const projectRelativeFolder: string = element.rushConfigurationProject.projectRelativeFolder;
-        const packageJson: JsonObject = JsonFile.load(path.join(projectFolder, 'package.json'));
-        const rushProjectScriptTreeItems: RushProjectScript[] = Object.keys(packageJson.scripts).map(
-          (scriptName) =>
+        const {
+          projectFolder,
+          projectRelativeFolder,
+          packageJson: { scripts = {} }
+        } = element.rushConfigurationProject;
+        const rushProjectScriptTreeItems: RushProjectScript[] = Object.entries(scripts).map(
+          ([scriptName, scriptValue]) =>
             new RushProjectScript({
               label: scriptName,
               collapsibleState: vscode.TreeItemCollapsibleState.None,
               projectFolder,
               projectRelativeFolder,
               scriptName,
-              scriptValue: packageJson.scripts[scriptName]
+              scriptValue
             })
         );
-        return Promise.resolve(rushProjectScriptTreeItems);
+        return rushProjectScriptTreeItems;
       } catch {
-        return Promise.resolve([]);
+        return [];
       }
     }
 
-    return Promise.resolve([]);
+    return [];
   }
 }
