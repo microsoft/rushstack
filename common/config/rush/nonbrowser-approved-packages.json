@@ -276,7 +276,7 @@
     },
     {
       "name": "@rushstack/heft-vscode-extension-rig",
-      "allowedCategories": [ "vscode-extensions" ]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/heft-web-rig",
@@ -700,7 +700,7 @@
     },
     {
       "name": "fast-glob",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "fastify",
@@ -717,10 +717,6 @@
     {
       "name": "git-repo-info",
       "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "glob",
-      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "heft-action-plugin",
@@ -861,6 +857,10 @@
     {
       "name": "local-node-rig",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "local-vscode-extension-rig",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "local-web-rig",

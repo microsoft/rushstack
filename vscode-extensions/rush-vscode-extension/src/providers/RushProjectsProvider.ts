@@ -1,14 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import path from 'node:path';
+
 import * as vscode from 'vscode';
-import * as path from 'path';
+
 import { JsonFile, type JsonObject } from '@rushstack/node-core-library';
+import type { RushConfiguration, RushConfigurationProject } from '@rushstack/rush-sdk';
+
 import { RushTaskProvider } from './TaskProvider';
 import { terminal } from '../logic/logger';
 import { RushWorkspace } from '../logic/RushWorkspace';
-
-import type { RushConfiguration, RushConfigurationProject } from '@rushstack/rush-sdk';
 import { RushCommandWebViewPanel } from '../logic/RushCommandWebViewPanel';
 
 interface IRushProjectParams {
