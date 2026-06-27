@@ -35,7 +35,7 @@ import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from './InstallHelpers';
 import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import type { RepoStateFile } from '../RepoStateFile';
-import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
@@ -44,10 +44,19 @@ import type { Subspace } from '../../api/Subspace';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 import { FlagFile } from '../../api/FlagFile';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
+import type { PnpmOptionsConfiguration, PnpmStoreLocation } from '../pnpm/PnpmOptionsConfiguration';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
+}
+
+interface IGlobalVirtualStoreValidationOptions {
+  pnpmVersion: string;
+  rushJsonFolder: string;
+  pnpmStore: PnpmStoreLocation;
+  pnpmStorePath: string;
+  pnpmStorePathOverride: string | undefined;
+  usePnpmSyncForInjectedDependencies: boolean | undefined;
 }
 
 /**
@@ -476,10 +485,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     ) {
       if (pnpmOptions.globalAllowBuilds) {
         workspaceFile.setAllowBuilds(pnpmOptions.globalAllowBuilds);
-      } else if (
-        pnpmOptions.globalOnlyBuiltDependencies ||
-        pnpmOptions.globalNeverBuiltDependencies
-      ) {
+      } else if (pnpmOptions.globalOnlyBuiltDependencies || pnpmOptions.globalNeverBuiltDependencies) {
         // Backward compatibility: convert globalOnlyBuiltDependencies/globalNeverBuiltDependencies
         // to allowBuilds format for pnpm 11+
         const allowBuilds: Record<string, boolean> = {};
@@ -509,11 +515,71 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
     }
 
+    if (EnvironmentConfiguration.pnpmGlobalVirtualStore) {
+      const globalVirtualStoreWarning: string | undefined =
+        WorkspaceInstallManager._validateGlobalVirtualStoreOptions({
+          pnpmVersion: this.rushConfiguration.packageManagerToolVersion,
+          rushJsonFolder: this.rushConfiguration.rushJsonFolder,
+          pnpmStore: this.rushConfiguration.pnpmOptions.pnpmStore,
+          pnpmStorePath: this.rushConfiguration.pnpmOptions.pnpmStorePath,
+          pnpmStorePathOverride: EnvironmentConfiguration.pnpmStorePathOverride,
+          usePnpmSyncForInjectedDependencies:
+            this.rushConfiguration.experimentsConfiguration.configuration?.usePnpmSyncForInjectedDependencies
+        });
+      if (globalVirtualStoreWarning) {
+        this._terminal.writeWarningLine(Colorize.yellow(globalVirtualStoreWarning));
+      }
+      workspaceFile.setEnableGlobalVirtualStore(true);
+    }
+
     // Save the generated workspace file. Don't update the file timestamp unless the content has changed,
     // since "rush install" will consider this timestamp
     workspaceFile.save(workspaceFile.workspaceFilename, { onlyIfChanged: true });
 
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
+  }
+
+  private static _validateGlobalVirtualStoreOptions(
+    options: IGlobalVirtualStoreValidationOptions
+  ): string | undefined {
+    if (semver.lt(options.pnpmVersion, '10.12.1')) {
+      throw new Error(
+        `Your version of PNPM (${options.pnpmVersion}) doesn't support the ` +
+          `${EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE} environment variable. ` +
+          'Unset this environment variable or upgrade to PNPM 10.12.1 or newer.'
+      );
+    }
+
+    if (options.pnpmStore === 'local' && !options.pnpmStorePathOverride) {
+      throw new Error(
+        `The ${EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE} environment ` +
+          `variable requires a shared PNPM store. The current "pnpmStore" setting resolves to ` +
+          `a worktree-local store under ${options.pnpmStorePath}. Set "pnpmStore" to "global" ` +
+          `or use ${EnvironmentVariableNames.RUSH_PNPM_STORE_PATH}.`
+      );
+    }
+
+    if (options.pnpmStorePathOverride) {
+      if (Path.isUnderOrEqual(path.resolve(options.pnpmStorePathOverride), options.rushJsonFolder)) {
+        return (
+          `The ${EnvironmentVariableNames.RUSH_PNPM_STORE_PATH} environment variable points inside ` +
+          `the Rush repo: ${options.pnpmStorePathOverride}. PNPM global virtual store will still ` +
+          `be enabled, but the store will remain worktree-local and will not reduce setup or ` +
+          `cleanup costs across multiple worktrees.`
+        );
+      }
+    }
+
+    if (options.usePnpmSyncForInjectedDependencies) {
+      throw new Error(
+        `The ${EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE} environment ` +
+          `variable is not compatible with the ` +
+          `"usePnpmSyncForInjectedDependencies" experiment. PNPM global virtual store moves the ` +
+          `virtual store out of "node_modules/.pnpm", but pnpm-sync currently requires that folder.`
+      );
+    }
+
+    return undefined;
   }
 
   protected async canSkipInstallAsync(

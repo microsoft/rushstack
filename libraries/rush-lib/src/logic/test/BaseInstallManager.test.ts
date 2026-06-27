@@ -11,6 +11,7 @@ import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import type { Subspace } from '../../api/Subspace';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 
 class FakeBaseInstallManager extends BaseInstallManager {
   public constructor(
@@ -43,6 +44,10 @@ class FakeBaseInstallManager extends BaseInstallManager {
 
 describe('BaseInstallManager Test', () => {
   const rushGlobalFolder: RushGlobalFolder = new RushGlobalFolder();
+
+  afterEach(() => {
+    EnvironmentConfiguration.reset();
+  });
 
   it('pnpm version in 6.32.12 - 6.33.x || 7.0.1 - 7.8.x should output warning', () => {
     const rushJsonFilePnpmV6: string = path.resolve(__dirname, 'ignoreCompatibilityDb/rush1.json');
@@ -127,6 +132,152 @@ describe('BaseInstallManager Test', () => {
       expect(mockWrite.mock.calls[0][0]).not.toContain(
         "Warning: Your rush.json specifies a pnpmVersion with a known issue that may cause unintended version selections. It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. For details see: https://rushjs.io/link/pnpm-issue-5132"
       );
+    }
+  });
+
+  it('passes --store when RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE is used with a local PNPM store', () => {
+    const originalPnpmGlobalVirtualStore: string | undefined =
+      process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE];
+    const originalPnpmStorePath: string | undefined =
+      process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH];
+    try {
+      process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE] = '1';
+      delete process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH];
+      EnvironmentConfiguration.reset();
+
+      const rushJsonFile: string = path.resolve(__dirname, 'ignoreCompatibilityDb/rush3.json');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
+      const purgeManager: typeof PurgeManager.prototype = new PurgeManager(
+        rushConfiguration,
+        rushGlobalFolder
+      );
+      const options: IInstallManagerOptions = {
+        subspace: rushConfiguration.defaultSubspace
+      } as IInstallManagerOptions;
+      const fakeBaseInstallManager: FakeBaseInstallManager = new FakeBaseInstallManager(
+        rushConfiguration,
+        rushGlobalFolder,
+        purgeManager,
+        options
+      );
+
+      const args: string[] = [];
+      fakeBaseInstallManager.pushConfigurationArgs(args, options, rushConfiguration.defaultSubspace);
+
+      expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
+      expect(rushConfiguration.pnpmOptions.pnpmStorePath).not.toEqual('');
+      expect(args).toContain('--store');
+      expect(args).toContain(rushConfiguration.pnpmOptions.pnpmStorePath);
+    } finally {
+      if (originalPnpmGlobalVirtualStore === undefined) {
+        delete process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE];
+      } else {
+        process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE] =
+          originalPnpmGlobalVirtualStore;
+      }
+      if (originalPnpmStorePath === undefined) {
+        delete process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH];
+      } else {
+        process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH] = originalPnpmStorePath;
+      }
+      EnvironmentConfiguration.reset();
+    }
+  });
+
+  it('does not pass --store when RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE is used with a global PNPM store', () => {
+    const originalPnpmGlobalVirtualStore: string | undefined =
+      process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE];
+    const originalPnpmStorePath: string | undefined =
+      process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH];
+    try {
+      process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE] = '1';
+      delete process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH];
+      EnvironmentConfiguration.reset();
+
+      const rushJsonFile: string = path.resolve(__dirname, '../../api/test/repo/rush-pnpm-global.json');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
+      const purgeManager: typeof PurgeManager.prototype = new PurgeManager(
+        rushConfiguration,
+        rushGlobalFolder
+      );
+      const options: IInstallManagerOptions = {
+        subspace: rushConfiguration.defaultSubspace
+      } as IInstallManagerOptions;
+      const fakeBaseInstallManager: FakeBaseInstallManager = new FakeBaseInstallManager(
+        rushConfiguration,
+        rushGlobalFolder,
+        purgeManager,
+        options
+      );
+
+      const args: string[] = [];
+      fakeBaseInstallManager.pushConfigurationArgs(args, options, rushConfiguration.defaultSubspace);
+
+      expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('global');
+      expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual('');
+      expect(args).not.toContain('--store');
+    } finally {
+      if (originalPnpmGlobalVirtualStore === undefined) {
+        delete process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE];
+      } else {
+        process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE] =
+          originalPnpmGlobalVirtualStore;
+      }
+      if (originalPnpmStorePath === undefined) {
+        delete process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH];
+      } else {
+        process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH] = originalPnpmStorePath;
+      }
+      EnvironmentConfiguration.reset();
+    }
+  });
+
+  it('passes --store when RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE uses an explicit PNPM store path', () => {
+    const originalPnpmGlobalVirtualStore: string | undefined =
+      process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE];
+    const originalPnpmStorePath: string | undefined =
+      process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH];
+    try {
+      const expectedStorePath: string = path.resolve('/var/temp/pnpm-store');
+      process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE] = '1';
+      process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH] = expectedStorePath;
+      EnvironmentConfiguration.reset();
+
+      const rushJsonFile: string = path.resolve(__dirname, 'ignoreCompatibilityDb/rush3.json');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
+      const purgeManager: typeof PurgeManager.prototype = new PurgeManager(
+        rushConfiguration,
+        rushGlobalFolder
+      );
+      const options: IInstallManagerOptions = {
+        subspace: rushConfiguration.defaultSubspace
+      } as IInstallManagerOptions;
+      const fakeBaseInstallManager: FakeBaseInstallManager = new FakeBaseInstallManager(
+        rushConfiguration,
+        rushGlobalFolder,
+        purgeManager,
+        options
+      );
+
+      const args: string[] = [];
+      fakeBaseInstallManager.pushConfigurationArgs(args, options, rushConfiguration.defaultSubspace);
+
+      expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(expectedStorePath);
+      expect(args).toContain('--store');
+      expect(args).toContain(expectedStorePath);
+    } finally {
+      if (originalPnpmGlobalVirtualStore === undefined) {
+        delete process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE];
+      } else {
+        process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE] =
+          originalPnpmGlobalVirtualStore;
+      }
+      if (originalPnpmStorePath === undefined) {
+        delete process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH];
+      } else {
+        process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH] = originalPnpmStorePath;
+      }
+      EnvironmentConfiguration.reset();
     }
   });
 });
