@@ -242,4 +242,259 @@ describe(PnpmWorkspaceFile.name, () => {
       expect(content).not.toContain('allowBuilds');
     });
   });
+
+  describe('overrides functionality', () => {
+    it('generates workspace file with overrides', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setOverrides({
+        'foo@1.0.0': '1.0.1',
+        bar: '^2.0.0'
+      });
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toContain('overrides:');
+      expect(content).toMatchSnapshot();
+    });
+
+    it('handles empty overrides object', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setOverrides({});
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).not.toContain('overrides');
+    });
+
+    it('handles undefined overrides', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setOverrides(undefined);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).not.toContain('overrides');
+    });
+  });
+
+  describe('packageExtensions functionality', () => {
+    it('generates workspace file with packageExtensions', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setPackageExtensions({
+        'react@*': {
+          dependencies: {
+            foo: '1.0.0'
+          }
+        }
+      });
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toContain('packageExtensions:');
+      expect(content).toMatchSnapshot();
+    });
+
+    it('handles empty packageExtensions object', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setPackageExtensions({});
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).not.toContain('packageExtensions');
+    });
+
+    it('handles undefined packageExtensions', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setPackageExtensions(undefined);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).not.toContain('packageExtensions');
+    });
+  });
+
+  describe('peerDependencyRules functionality', () => {
+    it('generates workspace file with peerDependencyRules', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setPeerDependencyRules({
+        ignoreMissing: ['baz'],
+        allowedVersions: {
+          react: '18'
+        }
+      });
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toContain('peerDependencyRules:');
+      expect(content).toMatchSnapshot();
+    });
+
+    it('handles empty peerDependencyRules object', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setPeerDependencyRules({});
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).not.toContain('peerDependencyRules');
+    });
+
+    it('handles undefined peerDependencyRules', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setPeerDependencyRules(undefined);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).not.toContain('peerDependencyRules');
+    });
+  });
+
+  describe('allowedDeprecatedVersions functionality', () => {
+    it('generates workspace file with allowedDeprecatedVersions', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setAllowedDeprecatedVersions({
+        querystring: '*'
+      });
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toContain('allowedDeprecatedVersions:');
+      expect(content).toMatchSnapshot();
+    });
+
+    it('handles empty allowedDeprecatedVersions object', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setAllowedDeprecatedVersions({});
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).not.toContain('allowedDeprecatedVersions');
+    });
+
+    it('handles undefined allowedDeprecatedVersions', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setAllowedDeprecatedVersions(undefined);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).not.toContain('allowedDeprecatedVersions');
+    });
+  });
+
+  describe('patchedDependencies functionality', () => {
+    it('generates workspace file with patchedDependencies', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setPatchedDependencies({
+        'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
+      });
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toContain('patchedDependencies:');
+      expect(content).toMatchSnapshot();
+    });
+
+    it('handles empty patchedDependencies object', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setPatchedDependencies({});
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).not.toContain('patchedDependencies');
+    });
+
+    it('handles undefined patchedDependencies', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setPatchedDependencies(undefined);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).not.toContain('patchedDependencies');
+    });
+  });
+
+  describe('combined pnpm 11 settings', () => {
+    it('generates workspace file with all relocated settings together', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setCatalogs({
+        default: {
+          react: '^18.0.0'
+        }
+      });
+      workspaceFile.setAllowBuilds({
+        esbuild: true
+      });
+      workspaceFile.setOverrides({
+        'foo@1.0.0': '1.0.1'
+      });
+      workspaceFile.setPackageExtensions({
+        'react@*': {
+          dependencies: {
+            foo: '1.0.0'
+          }
+        }
+      });
+      workspaceFile.setPeerDependencyRules({
+        allowedVersions: {
+          react: '18'
+        }
+      });
+      workspaceFile.setAllowedDeprecatedVersions({
+        querystring: '*'
+      });
+      workspaceFile.setPatchedDependencies({
+        'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
+      });
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toMatchSnapshot();
+    });
+  });
 });

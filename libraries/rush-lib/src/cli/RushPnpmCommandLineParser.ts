@@ -537,12 +537,28 @@ export class RushPnpmCommandLineParser {
           break;
         }
 
-        // Example: "C:\MyRepo\common\temp\package.json"
-        const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
-        const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
-        const newGlobalPatchedDependencies: Record<string, string> | undefined =
-          commonPackageJson?.pnpm?.patchedDependencies;
         const pnpmOptions: PnpmOptionsConfiguration | undefined = this._subspace.getPnpmOptions();
+        const pnpmVersion: string = this._rushConfiguration.packageManagerToolVersion;
+        const semver: typeof import('semver') = await import('semver');
+
+        let newGlobalPatchedDependencies: Record<string, string> | undefined;
+        if (semver.gte(pnpmVersion, '11.0.0')) {
+          // PNPM 11+ stores patchedDependencies in pnpm-workspace.yaml instead of the package.json "pnpm" field
+          const workspaceYamlFilename: string = `${subspaceTempFolder}/pnpm-workspace.yaml`;
+          const yamlModule: typeof import('js-yaml') = await import('js-yaml');
+          const workspaceYamlContent: string = await FileSystem.readFileAsync(workspaceYamlFilename);
+          const workspaceYaml: { patchedDependencies?: Record<string, string> } = (yamlModule.load(
+            workspaceYamlContent
+          ) ?? {}) as { patchedDependencies?: Record<string, string> };
+          newGlobalPatchedDependencies = workspaceYaml?.patchedDependencies;
+        } else {
+          // PNPM 10.x and earlier store patchedDependencies in the package.json "pnpm" field
+          // Example: "C:\MyRepo\common\temp\package.json"
+          const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
+          const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
+          newGlobalPatchedDependencies = commonPackageJson?.pnpm?.patchedDependencies;
+        }
+
         const currentGlobalPatchedDependencies: Record<string, string> | undefined =
           pnpmOptions?.globalPatchedDependencies;
 

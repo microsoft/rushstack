@@ -65,18 +65,23 @@ export class InstallHelpers {
         commonPackageJson.pnpm = {};
       }
 
-      if (pnpmOptions.globalOverrides) {
+      const pnpmVersion: string = rushConfiguration.packageManagerToolVersion;
+
+      // pnpm 11 no longer reads the "pnpm" field of package.json. For pnpm 11+, these settings
+      // are written to common/temp/pnpm-workspace.yaml by WorkspaceInstallManager instead.
+      // See https://github.com/microsoft/rushstack/issues/5837
+      const isPnpm11OrNewer: boolean = semver.gte(pnpmVersion, '11.0.0');
+
+      if (!isPnpm11OrNewer && pnpmOptions.globalOverrides) {
         commonPackageJson.pnpm.overrides = pnpmOptions.globalOverrides;
       }
 
-      if (pnpmOptions.globalPackageExtensions) {
+      if (!isPnpm11OrNewer && pnpmOptions.globalPackageExtensions) {
         commonPackageJson.pnpm.packageExtensions = pnpmOptions.globalPackageExtensions;
       }
-      if (pnpmOptions.globalPeerDependencyRules) {
+      if (!isPnpm11OrNewer && pnpmOptions.globalPeerDependencyRules) {
         commonPackageJson.pnpm.peerDependencyRules = pnpmOptions.globalPeerDependencyRules;
       }
-
-      const pnpmVersion: string = rushConfiguration.packageManagerToolVersion;
 
       if (pnpmOptions.globalNeverBuiltDependencies) {
         if (semver.gte(pnpmVersion, '11.0.0')) {
@@ -134,11 +139,11 @@ export class InstallHelpers {
         commonPackageJson.pnpm.ignoredOptionalDependencies = pnpmOptions.globalIgnoredOptionalDependencies;
       }
 
-      if (pnpmOptions.globalAllowedDeprecatedVersions) {
+      if (!isPnpm11OrNewer && pnpmOptions.globalAllowedDeprecatedVersions) {
         commonPackageJson.pnpm.allowedDeprecatedVersions = pnpmOptions.globalAllowedDeprecatedVersions;
       }
 
-      if (pnpmOptions.globalPatchedDependencies) {
+      if (!isPnpm11OrNewer && pnpmOptions.globalPatchedDependencies) {
         commonPackageJson.pnpm.patchedDependencies = pnpmOptions.globalPatchedDependencies;
       }
 

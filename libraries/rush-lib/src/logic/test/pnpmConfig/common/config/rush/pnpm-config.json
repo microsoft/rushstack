@@ -12,6 +12,18 @@
       }
     }
   },
+  "globalPeerDependencyRules": {
+    "allowedVersions": {
+      "react": "18"
+    },
+    "ignoreMissing": ["@babel/core"]
+  },
+  "globalAllowedDeprecatedVersions": {
+    "request": "*"
+  },
+  "globalPatchedDependencies": {
+    "lodash@4.17.21": "patches/lodash@4.17.21.patch"
+  },
   "globalNeverBuiltDependencies": ["fsevents", "level"],
   "globalOnlyBuiltDependencies": ["esbuild", "playwright"],
   "globalCatalogs": {
