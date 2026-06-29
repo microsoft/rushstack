@@ -48,6 +48,7 @@
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
     "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:*",
     "@rushstack/rush-http-build-cache-plugin": "workspace:*",
+    "@rushstack/rush-serve-plugin": "workspace:*",
     "@types/semver": "7.7.1"
   },
   "exports": {
