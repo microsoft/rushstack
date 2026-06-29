@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update js-yaml dependency to ~4.2.0 to address security advisory GHSA-h67p-54hq-rp68 (poor performance characteristics with certain input)",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "copilot@microsoft.com"
+}

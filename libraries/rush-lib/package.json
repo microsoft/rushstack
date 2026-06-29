@@ -68,7 +68,7 @@
     "@inquirer/input": "~5.0.11",
     "@inquirer/search": "~4.1.7",
     "@inquirer/select": "~5.1.3",
-    "js-yaml": "~4.1.0",
+    "js-yaml": "~4.2.0",
     "npm-package-arg": "~6.1.0",
     "object-hash": "3.0.0",
     "pnpm-sync-lib": "0.3.3",
