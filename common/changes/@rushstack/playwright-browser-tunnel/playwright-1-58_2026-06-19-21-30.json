@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/playwright-browser-tunnel",
+      "comment": "Upgrade the Playwright dependencies from 1.56.1 to 1.58.2",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/playwright-browser-tunnel",
+  "email": "50554904+hl662@users.noreply.github.com"
+}

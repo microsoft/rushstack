@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import { FileSystem, Import, JsonFile, type JsonObject, JsonSchema } from '@rushstack/node-core-library';
 import { Autoinstaller } from '@rushstack/rush-sdk/lib/logic/Autoinstaller';
