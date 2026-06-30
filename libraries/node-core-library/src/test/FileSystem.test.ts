@@ -149,6 +149,62 @@ describe(FileSystem.name, () => {
     });
   });
 
+  describe(FileSystem.ensureEmptyFolder.name, () => {
+    const tempDir: string = `${testTempFolder}/ensureEmptyFolder`;
+
+    afterEach(() => {
+      FileSystem.deleteFolder(tempDir);
+    });
+
+    test('empties an existing folder but keeps the folder itself', () => {
+      FileSystem.ensureFolder(`${tempDir}/sub`);
+      FileSystem.writeFile(`${tempDir}/a.txt`, 'a');
+      FileSystem.writeFile(`${tempDir}/sub/b.txt`, 'b');
+
+      FileSystem.ensureEmptyFolder(tempDir);
+
+      expect(fs.existsSync(tempDir)).toBe(true);
+      expect(fs.readdirSync(tempDir)).toEqual([]);
+    });
+
+    test('creates the folder when it does not exist', () => {
+      expect(fs.existsSync(tempDir)).toBe(false);
+
+      FileSystem.ensureEmptyFolder(tempDir);
+
+      expect(fs.existsSync(tempDir)).toBe(true);
+      expect(fs.readdirSync(tempDir)).toEqual([]);
+    });
+  });
+
+  describe(FileSystem.ensureEmptyFolderAsync.name, () => {
+    const tempDir: string = `${testTempFolder}/ensureEmptyFolderAsync`;
+
+    afterEach(async () => {
+      await FileSystem.deleteFolderAsync(tempDir);
+    });
+
+    test('empties an existing folder but keeps the folder itself', async () => {
+      await FileSystem.ensureFolderAsync(`${tempDir}/sub`);
+      await FileSystem.writeFileAsync(`${tempDir}/a.txt`, 'a');
+      await FileSystem.writeFileAsync(`${tempDir}/sub/b.txt`, 'b');
+
+      await FileSystem.ensureEmptyFolderAsync(tempDir);
+
+      expect(fs.existsSync(tempDir)).toBe(true);
+      expect(fs.readdirSync(tempDir)).toEqual([]);
+    });
+
+    test('creates the folder when it does not exist', async () => {
+      expect(fs.existsSync(tempDir)).toBe(false);
+
+      await FileSystem.ensureEmptyFolderAsync(tempDir);
+
+      expect(fs.existsSync(tempDir)).toBe(true);
+      expect(fs.readdirSync(tempDir)).toEqual([]);
+    });
+  });
+
   describe(FileSystem.createWriteStreamAsync.name, () => {
     const tempDir: string = `${testTempFolder}/createWriteStreamAsync`;
 
