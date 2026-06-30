@@ -300,6 +300,28 @@ export class ExportAnalyzer {
       return false;
     }
 
+    // If the user configured `bundledPackages` but TypeScript could not
+    // produce a `packageId` for this module, the bundled-package lookup is
+    // guaranteed to miss it and the module will be silently treated as
+    // external (issue #5730). The most common cause is a local package
+    // whose `package.json` lacks a `"version"` field — TypeScript does not
+    // assign a `packageId` without one (microsoft/TypeScript#63307). Surface
+    // the cause with a remediable error rather than producing a confusing
+    // bundling result.
+    if (packageName === undefined && this._bundledPackageNames.size > 0) {
+      throw new InternalError(
+        `Cannot determine the package name for the module ${JSON.stringify(
+          moduleSpecifier
+        )}, but "bundledPackages" is configured. ` +
+          `This is usually because the resolved package's package.json ` +
+          `is missing a "version" field — TypeScript does not assign a ` +
+          `packageId without one (microsoft/TypeScript#63307), so the ` +
+          `bundledPackages lookup cannot match it. Add a "version" field ` +
+          `(any value works) to the package's package.json and re-run.\n` +
+          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
+      );
+    }
+
     if (resolvedModule.isExternalLibraryImport === undefined) {
       // This presumably means the compiler couldn't figure out whether the module was external, but we're not
       // sure how this can happen.
