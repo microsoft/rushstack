@@ -4819,6 +4819,33 @@ importers:
         specifier: ~5.8.2
         version: 5.8.2
 
+  ../../../rigs/local-vscode-extension-rig:
+    dependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/heft-vscode-extension-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-vscode-extension-plugin
+      '@rushstack/heft-vscode-extension-rig':
+        specifier: workspace:*
+        version: link:../heft-vscode-extension-rig
+      '@rushstack/webpack-preserve-dynamic-require-plugin':
+        specifier: workspace:*
+        version: link:../../webpack/preserve-dynamic-require-plugin
+      eslint:
+        specifier: ~9.37.0
+        version: 9.37.0
+      local-eslint-config:
+        specifier: workspace:*
+        version: link:../../eslint/local-eslint-config
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../local-node-rig
+      typescript:
+        specifier: ~5.8.2
+        version: 5.8.2
+
   ../../../rigs/local-web-rig:
     dependencies:
       '@microsoft/api-extractor':
@@ -5211,9 +5238,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-vscode-extension-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-vscode-extension-rig
       '@types/node':
         specifier: 20.17.19
         version: 20.17.19
@@ -5223,6 +5247,9 @@ importers:
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
+      local-vscode-extension-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-vscode-extension-rig
 
   ../../../vscode-extensions/playwright-local-browser-server-vscode-extension:
     dependencies:
@@ -5251,9 +5278,6 @@ importers:
       '@rushstack/heft-node-rig':
         specifier: workspace:*
         version: link:../../rigs/heft-node-rig
-      '@rushstack/heft-vscode-extension-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-vscode-extension-rig
       '@types/node':
         specifier: 20.17.19
         version: 20.17.19
@@ -5263,6 +5287,9 @@ importers:
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
+      local-vscode-extension-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-vscode-extension-rig
 
   ../../../vscode-extensions/rush-vscode-command-webview:
     dependencies:
@@ -5352,12 +5379,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-vscode-extension-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-vscode-extension-rig
-      '@types/glob':
-        specifier: 7.1.1
-        version: 7.1.1
       '@types/mocha':
         specifier: 10.0.6
         version: 10.0.6
@@ -5373,9 +5394,12 @@ importers:
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
-      glob:
-        specifier: ~7.0.5
-        version: 7.0.6
+      fast-glob:
+        specifier: ~3.3.1
+        version: 3.3.3
+      local-vscode-extension-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-vscode-extension-rig
       mocha:
         specifier: ^10.1.0
         version: 10.8.2

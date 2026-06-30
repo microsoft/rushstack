@@ -1,5 +1,4 @@
 /* eslint-env es6 */
-const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
@@ -16,10 +15,10 @@ function createWebpackConfig({ production }) {
       }
     },
     entry: {
-      bundle: path.join(__dirname, 'lib-esm', 'entry.js')
+      bundle: `${__dirname}/lib-esm/entry.js`
     },
     output: {
-      path: path.join(__dirname, 'dist'),
+      path: `${__dirname}/dist`,
       filename: '[name].js'
     },
     module: {
@@ -58,9 +57,9 @@ function createWebpackConfig({ production }) {
       new BundleAnalyzerPlugin({
         openAnalyzer: false,
         analyzerMode: 'static',
-        reportFilename: path.resolve(__dirname, 'temp', 'stats.html'),
+        reportFilename: `${__dirname}/temp/stats.html`,
         generateStatsFile: true,
-        statsFilename: path.resolve(__dirname, 'temp', 'stats.json'),
+        statsFilename: `${__dirname}/temp/stats.json`,
         logLevel: 'info'
       })
     ].filter(Boolean)
