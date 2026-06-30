@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { TSESTree, TSESLint } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES } from '@typescript-eslint/utils';
 
 type MessageIds = 'error-usage-of-null';
 type Options = [];
@@ -27,15 +28,43 @@ const noNullRule: TSESLint.RuleModule<MessageIds, Options> = {
         // Is it a "null" literal?
         if (node.value === null) {
           // Does the "null" appear in a comparison such as "if (x === null)"?
-          let isComparison: boolean = false;
-          if (node.parent && node.parent.type === 'BinaryExpression') {
+          if (node.parent && node.parent.type === AST_NODE_TYPES.BinaryExpression) {
             const operator: string = node.parent.operator;
-            isComparison = operator === '!==' || operator === '===' || operator === '!=' || operator === '==';
+            if (operator === '!==' || operator === '===' || operator === '!=' || operator === '==') {
+              return;
+            }
           }
 
-          if (!isComparison) {
-            context.report({ node, messageId: 'error-usage-of-null' });
+          // Is this "Object.create(null)"?  This is the correct pattern for creating
+          // a dictionary object that does not inherit members from the Object prototype.
+          if (
+            node.parent &&
+            node.parent.type === AST_NODE_TYPES.CallExpression &&
+            node.parent.arguments[0] === node &&
+            node.parent.callee.type === AST_NODE_TYPES.MemberExpression &&
+            node.parent.callee.object.type === AST_NODE_TYPES.Identifier &&
+            node.parent.callee.object.name === 'Object' &&
+            node.parent.callee.property.type === AST_NODE_TYPES.Identifier &&
+            node.parent.callee.property.name === 'create'
+          ) {
+            return;
           }
+
+          // Is this "__proto__: null" inside an object literal?  This is used to create
+          // an object literal that does not inherit from Object.prototype.
+          if (
+            node.parent &&
+            node.parent.type === AST_NODE_TYPES.Property &&
+            !node.parent.computed &&
+            ((node.parent.key.type === AST_NODE_TYPES.Identifier &&
+              node.parent.key.name === '__proto__') ||
+              (node.parent.key.type === AST_NODE_TYPES.Literal &&
+                node.parent.key.value === '__proto__'))
+          ) {
+            return;
+          }
+
+          context.report({ node, messageId: 'error-usage-of-null' });
         }
       }
     };
