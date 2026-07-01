@@ -1,0 +1,56 @@
+{
+  "name": "@rushstack/rushd",
+  "version": "0.1.0",
+  "description": "A background daemon for Rush that keeps state hot between builds",
+  "keywords": [
+    "rush",
+    "daemon",
+    "monorepo",
+    "build"
+  ],
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/rushd.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/rushd.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "apps/rushd"
+  },
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "engineStrict": true,
+  "homepage": "https://rushstack.io",
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "bin": {
+    "rushd": "./bin/rushd"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*",
+    "typescript": "~5.8.2",
+    "@types/node": "20.17.19"
+  },
+  "sideEffects": [
+    "lib-commonjs/start.js",
+    "lib-esm/start.js"
+  ]
+}
