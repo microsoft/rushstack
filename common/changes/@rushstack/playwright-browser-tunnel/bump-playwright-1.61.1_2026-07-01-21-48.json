@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Bump the Playwright dependencies to 1.61.1",
+      "type": "patch",
+      "packageName": "@rushstack/playwright-browser-tunnel"
+    }
+  ],
+  "packageName": "@rushstack/playwright-browser-tunnel",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}

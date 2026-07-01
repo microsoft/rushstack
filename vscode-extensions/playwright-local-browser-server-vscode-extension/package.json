@@ -99,7 +99,7 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/vscode-shared": "workspace:*",
-    "playwright-core": "~1.56.1",
+    "playwright-core": "~1.61.1",
     "tslib": "~2.8.1"
   },
   "devDependencies": {
