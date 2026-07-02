@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix minimumReleaseAge and minimumReleaseAgeExclude in pnpm-config.json being silently ignored because they were written to package.json instead of pnpm-workspace.yaml",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "aaronmaxlevy@users.noreply.github.com"
+}

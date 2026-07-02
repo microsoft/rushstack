@@ -42,6 +42,16 @@ interface IPnpmWorkspaceYaml {
    * (SUPPORTED ONLY IN PNPM 11.0.0 AND NEWER)
    */
   allowBuilds?: Record<string, boolean>;
+  /**
+   * The minimum number of minutes that must pass after a version is published before pnpm will install it.
+   * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
+   */
+  minimumReleaseAge?: number;
+  /**
+   * List of package names or patterns that are excluded from the minimumReleaseAge check.
+   * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
+   */
+  minimumReleaseAgeExclude?: string[];
 }
 
 export class PnpmWorkspaceFile extends BaseWorkspaceFile {
@@ -53,6 +63,8 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
   private _workspacePackages: Set<string>;
   private _catalogs: Record<string, Record<string, string>> | undefined;
   private _allowBuilds: Record<string, boolean> | undefined;
+  private _minimumReleaseAge: number | undefined;
+  private _minimumReleaseAgeExclude: string[] | undefined;
 
   /**
    * The PNPM workspace file is used to specify the location of workspaces relative to the root
@@ -67,6 +79,8 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     this._workspacePackages = new Set<string>();
     this._catalogs = undefined;
     this._allowBuilds = undefined;
+    this._minimumReleaseAge = undefined;
+    this._minimumReleaseAgeExclude = undefined;
   }
 
   /**
@@ -84,6 +98,24 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
    */
   public setAllowBuilds(allowBuilds: Record<string, boolean> | undefined): void {
     this._allowBuilds = allowBuilds;
+  }
+
+  /**
+   * Sets the minimumReleaseAge setting for the workspace.
+   * The minimum number of minutes that must pass after a version is published before pnpm will install it.
+   * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
+   */
+  public setMinimumReleaseAge(minimumReleaseAge: number | undefined): void {
+    this._minimumReleaseAge = minimumReleaseAge;
+  }
+
+  /**
+   * Sets the minimumReleaseAgeExclude setting for the workspace.
+   * List of package names or patterns that are excluded from the minimumReleaseAge check.
+   * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
+   */
+  public setMinimumReleaseAgeExclude(minimumReleaseAgeExclude: string[] | undefined): void {
+    this._minimumReleaseAgeExclude = minimumReleaseAgeExclude;
   }
 
   /** @override */
@@ -113,6 +145,14 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
 
     if (this._allowBuilds && Object.keys(this._allowBuilds).length > 0) {
       workspaceYaml.allowBuilds = this._allowBuilds;
+    }
+
+    if (this._minimumReleaseAge !== undefined) {
+      workspaceYaml.minimumReleaseAge = this._minimumReleaseAge;
+    }
+
+    if (this._minimumReleaseAgeExclude && this._minimumReleaseAgeExclude.length > 0) {
+      workspaceYaml.minimumReleaseAgeExclude = this._minimumReleaseAgeExclude;
     }
 
     return yamlModule.dump(workspaceYaml, PNPM_SHRINKWRAP_YAML_FORMAT);
