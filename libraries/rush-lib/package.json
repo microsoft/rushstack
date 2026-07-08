@@ -71,7 +71,7 @@
     "js-yaml": "~4.1.0",
     "npm-package-arg": "~6.1.0",
     "object-hash": "3.0.0",
-    "pnpm-sync-lib": "0.3.3",
+    "pnpm-sync-lib": "0.3.4",
     "read-package-tree": "~5.1.5",
     "rxjs": "~6.6.7",
     "semver": "~7.7.4",
