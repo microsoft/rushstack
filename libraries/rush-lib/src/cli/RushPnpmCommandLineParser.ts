@@ -633,7 +633,7 @@ export class RushPnpmCommandLineParser {
 
           if (!Objects.areDeepEqual(currentGlobalOnlyBuiltDependencies, newGlobalOnlyBuiltDependencies)) {
             // Update onlyBuiltDependencies to pnpm configuration file
-            pnpmOptions?.updateGlobalOnlyBuiltDependencies(newGlobalOnlyBuiltDependencies);
+            await pnpmOptions?.updateGlobalOnlyBuiltDependenciesAsync(newGlobalOnlyBuiltDependencies);
 
             // Rerun installation to update
             await this._doRushUpdateAsync();
