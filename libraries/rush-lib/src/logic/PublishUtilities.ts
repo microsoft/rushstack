@@ -7,7 +7,7 @@
  */
 
 import * as path from 'node:path';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
 import * as semver from 'semver';
 
@@ -377,7 +377,7 @@ export class PublishUtilities {
   private static _updateCommitDetails(git: Git, filename: string, changes: IChangeInfo[] | undefined): void {
     try {
       const gitPath: string = git.getGitPathOrThrow();
-      const fileLog: string = execSync(`${gitPath} log -n 1 ${filename}`, {
+      const fileLog: string = execFileSync(gitPath, ['log', '-n', '1', '--', filename], {
         cwd: path.dirname(filename)
       }).toString();
       const author: string = fileLog.match(/Author: (.*)/)![1];

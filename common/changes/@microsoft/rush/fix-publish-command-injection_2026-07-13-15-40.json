@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Run Git without a shell when adding change file commit details during publishing.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
