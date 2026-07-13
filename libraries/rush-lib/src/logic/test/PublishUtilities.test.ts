@@ -1,14 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-jest.mock('node:child_process', () => ({
-  ...jest.requireActual('node:child_process'),
-  execFileSync: jest.fn()
-}));
-
 import * as path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import type { SpawnSyncReturns } from 'node:child_process';
 
+import { Executable } from '@rushstack/node-core-library';
 import { type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -18,6 +14,17 @@ import { Git } from '../Git';
 
 function createChangeFiles(changesFolder: string): ChangeFiles {
   return new ChangeFiles({ changesFolder } as unknown as RushConfiguration);
+}
+
+function createGitResult(stdout: string, status: number = 0): SpawnSyncReturns<string> {
+  return {
+    pid: 0,
+    output: [],
+    stdout,
+    stderr: '',
+    status,
+    signal: null
+  };
 }
 
 function generateChangeSnapshot(
@@ -92,6 +99,10 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     repoRushConfiguration = RushConfiguration.loadFromConfigurationFile(`${__dirname}/repo/rush.json`);
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('returns no changes in an empty change folder', async () => {
     const allPackages: ReadonlyMap<string, RushConfigurationProject> =
       packagesRushConfiguration.projectsByName;
@@ -106,7 +117,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('passes change file paths as discrete Git arguments', () => {
-    const gitPath: string = path.resolve('git with spaces', 'git');
+    const gitPath: string = path.resolve('git with spaces', 'git.exe');
     const changeFilePath: string = path.resolve(
       'repo with spaces',
       'common',
@@ -117,16 +128,16 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
     const git: Git = new Git(packagesRushConfiguration);
 
     jest.spyOn(git, 'getGitPathOrThrow').mockReturnValue(gitPath);
-    jest
-      .mocked(execFileSync)
-      .mockReturnValue(Buffer.from('commit 0123456789abcdef\nAuthor: Test Author <test@example.com>\n'));
+    const spawnSyncSpy: jest.SpyInstance = jest.spyOn(Executable, 'spawnSync').mockReturnValue(
+      createGitResult('commit 0123456789abcdef\nAuthor: Test Author <test@example.com>\n')
+    );
 
     PublishUtilities['_updateCommitDetails'](git, changeFilePath, changes);
 
-    expect(execFileSync).toHaveBeenCalledWith(
+    expect(spawnSyncSpy).toHaveBeenCalledWith(
       gitPath,
       ['log', '-n', '1', '--', changeFilePath],
-      { cwd: path.dirname(changeFilePath) }
+      { currentWorkingDirectory: path.dirname(changeFilePath) }
     );
     expect(changes).toEqual([
       {
@@ -135,6 +146,43 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
         commit: '0123456789abcdef'
       }
     ]);
+  });
+
+  it('delegates Git wrapper paths to Executable', () => {
+    const gitPath: string = path.resolve('git-wrapper', 'git.cmd');
+    const changeFilePath: string = path.resolve('repo', 'common', 'changes', 'change.json');
+    const changes: IChangeInfo[] = [{ packageName: 'd' }];
+    const git: Git = new Git(packagesRushConfiguration);
+
+    jest.spyOn(git, 'getGitPathOrThrow').mockReturnValue(gitPath);
+    const spawnSyncSpy: jest.SpyInstance = jest.spyOn(Executable, 'spawnSync').mockReturnValue(
+      createGitResult('commit 0123456789abcdef\nAuthor: Test Author <test@example.com>\n')
+    );
+
+    PublishUtilities['_updateCommitDetails'](git, changeFilePath, changes);
+
+    expect(spawnSyncSpy).toHaveBeenCalledWith(
+      gitPath,
+      ['log', '-n', '1', '--', changeFilePath],
+      { currentWorkingDirectory: path.dirname(changeFilePath) }
+    );
+    expect(changes[0].commit).toEqual('0123456789abcdef');
+  });
+
+  it('does not use Git output from a failed process', () => {
+    const changes: IChangeInfo[] = [{ packageName: 'd' }];
+    const git: Git = new Git(packagesRushConfiguration);
+
+    jest.spyOn(git, 'getGitPathOrThrow').mockReturnValue(path.resolve('git.exe'));
+    jest
+      .spyOn(Executable, 'spawnSync')
+      .mockReturnValue(
+        createGitResult('commit 0123456789abcdef\nAuthor: Test Author <test@example.com>\n', 1)
+      );
+
+    PublishUtilities['_updateCommitDetails'](git, path.resolve('change.json'), changes);
+
+    expect(changes).toEqual([{ packageName: 'd' }]);
   });
 
   it('returns 1 change when changing a leaf package', async () => {

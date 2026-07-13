@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Run Git without a shell when adding change file commit details during publishing.",
+      "comment": "Pass change file paths as discrete Git arguments when adding commit details during publishing.",
       "type": "patch"
     }
   ],

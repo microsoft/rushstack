@@ -7,7 +7,7 @@
  */
 
 import * as path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import type child_process from 'node:child_process';
 
 import * as semver from 'semver';
 
@@ -17,7 +17,8 @@ import {
   FileConstants,
   Text,
   Enum,
-  InternalError
+  InternalError,
+  Executable
 } from '@rushstack/node-core-library';
 
 import { type IChangeInfo, ChangeType, type IVersionPolicyChangeInfo } from '../api/ChangeManagement';
@@ -377,9 +378,21 @@ export class PublishUtilities {
   private static _updateCommitDetails(git: Git, filename: string, changes: IChangeInfo[] | undefined): void {
     try {
       const gitPath: string = git.getGitPathOrThrow();
-      const fileLog: string = execFileSync(gitPath, ['log', '-n', '1', '--', filename], {
-        cwd: path.dirname(filename)
-      }).toString();
+      const gitResult: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
+        gitPath,
+        ['log', '-n', '1', '--', filename],
+        {
+          currentWorkingDirectory: path.dirname(filename)
+        }
+      );
+      if (gitResult.error) {
+        throw gitResult.error;
+      }
+      if (gitResult.status !== 0) {
+        throw new Error(`Git exited with code ${gitResult.status}: ${gitResult.stderr}`);
+      }
+
+      const fileLog: string = gitResult.stdout;
       const author: string = fileLog.match(/Author: (.*)/)![1];
       const commit: string = fileLog.match(/commit (.*)/)![1];
 
