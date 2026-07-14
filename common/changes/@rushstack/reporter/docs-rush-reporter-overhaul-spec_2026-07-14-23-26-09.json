@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add structured diagnostics: category, remediation, and source types, a central RUSH_<DOMAIN>_<NAME> code registry with English templates, field privacy floor helpers, createRushDiagnostic, and RushError",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
