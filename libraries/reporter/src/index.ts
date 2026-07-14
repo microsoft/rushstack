@@ -28,3 +28,14 @@ export type {
   IReporterEventScope,
   IReporterEventEnvelope
 } from './events/IReporterEventEnvelope';
+
+export type { RushDiagnosticSeverity, IRushDiagnostic } from './diagnostics/IRushDiagnostic';
+
+export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
+export type {
+  ReporterMessageSeverity,
+  IScopedMessageOptions,
+  IScopedReporter
+} from './producers/IScopedReporter';
+export type { ReporterExtensionEventName } from './producers/ReporterExtensionEventName';
+export { isReporterExtensionEventName } from './producers/ReporterExtensionEventName';

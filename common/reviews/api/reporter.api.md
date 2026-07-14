@@ -5,6 +5,9 @@
 ```ts
 
 // @beta
+export type IReporterEmitEventInput<TPayload> = Omit<IReporterEventEnvelope<TPayload>, 'eventId' | 'sequence' | 'timestamp'>;
+
+// @beta
 export interface IReporterEventEnvelope<TPayload = unknown> {
     readonly eventId: string;
     readonly parentOperationId?: string;
@@ -31,6 +34,11 @@ export interface IReporterEventScope {
 }
 
 // @beta
+export interface IReporterEventSink {
+    emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string;
+}
+
+// @beta
 export interface IReporterEventSource {
     readonly component?: string;
     readonly packageName: string;
@@ -44,6 +52,30 @@ export interface IReporterProtocolVersion {
 }
 
 // @beta
+export interface IRushDiagnostic {
+    readonly code: string;
+    readonly severity: RushDiagnosticSeverity;
+    readonly summaryKey: string;
+}
+
+// @beta
+export interface IScopedMessageOptions {
+    readonly privacy?: ReporterPrivacyClassification;
+    readonly severity: ReporterMessageSeverity;
+    readonly text: string;
+}
+
+// @beta
+export interface IScopedReporter {
+    emitDiagnostic(diagnostic: IRushDiagnostic): string;
+    emitExtension<TPayload>(name: ReporterExtensionEventName, payload: TPayload): string;
+    emitMessage(options: IScopedMessageOptions): string;
+}
+
+// @beta
+export function isReporterExtensionEventName(name: string): boolean;
+
+// @beta
 export const REPORTER_EVENT_TYPES: readonly ReporterEventType[];
 
 // @beta
@@ -51,6 +83,9 @@ export const REPORTER_PACKAGE_NAME: '@rushstack/reporter';
 
 // @beta
 export type ReporterEventType = 'sessionStarted' | 'sessionCompleted' | 'commandStarted' | 'commandCompleted' | 'operationRegistered' | 'operationStatusChanged' | 'activityChanged' | 'watchCycleCompleted' | 'diagnosticEmitted' | 'externalProcessStarted' | 'externalOutput' | 'externalProcessCompleted' | 'artifactAvailable' | 'commandResult' | 'extension';
+
+// @beta
+export type ReporterExtensionEventName = string;
 
 // @beta
 export type ReporterJsonNull = null;
@@ -61,6 +96,12 @@ export type ReporterJsonValue = string | number | boolean | ReporterJsonNull | r
 };
 
 // @beta
+export type ReporterMessageSeverity = 'debug' | 'info' | 'warning' | 'error';
+
+// @beta
 export type ReporterPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
+
+// @beta
+export type RushDiagnosticSeverity = 'warning' | 'error';
 
 ```

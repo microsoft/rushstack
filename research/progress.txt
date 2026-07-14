@@ -30,3 +30,20 @@
     - golden envelope snapshot + JSON round-trip + closed-set + sourceSequence + Error-not-serialized tests pass
     - api report confirms all exports @beta, envelope fields readonly
   Next: Feature 3/28 - Producer API (IReporterEventSink, IScopedReporter)
+
+[2026-07-14] Feature 3/28 COMPLETE: Producer API (scoped emit without reporter/destination access)
+  Files:
+    - libraries/reporter/src/producers/IReporterEventSink.ts (IReporterEmitEventInput, IReporterEventSink.emit)
+    - libraries/reporter/src/producers/IScopedReporter.ts (ReporterMessageSeverity, IScopedMessageOptions, IScopedReporter)
+    - libraries/reporter/src/producers/ReporterExtensionEventName.ts (type + isReporterExtensionEventName validator)
+    - libraries/reporter/src/diagnostics/IRushDiagnostic.ts (MINIMAL stub: code/severity/summaryKey; expanded in Feature 4)
+    - libraries/reporter/src/index.ts (re-exports)
+    - libraries/reporter/src/test/ProducerApi.test.ts
+    - common/reviews/api/reporter.api.md (regenerated, all @beta)
+  Notes:
+    - emitDiagnostic requires IRushDiagnostic; introduced a MINIMAL stub now. Feature 4 must EXPAND it
+      (add RushDiagnosticCategory, remediation, source, classified parameters, field privacy, code registry, templates, tests) - not recreate.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest), no warnings
+    - sink Omit contract, scoped emit ids, emit-only surface, extension-name validation tests pass
+  Next: Feature 4/28 - Structured diagnostics (registry, categories, remediation, field privacy)

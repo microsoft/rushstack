@@ -34,7 +34,7 @@
       "Ensure reporter instances, destinations, and thresholds are not exposed to producers",
       "Add namespaced beta identifiers for extension events"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
