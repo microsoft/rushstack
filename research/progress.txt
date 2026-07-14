@@ -119,3 +119,20 @@
   Verify:
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest), 8 snapshots
   Next: Feature 8/28 - Two-stage bootstrap in install-run-rush (handoff file)
+
+[2026-07-14] Feature 8/28 COMPLETE: Two-stage bootstrap handoff (buffer + encoder + handoff + early controls)
+  Files (new):
+    - bootstrap/BootstrapProtocol.ts (BOOTSTRAP_PROTOCOL_MAJOR=1 frozen, BUFFER_MAX 1MiB, EXTERNAL_CHUNK 64KiB, RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR='_RUSH_REPORTER_BOOTSTRAP_HANDOFF', bufferTruncated ext name)
+    - bootstrap/BootstrapEventBuffer.ts (self-contained mini-sink; emit assigns ids/seq/ts; addExternalOutput 64KiB chunking; overflow preserves required+diagnostic, evicts non-preserve, fails if required can't fit; serialize appends bufferTruncated extension event)
+    - bootstrap/BootstrapHandoff.ts (write/read/delete NDJSON handoff via node fs/os)
+    - bootstrap/EarlyReporterControls.ts (parseEarlyReporterControls: --reporter/--log-level/-q/--verbose/--debug + RUSH_REPORTER/RUSH_LOG_LEVEL/RUSH_QUIET_MODE; CLI over env)
+    - test/Bootstrap.test.ts
+  Files (modified): index.ts, common/reviews/api/reporter.api.md
+  SCOPING DECISION (important):
+    - Authored the bootstrap machinery IN @rushstack/reporter as the source of truth (per spec 5.1: install-run-rush embeds a FROZEN copy generated from this package and does NOT import it at runtime).
+    - Did NOT modify the live libraries/rush-lib/src/scripts/install-run-rush.ts / common/scripts/install-run-rush.js bundle: it is zero-dependency, webpack-bundled critical tooling used for every build/test here; wiring live would risk breaking the repo's own tooling. Actual embedding into install-run-rush is a rollout/build-integration step.
+    - BOOTSTRAP_PROTOCOL_MAJOR duplicated (frozen) with a test asserting == REPORTER_PROTOCOL_VERSION.major.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - early-controls parsing, encode/serialize round-trip, 64KiB external chunking, overflow preserve+truncate, required-cannot-preserve fail, handoff write/read/delete tests pass; all exports @beta
+  Next: Feature 9/28 - Frontend ReporterManager host + replay the bootstrap handoff

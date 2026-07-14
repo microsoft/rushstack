@@ -72,6 +72,30 @@ export {
 } from './manager/ReporterManager';
 export { ReporterMultiplexer } from './manager/ReporterMultiplexer';
 
+export {
+  BOOTSTRAP_PROTOCOL_MAJOR,
+  BOOTSTRAP_BUFFER_MAX_BYTES,
+  BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES,
+  RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
+  BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME
+} from './bootstrap/BootstrapProtocol';
+export type {
+  BootstrapPrivacyClassification,
+  IBootstrapEventSource,
+  IBootstrapEventInput,
+  IBootstrapTruncation,
+  IBootstrapEventBufferOptions
+} from './bootstrap/BootstrapEventBuffer';
+export { BootstrapEventBuffer } from './bootstrap/BootstrapEventBuffer';
+export type { IWriteBootstrapHandoffOptions } from './bootstrap/BootstrapHandoff';
+export {
+  writeBootstrapHandoffFileAsync,
+  readBootstrapHandoffFileAsync,
+  deleteBootstrapHandoffFileAsync
+} from './bootstrap/BootstrapHandoff';
+export type { IEarlyReporterControls } from './bootstrap/EarlyReporterControls';
+export { parseEarlyReporterControls } from './bootstrap/EarlyReporterControls';
+
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,

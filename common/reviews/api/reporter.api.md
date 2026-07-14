@@ -5,6 +5,31 @@
 ```ts
 
 // @beta
+export const BOOTSTRAP_BUFFER_MAX_BYTES: number;
+
+// @beta
+export const BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME: 'rush.reporter.bufferTruncated';
+
+// @beta
+export const BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES: number;
+
+// @beta
+export const BOOTSTRAP_PROTOCOL_MAJOR: number;
+
+// @beta
+export class BootstrapEventBuffer {
+    constructor(options: IBootstrapEventBufferOptions);
+    addExternalOutput(stream: 'stdout' | 'stderr', text: string): void;
+    emit(input: IBootstrapEventInput): string;
+    get failed(): boolean;
+    serialize(): string;
+    get truncation(): IBootstrapTruncation;
+}
+
+// @beta
+export type BootstrapPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
+
+// @beta
 export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPrivacyClassification>): ReporterPrivacyClassification;
 
 // @beta
@@ -17,10 +42,46 @@ export const DEFAULT_FLUSH_TIMEOUT_MS: number;
 export const DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS: number;
 
 // @beta
+export function deleteBootstrapHandoffFileAsync(filePath: string): Promise<void>;
+
+// @beta
 export function encodeNdjsonRecord(value: unknown, options?: INdjsonOptions): string;
 
 // @beta
 export function getPrivacyClassificationRank(classification: ReporterPrivacyClassification): number;
+
+// @beta
+export interface IBootstrapEventBufferOptions {
+    readonly maxBytes?: number;
+    readonly now?: () => string;
+    readonly sessionId: string;
+    readonly source: IBootstrapEventSource;
+}
+
+// @beta
+export interface IBootstrapEventInput {
+    readonly payload?: unknown;
+    readonly privacy?: BootstrapPrivacyClassification;
+    readonly required: boolean;
+    readonly type: string;
+}
+
+// @beta
+export interface IBootstrapEventSource {
+    // (undocumented)
+    readonly packageName: string;
+    // (undocumented)
+    readonly packageVersion: string;
+}
+
+// @beta
+export interface IBootstrapTruncation {
+    readonly droppedOther: number;
+    readonly droppedReplaceable: number;
+    readonly droppedRequired: number;
+    readonly failed: boolean;
+    readonly truncated: boolean;
+}
 
 // @beta
 export interface IClassifiedDiagnosticValue {
@@ -40,6 +101,12 @@ export interface ICreateRushDiagnosticOptions {
     readonly retryable?: boolean;
     readonly severity?: RushDiagnosticSeverity;
     readonly source?: IRushDiagnosticSource;
+}
+
+// @beta
+export interface IEarlyReporterControls {
+    readonly logLevel?: string;
+    readonly reporter?: string;
 }
 
 // @beta
@@ -227,6 +294,12 @@ export function isReporterProtocolCompatible(consumer: IReporterProtocolVersion,
 export function isValidRushDiagnosticCode(code: string): boolean;
 
 // @beta
+export interface IWriteBootstrapHandoffOptions {
+    readonly directory?: string;
+    readonly pid?: number;
+}
+
+// @beta
 export class NdjsonDecoder {
     constructor(options?: INdjsonOptions);
     decode(chunk: string): unknown[];
@@ -241,6 +314,12 @@ export class NdjsonRecordTooLargeError extends Error {
 
 // @beta
 export function negotiateReporterHello(hello: IReporterHello, options: IReporterHandshakeOptions): IReporterHandshakeResult;
+
+// @beta
+export function parseEarlyReporterControls(argv: readonly string[], env: Record<string, string | undefined>): IEarlyReporterControls;
+
+// @beta
+export function readBootstrapHandoffFileAsync(filePath: string): Promise<unknown[]>;
 
 // @beta
 export const REPORTER_EVENT_TYPES: readonly ReporterEventType[];
@@ -315,6 +394,9 @@ export const RUSH_DIAGNOSTIC_TEMPLATES: {
 export const RUSH_INTERNAL_ERROR_CODE: 'RUSH_INTERNAL_UNEXPECTED';
 
 // @beta
+export const RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_HANDOFF';
+
+// @beta
 export type RushDiagnosticCategory = 'configuration' | 'input' | 'dependency-tool' | 'environment' | 'network-auth' | 'operation' | 'internal';
 
 // @beta
@@ -329,5 +411,8 @@ export class RushError extends Error {
 
 // @beta
 export type RushRemediationSafety = 'safe' | 'requires-confirmation' | 'unsafe';
+
+// @beta
+export function writeBootstrapHandoffFileAsync(buffer: BootstrapEventBuffer, options?: IWriteBootstrapHandoffOptions): Promise<string>;
 
 ```
