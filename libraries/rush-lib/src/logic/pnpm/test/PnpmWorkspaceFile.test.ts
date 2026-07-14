@@ -306,11 +306,23 @@ describe(PnpmWorkspaceFile.name, () => {
       expect(content).not.toContain('minimumReleaseAge');
     });
 
-    it('handles empty minimumReleaseAgeExclude', () => {
+    it('passes through an explicitly-set empty minimumReleaseAgeExclude', () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(path.join(projectsDir, 'app1'));
 
       workspaceFile.setMinimumReleaseAgeExclude([]);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toContain('minimumReleaseAgeExclude: []');
+    });
+
+    it('omits an undefined minimumReleaseAgeExclude', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setMinimumReleaseAgeExclude(undefined);
 
       workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
 

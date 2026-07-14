@@ -147,13 +147,9 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
       workspaceYaml.allowBuilds = this._allowBuilds;
     }
 
-    if (this._minimumReleaseAge !== undefined) {
-      workspaceYaml.minimumReleaseAge = this._minimumReleaseAge;
-    }
-
-    if (this._minimumReleaseAgeExclude && this._minimumReleaseAgeExclude.length > 0) {
-      workspaceYaml.minimumReleaseAgeExclude = this._minimumReleaseAgeExclude;
-    }
+    // js-yaml omits mapping entries whose value is `undefined`, so no guard is needed here.
+    workspaceYaml.minimumReleaseAge = this._minimumReleaseAge;
+    workspaceYaml.minimumReleaseAgeExclude = this._minimumReleaseAgeExclude;
 
     return yamlModule.dump(workspaceYaml, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
