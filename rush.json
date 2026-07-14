@@ -1227,6 +1227,12 @@
       "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/reporter",
+      "projectFolder": "libraries/reporter",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-config-file",
       "projectFolder": "libraries/heft-config-file",
       "reviewCategory": "libraries",

@@ -1,0 +1,338 @@
+[
+  {
+    "category": "functional",
+    "description": "Scaffold @rushstack/reporter as a public beta package with no dependency on rush-lib",
+    "steps": [
+      "Create libraries/reporter as the @rushstack/reporter package",
+      "Configure API Extractor to mark exported contracts public beta",
+      "Ensure package.json declares no dependency on rush-lib",
+      "Register the package in rush.json projects",
+      "Verify rush build --to @rushstack/reporter succeeds"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Define the canonical event envelope and closed core event type union",
+    "steps": [
+      "Add IReporterProtocolVersion, ReporterPrivacyClassification, and IReporterEventEnvelope",
+      "Define the closed ReporterEventType core union from sessionStarted through extension",
+      "Keep events immutable and JSON-serializable and never serialize Error instances",
+      "Document sequence as authoritative ordering and timestamp as informational",
+      "Preserve producer local sequence as sourceSequence for child sessions",
+      "Add a golden envelope schema test"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Define the producer API exposing scoped emit without reporter or destination access",
+    "steps": [
+      "Add IReporterEventSink.emit that assigns eventId, sequence, and timestamp",
+      "Add IScopedReporter with emitMessage, emitDiagnostic, and emitExtension",
+      "Keep core lifecycle event creation controlled by Rush",
+      "Ensure reporter instances, destinations, and thresholds are not exposed to producers",
+      "Add namespaced beta identifiers for extension events"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Define structured diagnostics with a central permanent code registry and field privacy",
+    "steps": [
+      "Add RushDiagnosticCategory, IRushDiagnostic, remediation, and source types",
+      "Add a central never-reused RUSH_<DOMAIN>_<NAME> code registry",
+      "Add English templates keyed by code and resource key",
+      "Classify fields as public, local-sensitive, or secret with the envelope as the floor",
+      "Return a diagnostic ID from emission and reference it from propagated failures",
+      "Add a code registry validation test"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement the NDJSON wire protocol with handshake, versioning, and size limits",
+    "steps": [
+      "Add NDJSON encoder and decoder",
+      "Add hello and helloAck handshake with protocol version and capabilities",
+      "Make minor versions additive and default events and capabilities to optional",
+      "Emit an update-global-Rush diagnostic for unknown required features or unsupported majors",
+      "Enforce 1 MiB bootstrap buffer, 1 MiB NDJSON record, and 64 KiB external chunk limits",
+      "Add negotiation and limit tests"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement ReporterManager lifecycle, ordering, and fan-out",
+    "steps": [
+      "Add the IReporter interface with initialize, report, flush, and close",
+      "Assign one monotonic session sequence and one ordered async queue per reporter",
+      "Enforce exclusive destination ownership and allow shared output only via a multiplexer",
+      "Flush on normal and error completion with a 10 second timeout and signal flush with 2 seconds",
+      "Coalesce replaceable UI status events under pressure",
+      "Never drop lifecycle, diagnostic, result, artifact, or external-output events"
+    ],
+    "passes": false
+  },
+  {
+    "category": "test",
+    "description": "Freeze legacy output snapshots and add protocol and compatibility goldens",
+    "steps": [
+      "Capture current legacy output as frozen snapshots",
+      "Add protocol golden tests for envelopes and diagnostics",
+      "Add compatibility goldens for supported majors and minors",
+      "Wire the snapshots into the existing test runner"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Add two-stage bootstrap in install-run-rush that buffers startup events to a handoff file",
+    "steps": [
+      "Parse early reporter controls in the install-run-rush prelude",
+      "Embed only a minimal frozen envelope encoder and protocol-major constant with no runtime import",
+      "Encode up to 1 MiB of bootstrap events and preserve inherited npm output as raw external output",
+      "Write the bounded events to a temporary NDJSON handoff file",
+      "Pass the handoff path to the frontend via a private environment variable",
+      "Preserve required and diagnostic events on overflow and emit a bufferTruncated event"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Create the frontend ReporterManager host and replay the bootstrap handoff",
+    "steps": [
+      "Create ReporterManager in apps/rush before version selection",
+      "Replay the bootstrap handoff file then delete it",
+      "Pass a typed sink to the selected rush-lib without giving it selection ownership",
+      "Skip the handoff file for direct rush invocations",
+      "Clean abandoned handoff files using the OS-temp fallback retention policy"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Add cross-version compatibility adapters while keeping legacy rendering visible",
+    "steps": [
+      "Support a new frontend with an old engine through an adapter",
+      "Support an old frontend with a new engine through fallback",
+      "Keep legacy rendering as the sole visible output in this phase",
+      "Add cross-version compatibility tests for both directions"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Expose the RushSession event sink and scoped producers to actions and plugins",
+    "steps": [
+      "Expose scoped reporter and logger creation from RushSession",
+      "Pass the sink to actions through execution context",
+      "Prevent plugins from inspecting modes, destinations, or thresholds",
+      "Declare the supported Rush plugin API version in plugin manifests"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Emit shadow structured lifecycle and diagnostic events without changing output",
+    "steps": [
+      "Emit first-party lifecycle events from actions, scheduler, and plugins",
+      "Emit structured diagnostics alongside existing rendering",
+      "Keep legacy output unchanged while events flow",
+      "Validate telemetry and exit-code parity against the frozen baselines"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Add the telemetry projection subscriber with an allowlist and beforeLog adapter",
+    "steps": [
+      "Subscribe telemetry to canonical events before reporter filtering",
+      "Produce an allowlisted aggregate at command completion",
+      "Exclude messages, paths, raw streams, stacks, remediation parameters, and secret values",
+      "Preserve the existing beforeLog hook through an adapter",
+      "Add allowlist schema and leakage tests"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Preserve command success and exit-code semantics independent of reporters",
+    "steps": [
+      "Return 0 for success including warning-only success",
+      "Return 1 for Rush or operation failure and for logical cancellation",
+      "Return the conventional signal-derived status for OS signal termination",
+      "Ensure reporters and diagnostic categories never select exit codes",
+      "Preserve command-specific JSON schemas"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Add reporter selection and configuration controls with precedence",
+    "steps": [
+      "Add --reporter, --log-level, and --output CLI controls",
+      "Add RUSH_REPORTER, RUSH_LOG_LEVEL, COPILOT_CLI, and configured agent environment controls",
+      "Implement precedence from explicit CLI down to generic non-TTY plaintext",
+      "Map --quiet, --verbose, and --debug as permanent aliases and reject contradictory controls",
+      "Keep command-specific --json unchanged and not an alias for --reporter=json",
+      "Fail explicit unsupported reporter requests"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement independent per-reporter log levels",
+    "steps": [
+      "Implement quiet, normal, verbose, and debug filtering per reporter",
+      "Keep diagnostic severity separate from reporter log level",
+      "Default the full-detail file reporter to debug",
+      "Add log-level filtering tests"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement automatic reporter selection matrix by environment",
+    "steps": [
+      "Select ai plus file when an agent is detected",
+      "Select detailed plaintext plus file for recognized CI",
+      "Select default plus file for interactive TTY and concise plaintext plus file otherwise",
+      "Give machine reporters exclusive stdout and route human progress and emergencies to stderr or files",
+      "Record the selection reason in the detailed log"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Implement the default interactive reporter with a three-row live region",
+    "steps": [
+      "Render aggregate phase progress and spinner, width-aware active projects with +N more, and latest activity",
+      "Refresh at no more than 10 Hz and react to terminal resize",
+      "Restore cursor state on success, failure, cancellation, and signal",
+      "Leave at most three stable lines on success and append a bounded diagnostic block and log path on failure",
+      "Keep the live region in watch mode and append one summary per completed cycle",
+      "Follow TTY color capability while honoring NO_COLOR and FORCE_COLOR"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement the plaintext and non-TTY reporter",
+    "steps": [
+      "Make plaintext append-only with no cursor movement and color off by default",
+      "Emit start, meaningful state changes, diagnostics, and final result",
+      "Emit a compact heartbeat every 30 seconds for long non-TTY and CI sessions",
+      "Retain StreamCollator-like operation grouping in detailed CI mode",
+      "Add stable plaintext snapshot tests"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement the JSON and AI reporters",
+    "steps": [
+      "Emit the complete versioned NDJSON event stream from the JSON reporter on exclusive stdout",
+      "Emit a bounded AI projection with result, scope, error codes, remediation, counts, log path, and artifact completeness",
+      "Cap AI output at 64 KiB and 20 detailed diagnostics and exclude raw logs and stacks by default",
+      "Keep absolute log paths as local reporter output and never in telemetry",
+      "Add stdout-purity tests for JSON and AI"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement the full-detail file reporter with retention and fallback",
+    "steps": [
+      "Write <commonTempFolder>/rush-logs/<UTC timestamp>-<pid>-<action>.log at debug",
+      "Maintain latest.log for successful and failed commands per platform capability",
+      "Buffer events before configuration loads and use an OS-temp fallback",
+      "Use owner-only permissions and exclude fields classified as secret",
+      "Delete files older than 14 days, cap at 20 sessions, and let rush purge remove the directory",
+      "Treat file creation failure as nonfatal with an emergency warning and unavailable artifact"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement the legacy reporter as a selectable and emergency-fallback mode",
+    "steps": [
+      "Reproduce current Rush output as a selectable legacy reporter",
+      "Wire RUSH_REPORTER=legacy as an emergency fallback for at least one major",
+      "Validate the legacy reporter against the frozen output snapshots"
+    ],
+    "passes": false
+  },
+  {
+    "category": "refactor",
+    "description": "Replace StreamCollator in the primary Rush output path with raw semantic events",
+    "steps": [
+      "Emit operation registration, status transitions, output chunks, completion, and command result from the scheduler",
+      "Derive current activity in the concise reporter without buffering project output",
+      "Own grouping and buffering in the detailed plaintext and file reporters",
+      "Feed the same uncollated stream to problem matchers",
+      "Remove StreamCollator from the primary path after parity tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Preserve external output losslessly and recover diagnostics through problem matchers",
+    "steps": [
+      "Preserve raw child stdout and stderr as ordered chunks",
+      "Run tool- and version-scoped matchers on ANSI-normalized text without modifying output or status",
+      "Emit linked diagnostics without replacing evidence and preserve unmatched text",
+      "Cap duplicate diagnostics and gate default enablement on high-confidence corpus tests",
+      "Route older Heft versions through this path"
+    ],
+    "passes": false
+  },
+  {
+    "category": "refactor",
+    "description": "Prohibit new AlreadyReportedError usage and bridge legacy sentinels",
+    "steps": [
+      "Prohibit new AlreadyReportedError usage once structured diagnostic APIs are available",
+      "Correlate legacy sentinels with previously emitted diagnostics",
+      "Suppress duplicate rendering through the bridge",
+      "Plan bridge removal after zero first-party usages and published migration guidance"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Integrate Heft through negotiated child descriptors with raw-stream fallback",
+    "steps": [
+      "Pass a dynamically allocated inherited file descriptor to the child and communicate it via a private env var",
+      "Correlate child events using child session ID, parent session ID, and parent operation ID",
+      "Fall back to normal stdout and stderr when descriptor negotiation is unavailable",
+      "Keep the raw-stream and problem-matcher path for older Heft versions",
+      "Add old and new Heft descriptor path tests"
+    ],
+    "passes": false
+  },
+  {
+    "category": "performance",
+    "description": "Meet reporter performance and capacity budgets",
+    "steps": [
+      "Keep representative-build wall-time regression at no more than 3 percent",
+      "Keep additional peak memory at no more than 32 MiB",
+      "Use bounded streaming rather than whole-build buffering",
+      "Preserve lifecycle, diagnostics, results, artifacts, and external output under queue pressure",
+      "Add benchmark, queue-pressure, and status-coalescing tests"
+    ],
+    "passes": false
+  },
+  {
+    "category": "migration",
+    "description": "Flip defaults in the Rush daemon-aligned major release",
+    "steps": [
+      "Enable environment-based automatic reporter selection by default",
+      "Remove ILogger.terminal and RushSession.terminalProvider",
+      "Fail incompatible plugins with a structured migration diagnostic before apply()",
+      "Retain the legacy renderer, verbosity aliases, and sentinel bridge",
+      "Keep every phase independently releasable and revertible"
+    ],
+    "passes": false
+  }
+]

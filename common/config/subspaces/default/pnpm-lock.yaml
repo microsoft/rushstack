@@ -4001,6 +4001,18 @@ importers:
         specifier: ~9.37.0
         version: 9.37.0
 
+  ../../../libraries/reporter:
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      eslint:
+        specifier: ~9.37.0
+        version: 9.37.0
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../libraries/rig-package:
     dependencies:
       jju:

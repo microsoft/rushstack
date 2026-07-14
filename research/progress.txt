@@ -1,0 +1,16 @@
+[2026-07-14] Feature 1/28 COMPLETE: Scaffold @rushstack/reporter public beta package
+  Files:
+    - libraries/reporter/package.json (name @rushstack/reporter v0.1.0, no rush-lib dep)
+    - libraries/reporter/tsconfig.json, config/{api-extractor,jest,rig}.json, eslint.config.js
+    - libraries/reporter/.npmignore, LICENSE, README.md
+    - libraries/reporter/src/index.ts (REPORTER_PACKAGE_NAME, @beta)
+    - rush.json (registered @rushstack/reporter after problem-matcher)
+    - common/reviews/api/reporter.api.md (generated, shows // @beta)
+    - common/config/subspaces/default/pnpm-lock.yaml (rush update)
+  Verify:
+    - rush update: success (~20s)
+    - rush build --to @rushstack/reporter: success
+    - rush build --only @rushstack/reporter: clean SUCCESS, no warnings
+    - api report confirms @beta release tag on exports
+    - no rush-lib reference in package.json
+  Next: Feature 2/28 - Define canonical event envelope and closed core event type union
