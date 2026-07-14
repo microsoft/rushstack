@@ -70,3 +70,21 @@
     - registry validation (code pattern/uniqueness/category/templates/internal-code), privacy floor, factory, RushError tests pass
     - all 35 exports @beta
   Next: Feature 5/28 - NDJSON wire protocol (handshake, versioning, size limits)
+
+[2026-07-14] Feature 5/28 COMPLETE: NDJSON wire protocol (handshake, versioning, size limits)
+  Files (new):
+    - protocol/ReporterProtocol.ts (REPORTER_PROTOCOL_VERSION {1,0}, REPORTER_PROTOCOL_LIMITS 1MiB/1MiB/64KiB, isReporterProtocolCompatible = major-equality)
+    - protocol/Ndjson.ts (encodeNdjsonRecord, NdjsonDecoder streaming, NdjsonRecordTooLargeError, INdjsonOptions)
+    - protocol/ReporterHandshake.ts (IReporterHello, IReporterHelloAck, negotiateReporterHello -> {accepted, ack, diagnostic})
+    - test/Protocol.test.ts
+  Files (modified):
+    - diagnostics/RushDiagnosticCodeRegistry.ts (APPENDED code RUSH_PROTOCOL_UPDATE_REQUIRED + templates; registry is append-only)
+    - index.ts, common/reviews/api/reporter.api.md
+  Notes:
+    - Capabilities optional (accepted = intersection; unknown ignored). Only unknown requiredFeatures or unsupported major reject + emit RUSH_PROTOCOL_UPDATE_REQUIRED. Minor additive.
+    - Byte limits enforced via Buffer.byteLength (utf8), incl. oversized partial-line guard in decoder.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - encode/decode round-trip, chunk-split reassembly, blank-line skip, record/partial size limits, negotiation (compat major, minor additive, unknown required, unsupported major, supported required) tests pass
+    - all exports @beta
+  Next: Feature 6/28 - ReporterManager lifecycle, ordering, and fan-out

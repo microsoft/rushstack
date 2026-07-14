@@ -60,7 +60,7 @@
       "Enforce 1 MiB bootstrap buffer, 1 MiB NDJSON record, and 64 KiB external chunk limits",
       "Add negotiation and limit tests"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

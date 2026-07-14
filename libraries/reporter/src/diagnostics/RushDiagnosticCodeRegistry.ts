@@ -104,6 +104,13 @@ export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly IRushDiagnosticCodeDefin
     summaryKey: 'diagnostic.RUSH_OPERATION_FAILED.summary'
   },
   {
+    code: 'RUSH_PROTOCOL_UPDATE_REQUIRED',
+    category: 'environment',
+    defaultSeverity: 'error',
+    summaryKey: 'diagnostic.RUSH_PROTOCOL_UPDATE_REQUIRED.summary',
+    detailKey: 'diagnostic.RUSH_PROTOCOL_UPDATE_REQUIRED.detail'
+  },
+  {
     code: RUSH_INTERNAL_ERROR_CODE,
     category: 'internal',
     defaultSeverity: 'error',
@@ -144,6 +151,10 @@ export const RUSH_DIAGNOSTIC_TEMPLATES: { readonly [resourceKey: string]: string
   'diagnostic.RUSH_NETWORK_AUTH_UNAUTHORIZED.summary':
     'Authentication failed for the registry {registryUrl}.',
   'diagnostic.RUSH_OPERATION_FAILED.summary': 'The operation for {projectName} failed.',
+  'diagnostic.RUSH_PROTOCOL_UPDATE_REQUIRED.summary':
+    'A reporter protocol feature required by {producerVersion} is not supported by this Rush.',
+  'diagnostic.RUSH_PROTOCOL_UPDATE_REQUIRED.detail':
+    'The producer advertised protocol major {producerProtocolMajor}. Update your global Rush installation to a version that supports it.',
   'diagnostic.RUSH_INTERNAL_UNEXPECTED.summary': 'An unexpected internal error occurred in Rush.',
   'diagnostic.RUSH_INTERNAL_UNEXPECTED.detail':
     'This is a bug in Rush. See {logPath} for details, then report it upstream.'

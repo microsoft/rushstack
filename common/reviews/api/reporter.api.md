@@ -11,6 +11,9 @@ export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPr
 export function createRushDiagnostic(code: string, options?: ICreateRushDiagnosticOptions): IRushDiagnostic;
 
 // @beta
+export function encodeNdjsonRecord(value: unknown, options?: INdjsonOptions): string;
+
+// @beta
 export function getPrivacyClassificationRank(classification: ReporterPrivacyClassification): number;
 
 // @beta
@@ -31,6 +34,11 @@ export interface ICreateRushDiagnosticOptions {
     readonly retryable?: boolean;
     readonly severity?: RushDiagnosticSeverity;
     readonly source?: IRushDiagnosticSource;
+}
+
+// @beta
+export interface INdjsonOptions {
+    readonly maxRecordBytes?: number;
 }
 
 // @beta
@@ -72,6 +80,43 @@ export interface IReporterEventSource {
     readonly component?: string;
     readonly packageName: string;
     readonly packageVersion: string;
+}
+
+// @beta
+export interface IReporterHandshakeOptions {
+    readonly supportedCapabilities?: readonly string[];
+    readonly supportedProtocolVersion: IReporterProtocolVersion;
+}
+
+// @beta
+export interface IReporterHandshakeResult {
+    readonly accepted: boolean;
+    readonly ack: IReporterHelloAck;
+    readonly diagnostic?: IRushDiagnostic;
+}
+
+// @beta
+export interface IReporterHello {
+    readonly capabilities: string[];
+    readonly kind: 'hello';
+    readonly producerVersion: string;
+    readonly protocolVersion: IReporterProtocolVersion;
+    readonly requiredFeatures: string[];
+}
+
+// @beta
+export interface IReporterHelloAck {
+    readonly acceptedCapabilities: string[];
+    readonly kind: 'helloAck';
+    readonly protocolVersion: IReporterProtocolVersion;
+    readonly rejectedRequiredFeatures: string[];
+}
+
+// @beta
+export interface IReporterProtocolLimits {
+    readonly bootstrapBufferBytes: number;
+    readonly externalOutputChunkBytes: number;
+    readonly ndjsonRecordBytes: number;
 }
 
 // @beta
@@ -141,13 +186,38 @@ export interface IScopedReporter {
 export function isReporterExtensionEventName(name: string): boolean;
 
 // @beta
+export function isReporterProtocolCompatible(consumer: IReporterProtocolVersion, producer: IReporterProtocolVersion): boolean;
+
+// @beta
 export function isValidRushDiagnosticCode(code: string): boolean;
+
+// @beta
+export class NdjsonDecoder {
+    constructor(options?: INdjsonOptions);
+    decode(chunk: string): unknown[];
+    flush(): unknown[];
+}
+
+// @beta
+export class NdjsonRecordTooLargeError extends Error {
+    constructor(maxRecordBytes: number);
+    readonly maxRecordBytes: number;
+}
+
+// @beta
+export function negotiateReporterHello(hello: IReporterHello, options: IReporterHandshakeOptions): IReporterHandshakeResult;
 
 // @beta
 export const REPORTER_EVENT_TYPES: readonly ReporterEventType[];
 
 // @beta
 export const REPORTER_PACKAGE_NAME: '@rushstack/reporter';
+
+// @beta
+export const REPORTER_PROTOCOL_LIMITS: IReporterProtocolLimits;
+
+// @beta
+export const REPORTER_PROTOCOL_VERSION: IReporterProtocolVersion;
 
 // @beta
 export type ReporterEventType = 'sessionStarted' | 'sessionCompleted' | 'commandStarted' | 'commandCompleted' | 'operationRegistered' | 'operationStatusChanged' | 'activityChanged' | 'watchCycleCompleted' | 'diagnosticEmitted' | 'externalProcessStarted' | 'externalOutput' | 'externalProcessCompleted' | 'artifactAvailable' | 'commandResult' | 'extension';

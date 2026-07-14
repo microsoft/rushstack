@@ -47,6 +47,22 @@ export { RushError } from './diagnostics/RushError';
 export type { ICreateRushDiagnosticOptions } from './diagnostics/createRushDiagnostic';
 export { createRushDiagnostic } from './diagnostics/createRushDiagnostic';
 
+export type { IReporterProtocolLimits } from './protocol/ReporterProtocol';
+export {
+  REPORTER_PROTOCOL_VERSION,
+  REPORTER_PROTOCOL_LIMITS,
+  isReporterProtocolCompatible
+} from './protocol/ReporterProtocol';
+export type { INdjsonOptions } from './protocol/Ndjson';
+export { NdjsonRecordTooLargeError, encodeNdjsonRecord, NdjsonDecoder } from './protocol/Ndjson';
+export type {
+  IReporterHello,
+  IReporterHelloAck,
+  IReporterHandshakeOptions,
+  IReporterHandshakeResult
+} from './protocol/ReporterHandshake';
+export { negotiateReporterHello } from './protocol/ReporterHandshake';
+
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,
