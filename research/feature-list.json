@@ -84,7 +84,7 @@
       "Add compatibility goldens for supported majors and minors",
       "Wire the snapshots into the existing test runner"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

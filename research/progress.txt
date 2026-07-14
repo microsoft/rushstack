@@ -105,3 +105,17 @@
     - ordering/sequence/eventId/timestamp, foreign rehome, destination exclusivity, multiplexer, add-after-init guard, init-fatal, optional-disable, required-fatal-flush, coalescing (protected preserved), flush/close, flush-timeout tests pass
     - all exports @beta
   Next: Feature 7/28 - Freeze legacy output snapshots + protocol/compatibility goldens
+
+[2026-07-14] Feature 7/28 COMPLETE: Freeze legacy output snapshots + protocol/compatibility goldens (test-only)
+  Files (new):
+    - test/Goldens.test.ts + test/__snapshots__/Goldens.test.ts.snap (8 snapshots)
+  Files (modified): research/*
+  Notes:
+    - No new production API -> api.md unchanged. Legacy output samples INLINED as string constants (jest runs against lib/, so .txt fixtures would not be copied). Durations normalized (X.XX seconds).
+    - Protocol goldens: envelope schema, full diagnostic schema (fixed diagnosticId), hello/helloAck, NDJSON round-trip.
+    - Compatibility goldens: negotiation matrix (same major/minor, additive minor, unknown optional cap ignored, unknown required rejected+RUSH_PROTOCOL_UPDATE_REQUIRED, unsupported major rejected) normalized to drop random diagnosticId; minor-additive unknown-field retention on decode; protocol-version baseline.
+    - Legacy goldens: success + failure output frozen.
+    - Change file type=none (test-only, no version bump).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest), 8 snapshots
+  Next: Feature 8/28 - Two-stage bootstrap in install-run-rush (handoff file)
