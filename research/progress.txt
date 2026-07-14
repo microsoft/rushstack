@@ -88,3 +88,20 @@
     - encode/decode round-trip, chunk-split reassembly, blank-line skip, record/partial size limits, negotiation (compat major, minor additive, unknown required, unsupported major, supported required) tests pass
     - all exports @beta
   Next: Feature 6/28 - ReporterManager lifecycle, ordering, and fan-out
+
+[2026-07-14] Feature 6/28 COMPLETE: ReporterManager lifecycle, ordering, and fan-out
+  Files (new):
+    - manager/IReporter.ts (IReporter {name, initializeAsync, report, flushAsync, closeAsync}, IReporterContext)
+    - manager/ReporterManager.ts (implements IReporterEventSink; emit assigns eventId/sequence/timestamp; ingestForeignEnvelope sets sourceSequence; per-reporter ordered async drain queue; addReporter destination exclusivity + required flag; initializeAsync fatal on failure; flushAsync 10s / signalFlushAsync 2s / closeAsync; coalescing under pressure; emergency stderr writer)
+    - manager/ReporterMultiplexer.ts (shared-destination fan-out)
+    - test/Manager.test.ts
+  Files (modified): index.ts, common/reviews/api/reporter.api.md
+  Notes:
+    - Coalescible = type 'activityChanged' && !required; only coalesces when queue length >= coalesceThreshold (default 64). Protected types never coalesced/dropped.
+    - Optional reporter runtime failure -> disabled + 1 emergency stderr line; required failure -> captured, flush/close reject (fatal). Init failure always fatal.
+    - report() is sync; drain loop yields via await Promise.resolve() between events so flush is the sync point.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - ordering/sequence/eventId/timestamp, foreign rehome, destination exclusivity, multiplexer, add-after-init guard, init-fatal, optional-disable, required-fatal-flush, coalescing (protected preserved), flush/close, flush-timeout tests pass
+    - all exports @beta
+  Next: Feature 7/28 - Freeze legacy output snapshots + protocol/compatibility goldens

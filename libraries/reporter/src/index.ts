@@ -63,6 +63,15 @@ export type {
 } from './protocol/ReporterHandshake';
 export { negotiateReporterHello } from './protocol/ReporterHandshake';
 
+export type { IReporter, IReporterContext } from './manager/IReporter';
+export type { IReporterRegistrationOptions, IReporterManagerOptions } from './manager/ReporterManager';
+export {
+  ReporterManager,
+  DEFAULT_FLUSH_TIMEOUT_MS,
+  DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS
+} from './manager/ReporterManager';
+export { ReporterMultiplexer } from './manager/ReporterMultiplexer';
+
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,

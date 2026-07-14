@@ -73,7 +73,7 @@
       "Coalesce replaceable UI status events under pressure",
       "Never drop lifecycle, diagnostic, result, artifact, or external-output events"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "test",

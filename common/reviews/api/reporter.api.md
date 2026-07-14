@@ -11,6 +11,12 @@ export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPr
 export function createRushDiagnostic(code: string, options?: ICreateRushDiagnosticOptions): IRushDiagnostic;
 
 // @beta
+export const DEFAULT_FLUSH_TIMEOUT_MS: number;
+
+// @beta
+export const DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS: number;
+
+// @beta
 export function encodeNdjsonRecord(value: unknown, options?: INdjsonOptions): string;
 
 // @beta
@@ -39,6 +45,21 @@ export interface ICreateRushDiagnosticOptions {
 // @beta
 export interface INdjsonOptions {
     readonly maxRecordBytes?: number;
+}
+
+// @beta
+export interface IReporter {
+    closeAsync(): Promise<void>;
+    flushAsync(): Promise<void>;
+    initializeAsync(context: IReporterContext): Promise<void>;
+    readonly name: string;
+    report(event: IReporterEventEnvelope<unknown>): void;
+}
+
+// @beta
+export interface IReporterContext {
+    readonly destination?: string;
+    readonly protocolVersion: IReporterProtocolVersion;
 }
 
 // @beta
@@ -113,6 +134,14 @@ export interface IReporterHelloAck {
 }
 
 // @beta
+export interface IReporterManagerOptions {
+    readonly coalesceThreshold?: number;
+    readonly emergencyDiagnosticWriter?: (message: string) => void;
+    readonly now?: () => string;
+    readonly protocolVersion?: IReporterProtocolVersion;
+}
+
+// @beta
 export interface IReporterProtocolLimits {
     readonly bootstrapBufferBytes: number;
     readonly externalOutputChunkBytes: number;
@@ -123,6 +152,12 @@ export interface IReporterProtocolLimits {
 export interface IReporterProtocolVersion {
     readonly major: number;
     readonly minor: number;
+}
+
+// @beta
+export interface IReporterRegistrationOptions {
+    readonly destination?: string;
+    readonly required?: boolean;
 }
 
 // @beta
@@ -234,7 +269,33 @@ export type ReporterJsonValue = string | number | boolean | ReporterJsonNull | r
 };
 
 // @beta
+export class ReporterManager implements IReporterEventSink {
+    constructor(options?: IReporterManagerOptions);
+    addReporter(reporter: IReporter, options?: IReporterRegistrationOptions): void;
+    closeAsync(timeoutMs?: number): Promise<void>;
+    emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string;
+    flushAsync(timeoutMs?: number): Promise<void>;
+    ingestForeignEnvelope(envelope: IReporterEventEnvelope<unknown>): string;
+    initializeAsync(): Promise<void>;
+    signalFlushAsync(timeoutMs?: number): Promise<void>;
+}
+
+// @beta
 export type ReporterMessageSeverity = 'debug' | 'info' | 'warning' | 'error';
+
+// @beta
+export class ReporterMultiplexer implements IReporter {
+    constructor(name: string, reporters: readonly IReporter[]);
+    // (undocumented)
+    closeAsync(): Promise<void>;
+    // (undocumented)
+    flushAsync(): Promise<void>;
+    // (undocumented)
+    initializeAsync(context: IReporterContext): Promise<void>;
+    readonly name: string;
+    // (undocumented)
+    report(event: IReporterEventEnvelope<unknown>): void;
+}
 
 // @beta
 export type ReporterPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
