@@ -47,7 +47,7 @@
       "Return a diagnostic ID from emission and reference it from propagated failures",
       "Add a code registry validation test"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

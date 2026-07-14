@@ -47,3 +47,26 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest), no warnings
     - sink Omit contract, scoped emit ids, emit-only surface, extension-name validation tests pass
   Next: Feature 4/28 - Structured diagnostics (registry, categories, remediation, field privacy)
+
+[2026-07-14] Feature 4/28 COMPLETE: Structured diagnostics (registry, categories, remediation, field privacy)
+  Files (new):
+    - diagnostics/RushDiagnosticCategory.ts (7 categories)
+    - diagnostics/IRushRemediationAction.ts (RushRemediationSafety + action)
+    - diagnostics/IRushDiagnosticSource.ts
+    - diagnostics/IClassifiedDiagnosticValue.ts (value + privacy)
+    - diagnostics/DiagnosticPrivacy.ts (getPrivacyClassificationRank, computeEnvelopePrivacyFloor = min sensitivity)
+    - diagnostics/RushDiagnosticCodeRegistry.ts (defs, RUSH_DIAGNOSTIC_CODES map, templates, isValidRushDiagnosticCode, RUSH_INTERNAL_ERROR_CODE)
+    - diagnostics/RushError.ts (wraps DTO, exposes diagnosticId)
+    - diagnostics/createRushDiagnostic.ts (factory, randomUUID id)
+    - test/Diagnostics.test.ts
+  Files (modified):
+    - diagnostics/IRushDiagnostic.ts (EXPANDED from Feature 3 stub: diagnosticId, category, detailKey, parameters, remediation, source, causeDiagnosticIds, retryable, relatedArtifactIds)
+    - test/ProducerApi.test.ts (updated IRushDiagnostic literal for new required fields)
+    - index.ts (re-exports), common/reviews/api/reporter.api.md
+  Notes:
+    - Privacy floor = MIN sensitivity across fields (spec: "minimum classification floor for every field"); field-level classification remains authoritative for redaction.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - registry validation (code pattern/uniqueness/category/templates/internal-code), privacy floor, factory, RushError tests pass
+    - all 35 exports @beta
+  Next: Feature 5/28 - NDJSON wire protocol (handshake, versioning, size limits)

@@ -30,6 +30,22 @@ export type {
 } from './events/IReporterEventEnvelope';
 
 export type { RushDiagnosticSeverity, IRushDiagnostic } from './diagnostics/IRushDiagnostic';
+export type { RushDiagnosticCategory } from './diagnostics/RushDiagnosticCategory';
+export type { RushRemediationSafety, IRushRemediationAction } from './diagnostics/IRushRemediationAction';
+export type { IRushDiagnosticSource } from './diagnostics/IRushDiagnosticSource';
+export type { IClassifiedDiagnosticValue } from './diagnostics/IClassifiedDiagnosticValue';
+export { getPrivacyClassificationRank, computeEnvelopePrivacyFloor } from './diagnostics/DiagnosticPrivacy';
+export type { IRushDiagnosticCodeDefinition } from './diagnostics/RushDiagnosticCodeRegistry';
+export {
+  RUSH_INTERNAL_ERROR_CODE,
+  isValidRushDiagnosticCode,
+  RUSH_DIAGNOSTIC_CODE_DEFINITIONS,
+  RUSH_DIAGNOSTIC_CODES,
+  RUSH_DIAGNOSTIC_TEMPLATES
+} from './diagnostics/RushDiagnosticCodeRegistry';
+export { RushError } from './diagnostics/RushError';
+export type { ICreateRushDiagnosticOptions } from './diagnostics/createRushDiagnostic';
+export { createRushDiagnostic } from './diagnostics/createRushDiagnostic';
 
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {

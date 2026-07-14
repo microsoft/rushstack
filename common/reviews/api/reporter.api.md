@@ -5,6 +5,35 @@
 ```ts
 
 // @beta
+export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPrivacyClassification>): ReporterPrivacyClassification;
+
+// @beta
+export function createRushDiagnostic(code: string, options?: ICreateRushDiagnosticOptions): IRushDiagnostic;
+
+// @beta
+export function getPrivacyClassificationRank(classification: ReporterPrivacyClassification): number;
+
+// @beta
+export interface IClassifiedDiagnosticValue {
+    readonly privacy: ReporterPrivacyClassification;
+    readonly value: ReporterJsonValue;
+}
+
+// @beta
+export interface ICreateRushDiagnosticOptions {
+    readonly causeDiagnosticIds?: readonly string[];
+    readonly diagnosticId?: string;
+    readonly parameters?: {
+        readonly [name: string]: IClassifiedDiagnosticValue;
+    };
+    readonly relatedArtifactIds?: readonly string[];
+    readonly remediation?: readonly IRushRemediationAction[];
+    readonly retryable?: boolean;
+    readonly severity?: RushDiagnosticSeverity;
+    readonly source?: IRushDiagnosticSource;
+}
+
+// @beta
 export type IReporterEmitEventInput<TPayload> = Omit<IReporterEventEnvelope<TPayload>, 'eventId' | 'sequence' | 'timestamp'>;
 
 // @beta
@@ -53,9 +82,45 @@ export interface IReporterProtocolVersion {
 
 // @beta
 export interface IRushDiagnostic {
+    readonly category: RushDiagnosticCategory;
+    readonly causeDiagnosticIds?: readonly string[];
     readonly code: string;
+    readonly detailKey?: string;
+    readonly diagnosticId: string;
+    readonly parameters?: {
+        readonly [name: string]: IClassifiedDiagnosticValue;
+    };
+    readonly relatedArtifactIds?: readonly string[];
+    readonly remediation?: readonly IRushRemediationAction[];
+    readonly retryable?: boolean;
     readonly severity: RushDiagnosticSeverity;
+    readonly source?: IRushDiagnosticSource;
     readonly summaryKey: string;
+}
+
+// @beta
+export interface IRushDiagnosticCodeDefinition {
+    readonly category: RushDiagnosticCategory;
+    readonly code: string;
+    readonly defaultSeverity: RushDiagnosticSeverity;
+    readonly detailKey?: string;
+    readonly summaryKey: string;
+}
+
+// @beta
+export interface IRushDiagnosticSource {
+    readonly column?: number;
+    readonly file?: string;
+    readonly line?: number;
+    readonly toolName?: string;
+}
+
+// @beta
+export interface IRushRemediationAction {
+    readonly automatedExecutionSafety: RushRemediationSafety;
+    readonly command?: string;
+    readonly descriptionKey: string;
+    readonly documentationUrl?: string;
 }
 
 // @beta
@@ -74,6 +139,9 @@ export interface IScopedReporter {
 
 // @beta
 export function isReporterExtensionEventName(name: string): boolean;
+
+// @beta
+export function isValidRushDiagnosticCode(code: string): boolean;
 
 // @beta
 export const REPORTER_EVENT_TYPES: readonly ReporterEventType[];
@@ -102,6 +170,33 @@ export type ReporterMessageSeverity = 'debug' | 'info' | 'warning' | 'error';
 export type ReporterPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
 
 // @beta
+export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly IRushDiagnosticCodeDefinition[];
+
+// @beta
+export const RUSH_DIAGNOSTIC_CODES: ReadonlyMap<string, IRushDiagnosticCodeDefinition>;
+
+// @beta
+export const RUSH_DIAGNOSTIC_TEMPLATES: {
+    readonly [resourceKey: string]: string;
+};
+
+// @beta
+export const RUSH_INTERNAL_ERROR_CODE: 'RUSH_INTERNAL_UNEXPECTED';
+
+// @beta
+export type RushDiagnosticCategory = 'configuration' | 'input' | 'dependency-tool' | 'environment' | 'network-auth' | 'operation' | 'internal';
+
+// @beta
 export type RushDiagnosticSeverity = 'warning' | 'error';
+
+// @beta
+export class RushError extends Error {
+    constructor(diagnostic: IRushDiagnostic, message?: string);
+    readonly diagnostic: IRushDiagnostic;
+    get diagnosticId(): string;
+}
+
+// @beta
+export type RushRemediationSafety = 'safe' | 'requires-confirmation' | 'unsafe';
 
 ```
