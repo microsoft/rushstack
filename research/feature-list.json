@@ -97,7 +97,7 @@
       "Pass the handoff path to the frontend via a private environment variable",
       "Preserve required and diagnostic events on overflow and emit a bufferTruncated event"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
