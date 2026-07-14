@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add ReporterManager and IReporter: monotonic session ordering, per-reporter queues, exclusive destination ownership with a multiplexer, timed flush/close, status coalescing, and optional/required failure handling",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
