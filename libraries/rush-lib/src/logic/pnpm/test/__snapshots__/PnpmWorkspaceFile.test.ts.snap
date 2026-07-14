@@ -86,3 +86,22 @@ exports[`PnpmWorkspaceFile catalog functionality handles undefined catalog 1`] =
   - projects/app1
 "
 `;
+
+exports[`PnpmWorkspaceFile global virtual store functionality generates workspace file with enableGlobalVirtualStore 1`] = `
+"enableGlobalVirtualStore: true
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile global virtual store functionality generates workspace file with enableGlobalVirtualStore, allowBuilds, and catalogs 1`] = `
+"allowBuilds:
+  esbuild: true
+catalogs:
+  default:
+    react: ^18.0.0
+enableGlobalVirtualStore: true
+packages:
+  - projects/app1
+"
+`;

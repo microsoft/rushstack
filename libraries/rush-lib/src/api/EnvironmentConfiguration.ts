@@ -82,6 +82,13 @@ export const EnvironmentVariableNames = {
   RUSH_PNPM_STORE_PATH: 'RUSH_PNPM_STORE_PATH',
 
   /**
+   * When using PNPM as the package manager, this variable can be used to enable PNPM's global
+   * virtual store for workspace installs. The value of this environment variable must be `1` (for
+   * true) or `0` (for false). If not specified, PNPM's global virtual store is not enabled by Rush.
+   */
+  RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE: 'RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE',
+
+  /**
    * When using PNPM as the package manager, this variable can be used to control whether or not PNPM
    * validates the integrity of the PNPM store during installation. The value of this environment variable must be
    * `1` (for true) or `0` (for false). If not specified, defaults to the value in .npmrc.
@@ -276,6 +283,8 @@ export class EnvironmentConfiguration {
 
   private static _pnpmStorePathOverride: string | undefined;
 
+  private static _pnpmGlobalVirtualStore: boolean = false;
+
   private static _pnpmVerifyStoreIntegrity: boolean | undefined;
 
   private static _rushGlobalFolderOverride: string | undefined;
@@ -355,6 +364,15 @@ export class EnvironmentConfiguration {
   public static get pnpmStorePathOverride(): string | undefined {
     EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._pnpmStorePathOverride;
+  }
+
+  /**
+   * If true, enables PNPM's global virtual store during workspace installs.
+   * See {@link EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE}
+   */
+  public static get pnpmGlobalVirtualStore(): boolean {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._pnpmGlobalVirtualStore;
   }
 
   /**
@@ -551,6 +569,15 @@ export class EnvironmentConfiguration {
             break;
           }
 
+          case EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE: {
+            EnvironmentConfiguration._pnpmGlobalVirtualStore =
+              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE,
+                value
+              ) ?? false;
+            break;
+          }
+
           case EnvironmentVariableNames.RUSH_PNPM_VERIFY_STORE_INTEGRITY: {
             EnvironmentConfiguration._pnpmVerifyStoreIntegrity =
               value === '1' ? true : value === '0' ? false : undefined;
@@ -694,6 +721,9 @@ export class EnvironmentConfiguration {
   public static reset(): void {
     EnvironmentConfiguration._rushTempFolderOverride = undefined;
     EnvironmentConfiguration._quietMode = false;
+    EnvironmentConfiguration._pnpmStorePathOverride = undefined;
+    EnvironmentConfiguration._pnpmGlobalVirtualStore = false;
+    EnvironmentConfiguration._pnpmVerifyStoreIntegrity = undefined;
     EnvironmentConfiguration._gitBinaryPath = undefined;
     EnvironmentConfiguration._tarBinaryPath = undefined;
     EnvironmentConfiguration._hasBeenValidated = false;
