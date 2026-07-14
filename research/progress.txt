@@ -14,3 +14,19 @@
     - api report confirms @beta release tag on exports
     - no rush-lib reference in package.json
   Next: Feature 2/28 - Define canonical event envelope and closed core event type union
+
+[2026-07-14] Feature 2/28 COMPLETE: Canonical event envelope and closed core event type union
+  Files:
+    - libraries/reporter/src/events/ReporterProtocolVersion.ts (IReporterProtocolVersion)
+    - libraries/reporter/src/events/ReporterPrivacyClassification.ts (public|local-sensitive|secret)
+    - libraries/reporter/src/events/ReporterJsonValue.ts (ReporterJsonNull, ReporterJsonValue)
+    - libraries/reporter/src/events/ReporterEventType.ts (union + REPORTER_EVENT_TYPES, 15 members)
+    - libraries/reporter/src/events/IReporterEventEnvelope.ts (source, scope, envelope; all readonly)
+    - libraries/reporter/src/index.ts (re-exports)
+    - libraries/reporter/src/test/IReporterEventEnvelope.test.ts (+ __snapshots__ golden)
+    - common/reviews/api/reporter.api.md (regenerated, all @beta)
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - golden envelope snapshot + JSON round-trip + closed-set + sourceSequence + Error-not-serialized tests pass
+    - api report confirms all exports @beta, envelope fields readonly
+  Next: Feature 3/28 - Producer API (IReporterEventSink, IScopedReporter)

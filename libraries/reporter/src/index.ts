@@ -17,3 +17,14 @@
  * @beta
  */
 export const REPORTER_PACKAGE_NAME: '@rushstack/reporter' = '@rushstack/reporter';
+
+export type { IReporterProtocolVersion } from './events/ReporterProtocolVersion';
+export type { ReporterPrivacyClassification } from './events/ReporterPrivacyClassification';
+export type { ReporterJsonNull, ReporterJsonValue } from './events/ReporterJsonValue';
+export type { ReporterEventType } from './events/ReporterEventType';
+export { REPORTER_EVENT_TYPES } from './events/ReporterEventType';
+export type {
+  IReporterEventSource,
+  IReporterEventScope,
+  IReporterEventEnvelope
+} from './events/IReporterEventEnvelope';

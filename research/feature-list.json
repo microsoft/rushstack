@@ -22,7 +22,7 @@
       "Preserve producer local sequence as sourceSequence for child sessions",
       "Add a golden envelope schema test"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

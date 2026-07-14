@@ -5,6 +5,62 @@
 ```ts
 
 // @beta
+export interface IReporterEventEnvelope<TPayload = unknown> {
+    readonly eventId: string;
+    readonly parentOperationId?: string;
+    readonly parentSessionId?: string;
+    readonly payload: TPayload;
+    readonly privacy: ReporterPrivacyClassification;
+    readonly protocolVersion: IReporterProtocolVersion;
+    readonly required: boolean;
+    readonly scope?: IReporterEventScope;
+    readonly sequence: number;
+    readonly sessionId: string;
+    readonly source: IReporterEventSource;
+    readonly sourceSequence?: number;
+    readonly timestamp: string;
+    readonly type: ReporterEventType;
+}
+
+// @beta
+export interface IReporterEventScope {
+    readonly commandName?: string;
+    readonly operationId?: string;
+    readonly phaseName?: string;
+    readonly projectName?: string;
+}
+
+// @beta
+export interface IReporterEventSource {
+    readonly component?: string;
+    readonly packageName: string;
+    readonly packageVersion: string;
+}
+
+// @beta
+export interface IReporterProtocolVersion {
+    readonly major: number;
+    readonly minor: number;
+}
+
+// @beta
+export const REPORTER_EVENT_TYPES: readonly ReporterEventType[];
+
+// @beta
 export const REPORTER_PACKAGE_NAME: '@rushstack/reporter';
+
+// @beta
+export type ReporterEventType = 'sessionStarted' | 'sessionCompleted' | 'commandStarted' | 'commandCompleted' | 'operationRegistered' | 'operationStatusChanged' | 'activityChanged' | 'watchCycleCompleted' | 'diagnosticEmitted' | 'externalProcessStarted' | 'externalOutput' | 'externalProcessCompleted' | 'artifactAvailable' | 'commandResult' | 'extension';
+
+// @beta
+export type ReporterJsonNull = null;
+
+// @beta
+export type ReporterJsonValue = string | number | boolean | ReporterJsonNull | readonly ReporterJsonValue[] | {
+    readonly [key: string]: ReporterJsonValue;
+};
+
+// @beta
+export type ReporterPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
 
 ```
