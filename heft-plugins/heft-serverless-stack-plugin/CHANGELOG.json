@@ -2,6 +2,48 @@
   "name": "@rushstack/heft-serverless-stack-plugin",
   "entries": [
     {
+      "version": "1.2.21",
+      "tag": "@rushstack/heft-serverless-stack-plugin_v1.2.21",
+      "date": "Sat, 13 Jun 2026 00:16:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `1.2.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.3.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.2.18` to `1.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.20",
+      "tag": "@rushstack/heft-serverless-stack-plugin_v1.2.20",
+      "date": "Mon, 08 Jun 2026 15:15:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `1.2.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.3.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.2.17` to `1.2.18`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.19",
       "tag": "@rushstack/heft-serverless-stack-plugin_v1.2.19",
       "date": "Mon, 20 Apr 2026 23:31:13 GMT",

@@ -2,6 +2,42 @@
   "name": "@rushstack/webpack-plugin-utilities",
   "entries": [
     {
+      "version": "0.7.0",
+      "tag": "@rushstack/webpack-plugin-utilities_v0.7.0",
+      "date": "Sat, 27 Jun 2026 00:15:40 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `evaluateConstantEstreeExpression` for statically evaluating constant ESTree expression nodes."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.20",
+      "tag": "@rushstack/webpack-plugin-utilities_v0.6.20",
+      "date": "Sat, 13 Jun 2026 00:16:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.19",
+      "tag": "@rushstack/webpack-plugin-utilities_v0.6.19",
+      "date": "Mon, 08 Jun 2026 15:15:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.18`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.18",
       "tag": "@rushstack/webpack-plugin-utilities_v0.6.18",
       "date": "Mon, 20 Apr 2026 23:31:13 GMT",

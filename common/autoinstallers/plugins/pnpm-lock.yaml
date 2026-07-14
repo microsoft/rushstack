@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@rushstack/rush-published-versions-json-plugin':
-        specifier: 0.1.10
-        version: 0.1.10
+        specifier: 0.1.12
+        version: 0.1.12
 
 packages:
 
@@ -26,11 +26,11 @@ packages:
     resolution: {integrity: sha512-GucC9h/EVbU03Kl7M/FqVes1s5RCQaGCW2f41lFA7VqqHWQElR6k1q33iF6f6fXDUSCdzB1IUxSq9ghP2J+8Pw==}
     engines: {node: '>=18.12'}
 
-  '@rushstack/credential-cache@0.2.17':
-    resolution: {integrity: sha512-TSHT0WEiAduX+KbIKZU1IAmTokZzwYF2ErW/4IS5LV2QDaA+uN2jLCKDXmP9D2OxCERwV5OmTb3H6pZZWA+aJg==}
+  '@rushstack/credential-cache@0.2.18':
+    resolution: {integrity: sha512-ykf8jgoDdpMfDdIib7ReCV3XiHwppgPI6lGIEI5I/aN9rLUvdgj8inivGdtur0bpnxXif/O40TMFXMUi+DCW/A==}
 
-  '@rushstack/lookup-by-path@0.10.6':
-    resolution: {integrity: sha512-oxBVdRjaY0r/LwGMESu4rgbWKKnUng8VBD830A3KP5py346WhHbzpMkD9w3Oy75nCqrOTlVWgveL/bW3WVQthw==}
+  '@rushstack/lookup-by-path@0.10.7':
+    resolution: {integrity: sha512-2SbMEqhfLAne2Zgucz4QHD7WpXJEyZ7iErO8j/ZlejEtWRcdZIZhrJhdfylhIRrL/Kosq9vdSOMsKcljM9+GuQ==}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -45,8 +45,8 @@ packages:
       '@types/node':
         optional: true
 
-  '@rushstack/package-deps-hash@4.7.17':
-    resolution: {integrity: sha512-Zw0ceestXU+rwfNUwZsJAlLTuHUrWbjLuif81kgkASME9lv4rl3ro8/LL9qZ3qfFZw5zB35fmHtsYdAsSRI16A==}
+  '@rushstack/package-deps-hash@4.7.19':
+    resolution: {integrity: sha512-dIn4efsv5JrcAwoub68i/FGjFXZoH9E2IQhG+ZDeQxv/hW1NvIW1NRn4ir1nVlgpo/xm3sm7gw4f8QaIshkNHg==}
 
   '@rushstack/problem-matcher@0.2.1':
     resolution: {integrity: sha512-gulfhBs6n+I5b7DvjKRfhMGyUejtSgOHTclF/eONr8hcgF1APEDjhxIsfdUYYMzC3rvLwGluqLjbwCFZ8nxrog==}
@@ -56,11 +56,11 @@ packages:
       '@types/node':
         optional: true
 
-  '@rushstack/rush-published-versions-json-plugin@0.1.10':
-    resolution: {integrity: sha512-xULrbFQXlHlVv4KXigqdk8Up74WwrzDOki9L360ukMMNYDy20V3dXTwFL08s5dSXiylWOGOrDc54F4USPNFizw==}
+  '@rushstack/rush-published-versions-json-plugin@0.1.12':
+    resolution: {integrity: sha512-dTMFziwkP9BYrdN6vBDPkEMz2aHkxSmx8kyYdWdOlazfRv7zCGmr/JKrIhTZsho+raH8lCIsZGEum0CSsLS8fQ==}
 
-  '@rushstack/rush-sdk@5.175.1':
-    resolution: {integrity: sha512-xdQezHpM/1mJ5SvLpgXCwM6OJqAr9ecoRzQHWjbS3WodC72FfZsAzSNusUazn5qcWFiC5UvaBvBhJAiLJBbvmQ==}
+  '@rushstack/rush-sdk@5.176.0':
+    resolution: {integrity: sha512-szG89Ri75f20s1SAP6PrdKNsGcoIvwv3cfbjB2iEBS0EMuvdNX0gNzlb0vMIdrVr9Z53C9e7CQl69ysZgv1ofg==}
 
   '@rushstack/terminal@0.24.0':
     resolution: {integrity: sha512-8ZQS4MMaGsv27EXCBiH7WMPkRZrffeDoIevs6z9TM5dzqiY6+Hn4evfK/G+gvgBTjfvfkHIZPQQmalmI2sM4TQ==}
@@ -96,11 +96,11 @@ packages:
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
 
-  fast-uri@3.1.2:
-    resolution: {integrity: sha512-rVjf7ArG3LTk+FS6Yw81V1DLuZl1bRbNrev6Tmd/9RaroeeRRJhAt7jg/6YFxbvAQXUCavSoZhPPj6oOx+5KjQ==}
+  fast-uri@3.1.3:
+    resolution: {integrity: sha512-i70LwGWUduXqzicKXWshooq+sWL1K3WUU5rKZNG/0i3a1OSoX3HqhH5WbWwTmqWfor4urUakGPiRQcleRZTwOg==}
 
-  fs-extra@11.3.5:
-    resolution: {integrity: sha512-eKpRKAovdpZtR1WopLHxlBWvAgPny3c4gX1G5Jhwmmw4XJj0ifSD5qB5TOo8hmA0wlRKDAOAhEE1yVPgs6Fgcg==}
+  fs-extra@11.3.6:
+    resolution: {integrity: sha512-w8ZNZr2mKIc7qeNaQ9AVPT1+iFaI+Avd4xudVOvdDJ8VytREi1Ft5Ih7hd9jjehod8vAM5GMsfQ/TpPf4EyoEA==}
     engines: {node: '>=14.14'}
 
   function-bind@1.1.2:
@@ -178,26 +178,26 @@ snapshots:
 
   '@pnpm/types@900.0.0': {}
 
-  '@rushstack/credential-cache@0.2.17':
+  '@rushstack/credential-cache@0.2.18':
     dependencies:
       '@rushstack/node-core-library': 5.23.1
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/lookup-by-path@0.10.6': {}
+  '@rushstack/lookup-by-path@0.10.7': {}
 
   '@rushstack/node-core-library@5.23.1':
     dependencies:
       ajv: 8.18.0
       ajv-draft-04: 1.0.0(ajv@8.18.0)
       ajv-formats: 3.0.1(ajv@8.18.0)
-      fs-extra: 11.3.5
+      fs-extra: 11.3.6
       import-lazy: 4.0.0
       jju: 1.4.0
       resolve: 1.22.12
       semver: 7.7.4
 
-  '@rushstack/package-deps-hash@4.7.17':
+  '@rushstack/package-deps-hash@4.7.19':
     dependencies:
       '@rushstack/node-core-library': 5.23.1
     transitivePeerDependencies:
@@ -205,21 +205,21 @@ snapshots:
 
   '@rushstack/problem-matcher@0.2.1': {}
 
-  '@rushstack/rush-published-versions-json-plugin@0.1.10':
+  '@rushstack/rush-published-versions-json-plugin@0.1.12':
     dependencies:
       '@rushstack/node-core-library': 5.23.1
-      '@rushstack/rush-sdk': 5.175.1
+      '@rushstack/rush-sdk': 5.176.0
       '@rushstack/terminal': 0.24.0
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/rush-sdk@5.175.1':
+  '@rushstack/rush-sdk@5.176.0':
     dependencies:
       '@pnpm/lockfile.types-900': '@pnpm/lockfile.types@900.0.0'
-      '@rushstack/credential-cache': 0.2.17
-      '@rushstack/lookup-by-path': 0.10.6
+      '@rushstack/credential-cache': 0.2.18
+      '@rushstack/lookup-by-path': 0.10.7
       '@rushstack/node-core-library': 5.23.1
-      '@rushstack/package-deps-hash': 4.7.17
+      '@rushstack/package-deps-hash': 4.7.19
       '@rushstack/terminal': 0.24.0
       tapable: 2.2.1
     transitivePeerDependencies:
@@ -242,7 +242,7 @@ snapshots:
   ajv@8.18.0:
     dependencies:
       fast-deep-equal: 3.1.3
-      fast-uri: 3.1.2
+      fast-uri: 3.1.3
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
@@ -250,9 +250,9 @@ snapshots:
 
   fast-deep-equal@3.1.3: {}
 
-  fast-uri@3.1.2: {}
+  fast-uri@3.1.3: {}
 
-  fs-extra@11.3.5:
+  fs-extra@11.3.6:
     dependencies:
       graceful-fs: 4.2.11
       jsonfile: 6.2.1

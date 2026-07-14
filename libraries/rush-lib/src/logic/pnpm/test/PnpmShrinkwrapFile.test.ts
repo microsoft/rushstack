@@ -487,6 +487,22 @@ snapshots:
         ).resolves.toBe(false);
       });
 
+      it('can detect a devDependency that is still listed under dependencies in the importer', async () => {
+        // Regression: moving a dep from dependencies to devDependencies should be detected as modified.
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v9/stale-dev-in-dependencies.yaml`,
+          project.rushConfiguration.defaultSubspace
+        );
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace,
+            undefined
+          )
+        ).resolves.toBe(true);
+      });
+
       it('sha1 integrity can be handled when disallowInsecureSha1', async () => {
         const project = getMockRushProject();
         const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(

@@ -1391,6 +1391,60 @@ export default styles;",
 }
 `;
 
+exports[`SassProcessor use-plain-css.module.scss (@use of a plain .css file) resolves a plain .css file referenced via @use with an explicit extension: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor use-plain-css.module.scss (@use of a plain .css file) resolves a plain .css file referenced via @use with an explicit extension: written-files 1`] = `
+Map {
+  "/fake/output/dts/use-plain-css.module.scss.d.ts" => "declare interface IStyles {
+  \\"token-base\\": string;
+  container: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/use-plain-css.module.css" => "/* A plain CSS file (no Sass syntax) imported via @use from another stylesheet. */
+.token-base {
+  color: #0078d4;
+  display: block;
+}
+
+.container {
+  font-weight: bold;
+}",
+}
+`;
+
+exports[`SassProcessor use-plain-css.module.scss (@use of a plain .css file) resolves a plain .css file referenced via @use without an explicit extension: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor use-plain-css.module.scss (@use of a plain .css file) resolves a plain .css file referenced via @use without an explicit extension: written-files 1`] = `
+Map {
+  "/fake/output/dts/use-plain-css-extensionless.module.scss.d.ts" => "declare interface IStyles {
+  \\"token-base\\": string;
+  container: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/use-plain-css-extensionless.module.css" => "/* A plain CSS file (no Sass syntax) imported via @use from another stylesheet. */
+.token-base {
+  color: #0078d4;
+  display: block;
+}
+
+.container {
+  font-weight: bold;
+}",
+}
+`;
+
 exports[`SassProcessor use-with-partial.module.scss (@use with local partial) generates .d.ts with class names from a file using @use: terminal-output 1`] = `
 Array [
   "[verbose] Checking for changes to 1 files...[n]",

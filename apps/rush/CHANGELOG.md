@@ -1,6 +1,50 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 20 Apr 2026 23:31:34 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Jul 2026 21:27:15 GMT and should not be manually modified.
+
+## 5.177.2
+Wed, 08 Jul 2026 21:27:15 GMT
+
+### Patches
+
+- Upgrade the `pnpm-sync-lib` dependency to 0.3.4.
+
+## 5.177.1
+Sat, 20 Jun 2026 21:37:30 GMT
+
+### Updates
+
+- Bump `ws` in `rush-serve-plugin` to mitigate CVE-2026-48779.
+
+## 5.177.0
+Sat, 20 Jun 2026 00:16:15 GMT
+
+### Patches
+
+- Set Redis `connectTimeout` and `socketTimeout` so half-dead TCP connections (NAT/firewall) surface in seconds instead of stalling in-flight commands for many minutes while the kernel waits to give up.
+
+### Updates
+
+- Fix build cache failures when running inside a git linked worktree via a pre-commit hook, caused by GIT_DIR being set to the per-worktree metadata directory
+
+## 5.176.0
+Tue, 09 Jun 2026 02:02:32 GMT
+
+### Minor changes
+
+- Add support for pnpm 11's `allowBuilds` field in `pnpm-workspace.yaml`. Rush now correctly handles the pnpm 11 security model where build scripts must be explicitly approved. The new `globalAllowBuilds` field in `pnpm-config.json` replaces the deprecated `globalOnlyBuiltDependencies` and `globalNeverBuiltDependencies` fields for pnpm 11+. The `rush-pnpm approve-builds` command is also updated to work correctly with pnpm 11.
+- Include seconds in the generated change file name so that running `rush change` more than once in the same minute no longer silently overwrites the previously generated change file.
+- Default `rush-pnpm outdated` and `rush-pnpm why` to recursive workspace queries.
+
+### Patches
+
+- Fix a regression where Rush change-detection treated any `pnpm-config.json` containing comments as unparseable, causing every project to be flagged as impacted.
+- Route the "Lockfile was created or deleted" warning to stderr so that machine-readable output (e.g. `rush list --json`) remains parseable when the lockfile was added or removed in the diff range.
+- Fix `rush update` not syncing `pnpm-lock.yaml` when a workspace dependency moves from `dependencies` to `devDependencies`.
+
+### Updates
+
+- Bump the `ws` dependency to `~8.20.0`.
 
 ## 5.175.1
 Mon, 20 Apr 2026 23:31:34 GMT

@@ -7,7 +7,7 @@
  */
 
 import * as path from 'node:path';
-import { execSync } from 'node:child_process';
+import type child_process from 'node:child_process';
 
 import * as semver from 'semver';
 
@@ -17,7 +17,8 @@ import {
   FileConstants,
   Text,
   Enum,
-  InternalError
+  InternalError,
+  Executable
 } from '@rushstack/node-core-library';
 
 import { type IChangeInfo, ChangeType, type IVersionPolicyChangeInfo } from '../api/ChangeManagement';
@@ -83,13 +84,14 @@ export class PublishUtilities {
     // Add the minimum changes defined by the change descriptions.
     for (const changeFilePath of files) {
       const changeRequest: IChangeInfo = JsonFile.load(changeFilePath);
+      const changes: IChangeInfo[] = changeRequest.changes!;
 
       if (includeCommitDetails) {
         const git: Git = new Git(rushConfiguration);
-        PublishUtilities._updateCommitDetails(git, changeFilePath, changeRequest.changes);
+        await PublishUtilities._updateCommitDetailsAsync(git, changeFilePath, changes);
       }
 
-      for (const change of changeRequest.changes!) {
+      for (const change of changes) {
         PublishUtilities._addChange({
           change,
           changeFilePath,
@@ -374,16 +376,31 @@ export class PublishUtilities {
     );
   }
 
-  private static _updateCommitDetails(git: Git, filename: string, changes: IChangeInfo[] | undefined): void {
+  private static async _updateCommitDetailsAsync(
+    git: Git,
+    filename: string,
+    changes: IChangeInfo[]
+  ): Promise<void> {
     try {
       const gitPath: string = git.getGitPathOrThrow();
-      const fileLog: string = execSync(`${gitPath} log -n 1 ${filename}`, {
-        cwd: path.dirname(filename)
-      }).toString();
+      const gitProcess: child_process.ChildProcess = Executable.spawn(
+        gitPath,
+        ['log', '-n', '1', '--', filename],
+        {
+          currentWorkingDirectory: path.dirname(filename)
+        }
+      );
+      const { stdout: fileLog, exitCode, signal } = await Executable.waitForExitAsync(gitProcess, {
+        encoding: 'utf8'
+      });
+      if (exitCode !== 0 || signal) {
+        return;
+      }
+
       const author: string = fileLog.match(/Author: (.*)/)![1];
       const commit: string = fileLog.match(/commit (.*)/)![1];
 
-      changes!.forEach((change) => {
+      changes.forEach((change) => {
         change.author = author;
         change.commit = commit;
       });

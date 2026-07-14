@@ -627,7 +627,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
       testNamePattern: options.testNamePattern,
       testPathIgnorePatterns: options.testPathIgnorePatterns ? [options.testPathIgnorePatterns] : undefined,
-      testPathPattern: options.testPathPattern ? [options.testPathPattern] : undefined,
+      testPathPatterns: options.testPathPattern ? [options.testPathPattern] : undefined,
       testTimeout: options.testTimeout,
       maxWorkers: options.maxWorkers,
 

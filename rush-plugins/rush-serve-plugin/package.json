@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-serve-plugin",
-  "version": "5.175.1",
+  "version": "5.177.2",
   "description": "A Rush plugin that hooks into a rush action and serves output folders from all projects in the repository.",
   "license": "MIT",
   "repository": {
@@ -28,7 +28,7 @@
     "cors": "~2.8.5",
     "express": "4.21.1",
     "http2-express-bridge": "~1.0.7",
-    "ws": "~8.20.0"
+    "ws": "~8.21.0"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
@@ -37,7 +37,7 @@
     "@types/compression": "~1.7.2",
     "@types/cors": "~2.8.12",
     "@types/express": "4.17.21",
-    "@types/ws": "8.5.5"
+    "@types/ws": "8.18.1"
   },
   "exports": {
     ".": {

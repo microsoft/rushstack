@@ -2,6 +2,45 @@
   "name": "@rushstack/playwright-browser-tunnel",
   "entries": [
     {
+      "version": "0.3.23",
+      "tag": "@rushstack/playwright-browser-tunnel_v0.3.23",
+      "date": "Sat, 20 Jun 2026 21:37:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump `ws` in `rush-serve-plugin` to mitigate CVE-2026-48779."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.22",
+      "tag": "@rushstack/playwright-browser-tunnel_v0.3.22",
+      "date": "Sat, 13 Jun 2026 00:16:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.21",
+      "tag": "@rushstack/playwright-browser-tunnel_v0.3.21",
+      "date": "Mon, 08 Jun 2026 15:15:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.18`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.20",
       "tag": "@rushstack/playwright-browser-tunnel_v0.3.20",
       "date": "Sat, 25 Apr 2026 00:15:59 GMT",
