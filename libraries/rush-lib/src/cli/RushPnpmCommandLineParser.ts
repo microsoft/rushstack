@@ -633,7 +633,7 @@ export class RushPnpmCommandLineParser {
 
           if (!Objects.areDeepEqual(currentGlobalOnlyBuiltDependencies, newGlobalOnlyBuiltDependencies)) {
             // Update onlyBuiltDependencies to pnpm configuration file
-            pnpmOptions?.updateGlobalOnlyBuiltDependencies(newGlobalOnlyBuiltDependencies);
+            await pnpmOptions?.updateGlobalOnlyBuiltDependenciesAsync(newGlobalOnlyBuiltDependencies);
 
             // Rerun installation to update
             await this._doRushUpdateAsync();
@@ -643,6 +643,38 @@ export class RushPnpmCommandLineParser {
                 '  Please commit this change to Git.'
             );
           }
+        }
+        break;
+      }
+      case 'update':
+      case 'up': {
+        // When "pnpm up" / "pnpm update" runs, PNPM writes any updated catalog versions to the
+        // generated "catalogs" section of common/temp/<subspace>/pnpm-workspace.yaml. That file is
+        // regenerated on every install, so the updated versions must be synced back to the
+        // "globalCatalogs" field of pnpm-config.json for the change to be persisted.
+        const pnpmOptions: PnpmOptionsConfiguration | undefined = this._subspace.getPnpmOptions();
+        if (pnpmOptions === undefined) {
+          break;
+        }
+
+        const workspaceYamlFilename: string = `${subspaceTempFolder}/pnpm-workspace.yaml`;
+        const yamlModule: typeof import('js-yaml') = await import('js-yaml');
+        const workspaceYamlContent: string = await FileSystem.readFileAsync(workspaceYamlFilename);
+        const workspaceYaml: { catalogs?: Record<string, Record<string, string>> } = (yamlModule.load(
+          workspaceYamlContent
+        ) ?? {}) as { catalogs?: Record<string, Record<string, string>> };
+        const newGlobalCatalogs: Record<string, Record<string, string>> | undefined = workspaceYaml?.catalogs;
+        const currentGlobalCatalogs: Record<string, Record<string, string>> | undefined =
+          pnpmOptions.globalCatalogs;
+
+        if (!Objects.areDeepEqual(currentGlobalCatalogs, newGlobalCatalogs)) {
+          await pnpmOptions.updateGlobalCatalogsAsync(newGlobalCatalogs);
+          await this._doRushUpdateAsync();
+
+          this._terminal.writeWarningLine(
+            `Rush refreshed the ${RushConstants.pnpmConfigFilename} and shrinkwrap file.\n` +
+              '  Please commit this change to Git.'
+          );
         }
         break;
       }
