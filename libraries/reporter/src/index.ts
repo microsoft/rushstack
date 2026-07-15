@@ -113,6 +113,13 @@ export type { IEngineSinkResolution } from './compat/LegacyFallbackSink';
 export { LegacyFallbackSink, createEngineSink } from './compat/LegacyFallbackSink';
 export type { IOldEngineOutputAdapterOptions } from './compat/OldEngineOutputAdapter';
 export { OldEngineOutputAdapter } from './compat/OldEngineOutputAdapter';
+export {
+  ALREADY_REPORTED_ERROR_NAME,
+  LEGACY_ERROR_BRIDGE_REMOVAL_CRITERIA,
+  AlreadyReportedError,
+  isAlreadyReportedSentinel,
+  LegacyErrorBridge
+} from './compat/LegacyErrorBridge';
 
 export type { ICreateScopedReporterOptions } from './session/ScopedReporterFactory';
 export { createScopedReporter } from './session/ScopedReporterFactory';

@@ -20,6 +20,14 @@ export class AiReporter implements IReporter {
 }
 
 // @beta
+export const ALREADY_REPORTED_ERROR_NAME: 'AlreadyReportedError';
+
+// @beta @deprecated
+export class AlreadyReportedError extends Error {
+    constructor(message?: string);
+}
+
+// @beta
 export const BOOTSTRAP_BUFFER_MAX_BYTES: number;
 
 // @beta
@@ -792,6 +800,9 @@ export interface IRushSessionReportingOptions {
 export function isAgentVariableActive(value: string | undefined): boolean;
 
 // @beta
+export function isAlreadyReportedSentinel(error: unknown): boolean;
+
+// @beta
 export function isBootstrapHandoffFileName(fileName: string): boolean;
 
 // @beta
@@ -920,7 +931,19 @@ export const KNOWN_CI_ENV_VARS: readonly string[];
 export const LATEST_LOG_NAME: 'latest.log';
 
 // @beta
+export const LEGACY_ERROR_BRIDGE_REMOVAL_CRITERIA: readonly string[];
+
+// @beta
 export type LegacyBeforeLogHook = (telemetry: Record<string, unknown>) => void;
+
+// @beta
+export class LegacyErrorBridge {
+    correlate(error: unknown, diagnosticId: string): void;
+    getCorrelatedDiagnosticId(error: unknown): string | undefined;
+    ingest(event: IReporterEventEnvelope<unknown>): void;
+    recordEmittedDiagnostic(diagnosticId: string): void;
+    shouldSuppressRendering(error: unknown): boolean;
+}
 
 // @beta
 export class LegacyFallbackSink implements IReporterEventSink {
