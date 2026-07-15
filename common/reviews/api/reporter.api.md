@@ -403,6 +403,12 @@ export interface IJsonReporterOptions {
 }
 
 // @beta
+export interface ILegacyReporterOptions {
+    readonly maxParallelism?: number;
+    readonly write: (text: string) => void;
+}
+
+// @beta
 export interface ILifecycleEmitterOptions {
     readonly protocolVersion?: IReporterProtocolVersion;
     readonly scope?: IReporterEventScope;
@@ -780,6 +786,9 @@ export interface IShadowResultSummary {
 }
 
 // @beta
+export function isLegacyEmergencyFallbackRequested(env: Record<string, string | undefined>): boolean;
+
+// @beta
 export function isMachineReporter(reporter: ReporterName): boolean;
 
 // @beta
@@ -858,6 +867,21 @@ export type LegacyBeforeLogHook = (telemetry: Record<string, unknown>) => void;
 export class LegacyFallbackSink implements IReporterEventSink {
     // (undocumented)
     emit(): string;
+}
+
+// @beta
+export class LegacyReporter implements IReporter {
+    constructor(options: ILegacyReporterOptions);
+    // (undocumented)
+    closeAsync(): Promise<void>;
+    // (undocumented)
+    flushAsync(): Promise<void>;
+    // (undocumented)
+    initializeAsync(): Promise<void>;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    report(event: IReporterEventEnvelope<unknown>): void;
 }
 
 // @beta
@@ -1060,6 +1084,9 @@ export const RUSH_PLUGIN_API_VERSION: '1.0.0';
 
 // @beta
 export const RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_HANDOFF';
+
+// @beta
+export const RUSH_REPORTER_ENV_VAR: 'RUSH_REPORTER';
 
 // @beta
 export type RushCommandOutcome = 'succeeded' | 'failed' | 'cancelled' | 'signal';

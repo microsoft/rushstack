@@ -262,7 +262,7 @@
       "Wire RUSH_REPORTER=legacy as an emergency fallback for at least one major",
       "Validate the legacy reporter against the frozen output snapshots"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "refactor",

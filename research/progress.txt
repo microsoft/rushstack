@@ -333,3 +333,16 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - write+perms+latest, latest-on-failure, secret redaction, retention (old delete + cap 20), OS-temp fallback, both-fail nonfatal tests pass; all exports @beta
   Next: Feature 22/28 - Legacy reporter (selectable + emergency fallback)
+
+[2026-07-14] Feature 22/28 COMPLETE: Legacy reporter (selectable + emergency fallback)
+  Files (new):
+    - reporters/LegacyReporter.ts (IReporter name 'legacy'; reproduces Starting line, "Executing a maximum of N...", 79-wide ==[ project (phase) ]==...[ n of total ]== headers, grouped externalOutput, SUCCESS/FAILURE summary with per-project + total durations; RUSH_REPORTER_ENV_VAR; isLegacyEmergencyFallbackRequested case-insensitive)
+    - test/LegacyReporter.test.ts + __snapshots__/LegacyReporter.test.ts.snap (success + failure)
+  Files (modified): index.ts, api.md
+  Notes:
+    - Legacy snapshots reproduce Feature 7 frozen legacy format EXACTLY (same 79-wide header padding, SUCCESS/FAILURE blocks, ==> ERROR line). Durations normalized X.XX.
+    - Emergency fallback: feature 15 resolveReporterSelection selects 'legacy' via RUSH_REPORTER=legacy (validated); isLegacyEmergencyFallbackRequested helper.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - success/failure snapshots, frozen-marker validation, emergency-fallback detection + selection tests pass; all exports @beta
+  Next: Feature 23/28 - Replace StreamCollator in primary path with raw semantic events
