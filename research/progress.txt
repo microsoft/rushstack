@@ -261,3 +261,18 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - rank, classification, per-level rendering (quiet/normal/verbose/debug), monotonicity, severity-separation, filter, file-default tests pass; all exports @beta
   Next: Feature 17/28 - Automatic reporter selection matrix by environment
+
+[2026-07-14] Feature 17/28 COMPLETE: Automatic reporter selection matrix by environment
+  Files (new):
+    - config/AutomaticReporterMatrix.ts (PlaintextVariant detailed|concise; IReporterPlanEntry; IAutomaticReporterPlan; isMachineReporter(json|ai); planAutomaticReporters(selection)->plan; describeReporterPlan for detailed log)
+    - test/AutomaticReporterMatrix.test.ts
+  Files (modified): index.ts, api.md
+  Matrix: agent->ai+file (machine stdout, human progress stderr); CI->plaintext[detailed]+file; TTY->default+file; non-TTY->plaintext[concise]+file. Emergency always stderr.
+  Notes:
+    - Composes Feature 15 resolveReporterSelection; plaintext variant from reason (CI detected->detailed else concise).
+    - Machine reporters (ai/json) own stdout exclusively -> stdoutOwner 'machine', humanProgressDestination 'stderr'. Applies to explicit --reporter=json too.
+    - describeReporterPlan records selection reason + reporters for the detailed (file/debug) log.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - agent/CI/TTY/non-TTY matrix, json machine stdout, emergency stderr, isMachineReporter, describeReporterPlan tests pass; all exports @beta
+  Next: Feature 18/28 - Default interactive reporter (three-row live region)

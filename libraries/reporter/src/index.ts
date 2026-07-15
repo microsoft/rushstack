@@ -190,6 +190,16 @@ export {
   shouldRenderAtLogLevel,
   filterEventsForLogLevel
 } from './config/LogLevelFilter';
+export type {
+  PlaintextVariant,
+  IReporterPlanEntry,
+  IAutomaticReporterPlan
+} from './config/AutomaticReporterMatrix';
+export {
+  isMachineReporter,
+  planAutomaticReporters,
+  describeReporterPlan
+} from './config/AutomaticReporterMatrix';
 
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {

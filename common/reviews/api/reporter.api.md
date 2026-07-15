@@ -78,6 +78,9 @@ export function deleteBootstrapHandoffFileAsync(filePath: string): Promise<void>
 export function deriveExitCodeFromEvents(events: readonly IReporterEventEnvelope<unknown>[]): number;
 
 // @beta
+export function describeReporterPlan(plan: IAutomaticReporterPlan): string;
+
+// @beta
 export function detectAgent(env: Record<string, string | undefined>, configuredVariables?: readonly string[]): boolean;
 
 // @beta
@@ -106,6 +109,16 @@ export function getPrivacyClassificationRank(classification: ReporterPrivacyClas
 
 // @beta
 export function getSignalExitCode(signal: NodeJS.Signals): number;
+
+// @beta
+export interface IAutomaticReporterPlan {
+    readonly emergencyDestination: 'stderr';
+    readonly entries: readonly IReporterPlanEntry[];
+    readonly humanProgressDestination: 'stdout' | 'stderr';
+    readonly primary: IReporterPlanEntry;
+    readonly reason: string;
+    readonly stdoutOwner: 'machine' | 'human';
+}
 
 // @beta
 export interface IBootstrapEventBufferOptions {
@@ -394,6 +407,15 @@ export interface IReporterOutputTarget {
 }
 
 // @beta
+export interface IReporterPlanEntry {
+    readonly destination: string;
+    readonly machine: boolean;
+    readonly reporter: ReporterName;
+    readonly role: 'primary' | 'additional';
+    readonly variant?: PlaintextVariant;
+}
+
+// @beta
 export interface IReporterProtocolLimits {
     readonly bootstrapBufferBytes: number;
     readonly externalOutputChunkBytes: number;
@@ -561,6 +583,9 @@ export interface IShadowResultSummary {
 }
 
 // @beta
+export function isMachineReporter(reporter: ReporterName): boolean;
+
+// @beta
 export function isPluginApiVersionSupported(declaredApiVersion: string, supportedApiVersion?: string): boolean;
 
 // @beta
@@ -672,6 +697,12 @@ export function parseEarlyReporterControls(argv: readonly string[], env: Record<
 
 // @beta
 export function parseOutputControl(value: string): IReporterOutputTarget;
+
+// @beta
+export type PlaintextVariant = 'detailed' | 'concise';
+
+// @beta
+export function planAutomaticReporters(selection: IReporterSelection): IAutomaticReporterPlan;
 
 // @beta
 export function readBootstrapHandoffFileAsync(filePath: string): Promise<unknown[]>;

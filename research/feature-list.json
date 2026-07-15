@@ -202,7 +202,7 @@
       "Give machine reporters exclusive stdout and route human progress and emergencies to stderr or files",
       "Record the selection reason in the detailed log"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
