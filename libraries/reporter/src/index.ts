@@ -232,6 +232,8 @@ export type {
   IAiReporterOptions
 } from './reporters/AiReporter';
 export { AiReporter } from './reporters/AiReporter';
+export type { IFileReporterArtifact, IFileReporterOptions } from './reporters/FileReporter';
+export { FileReporter, RUSH_LOGS_DIR_NAME, LATEST_LOG_NAME } from './reporters/FileReporter';
 
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {

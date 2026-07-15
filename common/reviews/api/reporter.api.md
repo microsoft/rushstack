@@ -129,6 +129,22 @@ export const EXIT_CODE_SUCCESS: 0;
 export const FILE_REPORTER_DEFAULT_LOG_LEVEL: ReporterLogLevel;
 
 // @beta
+export class FileReporter implements IReporter {
+    constructor(options?: IFileReporterOptions);
+    // (undocumented)
+    closeAsync(): Promise<void>;
+    // (undocumented)
+    flushAsync(): Promise<void>;
+    getArtifact(): IFileReporterArtifact;
+    // (undocumented)
+    initializeAsync(): Promise<void>;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    report(event: IReporterEventEnvelope<unknown>): void;
+}
+
+// @beta
 export function filterEventsForLogLevel(logLevel: ReporterLogLevel, events: readonly IReporterEventEnvelope<unknown>[]): IReporterEventEnvelope<unknown>[];
 
 // @beta
@@ -347,6 +363,24 @@ export interface IEarlyReporterControls {
 export interface IEngineSinkResolution {
     readonly mode: 'structured' | 'legacy-fallback';
     readonly sink: IReporterEventSink;
+}
+
+// @beta
+export interface IFileReporterArtifact {
+    readonly available: boolean;
+    readonly path?: string;
+}
+
+// @beta
+export interface IFileReporterOptions {
+    readonly actionName?: string;
+    readonly commonTempFolder?: string;
+    readonly emergencyWarn?: (message: string) => void;
+    readonly maxSessions?: number;
+    readonly nowMs?: () => number;
+    readonly osTempFolder?: string;
+    readonly pid?: number;
+    readonly retentionDays?: number;
 }
 
 // @beta
@@ -815,6 +849,9 @@ export class JsonReporter implements IReporter {
 export const KNOWN_CI_ENV_VARS: readonly string[];
 
 // @beta
+export const LATEST_LOG_NAME: 'latest.log';
+
+// @beta
 export type LegacyBeforeLogHook = (telemetry: Record<string, unknown>) => void;
 
 // @beta
@@ -1014,6 +1051,9 @@ export const RUSH_DIAGNOSTIC_TEMPLATES: {
 
 // @beta
 export const RUSH_INTERNAL_ERROR_CODE: 'RUSH_INTERNAL_UNEXPECTED';
+
+// @beta
+export const RUSH_LOGS_DIR_NAME: 'rush-logs';
 
 // @beta
 export const RUSH_PLUGIN_API_VERSION: '1.0.0';
