@@ -201,6 +201,27 @@ export {
   describeReporterPlan
 } from './config/AutomaticReporterMatrix';
 
+export type {
+  ILiveRegionState,
+  IColorizer,
+  IRenderLiveRegionOptions
+} from './reporters/InteractiveRendering';
+export {
+  SPINNER_FRAMES,
+  MIN_REFRESH_INTERVAL_MS,
+  resolveColorEnabled,
+  createColorizer,
+  truncateToWidth,
+  renderActiveProjectsRow,
+  renderLiveRegion,
+  shouldRefresh
+} from './reporters/InteractiveRendering';
+export type {
+  IInteractiveTerminal,
+  IDefaultInteractiveReporterOptions
+} from './reporters/DefaultInteractiveReporter';
+export { DefaultInteractiveReporter } from './reporters/DefaultInteractiveReporter';
+
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,

@@ -276,3 +276,18 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - agent/CI/TTY/non-TTY matrix, json machine stdout, emergency stderr, isMachineReporter, describeReporterPlan tests pass; all exports @beta
   Next: Feature 18/28 - Default interactive reporter (three-row live region)
+
+[2026-07-14] Feature 18/28 COMPLETE: Default interactive reporter (three-row live region)
+  Files (new):
+    - reporters/InteractiveRendering.ts (SPINNER_FRAMES, MIN_REFRESH_INTERVAL_MS=100; resolveColorEnabled NO_COLOR>FORCE_COLOR>isTTY; createColorizer; truncateToWidth; renderActiveProjectsRow +N more; renderLiveRegion 3 rows [color applied AFTER truncation]; shouldRefresh)
+    - reporters/DefaultInteractiveReporter.ts (IReporter; injected IInteractiveTerminal + nowMs; state from events; throttled paint <=10Hz; cursor hide/show ANSI; success<=3 lines; failure bounded diag block <=10 + Log path; watchCycleCompleted summary; non-TTY skips live region but writes final)
+    - test/DefaultInteractiveReporter.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - Color applied after truncateToWidth so ANSI never affects width/split mid-code.
+    - Resize-aware: reads terminal.columns each paint.
+    - Testable via FakeTerminal capturing writes + injected clock.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - color resolution, colorizer, truncate, +N more, 3-row render, throttle; reporter hide/paint/throttle, success line + cursor restore, failure diag+log, watch summary, non-TTY tests pass; all exports @beta
+  Next: Feature 19/28 - Plaintext and non-TTY reporter

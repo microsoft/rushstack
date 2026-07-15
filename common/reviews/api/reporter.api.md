@@ -45,6 +45,9 @@ export const COPILOT_CLI_ENV_VAR: 'COPILOT_CLI';
 export function createBeforeLogAdapter(hooks: readonly LegacyBeforeLogHook[]): (aggregate: ITelemetryAggregate) => void;
 
 // @beta
+export function createColorizer(enabled: boolean): IColorizer;
+
+// @beta
 export function createEngineSink(providedSink?: IReporterEventSink): IEngineSinkResolution;
 
 // @beta
@@ -70,6 +73,21 @@ export const DEFAULT_HANDOFF_RETENTION_MS: number;
 
 // @beta
 export const DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS: number;
+
+// @beta
+export class DefaultInteractiveReporter implements IReporter {
+    constructor(options: IDefaultInteractiveReporterOptions);
+    // (undocumented)
+    closeAsync(): Promise<void>;
+    // (undocumented)
+    flushAsync(): Promise<void>;
+    // (undocumented)
+    initializeAsync(): Promise<void>;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    report(event: IReporterEventEnvelope<unknown>): void;
+}
 
 // @beta
 export function deleteBootstrapHandoffFileAsync(filePath: string): Promise<void>;
@@ -168,6 +186,22 @@ export interface IClassifiedDiagnosticValue {
 }
 
 // @beta
+export interface IColorizer {
+    // (undocumented)
+    bold(text: string): string;
+    // (undocumented)
+    cyan(text: string): string;
+    // (undocumented)
+    dim(text: string): string;
+    // (undocumented)
+    green(text: string): string;
+    // (undocumented)
+    red(text: string): string;
+    // (undocumented)
+    yellow(text: string): string;
+}
+
+// @beta
 export interface ICommandCompletedPayload {
     readonly commandName: string;
     readonly durationMs?: number;
@@ -214,6 +248,15 @@ export interface ICreateScopedReporterOptions {
 }
 
 // @beta
+export interface IDefaultInteractiveReporterOptions {
+    readonly color?: boolean;
+    readonly logPath?: string;
+    readonly minRefreshIntervalMs?: number;
+    readonly nowMs?: () => number;
+    readonly terminal: IInteractiveTerminal;
+}
+
+// @beta
 export interface IEarlyReporterControls {
     readonly logLevel?: string;
     readonly reporter?: string;
@@ -223,6 +266,13 @@ export interface IEarlyReporterControls {
 export interface IEngineSinkResolution {
     readonly mode: 'structured' | 'legacy-fallback';
     readonly sink: IReporterEventSink;
+}
+
+// @beta
+export interface IInteractiveTerminal {
+    readonly columns: number;
+    readonly isTTY: boolean;
+    write(text: string): void;
 }
 
 // @beta
@@ -238,6 +288,16 @@ export interface ILifecycleEmitterOptions {
     readonly sessionId: string;
     readonly sink: IReporterEventSink;
     readonly source: IReporterEventSource;
+}
+
+// @beta
+export interface ILiveRegionState {
+    readonly activeProjects: readonly string[];
+    readonly commandName?: string;
+    readonly completedOperations: number;
+    readonly failedOperations: number;
+    readonly latestActivity: string;
+    readonly totalOperations: number;
 }
 
 // @beta
@@ -265,6 +325,13 @@ export interface IOperationRegisteredPayload {
 export interface IOperationStatusChangedPayload {
     readonly operationId: string;
     readonly status: OperationStatus;
+}
+
+// @beta
+export interface IRenderLiveRegionOptions {
+    readonly color: IColorizer;
+    readonly spinnerFrame: string;
+    readonly width: number;
 }
 
 // @beta
@@ -668,6 +735,9 @@ export class LifecycleEmitter {
 }
 
 // @beta
+export const MIN_REFRESH_INTERVAL_MS: number;
+
+// @beta
 export class NdjsonDecoder {
     constructor(options?: INdjsonOptions);
     decode(chunk: string): unknown[];
@@ -706,6 +776,12 @@ export function planAutomaticReporters(selection: IReporterSelection): IAutomati
 
 // @beta
 export function readBootstrapHandoffFileAsync(filePath: string): Promise<unknown[]>;
+
+// @beta
+export function renderActiveProjectsRow(projects: readonly string[], width: number): string;
+
+// @beta
+export function renderLiveRegion(state: ILiveRegionState, options: IRenderLiveRegionOptions): string[];
 
 // @beta
 export const REPORTER_EVENT_TYPES: readonly ReporterEventType[];
@@ -784,6 +860,9 @@ export type ReporterName = 'default' | 'ai' | 'json' | 'plaintext' | 'file' | 'l
 export type ReporterPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
 
 // @beta
+export function resolveColorEnabled(env: Record<string, string | undefined>, isTTY: boolean): boolean;
+
+// @beta
 export function resolveExitStatus(options: IResolveExitStatusOptions): IRushExitStatus;
 
 // @beta
@@ -847,7 +926,13 @@ export class RushSessionReporting {
 export function separateJsonControls(argv: readonly string[]): IJsonControls;
 
 // @beta
+export function shouldRefresh(lastPaintMs: number, nowMs: number, minIntervalMs?: number): boolean;
+
+// @beta
 export function shouldRenderAtLogLevel(logLevel: ReporterLogLevel, event: IReporterEventEnvelope<unknown>): boolean;
+
+// @beta
+export const SPINNER_FRAMES: readonly string[];
 
 // @beta
 export function summarizeShadowResult(events: readonly IReporterEventEnvelope<unknown>[]): IShadowResultSummary;
@@ -871,6 +956,9 @@ export class TelemetrySubscriber {
     ingest(event: IReporterEventEnvelope<unknown>): void;
     setReporterMode(reporterMode: string): void;
 }
+
+// @beta
+export function truncateToWidth(text: string, width: number): string;
 
 // @beta
 export function writeBootstrapHandoffFileAsync(buffer: BootstrapEventBuffer, options?: IWriteBootstrapHandoffOptions): Promise<string>;
