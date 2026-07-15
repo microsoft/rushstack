@@ -230,3 +230,20 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - resolveExitStatus (success/warning-only/failure/cancel/signal precedence), signal codes, from-events (warning/error/op-failure/failed-result/category-independence/cancel/signal), separateJsonControls (5 cases) tests pass; all exports @beta
   Next: Feature 15/28 - Reporter selection + configuration controls with precedence
+
+[2026-07-14] Feature 15/28 COMPLETE: Reporter selection + configuration controls with precedence
+  Files (new):
+    - config/ReporterNames.ts (ReporterName default|ai|json|plaintext|file|legacy; ReporterLogLevel quiet|normal|verbose|debug; SUPPORTED_* + isSupported* guards)
+    - config/AgentDetection.ts (COPILOT_CLI_ENV_VAR, KNOWN_CI_ENV_VARS, isAgentVariableActive [inactive if undefined/''/0/false/no/off case-insens], detectAgent(env,configuredVars), isCiDetected)
+    - config/OutputControl.ts (IReporterOutputTarget, parseOutputControl '<reporter>://<target>?k=v')
+    - config/ReporterSelection.ts (resolveReporterSelection: primary precedence CLI --reporter > RUSH_REPORTER > agent > CI > TTY > non-TTY plaintext; log level independent CLI/aliases/RUSH_LOG_LEVEL default normal; contradiction throws; additional=['file'] unless primary file; commandJson preserved; unsupported reporter/level throws)
+    - test/ReporterSelection.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - Full resolver (Feature 8 was early subset). Orthogonal axes: reporter (format) vs log level (severity) per pnpm memory.
+    - Matrix: agent->ai+file, CI->plaintext+file, TTY->default+file, non-TTY->plaintext+file.
+    - --json (command) never aliases --reporter=json.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - primary precedence (explicit/env/agent/CI/TTY/non-TTY), additional file, unsupported-reporter throw, log-level aliases + contradiction + unsupported, command-json preserved, --output parse, agent-active semantics tests pass; all exports @beta
+  Next: Feature 16/28 - Independent per-reporter log levels

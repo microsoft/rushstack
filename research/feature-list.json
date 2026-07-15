@@ -179,7 +179,7 @@
       "Keep command-specific --json unchanged and not an alias for --reporter=json",
       "Fail explicit unsupported reporter requests"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
