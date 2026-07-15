@@ -242,4 +242,92 @@ describe(PnpmWorkspaceFile.name, () => {
       expect(content).not.toContain('allowBuilds');
     });
   });
+
+  describe('minimumReleaseAge functionality', () => {
+    it('generates workspace file with minimumReleaseAge', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setMinimumReleaseAge(20160);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toMatchSnapshot();
+    });
+
+    it('generates workspace file with minimumReleaseAge and minimumReleaseAgeExclude', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setMinimumReleaseAge(1440);
+      workspaceFile.setMinimumReleaseAgeExclude(['webpack', '@myorg/*']);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toMatchSnapshot();
+    });
+
+    it('generates workspace file with minimumReleaseAgeExclude only', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setMinimumReleaseAgeExclude(['webpack']);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toMatchSnapshot();
+    });
+
+    it('handles zero value for minimumReleaseAge', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setMinimumReleaseAge(0);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toContain('minimumReleaseAge: 0');
+    });
+
+    it('handles undefined minimumReleaseAge', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setMinimumReleaseAge(undefined);
+      workspaceFile.setMinimumReleaseAgeExclude(undefined);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).not.toContain('minimumReleaseAge');
+    });
+
+    it('passes through an explicitly-set empty minimumReleaseAgeExclude', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setMinimumReleaseAgeExclude([]);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).toContain('minimumReleaseAgeExclude: []');
+    });
+
+    it('omits an undefined minimumReleaseAgeExclude', () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+
+      workspaceFile.setMinimumReleaseAgeExclude(undefined);
+
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      const content: string = FileSystem.readFile(workspaceFilePath);
+      expect(content).not.toContain('minimumReleaseAgeExclude');
+    });
+  });
 });

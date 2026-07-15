@@ -5,7 +5,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -19,7 +19,7 @@
         {
           "runner": {
             "name": "@rushstack/rush-sdk (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -33,7 +33,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -47,7 +47,7 @@
         {
           "runner": {
             "name": "@rushstack/ts-command-line (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -61,7 +61,7 @@
         {
           "runner": {
             "name": "@microsoft/rush-lib (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -75,7 +75,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -103,7 +103,7 @@
       ],
       "runner": {
         "name": "@rushstack/rush-buildxl-graph-plugin (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -133,7 +133,7 @@
       ],
       "runner": {
         "name": "@rushstack/node-core-library (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -163,7 +163,7 @@
         {
           "runner": {
             "name": "@rushstack/eslint-patch (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -193,7 +193,7 @@
         {
           "runner": {
             "name": "@rushstack/eslint-patch (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -207,7 +207,7 @@
         {
           "runner": {
             "name": "@rushstack/eslint-plugin (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -221,7 +221,7 @@
         {
           "runner": {
             "name": "@rushstack/eslint-plugin-packlets (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -235,7 +235,7 @@
         {
           "runner": {
             "name": "@rushstack/eslint-plugin-security (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -264,7 +264,7 @@
       "dependencies": [],
       "runner": {
         "name": "@rushstack/eslint-patch (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -280,7 +280,7 @@
         {
           "runner": {
             "name": "@rushstack/tree-pattern (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -294,7 +294,7 @@
       ],
       "runner": {
         "name": "@rushstack/eslint-plugin (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -309,7 +309,7 @@
       "dependencies": [],
       "runner": {
         "name": "@rushstack/tree-pattern (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -325,7 +325,7 @@
         {
           "runner": {
             "name": "@rushstack/tree-pattern (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -339,7 +339,7 @@
       ],
       "runner": {
         "name": "@rushstack/eslint-plugin-packlets (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -355,7 +355,7 @@
         {
           "runner": {
             "name": "@rushstack/tree-pattern (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -369,7 +369,7 @@
       ],
       "runner": {
         "name": "@rushstack/eslint-plugin-security (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -385,7 +385,7 @@
         {
           "runner": {
             "name": "@rushstack/lookup-by-path (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -399,7 +399,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -413,7 +413,7 @@
         {
           "runner": {
             "name": "@rushstack/package-deps-hash (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -427,7 +427,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -441,7 +441,7 @@
         {
           "runner": {
             "name": "@microsoft/rush-lib (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -455,7 +455,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -483,7 +483,7 @@
         {
           "runner": {
             "name": "@rushstack/heft-webpack5-plugin (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -497,7 +497,7 @@
         {
           "runner": {
             "name": "@rushstack/stream-collator (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -511,7 +511,7 @@
         {
           "runner": {
             "name": "@rushstack/ts-command-line (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -525,7 +525,7 @@
         {
           "runner": {
             "name": "@rushstack/webpack-preserve-dynamic-require-plugin (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -539,7 +539,7 @@
       ],
       "runner": {
         "name": "@rushstack/rush-sdk (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -555,7 +555,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -583,7 +583,7 @@
       ],
       "runner": {
         "name": "@rushstack/lookup-by-path (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -599,7 +599,7 @@
         {
           "runner": {
             "name": "@rushstack/heft-config-file (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -613,7 +613,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -627,7 +627,7 @@
         {
           "runner": {
             "name": "@rushstack/operation-graph (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -641,7 +641,7 @@
         {
           "runner": {
             "name": "@rushstack/rig-package (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -655,7 +655,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -669,7 +669,7 @@
         {
           "runner": {
             "name": "@rushstack/ts-command-line (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -683,7 +683,7 @@
         {
           "runner": {
             "name": "@microsoft/api-extractor (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -711,7 +711,7 @@
       ],
       "runner": {
         "name": "@rushstack/heft (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -727,7 +727,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -741,7 +741,7 @@
         {
           "runner": {
             "name": "@rushstack/rig-package (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -755,7 +755,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -783,7 +783,7 @@
       ],
       "runner": {
         "name": "@rushstack/heft-config-file (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -813,7 +813,7 @@
       ],
       "runner": {
         "name": "@rushstack/rig-package (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -829,7 +829,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -857,7 +857,7 @@
       ],
       "runner": {
         "name": "@rushstack/terminal (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -873,7 +873,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -887,7 +887,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -915,7 +915,7 @@
       ],
       "runner": {
         "name": "@rushstack/operation-graph (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -931,7 +931,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -959,7 +959,7 @@
       ],
       "runner": {
         "name": "@rushstack/ts-command-line (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -975,7 +975,7 @@
         {
           "runner": {
             "name": "@microsoft/api-extractor-model (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -989,7 +989,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1003,7 +1003,7 @@
         {
           "runner": {
             "name": "@rushstack/rig-package (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1017,7 +1017,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1031,7 +1031,7 @@
         {
           "runner": {
             "name": "@rushstack/ts-command-line (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1059,7 +1059,7 @@
       ],
       "runner": {
         "name": "@microsoft/api-extractor (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -1075,7 +1075,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1103,7 +1103,7 @@
       ],
       "runner": {
         "name": "@microsoft/api-extractor-model (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -1119,7 +1119,7 @@
         {
           "runner": {
             "name": "@microsoft/api-extractor (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1147,7 +1147,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1191,7 +1191,7 @@
         {
           "runner": {
             "name": "@microsoft/api-extractor (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1219,7 +1219,7 @@
         {
           "runner": {
             "name": "@rushstack/heft-api-extractor-plugin (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1233,7 +1233,7 @@
         {
           "runner": {
             "name": "@rushstack/heft-jest-plugin (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1247,7 +1247,7 @@
         {
           "runner": {
             "name": "@rushstack/heft-lint-plugin (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1261,7 +1261,7 @@
         {
           "runner": {
             "name": "@rushstack/heft-typescript-plugin (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1275,7 +1275,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1305,7 +1305,7 @@
         {
           "runner": {
             "name": "@rushstack/heft-config-file (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1319,7 +1319,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1333,7 +1333,7 @@
         {
           "runner": {
             "name": "@microsoft/api-extractor (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1361,7 +1361,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1375,7 +1375,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1389,7 +1389,7 @@
       ],
       "runner": {
         "name": "@rushstack/heft-api-extractor-plugin (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -1405,7 +1405,7 @@
         {
           "runner": {
             "name": "@rushstack/heft-config-file (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1419,7 +1419,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1433,7 +1433,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1447,7 +1447,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1475,7 +1475,7 @@
       ],
       "runner": {
         "name": "@rushstack/heft-jest-plugin (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -1491,7 +1491,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1519,7 +1519,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1533,7 +1533,7 @@
         {
           "runner": {
             "name": "@rushstack/heft-typescript-plugin (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1547,7 +1547,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1561,7 +1561,7 @@
       ],
       "runner": {
         "name": "@rushstack/heft-lint-plugin (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -1577,7 +1577,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1591,7 +1591,7 @@
         {
           "runner": {
             "name": "@rushstack/heft-config-file (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1619,7 +1619,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1633,7 +1633,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1647,7 +1647,7 @@
       ],
       "runner": {
         "name": "@rushstack/heft-typescript-plugin (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -1663,7 +1663,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1677,7 +1677,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1705,7 +1705,7 @@
       ],
       "runner": {
         "name": "@rushstack/package-deps-hash (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -1721,7 +1721,7 @@
         {
           "runner": {
             "name": "@rushstack/heft-config-file (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1735,7 +1735,7 @@
         {
           "runner": {
             "name": "@rushstack/lookup-by-path (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1749,7 +1749,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1763,7 +1763,7 @@
         {
           "runner": {
             "name": "@rushstack/package-deps-hash (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1777,7 +1777,7 @@
         {
           "runner": {
             "name": "@rushstack/package-extractor (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1791,7 +1791,7 @@
         {
           "runner": {
             "name": "@rushstack/rig-package (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1805,7 +1805,7 @@
         {
           "runner": {
             "name": "@rushstack/stream-collator (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1819,7 +1819,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1833,7 +1833,7 @@
         {
           "runner": {
             "name": "@rushstack/ts-command-line (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1861,7 +1861,7 @@
         {
           "runner": {
             "name": "@rushstack/heft-webpack5-plugin (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1875,7 +1875,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1889,7 +1889,7 @@
         {
           "runner": {
             "name": "@rushstack/operation-graph (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1903,7 +1903,7 @@
         {
           "runner": {
             "name": "@rushstack/webpack-deep-imports-plugin (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1917,7 +1917,7 @@
         {
           "runner": {
             "name": "@rushstack/webpack-preserve-dynamic-require-plugin (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1931,7 +1931,7 @@
       ],
       "runner": {
         "name": "@microsoft/rush-lib (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -1947,7 +1947,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1961,7 +1961,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -1975,7 +1975,7 @@
         {
           "runner": {
             "name": "@rushstack/ts-command-line (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2003,7 +2003,7 @@
         {
           "runner": {
             "name": "@rushstack/heft-webpack5-plugin (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2017,7 +2017,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2031,7 +2031,7 @@
         {
           "runner": {
             "name": "@rushstack/webpack-preserve-dynamic-require-plugin (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2045,7 +2045,7 @@
       ],
       "runner": {
         "name": "@rushstack/package-extractor (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -2061,7 +2061,7 @@
         {
           "runner": {
             "name": "@rushstack/debug-certificate-manager (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2075,7 +2075,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2089,7 +2089,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2103,7 +2103,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2131,7 +2131,7 @@
       ],
       "runner": {
         "name": "@rushstack/heft-webpack5-plugin (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -2147,7 +2147,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2161,7 +2161,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2175,7 +2175,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2203,7 +2203,7 @@
       ],
       "runner": {
         "name": "@rushstack/debug-certificate-manager (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -2219,7 +2219,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2247,7 +2247,7 @@
       ],
       "runner": {
         "name": "@rushstack/webpack-preserve-dynamic-require-plugin (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -2263,7 +2263,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2277,7 +2277,7 @@
         {
           "runner": {
             "name": "@rushstack/terminal (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2291,7 +2291,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2319,7 +2319,7 @@
       ],
       "runner": {
         "name": "@rushstack/stream-collator (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",
@@ -2335,7 +2335,7 @@
         {
           "runner": {
             "name": "@rushstack/node-core-library (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2363,7 +2363,7 @@
         {
           "runner": {
             "name": "@rushstack/heft (build)",
-            "commandToRun": "heft run --only build -- --clean --production"
+            "_configHash": "heft run --only build -- --clean --production"
           },
           "associatedPhase": {
             "name": "_phase:build",
@@ -2377,7 +2377,7 @@
       ],
       "runner": {
         "name": "@rushstack/webpack-deep-imports-plugin (build)",
-        "commandToRun": "heft run --only build -- --clean --production"
+        "_configHash": "heft run --only build -- --clean --production"
       },
       "associatedPhase": {
         "name": "_phase:build",

@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.177.2",
+      "tag": "@microsoft/rush_v5.177.2",
+      "date": "Wed, 08 Jul 2026 21:27:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade the `pnpm-sync-lib` dependency to 0.3.4."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.177.1",
       "tag": "@microsoft/rush_v5.177.1",
       "date": "Sat, 20 Jun 2026 21:37:30 GMT",

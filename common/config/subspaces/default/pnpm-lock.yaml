@@ -403,6 +403,9 @@ importers:
       '@rushstack/rush-http-build-cache-plugin':
         specifier: workspace:*
         version: link:../../rush-plugins/rush-http-build-cache-plugin
+      '@rushstack/rush-serve-plugin':
+        specifier: workspace:*
+        version: link:../../rush-plugins/rush-serve-plugin
       '@types/semver':
         specifier: 7.7.1
         version: 7.7.1
@@ -4122,8 +4125,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       pnpm-sync-lib:
-        specifier: 0.3.3
-        version: 0.3.3
+        specifier: 0.3.4
+        version: 0.3.4
       read-package-tree:
         specifier: ~5.1.5
         version: 5.1.6
@@ -5146,6 +5149,9 @@ importers:
       '@rushstack/rush-sdk':
         specifier: workspace:*
         version: link:../../libraries/rush-sdk
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../../libraries/ts-command-line
@@ -5168,9 +5174,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/terminal':
-        specifier: workspace:*
-        version: link:../../libraries/terminal
       '@types/compression':
         specifier: ~1.7.2
         version: 1.7.5(@types/express@4.17.21)
@@ -5407,6 +5410,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@rushstack/webpack-plugin-utilities':
+        specifier: workspace:*
+        version: link:../webpack-plugin-utilities
       fast-glob:
         specifier: ~3.3.1
         version: 3.3.3
@@ -5560,6 +5566,9 @@ importers:
 
   ../../../webpack/webpack-plugin-utilities:
     dependencies:
+      '@types/estree':
+        specifier: 1.0.8
+        version: 1.0.8
       memfs:
         specifier: 4.12.0
         version: 4.12.0
@@ -16206,8 +16215,8 @@ packages:
     resolution: {integrity: sha512-7Wjy+9E3WwLOEL30D+m8TSTF7qJJUJLONBnwQp0518siuMxUQUbgZwssaFX+QKlZkjHZcw/IpZCt/H0srrntSg==}
     engines: {node: '>=6'}
 
-  pnpm-sync-lib@0.3.3:
-    resolution: {integrity: sha512-iE0xtJIm7cljColV3CAfi05FfRWHeJFwKcxsJfwo+dkFo9kg9QgGKHlF5qlF2o2uArOz6z0P4bA/t4pX2Z2jYg==}
+  pnpm-sync-lib@0.3.4:
+    resolution: {integrity: sha512-ZgRR+j6B+VUrolPBswPvXBnCyxg39Zfw3ShNCTuCrOFG1V29V4EyXaA1rDDMjdhpF85QYp2NEUjeHAm02A2E/A==}
 
   polished@4.3.1:
     resolution: {integrity: sha512-OBatVyC/N7SCW/FaDHrSd+vn0o5cS855TOmYi4OkdWUMSJCET/xip//ch8xGUvtr3i44X9LVyWwQlRMTN3pwSA==}
@@ -18994,9 +19003,9 @@ packages:
     resolution: {integrity: sha512-vIYeF1u3CjlhAFekPPAk2h/Kv4T3mAkMox5OymRiJQB0spDP10LHvt+K7G9Ny6NuuMAb25/6n1qyUjAcGNf/AA==}
     engines: {node: '>= 6'}
 
-  yaml@2.4.1:
-    resolution: {integrity: sha512-pIXzoImaqmfOrL7teGUBt/T7ZDnyeGBWyXQBvOVhLkWLN37GXv8NMLK406UY6dS51JfcQHsmcW5cJ441bHg6Lg==}
-    engines: {node: '>= 14'}
+  yaml@2.9.0:
+    resolution: {integrity: sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA==}
+    engines: {node: '>= 14.6'}
     hasBin: true
 
   yargs-parser@18.1.3:
@@ -34933,14 +34942,14 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  pnpm-sync-lib@0.3.3:
+  pnpm-sync-lib@0.3.4:
     dependencies:
       '@pnpm/dependency-path-pnpm-v10': '@pnpm/dependency-path@1000.0.9'
       '@pnpm/dependency-path-pnpm-v8': '@pnpm/dependency-path@2.1.8'
       '@pnpm/dependency-path-pnpm-v9': '@pnpm/dependency-path@5.1.7'
       '@pnpm/lockfile-types-pnpm-lock-v6': '@pnpm/lockfile-types@5.1.5'
       '@pnpm/lockfile.types-pnpm-lock-v9': '@pnpm/lockfile.types@1001.1.0'
-      yaml: 2.4.1
+      yaml: 2.9.0
 
   polished@4.3.1:
     dependencies:
@@ -38347,7 +38356,7 @@ snapshots:
 
   yaml@1.10.3: {}
 
-  yaml@2.4.1: {}
+  yaml@2.9.0: {}
 
   yargs-parser@18.1.3:
     dependencies:

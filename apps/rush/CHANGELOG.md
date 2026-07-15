@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 20 Jun 2026 21:37:30 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Jul 2026 21:27:15 GMT and should not be manually modified.
+
+## 5.177.2
+Wed, 08 Jul 2026 21:27:15 GMT
+
+### Patches
+
+- Upgrade the `pnpm-sync-lib` dependency to 0.3.4.
 
 ## 5.177.1
 Sat, 20 Jun 2026 21:37:30 GMT

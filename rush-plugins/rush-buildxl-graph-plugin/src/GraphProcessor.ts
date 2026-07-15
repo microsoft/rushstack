@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import type { Operation, ILogger } from '@rushstack/rush-sdk';
-import type { ShellOperationRunner } from '@rushstack/rush-sdk/lib/logic/operations/ShellOperationRunner';
 import { Colorize } from '@rushstack/terminal';
 
 /**
@@ -225,7 +224,7 @@ export class GraphProcessor {
       package: packageName,
       dependencies,
       workingDirectory,
-      command: (runner as Partial<Pick<ShellOperationRunner, 'commandToRun'>>)?.commandToRun
+      command: runner?.getConfigHash()
     };
 
     if (settings?.disableBuildCacheForOperation) {

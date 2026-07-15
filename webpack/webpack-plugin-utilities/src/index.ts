@@ -10,3 +10,5 @@
 import * as VersionDetection from './DetectWebpackVersion';
 import * as Testing from './Testing';
 export { VersionDetection, Testing };
+
+export { evaluateConstantEstreeExpression } from './evaluateConstantEstreeExpression';
