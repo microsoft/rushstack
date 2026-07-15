@@ -42,7 +42,16 @@ export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPr
 export function createEngineSink(providedSink?: IReporterEventSink): IEngineSinkResolution;
 
 // @beta
+export function createPluginApiIncompatibleDiagnostic(manifest: IRushPluginManifest): IRushDiagnostic;
+
+// @beta
 export function createRushDiagnostic(code: string, options?: ICreateRushDiagnosticOptions): IRushDiagnostic;
+
+// @beta
+export function createScopedLogger(reporter: IScopedReporter): IScopedLogger;
+
+// @beta
+export function createScopedReporter(options: ICreateScopedReporterOptions): IScopedReporter;
 
 // @beta
 export const DEFAULT_FLUSH_TIMEOUT_MS: number;
@@ -121,6 +130,15 @@ export interface ICreateRushDiagnosticOptions {
     readonly retryable?: boolean;
     readonly severity?: RushDiagnosticSeverity;
     readonly source?: IRushDiagnosticSource;
+}
+
+// @beta
+export interface ICreateScopedReporterOptions {
+    readonly protocolVersion?: IReporterProtocolVersion;
+    readonly scope?: IReporterEventScope;
+    readonly sessionId: string;
+    readonly sink: IReporterEventSink;
+    readonly source: IReporterEventSource;
 }
 
 // @beta
@@ -218,6 +236,12 @@ export interface IReporterEventSource {
     readonly component?: string;
     readonly packageName: string;
     readonly packageVersion: string;
+}
+
+// @beta
+export interface IReporterExecutionContext {
+    readonly reporter: IScopedReporter;
+    readonly sink: IReporterEventSink;
 }
 
 // @beta
@@ -328,6 +352,12 @@ export interface IRushDiagnosticSource {
 }
 
 // @beta
+export interface IRushPluginManifest {
+    readonly pluginApiVersion: string;
+    readonly pluginName: string;
+}
+
+// @beta
 export interface IRushRemediationAction {
     readonly automatedExecutionSafety: RushRemediationSafety;
     readonly command?: string;
@@ -336,7 +366,23 @@ export interface IRushRemediationAction {
 }
 
 // @beta
+export interface IRushSessionReportingOptions {
+    readonly protocolVersion?: IReporterProtocolVersion;
+    readonly sessionId: string;
+    readonly sink: IReporterEventSink;
+    readonly source: IReporterEventSource;
+}
+
+// @beta
 export function isBootstrapHandoffFileName(fileName: string): boolean;
+
+// @beta
+export interface IScopedLogger {
+    writeDebugLine(text: string): string;
+    writeErrorLine(text: string): string;
+    writeLine(text: string): string;
+    writeWarningLine(text: string): string;
+}
 
 // @beta
 export interface IScopedMessageOptions {
@@ -351,6 +397,9 @@ export interface IScopedReporter {
     emitExtension<TPayload>(name: ReporterExtensionEventName, payload: TPayload): string;
     emitMessage(options: IScopedMessageOptions): string;
 }
+
+// @beta
+export function isPluginApiVersionSupported(declaredApiVersion: string, supportedApiVersion?: string): boolean;
 
 // @beta
 export function isReporterExtensionEventName(name: string): boolean;
@@ -489,6 +538,9 @@ export const RUSH_DIAGNOSTIC_TEMPLATES: {
 export const RUSH_INTERNAL_ERROR_CODE: 'RUSH_INTERNAL_UNEXPECTED';
 
 // @beta
+export const RUSH_PLUGIN_API_VERSION: '1.0.0';
+
+// @beta
 export const RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_HANDOFF';
 
 // @beta
@@ -506,6 +558,15 @@ export class RushError extends Error {
 
 // @beta
 export type RushRemediationSafety = 'safe' | 'requires-confirmation' | 'unsafe';
+
+// @beta
+export class RushSessionReporting {
+    constructor(options: IRushSessionReportingOptions);
+    createExecutionContext(scope?: IReporterEventScope): IReporterExecutionContext;
+    createScopedLogger(scope?: IReporterEventScope): IScopedLogger;
+    createScopedReporter(scope?: IReporterEventScope): IScopedReporter;
+    getSink(): IReporterEventSink;
+}
 
 // @beta
 export function writeBootstrapHandoffFileAsync(buffer: BootstrapEventBuffer, options?: IWriteBootstrapHandoffOptions): Promise<string>;

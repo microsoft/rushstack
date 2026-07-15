@@ -79,6 +79,13 @@ export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly IRushDiagnosticCodeDefin
     summaryKey: 'diagnostic.RUSH_INPUT_UNKNOWN_PROJECT.summary'
   },
   {
+    code: 'RUSH_PLUGIN_API_INCOMPATIBLE',
+    category: 'configuration',
+    defaultSeverity: 'error',
+    summaryKey: 'diagnostic.RUSH_PLUGIN_API_INCOMPATIBLE.summary',
+    detailKey: 'diagnostic.RUSH_PLUGIN_API_INCOMPATIBLE.detail'
+  },
+  {
     code: 'RUSH_DEPENDENCY_TOOL_FAILED',
     category: 'dependency-tool',
     defaultSeverity: 'error',
@@ -143,6 +150,10 @@ export const RUSH_DIAGNOSTIC_CODES: ReadonlyMap<string, IRushDiagnosticCodeDefin
 export const RUSH_DIAGNOSTIC_TEMPLATES: { readonly [resourceKey: string]: string } = {
   'diagnostic.RUSH_CONFIG_INVALID_JSON.summary': 'The configuration file {file} contains invalid JSON.',
   'diagnostic.RUSH_INPUT_UNKNOWN_PROJECT.summary': 'The project {projectName} was not found in rush.json.',
+  'diagnostic.RUSH_PLUGIN_API_INCOMPATIBLE.summary':
+    'The plugin {pluginName} declares an unsupported Rush plugin API version {declaredApiVersion}.',
+  'diagnostic.RUSH_PLUGIN_API_INCOMPATIBLE.detail':
+    'This Rush supports plugin API version {supportedApiVersion}. Update the plugin or Rush so the major versions match.',
   'diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.summary': 'The package manager exited with code {exitCode}.',
   'diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.detail':
     'The command {command} failed. See {logPath} for the full output.',

@@ -114,6 +114,19 @@ export { LegacyFallbackSink, createEngineSink } from './compat/LegacyFallbackSin
 export type { IOldEngineOutputAdapterOptions } from './compat/OldEngineOutputAdapter';
 export { OldEngineOutputAdapter } from './compat/OldEngineOutputAdapter';
 
+export type { ICreateScopedReporterOptions } from './session/ScopedReporterFactory';
+export { createScopedReporter } from './session/ScopedReporterFactory';
+export type { IScopedLogger } from './session/ScopedLogger';
+export { createScopedLogger } from './session/ScopedLogger';
+export type { IRushSessionReportingOptions, IReporterExecutionContext } from './session/RushSessionReporting';
+export { RushSessionReporting } from './session/RushSessionReporting';
+export type { IRushPluginManifest } from './session/PluginApi';
+export {
+  RUSH_PLUGIN_API_VERSION,
+  isPluginApiVersionSupported,
+  createPluginApiIncompatibleDiagnostic
+} from './session/PluginApi';
+
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,
