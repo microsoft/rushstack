@@ -326,8 +326,8 @@ importers:
         specifier: ~0.3.1
         version: 0.3.2
       ws:
-        specifier: ~8.20.0
-        version: 8.20.0
+        specifier: ~8.21.0
+        version: 8.21.0
     devDependencies:
       '@playwright/test':
         specifier: ~1.56.1
@@ -342,8 +342,8 @@ importers:
         specifier: 7.7.1
         version: 7.7.1
       '@types/ws':
-        specifier: 8.5.5
-        version: 8.5.5
+        specifier: 8.18.1
+        version: 8.18.1
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
@@ -403,6 +403,9 @@ importers:
       '@rushstack/rush-http-build-cache-plugin':
         specifier: workspace:*
         version: link:../../rush-plugins/rush-http-build-cache-plugin
+      '@rushstack/rush-serve-plugin':
+        specifier: workspace:*
+        version: link:../../rush-plugins/rush-serve-plugin
       '@types/semver':
         specifier: 7.7.1
         version: 7.7.1
@@ -4122,8 +4125,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       pnpm-sync-lib:
-        specifier: 0.3.3
-        version: 0.3.3
+        specifier: 0.3.4
+        version: 0.3.4
       read-package-tree:
         specifier: ~5.1.5
         version: 5.1.6
@@ -5146,6 +5149,9 @@ importers:
       '@rushstack/rush-sdk':
         specifier: workspace:*
         version: link:../../libraries/rush-sdk
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../../libraries/ts-command-line
@@ -5162,15 +5168,12 @@ importers:
         specifier: ~1.0.7
         version: 1.0.7(@types/express@4.17.21)
       ws:
-        specifier: ~8.20.0
-        version: 8.20.0
+        specifier: ~8.21.0
+        version: 8.21.0
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/terminal':
-        specifier: workspace:*
-        version: link:../../libraries/terminal
       '@types/compression':
         specifier: ~1.7.2
         version: 1.7.5(@types/express@4.17.21)
@@ -5181,8 +5184,8 @@ importers:
         specifier: 4.17.21
         version: 4.17.21
       '@types/ws':
-        specifier: 8.5.5
-        version: 8.5.5
+        specifier: 8.18.1
+        version: 8.18.1
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
@@ -5407,6 +5410,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@rushstack/webpack-plugin-utilities':
+        specifier: workspace:*
+        version: link:../webpack-plugin-utilities
       fast-glob:
         specifier: ~3.3.1
         version: 3.3.3
@@ -5560,6 +5566,9 @@ importers:
 
   ../../../webpack/webpack-plugin-utilities:
     dependencies:
+      '@types/estree':
+        specifier: 1.0.8
+        version: 1.0.8
       memfs:
         specifier: 4.12.0
         version: 4.12.0
@@ -10432,9 +10441,6 @@ packages:
 
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
-
-  '@types/ws@8.5.5':
-    resolution: {integrity: sha512-lwhs8hktwxSjf9UaZ9tG5M03PGogvFaH8gUgLNbN9HKIg0dvv6q+gkSuJ8HN4/VbyxkuLzCjlN7GquQ0gUJfIg==}
 
   '@types/xmldoc@1.1.4':
     resolution: {integrity: sha512-a/ONNCf9itbmzEz1ohx0Fv5TLJzXIPQTapxFu+DlYlDtn9UcAa1OhnrOOMwbU8125hFjrkJKL3qllD7vO5Bivw==}
@@ -16209,8 +16215,8 @@ packages:
     resolution: {integrity: sha512-7Wjy+9E3WwLOEL30D+m8TSTF7qJJUJLONBnwQp0518siuMxUQUbgZwssaFX+QKlZkjHZcw/IpZCt/H0srrntSg==}
     engines: {node: '>=6'}
 
-  pnpm-sync-lib@0.3.3:
-    resolution: {integrity: sha512-iE0xtJIm7cljColV3CAfi05FfRWHeJFwKcxsJfwo+dkFo9kg9QgGKHlF5qlF2o2uArOz6z0P4bA/t4pX2Z2jYg==}
+  pnpm-sync-lib@0.3.4:
+    resolution: {integrity: sha512-ZgRR+j6B+VUrolPBswPvXBnCyxg39Zfw3ShNCTuCrOFG1V29V4EyXaA1rDDMjdhpF85QYp2NEUjeHAm02A2E/A==}
 
   polished@4.3.1:
     resolution: {integrity: sha512-OBatVyC/N7SCW/FaDHrSd+vn0o5cS855TOmYi4OkdWUMSJCET/xip//ch8xGUvtr3i44X9LVyWwQlRMTN3pwSA==}
@@ -18924,8 +18930,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.20.0:
-    resolution: {integrity: sha512-sAt8BhgNbzCtgGbt2OxmpuryO63ZoDk/sqaB/znQm94T4fCEsy/yV+7CdC1kJhOU9lboAEU7R3kquuycDoibVA==}
+  ws@8.21.0:
+    resolution: {integrity: sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -18997,9 +19003,9 @@ packages:
     resolution: {integrity: sha512-vIYeF1u3CjlhAFekPPAk2h/Kv4T3mAkMox5OymRiJQB0spDP10LHvt+K7G9Ny6NuuMAb25/6n1qyUjAcGNf/AA==}
     engines: {node: '>= 6'}
 
-  yaml@2.4.1:
-    resolution: {integrity: sha512-pIXzoImaqmfOrL7teGUBt/T7ZDnyeGBWyXQBvOVhLkWLN37GXv8NMLK406UY6dS51JfcQHsmcW5cJ441bHg6Lg==}
-    engines: {node: '>= 14'}
+  yaml@2.9.0:
+    resolution: {integrity: sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA==}
+    engines: {node: '>= 14.6'}
     hasBin: true
 
   yargs-parser@18.1.3:
@@ -24320,7 +24326,7 @@ snapshots:
       sockjs: 0.3.24
       spdy: 4.0.2
       webpack-dev-middleware: 7.4.5(@types/webpack@4.41.32)(webpack@5.105.4)
-      ws: 8.20.0
+      ws: 8.21.0
     transitivePeerDependencies:
       - '@types/webpack'
       - bufferutil
@@ -24903,7 +24909,7 @@ snapshots:
       fs-extra: 9.1.0
       remeda: 0.0.32
       source-map-support: 0.5.21
-      ws: 8.20.0
+      ws: 8.21.0
       yargs: 15.4.1
     transitivePeerDependencies:
       - aws-crt
@@ -24949,7 +24955,7 @@ snapshots:
       semver: 7.7.4
       typescript: 4.9.5
       uuid: 8.3.2
-      ws: 8.20.0
+      ws: 8.21.0
       xstate: 4.26.1
       zip-local: 0.3.5
     optionalDependencies:
@@ -26048,7 +26054,7 @@ snapshots:
       util-deprecate: 1.0.2
       watchpack: 2.4.0
       webpack: 4.47.0
-      ws: 8.20.0
+      ws: 8.21.0
     optionalDependencies:
       typescript: 5.8.2
     transitivePeerDependencies:
@@ -26972,10 +26978,6 @@ snapshots:
       source-map: 0.6.1
 
   '@types/ws@8.18.1':
-    dependencies:
-      '@types/node': 22.9.3
-
-  '@types/ws@8.5.5':
     dependencies:
       '@types/node': 22.9.3
 
@@ -33572,7 +33574,7 @@ snapshots:
       whatwg-encoding: 3.1.1
       whatwg-mimetype: 4.0.0
       whatwg-url: 14.2.0
-      ws: 8.20.0
+      ws: 8.21.0
       xml-name-validator: 5.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -34940,14 +34942,14 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  pnpm-sync-lib@0.3.3:
+  pnpm-sync-lib@0.3.4:
     dependencies:
       '@pnpm/dependency-path-pnpm-v10': '@pnpm/dependency-path@1000.0.9'
       '@pnpm/dependency-path-pnpm-v8': '@pnpm/dependency-path@2.1.8'
       '@pnpm/dependency-path-pnpm-v9': '@pnpm/dependency-path@5.1.7'
       '@pnpm/lockfile-types-pnpm-lock-v6': '@pnpm/lockfile-types@5.1.5'
       '@pnpm/lockfile.types-pnpm-lock-v9': '@pnpm/lockfile.types@1001.1.0'
-      yaml: 2.4.1
+      yaml: 2.9.0
 
   polished@4.3.1:
     dependencies:
@@ -36752,7 +36754,7 @@ snapshots:
       esbuild-register: 3.6.0(esbuild@0.25.12)
       recast: 0.23.11
       semver: 7.7.4
-      ws: 8.20.0
+      ws: 8.21.0
     optionalDependencies:
       prettier: 3.8.1
     transitivePeerDependencies:
@@ -37944,7 +37946,7 @@ snapshots:
       '@types/serve-index': 1.9.4
       '@types/serve-static': 1.15.10
       '@types/sockjs': 0.3.36
-      '@types/ws': 8.5.5
+      '@types/ws': 8.18.1
       ansi-html-community: 0.0.8
       anymatch: 3.1.3
       bonjour-service: 1.3.0
@@ -37968,7 +37970,7 @@ snapshots:
       spdy: 4.0.2
       webpack: 4.47.0
       webpack-dev-middleware: 5.3.4(@types/webpack@4.41.32)(webpack@4.47.0)
-      ws: 8.20.0
+      ws: 8.21.0
     optionalDependencies:
       '@types/webpack': 4.41.32
     transitivePeerDependencies:
@@ -38007,7 +38009,7 @@ snapshots:
       sockjs: 0.3.24
       spdy: 4.0.2
       webpack-dev-middleware: 7.4.5(@types/webpack@4.41.32)(webpack@4.47.0)
-      ws: 8.20.0
+      ws: 8.21.0
     optionalDependencies:
       '@types/webpack': 4.41.32
       webpack: 4.47.0
@@ -38048,7 +38050,7 @@ snapshots:
       sockjs: 0.3.24
       spdy: 4.0.2
       webpack-dev-middleware: 7.4.5(@types/webpack@4.41.32)(webpack@5.105.4)
-      ws: 8.20.0
+      ws: 8.21.0
     optionalDependencies:
       '@types/webpack': 4.41.32
       webpack: 5.105.4
@@ -38308,7 +38310,7 @@ snapshots:
 
   ws@7.5.10: {}
 
-  ws@8.20.0: {}
+  ws@8.21.0: {}
 
   wsl-utils@0.1.0:
     dependencies:
@@ -38354,7 +38356,7 @@ snapshots:
 
   yaml@1.10.3: {}
 
-  yaml@2.4.1: {}
+  yaml@2.9.0: {}
 
   yargs-parser@18.1.3:
     dependencies:

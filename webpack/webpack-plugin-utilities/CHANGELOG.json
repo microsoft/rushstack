@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack-plugin-utilities",
   "entries": [
     {
+      "version": "0.7.0",
+      "tag": "@rushstack/webpack-plugin-utilities_v0.7.0",
+      "date": "Sat, 27 Jun 2026 00:15:40 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `evaluateConstantEstreeExpression` for statically evaluating constant ESTree expression nodes."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.20",
       "tag": "@rushstack/webpack-plugin-utilities_v0.6.20",
       "date": "Sat, 13 Jun 2026 00:16:19 GMT",

@@ -1,6 +1,31 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 09 Jun 2026 02:02:32 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Jul 2026 21:27:15 GMT and should not be manually modified.
+
+## 5.177.2
+Wed, 08 Jul 2026 21:27:15 GMT
+
+### Patches
+
+- Upgrade the `pnpm-sync-lib` dependency to 0.3.4.
+
+## 5.177.1
+Sat, 20 Jun 2026 21:37:30 GMT
+
+### Updates
+
+- Bump `ws` in `rush-serve-plugin` to mitigate CVE-2026-48779.
+
+## 5.177.0
+Sat, 20 Jun 2026 00:16:15 GMT
+
+### Patches
+
+- Set Redis `connectTimeout` and `socketTimeout` so half-dead TCP connections (NAT/firewall) surface in seconds instead of stalling in-flight commands for many minutes while the kernel waits to give up.
+
+### Updates
+
+- Fix build cache failures when running inside a git linked worktree via a pre-commit hook, caused by GIT_DIR being set to the per-worktree metadata directory
 
 ## 5.176.0
 Tue, 09 Jun 2026 02:02:32 GMT

@@ -221,8 +221,7 @@ export class RushCommandLineParser extends CommandLineParser {
       }
     }
 
-    const quietModeValue: string | undefined =
-      process.env[EnvironmentVariableNames.RUSH_QUIET_MODE];
+    const quietModeValue: string | undefined = process.env[EnvironmentVariableNames.RUSH_QUIET_MODE];
     if (quietModeValue === '1' || quietModeValue === 'true') {
       return true;
     }
@@ -483,7 +482,8 @@ export class RushCommandLineParser extends CommandLineParser {
       watchPhases,
       watchDebounceMs = RushConstants.defaultWatchDebounceMs,
       alwaysWatch,
-      alwaysInstall
+      alwaysInstall,
+      includeAllProjectsInWatchGraph = false
     } = command;
     this.addAction(
       new PhasedScriptAction({
@@ -502,6 +502,7 @@ export class RushCommandLineParser extends CommandLineParser {
         originalPhases,
         watchPhases,
         watchDebounceMs,
+        includeAllProjectsInWatchGraph,
         phases: commandLineConfiguration.phases,
 
         alwaysWatch,

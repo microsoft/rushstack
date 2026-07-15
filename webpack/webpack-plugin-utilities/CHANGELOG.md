@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack-plugin-utilities
 
-This log was last generated on Sat, 13 Jun 2026 00:16:19 GMT and should not be manually modified.
+This log was last generated on Sat, 27 Jun 2026 00:15:40 GMT and should not be manually modified.
+
+## 0.7.0
+Sat, 27 Jun 2026 00:15:40 GMT
+
+### Minor changes
+
+- Add `evaluateConstantEstreeExpression` for statically evaluating constant ESTree expression nodes.
 
 ## 0.6.20
 Sat, 13 Jun 2026 00:16:19 GMT

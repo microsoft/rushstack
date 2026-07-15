@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Pass change file paths as discrete Git arguments when adding commit details during publishing.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

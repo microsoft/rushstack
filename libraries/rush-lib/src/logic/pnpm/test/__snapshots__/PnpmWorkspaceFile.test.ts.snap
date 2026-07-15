@@ -119,6 +119,31 @@ peerDependencyRules:
 "
 `;
 
+exports[`PnpmWorkspaceFile minimumReleaseAge functionality generates workspace file with minimumReleaseAge 1`] = `
+"minimumReleaseAge: 20160
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile minimumReleaseAge functionality generates workspace file with minimumReleaseAge and minimumReleaseAgeExclude 1`] = `
+"minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+  - webpack
+  - '@myorg/*'
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile minimumReleaseAge functionality generates workspace file with minimumReleaseAgeExclude only 1`] = `
+"minimumReleaseAgeExclude:
+  - webpack
+packages:
+  - projects/app1
+"
+`;
+
 exports[`PnpmWorkspaceFile overrides functionality generates workspace file with overrides 1`] = `
 "overrides:
   bar: ^2.0.0

@@ -51,7 +51,7 @@ function createRecord(name: string): OperationExecutionRecord {
       phase: mockPhase,
       project: getOrCreateProject(name)
     }),
-    {} as unknown as IOperationExecutionRecordContext
+    { maxParallelism: 10 } as unknown as IOperationExecutionRecordContext
   );
 }
 
