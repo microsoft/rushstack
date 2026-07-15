@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add reporter-independent exit-code semantics (resolveExitStatus, resolveExitStatusFromEvents, getSignalExitCode) and separateJsonControls to keep command-specific --json distinct from the json reporter",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
