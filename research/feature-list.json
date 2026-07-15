@@ -321,7 +321,7 @@
       "Preserve lifecycle, diagnostics, results, artifacts, and external output under queue pressure",
       "Add benchmark, queue-pressure, and status-coalescing tests"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "migration",

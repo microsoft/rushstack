@@ -65,6 +65,9 @@ export type BootstrapPrivacyClassification = 'public' | 'local-sensitive' | 'sec
 export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPrivacyClassification>): ReporterPrivacyClassification;
 
 // @beta
+export function computeWallTimeRegressionPercent(baselineMs: number, candidateMs: number): number;
+
+// @beta
 export const COPILOT_CLI_ENV_VAR: 'COPILOT_CLI';
 
 // @beta
@@ -744,6 +747,15 @@ export interface IReporterOutputTarget {
 }
 
 // @beta
+export interface IReporterPerformanceBudgets {
+    readonly maxAdditionalPeakMemoryBytes: number;
+    readonly maxAiDetailedDiagnostics: number;
+    readonly maxAiOutputBytes: number;
+    readonly maxInteractiveRefreshHz: number;
+    readonly maxWallTimeRegressionPercent: number;
+}
+
+// @beta
 export interface IReporterPlanEntry {
     readonly destination: string;
     readonly machine: boolean;
@@ -950,6 +962,12 @@ export function isSupportedReporterName(name: string): name is ReporterName;
 
 // @beta
 export function isValidRushDiagnosticCode(code: string): boolean;
+
+// @beta
+export function isWithinMemoryBudget(additionalPeakBytes: number, budgets?: IReporterPerformanceBudgets): boolean;
+
+// @beta
+export function isWithinWallTimeBudget(baselineMs: number, candidateMs: number, budgets?: IReporterPerformanceBudgets): boolean;
 
 // @beta
 export interface ITelemetryAggregate {
@@ -1161,6 +1179,9 @@ export const REPORTER_EVENT_TYPES: readonly ReporterEventType[];
 export const REPORTER_PACKAGE_NAME: '@rushstack/reporter';
 
 // @beta
+export const REPORTER_PERFORMANCE_BUDGETS: IReporterPerformanceBudgets;
+
+// @beta
 export const REPORTER_PROTOCOL_LIMITS: IReporterProtocolLimits;
 
 // @beta
@@ -1202,6 +1223,7 @@ export class ReporterManager implements IReporterEventSink {
     closeAsync(timeoutMs?: number): Promise<void>;
     emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string;
     flushAsync(timeoutMs?: number): Promise<void>;
+    getPendingEventCount(): number;
     ingestForeignEnvelope(envelope: IReporterEventEnvelope<unknown>): string;
     initializeAsync(): Promise<void>;
     signalFlushAsync(timeoutMs?: number): Promise<void>;

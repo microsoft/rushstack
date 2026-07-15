@@ -283,3 +283,11 @@ export type {
 } from './producers/IScopedReporter';
 export type { ReporterExtensionEventName } from './producers/ReporterExtensionEventName';
 export { isReporterExtensionEventName } from './producers/ReporterExtensionEventName';
+
+export type { IReporterPerformanceBudgets } from './perf/PerformanceBudgets';
+export {
+  REPORTER_PERFORMANCE_BUDGETS,
+  computeWallTimeRegressionPercent,
+  isWithinWallTimeBudget,
+  isWithinMemoryBudget
+} from './perf/PerformanceBudgets';

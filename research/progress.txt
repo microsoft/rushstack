@@ -409,3 +409,28 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - descriptor alloc/read, structured emit, raw fallback, host correlate+forward, protocol reject, old-heft raw+matcher tests pass; all exports @beta
   Next: Feature 27/28 - Reporter performance and capacity budgets
+
+[2026-07-15] Feature 27/28 COMPLETE: Meet reporter performance and capacity budgets (category: performance, spec §7.3)
+Files:
+  - libraries/reporter/src/perf/PerformanceBudgets.ts (NEW): IReporterPerformanceBudgets interface + REPORTER_PERFORMANCE_BUDGETS
+    constant encoding the §7.3 blocking budgets (3% wall-time regression, 32 MiB peak memory, 10 Hz interactive refresh,
+    64 KiB AI output, 20 AI detailed diagnostics). Helpers computeWallTimeRegressionPercent / isWithinWallTimeBudget /
+    isWithinMemoryBudget for benchmark harnesses and capacity tests to share a single source of truth.
+  - libraries/reporter/src/manager/ReporterManager.ts (EDIT): added public getPendingEventCount() observability hook —
+    sums all reporter queue lengths; proves bounded streaming (stays near coalesceThreshold, ==0 after flushAsync).
+  - libraries/reporter/src/index.ts (EDIT): barrel exports for the perf module (all @beta).
+  - libraries/reporter/src/test/Performance.test.ts (NEW, 7 tests): budget-constant assertions; wall-time & memory budget
+    helper checks; bounded-streaming test (5000-event synchronous burst keeps pending queue <200, ==0 after flush);
+    high-volume benchmark smoke ceiling (50000 events under 10s, queue drained); queue-pressure test asserting EVERY
+    protected outcome category (lifecycle/diagnostics/results/artifacts/external-output) is delivered exactly once per batch
+    while replaceable activityChanged noise coalesces; required-status-never-coalesced test.
+  - common/reviews/api/reporter.api.md (regenerated): new @beta perf exports + getPendingEventCount().
+Design notes:
+  - Feature is primarily validation (like F7): the bounded queue + coalescing already exist in ReporterManager (F6); this
+    feature encodes the budgets as shared data and proves the P0 capacity guarantees with benchmark/queue-pressure/
+    status-coalescing tests. No live tooling touched — budgets are simulated/injected, not measured against real Rush builds.
+  - Coalescible = non-required 'activityChanged' only; every other type (and required activityChanged) is protected and
+    never dropped, satisfying "no loss of lifecycle, diagnostics, results, artifacts, or external output".
+Verify: rush build --to @rushstack/reporter -> SUCCESS (clean API report on rebuild); rush test --only @rushstack/reporter
+  -> SUCCESS; Performance.test.js 7 passed / 0 failed; all exports @beta (no @public/@alpha/@internal).
+Next: Feature 28/28 - Flip defaults in Rush daemon-aligned major (category: migration, spec §8.1 phase 6).
