@@ -149,3 +149,19 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - replay+delete+rehome(sourceSequence), direct skip, missing-file tolerance, typed sink emit, abandoned-file cleanup (stale deleted, new/non-matching kept) tests pass; all exports @beta
   Next: Feature 10/28 - Cross-version compatibility adapters (new/old frontend/engine) while keeping legacy rendering visible
+
+[2026-07-14] Feature 10/28 COMPLETE: Cross-version compatibility adapters (both directions)
+  Files (new):
+    - compat/ReporterCompatibility.ts (resolveReporterCompatibility -> mode structured|new-frontend-old-engine|old-frontend-new-engine|legacy; flags provideSinkToEngine/engineRendersLegacy/legacyRenderingVisible=true always)
+    - compat/LegacyFallbackSink.ts (LegacyFallbackSink discards emits; createEngineSink(providedSink?) -> {sink, mode structured|legacy-fallback})
+    - compat/OldEngineOutputAdapter.ts (capture(stream,text) bridges old-engine raw output into externalOutput events, 64KiB chunked, privacy local-sensitive)
+    - test/Compatibility.test.ts
+  Files (modified): index.ts, common/reviews/api/reporter.api.md
+  Notes:
+    - New frontend + old engine: OldEngineOutputAdapter bridges legacy stdout/stderr into structured events without altering visible legacy output.
+    - Old frontend + new engine: createEngineSink falls back to LegacyFallbackSink so a new engine emits safely then renders legacy.
+    - legacyRenderingVisible always true (phase 2: legacy sole visible output). Same source-of-truth scoping (not wired into live apps/rush or rush-lib).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - resolver (5 combos incl newer-major), engine sink (structured + fallback), adapter bridge + chunk-split tests pass; all exports @beta
+  Next: Feature 11/28 - Expose RushSession event sink and scoped producers to actions and plugins

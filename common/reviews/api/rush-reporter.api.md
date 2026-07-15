@@ -39,6 +39,9 @@ export type BootstrapPrivacyClassification = 'public' | 'local-sensitive' | 'sec
 export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPrivacyClassification>): ReporterPrivacyClassification;
 
 // @beta
+export function createEngineSink(providedSink?: IReporterEventSink): IEngineSinkResolution;
+
+// @beta
 export function createRushDiagnostic(code: string, options?: ICreateRushDiagnosticOptions): IRushDiagnostic;
 
 // @beta
@@ -127,8 +130,23 @@ export interface IEarlyReporterControls {
 }
 
 // @beta
+export interface IEngineSinkResolution {
+    readonly mode: 'structured' | 'legacy-fallback';
+    readonly sink: IReporterEventSink;
+}
+
+// @beta
 export interface INdjsonOptions {
     readonly maxRecordBytes?: number;
+}
+
+// @beta
+export interface IOldEngineOutputAdapterOptions {
+    readonly maxChunkBytes?: number;
+    readonly protocolVersion?: IReporterProtocolVersion;
+    readonly sessionId: string;
+    readonly sink: IReporterEventSink;
+    readonly source: IReporterEventSource;
 }
 
 // @beta
@@ -141,6 +159,15 @@ export interface IReporter {
 }
 
 // @beta
+export interface IReporterCompatibilityDecision {
+    readonly engineRendersLegacy: boolean;
+    readonly legacyRenderingVisible: boolean;
+    readonly mode: ReporterCompatibilityMode;
+    readonly provideSinkToEngine: boolean;
+    readonly reason: string;
+}
+
+// @beta
 export interface IReporterContext {
     readonly destination?: string;
     readonly protocolVersion: IReporterProtocolVersion;
@@ -148,6 +175,12 @@ export interface IReporterContext {
 
 // @beta
 export type IReporterEmitEventInput<TPayload> = Omit<IReporterEventEnvelope<TPayload>, 'eventId' | 'sequence' | 'timestamp'>;
+
+// @beta
+export interface IReporterEngineDescriptor {
+    readonly protocolMajor?: number;
+    readonly supportsStructuredSink: boolean;
+}
 
 // @beta
 export interface IReporterEventEnvelope<TPayload = unknown> {
@@ -185,6 +218,12 @@ export interface IReporterEventSource {
     readonly component?: string;
     readonly packageName: string;
     readonly packageVersion: string;
+}
+
+// @beta
+export interface IReporterFrontendDescriptor {
+    readonly hasManager: boolean;
+    readonly protocolMajor: number;
 }
 
 // @beta
@@ -329,6 +368,12 @@ export interface IWriteBootstrapHandoffOptions {
 }
 
 // @beta
+export class LegacyFallbackSink implements IReporterEventSink {
+    // (undocumented)
+    emit(): string;
+}
+
+// @beta
 export class NdjsonDecoder {
     constructor(options?: INdjsonOptions);
     decode(chunk: string): unknown[];
@@ -343,6 +388,12 @@ export class NdjsonRecordTooLargeError extends Error {
 
 // @beta
 export function negotiateReporterHello(hello: IReporterHello, options: IReporterHandshakeOptions): IReporterHandshakeResult;
+
+// @beta
+export class OldEngineOutputAdapter {
+    constructor(options: IOldEngineOutputAdapterOptions);
+    capture(stream: 'stdout' | 'stderr', text: string): string[];
+}
 
 // @beta
 export function parseEarlyReporterControls(argv: readonly string[], env: Record<string, string | undefined>): IEarlyReporterControls;
@@ -361,6 +412,9 @@ export const REPORTER_PROTOCOL_LIMITS: IReporterProtocolLimits;
 
 // @beta
 export const REPORTER_PROTOCOL_VERSION: IReporterProtocolVersion;
+
+// @beta
+export type ReporterCompatibilityMode = 'structured' | 'new-frontend-old-engine' | 'old-frontend-new-engine' | 'legacy';
 
 // @beta
 export type ReporterEventType = 'sessionStarted' | 'sessionCompleted' | 'commandStarted' | 'commandCompleted' | 'operationRegistered' | 'operationStatusChanged' | 'activityChanged' | 'watchCycleCompleted' | 'diagnosticEmitted' | 'externalProcessStarted' | 'externalOutput' | 'externalProcessCompleted' | 'artifactAvailable' | 'commandResult' | 'extension';
@@ -416,6 +470,9 @@ export class ReporterMultiplexer implements IReporter {
 
 // @beta
 export type ReporterPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
+
+// @beta
+export function resolveReporterCompatibility(frontend: IReporterFrontendDescriptor, engine: IReporterEngineDescriptor): IReporterCompatibilityDecision;
 
 // @beta
 export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly IRushDiagnosticCodeDefinition[];
