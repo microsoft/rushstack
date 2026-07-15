@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add the full-detail file reporter that writes a debug NDJSON invocation log with owner-only permissions, secret redaction, a latest.log pointer, 14-day and 20-session retention, an OS-temp fallback, and nonfatal failure handling",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
