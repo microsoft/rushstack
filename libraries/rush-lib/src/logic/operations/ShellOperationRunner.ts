@@ -10,7 +10,7 @@ import type { IPhase } from '../../api/CommandLineConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
-import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
+import type { IOperationRunner, IOperationRunnerContext, IOperationLastState } from './IOperationRunner';
 import { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
 
@@ -18,7 +18,8 @@ export interface IShellOperationRunnerOptions {
   phase: IPhase;
   rushProject: RushConfigurationProject;
   displayName: string;
-  commandToRun: string;
+  initialCommand: string;
+  incrementalCommand: string | undefined;
   commandForHash: string;
   ignoredParameterValues: ReadonlyArray<string>;
 }
@@ -35,43 +36,36 @@ export class ShellOperationRunner implements IOperationRunner {
   public readonly silent: boolean = false;
   public readonly cacheable: boolean = true;
   public readonly warningsAreAllowed: boolean;
-  public readonly commandToRun: string;
   /**
    * The creator is expected to use a different runner if the command is known to be a noop.
    */
   public readonly isNoOp: boolean = false;
 
   private readonly _commandForHash: string;
+  private readonly _initialCommand: string;
+  private readonly _incrementalCommand: string | undefined;
 
   private readonly _rushProject: RushConfigurationProject;
 
   private readonly _ignoredParameterValues: ReadonlyArray<string>;
 
   public constructor(options: IShellOperationRunnerOptions) {
-    const { phase, displayName, rushProject, commandToRun, commandForHash, ignoredParameterValues } = options;
+    const { phase, displayName, rushProject, initialCommand, incrementalCommand, commandForHash, ignoredParameterValues } = options;
 
     this.name = displayName;
     this.warningsAreAllowed =
       EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
     this._rushProject = rushProject;
-    this.commandToRun = commandToRun;
+    this._initialCommand = initialCommand;
+    this._incrementalCommand = incrementalCommand;
     this._commandForHash = commandForHash;
     this._ignoredParameterValues = ignoredParameterValues;
   }
 
-  public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    try {
-      return await this._executeAsync(context);
-    } catch (error) {
-      throw new OperationError('executing', (error as Error).message);
-    }
-  }
-
-  public getConfigHash(): string {
-    return this._commandForHash;
-  }
-
-  private async _executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
+  public async executeAsync(
+    context: IOperationRunnerContext,
+    lastState?: IOperationLastState
+  ): Promise<OperationStatus> {
     return await context.runWithTerminalAsync(
       async (terminal: ITerminal, terminalProvider: ITerminalProvider) => {
         let hasWarningOrError: boolean = false;
@@ -82,27 +76,29 @@ export class ShellOperationRunner implements IOperationRunner {
             `These parameters were ignored for this operation by project-level configuration: ${this._ignoredParameterValues.join(' ')}`
           );
         }
+        const incrementalCommand: string | undefined =
+          lastState && this._incrementalCommand ? this._incrementalCommand : undefined;
+        const commandToRun: string = incrementalCommand ?? this._initialCommand;
 
         // Run the operation
-        terminal.writeLine(`Invoking: ${this.commandToRun}`);
+        terminal.writeLine(
+          `Invoking (${incrementalCommand !== undefined ? 'incremental' : 'initial'}): ${commandToRun}`
+        );
 
         const { rushConfiguration, projectFolder } = this._rushProject;
 
         const { environment: initialEnvironment } = context;
 
-        const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
-          this.commandToRun,
-          {
-            rushConfiguration: rushConfiguration,
-            workingDirectory: projectFolder,
-            initCwd: rushConfiguration.commonTempFolder,
-            handleOutput: true,
-            environmentPathOptions: {
-              includeProjectBin: true
-            },
-            initialEnvironment
-          }
-        );
+        const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(commandToRun, {
+          rushConfiguration: rushConfiguration,
+          workingDirectory: projectFolder,
+          initCwd: rushConfiguration.commonTempFolder,
+          handleOutput: true,
+          environmentPathOptions: {
+            includeProjectBin: true
+          },
+          initialEnvironment
+        });
 
         // Hook into events, in order to get live streaming of the log
         subProcess.stdout?.on('data', (data: Buffer) => {
@@ -145,6 +141,10 @@ export class ShellOperationRunner implements IOperationRunner {
         createLogFile: true
       }
     );
+  }
+
+  public getConfigHash(): string {
+    return this._commandForHash;
   }
 }
 
