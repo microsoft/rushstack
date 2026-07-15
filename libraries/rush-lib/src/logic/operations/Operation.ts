@@ -155,7 +155,7 @@ export class Operation {
     this.enabled = enabled;
     this.weight = _getFinalWeight(
       settings?.weight ?? 1,
-      runner?.name ?? `${project.packageName} (${phase.name}`
+      runner?.name ?? `${project.packageName} (${phase.name})`
     );
   }
 
