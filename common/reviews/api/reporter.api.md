@@ -14,6 +14,12 @@ export const BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME: 'rush.reporter.bufferTru
 export const BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES: number;
 
 // @beta
+export const BOOTSTRAP_HANDOFF_FILE_PREFIX: 'rush-reporter-bootstrap-';
+
+// @beta
+export const BOOTSTRAP_HANDOFF_FILE_SUFFIX: '.ndjson';
+
+// @beta
 export const BOOTSTRAP_PROTOCOL_MAJOR: number;
 
 // @beta
@@ -37,6 +43,9 @@ export function createRushDiagnostic(code: string, options?: ICreateRushDiagnost
 
 // @beta
 export const DEFAULT_FLUSH_TIMEOUT_MS: number;
+
+// @beta
+export const DEFAULT_HANDOFF_RETENTION_MS: number;
 
 // @beta
 export const DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS: number;
@@ -72,6 +81,14 @@ export interface IBootstrapEventSource {
     readonly packageName: string;
     // (undocumented)
     readonly packageVersion: string;
+}
+
+// @beta
+export interface IBootstrapReplayResult {
+    readonly direct: boolean;
+    readonly eventCount: number;
+    readonly handoffPath?: string;
+    readonly replayed: boolean;
 }
 
 // @beta
@@ -201,6 +218,15 @@ export interface IReporterHelloAck {
 }
 
 // @beta
+export interface IReporterHostOptions {
+    readonly env?: Record<string, string | undefined>;
+    readonly handoffDirectory?: string;
+    readonly manager?: ReporterManager;
+    readonly nowMs?: () => number;
+    readonly retentionMs?: number;
+}
+
+// @beta
 export interface IReporterManagerOptions {
     readonly coalesceThreshold?: number;
     readonly emergencyDiagnosticWriter?: (message: string) => void;
@@ -271,6 +297,9 @@ export interface IRushRemediationAction {
 }
 
 // @beta
+export function isBootstrapHandoffFileName(fileName: string): boolean;
+
+// @beta
 export interface IScopedMessageOptions {
     readonly privacy?: ReporterPrivacyClassification;
     readonly severity: ReporterMessageSeverity;
@@ -338,6 +367,15 @@ export type ReporterEventType = 'sessionStarted' | 'sessionCompleted' | 'command
 
 // @beta
 export type ReporterExtensionEventName = string;
+
+// @beta
+export class ReporterHost {
+    constructor(options?: IReporterHostOptions);
+    cleanAbandonedHandoffFilesAsync(): Promise<string[]>;
+    getSink(): IReporterEventSink;
+    get manager(): ReporterManager;
+    replayBootstrapHandoffAsync(): Promise<IBootstrapReplayResult>;
+}
 
 // @beta
 export type ReporterJsonNull = null;

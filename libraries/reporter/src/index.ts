@@ -89,12 +89,18 @@ export type {
 export { BootstrapEventBuffer } from './bootstrap/BootstrapEventBuffer';
 export type { IWriteBootstrapHandoffOptions } from './bootstrap/BootstrapHandoff';
 export {
+  BOOTSTRAP_HANDOFF_FILE_PREFIX,
+  BOOTSTRAP_HANDOFF_FILE_SUFFIX,
+  isBootstrapHandoffFileName,
   writeBootstrapHandoffFileAsync,
   readBootstrapHandoffFileAsync,
   deleteBootstrapHandoffFileAsync
 } from './bootstrap/BootstrapHandoff';
 export type { IEarlyReporterControls } from './bootstrap/EarlyReporterControls';
 export { parseEarlyReporterControls } from './bootstrap/EarlyReporterControls';
+
+export type { IReporterHostOptions, IBootstrapReplayResult } from './frontend/ReporterHost';
+export { ReporterHost, DEFAULT_HANDOFF_RETENTION_MS } from './frontend/ReporterHost';
 
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {

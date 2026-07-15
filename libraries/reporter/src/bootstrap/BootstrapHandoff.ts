@@ -8,6 +8,31 @@ import * as path from 'node:path';
 import type { BootstrapEventBuffer } from './BootstrapEventBuffer';
 
 /**
+ * The file-name prefix of a bootstrap handoff file.
+ *
+ * @beta
+ */
+export const BOOTSTRAP_HANDOFF_FILE_PREFIX: 'rush-reporter-bootstrap-' = 'rush-reporter-bootstrap-';
+
+/**
+ * The file-name suffix of a bootstrap handoff file.
+ *
+ * @beta
+ */
+export const BOOTSTRAP_HANDOFF_FILE_SUFFIX: '.ndjson' = '.ndjson';
+
+/**
+ * Returns `true` if `fileName` is a bootstrap handoff file name.
+ *
+ * @beta
+ */
+export function isBootstrapHandoffFileName(fileName: string): boolean {
+  return (
+    fileName.startsWith(BOOTSTRAP_HANDOFF_FILE_PREFIX) && fileName.endsWith(BOOTSTRAP_HANDOFF_FILE_SUFFIX)
+  );
+}
+
+/**
  * Options for {@link writeBootstrapHandoffFileAsync}.
  *
  * @beta
@@ -41,7 +66,7 @@ export async function writeBootstrapHandoffFileAsync(
 ): Promise<string> {
   const directory: string = options.directory ?? os.tmpdir();
   const pid: number = options.pid ?? process.pid;
-  const fileName: string = `rush-reporter-bootstrap-${pid}-${Date.now()}.ndjson`;
+  const fileName: string = `${BOOTSTRAP_HANDOFF_FILE_PREFIX}${pid}-${Date.now()}${BOOTSTRAP_HANDOFF_FILE_SUFFIX}`;
   const filePath: string = path.join(directory, fileName);
   await fs.promises.writeFile(filePath, buffer.serialize(), { encoding: 'utf8' });
   return filePath;
