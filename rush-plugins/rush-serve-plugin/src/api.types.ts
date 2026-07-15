@@ -54,7 +54,7 @@ export interface IOperationInfo {
    * - `never`: The operation is disabled and will not be executed.
    * - `ignore-dependency-changes`: The operation will be executed if there are local changes in the project,
    *   otherwise it will be skipped.
-   * - `always`: The operation will be executed if it or any dependencies changed.
+   * - `affected`: The operation will be executed if it or any dependencies changed.
    */
   enabled: ReadableOperationEnabledState;
 
@@ -205,7 +205,9 @@ export interface IWebSocketSyncEventMessage {
 }
 
 /**
- * Message sent to a WebSocket client containing a full refresh of only the dynamic execution states.
+ * Message sent to a WebSocket client containing a full refresh of the static graph definition
+ * (one entry per operation in the graph). Emitted when operation enabled states change; the
+ * client preserves its existing dynamic execution state arrays.
  */
 export interface IWebSocketSyncOperationsEventMessage {
   event: 'sync-operations';
@@ -244,7 +246,8 @@ export type IWebSocketEventMessage =
   | IWebSocketSyncEventMessage
   | IWebSocketSyncOperationsEventMessage
   | IWebSocketPassQueuedEventMessage
-  | IWebSocketSyncGraphStateEventMessage;
+  | IWebSocketSyncGraphStateEventMessage
+  | IWebSocketTerminalChunkEventMessage;
 
 // Command (client->server) message interfaces (alphabetically by interface name)
 /**
