@@ -154,7 +154,7 @@
       "Preserve the existing beforeLog hook through an adapter",
       "Add allowlist schema and leakage tests"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
