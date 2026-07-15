@@ -190,7 +190,7 @@
       "Default the full-detail file reporter to debug",
       "Add log-level filtering tests"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

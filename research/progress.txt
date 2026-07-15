@@ -247,3 +247,17 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - primary precedence (explicit/env/agent/CI/TTY/non-TTY), additional file, unsupported-reporter throw, log-level aliases + contradiction + unsupported, command-json preserved, --output parse, agent-active semantics tests pass; all exports @beta
   Next: Feature 16/28 - Independent per-reporter log levels
+
+[2026-07-14] Feature 16/28 COMPLETE: Independent per-reporter log levels
+  Files (new):
+    - config/LogLevelFilter.ts (LOG_LEVEL_RANK quiet0/normal1/verbose2/debug3; getEventMinimumLogLevel classifies events; shouldRenderAtLogLevel; filterEventsForLogLevel; FILE_REPORTER_DEFAULT_LOG_LEVEL='debug')
+    - test/LogLevelFilter.test.ts
+  Files (modified): index.ts, api.md
+  Classification (min level per §5.7): commandResult=quiet; diagnostic error=quiet, warning required=quiet else normal; lifecycle/operation/artifact=normal; activityChanged debug-message=debug else normal; externalOutput/externalProcess*=verbose; extension required=normal else debug.
+  Notes:
+    - Diagnostic severity separate from log level: severity sets min-level, reporter's configured level gates rendering. Test flips warning visibility by level, not severity.
+    - Monotonic: shown at level L -> shown at all higher levels.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - rank, classification, per-level rendering (quiet/normal/verbose/debug), monotonicity, severity-separation, filter, file-default tests pass; all exports @beta
+  Next: Feature 17/28 - Automatic reporter selection matrix by environment
