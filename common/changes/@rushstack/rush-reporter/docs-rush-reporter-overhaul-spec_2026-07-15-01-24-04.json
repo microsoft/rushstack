@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add the legacy reporter that reproduces the current Rush StreamCollator-style output, selectable and available as the RUSH_REPORTER=legacy emergency fallback, validated against the frozen legacy snapshots",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
