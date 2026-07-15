@@ -476,10 +476,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     ) {
       if (pnpmOptions.globalAllowBuilds) {
         workspaceFile.setAllowBuilds(pnpmOptions.globalAllowBuilds);
-      } else if (
-        pnpmOptions.globalOnlyBuiltDependencies ||
-        pnpmOptions.globalNeverBuiltDependencies
-      ) {
+      } else if (pnpmOptions.globalOnlyBuiltDependencies || pnpmOptions.globalNeverBuiltDependencies) {
         // Backward compatibility: convert globalOnlyBuiltDependencies/globalNeverBuiltDependencies
         // to allowBuilds format for pnpm 11+
         const allowBuilds: Record<string, boolean> = {};
@@ -507,6 +504,33 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             'Remove this field or upgrade to pnpm 11.0.0 or newer.'
         )
       );
+    }
+
+    // Set minimumReleaseAge/minimumReleaseAgeExclude in the workspace file.
+    // pnpm does not read these fields from package.json, only from pnpm-workspace.yaml or .npmrc.
+    if (pnpmOptions.minimumReleaseAgeMinutes !== undefined || pnpmOptions.minimumReleaseAgeExclude) {
+      if (
+        this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+        semver.lt(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '10.16.0')
+      ) {
+        this._terminal.writeWarningLine(
+          Colorize.yellow(
+            `Your version of pnpm (${this.rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+              `doesn't support the "minimumReleaseAgeMinutes" or "minimumReleaseAgeExclude" fields in ` +
+              `${this.rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+              'Remove these fields or upgrade to pnpm 10.16.0 or newer.'
+          )
+        );
+      }
+
+      if (pnpmOptions.minimumReleaseAgeMinutes !== undefined) {
+        // NOTE: the pnpm setting is `minimumReleaseAge`, but the Rush setting is `minimumReleaseAgeMinutes`
+        workspaceFile.setMinimumReleaseAge(pnpmOptions.minimumReleaseAgeMinutes);
+      }
+
+      if (pnpmOptions.minimumReleaseAgeExclude) {
+        workspaceFile.setMinimumReleaseAgeExclude(pnpmOptions.minimumReleaseAgeExclude);
+      }
     }
 
     // Save the generated workspace file. Don't update the file timestamp unless the content has changed,
