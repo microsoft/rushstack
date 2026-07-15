@@ -182,3 +182,19 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - scoped message/diagnostic/extension, privacy floor, emit-only surface, logger severities, session facade end-to-end via ReporterManager, plugin API compat + migration diagnostic tests pass; all exports @beta
   Next: Feature 12/28 - Emit shadow structured lifecycle + diagnostic events without changing output
+
+[2026-07-14] Feature 12/28 COMPLETE: Shadow structured lifecycle + diagnostic emission
+  Files (new):
+    - lifecycle/LifecycleEvents.ts (OperationStatus + payload interfaces: session/command started+completed, operation registered+statusChanged, commandResult, watchCycleCompleted)
+    - lifecycle/LifecycleEmitter.ts (emit* methods, all required=true; merges base scope + per-event scope override; emitDiagnostic uses privacy floor; writes nothing to stdout/stderr)
+    - lifecycle/ShadowParity.ts (deriveExitCodeFromEvents: commandResult succeeded->0 else exitCode/1, sessionCompleted fallback; summarizeShadowResult: operationCounts + result)
+    - test/Lifecycle.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - Step 3 "keep legacy output unchanged": emitter is output-neutral (only sink.emit). Test spies process.stdout/stderr.write and asserts not called.
+    - Step 4 parity: exit-code parity helper + result summary. Full telemetry allowlist deferred to Feature 13; authoritative exit-code semantics to Feature 14 (this is shadow parity derivation).
+    - Same source-of-truth scoping (actions/scheduler/plugins live in rush-lib; not wired live).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - lifecycle emit + scope merge, diagnostic privacy floor, shadow output-neutrality, exit-code parity (4 cases), result summary, manager integration tests pass; all exports @beta
+  Next: Feature 13/28 - Telemetry projection subscriber (allowlist + beforeLog adapter)
