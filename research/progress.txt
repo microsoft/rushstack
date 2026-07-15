@@ -165,3 +165,20 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - resolver (5 combos incl newer-major), engine sink (structured + fallback), adapter bridge + chunk-split tests pass; all exports @beta
   Next: Feature 11/28 - Expose RushSession event sink and scoped producers to actions and plugins
+
+[2026-07-14] Feature 11/28 COMPLETE: RushSession event sink + scoped producers for actions/plugins
+  Files (new):
+    - session/ScopedReporterFactory.ts (createScopedReporter -> IScopedReporter; emitMessage->activityChanged {kind:'message',severity,text}, required for warning/error; emitDiagnostic->diagnosticEmitted with computeEnvelopePrivacyFloor; emitExtension validates namespaced name, wraps {name,payload})
+    - session/ScopedLogger.ts (IScopedLogger writeLine/writeDebugLine/writeWarningLine/writeErrorLine; NO .terminal handle)
+    - session/RushSessionReporting.ts (facade: createScopedReporter/createScopedLogger; getSink(); createExecutionContext()->IReporterExecutionContext {sink, reporter})
+    - session/PluginApi.ts (RUSH_PLUGIN_API_VERSION '1.0.0', IRushPluginManifest.pluginApiVersion, isPluginApiVersionSupported major-equality, createPluginApiIncompatibleDiagnostic migration diagnostic)
+    - test/Session.test.ts
+  Files (modified): diagnostics/RushDiagnosticCodeRegistry.ts (APPENDED RUSH_PLUGIN_API_INCOMPATIBLE code+templates), index.ts, api.md
+  Notes:
+    - Human messages map to activityChanged (closed union has no 'message' type; golden freezes the 15). required-by-severity so warnings/errors aren't coalesced.
+    - Step 3 (no modes/destinations/thresholds) satisfied structurally: scoped reporter/logger + sink are emit-only. Test asserts Object.keys == 3 emit methods.
+    - Same source-of-truth scoping (RushSession itself lives in rush-lib; not wired live).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - scoped message/diagnostic/extension, privacy floor, emit-only surface, logger severities, session facade end-to-end via ReporterManager, plugin API compat + migration diagnostic tests pass; all exports @beta
+  Next: Feature 12/28 - Emit shadow structured lifecycle + diagnostic events without changing output

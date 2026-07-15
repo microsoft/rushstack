@@ -131,7 +131,7 @@
       "Prevent plugins from inspecting modes, destinations, or thresholds",
       "Declare the supported Rush plugin API version in plugin manifests"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
