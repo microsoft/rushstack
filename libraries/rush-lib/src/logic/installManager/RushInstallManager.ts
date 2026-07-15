@@ -383,7 +383,7 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     // Write the common package.json
-    InstallHelpers.generateCommonPackageJson(
+    await InstallHelpers.generateCommonPackageJsonAsync(
       this.rushConfiguration,
       this.rushConfiguration.defaultSubspace,
       commonDependencies,

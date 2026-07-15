@@ -8,13 +8,13 @@ import { InstallHelpers } from '../installManager/InstallHelpers';
 import { RushConfiguration } from '../../api/RushConfiguration';
 
 describe(InstallHelpers.name, () => {
-  describe(InstallHelpers.generateCommonPackageJson.name, () => {
-    let mockJsonFileSave: jest.SpyInstance;
+  describe(InstallHelpers.generateCommonPackageJsonAsync.name, () => {
+    let mockJsonFileSaveAsync: jest.SpyInstance;
     let terminal: Terminal;
     let terminalProvider: StringBufferTerminalProvider;
 
     beforeAll(() => {
-      mockJsonFileSave = jest.spyOn(JsonFile, 'save').mockImplementation(() => true);
+      mockJsonFileSaveAsync = jest.spyOn(JsonFile, 'saveAsync').mockImplementation(async () => true);
     });
 
     beforeEach(() => {
@@ -29,21 +29,21 @@ describe(InstallHelpers.name, () => {
           asLines: true
         })
       ).toMatchSnapshot('Terminal Output');
-      mockJsonFileSave.mockClear();
+      mockJsonFileSaveAsync.mockClear();
     });
 
-    it('generates correct package json with pnpm configurations', () => {
+    it('generates correct package json with pnpm configurations', async () => {
       const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfig/rush.json`;
       const rushConfiguration: RushConfiguration =
         RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
-      InstallHelpers.generateCommonPackageJson(
+      await InstallHelpers.generateCommonPackageJsonAsync(
         rushConfiguration,
         rushConfiguration.defaultSubspace,
         undefined,
         terminal
       );
       const packageJson: IPackageJson = JSON.parse(
-        JsonFile.stringify(mockJsonFileSave.mock.calls[0][0], { ignoreUndefinedValues: true })
+        JsonFile.stringify(mockJsonFileSaveAsync.mock.calls[0][0], { ignoreUndefinedValues: true })
       );
       expect(packageJson).toEqual(
         expect.objectContaining({

@@ -442,7 +442,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // Write the common package.json
-    InstallHelpers.generateCommonPackageJson(this.rushConfiguration, subspace, undefined, this._terminal);
+    await InstallHelpers.generateCommonPackageJsonAsync(
+      this.rushConfiguration,
+      subspace,
+      undefined,
+      this._terminal
+    );
 
     // Set catalog definitions in the workspace file if specified
     if (pnpmOptions.globalCatalogs) {
