@@ -114,6 +114,57 @@ export { LegacyFallbackSink, createEngineSink } from './compat/LegacyFallbackSin
 export type { IOldEngineOutputAdapterOptions } from './compat/OldEngineOutputAdapter';
 export { OldEngineOutputAdapter } from './compat/OldEngineOutputAdapter';
 
+export type { ICreateScopedReporterOptions } from './session/ScopedReporterFactory';
+export { createScopedReporter } from './session/ScopedReporterFactory';
+export type { IScopedLogger } from './session/ScopedLogger';
+export { createScopedLogger } from './session/ScopedLogger';
+export type { IRushSessionReportingOptions, IReporterExecutionContext } from './session/RushSessionReporting';
+export { RushSessionReporting } from './session/RushSessionReporting';
+export type { IRushPluginManifest } from './session/PluginApi';
+export {
+  RUSH_PLUGIN_API_VERSION,
+  isPluginApiVersionSupported,
+  createPluginApiIncompatibleDiagnostic
+} from './session/PluginApi';
+
+export type {
+  OperationStatus,
+  ISessionStartedPayload,
+  ISessionCompletedPayload,
+  ICommandStartedPayload,
+  ICommandCompletedPayload,
+  IOperationRegisteredPayload,
+  IOperationStatusChangedPayload,
+  ICommandResultPayload,
+  IWatchCycleCompletedPayload
+} from './lifecycle/LifecycleEvents';
+export type { ILifecycleEmitterOptions } from './lifecycle/LifecycleEmitter';
+export { LifecycleEmitter } from './lifecycle/LifecycleEmitter';
+export type { IShadowResultSummary } from './lifecycle/ShadowParity';
+export { deriveExitCodeFromEvents, summarizeShadowResult } from './lifecycle/ShadowParity';
+
+export type { TelemetryResult, ITelemetryAggregate } from './telemetry/TelemetryAggregate';
+export { TELEMETRY_AGGREGATE_KEYS } from './telemetry/TelemetryAggregate';
+export { TelemetrySubscriber, createTelemetryReporter } from './telemetry/TelemetrySubscriber';
+export type { LegacyBeforeLogHook } from './telemetry/BeforeLogAdapter';
+export { createBeforeLogAdapter } from './telemetry/BeforeLogAdapter';
+
+export type {
+  RushCommandOutcome,
+  IRushExitStatus,
+  IResolveExitStatusOptions,
+  IResolveExitStatusFromEventsOptions
+} from './exit/ExitStatus';
+export {
+  EXIT_CODE_SUCCESS,
+  EXIT_CODE_FAILURE,
+  getSignalExitCode,
+  resolveExitStatus,
+  resolveExitStatusFromEvents
+} from './exit/ExitStatus';
+export type { IJsonControls } from './exit/CommandJson';
+export { separateJsonControls } from './exit/CommandJson';
+
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,

@@ -39,10 +39,25 @@ export type BootstrapPrivacyClassification = 'public' | 'local-sensitive' | 'sec
 export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPrivacyClassification>): ReporterPrivacyClassification;
 
 // @beta
+export function createBeforeLogAdapter(hooks: readonly LegacyBeforeLogHook[]): (aggregate: ITelemetryAggregate) => void;
+
+// @beta
 export function createEngineSink(providedSink?: IReporterEventSink): IEngineSinkResolution;
 
 // @beta
+export function createPluginApiIncompatibleDiagnostic(manifest: IRushPluginManifest): IRushDiagnostic;
+
+// @beta
 export function createRushDiagnostic(code: string, options?: ICreateRushDiagnosticOptions): IRushDiagnostic;
+
+// @beta
+export function createScopedLogger(reporter: IScopedReporter): IScopedLogger;
+
+// @beta
+export function createScopedReporter(options: ICreateScopedReporterOptions): IScopedReporter;
+
+// @beta
+export function createTelemetryReporter(subscriber: TelemetrySubscriber): IReporter;
 
 // @beta
 export const DEFAULT_FLUSH_TIMEOUT_MS: number;
@@ -57,10 +72,22 @@ export const DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS: number;
 export function deleteBootstrapHandoffFileAsync(filePath: string): Promise<void>;
 
 // @beta
+export function deriveExitCodeFromEvents(events: readonly IReporterEventEnvelope<unknown>[]): number;
+
+// @beta
 export function encodeNdjsonRecord(value: unknown, options?: INdjsonOptions): string;
 
 // @beta
+export const EXIT_CODE_FAILURE: 1;
+
+// @beta
+export const EXIT_CODE_SUCCESS: 0;
+
+// @beta
 export function getPrivacyClassificationRank(classification: ReporterPrivacyClassification): number;
+
+// @beta
+export function getSignalExitCode(signal: NodeJS.Signals): number;
 
 // @beta
 export interface IBootstrapEventBufferOptions {
@@ -110,6 +137,29 @@ export interface IClassifiedDiagnosticValue {
 }
 
 // @beta
+export interface ICommandCompletedPayload {
+    readonly commandName: string;
+    readonly durationMs?: number;
+    readonly exitCode: number;
+}
+
+// @beta
+export interface ICommandResultPayload {
+    readonly commandName: string;
+    readonly exitCode: number;
+    readonly operationCounts?: {
+        readonly [status: string]: number;
+    };
+    readonly succeeded: boolean;
+}
+
+// @beta
+export interface ICommandStartedPayload {
+    readonly argv?: readonly string[];
+    readonly commandName: string;
+}
+
+// @beta
 export interface ICreateRushDiagnosticOptions {
     readonly causeDiagnosticIds?: readonly string[];
     readonly diagnosticId?: string;
@@ -121,6 +171,15 @@ export interface ICreateRushDiagnosticOptions {
     readonly retryable?: boolean;
     readonly severity?: RushDiagnosticSeverity;
     readonly source?: IRushDiagnosticSource;
+}
+
+// @beta
+export interface ICreateScopedReporterOptions {
+    readonly protocolVersion?: IReporterProtocolVersion;
+    readonly scope?: IReporterEventScope;
+    readonly sessionId: string;
+    readonly sink: IReporterEventSink;
+    readonly source: IReporterEventSource;
 }
 
 // @beta
@@ -136,6 +195,21 @@ export interface IEngineSinkResolution {
 }
 
 // @beta
+export interface IJsonControls {
+    readonly commandJson: boolean;
+    readonly reporterJson: boolean;
+}
+
+// @beta
+export interface ILifecycleEmitterOptions {
+    readonly protocolVersion?: IReporterProtocolVersion;
+    readonly scope?: IReporterEventScope;
+    readonly sessionId: string;
+    readonly sink: IReporterEventSink;
+    readonly source: IReporterEventSource;
+}
+
+// @beta
 export interface INdjsonOptions {
     readonly maxRecordBytes?: number;
 }
@@ -147,6 +221,19 @@ export interface IOldEngineOutputAdapterOptions {
     readonly sessionId: string;
     readonly sink: IReporterEventSink;
     readonly source: IReporterEventSource;
+}
+
+// @beta
+export interface IOperationRegisteredPayload {
+    readonly operationId: string;
+    readonly phaseName?: string;
+    readonly projectName?: string;
+}
+
+// @beta
+export interface IOperationStatusChangedPayload {
+    readonly operationId: string;
+    readonly status: OperationStatus;
 }
 
 // @beta
@@ -218,6 +305,12 @@ export interface IReporterEventSource {
     readonly component?: string;
     readonly packageName: string;
     readonly packageVersion: string;
+}
+
+// @beta
+export interface IReporterExecutionContext {
+    readonly reporter: IScopedReporter;
+    readonly sink: IReporterEventSink;
 }
 
 // @beta
@@ -293,6 +386,19 @@ export interface IReporterRegistrationOptions {
 }
 
 // @beta
+export interface IResolveExitStatusFromEventsOptions {
+    readonly cancelled?: boolean;
+    readonly signal?: NodeJS.Signals;
+}
+
+// @beta
+export interface IResolveExitStatusOptions {
+    readonly cancelled?: boolean;
+    readonly hasFailures?: boolean;
+    readonly signal?: NodeJS.Signals;
+}
+
+// @beta
 export interface IRushDiagnostic {
     readonly category: RushDiagnosticCategory;
     readonly causeDiagnosticIds?: readonly string[];
@@ -328,6 +434,19 @@ export interface IRushDiagnosticSource {
 }
 
 // @beta
+export interface IRushExitStatus {
+    readonly exitCode: number;
+    readonly outcome: RushCommandOutcome;
+    readonly signal?: NodeJS.Signals;
+}
+
+// @beta
+export interface IRushPluginManifest {
+    readonly pluginApiVersion: string;
+    readonly pluginName: string;
+}
+
+// @beta
 export interface IRushRemediationAction {
     readonly automatedExecutionSafety: RushRemediationSafety;
     readonly command?: string;
@@ -336,7 +455,23 @@ export interface IRushRemediationAction {
 }
 
 // @beta
+export interface IRushSessionReportingOptions {
+    readonly protocolVersion?: IReporterProtocolVersion;
+    readonly sessionId: string;
+    readonly sink: IReporterEventSink;
+    readonly source: IReporterEventSource;
+}
+
+// @beta
 export function isBootstrapHandoffFileName(fileName: string): boolean;
+
+// @beta
+export interface IScopedLogger {
+    writeDebugLine(text: string): string;
+    writeErrorLine(text: string): string;
+    writeLine(text: string): string;
+    writeWarningLine(text: string): string;
+}
 
 // @beta
 export interface IScopedMessageOptions {
@@ -353,6 +488,31 @@ export interface IScopedReporter {
 }
 
 // @beta
+export interface ISessionCompletedPayload {
+    readonly durationMs?: number;
+    readonly exitCode: number;
+}
+
+// @beta
+export interface ISessionStartedPayload {
+    readonly cwd?: string;
+    readonly rushVersion: string;
+}
+
+// @beta
+export interface IShadowResultSummary {
+    readonly commandName?: string;
+    readonly exitCode: number;
+    readonly operationCounts: {
+        readonly [status: string]: number;
+    };
+    readonly succeeded: boolean;
+}
+
+// @beta
+export function isPluginApiVersionSupported(declaredApiVersion: string, supportedApiVersion?: string): boolean;
+
+// @beta
 export function isReporterExtensionEventName(name: string): boolean;
 
 // @beta
@@ -362,15 +522,64 @@ export function isReporterProtocolCompatible(consumer: IReporterProtocolVersion,
 export function isValidRushDiagnosticCode(code: string): boolean;
 
 // @beta
+export interface ITelemetryAggregate {
+    readonly commandName?: string;
+    readonly diagnosticCategoryCounts: {
+        readonly [category: string]: number;
+    };
+    readonly diagnosticCodes: readonly string[];
+    readonly durationMs?: number;
+    readonly exitCode?: number;
+    readonly operationStatusCounts: {
+        readonly [status: string]: number;
+    };
+    readonly producerVersions: readonly string[];
+    readonly protocolVersion?: IReporterProtocolVersion;
+    readonly reporterMode?: string;
+    readonly result?: TelemetryResult;
+}
+
+// @beta
+export interface IWatchCycleCompletedPayload {
+    readonly changedProjects?: readonly string[];
+    readonly succeeded: boolean;
+}
+
+// @beta
 export interface IWriteBootstrapHandoffOptions {
     readonly directory?: string;
     readonly pid?: number;
 }
 
 // @beta
+export type LegacyBeforeLogHook = (telemetry: Record<string, unknown>) => void;
+
+// @beta
 export class LegacyFallbackSink implements IReporterEventSink {
     // (undocumented)
     emit(): string;
+}
+
+// @beta
+export class LifecycleEmitter {
+    constructor(options: ILifecycleEmitterOptions);
+    // (undocumented)
+    emitCommandCompleted(payload: ICommandCompletedPayload): string;
+    // (undocumented)
+    emitCommandResult(payload: ICommandResultPayload): string;
+    // (undocumented)
+    emitCommandStarted(payload: ICommandStartedPayload): string;
+    emitDiagnostic(diagnostic: IRushDiagnostic): string;
+    // (undocumented)
+    emitOperationRegistered(payload: IOperationRegisteredPayload): string;
+    // (undocumented)
+    emitOperationStatusChanged(payload: IOperationStatusChangedPayload): string;
+    // (undocumented)
+    emitSessionCompleted(payload: ISessionCompletedPayload): string;
+    // (undocumented)
+    emitSessionStarted(payload: ISessionStartedPayload): string;
+    // (undocumented)
+    emitWatchCycleCompleted(payload: IWatchCycleCompletedPayload): string;
 }
 
 // @beta
@@ -394,6 +603,9 @@ export class OldEngineOutputAdapter {
     constructor(options: IOldEngineOutputAdapterOptions);
     capture(stream: 'stdout' | 'stderr', text: string): string[];
 }
+
+// @beta
+export type OperationStatus = 'ready' | 'executing' | 'success' | 'successWithWarnings' | 'failure' | 'blocked' | 'skipped' | 'fromCache' | 'noOp';
 
 // @beta
 export function parseEarlyReporterControls(argv: readonly string[], env: Record<string, string | undefined>): IEarlyReporterControls;
@@ -472,6 +684,12 @@ export class ReporterMultiplexer implements IReporter {
 export type ReporterPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
 
 // @beta
+export function resolveExitStatus(options: IResolveExitStatusOptions): IRushExitStatus;
+
+// @beta
+export function resolveExitStatusFromEvents(events: readonly IReporterEventEnvelope<unknown>[], options?: IResolveExitStatusFromEventsOptions): IRushExitStatus;
+
+// @beta
 export function resolveReporterCompatibility(frontend: IReporterFrontendDescriptor, engine: IReporterEngineDescriptor): IReporterCompatibilityDecision;
 
 // @beta
@@ -489,7 +707,13 @@ export const RUSH_DIAGNOSTIC_TEMPLATES: {
 export const RUSH_INTERNAL_ERROR_CODE: 'RUSH_INTERNAL_UNEXPECTED';
 
 // @beta
+export const RUSH_PLUGIN_API_VERSION: '1.0.0';
+
+// @beta
 export const RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_HANDOFF';
+
+// @beta
+export type RushCommandOutcome = 'succeeded' | 'failed' | 'cancelled' | 'signal';
 
 // @beta
 export type RushDiagnosticCategory = 'configuration' | 'input' | 'dependency-tool' | 'environment' | 'network-auth' | 'operation' | 'internal';
@@ -506,6 +730,35 @@ export class RushError extends Error {
 
 // @beta
 export type RushRemediationSafety = 'safe' | 'requires-confirmation' | 'unsafe';
+
+// @beta
+export class RushSessionReporting {
+    constructor(options: IRushSessionReportingOptions);
+    createExecutionContext(scope?: IReporterEventScope): IReporterExecutionContext;
+    createScopedLogger(scope?: IReporterEventScope): IScopedLogger;
+    createScopedReporter(scope?: IReporterEventScope): IScopedReporter;
+    getSink(): IReporterEventSink;
+}
+
+// @beta
+export function separateJsonControls(argv: readonly string[]): IJsonControls;
+
+// @beta
+export function summarizeShadowResult(events: readonly IReporterEventEnvelope<unknown>[]): IShadowResultSummary;
+
+// @beta
+export const TELEMETRY_AGGREGATE_KEYS: readonly string[];
+
+// @beta
+export type TelemetryResult = 'succeeded' | 'failed';
+
+// @beta
+export class TelemetrySubscriber {
+    constructor();
+    buildAggregate(): ITelemetryAggregate;
+    ingest(event: IReporterEventEnvelope<unknown>): void;
+    setReporterMode(reporterMode: string): void;
+}
 
 // @beta
 export function writeBootstrapHandoffFileAsync(buffer: BootstrapEventBuffer, options?: IWriteBootstrapHandoffOptions): Promise<string>;

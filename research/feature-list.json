@@ -131,7 +131,7 @@
       "Prevent plugins from inspecting modes, destinations, or thresholds",
       "Declare the supported Rush plugin API version in plugin manifests"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -142,7 +142,7 @@
       "Keep legacy output unchanged while events flow",
       "Validate telemetry and exit-code parity against the frozen baselines"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -154,7 +154,7 @@
       "Preserve the existing beforeLog hook through an adapter",
       "Add allowlist schema and leakage tests"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -166,7 +166,7 @@
       "Ensure reporters and diagnostic categories never select exit codes",
       "Preserve command-specific JSON schemas"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
