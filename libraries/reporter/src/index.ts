@@ -165,6 +165,25 @@ export {
 export type { IJsonControls } from './exit/CommandJson';
 export { separateJsonControls } from './exit/CommandJson';
 
+export type { ReporterName, ReporterLogLevel } from './config/ReporterNames';
+export {
+  SUPPORTED_REPORTER_NAMES,
+  SUPPORTED_LOG_LEVELS,
+  isSupportedReporterName,
+  isSupportedLogLevel
+} from './config/ReporterNames';
+export {
+  COPILOT_CLI_ENV_VAR,
+  KNOWN_CI_ENV_VARS,
+  isAgentVariableActive,
+  detectAgent,
+  isCiDetected
+} from './config/AgentDetection';
+export type { IReporterOutputTarget } from './config/OutputControl';
+export { parseOutputControl } from './config/OutputControl';
+export type { IReporterSelectionInput, IReporterSelection } from './config/ReporterSelection';
+export { resolveReporterSelection } from './config/ReporterSelection';
+
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,

@@ -39,6 +39,9 @@ export type BootstrapPrivacyClassification = 'public' | 'local-sensitive' | 'sec
 export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPrivacyClassification>): ReporterPrivacyClassification;
 
 // @beta
+export const COPILOT_CLI_ENV_VAR: 'COPILOT_CLI';
+
+// @beta
 export function createBeforeLogAdapter(hooks: readonly LegacyBeforeLogHook[]): (aggregate: ITelemetryAggregate) => void;
 
 // @beta
@@ -73,6 +76,9 @@ export function deleteBootstrapHandoffFileAsync(filePath: string): Promise<void>
 
 // @beta
 export function deriveExitCodeFromEvents(events: readonly IReporterEventEnvelope<unknown>[]): number;
+
+// @beta
+export function detectAgent(env: Record<string, string | undefined>, configuredVariables?: readonly string[]): boolean;
 
 // @beta
 export function encodeNdjsonRecord(value: unknown, options?: INdjsonOptions): string;
@@ -367,6 +373,15 @@ export interface IReporterManagerOptions {
 }
 
 // @beta
+export interface IReporterOutputTarget {
+    readonly params: {
+        readonly [key: string]: string;
+    };
+    readonly reporter: string;
+    readonly target: string;
+}
+
+// @beta
 export interface IReporterProtocolLimits {
     readonly bootstrapBufferBytes: number;
     readonly externalOutputChunkBytes: number;
@@ -383,6 +398,24 @@ export interface IReporterProtocolVersion {
 export interface IReporterRegistrationOptions {
     readonly destination?: string;
     readonly required?: boolean;
+}
+
+// @beta
+export interface IReporterSelection {
+    readonly additionalReporters: readonly ReporterName[];
+    readonly commandJson: boolean;
+    readonly logLevel: ReporterLogLevel;
+    readonly outputs: readonly IReporterOutputTarget[];
+    readonly primaryReporter: ReporterName;
+    readonly reason: string;
+}
+
+// @beta
+export interface IReporterSelectionInput {
+    readonly agentEnvironmentVariables?: readonly string[];
+    readonly argv: readonly string[];
+    readonly env: Record<string, string | undefined>;
+    readonly isTTY: boolean;
 }
 
 // @beta
@@ -463,7 +496,13 @@ export interface IRushSessionReportingOptions {
 }
 
 // @beta
+export function isAgentVariableActive(value: string | undefined): boolean;
+
+// @beta
 export function isBootstrapHandoffFileName(fileName: string): boolean;
+
+// @beta
+export function isCiDetected(env: Record<string, string | undefined>): boolean;
 
 // @beta
 export interface IScopedLogger {
@@ -519,6 +558,12 @@ export function isReporterExtensionEventName(name: string): boolean;
 export function isReporterProtocolCompatible(consumer: IReporterProtocolVersion, producer: IReporterProtocolVersion): boolean;
 
 // @beta
+export function isSupportedLogLevel(level: string): level is ReporterLogLevel;
+
+// @beta
+export function isSupportedReporterName(name: string): name is ReporterName;
+
+// @beta
 export function isValidRushDiagnosticCode(code: string): boolean;
 
 // @beta
@@ -550,6 +595,9 @@ export interface IWriteBootstrapHandoffOptions {
     readonly directory?: string;
     readonly pid?: number;
 }
+
+// @beta
+export const KNOWN_CI_ENV_VARS: readonly string[];
 
 // @beta
 export type LegacyBeforeLogHook = (telemetry: Record<string, unknown>) => void;
@@ -611,6 +659,9 @@ export type OperationStatus = 'ready' | 'executing' | 'success' | 'successWithWa
 export function parseEarlyReporterControls(argv: readonly string[], env: Record<string, string | undefined>): IEarlyReporterControls;
 
 // @beta
+export function parseOutputControl(value: string): IReporterOutputTarget;
+
+// @beta
 export function readBootstrapHandoffFileAsync(filePath: string): Promise<unknown[]>;
 
 // @beta
@@ -652,6 +703,9 @@ export type ReporterJsonValue = string | number | boolean | ReporterJsonNull | r
 };
 
 // @beta
+export type ReporterLogLevel = 'quiet' | 'normal' | 'verbose' | 'debug';
+
+// @beta
 export class ReporterManager implements IReporterEventSink {
     constructor(options?: IReporterManagerOptions);
     addReporter(reporter: IReporter, options?: IReporterRegistrationOptions): void;
@@ -681,6 +735,9 @@ export class ReporterMultiplexer implements IReporter {
 }
 
 // @beta
+export type ReporterName = 'default' | 'ai' | 'json' | 'plaintext' | 'file' | 'legacy';
+
+// @beta
 export type ReporterPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
 
 // @beta
@@ -691,6 +748,9 @@ export function resolveExitStatusFromEvents(events: readonly IReporterEventEnvel
 
 // @beta
 export function resolveReporterCompatibility(frontend: IReporterFrontendDescriptor, engine: IReporterEngineDescriptor): IReporterCompatibilityDecision;
+
+// @beta
+export function resolveReporterSelection(input: IReporterSelectionInput): IReporterSelection;
 
 // @beta
 export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly IRushDiagnosticCodeDefinition[];
@@ -745,6 +805,12 @@ export function separateJsonControls(argv: readonly string[]): IJsonControls;
 
 // @beta
 export function summarizeShadowResult(events: readonly IReporterEventEnvelope<unknown>[]): IShadowResultSummary;
+
+// @beta
+export const SUPPORTED_LOG_LEVELS: readonly ReporterLogLevel[];
+
+// @beta
+export const SUPPORTED_REPORTER_NAMES: readonly ReporterName[];
 
 // @beta
 export const TELEMETRY_AGGREGATE_KEYS: readonly string[];
