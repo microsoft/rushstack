@@ -230,3 +230,166 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - resolveExitStatus (success/warning-only/failure/cancel/signal precedence), signal codes, from-events (warning/error/op-failure/failed-result/category-independence/cancel/signal), separateJsonControls (5 cases) tests pass; all exports @beta
   Next: Feature 15/28 - Reporter selection + configuration controls with precedence
+
+[2026-07-14] Feature 15/28 COMPLETE: Reporter selection + configuration controls with precedence
+  Files (new):
+    - config/ReporterNames.ts (ReporterName default|ai|json|plaintext|file|legacy; ReporterLogLevel quiet|normal|verbose|debug; SUPPORTED_* + isSupported* guards)
+    - config/AgentDetection.ts (COPILOT_CLI_ENV_VAR, KNOWN_CI_ENV_VARS, isAgentVariableActive [inactive if undefined/''/0/false/no/off case-insens], detectAgent(env,configuredVars), isCiDetected)
+    - config/OutputControl.ts (IReporterOutputTarget, parseOutputControl '<reporter>://<target>?k=v')
+    - config/ReporterSelection.ts (resolveReporterSelection: primary precedence CLI --reporter > RUSH_REPORTER > agent > CI > TTY > non-TTY plaintext; log level independent CLI/aliases/RUSH_LOG_LEVEL default normal; contradiction throws; additional=['file'] unless primary file; commandJson preserved; unsupported reporter/level throws)
+    - test/ReporterSelection.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - Full resolver (Feature 8 was early subset). Orthogonal axes: reporter (format) vs log level (severity) per pnpm memory.
+    - Matrix: agent->ai+file, CI->plaintext+file, TTY->default+file, non-TTY->plaintext+file.
+    - --json (command) never aliases --reporter=json.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - primary precedence (explicit/env/agent/CI/TTY/non-TTY), additional file, unsupported-reporter throw, log-level aliases + contradiction + unsupported, command-json preserved, --output parse, agent-active semantics tests pass; all exports @beta
+  Next: Feature 16/28 - Independent per-reporter log levels
+
+[2026-07-14] Feature 16/28 COMPLETE: Independent per-reporter log levels
+  Files (new):
+    - config/LogLevelFilter.ts (LOG_LEVEL_RANK quiet0/normal1/verbose2/debug3; getEventMinimumLogLevel classifies events; shouldRenderAtLogLevel; filterEventsForLogLevel; FILE_REPORTER_DEFAULT_LOG_LEVEL='debug')
+    - test/LogLevelFilter.test.ts
+  Files (modified): index.ts, api.md
+  Classification (min level per §5.7): commandResult=quiet; diagnostic error=quiet, warning required=quiet else normal; lifecycle/operation/artifact=normal; activityChanged debug-message=debug else normal; externalOutput/externalProcess*=verbose; extension required=normal else debug.
+  Notes:
+    - Diagnostic severity separate from log level: severity sets min-level, reporter's configured level gates rendering. Test flips warning visibility by level, not severity.
+    - Monotonic: shown at level L -> shown at all higher levels.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - rank, classification, per-level rendering (quiet/normal/verbose/debug), monotonicity, severity-separation, filter, file-default tests pass; all exports @beta
+  Next: Feature 17/28 - Automatic reporter selection matrix by environment
+
+[2026-07-14] Feature 17/28 COMPLETE: Automatic reporter selection matrix by environment
+  Files (new):
+    - config/AutomaticReporterMatrix.ts (PlaintextVariant detailed|concise; IReporterPlanEntry; IAutomaticReporterPlan; isMachineReporter(json|ai); planAutomaticReporters(selection)->plan; describeReporterPlan for detailed log)
+    - test/AutomaticReporterMatrix.test.ts
+  Files (modified): index.ts, api.md
+  Matrix: agent->ai+file (machine stdout, human progress stderr); CI->plaintext[detailed]+file; TTY->default+file; non-TTY->plaintext[concise]+file. Emergency always stderr.
+  Notes:
+    - Composes Feature 15 resolveReporterSelection; plaintext variant from reason (CI detected->detailed else concise).
+    - Machine reporters (ai/json) own stdout exclusively -> stdoutOwner 'machine', humanProgressDestination 'stderr'. Applies to explicit --reporter=json too.
+    - describeReporterPlan records selection reason + reporters for the detailed (file/debug) log.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - agent/CI/TTY/non-TTY matrix, json machine stdout, emergency stderr, isMachineReporter, describeReporterPlan tests pass; all exports @beta
+  Next: Feature 18/28 - Default interactive reporter (three-row live region)
+
+[2026-07-14] Feature 18/28 COMPLETE: Default interactive reporter (three-row live region)
+  Files (new):
+    - reporters/InteractiveRendering.ts (SPINNER_FRAMES, MIN_REFRESH_INTERVAL_MS=100; resolveColorEnabled NO_COLOR>FORCE_COLOR>isTTY; createColorizer; truncateToWidth; renderActiveProjectsRow +N more; renderLiveRegion 3 rows [color applied AFTER truncation]; shouldRefresh)
+    - reporters/DefaultInteractiveReporter.ts (IReporter; injected IInteractiveTerminal + nowMs; state from events; throttled paint <=10Hz; cursor hide/show ANSI; success<=3 lines; failure bounded diag block <=10 + Log path; watchCycleCompleted summary; non-TTY skips live region but writes final)
+    - test/DefaultInteractiveReporter.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - Color applied after truncateToWidth so ANSI never affects width/split mid-code.
+    - Resize-aware: reads terminal.columns each paint.
+    - Testable via FakeTerminal capturing writes + injected clock.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - color resolution, colorizer, truncate, +N more, 3-row render, throttle; reporter hide/paint/throttle, success line + cursor restore, failure diag+log, watch summary, non-TTY tests pass; all exports @beta
+  Next: Feature 19/28 - Plaintext and non-TTY reporter
+
+[2026-07-14] Feature 19/28 COMPLETE: Plaintext and non-TTY reporter
+  Files (new):
+    - reporters/PlaintextReporter.ts (IReporter; append-only via injected write; no cursor codes; color off default; variant concise|detailed; emits Starting line, terminal status lines, [severity] code diagnostics, final result; emitHeartbeatIfDue 30s; detailed groups externalOutput under ==[ project (phase) ]== StreamCollator-like)
+    - test/PlaintextReporter.test.ts + __snapshots__/PlaintextReporter.test.ts.snap (concise + detailed)
+  Files (modified): index.ts, api.md
+  Notes:
+    - No-ANSI assertion (append-only, no cursor, color off). Heartbeat interval-based via injected clock (report resets lastOutput).
+    - Detailed buffers external output per operationId, flushes under header on terminal status.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - no-ANSI, concise snapshot, detailed grouping snapshot, heartbeat timing tests pass; all exports @beta
+  Next: Feature 20/28 - JSON and AI reporters
+
+[2026-07-14] Feature 20/28 COMPLETE: JSON and AI reporters
+  Files (new):
+    - reporters/JsonReporter.ts (IReporter; encodeNdjsonRecord per event to exclusive stdout; oversized -> rush.reporter.recordTooLarge marker so stream stays valid NDJSON)
+    - reporters/AiReporter.ts (IReporter; ai.status on commandStarted; ai.final on commandResult/close; IAiFinalRecord result/exitCode/scope{commandName,failedProjects}/errorCodes/diagnosticCategoryCounts/diagnostics(remediation)/counts/log{path,format,complete}; caps 64KiB + 20 diagnostics; warnings by count when failures else warning-only details; excludes raw external output/stacks; byte-cap trims diagnostics->errorCodes->failedProjects)
+    - test/JsonAiReporter.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - Fixed byte-cap: trim errorCodes/failedProjects too (base record with many long codes exceeded tiny maxBytes otherwise). Real cap 64KiB.
+    - Log path in AI final.log.path (local) but telemetry aggregate cross-check asserts path NOT present.
+    - stdout purity: every emitted line parses as JSON.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - JSON stream + oversized marker; AI status+final, log/scope/codes/remediation, 20-cap, 64KiB byte-cap trim, warnings-by-count vs warning-only, raw-excluded, stdout purity, telemetry path cross-check tests pass; all exports @beta
+  Next: Feature 21/28 - Full-detail file reporter (retention + fallback)
+
+[2026-07-14] Feature 21/28 COMPLETE: Full-detail file reporter (retention + fallback)
+  Files (new):
+    - reporters/FileReporter.ts (IReporter; RUSH_LOGS_DIR_NAME 'rush-logs', LATEST_LOG_NAME 'latest.log'; buffers lines, writes NDJSON at debug to <commonTemp>/rush-logs/<UTC ts>-<pid>-<action>.log; owner-only 0o600; redacts secret fields ->[secret], keeps local-sensitive; latest.log symlink/copy for success+failure; retention delete >14d + cap 20; OS-temp fallback; both-fail nonfatal emergencyWarn + getArtifact().available=false)
+    - test/FileReporter.test.ts (real temp dirs)
+  Files (modified): index.ts, api.md
+  Notes:
+    - report() buffers; _writeAsync (flush/close) resolves target lazily: try repoDir then osTempDir; appendFile new lines.
+    - Timestamp filename: toISOString().replace(/[:.]/g,'-'). rush purge removes the rush-logs dir (path convention).
+    - Test mode check uses %0o1000 (no-bitwise lint), guarded on non-win32.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - write+perms+latest, latest-on-failure, secret redaction, retention (old delete + cap 20), OS-temp fallback, both-fail nonfatal tests pass; all exports @beta
+  Next: Feature 22/28 - Legacy reporter (selectable + emergency fallback)
+
+[2026-07-14] Feature 22/28 COMPLETE: Legacy reporter (selectable + emergency fallback)
+  Files (new):
+    - reporters/LegacyReporter.ts (IReporter name 'legacy'; reproduces Starting line, "Executing a maximum of N...", 79-wide ==[ project (phase) ]==...[ n of total ]== headers, grouped externalOutput, SUCCESS/FAILURE summary with per-project + total durations; RUSH_REPORTER_ENV_VAR; isLegacyEmergencyFallbackRequested case-insensitive)
+    - test/LegacyReporter.test.ts + __snapshots__/LegacyReporter.test.ts.snap (success + failure)
+  Files (modified): index.ts, api.md
+  Notes:
+    - Legacy snapshots reproduce Feature 7 frozen legacy format EXACTLY (same 79-wide header padding, SUCCESS/FAILURE blocks, ==> ERROR line). Durations normalized X.XX.
+    - Emergency fallback: feature 15 resolveReporterSelection selects 'legacy' via RUSH_REPORTER=legacy (validated); isLegacyEmergencyFallbackRequested helper.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - success/failure snapshots, frozen-marker validation, emergency-fallback detection + selection tests pass; all exports @beta
+  Next: Feature 23/28 - Replace StreamCollator in primary path with raw semantic events
+
+[2026-07-14] Feature 23/28 COMPLETE: Replace StreamCollator with raw semantic events
+  Files (new):
+    - scheduler/OperationStreamEmitter.ts (registerOperation, changeStatus, writeOutput [uncollated 64KiB chunked externalOutput, local-sensitive], completeCommand; emits raw events in call order = NOT collated)
+    - scheduler/OperationOutputGrouping.ts (iterateExternalOutput -> ordered IExternalOutputChunk[] for matchers; regroupOperationOutput -> Map<opId,string> per-op parity)
+    - test/OperationStreamEmitter.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - Uncollated: interleaved writeOutput emits in call order. Parity proven: detailed PlaintextReporter regroups interleaved stream (A1,A2 before B1); regroupOperationOutput reconstructs per-op.
+    - Concise DefaultInteractiveReporter never echoes raw project output (derives activity without buffering).
+    - Same uncollated stream feeds problem matchers via iterateExternalOutput (Feature 24 owns matchers).
+    - StreamCollator replacement = OperationStreamEmitter (source of truth). Actual rush-lib @rushstack/stream-collator removal from primary path is a rollout step (not modifying rush-lib live); package removal deferred per spec.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - emitter events/scope, chunking, uncollated order, regroup parity, detailed-plaintext regroup, concise no-buffer tests pass; all exports @beta
+  Next: Feature 24/28 - External output preservation + problem matchers
+
+[2026-07-14] Feature 24/28 COMPLETE: External output preservation + problem matchers
+  Files (new):
+    - matchers/AnsiNormalization.ts (normalizeAnsi strips CSI codes)
+    - matchers/ProblemMatcher.ts (IProblemMatcher {name,tool,severity,pattern,enabledByDefault,matchesVersion?,extract}, IProblemMatch)
+    - matchers/ProblemMatcherRegistry.ts (register, getMatchers(tool,{version,includeDisabled}) - tool+version scope + default-enablement gate)
+    - matchers/ProblemMatcherRunner.ts (runProblemMatchers: reassembles lines per op across chunks, ANSI-normalized copy, linked RUSH_EXTERNAL_TOOL_PROBLEM diagnostics w/ source+relatedArtifactIds, dedup cap, unmatched preserved; raw events NEVER modified)
+    - test/ProblemMatchers.test.ts
+  Files (modified): diagnostics/RushDiagnosticCodeRegistry.ts (APPENDED RUSH_EXTERNAL_TOOL_PROBLEM code+template), index.ts, api.md
+  Notes:
+    - Consumes Feature 23 uncollated externalOutput stream (iterateExternalOutput). Split-chunk reassembly per operationId. Evidence preserved (events unchanged, asserted via JSON equal).
+    - Duplicate cap (maxDuplicates default 3). Default-enablement gate via enabledByDefault + corpus test.
+    - Old Heft routed via version-scoped matcher (registry.getMatchers('heft',{version:'0.9.0'})). Reporter self-contained (no @rushstack/problem-matcher dep).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - normalizeAnsi, registry scope/gate, recover+link+evidence-preserve, split-chunk+ANSI, dedup cap, corpus tests pass; all exports @beta
+  Next: Feature 25/28 - Prohibit new AlreadyReportedError + bridge legacy sentinels
+
+[2026-07-14] Feature 25/28 COMPLETE: Prohibit new AlreadyReportedError + bridge legacy sentinels
+  Files (new):
+    - compat/LegacyErrorBridge.ts (ALREADY_REPORTED_ERROR_NAME; AlreadyReportedError class @deprecated=prohibition; isAlreadyReportedSentinel; LegacyErrorBridge {recordEmittedDiagnostic, ingest(diagnosticEmitted->id), correlate/getCorrelatedDiagnosticId via symbol, shouldSuppressRendering}; LEGACY_ERROR_BRIDGE_REMOVAL_CRITERIA 3 items)
+    - test/LegacyErrorBridge.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - Prohibition encoded as @deprecated on AlreadyReportedError (api.md shows "// @beta @deprecated"); replacement = structured diagnostic + RushError.
+    - shouldSuppressRendering: sentinel->true; RushError whose diagnosticId already emitted->true; correlated error with emitted id->true; else false (catch boundaries render only unrepresented failures).
+    - Removal plan constant documents criteria (zero first-party usages, plugin migration guidance published, ecosystem notice/time).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - sentinel detection, removal criteria, suppress sentinel/RushError-emitted/correlated, record direct+ingest tests pass; all exports @beta
+  Next: Feature 26/28 - Heft integration via negotiated child descriptors + raw-stream fallback

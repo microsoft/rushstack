@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add the JSON reporter that emits the complete NDJSON event stream and the bounded AI reporter with a 64 KiB, 20-diagnostic projection carrying result, scope, codes, remediation, counts, and log reference",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

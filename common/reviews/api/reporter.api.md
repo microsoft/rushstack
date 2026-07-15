@@ -5,6 +5,29 @@
 ```ts
 
 // @beta
+export class AiReporter implements IReporter {
+    constructor(options: IAiReporterOptions);
+    // (undocumented)
+    closeAsync(): Promise<void>;
+    // (undocumented)
+    flushAsync(): Promise<void>;
+    // (undocumented)
+    initializeAsync(): Promise<void>;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    report(event: IReporterEventEnvelope<unknown>): void;
+}
+
+// @beta
+export const ALREADY_REPORTED_ERROR_NAME: 'AlreadyReportedError';
+
+// @beta @deprecated
+export class AlreadyReportedError extends Error {
+    constructor(message?: string);
+}
+
+// @beta
 export const BOOTSTRAP_BUFFER_MAX_BYTES: number;
 
 // @beta
@@ -39,7 +62,13 @@ export type BootstrapPrivacyClassification = 'public' | 'local-sensitive' | 'sec
 export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPrivacyClassification>): ReporterPrivacyClassification;
 
 // @beta
+export const COPILOT_CLI_ENV_VAR: 'COPILOT_CLI';
+
+// @beta
 export function createBeforeLogAdapter(hooks: readonly LegacyBeforeLogHook[]): (aggregate: ITelemetryAggregate) => void;
+
+// @beta
+export function createColorizer(enabled: boolean): IColorizer;
 
 // @beta
 export function createEngineSink(providedSink?: IReporterEventSink): IEngineSinkResolution;
@@ -69,10 +98,31 @@ export const DEFAULT_HANDOFF_RETENTION_MS: number;
 export const DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS: number;
 
 // @beta
+export class DefaultInteractiveReporter implements IReporter {
+    constructor(options: IDefaultInteractiveReporterOptions);
+    // (undocumented)
+    closeAsync(): Promise<void>;
+    // (undocumented)
+    flushAsync(): Promise<void>;
+    // (undocumented)
+    initializeAsync(): Promise<void>;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    report(event: IReporterEventEnvelope<unknown>): void;
+}
+
+// @beta
 export function deleteBootstrapHandoffFileAsync(filePath: string): Promise<void>;
 
 // @beta
 export function deriveExitCodeFromEvents(events: readonly IReporterEventEnvelope<unknown>[]): number;
+
+// @beta
+export function describeReporterPlan(plan: IAutomaticReporterPlan): string;
+
+// @beta
+export function detectAgent(env: Record<string, string | undefined>, configuredVariables?: readonly string[]): boolean;
 
 // @beta
 export function encodeNdjsonRecord(value: unknown, options?: INdjsonOptions): string;
@@ -84,10 +134,114 @@ export const EXIT_CODE_FAILURE: 1;
 export const EXIT_CODE_SUCCESS: 0;
 
 // @beta
+export const FILE_REPORTER_DEFAULT_LOG_LEVEL: ReporterLogLevel;
+
+// @beta
+export class FileReporter implements IReporter {
+    constructor(options?: IFileReporterOptions);
+    // (undocumented)
+    closeAsync(): Promise<void>;
+    // (undocumented)
+    flushAsync(): Promise<void>;
+    getArtifact(): IFileReporterArtifact;
+    // (undocumented)
+    initializeAsync(): Promise<void>;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    report(event: IReporterEventEnvelope<unknown>): void;
+}
+
+// @beta
+export function filterEventsForLogLevel(logLevel: ReporterLogLevel, events: readonly IReporterEventEnvelope<unknown>[]): IReporterEventEnvelope<unknown>[];
+
+// @beta
+export function getEventMinimumLogLevel(event: IReporterEventEnvelope<unknown>): ReporterLogLevel;
+
+// @beta
+export function getLogLevelRank(level: ReporterLogLevel): number;
+
+// @beta
 export function getPrivacyClassificationRank(classification: ReporterPrivacyClassification): number;
 
 // @beta
 export function getSignalExitCode(signal: NodeJS.Signals): number;
+
+// @beta
+export interface IAiDiagnostic {
+    // (undocumented)
+    readonly category: string;
+    // (undocumented)
+    readonly code: string;
+    // (undocumented)
+    readonly remediation?: readonly IRushRemediationAction[];
+    // (undocumented)
+    readonly severity: string;
+}
+
+// @beta
+export interface IAiFinalRecord {
+    // (undocumented)
+    readonly diagnosticCategoryCounts: {
+        readonly [category: string]: number;
+    };
+    // (undocumented)
+    readonly diagnostics: readonly IAiDiagnostic[];
+    // (undocumented)
+    readonly errorCodes: readonly string[];
+    // (undocumented)
+    readonly errorCount: number;
+    // (undocumented)
+    readonly exitCode: number;
+    // (undocumented)
+    readonly kind: 'ai.final';
+    // (undocumented)
+    readonly log?: IAiLogReference;
+    // (undocumented)
+    readonly operationCounts: {
+        readonly [status: string]: number;
+    };
+    // (undocumented)
+    readonly protocolVersion: IReporterProtocolVersion;
+    // (undocumented)
+    readonly result: 'succeeded' | 'failed';
+    // (undocumented)
+    readonly scope: {
+        readonly commandName?: string;
+        readonly failedProjects: readonly string[];
+    };
+    // (undocumented)
+    readonly truncated: boolean;
+    // (undocumented)
+    readonly warningCount: number;
+}
+
+// @beta
+export interface IAiLogReference {
+    // (undocumented)
+    readonly complete: boolean;
+    // (undocumented)
+    readonly format?: string;
+    // (undocumented)
+    readonly path: string;
+}
+
+// @beta
+export interface IAiReporterOptions {
+    readonly maxBytes?: number;
+    readonly maxDetailedDiagnostics?: number;
+    readonly write: (text: string) => void;
+}
+
+// @beta
+export interface IAutomaticReporterPlan {
+    readonly emergencyDestination: 'stderr';
+    readonly entries: readonly IReporterPlanEntry[];
+    readonly humanProgressDestination: 'stdout' | 'stderr';
+    readonly primary: IReporterPlanEntry;
+    readonly reason: string;
+    readonly stdoutOwner: 'machine' | 'human';
+}
 
 // @beta
 export interface IBootstrapEventBufferOptions {
@@ -137,6 +291,22 @@ export interface IClassifiedDiagnosticValue {
 }
 
 // @beta
+export interface IColorizer {
+    // (undocumented)
+    bold(text: string): string;
+    // (undocumented)
+    cyan(text: string): string;
+    // (undocumented)
+    dim(text: string): string;
+    // (undocumented)
+    green(text: string): string;
+    // (undocumented)
+    red(text: string): string;
+    // (undocumented)
+    yellow(text: string): string;
+}
+
+// @beta
 export interface ICommandCompletedPayload {
     readonly commandName: string;
     readonly durationMs?: number;
@@ -183,6 +353,15 @@ export interface ICreateScopedReporterOptions {
 }
 
 // @beta
+export interface IDefaultInteractiveReporterOptions {
+    readonly color?: boolean;
+    readonly logPath?: string;
+    readonly minRefreshIntervalMs?: number;
+    readonly nowMs?: () => number;
+    readonly terminal: IInteractiveTerminal;
+}
+
+// @beta
 export interface IEarlyReporterControls {
     readonly logLevel?: string;
     readonly reporter?: string;
@@ -195,9 +374,59 @@ export interface IEngineSinkResolution {
 }
 
 // @beta
+export interface IExternalOutputChunk {
+    readonly operationId?: string;
+    readonly stream: string;
+    readonly text: string;
+}
+
+// @beta
+export interface IFileReporterArtifact {
+    readonly available: boolean;
+    readonly path?: string;
+}
+
+// @beta
+export interface IFileReporterOptions {
+    readonly actionName?: string;
+    readonly commonTempFolder?: string;
+    readonly emergencyWarn?: (message: string) => void;
+    readonly maxSessions?: number;
+    readonly nowMs?: () => number;
+    readonly osTempFolder?: string;
+    readonly pid?: number;
+    readonly retentionDays?: number;
+}
+
+// @beta
+export interface IGetMatchersOptions {
+    readonly includeDisabled?: boolean;
+    readonly version?: string;
+}
+
+// @beta
+export interface IInteractiveTerminal {
+    readonly columns: number;
+    readonly isTTY: boolean;
+    write(text: string): void;
+}
+
+// @beta
 export interface IJsonControls {
     readonly commandJson: boolean;
     readonly reporterJson: boolean;
+}
+
+// @beta
+export interface IJsonReporterOptions {
+    readonly maxRecordBytes?: number;
+    readonly write: (text: string) => void;
+}
+
+// @beta
+export interface ILegacyReporterOptions {
+    readonly maxParallelism?: number;
+    readonly write: (text: string) => void;
 }
 
 // @beta
@@ -207,6 +436,16 @@ export interface ILifecycleEmitterOptions {
     readonly sessionId: string;
     readonly sink: IReporterEventSink;
     readonly source: IReporterEventSource;
+}
+
+// @beta
+export interface ILiveRegionState {
+    readonly activeProjects: readonly string[];
+    readonly commandName?: string;
+    readonly completedOperations: number;
+    readonly failedOperations: number;
+    readonly latestActivity: string;
+    readonly totalOperations: number;
 }
 
 // @beta
@@ -234,6 +473,60 @@ export interface IOperationRegisteredPayload {
 export interface IOperationStatusChangedPayload {
     readonly operationId: string;
     readonly status: OperationStatus;
+}
+
+// @beta
+export interface IOperationStreamEmitterOptions {
+    readonly maxChunkBytes?: number;
+    readonly protocolVersion?: IReporterProtocolVersion;
+    readonly scope?: IReporterEventScope;
+    readonly sessionId: string;
+    readonly sink: IReporterEventSink;
+    readonly source: IReporterEventSource;
+}
+
+// @beta
+export interface IPlaintextReporterOptions {
+    readonly color?: boolean;
+    readonly heartbeatIntervalMs?: number;
+    readonly nowMs?: () => number;
+    readonly variant?: PlaintextVariant;
+    readonly write: (text: string) => void;
+}
+
+// @beta
+export interface IProblemMatch {
+    readonly code?: string;
+    readonly column?: number;
+    readonly file?: string;
+    readonly line?: number;
+    readonly message: string;
+}
+
+// @beta
+export interface IProblemMatcher {
+    readonly enabledByDefault: boolean;
+    extract(match: RegExpMatchArray): IProblemMatch;
+    matchesVersion?(version: string): boolean;
+    readonly name: string;
+    readonly pattern: RegExp;
+    readonly severity: RushDiagnosticSeverity;
+    readonly tool: string;
+}
+
+// @beta
+export interface IProblemMatcherResult {
+    readonly diagnostics: readonly IRushDiagnostic[];
+    readonly matchedLineCount: number;
+    readonly suppressedDuplicateCount: number;
+    readonly unmatchedLineCount: number;
+}
+
+// @beta
+export interface IRenderLiveRegionOptions {
+    readonly color: IColorizer;
+    readonly spinnerFrame: string;
+    readonly width: number;
 }
 
 // @beta
@@ -367,6 +660,24 @@ export interface IReporterManagerOptions {
 }
 
 // @beta
+export interface IReporterOutputTarget {
+    readonly params: {
+        readonly [key: string]: string;
+    };
+    readonly reporter: string;
+    readonly target: string;
+}
+
+// @beta
+export interface IReporterPlanEntry {
+    readonly destination: string;
+    readonly machine: boolean;
+    readonly reporter: ReporterName;
+    readonly role: 'primary' | 'additional';
+    readonly variant?: PlaintextVariant;
+}
+
+// @beta
 export interface IReporterProtocolLimits {
     readonly bootstrapBufferBytes: number;
     readonly externalOutputChunkBytes: number;
@@ -386,6 +697,24 @@ export interface IReporterRegistrationOptions {
 }
 
 // @beta
+export interface IReporterSelection {
+    readonly additionalReporters: readonly ReporterName[];
+    readonly commandJson: boolean;
+    readonly logLevel: ReporterLogLevel;
+    readonly outputs: readonly IReporterOutputTarget[];
+    readonly primaryReporter: ReporterName;
+    readonly reason: string;
+}
+
+// @beta
+export interface IReporterSelectionInput {
+    readonly agentEnvironmentVariables?: readonly string[];
+    readonly argv: readonly string[];
+    readonly env: Record<string, string | undefined>;
+    readonly isTTY: boolean;
+}
+
+// @beta
 export interface IResolveExitStatusFromEventsOptions {
     readonly cancelled?: boolean;
     readonly signal?: NodeJS.Signals;
@@ -396,6 +725,11 @@ export interface IResolveExitStatusOptions {
     readonly cancelled?: boolean;
     readonly hasFailures?: boolean;
     readonly signal?: NodeJS.Signals;
+}
+
+// @beta
+export interface IRunProblemMatchersOptions {
+    readonly maxDuplicates?: number;
 }
 
 // @beta
@@ -463,7 +797,16 @@ export interface IRushSessionReportingOptions {
 }
 
 // @beta
+export function isAgentVariableActive(value: string | undefined): boolean;
+
+// @beta
+export function isAlreadyReportedSentinel(error: unknown): boolean;
+
+// @beta
 export function isBootstrapHandoffFileName(fileName: string): boolean;
+
+// @beta
+export function isCiDetected(env: Record<string, string | undefined>): boolean;
 
 // @beta
 export interface IScopedLogger {
@@ -510,6 +853,12 @@ export interface IShadowResultSummary {
 }
 
 // @beta
+export function isLegacyEmergencyFallbackRequested(env: Record<string, string | undefined>): boolean;
+
+// @beta
+export function isMachineReporter(reporter: ReporterName): boolean;
+
+// @beta
 export function isPluginApiVersionSupported(declaredApiVersion: string, supportedApiVersion?: string): boolean;
 
 // @beta
@@ -517,6 +866,12 @@ export function isReporterExtensionEventName(name: string): boolean;
 
 // @beta
 export function isReporterProtocolCompatible(consumer: IReporterProtocolVersion, producer: IReporterProtocolVersion): boolean;
+
+// @beta
+export function isSupportedLogLevel(level: string): level is ReporterLogLevel;
+
+// @beta
+export function isSupportedReporterName(name: string): name is ReporterName;
 
 // @beta
 export function isValidRushDiagnosticCode(code: string): boolean;
@@ -540,6 +895,9 @@ export interface ITelemetryAggregate {
 }
 
 // @beta
+export function iterateExternalOutput(events: readonly IReporterEventEnvelope<unknown>[]): IExternalOutputChunk[];
+
+// @beta
 export interface IWatchCycleCompletedPayload {
     readonly changedProjects?: readonly string[];
     readonly succeeded: boolean;
@@ -552,12 +910,60 @@ export interface IWriteBootstrapHandoffOptions {
 }
 
 // @beta
+export class JsonReporter implements IReporter {
+    constructor(options: IJsonReporterOptions);
+    // (undocumented)
+    closeAsync(): Promise<void>;
+    // (undocumented)
+    flushAsync(): Promise<void>;
+    // (undocumented)
+    initializeAsync(): Promise<void>;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    report(event: IReporterEventEnvelope<unknown>): void;
+}
+
+// @beta
+export const KNOWN_CI_ENV_VARS: readonly string[];
+
+// @beta
+export const LATEST_LOG_NAME: 'latest.log';
+
+// @beta
+export const LEGACY_ERROR_BRIDGE_REMOVAL_CRITERIA: readonly string[];
+
+// @beta
 export type LegacyBeforeLogHook = (telemetry: Record<string, unknown>) => void;
+
+// @beta
+export class LegacyErrorBridge {
+    correlate(error: unknown, diagnosticId: string): void;
+    getCorrelatedDiagnosticId(error: unknown): string | undefined;
+    ingest(event: IReporterEventEnvelope<unknown>): void;
+    recordEmittedDiagnostic(diagnosticId: string): void;
+    shouldSuppressRendering(error: unknown): boolean;
+}
 
 // @beta
 export class LegacyFallbackSink implements IReporterEventSink {
     // (undocumented)
     emit(): string;
+}
+
+// @beta
+export class LegacyReporter implements IReporter {
+    constructor(options: ILegacyReporterOptions);
+    // (undocumented)
+    closeAsync(): Promise<void>;
+    // (undocumented)
+    flushAsync(): Promise<void>;
+    // (undocumented)
+    initializeAsync(): Promise<void>;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    report(event: IReporterEventEnvelope<unknown>): void;
 }
 
 // @beta
@@ -583,6 +989,9 @@ export class LifecycleEmitter {
 }
 
 // @beta
+export const MIN_REFRESH_INTERVAL_MS: number;
+
+// @beta
 export class NdjsonDecoder {
     constructor(options?: INdjsonOptions);
     decode(chunk: string): unknown[];
@@ -599,6 +1008,9 @@ export class NdjsonRecordTooLargeError extends Error {
 export function negotiateReporterHello(hello: IReporterHello, options: IReporterHandshakeOptions): IReporterHandshakeResult;
 
 // @beta
+export function normalizeAnsi(text: string): string;
+
+// @beta
 export class OldEngineOutputAdapter {
     constructor(options: IOldEngineOutputAdapterOptions);
     capture(stream: 'stdout' | 'stderr', text: string): string[];
@@ -608,10 +1020,61 @@ export class OldEngineOutputAdapter {
 export type OperationStatus = 'ready' | 'executing' | 'success' | 'successWithWarnings' | 'failure' | 'blocked' | 'skipped' | 'fromCache' | 'noOp';
 
 // @beta
+export class OperationStreamEmitter {
+    constructor(options: IOperationStreamEmitterOptions);
+    changeStatus(operationId: string, status: OperationStatus, durationMs?: number): string;
+    completeCommand(commandName: string, succeeded: boolean, exitCode: number, operationCounts?: {
+        readonly [status: string]: number;
+    }): string;
+    registerOperation(operationId: string, projectName?: string, phaseName?: string): string;
+    writeOutput(operationId: string, stream: 'stdout' | 'stderr', text: string): string[];
+}
+
+// @beta
 export function parseEarlyReporterControls(argv: readonly string[], env: Record<string, string | undefined>): IEarlyReporterControls;
 
 // @beta
+export function parseOutputControl(value: string): IReporterOutputTarget;
+
+// @beta
+export class PlaintextReporter implements IReporter {
+    constructor(options: IPlaintextReporterOptions);
+    // (undocumented)
+    closeAsync(): Promise<void>;
+    emitHeartbeatIfDue(): boolean;
+    // (undocumented)
+    flushAsync(): Promise<void>;
+    // (undocumented)
+    initializeAsync(): Promise<void>;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    report(event: IReporterEventEnvelope<unknown>): void;
+}
+
+// @beta
+export type PlaintextVariant = 'detailed' | 'concise';
+
+// @beta
+export function planAutomaticReporters(selection: IReporterSelection): IAutomaticReporterPlan;
+
+// @beta
+export class ProblemMatcherRegistry {
+    getMatchers(tool: string, options?: IGetMatchersOptions): IProblemMatcher[];
+    register(matcher: IProblemMatcher): void;
+}
+
+// @beta
 export function readBootstrapHandoffFileAsync(filePath: string): Promise<unknown[]>;
+
+// @beta
+export function regroupOperationOutput(events: readonly IReporterEventEnvelope<unknown>[]): Map<string, string>;
+
+// @beta
+export function renderActiveProjectsRow(projects: readonly string[], width: number): string;
+
+// @beta
+export function renderLiveRegion(state: ILiveRegionState, options: IRenderLiveRegionOptions): string[];
 
 // @beta
 export const REPORTER_EVENT_TYPES: readonly ReporterEventType[];
@@ -652,6 +1115,9 @@ export type ReporterJsonValue = string | number | boolean | ReporterJsonNull | r
 };
 
 // @beta
+export type ReporterLogLevel = 'quiet' | 'normal' | 'verbose' | 'debug';
+
+// @beta
 export class ReporterManager implements IReporterEventSink {
     constructor(options?: IReporterManagerOptions);
     addReporter(reporter: IReporter, options?: IReporterRegistrationOptions): void;
@@ -681,7 +1147,13 @@ export class ReporterMultiplexer implements IReporter {
 }
 
 // @beta
+export type ReporterName = 'default' | 'ai' | 'json' | 'plaintext' | 'file' | 'legacy';
+
+// @beta
 export type ReporterPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
+
+// @beta
+export function resolveColorEnabled(env: Record<string, string | undefined>, isTTY: boolean): boolean;
 
 // @beta
 export function resolveExitStatus(options: IResolveExitStatusOptions): IRushExitStatus;
@@ -691,6 +1163,12 @@ export function resolveExitStatusFromEvents(events: readonly IReporterEventEnvel
 
 // @beta
 export function resolveReporterCompatibility(frontend: IReporterFrontendDescriptor, engine: IReporterEngineDescriptor): IReporterCompatibilityDecision;
+
+// @beta
+export function resolveReporterSelection(input: IReporterSelectionInput): IReporterSelection;
+
+// @beta
+export function runProblemMatchers(events: readonly IReporterEventEnvelope<unknown>[], matchers: readonly IProblemMatcher[], options?: IRunProblemMatchersOptions): IProblemMatcherResult;
 
 // @beta
 export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly IRushDiagnosticCodeDefinition[];
@@ -707,10 +1185,16 @@ export const RUSH_DIAGNOSTIC_TEMPLATES: {
 export const RUSH_INTERNAL_ERROR_CODE: 'RUSH_INTERNAL_UNEXPECTED';
 
 // @beta
+export const RUSH_LOGS_DIR_NAME: 'rush-logs';
+
+// @beta
 export const RUSH_PLUGIN_API_VERSION: '1.0.0';
 
 // @beta
 export const RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_HANDOFF';
+
+// @beta
+export const RUSH_REPORTER_ENV_VAR: 'RUSH_REPORTER';
 
 // @beta
 export type RushCommandOutcome = 'succeeded' | 'failed' | 'cancelled' | 'signal';
@@ -744,7 +1228,22 @@ export class RushSessionReporting {
 export function separateJsonControls(argv: readonly string[]): IJsonControls;
 
 // @beta
+export function shouldRefresh(lastPaintMs: number, nowMs: number, minIntervalMs?: number): boolean;
+
+// @beta
+export function shouldRenderAtLogLevel(logLevel: ReporterLogLevel, event: IReporterEventEnvelope<unknown>): boolean;
+
+// @beta
+export const SPINNER_FRAMES: readonly string[];
+
+// @beta
 export function summarizeShadowResult(events: readonly IReporterEventEnvelope<unknown>[]): IShadowResultSummary;
+
+// @beta
+export const SUPPORTED_LOG_LEVELS: readonly ReporterLogLevel[];
+
+// @beta
+export const SUPPORTED_REPORTER_NAMES: readonly ReporterName[];
 
 // @beta
 export const TELEMETRY_AGGREGATE_KEYS: readonly string[];
@@ -759,6 +1258,9 @@ export class TelemetrySubscriber {
     ingest(event: IReporterEventEnvelope<unknown>): void;
     setReporterMode(reporterMode: string): void;
 }
+
+// @beta
+export function truncateToWidth(text: string, width: number): string;
 
 // @beta
 export function writeBootstrapHandoffFileAsync(buffer: BootstrapEventBuffer, options?: IWriteBootstrapHandoffOptions): Promise<string>;

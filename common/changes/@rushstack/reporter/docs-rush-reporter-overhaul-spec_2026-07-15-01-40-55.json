@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add the legacy error bridge that correlates AlreadyReportedError sentinels with emitted diagnostics and suppresses duplicate rendering, and deprecate AlreadyReportedError to prohibit new usage",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

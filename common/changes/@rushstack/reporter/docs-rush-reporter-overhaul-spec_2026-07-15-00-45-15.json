@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add independent per-reporter log-level filtering (quiet/normal/verbose/debug) with event classification, keeping diagnostic severity separate, and default the file reporter to debug",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
