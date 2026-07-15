@@ -5,12 +5,10 @@ import * as path from 'node:path';
 
 import { escapePath as globEscape } from 'fast-glob';
 
-import { Sort, Import, Path } from '@rushstack/node-core-library';
+import { Sort, Path } from '@rushstack/node-core-library';
 
 import { BaseWorkspaceFile } from '../base/BaseWorkspaceFile';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
-
-const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
 /**
  * This interface represents the raw pnpm-workspace.YAML file
@@ -118,8 +116,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     this._minimumReleaseAgeExclude = minimumReleaseAgeExclude;
   }
 
-  /** @override */
-  public addPackage(packagePath: string): void {
+  public override addPackage(packagePath: string): void {
     // Ensure the path is relative to the pnpm-workspace.yaml file
     if (path.isAbsolute(packagePath)) {
       packagePath = path.relative(path.dirname(this.workspaceFilename), packagePath);
@@ -130,8 +127,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     this._workspacePackages.add(globEscape(globPath));
   }
 
-  /** @override */
-  protected serialize(): string {
+  protected override async serializeAsync(): Promise<string> {
     // Ensure stable sort order when serializing
     Sort.sortSet(this._workspacePackages);
 
@@ -151,6 +147,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     workspaceYaml.minimumReleaseAge = this._minimumReleaseAge;
     workspaceYaml.minimumReleaseAgeExclude = this._minimumReleaseAgeExclude;
 
+    const yamlModule: typeof import('js-yaml') = await import('js-yaml');
     return yamlModule.dump(workspaceYaml, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
 }

@@ -535,7 +535,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // Save the generated workspace file. Don't update the file timestamp unless the content has changed,
     // since "rush install" will consider this timestamp
-    workspaceFile.save(workspaceFile.workspaceFilename, { onlyIfChanged: true });
+    await workspaceFile.saveAsync(workspaceFile.workspaceFilename, { onlyIfChanged: true });
 
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
   }
