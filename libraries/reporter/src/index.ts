@@ -241,6 +241,11 @@ export {
   isLegacyEmergencyFallbackRequested
 } from './reporters/LegacyReporter';
 
+export type { IOperationStreamEmitterOptions } from './scheduler/OperationStreamEmitter';
+export { OperationStreamEmitter } from './scheduler/OperationStreamEmitter';
+export type { IExternalOutputChunk } from './scheduler/OperationOutputGrouping';
+export { iterateExternalOutput, regroupOperationOutput } from './scheduler/OperationOutputGrouping';
+
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,

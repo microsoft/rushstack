@@ -346,3 +346,19 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - success/failure snapshots, frozen-marker validation, emergency-fallback detection + selection tests pass; all exports @beta
   Next: Feature 23/28 - Replace StreamCollator in primary path with raw semantic events
+
+[2026-07-14] Feature 23/28 COMPLETE: Replace StreamCollator with raw semantic events
+  Files (new):
+    - scheduler/OperationStreamEmitter.ts (registerOperation, changeStatus, writeOutput [uncollated 64KiB chunked externalOutput, local-sensitive], completeCommand; emits raw events in call order = NOT collated)
+    - scheduler/OperationOutputGrouping.ts (iterateExternalOutput -> ordered IExternalOutputChunk[] for matchers; regroupOperationOutput -> Map<opId,string> per-op parity)
+    - test/OperationStreamEmitter.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - Uncollated: interleaved writeOutput emits in call order. Parity proven: detailed PlaintextReporter regroups interleaved stream (A1,A2 before B1); regroupOperationOutput reconstructs per-op.
+    - Concise DefaultInteractiveReporter never echoes raw project output (derives activity without buffering).
+    - Same uncollated stream feeds problem matchers via iterateExternalOutput (Feature 24 owns matchers).
+    - StreamCollator replacement = OperationStreamEmitter (source of truth). Actual rush-lib @rushstack/stream-collator removal from primary path is a rollout step (not modifying rush-lib live); package removal deferred per spec.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - emitter events/scope, chunking, uncollated order, regroup parity, detailed-plaintext regroup, concise no-buffer tests pass; all exports @beta
+  Next: Feature 24/28 - External output preservation + problem matchers

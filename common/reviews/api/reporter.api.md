@@ -366,6 +366,13 @@ export interface IEngineSinkResolution {
 }
 
 // @beta
+export interface IExternalOutputChunk {
+    readonly operationId?: string;
+    readonly stream: string;
+    readonly text: string;
+}
+
+// @beta
 export interface IFileReporterArtifact {
     readonly available: boolean;
     readonly path?: string;
@@ -452,6 +459,16 @@ export interface IOperationRegisteredPayload {
 export interface IOperationStatusChangedPayload {
     readonly operationId: string;
     readonly status: OperationStatus;
+}
+
+// @beta
+export interface IOperationStreamEmitterOptions {
+    readonly maxChunkBytes?: number;
+    readonly protocolVersion?: IReporterProtocolVersion;
+    readonly scope?: IReporterEventScope;
+    readonly sessionId: string;
+    readonly sink: IReporterEventSink;
+    readonly source: IReporterEventSource;
 }
 
 // @beta
@@ -828,6 +845,9 @@ export interface ITelemetryAggregate {
 }
 
 // @beta
+export function iterateExternalOutput(events: readonly IReporterEventEnvelope<unknown>[]): IExternalOutputChunk[];
+
+// @beta
 export interface IWatchCycleCompletedPayload {
     readonly changedProjects?: readonly string[];
     readonly succeeded: boolean;
@@ -935,6 +955,17 @@ export class OldEngineOutputAdapter {
 export type OperationStatus = 'ready' | 'executing' | 'success' | 'successWithWarnings' | 'failure' | 'blocked' | 'skipped' | 'fromCache' | 'noOp';
 
 // @beta
+export class OperationStreamEmitter {
+    constructor(options: IOperationStreamEmitterOptions);
+    changeStatus(operationId: string, status: OperationStatus, durationMs?: number): string;
+    completeCommand(commandName: string, succeeded: boolean, exitCode: number, operationCounts?: {
+        readonly [status: string]: number;
+    }): string;
+    registerOperation(operationId: string, projectName?: string, phaseName?: string): string;
+    writeOutput(operationId: string, stream: 'stdout' | 'stderr', text: string): string[];
+}
+
+// @beta
 export function parseEarlyReporterControls(argv: readonly string[], env: Record<string, string | undefined>): IEarlyReporterControls;
 
 // @beta
@@ -964,6 +995,9 @@ export function planAutomaticReporters(selection: IReporterSelection): IAutomati
 
 // @beta
 export function readBootstrapHandoffFileAsync(filePath: string): Promise<unknown[]>;
+
+// @beta
+export function regroupOperationOutput(events: readonly IReporterEventEnvelope<unknown>[]): Map<string, string>;
 
 // @beta
 export function renderActiveProjectsRow(projects: readonly string[], width: number): string;
