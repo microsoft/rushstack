@@ -274,7 +274,7 @@
       "Feed the same uncollated stream to problem matchers",
       "Remove StreamCollator from the primary path after parity tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
