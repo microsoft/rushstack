@@ -297,7 +297,7 @@
       "Suppress duplicate rendering through the bridge",
       "Plan bridge removal after zero first-party usages and published migration guidance"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

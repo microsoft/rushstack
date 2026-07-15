@@ -379,3 +379,17 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - normalizeAnsi, registry scope/gate, recover+link+evidence-preserve, split-chunk+ANSI, dedup cap, corpus tests pass; all exports @beta
   Next: Feature 25/28 - Prohibit new AlreadyReportedError + bridge legacy sentinels
+
+[2026-07-14] Feature 25/28 COMPLETE: Prohibit new AlreadyReportedError + bridge legacy sentinels
+  Files (new):
+    - compat/LegacyErrorBridge.ts (ALREADY_REPORTED_ERROR_NAME; AlreadyReportedError class @deprecated=prohibition; isAlreadyReportedSentinel; LegacyErrorBridge {recordEmittedDiagnostic, ingest(diagnosticEmitted->id), correlate/getCorrelatedDiagnosticId via symbol, shouldSuppressRendering}; LEGACY_ERROR_BRIDGE_REMOVAL_CRITERIA 3 items)
+    - test/LegacyErrorBridge.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - Prohibition encoded as @deprecated on AlreadyReportedError (api.md shows "// @beta @deprecated"); replacement = structured diagnostic + RushError.
+    - shouldSuppressRendering: sentinel->true; RushError whose diagnosticId already emitted->true; correlated error with emitted id->true; else false (catch boundaries render only unrepresented failures).
+    - Removal plan constant documents criteria (zero first-party usages, plugin migration guidance published, ecosystem notice/time).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - sentinel detection, removal criteria, suppress sentinel/RushError-emitted/correlated, record direct+ingest tests pass; all exports @beta
+  Next: Feature 26/28 - Heft integration via negotiated child descriptors + raw-stream fallback
