@@ -312,7 +312,7 @@ describe(RushConfiguration.name, () => {
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
         `${__dirname}/repo/rush-pnpm.json`
       );
-      jest.spyOn(JsonFile, 'save').mockImplementation(() => {
+      jest.spyOn(JsonFile, 'saveAsync').mockImplementation(async () => {
         /* no-op*/
         return true;
       });
