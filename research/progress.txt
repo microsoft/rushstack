@@ -304,3 +304,18 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - no-ANSI, concise snapshot, detailed grouping snapshot, heartbeat timing tests pass; all exports @beta
   Next: Feature 20/28 - JSON and AI reporters
+
+[2026-07-14] Feature 20/28 COMPLETE: JSON and AI reporters
+  Files (new):
+    - reporters/JsonReporter.ts (IReporter; encodeNdjsonRecord per event to exclusive stdout; oversized -> rush.reporter.recordTooLarge marker so stream stays valid NDJSON)
+    - reporters/AiReporter.ts (IReporter; ai.status on commandStarted; ai.final on commandResult/close; IAiFinalRecord result/exitCode/scope{commandName,failedProjects}/errorCodes/diagnosticCategoryCounts/diagnostics(remediation)/counts/log{path,format,complete}; caps 64KiB + 20 diagnostics; warnings by count when failures else warning-only details; excludes raw external output/stacks; byte-cap trims diagnostics->errorCodes->failedProjects)
+    - test/JsonAiReporter.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - Fixed byte-cap: trim errorCodes/failedProjects too (base record with many long codes exceeded tiny maxBytes otherwise). Real cap 64KiB.
+    - Log path in AI final.log.path (local) but telemetry aggregate cross-check asserts path NOT present.
+    - stdout purity: every emitted line parses as JSON.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - JSON stream + oversized marker; AI status+final, log/scope/codes/remediation, 20-cap, 64KiB byte-cap trim, warnings-by-count vs warning-only, raw-excluded, stdout purity, telemetry path cross-check tests pass; all exports @beta
+  Next: Feature 21/28 - Full-detail file reporter (retention + fallback)
