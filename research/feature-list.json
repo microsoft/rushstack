@@ -109,7 +109,7 @@
       "Skip the handoff file for direct rush invocations",
       "Clean abandoned handoff files using the OS-temp fallback retention policy"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

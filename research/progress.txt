@@ -136,3 +136,16 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - early-controls parsing, encode/serialize round-trip, 64KiB external chunking, overflow preserve+truncate, required-cannot-preserve fail, handoff write/read/delete tests pass; all exports @beta
   Next: Feature 9/28 - Frontend ReporterManager host + replay the bootstrap handoff
+
+[2026-07-14] Feature 9/28 COMPLETE: Frontend ReporterManager host + bootstrap handoff replay
+  Files (new):
+    - frontend/ReporterHost.ts (ReporterHost: owns a ReporterManager; getSink()->IReporterEventSink (narrowed, no selection ownership); replayBootstrapHandoffAsync (read+ingestForeignEnvelope+delete; direct when env var absent; tolerates missing/corrupt file); cleanAbandonedHandoffFilesAsync (14d retention default); DEFAULT_HANDOFF_RETENTION_MS)
+    - test/ReporterHost.test.ts
+  Files (modified):
+    - bootstrap/BootstrapHandoff.ts (added BOOTSTRAP_HANDOFF_FILE_PREFIX/SUFFIX + isBootstrapHandoffFileName; writer now uses them)
+    - index.ts, common/reviews/api/reporter.api.md
+  SCOPING (same as F8): host authored in @rushstack/reporter as source of truth. Did NOT wire into live apps/rush start.ts (critical frontend tooling); actual creation "before version selection" is a rollout integration step.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - replay+delete+rehome(sourceSequence), direct skip, missing-file tolerance, typed sink emit, abandoned-file cleanup (stale deleted, new/non-matching kept) tests pass; all exports @beta
+  Next: Feature 10/28 - Cross-version compatibility adapters (new/old frontend/engine) while keeping legacy rendering visible
