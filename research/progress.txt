@@ -198,3 +198,19 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - lifecycle emit + scope merge, diagnostic privacy floor, shadow output-neutrality, exit-code parity (4 cases), result summary, manager integration tests pass; all exports @beta
   Next: Feature 13/28 - Telemetry projection subscriber (allowlist + beforeLog adapter)
+
+[2026-07-14] Feature 13/28 COMPLETE: Telemetry projection subscriber (allowlist + beforeLog adapter)
+  Files (new):
+    - telemetry/TelemetryAggregate.ts (ITelemetryAggregate allowlist: commandName/result/exitCode/durationMs/operationStatusCounts/diagnosticCodes/diagnosticCategoryCounts/reporterMode/protocolVersion/producerVersions; TELEMETRY_AGGREGATE_KEYS)
+    - telemetry/TelemetrySubscriber.ts (ingest extracts only allowlisted values - diagnostics keep code+category only, ignores argv/messages/external/artifacts; buildAggregate; setReporterMode; createTelemetryReporter adapter = IReporter with no destination, feeds before reporter filtering)
+    - telemetry/BeforeLogAdapter.ts (LegacyBeforeLogHook + createBeforeLogAdapter runs hooks with plain copy of aggregate)
+    - test/Telemetry.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - "Before reporter filtering": manager fans full events to all reporters (each filters internally), so telemetry-as-reporter sees unfiltered events.
+    - Leakage test emits secret param/path/argv/message/remediation-command/raw-output; asserts JSON.stringify(aggregate) contains none; keys subset of allowlist.
+    - Same source-of-truth scoping (Rush telemetry lives in rush-lib; not wired live).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - aggregate build, allowlist schema, leakage (5 forbidden strings absent), beforeLog adapter (plain copy) tests pass; all exports @beta
+  Next: Feature 14/28 - Preserve command success + exit-code semantics independent of reporters

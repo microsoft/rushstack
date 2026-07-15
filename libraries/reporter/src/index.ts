@@ -143,6 +143,12 @@ export { LifecycleEmitter } from './lifecycle/LifecycleEmitter';
 export type { IShadowResultSummary } from './lifecycle/ShadowParity';
 export { deriveExitCodeFromEvents, summarizeShadowResult } from './lifecycle/ShadowParity';
 
+export type { TelemetryResult, ITelemetryAggregate } from './telemetry/TelemetryAggregate';
+export { TELEMETRY_AGGREGATE_KEYS } from './telemetry/TelemetryAggregate';
+export { TelemetrySubscriber, createTelemetryReporter } from './telemetry/TelemetrySubscriber';
+export type { LegacyBeforeLogHook } from './telemetry/BeforeLogAdapter';
+export { createBeforeLogAdapter } from './telemetry/BeforeLogAdapter';
+
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,

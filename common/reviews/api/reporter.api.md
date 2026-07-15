@@ -39,6 +39,9 @@ export type BootstrapPrivacyClassification = 'public' | 'local-sensitive' | 'sec
 export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPrivacyClassification>): ReporterPrivacyClassification;
 
 // @beta
+export function createBeforeLogAdapter(hooks: readonly LegacyBeforeLogHook[]): (aggregate: ITelemetryAggregate) => void;
+
+// @beta
 export function createEngineSink(providedSink?: IReporterEventSink): IEngineSinkResolution;
 
 // @beta
@@ -52,6 +55,9 @@ export function createScopedLogger(reporter: IScopedReporter): IScopedLogger;
 
 // @beta
 export function createScopedReporter(options: ICreateScopedReporterOptions): IScopedReporter;
+
+// @beta
+export function createTelemetryReporter(subscriber: TelemetrySubscriber): IReporter;
 
 // @beta
 export const DEFAULT_FLUSH_TIMEOUT_MS: number;
@@ -481,6 +487,24 @@ export function isReporterProtocolCompatible(consumer: IReporterProtocolVersion,
 export function isValidRushDiagnosticCode(code: string): boolean;
 
 // @beta
+export interface ITelemetryAggregate {
+    readonly commandName?: string;
+    readonly diagnosticCategoryCounts: {
+        readonly [category: string]: number;
+    };
+    readonly diagnosticCodes: readonly string[];
+    readonly durationMs?: number;
+    readonly exitCode?: number;
+    readonly operationStatusCounts: {
+        readonly [status: string]: number;
+    };
+    readonly producerVersions: readonly string[];
+    readonly protocolVersion?: IReporterProtocolVersion;
+    readonly reporterMode?: string;
+    readonly result?: TelemetryResult;
+}
+
+// @beta
 export interface IWatchCycleCompletedPayload {
     readonly changedProjects?: readonly string[];
     readonly succeeded: boolean;
@@ -491,6 +515,9 @@ export interface IWriteBootstrapHandoffOptions {
     readonly directory?: string;
     readonly pid?: number;
 }
+
+// @beta
+export type LegacyBeforeLogHook = (telemetry: Record<string, unknown>) => void;
 
 // @beta
 export class LegacyFallbackSink implements IReporterEventSink {
@@ -671,6 +698,20 @@ export class RushSessionReporting {
 
 // @beta
 export function summarizeShadowResult(events: readonly IReporterEventEnvelope<unknown>[]): IShadowResultSummary;
+
+// @beta
+export const TELEMETRY_AGGREGATE_KEYS: readonly string[];
+
+// @beta
+export type TelemetryResult = 'succeeded' | 'failed';
+
+// @beta
+export class TelemetrySubscriber {
+    constructor();
+    buildAggregate(): ITelemetryAggregate;
+    ingest(event: IReporterEventEnvelope<unknown>): void;
+    setReporterMode(reporterMode: string): void;
+}
 
 // @beta
 export function writeBootstrapHandoffFileAsync(buffer: BootstrapEventBuffer, options?: IWriteBootstrapHandoffOptions): Promise<string>;
