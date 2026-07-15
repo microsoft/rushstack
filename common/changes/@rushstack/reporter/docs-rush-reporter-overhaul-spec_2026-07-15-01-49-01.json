@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add Heft integration over a negotiated inherited descriptor: HeftChildEmitter and HeftDescriptorHost with parent/child event correlation, a raw-stream fallback for older Heft, and descriptor allocation helpers",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
