@@ -210,6 +210,24 @@ export class ReporterManager implements IReporterEventSink {
   }
 
   /**
+   * Returns the total number of envelopes still buffered across all reporter
+   * queues.
+   *
+   * @remarks
+   * This is an observability hook for verifying bounded streaming: because each
+   * queue drains incrementally and coalesces replaceable status events, the
+   * pending count stays bounded rather than growing to the whole-build event
+   * total. After {@link ReporterManager.flushAsync} resolves it is `0`.
+   */
+  public getPendingEventCount(): number {
+    let total: number = 0;
+    for (const entry of this._entries) {
+      total += entry.queue.length;
+    }
+    return total;
+  }
+
+  /**
    * Drains every reporter queue and flushes each reporter, bounded by a timeout.
    *
    * @param timeoutMs - the flush timeout in milliseconds

@@ -409,3 +409,63 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - descriptor alloc/read, structured emit, raw fallback, host correlate+forward, protocol reject, old-heft raw+matcher tests pass; all exports @beta
   Next: Feature 27/28 - Reporter performance and capacity budgets
+
+[2026-07-15] Feature 27/28 COMPLETE: Meet reporter performance and capacity budgets (category: performance, spec §7.3)
+Files:
+  - libraries/reporter/src/perf/PerformanceBudgets.ts (NEW): IReporterPerformanceBudgets interface + REPORTER_PERFORMANCE_BUDGETS
+    constant encoding the §7.3 blocking budgets (3% wall-time regression, 32 MiB peak memory, 10 Hz interactive refresh,
+    64 KiB AI output, 20 AI detailed diagnostics). Helpers computeWallTimeRegressionPercent / isWithinWallTimeBudget /
+    isWithinMemoryBudget for benchmark harnesses and capacity tests to share a single source of truth.
+  - libraries/reporter/src/manager/ReporterManager.ts (EDIT): added public getPendingEventCount() observability hook —
+    sums all reporter queue lengths; proves bounded streaming (stays near coalesceThreshold, ==0 after flushAsync).
+  - libraries/reporter/src/index.ts (EDIT): barrel exports for the perf module (all @beta).
+  - libraries/reporter/src/test/Performance.test.ts (NEW, 7 tests): budget-constant assertions; wall-time & memory budget
+    helper checks; bounded-streaming test (5000-event synchronous burst keeps pending queue <200, ==0 after flush);
+    high-volume benchmark smoke ceiling (50000 events under 10s, queue drained); queue-pressure test asserting EVERY
+    protected outcome category (lifecycle/diagnostics/results/artifacts/external-output) is delivered exactly once per batch
+    while replaceable activityChanged noise coalesces; required-status-never-coalesced test.
+  - common/reviews/api/reporter.api.md (regenerated): new @beta perf exports + getPendingEventCount().
+Design notes:
+  - Feature is primarily validation (like F7): the bounded queue + coalescing already exist in ReporterManager (F6); this
+    feature encodes the budgets as shared data and proves the P0 capacity guarantees with benchmark/queue-pressure/
+    status-coalescing tests. No live tooling touched — budgets are simulated/injected, not measured against real Rush builds.
+  - Coalescible = non-required 'activityChanged' only; every other type (and required activityChanged) is protected and
+    never dropped, satisfying "no loss of lifecycle, diagnostics, results, artifacts, or external output".
+Verify: rush build --to @rushstack/reporter -> SUCCESS (clean API report on rebuild); rush test --only @rushstack/reporter
+  -> SUCCESS; Performance.test.js 7 passed / 0 failed; all exports @beta (no @public/@alpha/@internal).
+Next: Feature 28/28 - Flip defaults in Rush daemon-aligned major (category: migration, spec §8.1 phase 6).
+
+[2026-07-15] Feature 28/28 COMPLETE: Flip defaults in the Rush daemon-aligned major release (category: migration, spec §8.1 phase 6 / §5.3 / §8.2)
+Files:
+  - libraries/reporter/src/migration/MigrationPhase.ts (NEW): ReporterMigrationPhaseId union (7 phases) + IReporterMigrationPhase
+    + REPORTER_MIGRATION_PHASES ordered list (each independentlyReleasable & revertible = true, per §8.1 "Every phase must be
+    independently releasable and revertible") + getReporterMigrationPhase(id).
+  - libraries/reporter/src/migration/DaemonAlignedMajorDefaults.ts (NEW): IReporterMajorDefaults + PRE_FLIP_REPORTER_DEFAULTS
+    and DAEMON_ALIGNED_MAJOR_REPORTER_DEFAULTS (the flip = data, so it is revertible by swapping default sets):
+      * automaticSelectionEnabledByDefault true (post) / false (pre) -> step 1
+      * removedTerminalApis = REMOVED_TERMINAL_APIS ['ILogger.terminal','RushSession.terminalProvider'] (post) / [] (pre) -> step 2
+      * gateIncompatiblePluginsBeforeApply true (post) / false (pre) -> step 3
+      * legacyRendererRetained / verbosityAliasesRetained / sentinelBridgeRetained ALL true in BOTH (removed only in phase 7) -> step 4
+      * emergencyFallbackEnvVar 'RUSH_REPORTER' = 'legacy' (§8.2, >=1 major)
+    Helpers: isTerminalApiRemoved, isEmergencyLegacyFallback (fallback wins), isAutomaticSelectionEnabled(defaults, context).
+  - libraries/reporter/src/migration/PluginApplyGate.ts (NEW): evaluatePluginApplyGate(manifests, {gateEnabled=true,supportedApiVersion})
+    composing F11 primitives (isPluginApiVersionSupported + createPluginApiIncompatibleDiagnostic) to FAIL incompatible plugins
+    BEFORE apply() with a structured RUSH_PLUGIN_API_INCOMPATIBLE diagnostic; gateEnabled=false models pre-flip (permit) for
+    revertibility. getBlockedPlugins(decisions) -> step 3.
+  - libraries/reporter/src/index.ts (EDIT): barrel exports for the migration module (all @beta).
+  - libraries/reporter/src/test/Migration.test.ts (NEW, 10 tests): phase order/ordinals; every-phase releasable+revertible;
+    phase lookup + throw; default-flip automatic-selection (post default on / pre opt-in only); emergency legacy fallback overrides
+    the flip; terminal-API removal post-but-not-pre; legacy renderer/aliases/sentinel retained across the flip; plugin gate fails
+    incompatible plugins with RUSH_PLUGIN_API_INCOMPATIBLE before apply(); gate-disabled permits (revertible); explicit supported version.
+  - common/reviews/api/reporter.api.md (regenerated): new @beta migration exports.
+Design notes:
+  - Per the project-wide scoping decision, ILogger.terminal / RushSession.terminalProvider live in rush-lib; actually removing them
+    is a rollout step. This feature encodes the flip's SEMANTICS (which APIs are removed, when automatic selection is default, when
+    plugins are gated, what is retained) as data + helpers inside @rushstack/reporter so rush-lib can consume a single source of truth,
+    and proves the independently-releasable/revertible guarantee with tests. No live tooling modified.
+Verify: rush build --to @rushstack/reporter -> SUCCESS (fixed an ae-unresolved-link on a union member; clean rebuild);
+  rush test --only @rushstack/reporter -> SUCCESS; Migration.test.js 10 passed / 0 failed; all exports @beta.
+
+============================================================================
+[2026-07-15] ALL 28/28 FEATURES COMPLETE. Rush Reporter Overhaul spec fully implemented in @rushstack/reporter (public-beta).
+============================================================================
