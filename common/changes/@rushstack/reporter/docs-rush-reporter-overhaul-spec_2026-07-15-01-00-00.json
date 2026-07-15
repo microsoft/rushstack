@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add the default interactive reporter with a three-row live region, spinner, width-aware active projects, throttled refresh, cursor restoration, failure diagnostic block, watch summaries, and NO_COLOR/FORCE_COLOR handling",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
