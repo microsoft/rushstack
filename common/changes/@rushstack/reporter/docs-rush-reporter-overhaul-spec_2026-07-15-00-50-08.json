@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add the automatic reporter selection matrix (planAutomaticReporters, describeReporterPlan, isMachineReporter) that maps agent, CI, TTY, and non-TTY environments to reporters and gives machine reporters exclusive stdout",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
