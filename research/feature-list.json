@@ -166,7 +166,7 @@
       "Ensure reporters and diagnostic categories never select exit codes",
       "Preserve command-specific JSON schemas"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
