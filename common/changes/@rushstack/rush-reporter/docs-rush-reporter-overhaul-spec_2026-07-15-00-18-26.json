@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add scoped session reporting (createScopedReporter, RushSessionReporting, IScopedLogger, execution context) and plugin API version compatibility with a migration diagnostic",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
