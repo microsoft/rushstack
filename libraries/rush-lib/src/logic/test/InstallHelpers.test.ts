@@ -3,20 +3,18 @@
 
 import { type IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
-import { TestUtilities } from '@rushstack/heft-config-file';
 
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { RushConfiguration } from '../../api/RushConfiguration';
 
-describe('InstallHelpers', () => {
-  describe('generateCommonPackageJson', () => {
-    const originalJsonFileSave = JsonFile.save;
-    const mockJsonFileSave: jest.Mock = jest.fn();
+describe(InstallHelpers.name, () => {
+  describe(InstallHelpers.generateCommonPackageJson.name, () => {
+    let mockJsonFileSave: jest.SpyInstance;
     let terminal: Terminal;
     let terminalProvider: StringBufferTerminalProvider;
 
     beforeAll(() => {
-      JsonFile.save = mockJsonFileSave;
+      mockJsonFileSave = jest.spyOn(JsonFile, 'save').mockImplementation(() => true);
     });
 
     beforeEach(() => {
@@ -34,10 +32,6 @@ describe('InstallHelpers', () => {
       mockJsonFileSave.mockClear();
     });
 
-    afterAll(() => {
-      JsonFile.save = originalJsonFileSave;
-    });
-
     it('generates correct package json with pnpm configurations', () => {
       const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfig/rush.json`;
       const rushConfiguration: RushConfiguration =
@@ -48,8 +42,10 @@ describe('InstallHelpers', () => {
         undefined,
         terminal
       );
-      const packageJson: IPackageJson = mockJsonFileSave.mock.calls[0][0];
-      expect(TestUtilities.stripAnnotations(packageJson)).toEqual(
+      const packageJson: IPackageJson = JSON.parse(
+        JsonFile.stringify(mockJsonFileSave.mock.calls[0][0], { ignoreUndefinedValues: true })
+      );
+      expect(packageJson).toEqual(
         expect.objectContaining({
           pnpm: {
             overrides: {
@@ -71,6 +67,7 @@ describe('InstallHelpers', () => {
           }
         })
       );
+      expect(packageJson).toMatchSnapshot();
     });
   });
 });
