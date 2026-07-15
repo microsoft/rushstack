@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`LegacyReporter reproduces the legacy failure output 1`] = `
+"Starting \\"rush build\\"
+
+Executing a maximum of 2 simultaneous processes...
+
+==[ @my-company/project-a (build) ]================================[ 1 of 1 ]==
+Building project-a...
+Error: Command failed with exit code 1
+
+
+==[ FAILURE: 1 operation ]=====================================================
+
+The following projects failed to build:
+  @my-company/project-a (build)    X.XX seconds
+
+rush build (X.XX seconds) ==> ERROR: Project(s) failed to build
+"
+`;
+
+exports[`LegacyReporter reproduces the legacy success output 1`] = `
+"Starting \\"rush build\\"
+
+Executing a maximum of 2 simultaneous processes...
+
+==[ @my-company/project-a (build) ]================================[ 1 of 2 ]==
+Building project-a...
+project-a done.
+
+==[ @my-company/project-b (build) ]================================[ 2 of 2 ]==
+Building project-b...
+project-b done.
+
+
+==[ SUCCESS: 2 operations ]====================================================
+
+These operations completed successfully:
+  @my-company/project-a (build)    X.XX seconds
+  @my-company/project-b (build)    X.XX seconds
+
+rush build (X.XX seconds)
+"
+`;
