@@ -391,6 +391,12 @@ export interface IFileReporterOptions {
 }
 
 // @beta
+export interface IGetMatchersOptions {
+    readonly includeDisabled?: boolean;
+    readonly version?: string;
+}
+
+// @beta
 export interface IInteractiveTerminal {
     readonly columns: number;
     readonly isTTY: boolean;
@@ -478,6 +484,34 @@ export interface IPlaintextReporterOptions {
     readonly nowMs?: () => number;
     readonly variant?: PlaintextVariant;
     readonly write: (text: string) => void;
+}
+
+// @beta
+export interface IProblemMatch {
+    readonly code?: string;
+    readonly column?: number;
+    readonly file?: string;
+    readonly line?: number;
+    readonly message: string;
+}
+
+// @beta
+export interface IProblemMatcher {
+    readonly enabledByDefault: boolean;
+    extract(match: RegExpMatchArray): IProblemMatch;
+    matchesVersion?(version: string): boolean;
+    readonly name: string;
+    readonly pattern: RegExp;
+    readonly severity: RushDiagnosticSeverity;
+    readonly tool: string;
+}
+
+// @beta
+export interface IProblemMatcherResult {
+    readonly diagnostics: readonly IRushDiagnostic[];
+    readonly matchedLineCount: number;
+    readonly suppressedDuplicateCount: number;
+    readonly unmatchedLineCount: number;
 }
 
 // @beta
@@ -683,6 +717,11 @@ export interface IResolveExitStatusOptions {
     readonly cancelled?: boolean;
     readonly hasFailures?: boolean;
     readonly signal?: NodeJS.Signals;
+}
+
+// @beta
+export interface IRunProblemMatchersOptions {
+    readonly maxDuplicates?: number;
 }
 
 // @beta
@@ -946,6 +985,9 @@ export class NdjsonRecordTooLargeError extends Error {
 export function negotiateReporterHello(hello: IReporterHello, options: IReporterHandshakeOptions): IReporterHandshakeResult;
 
 // @beta
+export function normalizeAnsi(text: string): string;
+
+// @beta
 export class OldEngineOutputAdapter {
     constructor(options: IOldEngineOutputAdapterOptions);
     capture(stream: 'stdout' | 'stderr', text: string): string[];
@@ -992,6 +1034,12 @@ export type PlaintextVariant = 'detailed' | 'concise';
 
 // @beta
 export function planAutomaticReporters(selection: IReporterSelection): IAutomaticReporterPlan;
+
+// @beta
+export class ProblemMatcherRegistry {
+    getMatchers(tool: string, options?: IGetMatchersOptions): IProblemMatcher[];
+    register(matcher: IProblemMatcher): void;
+}
 
 // @beta
 export function readBootstrapHandoffFileAsync(filePath: string): Promise<unknown[]>;
@@ -1095,6 +1143,9 @@ export function resolveReporterCompatibility(frontend: IReporterFrontendDescript
 
 // @beta
 export function resolveReporterSelection(input: IReporterSelectionInput): IReporterSelection;
+
+// @beta
+export function runProblemMatchers(events: readonly IReporterEventEnvelope<unknown>[], matchers: readonly IProblemMatcher[], options?: IRunProblemMatchersOptions): IProblemMatcherResult;
 
 // @beta
 export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly IRushDiagnosticCodeDefinition[];

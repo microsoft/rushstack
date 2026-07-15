@@ -286,7 +286,7 @@
       "Cap duplicate diagnostics and gate default enablement on high-confidence corpus tests",
       "Route older Heft versions through this path"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "refactor",

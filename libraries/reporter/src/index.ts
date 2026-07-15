@@ -246,6 +246,13 @@ export { OperationStreamEmitter } from './scheduler/OperationStreamEmitter';
 export type { IExternalOutputChunk } from './scheduler/OperationOutputGrouping';
 export { iterateExternalOutput, regroupOperationOutput } from './scheduler/OperationOutputGrouping';
 
+export { normalizeAnsi } from './matchers/AnsiNormalization';
+export type { IProblemMatch, IProblemMatcher } from './matchers/ProblemMatcher';
+export type { IGetMatchersOptions } from './matchers/ProblemMatcherRegistry';
+export { ProblemMatcherRegistry } from './matchers/ProblemMatcherRegistry';
+export type { IRunProblemMatchersOptions, IProblemMatcherResult } from './matchers/ProblemMatcherRunner';
+export { runProblemMatchers } from './matchers/ProblemMatcherRunner';
+
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,
