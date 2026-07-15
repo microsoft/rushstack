@@ -319,3 +319,17 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - JSON stream + oversized marker; AI status+final, log/scope/codes/remediation, 20-cap, 64KiB byte-cap trim, warnings-by-count vs warning-only, raw-excluded, stdout purity, telemetry path cross-check tests pass; all exports @beta
   Next: Feature 21/28 - Full-detail file reporter (retention + fallback)
+
+[2026-07-14] Feature 21/28 COMPLETE: Full-detail file reporter (retention + fallback)
+  Files (new):
+    - reporters/FileReporter.ts (IReporter; RUSH_LOGS_DIR_NAME 'rush-logs', LATEST_LOG_NAME 'latest.log'; buffers lines, writes NDJSON at debug to <commonTemp>/rush-logs/<UTC ts>-<pid>-<action>.log; owner-only 0o600; redacts secret fields ->[secret], keeps local-sensitive; latest.log symlink/copy for success+failure; retention delete >14d + cap 20; OS-temp fallback; both-fail nonfatal emergencyWarn + getArtifact().available=false)
+    - test/FileReporter.test.ts (real temp dirs)
+  Files (modified): index.ts, api.md
+  Notes:
+    - report() buffers; _writeAsync (flush/close) resolves target lazily: try repoDir then osTempDir; appendFile new lines.
+    - Timestamp filename: toISOString().replace(/[:.]/g,'-'). rush purge removes the rush-logs dir (path convention).
+    - Test mode check uses %0o1000 (no-bitwise lint), guarded on non-win32.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - write+perms+latest, latest-on-failure, secret redaction, retention (old delete + cap 20), OS-temp fallback, both-fail nonfatal tests pass; all exports @beta
+  Next: Feature 22/28 - Legacy reporter (selectable + emergency fallback)

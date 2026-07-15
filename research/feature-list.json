@@ -252,7 +252,7 @@
       "Delete files older than 14 days, cap at 20 sessions, and let rush purge remove the directory",
       "Treat file creation failure as nonfatal with an emergency warning and unavailable artifact"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
