@@ -291,3 +291,16 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - color resolution, colorizer, truncate, +N more, 3-row render, throttle; reporter hide/paint/throttle, success line + cursor restore, failure diag+log, watch summary, non-TTY tests pass; all exports @beta
   Next: Feature 19/28 - Plaintext and non-TTY reporter
+
+[2026-07-14] Feature 19/28 COMPLETE: Plaintext and non-TTY reporter
+  Files (new):
+    - reporters/PlaintextReporter.ts (IReporter; append-only via injected write; no cursor codes; color off default; variant concise|detailed; emits Starting line, terminal status lines, [severity] code diagnostics, final result; emitHeartbeatIfDue 30s; detailed groups externalOutput under ==[ project (phase) ]== StreamCollator-like)
+    - test/PlaintextReporter.test.ts + __snapshots__/PlaintextReporter.test.ts.snap (concise + detailed)
+  Files (modified): index.ts, api.md
+  Notes:
+    - No-ANSI assertion (append-only, no cursor, color off). Heartbeat interval-based via injected clock (report resets lastOutput).
+    - Detailed buffers external output per operationId, flushes under header on terminal status.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - no-ANSI, concise snapshot, detailed grouping snapshot, heartbeat timing tests pass; all exports @beta
+  Next: Feature 20/28 - JSON and AI reporters

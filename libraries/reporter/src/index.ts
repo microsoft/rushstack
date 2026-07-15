@@ -221,6 +221,8 @@ export type {
   IDefaultInteractiveReporterOptions
 } from './reporters/DefaultInteractiveReporter';
 export { DefaultInteractiveReporter } from './reporters/DefaultInteractiveReporter';
+export type { IPlaintextReporterOptions } from './reporters/PlaintextReporter';
+export { PlaintextReporter } from './reporters/PlaintextReporter';
 
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {

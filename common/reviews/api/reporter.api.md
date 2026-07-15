@@ -328,6 +328,15 @@ export interface IOperationStatusChangedPayload {
 }
 
 // @beta
+export interface IPlaintextReporterOptions {
+    readonly color?: boolean;
+    readonly heartbeatIntervalMs?: number;
+    readonly nowMs?: () => number;
+    readonly variant?: PlaintextVariant;
+    readonly write: (text: string) => void;
+}
+
+// @beta
 export interface IRenderLiveRegionOptions {
     readonly color: IColorizer;
     readonly spinnerFrame: string;
@@ -767,6 +776,22 @@ export function parseEarlyReporterControls(argv: readonly string[], env: Record<
 
 // @beta
 export function parseOutputControl(value: string): IReporterOutputTarget;
+
+// @beta
+export class PlaintextReporter implements IReporter {
+    constructor(options: IPlaintextReporterOptions);
+    // (undocumented)
+    closeAsync(): Promise<void>;
+    emitHeartbeatIfDue(): boolean;
+    // (undocumented)
+    flushAsync(): Promise<void>;
+    // (undocumented)
+    initializeAsync(): Promise<void>;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    report(event: IReporterEventEnvelope<unknown>): void;
+}
 
 // @beta
 export type PlaintextVariant = 'detailed' | 'concise';

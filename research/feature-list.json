@@ -227,7 +227,7 @@
       "Retain StreamCollator-like operation grouping in detailed CI mode",
       "Add stable plaintext snapshot tests"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
