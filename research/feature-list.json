@@ -215,7 +215,7 @@
       "Keep the live region in watch mode and append one summary per completed cycle",
       "Follow TTY color capability while honoring NO_COLOR and FORCE_COLOR"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
