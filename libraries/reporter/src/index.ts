@@ -260,6 +260,21 @@ export { ProblemMatcherRegistry } from './matchers/ProblemMatcherRegistry';
 export type { IRunProblemMatchersOptions, IProblemMatcherResult } from './matchers/ProblemMatcherRunner';
 export { runProblemMatchers } from './matchers/ProblemMatcherRunner';
 
+export type { IChildDescriptorPlan } from './heft/HeftDescriptor';
+export {
+  RUSH_REPORTER_CHILD_FD_ENV_VAR,
+  allocateChildDescriptor,
+  readChildDescriptorFd
+} from './heft/HeftDescriptor';
+export type {
+  HeftChildReporterMode,
+  IHeftChildEventInput,
+  IHeftChildEmitterOptions
+} from './heft/HeftChildEmitter';
+export { HeftChildEmitter } from './heft/HeftChildEmitter';
+export type { IHeftDescriptorHostOptions, IHeftChildResult } from './heft/HeftDescriptorHost';
+export { HeftDescriptorHost } from './heft/HeftDescriptorHost';
+
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,

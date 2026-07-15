@@ -393,3 +393,19 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - sentinel detection, removal criteria, suppress sentinel/RushError-emitted/correlated, record direct+ingest tests pass; all exports @beta
   Next: Feature 26/28 - Heft integration via negotiated child descriptors + raw-stream fallback
+
+[2026-07-14] Feature 26/28 COMPLETE: Heft integration via negotiated child descriptors + raw-stream fallback
+  Files (new):
+    - heft/HeftDescriptor.ts (RUSH_REPORTER_CHILD_FD_ENV_VAR='_RUSH_REPORTER_CHILD_FD'; allocateChildDescriptor -> {fdNumber 3, env var, stdio [inherit,inherit,inherit,pipe]}; readChildDescriptorFd)
+    - heft/HeftChildEmitter.ts (child side; mode structured if fd+writeDescriptor else raw-fallback; sendHello/emitEvent NDJSON to descriptor stamping childSessionId; writeRaw stdout/stderr fallback)
+    - heft/HeftDescriptorHost.ts (parent side; processChildRecords/Ndjson: negotiate hello (feature 5), correlate each child event with parentSessionId+parentOperationId, forwardEnvelope; reject->RUSH_PROTOCOL_UPDATE_REQUIRED diagnostic)
+    - test/HeftIntegration.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - New path: child structured NDJSON over inherited fd -> host negotiate+correlate -> manager.ingestForeignEnvelope (sourceSequence preserved). stdout/stderr stay normal streams.
+    - Old path: no fd -> raw-fallback writeRaw -> Rush captures as externalOutput -> runProblemMatchers (feature 24) recovers diagnostics.
+    - Streams injected (writeDescriptor/writeStdout) for testability instead of real spawned FDs.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - descriptor alloc/read, structured emit, raw fallback, host correlate+forward, protocol reject, old-heft raw+matcher tests pass; all exports @beta
+  Next: Feature 27/28 - Reporter performance and capacity budgets
