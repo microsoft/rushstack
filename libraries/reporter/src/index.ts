@@ -102,6 +102,18 @@ export { parseEarlyReporterControls } from './bootstrap/EarlyReporterControls';
 export type { IReporterHostOptions, IBootstrapReplayResult } from './frontend/ReporterHost';
 export { ReporterHost, DEFAULT_HANDOFF_RETENTION_MS } from './frontend/ReporterHost';
 
+export type {
+  IReporterFrontendDescriptor,
+  IReporterEngineDescriptor,
+  ReporterCompatibilityMode,
+  IReporterCompatibilityDecision
+} from './compat/ReporterCompatibility';
+export { resolveReporterCompatibility } from './compat/ReporterCompatibility';
+export type { IEngineSinkResolution } from './compat/LegacyFallbackSink';
+export { LegacyFallbackSink, createEngineSink } from './compat/LegacyFallbackSink';
+export type { IOldEngineOutputAdapterOptions } from './compat/OldEngineOutputAdapter';
+export { OldEngineOutputAdapter } from './compat/OldEngineOutputAdapter';
+
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,

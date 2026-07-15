@@ -120,7 +120,7 @@
       "Keep legacy rendering as the sole visible output in this phase",
       "Add cross-version compatibility tests for both directions"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
