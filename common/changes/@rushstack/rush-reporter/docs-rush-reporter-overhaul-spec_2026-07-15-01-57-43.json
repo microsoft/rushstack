@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add reporter performance and capacity budgets: a perf module encoding the specification blocking budgets with wall-time and memory helpers, plus a ReporterManager.getPendingEventCount observability hook for bounded streaming",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
