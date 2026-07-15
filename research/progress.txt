@@ -214,3 +214,19 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - aggregate build, allowlist schema, leakage (5 forbidden strings absent), beforeLog adapter (plain copy) tests pass; all exports @beta
   Next: Feature 14/28 - Preserve command success + exit-code semantics independent of reporters
+
+[2026-07-14] Feature 14/28 COMPLETE: Authoritative command success + exit-code semantics
+  Files (new):
+    - exit/ExitStatus.ts (EXIT_CODE_SUCCESS=0/FAILURE=1; RushCommandOutcome succeeded|failed|cancelled|signal; getSignalExitCode=128+os.constants.signals[sig]; resolveExitStatus(hasFailures/cancelled/signal); resolveExitStatusFromEvents - failure = failed commandResult OR error diagnostic OR failed operation; category & reporter never inputs; precedence signal>cancelled>failure)
+    - exit/CommandJson.ts (separateJsonControls -> {commandJson (--json), reporterJson (--reporter=json/--reporter json)} independent)
+    - test/ExitStatus.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - Warning-only success -> 0 (warnings not failures). Signal-derived status conventional (SIGINT->130, SIGTERM->143).
+    - Category-independence proven: error diagnostics of any category ->1; warnings of any category ->0.
+    - Command-specific --json preserved and NOT an alias for --reporter=json.
+    - Distinct from Feature 12 shadow deriveExitCodeFromEvents (this is authoritative full outcome incl cancel/signal).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - resolveExitStatus (success/warning-only/failure/cancel/signal precedence), signal codes, from-events (warning/error/op-failure/failed-result/category-independence/cancel/signal), separateJsonControls (5 cases) tests pass; all exports @beta
+  Next: Feature 15/28 - Reporter selection + configuration controls with precedence

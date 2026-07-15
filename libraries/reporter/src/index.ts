@@ -149,6 +149,22 @@ export { TelemetrySubscriber, createTelemetryReporter } from './telemetry/Teleme
 export type { LegacyBeforeLogHook } from './telemetry/BeforeLogAdapter';
 export { createBeforeLogAdapter } from './telemetry/BeforeLogAdapter';
 
+export type {
+  RushCommandOutcome,
+  IRushExitStatus,
+  IResolveExitStatusOptions,
+  IResolveExitStatusFromEventsOptions
+} from './exit/ExitStatus';
+export {
+  EXIT_CODE_SUCCESS,
+  EXIT_CODE_FAILURE,
+  getSignalExitCode,
+  resolveExitStatus,
+  resolveExitStatusFromEvents
+} from './exit/ExitStatus';
+export type { IJsonControls } from './exit/CommandJson';
+export { separateJsonControls } from './exit/CommandJson';
+
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,

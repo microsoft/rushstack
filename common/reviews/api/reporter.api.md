@@ -78,7 +78,16 @@ export function deriveExitCodeFromEvents(events: readonly IReporterEventEnvelope
 export function encodeNdjsonRecord(value: unknown, options?: INdjsonOptions): string;
 
 // @beta
+export const EXIT_CODE_FAILURE: 1;
+
+// @beta
+export const EXIT_CODE_SUCCESS: 0;
+
+// @beta
 export function getPrivacyClassificationRank(classification: ReporterPrivacyClassification): number;
+
+// @beta
+export function getSignalExitCode(signal: NodeJS.Signals): number;
 
 // @beta
 export interface IBootstrapEventBufferOptions {
@@ -183,6 +192,12 @@ export interface IEarlyReporterControls {
 export interface IEngineSinkResolution {
     readonly mode: 'structured' | 'legacy-fallback';
     readonly sink: IReporterEventSink;
+}
+
+// @beta
+export interface IJsonControls {
+    readonly commandJson: boolean;
+    readonly reporterJson: boolean;
 }
 
 // @beta
@@ -371,6 +386,19 @@ export interface IReporterRegistrationOptions {
 }
 
 // @beta
+export interface IResolveExitStatusFromEventsOptions {
+    readonly cancelled?: boolean;
+    readonly signal?: NodeJS.Signals;
+}
+
+// @beta
+export interface IResolveExitStatusOptions {
+    readonly cancelled?: boolean;
+    readonly hasFailures?: boolean;
+    readonly signal?: NodeJS.Signals;
+}
+
+// @beta
 export interface IRushDiagnostic {
     readonly category: RushDiagnosticCategory;
     readonly causeDiagnosticIds?: readonly string[];
@@ -403,6 +431,13 @@ export interface IRushDiagnosticSource {
     readonly file?: string;
     readonly line?: number;
     readonly toolName?: string;
+}
+
+// @beta
+export interface IRushExitStatus {
+    readonly exitCode: number;
+    readonly outcome: RushCommandOutcome;
+    readonly signal?: NodeJS.Signals;
 }
 
 // @beta
@@ -649,6 +684,12 @@ export class ReporterMultiplexer implements IReporter {
 export type ReporterPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
 
 // @beta
+export function resolveExitStatus(options: IResolveExitStatusOptions): IRushExitStatus;
+
+// @beta
+export function resolveExitStatusFromEvents(events: readonly IReporterEventEnvelope<unknown>[], options?: IResolveExitStatusFromEventsOptions): IRushExitStatus;
+
+// @beta
 export function resolveReporterCompatibility(frontend: IReporterFrontendDescriptor, engine: IReporterEngineDescriptor): IReporterCompatibilityDecision;
 
 // @beta
@@ -670,6 +711,9 @@ export const RUSH_PLUGIN_API_VERSION: '1.0.0';
 
 // @beta
 export const RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_HANDOFF';
+
+// @beta
+export type RushCommandOutcome = 'succeeded' | 'failed' | 'cancelled' | 'signal';
 
 // @beta
 export type RushDiagnosticCategory = 'configuration' | 'input' | 'dependency-tool' | 'environment' | 'network-auth' | 'operation' | 'internal';
@@ -695,6 +739,9 @@ export class RushSessionReporting {
     createScopedReporter(scope?: IReporterEventScope): IScopedReporter;
     getSink(): IReporterEventSink;
 }
+
+// @beta
+export function separateJsonControls(argv: readonly string[]): IJsonControls;
 
 // @beta
 export function summarizeShadowResult(events: readonly IReporterEventEnvelope<unknown>[]): IShadowResultSummary;
