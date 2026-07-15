@@ -127,6 +127,22 @@ export {
   createPluginApiIncompatibleDiagnostic
 } from './session/PluginApi';
 
+export type {
+  OperationStatus,
+  ISessionStartedPayload,
+  ISessionCompletedPayload,
+  ICommandStartedPayload,
+  ICommandCompletedPayload,
+  IOperationRegisteredPayload,
+  IOperationStatusChangedPayload,
+  ICommandResultPayload,
+  IWatchCycleCompletedPayload
+} from './lifecycle/LifecycleEvents';
+export type { ILifecycleEmitterOptions } from './lifecycle/LifecycleEmitter';
+export { LifecycleEmitter } from './lifecycle/LifecycleEmitter';
+export type { IShadowResultSummary } from './lifecycle/ShadowParity';
+export { deriveExitCodeFromEvents, summarizeShadowResult } from './lifecycle/ShadowParity';
+
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,

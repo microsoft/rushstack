@@ -142,7 +142,7 @@
       "Keep legacy output unchanged while events flow",
       "Validate telemetry and exit-code parity against the frozen baselines"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
