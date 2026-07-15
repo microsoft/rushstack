@@ -14,7 +14,7 @@ import { NewlineKind, Async, InternalError, AlreadyReportedError } from '@rushst
 
 import { AsyncOperationQueue, type IOperationSortFunction } from './AsyncOperationQueue';
 import type { Operation } from './Operation';
-import { OperationStatus, TERMINAL_STATUSES } from './OperationStatus';
+import { OperationStatus, SUCCESS_STATUSES, TERMINAL_STATUSES } from './OperationStatus';
 import {
   type IOperationExecutionContext,
   type IOperationExecutionRecordContext,
@@ -828,11 +828,19 @@ export class OperationGraph implements IOperationGraph {
         );
 
     if (bailStatus) {
-      // Mark all non-terminal operations as Aborted
+      // A tap short-circuited the iteration. If it bailed with a successful status (e.g. the
+      // bridge-cache plugin performed a cache read/write out-of-band), the remaining operations
+      // were intentionally not executed rather than aborted, so report them as Skipped. Genuine
+      // aborts and failures still mark the remaining, not-yet-executed work as Aborted.
+      const unexecutedStatus: OperationStatus = SUCCESS_STATUSES.has(bailStatus)
+        ? OperationStatus.Skipped
+        : OperationStatus.Aborted;
       for (const record of executionRecords.values()) {
         if (!record.isTerminal) {
-          record.status = OperationStatus.Aborted;
-          state.hasAnyAborted = true;
+          record.status = unexecutedStatus;
+          if (unexecutedStatus === OperationStatus.Aborted) {
+            state.hasAnyAborted = true;
+          }
         }
       }
     } else {

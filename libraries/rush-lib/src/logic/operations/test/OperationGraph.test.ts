@@ -221,6 +221,50 @@ describe('OperationGraph', () => {
       expect(result.operationResults.get(firstOperation)?.status).toEqual(OperationStatus.Aborted);
       expect(result.operationResults.get(secondOperation)?.status).toEqual(OperationStatus.Aborted);
     });
+
+    it('Successful bail marks unexecuted operations as Skipped', async () => {
+      const mockRun: jest.Mock = jest.fn();
+
+      const firstOperation = new Operation({
+        runner: new MockOperationRunner('1', mockRun),
+        phase: mockPhase,
+        project: getOrCreateProject('1'),
+        logFilenameIdentifier: '1'
+      });
+
+      const secondOperation = new Operation({
+        runner: new MockOperationRunner('2', mockRun),
+        phase: mockPhase,
+        project: getOrCreateProject('2'),
+        logFilenameIdentifier: '2'
+      });
+
+      secondOperation.addDependency(firstOperation);
+
+      const graph: OperationGraph = new OperationGraph(new Set([firstOperation, secondOperation]), {
+        quietMode: false,
+        debugMode: false,
+        parallelism: 1,
+        allowOversubscription: true,
+        destinations: [mockWritable],
+        abortController: new AbortController()
+      });
+
+      // Simulate a plugin (e.g. bridge-cache) that performs the work out-of-band and short-circuits
+      // the iteration with a successful status.
+      graph.hooks.beforeExecuteIterationAsync.tapPromise(
+        'test',
+        async (): Promise<OperationStatus> => OperationStatus.FromCache
+      );
+      const result: IExecutionResult = await graph.executeAsync(graphIterationOptions);
+      expect(result.status).toEqual(OperationStatus.FromCache);
+      expect(graph.status).toEqual(OperationStatus.FromCache);
+      expect(mockRun).not.toHaveBeenCalled();
+      expect(result.operationResults.size).toEqual(2);
+      // Operations were intentionally not executed, so they should be Skipped rather than Aborted.
+      expect(result.operationResults.get(firstOperation)?.status).toEqual(OperationStatus.Skipped);
+      expect(result.operationResults.get(secondOperation)?.status).toEqual(OperationStatus.Skipped);
+    });
   });
 
   describe('Blocking', () => {

@@ -65,8 +65,8 @@ export class OperationGraphHooks {
    * short-circuit the entire iteration.
    *
    * If any tap returns an {@link OperationStatus}, the remaining taps are skipped and the iteration will
-   * end immediately with that status. All operations which have not yet executed will be marked
-   * Aborted.
+   * end immediately with that status. Operations which have not yet executed are marked Skipped if the
+   * returned status is successful (e.g. `Success`, `FromCache`, `NoOp`); otherwise they are marked Aborted.
    */
   public readonly beforeExecuteIterationAsync: AsyncSeriesBailHook<
     [ReadonlyMap<Operation, IOperationExecutionResult>, IOperationGraphIterationOptions],

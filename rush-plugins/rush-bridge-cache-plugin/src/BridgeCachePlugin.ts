@@ -156,7 +156,9 @@ export class BridgeCachePlugin implements IRushPlugin {
                 `Cache operation "${cacheAction}" completed successfully for ${successCount} out of ${filteredOperations.length} operations.`
               );
 
-              // Bail out with a status indicating success; treat cache read as FromCache.
+              // Bail out with a status indicating success; treat cache read as FromCache. Because this
+              // status is successful, the OperationGraph reports the individual operations (which were
+              // intentionally not executed) as Skipped rather than Aborted.
               return cacheAction === CACHE_ACTION_READ ? OperationStatus.FromCache : OperationStatus.Success;
             }
           );
