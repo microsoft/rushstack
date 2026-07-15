@@ -76,10 +76,14 @@ export class ShellOperationRunner implements IOperationRunner {
             `These parameters were ignored for this operation by project-level configuration: ${this._ignoredParameterValues.join(' ')}`
           );
         }
-        const commandToRun: string = (lastState && this._incrementalCommand) || this._initialCommand;
+        const incrementalCommand: string | undefined =
+          lastState && this._incrementalCommand ? this._incrementalCommand : undefined;
+        const commandToRun: string = incrementalCommand ?? this._initialCommand;
 
         // Run the operation
-        terminal.writeLine(`Invoking (${lastState ? 'incremental' : 'initial'}): ${commandToRun}`);
+        terminal.writeLine(
+          `Invoking (${incrementalCommand !== undefined ? 'incremental' : 'initial'}): ${commandToRun}`
+        );
 
         const { rushConfiguration, projectFolder } = this._rushProject;
 
