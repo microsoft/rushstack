@@ -362,3 +362,20 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - emitter events/scope, chunking, uncollated order, regroup parity, detailed-plaintext regroup, concise no-buffer tests pass; all exports @beta
   Next: Feature 24/28 - External output preservation + problem matchers
+
+[2026-07-14] Feature 24/28 COMPLETE: External output preservation + problem matchers
+  Files (new):
+    - matchers/AnsiNormalization.ts (normalizeAnsi strips CSI codes)
+    - matchers/ProblemMatcher.ts (IProblemMatcher {name,tool,severity,pattern,enabledByDefault,matchesVersion?,extract}, IProblemMatch)
+    - matchers/ProblemMatcherRegistry.ts (register, getMatchers(tool,{version,includeDisabled}) - tool+version scope + default-enablement gate)
+    - matchers/ProblemMatcherRunner.ts (runProblemMatchers: reassembles lines per op across chunks, ANSI-normalized copy, linked RUSH_EXTERNAL_TOOL_PROBLEM diagnostics w/ source+relatedArtifactIds, dedup cap, unmatched preserved; raw events NEVER modified)
+    - test/ProblemMatchers.test.ts
+  Files (modified): diagnostics/RushDiagnosticCodeRegistry.ts (APPENDED RUSH_EXTERNAL_TOOL_PROBLEM code+template), index.ts, api.md
+  Notes:
+    - Consumes Feature 23 uncollated externalOutput stream (iterateExternalOutput). Split-chunk reassembly per operationId. Evidence preserved (events unchanged, asserted via JSON equal).
+    - Duplicate cap (maxDuplicates default 3). Default-enablement gate via enabledByDefault + corpus test.
+    - Old Heft routed via version-scoped matcher (registry.getMatchers('heft',{version:'0.9.0'})). Reporter self-contained (no @rushstack/problem-matcher dep).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - normalizeAnsi, registry scope/gate, recover+link+evidence-preserve, split-chunk+ANSI, dedup cap, corpus tests pass; all exports @beta
+  Next: Feature 25/28 - Prohibit new AlreadyReportedError + bridge legacy sentinels
