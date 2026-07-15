@@ -239,7 +239,7 @@
       "Keep absolute log paths as local reporter output and never in telemetry",
       "Add stdout-purity tests for JSON and AI"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

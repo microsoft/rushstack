@@ -5,6 +5,21 @@
 ```ts
 
 // @beta
+export class AiReporter implements IReporter {
+    constructor(options: IAiReporterOptions);
+    // (undocumented)
+    closeAsync(): Promise<void>;
+    // (undocumented)
+    flushAsync(): Promise<void>;
+    // (undocumented)
+    initializeAsync(): Promise<void>;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    report(event: IReporterEventEnvelope<unknown>): void;
+}
+
+// @beta
 export const BOOTSTRAP_BUFFER_MAX_BYTES: number;
 
 // @beta
@@ -127,6 +142,72 @@ export function getPrivacyClassificationRank(classification: ReporterPrivacyClas
 
 // @beta
 export function getSignalExitCode(signal: NodeJS.Signals): number;
+
+// @beta
+export interface IAiDiagnostic {
+    // (undocumented)
+    readonly category: string;
+    // (undocumented)
+    readonly code: string;
+    // (undocumented)
+    readonly remediation?: readonly IRushRemediationAction[];
+    // (undocumented)
+    readonly severity: string;
+}
+
+// @beta
+export interface IAiFinalRecord {
+    // (undocumented)
+    readonly diagnosticCategoryCounts: {
+        readonly [category: string]: number;
+    };
+    // (undocumented)
+    readonly diagnostics: readonly IAiDiagnostic[];
+    // (undocumented)
+    readonly errorCodes: readonly string[];
+    // (undocumented)
+    readonly errorCount: number;
+    // (undocumented)
+    readonly exitCode: number;
+    // (undocumented)
+    readonly kind: 'ai.final';
+    // (undocumented)
+    readonly log?: IAiLogReference;
+    // (undocumented)
+    readonly operationCounts: {
+        readonly [status: string]: number;
+    };
+    // (undocumented)
+    readonly protocolVersion: IReporterProtocolVersion;
+    // (undocumented)
+    readonly result: 'succeeded' | 'failed';
+    // (undocumented)
+    readonly scope: {
+        readonly commandName?: string;
+        readonly failedProjects: readonly string[];
+    };
+    // (undocumented)
+    readonly truncated: boolean;
+    // (undocumented)
+    readonly warningCount: number;
+}
+
+// @beta
+export interface IAiLogReference {
+    // (undocumented)
+    readonly complete: boolean;
+    // (undocumented)
+    readonly format?: string;
+    // (undocumented)
+    readonly path: string;
+}
+
+// @beta
+export interface IAiReporterOptions {
+    readonly maxBytes?: number;
+    readonly maxDetailedDiagnostics?: number;
+    readonly write: (text: string) => void;
+}
 
 // @beta
 export interface IAutomaticReporterPlan {
@@ -279,6 +360,12 @@ export interface IInteractiveTerminal {
 export interface IJsonControls {
     readonly commandJson: boolean;
     readonly reporterJson: boolean;
+}
+
+// @beta
+export interface IJsonReporterOptions {
+    readonly maxRecordBytes?: number;
+    readonly write: (text: string) => void;
 }
 
 // @beta
@@ -707,6 +794,21 @@ export interface IWatchCycleCompletedPayload {
 export interface IWriteBootstrapHandoffOptions {
     readonly directory?: string;
     readonly pid?: number;
+}
+
+// @beta
+export class JsonReporter implements IReporter {
+    constructor(options: IJsonReporterOptions);
+    // (undocumented)
+    closeAsync(): Promise<void>;
+    // (undocumented)
+    flushAsync(): Promise<void>;
+    // (undocumented)
+    initializeAsync(): Promise<void>;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    report(event: IReporterEventEnvelope<unknown>): void;
 }
 
 // @beta

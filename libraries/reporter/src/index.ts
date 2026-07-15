@@ -223,6 +223,15 @@ export type {
 export { DefaultInteractiveReporter } from './reporters/DefaultInteractiveReporter';
 export type { IPlaintextReporterOptions } from './reporters/PlaintextReporter';
 export { PlaintextReporter } from './reporters/PlaintextReporter';
+export type { IJsonReporterOptions } from './reporters/JsonReporter';
+export { JsonReporter } from './reporters/JsonReporter';
+export type {
+  IAiDiagnostic,
+  IAiLogReference,
+  IAiFinalRecord,
+  IAiReporterOptions
+} from './reporters/AiReporter';
+export { AiReporter } from './reporters/AiReporter';
 
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
