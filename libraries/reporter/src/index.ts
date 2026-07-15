@@ -183,6 +183,13 @@ export type { IReporterOutputTarget } from './config/OutputControl';
 export { parseOutputControl } from './config/OutputControl';
 export type { IReporterSelectionInput, IReporterSelection } from './config/ReporterSelection';
 export { resolveReporterSelection } from './config/ReporterSelection';
+export {
+  FILE_REPORTER_DEFAULT_LOG_LEVEL,
+  getLogLevelRank,
+  getEventMinimumLogLevel,
+  shouldRenderAtLogLevel,
+  filterEventsForLogLevel
+} from './config/LogLevelFilter';
 
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {

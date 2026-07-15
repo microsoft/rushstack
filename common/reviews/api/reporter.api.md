@@ -90,6 +90,18 @@ export const EXIT_CODE_FAILURE: 1;
 export const EXIT_CODE_SUCCESS: 0;
 
 // @beta
+export const FILE_REPORTER_DEFAULT_LOG_LEVEL: ReporterLogLevel;
+
+// @beta
+export function filterEventsForLogLevel(logLevel: ReporterLogLevel, events: readonly IReporterEventEnvelope<unknown>[]): IReporterEventEnvelope<unknown>[];
+
+// @beta
+export function getEventMinimumLogLevel(event: IReporterEventEnvelope<unknown>): ReporterLogLevel;
+
+// @beta
+export function getLogLevelRank(level: ReporterLogLevel): number;
+
+// @beta
 export function getPrivacyClassificationRank(classification: ReporterPrivacyClassification): number;
 
 // @beta
@@ -802,6 +814,9 @@ export class RushSessionReporting {
 
 // @beta
 export function separateJsonControls(argv: readonly string[]): IJsonControls;
+
+// @beta
+export function shouldRenderAtLogLevel(logLevel: ReporterLogLevel, event: IReporterEventEnvelope<unknown>): boolean;
 
 // @beta
 export function summarizeShadowResult(events: readonly IReporterEventEnvelope<unknown>[]): IShadowResultSummary;
