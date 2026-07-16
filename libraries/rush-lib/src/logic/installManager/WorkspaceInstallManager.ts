@@ -380,6 +380,15 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       shrinkwrapIsUpToDate = false;
     }
 
+    const {
+      rushConfigurationJson: { pnpmVersion },
+      pnpmOptions,
+      commonRushConfigFolder
+    } = this.rushConfiguration;
+    if (pnpmVersion === undefined) {
+      throw new Error('Unexpected: pnpmVersion is not defined in rush.json');
+    }
+
     // Check if overrides and globalOverrides are the same
     const {
       globalOverrides = {},
@@ -389,8 +398,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       globalOnlyBuiltDependencies,
       globalNeverBuiltDependencies,
       minimumReleaseAgeMinutes,
-      minimumReleaseAgeExclude
-    }: PnpmOptionsConfiguration = subspace.getPnpmOptions() || this.rushConfiguration.pnpmOptions;
+      minimumReleaseAgeExclude,
+      globalPeerDependencyRules,
+      globalAllowedDeprecatedVersions,
+      globalPatchedDependencies
+    }: PnpmOptionsConfiguration = subspace.getPnpmOptions() || pnpmOptions;
 
     const overridesAreEqual: boolean = Objects.areDeepEqual<Record<string, string>>(
       globalOverrides,
@@ -452,15 +464,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // Set catalog definitions in the workspace file if specified
     if (catalogs) {
-      if (
-        this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-        semver.lt(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '9.5.0')
-      ) {
+      if (semver.lt(pnpmVersion, '9.5.0')) {
         this._terminal.writeWarningLine(
           Colorize.yellow(
-            `Your version of pnpm (${this.rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+            `Your version of pnpm (${pnpmVersion}) ` +
               `doesn't support the "globalCatalogs" fields in ` +
-              `${this.rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+              `${commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
               'Remove these fields or upgrade to pnpm 9.5.0 or newer.'
           )
         );
@@ -470,10 +479,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // Set allowBuilds in the workspace file for pnpm 11+ (replaces onlyBuiltDependencies/neverBuiltDependencies)
-    if (
-      this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-      semver.gte(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '11.0.0')
-    ) {
+    if (semver.gte(pnpmVersion, '11.0.0')) {
       if (globalAllowBuilds) {
         workspaceFile.allowBuilds = globalAllowBuilds;
       } else if (globalOnlyBuiltDependencies || globalNeverBuiltDependencies) {
@@ -494,12 +500,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
         workspaceFile.allowBuilds = allowBuilds;
       }
-    } else if (globalAllowBuilds && this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined) {
+    } else if (globalAllowBuilds && pnpmVersion !== undefined) {
       this._terminal.writeWarningLine(
         Colorize.yellow(
-          `Your version of pnpm (${this.rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+          `Your version of pnpm (${pnpmVersion}) ` +
             `doesn't support the "globalAllowBuilds" field in ` +
-            `${this.rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+            `${commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
             'Remove this field or upgrade to pnpm 11.0.0 or newer.'
         )
       );
@@ -508,31 +514,23 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // For pnpm 11+, the following settings must be written to pnpm-workspace.yaml because pnpm 11
     // no longer reads the "pnpm" field of package.json (where Rush writes them for older pnpm).
     // See https://github.com/microsoft/rushstack/issues/5837
-    if (
-      this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-      semver.gte(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '11.0.0')
-    ) {
-      const pnpmOptions: PnpmOptionsConfiguration =
-        subspace.getPnpmOptions() || this.rushConfiguration.pnpmOptions;
-      workspaceFile.overrides = pnpmOptions.globalOverrides;
-      workspaceFile.packageExtensions = pnpmOptions.globalPackageExtensions;
-      workspaceFile.peerDependencyRules = pnpmOptions.globalPeerDependencyRules;
-      workspaceFile.allowedDeprecatedVersions = pnpmOptions.globalAllowedDeprecatedVersions;
-      workspaceFile.patchedDependencies = pnpmOptions.globalPatchedDependencies;
+    if (semver.gte(pnpmVersion, '11.0.0')) {
+      workspaceFile.overrides = globalOverrides;
+      workspaceFile.packageExtensions = globalPackageExtensions;
+      workspaceFile.peerDependencyRules = globalPeerDependencyRules;
+      workspaceFile.allowedDeprecatedVersions = globalAllowedDeprecatedVersions;
+      workspaceFile.patchedDependencies = globalPatchedDependencies;
     }
 
     // Set minimumReleaseAge/minimumReleaseAgeExclude in the workspace file.
     // pnpm does not read these fields from package.json, only from pnpm-workspace.yaml or .npmrc.
     if (minimumReleaseAgeMinutes !== undefined || minimumReleaseAgeExclude) {
-      if (
-        this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-        semver.lt(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '10.16.0')
-      ) {
+      if (semver.lt(pnpmVersion, '10.16.0')) {
         this._terminal.writeWarningLine(
           Colorize.yellow(
-            `Your version of pnpm (${this.rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+            `Your version of pnpm (${pnpmVersion}) ` +
               `doesn't support the "minimumReleaseAgeMinutes" or "minimumReleaseAgeExclude" fields in ` +
-              `${this.rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+              `${commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
               'Remove these fields or upgrade to pnpm 10.16.0 or newer.'
           )
         );
