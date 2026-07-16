@@ -48,13 +48,13 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setCatalogs({
+      workspaceFile.catalogs = {
         default: {
           react: '^18.0.0',
           'react-dom': '^18.0.0',
           typescript: '~5.3.0'
         }
-      });
+      };
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
@@ -65,7 +65,7 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setCatalogs({
+      workspaceFile.catalogs = {
         default: {
           typescript: '~5.3.0'
         },
@@ -77,7 +77,7 @@ describe(PnpmWorkspaceFile.name, () => {
           express: '^4.18.0',
           fastify: '^4.26.0'
         }
-      });
+      };
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
@@ -88,7 +88,7 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setCatalogs({});
+      workspaceFile.catalogs = {};
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
@@ -99,7 +99,7 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setCatalogs(undefined);
+      workspaceFile.catalogs = undefined;
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
@@ -110,13 +110,13 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setCatalogs({
+      workspaceFile.catalogs = {
         default: {
           '@types/node': '~22.9.4',
           '@types/cookies': '^0.7.7',
           '@rushstack/node-core-library': '~5.0.0'
         }
-      });
+      };
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
@@ -127,21 +127,21 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setCatalogs({
+      workspaceFile.catalogs = {
         default: {
           react: '^18.0.0'
         }
-      });
+      };
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
       // Update catalogs
-      workspaceFile.setCatalogs({
+      workspaceFile.catalogs = {
         default: {
           react: '^18.2.0',
           'react-dom': '^18.2.0'
         }
-      });
+      };
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
@@ -154,11 +154,11 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setAllowBuilds({
+      workspaceFile.allowBuilds = {
         esbuild: true,
         '@parcel/watcher': true,
         fsevents: false
-      });
+      };
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
@@ -169,15 +169,15 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setCatalogs({
+      workspaceFile.catalogs = {
         default: {
           react: '^18.0.0'
         }
-      });
+      };
 
-      workspaceFile.setAllowBuilds({
+      workspaceFile.allowBuilds = {
         esbuild: true
-      });
+      };
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
@@ -188,18 +188,18 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setAllowBuilds({});
+      workspaceFile.allowBuilds = {};
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      expect(writtenContent).not.toContain('allowBuilds');
+      expect(writtenContent).toContain('allowBuilds: {}');
     });
 
     it('handles undefined allowBuilds', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setAllowBuilds(undefined);
+      workspaceFile.allowBuilds = undefined;
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
@@ -212,7 +212,7 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setMinimumReleaseAge(20160);
+      workspaceFile.minimumReleaseAge = 20160;
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
@@ -223,8 +223,8 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setMinimumReleaseAge(1440);
-      workspaceFile.setMinimumReleaseAgeExclude(['webpack', '@myorg/*']);
+      workspaceFile.minimumReleaseAge = 1440;
+      workspaceFile.minimumReleaseAgeExclude = ['webpack', '@myorg/*'];
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
@@ -235,7 +235,7 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setMinimumReleaseAgeExclude(['webpack']);
+      workspaceFile.minimumReleaseAgeExclude = ['webpack'];
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
@@ -246,7 +246,7 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setMinimumReleaseAge(0);
+      workspaceFile.minimumReleaseAge = 0;
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
@@ -257,8 +257,8 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setMinimumReleaseAge(undefined);
-      workspaceFile.setMinimumReleaseAgeExclude(undefined);
+      workspaceFile.minimumReleaseAge = undefined;
+      workspaceFile.minimumReleaseAgeExclude = undefined;
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
@@ -269,7 +269,7 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setMinimumReleaseAgeExclude([]);
+      workspaceFile.minimumReleaseAgeExclude = [];
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
@@ -280,7 +280,7 @@ describe(PnpmWorkspaceFile.name, () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setMinimumReleaseAgeExclude(undefined);
+      workspaceFile.minimumReleaseAgeExclude = undefined;
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 

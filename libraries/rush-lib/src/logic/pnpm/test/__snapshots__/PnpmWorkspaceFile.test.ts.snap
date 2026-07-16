@@ -65,7 +65,8 @@ packages:
 `;
 
 exports[`PnpmWorkspaceFile catalog functionality handles empty catalog object 1`] = `
-"packages:
+"catalogs: {}
+packages:
   - projects/app1
 "
 `;
