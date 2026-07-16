@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@rushstack/rush-published-versions-json-plugin':
-        specifier: 0.1.12
-        version: 0.1.12
+        specifier: 0.1.13
+        version: 0.1.13
 
 packages:
 
@@ -26,11 +26,11 @@ packages:
     resolution: {integrity: sha512-GucC9h/EVbU03Kl7M/FqVes1s5RCQaGCW2f41lFA7VqqHWQElR6k1q33iF6f6fXDUSCdzB1IUxSq9ghP2J+8Pw==}
     engines: {node: '>=18.12'}
 
-  '@rushstack/credential-cache@0.2.18':
-    resolution: {integrity: sha512-ykf8jgoDdpMfDdIib7ReCV3XiHwppgPI6lGIEI5I/aN9rLUvdgj8inivGdtur0bpnxXif/O40TMFXMUi+DCW/A==}
+  '@rushstack/credential-cache@0.2.19':
+    resolution: {integrity: sha512-7wsj+xULJ2K10vaYVkZ1aS7IZNoyblyBvwlQMyDeuI8ZkM6GU8nIdgSB7lygaPoZHWG5HZ6pHP9kpXUblGoJqA==}
 
-  '@rushstack/lookup-by-path@0.10.7':
-    resolution: {integrity: sha512-2SbMEqhfLAne2Zgucz4QHD7WpXJEyZ7iErO8j/ZlejEtWRcdZIZhrJhdfylhIRrL/Kosq9vdSOMsKcljM9+GuQ==}
+  '@rushstack/lookup-by-path@0.10.8':
+    resolution: {integrity: sha512-aniYM6ZMdI9qJBIALjVbw3onw6hTE3yYOjM00lIiCSM85SH12wfhb/4MNBXCYWStWuUb9PHekOChY6m1/BR2eg==}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -45,8 +45,16 @@ packages:
       '@types/node':
         optional: true
 
-  '@rushstack/package-deps-hash@4.7.19':
-    resolution: {integrity: sha512-dIn4efsv5JrcAwoub68i/FGjFXZoH9E2IQhG+ZDeQxv/hW1NvIW1NRn4ir1nVlgpo/xm3sm7gw4f8QaIshkNHg==}
+  '@rushstack/node-core-library@5.23.2':
+    resolution: {integrity: sha512-dCdCdy+5/L+wss7bymRPWuAhhUMT3kEzN7g9xE0AgzrPFtJ8JS+gMsfgm9spvTSl1YkhSgM3TK4u8BruUQj4Kg==}
+    peerDependencies:
+      '@types/node': '*'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@rushstack/package-deps-hash@4.7.21':
+    resolution: {integrity: sha512-M/DPM9xUepZQAxN/tzEBPlm23kd/gsFkeOHikryYQidc3lNuhYnIP8b+aWVZWOJ2SxVx5lCzTdTmhBG/S3CGdg==}
 
   '@rushstack/problem-matcher@0.2.1':
     resolution: {integrity: sha512-gulfhBs6n+I5b7DvjKRfhMGyUejtSgOHTclF/eONr8hcgF1APEDjhxIsfdUYYMzC3rvLwGluqLjbwCFZ8nxrog==}
@@ -56,14 +64,22 @@ packages:
       '@types/node':
         optional: true
 
-  '@rushstack/rush-published-versions-json-plugin@0.1.12':
-    resolution: {integrity: sha512-dTMFziwkP9BYrdN6vBDPkEMz2aHkxSmx8kyYdWdOlazfRv7zCGmr/JKrIhTZsho+raH8lCIsZGEum0CSsLS8fQ==}
+  '@rushstack/rush-published-versions-json-plugin@0.1.13':
+    resolution: {integrity: sha512-NNVUTcJQUTLT4oY7gqJU6lTHCOEeli/oKhYdegR6Q8AbJHLJtxRkH8i8SjJs4q/YjE0LJ9Jp9ohwApNyIA8QbA==}
 
-  '@rushstack/rush-sdk@5.176.0':
-    resolution: {integrity: sha512-szG89Ri75f20s1SAP6PrdKNsGcoIvwv3cfbjB2iEBS0EMuvdNX0gNzlb0vMIdrVr9Z53C9e7CQl69ysZgv1ofg==}
+  '@rushstack/rush-sdk@5.177.2':
+    resolution: {integrity: sha512-eDry7HDJsx98/Rml6wb3dSjxu091TIvxezfjl7datjNjBuZDNtid1/SjHxWZnP9WWjzzv7nVyt5RKNN19b157Q==}
 
   '@rushstack/terminal@0.24.0':
     resolution: {integrity: sha512-8ZQS4MMaGsv27EXCBiH7WMPkRZrffeDoIevs6z9TM5dzqiY6+Hn4evfK/G+gvgBTjfvfkHIZPQQmalmI2sM4TQ==}
+    peerDependencies:
+      '@types/node': '*'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@rushstack/terminal@0.24.1':
+    resolution: {integrity: sha512-1NPimt0UnLP0mOxpQpcROPpkArwjr/rEThalQN49bh2rJLNL+PiryGp3iAoW/fLbXxuuazN6SvHqsQl0qnxy+Q==}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -88,6 +104,9 @@ packages:
 
   ajv@8.18.0:
     resolution: {integrity: sha512-PlXPeEWMXMZ7sPYOHqmDyCJzcfNrUr3fGNKtezX14ykXOEIvyK81d+qydx89KY5O71FKMPaQ2vBfBFI5NHR63A==}
+
+  ajv@8.20.0:
+    resolution: {integrity: sha512-Thbli+OlOj+iMPYFBVBfJ3OmCAnaSyNn4M1vz9T6Gka5Jt9ba/HIR56joy65tY6kx/FCF5VXNB819Y7/GUrBGA==}
 
   es-errors@1.3.0:
     resolution: {integrity: sha512-Zf5H2Kxt2xjTvbJvP2ZWLEICxA6j+hAmMzIlypy4xcBg1vKVnx89Wy0GbS+kf5cwCVFFzdCFh2XSCFNULS6csw==}
@@ -178,13 +197,13 @@ snapshots:
 
   '@pnpm/types@900.0.0': {}
 
-  '@rushstack/credential-cache@0.2.18':
+  '@rushstack/credential-cache@0.2.19':
     dependencies:
       '@rushstack/node-core-library': 5.23.1
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/lookup-by-path@0.10.7': {}
+  '@rushstack/lookup-by-path@0.10.8': {}
 
   '@rushstack/node-core-library@5.23.1':
     dependencies:
@@ -197,7 +216,18 @@ snapshots:
       resolve: 1.22.12
       semver: 7.7.4
 
-  '@rushstack/package-deps-hash@4.7.19':
+  '@rushstack/node-core-library@5.23.2':
+    dependencies:
+      ajv: 8.20.0
+      ajv-draft-04: 1.0.0(ajv@8.20.0)
+      ajv-formats: 3.0.1(ajv@8.20.0)
+      fs-extra: 11.3.6
+      import-lazy: 4.0.0
+      jju: 1.4.0
+      resolve: 1.22.12
+      semver: 7.7.4
+
+  '@rushstack/package-deps-hash@4.7.21':
     dependencies:
       '@rushstack/node-core-library': 5.23.1
     transitivePeerDependencies:
@@ -205,21 +235,21 @@ snapshots:
 
   '@rushstack/problem-matcher@0.2.1': {}
 
-  '@rushstack/rush-published-versions-json-plugin@0.1.12':
+  '@rushstack/rush-published-versions-json-plugin@0.1.13':
     dependencies:
-      '@rushstack/node-core-library': 5.23.1
-      '@rushstack/rush-sdk': 5.176.0
-      '@rushstack/terminal': 0.24.0
+      '@rushstack/node-core-library': 5.23.2
+      '@rushstack/rush-sdk': 5.177.2
+      '@rushstack/terminal': 0.24.1
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/rush-sdk@5.176.0':
+  '@rushstack/rush-sdk@5.177.2':
     dependencies:
       '@pnpm/lockfile.types-900': '@pnpm/lockfile.types@900.0.0'
-      '@rushstack/credential-cache': 0.2.18
-      '@rushstack/lookup-by-path': 0.10.7
+      '@rushstack/credential-cache': 0.2.19
+      '@rushstack/lookup-by-path': 0.10.8
       '@rushstack/node-core-library': 5.23.1
-      '@rushstack/package-deps-hash': 4.7.19
+      '@rushstack/package-deps-hash': 4.7.21
       '@rushstack/terminal': 0.24.0
       tapable: 2.2.1
     transitivePeerDependencies:
@@ -231,15 +261,36 @@ snapshots:
       '@rushstack/problem-matcher': 0.2.1
       supports-color: 8.1.1
 
+  '@rushstack/terminal@0.24.1':
+    dependencies:
+      '@rushstack/node-core-library': 5.23.2
+      '@rushstack/problem-matcher': 0.2.1
+      supports-color: 8.1.1
+
   ajv-draft-04@1.0.0(ajv@8.18.0):
     optionalDependencies:
       ajv: 8.18.0
+
+  ajv-draft-04@1.0.0(ajv@8.20.0):
+    optionalDependencies:
+      ajv: 8.20.0
 
   ajv-formats@3.0.1(ajv@8.18.0):
     optionalDependencies:
       ajv: 8.18.0
 
+  ajv-formats@3.0.1(ajv@8.20.0):
+    optionalDependencies:
+      ajv: 8.20.0
+
   ajv@8.18.0:
+    dependencies:
+      fast-deep-equal: 3.1.3
+      fast-uri: 3.1.3
+      json-schema-traverse: 1.0.0
+      require-from-string: 2.0.2
+
+  ajv@8.20.0:
     dependencies:
       fast-deep-equal: 3.1.3
       fast-uri: 3.1.3
