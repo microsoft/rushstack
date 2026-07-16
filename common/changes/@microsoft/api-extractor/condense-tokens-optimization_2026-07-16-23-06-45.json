@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Improve the performance of the internal excerpt token condensing algorithm from O(n^2) to O(n) by eliminating repeated array splicing and per-merge bookkeeping.",
+      "type": "patch",
+      "packageName": "@microsoft/api-extractor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
