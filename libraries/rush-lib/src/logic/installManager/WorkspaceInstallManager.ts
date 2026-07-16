@@ -513,21 +513,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
       semver.gte(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '11.0.0')
     ) {
-      if (pnpmOptions.globalOverrides) {
-        workspaceFile.setOverrides(pnpmOptions.globalOverrides);
-      }
-      if (pnpmOptions.globalPackageExtensions) {
-        workspaceFile.setPackageExtensions(pnpmOptions.globalPackageExtensions);
-      }
-      if (pnpmOptions.globalPeerDependencyRules) {
-        workspaceFile.setPeerDependencyRules(pnpmOptions.globalPeerDependencyRules);
-      }
-      if (pnpmOptions.globalAllowedDeprecatedVersions) {
-        workspaceFile.setAllowedDeprecatedVersions(pnpmOptions.globalAllowedDeprecatedVersions);
-      }
-      if (pnpmOptions.globalPatchedDependencies) {
-        workspaceFile.setPatchedDependencies(pnpmOptions.globalPatchedDependencies);
-      }
+      workspaceFile.setOverrides(pnpmOptions.globalOverrides);
+      workspaceFile.setPackageExtensions(pnpmOptions.globalPackageExtensions);
+      workspaceFile.setPeerDependencyRules(pnpmOptions.globalPeerDependencyRules);
+      workspaceFile.setAllowedDeprecatedVersions(pnpmOptions.globalAllowedDeprecatedVersions);
+      workspaceFile.setPatchedDependencies(pnpmOptions.globalPatchedDependencies);
     }
 
     // Set minimumReleaseAge/minimumReleaseAgeExclude in the workspace file.

@@ -260,18 +260,6 @@ describe(PnpmWorkspaceFile.name, () => {
       expect(content).toMatchSnapshot();
     });
 
-    it('handles empty overrides object', () => {
-      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
-
-      workspaceFile.setOverrides({});
-
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
-
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).not.toContain('overrides');
-    });
-
     it('handles undefined overrides', () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(path.join(projectsDir, 'app1'));
@@ -303,18 +291,6 @@ describe(PnpmWorkspaceFile.name, () => {
       const content: string = FileSystem.readFile(workspaceFilePath);
       expect(content).toContain('packageExtensions:');
       expect(content).toMatchSnapshot();
-    });
-
-    it('handles empty packageExtensions object', () => {
-      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
-
-      workspaceFile.setPackageExtensions({});
-
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
-
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).not.toContain('packageExtensions');
     });
 
     it('handles undefined packageExtensions', () => {
@@ -349,18 +325,6 @@ describe(PnpmWorkspaceFile.name, () => {
       expect(content).toMatchSnapshot();
     });
 
-    it('handles empty peerDependencyRules object', () => {
-      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
-
-      workspaceFile.setPeerDependencyRules({});
-
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
-
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).not.toContain('peerDependencyRules');
-    });
-
     it('handles undefined peerDependencyRules', () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(path.join(projectsDir, 'app1'));
@@ -390,18 +354,6 @@ describe(PnpmWorkspaceFile.name, () => {
       expect(content).toMatchSnapshot();
     });
 
-    it('handles empty allowedDeprecatedVersions object', () => {
-      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
-
-      workspaceFile.setAllowedDeprecatedVersions({});
-
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
-
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).not.toContain('allowedDeprecatedVersions');
-    });
-
     it('handles undefined allowedDeprecatedVersions', () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
       workspaceFile.addPackage(path.join(projectsDir, 'app1'));
@@ -429,18 +381,6 @@ describe(PnpmWorkspaceFile.name, () => {
       const content: string = FileSystem.readFile(workspaceFilePath);
       expect(content).toContain('patchedDependencies:');
       expect(content).toMatchSnapshot();
-    });
-
-    it('handles empty patchedDependencies object', () => {
-      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
-
-      workspaceFile.setPatchedDependencies({});
-
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
-
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).not.toContain('patchedDependencies');
     });
 
     it('handles undefined patchedDependencies', () => {

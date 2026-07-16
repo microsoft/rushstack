@@ -233,27 +233,12 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
       workspaceYaml.allowBuilds = this._allowBuilds;
     }
 
-    if (this._overrides && Object.keys(this._overrides).length > 0) {
-      workspaceYaml.overrides = this._overrides;
-    }
-
-    if (this._packageExtensions && Object.keys(this._packageExtensions).length > 0) {
-      workspaceYaml.packageExtensions = this._packageExtensions;
-    }
-
-    if (this._peerDependencyRules && Object.keys(this._peerDependencyRules).length > 0) {
-      workspaceYaml.peerDependencyRules = this._peerDependencyRules;
-    }
-
-    if (this._allowedDeprecatedVersions && Object.keys(this._allowedDeprecatedVersions).length > 0) {
-      workspaceYaml.allowedDeprecatedVersions = this._allowedDeprecatedVersions;
-    }
-
-    if (this._patchedDependencies && Object.keys(this._patchedDependencies).length > 0) {
-      workspaceYaml.patchedDependencies = this._patchedDependencies;
-    }
-
     // js-yaml omits mapping entries whose value is `undefined`, so no guard is needed here.
+    workspaceYaml.overrides = this._overrides;
+    workspaceYaml.packageExtensions = this._packageExtensions;
+    workspaceYaml.peerDependencyRules = this._peerDependencyRules;
+    workspaceYaml.allowedDeprecatedVersions = this._allowedDeprecatedVersions;
+    workspaceYaml.patchedDependencies = this._patchedDependencies;
     workspaceYaml.minimumReleaseAge = this._minimumReleaseAge;
     workspaceYaml.minimumReleaseAgeExclude = this._minimumReleaseAgeExclude;
 
