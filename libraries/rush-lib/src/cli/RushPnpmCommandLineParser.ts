@@ -32,6 +32,7 @@ import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTyp
 import { Utilities } from '../utilities/Utilities';
 import type { Subspace } from '../api/Subspace';
 import type { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
+import { PnpmWorkspaceFile } from '../logic/pnpm/PnpmWorkspaceFile';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { initializeDotEnv } from '../logic/dotenv';
 
@@ -544,13 +545,9 @@ export class RushPnpmCommandLineParser {
         let newGlobalPatchedDependencies: Record<string, string> | undefined;
         if (semver.gte(pnpmVersion, '11.0.0')) {
           // PNPM 11+ stores patchedDependencies in pnpm-workspace.yaml instead of the package.json "pnpm" field
-          const workspaceYamlFilename: string = `${subspaceTempFolder}/pnpm-workspace.yaml`;
-          const yamlModule: typeof import('js-yaml') = await import('js-yaml');
-          const workspaceYamlContent: string = await FileSystem.readFileAsync(workspaceYamlFilename);
-          const workspaceYaml: { patchedDependencies?: Record<string, string> } = (yamlModule.load(
-            workspaceYamlContent
-          ) ?? {}) as { patchedDependencies?: Record<string, string> };
-          newGlobalPatchedDependencies = workspaceYaml?.patchedDependencies;
+          newGlobalPatchedDependencies = await PnpmWorkspaceFile.loadPatchedDependenciesAsync(
+            `${subspaceTempFolder}/pnpm-workspace.yaml`
+          );
         } else {
           // PNPM 10.x and earlier store patchedDependencies in the package.json "pnpm" field
           // Example: "C:\MyRepo\common\temp\package.json"

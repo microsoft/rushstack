@@ -396,6 +396,47 @@ describe(PnpmWorkspaceFile.name, () => {
     });
   });
 
+  describe(PnpmWorkspaceFile.loadPatchedDependenciesAsync.name, () => {
+    let mockReadFileAsync: jest.SpyInstance;
+
+    beforeEach(() => {
+      // Mock FileSystem.readFileAsync to return the content captured by the FileSystem.writeFile mock
+      mockReadFileAsync = jest.spyOn(FileSystem, 'readFileAsync').mockImplementation(async () => {
+        if (writtenContent === undefined) {
+          throw new Error('File not found');
+        }
+        return writtenContent;
+      });
+    });
+
+    afterEach(() => {
+      mockReadFileAsync.mockRestore();
+    });
+
+    it('reads patchedDependencies from an existing workspace file', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.setPatchedDependencies({
+        'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
+      });
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      await expect(PnpmWorkspaceFile.loadPatchedDependenciesAsync(workspaceFilePath)).resolves.toEqual({
+        'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
+      });
+    });
+
+    it('returns undefined when the workspace file has no patchedDependencies', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+
+      await expect(
+        PnpmWorkspaceFile.loadPatchedDependenciesAsync(workspaceFilePath)
+      ).resolves.toBeUndefined();
+    });
+  });
+
   describe('combined pnpm 11 settings', () => {
     it('generates workspace file with all relocated settings together', () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);

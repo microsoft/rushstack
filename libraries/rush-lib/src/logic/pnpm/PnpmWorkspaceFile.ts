@@ -5,7 +5,7 @@ import * as path from 'node:path';
 
 import { escapePath as globEscape } from 'fast-glob';
 
-import { Sort, Import, Path } from '@rushstack/node-core-library';
+import { FileSystem, Sort, Import, Path } from '@rushstack/node-core-library';
 
 import { BaseWorkspaceFile } from '../base/BaseWorkspaceFile';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
@@ -184,6 +184,20 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
    */
   public setPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void {
     this._patchedDependencies = patchedDependencies;
+  }
+
+  /**
+   * Reads the `patchedDependencies` field from an existing `pnpm-workspace.yaml` file.
+   * @param workspaceYamlFilename - The path to the `pnpm-workspace.yaml` file
+   */
+  public static async loadPatchedDependenciesAsync(
+    workspaceYamlFilename: string
+  ): Promise<Record<string, string> | undefined> {
+    const workspaceYamlContent: string = await FileSystem.readFileAsync(workspaceYamlFilename);
+    const workspaceYaml: IPnpmWorkspaceYaml | undefined = yamlModule.load(workspaceYamlContent) as
+      | IPnpmWorkspaceYaml
+      | undefined;
+    return workspaceYaml?.patchedDependencies;
   }
 
   /**
