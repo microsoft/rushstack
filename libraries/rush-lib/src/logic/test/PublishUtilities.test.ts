@@ -140,9 +140,11 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
 
     await PublishUtilities['_updateCommitDetailsAsync'](git, changeFilePath, changes);
 
-    expect(spawnSpy).toHaveBeenCalledWith(gitPath, ['log', '-n', '1', '--', changeFilePath], {
-      currentWorkingDirectory: path.dirname(changeFilePath)
-    });
+    expect(spawnSpy).toHaveBeenCalledWith(
+      gitPath,
+      ['log', '-n', '1', '--', changeFilePath],
+      { currentWorkingDirectory: path.dirname(changeFilePath) }
+    );
     expect(waitForExitSpy).toHaveBeenCalledWith(gitProcess, { encoding: 'utf8' });
     expect(changes).toEqual([
       {
@@ -170,9 +172,11 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
 
     await PublishUtilities['_updateCommitDetailsAsync'](git, changeFilePath, changes);
 
-    expect(spawnSpy).toHaveBeenCalledWith(gitPath, ['log', '-n', '1', '--', changeFilePath], {
-      currentWorkingDirectory: path.dirname(changeFilePath)
-    });
+    expect(spawnSpy).toHaveBeenCalledWith(
+      gitPath,
+      ['log', '-n', '1', '--', changeFilePath],
+      { currentWorkingDirectory: path.dirname(changeFilePath) }
+    );
     expect(changes[0].commit).toEqual('0123456789abcdef');
   });
 
@@ -188,15 +192,13 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
 
       jest.spyOn(git, 'getGitPathOrThrow').mockReturnValue(path.resolve('git.exe'));
       jest.spyOn(Executable, 'spawn').mockReturnValue(gitProcess);
-      jest
-        .spyOn(Executable, 'waitForExitAsync')
-        .mockResolvedValue(
-          createGitResult(
-            'commit 0123456789abcdef\nAuthor: Test Author <test@example.com>\n',
-            exitCode,
-            signal
-          )
-        );
+      jest.spyOn(Executable, 'waitForExitAsync').mockResolvedValue(
+        createGitResult(
+          'commit 0123456789abcdef\nAuthor: Test Author <test@example.com>\n',
+          exitCode,
+          signal
+        )
+      );
 
       await PublishUtilities['_updateCommitDetailsAsync'](git, path.resolve('change.json'), changes);
 
