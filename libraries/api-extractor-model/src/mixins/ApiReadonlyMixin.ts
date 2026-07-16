@@ -91,8 +91,7 @@ export function ApiReadonlyMixin<TBaseClass extends IApiItemConstructor>(
       this[_isReadonly] = options.isReadonly;
     }
 
-    /** @override */
-    public static onDeserializeInto(
+    public static override onDeserializeInto(
       options: Partial<IApiReadonlyMixinOptions>,
       context: DeserializerContext,
       jsonObject: IApiReadonlyMixinJson
@@ -106,8 +105,7 @@ export function ApiReadonlyMixin<TBaseClass extends IApiItemConstructor>(
       return this[_isReadonly];
     }
 
-    /** @override */
-    public serializeInto(jsonObject: Partial<IApiReadonlyMixinJson>): void {
+    public override serializeInto(jsonObject: Partial<IApiReadonlyMixinJson>): void {
       super.serializeInto(jsonObject);
 
       jsonObject.isReadonly = this.isReadonly;

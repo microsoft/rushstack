@@ -97,8 +97,7 @@ export class ApiInterface extends ApiItemContainerMixin(
     return `${name}|${ApiItemKind.Interface}`;
   }
 
-  /** @override */
-  public static onDeserializeInto(
+  public static override onDeserializeInto(
     options: Partial<IApiInterfaceOptions>,
     context: DeserializerContext,
     jsonObject: IApiInterfaceJson
@@ -108,13 +107,11 @@ export class ApiInterface extends ApiItemContainerMixin(
     options.extendsTokenRanges = jsonObject.extendsTokenRanges;
   }
 
-  /** @override */
-  public get kind(): ApiItemKind {
+  public override get kind(): ApiItemKind {
     return ApiItemKind.Interface;
   }
 
-  /** @override */
-  public get containerKey(): string {
+  public override get containerKey(): string {
     return ApiInterface.getContainerKey(this.name);
   }
 
@@ -125,15 +122,14 @@ export class ApiInterface extends ApiItemContainerMixin(
     return this._extendsTypes;
   }
 
-  /** @override */
-  public serializeInto(jsonObject: Partial<IApiInterfaceJson>): void {
+  public override serializeInto(jsonObject: Partial<IApiInterfaceJson>): void {
     super.serializeInto(jsonObject);
 
     jsonObject.extendsTokenRanges = this.extendsTypes.map((x) => x.excerpt.tokenRange);
   }
 
-  /** @beta @override */
-  public buildCanonicalReference(): DeclarationReference {
+  /** @beta */
+  public override buildCanonicalReference(): DeclarationReference {
     const nameComponent: Component = DeclarationReference.parseComponent(this.name);
     const navigation: Navigation = this.isExported ? Navigation.Exports : Navigation.Locals;
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())

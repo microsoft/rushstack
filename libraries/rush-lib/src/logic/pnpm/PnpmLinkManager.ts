@@ -39,10 +39,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     this._rushConfiguration.packageManagerToolVersion
   );
 
-  /**
-   * @override
-   */
-  public async createSymlinksForProjectsAsync(force: boolean): Promise<void> {
+  public override async createSymlinksForProjectsAsync(force: boolean): Promise<void> {
     const useWorkspaces: boolean =
       this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
     if (useWorkspaces) {

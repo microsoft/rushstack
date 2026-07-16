@@ -53,8 +53,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     this._snippetsAll = yaml.load(snippetsContent, { filename: snippetsFilePath }) as ISnippetsFile;
   }
 
-  /** @override */
-  public generateFiles(outputFolder: string): void {
+  public override generateFiles(outputFolder: string): void {
     super.generateFiles(outputFolder);
 
     // After we generate everything, check for any unused snippets
@@ -64,8 +63,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     }
   }
 
-  /** @override */
-  protected onGetTocRoot(): IYamlTocItem {
+  protected override onGetTocRoot(): IYamlTocItem {
     return {
       name: 'API reference',
       href: 'overview.md',
@@ -73,8 +71,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     };
   }
 
-  /** @override */
-  protected onCustomizeYamlItem(yamlItem: IYamlItem): void {
+  protected override onCustomizeYamlItem(yamlItem: IYamlItem): void {
     const nameWithoutPackage: string = yamlItem.uid.replace(/^[^.]+\!/, '');
     if (yamlItem.summary) {
       yamlItem.summary = this._fixupApiSet(yamlItem.summary, yamlItem.uid);

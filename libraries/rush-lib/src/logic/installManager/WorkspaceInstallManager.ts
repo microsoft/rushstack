@@ -53,10 +53,7 @@ export interface IPnpmModules {
  * This class implements common logic between "rush install" and "rush update".
  */
 export class WorkspaceInstallManager extends BaseInstallManager {
-  /**
-   * @override
-   */
-  public async doInstallAsync(): Promise<void> {
+  public override async doInstallAsync(): Promise<void> {
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     if (this.options.noLink) {
       // eslint-disable-next-line no-console
@@ -77,10 +74,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
    * If shrinkwrapFile is provided, this function also validates whether it contains
    * everything we need to install and returns true if so; in all other cases,
    * the return value is false.
-   *
-   * @override
    */
-  protected async prepareCommonTempAsync(
+  protected override async prepareCommonTempAsync(
     subspace: Subspace,
     shrinkwrapFile: (PnpmShrinkwrapFile & BaseShrinkwrapFile) | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
@@ -132,6 +127,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
               `which was not found in ${RushConstants.rushJsonFilename}`
           );
         }
+
         shrinkwrapIsUpToDate = false;
       }
     }

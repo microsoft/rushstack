@@ -81,10 +81,8 @@ export class RushInstallManager extends BaseInstallManager {
    * If shrinkwrapFile is provided, this function also validates whether it contains
    * everything we need to install and returns true if so; in all other cases,
    * the return value is false.
-   *
-   * @override
    */
-  public async prepareCommonTempAsync(
+  public override async prepareCommonTempAsync(
     subspace: Subspace,
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
@@ -448,10 +446,8 @@ export class RushInstallManager extends BaseInstallManager {
 
   /**
    * Check whether or not the install is already valid, and therefore can be skipped.
-   *
-   * @override
    */
-  protected async canSkipInstallAsync(
+  protected override async canSkipInstallAsync(
     lastModifiedDate: Date,
     subspace: Subspace,
     variant: string | undefined
@@ -476,10 +472,8 @@ export class RushInstallManager extends BaseInstallManager {
 
   /**
    * Runs "npm/pnpm/yarn install" in the "common/temp" folder.
-   *
-   * @override
    */
-  protected async installAsync(cleanInstall: boolean, subspace: Subspace): Promise<void> {
+  protected override async installAsync(cleanInstall: boolean, subspace: Subspace): Promise<void> {
     // Since we are actually running npm/pnpm/yarn install, recreate all the temp project tarballs.
     // This ensures that any existing tarballs with older header bits will be regenerated.
     // It is safe to assume that temp project pacakge.jsons already exist.

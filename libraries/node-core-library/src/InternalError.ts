@@ -57,8 +57,7 @@ export class InternalError extends Error {
     );
   }
 
-  /** @override */
-  public toString(): string {
+  public override toString(): string {
     return this.message; // Avoid adding the "Error:" prefix
   }
 }

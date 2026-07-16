@@ -126,10 +126,8 @@ export class FileError extends Error {
 
   /**
    * Get the Unix-formatted the error message.
-   *
-   * @override
    */
-  public toString(): string {
+  public override toString(): string {
     // Default to formatting in 'Unix' format, for consistency.
     return this.getFormattedErrorMessage();
   }

@@ -118,8 +118,8 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
     return this._value;
   }
 
-  /** {@inheritDoc CommandLineParameterBase.appendToArgList} @override */
-  public appendToArgList(argList: string[]): void {
+  /** {@inheritDoc CommandLineParameterBase.appendToArgList} */
+  public override appendToArgList(argList: string[]): void {
     if (this.value !== undefined) {
       argList.push(this.longName);
       argList.push(this.value);

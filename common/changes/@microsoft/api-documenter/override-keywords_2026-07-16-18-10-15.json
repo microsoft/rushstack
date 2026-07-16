@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Replace `@override` with the `override` keyword.",
+      "type": "patch",
+      "packageName": "@microsoft/api-documenter"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "iclanton@users.noreply.github.com"
+}

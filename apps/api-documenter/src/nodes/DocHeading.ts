@@ -34,8 +34,7 @@ export class DocHeading extends DocNode {
     }
   }
 
-  /** @override */
-  public get kind(): string {
+  public override get kind(): string {
     return CustomDocNodeKind.Heading;
   }
 }

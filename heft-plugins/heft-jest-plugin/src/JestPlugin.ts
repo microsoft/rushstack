@@ -166,8 +166,6 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
   /**
    * Setup the hooks and custom CLI options for the Jest plugin.
-   *
-   * @override
    */
   public apply(
     taskSession: IHeftTaskSession,

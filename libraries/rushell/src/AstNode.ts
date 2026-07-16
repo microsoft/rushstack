@@ -82,8 +82,7 @@ export class AstScript extends AstBaseNode {
 
   public body: AstNode | undefined;
 
-  /** @override */
-  protected collectChildNodesInto(nodes: AstNode[]): void {
+  protected override collectChildNodesInto(nodes: AstNode[]): void {
     if (this.body) {
       nodes.push(this.body);
     }
@@ -106,8 +105,7 @@ export class AstAndIf extends AstBaseNode {
    */
   public secondCommand: AstCommand | undefined;
 
-  /** @override */
-  protected collectChildNodesInto(nodes: AstNode[]): void {
+  protected override collectChildNodesInto(nodes: AstNode[]): void {
     if (this.firstCommand) {
       nodes.push(this.firstCommand);
     }
@@ -126,8 +124,7 @@ export class AstCommand extends AstBaseNode {
   public commandPath: AstCompoundWord | undefined;
   public arguments: AstCompoundWord[] = [];
 
-  /** @override */
-  protected collectChildNodesInto(nodes: AstNode[]): void {
+  protected override collectChildNodesInto(nodes: AstNode[]): void {
     if (this.commandPath) {
       nodes.push(this.commandPath);
     }
@@ -143,8 +140,7 @@ export class AstCompoundWord extends AstBaseNode {
 
   public readonly parts: AstNode[] = [];
 
-  /** @override */
-  protected collectChildNodesInto(nodes: AstNode[]): void {
+  protected override collectChildNodesInto(nodes: AstNode[]): void {
     nodes.push(...this.parts);
   }
 }
@@ -155,8 +151,7 @@ export class AstCompoundWord extends AstBaseNode {
 export class AstVariableExpansion extends AstBaseNode {
   public readonly kind: AstKind.VariableExpansion = AstKind.VariableExpansion;
 
-  /** @override */
-  protected collectChildNodesInto(nodes: AstNode[]): void {
+  protected override collectChildNodesInto(nodes: AstNode[]): void {
     // no children
   }
 }
@@ -169,13 +164,11 @@ export class AstText extends AstBaseNode {
 
   public token: Token | undefined;
 
-  /** @override */
-  protected collectChildNodesInto(nodes: AstNode[]): void {
+  protected override collectChildNodesInto(nodes: AstNode[]): void {
     // no children
   }
 
-  /** @override */
-  protected getDumpText(): string | undefined {
+  protected override getDumpText(): string | undefined {
     if (this.token) {
       return this.token.text;
     }
