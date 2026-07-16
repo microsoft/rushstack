@@ -41,8 +41,11 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
     return super.emit(stringBuilder, docNode, options);
   }
 
-  /** @override */
-  protected writeNode(docNode: DocNode, context: IMarkdownEmitterContext, docNodeSiblings: boolean): void {
+  protected override writeNode(
+    docNode: DocNode,
+    context: IMarkdownEmitterContext,
+    docNodeSiblings: boolean
+  ): void {
     const writer: IndentedWriter = context.writer;
 
     switch (docNode.kind) {
@@ -156,8 +159,7 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
     }
   }
 
-  /** @override */
-  protected writeLinkTagWithCodeDestination(
+  protected override writeLinkTagWithCodeDestination(
     docLinkTag: DocLinkTag,
     context: IMarkdownEmitterContext<ICustomMarkdownEmitterOptions>
   ): void {

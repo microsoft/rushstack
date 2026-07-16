@@ -68,8 +68,8 @@ export class CommandLineFlagParameter extends CommandLineParameterBase {
     return this._value;
   }
 
-  /** {@inheritDoc CommandLineParameterBase.appendToArgList} @override */
-  public appendToArgList(argList: string[]): void {
+  /** {@inheritDoc CommandLineParameterBase.appendToArgList} */
+  public override appendToArgList(argList: string[]): void {
     if (this.value) {
       argList.push(this.longName);
     }

@@ -174,7 +174,6 @@ export interface ApiItemContainerMixin extends ApiItem {
    */
   _getMergedSiblingsForMember(memberApiItem: ApiItem): ReadonlyArray<ApiItem>;
 
-  /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
@@ -221,8 +220,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
       }
     }
 
-    /** @override */
-    public static onDeserializeInto(
+    public static override onDeserializeInto(
       options: Partial<IApiItemContainerMixinOptions>,
       context: DeserializerContext,
       jsonObject: IApiItemContainerJson
@@ -235,8 +233,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
       }
     }
 
-    /** @override */
-    public get members(): ReadonlyArray<ApiItem> {
+    public override get members(): ReadonlyArray<ApiItem> {
       if (!this[_membersSorted] && !this[_preserveMemberOrder]) {
         this[_members].sort((x, y) => x.getSortKey().localeCompare(y.getSortKey()));
         this[_membersSorted] = true;
@@ -509,8 +506,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
       }
     }
 
-    /** @override */
-    public serializeInto(jsonObject: Partial<IApiItemContainerJson>): void {
+    public override serializeInto(jsonObject: Partial<IApiItemContainerJson>): void {
       super.serializeInto(jsonObject);
 
       const memberObjects: IApiItemJson[] = [];

@@ -59,18 +59,16 @@ export class ApiNamespace extends ApiItemContainerMixin(
     return `${name}|${ApiItemKind.Namespace}`;
   }
 
-  /** @override */
-  public get kind(): ApiItemKind {
+  public override get kind(): ApiItemKind {
     return ApiItemKind.Namespace;
   }
 
-  /** @override */
-  public get containerKey(): string {
+  public override get containerKey(): string {
     return ApiNamespace.getContainerKey(this.name);
   }
 
-  /** @beta @override */
-  public buildCanonicalReference(): DeclarationReference {
+  /** @beta */
+  public override buildCanonicalReference(): DeclarationReference {
     const nameComponent: Component = DeclarationReference.parseComponent(this.name);
     const navigation: Navigation = this.isExported ? Navigation.Exports : Navigation.Locals;
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())

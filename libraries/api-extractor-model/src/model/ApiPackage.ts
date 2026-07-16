@@ -140,8 +140,7 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
     this._projectFolderUrl = options.projectFolderUrl;
   }
 
-  /** @override */
-  public static onDeserializeInto(
+  public static override onDeserializeInto(
     options: Partial<IApiPackageOptions>,
     context: DeserializerContext,
     jsonObject: IApiPackageJson
@@ -223,13 +222,11 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
     return ApiItem.deserialize(jsonObject, context) as ApiPackage;
   }
 
-  /** @override */
-  public get kind(): ApiItemKind {
+  public override get kind(): ApiItemKind {
     return ApiItemKind.Package;
   }
 
-  /** @override */
-  public get containerKey(): string {
+  public override get containerKey(): string {
     // No prefix needed, because ApiPackage is the only possible member of an ApiModel
     return this.name;
   }
@@ -254,8 +251,7 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
     return this._projectFolderUrl;
   }
 
-  /** @override */
-  public addMember(member: ApiEntryPoint): void {
+  public override addMember(member: ApiEntryPoint): void {
     if (member.kind !== ApiItemKind.EntryPoint) {
       throw new Error('Only items of type ApiEntryPoint may be added to an ApiPackage');
     }
@@ -296,8 +292,8 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
     JsonFile.save(jsonObject, apiJsonFilename, options);
   }
 
-  /** @beta @override */
-  public buildCanonicalReference(): DeclarationReference {
+  /** @beta */
+  public override buildCanonicalReference(): DeclarationReference {
     return DeclarationReference.package(this.name);
   }
 }

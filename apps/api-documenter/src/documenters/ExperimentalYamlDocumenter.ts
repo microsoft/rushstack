@@ -27,8 +27,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
     this._generateTocPointersMap(this._config.tocConfig);
   }
 
-  /** @override */
-  protected buildYamlTocFile(apiItems: ReadonlyArray<ApiItem>): IYamlTocFile {
+  protected override buildYamlTocFile(apiItems: ReadonlyArray<ApiItem>): IYamlTocFile {
     this._buildTocItems2(apiItems);
     return this._config.tocConfig;
   }

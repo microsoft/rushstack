@@ -147,7 +147,6 @@ export class FileError extends Error {
     readonly projectFolder: string;
     // @internal (undocumented)
     static _sanitizedEnvironmentVariable: string | undefined;
-    // @override
     toString(): string;
 }
 
@@ -534,7 +533,7 @@ export interface INodePackageJson {
 export class InternalError extends Error {
     constructor(message: string);
     static breakInDebugger: boolean;
-    // @override (undocumented)
+    // (undocumented)
     toString(): string;
     readonly unformattedMessage: string;
 }

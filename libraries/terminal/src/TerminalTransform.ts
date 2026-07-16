@@ -62,8 +62,7 @@ export abstract class TerminalTransform extends TerminalWritable {
     this.preventDestinationAutoclose = !!options.preventDestinationAutoclose;
   }
 
-  /** @override */
-  protected onClose(): void {
+  protected override onClose(): void {
     this.autocloseDestination();
   }
 

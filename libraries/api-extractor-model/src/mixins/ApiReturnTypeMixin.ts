@@ -46,7 +46,6 @@ export interface ApiReturnTypeMixin extends ApiItem {
    */
   readonly returnTypeExcerpt: Excerpt;
 
-  /** @override */
   serializeInto(jsonObject: Partial<IApiReturnTypeMixinJson>): void;
 }
 
@@ -78,8 +77,7 @@ export function ApiReturnTypeMixin<TBaseClass extends IApiItemConstructor>(
       }
     }
 
-    /** @override */
-    public static onDeserializeInto(
+    public static override onDeserializeInto(
       options: Partial<IApiReturnTypeMixinOptions>,
       context: DeserializerContext,
       jsonObject: IApiReturnTypeMixinJson
@@ -93,8 +91,7 @@ export function ApiReturnTypeMixin<TBaseClass extends IApiItemConstructor>(
       return this[_returnTypeExcerpt];
     }
 
-    /** @override */
-    public serializeInto(jsonObject: Partial<IApiReturnTypeMixinJson>): void {
+    public override serializeInto(jsonObject: Partial<IApiReturnTypeMixinJson>): void {
       super.serializeInto(jsonObject);
 
       jsonObject.returnTypeTokenRange = this.returnTypeExcerpt.tokenRange;

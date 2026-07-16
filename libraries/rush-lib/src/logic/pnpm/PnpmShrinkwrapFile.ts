@@ -507,8 +507,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return false;
   }
 
-  /** @override */
-  public validateShrinkwrapAfterUpdate(
+  public override validateShrinkwrapAfterUpdate(
     rushConfiguration: RushConfiguration,
     subspace: Subspace,
     terminal: ITerminal
@@ -535,8 +534,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
   }
 
-  /** @override */
-  public validate(
+  public override validate(
     packageManagerOptionsConfig: PackageManagerOptionsConfigurationBase,
     policyOptions: IShrinkwrapFilePolicyValidatorOptions,
     experimentsConfig?: IExperimentsJson
@@ -631,8 +629,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._getPackageId(name, version);
   }
 
-  /** @override */
-  public getTempProjectNames(): ReadonlyArray<string> {
+  public override getTempProjectNames(): ReadonlyArray<string> {
     return this._getTempProjectNames(this._shrinkwrapJson.dependencies || {});
   }
 
@@ -657,10 +654,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    *   '1.9.0-dev.27'
    *   'file:projects/empty-webpart-project.tgz'
    *   undefined
-   *
-   * @override
    */
-  public getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
+  public override getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
     let value: IPnpmVersionSpecifier | undefined = this.dependencies.get(dependencyName);
     if (value) {
       value = normalizePnpmVersionSpecifier(value);
@@ -809,10 +804,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   /**
    * Serializes the PNPM Shrinkwrap file
-   *
-   * @override
    */
-  protected serialize(): string {
+  protected override serialize(): string {
     return this._serializeInternal(false);
   }
 
@@ -820,10 +813,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * Gets the resolved version number of a dependency for a specific temp project.
    * For PNPM, we can reuse the version that another project is using.
    * Note that this function modifies the shrinkwrap data if tryReusingPackageVersionsFromShrinkwrap is set to true.
-   *
-   * @override
    */
-  protected tryEnsureDependencyVersion(
+  protected override tryEnsureDependencyVersion(
     dependencySpecifier: DependencySpecifier,
     tempProjectName: string
   ): DependencySpecifier | undefined {
@@ -856,8 +847,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._parsePnpmDependencyKey(packageName, dependencyKey);
   }
 
-  /** @override */
-  public findOrphanedProjects(
+  public override findOrphanedProjects(
     rushConfiguration: RushConfiguration,
     subspace: Subspace
   ): ReadonlyArray<string> {
@@ -881,8 +871,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return orphanedProjectPaths;
   }
 
-  /** @override */
-  public getProjectShrinkwrap(project: RushConfigurationProject): PnpmProjectShrinkwrapFile {
+  public override getProjectShrinkwrap(project: RushConfigurationProject): PnpmProjectShrinkwrapFile {
     return new PnpmProjectShrinkwrapFile(this, project);
   }
 
@@ -948,8 +937,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return integrityMap;
   }
 
-  /** @override */
-  public async isWorkspaceProjectModifiedAsync(
+  public override async isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
     subspace: Subspace,
     variant: string | undefined

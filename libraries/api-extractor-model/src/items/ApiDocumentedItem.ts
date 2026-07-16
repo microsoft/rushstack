@@ -36,8 +36,7 @@ export class ApiDocumentedItem extends ApiItem {
     this._tsdocComment = options.docComment;
   }
 
-  /** @override */
-  public static onDeserializeInto(
+  public static override onDeserializeInto(
     options: Partial<IApiDocumentedItemOptions>,
     context: DeserializerContext,
     jsonObject: IApiItemJson
@@ -63,8 +62,7 @@ export class ApiDocumentedItem extends ApiItem {
     return this._tsdocComment;
   }
 
-  /** @override */
-  public serializeInto(jsonObject: Partial<IApiDocumentedItemJson>): void {
+  public override serializeInto(jsonObject: Partial<IApiDocumentedItemJson>): void {
     super.serializeInto(jsonObject);
     if (this.tsdocComment !== undefined) {
       jsonObject.docComment = this.tsdocComment.emitAsTsdoc();

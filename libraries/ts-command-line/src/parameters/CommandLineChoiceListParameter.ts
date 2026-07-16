@@ -92,8 +92,8 @@ export class CommandLineChoiceListParameter<
     return this._values;
   }
 
-  /** {@inheritDoc CommandLineParameterBase.appendToArgList} @override */
-  public appendToArgList(argList: string[]): void {
+  /** {@inheritDoc CommandLineParameterBase.appendToArgList} */
+  public override appendToArgList(argList: string[]): void {
     if (this.values.length > 0) {
       for (const value of this.values) {
         argList.push(this.longName);

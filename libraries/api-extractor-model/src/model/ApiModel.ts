@@ -67,13 +67,11 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
     return apiPackage;
   }
 
-  /** @override */
-  public get kind(): ApiItemKind {
+  public override get kind(): ApiItemKind {
     return ApiItemKind.Model;
   }
 
-  /** @override */
-  public get containerKey(): string {
+  public override get containerKey(): string {
     return '';
   }
 
@@ -81,8 +79,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
     return this.members as ReadonlyArray<ApiPackage>;
   }
 
-  /** @override */
-  public addMember(member: ApiPackage): void {
+  public override addMember(member: ApiPackage): void {
     if (member.kind !== ApiItemKind.Package) {
       throw new Error('Only items of type ApiPackage may be added to an ApiModel');
     }
@@ -194,8 +191,8 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
     }
   }
 
-  /** @beta @override */
-  public buildCanonicalReference(): DeclarationReference {
+  /** @beta */
+  public override buildCanonicalReference(): DeclarationReference {
     return DeclarationReference.empty();
   }
 }
