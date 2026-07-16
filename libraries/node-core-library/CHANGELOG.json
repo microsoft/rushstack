@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.23.2",
+      "tag": "@rushstack/node-core-library_v5.23.2",
+      "date": "Thu, 16 Jul 2026 00:16:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update `ajv` dependency to `~8.20.0` to resolve vulnerable transitive `fast-uri` versions."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.23.1",
       "tag": "@rushstack/node-core-library_v5.23.1",
       "date": "Sat, 18 Apr 2026 00:15:16 GMT",
