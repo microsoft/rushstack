@@ -151,6 +151,7 @@ export enum ExtractorMessageId {
     IncompatibleReleaseTags = "ae-incompatible-release-tags",
     InternalMissingUnderscore = "ae-internal-missing-underscore",
     InternalMixedReleaseTag = "ae-internal-mixed-release-tag",
+    MisplacedModuleTag = "ae-misplaced-module-tag",
     MisplacedPackageTag = "ae-misplaced-package-tag",
     MissingGetter = "ae-missing-getter",
     MissingReleaseTag = "ae-missing-release-tag",

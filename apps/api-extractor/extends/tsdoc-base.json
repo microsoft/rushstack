@@ -30,6 +30,10 @@
       "syntaxKind": "block"
     },
     {
+      "tagName": "@module",
+      "syntaxKind": "modifier"
+    },
+    {
       "tagName": "@preapproved",
       "syntaxKind": "modifier"
     }
@@ -51,6 +55,7 @@
     "@internal": true,
     "@label": true,
     "@link": true,
+    "@module": true,
     "@override": true,
     "@packageDocumentation": true,
     "@param": true,
