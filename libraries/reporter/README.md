@@ -6,9 +6,8 @@ This package is released as a public beta. Exported contracts may change before 
 
 ## Links
 
-- [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/main/libraries/reporter/CHANGELOG.md) - Find
-  out what's new in the latest version
+- [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/main/libraries/reporter/CHANGELOG.md) - Find out
+  what's new in the latest version
 - [API Reference](https://api.rushstack.io/pages/reporter/)
 
 `@rushstack/reporter` is part of the [Rush Stack](https://rushstack.io/) family of projects.

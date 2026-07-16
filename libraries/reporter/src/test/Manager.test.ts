@@ -64,6 +64,32 @@ function makeInput(
 }
 
 describe('ReporterManager ordering and assignment', () => {
+  it('rejects in-process events before reporters are initialized', () => {
+    const manager: ReporterManager = new ReporterManager();
+    manager.addReporter(new RecordingReporter('a'));
+
+    expect(() => manager.emit(makeInput('commandStarted'))).toThrow(/must be initialized/);
+  });
+
+  it('rejects foreign envelopes before reporters are initialized', () => {
+    const manager: ReporterManager = new ReporterManager();
+    manager.addReporter(new RecordingReporter('a'));
+    const foreign: IReporterEventEnvelope<unknown> = {
+      protocolVersion: { major: 1, minor: 0 },
+      eventId: 'child_evt',
+      sessionId: 'child',
+      sequence: 42,
+      timestamp: '2026-01-01T00:00:01.000Z',
+      source: { packageName: '@rushstack/heft', packageVersion: '1.2.19' },
+      privacy: 'public',
+      required: false,
+      type: 'externalOutput',
+      payload: {}
+    };
+
+    expect(() => manager.ingestForeignEnvelope(foreign)).toThrow(/must be initialized/);
+  });
+
   it('assigns monotonic sequence, event ids, and timestamps in order', async () => {
     const manager: ReporterManager = new ReporterManager({ now: () => '2026-01-01T00:00:00.000Z' });
     const reporter: RecordingReporter = new RecordingReporter('a');

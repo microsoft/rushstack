@@ -58,7 +58,7 @@ export interface IScopedReporter {
   emitMessage(options: IScopedMessageOptions): string;
 
   /**
-   * Emits a structured diagnostic and returns its assigned diagnostic id.
+   * Emits a structured diagnostic and returns its assigned event id.
    */
   emitDiagnostic(diagnostic: IRushDiagnostic): string;
 

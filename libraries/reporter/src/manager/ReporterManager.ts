@@ -179,6 +179,7 @@ export class ReporterManager implements IReporterEventSink {
    * `timestamp`, and returns the assigned `eventId`.
    */
   public emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string {
+    this._ensureInitialized();
     const eventId: string = `evt_${this._nextEventId++}`;
     const envelope: IReporterEventEnvelope<TPayload> = {
       ...event,
@@ -200,6 +201,7 @@ export class ReporterManager implements IReporterEventSink {
    * @returns the ingested event's `eventId`
    */
   public ingestForeignEnvelope(envelope: IReporterEventEnvelope<unknown>): string {
+    this._ensureInitialized();
     const rehomed: IReporterEventEnvelope<unknown> = {
       ...envelope,
       sequence: this._nextSequence++,
@@ -270,6 +272,12 @@ export class ReporterManager implements IReporterEventSink {
       if (!entry.disabled) {
         this._enqueue(entry, envelope);
       }
+    }
+  }
+
+  private _ensureInitialized(): void {
+    if (!this._initialized) {
+      throw new Error('ReporterManager must be initialized before publishing events.');
     }
   }
 

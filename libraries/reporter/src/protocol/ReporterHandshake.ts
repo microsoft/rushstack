@@ -30,12 +30,12 @@ export interface IReporterHello {
   /**
    * Optional capabilities the producer can use if the consumer supports them.
    */
-  readonly capabilities: string[];
+  readonly capabilities: readonly string[];
 
   /**
    * Correctness-critical features the producer requires the consumer to support.
    */
-  readonly requiredFeatures: string[];
+  readonly requiredFeatures: readonly string[];
 }
 
 /**
@@ -57,12 +57,12 @@ export interface IReporterHelloAck {
   /**
    * The subset of the producer's capabilities the consumer accepted.
    */
-  readonly acceptedCapabilities: string[];
+  readonly acceptedCapabilities: readonly string[];
 
   /**
    * The producer's required features the consumer does not support.
    */
-  readonly rejectedRequiredFeatures: string[];
+  readonly rejectedRequiredFeatures: readonly string[];
 }
 
 /**

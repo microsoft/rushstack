@@ -63,7 +63,7 @@ export interface IReporterContext {
 }
 
 // @beta
-export type IReporterEmitEventInput<TPayload> = Omit<IReporterEventEnvelope<TPayload>, 'eventId' | 'sequence' | 'timestamp'>;
+export type IReporterEmitEventInput<TPayload> = Omit<IReporterEventEnvelope<TPayload>, 'eventId' | 'sequence' | 'sourceSequence' | 'timestamp'>;
 
 // @beta
 export interface IReporterEventEnvelope<TPayload = unknown> {
@@ -118,19 +118,19 @@ export interface IReporterHandshakeResult {
 
 // @beta
 export interface IReporterHello {
-    readonly capabilities: string[];
+    readonly capabilities: readonly string[];
     readonly kind: 'hello';
     readonly producerVersion: string;
     readonly protocolVersion: IReporterProtocolVersion;
-    readonly requiredFeatures: string[];
+    readonly requiredFeatures: readonly string[];
 }
 
 // @beta
 export interface IReporterHelloAck {
-    readonly acceptedCapabilities: string[];
+    readonly acceptedCapabilities: readonly string[];
     readonly kind: 'helloAck';
     readonly protocolVersion: IReporterProtocolVersion;
-    readonly rejectedRequiredFeatures: string[];
+    readonly rejectedRequiredFeatures: readonly string[];
 }
 
 // @beta

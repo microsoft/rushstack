@@ -7,14 +7,14 @@ import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
  * The fields of an event envelope that a producer supplies when emitting.
  *
  * @remarks
- * The sink assigns `eventId`, the authoritative `sequence`, and the `timestamp`,
- * so producers never provide them.
+ * The sink assigns `eventId`, the authoritative `sequence`, `sourceSequence`,
+ * and the `timestamp`, so producers never provide them.
  *
  * @beta
  */
 export type IReporterEmitEventInput<TPayload> = Omit<
   IReporterEventEnvelope<TPayload>,
-  'eventId' | 'sequence' | 'timestamp'
+  'eventId' | 'sequence' | 'sourceSequence' | 'timestamp'
 >;
 
 /**
@@ -32,7 +32,7 @@ export interface IReporterEventSink {
    * Publishes an event and returns its assigned event id.
    *
    * @param event - the event envelope without the sink-assigned `eventId`,
-   * `sequence`, and `timestamp`
+   * `sequence`, `sourceSequence`, and `timestamp`
    * @returns the `eventId` assigned to the published event
    */
   emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string;
