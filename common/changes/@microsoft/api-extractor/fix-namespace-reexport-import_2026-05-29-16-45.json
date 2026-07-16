@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix an internal error (\"... symbol has a ts.SyntaxKind.SourceFile declaration which is not (yet?) supported by API Extractor\") that occurred when importing by name a namespace that a dependency had produced by re-exporting an entire module (e.g. `export * as ns from './module'`) and then referencing a type within it.",
+      "type": "patch",
+      "packageName": "@microsoft/api-extractor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "lukas@livekit.io"
+}
