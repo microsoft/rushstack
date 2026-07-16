@@ -32,6 +32,7 @@ import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTyp
 import { Utilities } from '../utilities/Utilities';
 import type { Subspace } from '../api/Subspace';
 import type { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
+import { PnpmWorkspaceFile } from '../logic/pnpm/PnpmWorkspaceFile';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { initializeDotEnv } from '../logic/dotenv';
 
@@ -537,12 +538,24 @@ export class RushPnpmCommandLineParser {
           break;
         }
 
-        // Example: "C:\MyRepo\common\temp\package.json"
-        const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
-        const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
-        const newGlobalPatchedDependencies: Record<string, string> | undefined =
-          commonPackageJson?.pnpm?.patchedDependencies;
         const pnpmOptions: PnpmOptionsConfiguration | undefined = this._subspace.getPnpmOptions();
+        const pnpmVersion: string = this._rushConfiguration.packageManagerToolVersion;
+        const semver: typeof import('semver') = await import('semver');
+
+        let newGlobalPatchedDependencies: Record<string, string> | undefined;
+        if (semver.gte(pnpmVersion, '11.0.0')) {
+          // PNPM 11+ stores patchedDependencies in pnpm-workspace.yaml instead of the package.json "pnpm" field
+          newGlobalPatchedDependencies = await PnpmWorkspaceFile.loadPatchedDependenciesAsync(
+            `${subspaceTempFolder}/pnpm-workspace.yaml`
+          );
+        } else {
+          // PNPM 10.x and earlier store patchedDependencies in the package.json "pnpm" field
+          // Example: "C:\MyRepo\common\temp\package.json"
+          const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
+          const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
+          newGlobalPatchedDependencies = commonPackageJson?.pnpm?.patchedDependencies;
+        }
+
         const currentGlobalPatchedDependencies: Record<string, string> | undefined =
           pnpmOptions?.globalPatchedDependencies;
 

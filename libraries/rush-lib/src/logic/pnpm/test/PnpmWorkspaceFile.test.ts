@@ -207,6 +207,231 @@ describe(PnpmWorkspaceFile.name, () => {
     });
   });
 
+  describe('overrides functionality', () => {
+    it('generates workspace file with overrides', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+
+      workspaceFile.overrides = {
+        'foo@1.0.0': '1.0.1',
+        bar: '^2.0.0'
+      };
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).toContain('overrides:');
+      expect(writtenContent).toMatchSnapshot();
+    });
+
+    it('handles undefined overrides', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+
+      workspaceFile.overrides = undefined;
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).not.toContain('overrides');
+    });
+  });
+
+  describe('packageExtensions functionality', () => {
+    it('generates workspace file with packageExtensions', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+
+      workspaceFile.packageExtensions = {
+        'react@*': {
+          dependencies: {
+            foo: '1.0.0'
+          }
+        }
+      };
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).toContain('packageExtensions:');
+      expect(writtenContent).toMatchSnapshot();
+    });
+
+    it('handles undefined packageExtensions', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+
+      workspaceFile.packageExtensions = undefined;
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).not.toContain('packageExtensions');
+    });
+  });
+
+  describe('peerDependencyRules functionality', () => {
+    it('generates workspace file with peerDependencyRules', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+
+      workspaceFile.peerDependencyRules = {
+        ignoreMissing: ['baz'],
+        allowedVersions: {
+          react: '18'
+        }
+      };
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).toContain('peerDependencyRules:');
+      expect(writtenContent).toMatchSnapshot();
+    });
+
+    it('handles undefined peerDependencyRules', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+
+      workspaceFile.peerDependencyRules = undefined;
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).not.toContain('peerDependencyRules');
+    });
+  });
+
+  describe('allowedDeprecatedVersions functionality', () => {
+    it('generates workspace file with allowedDeprecatedVersions', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+
+      workspaceFile.allowedDeprecatedVersions = {
+        querystring: '*'
+      };
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).toContain('allowedDeprecatedVersions:');
+      expect(writtenContent).toMatchSnapshot();
+    });
+
+    it('handles undefined allowedDeprecatedVersions', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+
+      workspaceFile.allowedDeprecatedVersions = undefined;
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).not.toContain('allowedDeprecatedVersions');
+    });
+  });
+
+  describe('patchedDependencies functionality', () => {
+    it('generates workspace file with patchedDependencies', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+
+      workspaceFile.patchedDependencies = {
+        'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
+      };
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).toContain('patchedDependencies:');
+      expect(writtenContent).toMatchSnapshot();
+    });
+
+    it('handles undefined patchedDependencies', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+
+      workspaceFile.patchedDependencies = undefined;
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).not.toContain('patchedDependencies');
+    });
+  });
+
+  describe(PnpmWorkspaceFile.loadPatchedDependenciesAsync.name, () => {
+    let mockReadFileAsync: jest.SpyInstance;
+
+    beforeEach(() => {
+      // Mock FileSystem.readFileAsync to return the content captured by the FileSystem.writeFile mock
+      mockReadFileAsync = jest.spyOn(FileSystem, 'readFileAsync').mockImplementation(async () => {
+        if (writtenContent === undefined) {
+          throw new Error('File not found');
+        }
+        return writtenContent;
+      });
+    });
+
+    afterEach(() => {
+      mockReadFileAsync.mockRestore();
+    });
+
+    it('reads patchedDependencies from an existing workspace file', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+      workspaceFile.patchedDependencies = {
+        'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
+      };
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      await expect(PnpmWorkspaceFile.loadPatchedDependenciesAsync(workspaceFilePath)).resolves.toEqual({
+        'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
+      });
+    });
+
+    it('returns undefined when the workspace file has no patchedDependencies', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      await expect(
+        PnpmWorkspaceFile.loadPatchedDependenciesAsync(workspaceFilePath)
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('combined pnpm 11 settings', () => {
+    it('generates workspace file with all relocated settings together', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+
+      workspaceFile.catalogs = {
+        default: {
+          react: '^18.0.0'
+        }
+      };
+      workspaceFile.allowBuilds = {
+        esbuild: true
+      };
+      workspaceFile.overrides = {
+        'foo@1.0.0': '1.0.1'
+      };
+      workspaceFile.packageExtensions = {
+        'react@*': {
+          dependencies: {
+            foo: '1.0.0'
+          }
+        }
+      };
+      workspaceFile.peerDependencyRules = {
+        allowedVersions: {
+          react: '18'
+        }
+      };
+      workspaceFile.allowedDeprecatedVersions = {
+        querystring: '*'
+      };
+      workspaceFile.patchedDependencies = {
+        'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
+      };
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).toMatchSnapshot();
+    });
+  });
+
   describe('minimumReleaseAge functionality', () => {
     it('generates workspace file with minimumReleaseAge', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);

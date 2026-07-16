@@ -21,6 +21,14 @@ packages:
 "
 `;
 
+exports[`PnpmWorkspaceFile allowedDeprecatedVersions functionality generates workspace file with allowedDeprecatedVersions 1`] = `
+"allowedDeprecatedVersions:
+  querystring: '*'
+packages:
+  - projects/app1
+"
+`;
+
 exports[`PnpmWorkspaceFile basic functionality generates workspace file with packages only 1`] = `
 "packages:
   - projects/app1
@@ -88,6 +96,30 @@ exports[`PnpmWorkspaceFile catalog functionality handles undefined catalog 1`] =
 "
 `;
 
+exports[`PnpmWorkspaceFile combined pnpm 11 settings generates workspace file with all relocated settings together 1`] = `
+"allowBuilds:
+  esbuild: true
+allowedDeprecatedVersions:
+  querystring: '*'
+catalogs:
+  default:
+    react: ^18.0.0
+overrides:
+  foo@1.0.0: 1.0.1
+packageExtensions:
+  react@*:
+    dependencies:
+      foo: 1.0.0
+packages:
+  - projects/app1
+patchedDependencies:
+  lodash@4.17.21: patches/lodash@4.17.21.patch
+peerDependencyRules:
+  allowedVersions:
+    react: '18'
+"
+`;
+
 exports[`PnpmWorkspaceFile minimumReleaseAge functionality generates workspace file with minimumReleaseAge 1`] = `
 "minimumReleaseAge: 20160
 packages:
@@ -110,5 +142,43 @@ exports[`PnpmWorkspaceFile minimumReleaseAge functionality generates workspace f
   - webpack
 packages:
   - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile overrides functionality generates workspace file with overrides 1`] = `
+"overrides:
+  bar: ^2.0.0
+  foo@1.0.0: 1.0.1
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile packageExtensions functionality generates workspace file with packageExtensions 1`] = `
+"packageExtensions:
+  react@*:
+    dependencies:
+      foo: 1.0.0
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile patchedDependencies functionality generates workspace file with patchedDependencies 1`] = `
+"packages:
+  - projects/app1
+patchedDependencies:
+  lodash@4.17.21: patches/lodash@4.17.21.patch
+"
+`;
+
+exports[`PnpmWorkspaceFile peerDependencyRules functionality generates workspace file with peerDependencyRules 1`] = `
+"packages:
+  - projects/app1
+peerDependencyRules:
+  allowedVersions:
+    react: '18'
+  ignoreMissing:
+    - baz
 "
 `;

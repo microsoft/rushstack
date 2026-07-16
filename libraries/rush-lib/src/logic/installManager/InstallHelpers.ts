@@ -159,15 +159,18 @@ export class InstallHelpers {
 
       additionalCommonPackageJsonPropertiesToMerge = unsupportedPackageJsonSettings;
 
+      // pnpm 11 no longer reads the "pnpm" field of package.json. For pnpm 11+, these settings
+      // are written to common/temp/pnpm-workspace.yaml by WorkspaceInstallManager instead.
+      // See https://github.com/microsoft/rushstack/issues/5837
       pnpmSection = {
-        overrides,
-        packageExtensions,
-        peerDependencyRules,
+        overrides: isPnpm11 ? undefined : overrides,
+        packageExtensions: isPnpm11 ? undefined : packageExtensions,
+        peerDependencyRules: isPnpm11 ? undefined : peerDependencyRules,
         neverBuiltDependencies,
         onlyBuiltDependencies,
         ignoredOptionalDependencies,
-        allowedDeprecatedVersions,
-        patchedDependencies,
+        allowedDeprecatedVersions: isPnpm11 ? undefined : allowedDeprecatedVersions,
+        patchedDependencies: isPnpm11 ? undefined : patchedDependencies,
         trustPolicy,
         trustPolicyExclude,
         trustPolicyIgnoreAfter
