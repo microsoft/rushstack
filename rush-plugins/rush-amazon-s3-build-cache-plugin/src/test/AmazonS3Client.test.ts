@@ -661,6 +661,9 @@ describe(AmazonS3Client.name, () => {
       jest
         .spyOn(FileSystem, 'createWriteStreamAsync')
         .mockResolvedValue({} as unknown as Awaited<ReturnType<typeof FileSystem.createWriteStreamAsync>>);
+      jest
+        .spyOn(FileSystem, 'getStatisticsAsync')
+        .mockResolvedValue({ size: 123 } as Awaited<ReturnType<typeof FileSystem.getStatisticsAsync>>);
       // Return a Readable that immediately ends, so _hashFileAsync completes with the null hash
       jest.spyOn(FileSystem, 'createReadStream').mockReturnValue(
         new Readable({
@@ -836,6 +839,7 @@ describe(AmazonS3Client.name, () => {
         const [url, options] = spy.mock.calls[0];
         expect(url).toBe('http://localhost:9000/abc123');
         expect(options.verb).toBe('PUT');
+        expect(options.headers['Content-Length']).toBe('123');
         // Verify the content hash is a real SHA-256 hex string, NOT UNSIGNED-PAYLOAD
         expect(options.headers['x-amz-content-sha256']).toMatch(/^[0-9a-f]{64}$/);
         expect(options.headers['x-amz-date']).toBe('20200418T123242Z');
@@ -874,6 +878,34 @@ describe(AmazonS3Client.name, () => {
         // Only 1 call - no retry for file-based uploads
         expect(spy).toHaveBeenCalledTimes(1);
         spy.mockRestore();
+      });
+
+      it('Preserves S3 error details for buffered GET failures', async () => {
+        jest.spyOn(WebClient.prototype, 'fetchAsync').mockReturnValue(
+          Promise.resolve({
+            getBufferAsync: () => Promise.resolve(Buffer.from('AccessDenied: missing permission')),
+            getTextAsync: () => Promise.resolve('AccessDenied: missing permission'),
+            getJsonAsync: () => Promise.reject(new Error('Not JSON')),
+            headers: {},
+            status: 403,
+            statusText: 'Forbidden',
+            ok: false,
+            redirected: false
+          })
+        );
+
+        const s3Client: AmazonS3Client = new AmazonS3Client(
+          {
+            accessKeyId: 'accessKeyId',
+            secretAccessKey: 'secretAccessKey',
+            sessionToken: undefined
+          },
+          DUMMY_OPTIONS,
+          webClient,
+          terminal
+        );
+
+        await expect(s3Client.getObjectAsync('abc123')).rejects.toThrow('AccessDenied: missing permission');
       });
     });
   });

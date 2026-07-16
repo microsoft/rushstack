@@ -170,6 +170,10 @@ function _makeRawRequestAsync<TResponse>(
 
         handleResponse(response, redirected, resolve, reject);
       }).on('error', (error: Error) => {
+        if (body && !Buffer.isBuffer(body)) {
+          body.destroy(error);
+        }
+
         reject(error);
       });
 

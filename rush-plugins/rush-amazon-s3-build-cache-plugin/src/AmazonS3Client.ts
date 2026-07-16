@@ -70,6 +70,15 @@ const storageRetryOptions: IStorageRetryOptions = {
   retryPolicyType: StorageRetryPolicyType.EXPONENTIAL
 };
 
+function _isWebClientResponse(response: IWebClientResponseBase): response is IWebClientResponse {
+  const candidate: Partial<IWebClientResponse> = response;
+  return (
+    typeof candidate.getTextAsync === 'function' &&
+    typeof candidate.getJsonAsync === 'function' &&
+    typeof candidate.getBufferAsync === 'function'
+  );
+}
+
 /**
  * Computes the SHA-256 hash of a file on disk using streaming reads.
  */
@@ -216,6 +225,7 @@ export class AmazonS3Client {
 
     // Compute SHA-256 hash of the file before uploading so we can sign the payload
     const contentHash: string = await _hashFileAsync(localFilePath);
+    const { size } = await FileSystem.getStatisticsAsync(localFilePath);
     const entryStream: FileSystemReadStream = FileSystem.createReadStream(localFilePath);
 
     // Streaming uploads cannot be retried because the stream is consumed after the first attempt.
@@ -224,7 +234,8 @@ export class AmazonS3Client {
       objectName,
       entryStream as Readable,
       true,
-      contentHash
+      contentHash,
+      size
     );
     response.stream.resume();
     if (!response.ok) {
@@ -260,7 +271,7 @@ export class AmazonS3Client {
     getSuccessResult: () => T | Promise<T>,
     cleanup?: () => void
   ): Promise<RetryableRequestResponse<T | undefined>> {
-    const { ok, status, statusText } = response;
+    const { ok, status } = response;
     if (ok) {
       return {
         hasNetworkError: false,
@@ -288,14 +299,23 @@ export class AmazonS3Client {
       };
     } else if (status === 400 || status === 401 || status === 403) {
       cleanup?.();
-      throw new Error(`Amazon S3 responded with status code ${status} (${statusText})`);
+      throw await this._getGetResponseErrorAsync(response);
     } else {
       cleanup?.();
       return {
         hasNetworkError: true,
-        error: new Error(`Amazon S3 responded with status code ${status} (${statusText})`)
+        error: await this._getGetResponseErrorAsync(response)
       };
     }
+  }
+
+  private async _getGetResponseErrorAsync(response: IWebClientResponseBase): Promise<Error> {
+    if (_isWebClientResponse(response)) {
+      return await this._getS3ErrorAsync(response);
+    }
+
+    const { status, statusText } = response;
+    return new Error(`Amazon S3 responded with status code ${status} (${statusText})`);
   }
 
   private async _makeSignedRequestAsync(
@@ -308,27 +328,33 @@ export class AmazonS3Client {
     objectName: string,
     body: Readable | undefined,
     stream: true,
-    contentHash?: string
+    contentHash?: string,
+    contentLength?: number
   ): Promise<IWebClientStreamResponse>;
   private async _makeSignedRequestAsync(
     verb: 'GET' | 'PUT',
     objectName: string,
     body?: Buffer | Readable,
     stream?: boolean,
-    contentHash?: string
+    contentHash?: string,
+    contentLength?: number
   ): Promise<IWebClientResponse | IWebClientStreamResponse> {
     // Use the provided content hash if available (e.g. pre-computed from a file on disk),
     // otherwise compute from the buffer body, or use the empty hash for GET requests.
     const bodyHash: string = contentHash ?? this._getBufferSha256(Buffer.isBuffer(body) ? body : undefined);
-    const { url, headers } = this._buildSignedRequest(verb, objectName, bodyHash);
+    const { url, headers } = this._buildSignedRequest(verb, objectName, bodyHash, contentLength);
 
-    const webFetchOptions: IGetFetchOptions | IFetchOptionsWithBody = {
-      verb,
-      headers
-    };
-    if (verb === 'PUT' && body) {
-      (webFetchOptions as IFetchOptionsWithBody).body = body;
-    }
+    const webFetchOptions: IGetFetchOptions | IFetchOptionsWithBody =
+      verb === 'GET'
+        ? {
+            verb: 'GET',
+            headers
+          }
+        : {
+            verb: 'PUT',
+            headers,
+            body
+          };
 
     if (stream) {
       return await this._webClient.fetchStreamAsync(url, webFetchOptions);
@@ -343,12 +369,16 @@ export class AmazonS3Client {
   private _buildSignedRequest(
     verb: 'GET' | 'PUT',
     objectName: string,
-    bodyHash: string
+    bodyHash: string,
+    contentLength?: number
   ): { url: string; headers: Record<string, string> } {
     const isoDateString: IIsoDateString = this._getIsoDateString();
     const headers: Record<string, string> = {};
     headers[DATE_HEADER_NAME] = isoDateString.dateTime;
     headers[CONTENT_HASH_HEADER_NAME] = bodyHash;
+    if (verb === 'PUT' && contentLength !== undefined) {
+      headers['Content-Length'] = `${contentLength}`;
+    }
 
     // the host can be e.g. https://s3.aws.com or http://localhost:9000
     const host: string = this._s3Endpoint.replace(protocolRegex, '');

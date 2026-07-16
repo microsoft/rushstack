@@ -18,8 +18,9 @@ export interface ICloudBuildCacheProvider {
    * cache entry into memory, if possible. The implementation should download the cache entry and write it
    * to the specified local file path.
    *
-   * @returns `true` if the cache entry was found and written to the file, `false` if it was
-   * not found. Throws on errors.
+   * @returns `true` if the cache entry was found and written to the file; otherwise `false`.
+   * Implementations typically log transfer failures and return `false`, but may still throw for
+   * unexpected errors.
    */
   tryDownloadCacheEntryToFileAsync?(
     terminal: ITerminal,
