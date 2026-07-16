@@ -1,98 +1,71 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'node:path';
 import { FileSystem } from '@rushstack/node-core-library';
 import { PnpmWorkspaceFile } from '../PnpmWorkspaceFile';
 
 describe(PnpmWorkspaceFile.name, () => {
-  const tempDir: string = path.join(__dirname, 'temp');
-  const workspaceFilePath: string = path.join(tempDir, 'pnpm-workspace.yaml');
-  const projectsDir: string = path.join(tempDir, 'projects');
+  const tempDir: string = `${__dirname}/temp`;
+  const workspaceFilePath: string = `${tempDir}/pnpm-workspace.yaml`;
+  const projectsDir: string = `${tempDir}/projects`;
 
-  let mockWriteFile: jest.SpyInstance;
-  let mockReadFile: jest.SpyInstance;
-  let mockExists: jest.SpyInstance;
   let writtenContent: string | undefined;
 
   beforeEach(() => {
     writtenContent = undefined;
 
     // Mock FileSystem.writeFile to capture content instead of writing to disk
-    mockWriteFile = jest
-      .spyOn(FileSystem, 'writeFile')
-      .mockImplementation((filePath: string, contents: string | Buffer) => {
-        void filePath; // Unused parameter
-        writtenContent = typeof contents === 'string' ? contents : contents.toString();
+    jest
+      .spyOn(FileSystem, 'writeFileAsync')
+      .mockImplementation(async (filePath: string, contents: string | Buffer) => {
+        writtenContent = String(contents);
       });
-
-    // Mock FileSystem.readFile to return the written content
-    mockReadFile = jest.spyOn(FileSystem, 'readFile').mockImplementation(() => {
-      if (writtenContent === undefined) {
-        throw new Error('File not found');
-      }
-      return writtenContent;
-    });
-
-    // Mock FileSystem.exists to return true if content was written
-    mockExists = jest.spyOn(FileSystem, 'exists').mockImplementation(() => {
-      return writtenContent !== undefined;
-    });
-  });
-
-  afterEach(() => {
-    mockWriteFile.mockRestore();
-    mockReadFile.mockRestore();
-    mockExists.mockRestore();
   });
 
   describe('basic functionality', () => {
-    it('generates workspace file with packages only', () => {
+    it('generates workspace file with packages only', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
-      workspaceFile.addPackage(path.join(projectsDir, 'app2'));
+      workspaceFile.addPackage(`${projectsDir}/app2`);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchSnapshot();
+      expect(writtenContent).toMatchSnapshot();
     });
 
-    it('escapes special characters in package paths', () => {
+    it('escapes special characters in package paths', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, '[app-with-brackets]'));
+      workspaceFile.addPackage(`${projectsDir}/[app-with-brackets]`);
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toContain('\\[app-with-brackets\\]');
+      expect(writtenContent).toContain('\\[app-with-brackets\\]');
     });
   });
 
   describe('catalog functionality', () => {
-    it('generates workspace file with default catalog only', () => {
+    it('generates workspace file with default catalog only', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setCatalogs({
+      workspaceFile.catalogs = {
         default: {
           react: '^18.0.0',
           'react-dom': '^18.0.0',
           typescript: '~5.3.0'
         }
-      });
+      };
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchSnapshot();
+      expect(writtenContent).toMatchSnapshot();
     });
 
-    it('generates workspace file with named catalogs', () => {
+    it('generates workspace file with named catalogs', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setCatalogs({
+      workspaceFile.catalogs = {
         default: {
           typescript: '~5.3.0'
         },
@@ -104,230 +77,214 @@ describe(PnpmWorkspaceFile.name, () => {
           express: '^4.18.0',
           fastify: '^4.26.0'
         }
-      });
+      };
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchSnapshot();
+      expect(writtenContent).toMatchSnapshot();
     });
 
-    it('handles empty catalog object', () => {
+    it('handles empty catalog object', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setCatalogs({});
+      workspaceFile.catalogs = {};
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchSnapshot();
+      expect(writtenContent).toMatchSnapshot();
     });
 
-    it('handles undefined catalog', () => {
+    it('handles undefined catalog', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setCatalogs(undefined);
+      workspaceFile.catalogs = undefined;
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchSnapshot();
+      expect(writtenContent).toMatchSnapshot();
     });
 
-    it('handles scoped packages in catalogs', () => {
+    it('handles scoped packages in catalogs', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setCatalogs({
+      workspaceFile.catalogs = {
         default: {
           '@types/node': '~22.9.4',
           '@types/cookies': '^0.7.7',
           '@rushstack/node-core-library': '~5.0.0'
         }
-      });
+      };
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchSnapshot();
+      expect(writtenContent).toMatchSnapshot();
     });
 
-    it('can update catalogs after initial creation', () => {
+    it('can update catalogs after initial creation', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setCatalogs({
+      workspaceFile.catalogs = {
         default: {
           react: '^18.0.0'
         }
-      });
+      };
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
       // Update catalogs
-      workspaceFile.setCatalogs({
+      workspaceFile.catalogs = {
         default: {
           react: '^18.2.0',
           'react-dom': '^18.2.0'
         }
-      });
+      };
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchSnapshot();
+      expect(writtenContent).toMatchSnapshot();
     });
   });
 
   describe('allowBuilds functionality', () => {
-    it('generates workspace file with allowBuilds', () => {
+    it('generates workspace file with allowBuilds', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setAllowBuilds({
+      workspaceFile.allowBuilds = {
         esbuild: true,
         '@parcel/watcher': true,
         fsevents: false
-      });
+      };
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchSnapshot();
+      expect(writtenContent).toMatchSnapshot();
     });
 
-    it('generates workspace file with allowBuilds and catalogs', () => {
+    it('generates workspace file with allowBuilds and catalogs', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setCatalogs({
+      workspaceFile.catalogs = {
         default: {
           react: '^18.0.0'
         }
-      });
+      };
 
-      workspaceFile.setAllowBuilds({
+      workspaceFile.allowBuilds = {
         esbuild: true
-      });
+      };
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchSnapshot();
+      expect(writtenContent).toMatchSnapshot();
     });
 
-    it('handles empty allowBuilds object', () => {
+    it('handles empty allowBuilds object', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setAllowBuilds({});
+      workspaceFile.allowBuilds = {};
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).not.toContain('allowBuilds');
+      expect(writtenContent).toContain('allowBuilds: {}');
     });
 
-    it('handles undefined allowBuilds', () => {
+    it('handles undefined allowBuilds', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setAllowBuilds(undefined);
+      workspaceFile.allowBuilds = undefined;
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).not.toContain('allowBuilds');
+      expect(writtenContent).not.toContain('allowBuilds');
     });
   });
 
   describe('minimumReleaseAge functionality', () => {
-    it('generates workspace file with minimumReleaseAge', () => {
+    it('generates workspace file with minimumReleaseAge', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setMinimumReleaseAge(20160);
+      workspaceFile.minimumReleaseAge = 20160;
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchSnapshot();
+      expect(writtenContent).toMatchSnapshot();
     });
 
-    it('generates workspace file with minimumReleaseAge and minimumReleaseAgeExclude', () => {
+    it('generates workspace file with minimumReleaseAge and minimumReleaseAgeExclude', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setMinimumReleaseAge(1440);
-      workspaceFile.setMinimumReleaseAgeExclude(['webpack', '@myorg/*']);
+      workspaceFile.minimumReleaseAge = 1440;
+      workspaceFile.minimumReleaseAgeExclude = ['webpack', '@myorg/*'];
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchSnapshot();
+      expect(writtenContent).toMatchSnapshot();
     });
 
-    it('generates workspace file with minimumReleaseAgeExclude only', () => {
+    it('generates workspace file with minimumReleaseAgeExclude only', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setMinimumReleaseAgeExclude(['webpack']);
+      workspaceFile.minimumReleaseAgeExclude = ['webpack'];
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toMatchSnapshot();
+      expect(writtenContent).toMatchSnapshot();
     });
 
-    it('handles zero value for minimumReleaseAge', () => {
+    it('handles zero value for minimumReleaseAge', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setMinimumReleaseAge(0);
+      workspaceFile.minimumReleaseAge = 0;
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toContain('minimumReleaseAge: 0');
+      expect(writtenContent).toContain('minimumReleaseAge: 0');
     });
 
-    it('handles undefined minimumReleaseAge', () => {
+    it('handles undefined minimumReleaseAge', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setMinimumReleaseAge(undefined);
-      workspaceFile.setMinimumReleaseAgeExclude(undefined);
+      workspaceFile.minimumReleaseAge = undefined;
+      workspaceFile.minimumReleaseAgeExclude = undefined;
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).not.toContain('minimumReleaseAge');
+      expect(writtenContent).not.toContain('minimumReleaseAge');
     });
 
-    it('passes through an explicitly-set empty minimumReleaseAgeExclude', () => {
+    it('passes through an explicitly-set empty minimumReleaseAgeExclude', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setMinimumReleaseAgeExclude([]);
+      workspaceFile.minimumReleaseAgeExclude = [];
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).toContain('minimumReleaseAgeExclude: []');
+      expect(writtenContent).toContain('minimumReleaseAgeExclude: []');
     });
 
-    it('omits an undefined minimumReleaseAgeExclude', () => {
+    it('omits an undefined minimumReleaseAgeExclude', async () => {
       const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(path.join(projectsDir, 'app1'));
+      workspaceFile.addPackage(`${projectsDir}/app1`);
 
-      workspaceFile.setMinimumReleaseAgeExclude(undefined);
+      workspaceFile.minimumReleaseAgeExclude = undefined;
 
-      workspaceFile.save(workspaceFilePath, { onlyIfChanged: true });
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      const content: string = FileSystem.readFile(workspaceFilePath);
-      expect(content).not.toContain('minimumReleaseAgeExclude');
+      expect(writtenContent).not.toContain('minimumReleaseAgeExclude');
     });
   });
 });

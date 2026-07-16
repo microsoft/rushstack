@@ -5,12 +5,10 @@ import * as path from 'node:path';
 
 import { escapePath as globEscape } from 'fast-glob';
 
-import { Sort, Import, Path } from '@rushstack/node-core-library';
+import { Sort, Path } from '@rushstack/node-core-library';
 
 import { BaseWorkspaceFile } from '../base/BaseWorkspaceFile';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
-
-const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
 /**
  * This interface represents the raw pnpm-workspace.YAML file
@@ -34,24 +32,24 @@ interface IPnpmWorkspaceYaml {
   /** The list of local package directories */
   packages: string[];
   /** Catalog definitions for centralized version management */
-  catalogs?: Record<string, Record<string, string>>;
+  catalogs: Record<string, Record<string, string>> | undefined;
   /**
    * Controls which packages are allowed to run build scripts. A value of `true` means the
    * package is allowed to run build scripts; `false` means it is explicitly denied.
    * Packages with build scripts not listed here will cause pnpm to fail with ERR_PNPM_IGNORED_BUILDS.
    * (SUPPORTED ONLY IN PNPM 11.0.0 AND NEWER)
    */
-  allowBuilds?: Record<string, boolean>;
+  allowBuilds: Record<string, boolean> | undefined;
   /**
    * The minimum number of minutes that must pass after a version is published before pnpm will install it.
    * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
    */
-  minimumReleaseAge?: number;
+  minimumReleaseAge: number | undefined;
   /**
    * List of package names or patterns that are excluded from the minimumReleaseAge check.
    * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
    */
-  minimumReleaseAgeExclude?: string[];
+  minimumReleaseAgeExclude: string[] | undefined;
 }
 
 export class PnpmWorkspaceFile extends BaseWorkspaceFile {
@@ -60,11 +58,11 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
    */
   public readonly workspaceFilename: string;
 
-  private _workspacePackages: Set<string>;
-  private _catalogs: Record<string, Record<string, string>> | undefined;
-  private _allowBuilds: Record<string, boolean> | undefined;
-  private _minimumReleaseAge: number | undefined;
-  private _minimumReleaseAgeExclude: string[] | undefined;
+  private readonly _workspacePackages: Set<string>;
+  public catalogs: IPnpmWorkspaceYaml['catalogs'];
+  public allowBuilds: IPnpmWorkspaceYaml['allowBuilds'];
+  public minimumReleaseAge: IPnpmWorkspaceYaml['minimumReleaseAge'];
+  public minimumReleaseAgeExclude: IPnpmWorkspaceYaml['minimumReleaseAgeExclude'];
 
   /**
    * The PNPM workspace file is used to specify the location of workspaces relative to the root
@@ -77,49 +75,9 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     // Ignore any existing file since this file is generated and we need to handle deleting packages
     // If we need to support manual customization, that should be an additional parameter for "base file"
     this._workspacePackages = new Set<string>();
-    this._catalogs = undefined;
-    this._allowBuilds = undefined;
-    this._minimumReleaseAge = undefined;
-    this._minimumReleaseAgeExclude = undefined;
   }
 
-  /**
-   * Sets the catalog definitions for the workspace.
-   * @param catalogs - A map of catalog name to package versions
-   */
-  public setCatalogs(catalogs: Record<string, Record<string, string>> | undefined): void {
-    this._catalogs = catalogs;
-  }
-
-  /**
-   * Sets the allowBuilds definitions for the workspace.
-   * This controls which packages are allowed to run build scripts in pnpm 11+.
-   * @param allowBuilds - A map of package name to boolean (true = allowed, false = denied)
-   */
-  public setAllowBuilds(allowBuilds: Record<string, boolean> | undefined): void {
-    this._allowBuilds = allowBuilds;
-  }
-
-  /**
-   * Sets the minimumReleaseAge setting for the workspace.
-   * The minimum number of minutes that must pass after a version is published before pnpm will install it.
-   * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
-   */
-  public setMinimumReleaseAge(minimumReleaseAge: number | undefined): void {
-    this._minimumReleaseAge = minimumReleaseAge;
-  }
-
-  /**
-   * Sets the minimumReleaseAgeExclude setting for the workspace.
-   * List of package names or patterns that are excluded from the minimumReleaseAge check.
-   * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
-   */
-  public setMinimumReleaseAgeExclude(minimumReleaseAgeExclude: string[] | undefined): void {
-    this._minimumReleaseAgeExclude = minimumReleaseAgeExclude;
-  }
-
-  /** @override */
-  public addPackage(packagePath: string): void {
+  public override addPackage(packagePath: string): void {
     // Ensure the path is relative to the pnpm-workspace.yaml file
     if (path.isAbsolute(packagePath)) {
       packagePath = path.relative(path.dirname(this.workspaceFilename), packagePath);
@@ -130,27 +88,28 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     this._workspacePackages.add(globEscape(globPath));
   }
 
-  /** @override */
-  protected serialize(): string {
+  protected override async serializeAsync(): Promise<string> {
     // Ensure stable sort order when serializing
     Sort.sortSet(this._workspacePackages);
 
+    const {
+      _workspacePackages: workspacePackages,
+      catalogs,
+      allowBuilds,
+      minimumReleaseAge,
+      minimumReleaseAgeExclude
+    } = this;
     const workspaceYaml: IPnpmWorkspaceYaml = {
-      packages: Array.from(this._workspacePackages)
+      packages: Array.from(workspacePackages),
+      // js-yaml omits mapping entries whose value is `undefined`, so no guard is needed here.
+      // An explicitly-set empty object is passed through as-is.
+      catalogs,
+      allowBuilds,
+      minimumReleaseAge,
+      minimumReleaseAgeExclude
     };
 
-    if (this._catalogs && Object.keys(this._catalogs).length > 0) {
-      workspaceYaml.catalogs = this._catalogs;
-    }
-
-    if (this._allowBuilds && Object.keys(this._allowBuilds).length > 0) {
-      workspaceYaml.allowBuilds = this._allowBuilds;
-    }
-
-    // js-yaml omits mapping entries whose value is `undefined`, so no guard is needed here.
-    workspaceYaml.minimumReleaseAge = this._minimumReleaseAge;
-    workspaceYaml.minimumReleaseAgeExclude = this._minimumReleaseAgeExclude;
-
+    const yamlModule: typeof import('js-yaml') = await import('js-yaml');
     return yamlModule.dump(workspaceYaml, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
 }

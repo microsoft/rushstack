@@ -3,20 +3,18 @@
 
 import { type IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
-import { TestUtilities } from '@rushstack/heft-config-file';
 
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { RushConfiguration } from '../../api/RushConfiguration';
 
-describe('InstallHelpers', () => {
-  describe('generateCommonPackageJson', () => {
-    const originalJsonFileSave = JsonFile.save;
-    const mockJsonFileSave: jest.Mock = jest.fn();
+describe(InstallHelpers.name, () => {
+  describe(InstallHelpers.generateCommonPackageJsonAsync.name, () => {
+    let mockJsonFileSaveAsync: jest.SpyInstance;
     let terminal: Terminal;
     let terminalProvider: StringBufferTerminalProvider;
 
     beforeAll(() => {
-      JsonFile.save = mockJsonFileSave;
+      mockJsonFileSaveAsync = jest.spyOn(JsonFile, 'saveAsync').mockImplementation(async () => true);
     });
 
     beforeEach(() => {
@@ -31,25 +29,23 @@ describe('InstallHelpers', () => {
           asLines: true
         })
       ).toMatchSnapshot('Terminal Output');
-      mockJsonFileSave.mockClear();
+      mockJsonFileSaveAsync.mockClear();
     });
 
-    afterAll(() => {
-      JsonFile.save = originalJsonFileSave;
-    });
-
-    it('generates correct package json with pnpm configurations', () => {
+    it('generates correct package json with pnpm configurations', async () => {
       const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfig/rush.json`;
       const rushConfiguration: RushConfiguration =
         RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
-      InstallHelpers.generateCommonPackageJson(
+      await InstallHelpers.generateCommonPackageJsonAsync(
         rushConfiguration,
         rushConfiguration.defaultSubspace,
         undefined,
         terminal
       );
-      const packageJson: IPackageJson = mockJsonFileSave.mock.calls[0][0];
-      expect(TestUtilities.stripAnnotations(packageJson)).toEqual(
+      const packageJson: IPackageJson = JSON.parse(
+        JsonFile.stringify(mockJsonFileSaveAsync.mock.calls[0][0], { ignoreUndefinedValues: true })
+      );
+      expect(packageJson).toEqual(
         expect.objectContaining({
           pnpm: {
             overrides: {
@@ -71,6 +67,7 @@ describe('InstallHelpers', () => {
           }
         })
       );
+      expect(packageJson).toMatchSnapshot();
     });
   });
 });

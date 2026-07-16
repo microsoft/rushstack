@@ -26,32 +26,33 @@ export abstract class BaseWorkspaceFile {
   /**
    * Serializes and saves the workspace file to specified location
    */
-  public save(filePath: string, options: IWorkspaceFileSaveOptions): void {
+  public async saveAsync(filePath: string, options: IWorkspaceFileSaveOptions): Promise<void> {
+    const { onlyIfChanged, ensureFolderExists } = options;
+
     // Do we need to read the previous file contents?
-    let oldBuffer: Buffer | undefined = undefined;
-    if (options.onlyIfChanged && FileSystem.exists(filePath)) {
+    let oldBuffer: Buffer | undefined;
+    if (onlyIfChanged) {
       try {
-        oldBuffer = FileSystem.readFileToBuffer(filePath);
+        oldBuffer = await FileSystem.readFileToBufferAsync(filePath);
       } catch (error) {
         // Ignore this error, and try writing a new file.  If that fails, then we should report that
         // error instead.
       }
     }
 
-    const newYaml: string = this.serialize();
+    const newContent: string = await this.serializeAsync();
+    const newBuffer: Buffer = Buffer.from(newContent); // utf8 encoding happens here
 
-    const newBuffer: Buffer = Buffer.from(newYaml); // utf8 encoding happens here
-
-    if (options.onlyIfChanged) {
+    if (oldBuffer) {
       // Has the file changed?
-      if (oldBuffer && Buffer.compare(newBuffer, oldBuffer) === 0) {
+      if (Buffer.compare(newBuffer, oldBuffer) === 0) {
         // Nothing has changed, so don't touch the file
         return;
       }
     }
 
-    FileSystem.writeFile(filePath, newBuffer.toString(), {
-      ensureFolderExists: options.ensureFolderExists
+    await FileSystem.writeFileAsync(filePath, newBuffer.toString(), {
+      ensureFolderExists
     });
   }
 
@@ -63,5 +64,5 @@ export abstract class BaseWorkspaceFile {
   public abstract addPackage(packagePath: string): void;
 
   /** @virtual */
-  protected abstract serialize(): string;
+  protected abstract serializeAsync(): Promise<string>;
 }

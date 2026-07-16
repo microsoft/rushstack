@@ -5,7 +5,6 @@ import * as path from 'node:path';
 import { createHash } from 'node:crypto';
 
 import * as semver from 'semver';
-import yaml from 'js-yaml';
 
 import {
   FileSystem,
@@ -386,11 +385,19 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // Check if overrides and globalOverrides are the same
-    const pnpmOptions: PnpmOptionsConfiguration =
-      subspace.getPnpmOptions() || this.rushConfiguration.pnpmOptions;
+    const {
+      globalOverrides = {},
+      globalPackageExtensions,
+      globalCatalogs: catalogs,
+      globalAllowBuilds,
+      globalOnlyBuiltDependencies,
+      globalNeverBuiltDependencies,
+      minimumReleaseAgeMinutes,
+      minimumReleaseAgeExclude
+    }: PnpmOptionsConfiguration = subspace.getPnpmOptions() || this.rushConfiguration.pnpmOptions;
 
     const overridesAreEqual: boolean = Objects.areDeepEqual<Record<string, string>>(
-      pnpmOptions.globalOverrides ?? {},
+      globalOverrides,
       shrinkwrapFile?.overrides ? Object.fromEntries(shrinkwrapFile?.overrides) : {}
     );
 
@@ -420,8 +427,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         }
       }
 
-      const globalPackageExtensions: Record<string, unknown> | undefined =
-        pnpmOptions.globalPackageExtensions;
       // https://github.com/pnpm/pnpm/blob/ba9409ffcef0c36dc1b167d770a023c87444822d/pkg-manager/core/src/install/index.ts#L331
       if (globalPackageExtensions && Object.keys(globalPackageExtensions).length !== 0) {
         if (packageExtensionsChecksumAlgorithm) {
@@ -442,10 +447,15 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // Write the common package.json
-    InstallHelpers.generateCommonPackageJson(this.rushConfiguration, subspace, undefined, this._terminal);
+    await InstallHelpers.generateCommonPackageJsonAsync(
+      this.rushConfiguration,
+      subspace,
+      undefined,
+      this._terminal
+    );
 
     // Set catalog definitions in the workspace file if specified
-    if (pnpmOptions.globalCatalogs) {
+    if (catalogs) {
       if (
         this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
         semver.lt(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '9.5.0')
@@ -460,13 +470,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         );
       }
 
-      const catalogs: Record<string, Record<string, string>> = {};
-
-      if (pnpmOptions.globalCatalogs) {
-        Object.assign(catalogs, pnpmOptions.globalCatalogs);
-      }
-
-      workspaceFile.setCatalogs(catalogs);
+      workspaceFile.catalogs = catalogs;
     }
 
     // Set allowBuilds in the workspace file for pnpm 11+ (replaces onlyBuiltDependencies/neverBuiltDependencies)
@@ -474,28 +478,27 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
       semver.gte(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '11.0.0')
     ) {
-      if (pnpmOptions.globalAllowBuilds) {
-        workspaceFile.setAllowBuilds(pnpmOptions.globalAllowBuilds);
-      } else if (pnpmOptions.globalOnlyBuiltDependencies || pnpmOptions.globalNeverBuiltDependencies) {
+      if (globalAllowBuilds) {
+        workspaceFile.allowBuilds = globalAllowBuilds;
+      } else if (globalOnlyBuiltDependencies || globalNeverBuiltDependencies) {
         // Backward compatibility: convert globalOnlyBuiltDependencies/globalNeverBuiltDependencies
         // to allowBuilds format for pnpm 11+
         const allowBuilds: Record<string, boolean> = {};
-        if (pnpmOptions.globalOnlyBuiltDependencies) {
-          for (const pkg of pnpmOptions.globalOnlyBuiltDependencies) {
+        if (globalOnlyBuiltDependencies) {
+          for (const pkg of globalOnlyBuiltDependencies) {
             allowBuilds[pkg] = true;
           }
         }
-        if (pnpmOptions.globalNeverBuiltDependencies) {
-          for (const pkg of pnpmOptions.globalNeverBuiltDependencies) {
+
+        if (globalNeverBuiltDependencies) {
+          for (const pkg of globalNeverBuiltDependencies) {
             allowBuilds[pkg] = false;
           }
         }
-        workspaceFile.setAllowBuilds(allowBuilds);
+
+        workspaceFile.allowBuilds = allowBuilds;
       }
-    } else if (
-      pnpmOptions.globalAllowBuilds &&
-      this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined
-    ) {
+    } else if (globalAllowBuilds && this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined) {
       this._terminal.writeWarningLine(
         Colorize.yellow(
           `Your version of pnpm (${this.rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
@@ -508,7 +511,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // Set minimumReleaseAge/minimumReleaseAgeExclude in the workspace file.
     // pnpm does not read these fields from package.json, only from pnpm-workspace.yaml or .npmrc.
-    if (pnpmOptions.minimumReleaseAgeMinutes !== undefined || pnpmOptions.minimumReleaseAgeExclude) {
+    if (minimumReleaseAgeMinutes !== undefined || minimumReleaseAgeExclude) {
       if (
         this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
         semver.lt(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '10.16.0')
@@ -523,19 +526,14 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         );
       }
 
-      if (pnpmOptions.minimumReleaseAgeMinutes !== undefined) {
-        // NOTE: the pnpm setting is `minimumReleaseAge`, but the Rush setting is `minimumReleaseAgeMinutes`
-        workspaceFile.setMinimumReleaseAge(pnpmOptions.minimumReleaseAgeMinutes);
-      }
-
-      if (pnpmOptions.minimumReleaseAgeExclude) {
-        workspaceFile.setMinimumReleaseAgeExclude(pnpmOptions.minimumReleaseAgeExclude);
-      }
+      // NOTE: the pnpm setting is `minimumReleaseAge`, but the Rush setting is `minimumReleaseAgeMinutes`
+      workspaceFile.minimumReleaseAge = minimumReleaseAgeMinutes;
+      workspaceFile.minimumReleaseAgeExclude = minimumReleaseAgeExclude;
     }
 
     // Save the generated workspace file. Don't update the file timestamp unless the content has changed,
     // since "rush install" will consider this timestamp
-    workspaceFile.save(workspaceFile.workspaceFilename, { onlyIfChanged: true });
+    await workspaceFile.saveAsync(workspaceFile.workspaceFilename, { onlyIfChanged: true });
 
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
   }
@@ -819,6 +817,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       ) {
         // Find the .modules.yaml file in the subspace temp/node_modules folder
         const modulesContent: string = await FileSystem.readFileAsync(modulesFilePath);
+        const yaml: typeof import('js-yaml') = await import('js-yaml');
         const yamlContent: IPnpmModules = yaml.load(modulesContent, {
           filename: modulesFilePath
         }) as IPnpmModules;
