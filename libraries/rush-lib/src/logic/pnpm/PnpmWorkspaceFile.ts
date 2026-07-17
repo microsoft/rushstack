@@ -180,9 +180,6 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
   }
 
   protected override async serializeAsync(): Promise<string> {
-    // Ensure stable sort order when serializing
-    Sort.sortSet(this._workspacePackages);
-
     const {
       _workspacePackages: workspacePackages,
       catalogs,
@@ -195,6 +192,8 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
       minimumReleaseAge,
       minimumReleaseAgeExclude
     } = this;
+    // Ensure stable sort order when serializing
+    Sort.sortSet(workspacePackages);
     const workspaceYaml: IPnpmWorkspaceYaml = {
       packages: Array.from(workspacePackages),
       // js-yaml omits mapping entries whose value is `undefined`, so no guard is needed here.
