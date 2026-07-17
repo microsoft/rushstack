@@ -32,7 +32,7 @@ import {
   type PackageJsonDependency
 } from '../../api/PackageJsonEditor';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
-import { InstallHelpers } from './InstallHelpers';
+import { InstallHelpers, type IResolvedPnpmSettings } from './InstallHelpers';
 import { TempProjectHelper } from '../TempProjectHelper';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import type { RushConfiguration } from '../..';
@@ -367,10 +367,7 @@ export class RushInstallManager extends BaseInstallManager {
 
     // Remove the workspace file if it exists
     if (this.rushConfiguration.isPnpm) {
-      const workspaceFilePath: string = path.join(
-        this.rushConfiguration.commonTempFolder,
-        'pnpm-workspace.yaml'
-      );
+      const workspaceFilePath: string = `${this.rushConfiguration.commonTempFolder}/pnpm-workspace.yaml`;
       try {
         await FileSystem.deleteFileAsync(workspaceFilePath);
       } catch (e) {
@@ -380,12 +377,16 @@ export class RushInstallManager extends BaseInstallManager {
       }
     }
 
-    // Write the common package.json
-    await InstallHelpers.generateCommonPackageJsonAsync(
+    // Read the pnpm options (if any) in a single place, then write the common package.json.
+    const pnpmSettings: IResolvedPnpmSettings | undefined = InstallHelpers.resolvePnpmSettings(
       this.rushConfiguration,
       this.rushConfiguration.defaultSubspace,
-      commonDependencies,
       this._terminal
+    );
+    await InstallHelpers.generateCommonPackageJsonAsync(
+      this.rushConfiguration.defaultSubspace,
+      commonDependencies,
+      pnpmSettings
     );
 
     stopwatch.stop();
