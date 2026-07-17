@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Refactor Rush's pnpm install logic so the pnpm options are interpreted in a single place (InstallHelpers.resolvePnpmSettings), and add PnpmWorkspaceFile.loadAsync.",
+      "comment": "",
       "type": "none",
       "packageName": "@microsoft/rush"
     }
