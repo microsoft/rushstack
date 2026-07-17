@@ -369,4 +369,9 @@ export class RushConstants {
    * The filename ("pnpm-sync.json") used to store the state of the pnpm sync command.
    */
   public static readonly pnpmSyncFilename: '.pnpm-sync.json' = '.pnpm-sync.json';
+
+  /**
+   * The filename ("pnpm-workspace.yaml") used to store the state of the pnpm workspace configuration.
+   */
+  public static readonly pnpmWorkspaceFileName: 'pnpm-workspace.yaml' = 'pnpm-workspace.yaml';
 }

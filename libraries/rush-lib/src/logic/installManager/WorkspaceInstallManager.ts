@@ -465,10 +465,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     if (this.rushConfiguration.isPnpm) {
       // Add workspace file. This file is only modified when workspace packages change.
-      const pnpmWorkspaceFilename: string = path.join(
-        subspace.getSubspaceTempFolderPath(),
-        'pnpm-workspace.yaml'
-      );
+      const pnpmWorkspaceFilename: string = `${subspace.getSubspaceTempFolderPath()}/${RushConstants.pnpmWorkspaceFileName}`;
 
       if (FileSystem.exists(pnpmWorkspaceFilename)) {
         potentiallyChangedFiles.push(pnpmWorkspaceFilename);

@@ -166,7 +166,7 @@ export class RushPnpmCommandLineParser {
     this._subspace = subspace;
 
     const workspaceFolder: string = subspace.getSubspaceTempFolderPath();
-    const workspaceFilePath: string = path.join(workspaceFolder, 'pnpm-workspace.yaml');
+    const workspaceFilePath: string = `${workspaceFolder}/${RushConstants.pnpmWorkspaceFileName}`;
 
     if (!FileSystem.exists(workspaceFilePath)) {
       this._terminal.writeErrorLine('Error: The PNPM workspace file has not been generated:');
@@ -546,7 +546,7 @@ export class RushPnpmCommandLineParser {
         if (semver.gte(pnpmVersion, '11.0.0')) {
           // PNPM 11+ stores patchedDependencies in pnpm-workspace.yaml instead of the package.json "pnpm" field
           newGlobalPatchedDependencies = await PnpmWorkspaceFile.loadPatchedDependenciesAsync(
-            `${subspaceTempFolder}/pnpm-workspace.yaml`
+            `${subspaceTempFolder}/${RushConstants.pnpmWorkspaceFileName}`
           );
         } else {
           // PNPM 10.x and earlier store patchedDependencies in the package.json "pnpm" field
@@ -612,7 +612,7 @@ export class RushPnpmCommandLineParser {
 
         if (semver.gte(pnpmVersion, '11.0.0')) {
           // PNPM 11+ uses allowBuilds in pnpm-workspace.yaml instead of onlyBuiltDependencies in package.json
-          const workspaceYamlFilename: string = `${subspaceTempFolder}/pnpm-workspace.yaml`;
+          const workspaceYamlFilename: string = `${subspaceTempFolder}/${RushConstants.pnpmWorkspaceFileName}`;
           const yamlModule: typeof import('js-yaml') = await import('js-yaml');
           const workspaceYamlContent: string = await FileSystem.readFileAsync(workspaceYamlFilename);
           const workspaceYaml: { allowBuilds?: Record<string, boolean> } = (yamlModule.load(

@@ -316,7 +316,7 @@ export class InstallHelpers {
     // Populate a PnpmWorkspaceFile with the workspace settings. The caller adds the workspace
     // packages to this file and saves it; here we only set the pnpm settings.
     const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(
-      `${subspace.getSubspaceTempFolderPath()}/pnpm-workspace.yaml`
+      `${subspace.getSubspaceTempFolderPath()}/${RushConstants.pnpmWorkspaceFileName}`
     );
     workspaceFile.catalogs = globalCatalogs;
     workspaceFile.allowBuilds = allowBuilds;
