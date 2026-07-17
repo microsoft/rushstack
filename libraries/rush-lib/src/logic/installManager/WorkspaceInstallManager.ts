@@ -12,6 +12,7 @@ import {
   AlreadyReportedError,
   Async,
   type IDependenciesMetaTable,
+  InternalError,
   Objects,
   Path,
   Sort
@@ -27,11 +28,10 @@ import {
   DependencyType,
   type PackageJsonDependencyMeta
 } from '../../api/PackageJsonEditor';
-import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../RushConstants';
 import { Utilities } from '../../utilities/Utilities';
-import { InstallHelpers } from './InstallHelpers';
+import { InstallHelpers, type IResolvedPnpmSettings } from './InstallHelpers';
 import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import type { RepoStateFile } from '../RepoStateFile';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
@@ -43,7 +43,6 @@ import type { Subspace } from '../../api/Subspace';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 import { FlagFile } from '../../api/FlagFile';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -181,10 +180,21 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
 
-    // To generate the workspace file, we will add each project to the file as we loop through and validate
-    const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(
-      path.join(subspace.getSubspaceTempFolderPath(), 'pnpm-workspace.yaml')
+    // Read the pnpm options in a single place, deriving the "pnpm" field for the common package.json
+    // and a pnpm-workspace.yaml file pre-populated with its settings (and emitting any related
+    // warnings). WorkspaceInstallManager is only used for pnpm, so this always returns a value.
+    const pnpmSettings: IResolvedPnpmSettings | undefined = InstallHelpers.resolvePnpmSettings(
+      this.rushConfiguration,
+      subspace,
+      this._terminal
     );
+    if (!pnpmSettings) {
+      throw new InternalError('Expected pnpm settings to be resolved for a workspace install');
+    }
+
+    // To generate the workspace file, we will add each project to the file as we loop through and
+    // validate. The file already carries the pnpm settings; here we add the workspace packages.
+    const { workspaceFile, configuredOverrides, configuredPackageExtensions } = pnpmSettings;
 
     // For pnpm package manager, we need to handle dependenciesMeta changes in package.json. See more: https://pnpm.io/package_json#dependenciesmeta
     // If dependenciesMeta settings is different between package.json and pnpm-lock.yaml, then shrinkwrapIsUpToDate return false.
@@ -380,20 +390,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       shrinkwrapIsUpToDate = false;
     }
 
-    // Check if overrides and globalOverrides are the same
-    const {
-      globalOverrides = {},
-      globalPackageExtensions,
-      globalCatalogs: catalogs,
-      globalAllowBuilds,
-      globalOnlyBuiltDependencies,
-      globalNeverBuiltDependencies,
-      minimumReleaseAgeMinutes,
-      minimumReleaseAgeExclude
-    }: PnpmOptionsConfiguration = subspace.getPnpmOptions() || this.rushConfiguration.pnpmOptions;
-
+    // Check if the configured overrides match the shrinkwrap
     const overridesAreEqual: boolean = Objects.areDeepEqual<Record<string, string>>(
-      globalOverrides,
+      configuredOverrides,
       shrinkwrapFile?.overrides ? Object.fromEntries(shrinkwrapFile?.overrides) : {}
     );
 
@@ -402,7 +401,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       shrinkwrapIsUpToDate = false;
     }
 
-    // Check if packageExtensionsChecksum matches globalPackageExtension's hash
+    // Check if packageExtensionsChecksum matches the configured packageExtensions' hash
     let packageExtensionsChecksum: string | undefined;
     let existingPackageExtensionsChecksum: string | undefined;
     if (shrinkwrapFile) {
@@ -424,12 +423,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
 
       // https://github.com/pnpm/pnpm/blob/ba9409ffcef0c36dc1b167d770a023c87444822d/pkg-manager/core/src/install/index.ts#L331
-      if (globalPackageExtensions && Object.keys(globalPackageExtensions).length !== 0) {
+      if (configuredPackageExtensions && Object.keys(configuredPackageExtensions).length !== 0) {
         if (packageExtensionsChecksumAlgorithm) {
           // In PNPM v10, the algorithm changed to SHA256 and the digest changed from hex to base64
-          packageExtensionsChecksum = await createObjectChecksumAsync(globalPackageExtensions);
+          packageExtensionsChecksum = await createObjectChecksumAsync(configuredPackageExtensions);
         } else {
-          packageExtensionsChecksum = createObjectChecksumLegacy(globalPackageExtensions);
+          packageExtensionsChecksum = createObjectChecksumLegacy(configuredPackageExtensions);
         }
       }
     }
@@ -442,109 +441,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       shrinkwrapIsUpToDate = false;
     }
 
-    // Write the common package.json
-    await InstallHelpers.generateCommonPackageJsonAsync(
-      this.rushConfiguration,
-      subspace,
-      undefined,
-      this._terminal
-    );
+    // Write the common package.json using the "pnpm" field derived above.
+    await InstallHelpers.generateCommonPackageJsonAsync(subspace, undefined, pnpmSettings);
 
-    // Set catalog definitions in the workspace file if specified
-    if (catalogs) {
-      if (
-        this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-        semver.lt(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '9.5.0')
-      ) {
-        this._terminal.writeWarningLine(
-          Colorize.yellow(
-            `Your version of pnpm (${this.rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-              `doesn't support the "globalCatalogs" fields in ` +
-              `${this.rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-              'Remove these fields or upgrade to pnpm 9.5.0 or newer.'
-          )
-        );
-      }
-
-      workspaceFile.catalogs = catalogs;
-    }
-
-    // Set allowBuilds in the workspace file for pnpm 11+ (replaces onlyBuiltDependencies/neverBuiltDependencies)
-    if (
-      this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-      semver.gte(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '11.0.0')
-    ) {
-      if (globalAllowBuilds) {
-        workspaceFile.allowBuilds = globalAllowBuilds;
-      } else if (globalOnlyBuiltDependencies || globalNeverBuiltDependencies) {
-        // Backward compatibility: convert globalOnlyBuiltDependencies/globalNeverBuiltDependencies
-        // to allowBuilds format for pnpm 11+
-        const allowBuilds: Record<string, boolean> = {};
-        if (globalOnlyBuiltDependencies) {
-          for (const pkg of globalOnlyBuiltDependencies) {
-            allowBuilds[pkg] = true;
-          }
-        }
-
-        if (globalNeverBuiltDependencies) {
-          for (const pkg of globalNeverBuiltDependencies) {
-            allowBuilds[pkg] = false;
-          }
-        }
-
-        workspaceFile.allowBuilds = allowBuilds;
-      }
-    } else if (globalAllowBuilds && this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined) {
-      this._terminal.writeWarningLine(
-        Colorize.yellow(
-          `Your version of pnpm (${this.rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-            `doesn't support the "globalAllowBuilds" field in ` +
-            `${this.rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-            'Remove this field or upgrade to pnpm 11.0.0 or newer.'
-        )
-      );
-    }
-
-    // For pnpm 11+, the following settings must be written to pnpm-workspace.yaml because pnpm 11
-    // no longer reads the "pnpm" field of package.json (where Rush writes them for older pnpm).
-    // See https://github.com/microsoft/rushstack/issues/5837
-    if (
-      this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-      semver.gte(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '11.0.0')
-    ) {
-      const pnpmOptions: PnpmOptionsConfiguration =
-        subspace.getPnpmOptions() || this.rushConfiguration.pnpmOptions;
-      workspaceFile.overrides = pnpmOptions.globalOverrides;
-      workspaceFile.packageExtensions = pnpmOptions.globalPackageExtensions;
-      workspaceFile.peerDependencyRules = pnpmOptions.globalPeerDependencyRules;
-      workspaceFile.allowedDeprecatedVersions = pnpmOptions.globalAllowedDeprecatedVersions;
-      workspaceFile.patchedDependencies = pnpmOptions.globalPatchedDependencies;
-    }
-
-    // Set minimumReleaseAge/minimumReleaseAgeExclude in the workspace file.
-    // pnpm does not read these fields from package.json, only from pnpm-workspace.yaml or .npmrc.
-    if (minimumReleaseAgeMinutes !== undefined || minimumReleaseAgeExclude) {
-      if (
-        this.rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
-        semver.lt(this.rushConfiguration.rushConfigurationJson.pnpmVersion, '10.16.0')
-      ) {
-        this._terminal.writeWarningLine(
-          Colorize.yellow(
-            `Your version of pnpm (${this.rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-              `doesn't support the "minimumReleaseAgeMinutes" or "minimumReleaseAgeExclude" fields in ` +
-              `${this.rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-              'Remove these fields or upgrade to pnpm 10.16.0 or newer.'
-          )
-        );
-      }
-
-      // NOTE: the pnpm setting is `minimumReleaseAge`, but the Rush setting is `minimumReleaseAgeMinutes`
-      workspaceFile.minimumReleaseAge = minimumReleaseAgeMinutes;
-      workspaceFile.minimumReleaseAgeExclude = minimumReleaseAgeExclude;
-    }
-
-    // Save the generated workspace file. Don't update the file timestamp unless the content has changed,
-    // since "rush install" will consider this timestamp
+    // The pnpm-workspace.yaml settings were already populated by resolvePnpmSettings, and the
+    // workspace packages were added in the loop above. Save the generated workspace file. Don't
+    // update the file timestamp unless the content has changed, since "rush install" considers it.
     await workspaceFile.saveAsync(workspaceFile.workspaceFilename, { onlyIfChanged: true });
 
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
@@ -563,10 +465,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     if (this.rushConfiguration.isPnpm) {
       // Add workspace file. This file is only modified when workspace packages change.
-      const pnpmWorkspaceFilename: string = path.join(
-        subspace.getSubspaceTempFolderPath(),
-        'pnpm-workspace.yaml'
-      );
+      const pnpmWorkspaceFilename: string = `${subspace.getSubspaceTempFolderPath()}/${RushConstants.pnpmWorkspaceFileName}`;
 
       if (FileSystem.exists(pnpmWorkspaceFilename)) {
         potentiallyChangedFiles.push(pnpmWorkspaceFilename);
@@ -576,14 +475,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Also consider timestamps for all the project node_modules folders, as well as the package.json
     // files
     // Example: [ "C:\MyRepo\projects\projectA\node_modules", "C:\MyRepo\projects\projectA\package.json" ]
-    potentiallyChangedFiles.push(
-      ...subspace.getProjects().map((project) => {
-        return path.join(project.projectFolder, RushConstants.nodeModulesFolderName);
-      }),
-      ...subspace.getProjects().map((project) => {
-        return path.join(project.projectFolder, FileConstants.PackageJson);
-      })
-    );
+    for (const { projectFolder } of subspace.getProjects()) {
+      potentiallyChangedFiles.push(`${projectFolder}/${RushConstants.nodeModulesFolderName}`);
+      potentiallyChangedFiles.push(`${projectFolder}/${FileConstants.PackageJson}`);
+    }
 
     // NOTE: If any of the potentiallyChangedFiles does not exist, then isFileTimestampCurrent()
     // returns false.
@@ -605,10 +500,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       packageManagerEnv.FORCE_COLOR = '1';
     }
 
-    const commonNodeModulesFolder: string = path.join(
-      subspace.getSubspaceTempFolderPath(),
-      RushConstants.nodeModulesFolderName
-    );
+    const commonNodeModulesFolder: string = `${subspace.getSubspaceTempFolderPath()}/${RushConstants.nodeModulesFolderName}`;
 
     // Is there an existing "node_modules" folder to consider?
     if (FileSystem.exists(commonNodeModulesFolder)) {
@@ -757,9 +649,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Ensure that node_modules folders exist after install, since the timestamps on these folders are used
     // to determine if the install can be skipped
     const projectNodeModulesFolders: string[] = [
-      path.join(subspace.getSubspaceTempFolderPath(), RushConstants.nodeModulesFolderName),
+      `${subspace.getSubspaceTempFolderPath()}/${RushConstants.nodeModulesFolderName}`,
       ...this.rushConfiguration.projects.map((project) => {
-        return path.join(project.projectFolder, RushConstants.nodeModulesFolderName);
+        return `${project.projectFolder}/${RushConstants.nodeModulesFolderName}`;
       })
     ];
 

@@ -350,7 +350,7 @@ describe(PnpmWorkspaceFile.name, () => {
     });
   });
 
-  describe(PnpmWorkspaceFile.loadPatchedDependenciesAsync.name, () => {
+  describe(PnpmWorkspaceFile.loadAsync.name, () => {
     let mockReadFileAsync: jest.SpyInstance;
 
     beforeEach(() => {
@@ -375,7 +375,8 @@ describe(PnpmWorkspaceFile.name, () => {
       };
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      await expect(PnpmWorkspaceFile.loadPatchedDependenciesAsync(workspaceFilePath)).resolves.toEqual({
+      const loadedWorkspaceFile: PnpmWorkspaceFile = await PnpmWorkspaceFile.loadAsync(workspaceFilePath);
+      expect(loadedWorkspaceFile.patchedDependencies).toEqual({
         'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
       });
     });
@@ -385,9 +386,8 @@ describe(PnpmWorkspaceFile.name, () => {
       workspaceFile.addPackage(`${projectsDir}/app1`);
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
-      await expect(
-        PnpmWorkspaceFile.loadPatchedDependenciesAsync(workspaceFilePath)
-      ).resolves.toBeUndefined();
+      const loadedWorkspaceFile: PnpmWorkspaceFile = await PnpmWorkspaceFile.loadAsync(workspaceFilePath);
+      expect(loadedWorkspaceFile.patchedDependencies).toBeUndefined();
     });
   });
 

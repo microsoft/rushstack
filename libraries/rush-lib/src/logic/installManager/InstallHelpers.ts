@@ -19,11 +19,12 @@ import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { Utilities } from '../../utilities/Utilities';
 import type { IConfigurationEnvironment } from '../base/BasePackageManagerOptionsConfiguration';
 import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
+import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 import { merge } from '../../utilities/objectUtilities';
 import type { Subspace } from '../../api/Subspace';
 import { RushConstants } from '../RushConstants';
 
-interface ICommonPackageJsonPnpmSection {
+export interface ICommonPackageJsonPnpmSection {
   overrides?: typeof PnpmOptionsConfiguration.prototype.globalOverrides;
   packageExtensions?: typeof PnpmOptionsConfiguration.prototype.globalPackageExtensions;
   peerDependencyRules?: typeof PnpmOptionsConfiguration.prototype.globalPeerDependencyRules;
@@ -41,141 +42,50 @@ interface ICommonPackageJson extends IPackageJson {
   pnpm?: ICommonPackageJsonPnpmSection;
 }
 
+/**
+ * The pnpm-specific settings that Rush writes into the generated `common/temp` install files,
+ * derived from a subspace's pnpm options by {@link InstallHelpers.resolvePnpmSettings}.
+ */
+export interface IResolvedPnpmSettings {
+  /**
+   * The "pnpm" field to write into `common/temp/package.json`. For pnpm 11+, settings that pnpm
+   * no longer reads from package.json are omitted here and appear in {@link workspaceFile}.
+   */
+  packageJsonPnpmSection: ICommonPackageJsonPnpmSection;
+
+  /**
+   * Additional top-level properties to merge into `common/temp/package.json`
+   * (from `pnpmOptions.unsupportedPackageJsonSettings`).
+   */
+  additionalPackageJsonProperties: unknown;
+
+  /**
+   * The `common/temp/pnpm-workspace.yaml` file, populated with the version-gated pnpm settings.
+   * The caller is responsible for adding the workspace packages and saving the file. Only used by
+   * workspace installs.
+   */
+  workspaceFile: PnpmWorkspaceFile;
+
+  /**
+   * The configured pnpm `globalOverrides` (defaulting to `{}`), regardless of the pnpm version.
+   * Used to verify that the shrinkwrap file is up to date.
+   */
+  configuredOverrides: Record<string, string>;
+
+  /**
+   * The configured pnpm `globalPackageExtensions`, regardless of the pnpm version. Used to verify
+   * that the shrinkwrap file is up to date.
+   */
+  configuredPackageExtensions: typeof PnpmOptionsConfiguration.prototype.globalPackageExtensions;
+}
+
 export class InstallHelpers {
   public static async generateCommonPackageJsonAsync(
-    rushConfiguration: RushConfiguration,
     subspace: Subspace,
     dependenciesMap: Map<string, string> = new Map<string, string>(),
-    terminal: ITerminal
+    resolvedPnpmSettings: IResolvedPnpmSettings | undefined
   ): Promise<void> {
-    let pnpmSection: ICommonPackageJsonPnpmSection | undefined;
-    let additionalCommonPackageJsonPropertiesToMerge: unknown | undefined;
-    if (rushConfiguration.isPnpm) {
-      const {
-        globalOverrides: overrides,
-        globalPackageExtensions: packageExtensions,
-        globalPeerDependencyRules: peerDependencyRules,
-        globalNeverBuiltDependencies,
-        globalOnlyBuiltDependencies,
-        globalIgnoredOptionalDependencies: ignoredOptionalDependencies,
-        globalAllowedDeprecatedVersions: allowedDeprecatedVersions,
-        globalPatchedDependencies: patchedDependencies,
-        trustPolicy,
-        trustPolicyExclude,
-        // NOTE: the pnpm setting is `trustPolicyIgnoreAfter`, but the rush pnpm setting is `trustPolicyIgnoreAfterMinutes`
-        trustPolicyIgnoreAfterMinutes: trustPolicyIgnoreAfter,
-        unsupportedPackageJsonSettings
-      } = subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
-
-      const pnpmVersion: string = rushConfiguration.packageManagerToolVersion;
-      const isPnpm11: boolean = semver.gte(pnpmVersion, '11.0.0');
-
-      let neverBuiltDependencies: ICommonPackageJsonPnpmSection['neverBuiltDependencies'];
-      if (globalNeverBuiltDependencies) {
-        if (isPnpm11) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of PNPM (${pnpmVersion}) ` +
-                `no longer supports the "globalNeverBuiltDependencies" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Use "globalAllowBuilds" instead (with a value of false to deny build scripts).'
-            )
-          );
-        } else {
-          neverBuiltDependencies = globalNeverBuiltDependencies;
-        }
-      }
-
-      let onlyBuiltDependencies: ICommonPackageJsonPnpmSection['onlyBuiltDependencies'];
-      if (globalOnlyBuiltDependencies) {
-        if (isPnpm11) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of PNPM (${pnpmVersion}) ` +
-                `no longer supports the "globalOnlyBuiltDependencies" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Use "globalAllowBuilds" instead (with a value of true to allow build scripts).'
-            )
-          );
-        } else {
-          if (semver.lt(pnpmVersion, '10.1.0')) {
-            terminal.writeWarningLine(
-              Colorize.yellow(
-                `Your version of PNPM (${pnpmVersion}) ` +
-                  `doesn't support the "globalOnlyBuiltDependencies" field in ` +
-                  `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                  'Remove this field or upgrade to PNPM 10.1.0 or newer.'
-              )
-            );
-          }
-
-          onlyBuiltDependencies = globalOnlyBuiltDependencies;
-        }
-      }
-
-      if (ignoredOptionalDependencies && semver.lt(pnpmVersion, '9.0.0')) {
-        terminal.writeWarningLine(
-          Colorize.yellow(
-            `Your version of PNPM (${pnpmVersion}) ` +
-              `doesn't support the "globalIgnoredOptionalDependencies" field in ` +
-              `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-              'Remove this field or upgrade to PNPM 9.'
-          )
-        );
-      }
-
-      if (trustPolicy !== undefined && semver.lt(pnpmVersion, '10.21.0')) {
-        terminal.writeWarningLine(
-          Colorize.yellow(
-            `Your version of PNPM (${pnpmVersion}) ` +
-              `doesn't support the "trustPolicy" field in ` +
-              `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-              'Remove this field or upgrade to PNPM 10.21.0 or newer.'
-          )
-        );
-      }
-
-      if (trustPolicyExclude && semver.lt(pnpmVersion, '10.22.0')) {
-        terminal.writeWarningLine(
-          Colorize.yellow(
-            `Your version of PNPM (${pnpmVersion}) ` +
-              `doesn't support the "trustPolicyExclude" field in ` +
-              `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-              'Remove this field or upgrade to PNPM 10.22.0 or newer.'
-          )
-        );
-      }
-
-      if (trustPolicyIgnoreAfter !== undefined && semver.lt(pnpmVersion, '10.27.0')) {
-        terminal.writeWarningLine(
-          Colorize.yellow(
-            `Your version of PNPM (${pnpmVersion}) ` +
-              `doesn't support the "trustPolicyIgnoreAfterMinutes" field in ` +
-              `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-              'Remove this field or upgrade to PNPM 10.27.0 or newer.'
-          )
-        );
-      }
-
-      additionalCommonPackageJsonPropertiesToMerge = unsupportedPackageJsonSettings;
-
-      // pnpm 11 no longer reads the "pnpm" field of package.json. For pnpm 11+, these settings
-      // are written to common/temp/pnpm-workspace.yaml by WorkspaceInstallManager instead.
-      // See https://github.com/microsoft/rushstack/issues/5837
-      pnpmSection = {
-        overrides: isPnpm11 ? undefined : overrides,
-        packageExtensions: isPnpm11 ? undefined : packageExtensions,
-        peerDependencyRules: isPnpm11 ? undefined : peerDependencyRules,
-        neverBuiltDependencies,
-        onlyBuiltDependencies,
-        ignoredOptionalDependencies,
-        allowedDeprecatedVersions: isPnpm11 ? undefined : allowedDeprecatedVersions,
-        patchedDependencies: isPnpm11 ? undefined : patchedDependencies,
-        trustPolicy,
-        trustPolicyExclude,
-        trustPolicyIgnoreAfter
-      };
-    }
+    const { packageJsonPnpmSection, additionalPackageJsonProperties } = resolvedPnpmSettings ?? {};
 
     // Add any preferred versions to the top of the commonPackageJson
     // do this in alphabetical order for simpler debugging
@@ -189,11 +99,11 @@ export class InstallHelpers {
       name: 'rush-common',
       private: true,
       version: '0.0.0',
-      pnpm: pnpmSection
+      pnpm: packageJsonPnpmSection
     };
 
-    if (additionalCommonPackageJsonPropertiesToMerge) {
-      merge(commonPackageJson, additionalCommonPackageJsonPropertiesToMerge);
+    if (additionalPackageJsonProperties) {
+      merge(commonPackageJson, additionalPackageJsonProperties);
     }
 
     // Example: "C:\MyRepo\common\temp\package.json"
@@ -205,6 +115,253 @@ export class InstallHelpers {
       onlyIfChanged: true,
       ignoreUndefinedValues: true
     });
+  }
+
+  /**
+   * Interprets the pnpm options for the given subspace and derives the pnpm-specific settings that
+   * Rush writes into the generated install files: the "pnpm" field of `common/temp/package.json`
+   * (see {@link IResolvedPnpmSettings.packageJsonPnpmSection}) and the settings for
+   * `common/temp/pnpm-workspace.yaml` (see {@link IResolvedPnpmSettings.workspaceSettings}).
+   *
+   * This is the single place that reads through the pnpm options and emits the associated
+   * version-compatibility warnings, so that both "rush install" code paths stay consistent.
+   *
+   * Returns `undefined` when the package manager is not pnpm.
+   */
+  public static resolvePnpmSettings(
+    rushConfiguration: RushConfiguration,
+    subspace: Subspace,
+    terminal: ITerminal
+  ): IResolvedPnpmSettings | undefined {
+    if (!rushConfiguration.isPnpm) {
+      return undefined;
+    }
+
+    const {
+      globalOverrides = {},
+      globalPackageExtensions,
+      globalPeerDependencyRules,
+      globalNeverBuiltDependencies,
+      globalOnlyBuiltDependencies,
+      globalIgnoredOptionalDependencies,
+      globalAllowedDeprecatedVersions,
+      globalPatchedDependencies,
+      globalCatalogs,
+      globalAllowBuilds,
+      minimumReleaseAgeMinutes,
+      minimumReleaseAgeExclude,
+      trustPolicy,
+      trustPolicyExclude,
+      // NOTE: the pnpm setting is `trustPolicyIgnoreAfter`, but the rush pnpm setting is `trustPolicyIgnoreAfterMinutes`
+      trustPolicyIgnoreAfterMinutes: trustPolicyIgnoreAfter,
+      unsupportedPackageJsonSettings
+    } = subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
+
+    const pnpmVersion: string = rushConfiguration.packageManagerToolVersion;
+    const isPnpm11: boolean = semver.gte(pnpmVersion, '11.0.0');
+    // Example: "C:\MyRepo\common\config\rush\pnpm-config.json"
+    const pnpmConfigLocation: string = `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}`;
+
+    //
+    // Derive the "pnpm" field of common/temp/package.json
+    //
+    let neverBuiltDependencies: ICommonPackageJsonPnpmSection['neverBuiltDependencies'];
+    if (globalNeverBuiltDependencies) {
+      if (isPnpm11) {
+        terminal.writeWarningLine(
+          Colorize.yellow(
+            `Your version of PNPM (${pnpmVersion}) ` +
+              `no longer supports the "globalNeverBuiltDependencies" field in ` +
+              `${pnpmConfigLocation}. ` +
+              'Use "globalAllowBuilds" instead (with a value of false to deny build scripts).'
+          )
+        );
+      } else {
+        neverBuiltDependencies = globalNeverBuiltDependencies;
+      }
+    }
+
+    let onlyBuiltDependencies: ICommonPackageJsonPnpmSection['onlyBuiltDependencies'];
+    if (globalOnlyBuiltDependencies) {
+      if (isPnpm11) {
+        terminal.writeWarningLine(
+          Colorize.yellow(
+            `Your version of PNPM (${pnpmVersion}) ` +
+              `no longer supports the "globalOnlyBuiltDependencies" field in ` +
+              `${pnpmConfigLocation}. ` +
+              'Use "globalAllowBuilds" instead (with a value of true to allow build scripts).'
+          )
+        );
+      } else {
+        if (semver.lt(pnpmVersion, '10.1.0')) {
+          terminal.writeWarningLine(
+            Colorize.yellow(
+              `Your version of PNPM (${pnpmVersion}) ` +
+                `doesn't support the "globalOnlyBuiltDependencies" field in ` +
+                `${pnpmConfigLocation}. ` +
+                'Remove this field or upgrade to PNPM 10.1.0 or newer.'
+            )
+          );
+        }
+
+        onlyBuiltDependencies = globalOnlyBuiltDependencies;
+      }
+    }
+
+    if (globalIgnoredOptionalDependencies && semver.lt(pnpmVersion, '9.0.0')) {
+      terminal.writeWarningLine(
+        Colorize.yellow(
+          `Your version of PNPM (${pnpmVersion}) ` +
+            `doesn't support the "globalIgnoredOptionalDependencies" field in ` +
+            `${pnpmConfigLocation}. ` +
+            'Remove this field or upgrade to PNPM 9.'
+        )
+      );
+    }
+
+    if (trustPolicy !== undefined && semver.lt(pnpmVersion, '10.21.0')) {
+      terminal.writeWarningLine(
+        Colorize.yellow(
+          `Your version of PNPM (${pnpmVersion}) ` +
+            `doesn't support the "trustPolicy" field in ` +
+            `${pnpmConfigLocation}. ` +
+            'Remove this field or upgrade to PNPM 10.21.0 or newer.'
+        )
+      );
+    }
+
+    if (trustPolicyExclude && semver.lt(pnpmVersion, '10.22.0')) {
+      terminal.writeWarningLine(
+        Colorize.yellow(
+          `Your version of PNPM (${pnpmVersion}) ` +
+            `doesn't support the "trustPolicyExclude" field in ` +
+            `${pnpmConfigLocation}. ` +
+            'Remove this field or upgrade to PNPM 10.22.0 or newer.'
+        )
+      );
+    }
+
+    if (trustPolicyIgnoreAfter !== undefined && semver.lt(pnpmVersion, '10.27.0')) {
+      terminal.writeWarningLine(
+        Colorize.yellow(
+          `Your version of PNPM (${pnpmVersion}) ` +
+            `doesn't support the "trustPolicyIgnoreAfterMinutes" field in ` +
+            `${pnpmConfigLocation}. ` +
+            'Remove this field or upgrade to PNPM 10.27.0 or newer.'
+        )
+      );
+    }
+
+    //
+    // Derive the settings for common/temp/pnpm-workspace.yaml
+    //
+    if (globalCatalogs && semver.lt(pnpmVersion, '9.5.0')) {
+      terminal.writeWarningLine(
+        Colorize.yellow(
+          `Your version of pnpm (${pnpmVersion}) ` +
+            `doesn't support the "globalCatalogs" fields in ` +
+            `${pnpmConfigLocation}. ` +
+            'Remove these fields or upgrade to pnpm 9.5.0 or newer.'
+        )
+      );
+    }
+
+    // For pnpm 11+, "allowBuilds" replaces onlyBuiltDependencies/neverBuiltDependencies
+    let allowBuilds: Record<string, boolean> | undefined;
+    if (isPnpm11) {
+      if (globalAllowBuilds) {
+        allowBuilds = globalAllowBuilds;
+      } else if (globalOnlyBuiltDependencies || globalNeverBuiltDependencies) {
+        // Backward compatibility: convert globalOnlyBuiltDependencies/globalNeverBuiltDependencies
+        // to allowBuilds format for pnpm 11+
+        allowBuilds = {};
+        if (globalOnlyBuiltDependencies) {
+          for (const pkg of globalOnlyBuiltDependencies) {
+            allowBuilds[pkg] = true;
+          }
+        }
+
+        if (globalNeverBuiltDependencies) {
+          for (const pkg of globalNeverBuiltDependencies) {
+            allowBuilds[pkg] = false;
+          }
+        }
+      }
+    } else if (globalAllowBuilds) {
+      terminal.writeWarningLine(
+        Colorize.yellow(
+          `Your version of pnpm (${pnpmVersion}) ` +
+            `doesn't support the "globalAllowBuilds" field in ` +
+            `${pnpmConfigLocation}. ` +
+            'Remove this field or upgrade to pnpm 11.0.0 or newer.'
+        )
+      );
+    }
+
+    // pnpm does not read these fields from package.json, only from pnpm-workspace.yaml or .npmrc.
+    if (
+      (minimumReleaseAgeMinutes !== undefined || minimumReleaseAgeExclude) &&
+      semver.lt(pnpmVersion, '10.16.0')
+    ) {
+      terminal.writeWarningLine(
+        Colorize.yellow(
+          `Your version of pnpm (${pnpmVersion}) ` +
+            `doesn't support the "minimumReleaseAgeMinutes" or "minimumReleaseAgeExclude" fields in ` +
+            `${pnpmConfigLocation}. ` +
+            'Remove these fields or upgrade to pnpm 10.16.0 or newer.'
+        )
+      );
+    }
+
+    // Populate a PnpmWorkspaceFile with the workspace settings. The caller adds the workspace
+    // packages to this file and saves it; here we only set the pnpm settings.
+    const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(
+      `${subspace.getSubspaceTempFolderPath()}/${RushConstants.pnpmWorkspaceFileName}`
+    );
+    workspaceFile.catalogs = globalCatalogs;
+    workspaceFile.allowBuilds = allowBuilds;
+    // NOTE: the pnpm setting is `minimumReleaseAge`, but the Rush setting is `minimumReleaseAgeMinutes`
+    workspaceFile.minimumReleaseAge = minimumReleaseAgeMinutes;
+    workspaceFile.minimumReleaseAgeExclude = minimumReleaseAgeExclude;
+
+    // pnpm 11 no longer reads the "pnpm" field of package.json. For pnpm 11+, the overrides,
+    // packageExtensions, peerDependencyRules, allowedDeprecatedVersions, and patchedDependencies
+    // settings are written to common/temp/pnpm-workspace.yaml (see workspaceSettings below) instead.
+    // See https://github.com/microsoft/rushstack/issues/5837
+    const packageJsonPnpmSection: ICommonPackageJsonPnpmSection = {
+      neverBuiltDependencies,
+      onlyBuiltDependencies,
+      ignoredOptionalDependencies: globalIgnoredOptionalDependencies,
+      trustPolicy,
+      trustPolicyExclude,
+      trustPolicyIgnoreAfter
+    };
+
+    if (isPnpm11) {
+      // These are written to pnpm-workspace.yaml only for pnpm 11+ (see note above); for older pnpm
+      // they live in packageJsonPnpmSection instead and are left undefined here.
+      workspaceFile.overrides = globalOverrides;
+      workspaceFile.packageExtensions = globalPackageExtensions;
+      workspaceFile.peerDependencyRules = globalPeerDependencyRules;
+      workspaceFile.allowedDeprecatedVersions = globalAllowedDeprecatedVersions;
+      workspaceFile.patchedDependencies = globalPatchedDependencies;
+    } else {
+      packageJsonPnpmSection.overrides = globalOverrides;
+      packageJsonPnpmSection.packageExtensions = globalPackageExtensions;
+      packageJsonPnpmSection.peerDependencyRules = globalPeerDependencyRules;
+      packageJsonPnpmSection.allowedDeprecatedVersions = globalAllowedDeprecatedVersions;
+      packageJsonPnpmSection.patchedDependencies = globalPatchedDependencies;
+    }
+
+    return {
+      packageJsonPnpmSection,
+      additionalPackageJsonProperties: unsupportedPackageJsonSettings,
+      workspaceFile,
+      // The configured overrides/packageExtensions are needed to verify the shrinkwrap is up to
+      // date, regardless of the pnpm version.
+      configuredOverrides: globalOverrides,
+      configuredPackageExtensions: globalPackageExtensions
+    };
   }
 
   public static getPackageManagerEnvironment(

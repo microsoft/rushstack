@@ -36,11 +36,15 @@ describe(InstallHelpers.name, () => {
       const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfig/rush.json`;
       const rushConfiguration: RushConfiguration =
         RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
-      await InstallHelpers.generateCommonPackageJsonAsync(
+      const pnpmSettings = InstallHelpers.resolvePnpmSettings(
         rushConfiguration,
         rushConfiguration.defaultSubspace,
-        undefined,
         terminal
+      );
+      await InstallHelpers.generateCommonPackageJsonAsync(
+        rushConfiguration.defaultSubspace,
+        undefined,
+        pnpmSettings
       );
       const packageJson: IPackageJson = JSON.parse(
         JsonFile.stringify(mockJsonFileSaveAsync.mock.calls[0][0], { ignoreUndefinedValues: true })
@@ -87,11 +91,15 @@ describe(InstallHelpers.name, () => {
       const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfigPnpm11/rush.json`;
       const rushConfiguration: RushConfiguration =
         RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
-      await InstallHelpers.generateCommonPackageJsonAsync(
+      const pnpmSettings = InstallHelpers.resolvePnpmSettings(
         rushConfiguration,
         rushConfiguration.defaultSubspace,
-        undefined,
         terminal
+      );
+      await InstallHelpers.generateCommonPackageJsonAsync(
+        rushConfiguration.defaultSubspace,
+        undefined,
+        pnpmSettings
       );
       const packageJson: IPackageJson = JSON.parse(
         JsonFile.stringify(mockJsonFileSaveAsync.mock.calls[0][0], { ignoreUndefinedValues: true })
