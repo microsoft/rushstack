@@ -124,8 +124,18 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
    *
    * @param workspaceYamlFilename - The path to the `pnpm-workspace.yaml` file
    */
-  public static async loadAsync(workspaceYamlFilename: string): Promise<PnpmWorkspaceFile> {
-    const workspaceYamlContent: string = await FileSystem.readFileAsync(workspaceYamlFilename);
+  public static async tryLoadAsync(workspaceYamlFilename: string): Promise<PnpmWorkspaceFile | undefined> {
+    let workspaceYamlContent: string;
+    try {
+      workspaceYamlContent = await FileSystem.readFileAsync(workspaceYamlFilename);
+    } catch (error) {
+      if (FileSystem.isNotExistError(error)) {
+        return undefined;
+      } else {
+        throw error;
+      }
+    }
+
     const yamlModule: typeof import('js-yaml') = await import('js-yaml');
     const workspaceYaml: IPnpmWorkspaceYaml | undefined = yamlModule.load(workspaceYamlContent) as
       | IPnpmWorkspaceYaml
@@ -133,15 +143,26 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
 
     const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceYamlFilename);
     if (workspaceYaml) {
-      workspaceFile.catalogs = workspaceYaml.catalogs;
-      workspaceFile.allowBuilds = workspaceYaml.allowBuilds;
-      workspaceFile.overrides = workspaceYaml.overrides;
-      workspaceFile.packageExtensions = workspaceYaml.packageExtensions;
-      workspaceFile.peerDependencyRules = workspaceYaml.peerDependencyRules;
-      workspaceFile.allowedDeprecatedVersions = workspaceYaml.allowedDeprecatedVersions;
-      workspaceFile.patchedDependencies = workspaceYaml.patchedDependencies;
-      workspaceFile.minimumReleaseAge = workspaceYaml.minimumReleaseAge;
-      workspaceFile.minimumReleaseAgeExclude = workspaceYaml.minimumReleaseAgeExclude;
+      const {
+        catalogs,
+        allowBuilds,
+        overrides,
+        packageExtensions,
+        peerDependencyRules,
+        allowedDeprecatedVersions,
+        patchedDependencies,
+        minimumReleaseAge,
+        minimumReleaseAgeExclude
+      } = workspaceYaml;
+      workspaceFile.catalogs = catalogs;
+      workspaceFile.allowBuilds = allowBuilds;
+      workspaceFile.overrides = overrides;
+      workspaceFile.packageExtensions = packageExtensions;
+      workspaceFile.peerDependencyRules = peerDependencyRules;
+      workspaceFile.allowedDeprecatedVersions = allowedDeprecatedVersions;
+      workspaceFile.patchedDependencies = patchedDependencies;
+      workspaceFile.minimumReleaseAge = minimumReleaseAge;
+      workspaceFile.minimumReleaseAgeExclude = minimumReleaseAgeExclude;
     }
 
     return workspaceFile;

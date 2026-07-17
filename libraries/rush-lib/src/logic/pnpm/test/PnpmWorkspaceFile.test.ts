@@ -350,44 +350,56 @@ describe(PnpmWorkspaceFile.name, () => {
     });
   });
 
-  describe(PnpmWorkspaceFile.loadAsync.name, () => {
+  describe(PnpmWorkspaceFile.tryLoadAsync.name, () => {
     let mockReadFileAsync: jest.SpyInstance;
 
-    beforeEach(() => {
-      // Mock FileSystem.readFileAsync to return the content captured by the FileSystem.writeFile mock
-      mockReadFileAsync = jest.spyOn(FileSystem, 'readFileAsync').mockImplementation(async () => {
-        if (writtenContent === undefined) {
-          throw new Error('File not found');
-        }
-        return writtenContent;
+    describe('file exists', () => {
+      beforeEach(() => {
+        // Mock FileSystem.readFileAsync to return the content captured by the FileSystem.writeFile mock
+        mockReadFileAsync = jest.spyOn(FileSystem, 'readFileAsync').mockImplementation(async () => {
+          if (writtenContent === undefined) {
+            throw new Error('File not found');
+          }
+
+          return writtenContent;
+        });
+      });
+
+      afterEach(() => {
+        mockReadFileAsync.mockRestore();
+      });
+
+      it('reads patchedDependencies from an existing workspace file', async () => {
+        const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+        workspaceFile.addPackage(`${projectsDir}/app1`);
+        workspaceFile.patchedDependencies = {
+          'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
+        };
+        await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+        const loadedWorkspaceFile: PnpmWorkspaceFile | undefined =
+          await PnpmWorkspaceFile.tryLoadAsync(workspaceFilePath);
+        expect(loadedWorkspaceFile?.patchedDependencies).toEqual({
+          'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
+        });
+      });
+
+      it('returns undefined when the workspace file has no patchedDependencies', async () => {
+        const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+        workspaceFile.addPackage(`${projectsDir}/app1`);
+        await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+        const loadedWorkspaceFile: PnpmWorkspaceFile | undefined =
+          await PnpmWorkspaceFile.tryLoadAsync(workspaceFilePath);
+        expect(loadedWorkspaceFile!.patchedDependencies).toBeUndefined();
       });
     });
 
-    afterEach(() => {
-      mockReadFileAsync.mockRestore();
-    });
-
-    it('reads patchedDependencies from an existing workspace file', async () => {
-      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(`${projectsDir}/app1`);
-      workspaceFile.patchedDependencies = {
-        'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
-      };
-      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
-
-      const loadedWorkspaceFile: PnpmWorkspaceFile = await PnpmWorkspaceFile.loadAsync(workspaceFilePath);
-      expect(loadedWorkspaceFile.patchedDependencies).toEqual({
-        'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
-      });
-    });
-
-    it('returns undefined when the workspace file has no patchedDependencies', async () => {
-      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
-      workspaceFile.addPackage(`${projectsDir}/app1`);
-      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
-
-      const loadedWorkspaceFile: PnpmWorkspaceFile = await PnpmWorkspaceFile.loadAsync(workspaceFilePath);
-      expect(loadedWorkspaceFile.patchedDependencies).toBeUndefined();
+    it("handles the case when the file doesn't exist", async () => {
+      const loadedWorkspaceFile: PnpmWorkspaceFile | undefined = await PnpmWorkspaceFile.tryLoadAsync(
+        `${__dirname}/file-that-does-not-exist.yaml`
+      );
+      expect(loadedWorkspaceFile).toBeUndefined();
     });
   });
 
