@@ -6,6 +6,7 @@
   "compilerOptions": {
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "noImplicitOverride": true,
 
     "target": "es2017",
     "lib": [
