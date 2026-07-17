@@ -390,7 +390,11 @@ export class PublishUtilities {
           currentWorkingDirectory: path.dirname(filename)
         }
       );
-      const { stdout: fileLog, exitCode, signal } = await Executable.waitForExitAsync(gitProcess, {
+      const {
+        stdout: fileLog,
+        exitCode,
+        signal
+      } = await Executable.waitForExitAsync(gitProcess, {
         encoding: 'utf8'
       });
       if (exitCode !== 0 || signal) {

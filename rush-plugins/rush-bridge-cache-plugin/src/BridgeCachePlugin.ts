@@ -60,7 +60,10 @@ export class BridgeCachePlugin implements IRushPlugin {
           const {
             rushConfiguration: {
               experimentsConfiguration: {
-                configuration: { omitAppleDoubleFilesFromBuildCache }
+                configuration: {
+                  omitAppleDoubleFilesFromBuildCache,
+                  useDirectFileTransfersForBuildCache = false
+                }
               }
             }
           } = context;
@@ -95,7 +98,8 @@ export class BridgeCachePlugin implements IRushPlugin {
                     {
                       buildCacheConfiguration,
                       terminal,
-                      excludeAppleDoubleFiles: !!omitAppleDoubleFilesFromBuildCache
+                      excludeAppleDoubleFiles: !!omitAppleDoubleFilesFromBuildCache,
+                      useDirectFileTransfersForBuildCache
                     }
                   );
 

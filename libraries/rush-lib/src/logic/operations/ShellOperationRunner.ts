@@ -50,7 +50,15 @@ export class ShellOperationRunner implements IOperationRunner {
   private readonly _ignoredParameterValues: ReadonlyArray<string>;
 
   public constructor(options: IShellOperationRunnerOptions) {
-    const { phase, displayName, rushProject, initialCommand, incrementalCommand, commandForHash, ignoredParameterValues } = options;
+    const {
+      phase,
+      displayName,
+      rushProject,
+      initialCommand,
+      incrementalCommand,
+      commandForHash,
+      ignoredParameterValues
+    } = options;
 
     this.name = displayName;
     this.warningsAreAllowed =

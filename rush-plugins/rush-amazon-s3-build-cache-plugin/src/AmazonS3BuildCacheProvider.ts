@@ -153,7 +153,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
   ): Promise<Buffer | undefined> {
     try {
       const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
-      return await client.getObjectAsync(this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId);
+      return await client.getObjectAsync(this._getObjectName(cacheId));
     } catch (e) {
       terminal.writeWarningLine(`Error getting cache entry from S3: ${e}`);
       return undefined;
@@ -165,21 +165,65 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     cacheId: string,
     objectBuffer: Buffer
   ): Promise<boolean> {
+    if (!this._validateWriteAllowed(terminal, cacheId)) {
+      return false;
+    }
+
+    try {
+      const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
+      await client.uploadObjectAsync(this._getObjectName(cacheId), objectBuffer);
+      return true;
+    } catch (e) {
+      terminal.writeWarningLine(`Error uploading cache entry to S3: ${e}`);
+      return false;
+    }
+  }
+
+  public async tryDownloadCacheEntryToFileAsync(
+    terminal: ITerminal,
+    cacheId: string,
+    localFilePath: string
+  ): Promise<boolean> {
+    try {
+      const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
+      return await client.downloadObjectToFileAsync(this._getObjectName(cacheId), localFilePath);
+    } catch (e) {
+      terminal.writeWarningLine(`Error downloading cache entry from S3: ${e}`);
+      return false;
+    }
+  }
+
+  public async tryUploadCacheEntryFromFileAsync(
+    terminal: ITerminal,
+    cacheId: string,
+    localFilePath: string
+  ): Promise<boolean> {
+    if (!this._validateWriteAllowed(terminal, cacheId)) {
+      return false;
+    }
+
+    try {
+      const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
+      await client.uploadObjectFromFileAsync(this._getObjectName(cacheId), localFilePath);
+      return true;
+    } catch (e) {
+      terminal.writeWarningLine(`Error uploading cache entry to S3: ${e}`);
+      return false;
+    }
+  }
+
+  private _getObjectName(cacheId: string): string {
+    return this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId;
+  }
+
+  private _validateWriteAllowed(terminal: ITerminal, cacheId: string): boolean {
     if (!this.isCacheWriteAllowed) {
       terminal.writeErrorLine('Writing to S3 cache is not allowed in the current configuration.');
       return false;
     }
 
     terminal.writeDebugLine('Uploading object with cacheId: ', cacheId);
-
-    try {
-      const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
-      await client.uploadObjectAsync(this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId, objectBuffer);
-      return true;
-    } catch (e) {
-      terminal.writeWarningLine(`Error uploading cache entry to S3: ${e}`);
-      return false;
-    }
+    return true;
   }
 
   public async updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void> {
