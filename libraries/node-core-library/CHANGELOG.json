@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.23.3",
+      "tag": "@rushstack/node-core-library_v5.23.3",
+      "date": "Fri, 17 Jul 2026 00:15:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace `@override` with the `override` keyword."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.23.2",
       "tag": "@rushstack/node-core-library_v5.23.2",
       "date": "Thu, 16 Jul 2026 00:16:13 GMT",

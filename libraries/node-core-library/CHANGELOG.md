@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 16 Jul 2026 00:16:13 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Jul 2026 00:15:59 GMT and should not be manually modified.
+
+## 5.23.3
+Fri, 17 Jul 2026 00:15:59 GMT
+
+### Patches
+
+- Replace `@override` with the `override` keyword.
 
 ## 5.23.2
 Thu, 16 Jul 2026 00:16:13 GMT

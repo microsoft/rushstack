@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 16 Jul 2026 00:16:13 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Jul 2026 00:15:59 GMT and should not be manually modified.
+
+## 7.30.9
+Fri, 17 Jul 2026 00:15:59 GMT
+
+### Patches
+
+- Replace `@override` with the `override` keyword.
 
 ## 7.30.8
 Thu, 16 Jul 2026 00:16:13 GMT

@@ -2,6 +2,35 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.30.9",
+      "tag": "@microsoft/api-documenter_v7.30.9",
+      "date": "Fri, 17 Jul 2026 00:15:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace `@override` with the `override` keyword."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.21`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.30.8",
       "tag": "@microsoft/api-documenter_v7.30.8",
       "date": "Thu, 16 Jul 2026 00:16:13 GMT",

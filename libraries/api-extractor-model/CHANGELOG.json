@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.33.10",
+      "tag": "@microsoft/api-extractor-model_v7.33.10",
+      "date": "Fri, 17 Jul 2026 00:15:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace `@override` with the `override` keyword."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.33.9",
       "tag": "@microsoft/api-extractor-model_v7.33.9",
       "date": "Thu, 16 Jul 2026 00:16:13 GMT",
