@@ -475,14 +475,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Also consider timestamps for all the project node_modules folders, as well as the package.json
     // files
     // Example: [ "C:\MyRepo\projects\projectA\node_modules", "C:\MyRepo\projects\projectA\package.json" ]
-    potentiallyChangedFiles.push(
-      ...subspace.getProjects().map((project) => {
-        return path.join(project.projectFolder, RushConstants.nodeModulesFolderName);
-      }),
-      ...subspace.getProjects().map((project) => {
-        return path.join(project.projectFolder, FileConstants.PackageJson);
-      })
-    );
+    for (const { projectFolder } of subspace.getProjects()) {
+      potentiallyChangedFiles.push(`${projectFolder}/${RushConstants.nodeModulesFolderName}`);
+      potentiallyChangedFiles.push(`${projectFolder}/${FileConstants.PackageJson}`);
+    }
 
     // NOTE: If any of the potentiallyChangedFiles does not exist, then isFileTimestampCurrent()
     // returns false.
@@ -504,10 +500,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       packageManagerEnv.FORCE_COLOR = '1';
     }
 
-    const commonNodeModulesFolder: string = path.join(
-      subspace.getSubspaceTempFolderPath(),
-      RushConstants.nodeModulesFolderName
-    );
+    const commonNodeModulesFolder: string = `${subspace.getSubspaceTempFolderPath()}/${RushConstants.nodeModulesFolderName}`;
 
     // Is there an existing "node_modules" folder to consider?
     if (FileSystem.exists(commonNodeModulesFolder)) {
@@ -656,9 +649,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Ensure that node_modules folders exist after install, since the timestamps on these folders are used
     // to determine if the install can be skipped
     const projectNodeModulesFolders: string[] = [
-      path.join(subspace.getSubspaceTempFolderPath(), RushConstants.nodeModulesFolderName),
+      `${subspace.getSubspaceTempFolderPath()}/${RushConstants.nodeModulesFolderName}`,
       ...this.rushConfiguration.projects.map((project) => {
-        return path.join(project.projectFolder, RushConstants.nodeModulesFolderName);
+        return `${project.projectFolder}/${RushConstants.nodeModulesFolderName}`;
       })
     ];
 
