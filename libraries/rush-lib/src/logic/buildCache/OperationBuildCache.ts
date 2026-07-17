@@ -106,6 +106,14 @@ export class OperationBuildCache {
     this._useDirectFileTransfersForBuildCache = useDirectFileTransfersForBuildCache;
   }
 
+  private static _getTempLocalCacheEntryPath(finalLocalCacheEntryPath: string): string {
+    // Derive the temp file from the destination path to ensure they are on the same volume.
+    // In the case of a shared network drive containing the build cache, we also need to make
+    // sure the temp path won't be shared by two parallel rush builds.
+    const randomSuffix: string = crypto.randomBytes(8).toString('hex');
+    return `${finalLocalCacheEntryPath}-${randomSuffix}.temp`;
+  }
+
   private static _tryGetTarUtility(terminal: ITerminal): Promise<TarExecutable | undefined> {
     if (!OperationBuildCache._tarUtilityPromise) {
       OperationBuildCache._tarUtilityPromise = TarExecutable.tryInitializeAsync(terminal);
@@ -178,15 +186,28 @@ export class OperationBuildCache {
         this._cloudBuildCacheProvider.tryDownloadCacheEntryToFileAsync
       ) {
         // Use file-based path to avoid loading the entire cache entry into memory.
-        // The provider downloads directly to the local cache file.
+        // The provider downloads directly to a temp file that is atomically moved into place.
         const targetPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
+        const tempTargetPath: string = OperationBuildCache._getTempLocalCacheEntryPath(targetPath);
         try {
-          cloudCacheHit = await this._cloudBuildCacheProvider.tryDownloadCacheEntryToFileAsync(
-            terminal,
-            cacheId,
-            targetPath
-          );
-          if (cloudCacheHit) {
+          const downloadedToTempFile: boolean =
+            await this._cloudBuildCacheProvider.tryDownloadCacheEntryToFileAsync(
+              terminal,
+              cacheId,
+              tempTargetPath
+            );
+          if (downloadedToTempFile) {
+            await Async.runWithRetriesAsync({
+              action: () =>
+                FileSystem.moveAsync({
+                  sourcePath: tempTargetPath,
+                  destinationPath: targetPath,
+                  overwrite: true
+                }),
+              maxRetries: 2,
+              retryDelayMs: 500
+            });
+            cloudCacheHit = true;
             localCacheEntryPath = targetPath;
             updateLocalCacheSuccess = true;
           }
@@ -200,7 +221,7 @@ export class OperationBuildCache {
           // mistaken for a valid cache entry on the next build. Providers may catch errors
           // internally and return false instead of throwing, leaving a partially written file.
           try {
-            await FileSystem.deleteFileAsync(targetPath);
+            await FileSystem.deleteFileAsync(tempTargetPath);
           } catch {
             // Ignore cleanup errors (file may not have been created)
           }
@@ -296,12 +317,8 @@ export class OperationBuildCache {
     const tarUtility: TarExecutable | undefined = await OperationBuildCache._tryGetTarUtility(terminal);
     if (tarUtility) {
       const finalLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
-
-      // Derive the temp file from the destination path to ensure they are on the same volume
-      // In the case of a shared network drive containing the build cache, we also need to make
-      // sure the the temp path won't be shared by two parallel rush builds.
-      const randomSuffix: string = crypto.randomBytes(8).toString('hex');
-      const tempLocalCacheEntryPath: string = `${finalLocalCacheEntryPath}-${randomSuffix}.temp`;
+      const tempLocalCacheEntryPath: string =
+        OperationBuildCache._getTempLocalCacheEntryPath(finalLocalCacheEntryPath);
 
       const logFilePath: string = this._getTarLogFilePath(cacheId, 'tar');
       const tarExitCode: number = await tarUtility.tryCreateArchiveFromProjectPathsAsync({

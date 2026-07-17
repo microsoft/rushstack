@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem, type FolderItem } from '@rushstack/node-core-library';
-import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
+import { StringBufferTerminalProvider, Terminal, type ITerminal } from '@rushstack/terminal';
 
 import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
@@ -52,6 +52,7 @@ describe(OperationBuildCache.name, () => {
         packageName: 'acme-wizard',
         projectRelativeFolder: 'apps/acme-wizard',
         projectFolder: '/repo/apps/acme-wizard',
+        projectRushTempFolder: '/repo/common/temp/project',
         dependencyProjects: []
       } as unknown as RushConfigurationProject,
       // Value from past tests, for consistency.
@@ -72,6 +73,106 @@ describe(OperationBuildCache.name, () => {
       expect(subject['_cacheId']).toMatchInlineSnapshot(
         `"acme-wizard/1926f30e8ed24cb47be89aea39e7efd70fcda075"`
       );
+    });
+  });
+
+  describe('direct file cloud cache restore', () => {
+    afterEach(() => {
+      Reflect.set(OperationBuildCache, '_tarUtilityPromise', undefined);
+      jest.restoreAllMocks();
+    });
+
+    function prepareDirectTransferSubject(cloudBuildCacheProvider: {
+      tryDownloadCacheEntryToFileAsync: jest.Mock<Promise<boolean>, [ITerminal, string, string]>;
+    }): OperationBuildCache {
+      const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+
+      return OperationBuildCache.getOperationBuildCache({
+        buildCacheConfiguration: {
+          buildCacheEnabled: true,
+          getCacheEntryId: (opts: IGenerateCacheEntryIdOptions) =>
+            `${opts.projectName}/${opts.projectStateHash}`,
+          localCacheProvider: {
+            getCacheEntryPath: jest.fn().mockReturnValue('/cache/acme-wizard-cache-entry'),
+            tryGetCacheEntryPathByIdAsync: jest.fn().mockResolvedValue(undefined)
+          },
+          cloudCacheProvider: {
+            isCacheWriteAllowed: false,
+            ...cloudBuildCacheProvider
+          }
+        } as unknown as BuildCacheConfiguration,
+        projectOutputFolderNames: ['dist'],
+        project: {
+          packageName: 'acme-wizard',
+          projectRelativeFolder: 'apps/acme-wizard',
+          projectFolder: '/repo/apps/acme-wizard',
+          projectRushTempFolder: '/repo/common/temp/project',
+          dependencyProjects: []
+        } as unknown as RushConfigurationProject,
+        operationStateHash: '1926f30e8ed24cb47be89aea39e7efd70fcda075',
+        terminal,
+        phaseName: 'build',
+        excludeAppleDoubleFiles: false,
+        useDirectFileTransfersForBuildCache: true
+      });
+    }
+
+    it('downloads cloud cache entries to a temp file before atomically moving them into place', async () => {
+      const tryDownloadCacheEntryToFileAsync: jest.Mock<Promise<boolean>, [ITerminal, string, string]> = jest
+        .fn()
+        .mockResolvedValue(true);
+      const subject: OperationBuildCache = prepareDirectTransferSubject({
+        tryDownloadCacheEntryToFileAsync
+      });
+      const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+      const tryUntarAsync: jest.Mock = jest.fn().mockResolvedValue(0);
+
+      jest.spyOn(FileSystem, 'deleteFolderAsync').mockResolvedValue();
+      const moveAsyncSpy: jest.SpyInstance = jest.spyOn(FileSystem, 'moveAsync').mockResolvedValue();
+      const deleteFileAsyncSpy: jest.SpyInstance = jest
+        .spyOn(FileSystem, 'deleteFileAsync')
+        .mockResolvedValue();
+      Reflect.set(OperationBuildCache, '_tarUtilityPromise', Promise.resolve({ tryUntarAsync }));
+
+      const result: boolean = await subject.tryRestoreFromCacheAsync(terminal);
+
+      expect(result).toBe(true);
+      expect(tryDownloadCacheEntryToFileAsync).toHaveBeenCalledTimes(1);
+      const [, , tempPath]: [ITerminal, string, string] = tryDownloadCacheEntryToFileAsync.mock.calls[0];
+      expect(tempPath).toMatch(/^\/cache\/acme-wizard-cache-entry-[0-9a-f]+\.temp$/);
+      expect(moveAsyncSpy).toHaveBeenCalledWith({
+        sourcePath: tempPath,
+        destinationPath: '/cache/acme-wizard-cache-entry',
+        overwrite: true
+      });
+      expect(tryUntarAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          archivePath: '/cache/acme-wizard-cache-entry'
+        })
+      );
+      expect(deleteFileAsyncSpy).not.toHaveBeenCalled();
+    });
+
+    it('cleans up the temp file when a direct file download misses or fails', async () => {
+      const tryDownloadCacheEntryToFileAsync: jest.Mock<Promise<boolean>, [ITerminal, string, string]> = jest
+        .fn()
+        .mockResolvedValue(false);
+      const subject: OperationBuildCache = prepareDirectTransferSubject({
+        tryDownloadCacheEntryToFileAsync
+      });
+      const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+
+      const deleteFileAsyncSpy: jest.SpyInstance = jest
+        .spyOn(FileSystem, 'deleteFileAsync')
+        .mockResolvedValue();
+
+      const result: boolean = await subject.tryRestoreFromCacheAsync(terminal);
+
+      expect(result).toBe(false);
+      expect(tryDownloadCacheEntryToFileAsync).toHaveBeenCalledTimes(1);
+      const [, , tempPath]: [ITerminal, string, string] = tryDownloadCacheEntryToFileAsync.mock.calls[0];
+      expect(tempPath).toMatch(/^\/cache\/acme-wizard-cache-entry-[0-9a-f]+\.temp$/);
+      expect(deleteFileAsyncSpy).toHaveBeenCalledWith(tempPath);
     });
   });
 
