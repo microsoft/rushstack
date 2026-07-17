@@ -545,9 +545,10 @@ export class RushPnpmCommandLineParser {
         let newGlobalPatchedDependencies: Record<string, string> | undefined;
         if (semver.gte(pnpmVersion, '11.0.0')) {
           // PNPM 11+ stores patchedDependencies in pnpm-workspace.yaml instead of the package.json "pnpm" field
-          newGlobalPatchedDependencies = await PnpmWorkspaceFile.loadPatchedDependenciesAsync(
+          const workspaceFile: PnpmWorkspaceFile = await PnpmWorkspaceFile.loadAsync(
             `${subspaceTempFolder}/${RushConstants.pnpmWorkspaceFileName}`
           );
+          newGlobalPatchedDependencies = workspaceFile.patchedDependencies;
         } else {
           // PNPM 10.x and earlier store patchedDependencies in the package.json "pnpm" field
           // Example: "C:\MyRepo\common\temp\package.json"
@@ -612,13 +613,10 @@ export class RushPnpmCommandLineParser {
 
         if (semver.gte(pnpmVersion, '11.0.0')) {
           // PNPM 11+ uses allowBuilds in pnpm-workspace.yaml instead of onlyBuiltDependencies in package.json
-          const workspaceYamlFilename: string = `${subspaceTempFolder}/${RushConstants.pnpmWorkspaceFileName}`;
-          const yamlModule: typeof import('js-yaml') = await import('js-yaml');
-          const workspaceYamlContent: string = await FileSystem.readFileAsync(workspaceYamlFilename);
-          const workspaceYaml: { allowBuilds?: Record<string, boolean> } = (yamlModule.load(
-            workspaceYamlContent
-          ) ?? {}) as { allowBuilds?: Record<string, boolean> };
-          const newGlobalAllowBuilds: Record<string, boolean> | undefined = workspaceYaml?.allowBuilds;
+          const workspaceFile: PnpmWorkspaceFile = await PnpmWorkspaceFile.loadAsync(
+            `${subspaceTempFolder}/${RushConstants.pnpmWorkspaceFileName}`
+          );
+          const newGlobalAllowBuilds: Record<string, boolean> | undefined = workspaceFile.allowBuilds;
           const currentGlobalAllowBuilds: Record<string, boolean> | undefined =
             pnpmOptions?.globalAllowBuilds;
 

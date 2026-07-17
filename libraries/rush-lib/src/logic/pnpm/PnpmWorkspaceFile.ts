@@ -114,18 +114,37 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
   }
 
   /**
-   * Reads the `patchedDependencies` field from an existing `pnpm-workspace.yaml` file.
+   * Reads an existing `pnpm-workspace.yaml` file and returns a {@link PnpmWorkspaceFile} whose
+   * settings properties are populated from its contents.
+   *
+   * @remarks
+   * The workspace `packages` list is not loaded; the returned instance is intended for reading the
+   * generated pnpm settings (such as `allowBuilds` and `patchedDependencies`), not for
+   * re-serialization.
+   *
    * @param workspaceYamlFilename - The path to the `pnpm-workspace.yaml` file
    */
-  public static async loadPatchedDependenciesAsync(
-    workspaceYamlFilename: string
-  ): Promise<Record<string, string> | undefined> {
+  public static async loadAsync(workspaceYamlFilename: string): Promise<PnpmWorkspaceFile> {
     const workspaceYamlContent: string = await FileSystem.readFileAsync(workspaceYamlFilename);
     const yamlModule: typeof import('js-yaml') = await import('js-yaml');
     const workspaceYaml: IPnpmWorkspaceYaml | undefined = yamlModule.load(workspaceYamlContent) as
       | IPnpmWorkspaceYaml
       | undefined;
-    return workspaceYaml?.patchedDependencies;
+
+    const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceYamlFilename);
+    if (workspaceYaml) {
+      workspaceFile.catalogs = workspaceYaml.catalogs;
+      workspaceFile.allowBuilds = workspaceYaml.allowBuilds;
+      workspaceFile.overrides = workspaceYaml.overrides;
+      workspaceFile.packageExtensions = workspaceYaml.packageExtensions;
+      workspaceFile.peerDependencyRules = workspaceYaml.peerDependencyRules;
+      workspaceFile.allowedDeprecatedVersions = workspaceYaml.allowedDeprecatedVersions;
+      workspaceFile.patchedDependencies = workspaceYaml.patchedDependencies;
+      workspaceFile.minimumReleaseAge = workspaceYaml.minimumReleaseAge;
+      workspaceFile.minimumReleaseAgeExclude = workspaceYaml.minimumReleaseAgeExclude;
+    }
+
+    return workspaceFile;
   }
 
   public override addPackage(packagePath: string): void {
