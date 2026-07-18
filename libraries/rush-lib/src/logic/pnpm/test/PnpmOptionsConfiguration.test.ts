@@ -169,4 +169,57 @@ describe(PnpmOptionsConfiguration.name, () => {
       }
     });
   });
+
+  describe('updateGlobalPatchedDependencies', () => {
+    function update(
+      patchedDependencies: Record<string, string> | undefined
+    ): Record<string, string> | undefined {
+      // No jsonFilename, so updateGlobalPatchedDependencies won't try to write to disk
+      const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonObject(
+        {},
+        fakeCommonTempFolder
+      );
+      pnpmConfiguration.updateGlobalPatchedDependencies(patchedDependencies);
+      return pnpmConfiguration.globalPatchedDependencies;
+    }
+
+    it('converts absolute patch paths under the common temp folder back to relative paths', () => {
+      // pnpm >= 9 "patch-commit"/"patch-remove" rewrite pre-existing "patchedDependencies" entries
+      // using absolute paths pointing into the common/temp folder
+      expect(
+        update({
+          'example@1.0.0': path.join(fakeCommonTempFolder, 'patches', 'example@1.0.0.patch'),
+          '@scope/example2@2.0.0': path.join(fakeCommonTempFolder, 'patches', '@scope__example2@2.0.0.patch')
+        })
+      ).toEqual({
+        'example@1.0.0': 'patches/example@1.0.0.patch',
+        '@scope/example2@2.0.0': 'patches/@scope__example2@2.0.0.patch'
+      });
+    });
+
+    it('leaves relative patch paths unchanged', () => {
+      expect(
+        update({
+          'example@1.0.0': 'patches/example@1.0.0.patch'
+        })
+      ).toEqual({
+        'example@1.0.0': 'patches/example@1.0.0.patch'
+      });
+    });
+
+    it('leaves absolute patch paths outside the common temp folder unchanged', () => {
+      const outsidePath: string = path.join(path.sep, 'somewhere', 'else', 'example@1.0.0.patch');
+      expect(
+        update({
+          'example@1.0.0': outsidePath
+        })
+      ).toEqual({
+        'example@1.0.0': outsidePath
+      });
+    });
+
+    it('passes through undefined', () => {
+      expect(update(undefined)).toBeUndefined();
+    });
+  });
 });
