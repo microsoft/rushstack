@@ -233,7 +233,7 @@ export class RushCommandLineParser extends CommandLineParser {
     this.telemetry?.flush();
   }
 
-  public async executeAsync(args?: string[]): Promise<boolean> {
+  public override async executeAsync(args?: string[]): Promise<boolean> {
     // debugParameter will be correctly parsed during super.executeAsync(), so manually parse here.
     this._terminalProvider.verboseEnabled = this._terminalProvider.debugEnabled =
       process.argv.indexOf('--debug') >= 0;

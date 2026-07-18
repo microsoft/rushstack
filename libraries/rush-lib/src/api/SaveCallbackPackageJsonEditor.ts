@@ -24,7 +24,7 @@ export class SaveCallbackPackageJsonEditor extends PackageJsonEditor {
     return new SaveCallbackPackageJsonEditor(options);
   }
 
-  public async saveIfModifiedAsync(): Promise<boolean> {
+  public override async saveIfModifiedAsync(): Promise<boolean> {
     const modified: boolean = await super.saveIfModifiedAsync();
     if (this._onSaved) {
       this._onSaved(this.saveToObject());

@@ -36,7 +36,12 @@ class FakeBaseInstallManager extends BaseInstallManager {
   protected postInstallAsync(): Promise<void> {
     return Promise.resolve();
   }
-  public pushConfigurationArgs(args: string[], options: IInstallManagerOptions, subspace: Subspace): void {
+
+  public override pushConfigurationArgs(
+    args: string[],
+    options: IInstallManagerOptions,
+    subspace: Subspace
+  ): void {
     return super.pushConfigurationArgs(args, options, subspace);
   }
 }

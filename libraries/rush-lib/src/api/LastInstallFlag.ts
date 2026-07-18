@@ -89,7 +89,7 @@ export class LastInstallFlag extends FlagFile<Partial<ILastInstallFlagJson>> {
   /**
    * Returns true if the file exists and the contents match the current state.
    */
-  public async isValidAsync(): Promise<boolean> {
+  public override async isValidAsync(): Promise<boolean> {
     return await this._isValidAsync(false, {});
   }
 

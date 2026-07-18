@@ -78,7 +78,7 @@ export abstract class AstBaseNode {
  * Represents a complete script that can be executed.
  */
 export class AstScript extends AstBaseNode {
-  public readonly kind: AstKind.Script = AstKind.Script;
+  public override readonly kind: AstKind.Script = AstKind.Script;
 
   public body: AstNode | undefined;
 
@@ -93,7 +93,7 @@ export class AstScript extends AstBaseNode {
  * Represents the "&&" operator, which is used to join two individual commands.
  */
 export class AstAndIf extends AstBaseNode {
-  public readonly kind: AstKind.AndIf = AstKind.AndIf;
+  public override readonly kind: AstKind.AndIf = AstKind.AndIf;
 
   /**
    * The command that executes first, and always.
@@ -119,7 +119,7 @@ export class AstAndIf extends AstBaseNode {
  * Represents a command.  For example, the name of an executable to be started.
  */
 export class AstCommand extends AstBaseNode {
-  public readonly kind: AstKind.Command = AstKind.Command;
+  public override readonly kind: AstKind.Command = AstKind.Command;
 
   public commandPath: AstCompoundWord | undefined;
   public arguments: AstCompoundWord[] = [];
@@ -136,7 +136,7 @@ export class AstCommand extends AstBaseNode {
  * Represents a compound word, e.g. "--the-thing" or "./the/thing".
  */
 export class AstCompoundWord extends AstBaseNode {
-  public readonly kind: AstKind.CompoundWord = AstKind.CompoundWord;
+  public override readonly kind: AstKind.CompoundWord = AstKind.CompoundWord;
 
   public readonly parts: AstNode[] = [];
 
@@ -149,7 +149,7 @@ export class AstCompoundWord extends AstBaseNode {
  * Represents an environment variable expansion expression, e.g. "${VARIABLE}"
  */
 export class AstVariableExpansion extends AstBaseNode {
-  public readonly kind: AstKind.VariableExpansion = AstKind.VariableExpansion;
+  public override readonly kind: AstKind.VariableExpansion = AstKind.VariableExpansion;
 
   protected override collectChildNodesInto(nodes: AstNode[]): void {
     // no children
@@ -160,7 +160,7 @@ export class AstVariableExpansion extends AstBaseNode {
  * Represents some plain text.
  */
 export class AstText extends AstBaseNode {
-  public readonly kind: AstKind.Text = AstKind.Text;
+  public override readonly kind: AstKind.Text = AstKind.Text;
 
   public token: Token | undefined;
 

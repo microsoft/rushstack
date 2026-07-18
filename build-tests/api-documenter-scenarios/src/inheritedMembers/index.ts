@@ -41,14 +41,14 @@ export class Class2<T> extends Namespace1.Class3 {
 
   /** Some method. Overrides `Class3.someMethod`. */
   // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
-  someMethod(x: boolean): void {}
+  override someMethod(x: boolean): void {}
 }
 
 /** @public */
 export class Class1 extends Class2<number> {
   /** A second prop. Overrides `Class2.secondProp`. */
   // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
-  secondProp: boolean;
+  override secondProp: boolean;
 
   /** A fourth prop */
   // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
@@ -56,7 +56,7 @@ export class Class1 extends Class2<number> {
 
   /** Some overload. Overrides `Class3.someOverload`. */
   // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
-  someOverload(x: boolean | string): void {}
+  override someOverload(x: boolean | string): void {}
 }
 
 /** @public */

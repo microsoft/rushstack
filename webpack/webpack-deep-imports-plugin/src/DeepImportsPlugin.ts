@@ -120,7 +120,7 @@ export class DeepImportsPlugin extends DllPlugin {
     this._dTsFilesInputFolderName = dTsFilesInputFolderName;
   }
 
-  public apply(compiler: Compiler): void {
+  public override apply(compiler: Compiler): void {
     super.apply(compiler);
 
     const { WebpackError } = compiler.webpack;

@@ -91,7 +91,10 @@ export class NpmPackage extends BasePackage {
    * @param targetFolderName - Filename where it should have been installed
    *        Example: `C:\MyRepo\common\temp\node_modules\@rush-temp\project1`
    */
-  public static createVirtualTempPackage(packageJsonFilename: string, installFolderName: string): NpmPackage {
+  public static override createVirtualTempPackage(
+    packageJsonFilename: string,
+    installFolderName: string
+  ): NpmPackage {
     const packageJson: IPackageJson = JsonFile.load(packageJsonFilename);
     const npmPackage: readPackageTree.Node = {
       children: [],
