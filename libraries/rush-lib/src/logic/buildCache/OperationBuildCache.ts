@@ -4,7 +4,7 @@
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
 
-import { FileSystem, type FolderItem, InternalError, Async } from '@rushstack/node-core-library';
+import { FileSystem, type FolderItem, InternalError, Async, LockFile } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -14,6 +14,16 @@ import type { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvide
 import { TarExecutable } from '../../utilities/TarExecutable';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import type { IBaseOperationExecutionResult } from '../operations/IOperationExecutionResult';
+
+/**
+ * How long to wait to acquire the per-cache-entry download lock (see
+ * {@link OperationBuildCache._getDirectFileTransferLockResourceName}) before giving up and
+ * downloading independently. This is strictly a best-effort optimization to avoid redundant
+ * downloads when multiple local Rush processes race to restore the same cache entry; it is not
+ * required for correctness, since downloads always land in a uniquely-named temp file that is
+ * atomically renamed into place.
+ */
+const DIRECT_FILE_TRANSFER_LOCK_MAX_WAIT_MS: number = 5 * 60 * 1000;
 
 /**
  * @internal
@@ -64,6 +74,13 @@ export type IProjectBuildCacheOptions = IOperationBuildCacheOptions & {
 interface IPathsToCache {
   filteredOutputFolderNames: string[];
   outputFilePaths: string[];
+}
+
+function _getDirectFileTransferLockResourceName(cacheId: string): string {
+  // LockFile resource names must match /^[a-zA-Z0-9][a-zA-Z0-9-.]+[a-zA-Z0-9]$/, but cacheId may
+  // contain other characters (e.g. "/") depending on the configured cacheEntryNamePattern, so hash
+  // it into a fixed-length, lock-file-safe token.
+  return crypto.createHash('sha1').update(cacheId).digest('hex');
 }
 
 /**
@@ -188,43 +205,79 @@ export class OperationBuildCache {
         // Use file-based path to avoid loading the entire cache entry into memory.
         // The provider downloads directly to a temp file that is atomically moved into place.
         const targetPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
-        const tempTargetPath: string = OperationBuildCache._getTempLocalCacheEntryPath(targetPath);
+
+        // If multiple local Rush processes race to restore the same cache entry (e.g. parallel
+        // "rush build" invocations on the same machine or CI agent), avoid redundant downloads by
+        // having later processes wait for the first one to finish, mirroring the pattern used for
+        // installing the package manager (see InstallHelpers.ensureLocalPackageManagerAsync). This
+        // is strictly a best-effort optimization: if the lock cannot be acquired (for example,
+        // because it is held by a process on a different machine sharing a network cache folder,
+        // where the lock's stale-holder detection cannot see across machines) we simply fall back
+        // to downloading independently below. Correctness never depends on the lock, because
+        // downloads always land in a uniquely-named temp file that is atomically renamed into
+        // place.
+        let downloadLock: LockFile | undefined;
         try {
-          const downloadedToTempFile: boolean =
-            await this._cloudBuildCacheProvider.tryDownloadCacheEntryToFileAsync(
-              terminal,
-              cacheId,
-              tempTargetPath
-            );
-          if (downloadedToTempFile) {
-            await Async.runWithRetriesAsync({
-              action: () =>
-                FileSystem.moveAsync({
-                  sourcePath: tempTargetPath,
-                  destinationPath: targetPath,
-                  overwrite: true
-                }),
-              maxRetries: 2,
-              retryDelayMs: 500
-            });
+          downloadLock = await LockFile.acquireAsync(
+            path.dirname(targetPath),
+            _getDirectFileTransferLockResourceName(cacheId),
+            DIRECT_FILE_TRANSFER_LOCK_MAX_WAIT_MS
+          );
+        } catch (e) {
+          terminal.writeVerboseLine(
+            `Unable to acquire the local download lock for cache entry "${cacheId}"; downloading independently: ${e}`
+          );
+        }
+
+        try {
+          // Another process may have finished populating the cache entry while we were waiting
+          // for the lock (or the lock may not have been acquired at all).
+          if (await FileSystem.existsAsync(targetPath)) {
             cloudCacheHit = true;
             localCacheEntryPath = targetPath;
             updateLocalCacheSuccess = true;
-          }
-        } catch (e) {
-          terminal.writeVerboseLine(`Failed to download cache entry to local cache: ${e}`);
-          updateLocalCacheSuccess = false;
-        }
+          } else {
+            const tempTargetPath: string = OperationBuildCache._getTempLocalCacheEntryPath(targetPath);
+            try {
+              const downloadedToTempFile: boolean =
+                await this._cloudBuildCacheProvider.tryDownloadCacheEntryToFileAsync(
+                  terminal,
+                  cacheId,
+                  tempTargetPath
+                );
+              if (downloadedToTempFile) {
+                await Async.runWithRetriesAsync({
+                  action: () =>
+                    FileSystem.moveAsync({
+                      sourcePath: tempTargetPath,
+                      destinationPath: targetPath,
+                      overwrite: true
+                    }),
+                  maxRetries: 2,
+                  retryDelayMs: 500
+                });
+                cloudCacheHit = true;
+                localCacheEntryPath = targetPath;
+                updateLocalCacheSuccess = true;
+              }
+            } catch (e) {
+              terminal.writeVerboseLine(`Failed to download cache entry to local cache: ${e}`);
+              updateLocalCacheSuccess = false;
+            }
 
-        if (!cloudCacheHit) {
-          // Clean up any partial file left by the failed or missed download so it isn't
-          // mistaken for a valid cache entry on the next build. Providers may catch errors
-          // internally and return false instead of throwing, leaving a partially written file.
-          try {
-            await FileSystem.deleteFileAsync(tempTargetPath);
-          } catch {
-            // Ignore cleanup errors (file may not have been created)
+            if (!cloudCacheHit) {
+              // Clean up any partial file left by the failed or missed download so it isn't
+              // mistaken for a valid cache entry on the next build. Providers may catch errors
+              // internally and return false instead of throwing, leaving a partially written file.
+              try {
+                await FileSystem.deleteFileAsync(tempTargetPath);
+              } catch {
+                // Ignore cleanup errors (file may not have been created)
+              }
+            }
           }
+        } finally {
+          downloadLock?.release();
         }
       } else {
         const cacheEntryBuffer: Buffer | undefined =
