@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Fixed an issue where the pnpm \"ignoredOptionalDependencies\", \"trustPolicy\", \"trustPolicyExclude\", and \"trustPolicyIgnoreAfterMinutes\" settings were written to the \"pnpm\" field of the generated package.json (which pnpm 11 ignores) instead of pnpm-workspace.yaml, causing them to be silently ignored under pnpm 11.",
+      "comment": "Fixed an issue where the pnpm `ignoredOptionalDependencies`, `trustPolicy`, `trustPolicyExclude`, and `trustPolicyIgnoreAfterMinutes` settings were written to the `pnpm` field of the generated `package.json` (which pnpm 11 ignores) instead of `pnpm-workspace.yaml`, causing them to be silently ignored under pnpm 11.",
       "type": "patch",
       "packageName": "@microsoft/rush"
     }
