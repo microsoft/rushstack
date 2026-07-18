@@ -48,10 +48,10 @@ interface ICommonPackageJson extends IPackageJson {
  */
 export interface IResolvedPnpmSettings {
   /**
-   * The "pnpm" field to write into `common/temp/package.json`. For pnpm 11+, settings that pnpm
-   * no longer reads from package.json are omitted here and appear in {@link workspaceFile}.
+   * The "pnpm" field to write into `common/temp/package.json`, or `undefined` for pnpm 11+ (which
+   * no longer reads that field — all settings are placed on {@link workspaceFile} instead).
    */
-  packageJsonPnpmSection: ICommonPackageJsonPnpmSection;
+  packageJsonPnpmSection: ICommonPackageJsonPnpmSection | undefined;
 
   /**
    * Additional top-level properties to merge into `common/temp/package.json`
@@ -324,19 +324,12 @@ export class InstallHelpers {
     workspaceFile.minimumReleaseAge = minimumReleaseAgeMinutes;
     workspaceFile.minimumReleaseAgeExclude = minimumReleaseAgeExclude;
 
-    // pnpm 11 no longer reads the "pnpm" field of package.json. For pnpm 11+, the overrides,
-    // packageExtensions, peerDependencyRules, allowedDeprecatedVersions, patchedDependencies,
-    // ignoredOptionalDependencies, and trustPolicy settings are written to
-    // common/temp/pnpm-workspace.yaml instead.
+    // pnpm 11 no longer reads the "pnpm" field of package.json, so for pnpm 11+ we don't generate
+    // it at all; every setting is written to common/temp/pnpm-workspace.yaml instead.
     // See https://github.com/microsoft/rushstack/issues/5837
-    const packageJsonPnpmSection: ICommonPackageJsonPnpmSection = {
-      neverBuiltDependencies,
-      onlyBuiltDependencies
-    };
+    let packageJsonPnpmSection: ICommonPackageJsonPnpmSection | undefined;
 
     if (isPnpm11) {
-      // These are written to pnpm-workspace.yaml only for pnpm 11+ (see note above); for older pnpm
-      // they live in packageJsonPnpmSection instead and are left undefined here.
       workspaceFile.overrides = globalOverrides;
       workspaceFile.packageExtensions = globalPackageExtensions;
       workspaceFile.peerDependencyRules = globalPeerDependencyRules;
@@ -347,15 +340,20 @@ export class InstallHelpers {
       workspaceFile.trustPolicyExclude = trustPolicyExclude;
       workspaceFile.trustPolicyIgnoreAfter = trustPolicyIgnoreAfter;
     } else {
-      packageJsonPnpmSection.overrides = globalOverrides;
-      packageJsonPnpmSection.packageExtensions = globalPackageExtensions;
-      packageJsonPnpmSection.peerDependencyRules = globalPeerDependencyRules;
-      packageJsonPnpmSection.allowedDeprecatedVersions = globalAllowedDeprecatedVersions;
-      packageJsonPnpmSection.patchedDependencies = globalPatchedDependencies;
-      packageJsonPnpmSection.ignoredOptionalDependencies = globalIgnoredOptionalDependencies;
-      packageJsonPnpmSection.trustPolicy = trustPolicy;
-      packageJsonPnpmSection.trustPolicyExclude = trustPolicyExclude;
-      packageJsonPnpmSection.trustPolicyIgnoreAfter = trustPolicyIgnoreAfter;
+      // For older pnpm, these settings live in the "pnpm" field of package.json.
+      packageJsonPnpmSection = {
+        neverBuiltDependencies,
+        onlyBuiltDependencies,
+        overrides: globalOverrides,
+        packageExtensions: globalPackageExtensions,
+        peerDependencyRules: globalPeerDependencyRules,
+        allowedDeprecatedVersions: globalAllowedDeprecatedVersions,
+        patchedDependencies: globalPatchedDependencies,
+        ignoredOptionalDependencies: globalIgnoredOptionalDependencies,
+        trustPolicy,
+        trustPolicyExclude,
+        trustPolicyIgnoreAfter
+      };
     }
 
     return {

@@ -88,7 +88,7 @@ describe(InstallHelpers.name, () => {
       expect(packageJson).toMatchSnapshot();
     });
 
-    it('omits the relocated pnpm settings for pnpm 11 (they belong in pnpm-workspace.yaml)', async () => {
+    it('does not generate a "pnpm" field for pnpm 11 (all settings belong in pnpm-workspace.yaml)', async () => {
       const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfigPnpm11/rush.json`;
       const rushConfiguration: RushConfiguration =
         RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
@@ -105,21 +105,12 @@ describe(InstallHelpers.name, () => {
       const packageJson: IPackageJson = JSON.parse(
         JsonFile.stringify(mockJsonFileSaveAsync.mock.calls[0][0], { ignoreUndefinedValues: true })
       );
-      const pnpmField: Record<string, unknown> = (packageJson as unknown as { pnpm: Record<string, unknown> })
-        .pnpm;
-      // For pnpm >= 11 these are written to common/temp/pnpm-workspace.yaml instead of package.json.
-      expect(pnpmField).not.toHaveProperty('overrides');
-      expect(pnpmField).not.toHaveProperty('packageExtensions');
-      expect(pnpmField).not.toHaveProperty('peerDependencyRules');
-      expect(pnpmField).not.toHaveProperty('allowedDeprecatedVersions');
-      expect(pnpmField).not.toHaveProperty('patchedDependencies');
-      expect(pnpmField).not.toHaveProperty('ignoredOptionalDependencies');
-      expect(pnpmField).not.toHaveProperty('trustPolicy');
-      expect(pnpmField).not.toHaveProperty('trustPolicyExclude');
-      expect(pnpmField).not.toHaveProperty('trustPolicyIgnoreAfter');
+      // For pnpm >= 11 the "pnpm" field is not generated at all; every setting is written to
+      // common/temp/pnpm-workspace.yaml instead.
+      expect(packageJson).not.toHaveProperty('pnpm');
 
-      // ...and the newly relocated settings are instead placed on the generated pnpm-workspace.yaml
-      // file. (The arrays are spread to drop the ConfigurationFile annotation symbol they carry.)
+      // ...and the relocated settings are instead placed on the generated pnpm-workspace.yaml file.
+      // (The arrays are spread to drop the ConfigurationFile annotation symbol they carry.)
       const workspaceFile: PnpmWorkspaceFile = pnpmSettings!.workspaceFile;
       expect([...(workspaceFile.ignoredOptionalDependencies ?? [])]).toEqual(['fsevents']);
       expect(workspaceFile.trustPolicy).toEqual('no-downgrade');
