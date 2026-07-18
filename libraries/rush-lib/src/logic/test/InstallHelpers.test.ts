@@ -6,6 +6,7 @@ import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { RushConfiguration } from '../../api/RushConfiguration';
+import type { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 
 describe(InstallHelpers.name, () => {
   describe(InstallHelpers.generateCommonPackageJsonAsync.name, () => {
@@ -112,6 +113,18 @@ describe(InstallHelpers.name, () => {
       expect(pnpmField).not.toHaveProperty('peerDependencyRules');
       expect(pnpmField).not.toHaveProperty('allowedDeprecatedVersions');
       expect(pnpmField).not.toHaveProperty('patchedDependencies');
+      expect(pnpmField).not.toHaveProperty('ignoredOptionalDependencies');
+      expect(pnpmField).not.toHaveProperty('trustPolicy');
+      expect(pnpmField).not.toHaveProperty('trustPolicyExclude');
+      expect(pnpmField).not.toHaveProperty('trustPolicyIgnoreAfter');
+
+      // ...and the newly relocated settings are instead placed on the generated pnpm-workspace.yaml
+      // file. (The arrays are spread to drop the ConfigurationFile annotation symbol they carry.)
+      const workspaceFile: PnpmWorkspaceFile = pnpmSettings!.workspaceFile;
+      expect([...(workspaceFile.ignoredOptionalDependencies ?? [])]).toEqual(['fsevents']);
+      expect(workspaceFile.trustPolicy).toEqual('no-downgrade');
+      expect([...(workspaceFile.trustPolicyExclude ?? [])]).toEqual(['chokidar@4.0.3']);
+      expect(workspaceFile.trustPolicyIgnoreAfter).toEqual(1440);
     });
   });
 });

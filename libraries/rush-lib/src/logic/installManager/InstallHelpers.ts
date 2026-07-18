@@ -325,16 +325,13 @@ export class InstallHelpers {
     workspaceFile.minimumReleaseAgeExclude = minimumReleaseAgeExclude;
 
     // pnpm 11 no longer reads the "pnpm" field of package.json. For pnpm 11+, the overrides,
-    // packageExtensions, peerDependencyRules, allowedDeprecatedVersions, and patchedDependencies
-    // settings are written to common/temp/pnpm-workspace.yaml (see workspaceSettings below) instead.
+    // packageExtensions, peerDependencyRules, allowedDeprecatedVersions, patchedDependencies,
+    // ignoredOptionalDependencies, and trustPolicy settings are written to
+    // common/temp/pnpm-workspace.yaml instead.
     // See https://github.com/microsoft/rushstack/issues/5837
     const packageJsonPnpmSection: ICommonPackageJsonPnpmSection = {
       neverBuiltDependencies,
-      onlyBuiltDependencies,
-      ignoredOptionalDependencies: globalIgnoredOptionalDependencies,
-      trustPolicy,
-      trustPolicyExclude,
-      trustPolicyIgnoreAfter
+      onlyBuiltDependencies
     };
 
     if (isPnpm11) {
@@ -345,12 +342,20 @@ export class InstallHelpers {
       workspaceFile.peerDependencyRules = globalPeerDependencyRules;
       workspaceFile.allowedDeprecatedVersions = globalAllowedDeprecatedVersions;
       workspaceFile.patchedDependencies = globalPatchedDependencies;
+      workspaceFile.ignoredOptionalDependencies = globalIgnoredOptionalDependencies;
+      workspaceFile.trustPolicy = trustPolicy;
+      workspaceFile.trustPolicyExclude = trustPolicyExclude;
+      workspaceFile.trustPolicyIgnoreAfter = trustPolicyIgnoreAfter;
     } else {
       packageJsonPnpmSection.overrides = globalOverrides;
       packageJsonPnpmSection.packageExtensions = globalPackageExtensions;
       packageJsonPnpmSection.peerDependencyRules = globalPeerDependencyRules;
       packageJsonPnpmSection.allowedDeprecatedVersions = globalAllowedDeprecatedVersions;
       packageJsonPnpmSection.patchedDependencies = globalPatchedDependencies;
+      packageJsonPnpmSection.ignoredOptionalDependencies = globalIgnoredOptionalDependencies;
+      packageJsonPnpmSection.trustPolicy = trustPolicy;
+      packageJsonPnpmSection.trustPolicyExclude = trustPolicyExclude;
+      packageJsonPnpmSection.trustPolicyIgnoreAfter = trustPolicyIgnoreAfter;
     }
 
     return {

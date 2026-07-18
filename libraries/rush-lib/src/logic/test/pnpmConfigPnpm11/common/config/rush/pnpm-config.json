@@ -21,5 +21,9 @@
   },
   "globalPatchedDependencies": {
     "lodash@4.17.21": "patches/lodash@4.17.21.patch"
-  }
+  },
+  "globalIgnoredOptionalDependencies": ["fsevents"],
+  "trustPolicy": "no-downgrade",
+  "trustPolicyExclude": ["chokidar@4.0.3"],
+  "trustPolicyIgnoreAfterMinutes": 1440
 }

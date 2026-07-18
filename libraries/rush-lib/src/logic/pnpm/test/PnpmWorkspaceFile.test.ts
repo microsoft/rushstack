@@ -437,6 +437,10 @@ describe(PnpmWorkspaceFile.name, () => {
       workspaceFile.patchedDependencies = {
         'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
       };
+      workspaceFile.ignoredOptionalDependencies = ['fsevents'];
+      workspaceFile.trustPolicy = 'no-downgrade';
+      workspaceFile.trustPolicyExclude = ['chokidar@4.0.3'];
+      workspaceFile.trustPolicyIgnoreAfter = 1440;
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 

@@ -104,6 +104,8 @@ allowedDeprecatedVersions:
 catalogs:
   default:
     react: ^18.0.0
+ignoredOptionalDependencies:
+  - fsevents
 overrides:
   foo@1.0.0: 1.0.1
 packageExtensions:
@@ -117,6 +119,10 @@ patchedDependencies:
 peerDependencyRules:
   allowedVersions:
     react: '18'
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  - chokidar@4.0.3
+trustPolicyIgnoreAfter: 1440
 "
 `;
 
