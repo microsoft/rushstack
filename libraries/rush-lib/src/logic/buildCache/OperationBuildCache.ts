@@ -23,7 +23,7 @@ import type { IBaseOperationExecutionResult } from '../operations/IOperationExec
  * required for correctness, since downloads always land in a uniquely-named temp file that is
  * atomically renamed into place.
  */
-const DIRECT_FILE_TRANSFER_LOCK_MAX_WAIT_MS: number = 5 * 60 * 1000;
+const DIRECT_FILE_TRANSFER_LOCK_MAX_WAIT_MS: number = 5 * 60 * 1000; // Five minutes
 
 /**
  * @internal
