@@ -3,6 +3,7 @@
 
 import { type IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
+import { TestUtilities } from '@rushstack/heft-config-file';
 
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { RushConfiguration } from '../../api/RushConfiguration';
@@ -110,12 +111,12 @@ describe(InstallHelpers.name, () => {
       expect(packageJson).not.toHaveProperty('pnpm');
 
       // ...and the relocated settings are instead placed on the generated pnpm-workspace.yaml file.
-      // (The arrays are spread to drop the ConfigurationFile annotation symbol they carry.)
-      const workspaceFile: PnpmWorkspaceFile = pnpmSettings!.workspaceFile;
-      expect([...(workspaceFile.ignoredOptionalDependencies ?? [])]).toEqual(['fsevents']);
-      expect(workspaceFile.trustPolicy).toEqual('no-downgrade');
-      expect([...(workspaceFile.trustPolicyExclude ?? [])]).toEqual(['chokidar@4.0.3']);
-      expect(workspaceFile.trustPolicyIgnoreAfter).toEqual(1440);
+      const workspaceFile: PnpmWorkspaceFile | undefined =
+        TestUtilities.stripAnnotations(pnpmSettings)?.workspaceFile;
+      expect(workspaceFile?.ignoredOptionalDependencies).toEqual(['fsevents']);
+      expect(workspaceFile?.trustPolicy).toEqual('no-downgrade');
+      expect(workspaceFile?.trustPolicyExclude).toEqual(['chokidar@4.0.3']);
+      expect(workspaceFile?.trustPolicyIgnoreAfter).toEqual(1440);
     });
   });
 });
