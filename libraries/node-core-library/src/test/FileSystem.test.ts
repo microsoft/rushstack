@@ -175,6 +175,21 @@ describe(FileSystem.name, () => {
       expect(fs.existsSync(tempDir)).toBe(true);
       expect(fs.readdirSync(tempDir)).toEqual([]);
     });
+
+    test('re-throws errors from readFolderItems that are not not-exist errors', () => {
+      const permError: NodeJS.ErrnoException = Object.assign(new Error('EACCES: permission denied'), {
+        code: 'EACCES'
+      });
+      const spy: jest.SpyInstance = jest.spyOn(FileSystem, 'readFolderItems').mockImplementationOnce(() => {
+        throw permError;
+      });
+
+      try {
+        expect(() => FileSystem.ensureEmptyFolder(tempDir)).toThrow(/EACCES/);
+      } finally {
+        spy.mockRestore();
+      }
+    });
   });
 
   describe(FileSystem.ensureEmptyFolderAsync.name, () => {
@@ -202,6 +217,21 @@ describe(FileSystem.name, () => {
 
       expect(fs.existsSync(tempDir)).toBe(true);
       expect(fs.readdirSync(tempDir)).toEqual([]);
+    });
+
+    test('re-throws errors from readFolderItemsAsync that are not not-exist errors', async () => {
+      const permError: NodeJS.ErrnoException = Object.assign(new Error('EACCES: permission denied'), {
+        code: 'EACCES'
+      });
+      const spy: jest.SpyInstance = jest
+        .spyOn(FileSystem, 'readFolderItemsAsync')
+        .mockRejectedValueOnce(permError);
+
+      try {
+        await expect(FileSystem.ensureEmptyFolderAsync(tempDir)).rejects.toThrow(/EACCES/);
+      } finally {
+        spy.mockRestore();
+      }
     });
   });
 
