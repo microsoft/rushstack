@@ -71,7 +71,7 @@ export class UpdateAction extends BaseInstallAction {
     });
   }
 
-  protected async runAsync(): Promise<void> {
+  protected override async runAsync(): Promise<void> {
     await this.parser.pluginManager.updateAsync();
 
     if (this.parser.pluginManager.error) {

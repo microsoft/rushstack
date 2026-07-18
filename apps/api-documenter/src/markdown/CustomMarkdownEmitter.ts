@@ -33,7 +33,7 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
     this._apiModel = apiModel;
   }
 
-  public emit(
+  public override emit(
     stringBuilder: StringBuilder,
     docNode: DocNode,
     options: ICustomMarkdownEmitterOptions

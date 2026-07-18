@@ -550,7 +550,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
   }
 
-  protected async canSkipInstallAsync(
+  protected override async canSkipInstallAsync(
     lastModifiedDate: Date,
     subspace: Subspace,
     variant: string | undefined
@@ -887,7 +887,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
    * Used when invoking the NPM tool.  Appends the common configuration options
    * to the command-line.
    */
-  protected pushConfigurationArgs(args: string[], options: IInstallManagerOptions, subspace: Subspace): void {
+  protected override pushConfigurationArgs(
+    args: string[],
+    options: IInstallManagerOptions,
+    subspace: Subspace
+  ): void {
     super.pushConfigurationArgs(args, options, subspace);
 
     // Add workspace-specific args

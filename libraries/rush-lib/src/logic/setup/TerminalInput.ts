@@ -35,7 +35,7 @@ class YesNoKeyboardLoop extends KeyboardLoop {
     this.options = options;
   }
 
-  protected onStart(): void {
+  protected override onStart(): void {
     this.stderr.write(Colorize.green('==>') + ' ');
     this.stderr.write(Colorize.bold(this.options.message));
     let optionSuffix: string = '';
@@ -53,7 +53,7 @@ class YesNoKeyboardLoop extends KeyboardLoop {
     this.stderr.write(' ' + Colorize.bold(optionSuffix) + ' ');
   }
 
-  protected onKeypress(character: string, key: readline.Key): void {
+  protected override onKeypress(character: string, key: readline.Key): void {
     if (this.result !== undefined) {
       return;
     }
@@ -102,7 +102,7 @@ class PasswordKeyboardLoop extends KeyboardLoop {
     return this.stderr.columns ? this.stderr.columns : 80;
   }
 
-  protected onStart(): void {
+  protected override onStart(): void {
     this.result = '';
 
     readline.cursorTo(this.stderr, 0);
@@ -118,7 +118,7 @@ class PasswordKeyboardLoop extends KeyboardLoop {
     this._startX = AnsiEscape.removeCodes(line).length % this._getLineWrapWidth();
   }
 
-  protected onKeypress(character: string, key: readline.Key): void {
+  protected override onKeypress(character: string, key: readline.Key): void {
     switch (key.name) {
       case 'enter':
       case 'return':

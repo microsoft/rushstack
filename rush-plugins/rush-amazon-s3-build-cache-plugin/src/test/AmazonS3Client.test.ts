@@ -49,7 +49,7 @@ class MockedDate extends Date {
     super(2020, 3, 18, 12, 32, 42, 493);
   }
 
-  public toISOString(): string {
+  public override toISOString(): string {
     return '2020-04-18T12:32:42.493Z';
   }
 }
