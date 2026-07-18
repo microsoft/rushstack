@@ -9,6 +9,7 @@ import * as fsx from 'fs-extra';
 
 import { Text, type NewlineKind, Encoding } from './Text';
 import { PosixModeBits } from './PosixModeBits';
+import { Async } from './Async';
 
 /**
  * An alias for the Node.js `fs.Stats` object.
@@ -378,6 +379,20 @@ const DELETE_FILE_DEFAULT_OPTIONS: Partial<IFileSystemDeleteFileOptions> = {
 };
 
 /**
+ * Default options for fs.rm / fsPromises.rm calls in this file.
+ *
+ * @remarks
+ * The retry settings mitigate transient EPERM/EBUSY/ENOTEMPTY errors on
+ * Windows (e.g. AV scanners holding a lock right after a delete).
+ */
+const FS_RM_DEFAULT_OPTIONS: Partial<fs.RmOptions> = {
+  recursive: true,
+  force: true,
+  maxRetries: 3,
+  retryDelay: 100
+};
+
+/**
  * The FileSystem API provides a complete set of recommended operations for interacting with the file system.
  *
  * @remarks
@@ -729,7 +744,7 @@ export class FileSystem {
    */
   public static deleteFolder(folderPath: string): void {
     FileSystem._wrapException(() => {
-      fs.rmSync(folderPath, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+      fs.rmSync(folderPath, FS_RM_DEFAULT_OPTIONS);
     });
   }
 
@@ -738,7 +753,7 @@ export class FileSystem {
    */
   public static async deleteFolderAsync(folderPath: string): Promise<void> {
     await FileSystem._wrapExceptionAsync(() => {
-      return fsPromises.rm(folderPath, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+      return fsPromises.rm(folderPath, FS_RM_DEFAULT_OPTIONS);
     });
   }
 
@@ -752,20 +767,19 @@ export class FileSystem {
    */
   public static ensureEmptyFolder(folderPath: string): void {
     FileSystem._wrapException(() => {
-      let items: string[];
+      let items: FolderItem[];
       try {
-        items = fsx.readdirSync(folderPath);
-      } catch {
+        items = this.readFolderItems(folderPath);
+      } catch (error) {
+        if (!FileSystem.isNotExistError(error as Error)) {
+          throw error;
+        }
         fsx.ensureDirSync(folderPath);
         return;
       }
       for (const item of items) {
-        fs.rmSync(nodeJsPath.join(folderPath, item), {
-          recursive: true,
-          force: true,
-          maxRetries: 3,
-          retryDelay: 100
-        });
+        const itemPath: string = nodeJsPath.join(item.parentPath, item.name);
+        fs.rmSync(itemPath, FS_RM_DEFAULT_OPTIONS);
       }
     });
   }
@@ -775,22 +789,23 @@ export class FileSystem {
    */
   public static async ensureEmptyFolderAsync(folderPath: string): Promise<void> {
     await FileSystem._wrapExceptionAsync(async () => {
-      let items: string[];
+      let items: FolderItem[];
       try {
-        items = await fsx.readdir(folderPath);
-      } catch {
+        items = await this.readFolderItemsAsync(folderPath);
+      } catch (error) {
+        if (!FileSystem.isNotExistError(error as Error)) {
+          throw error;
+        }
         await fsx.ensureDir(folderPath);
         return;
       }
-      await Promise.all(
-        items.map((item) =>
-          fsPromises.rm(nodeJsPath.join(folderPath, item), {
-            recursive: true,
-            force: true,
-            maxRetries: 3,
-            retryDelay: 100
-          })
-        )
+      await Async.forEachAsync(
+        items,
+        (item) => {
+          const itemPath: string = nodeJsPath.join(item.parentPath, item.name);
+          return fsPromises.rm(itemPath, FS_RM_DEFAULT_OPTIONS);
+        },
+        { concurrency: 10 }
       );
     });
   }
