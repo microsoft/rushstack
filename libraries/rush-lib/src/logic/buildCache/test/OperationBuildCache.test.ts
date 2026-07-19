@@ -8,8 +8,9 @@ import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfigurati
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import type { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider';
+import type { TarExecutable } from '../../../utilities/TarExecutable';
 
-import { OperationBuildCache } from '../OperationBuildCache';
+import { OperationBuildCache, _setTarUtilityPromiseForTesting } from '../OperationBuildCache';
 
 interface ITestOptions {
   enabled: boolean;
@@ -90,7 +91,7 @@ describe(OperationBuildCache.name, () => {
     });
 
     afterEach(() => {
-      Reflect.set(OperationBuildCache, '_tarUtilityPromise', undefined);
+      _setTarUtilityPromiseForTesting(undefined);
       jest.restoreAllMocks();
     });
 
@@ -144,7 +145,7 @@ describe(OperationBuildCache.name, () => {
       const deleteFileAsyncSpy: jest.SpyInstance = jest
         .spyOn(FileSystem, 'deleteFileAsync')
         .mockResolvedValue();
-      Reflect.set(OperationBuildCache, '_tarUtilityPromise', Promise.resolve({ tryUntarAsync }));
+      _setTarUtilityPromiseForTesting(Promise.resolve({ tryUntarAsync } as unknown as TarExecutable));
 
       const result: boolean = await subject.tryRestoreFromCacheAsync(terminal);
 

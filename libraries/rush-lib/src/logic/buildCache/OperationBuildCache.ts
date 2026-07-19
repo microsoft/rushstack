@@ -116,6 +116,16 @@ function _getCacheId(options: IProjectBuildCacheOptions): string | undefined {
 }
 
 /**
+ * Overrides the cached `TarExecutable` promise. Exposed for unit testing only.
+ * @internal
+ */
+export function _setTarUtilityPromiseForTesting(
+  promise: Promise<TarExecutable | undefined> | undefined
+): void {
+  _tarUtilityPromise = promise;
+}
+
+/**
  * @internal
  */
 export class OperationBuildCache {
