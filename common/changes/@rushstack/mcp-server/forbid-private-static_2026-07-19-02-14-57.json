@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/mcp-server"
+    }
+  ],
+  "packageName": "@rushstack/mcp-server",
+  "email": "iclanton@users.noreply.github.com"
+}
