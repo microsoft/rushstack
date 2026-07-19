@@ -21,9 +21,9 @@ interface IRushPluginsConfigurationJson {
   plugins: IRushPluginConfiguration[];
 }
 
-export class RushPluginsConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
+export class RushPluginsConfiguration {
   private _jsonFilename: string;
 
   public readonly configuration: Readonly<IRushPluginsConfigurationJson>;
@@ -35,7 +35,7 @@ export class RushPluginsConfiguration {
     };
 
     if (FileSystem.exists(this._jsonFilename)) {
-      this.configuration = JsonFile.loadAndValidate(this._jsonFilename, RushPluginsConfiguration._jsonSchema);
+      this.configuration = JsonFile.loadAndValidate(this._jsonFilename, _jsonSchema);
     }
   }
 }

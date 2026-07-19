@@ -110,11 +110,7 @@ export class StandardScriptUpdater {
     await Async.forEachAsync(
       getScripts(rushConfiguration),
       async (script: IScriptSpecifier) => {
-        const changed: boolean = await StandardScriptUpdater._updateScriptOrThrowAsync(
-          script,
-          rushConfiguration,
-          false
-        );
+        const changed: boolean = await _updateScriptOrThrowAsync(script, rushConfiguration, false);
         anyChanges ||= changed;
       },
       { concurrency: 10 }
@@ -136,85 +132,78 @@ export class StandardScriptUpdater {
     await Async.forEachAsync(
       getScripts(rushConfiguration),
       async (script: IScriptSpecifier) => {
-        await StandardScriptUpdater._updateScriptOrThrowAsync(script, rushConfiguration, true);
+        await _updateScriptOrThrowAsync(script, rushConfiguration, true);
       },
       { concurrency: 10 }
     );
   }
+}
 
-  /**
-   * Compares a single script in the common/script folder to see if it needs to be updated.
-   * If throwInsteadOfCopy=false, then an outdated or missing script will be recopied;
-   * otherwise, an exception is thrown.
-   */
-  private static async _updateScriptOrThrowAsync(
-    script: IScriptSpecifier,
-    rushConfiguration: RushConfiguration,
-    throwInsteadOfCopy: boolean
-  ): Promise<boolean> {
-    const targetFilePath: string = `${rushConfiguration.commonScriptsFolder}/${script.scriptName}`;
+/**
+ * Compares a single script in the common/script folder to see if it needs to be updated.
+ * If throwInsteadOfCopy=false, then an outdated or missing script will be recopied;
+ * otherwise, an exception is thrown.
+ */
+async function _updateScriptOrThrowAsync(
+  script: IScriptSpecifier,
+  rushConfiguration: RushConfiguration,
+  throwInsteadOfCopy: boolean
+): Promise<boolean> {
+  const targetFilePath: string = `${rushConfiguration.commonScriptsFolder}/${script.scriptName}`;
 
-    // Are the files the same?
-    let filesAreSame: boolean = false;
+  // Are the files the same?
+  let filesAreSame: boolean = false;
 
-    let targetContent: string | undefined;
-    try {
-      targetContent = await FileSystem.readFileAsync(targetFilePath);
-    } catch (e) {
-      if (!FileSystem.isNotExistError(e)) {
-        throw e;
-      }
+  let targetContent: string | undefined;
+  try {
+    targetContent = await FileSystem.readFileAsync(targetFilePath);
+  } catch (e) {
+    if (!FileSystem.isNotExistError(e)) {
+      throw e;
     }
-    const targetNormalized: string | undefined = targetContent
-      ? StandardScriptUpdater._normalize(targetContent)
-      : undefined;
+  }
+  const targetNormalized: string | undefined = targetContent ? _normalize(targetContent) : undefined;
 
-    let sourceNormalized: string;
-    if (targetNormalized) {
-      sourceNormalized = await StandardScriptUpdater._getExpectedFileDataAsync(script);
-      if (sourceNormalized === targetNormalized) {
-        filesAreSame = true;
-      }
+  let sourceNormalized: string;
+  if (targetNormalized) {
+    sourceNormalized = await _getExpectedFileDataAsync(script);
+    if (sourceNormalized === targetNormalized) {
+      filesAreSame = true;
     }
-
-    if (!filesAreSame) {
-      if (throwInsteadOfCopy) {
-        throw new Error(
-          'The standard files in the "common/scripts" folders need to be updated' +
-            ' for this Rush version.  Please run "rush update" and commit the changes.'
-        );
-      } else {
-        // eslint-disable-next-line no-console
-        console.log(`Script is out of date; updating "${targetFilePath}"`);
-        sourceNormalized ||= await StandardScriptUpdater._getExpectedFileDataAsync(script);
-        await FileSystem.writeFileAsync(targetFilePath, sourceNormalized);
-      }
-    }
-
-    return !filesAreSame;
   }
 
-  private static _normalize(content: string): string {
-    // Ignore newline differences from .gitattributes
-    return (
-      content
-        .split('\n')
-        // Ignore trailing whitespace
-        .map((x) => x.trimRight())
-        .join('\n')
-    );
+  if (!filesAreSame) {
+    if (throwInsteadOfCopy) {
+      throw new Error(
+        'The standard files in the "common/scripts" folders need to be updated' +
+          ' for this Rush version.  Please run "rush update" and commit the changes.'
+      );
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(`Script is out of date; updating "${targetFilePath}"`);
+      sourceNormalized ||= await _getExpectedFileDataAsync(script);
+      await FileSystem.writeFileAsync(targetFilePath, sourceNormalized);
+    }
   }
 
-  private static async _getExpectedFileDataAsync({
-    scriptName,
-    headerLines
-  }: IScriptSpecifier): Promise<string> {
-    const sourceFilePath: string = `${scriptsFolderPath}/${scriptName}`;
-    let sourceContent: string = await FileSystem.readFileAsync(sourceFilePath);
-    sourceContent = [...HEADER_LINES_PREFIX, ...headerLines, ...HEADER_LINES_SUFFIX, sourceContent].join(
-      '\n'
-    );
-    const sourceNormalized: string = StandardScriptUpdater._normalize(sourceContent);
-    return sourceNormalized;
-  }
+  return !filesAreSame;
+}
+
+function _normalize(content: string): string {
+  // Ignore newline differences from .gitattributes
+  return (
+    content
+      .split('\n')
+      // Ignore trailing whitespace
+      .map((x) => x.trimRight())
+      .join('\n')
+  );
+}
+
+async function _getExpectedFileDataAsync({ scriptName, headerLines }: IScriptSpecifier): Promise<string> {
+  const sourceFilePath: string = `${scriptsFolderPath}/${scriptName}`;
+  let sourceContent: string = await FileSystem.readFileAsync(sourceFilePath);
+  sourceContent = [...HEADER_LINES_PREFIX, ...headerLines, ...HEADER_LINES_SUFFIX, sourceContent].join('\n');
+  const sourceNormalized: string = _normalize(sourceContent);
+  return sourceNormalized;
 }

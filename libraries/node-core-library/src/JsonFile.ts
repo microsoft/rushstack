@@ -215,7 +215,7 @@ export class JsonFile {
   public static load(jsonFilename: string, options?: IJsonFileParseOptions): JsonObject {
     try {
       const contents: string = FileSystem.readFile(jsonFilename);
-      const parseOptions: jju.ParseOptions = JsonFile._buildJjuParseOptions(options);
+      const parseOptions: jju.ParseOptions = _buildJjuParseOptions(options);
       return jju.parse(contents, parseOptions);
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
@@ -236,7 +236,7 @@ export class JsonFile {
   public static async loadAsync(jsonFilename: string, options?: IJsonFileParseOptions): Promise<JsonObject> {
     try {
       const contents: string = await FileSystem.readFileAsync(jsonFilename);
-      const parseOptions: jju.ParseOptions = JsonFile._buildJjuParseOptions(options);
+      const parseOptions: jju.ParseOptions = _buildJjuParseOptions(options);
       return jju.parse(contents, parseOptions);
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
@@ -255,7 +255,7 @@ export class JsonFile {
    * Parses a JSON file's contents.
    */
   public static parseString(jsonContents: string, options?: IJsonFileParseOptions): JsonObject {
-    const parseOptions: jju.ParseOptions = JsonFile._buildJjuParseOptions(options);
+    const parseOptions: jju.ParseOptions = _buildJjuParseOptions(options);
     return jju.parse(jsonContents, parseOptions);
   }
 
@@ -374,13 +374,13 @@ export class JsonFile {
       });
 
       if (options.headerComment !== undefined) {
-        stringified = JsonFile._formatJsonHeaderComment(options.headerComment) + stringified;
+        stringified = _formatJsonHeaderComment(options.headerComment) + stringified;
       }
     } else {
       stringified = JSON.stringify(newJsonObject, undefined, 2);
 
       if (options.headerComment !== undefined) {
-        stringified = JsonFile._formatJsonHeaderComment(options.headerComment) + stringified;
+        stringified = _formatJsonHeaderComment(options.headerComment) + stringified;
       }
     }
 
@@ -511,97 +511,97 @@ export class JsonFile {
    * are any undefined members.
    */
   public static validateNoUndefinedMembers(jsonObject: JsonObject): void {
-    return JsonFile._validateNoUndefinedMembers(jsonObject, []);
+    return _validateNoUndefinedMembers(jsonObject, []);
   }
+}
 
-  // Private implementation of validateNoUndefinedMembers()
-  private static _validateNoUndefinedMembers(jsonObject: JsonObject, keyPath: string[]): void {
-    if (!jsonObject) {
-      return;
-    }
-    if (typeof jsonObject === 'object') {
-      for (const key of Object.keys(jsonObject)) {
-        keyPath.push(key);
+// Private implementation of validateNoUndefinedMembers()
+function _validateNoUndefinedMembers(jsonObject: JsonObject, keyPath: string[]): void {
+  if (!jsonObject) {
+    return;
+  }
+  if (typeof jsonObject === 'object') {
+    for (const key of Object.keys(jsonObject)) {
+      keyPath.push(key);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const value: any = jsonObject[key];
-        if (value === undefined) {
-          const fullPath: string = JsonFile._formatKeyPath(keyPath);
-          throw new Error(`The value for ${fullPath} is "undefined" and cannot be serialized as JSON`);
-        }
-
-        JsonFile._validateNoUndefinedMembers(value, keyPath);
-        keyPath.pop();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const value: any = jsonObject[key];
+      if (value === undefined) {
+        const fullPath: string = _formatKeyPath(keyPath);
+        throw new Error(`The value for ${fullPath} is "undefined" and cannot be serialized as JSON`);
       }
+
+      _validateNoUndefinedMembers(value, keyPath);
+      keyPath.pop();
     }
   }
+}
 
-  // Given this input:    ['items', '4', 'syntax', 'parameters', 'string "with" symbols", 'type']
-  // Return this string:  items[4].syntax.parameters["string \"with\" symbols"].type
-  private static _formatKeyPath(keyPath: string[]): string {
-    let result: string = '';
+// Given this input:    ['items', '4', 'syntax', 'parameters', 'string "with" symbols", 'type']
+// Return this string:  items[4].syntax.parameters["string \"with\" symbols"].type
+function _formatKeyPath(keyPath: string[]): string {
+  let result: string = '';
 
-    for (const key of keyPath) {
-      if (/^[0-9]+$/.test(key)) {
-        // It's an integer, so display like this:  parent[123]
-        result += `[${key}]`;
-      } else if (/^[a-z_][a-z_0-9]*$/i.test(key)) {
-        // It's an alphanumeric identifier, so display like this:  parent.name
-        if (result) {
-          result += '.';
-        }
-        result += `${key}`;
-      } else {
-        // It's a freeform string, so display like this:  parent["A path: \"C:\\file\""]
-
-        // Convert this:     A path: "C:\file"
-        // To this:          A path: \"C:\\file\"
-        const escapedKey: string = key
-          .replace(/[\\]/g, '\\\\') // escape backslashes
-          .replace(/["]/g, '\\'); // escape quotes
-        result += `["${escapedKey}"]`;
+  for (const key of keyPath) {
+    if (/^[0-9]+$/.test(key)) {
+      // It's an integer, so display like this:  parent[123]
+      result += `[${key}]`;
+    } else if (/^[a-z_][a-z_0-9]*$/i.test(key)) {
+      // It's an alphanumeric identifier, so display like this:  parent.name
+      if (result) {
+        result += '.';
       }
+      result += `${key}`;
+    } else {
+      // It's a freeform string, so display like this:  parent["A path: \"C:\\file\""]
+
+      // Convert this:     A path: "C:\file"
+      // To this:          A path: \"C:\\file\"
+      const escapedKey: string = key
+        .replace(/[\\]/g, '\\\\') // escape backslashes
+        .replace(/["]/g, '\\'); // escape quotes
+      result += `["${escapedKey}"]`;
     }
-    return result;
+  }
+  return result;
+}
+
+function _formatJsonHeaderComment(headerComment: string): string {
+  if (headerComment === '') {
+    return '';
+  }
+  const lines: string[] = headerComment.split('\n');
+  const result: string[] = [];
+  for (const line of lines) {
+    if (!/^\s*$/.test(line) && !/^\s*\/\//.test(line)) {
+      throw new Error(
+        'The headerComment lines must be blank or start with the "//" prefix.\n' +
+          'Invalid line' +
+          JSON.stringify(line)
+      );
+    }
+    result.push(Text.replaceAll(line, '\r', ''));
+  }
+  return lines.join('\n') + '\n';
+}
+
+function _buildJjuParseOptions(options: IJsonFileParseOptions = {}): jju.ParseOptions {
+  const parseOptions: jju.ParseOptions = {
+    reserved_keys: 'replace'
+  };
+
+  switch (options.jsonSyntax) {
+    case JsonSyntax.Strict:
+      parseOptions.mode = 'json';
+      break;
+    case JsonSyntax.JsonWithComments:
+      parseOptions.mode = 'cjson';
+      break;
+    case JsonSyntax.Json5:
+    default:
+      parseOptions.mode = 'json5';
+      break;
   }
 
-  private static _formatJsonHeaderComment(headerComment: string): string {
-    if (headerComment === '') {
-      return '';
-    }
-    const lines: string[] = headerComment.split('\n');
-    const result: string[] = [];
-    for (const line of lines) {
-      if (!/^\s*$/.test(line) && !/^\s*\/\//.test(line)) {
-        throw new Error(
-          'The headerComment lines must be blank or start with the "//" prefix.\n' +
-            'Invalid line' +
-            JSON.stringify(line)
-        );
-      }
-      result.push(Text.replaceAll(line, '\r', ''));
-    }
-    return lines.join('\n') + '\n';
-  }
-
-  private static _buildJjuParseOptions(options: IJsonFileParseOptions = {}): jju.ParseOptions {
-    const parseOptions: jju.ParseOptions = {
-      reserved_keys: 'replace'
-    };
-
-    switch (options.jsonSyntax) {
-      case JsonSyntax.Strict:
-        parseOptions.mode = 'json';
-        break;
-      case JsonSyntax.JsonWithComments:
-        parseOptions.mode = 'cjson';
-        break;
-      case JsonSyntax.Json5:
-      default:
-        parseOptions.mode = 'json5';
-        break;
-    }
-
-    return parseOptions;
-  }
+  return parseOptions;
 }

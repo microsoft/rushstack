@@ -18,6 +18,8 @@ import { CoreConfigFiles } from '../utilities/CoreConfigFiles';
 const PLUGIN_NAME: 'node-service-plugin' = 'node-service-plugin';
 const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';
 
+const _isWindows: boolean = process.platform === 'win32';
+
 export interface INodeServicePluginCompleteConfiguration {
   commandName: string;
   ignoreMissingScript: boolean;
@@ -56,8 +58,6 @@ enum State {
 }
 
 export default class NodeServicePlugin implements IHeftTaskPlugin {
-  private static readonly _isWindows: boolean = process.platform === 'win32';
-
   private _activeChildProcess: child_process.ChildProcess | undefined;
   private _childProcessExitPromise: Promise<void> | undefined;
   private _childProcessExitPromiseResolveFn: (() => void) | undefined;
@@ -208,7 +208,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
       return;
     }
 
-    if (NodeServicePlugin._isWindows) {
+    if (_isWindows) {
       // On Windows, SIGTERM can kill Cmd.exe and leave its children running in the background
       this._transitionToKilling();
     } else {

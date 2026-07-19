@@ -175,22 +175,26 @@ export interface IRigConfig {
   tryResolveConfigFilePathAsync(configFileRelativePath: string): Promise<string | undefined>;
 }
 
+// For syntax details, see PackageNameParser from @rushstack/node-core-library
+const _packageNameRegExp: RegExp = /^(@[A-Za-z0-9\-_\.]+\/)?[A-Za-z0-9\-_\.]+$/;
+
+// Rig package names must have the "-rig" suffix.
+// Also silently accept "-rig-test" for our build test projects.
+const _rigNameRegExp: RegExp = /-rig(-test)?$/;
+
+// Profiles must be lowercase alphanumeric words separated by hyphens
+const _profileNameRegExp: RegExp = /^[a-z0-9_\.]+(\-[a-z0-9_\.]+)*$/;
+
+let _jsonSchemaObject: object | undefined = undefined;
+
+const _configCache: Map<string, RigConfig> = new Map();
+
 /**
  * {@inheritdoc IRigConfig}
  *
  * @public
  */
 export class RigConfig implements IRigConfig {
-  // For syntax details, see PackageNameParser from @rushstack/node-core-library
-  private static readonly _packageNameRegExp: RegExp = /^(@[A-Za-z0-9\-_\.]+\/)?[A-Za-z0-9\-_\.]+$/;
-
-  // Rig package names must have the "-rig" suffix.
-  // Also silently accept "-rig-test" for our build test projects.
-  private static readonly _rigNameRegExp: RegExp = /-rig(-test)?$/;
-
-  // Profiles must be lowercase alphanumeric words separated by hyphens
-  private static readonly _profileNameRegExp: RegExp = /^[a-z0-9_\.]+(\-[a-z0-9_\.]+)*$/;
-
   /**
    * Returns the absolute path of the `rig.schema.json` JSON schema file for `config/rig.json`,
    * which is bundled with this NPM package.
@@ -202,9 +206,6 @@ export class RigConfig implements IRigConfig {
    * @public
    */
   public static jsonSchemaPath: string = path.resolve(__dirname, './schemas/rig.schema.json');
-  private static _jsonSchemaObject: object | undefined = undefined;
-
-  private static readonly _configCache: Map<string, RigConfig> = new Map();
 
   /**
    * {@inheritdoc IRigConfig.projectFolderOriginalPath}
@@ -276,11 +277,11 @@ export class RigConfig implements IRigConfig {
    * Accessing this property may make a synchronous filesystem call.
    */
   public static get jsonSchemaObject(): object {
-    if (RigConfig._jsonSchemaObject === undefined) {
+    if (_jsonSchemaObject === undefined) {
       const jsonSchemaContent: string = fs.readFileSync(RigConfig.jsonSchemaPath).toString();
-      RigConfig._jsonSchemaObject = JSON.parse(jsonSchemaContent);
+      _jsonSchemaObject = JSON.parse(jsonSchemaContent);
     }
-    return RigConfig._jsonSchemaObject!;
+    return _jsonSchemaObject!;
   }
 
   /**
@@ -294,9 +295,7 @@ export class RigConfig implements IRigConfig {
     const { overrideRigJsonObject, projectFolderPath } = options;
 
     const fromCache: RigConfig | undefined =
-      !options.bypassCache && !overrideRigJsonObject
-        ? RigConfig._configCache.get(projectFolderPath)
-        : undefined;
+      !options.bypassCache && !overrideRigJsonObject ? _configCache.get(projectFolderPath) : undefined;
 
     if (fromCache) {
       return fromCache;
@@ -311,9 +310,9 @@ export class RigConfig implements IRigConfig {
         const rigConfigFileContent: string = fs.readFileSync(rigConfigFilePath).toString();
         json = jju.parse(rigConfigFileContent) as IRigConfigJson;
       }
-      RigConfig._validateSchema(json);
+      _validateSchema(json);
     } catch (error) {
-      config = RigConfig._handleConfigError(error as Error, projectFolderPath, rigConfigFilePath);
+      config = new RigConfig(_handleConfigError(error as Error, projectFolderPath, rigConfigFilePath));
     }
 
     if (!config) {
@@ -328,7 +327,7 @@ export class RigConfig implements IRigConfig {
     }
 
     if (!overrideRigJsonObject) {
-      RigConfig._configCache.set(projectFolderPath, config);
+      _configCache.set(projectFolderPath, config);
     }
     return config;
   }
@@ -340,7 +339,7 @@ export class RigConfig implements IRigConfig {
     const { overrideRigJsonObject, projectFolderPath } = options;
 
     const fromCache: RigConfig | false | undefined =
-      !options.bypassCache && !overrideRigJsonObject && RigConfig._configCache.get(projectFolderPath);
+      !options.bypassCache && !overrideRigJsonObject && _configCache.get(projectFolderPath);
 
     if (fromCache) {
       return fromCache;
@@ -356,9 +355,9 @@ export class RigConfig implements IRigConfig {
         json = jju.parse(rigConfigFileContent) as IRigConfigJson;
       }
 
-      RigConfig._validateSchema(json);
+      _validateSchema(json);
     } catch (error) {
-      config = RigConfig._handleConfigError(error as Error, projectFolderPath, rigConfigFilePath);
+      config = new RigConfig(_handleConfigError(error as Error, projectFolderPath, rigConfigFilePath));
     }
 
     if (!config) {
@@ -373,29 +372,9 @@ export class RigConfig implements IRigConfig {
     }
 
     if (!overrideRigJsonObject) {
-      RigConfig._configCache.set(projectFolderPath, config);
+      _configCache.set(projectFolderPath, config);
     }
     return config;
-  }
-
-  private static _handleConfigError(
-    error: NodeJS.ErrnoException,
-    projectFolderPath: string,
-    rigConfigFilePath: string
-  ): RigConfig {
-    if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') {
-      throw new Error(error.message + '\nError loading config file: ' + rigConfigFilePath);
-    }
-
-    // File not found, i.e. no rig config
-    return new RigConfig({
-      projectFolderPath,
-
-      rigFound: false,
-      filePath: '',
-      rigPackageName: '',
-      rigProfile: ''
-    });
   }
 
   /**
@@ -508,41 +487,61 @@ export class RigConfig implements IRigConfig {
     }
     return undefined;
   }
+}
 
-  private static _validateSchema(json: IRigConfigJson): void {
-    for (const key of Object.getOwnPropertyNames(json)) {
-      switch (key) {
-        case '$schema':
-        case 'rigPackageName':
-        case 'rigProfile':
-          break;
-        default:
-          throw new Error(`Unsupported field ${JSON.stringify(key)}`);
-      }
-    }
-    if (!json.rigPackageName) {
-      throw new Error('Missing required field "rigPackageName"');
-    }
+function _handleConfigError(
+  error: NodeJS.ErrnoException,
+  projectFolderPath: string,
+  rigConfigFilePath: string
+): IRigConfigOptions {
+  if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') {
+    throw new Error(error.message + '\nError loading config file: ' + rigConfigFilePath);
+  }
 
-    if (!RigConfig._packageNameRegExp.test(json.rigPackageName)) {
+  // File not found, i.e. no rig config
+  return {
+    projectFolderPath,
+
+    rigFound: false,
+    filePath: '',
+    rigPackageName: '',
+    rigProfile: ''
+  };
+}
+
+function _validateSchema(json: IRigConfigJson): void {
+  for (const key of Object.getOwnPropertyNames(json)) {
+    switch (key) {
+      case '$schema':
+      case 'rigPackageName':
+      case 'rigProfile':
+        break;
+      default:
+        throw new Error(`Unsupported field ${JSON.stringify(key)}`);
+    }
+  }
+  if (!json.rigPackageName) {
+    throw new Error('Missing required field "rigPackageName"');
+  }
+
+  if (!_packageNameRegExp.test(json.rigPackageName)) {
+    throw new Error(
+      `The "rigPackageName" value is not a valid NPM package name: ${JSON.stringify(json.rigPackageName)}`
+    );
+  }
+
+  if (!_rigNameRegExp.test(json.rigPackageName)) {
+    throw new Error(
+      `The "rigPackageName" value is missing the "-rig" suffix: ` + JSON.stringify(json.rigProfile)
+    );
+  }
+
+  if (json.rigProfile !== undefined) {
+    if (!_profileNameRegExp.test(json.rigProfile)) {
       throw new Error(
-        `The "rigPackageName" value is not a valid NPM package name: ${JSON.stringify(json.rigPackageName)}`
+        `The profile name must consist of lowercase alphanumeric words separated by hyphens: ` +
+          JSON.stringify(json.rigProfile)
       );
-    }
-
-    if (!RigConfig._rigNameRegExp.test(json.rigPackageName)) {
-      throw new Error(
-        `The "rigPackageName" value is missing the "-rig" suffix: ` + JSON.stringify(json.rigProfile)
-      );
-    }
-
-    if (json.rigProfile !== undefined) {
-      if (!RigConfig._profileNameRegExp.test(json.rigProfile)) {
-        throw new Error(
-          `The profile name must consist of lowercase alphanumeric words separated by hyphens: ` +
-            JSON.stringify(json.rigProfile)
-        );
-      }
     }
   }
 }

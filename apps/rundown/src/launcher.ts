@@ -31,13 +31,6 @@ class Launcher {
     return [nodeArg, this.targetScriptPathArg, ...remainderArgs];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private static _copyProperties(dst: any, src: any): void {
-    for (const prop of Object.keys(src)) {
-      dst[prop] = src[prop];
-    }
-  }
-
   private _sendIpcTraceBatch(): void {
     if (this._ipcTraceRecordsBatch.length > 0) {
       const batch: IIpcTraceRecord[] = [...this._ipcTraceRecordsBatch];
@@ -104,7 +97,7 @@ class Launcher {
     }
 
     moduleApi.Module.prototype.require = hookedRequire as NodeJS.Require;
-    Launcher._copyProperties(hookedRequire, realRequire);
+    _copyProperties(hookedRequire, realRequire);
 
     process.on('exit', () => {
       this._sendIpcTraceBatch();
@@ -112,6 +105,13 @@ class Launcher {
         id: 'done'
       } as IIpcDone);
     });
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function _copyProperties(dst: any, src: any): void {
+  for (const prop of Object.keys(src)) {
+    dst[prop] = src[prop];
   }
 }
 

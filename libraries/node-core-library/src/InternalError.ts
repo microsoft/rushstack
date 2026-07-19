@@ -34,7 +34,7 @@ export class InternalError extends Error {
    * explaining that the user has encountered a software defect.
    */
   public constructor(message: string) {
-    super(InternalError._formatMessage(message));
+    super(_formatMessage(message));
 
     // Manually set the prototype, as we can no longer extend built-in classes like Error, Array, Map, etc.
     // https://github.com/microsoft/TypeScript-wiki/blob/main/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
@@ -50,14 +50,14 @@ export class InternalError extends Error {
     }
   }
 
-  private static _formatMessage(unformattedMessage: string): string {
-    return (
-      `Internal Error: ${unformattedMessage}\n\nYou have encountered a software defect. Please consider` +
-      ` reporting the issue to the maintainers of this application.`
-    );
-  }
-
   public override toString(): string {
     return this.message; // Avoid adding the "Error:" prefix
   }
+}
+
+function _formatMessage(unformattedMessage: string): string {
+  return (
+    `Internal Error: ${unformattedMessage}\n\nYou have encountered a software defect. Please consider` +
+    ` reporting the issue to the maintainers of this application.`
+  );
 }

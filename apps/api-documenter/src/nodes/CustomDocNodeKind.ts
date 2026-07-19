@@ -22,11 +22,11 @@ export enum CustomDocNodeKind {
   TableRow = 'TableRow'
 }
 
-export class CustomDocNodes {
-  private static _configuration: TSDocConfiguration | undefined;
+let _configuration: TSDocConfiguration | undefined;
 
+export class CustomDocNodes {
   public static get configuration(): TSDocConfiguration {
-    if (CustomDocNodes._configuration === undefined) {
+    if (_configuration === undefined) {
       const configuration: TSDocConfiguration = new TSDocConfiguration();
 
       configuration.docNodeManager.registerDocNodes('@micrososft/api-documenter', [
@@ -53,8 +53,8 @@ export class CustomDocNodes {
         CustomDocNodeKind.EmphasisSpan
       ]);
 
-      CustomDocNodes._configuration = configuration;
+      _configuration = configuration;
     }
-    return CustomDocNodes._configuration;
+    return _configuration;
   }
 }

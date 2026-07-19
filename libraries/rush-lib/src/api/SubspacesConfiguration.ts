@@ -27,14 +27,14 @@ export interface ISubspacesConfigurationJson {
   subspaceNames: string[];
 }
 
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 /**
  * This represents the subspace configurations for a repository, based on the "subspaces.json"
  * configuration file.
  * @beta
  */
 export class SubspacesConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   /**
    * The absolute path to the "subspaces.json" configuration file that was loaded to construct this object.
    */
@@ -135,7 +135,7 @@ export class SubspacesConfiguration {
   ): SubspacesConfiguration | undefined {
     let configuration: Readonly<ISubspacesConfigurationJson> | undefined;
     try {
-      configuration = JsonFile.loadAndValidate(subspaceJsonFilePath, SubspacesConfiguration._jsonSchema);
+      configuration = JsonFile.loadAndValidate(subspaceJsonFilePath, _jsonSchema);
     } catch (e) {
       if (!FileSystem.isNotExistError(e)) {
         throw e;

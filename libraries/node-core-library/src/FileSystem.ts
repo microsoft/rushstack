@@ -410,7 +410,7 @@ export class FileSystem {
    * @param path - The absolute or relative path to the filesystem object.
    */
   public static exists(path: string): boolean {
-    return FileSystem._wrapException(() => {
+    return _wrapException(() => {
       return fsx.existsSync(path);
     });
   }
@@ -419,7 +419,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.exists}.
    */
   public static async existsAsync(path: string): Promise<boolean> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    return await _wrapExceptionAsync(() => {
       return new Promise<boolean>((resolve: (result: boolean) => void) => {
         fsx.exists(path, resolve);
       });
@@ -433,7 +433,7 @@ export class FileSystem {
    * @param path - The absolute or relative path to the filesystem object.
    */
   public static getStatistics(path: string): FileSystemStats {
-    return FileSystem._wrapException(() => {
+    return _wrapException(() => {
       return fsx.statSync(path);
     });
   }
@@ -442,7 +442,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.getStatistics}.
    */
   public static async getStatisticsAsync(path: string): Promise<FileSystemStats> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    return await _wrapExceptionAsync(() => {
       return fsx.stat(path);
     });
   }
@@ -455,7 +455,7 @@ export class FileSystem {
    * @param times - The times that the object should be updated to reflect.
    */
   public static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void {
-    return FileSystem._wrapException(() => {
+    return _wrapException(() => {
       fsx.utimesSync(path, times.accessedTime, times.modifiedTime);
     });
   }
@@ -464,7 +464,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.updateTimes}.
    */
   public static async updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void> {
-    await FileSystem._wrapExceptionAsync(() => {
+    await _wrapExceptionAsync(() => {
       // This cast is needed because the fs-extra typings require both parameters
       // to have the same type (number or Date), whereas Node.js does not require that.
       return fsx.utimes(path, times.accessedTime as number, times.modifiedTime as number);
@@ -478,7 +478,7 @@ export class FileSystem {
    * @param modeBits - POSIX-style file mode bits specified using the {@link PosixModeBits} enum
    */
   public static changePosixModeBits(path: string, modeBits: PosixModeBits): void {
-    FileSystem._wrapException(() => {
+    _wrapException(() => {
       fs.chmodSync(path, modeBits);
     });
   }
@@ -487,7 +487,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.changePosixModeBits}.
    */
   public static async changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void> {
-    await FileSystem._wrapExceptionAsync(() => {
+    await _wrapExceptionAsync(() => {
       return fsx.chmod(path, mode);
     });
   }
@@ -503,7 +503,7 @@ export class FileSystem {
    * to call {@link FileSystem.getStatistics} directly instead.
    */
   public static getPosixModeBits(path: string): PosixModeBits {
-    return FileSystem._wrapException(() => {
+    return _wrapException(() => {
       return FileSystem.getStatistics(path).mode;
     });
   }
@@ -512,7 +512,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.getPosixModeBits}.
    */
   public static async getPosixModeBitsAsync(path: string): Promise<PosixModeBits> {
-    return await FileSystem._wrapExceptionAsync(async () => {
+    return await _wrapExceptionAsync(async () => {
       return (await FileSystem.getStatisticsAsync(path)).mode;
     });
   }
@@ -547,7 +547,7 @@ export class FileSystem {
    * Behind the scenes it uses `fs-extra.moveSync()`
    */
   public static move(options: IFileSystemMoveOptions): void {
-    FileSystem._wrapException(() => {
+    _wrapException(() => {
       options = {
         ...MOVE_DEFAULT_OPTIONS,
         ...options
@@ -575,7 +575,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.move}.
    */
   public static async moveAsync(options: IFileSystemMoveOptions): Promise<void> {
-    await FileSystem._wrapExceptionAsync(async () => {
+    await _wrapExceptionAsync(async () => {
       options = {
         ...MOVE_DEFAULT_OPTIONS,
         ...options
@@ -611,7 +611,7 @@ export class FileSystem {
    * @param folderPath - The absolute or relative path of the folder which should be created.
    */
   public static ensureFolder(folderPath: string): void {
-    FileSystem._wrapException(() => {
+    _wrapException(() => {
       fsx.ensureDirSync(folderPath);
     });
   }
@@ -620,7 +620,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.ensureFolder}.
    */
   public static async ensureFolderAsync(folderPath: string): Promise<void> {
-    await FileSystem._wrapExceptionAsync(() => {
+    await _wrapExceptionAsync(() => {
       return fsx.ensureDir(folderPath);
     });
   }
@@ -632,7 +632,7 @@ export class FileSystem {
    * @param options - Optional settings that can change the behavior. Type: `IReadFolderOptions`
    */
   public static readFolderItemNames(folderPath: string, options?: IFileSystemReadFolderOptions): string[] {
-    return FileSystem._wrapException(() => {
+    return _wrapException(() => {
       options = {
         ...READ_FOLDER_DEFAULT_OPTIONS,
         ...options
@@ -654,7 +654,7 @@ export class FileSystem {
     folderPath: string,
     options?: IFileSystemReadFolderOptions
   ): Promise<string[]> {
-    return await FileSystem._wrapExceptionAsync(async () => {
+    return await _wrapExceptionAsync(async () => {
       options = {
         ...READ_FOLDER_DEFAULT_OPTIONS,
         ...options
@@ -677,7 +677,7 @@ export class FileSystem {
    * @param options - Optional settings that can change the behavior. Type: `IReadFolderOptions`
    */
   public static readFolderItems(folderPath: string, options?: IFileSystemReadFolderOptions): FolderItem[] {
-    return FileSystem._wrapException(() => {
+    return _wrapException(() => {
       options = {
         ...READ_FOLDER_DEFAULT_OPTIONS,
         ...options
@@ -702,7 +702,7 @@ export class FileSystem {
     folderPath: string,
     options?: IFileSystemReadFolderOptions
   ): Promise<FolderItem[]> {
-    return await FileSystem._wrapExceptionAsync(async () => {
+    return await _wrapExceptionAsync(async () => {
       options = {
         ...READ_FOLDER_DEFAULT_OPTIONS,
         ...options
@@ -728,7 +728,7 @@ export class FileSystem {
    * @param folderPath - The absolute or relative path to the folder which should be deleted.
    */
   public static deleteFolder(folderPath: string): void {
-    FileSystem._wrapException(() => {
+    _wrapException(() => {
       fsx.removeSync(folderPath);
     });
   }
@@ -737,7 +737,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.deleteFolder}.
    */
   public static async deleteFolderAsync(folderPath: string): Promise<void> {
-    await FileSystem._wrapExceptionAsync(() => {
+    await _wrapExceptionAsync(() => {
       return fsx.remove(folderPath);
     });
   }
@@ -751,7 +751,7 @@ export class FileSystem {
    * @param folderPath - The absolute or relative path to the folder which should have its contents deleted.
    */
   public static ensureEmptyFolder(folderPath: string): void {
-    FileSystem._wrapException(() => {
+    _wrapException(() => {
       fsx.emptyDirSync(folderPath);
     });
   }
@@ -760,7 +760,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.ensureEmptyFolder}.
    */
   public static async ensureEmptyFolderAsync(folderPath: string): Promise<void> {
-    await FileSystem._wrapExceptionAsync(() => {
+    await _wrapExceptionAsync(() => {
       return fsx.emptyDir(folderPath);
     });
   }
@@ -784,7 +784,7 @@ export class FileSystem {
     contents: string | Buffer,
     options?: IFileSystemWriteFileOptions
   ): void {
-    FileSystem._wrapException(() => {
+    _wrapException(() => {
       options = {
         ...WRITE_FILE_DEFAULT_OPTIONS,
         ...options
@@ -831,7 +831,7 @@ export class FileSystem {
     contents: ReadonlyArray<NodeJS.ArrayBufferView>,
     options?: IFileSystemWriteBinaryFileOptions
   ): void {
-    FileSystem._wrapException(() => {
+    _wrapException(() => {
       // Need a mutable copy of the iterable to handle incomplete writes,
       // since writev() doesn't take an argument for where to start writing.
       const toCopy: NodeJS.ArrayBufferView[] = [...contents];
@@ -890,7 +890,7 @@ export class FileSystem {
     contents: string | Buffer,
     options?: IFileSystemWriteFileOptions
   ): Promise<void> {
-    await FileSystem._wrapExceptionAsync(async () => {
+    await _wrapExceptionAsync(async () => {
       options = {
         ...WRITE_FILE_DEFAULT_OPTIONS,
         ...options
@@ -926,7 +926,7 @@ export class FileSystem {
     contents: ReadonlyArray<NodeJS.ArrayBufferView>,
     options?: IFileSystemWriteBinaryFileOptions
   ): Promise<void> {
-    await FileSystem._wrapExceptionAsync(async () => {
+    await _wrapExceptionAsync(async () => {
       // Need a mutable copy of the iterable to handle incomplete writes,
       // since writev() doesn't take an argument for where to start writing.
       const toCopy: NodeJS.ArrayBufferView[] = [...contents];
@@ -992,7 +992,7 @@ export class FileSystem {
     contents: string | Buffer,
     options?: IFileSystemWriteFileOptions
   ): void {
-    FileSystem._wrapException(() => {
+    _wrapException(() => {
       options = {
         ...APPEND_TO_FILE_DEFAULT_OPTIONS,
         ...options
@@ -1028,7 +1028,7 @@ export class FileSystem {
     contents: string | Buffer,
     options?: IFileSystemWriteFileOptions
   ): Promise<void> {
-    await FileSystem._wrapExceptionAsync(async () => {
+    await _wrapExceptionAsync(async () => {
       options = {
         ...APPEND_TO_FILE_DEFAULT_OPTIONS,
         ...options
@@ -1063,7 +1063,7 @@ export class FileSystem {
    * @param options - Optional settings that can change the behavior. Type: `IReadFileOptions`
    */
   public static readFile(filePath: string, options?: IFileSystemReadFileOptions): string {
-    return FileSystem._wrapException(() => {
+    return _wrapException(() => {
       options = {
         ...READ_FILE_DEFAULT_OPTIONS,
         ...options
@@ -1082,7 +1082,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.readFile}.
    */
   public static async readFileAsync(filePath: string, options?: IFileSystemReadFileOptions): Promise<string> {
-    return await FileSystem._wrapExceptionAsync(async () => {
+    return await _wrapExceptionAsync(async () => {
       options = {
         ...READ_FILE_DEFAULT_OPTIONS,
         ...options
@@ -1103,7 +1103,7 @@ export class FileSystem {
    * @param filePath - The relative or absolute path to the file whose contents should be read.
    */
   public static readFileToBuffer(filePath: string): Buffer {
-    return FileSystem._wrapException(() => {
+    return _wrapException(() => {
       return fsx.readFileSync(filePath);
     });
   }
@@ -1112,7 +1112,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.readFileToBuffer}.
    */
   public static async readFileToBufferAsync(filePath: string): Promise<Buffer> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    return await _wrapExceptionAsync(() => {
       return fsx.readFile(filePath);
     });
   }
@@ -1139,7 +1139,7 @@ export class FileSystem {
       );
     }
 
-    FileSystem._wrapException(() => {
+    _wrapException(() => {
       fsx.copySync(options.sourcePath, options.destinationPath, {
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
         overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite
@@ -1162,7 +1162,7 @@ export class FileSystem {
       );
     }
 
-    await FileSystem._wrapExceptionAsync(() => {
+    await _wrapExceptionAsync(() => {
       return fsx.copy(options.sourcePath, options.destinationPath, {
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
         overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite
@@ -1186,7 +1186,7 @@ export class FileSystem {
       ...options
     };
 
-    FileSystem._wrapException(() => {
+    _wrapException(() => {
       fsx.copySync(options.sourcePath, options.destinationPath, {
         dereference: !!options.dereferenceSymlinks,
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
@@ -1206,7 +1206,7 @@ export class FileSystem {
       ...options
     };
 
-    await FileSystem._wrapExceptionAsync(async () => {
+    await _wrapExceptionAsync(async () => {
       await fsx.copy(options.sourcePath, options.destinationPath, {
         dereference: !!options.dereferenceSymlinks,
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
@@ -1224,7 +1224,7 @@ export class FileSystem {
    * @param options - Optional settings that can change the behavior. Type: `IDeleteFileOptions`
    */
   public static deleteFile(filePath: string, options?: IFileSystemDeleteFileOptions): void {
-    FileSystem._wrapException(() => {
+    _wrapException(() => {
       options = {
         ...DELETE_FILE_DEFAULT_OPTIONS,
         ...options
@@ -1247,7 +1247,7 @@ export class FileSystem {
     filePath: string,
     options?: IFileSystemDeleteFileOptions
   ): Promise<void> {
-    await FileSystem._wrapExceptionAsync(async () => {
+    await _wrapExceptionAsync(async () => {
       options = {
         ...DELETE_FILE_DEFAULT_OPTIONS,
         ...options
@@ -1271,7 +1271,7 @@ export class FileSystem {
    * @returns A new readable stream for the file.
    */
   public static createReadStream(filePath: string): FileSystemReadStream {
-    return FileSystem._wrapException(() => {
+    return _wrapException(() => {
       return fs.createReadStream(filePath);
     });
   }
@@ -1291,7 +1291,7 @@ export class FileSystem {
     filePath: string,
     options?: IFileSystemCreateWriteStreamOptions
   ): FileSystemWriteStream {
-    return FileSystem._wrapException(() => {
+    return _wrapException(() => {
       if (options?.ensureFolderExists) {
         const folderPath: string = nodeJsPath.dirname(filePath);
         FileSystem.ensureFolder(folderPath);
@@ -1308,7 +1308,7 @@ export class FileSystem {
     filePath: string,
     options?: IFileSystemCreateWriteStreamOptions
   ): Promise<FileSystemWriteStream> {
-    return await FileSystem._wrapExceptionAsync(async () => {
+    return await _wrapExceptionAsync(async () => {
       if (options?.ensureFolderExists) {
         const folderPath: string = nodeJsPath.dirname(filePath);
         await FileSystem.ensureFolderAsync(folderPath);
@@ -1328,7 +1328,7 @@ export class FileSystem {
    * @param path - The absolute or relative path to the filesystem object.
    */
   public static getLinkStatistics(path: string): FileSystemStats {
-    return FileSystem._wrapException(() => {
+    return _wrapException(() => {
       return fsx.lstatSync(path);
     });
   }
@@ -1337,7 +1337,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.getLinkStatistics}.
    */
   public static async getLinkStatisticsAsync(path: string): Promise<FileSystemStats> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    return await _wrapExceptionAsync(() => {
       return fsx.lstat(path);
     });
   }
@@ -1354,7 +1354,7 @@ export class FileSystem {
    * @returns the path of the link target
    */
   public static readLink(path: string): string {
-    return FileSystem._wrapException(() => {
+    return _wrapException(() => {
       return fsx.readlinkSync(path);
     });
   }
@@ -1363,7 +1363,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.readLink}.
    */
   public static async readLinkAsync(path: string): Promise<string> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    return await _wrapExceptionAsync(() => {
       return fsx.readlink(path);
     });
   }
@@ -1386,8 +1386,8 @@ export class FileSystem {
    * if not, use a symbolic link instead.
    */
   public static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void {
-    FileSystem._wrapException(() => {
-      return FileSystem._handleLink(() => {
+    _wrapException(() => {
+      return _handleLink(() => {
         // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
         return fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'junction');
       }, options);
@@ -1398,8 +1398,8 @@ export class FileSystem {
    * An async version of {@link FileSystem.createSymbolicLinkJunction}.
    */
   public static async createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    await FileSystem._wrapExceptionAsync(() => {
-      return FileSystem._handleLinkAsync(() => {
+    await _wrapExceptionAsync(() => {
+      return _handleLinkAsync(() => {
         // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
         return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'junction');
       }, options);
@@ -1420,8 +1420,8 @@ export class FileSystem {
    * tool incompatible with Windows.
    */
   public static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void {
-    FileSystem._wrapException(() => {
-      return FileSystem._handleLink(() => {
+    _wrapException(() => {
+      return _handleLink(() => {
         return fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'file');
       }, options);
     });
@@ -1431,8 +1431,8 @@ export class FileSystem {
    * An async version of {@link FileSystem.createSymbolicLinkFile}.
    */
   public static async createSymbolicLinkFileAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    await FileSystem._wrapExceptionAsync(() => {
-      return FileSystem._handleLinkAsync(() => {
+    await _wrapExceptionAsync(() => {
+      return _handleLinkAsync(() => {
         return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'file');
       }, options);
     });
@@ -1452,8 +1452,8 @@ export class FileSystem {
    * tool incompatible with Windows.
    */
   public static createSymbolicLinkFolder(options: IFileSystemCreateLinkOptions): void {
-    FileSystem._wrapException(() => {
-      return FileSystem._handleLink(() => {
+    _wrapException(() => {
+      return _handleLink(() => {
         return fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'dir');
       }, options);
     });
@@ -1463,8 +1463,8 @@ export class FileSystem {
    * An async version of {@link FileSystem.createSymbolicLinkFolder}.
    */
   public static async createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    await FileSystem._wrapExceptionAsync(() => {
-      return FileSystem._handleLinkAsync(() => {
+    await _wrapExceptionAsync(() => {
+      return _handleLinkAsync(() => {
         return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'dir');
       }, options);
     });
@@ -1487,8 +1487,8 @@ export class FileSystem {
    * if not, use a symbolic link instead.
    */
   public static createHardLink(options: IFileSystemCreateLinkOptions): void {
-    FileSystem._wrapException(() => {
-      return FileSystem._handleLink(
+    _wrapException(() => {
+      return _handleLink(
         () => {
           return fsx.linkSync(options.linkTargetPath, options.newLinkPath);
         },
@@ -1501,8 +1501,8 @@ export class FileSystem {
    * An async version of {@link FileSystem.createHardLink}.
    */
   public static async createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    await FileSystem._wrapExceptionAsync(() => {
-      return FileSystem._handleLinkAsync(
+    await _wrapExceptionAsync(() => {
+      return _handleLinkAsync(
         () => {
           return fsx.link(options.linkTargetPath, options.newLinkPath);
         },
@@ -1517,7 +1517,7 @@ export class FileSystem {
    * @param linkPath - The path to the link.
    */
   public static getRealPath(linkPath: string): string {
-    return FileSystem._wrapException(() => {
+    return _wrapException(() => {
       return fsx.realpathSync(linkPath);
     });
   }
@@ -1526,7 +1526,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.getRealPath}.
    */
   public static async getRealPathAsync(linkPath: string): Promise<string> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    return await _wrapExceptionAsync(() => {
       return fsx.realpath(linkPath);
     });
   }
@@ -1598,156 +1598,156 @@ export class FileSystem {
       typeof typedError.syscall === 'string'
     );
   }
+}
 
-  private static _handleLinkExistError(
-    linkFn: () => void,
-    options: IInternalFileSystemCreateLinkOptions,
-    error: Error
-  ): void {
-    switch (options.alreadyExistsBehavior) {
-      case AlreadyExistsBehavior.Ignore:
-        break;
-      case AlreadyExistsBehavior.Overwrite:
-        // fsx.linkSync does not allow overwriting so we must manually delete. If it's
-        // a folder, it will throw an error.
-        this.deleteFile(options.newLinkPath);
-        linkFn();
-        break;
-      case AlreadyExistsBehavior.Error:
-      default:
-        throw error;
-    }
-  }
-
-  private static _handleLink(linkFn: () => void, options: IInternalFileSystemCreateLinkOptions): void {
-    try {
+function _handleLinkExistError(
+  linkFn: () => void,
+  options: IInternalFileSystemCreateLinkOptions,
+  error: Error
+): void {
+  switch (options.alreadyExistsBehavior) {
+    case AlreadyExistsBehavior.Ignore:
+      break;
+    case AlreadyExistsBehavior.Overwrite:
+      // fsx.linkSync does not allow overwriting so we must manually delete. If it's
+      // a folder, it will throw an error.
+      FileSystem.deleteFile(options.newLinkPath);
       linkFn();
-    } catch (error) {
-      if (FileSystem.isExistError(error as Error)) {
-        // Link exists, handle it
-        FileSystem._handleLinkExistError(linkFn, options, error as Error);
-      } else {
-        // When attempting to create a link in a directory that does not exist, an ENOENT
-        // or ENOTDIR error is thrown, so we should ensure the directory exists before
-        // retrying. There are also cases where the target file must exist, so validate in
-        // those cases to avoid confusing the missing directory with the missing target file.
-        if (
-          FileSystem.isNotExistError(error as Error) &&
-          (!options.linkTargetMustExist || FileSystem.exists(options.linkTargetPath))
-        ) {
-          this.ensureFolder(nodeJsPath.dirname(options.newLinkPath));
-          try {
-            linkFn();
-          } catch (retryError) {
-            if (FileSystem.isExistError(retryError as Error)) {
-              // Another concurrent process may have created the link between the ensureFolder
-              // call and the retry; handle it the same way as the initial exist error.
-              FileSystem._handleLinkExistError(linkFn, options, retryError as Error);
-            } else {
-              throw retryError;
-            }
-          }
-        } else {
-          throw error;
-        }
-      }
-    }
+      break;
+    case AlreadyExistsBehavior.Error:
+    default:
+      throw error;
   }
+}
 
-  private static async _handleLinkExistErrorAsync(
-    linkFn: () => Promise<void>,
-    options: IInternalFileSystemCreateLinkOptions,
-    error: Error
-  ): Promise<void> {
-    switch (options.alreadyExistsBehavior) {
-      case AlreadyExistsBehavior.Ignore:
-        break;
-      case AlreadyExistsBehavior.Overwrite:
-        // fsx.linkSync does not allow overwriting so we must manually delete. If it's
-        // a folder, it will throw an error.
-        await this.deleteFileAsync(options.newLinkPath);
-        await linkFn();
-        break;
-      case AlreadyExistsBehavior.Error:
-      default:
+function _handleLink(linkFn: () => void, options: IInternalFileSystemCreateLinkOptions): void {
+  try {
+    linkFn();
+  } catch (error) {
+    if (FileSystem.isExistError(error as Error)) {
+      // Link exists, handle it
+      _handleLinkExistError(linkFn, options, error as Error);
+    } else {
+      // When attempting to create a link in a directory that does not exist, an ENOENT
+      // or ENOTDIR error is thrown, so we should ensure the directory exists before
+      // retrying. There are also cases where the target file must exist, so validate in
+      // those cases to avoid confusing the missing directory with the missing target file.
+      if (
+        FileSystem.isNotExistError(error as Error) &&
+        (!options.linkTargetMustExist || FileSystem.exists(options.linkTargetPath))
+      ) {
+        FileSystem.ensureFolder(nodeJsPath.dirname(options.newLinkPath));
+        try {
+          linkFn();
+        } catch (retryError) {
+          if (FileSystem.isExistError(retryError as Error)) {
+            // Another concurrent process may have created the link between the ensureFolder
+            // call and the retry; handle it the same way as the initial exist error.
+            _handleLinkExistError(linkFn, options, retryError as Error);
+          } else {
+            throw retryError;
+          }
+        }
+      } else {
         throw error;
+      }
     }
   }
+}
 
-  private static async _handleLinkAsync(
-    linkFn: () => Promise<void>,
-    options: IInternalFileSystemCreateLinkOptions
-  ): Promise<void> {
-    try {
+async function _handleLinkExistErrorAsync(
+  linkFn: () => Promise<void>,
+  options: IInternalFileSystemCreateLinkOptions,
+  error: Error
+): Promise<void> {
+  switch (options.alreadyExistsBehavior) {
+    case AlreadyExistsBehavior.Ignore:
+      break;
+    case AlreadyExistsBehavior.Overwrite:
+      // fsx.linkSync does not allow overwriting so we must manually delete. If it's
+      // a folder, it will throw an error.
+      await FileSystem.deleteFileAsync(options.newLinkPath);
       await linkFn();
-    } catch (error) {
-      if (FileSystem.isExistError(error as Error)) {
-        // Link exists, handle it
-        await FileSystem._handleLinkExistErrorAsync(linkFn, options, error as Error);
-      } else {
-        // When attempting to create a link in a directory that does not exist, an ENOENT
-        // or ENOTDIR error is thrown, so we should ensure the directory exists before
-        // retrying. There are also cases where the target file must exist, so validate in
-        // those cases to avoid confusing the missing directory with the missing target file.
-        if (
-          FileSystem.isNotExistError(error as Error) &&
-          (!options.linkTargetMustExist || (await FileSystem.existsAsync(options.linkTargetPath)))
-        ) {
-          await this.ensureFolderAsync(nodeJsPath.dirname(options.newLinkPath));
-          try {
-            await linkFn();
-          } catch (retryError) {
-            if (FileSystem.isExistError(retryError as Error)) {
-              // Another concurrent process may have created the link between the ensureFolderAsync
-              // call and the retry; handle it the same way as the initial exist error.
-              await FileSystem._handleLinkExistErrorAsync(linkFn, options, retryError as Error);
-            } else {
-              throw retryError;
-            }
+      break;
+    case AlreadyExistsBehavior.Error:
+    default:
+      throw error;
+  }
+}
+
+async function _handleLinkAsync(
+  linkFn: () => Promise<void>,
+  options: IInternalFileSystemCreateLinkOptions
+): Promise<void> {
+  try {
+    await linkFn();
+  } catch (error) {
+    if (FileSystem.isExistError(error as Error)) {
+      // Link exists, handle it
+      await _handleLinkExistErrorAsync(linkFn, options, error as Error);
+    } else {
+      // When attempting to create a link in a directory that does not exist, an ENOENT
+      // or ENOTDIR error is thrown, so we should ensure the directory exists before
+      // retrying. There are also cases where the target file must exist, so validate in
+      // those cases to avoid confusing the missing directory with the missing target file.
+      if (
+        FileSystem.isNotExistError(error as Error) &&
+        (!options.linkTargetMustExist || (await FileSystem.existsAsync(options.linkTargetPath)))
+      ) {
+        await FileSystem.ensureFolderAsync(nodeJsPath.dirname(options.newLinkPath));
+        try {
+          await linkFn();
+        } catch (retryError) {
+          if (FileSystem.isExistError(retryError as Error)) {
+            // Another concurrent process may have created the link between the ensureFolderAsync
+            // call and the retry; handle it the same way as the initial exist error.
+            await _handleLinkExistErrorAsync(linkFn, options, retryError as Error);
+          } else {
+            throw retryError;
           }
-        } else {
-          throw error;
         }
+      } else {
+        throw error;
       }
     }
   }
+}
 
-  private static _wrapException<TResult>(fn: () => TResult): TResult {
-    try {
-      return fn();
-    } catch (error) {
-      FileSystem._updateErrorMessage(error as Error);
-      throw error;
-    }
+function _wrapException<TResult>(fn: () => TResult): TResult {
+  try {
+    return fn();
+  } catch (error) {
+    _updateErrorMessage(error as Error);
+    throw error;
   }
+}
 
-  private static async _wrapExceptionAsync<TResult>(fn: () => Promise<TResult>): Promise<TResult> {
-    try {
-      return await fn();
-    } catch (error) {
-      FileSystem._updateErrorMessage(error as Error);
-      throw error;
-    }
+async function _wrapExceptionAsync<TResult>(fn: () => Promise<TResult>): Promise<TResult> {
+  try {
+    return await fn();
+  } catch (error) {
+    _updateErrorMessage(error as Error);
+    throw error;
   }
+}
 
-  private static _updateErrorMessage(error: Error): void {
-    if (FileSystem.isErrnoException(error)) {
-      if (FileSystem.isFileDoesNotExistError(error)) {
-        error.message = `File does not exist: ${error.path}\n${error.message}`;
-      } else if (FileSystem.isFolderDoesNotExistError(error)) {
-        error.message = `Folder does not exist: ${error.path}\n${error.message}`;
-      } else if (FileSystem.isExistError(error)) {
-        // Oddly, the typing does not include the `dest` property even though the documentation
-        // indicates it is there: https://nodejs.org/docs/latest-v10.x/api/errors.html#errors_error_dest
-        const extendedError: NodeJS.ErrnoException & { dest?: string } = error;
-        error.message = `File or folder already exists: ${extendedError.dest}\n${error.message}`;
-      } else if (FileSystem.isUnlinkNotPermittedError(error)) {
-        error.message = `File or folder could not be deleted: ${error.path}\n${error.message}`;
-      } else if (FileSystem.isDirectoryError(error)) {
-        error.message = `Target is a folder, not a file: ${error.path}\n${error.message}`;
-      } else if (FileSystem.isNotDirectoryError(error)) {
-        error.message = `Target is not a folder: ${error.path}\n${error.message}`;
-      }
+function _updateErrorMessage(error: Error): void {
+  if (FileSystem.isErrnoException(error)) {
+    if (FileSystem.isFileDoesNotExistError(error)) {
+      error.message = `File does not exist: ${error.path}\n${error.message}`;
+    } else if (FileSystem.isFolderDoesNotExistError(error)) {
+      error.message = `Folder does not exist: ${error.path}\n${error.message}`;
+    } else if (FileSystem.isExistError(error)) {
+      // Oddly, the typing does not include the `dest` property even though the documentation
+      // indicates it is there: https://nodejs.org/docs/latest-v10.x/api/errors.html#errors_error_dest
+      const extendedError: NodeJS.ErrnoException & { dest?: string } = error;
+      error.message = `File or folder already exists: ${extendedError.dest}\n${error.message}`;
+    } else if (FileSystem.isUnlinkNotPermittedError(error)) {
+      error.message = `File or folder could not be deleted: ${error.path}\n${error.message}`;
+    } else if (FileSystem.isDirectoryError(error)) {
+      error.message = `Target is a folder, not a file: ${error.path}\n${error.message}`;
+    } else if (FileSystem.isNotDirectoryError(error)) {
+      error.message = `Target is not a folder: ${error.path}\n${error.message}`;
     }
   }
 }

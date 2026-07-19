@@ -255,6 +255,44 @@ export const EnvironmentVariableNames = {
   RUSH_QUIET_MODE: 'RUSH_QUIET_MODE'
 } as const;
 
+let _hasBeenValidated: boolean = false;
+
+let _rushTempFolderOverride: string | undefined;
+
+let _absoluteSymlinks: boolean = false;
+
+let _allowUnsupportedNodeVersion: boolean = false;
+
+let _allowWarningsInSuccessfulBuild: boolean = false;
+
+let _pnpmStorePathOverride: string | undefined;
+
+let _pnpmVerifyStoreIntegrity: boolean | undefined;
+
+let _rushGlobalFolderOverride: string | undefined;
+
+let _buildCacheCredential: string | undefined;
+
+let _buildCacheEnabled: boolean | undefined;
+
+let _buildCacheWriteAllowed: boolean | undefined;
+
+let _buildCacheOverrideJson: string | undefined;
+
+let _buildCacheOverrideJsonFilePath: string | undefined;
+
+let _cobuildContextId: string | undefined;
+
+let _cobuildRunnerId: string | undefined;
+
+let _cobuildLeafProjectLogOnlyAllowed: boolean | undefined;
+
+let _gitBinaryPath: string | undefined;
+
+let _tarBinaryPath: string | undefined;
+
+let _quietMode: boolean = false;
+
 /**
  * Provides Rush-specific environment variable data. All Rush environment variables must start with "RUSH_". This class
  * is designed to be used by RushConfiguration.
@@ -264,57 +302,19 @@ export const EnvironmentVariableNames = {
  * Initialize will throw if any unknown parameters are present.
  */
 export class EnvironmentConfiguration {
-  private static _hasBeenValidated: boolean = false;
-
-  private static _rushTempFolderOverride: string | undefined;
-
-  private static _absoluteSymlinks: boolean = false;
-
-  private static _allowUnsupportedNodeVersion: boolean = false;
-
-  private static _allowWarningsInSuccessfulBuild: boolean = false;
-
-  private static _pnpmStorePathOverride: string | undefined;
-
-  private static _pnpmVerifyStoreIntegrity: boolean | undefined;
-
-  private static _rushGlobalFolderOverride: string | undefined;
-
-  private static _buildCacheCredential: string | undefined;
-
-  private static _buildCacheEnabled: boolean | undefined;
-
-  private static _buildCacheWriteAllowed: boolean | undefined;
-
-  private static _buildCacheOverrideJson: string | undefined;
-
-  private static _buildCacheOverrideJsonFilePath: string | undefined;
-
-  private static _cobuildContextId: string | undefined;
-
-  private static _cobuildRunnerId: string | undefined;
-
-  private static _cobuildLeafProjectLogOnlyAllowed: boolean | undefined;
-
-  private static _gitBinaryPath: string | undefined;
-
-  private static _tarBinaryPath: string | undefined;
-
-  private static _quietMode: boolean = false;
-
   /**
    * If true, the environment configuration has been validated and initialized.
    */
   public static get hasBeenValidated(): boolean {
-    return EnvironmentConfiguration._hasBeenValidated;
+    return _hasBeenValidated;
   }
 
   /**
    * An override for the common/temp folder path.
    */
   public static get rushTempFolderOverride(): string | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._rushTempFolderOverride;
+    _ensureValidated();
+    return _rushTempFolderOverride;
   }
 
   /**
@@ -322,8 +322,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS}
    */
   public static get absoluteSymlinks(): boolean {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._absoluteSymlinks;
+    _ensureValidated();
+    return _absoluteSymlinks;
   }
 
   /**
@@ -334,8 +334,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS}.
    */
   public static get allowUnsupportedNodeVersion(): boolean {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._allowUnsupportedNodeVersion;
+    _ensureValidated();
+    return _allowUnsupportedNodeVersion;
   }
 
   /**
@@ -344,8 +344,8 @@ export class EnvironmentConfiguration {
    * or `0` to disallow them. (See the comments in the command-line.json file for more information).
    */
   public static get allowWarningsInSuccessfulBuild(): boolean {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._allowWarningsInSuccessfulBuild;
+    _ensureValidated();
+    return _allowWarningsInSuccessfulBuild;
   }
 
   /**
@@ -353,8 +353,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_PNPM_STORE_PATH}
    */
   public static get pnpmStorePathOverride(): string | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._pnpmStorePathOverride;
+    _ensureValidated();
+    return _pnpmStorePathOverride;
   }
 
   /**
@@ -362,8 +362,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_PNPM_VERIFY_STORE_INTEGRITY}
    */
   public static get pnpmVerifyStoreIntegrity(): boolean | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._pnpmVerifyStoreIntegrity;
+    _ensureValidated();
+    return _pnpmVerifyStoreIntegrity;
   }
 
   /**
@@ -371,8 +371,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_GLOBAL_FOLDER}
    */
   public static get rushGlobalFolderOverride(): string | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._rushGlobalFolderOverride;
+    _ensureValidated();
+    return _rushGlobalFolderOverride;
   }
 
   /**
@@ -380,8 +380,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL}
    */
   public static get buildCacheCredential(): string | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._buildCacheCredential;
+    _ensureValidated();
+    return _buildCacheCredential;
   }
 
   /**
@@ -389,8 +389,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED}
    */
   public static get buildCacheEnabled(): boolean | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._buildCacheEnabled;
+    _ensureValidated();
+    return _buildCacheEnabled;
   }
 
   /**
@@ -398,8 +398,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED}
    */
   public static get buildCacheWriteAllowed(): boolean | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._buildCacheWriteAllowed;
+    _ensureValidated();
+    return _buildCacheWriteAllowed;
   }
 
   /**
@@ -407,8 +407,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON}
    */
   public static get buildCacheOverrideJson(): string | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._buildCacheOverrideJson;
+    _ensureValidated();
+    return _buildCacheOverrideJson;
   }
 
   /**
@@ -416,8 +416,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH}
    */
   public static get buildCacheOverrideJsonFilePath(): string | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._buildCacheOverrideJsonFilePath;
+    _ensureValidated();
+    return _buildCacheOverrideJsonFilePath;
   }
 
   /**
@@ -425,8 +425,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_COBUILD_CONTEXT_ID}
    */
   public static get cobuildContextId(): string | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._cobuildContextId;
+    _ensureValidated();
+    return _cobuildContextId;
   }
 
   /**
@@ -434,8 +434,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_COBUILD_RUNNER_ID}
    */
   public static get cobuildRunnerId(): string | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._cobuildRunnerId;
+    _ensureValidated();
+    return _cobuildRunnerId;
   }
 
   /**
@@ -443,8 +443,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED}
    */
   public static get cobuildLeafProjectLogOnlyAllowed(): boolean | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._cobuildLeafProjectLogOnlyAllowed;
+    _ensureValidated();
+    return _cobuildLeafProjectLogOnlyAllowed;
   }
 
   /**
@@ -452,8 +452,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_GIT_BINARY_PATH}
    */
   public static get gitBinaryPath(): string | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._gitBinaryPath;
+    _ensureValidated();
+    return _gitBinaryPath;
   }
 
   /**
@@ -461,8 +461,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_TAR_BINARY_PATH}
    */
   public static get tarBinaryPath(): string | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._tarBinaryPath;
+    _ensureValidated();
+    return _tarBinaryPath;
   }
 
   /**
@@ -470,8 +470,8 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_QUIET_MODE}
    */
   public static get quietMode(): boolean {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._quietMode;
+    _ensureValidated();
+    return _quietMode;
   }
 
   /**
@@ -483,8 +483,7 @@ export class EnvironmentConfiguration {
   public static _getRushGlobalFolderOverride(processEnv: IEnvironment): string | undefined {
     const value: string | undefined = processEnv[EnvironmentVariableNames.RUSH_GLOBAL_FOLDER];
     if (value) {
-      const normalizedValue: string | undefined =
-        EnvironmentConfiguration._normalizeDeepestParentFolderPath(value);
+      const normalizedValue: string | undefined = _normalizeDeepestParentFolderPath(value);
       return normalizedValue;
     }
   }
@@ -503,15 +502,15 @@ export class EnvironmentConfiguration {
         const normalizedEnvVarName: string = IS_WINDOWS ? envVarName.toUpperCase() : envVarName;
         switch (normalizedEnvVarName) {
           case EnvironmentVariableNames.RUSH_TEMP_FOLDER: {
-            EnvironmentConfiguration._rushTempFolderOverride =
+            _rushTempFolderOverride =
               value && !options.doNotNormalizePaths
-                ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(value) || value
+                ? _normalizeDeepestParentFolderPath(value) || value
                 : value;
             break;
           }
 
           case EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS: {
-            EnvironmentConfiguration._absoluteSymlinks =
+            _absoluteSymlinks =
               EnvironmentConfiguration.parseBooleanEnvironmentVariable(
                 EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS,
                 value
@@ -523,9 +522,9 @@ export class EnvironmentConfiguration {
             if (value === 'true' || value === 'false') {
               // Small, undocumented acceptance of old "true" and "false" values for
               // users of RUSH_ALLOW_UNSUPPORTED_NODEJS in rush pre-v5.46.
-              EnvironmentConfiguration._allowUnsupportedNodeVersion = value === 'true';
+              _allowUnsupportedNodeVersion = value === 'true';
             } else {
-              EnvironmentConfiguration._allowUnsupportedNodeVersion =
+              _allowUnsupportedNodeVersion =
                 EnvironmentConfiguration.parseBooleanEnvironmentVariable(
                   EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS,
                   value
@@ -535,7 +534,7 @@ export class EnvironmentConfiguration {
           }
 
           case EnvironmentVariableNames.RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: {
-            EnvironmentConfiguration._allowWarningsInSuccessfulBuild =
+            _allowWarningsInSuccessfulBuild =
               EnvironmentConfiguration.parseBooleanEnvironmentVariable(
                 EnvironmentVariableNames.RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD,
                 value
@@ -544,16 +543,15 @@ export class EnvironmentConfiguration {
           }
 
           case EnvironmentVariableNames.RUSH_PNPM_STORE_PATH: {
-            EnvironmentConfiguration._pnpmStorePathOverride =
+            _pnpmStorePathOverride =
               value && !options.doNotNormalizePaths
-                ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(value) || value
+                ? _normalizeDeepestParentFolderPath(value) || value
                 : value;
             break;
           }
 
           case EnvironmentVariableNames.RUSH_PNPM_VERIFY_STORE_INTEGRITY: {
-            EnvironmentConfiguration._pnpmVerifyStoreIntegrity =
-              value === '1' ? true : value === '0' ? false : undefined;
+            _pnpmVerifyStoreIntegrity = value === '1' ? true : value === '0' ? false : undefined;
             break;
           }
 
@@ -563,73 +561,70 @@ export class EnvironmentConfiguration {
           }
 
           case EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL: {
-            EnvironmentConfiguration._buildCacheCredential = value;
+            _buildCacheCredential = value;
             break;
           }
 
           case EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED: {
-            EnvironmentConfiguration._buildCacheEnabled =
-              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
-                EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED,
-                value
-              );
+            _buildCacheEnabled = EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+              EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED,
+              value
+            );
             break;
           }
 
           case EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED: {
-            EnvironmentConfiguration._buildCacheWriteAllowed =
-              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
-                EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED,
-                value
-              );
+            _buildCacheWriteAllowed = EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+              EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED,
+              value
+            );
             break;
           }
 
           case EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON: {
-            EnvironmentConfiguration._buildCacheOverrideJson = value;
+            _buildCacheOverrideJson = value;
             break;
           }
 
           case EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH: {
-            EnvironmentConfiguration._buildCacheOverrideJsonFilePath = value;
+            _buildCacheOverrideJsonFilePath = value;
             break;
           }
 
           case EnvironmentVariableNames.RUSH_COBUILD_CONTEXT_ID: {
-            EnvironmentConfiguration._cobuildContextId = value;
+            _cobuildContextId = value;
             break;
           }
 
           case EnvironmentVariableNames.RUSH_COBUILD_RUNNER_ID: {
-            EnvironmentConfiguration._cobuildRunnerId = value;
+            _cobuildRunnerId = value;
             break;
           }
 
           case EnvironmentVariableNames.RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: {
-            EnvironmentConfiguration._cobuildLeafProjectLogOnlyAllowed =
-              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
-                EnvironmentVariableNames.RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED,
-                value
-              );
+            _cobuildLeafProjectLogOnlyAllowed = EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+              EnvironmentVariableNames.RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED,
+              value
+            );
             break;
           }
 
           case EnvironmentVariableNames.RUSH_GIT_BINARY_PATH: {
-            EnvironmentConfiguration._gitBinaryPath = value;
+            _gitBinaryPath = value;
             break;
           }
 
           case EnvironmentVariableNames.RUSH_TAR_BINARY_PATH: {
-            EnvironmentConfiguration._tarBinaryPath = value;
+            _tarBinaryPath = value;
             break;
           }
 
           case EnvironmentVariableNames.RUSH_QUIET_MODE: {
             // Accept both "true"/"false" string values and the standard "1"/"0" values
             if (value === 'true' || value === 'false') {
-              EnvironmentConfiguration._quietMode = value === 'true';
+              _quietMode = value === 'true';
             } else {
-              EnvironmentConfiguration._quietMode =
+              _quietMode =
                 EnvironmentConfiguration.parseBooleanEnvironmentVariable(
                   EnvironmentVariableNames.RUSH_QUIET_MODE,
                   value
@@ -670,10 +665,7 @@ export class EnvironmentConfiguration {
       );
     }
 
-    if (
-      EnvironmentConfiguration._buildCacheOverrideJsonFilePath &&
-      EnvironmentConfiguration._buildCacheOverrideJson
-    ) {
+    if (_buildCacheOverrideJsonFilePath && _buildCacheOverrideJson) {
       throw new Error(
         `Environment variable ${EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH} and ` +
           `${EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON} are mutually exclusive. ` +
@@ -682,27 +674,21 @@ export class EnvironmentConfiguration {
     }
 
     // See doc comment for EnvironmentConfiguration._getRushGlobalFolderOverride().
-    EnvironmentConfiguration._rushGlobalFolderOverride =
-      EnvironmentConfiguration._getRushGlobalFolderOverride(process.env);
+    _rushGlobalFolderOverride = EnvironmentConfiguration._getRushGlobalFolderOverride(process.env);
 
-    EnvironmentConfiguration._hasBeenValidated = true;
+    _hasBeenValidated = true;
   }
 
   /**
    * Resets EnvironmentConfiguration into an un-initialized state.
    */
   public static reset(): void {
-    EnvironmentConfiguration._rushTempFolderOverride = undefined;
-    EnvironmentConfiguration._quietMode = false;
-    EnvironmentConfiguration._gitBinaryPath = undefined;
-    EnvironmentConfiguration._tarBinaryPath = undefined;
-    EnvironmentConfiguration._hasBeenValidated = false;
-  }
-
-  private static _ensureValidated(): void {
-    if (!EnvironmentConfiguration._hasBeenValidated) {
-      EnvironmentConfiguration.validate();
-    }
+    _rushTempFolderOverride = undefined;
+    _pnpmStorePathOverride = undefined;
+    _quietMode = false;
+    _gitBinaryPath = undefined;
+    _tarBinaryPath = undefined;
+    _hasBeenValidated = false;
   }
 
   public static parseBooleanEnvironmentVariable(
@@ -721,49 +707,53 @@ export class EnvironmentConfiguration {
       );
     }
   }
+}
 
-  /**
-   * Given a path to a folder (that may or may not exist), normalize the path, including casing,
-   * to the first existing parent folder in the path.
-   *
-   * If no existing path can be found (for example, if the root is a volume that doesn't exist),
-   * this function returns undefined.
-   *
-   * @example
-   * If the following path exists on disk: `C:\Folder1\folder2\`
-   * _normalizeFirstExistingFolderPath('c:\\folder1\\folder2\\temp\\subfolder')
-   * returns 'C:\\Folder1\\folder2\\temp\\subfolder'
-   */
-  private static _normalizeDeepestParentFolderPath(folderPath: string): string | undefined {
-    folderPath = path.normalize(folderPath);
-    const endsWithSlash: boolean = folderPath.charAt(folderPath.length - 1) === path.sep;
-    const parsedPath: path.ParsedPath = path.parse(folderPath);
-    const pathRoot: string = parsedPath.root;
-    const pathWithoutRoot: string = parsedPath.dir.substr(pathRoot.length);
-    const pathParts: string[] = [...pathWithoutRoot.split(path.sep), parsedPath.name].filter(
-      (part) => !!part
-    );
-
-    // Starting with all path sections, and eliminating one from the end during each loop iteration,
-    // run trueCasePathSync. If trueCasePathSync returns without exception, we've found a subset
-    // of the path that exists and we've now gotten the correct casing.
-    //
-    // Once we've found a parent folder that exists, append the path sections that didn't exist.
-    for (let i: number = pathParts.length; i >= 0; i--) {
-      const constructedPath: string = path.join(pathRoot, ...pathParts.slice(0, i));
-      try {
-        const normalizedConstructedPath: string = trueCasePathSync(constructedPath);
-        const result: string = path.join(normalizedConstructedPath, ...pathParts.slice(i));
-        if (endsWithSlash) {
-          return `${result}${path.sep}`;
-        } else {
-          return result;
-        }
-      } catch (e) {
-        // This path doesn't exist, continue to the next subpath
-      }
-    }
-
-    return undefined;
+function _ensureValidated(): void {
+  if (!_hasBeenValidated) {
+    EnvironmentConfiguration.validate();
   }
+}
+
+/**
+ * Given a path to a folder (that may or may not exist), normalize the path, including casing,
+ * to the first existing parent folder in the path.
+ *
+ * If no existing path can be found (for example, if the root is a volume that doesn't exist),
+ * this function returns undefined.
+ *
+ * @example
+ * If the following path exists on disk: `C:\Folder1\folder2\`
+ * _normalizeFirstExistingFolderPath('c:\\folder1\\folder2\\temp\\subfolder')
+ * returns 'C:\\Folder1\\folder2\\temp\\subfolder'
+ */
+function _normalizeDeepestParentFolderPath(folderPath: string): string | undefined {
+  folderPath = path.normalize(folderPath);
+  const endsWithSlash: boolean = folderPath.charAt(folderPath.length - 1) === path.sep;
+  const parsedPath: path.ParsedPath = path.parse(folderPath);
+  const pathRoot: string = parsedPath.root;
+  const pathWithoutRoot: string = parsedPath.dir.substr(pathRoot.length);
+  const pathParts: string[] = [...pathWithoutRoot.split(path.sep), parsedPath.name].filter((part) => !!part);
+
+  // Starting with all path sections, and eliminating one from the end during each loop iteration,
+  // run trueCasePathSync. If trueCasePathSync returns without exception, we've found a subset
+  // of the path that exists and we've now gotten the correct casing.
+  //
+  // Once we've found a parent folder that exists, append the path sections that didn't exist.
+  for (let i: number = pathParts.length; i >= 0; i--) {
+    const constructedPath: string = path.join(pathRoot, ...pathParts.slice(0, i));
+    try {
+      const normalizedConstructedPath: string = trueCasePathSync(constructedPath);
+      const result: string = path.join(normalizedConstructedPath, ...pathParts.slice(i));
+      if (endsWithSlash) {
+        return `${result}${path.sep}`;
+      } else {
+        return result;
+      }
+    } catch (e) {
+      // This path doesn't exist, continue to the next subpath
+    }
+  }
+
+  return undefined;
 }

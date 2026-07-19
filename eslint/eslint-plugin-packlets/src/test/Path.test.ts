@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import { Path } from '../Path';
+import { Path, _relativeCaseInsensitive } from '../Path';
 
 function toPosixPath(value: string): string {
   return value.replace(/[\\\/]/g, '/');
@@ -12,7 +12,7 @@ function toNativePath(value: string): string {
 }
 
 function relativeCaseInsensitive(from: string, to: string): string {
-  return toPosixPath(Path['_relativeCaseInsensitive'](toNativePath(from), toNativePath(to)));
+  return toPosixPath(_relativeCaseInsensitive(toNativePath(from), toNativePath(to)));
 }
 
 describe(Path.name, () => {

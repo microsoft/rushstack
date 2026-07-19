@@ -271,14 +271,6 @@ export class RushAlerts {
     return alertsSortedByPriority[0];
   }
 
-  private static _parseDate(dateString: string): Date {
-    const parsedDate: Date = new Date(dateString);
-    if (isNaN(parsedDate.getTime())) {
-      throw new Error(`Invalid date/time value ${JSON.stringify(dateString)}`);
-    }
-    return parsedDate;
-  }
-
   private _isSnoozing(alertState: IRushAlertStateEntry): boolean {
     return (
       Boolean(alertState.snooze) &&
@@ -290,14 +282,14 @@ export class RushAlerts {
     const timeNow: Date = new Date();
 
     if (alert.startTime) {
-      const startTime: Date = RushAlerts._parseDate(alert.startTime);
+      const startTime: Date = _parseDate(alert.startTime);
       if (timeNow < startTime) {
         return false;
       }
     }
 
     if (alert.endTime) {
-      const endTime: Date = RushAlerts._parseDate(alert.endTime);
+      const endTime: Date = _parseDate(alert.endTime);
       if (timeNow > endTime) {
         return false;
       }
@@ -428,4 +420,12 @@ export class RushAlerts {
       jsonSyntax: JsonSyntax.JsonWithComments
     });
   }
+}
+
+function _parseDate(dateString: string): Date {
+  const parsedDate: Date = new Date(dateString);
+  if (isNaN(parsedDate.getTime())) {
+    throw new Error(`Invalid date/time value ${JSON.stringify(dateString)}`);
+  }
+  return parsedDate;
 }

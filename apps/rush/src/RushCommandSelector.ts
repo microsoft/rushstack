@@ -17,9 +17,9 @@ type CommandName = 'rush' | 'rush-pnpm' | 'rushx' | undefined;
  */
 export class RushCommandSelector {
   public static failIfNotInvokedAsRush(version: string): void {
-    const commandName: CommandName = RushCommandSelector._getCommandName();
+    const commandName: CommandName = _getCommandName();
     if (commandName !== 'rush' && commandName !== undefined) {
-      RushCommandSelector._failWithError(
+      _failWithError(
         `This repository is using Rush version ${version} which does not support the ${commandName} command`
       );
     }
@@ -34,14 +34,14 @@ export class RushCommandSelector {
 
     if (!Rush) {
       // This should be impossible unless we somehow loaded an unexpected version
-      RushCommandSelector._failWithError(`Unable to find the "Rush" entry point in @microsoft/rush-lib`);
+      _failWithError(`Unable to find the "Rush" entry point in @microsoft/rush-lib`);
     }
 
-    const commandName: CommandName = RushCommandSelector._getCommandName();
+    const commandName: CommandName = _getCommandName();
 
     if (commandName === 'rush-pnpm') {
       if (!Rush.launchRushPnpm) {
-        RushCommandSelector._failWithError(
+        _failWithError(
           `This repository is using Rush version ${Rush.version}` +
             ` which does not support the "rush-pnpm" command`
         );
@@ -52,7 +52,7 @@ export class RushCommandSelector {
       });
     } else if (commandName === 'rushx') {
       if (!Rush.launchRushX) {
-        RushCommandSelector._failWithError(
+        _failWithError(
           `This repository is using Rush version ${Rush.version}` +
             ` which does not support the "rushx" command`
         );
@@ -62,28 +62,28 @@ export class RushCommandSelector {
       Rush.launch(launcherVersion, options);
     }
   }
+}
 
-  private static _failWithError(message: string): never {
-    console.log(Colorize.red(message));
-    return process.exit(1);
-  }
+function _failWithError(message: string): never {
+  console.log(Colorize.red(message));
+  return process.exit(1);
+}
 
-  private static _getCommandName(): CommandName {
-    if (process.argv.length >= 2) {
-      // Example:
-      // argv[0]: "C:\\Program Files\\nodejs\\node.exe"
-      // argv[1]: "C:\\Program Files\\nodejs\\node_modules\\@microsoft\\rush\\bin\\rushx"
-      const basename: string = path.basename(process.argv[1]).toUpperCase();
-      if (basename === 'RUSH') {
-        return 'rush';
-      }
-      if (basename === 'RUSH-PNPM') {
-        return 'rush-pnpm';
-      }
-      if (basename === 'RUSHX') {
-        return 'rushx';
-      }
+function _getCommandName(): CommandName {
+  if (process.argv.length >= 2) {
+    // Example:
+    // argv[0]: "C:\\Program Files\\nodejs\\node.exe"
+    // argv[1]: "C:\\Program Files\\nodejs\\node_modules\\@microsoft\\rush\\bin\\rushx"
+    const basename: string = path.basename(process.argv[1]).toUpperCase();
+    if (basename === 'RUSH') {
+      return 'rush';
     }
-    return undefined;
+    if (basename === 'RUSH-PNPM') {
+      return 'rush-pnpm';
+    }
+    if (basename === 'RUSHX') {
+      return 'rushx';
+    }
   }
+  return undefined;
 }

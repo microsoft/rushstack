@@ -76,8 +76,8 @@ export class NodeJsCompatibility {
     return (
       NodeJsCompatibility.reportAncientIncompatibleVersion() ||
       NodeJsCompatibility.warnAboutVersionTooNew(options) ||
-      NodeJsCompatibility._warnAboutOddNumberedVersion() ||
-      NodeJsCompatibility._warnAboutNonLtsVersion(options.rushConfiguration)
+      _warnAboutOddNumberedVersion() ||
+      _warnAboutNonLtsVersion(options.rushConfiguration)
     );
   }
 
@@ -115,44 +115,44 @@ export class NodeJsCompatibility {
     }
   }
 
-  private static _warnAboutNonLtsVersion(rushConfiguration: RushConfiguration | undefined): boolean {
-    if (rushConfiguration && !rushConfiguration.suppressNodeLtsWarning && !NodeJsCompatibility.isLtsVersion) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        Colorize.yellow(
-          `Your version of Node.js (${nodeVersion}) is not a Long-Term Support (LTS) release. ` +
-            'These versions frequently have bugs. Please consider installing a stable release.\n'
-        )
-      );
-
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  private static _warnAboutOddNumberedVersion(): boolean {
-    if (NodeJsCompatibility.isOddNumberedVersion) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        Colorize.yellow(
-          `Your version of Node.js (${nodeVersion}) is an odd-numbered release. ` +
-            `These releases frequently have bugs. Please consider installing a Long Term Support (LTS) ` +
-            `version instead.\n`
-        )
-      );
-
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   public static get isLtsVersion(): boolean {
     return !!process.release.lts;
   }
 
   public static get isOddNumberedVersion(): boolean {
     return nodeMajorVersion % 2 !== 0;
+  }
+}
+
+function _warnAboutNonLtsVersion(rushConfiguration: RushConfiguration | undefined): boolean {
+  if (rushConfiguration && !rushConfiguration.suppressNodeLtsWarning && !NodeJsCompatibility.isLtsVersion) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      Colorize.yellow(
+        `Your version of Node.js (${nodeVersion}) is not a Long-Term Support (LTS) release. ` +
+          'These versions frequently have bugs. Please consider installing a stable release.\n'
+      )
+    );
+
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function _warnAboutOddNumberedVersion(): boolean {
+  if (NodeJsCompatibility.isOddNumberedVersion) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      Colorize.yellow(
+        `Your version of Node.js (${nodeVersion}) is an odd-numbered release. ` +
+          `These releases frequently have bugs. Please consider installing a Long Term Support (LTS) ` +
+          `version instead.\n`
+      )
+    );
+
+    return true;
+  } else {
+    return false;
   }
 }

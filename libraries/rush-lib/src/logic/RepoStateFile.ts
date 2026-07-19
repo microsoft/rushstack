@@ -38,6 +38,8 @@ interface IRepoStateJson {
   pnpmCatalogsHash?: string;
 }
 
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 /**
  * This file is used to track the state of various Rush-related features. It is generated
  * and updated by Rush.
@@ -45,8 +47,6 @@ interface IRepoStateJson {
  * @public
  */
 export class RepoStateFile {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   private _pnpmShrinkwrapHash: string | undefined;
   private _preferredVersionsHash: string | undefined;
   private _packageJsonInjectedDependenciesHash: string | undefined;
@@ -148,7 +148,7 @@ export class RepoStateFile {
       }
 
       if (repoStateJson) {
-        this._jsonSchema.validateObject(repoStateJson, jsonFilename);
+        _jsonSchema.validateObject(repoStateJson, jsonFilename);
       }
     }
 

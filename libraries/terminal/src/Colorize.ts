@@ -74,7 +74,7 @@ const RAINBOW_SEQUENCE: SgrParameterAttribute[] = [
  */
 export class Colorize {
   public static black(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.BlackForeground,
       SgrParameterAttribute.DefaultForeground,
       text
@@ -82,7 +82,7 @@ export class Colorize {
   }
 
   public static red(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.RedForeground,
       SgrParameterAttribute.DefaultForeground,
       text
@@ -90,7 +90,7 @@ export class Colorize {
   }
 
   public static green(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.GreenForeground,
       SgrParameterAttribute.DefaultForeground,
       text
@@ -98,7 +98,7 @@ export class Colorize {
   }
 
   public static yellow(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.YellowForeground,
       SgrParameterAttribute.DefaultForeground,
       text
@@ -106,7 +106,7 @@ export class Colorize {
   }
 
   public static blue(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.BlueForeground,
       SgrParameterAttribute.DefaultForeground,
       text
@@ -114,7 +114,7 @@ export class Colorize {
   }
 
   public static magenta(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.MagentaForeground,
       SgrParameterAttribute.DefaultForeground,
       text
@@ -122,7 +122,7 @@ export class Colorize {
   }
 
   public static cyan(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.CyanForeground,
       SgrParameterAttribute.DefaultForeground,
       text
@@ -130,7 +130,7 @@ export class Colorize {
   }
 
   public static white(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.WhiteForeground,
       SgrParameterAttribute.DefaultForeground,
       text
@@ -138,7 +138,7 @@ export class Colorize {
   }
 
   public static gray(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.GrayForeground,
       SgrParameterAttribute.DefaultForeground,
       text
@@ -146,7 +146,7 @@ export class Colorize {
   }
 
   public static blackBackground(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.BlackBackground,
       SgrParameterAttribute.DefaultBackground,
       text
@@ -154,7 +154,7 @@ export class Colorize {
   }
 
   public static redBackground(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.RedBackground,
       SgrParameterAttribute.DefaultBackground,
       text
@@ -162,7 +162,7 @@ export class Colorize {
   }
 
   public static greenBackground(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.GreenBackground,
       SgrParameterAttribute.DefaultBackground,
       text
@@ -170,7 +170,7 @@ export class Colorize {
   }
 
   public static yellowBackground(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.YellowBackground,
       SgrParameterAttribute.DefaultBackground,
       text
@@ -178,7 +178,7 @@ export class Colorize {
   }
 
   public static blueBackground(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.BlueBackground,
       SgrParameterAttribute.DefaultBackground,
       text
@@ -186,7 +186,7 @@ export class Colorize {
   }
 
   public static magentaBackground(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.MagentaBackground,
       SgrParameterAttribute.DefaultBackground,
       text
@@ -194,7 +194,7 @@ export class Colorize {
   }
 
   public static cyanBackground(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.CyanBackground,
       SgrParameterAttribute.DefaultBackground,
       text
@@ -202,7 +202,7 @@ export class Colorize {
   }
 
   public static whiteBackground(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.WhiteBackground,
       SgrParameterAttribute.DefaultBackground,
       text
@@ -210,7 +210,7 @@ export class Colorize {
   }
 
   public static grayBackground(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.GrayBackground,
       SgrParameterAttribute.DefaultBackground,
       text
@@ -218,7 +218,7 @@ export class Colorize {
   }
 
   public static bold(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.Bold,
       SgrParameterAttribute.NormalColorOrIntensity,
       text
@@ -226,7 +226,7 @@ export class Colorize {
   }
 
   public static dim(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.Dim,
       SgrParameterAttribute.NormalColorOrIntensity,
       text
@@ -234,7 +234,7 @@ export class Colorize {
   }
 
   public static underline(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.Underline,
       SgrParameterAttribute.UnderlineOff,
       text
@@ -242,15 +242,11 @@ export class Colorize {
   }
 
   public static blink(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
-      SgrParameterAttribute.Blink,
-      SgrParameterAttribute.BlinkOff,
-      text
-    );
+    return _wrapTextInAnsiEscapeCodes(SgrParameterAttribute.Blink, SgrParameterAttribute.BlinkOff, text);
   }
 
   public static invertColor(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
+    return _wrapTextInAnsiEscapeCodes(
       SgrParameterAttribute.InvertColor,
       SgrParameterAttribute.InvertColorOff,
       text
@@ -258,32 +254,28 @@ export class Colorize {
   }
 
   public static hidden(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
-      SgrParameterAttribute.Hidden,
-      SgrParameterAttribute.HiddenOff,
-      text
-    );
+    return _wrapTextInAnsiEscapeCodes(SgrParameterAttribute.Hidden, SgrParameterAttribute.HiddenOff, text);
   }
 
   public static rainbow(text: string): string {
-    return Colorize._applyColorSequence(text, RAINBOW_SEQUENCE);
+    return _applyColorSequence(text, RAINBOW_SEQUENCE);
+  }
+}
+
+function _applyColorSequence(text: string, sequence: SgrParameterAttribute[]): string {
+  let result: string = '';
+  const sequenceLength: number = sequence.length;
+  for (let i: number = 0; i < text.length; i++) {
+    result += AnsiEscape.getEscapeSequenceForAnsiCode(sequence[i % sequenceLength]) + text[i];
   }
 
-  private static _applyColorSequence(text: string, sequence: SgrParameterAttribute[]): string {
-    let result: string = '';
-    const sequenceLength: number = sequence.length;
-    for (let i: number = 0; i < text.length; i++) {
-      result += AnsiEscape.getEscapeSequenceForAnsiCode(sequence[i % sequenceLength]) + text[i];
-    }
+  return result + AnsiEscape.getEscapeSequenceForAnsiCode(SgrParameterAttribute.DefaultForeground);
+}
 
-    return result + AnsiEscape.getEscapeSequenceForAnsiCode(SgrParameterAttribute.DefaultForeground);
-  }
-
-  private static _wrapTextInAnsiEscapeCodes(startCode: number, endCode: number, text: string): string {
-    return (
-      AnsiEscape.getEscapeSequenceForAnsiCode(startCode) +
-      text +
-      AnsiEscape.getEscapeSequenceForAnsiCode(endCode)
-    );
-  }
+function _wrapTextInAnsiEscapeCodes(startCode: number, endCode: number, text: string): string {
+  return (
+    AnsiEscape.getEscapeSequenceForAnsiCode(startCode) +
+    text +
+    AnsiEscape.getEscapeSequenceForAnsiCode(endCode)
+  );
 }

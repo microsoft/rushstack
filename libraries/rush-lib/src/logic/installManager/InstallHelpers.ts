@@ -383,7 +383,7 @@ export class InstallHelpers {
       configurationEnvironment = rushConfiguration.yarnOptions?.environmentVariables;
     }
 
-    return InstallHelpers._mergeEnvironmentVariables(process.env, configurationEnvironment, options);
+    return _mergeEnvironmentVariables(process.env, configurationEnvironment, options);
   }
 
   /**
@@ -494,63 +494,63 @@ export class InstallHelpers {
 
     lock.release();
   }
+}
 
-  // Helper for getPackageManagerEnvironment
-  private static _mergeEnvironmentVariables(
-    baseEnv: NodeJS.ProcessEnv,
-    environmentVariables?: IConfigurationEnvironment,
-    options: {
-      debug?: boolean;
-    } = {}
-  ): NodeJS.ProcessEnv {
-    const packageManagerEnv: NodeJS.ProcessEnv = baseEnv;
+// Helper for getPackageManagerEnvironment
+function _mergeEnvironmentVariables(
+  baseEnv: NodeJS.ProcessEnv,
+  environmentVariables?: IConfigurationEnvironment,
+  options: {
+    debug?: boolean;
+  } = {}
+): NodeJS.ProcessEnv {
+  const packageManagerEnv: NodeJS.ProcessEnv = baseEnv;
 
-    if (environmentVariables) {
-      // eslint-disable-next-line guard-for-in
-      for (const envVar in environmentVariables) {
-        let setEnvironmentVariable: boolean = true;
+  if (environmentVariables) {
+    // eslint-disable-next-line guard-for-in
+    for (const envVar in environmentVariables) {
+      let setEnvironmentVariable: boolean = true;
+      // eslint-disable-next-line no-console
+      console.log(`\nProcessing definition for environment variable: ${envVar}`);
+
+      if (baseEnv.hasOwnProperty(envVar)) {
+        setEnvironmentVariable = false;
         // eslint-disable-next-line no-console
-        console.log(`\nProcessing definition for environment variable: ${envVar}`);
+        console.log(`Environment variable already defined:`);
+        // eslint-disable-next-line no-console
+        console.log(`  Name: ${envVar}`);
+        // eslint-disable-next-line no-console
+        console.log(`  Existing value: ${baseEnv[envVar]}`);
+        // eslint-disable-next-line no-console
+        console.log(
+          `  Value set in ${RushConstants.rushJsonFilename}: ${environmentVariables[envVar].value}`
+        );
 
-        if (baseEnv.hasOwnProperty(envVar)) {
-          setEnvironmentVariable = false;
+        if (environmentVariables[envVar].override) {
+          setEnvironmentVariable = true;
           // eslint-disable-next-line no-console
-          console.log(`Environment variable already defined:`);
+          console.log(
+            `Overriding the environment variable with the value set in ${RushConstants.rushJsonFilename}.`
+          );
+        } else {
+          // eslint-disable-next-line no-console
+          console.log(Colorize.yellow(`WARNING: Not overriding the value of the environment variable.`));
+        }
+      }
+
+      if (setEnvironmentVariable) {
+        if (options.debug) {
+          // eslint-disable-next-line no-console
+          console.log(`Setting environment variable for package manager.`);
           // eslint-disable-next-line no-console
           console.log(`  Name: ${envVar}`);
           // eslint-disable-next-line no-console
-          console.log(`  Existing value: ${baseEnv[envVar]}`);
-          // eslint-disable-next-line no-console
-          console.log(
-            `  Value set in ${RushConstants.rushJsonFilename}: ${environmentVariables[envVar].value}`
-          );
-
-          if (environmentVariables[envVar].override) {
-            setEnvironmentVariable = true;
-            // eslint-disable-next-line no-console
-            console.log(
-              `Overriding the environment variable with the value set in ${RushConstants.rushJsonFilename}.`
-            );
-          } else {
-            // eslint-disable-next-line no-console
-            console.log(Colorize.yellow(`WARNING: Not overriding the value of the environment variable.`));
-          }
+          console.log(`  Value: ${environmentVariables[envVar].value}`);
         }
-
-        if (setEnvironmentVariable) {
-          if (options.debug) {
-            // eslint-disable-next-line no-console
-            console.log(`Setting environment variable for package manager.`);
-            // eslint-disable-next-line no-console
-            console.log(`  Name: ${envVar}`);
-            // eslint-disable-next-line no-console
-            console.log(`  Value: ${environmentVariables[envVar].value}`);
-          }
-          packageManagerEnv[envVar] = environmentVariables[envVar].value;
-        }
+        packageManagerEnv[envVar] = environmentVariables[envVar].value;
       }
     }
-
-    return packageManagerEnv;
   }
+
+  return packageManagerEnv;
 }

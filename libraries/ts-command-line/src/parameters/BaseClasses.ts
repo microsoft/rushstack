@@ -14,6 +14,9 @@ import type { CommandLineIntegerParameter } from './CommandLineIntegerParameter'
 import type { CommandLineStringListParameter } from './CommandLineStringListParameter';
 import type { CommandLineStringParameter } from './CommandLineStringParameter';
 
+// Matches the first character that *isn't* part of a valid upper-case argument name such as "URL_2"
+const _invalidArgumentNameRegExp: RegExp = /[^A-Z_0-9]/;
+
 /**
  * Identifies the kind of a CommandLineParameter.
  * @public
@@ -276,9 +279,6 @@ export abstract class CommandLineParameterBase {
  * @public
  */
 export abstract class CommandLineParameterWithArgument extends CommandLineParameterBase {
-  // Matches the first character that *isn't* part of a valid upper-case argument name such as "URL_2"
-  private static _invalidArgumentNameRegExp: RegExp = /[^A-Z_0-9]/;
-
   /** {@inheritDoc IBaseCommandLineDefinitionWithArgument.argumentName} */
   public readonly argumentName: string;
 
@@ -301,9 +301,7 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
         `Invalid name: "${definition.argumentName}". The argument name must be all upper case.`
       );
     }
-    const match: RegExpMatchArray | null = definition.argumentName.match(
-      CommandLineParameterWithArgument._invalidArgumentNameRegExp
-    );
+    const match: RegExpMatchArray | null = definition.argumentName.match(_invalidArgumentNameRegExp);
     if (match) {
       throw new Error(
         `The argument name "${definition.argumentName}" contains an invalid character "${match[0]}".` +

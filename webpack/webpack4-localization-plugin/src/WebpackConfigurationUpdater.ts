@@ -37,11 +37,11 @@ export class WebpackConfigurationUpdater {
       ignoreString: options.ignoreString
     };
 
-    WebpackConfigurationUpdater._addLoadersForLocFiles(options, loader, loaderOptions);
+    _addLoadersForLocFiles(options, loader, loaderOptions);
 
-    WebpackConfigurationUpdater._tryUpdateLocaleTokenInPublicPathPlugin(options);
+    _tryUpdateLocaleTokenInPublicPathPlugin(options);
 
-    WebpackConfigurationUpdater._tryUpdateSourceMapFilename(options.configuration);
+    _tryUpdateSourceMapFilename(options.configuration);
   }
 
   public static amendWebpackConfigurationForInPlaceLocFiles(
@@ -54,7 +54,7 @@ export class WebpackConfigurationUpdater {
       ignoreString: options.ignoreString
     };
 
-    WebpackConfigurationUpdater._addRulesToConfiguration(options.configuration, [
+    _addRulesToConfiguration(options.configuration, [
       {
         test: Constants.RESOURCE_FILE_NAME_REGEXP,
         use: [
@@ -68,91 +68,88 @@ export class WebpackConfigurationUpdater {
       }
     ]);
   }
+}
 
-  private static _tryUpdateLocaleTokenInPublicPathPlugin(options: IWebpackConfigurationUpdaterOptions): void {
-    let setPublicPathPlugin: typeof SetPublicPathPluginPackageType.SetPublicPathPlugin | undefined;
-    try {
-      const pluginPackage: typeof SetPublicPathPluginPackageType = require('@rushstack/set-webpack-public-path-plugin');
-      setPublicPathPlugin = pluginPackage.SetPublicPathPlugin;
-    } catch (e) {
-      // public path plugin isn't present - ignore
-    }
+function _tryUpdateLocaleTokenInPublicPathPlugin(options: IWebpackConfigurationUpdaterOptions): void {
+  let setPublicPathPlugin: typeof SetPublicPathPluginPackageType.SetPublicPathPlugin | undefined;
+  try {
+    const pluginPackage: typeof SetPublicPathPluginPackageType = require('@rushstack/set-webpack-public-path-plugin');
+    setPublicPathPlugin = pluginPackage.SetPublicPathPlugin;
+  } catch (e) {
+    // public path plugin isn't present - ignore
+  }
 
-    if (setPublicPathPlugin && options.configuration.plugins) {
-      for (const plugin of options.configuration.plugins) {
-        if (plugin instanceof setPublicPathPlugin) {
-          if (
-            plugin.options &&
-            plugin.options.scriptName &&
-            plugin.options.scriptName.isTokenized &&
-            plugin.options.scriptName.name
-          ) {
-            plugin.options.scriptName.name = plugin.options.scriptName.name.replace(
-              /\[locale\]/g,
-              options.localeNameOrPlaceholder
-            );
-          }
+  if (setPublicPathPlugin && options.configuration.plugins) {
+    for (const plugin of options.configuration.plugins) {
+      if (plugin instanceof setPublicPathPlugin) {
+        if (
+          plugin.options &&
+          plugin.options.scriptName &&
+          plugin.options.scriptName.isTokenized &&
+          plugin.options.scriptName.name
+        ) {
+          plugin.options.scriptName.name = plugin.options.scriptName.name.replace(
+            /\[locale\]/g,
+            options.localeNameOrPlaceholder
+          );
         }
       }
     }
   }
+}
 
-  private static _addLoadersForLocFiles(
-    options: IWebpackConfigurationUpdaterOptions,
-    loader: string,
-    loaderOptions: IBaseLoaderOptions
-  ): void {
-    const { globsToIgnore, configuration } = options;
-    const rules: Webpack.RuleSetCondition =
-      globsToIgnore && globsToIgnore.length > 0
-        ? {
-            include: Constants.RESOURCE_FILE_NAME_REGEXP,
-            exclude: (filePath: string): boolean =>
-              globsToIgnore.some((glob: string): boolean => minimatch(filePath, glob))
-          }
-        : Constants.RESOURCE_FILE_NAME_REGEXP;
-    WebpackConfigurationUpdater._addRulesToConfiguration(configuration, [
-      {
-        test: rules,
-        use: [
-          {
-            loader: loader,
-            options: loaderOptions
-          }
-        ],
-        type: 'json',
-        sideEffects: false
-      }
-    ]);
+function _addLoadersForLocFiles(
+  options: IWebpackConfigurationUpdaterOptions,
+  loader: string,
+  loaderOptions: IBaseLoaderOptions
+): void {
+  const { globsToIgnore, configuration } = options;
+  const rules: Webpack.RuleSetCondition =
+    globsToIgnore && globsToIgnore.length > 0
+      ? {
+          include: Constants.RESOURCE_FILE_NAME_REGEXP,
+          exclude: (filePath: string): boolean =>
+            globsToIgnore.some((glob: string): boolean => minimatch(filePath, glob))
+        }
+      : Constants.RESOURCE_FILE_NAME_REGEXP;
+  _addRulesToConfiguration(configuration, [
+    {
+      test: rules,
+      use: [
+        {
+          loader: loader,
+          options: loaderOptions
+        }
+      ],
+      type: 'json',
+      sideEffects: false
+    }
+  ]);
+}
+
+function _addRulesToConfiguration(configuration: Webpack.Configuration, rules: Webpack.RuleSetRule[]): void {
+  if (!configuration.module) {
+    configuration.module = {
+      rules: []
+    };
   }
 
-  private static _addRulesToConfiguration(
-    configuration: Webpack.Configuration,
-    rules: Webpack.RuleSetRule[]
-  ): void {
-    if (!configuration.module) {
-      configuration.module = {
-        rules: []
-      };
-    }
-
-    if (!configuration.module.rules) {
-      configuration.module.rules = [];
-    }
-
-    configuration.module.rules.push(...rules);
+  if (!configuration.module.rules) {
+    configuration.module.rules = [];
   }
 
-  private static _tryUpdateSourceMapFilename(configuration: Webpack.Configuration): void {
-    if (!configuration.output) {
-      configuration.output = {}; // This should never happen
-    }
+  configuration.module.rules.push(...rules);
+}
 
-    if (configuration.output.sourceMapFilename !== undefined) {
-      configuration.output.sourceMapFilename = configuration.output.sourceMapFilename.replace(
-        FILE_TOKEN_REGEX,
-        Constants.NO_LOCALE_SOURCE_MAP_FILENAME_TOKEN
-      );
-    }
+function _tryUpdateSourceMapFilename(configuration: Webpack.Configuration): void {
+  if (!configuration.output) {
+    configuration.output = {}; // This should never happen
+  }
+
+  if (configuration.output.sourceMapFilename !== undefined) {
+    configuration.output.sourceMapFilename = configuration.output.sourceMapFilename.replace(
+      FILE_TOKEN_REGEX,
+      Constants.NO_LOCALE_SOURCE_MAP_FILENAME_TOKEN
+    );
   }
 }

@@ -14,6 +14,17 @@ export interface IAnsiEscapeConvertForTestsOptions {
   encodeNewlines?: boolean;
 }
 
+// For now, we only care about the Control Sequence Introducer (CSI) commands which always start with "[".
+// eslint-disable-next-line no-control-regex
+const _csiRegExp: RegExp = /\x1b\[([\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e])/gu;
+
+// Text coloring is performed using Select Graphic Rendition (SGR) codes, which come after the
+// CSI introducer "ESC [".  The SGR sequence is a number followed by "m".
+const _sgrRegExp: RegExp = /([0-9]+)m/u;
+
+const _backslashNRegExp: RegExp = /\n/g;
+const _backslashRRegExp: RegExp = /\r/g;
+
 /**
  * Operations for working with text strings that contain
  * {@link https://en.wikipedia.org/wiki/ANSI_escape_code | ANSI escape codes}.
@@ -21,17 +32,6 @@ export interface IAnsiEscapeConvertForTestsOptions {
  * @public
  */
 export class AnsiEscape {
-  // For now, we only care about the Control Sequence Introducer (CSI) commands which always start with "[".
-  // eslint-disable-next-line no-control-regex
-  private static readonly _csiRegExp: RegExp = /\x1b\[([\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e])/gu;
-
-  // Text coloring is performed using Select Graphic Rendition (SGR) codes, which come after the
-  // CSI introducer "ESC [".  The SGR sequence is a number followed by "m".
-  private static readonly _sgrRegExp: RegExp = /([0-9]+)m/u;
-
-  private static readonly _backslashNRegExp: RegExp = /\n/g;
-  private static readonly _backslashRRegExp: RegExp = /\r/g;
-
   public static getEscapeSequenceForAnsiCode(code: number): string {
     return `\u001b[${code}m`;
   }
@@ -41,7 +41,7 @@ export class AnsiEscape {
    * colorized console output to a log file.
    */
   public static removeCodes(text: string): string {
-    return text.replace(AnsiEscape._csiRegExp, '');
+    return text.replace(_csiRegExp, '');
   }
 
   /**
@@ -53,12 +53,12 @@ export class AnsiEscape {
       options = {};
     }
 
-    let result: string = text.replace(AnsiEscape._csiRegExp, (capture: string, csiCode: string) => {
+    let result: string = text.replace(_csiRegExp, (capture: string, csiCode: string) => {
       // If it is an SGR code, then try to show a friendly token
-      const match: RegExpMatchArray | null = csiCode.match(AnsiEscape._sgrRegExp);
+      const match: RegExpMatchArray | null = csiCode.match(_sgrRegExp);
       if (match) {
         const sgrParameter: number = parseInt(match[1], 10);
-        const sgrParameterName: string | undefined = AnsiEscape._tryGetSgrFriendlyName(sgrParameter);
+        const sgrParameterName: string | undefined = _tryGetSgrFriendlyName(sgrParameter);
         if (sgrParameterName) {
           // Example: "[black-bg]"
           return `[${sgrParameterName}]`;
@@ -71,84 +71,82 @@ export class AnsiEscape {
     });
 
     if (options.encodeNewlines) {
-      result = result
-        .replace(AnsiEscape._backslashNRegExp, '[n]')
-        .replace(AnsiEscape._backslashRRegExp, `[r]`);
+      result = result.replace(_backslashNRegExp, '[n]').replace(_backslashRRegExp, `[r]`);
     }
     return result;
   }
+}
 
-  // Returns a human-readable token representing an SGR parameter, or undefined for parameter that is not well-known.
-  // The SGR parameter numbers are documented in this table:
-  // https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
-  private static _tryGetSgrFriendlyName(sgiParameter: number): string | undefined {
-    switch (sgiParameter) {
-      case SgrParameterAttribute.BlackForeground:
-        return 'black';
-      case SgrParameterAttribute.RedForeground:
-        return 'red';
-      case SgrParameterAttribute.GreenForeground:
-        return 'green';
-      case SgrParameterAttribute.YellowForeground:
-        return 'yellow';
-      case SgrParameterAttribute.BlueForeground:
-        return 'blue';
-      case SgrParameterAttribute.MagentaForeground:
-        return 'magenta';
-      case SgrParameterAttribute.CyanForeground:
-        return 'cyan';
-      case SgrParameterAttribute.WhiteForeground:
-        return 'white';
-      case SgrParameterAttribute.GrayForeground:
-        return 'gray';
-      case SgrParameterAttribute.DefaultForeground:
-        return 'default';
+// Returns a human-readable token representing an SGR parameter, or undefined for parameter that is not well-known.
+// The SGR parameter numbers are documented in this table:
+// https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
+function _tryGetSgrFriendlyName(sgiParameter: number): string | undefined {
+  switch (sgiParameter) {
+    case SgrParameterAttribute.BlackForeground:
+      return 'black';
+    case SgrParameterAttribute.RedForeground:
+      return 'red';
+    case SgrParameterAttribute.GreenForeground:
+      return 'green';
+    case SgrParameterAttribute.YellowForeground:
+      return 'yellow';
+    case SgrParameterAttribute.BlueForeground:
+      return 'blue';
+    case SgrParameterAttribute.MagentaForeground:
+      return 'magenta';
+    case SgrParameterAttribute.CyanForeground:
+      return 'cyan';
+    case SgrParameterAttribute.WhiteForeground:
+      return 'white';
+    case SgrParameterAttribute.GrayForeground:
+      return 'gray';
+    case SgrParameterAttribute.DefaultForeground:
+      return 'default';
 
-      case SgrParameterAttribute.BlackBackground:
-        return 'black-bg';
-      case SgrParameterAttribute.RedBackground:
-        return 'red-bg';
-      case SgrParameterAttribute.GreenBackground:
-        return 'green-bg';
-      case SgrParameterAttribute.YellowBackground:
-        return 'yellow-bg';
-      case SgrParameterAttribute.BlueBackground:
-        return 'blue-bg';
-      case SgrParameterAttribute.MagentaBackground:
-        return 'magenta-bg';
-      case SgrParameterAttribute.CyanBackground:
-        return 'cyan-bg';
-      case SgrParameterAttribute.WhiteBackground:
-        return 'white-bg';
-      case SgrParameterAttribute.GrayBackground:
-        return 'gray-bg';
-      case SgrParameterAttribute.DefaultBackground:
-        return 'default-bg';
+    case SgrParameterAttribute.BlackBackground:
+      return 'black-bg';
+    case SgrParameterAttribute.RedBackground:
+      return 'red-bg';
+    case SgrParameterAttribute.GreenBackground:
+      return 'green-bg';
+    case SgrParameterAttribute.YellowBackground:
+      return 'yellow-bg';
+    case SgrParameterAttribute.BlueBackground:
+      return 'blue-bg';
+    case SgrParameterAttribute.MagentaBackground:
+      return 'magenta-bg';
+    case SgrParameterAttribute.CyanBackground:
+      return 'cyan-bg';
+    case SgrParameterAttribute.WhiteBackground:
+      return 'white-bg';
+    case SgrParameterAttribute.GrayBackground:
+      return 'gray-bg';
+    case SgrParameterAttribute.DefaultBackground:
+      return 'default-bg';
 
-      case SgrParameterAttribute.Bold:
-        return 'bold';
-      case SgrParameterAttribute.Dim:
-        return 'dim';
-      case SgrParameterAttribute.NormalColorOrIntensity:
-        return 'normal';
-      case SgrParameterAttribute.Underline:
-        return 'underline';
-      case SgrParameterAttribute.UnderlineOff:
-        return 'underline-off';
-      case SgrParameterAttribute.Blink:
-        return 'blink';
-      case SgrParameterAttribute.BlinkOff:
-        return 'blink-off';
-      case SgrParameterAttribute.InvertColor:
-        return 'invert';
-      case SgrParameterAttribute.InvertColorOff:
-        return 'invert-off';
-      case SgrParameterAttribute.Hidden:
-        return 'hidden';
-      case SgrParameterAttribute.HiddenOff:
-        return 'hidden-off';
-      default:
-        return undefined;
-    }
+    case SgrParameterAttribute.Bold:
+      return 'bold';
+    case SgrParameterAttribute.Dim:
+      return 'dim';
+    case SgrParameterAttribute.NormalColorOrIntensity:
+      return 'normal';
+    case SgrParameterAttribute.Underline:
+      return 'underline';
+    case SgrParameterAttribute.UnderlineOff:
+      return 'underline-off';
+    case SgrParameterAttribute.Blink:
+      return 'blink';
+    case SgrParameterAttribute.BlinkOff:
+      return 'blink-off';
+    case SgrParameterAttribute.InvertColor:
+      return 'invert';
+    case SgrParameterAttribute.InvertColorOff:
+      return 'invert-off';
+    case SgrParameterAttribute.Hidden:
+      return 'hidden';
+    case SgrParameterAttribute.HiddenOff:
+      return 'hidden-off';
+    default:
+      return undefined;
   }
 }

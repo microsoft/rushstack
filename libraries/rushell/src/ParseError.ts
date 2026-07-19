@@ -24,7 +24,7 @@ export class ParseError extends Error {
   public readonly innerError: Error | undefined;
 
   public constructor(message: string, range: TextRange, innerError?: Error) {
-    super(ParseError._formatMessage(message, range));
+    super(_formatMessage(message, range));
 
     // Boilerplate for extending a system class
     //
@@ -38,25 +38,25 @@ export class ParseError extends Error {
     this.range = range;
     this.innerError = innerError;
   }
+}
 
-  /**
-   * Generates a line/column prefix.  Example with line=2 and column=5
-   * and message="An error occurred":
-   * ```
-   * "(2,5): An error occurred"
-   * ```
-   */
-  private static _formatMessage(message: string, range: TextRange): string {
-    if (!message) {
-      message = 'An unknown error occurred';
-    }
-
-    if (range.pos !== 0 || range.end !== 0) {
-      const location: ITextLocation = range.getLocation(range.pos);
-      if (location.line) {
-        return `(${location.line},${location.column}): ` + message;
-      }
-    }
-    return message;
+/**
+ * Generates a line/column prefix.  Example with line=2 and column=5
+ * and message="An error occurred":
+ * ```
+ * "(2,5): An error occurred"
+ * ```
+ */
+function _formatMessage(message: string, range: TextRange): string {
+  if (!message) {
+    message = 'An unknown error occurred';
   }
+
+  if (range.pos !== 0 || range.end !== 0) {
+    const location: ITextLocation = range.getLocation(range.pos);
+    if (location.line) {
+      return `(${location.line},${location.column}): ` + message;
+    }
+  }
+  return message;
 }

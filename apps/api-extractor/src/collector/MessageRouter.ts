@@ -116,7 +116,7 @@ export class MessageRouter {
   private _applyMessagesConfig(messagesConfig: IExtractorMessagesConfig): void {
     if (messagesConfig.compilerMessageReporting) {
       for (const messageId of Object.getOwnPropertyNames(messagesConfig.compilerMessageReporting)) {
-        const reportingRule: IReportingRule = MessageRouter._getNormalizedRule(
+        const reportingRule: IReportingRule = _getNormalizedRule(
           messagesConfig.compilerMessageReporting[messageId]
         );
 
@@ -135,7 +135,7 @@ export class MessageRouter {
 
     if (messagesConfig.extractorMessageReporting) {
       for (const messageId of Object.getOwnPropertyNames(messagesConfig.extractorMessageReporting)) {
-        const reportingRule: IReportingRule = MessageRouter._getNormalizedRule(
+        const reportingRule: IReportingRule = _getNormalizedRule(
           messagesConfig.extractorMessageReporting[messageId]
         );
 
@@ -159,7 +159,7 @@ export class MessageRouter {
 
     if (messagesConfig.tsdocMessageReporting) {
       for (const messageId of Object.getOwnPropertyNames(messagesConfig.tsdocMessageReporting)) {
-        const reportingRule: IReportingRule = MessageRouter._getNormalizedRule(
+        const reportingRule: IReportingRule = _getNormalizedRule(
           messagesConfig.tsdocMessageReporting[messageId]
         );
 
@@ -180,13 +180,6 @@ export class MessageRouter {
         }
       }
     }
-  }
-
-  private static _getNormalizedRule(rule: IConfigMessageReportingRule): IReportingRule {
-    return {
-      logLevel: rule.logLevel || 'none',
-      addToApiReportFile: rule.addToApiReportFile || false
-    };
   }
 
   public get messages(): ReadonlyArray<ExtractorMessage> {
@@ -303,55 +296,7 @@ export class MessageRouter {
 
     const keyNamesToOmit: Set<string> = new Set(options.keyNamesToOmit);
 
-    return MessageRouter._buildJsonDumpObject(input, keyNamesToOmit);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private static _buildJsonDumpObject(input: any, keyNamesToOmit: Set<string>): any | undefined {
-    if (input === null || input === undefined) {
-      return null; // JSON uses null instead of undefined
-    }
-
-    switch (typeof input) {
-      case 'boolean':
-      case 'number':
-      case 'string':
-        return input;
-      case 'object':
-        if (Array.isArray(input)) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const outputArray: any[] = [];
-          for (const element of input) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const serializedElement: any = MessageRouter._buildJsonDumpObject(element, keyNamesToOmit);
-            if (serializedElement !== undefined) {
-              outputArray.push(serializedElement);
-            }
-          }
-          return outputArray;
-        }
-
-        const outputObject: object = {};
-        for (const key of Object.getOwnPropertyNames(input)) {
-          if (keyNamesToOmit.has(key)) {
-            continue;
-          }
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const value: any = input[key];
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const serializedValue: any = MessageRouter._buildJsonDumpObject(value, keyNamesToOmit);
-
-          if (serializedValue !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (outputObject as any)[key] = serializedValue;
-          }
-        }
-        return outputObject;
-    }
-
-    return undefined;
+    return _buildJsonDumpObject(input, keyNamesToOmit);
   }
 
   /**
@@ -665,4 +610,59 @@ export class MessageRouter {
       return Sort.compareByValue(a.messageId, b.messageId);
     });
   }
+}
+
+function _getNormalizedRule(rule: IConfigMessageReportingRule): IReportingRule {
+  return {
+    logLevel: rule.logLevel || 'none',
+    addToApiReportFile: rule.addToApiReportFile || false
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function _buildJsonDumpObject(input: any, keyNamesToOmit: Set<string>): any | undefined {
+  if (input === null || input === undefined) {
+    return null; // JSON uses null instead of undefined
+  }
+
+  switch (typeof input) {
+    case 'boolean':
+    case 'number':
+    case 'string':
+      return input;
+    case 'object':
+      if (Array.isArray(input)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const outputArray: any[] = [];
+        for (const element of input) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const serializedElement: any = _buildJsonDumpObject(element, keyNamesToOmit);
+          if (serializedElement !== undefined) {
+            outputArray.push(serializedElement);
+          }
+        }
+        return outputArray;
+      }
+
+      const outputObject: object = {};
+      for (const key of Object.getOwnPropertyNames(input)) {
+        if (keyNamesToOmit.has(key)) {
+          continue;
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const value: any = input[key];
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const serializedValue: any = _buildJsonDumpObject(value, keyNamesToOmit);
+
+        if (serializedValue !== undefined) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (outputObject as any)[key] = serializedValue;
+        }
+      }
+      return outputObject;
+  }
+
+  return undefined;
 }

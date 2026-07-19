@@ -204,19 +204,6 @@ class PasswordKeyboardLoop extends KeyboardLoop {
 }
 
 export class TerminalInput {
-  private static async _readLineAsync(): Promise<string> {
-    const readlineInterface: readline.Interface = readline.createInterface({ input: process.stdin });
-    try {
-      return await new Promise((resolve, reject) => {
-        readlineInterface.question('', (answer: string) => {
-          resolve(answer);
-        });
-      });
-    } finally {
-      readlineInterface.close();
-    }
-  }
-
   public static async promptYesNoAsync(options: IPromptYesNoOptions): Promise<boolean> {
     const keyboardLoop: YesNoKeyboardLoop = new YesNoKeyboardLoop(options);
     await keyboardLoop.startAsync();
@@ -228,12 +215,25 @@ export class TerminalInput {
     stderr.write(Colorize.green('==>') + ' ');
     stderr.write(Colorize.bold(options.message));
     stderr.write(' ');
-    return await TerminalInput._readLineAsync();
+    return await _readLineAsync();
   }
 
   public static async promptPasswordLineAsync(options: IPromptLineOptions): Promise<string> {
     const keyboardLoop: PasswordKeyboardLoop = new PasswordKeyboardLoop(options);
     await keyboardLoop.startAsync();
     return keyboardLoop.result;
+  }
+}
+
+async function _readLineAsync(): Promise<string> {
+  const readlineInterface: readline.Interface = readline.createInterface({ input: process.stdin });
+  try {
+    return await new Promise((resolve, reject) => {
+      readlineInterface.question('', (answer: string) => {
+        resolve(answer);
+      });
+    });
+  } finally {
+    readlineInterface.close();
   }
 }
