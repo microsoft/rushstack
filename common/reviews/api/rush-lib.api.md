@@ -651,6 +651,7 @@ export interface IOperationGraphContext extends ICreateOperationsContext {
 
 // @alpha
 export interface IOperationGraphIterationOptions {
+    getRunnerPersistence?: (operation: Operation) => boolean;
     // (undocumented)
     inputsSnapshot?: IInputsSnapshot;
     startTime?: number;

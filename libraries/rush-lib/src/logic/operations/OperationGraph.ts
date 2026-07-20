@@ -85,6 +85,7 @@ interface IExecutionIterationContext extends IOperationExecutionRecordContext {
   promise: Promise<OperationStatus> | undefined;
 
   startTime?: number;
+  getRunnerPersistence: IOperationGraphIterationOptions['getRunnerPersistence'];
 
   completedOperations: number;
   totalOperations: number;
@@ -572,9 +573,16 @@ export class OperationGraph implements IOperationGraph {
   ): Promise<IExecutionIterationContext | undefined> {
     const { _getInputsSnapshotAsync: getInputsSnapshotAsync } = this;
 
-    const { startTime = performance.now(), inputsSnapshot = await getInputsSnapshotAsync?.() } =
-      iterationOptions;
-    const iterationOptionsForCallbacks: IOperationGraphIterationOptions = { startTime, inputsSnapshot };
+    const {
+      startTime = performance.now(),
+      inputsSnapshot = await getInputsSnapshotAsync?.(),
+      getRunnerPersistence
+    } = iterationOptions;
+    const iterationOptionsForCallbacks: IOperationGraphIterationOptions = {
+      startTime,
+      inputsSnapshot,
+      getRunnerPersistence
+    };
 
     const { hooks } = this;
 
@@ -607,6 +615,7 @@ export class OperationGraph implements IOperationGraph {
     const iterationContext: IExecutionIterationContext = {
       abortController,
       startTime,
+      getRunnerPersistence,
       streamCollator,
       terminal,
       inputsSnapshot,
@@ -757,7 +766,8 @@ export class OperationGraph implements IOperationGraph {
 
     const iterationOptions: IOperationGraphIterationOptions = {
       inputsSnapshot: iterationContext.inputsSnapshot,
-      startTime: iterationContext.startTime
+      startTime: iterationContext.startTime,
+      getRunnerPersistence: iterationContext.getRunnerPersistence
     };
 
     const executionQueue: AsyncOperationQueue = new AsyncOperationQueue(
@@ -1009,6 +1019,17 @@ export class OperationGraph implements IOperationGraph {
 
       measureFn(`${PERF_PREFIX}:beforeLog`, () => this.hooks.beforeLog.call(logEntry));
       telemetry.log(logEntry);
+    }
+
+    const { getRunnerPersistence } = iterationContext;
+    if (getRunnerPersistence) {
+      const operationsToClose: Operation[] = [];
+      for (const operation of this.operations) {
+        if (!getRunnerPersistence(operation)) {
+          operationsToClose.push(operation);
+        }
+      }
+      await this.closeRunnersAsync(operationsToClose);
     }
 
     return status;

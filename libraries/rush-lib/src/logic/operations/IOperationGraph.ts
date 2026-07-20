@@ -21,6 +21,15 @@ export interface IOperationGraphIterationOptions {
    * The time when the iteration was scheduled, if available, as returned by `performance.now()`.
    */
   startTime?: number;
+
+  /**
+   * Returns whether the operation's runner should remain active after this iteration.
+   *
+   * @remarks
+   * When omitted, all runners remain active. Returning `false` causes the operation's runner to be closed
+   * after the iteration, including when the operation was disabled for that iteration.
+   */
+  getRunnerPersistence?: (operation: Operation) => boolean;
 }
 
 /**
