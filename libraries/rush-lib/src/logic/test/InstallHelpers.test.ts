@@ -3,9 +3,11 @@
 
 import { type IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
+import { TestUtilities } from '@rushstack/heft-config-file';
 
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { RushConfiguration } from '../../api/RushConfiguration';
+import type { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 
 describe(InstallHelpers.name, () => {
   describe(InstallHelpers.generateCommonPackageJsonAsync.name, () => {
@@ -87,7 +89,7 @@ describe(InstallHelpers.name, () => {
       expect(packageJson).toMatchSnapshot();
     });
 
-    it('omits the relocated pnpm settings for pnpm 11 (they belong in pnpm-workspace.yaml)', async () => {
+    it('does not generate a "pnpm" field for pnpm 11 (all settings belong in pnpm-workspace.yaml)', async () => {
       const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfigPnpm11/rush.json`;
       const rushConfiguration: RushConfiguration =
         RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
@@ -104,14 +106,17 @@ describe(InstallHelpers.name, () => {
       const packageJson: IPackageJson = JSON.parse(
         JsonFile.stringify(mockJsonFileSaveAsync.mock.calls[0][0], { ignoreUndefinedValues: true })
       );
-      const pnpmField: Record<string, unknown> = (packageJson as unknown as { pnpm: Record<string, unknown> })
-        .pnpm;
-      // For pnpm >= 11 these are written to common/temp/pnpm-workspace.yaml instead of package.json.
-      expect(pnpmField).not.toHaveProperty('overrides');
-      expect(pnpmField).not.toHaveProperty('packageExtensions');
-      expect(pnpmField).not.toHaveProperty('peerDependencyRules');
-      expect(pnpmField).not.toHaveProperty('allowedDeprecatedVersions');
-      expect(pnpmField).not.toHaveProperty('patchedDependencies');
+      // For pnpm >= 11 the "pnpm" field is not generated at all; every setting is written to
+      // common/temp/pnpm-workspace.yaml instead.
+      expect(packageJson).not.toHaveProperty('pnpm');
+
+      // ...and the relocated settings are instead placed on the generated pnpm-workspace.yaml file.
+      const workspaceFile: PnpmWorkspaceFile | undefined =
+        TestUtilities.stripAnnotations(pnpmSettings)?.workspaceFile;
+      expect(workspaceFile?.ignoredOptionalDependencies).toEqual(['fsevents']);
+      expect(workspaceFile?.trustPolicy).toEqual('no-downgrade');
+      expect(workspaceFile?.trustPolicyExclude).toEqual(['chokidar@4.0.3']);
+      expect(workspaceFile?.trustPolicyIgnoreAfter).toEqual(1440);
     });
   });
 });
