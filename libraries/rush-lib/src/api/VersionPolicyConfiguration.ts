@@ -62,6 +62,8 @@ export interface IVersionPolicyDependencyJson {
   versionFormatForCommit?: VersionFormatForCommit;
 }
 
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 /**
  * Use this class to load and save the "common/config/rush/version-policies.json" config file.
  * This config file configures how different groups of projects will be published by Rush,
@@ -69,8 +71,6 @@ export interface IVersionPolicyDependencyJson {
  * @public
  */
 export class VersionPolicyConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   private _jsonFileName: string;
 
   /**
@@ -170,10 +170,7 @@ export class VersionPolicyConfiguration {
     if (!FileSystem.exists(this._jsonFileName)) {
       return;
     }
-    const versionPolicyJson: IVersionPolicyJson[] = JsonFile.loadAndValidate(
-      this._jsonFileName,
-      VersionPolicyConfiguration._jsonSchema
-    );
+    const versionPolicyJson: IVersionPolicyJson[] = JsonFile.loadAndValidate(this._jsonFileName, _jsonSchema);
 
     versionPolicyJson.forEach((policyJson) => {
       const policy: VersionPolicy | undefined = VersionPolicy.load(policyJson);

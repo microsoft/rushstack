@@ -202,103 +202,6 @@ export class Async {
     return result;
   }
 
-  private static async _forEachWeightedAsync<TReturn, TEntry extends { weight: number; element: TReturn }>(
-    iterable: AsyncIterable<TEntry>,
-    callback: (entry: TReturn, arrayIndex: number) => Promise<void>,
-    options?: IAsyncParallelismOptions | undefined
-  ): Promise<void> {
-    await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
-      const concurrency: number =
-        options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
-      let concurrentUnitsInProgress: number = 0;
-
-      const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (iterable as AsyncIterable<TEntry>)[
-        Symbol.asyncIterator
-      ].call(iterable);
-
-      let arrayIndex: number = 0;
-      let iteratorIsComplete: boolean = false;
-      let promiseHasResolvedOrRejected: boolean = false;
-      // iterator that is stored when the loop exits early due to not enough concurrency
-      let nextIterator: IteratorResult<TEntry> | undefined = undefined;
-
-      async function queueOperationsAsync(): Promise<void> {
-        while (
-          concurrentUnitsInProgress < concurrency &&
-          !iteratorIsComplete &&
-          !promiseHasResolvedOrRejected
-        ) {
-          // Increment the current concurrency units in progress by the concurrency limit before fetching the iterator weight.
-          // This function is reentrant, so this if concurrency is finite, at most 1 operation will be waiting. If it's infinite,
-          //  there will be effectively no cap on the number of operations waiting.
-          const limitedConcurrency: number = !Number.isFinite(concurrency) ? 1 : concurrency;
-          concurrentUnitsInProgress += limitedConcurrency;
-          const currentIteratorResult: IteratorResult<TEntry> = nextIterator ?? (await iterator.next());
-          // eslint-disable-next-line require-atomic-updates
-          iteratorIsComplete = !!currentIteratorResult.done;
-
-          if (!iteratorIsComplete) {
-            const currentIteratorValue: TEntry = currentIteratorResult.value;
-            Async.validateWeightedIterable(currentIteratorValue);
-            // Cap the weight to concurrency, this allows 0 weight items to execute despite the concurrency limit.
-            const weight: number = Math.min(currentIteratorValue.weight, concurrency);
-
-            // Remove the "lock" from the concurrency check and only apply the current weight.
-            //  This should allow other operations to execute.
-            concurrentUnitsInProgress -= limitedConcurrency;
-
-            // Wait until there's enough capacity to run this job, this function will be re-entered as tasks call `onOperationCompletionAsync`
-            const wouldExceedConcurrency: boolean = concurrentUnitsInProgress + weight > concurrency;
-            const allowOversubscription: boolean = options?.allowOversubscription ?? false;
-            if (!allowOversubscription && wouldExceedConcurrency) {
-              // eslint-disable-next-line require-atomic-updates
-              nextIterator = currentIteratorResult;
-              break;
-            }
-
-            // eslint-disable-next-line require-atomic-updates
-            nextIterator = undefined;
-            concurrentUnitsInProgress += weight;
-
-            Promise.resolve(callback(currentIteratorValue.element, arrayIndex++))
-              .then(async () => {
-                // Remove the operation completely from the in progress units.
-                concurrentUnitsInProgress -= weight;
-                await onOperationCompletionAsync();
-              })
-              .catch((error) => {
-                promiseHasResolvedOrRejected = true;
-                reject(error);
-              });
-          } else {
-            // The iterator is complete and there wasn't a value, so untrack the waiting state.
-            concurrentUnitsInProgress -= limitedConcurrency;
-          }
-        }
-
-        if (iteratorIsComplete) {
-          await onOperationCompletionAsync();
-        }
-      }
-
-      async function onOperationCompletionAsync(): Promise<void> {
-        if (!promiseHasResolvedOrRejected) {
-          if (concurrentUnitsInProgress === 0 && iteratorIsComplete) {
-            promiseHasResolvedOrRejected = true;
-            resolve();
-          } else if (!iteratorIsComplete) {
-            await queueOperationsAsync();
-          }
-        }
-      }
-
-      queueOperationsAsync().catch((error) => {
-        promiseHasResolvedOrRejected = true;
-        reject(error);
-      });
-    });
-  }
-
   /**
    * Given an input array and a `callback` function, invoke the callback to start a
    * promise for each element in the array.
@@ -359,7 +262,7 @@ export class Async {
     callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
     options?: IAsyncParallelismOptions
   ): Promise<void> {
-    await Async._forEachWeightedAsync(toWeightedIterator(iterable, options?.weighted), callback, options);
+    await _forEachWeightedAsync(toWeightedIterator(iterable, options?.weighted), callback, options);
   }
 
   /**
@@ -437,6 +340,103 @@ export class Async {
       }
     }
   }
+}
+
+async function _forEachWeightedAsync<TReturn, TEntry extends { weight: number; element: TReturn }>(
+  iterable: AsyncIterable<TEntry>,
+  callback: (entry: TReturn, arrayIndex: number) => Promise<void>,
+  options?: IAsyncParallelismOptions | undefined
+): Promise<void> {
+  await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
+    const concurrency: number =
+      options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
+    let concurrentUnitsInProgress: number = 0;
+
+    const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (iterable as AsyncIterable<TEntry>)[
+      Symbol.asyncIterator
+    ].call(iterable);
+
+    let arrayIndex: number = 0;
+    let iteratorIsComplete: boolean = false;
+    let promiseHasResolvedOrRejected: boolean = false;
+    // iterator that is stored when the loop exits early due to not enough concurrency
+    let nextIterator: IteratorResult<TEntry> | undefined = undefined;
+
+    async function queueOperationsAsync(): Promise<void> {
+      while (
+        concurrentUnitsInProgress < concurrency &&
+        !iteratorIsComplete &&
+        !promiseHasResolvedOrRejected
+      ) {
+        // Increment the current concurrency units in progress by the concurrency limit before fetching the iterator weight.
+        // This function is reentrant, so this if concurrency is finite, at most 1 operation will be waiting. If it's infinite,
+        //  there will be effectively no cap on the number of operations waiting.
+        const limitedConcurrency: number = !Number.isFinite(concurrency) ? 1 : concurrency;
+        concurrentUnitsInProgress += limitedConcurrency;
+        const currentIteratorResult: IteratorResult<TEntry> = nextIterator ?? (await iterator.next());
+        // eslint-disable-next-line require-atomic-updates
+        iteratorIsComplete = !!currentIteratorResult.done;
+
+        if (!iteratorIsComplete) {
+          const currentIteratorValue: TEntry = currentIteratorResult.value;
+          Async.validateWeightedIterable(currentIteratorValue);
+          // Cap the weight to concurrency, this allows 0 weight items to execute despite the concurrency limit.
+          const weight: number = Math.min(currentIteratorValue.weight, concurrency);
+
+          // Remove the "lock" from the concurrency check and only apply the current weight.
+          //  This should allow other operations to execute.
+          concurrentUnitsInProgress -= limitedConcurrency;
+
+          // Wait until there's enough capacity to run this job, this function will be re-entered as tasks call `onOperationCompletionAsync`
+          const wouldExceedConcurrency: boolean = concurrentUnitsInProgress + weight > concurrency;
+          const allowOversubscription: boolean = options?.allowOversubscription ?? false;
+          if (!allowOversubscription && wouldExceedConcurrency) {
+            // eslint-disable-next-line require-atomic-updates
+            nextIterator = currentIteratorResult;
+            break;
+          }
+
+          // eslint-disable-next-line require-atomic-updates
+          nextIterator = undefined;
+          concurrentUnitsInProgress += weight;
+
+          Promise.resolve(callback(currentIteratorValue.element, arrayIndex++))
+            .then(async () => {
+              // Remove the operation completely from the in progress units.
+              concurrentUnitsInProgress -= weight;
+              await onOperationCompletionAsync();
+            })
+            .catch((error) => {
+              promiseHasResolvedOrRejected = true;
+              reject(error);
+            });
+        } else {
+          // The iterator is complete and there wasn't a value, so untrack the waiting state.
+          concurrentUnitsInProgress -= limitedConcurrency;
+        }
+      }
+
+      if (iteratorIsComplete) {
+        await onOperationCompletionAsync();
+      }
+    }
+
+    async function onOperationCompletionAsync(): Promise<void> {
+      if (!promiseHasResolvedOrRejected) {
+        if (concurrentUnitsInProgress === 0 && iteratorIsComplete) {
+          promiseHasResolvedOrRejected = true;
+          resolve();
+        } else if (!iteratorIsComplete) {
+          await queueOperationsAsync();
+        }
+      }
+    }
+
+    queueOperationsAsync().catch((error) => {
+      promiseHasResolvedOrRejected = true;
+      reject(error);
+    });
+  });
 }
 
 /**

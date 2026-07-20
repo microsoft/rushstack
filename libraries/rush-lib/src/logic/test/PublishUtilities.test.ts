@@ -8,7 +8,7 @@ import { Executable, type IWaitForExitResult } from '@rushstack/node-core-librar
 import { type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { PublishUtilities, type IChangeRequests } from '../PublishUtilities';
+import { PublishUtilities, _updateCommitDetailsAsync, type IChangeRequests } from '../PublishUtilities';
 import { ChangeFiles } from '../ChangeFiles';
 import { Git } from '../Git';
 
@@ -138,7 +138,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
         createGitResult('commit 0123456789abcdef\nAuthor: Test Author <test@example.com>\n')
       );
 
-    await PublishUtilities['_updateCommitDetailsAsync'](git, changeFilePath, changes);
+    await _updateCommitDetailsAsync(git, changeFilePath, changes);
 
     expect(spawnSpy).toHaveBeenCalledWith(gitPath, ['log', '-n', '1', '--', changeFilePath], {
       currentWorkingDirectory: path.dirname(changeFilePath)
@@ -168,7 +168,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
         createGitResult('commit 0123456789abcdef\nAuthor: Test Author <test@example.com>\n')
       );
 
-    await PublishUtilities['_updateCommitDetailsAsync'](git, changeFilePath, changes);
+    await _updateCommitDetailsAsync(git, changeFilePath, changes);
 
     expect(spawnSpy).toHaveBeenCalledWith(gitPath, ['log', '-n', '1', '--', changeFilePath], {
       currentWorkingDirectory: path.dirname(changeFilePath)
@@ -198,7 +198,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
           )
         );
 
-      await PublishUtilities['_updateCommitDetailsAsync'](git, path.resolve('change.json'), changes);
+      await _updateCommitDetailsAsync(git, path.resolve('change.json'), changes);
 
       expect(changes).toEqual([{ packageName: 'd' }]);
     }

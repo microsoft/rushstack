@@ -323,35 +323,8 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
    * `LookupByPath.iteratePathSegments('foo\\bar\\baz', '\\')` yields 'foo', 'bar', 'baz'
    */
   public static *iteratePathSegments(serializedPath: string, delimiter: string = '/'): Iterable<string> {
-    for (const prefixMatch of this._iteratePrefixes(serializedPath, delimiter)) {
+    for (const prefixMatch of _iteratePrefixes(serializedPath, delimiter)) {
       yield prefixMatch.prefix;
-    }
-  }
-
-  private static *_iteratePrefixes(input: string, delimiter: string = '/'): Iterable<IPrefixEntry> {
-    if (!input) {
-      return;
-    }
-
-    let previousIndex: number = 0;
-    let nextIndex: number = input.indexOf(delimiter);
-
-    // Leading segments
-    while (nextIndex >= 0) {
-      yield {
-        prefix: input.slice(previousIndex, nextIndex),
-        index: nextIndex
-      };
-      previousIndex = nextIndex + 1;
-      nextIndex = input.indexOf(delimiter, previousIndex);
-    }
-
-    // Last segment
-    if (previousIndex < input.length) {
-      yield {
-        prefix: input.slice(previousIndex, input.length),
-        index: input.length
-      };
     }
   }
 
@@ -488,7 +461,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
     query: string,
     delimiter: string = this.delimiter
   ): IPrefixMatch<TItem> | undefined {
-    return this._findLongestPrefixMatch(LookupByPath._iteratePrefixes(query, delimiter));
+    return this._findLongestPrefixMatch(_iteratePrefixes(query, delimiter));
   }
 
   /**
@@ -607,9 +580,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
   /**
    * {@inheritdoc IReadonlyLookupByPath.toJson}
    */
-  public toJson<TSerialized>(
-    serializeValue: (value: TItem) => TSerialized
-  ): ILookupByPathJson<TSerialized> {
+  public toJson<TSerialized>(serializeValue: (value: TItem) => TSerialized): ILookupByPathJson<TSerialized> {
     const valueToIndex: Map<TItem, number> = new Map();
     const values: TSerialized[] = [];
 
@@ -671,10 +642,10 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
 
     const result: LookupByPath<TItem> = new LookupByPath<TItem>(undefined, json.delimiter);
 
-    const deserializeNode: (
+    const deserializeNode: (jsonNode: ISerializedPathTrieNode, targetNode: IPathTrieNode<TItem>) => void = (
       jsonNode: ISerializedPathTrieNode,
       targetNode: IPathTrieNode<TItem>
-    ) => void = (jsonNode: ISerializedPathTrieNode, targetNode: IPathTrieNode<TItem>) => {
+    ) => {
       if (jsonNode.valueIndex !== undefined) {
         targetNode.value = deserializedValues[jsonNode.valueIndex];
         result._size++;
@@ -750,7 +721,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
     delimiter: string = this.delimiter
   ): IPathTrieNode<TItem> | undefined {
     let node: IPathTrieNode<TItem> = this._root;
-    for (const { prefix } of LookupByPath._iteratePrefixes(query, delimiter)) {
+    for (const { prefix } of _iteratePrefixes(query, delimiter)) {
       if (!node.children) {
         return undefined;
       }
@@ -761,5 +732,32 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
       node = child;
     }
     return node;
+  }
+}
+
+function* _iteratePrefixes(input: string, delimiter: string = '/'): Iterable<IPrefixEntry> {
+  if (!input) {
+    return;
+  }
+
+  let previousIndex: number = 0;
+  let nextIndex: number = input.indexOf(delimiter);
+
+  // Leading segments
+  while (nextIndex >= 0) {
+    yield {
+      prefix: input.slice(previousIndex, nextIndex),
+      index: nextIndex
+    };
+    previousIndex = nextIndex + 1;
+    nextIndex = input.indexOf(delimiter, previousIndex);
+  }
+
+  // Last segment
+  if (previousIndex < input.length) {
+    yield {
+      prefix: input.slice(previousIndex, input.length),
+      index: input.length
+    };
   }
 }

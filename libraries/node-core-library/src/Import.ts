@@ -149,20 +149,20 @@ interface IPackageDescriptor {
   packageName: string;
 }
 
+let _builtInModules: Set<string> | undefined;
+function _getBuiltInModules(): Set<string> {
+  if (!_builtInModules) {
+    _builtInModules = new Set<string>(nodeModule.builtinModules);
+  }
+
+  return _builtInModules;
+}
+
 /**
  * Helpers for resolving and importing Node.js modules.
  * @public
  */
 export class Import {
-  private static __builtInModules: Set<string> | undefined;
-  private static get _builtInModules(): Set<string> {
-    if (!Import.__builtInModules) {
-      Import.__builtInModules = new Set<string>(nodeModule.builtinModules);
-    }
-
-    return Import.__builtInModules;
-  }
-
   /**
    * Provides a way to improve process startup times by lazy-loading imported modules.
    *
@@ -281,12 +281,12 @@ export class Import {
     // against the first path segment
     const slashIndex: number = modulePath.indexOf('/');
     const moduleName: string = slashIndex === -1 ? modulePath : modulePath.slice(0, slashIndex);
-    if (!includeSystemModules && Import._builtInModules.has(moduleName)) {
+    if (!includeSystemModules && _getBuiltInModules().has(moduleName)) {
       throw new Error(`Cannot find module "${modulePath}" from "${options.baseFolderPath}".`);
     }
 
     if (allowSelfReference === true) {
-      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(normalizedRootPath);
+      const ownPackage: IPackageDescriptor | undefined = _getPackageName(normalizedRootPath);
       if (
         ownPackage &&
         (modulePath === ownPackage.packageName || modulePath.startsWith(`${ownPackage.packageName}/`))
@@ -337,12 +337,12 @@ export class Import {
     // against the first path segment
     const slashIndex: number = modulePath.indexOf('/');
     const moduleName: string = slashIndex === -1 ? modulePath : modulePath.slice(0, slashIndex);
-    if (!includeSystemModules && Import._builtInModules.has(moduleName)) {
+    if (!includeSystemModules && _getBuiltInModules().has(moduleName)) {
       throw new Error(`Cannot find module "${modulePath}" from "${options.baseFolderPath}".`);
     }
 
     if (allowSelfReference === true) {
-      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(normalizedRootPath);
+      const ownPackage: IPackageDescriptor | undefined = _getPackageName(normalizedRootPath);
       if (
         ownPackage &&
         (modulePath === ownPackage.packageName || modulePath.startsWith(`${ownPackage.packageName}/`))
@@ -428,14 +428,14 @@ export class Import {
       useNodeJSResolver
     } = options;
 
-    if (includeSystemModules && Import._builtInModules.has(packageName)) {
+    if (includeSystemModules && _getBuiltInModules().has(packageName)) {
       return packageName;
     }
 
     const normalizedRootPath: string = (getRealPath || FileSystem.getRealPath)(baseFolderPath);
 
     if (allowSelfReference) {
-      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(normalizedRootPath);
+      const ownPackage: IPackageDescriptor | undefined = _getPackageName(normalizedRootPath);
       if (ownPackage && ownPackage.packageName === packageName) {
         return ownPackage.packageRootPath;
       }
@@ -476,7 +476,7 @@ export class Import {
       getRealPathAsync
     } = options;
 
-    if (includeSystemModules && Import._builtInModules.has(packageName)) {
+    if (includeSystemModules && _getBuiltInModules().has(packageName)) {
       return packageName;
     }
 
@@ -485,7 +485,7 @@ export class Import {
     );
 
     if (allowSelfReference) {
-      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(normalizedRootPath);
+      const ownPackage: IPackageDescriptor | undefined = _getPackageName(normalizedRootPath);
       if (ownPackage && ownPackage.packageName === packageName) {
         return ownPackage.packageRootPath;
       }
@@ -543,18 +543,18 @@ export class Import {
       throw new Error(`Cannot find package "${packageName}" from "${baseFolderPath}": ${e}`);
     }
   }
+}
 
-  private static _getPackageName(rootPath: string): IPackageDescriptor | undefined {
-    const packageJsonPath: string | undefined =
-      PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(rootPath);
-    if (packageJsonPath) {
-      const packageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(packageJsonPath);
-      return {
-        packageRootPath: path.dirname(packageJsonPath),
-        packageName: packageJson.name
-      };
-    } else {
-      return undefined;
-    }
+function _getPackageName(rootPath: string): IPackageDescriptor | undefined {
+  const packageJsonPath: string | undefined =
+    PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(rootPath);
+  if (packageJsonPath) {
+    const packageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(packageJsonPath);
+    return {
+      packageRootPath: path.dirname(packageJsonPath),
+      packageName: packageJson.name
+    };
+  } else {
+    return undefined;
   }
 }

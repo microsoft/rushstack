@@ -20,13 +20,13 @@ export interface IHeftPluginConfigurationJson {
 
 const HEFT_PLUGIN_CONFIGURATION_FILENAME: 'heft-plugin.json' = 'heft-plugin.json';
 
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(heftPluginSchema);
+const _pluginConfigurationPromises: Map<string, Promise<HeftPluginConfiguration>> = new Map();
+
 /**
  * Loads and validates the heft-plugin.json file.
  */
 export class HeftPluginConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(heftPluginSchema);
-  private static _pluginConfigurationPromises: Map<string, Promise<HeftPluginConfiguration>> = new Map();
-
   private readonly _heftPluginConfigurationJson: IHeftPluginConfigurationJson;
   private _lifecyclePluginDefinitions: Set<HeftLifecyclePluginDefinition> | undefined;
   private _lifecyclePluginDefinitionsMap: Map<string, HeftLifecyclePluginDefinition> | undefined;
@@ -63,16 +63,16 @@ export class HeftPluginConfiguration {
   ): Promise<HeftPluginConfiguration> {
     const resolvedHeftPluginConfigurationJsonFilename: string = `${packageRoot}/${HEFT_PLUGIN_CONFIGURATION_FILENAME}`;
     let heftPluginConfigurationPromise: Promise<HeftPluginConfiguration> | undefined =
-      HeftPluginConfiguration._pluginConfigurationPromises.get(packageRoot);
+      _pluginConfigurationPromises.get(packageRoot);
     if (!heftPluginConfigurationPromise) {
       heftPluginConfigurationPromise = (async () => {
         const heftPluginConfigurationJson: IHeftPluginConfigurationJson = await JsonFile.loadAndValidateAsync(
           resolvedHeftPluginConfigurationJsonFilename,
-          HeftPluginConfiguration._jsonSchema
+          _jsonSchema
         );
         return new HeftPluginConfiguration(heftPluginConfigurationJson, packageRoot, packageName);
       })();
-      HeftPluginConfiguration._pluginConfigurationPromises.set(packageRoot, heftPluginConfigurationPromise);
+      _pluginConfigurationPromises.set(packageRoot, heftPluginConfigurationPromise);
     }
 
     return await heftPluginConfigurationPromise;

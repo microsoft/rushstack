@@ -8,8 +8,9 @@ import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfigurati
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import type { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider';
+import type { TarExecutable } from '../../../utilities/TarExecutable';
 
-import { OperationBuildCache } from '../OperationBuildCache';
+import { OperationBuildCache, _setTarUtilityPromiseForTesting } from '../OperationBuildCache';
 
 interface ITestOptions {
   enabled: boolean;
@@ -79,6 +80,12 @@ describe(OperationBuildCache.name, () => {
   describe('direct file cloud cache restore', () => {
     let fakeLockRelease: jest.Mock;
 
+    function mockTarSuccess(): jest.Mock {
+      const tryUntarAsync: jest.Mock = jest.fn().mockResolvedValue(0);
+      _setTarUtilityPromiseForTesting(Promise.resolve({ tryUntarAsync } as unknown as TarExecutable));
+      return tryUntarAsync;
+    }
+
     beforeEach(() => {
       fakeLockRelease = jest.fn();
       // By default, simulate an uncontended lock acquisition and no pre-existing cache entry.
@@ -90,7 +97,7 @@ describe(OperationBuildCache.name, () => {
     });
 
     afterEach(() => {
-      Reflect.set(OperationBuildCache, '_tarUtilityPromise', undefined);
+      _setTarUtilityPromiseForTesting(undefined);
       jest.restoreAllMocks();
     });
 
@@ -137,14 +144,13 @@ describe(OperationBuildCache.name, () => {
         tryDownloadCacheEntryToFileAsync
       });
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
-      const tryUntarAsync: jest.Mock = jest.fn().mockResolvedValue(0);
 
       jest.spyOn(FileSystem, 'deleteFolderAsync').mockResolvedValue();
       const moveAsyncSpy: jest.SpyInstance = jest.spyOn(FileSystem, 'moveAsync').mockResolvedValue();
       const deleteFileAsyncSpy: jest.SpyInstance = jest
         .spyOn(FileSystem, 'deleteFileAsync')
         .mockResolvedValue();
-      Reflect.set(OperationBuildCache, '_tarUtilityPromise', Promise.resolve({ tryUntarAsync }));
+      const tryUntarAsync: jest.Mock = mockTarSuccess();
 
       const result: boolean = await subject.tryRestoreFromCacheAsync(terminal);
 
@@ -202,13 +208,12 @@ describe(OperationBuildCache.name, () => {
         tryDownloadCacheEntryToFileAsync
       });
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
-      const tryUntarAsync: jest.Mock = jest.fn().mockResolvedValue(0);
 
       jest.spyOn(FileSystem, 'deleteFolderAsync').mockResolvedValue();
       // Simulate the cache entry having been fully populated (e.g. by another local process)
       // by the time we acquired the lock.
       jest.spyOn(FileSystem, 'existsAsync').mockResolvedValue(true);
-      Reflect.set(OperationBuildCache, '_tarUtilityPromise', Promise.resolve({ tryUntarAsync }));
+      const tryUntarAsync: jest.Mock = mockTarSuccess();
 
       const result: boolean = await subject.tryRestoreFromCacheAsync(terminal);
 
@@ -232,11 +237,10 @@ describe(OperationBuildCache.name, () => {
         tryDownloadCacheEntryToFileAsync
       });
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
-      const tryUntarAsync: jest.Mock = jest.fn().mockResolvedValue(0);
 
       jest.spyOn(FileSystem, 'deleteFolderAsync').mockResolvedValue();
       jest.spyOn(FileSystem, 'moveAsync').mockResolvedValue();
-      Reflect.set(OperationBuildCache, '_tarUtilityPromise', Promise.resolve({ tryUntarAsync }));
+      mockTarSuccess();
 
       const result: boolean = await subject.tryRestoreFromCacheAsync(terminal);
 

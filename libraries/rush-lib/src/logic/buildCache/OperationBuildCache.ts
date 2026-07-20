@@ -83,12 +83,52 @@ function _getDirectFileTransferLockResourceName(cacheId: string): string {
   return crypto.createHash('sha1').update(cacheId).digest('hex');
 }
 
+let _tarUtilityPromise: Promise<TarExecutable | undefined> | undefined;
+
+function _getTempLocalCacheEntryPath(finalLocalCacheEntryPath: string): string {
+  // Derive the temp file from the destination path to ensure they are on the same volume.
+  // In the case of a shared network drive containing the build cache, we also need to make
+  // sure the temp path won't be shared by two parallel rush builds.
+  const randomSuffix: string = crypto.randomBytes(8).toString('hex');
+  return `${finalLocalCacheEntryPath}-${randomSuffix}.temp`;
+}
+
+function _tryGetTarUtility(terminal: ITerminal): Promise<TarExecutable | undefined> {
+  if (!_tarUtilityPromise) {
+    _tarUtilityPromise = TarExecutable.tryInitializeAsync(terminal);
+  }
+
+  return _tarUtilityPromise;
+}
+
+function _getCacheId(options: IProjectBuildCacheOptions): string | undefined {
+  const {
+    buildCacheConfiguration,
+    project: { packageName },
+    operationStateHash,
+    phaseName
+  } = options;
+  return buildCacheConfiguration.getCacheEntryId({
+    projectName: packageName,
+    projectStateHash: operationStateHash,
+    phaseName
+  });
+}
+
+/**
+ * Overrides the cached `TarExecutable` promise. Exposed for unit testing only.
+ * @internal
+ */
+export function _setTarUtilityPromiseForTesting(
+  promise: Promise<TarExecutable | undefined> | undefined
+): void {
+  _tarUtilityPromise = promise;
+}
+
 /**
  * @internal
  */
 export class OperationBuildCache {
-  private static _tarUtilityPromise: Promise<TarExecutable | undefined> | undefined;
-
   private readonly _project: RushConfigurationProject;
   private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
   private readonly _cloudBuildCacheProvider: ICloudBuildCacheProvider | undefined;
@@ -123,28 +163,12 @@ export class OperationBuildCache {
     this._useDirectFileTransfersForBuildCache = useDirectFileTransfersForBuildCache;
   }
 
-  private static _getTempLocalCacheEntryPath(finalLocalCacheEntryPath: string): string {
-    // Derive the temp file from the destination path to ensure they are on the same volume.
-    // In the case of a shared network drive containing the build cache, we also need to make
-    // sure the temp path won't be shared by two parallel rush builds.
-    const randomSuffix: string = crypto.randomBytes(8).toString('hex');
-    return `${finalLocalCacheEntryPath}-${randomSuffix}.temp`;
-  }
-
-  private static _tryGetTarUtility(terminal: ITerminal): Promise<TarExecutable | undefined> {
-    if (!OperationBuildCache._tarUtilityPromise) {
-      OperationBuildCache._tarUtilityPromise = TarExecutable.tryInitializeAsync(terminal);
-    }
-
-    return OperationBuildCache._tarUtilityPromise;
-  }
-
   public get cacheId(): string | undefined {
     return this._cacheId;
   }
 
   public static getOperationBuildCache(options: IProjectBuildCacheOptions): OperationBuildCache {
-    const cacheId: string | undefined = OperationBuildCache._getCacheId(options);
+    const cacheId: string | undefined = _getCacheId(options);
     return new OperationBuildCache(cacheId, options);
   }
 
@@ -173,7 +197,7 @@ export class OperationBuildCache {
       excludeAppleDoubleFiles,
       useDirectFileTransfersForBuildCache
     };
-    const cacheId: string | undefined = OperationBuildCache._getCacheId(buildCacheOptions);
+    const cacheId: string | undefined = _getCacheId(buildCacheOptions);
     return new OperationBuildCache(cacheId, buildCacheOptions);
   }
 
@@ -237,7 +261,7 @@ export class OperationBuildCache {
             localCacheEntryPath = targetPath;
             updateLocalCacheSuccess = true;
           } else {
-            const tempTargetPath: string = OperationBuildCache._getTempLocalCacheEntryPath(targetPath);
+            const tempTargetPath: string = _getTempLocalCacheEntryPath(targetPath);
             try {
               const downloadedToTempFile: boolean =
                 await this._cloudBuildCacheProvider.tryDownloadCacheEntryToFileAsync(
@@ -317,7 +341,7 @@ export class OperationBuildCache {
       )
     );
 
-    const tarUtility: TarExecutable | undefined = await OperationBuildCache._tryGetTarUtility(terminal);
+    const tarUtility: TarExecutable | undefined = await _tryGetTarUtility(terminal);
     let restoreSuccess: boolean = false;
     if (tarUtility && localCacheEntryPath) {
       const logFilePath: string = this._getTarLogFilePath(cacheId, 'untar');
@@ -367,11 +391,10 @@ export class OperationBuildCache {
 
     let localCacheEntryPath: string | undefined;
 
-    const tarUtility: TarExecutable | undefined = await OperationBuildCache._tryGetTarUtility(terminal);
+    const tarUtility: TarExecutable | undefined = await _tryGetTarUtility(terminal);
     if (tarUtility) {
       const finalLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
-      const tempLocalCacheEntryPath: string =
-        OperationBuildCache._getTempLocalCacheEntryPath(finalLocalCacheEntryPath);
+      const tempLocalCacheEntryPath: string = _getTempLocalCacheEntryPath(finalLocalCacheEntryPath);
 
       const logFilePath: string = this._getTarLogFilePath(cacheId, 'tar');
       const tarExitCode: number = await tarUtility.tryCreateArchiveFromProjectPathsAsync({
@@ -554,19 +577,5 @@ export class OperationBuildCache {
 
   private _getTarLogFilePath(cacheId: string, mode: 'tar' | 'untar'): string {
     return path.join(this._project.projectRushTempFolder, `${cacheId}.${mode}.log`);
-  }
-
-  private static _getCacheId(options: IProjectBuildCacheOptions): string | undefined {
-    const {
-      buildCacheConfiguration,
-      project: { packageName },
-      operationStateHash,
-      phaseName
-    } = options;
-    return buildCacheConfiguration.getCacheEntryId({
-      projectName: packageName,
-      projectStateHash: operationStateHash,
-      phaseName
-    });
   }
 }

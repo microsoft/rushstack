@@ -7,8 +7,9 @@ import { FileSystem } from '@rushstack/node-core-library';
 
 import type { IFromExtensionMessage, IRootState } from '@rushstack/rush-vscode-command-webview';
 
+let _instance: RushCommandWebViewPanel | undefined;
+
 export class RushCommandWebViewPanel {
-  private static _instance: RushCommandWebViewPanel | undefined;
   private _panel: vscode.WebviewView | undefined;
   private _webViewProvider: vscode.WebviewViewProvider | undefined;
   private _context: vscode.ExtensionContext;
@@ -19,19 +20,19 @@ export class RushCommandWebViewPanel {
   }
 
   public static getInstance(): RushCommandWebViewPanel {
-    if (!RushCommandWebViewPanel._instance) {
+    if (!_instance) {
       throw new Error('Instance has not been initialized!');
     }
 
-    return RushCommandWebViewPanel._instance;
+    return _instance;
   }
 
   public static initialize(context: vscode.ExtensionContext): RushCommandWebViewPanel {
-    if (RushCommandWebViewPanel._instance) {
+    if (_instance) {
       throw new Error('Only one instance of rush command web view panel should be created!');
     }
-    RushCommandWebViewPanel._instance = new RushCommandWebViewPanel(context);
-    return RushCommandWebViewPanel._instance;
+    _instance = new RushCommandWebViewPanel(context);
+    return _instance;
   }
 
   public postMessage(message: IFromExtensionMessage): void {

@@ -51,6 +51,8 @@ type ITryLoadPackageJsonInternalResult =
   | ITryLoadPackageJsonInternalKnownFailureResult
   | ITryLoadPackageJsonInternalUnknownFailureResult;
 
+let _instance: PackageJsonLookup | undefined;
+
 /**
  * This class provides methods for finding the nearest "package.json" for a folder
  * and retrieving the name of the package.  The results are cached.
@@ -58,8 +60,6 @@ type ITryLoadPackageJsonInternalResult =
  * @public
  */
 export class PackageJsonLookup {
-  private static _instance: PackageJsonLookup | undefined;
-
   /**
    * A singleton instance of `PackageJsonLookup`, which is useful for short-lived processes
    * that can reasonably assume that the file system will not be modified after the cache
@@ -71,11 +71,11 @@ export class PackageJsonLookup {
    * of relying on this instance.
    */
   public static get instance(): PackageJsonLookup {
-    if (!PackageJsonLookup._instance) {
-      PackageJsonLookup._instance = new PackageJsonLookup({ loadExtraFields: true });
+    if (!_instance) {
+      _instance = new PackageJsonLookup({ loadExtraFields: true });
     }
 
-    return PackageJsonLookup._instance;
+    return _instance;
   }
 
   private _loadExtraFields: boolean = false;

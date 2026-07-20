@@ -50,13 +50,13 @@ export class ApprovedPackagesItem {
   }
 }
 
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 /**
  * This represents the JSON file specified via the "approvedPackagesFile" option in rush.json.
  * @public
  */
 export class ApprovedPackagesConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   public items: ApprovedPackagesItem[] = [];
 
   private _itemsByName: Map<string, ApprovedPackagesItem> = new Map<string, ApprovedPackagesItem>();
@@ -130,7 +130,7 @@ export class ApprovedPackagesConfiguration {
   public loadFromFile(): void {
     const approvedPackagesJson: IApprovedPackagesJson = JsonFile.loadAndValidate(
       this._jsonFilename,
-      ApprovedPackagesConfiguration._jsonSchema
+      _jsonSchema
     );
 
     this.clear();

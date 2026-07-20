@@ -210,12 +210,12 @@ function _normalizeNameForLogFilenameIdentifiers(name: string): string {
   return name.replace(/:/g, '_'); // Replace colons with underscores to be filesystem-safe
 }
 
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 /**
  * Custom Commands and Options for the Rush Command Line
  */
 export class CommandLineConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   public readonly commands: Map<string, Command> = new Map();
   public readonly phases: Map<string, IPhase> = new Map();
   public readonly parameters: IParameterJson[] = [];
@@ -628,42 +628,6 @@ export class CommandLineConfiguration {
     cycleFreePhases.add(phase);
   }
 
-  private static _applyBuildCommandDefaults(commandLineJson: ICommandLineJson): void {
-    // merge commands specified in command-line.json and default (re)build settings
-    // Ensure both build commands are included and preserve any other commands specified
-    if (commandLineJson?.commands) {
-      for (let i: number = 0; i < commandLineJson.commands.length; i++) {
-        const command: CommandJson = commandLineJson.commands[i];
-
-        // Determine if we have a set of default parameters
-        let commandDefaultDefinition: CommandJson | {} = {};
-        switch (command.commandKind) {
-          case RushConstants.phasedCommandKind:
-          case RushConstants.bulkCommandKind: {
-            switch (command.name) {
-              case RushConstants.buildCommandName: {
-                commandDefaultDefinition = DEFAULT_BUILD_COMMAND_JSON;
-                break;
-              }
-
-              case RushConstants.rebuildCommandName: {
-                commandDefaultDefinition = DEFAULT_REBUILD_COMMAND_JSON;
-                break;
-              }
-            }
-            break;
-          }
-        }
-
-        // Merge the default parameters into the repo-specified parameters
-        commandLineJson.commands[i] = {
-          ...commandDefaultDefinition,
-          ...command
-        };
-      }
-    }
-  }
-
   /**
    * Load the command-line.json configuration file from the specified path. Note that this
    * does not include the default build settings. This option is intended to be used to load
@@ -675,7 +639,7 @@ export class CommandLineConfiguration {
   public static tryLoadFromFile(jsonFilePath: string): CommandLineConfiguration | undefined {
     let commandLineJson: ICommandLineJson | undefined;
     try {
-      commandLineJson = JsonFile.loadAndValidate(jsonFilePath, CommandLineConfiguration._jsonSchema);
+      commandLineJson = JsonFile.loadAndValidate(jsonFilePath, _jsonSchema);
     } catch (e) {
       if (!FileSystem.isNotExistError(e as Error)) {
         throw e;
@@ -683,7 +647,7 @@ export class CommandLineConfiguration {
     }
 
     if (commandLineJson) {
-      this._applyBuildCommandDefaults(commandLineJson);
+      _applyBuildCommandDefaults(commandLineJson);
       const hasBuildCommand: boolean = !!commandLineJson.commands?.some(
         (command) => command.name === RushConstants.buildCommandName
       );
@@ -721,9 +685,9 @@ export class CommandLineConfiguration {
       // merge commands specified in command-line.json and default (re)build settings
       // Ensure both build commands are included and preserve any other commands specified
       if (commandLineJson?.commands) {
-        this._applyBuildCommandDefaults(commandLineJson);
+        _applyBuildCommandDefaults(commandLineJson);
 
-        CommandLineConfiguration._jsonSchema.validateObject(commandLineJson, jsonFilePath);
+        _jsonSchema.validateObject(commandLineJson, jsonFilePath);
 
         // Validate that globalPlugin commands are not used in the repo's command-line.json
         for (const { commandKind, name } of commandLineJson.commands) {
@@ -784,5 +748,41 @@ export class CommandLineConfiguration {
     };
 
     return translatedCommand;
+  }
+}
+
+function _applyBuildCommandDefaults(commandLineJson: ICommandLineJson): void {
+  // merge commands specified in command-line.json and default (re)build settings
+  // Ensure both build commands are included and preserve any other commands specified
+  if (commandLineJson?.commands) {
+    for (let i: number = 0; i < commandLineJson.commands.length; i++) {
+      const command: CommandJson = commandLineJson.commands[i];
+
+      // Determine if we have a set of default parameters
+      let commandDefaultDefinition: CommandJson | {} = {};
+      switch (command.commandKind) {
+        case RushConstants.phasedCommandKind:
+        case RushConstants.bulkCommandKind: {
+          switch (command.name) {
+            case RushConstants.buildCommandName: {
+              commandDefaultDefinition = DEFAULT_BUILD_COMMAND_JSON;
+              break;
+            }
+
+            case RushConstants.rebuildCommandName: {
+              commandDefaultDefinition = DEFAULT_REBUILD_COMMAND_JSON;
+              break;
+            }
+          }
+          break;
+        }
+      }
+
+      // Merge the default parameters into the repo-specified parameters
+      commandLineJson.commands[i] = {
+        ...commandDefaultDefinition,
+        ...command
+      };
+    }
   }
 }

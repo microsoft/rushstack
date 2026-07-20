@@ -132,6 +132,8 @@ const JSONPATHPROPERTY_REGEX: RegExp = /^\$\['([^']+)'\]/;
 
 const JEST_CONFIG_PACKAGE_FOLDER: string = path.dirname(require.resolve('jest-config'));
 
+let _jestConfigurationFileLoader: ProjectConfigurationFile<IHeftJestConfiguration> | undefined;
+
 interface IPendingTestRun {
   (): Promise<AggregatedResult | undefined>;
 }
@@ -140,8 +142,6 @@ interface IPendingTestRun {
  * @internal
  */
 export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
-  private static _jestConfigurationFileLoader: ProjectConfigurationFile<IHeftJestConfiguration> | undefined;
-
   private _jestPromise: Promise<unknown> | undefined;
   private _pendingTestRuns: Set<IPendingTestRun> = new Set();
   private _executing: boolean = false;
@@ -641,13 +641,12 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
     if (!options.debugHeftReporter) {
       // Extract the reporters and transform to include the Heft reporter by default
-      (jestArgv as unknown as { reporters: JestReporterConfig[] }).reporters =
-        JestPlugin._extractHeftJestReporters(
-          taskSession,
-          heftConfiguration,
-          jestConfig,
-          projectRelativeFilePath
-        );
+      (jestArgv as unknown as { reporters: JestReporterConfig[] }).reporters = _extractHeftJestReporters(
+        taskSession,
+        heftConfiguration,
+        jestConfig,
+        projectRelativeFilePath
+      );
     } else {
       logger.emitWarning(
         new Error('The "--debug-heft-reporter" parameter was specified; disabling HeftJestReporter')
@@ -677,7 +676,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     buildFolder: string,
     projectRelativeFilePath: string
   ): ProjectConfigurationFile<IHeftJestConfiguration> {
-    if (!JestPlugin._jestConfigurationFileLoader) {
+    if (!_jestConfigurationFileLoader) {
       // By default, ConfigurationFile will replace all objects, so we need to provide merge functions for these
       const shallowObjectInheritanceFunc: <T extends Record<string, unknown> | undefined>(
         currentObject: T,
@@ -716,17 +715,15 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         }) as T;
       };
 
-      const tokenResolveMetadata: ICustomJsonPathMetadata<IHeftJestConfiguration> =
-        JestPlugin._getJsonPathMetadata({
-          rootDir: buildFolder
-        });
-      const jestResolveMetadata: ICustomJsonPathMetadata<IHeftJestConfiguration> =
-        JestPlugin._getJsonPathMetadata({
-          rootDir: buildFolder,
-          resolveAsModule: true
-        });
+      const tokenResolveMetadata: ICustomJsonPathMetadata<IHeftJestConfiguration> = _getJsonPathMetadata({
+        rootDir: buildFolder
+      });
+      const jestResolveMetadata: ICustomJsonPathMetadata<IHeftJestConfiguration> = _getJsonPathMetadata({
+        rootDir: buildFolder,
+        resolveAsModule: true
+      });
 
-      JestPlugin._jestConfigurationFileLoader = new ProjectConfigurationFile<IHeftJestConfiguration>({
+      _jestConfigurationFileLoader = new ProjectConfigurationFile<IHeftJestConfiguration>({
         projectRelativeFilePath: projectRelativeFilePath,
         // Bypass Jest configuration validation
         jsonSchemaObject: anythingSchema,
@@ -796,7 +793,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       });
     }
 
-    return JestPlugin._jestConfigurationFileLoader;
+    return _jestConfigurationFileLoader;
   }
 
   private _setNodeEnvIfRequested(options: IJestPluginOptions, logger: IScopedLogger): void {
@@ -821,263 +818,256 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       delete process.env.NODE_ENV;
     }
   }
+}
 
-  private static _extractHeftJestReporters(
-    taskSession: IHeftTaskSession,
-    heftConfiguration: HeftConfiguration,
-    config: IHeftJestConfiguration,
-    projectRelativeFilePath: string
-  ): JestReporterConfig[] {
-    let isUsingHeftReporter: boolean = false;
+function _extractHeftJestReporters(
+  taskSession: IHeftTaskSession,
+  heftConfiguration: HeftConfiguration,
+  config: IHeftJestConfiguration,
+  projectRelativeFilePath: string
+): JestReporterConfig[] {
+  let isUsingHeftReporter: boolean = false;
 
-    const logger: IScopedLogger = taskSession.logger;
-    const terminal: ITerminal = logger.terminal;
-    const reporterOptions: IHeftJestReporterOptions = {
-      heftConfiguration,
-      logger,
-      debugMode: taskSession.parameters.debug
-    };
-    if (Array.isArray(config.reporters)) {
-      // Harvest all the array indices that need to modified before altering the array
-      const heftReporterIndices: number[] = JestPlugin._findIndexes(config.reporters, 'default');
+  const logger: IScopedLogger = taskSession.logger;
+  const terminal: ITerminal = logger.terminal;
+  const reporterOptions: IHeftJestReporterOptions = {
+    heftConfiguration,
+    logger,
+    debugMode: taskSession.parameters.debug
+  };
+  if (Array.isArray(config.reporters)) {
+    // Harvest all the array indices that need to modified before altering the array
+    const heftReporterIndices: number[] = _findIndexes(config.reporters, 'default');
 
-      // Replace 'default' reporter with the heft reporter
-      // This may clobber default reporters options
-      if (heftReporterIndices.length > 0) {
-        const heftReporter: Config.ReporterConfig = JestPlugin._getHeftJestReporterConfig(reporterOptions);
-        for (const index of heftReporterIndices) {
-          config.reporters[index] = heftReporter;
-        }
-        isUsingHeftReporter = true;
+    // Replace 'default' reporter with the heft reporter
+    // This may clobber default reporters options
+    if (heftReporterIndices.length > 0) {
+      const heftReporter: Config.ReporterConfig = _getHeftJestReporterConfig(reporterOptions);
+      for (const index of heftReporterIndices) {
+        config.reporters[index] = heftReporter;
       }
-    } else if (typeof config.reporters === 'undefined' || config.reporters === null) {
-      // Otherwise if no reporters are specified install only the heft reporter
-      config.reporters = [JestPlugin._getHeftJestReporterConfig(reporterOptions)];
       isUsingHeftReporter = true;
-    } else {
-      // Making a note if Heft cannot understand the reporter entry in Jest config
-      // Not making this an error or warning because it does not warrant blocking a dev or CI test pass
-      // If the Jest config is truly wrong Jest itself is in a better position to report what is wrong with the config
-      terminal.writeVerboseLine(
-        `The 'reporters' entry in Jest config '${projectRelativeFilePath}' is in an unexpected format. Was ` +
-          'expecting an array of reporters'
-      );
     }
-
-    if (!isUsingHeftReporter) {
-      terminal.writeVerboseLine(
-        `HeftJestReporter was not specified in Jest config '${projectRelativeFilePath}'. Consider adding a ` +
-          "'default' entry in the reporters array."
-      );
-    }
-
-    // Since we're injecting the HeftConfiguration, we need to pass these args directly and not through serialization
-    const reporters: JestReporterConfig[] = config.reporters;
-    config.reporters = undefined;
-    return reporters;
+  } else if (typeof config.reporters === 'undefined' || config.reporters === null) {
+    // Otherwise if no reporters are specified install only the heft reporter
+    config.reporters = [_getHeftJestReporterConfig(reporterOptions)];
+    isUsingHeftReporter = true;
+  } else {
+    // Making a note if Heft cannot understand the reporter entry in Jest config
+    // Not making this an error or warning because it does not warrant blocking a dev or CI test pass
+    // If the Jest config is truly wrong Jest itself is in a better position to report what is wrong with the config
+    terminal.writeVerboseLine(
+      `The 'reporters' entry in Jest config '${projectRelativeFilePath}' is in an unexpected format. Was ` +
+        'expecting an array of reporters'
+    );
   }
 
-  /**
-   * Returns the reporter config using the HeftJestReporter and the provided options.
-   */
-  private static _getHeftJestReporterConfig(
-    reporterOptions: IHeftJestReporterOptions
-  ): Config.ReporterConfig {
-    return [
-      `${__dirname}/HeftJestReporter.js`,
-      reporterOptions as Record<keyof IHeftJestReporterOptions, unknown>
-    ];
+  if (!isUsingHeftReporter) {
+    terminal.writeVerboseLine(
+      `HeftJestReporter was not specified in Jest config '${projectRelativeFilePath}'. Consider adding a ` +
+        "'default' entry in the reporters array."
+    );
   }
 
-  /**
-   * Resolve all specified properties to an absolute path using Jest resolution. In addition, the following
-   * transforms will be applied to the provided propertyValue before resolution:
-   *   - replace `<rootDir>` with the same rootDir
-   *   - replace `<configDir>` with the directory containing the current configuration file
-   *   - replace `<packageDir:...>` with the path to the resolved package (NOT module)
-   */
-  private static _getJsonPathMetadata(
-    options: IJestResolutionOptions
-  ): ICustomJsonPathMetadata<IHeftJestConfiguration> {
-    return {
-      customResolver: (resolverOptions: IJsonPathMetadataResolverOptions<IHeftJestConfiguration>) => {
-        const { propertyName, configurationFilePath, configurationFile } = resolverOptions;
-        let { propertyValue } = resolverOptions;
+  // Since we're injecting the HeftConfiguration, we need to pass these args directly and not through serialization
+  const reporters: JestReporterConfig[] = config.reporters;
+  config.reporters = undefined;
+  return reporters;
+}
 
-        const configDir: string = path.dirname(configurationFilePath);
-        const parsedPropertyName: string | undefined = propertyName?.match(JSONPATHPROPERTY_REGEX)?.[1];
+/**
+ * Returns the reporter config using the HeftJestReporter and the provided options.
+ */
+function _getHeftJestReporterConfig(reporterOptions: IHeftJestReporterOptions): Config.ReporterConfig {
+  return [
+    `${__dirname}/HeftJestReporter.js`,
+    reporterOptions as Record<keyof IHeftJestReporterOptions, unknown>
+  ];
+}
 
-        function requireResolveFunction(request: string): string {
-          return require.resolve(request, {
-            paths: [configDir, PLUGIN_PACKAGE_FOLDER, JEST_CONFIG_PACKAGE_FOLDER]
-          });
-        }
+/**
+ * Resolve all specified properties to an absolute path using Jest resolution. In addition, the following
+ * transforms will be applied to the provided propertyValue before resolution:
+ *   - replace `<rootDir>` with the same rootDir
+ *   - replace `<configDir>` with the directory containing the current configuration file
+ *   - replace `<packageDir:...>` with the path to the resolved package (NOT module)
+ */
+function _getJsonPathMetadata(
+  options: IJestResolutionOptions
+): ICustomJsonPathMetadata<IHeftJestConfiguration> {
+  return {
+    customResolver: (resolverOptions: IJsonPathMetadataResolverOptions<IHeftJestConfiguration>) => {
+      const { propertyName, configurationFilePath, configurationFile } = resolverOptions;
+      let { propertyValue } = resolverOptions;
 
-        // Compare with replaceRootDirInPath() from here:
-        // https://github.com/facebook/jest/blob/5f4dd187d89070d07617444186684c20d9213031/packages/jest-config/src/utils.ts#L58
-        if (propertyValue.startsWith(ROOTDIR_TOKEN)) {
-          // Example:  <rootDir>/path/to/file.js
-          const restOfPath: string = path.normalize('./' + propertyValue.slice(ROOTDIR_TOKEN.length));
-          propertyValue = path.resolve(options.rootDir, restOfPath);
-        } else if (propertyValue.startsWith(CONFIGDIR_TOKEN)) {
-          // Example:  <configDir>/path/to/file.js
-          const restOfPath: string = path.normalize('./' + propertyValue.slice(CONFIGDIR_TOKEN.length));
-          propertyValue = path.resolve(configDir, restOfPath);
-        } else {
-          // Example:  <packageDir:@my/package>/path/to/file.js
-          const packageDirMatches: RegExpExecArray | null = PACKAGEDIR_REGEX.exec(propertyValue);
-          if (packageDirMatches !== null) {
-            const packageName: string | undefined = packageDirMatches.groups?.[PACKAGE_CAPTUREGROUP];
-            if (!packageName) {
-              throw new Error(
-                `Could not parse package name from "packageDir" token ` +
-                  (parsedPropertyName ? `of property "${parsedPropertyName}" ` : '') +
-                  `in "${configDir}".`
-              );
-            }
+      const configDir: string = path.dirname(configurationFilePath);
+      const parsedPropertyName: string | undefined = propertyName?.match(JSONPATHPROPERTY_REGEX)?.[1];
 
-            if (!PackageName.isValidName(packageName)) {
-              throw new Error(
-                `Module paths are not supported when using the "packageDir" token ` +
-                  (parsedPropertyName ? `of property "${parsedPropertyName}" ` : '') +
-                  `in "${configDir}". Only a package name is allowed.`
-              );
-            }
+      function requireResolveFunction(request: string): string {
+        return require.resolve(request, {
+          paths: [configDir, PLUGIN_PACKAGE_FOLDER, JEST_CONFIG_PACKAGE_FOLDER]
+        });
+      }
 
-            // Resolve to the package directory (not the module referenced by the package). The normal resolution
-            // method will generally not be able to find @rushstack/heft-jest-plugin from a project that is
-            // using a rig. Since it is important, and it is our own package, we resolve it manually as a special
-            // case.
-            const resolvedPackagePath: string =
-              packageName === PLUGIN_PACKAGE_NAME
-                ? PLUGIN_PACKAGE_FOLDER
-                : Import.resolvePackage({ baseFolderPath: configDir, packageName, useNodeJSResolver: true });
-            // First entry is the entire match
-            const restOfPath: string = path.normalize(
-              './' + propertyValue.slice(packageDirMatches[0].length)
+      // Compare with replaceRootDirInPath() from here:
+      // https://github.com/facebook/jest/blob/5f4dd187d89070d07617444186684c20d9213031/packages/jest-config/src/utils.ts#L58
+      if (propertyValue.startsWith(ROOTDIR_TOKEN)) {
+        // Example:  <rootDir>/path/to/file.js
+        const restOfPath: string = path.normalize('./' + propertyValue.slice(ROOTDIR_TOKEN.length));
+        propertyValue = path.resolve(options.rootDir, restOfPath);
+      } else if (propertyValue.startsWith(CONFIGDIR_TOKEN)) {
+        // Example:  <configDir>/path/to/file.js
+        const restOfPath: string = path.normalize('./' + propertyValue.slice(CONFIGDIR_TOKEN.length));
+        propertyValue = path.resolve(configDir, restOfPath);
+      } else {
+        // Example:  <packageDir:@my/package>/path/to/file.js
+        const packageDirMatches: RegExpExecArray | null = PACKAGEDIR_REGEX.exec(propertyValue);
+        if (packageDirMatches !== null) {
+          const packageName: string | undefined = packageDirMatches.groups?.[PACKAGE_CAPTUREGROUP];
+          if (!packageName) {
+            throw new Error(
+              `Could not parse package name from "packageDir" token ` +
+                (parsedPropertyName ? `of property "${parsedPropertyName}" ` : '') +
+                `in "${configDir}".`
             );
-            propertyValue = path.resolve(resolvedPackagePath, restOfPath);
           }
+
+          if (!PackageName.isValidName(packageName)) {
+            throw new Error(
+              `Module paths are not supported when using the "packageDir" token ` +
+                (parsedPropertyName ? `of property "${parsedPropertyName}" ` : '') +
+                `in "${configDir}". Only a package name is allowed.`
+            );
+          }
+
+          // Resolve to the package directory (not the module referenced by the package). The normal resolution
+          // method will generally not be able to find @rushstack/heft-jest-plugin from a project that is
+          // using a rig. Since it is important, and it is our own package, we resolve it manually as a special
+          // case.
+          const resolvedPackagePath: string =
+            packageName === PLUGIN_PACKAGE_NAME
+              ? PLUGIN_PACKAGE_FOLDER
+              : Import.resolvePackage({ baseFolderPath: configDir, packageName, useNodeJSResolver: true });
+          // First entry is the entire match
+          const restOfPath: string = path.normalize('./' + propertyValue.slice(packageDirMatches[0].length));
+          propertyValue = path.resolve(resolvedPackagePath, restOfPath);
         }
+      }
 
-        // Return early, since the remainder of this function is used to resolve module paths
-        if (!options.resolveAsModule) {
-          return propertyValue;
-        }
+      // Return early, since the remainder of this function is used to resolve module paths
+      if (!options.resolveAsModule) {
+        return propertyValue;
+      }
 
-        // Example:  @rushstack/heft-jest-plugin
-        if (propertyValue === PLUGIN_PACKAGE_NAME) {
-          return PLUGIN_PACKAGE_FOLDER;
-        }
+      // Example:  @rushstack/heft-jest-plugin
+      if (propertyValue === PLUGIN_PACKAGE_NAME) {
+        return PLUGIN_PACKAGE_FOLDER;
+      }
 
-        // Example:  @rushstack/heft-jest-plugin/path/to/file.js
-        if (propertyValue.startsWith(PLUGIN_PACKAGE_NAME)) {
-          const restOfPath: string = path.normalize('./' + propertyValue.slice(PLUGIN_PACKAGE_NAME.length));
-          return path.join(PLUGIN_PACKAGE_FOLDER, restOfPath);
-        }
+      // Example:  @rushstack/heft-jest-plugin/path/to/file.js
+      if (propertyValue.startsWith(PLUGIN_PACKAGE_NAME)) {
+        const restOfPath: string = path.normalize('./' + propertyValue.slice(PLUGIN_PACKAGE_NAME.length));
+        return path.join(PLUGIN_PACKAGE_FOLDER, restOfPath);
+      }
 
-        // Use the Jest-provided resolvers to resolve the module paths
-        switch (parsedPropertyName) {
-          case 'testRunner':
-            return resolveRunner(/*resolver:*/ undefined, {
-              rootDir: configDir,
-              filePath: propertyValue,
-              requireResolveFunction
-            });
+      // Use the Jest-provided resolvers to resolve the module paths
+      switch (parsedPropertyName) {
+        case 'testRunner':
+          return resolveRunner(/*resolver:*/ undefined, {
+            rootDir: configDir,
+            filePath: propertyValue,
+            requireResolveFunction
+          });
 
-          case 'testSequencer':
-            return resolveSequencer(/*resolver:*/ undefined, {
-              rootDir: configDir,
-              filePath: propertyValue,
-              requireResolveFunction
-            });
+        case 'testSequencer':
+          return resolveSequencer(/*resolver:*/ undefined, {
+            rootDir: configDir,
+            filePath: propertyValue,
+            requireResolveFunction
+          });
 
-          case 'testEnvironment':
-            return resolveTestEnvironment({
-              rootDir: configDir,
-              testEnvironment: propertyValue,
-              requireResolveFunction
-            });
+        case 'testEnvironment':
+          return resolveTestEnvironment({
+            rootDir: configDir,
+            testEnvironment: propertyValue,
+            requireResolveFunction
+          });
 
-          case 'watchPlugins':
-            return resolveWatchPlugin(/*resolver:*/ undefined, {
-              rootDir: configDir,
-              filePath: propertyValue,
-              requireResolveFunction
-            });
+        case 'watchPlugins':
+          return resolveWatchPlugin(/*resolver:*/ undefined, {
+            rootDir: configDir,
+            filePath: propertyValue,
+            requireResolveFunction
+          });
 
-          case 'preset':
-            // Do not allow use of presets and extends together, since that would create a
-            // confusing hierarchy.
-            if (
-              configurationFile.preset &&
-              (configurationFile as IHeftJestConfigurationWithExtends).extends
-            ) {
-              throw new Error(
-                `The configuration file at "${configurationFilePath}" cannot specify both "preset" and ` +
-                  `"extends" properties.`
-              );
-            }
+        case 'preset':
+          // Do not allow use of presets and extends together, since that would create a
+          // confusing hierarchy.
+          if (configurationFile.preset && (configurationFile as IHeftJestConfigurationWithExtends).extends) {
+            throw new Error(
+              `The configuration file at "${configurationFilePath}" cannot specify both "preset" and ` +
+                `"extends" properties.`
+            );
+          }
 
-            // Preset is an odd value, since it can either be a relative path to a preset module
-            // from the rootDir, or a path to the parent directory of a preset module. So to
-            // determine which it is, we will attempt to resolve it as a module from the rootDir,
-            // as per the spec. If it resolves, then we will return the relative path to the
-            // resolved value from the rootDir. If it does not resolve, then we will return the
-            // original value to allow Jest to resolve within the target directory.
-            // See: https://github.com/jestjs/jest/blob/268afca708199c0e64ef26f35995907faf4454ff/packages/jest-config/src/normalize.ts#L123
+          // Preset is an odd value, since it can either be a relative path to a preset module
+          // from the rootDir, or a path to the parent directory of a preset module. So to
+          // determine which it is, we will attempt to resolve it as a module from the rootDir,
+          // as per the spec. If it resolves, then we will return the relative path to the
+          // resolved value from the rootDir. If it does not resolve, then we will return the
+          // original value to allow Jest to resolve within the target directory.
+          // See: https://github.com/jestjs/jest/blob/268afca708199c0e64ef26f35995907faf4454ff/packages/jest-config/src/normalize.ts#L123
 
-            let resolvedValue: string | null | undefined;
-            try {
-              resolvedValue = jestResolve(/*resolver:*/ undefined, {
-                rootDir: options.rootDir,
-                filePath: propertyValue,
-                key: propertyName
-              });
-            } catch (e) {
-              // Swallow
-            }
-            if (resolvedValue) {
-              // Jest will resolve relative module paths to files only if they use forward slashes.
-              // They must also start with a '.' otherwise the preset resolution will assume it is a
-              // folder path and will path.join() it with the default 'jest-preset' filename.
-              // See: https://github.com/jestjs/jest/blob/268afca708199c0e64ef26f35995907faf4454ff/packages/jest-config/src/normalize.ts#L123
-              return Path.convertToSlashes(`./${path.relative(options.rootDir, resolvedValue)}`);
-            } else {
-              return propertyValue;
-            }
-
-          default:
-            // We know the value will be non-null since resolve will throw an error if it is null
-            // and non-optional
-            return jestResolve(/*resolver:*/ undefined, {
-              rootDir: configDir,
+          let resolvedValue: string | null | undefined;
+          try {
+            resolvedValue = jestResolve(/*resolver:*/ undefined, {
+              rootDir: options.rootDir,
               filePath: propertyValue,
               key: propertyName
-            })!;
-        }
-      },
-      pathResolutionMethod: PathResolutionMethod.custom
-    };
-  }
+            });
+          } catch (e) {
+            // Swallow
+          }
+          if (resolvedValue) {
+            // Jest will resolve relative module paths to files only if they use forward slashes.
+            // They must also start with a '.' otherwise the preset resolution will assume it is a
+            // folder path and will path.join() it with the default 'jest-preset' filename.
+            // See: https://github.com/jestjs/jest/blob/268afca708199c0e64ef26f35995907faf4454ff/packages/jest-config/src/normalize.ts#L123
+            return Path.convertToSlashes(`./${path.relative(options.rootDir, resolvedValue)}`);
+          } else {
+            return propertyValue;
+          }
 
-  /**
-   * Finds the indices of jest reporters with a given name
-   */
-  private static _findIndexes(items: JestReporterConfig[], search: string): number[] {
-    const result: number[] = [];
-
-    for (let index: number = 0; index < items.length; index++) {
-      const item: JestReporterConfig = items[index];
-
-      // Item is either a string or a tuple of [reporterName: string, options: unknown]
-      if (item === search) {
-        result.push(index);
-      } else if (typeof item !== 'undefined' && item !== null && item[0] === search) {
-        result.push(index);
+        default:
+          // We know the value will be non-null since resolve will throw an error if it is null
+          // and non-optional
+          return jestResolve(/*resolver:*/ undefined, {
+            rootDir: configDir,
+            filePath: propertyValue,
+            key: propertyName
+          })!;
       }
-    }
+    },
+    pathResolutionMethod: PathResolutionMethod.custom
+  };
+}
 
-    return result;
+/**
+ * Finds the indices of jest reporters with a given name
+ */
+function _findIndexes(items: JestReporterConfig[], search: string): number[] {
+  const result: number[] = [];
+
+  for (let index: number = 0; index < items.length; index++) {
+    const item: JestReporterConfig = items[index];
+
+    // Item is either a string or a tuple of [reporterName: string, options: unknown]
+    if (item === search) {
+      result.push(index);
+    } else if (typeof item !== 'undefined' && item !== null && item[0] === search) {
+      result.push(index);
+    }
   }
+
+  return result;
 }

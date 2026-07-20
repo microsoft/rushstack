@@ -37,17 +37,13 @@ export class MinimalRushConfiguration {
       showVerbose: !RushCommandLineParser.shouldRestrictConsoleOutput()
     });
     if (rushJsonLocation) {
-      return MinimalRushConfiguration._loadFromConfigurationFile(rushJsonLocation);
-    } else {
+      const minimalRushConfigurationJson: IMinimalRushConfigurationJson | undefined =
+        _loadConfigurationJson(rushJsonLocation);
+      if (minimalRushConfigurationJson) {
+        return new MinimalRushConfiguration(minimalRushConfigurationJson, rushJsonLocation);
+      }
       return undefined;
-    }
-  }
-
-  private static _loadFromConfigurationFile(rushJsonFilename: string): MinimalRushConfiguration | undefined {
-    try {
-      const minimalRushConfigurationJson: IMinimalRushConfigurationJson = JsonFile.load(rushJsonFilename);
-      return new MinimalRushConfiguration(minimalRushConfigurationJson, rushJsonFilename);
-    } catch (e) {
+    } else {
       return undefined;
     }
   }
@@ -71,5 +67,13 @@ export class MinimalRushConfiguration {
    */
   public get commonRushConfigFolder(): string {
     return this._commonRushConfigFolder;
+  }
+}
+
+function _loadConfigurationJson(rushJsonFilename: string): IMinimalRushConfigurationJson | undefined {
+  try {
+    return JsonFile.load(rushJsonFilename);
+  } catch (e) {
+    return undefined;
   }
 }

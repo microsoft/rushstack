@@ -59,14 +59,14 @@ export interface ILaunchOptionsValidationResult {
   warnings: string[];
 }
 
+const _allowlistVersion: number = 1;
+
 /**
  * Validates Playwright launch options against security allowlists.
  * Provides utilities for managing client-side allowlist configuration.
  * @beta
  */
 export class LaunchOptionsValidator {
-  private static readonly _allowlistVersion: number = 1;
-
   /**
    * Gets the path to the allowlist file in the user's local preferences folder.
    * This follows the pattern of playwright-browser-installed.txt but stores in user's home directory.
@@ -89,7 +89,7 @@ export class LaunchOptionsValidator {
       if (!FileSystem.exists(allowlistPath)) {
         return {
           allowedOptions: [],
-          version: this._allowlistVersion
+          version: _allowlistVersion
         };
       }
 
@@ -110,13 +110,13 @@ export class LaunchOptionsValidator {
       // Invalid format, return empty allowlist
       return {
         allowedOptions: [],
-        version: this._allowlistVersion
+        version: _allowlistVersion
       };
     } catch (error) {
       // If we can't read the file, return empty allowlist
       return {
         allowedOptions: [],
-        version: this._allowlistVersion
+        version: _allowlistVersion
       };
     }
   }
@@ -217,7 +217,7 @@ export class LaunchOptionsValidator {
   public static async clearAllowlistAsync(): Promise<void> {
     await this.writeAllowlistAsync({
       allowedOptions: [],
-      version: this._allowlistVersion
+      version: _allowlistVersion
     });
   }
 

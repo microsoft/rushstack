@@ -42,11 +42,7 @@ export class PnpmfileConfiguration {
     // Set the context to swallow log output and store our settings
     const context: IPnpmfileContext = {
       log: (message: string) => {},
-      pnpmfileShimSettings: await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(
-        rushConfiguration,
-        subspace,
-        variant
-      )
+      pnpmfileShimSettings: await _getPnpmfileShimSettingsAsync(rushConfiguration, subspace, variant)
     };
 
     return new PnpmfileConfiguration(context);
@@ -75,62 +71,16 @@ export class PnpmfileConfiguration {
       destinationPath: pnpmfilePath
     });
 
-    const pnpmfileShimSettings: IPnpmfileShimSettings =
-      await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(rushConfiguration, subspace, variant);
+    const pnpmfileShimSettings: IPnpmfileShimSettings = await _getPnpmfileShimSettingsAsync(
+      rushConfiguration,
+      subspace,
+      variant
+    );
 
     // Write the settings file used by the shim
     await JsonFile.saveAsync(pnpmfileShimSettings, path.join(targetDir, 'pnpmfileSettings.json'), {
       ensureFolderExists: true
     });
-  }
-
-  private static async _getPnpmfileShimSettingsAsync(
-    rushConfiguration: RushConfiguration,
-    subspace: Subspace,
-    variant: string | undefined
-  ): Promise<IPnpmfileShimSettings> {
-    let allPreferredVersions: { [dependencyName: string]: string } = {};
-    let allowedAlternativeVersions: { [dependencyName: string]: readonly string[] } = {};
-    const workspaceVersions: Record<string, string> = {};
-
-    // Only workspaces shims in the common versions using pnpmfile
-    if ((rushConfiguration.packageManagerOptions as PnpmOptionsConfiguration).useWorkspaces) {
-      const commonVersionsConfiguration: CommonVersionsConfiguration = subspace.getCommonVersions(variant);
-      const preferredVersions: Map<string, string> = new Map();
-      MapExtensions.mergeFromMap(
-        preferredVersions,
-        rushConfiguration.getImplicitlyPreferredVersions(subspace, variant)
-      );
-      for (const [name, version] of commonVersionsConfiguration.getAllPreferredVersions()) {
-        // Use the most restrictive version range available
-        if (!preferredVersions.has(name) || semver.subset(version, preferredVersions.get(name)!)) {
-          preferredVersions.set(name, version);
-        }
-      }
-      allPreferredVersions = MapExtensions.toObject(preferredVersions);
-      allowedAlternativeVersions = MapExtensions.toObject(
-        commonVersionsConfiguration.allowedAlternativeVersions
-      );
-
-      for (const project of rushConfiguration.projects) {
-        workspaceVersions[project.packageName] = project.packageJson.version;
-      }
-    }
-
-    const settings: IPnpmfileShimSettings = {
-      allPreferredVersions,
-      allowedAlternativeVersions,
-      workspaceVersions,
-      semverPath: Import.resolveModule({ modulePath: 'semver', baseFolderPath: __dirname })
-    };
-
-    // Use the provided path if available. Otherwise, use the default path.
-    const userPnpmfilePath: string | undefined = subspace.getPnpmfilePath(variant);
-    if (userPnpmfilePath && FileSystem.exists(userPnpmfilePath)) {
-      settings.userPnpmfilePath = userPnpmfilePath;
-    }
-
-    return settings;
   }
 
   /**
@@ -144,4 +94,53 @@ export class PnpmfileConfiguration {
       return pnpmfile.hooks.readPackage(packageJson, this._context);
     }
   }
+}
+
+async function _getPnpmfileShimSettingsAsync(
+  rushConfiguration: RushConfiguration,
+  subspace: Subspace,
+  variant: string | undefined
+): Promise<IPnpmfileShimSettings> {
+  let allPreferredVersions: { [dependencyName: string]: string } = {};
+  let allowedAlternativeVersions: { [dependencyName: string]: readonly string[] } = {};
+  const workspaceVersions: Record<string, string> = {};
+
+  // Only workspaces shims in the common versions using pnpmfile
+  if ((rushConfiguration.packageManagerOptions as PnpmOptionsConfiguration).useWorkspaces) {
+    const commonVersionsConfiguration: CommonVersionsConfiguration = subspace.getCommonVersions(variant);
+    const preferredVersions: Map<string, string> = new Map();
+    MapExtensions.mergeFromMap(
+      preferredVersions,
+      rushConfiguration.getImplicitlyPreferredVersions(subspace, variant)
+    );
+    for (const [name, version] of commonVersionsConfiguration.getAllPreferredVersions()) {
+      // Use the most restrictive version range available
+      if (!preferredVersions.has(name) || semver.subset(version, preferredVersions.get(name)!)) {
+        preferredVersions.set(name, version);
+      }
+    }
+    allPreferredVersions = MapExtensions.toObject(preferredVersions);
+    allowedAlternativeVersions = MapExtensions.toObject(
+      commonVersionsConfiguration.allowedAlternativeVersions
+    );
+
+    for (const project of rushConfiguration.projects) {
+      workspaceVersions[project.packageName] = project.packageJson.version;
+    }
+  }
+
+  const settings: IPnpmfileShimSettings = {
+    allPreferredVersions,
+    allowedAlternativeVersions,
+    workspaceVersions,
+    semverPath: Import.resolveModule({ modulePath: 'semver', baseFolderPath: __dirname })
+  };
+
+  // Use the provided path if available. Otherwise, use the default path.
+  const userPnpmfilePath: string | undefined = subspace.getPnpmfilePath(variant);
+  if (userPnpmfilePath && FileSystem.exists(userPnpmfilePath)) {
+    settings.userPnpmfilePath = userPnpmfilePath;
+  }
+
+  return settings;
 }

@@ -360,7 +360,7 @@ export class PackageExtractor {
    * Extract a package using the provided options
    */
   public async extractAsync(options: IExtractorOptions): Promise<void> {
-    options = PackageExtractor._normalizeOptions(options);
+    options = _normalizeOptions(options);
     const {
       terminal,
       projectConfigurations,
@@ -429,36 +429,6 @@ export class PackageExtractor {
         await this._writeExtractorMetadataAsync(options, state);
       }
     });
-  }
-
-  private static _normalizeOptions(options: IExtractorOptions): IExtractorOptions {
-    if (options.subspaces) {
-      if (options.pnpmInstallFolder !== undefined) {
-        throw new Error(
-          'IExtractorOptions.pnpmInstallFolder cannot be combined with IExtractorOptions.subspaces'
-        );
-      }
-      if (options.transformPackageJson !== undefined) {
-        throw new Error(
-          'IExtractorOptions.transformPackageJson cannot be combined with IExtractorOptions.subspaces'
-        );
-      }
-      return options;
-    }
-
-    const normalizedOptions: IExtractorOptions = { ...options };
-    delete normalizedOptions.pnpmInstallFolder;
-    delete normalizedOptions.transformPackageJson;
-
-    normalizedOptions.subspaces = [
-      {
-        subspaceName: 'default',
-        pnpmInstallFolder: options.pnpmInstallFolder,
-        transformPackageJson: options.transformPackageJson
-      }
-    ];
-
-    return normalizedOptions;
   }
 
   private async _performExtractionAsync(options: IExtractorOptions, state: IExtractorState): Promise<void> {
@@ -1011,4 +981,34 @@ export class PackageExtractor {
       targetFilePath: createLinksTargetFilePath
     });
   }
+}
+
+function _normalizeOptions(options: IExtractorOptions): IExtractorOptions {
+  if (options.subspaces) {
+    if (options.pnpmInstallFolder !== undefined) {
+      throw new Error(
+        'IExtractorOptions.pnpmInstallFolder cannot be combined with IExtractorOptions.subspaces'
+      );
+    }
+    if (options.transformPackageJson !== undefined) {
+      throw new Error(
+        'IExtractorOptions.transformPackageJson cannot be combined with IExtractorOptions.subspaces'
+      );
+    }
+    return options;
+  }
+
+  const normalizedOptions: IExtractorOptions = { ...options };
+  delete normalizedOptions.pnpmInstallFolder;
+  delete normalizedOptions.transformPackageJson;
+
+  normalizedOptions.subspaces = [
+    {
+      subspaceName: 'default',
+      pnpmInstallFolder: options.pnpmInstallFolder,
+      transformPackageJson: options.transformPackageJson
+    }
+  ];
+
+  return normalizedOptions;
 }

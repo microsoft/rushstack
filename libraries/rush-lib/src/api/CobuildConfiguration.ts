@@ -31,14 +31,14 @@ export interface ICobuildConfigurationOptions {
   cobuildLockProviderFactory: CobuildLockProviderFactory;
 }
 
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 /**
  * Use this class to load and save the "common/config/rush/cobuild.json" config file.
  * This file provides configuration options for the Rush Cobuild feature.
  * @beta
  */
 export class CobuildConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   /**
    * Indicates whether the cobuild feature is enabled.
    * Typically it is enabled in the cobuild.json config file.
@@ -106,7 +106,13 @@ export class CobuildConfiguration {
   ): Promise<CobuildConfiguration | undefined> {
     const jsonFilePath: string = CobuildConfiguration.getCobuildConfigFilePath(rushConfiguration);
     try {
-      return await CobuildConfiguration._loadAsync(jsonFilePath, terminal, rushConfiguration, rushSession);
+      const options: ICobuildConfigurationOptions | undefined = await _loadAsync(
+        jsonFilePath,
+        terminal,
+        rushConfiguration,
+        rushSession
+      );
+      return options ? new CobuildConfiguration(options) : undefined;
     } catch (err) {
       if (!FileSystem.isNotExistError(err)) {
         throw err;
@@ -116,40 +122,6 @@ export class CobuildConfiguration {
 
   public static getCobuildConfigFilePath(rushConfiguration: RushConfiguration): string {
     return `${rushConfiguration.commonRushConfigFolder}/${RushConstants.cobuildFilename}`;
-  }
-
-  private static async _loadAsync(
-    jsonFilePath: string,
-    terminal: ITerminal,
-    rushConfiguration: RushConfiguration,
-    rushSession: RushSession
-  ): Promise<CobuildConfiguration | undefined> {
-    let cobuildJson: ICobuildJson | undefined;
-    try {
-      cobuildJson = await JsonFile.loadAndValidateAsync(jsonFilePath, CobuildConfiguration._jsonSchema);
-    } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
-        return undefined;
-      }
-      throw e;
-    }
-
-    if (!cobuildJson?.cobuildFeatureEnabled) {
-      return undefined;
-    }
-
-    const cobuildLockProviderFactory: CobuildLockProviderFactory | undefined =
-      rushSession.getCobuildLockProviderFactory(cobuildJson.cobuildLockProvider);
-    if (!cobuildLockProviderFactory) {
-      throw new Error(`Unexpected cobuild lock provider: ${cobuildJson.cobuildLockProvider}`);
-    }
-
-    return new CobuildConfiguration({
-      cobuildJson,
-      rushConfiguration,
-      rushSession,
-      cobuildLockProviderFactory
-    });
   }
 
   public async createLockProviderAsync(terminal: ITerminal): Promise<void> {
@@ -175,4 +147,38 @@ export class CobuildConfiguration {
     }
     return this._cobuildLockProvider;
   }
+}
+
+async function _loadAsync(
+  jsonFilePath: string,
+  terminal: ITerminal,
+  rushConfiguration: RushConfiguration,
+  rushSession: RushSession
+): Promise<ICobuildConfigurationOptions | undefined> {
+  let cobuildJson: ICobuildJson | undefined;
+  try {
+    cobuildJson = await JsonFile.loadAndValidateAsync(jsonFilePath, _jsonSchema);
+  } catch (e) {
+    if (FileSystem.isNotExistError(e)) {
+      return undefined;
+    }
+    throw e;
+  }
+
+  if (!cobuildJson?.cobuildFeatureEnabled) {
+    return undefined;
+  }
+
+  const cobuildLockProviderFactory: CobuildLockProviderFactory | undefined =
+    rushSession.getCobuildLockProviderFactory(cobuildJson.cobuildLockProvider);
+  if (!cobuildLockProviderFactory) {
+    throw new Error(`Unexpected cobuild lock provider: ${cobuildJson.cobuildLockProvider}`);
+  }
+
+  return {
+    cobuildJson,
+    rushConfiguration,
+    rushSession,
+    cobuildLockProviderFactory
+  };
 }

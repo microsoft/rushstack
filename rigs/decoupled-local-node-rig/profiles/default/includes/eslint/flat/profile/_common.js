@@ -180,6 +180,14 @@ module.exports = {
             // Forbid only bare `export * from '...'`
             selector: 'ExportAllDeclaration[exported=null]',
             message: "Use explicit named exports instead of `export * from '...'`."
+          },
+          {
+            selector: 'MethodDefinition[accessibility="private"][static=true]',
+            message: 'Use a module-scoped function instead of a `private static` method.'
+          },
+          {
+            selector: 'PropertyDefinition[accessibility="private"][static=true]',
+            message: 'Use a module-scoped variable instead of a `private static` property.'
           }
         ]
       }

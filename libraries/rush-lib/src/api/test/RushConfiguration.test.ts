@@ -226,7 +226,7 @@ describe(RushConfiguration.name, () => {
 
   describe('PNPM Store Paths', () => {
     afterEach(() => {
-      EnvironmentConfiguration['_pnpmStorePathOverride'] = undefined;
+      EnvironmentConfiguration.reset();
     });
 
     const PNPM_STORE_PATH_ENV: string = 'RUSH_PNPM_STORE_PATH';
