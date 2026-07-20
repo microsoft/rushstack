@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-oxlint-plugin",
+      "comment": "Initial release of a Heft plugin for running oxlint, the fast Rust-based JavaScript/TypeScript linter.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/heft-oxlint-plugin",
+  "email": "yashwanth195@users.noreply.github.com"
+}

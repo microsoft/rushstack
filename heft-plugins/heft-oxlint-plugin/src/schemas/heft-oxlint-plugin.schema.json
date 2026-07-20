@@ -1,0 +1,184 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Heft oxlint Plugin Options Configuration",
+  "description": "This schema describes the \"options\" field that can be specified in heft.json when loading \"@rushstack/heft-oxlint-plugin\".",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "configFilePath": {
+      "title": "Config File Path",
+      "description": "An optional path (relative to the project root) to an oxlint configuration file (e.g. \".oxlintrc.json\"). Maps to oxlint's --config. If omitted, oxlint will search for a configuration file using its default resolution.",
+      "type": "string"
+    },
+
+    "tsConfigFilePath": {
+      "title": "TypeScript Config File Path",
+      "description": "Override the TypeScript config used for import resolution. Maps to oxlint's --tsconfig.",
+      "type": "string"
+    },
+
+    "paths": {
+      "title": "Paths",
+      "description": "The list of file or folder paths (relative to the project root) that oxlint should lint. Defaults to [\"src\"].",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "allow": {
+      "title": "Allow",
+      "description": "Allow (suppress) the listed rules or categories. Maps to oxlint's --allow (-A).",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "warn": {
+      "title": "Warn",
+      "description": "Warn on the listed rules or categories. Maps to oxlint's --warn (-W).",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "deny": {
+      "title": "Deny",
+      "description": "Deny (error on) the listed rules or categories. Maps to oxlint's --deny (-D).",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "disableUnicornPlugin": {
+      "description": "Disable the unicorn plugin, which is on by default. Maps to --disable-unicorn-plugin.",
+      "type": "boolean"
+    },
+    "disableOxcPlugin": {
+      "description": "Disable oxc unique rules, which are on by default. Maps to --disable-oxc-plugin.",
+      "type": "boolean"
+    },
+    "disableTypeScriptPlugin": {
+      "description": "Disable the TypeScript plugin, which is on by default. Maps to --disable-typescript-plugin.",
+      "type": "boolean"
+    },
+    "importPlugin": {
+      "description": "Enable the import plugin. Maps to --import-plugin.",
+      "type": "boolean"
+    },
+    "reactPlugin": {
+      "description": "Enable the react plugin. Maps to --react-plugin.",
+      "type": "boolean"
+    },
+    "jsdocPlugin": {
+      "description": "Enable the jsdoc plugin. Maps to --jsdoc-plugin.",
+      "type": "boolean"
+    },
+    "jestPlugin": {
+      "description": "Enable the Jest plugin. Maps to --jest-plugin.",
+      "type": "boolean"
+    },
+    "vitestPlugin": {
+      "description": "Enable the Vitest plugin. Maps to --vitest-plugin.",
+      "type": "boolean"
+    },
+    "jsxA11yPlugin": {
+      "description": "Enable the JSX-a11y plugin. Maps to --jsx-a11y-plugin.",
+      "type": "boolean"
+    },
+    "nextjsPlugin": {
+      "description": "Enable the Next.js plugin. Maps to --nextjs-plugin.",
+      "type": "boolean"
+    },
+    "reactPerfPlugin": {
+      "description": "Enable the React performance plugin. Maps to --react-perf-plugin.",
+      "type": "boolean"
+    },
+    "promisePlugin": {
+      "description": "Enable the promise plugin. Maps to --promise-plugin.",
+      "type": "boolean"
+    },
+    "nodePlugin": {
+      "description": "Enable the node plugin. Maps to --node-plugin.",
+      "type": "boolean"
+    },
+    "vuePlugin": {
+      "description": "Enable the vue plugin. Maps to --vue-plugin.",
+      "type": "boolean"
+    },
+
+    "alwaysFix": {
+      "title": "Always Fix",
+      "description": "If set to true, fix all encountered rule violations where the violated rule provides a fixer, regardless of if the \"--fix\" command-line argument is provided. Maps to oxlint's --fix. When running in production mode, fixes will be disabled regardless of this setting.",
+      "type": "boolean"
+    },
+    "fixSuggestions": {
+      "description": "Apply auto-fixable suggestions. Maps to --fix-suggestions. Disabled in production mode.",
+      "type": "boolean"
+    },
+    "fixDangerously": {
+      "description": "Apply dangerous fixes and suggestions. Maps to --fix-dangerously. Disabled in production mode.",
+      "type": "boolean"
+    },
+
+    "ignorePath": {
+      "description": "Specify the file to use as your .eslintignore. Maps to --ignore-path.",
+      "type": "string"
+    },
+    "ignorePattern": {
+      "description": "Patterns of files to ignore. Maps to --ignore-pattern.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "noIgnore": {
+      "description": "Disable excluding files from ignore files/patterns. Maps to --no-ignore.",
+      "type": "boolean"
+    },
+
+    "quiet": {
+      "description": "Disable reporting on warnings; only errors are reported. Maps to --quiet.",
+      "type": "boolean"
+    },
+    "denyWarnings": {
+      "description": "Ensure warnings produce a non-zero exit code. Maps to --deny-warnings.",
+      "type": "boolean"
+    },
+    "maxWarnings": {
+      "description": "Warning threshold that forces an error exit status when exceeded. Maps to --max-warnings.",
+      "type": "integer"
+    },
+
+    "threads": {
+      "description": "Number of threads to use. Set to 1 to use a single CPU core. Maps to --threads.",
+      "type": "integer"
+    },
+    "noErrorOnUnmatchedPattern": {
+      "description": "Do not error when no files are selected for linting. Maps to --no-error-on-unmatched-pattern.",
+      "type": "boolean"
+    },
+    "disableNestedConfig": {
+      "description": "Disable automatic loading of nested configuration files. Maps to --disable-nested-config.",
+      "type": "boolean"
+    },
+    "typeAware": {
+      "description": "Enable rules that require type information. Maps to --type-aware.",
+      "type": "boolean"
+    },
+    "typeCheck": {
+      "description": "Enable experimental type checking (includes TypeScript compiler diagnostics). Maps to --type-check.",
+      "type": "boolean"
+    },
+    "reportUnusedDisableDirectives": {
+      "description": "Report unused inline disable directives. Maps to --report-unused-disable-directives.",
+      "type": "boolean"
+    },
+    "reportUnusedDisableDirectivesSeverity": {
+      "description": "Report unused inline disable directives at the specified severity. Maps to --report-unused-disable-directives-severity. Mutually exclusive with reportUnusedDisableDirectives.",
+      "type": "string",
+      "enum": ["off", "warn", "error"]
+    },
+
+    "sarifLogPath": {
+      "title": "SARIF Log Path",
+      "description": "If specified, a log of all findings will be emitted in the Static Analysis Results Interchange Format (https://sarifweb.azurewebsites.net/) at the provided path, relative to the project root. This is produced by an additional oxlint invocation using --format=sarif.",
+      "type": "string"
+    }
+  }
+}

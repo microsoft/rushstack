@@ -1127,6 +1127,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-oxlint-plugin",
+      "projectFolder": "heft-plugins/heft-oxlint-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-localization-typings-plugin",
       "projectFolder": "heft-plugins/heft-localization-typings-plugin",
       "reviewCategory": "libraries",
