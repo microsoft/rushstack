@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Avoid redundant downloads when multiple local Rush processes race to restore the same build cache entry (when useDirectFileTransfersForBuildCache is enabled).",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "198982749+Copilot@users.noreply.github.com"
+}

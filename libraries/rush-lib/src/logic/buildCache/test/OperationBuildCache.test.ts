@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, type FolderItem } from '@rushstack/node-core-library';
+import { FileSystem, type FolderItem, LockFile } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal, type ITerminal } from '@rushstack/terminal';
 
 import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
@@ -77,6 +77,18 @@ describe(OperationBuildCache.name, () => {
   });
 
   describe('direct file cloud cache restore', () => {
+    let fakeLockRelease: jest.Mock;
+
+    beforeEach(() => {
+      fakeLockRelease = jest.fn();
+      // By default, simulate an uncontended lock acquisition and no pre-existing cache entry.
+      // Individual tests may override these to exercise the lock-contention/fallback paths.
+      jest
+        .spyOn(LockFile, 'acquireAsync')
+        .mockImplementation(async () => ({ release: fakeLockRelease }) as unknown as LockFile);
+      jest.spyOn(FileSystem, 'existsAsync').mockResolvedValue(false);
+    });
+
     afterEach(() => {
       Reflect.set(OperationBuildCache, '_tarUtilityPromise', undefined);
       jest.restoreAllMocks();
@@ -151,6 +163,12 @@ describe(OperationBuildCache.name, () => {
         })
       );
       expect(deleteFileAsyncSpy).not.toHaveBeenCalled();
+      expect(LockFile.acquireAsync).toHaveBeenCalledWith(
+        '/cache',
+        expect.stringMatching(/^[0-9a-f]{40}$/),
+        expect.any(Number)
+      );
+      expect(fakeLockRelease).toHaveBeenCalledTimes(1);
     });
 
     it('cleans up the temp file when a direct file download misses or fails', async () => {
@@ -173,6 +191,59 @@ describe(OperationBuildCache.name, () => {
       const [, , tempPath]: [ITerminal, string, string] = tryDownloadCacheEntryToFileAsync.mock.calls[0];
       expect(tempPath).toMatch(/^\/cache\/acme-wizard-cache-entry-[0-9a-f]+\.temp$/);
       expect(deleteFileAsyncSpy).toHaveBeenCalledWith(tempPath);
+    });
+
+    it('skips downloading when another process already populated the cache entry while waiting for the lock', async () => {
+      const tryDownloadCacheEntryToFileAsync: jest.Mock<
+        Promise<boolean>,
+        [ITerminal, string, string]
+      > = jest.fn();
+      const subject: OperationBuildCache = prepareDirectTransferSubject({
+        tryDownloadCacheEntryToFileAsync
+      });
+      const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+      const tryUntarAsync: jest.Mock = jest.fn().mockResolvedValue(0);
+
+      jest.spyOn(FileSystem, 'deleteFolderAsync').mockResolvedValue();
+      // Simulate the cache entry having been fully populated (e.g. by another local process)
+      // by the time we acquired the lock.
+      jest.spyOn(FileSystem, 'existsAsync').mockResolvedValue(true);
+      Reflect.set(OperationBuildCache, '_tarUtilityPromise', Promise.resolve({ tryUntarAsync }));
+
+      const result: boolean = await subject.tryRestoreFromCacheAsync(terminal);
+
+      expect(result).toBe(true);
+      expect(tryDownloadCacheEntryToFileAsync).not.toHaveBeenCalled();
+      expect(tryUntarAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          archivePath: '/cache/acme-wizard-cache-entry'
+        })
+      );
+      expect(fakeLockRelease).toHaveBeenCalledTimes(1);
+    });
+
+    it('falls back to downloading independently when the download lock cannot be acquired', async () => {
+      jest.spyOn(LockFile, 'acquireAsync').mockRejectedValue(new Error('Exceeded maximum wait time'));
+
+      const tryDownloadCacheEntryToFileAsync: jest.Mock<Promise<boolean>, [ITerminal, string, string]> = jest
+        .fn()
+        .mockResolvedValue(true);
+      const subject: OperationBuildCache = prepareDirectTransferSubject({
+        tryDownloadCacheEntryToFileAsync
+      });
+      const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+      const tryUntarAsync: jest.Mock = jest.fn().mockResolvedValue(0);
+
+      jest.spyOn(FileSystem, 'deleteFolderAsync').mockResolvedValue();
+      jest.spyOn(FileSystem, 'moveAsync').mockResolvedValue();
+      Reflect.set(OperationBuildCache, '_tarUtilityPromise', Promise.resolve({ tryUntarAsync }));
+
+      const result: boolean = await subject.tryRestoreFromCacheAsync(terminal);
+
+      expect(result).toBe(true);
+      expect(tryDownloadCacheEntryToFileAsync).toHaveBeenCalledTimes(1);
+      // No lock instance was returned, so there is nothing to release.
+      expect(fakeLockRelease).not.toHaveBeenCalled();
     });
   });
 
