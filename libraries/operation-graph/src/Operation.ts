@@ -290,6 +290,7 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
             switch (this.state?.status) {
               case OperationStatus.Waiting:
               case OperationStatus.Ready:
+              case OperationStatus.Queued:
               case OperationStatus.Executing:
                 // If current status has not yet resolved to a fixed value,
                 // re-executing this operation does not require a full rerun
@@ -306,6 +307,9 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
               case OperationStatus.Failure:
               case OperationStatus.NoOp:
               case OperationStatus.Success:
+              case OperationStatus.SuccessWithWarning:
+              case OperationStatus.Skipped:
+              case OperationStatus.FromCache:
                 // The requestRun callback is assumed to remain constant
                 // throughout the lifetime of the process, so it is safe
                 // to capture here.
