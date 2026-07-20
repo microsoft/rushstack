@@ -130,6 +130,25 @@ export class AstSymbolTable {
   }
 
   /**
+   * Returns the set of source files that contain a declaration that was analyzed, i.e. that is
+   * reachable from the entry point.
+   *
+   * @remarks
+   * API Extractor analyzes the compiler's `.d.ts` outputs, and by default does not use
+   * `skipLibCheck`, so type-checking the entire program would bind-and-check every transitively
+   * reachable declaration file -- including deep dependencies that are not part of the API surface.
+   * This set allows compiler diagnostics to be scoped to just the files that contribute
+   * declarations to the analyzed API.
+   */
+  public collectAnalyzedSourceFiles(): Set<ts.SourceFile> {
+    const sourceFiles: Set<ts.SourceFile> = new Set<ts.SourceFile>();
+    for (const declaration of this._astDeclarationsByDeclaration.keys()) {
+      sourceFiles.add(declaration.getSourceFile());
+    }
+    return sourceFiles;
+  }
+
+  /**
    * Attempts to retrieve an export by name from the specified `AstModule`.
    * Returns undefined if no match was found.
    */
