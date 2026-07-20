@@ -1,0 +1,121 @@
+[2026-07-14] Feature 1/28 COMPLETE: Scaffold @rushstack/reporter public beta package
+  Files:
+    - libraries/reporter/package.json (name @rushstack/reporter v0.1.0, no rush-lib dep)
+    - libraries/reporter/tsconfig.json, config/{api-extractor,jest,rig}.json, eslint.config.js
+    - libraries/reporter/.npmignore, LICENSE, README.md
+    - libraries/reporter/src/index.ts (REPORTER_PACKAGE_NAME, @beta)
+    - rush.json (registered @rushstack/reporter after problem-matcher)
+    - common/reviews/api/reporter.api.md (generated, shows // @beta)
+    - common/config/subspaces/default/pnpm-lock.yaml (rush update)
+  Verify:
+    - rush update: success (~20s)
+    - rush build --to @rushstack/reporter: success
+    - rush build --only @rushstack/reporter: clean SUCCESS, no warnings
+    - api report confirms @beta release tag on exports
+    - no rush-lib reference in package.json
+  Next: Feature 2/28 - Define canonical event envelope and closed core event type union
+
+[2026-07-14] Feature 2/28 COMPLETE: Canonical event envelope and closed core event type union
+  Files:
+    - libraries/reporter/src/events/ReporterProtocolVersion.ts (IReporterProtocolVersion)
+    - libraries/reporter/src/events/ReporterPrivacyClassification.ts (public|local-sensitive|secret)
+    - libraries/reporter/src/events/ReporterJsonValue.ts (ReporterJsonNull, ReporterJsonValue)
+    - libraries/reporter/src/events/ReporterEventType.ts (union + REPORTER_EVENT_TYPES, 15 members)
+    - libraries/reporter/src/events/IReporterEventEnvelope.ts (source, scope, envelope; all readonly)
+    - libraries/reporter/src/index.ts (re-exports)
+    - libraries/reporter/src/test/IReporterEventEnvelope.test.ts (+ __snapshots__ golden)
+    - common/reviews/api/reporter.api.md (regenerated, all @beta)
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - golden envelope snapshot + JSON round-trip + closed-set + sourceSequence + Error-not-serialized tests pass
+    - api report confirms all exports @beta, envelope fields readonly
+  Next: Feature 3/28 - Producer API (IReporterEventSink, IScopedReporter)
+
+[2026-07-14] Feature 3/28 COMPLETE: Producer API (scoped emit without reporter/destination access)
+  Files:
+    - libraries/reporter/src/producers/IReporterEventSink.ts (IReporterEmitEventInput, IReporterEventSink.emit)
+    - libraries/reporter/src/producers/IScopedReporter.ts (ReporterMessageSeverity, IScopedMessageOptions, IScopedReporter)
+    - libraries/reporter/src/producers/ReporterExtensionEventName.ts (type + isReporterExtensionEventName validator)
+    - libraries/reporter/src/diagnostics/IRushDiagnostic.ts (MINIMAL stub: code/severity/summaryKey; expanded in Feature 4)
+    - libraries/reporter/src/index.ts (re-exports)
+    - libraries/reporter/src/test/ProducerApi.test.ts
+    - common/reviews/api/reporter.api.md (regenerated, all @beta)
+  Notes:
+    - emitDiagnostic requires IRushDiagnostic; introduced a MINIMAL stub now. Feature 4 must EXPAND it
+      (add RushDiagnosticCategory, remediation, source, classified parameters, field privacy, code registry, templates, tests) - not recreate.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest), no warnings
+    - sink Omit contract, scoped emit ids, emit-only surface, extension-name validation tests pass
+  Next: Feature 4/28 - Structured diagnostics (registry, categories, remediation, field privacy)
+
+[2026-07-14] Feature 4/28 COMPLETE: Structured diagnostics (registry, categories, remediation, field privacy)
+  Files (new):
+    - diagnostics/RushDiagnosticCategory.ts (7 categories)
+    - diagnostics/IRushRemediationAction.ts (RushRemediationSafety + action)
+    - diagnostics/IRushDiagnosticSource.ts
+    - diagnostics/IClassifiedDiagnosticValue.ts (value + privacy)
+    - diagnostics/DiagnosticPrivacy.ts (getPrivacyClassificationRank, computeEnvelopePrivacyFloor = min sensitivity)
+    - diagnostics/RushDiagnosticCodeRegistry.ts (defs, RUSH_DIAGNOSTIC_CODES map, templates, isValidRushDiagnosticCode, RUSH_INTERNAL_ERROR_CODE)
+    - diagnostics/RushError.ts (wraps DTO, exposes diagnosticId)
+    - diagnostics/createRushDiagnostic.ts (factory, randomUUID id)
+    - test/Diagnostics.test.ts
+  Files (modified):
+    - diagnostics/IRushDiagnostic.ts (EXPANDED from Feature 3 stub: diagnosticId, category, detailKey, parameters, remediation, source, causeDiagnosticIds, retryable, relatedArtifactIds)
+    - test/ProducerApi.test.ts (updated IRushDiagnostic literal for new required fields)
+    - index.ts (re-exports), common/reviews/api/reporter.api.md
+  Notes:
+    - Privacy floor = MIN sensitivity across fields (spec: "minimum classification floor for every field"); field-level classification remains authoritative for redaction.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - registry validation (code pattern/uniqueness/category/templates/internal-code), privacy floor, factory, RushError tests pass
+    - all 35 exports @beta
+  Next: Feature 5/28 - NDJSON wire protocol (handshake, versioning, size limits)
+
+[2026-07-14] Feature 5/28 COMPLETE: NDJSON wire protocol (handshake, versioning, size limits)
+  Files (new):
+    - protocol/ReporterProtocol.ts (REPORTER_PROTOCOL_VERSION {1,0}, REPORTER_PROTOCOL_LIMITS 1MiB/1MiB/64KiB, isReporterProtocolCompatible = major-equality)
+    - protocol/Ndjson.ts (encodeNdjsonRecord, NdjsonDecoder streaming, NdjsonRecordTooLargeError, INdjsonOptions)
+    - protocol/ReporterHandshake.ts (IReporterHello, IReporterHelloAck, negotiateReporterHello -> {accepted, ack, diagnostic})
+    - test/Protocol.test.ts
+  Files (modified):
+    - diagnostics/RushDiagnosticCodeRegistry.ts (APPENDED code RUSH_PROTOCOL_UPDATE_REQUIRED + templates; registry is append-only)
+    - index.ts, common/reviews/api/reporter.api.md
+  Notes:
+    - Capabilities optional (accepted = intersection; unknown ignored). Only unknown requiredFeatures or unsupported major reject + emit RUSH_PROTOCOL_UPDATE_REQUIRED. Minor additive.
+    - Byte limits enforced via Buffer.byteLength (utf8), incl. oversized partial-line guard in decoder.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - encode/decode round-trip, chunk-split reassembly, blank-line skip, record/partial size limits, negotiation (compat major, minor additive, unknown required, unsupported major, supported required) tests pass
+    - all exports @beta
+  Next: Feature 6/28 - ReporterManager lifecycle, ordering, and fan-out
+
+[2026-07-14] Feature 6/28 COMPLETE: ReporterManager lifecycle, ordering, and fan-out
+  Files (new):
+    - manager/IReporter.ts (IReporter {name, initializeAsync, report, flushAsync, closeAsync}, IReporterContext)
+    - manager/ReporterManager.ts (implements IReporterEventSink; emit assigns eventId/sequence/timestamp; ingestForeignEnvelope sets sourceSequence; per-reporter ordered async drain queue; addReporter destination exclusivity + required flag; initializeAsync fatal on failure; flushAsync 10s / signalFlushAsync 2s / closeAsync; coalescing under pressure; emergency stderr writer)
+    - manager/ReporterMultiplexer.ts (shared-destination fan-out)
+    - test/Manager.test.ts
+  Files (modified): index.ts, common/reviews/api/reporter.api.md
+  Notes:
+    - Coalescible = type 'activityChanged' && !required; only coalesces when queue length >= coalesceThreshold (default 64). Protected types never coalesced/dropped.
+    - Optional reporter runtime failure -> disabled + 1 emergency stderr line; required failure -> captured, flush/close reject (fatal). Init failure always fatal.
+    - report() is sync; drain loop yields via await Promise.resolve() between events so flush is the sync point.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - ordering/sequence/eventId/timestamp, foreign rehome, destination exclusivity, multiplexer, add-after-init guard, init-fatal, optional-disable, required-fatal-flush, coalescing (protected preserved), flush/close, flush-timeout tests pass
+    - all exports @beta
+  Next: Feature 7/28 - Freeze legacy output snapshots + protocol/compatibility goldens
+
+[2026-07-14] Feature 7/28 COMPLETE: Freeze legacy output snapshots + protocol/compatibility goldens (test-only)
+  Files (new):
+    - test/Goldens.test.ts + test/__snapshots__/Goldens.test.ts.snap (8 snapshots)
+  Files (modified): research/*
+  Notes:
+    - No new production API -> api.md unchanged. Legacy output samples INLINED as string constants (jest runs against lib/, so .txt fixtures would not be copied). Durations normalized (X.XX seconds).
+    - Protocol goldens: envelope schema, full diagnostic schema (fixed diagnosticId), hello/helloAck, NDJSON round-trip.
+    - Compatibility goldens: negotiation matrix (same major/minor, additive minor, unknown optional cap ignored, unknown required rejected+RUSH_PROTOCOL_UPDATE_REQUIRED, unsupported major rejected) normalized to drop random diagnosticId; minor-additive unknown-field retention on decode; protocol-version baseline.
+    - Legacy goldens: success + failure output frozen.
+    - Change file type=none (test-only, no version bump).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest), 8 snapshots
+  Next: Feature 8/28 - Two-stage bootstrap in install-run-rush (handoff file)

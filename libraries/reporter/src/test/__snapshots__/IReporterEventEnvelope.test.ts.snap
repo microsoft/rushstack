@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`IReporterEventEnvelope matches the golden envelope shape 1`] = `
+Object {
+  "eventId": "evt_0001",
+  "payload": Object {
+    "argv": Array [
+      "--to",
+      "@rushstack/reporter",
+    ],
+    "commandName": "build",
+  },
+  "privacy": "public",
+  "protocolVersion": Object {
+    "major": 1,
+    "minor": 0,
+  },
+  "required": true,
+  "scope": Object {
+    "commandName": "build",
+  },
+  "sequence": 1,
+  "sessionId": "sess_root",
+  "source": Object {
+    "packageName": "@microsoft/rush-lib",
+    "packageVersion": "5.177.2",
+  },
+  "timestamp": "2026-07-12T00:00:00.000Z",
+  "type": "commandStarted",
+}
+`;
