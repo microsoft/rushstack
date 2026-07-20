@@ -668,6 +668,7 @@ export interface _IOperationGraphEventSink {
 
 // @alpha
 export interface IOperationGraphIterationOptions {
+    getRunnerPersistence?: (operation: Operation) => boolean;
     // (undocumented)
     inputsSnapshot?: IInputsSnapshot;
     startTime?: number;
