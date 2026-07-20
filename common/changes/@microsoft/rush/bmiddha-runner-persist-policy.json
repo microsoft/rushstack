@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/rush",
       "comment": "Add a per-iteration, host-driven runner persist policy so IPC runners can be kept hot or torn down per operation per iteration, instead of fixing persistence at plugin construction.",
-      "type": "minor"
+      "type": "patch"
     }
   ]
 }
