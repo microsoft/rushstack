@@ -37,5 +37,21 @@ export enum OperationStatus {
   /**
    * The operation performed no meaningful work.
    */
-  NoOp = 'NO OP'
+  NoOp = 'NO OP',
+  /**
+   * The Operation is queued.
+   */
+  Queued = 'QUEUED',
+  /**
+   * The Operation completed successfully, but wrote to standard output.
+   */
+  SuccessWithWarning = 'SUCCESS WITH WARNINGS',
+  /**
+   * The Operation was skipped via legacy incremental build logic.
+   */
+  Skipped = 'SKIPPED',
+  /**
+   * The Operation had its outputs restored from the build cache.
+   */
+  FromCache = 'FROM CACHE'
 }
