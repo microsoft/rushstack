@@ -1,6 +1,24 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 08 Jul 2026 21:27:15 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Jul 2026 17:49:39 GMT and should not be manually modified.
+
+## 5.178.0
+Mon, 20 Jul 2026 17:49:39 GMT
+
+### Patches
+
+- Pass change file paths as discrete Git arguments when adding commit details during publishing.
+- Fix an issue where "rush-pnpm patch-commit" rewrote the pre-existing "globalPatchedDependencies" entries in pnpm-config.json using absolute paths when running with pnpm >= 9.
+- Fixed an issue where the pnpm `ignoredOptionalDependencies`, `trustPolicy`, `trustPolicyExclude`, and `trustPolicyIgnoreAfterMinutes` settings were written to the `pnpm` field of the generated `package.json` (which pnpm 11 ignores) instead of `pnpm-workspace.yaml`, causing them to be silently ignored under pnpm 11.
+- Fix pnpm 11 silently ignoring the `globalOverrides`, `globalPackageExtensions`, `globalPeerDependencyRules`, `globalAllowedDeprecatedVersions`, and `globalPatchedDependencies` settings from pnpm-config.json. Because pnpm 11 no longer reads the `pnpm` field of package.json, Rush now writes these settings to the generated `common/temp/pnpm-workspace.yaml` for pnpm 11+ (matching the existing `allowBuilds` relocation), and `rush-pnpm patch-commit`/`patch-remove` now read `patchedDependencies` back from `pnpm-workspace.yaml` for pnpm 11+. Behavior for pnpm 10 and earlier is unchanged.
+
+### Updates
+
+- Fix `minimumReleaseAge` and `minimumReleaseAgeExclude` in `pnpm-config.json` being silently ignored because they were written to package.json instead of `pnpm-workspace.yaml`
+- Add optional file-based transfer APIs (`tryDownloadCacheEntryToFileAsync`, `tryUploadCacheEntryFromFileAsync`) to `ICloudBuildCacheProvider`, allowing cache plugins to transfer cache entries directly to and from files on disk without buffering entire contents in memory. Implement in `@rushstack/rush-http-build-cache-plugin`, `@rushstack/rush-amazon-s3-build-cache-plugin`, and `@rushstack/rush-azure-storage-build-cache-plugin`. Gated behind the `useDirectFileTransfersForBuildCache` experiment.
+- Avoid redundant downloads when multiple local Rush processes race to restore the same build cache entry (when useDirectFileTransfersForBuildCache is enabled).
+- Replace `@override` with the `override` keyword.
+- (PLUGIN BREAKING CHANGE) Overhaul watch-mode commands such that the graph is only created once at the start of command invocation, along with a stateful manager object. Plugins may now access the manager object and use it to orchestrate and tap into the build process.
 
 ## 5.177.2
 Wed, 08 Jul 2026 21:27:15 GMT
