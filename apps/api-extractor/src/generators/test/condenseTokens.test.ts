@@ -80,7 +80,7 @@ function condenseTokensReference(excerptTokens: IExcerptToken[], tokenRanges: IE
   }
 }
 
-describe('condenseTokens', () => {
+describe(condenseTokens.name, () => {
   it('merges adjacent content tokens', () => {
     const tokens: IExcerptToken[] = [content('export '), content('declare '), content('class')];
     const ranges: IExcerptTokenRange[] = [];
