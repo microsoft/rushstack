@@ -3,16 +3,16 @@
 
 import * as path from 'node:path';
 
-import { FileSystem, Import, JsonFile, type IDependenciesMetaTable } from '@rushstack/node-core-library';
+import { FileSystem, type IDependenciesMetaTable } from '@rushstack/node-core-library';
 
 import { subspacePnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants';
 import type { ISubspacePnpmfileShimSettings, IWorkspaceProjectInfo } from './IPnpmfile';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import { RushConstants } from '../RushConstants';
 import type { Subspace } from '../../api/Subspace';
 import type { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
+import { PnpmfileSettingsFile } from './PnpmfileSettingsFile';
 
 /**
  * Loads PNPM's pnpmfile.js configuration, and invokes it to preprocess package.json files,
@@ -48,13 +48,7 @@ export class SubspacePnpmfileConfiguration {
       SubspacePnpmfileConfiguration.getSubspacePnpmfileShimSettings(rushConfiguration, subspace, variant);
 
     // Write the settings file used by the shim
-    await JsonFile.saveAsync(
-      subspaceGlobalPnpmfileShimSettings,
-      path.join(targetDir, 'pnpmfileSettings.json'),
-      {
-        ensureFolderExists: true
-      }
-    );
+    await PnpmfileSettingsFile.writeSettingsFileAsync(subspaceGlobalPnpmfileShimSettings, targetDir);
   }
 
   public static getSubspacePnpmfileShimSettings(
@@ -81,19 +75,10 @@ export class SubspacePnpmfileConfiguration {
     }
 
     const settings: ISubspacePnpmfileShimSettings = {
+      ...PnpmfileSettingsFile.getCommonPnpmfileShimSettings(rushConfiguration, subspace, variant),
       workspaceProjects,
-      subspaceProjects,
-      semverPath: Import.resolveModule({ modulePath: 'semver', baseFolderPath: __dirname })
+      subspaceProjects
     };
-
-    // common/config/subspaces/<subspace_name>/.pnpmfile.cjs
-    const userPnpmfilePath: string = path.join(
-      subspace.getVariantDependentSubspaceConfigFolderPath(variant),
-      (rushConfiguration.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
-    );
-    if (FileSystem.exists(userPnpmfilePath)) {
-      settings.userPnpmfilePath = userPnpmfilePath;
-    }
 
     return settings;
   }
