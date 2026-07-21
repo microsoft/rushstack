@@ -13,6 +13,7 @@ import {
 import { Span } from '../analyzer/Span';
 import type { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
 import type { AstDeclaration } from '../analyzer/AstDeclaration';
+import { condenseTokens } from './condenseTokens';
 
 /**
  * Used to provide ExcerptBuilder with a list of nodes whose token range we want to capture.
@@ -128,7 +129,7 @@ export class ExcerptBuilder {
       lastAppendedTokenIsSeparator: false
     });
 
-    _condenseTokens(excerptTokens, captureTokenRanges);
+    condenseTokens(excerptTokens, captureTokenRanges);
   }
 
   public static createEmptyTokenRange(): IExcerptTokenRange {
@@ -245,94 +246,6 @@ function _appendToken(
     excerptToken.canonicalReference = canonicalReference.toString();
   }
   excerptTokens.push(excerptToken);
-}
-
-/**
- * Condenses the provided excerpt tokens by merging tokens where possible. Updates the provided token ranges to
- * remain accurate after token merging.
- *
- * @remarks
- * For example, suppose we have excerpt tokens ["A", "B", "C"] and a token range [0, 2]. If the excerpt tokens
- * are condensed to ["AB", "C"], then the token range would be updated to [0, 1]. Note that merges are only
- * performed if they are compatible with the provided token ranges. In the example above, if our token range was
- * originally [0, 1], we would not be able to merge tokens "A" and "B".
- */
-function _condenseTokens(excerptTokens: IExcerptToken[], tokenRanges: IExcerptTokenRange[]): void {
-  // This set is used to quickly lookup a start or end index.
-  const startOrEndIndices: Set<number> = new Set();
-  for (const tokenRange of tokenRanges) {
-    startOrEndIndices.add(tokenRange.startIndex);
-    startOrEndIndices.add(tokenRange.endIndex);
-  }
-
-  for (let currentIndex: number = 1; currentIndex < excerptTokens.length; ++currentIndex) {
-    while (currentIndex < excerptTokens.length) {
-      const prevPrevToken: IExcerptToken = excerptTokens[currentIndex - 2]; // May be undefined
-      const prevToken: IExcerptToken = excerptTokens[currentIndex - 1];
-      const currentToken: IExcerptToken = excerptTokens[currentIndex];
-
-      // The number of excerpt tokens that are merged in this iteration. We need this to determine
-      // how to update the start and end indices of our token ranges.
-      let mergeCount: number;
-
-      // There are two types of merges that can occur. We only perform these merges if they are
-      // compatible with all of our token ranges.
-      if (
-        prevPrevToken &&
-        prevPrevToken.kind === ExcerptTokenKind.Reference &&
-        prevToken.kind === ExcerptTokenKind.Content &&
-        prevToken.text.trim() === '.' &&
-        currentToken.kind === ExcerptTokenKind.Reference &&
-        !startOrEndIndices.has(currentIndex) &&
-        !startOrEndIndices.has(currentIndex - 1)
-      ) {
-        // If the current token is a reference token, the previous token is a ".", and the previous-
-        // previous token is a reference token, then merge all three tokens into a reference token.
-        //
-        // For example: Given ["MyNamespace" (R), ".", "MyClass" (R)], tokens "." and "MyClass" might
-        // be merged into "MyNamespace". The condensed token would be ["MyNamespace.MyClass" (R)].
-        prevPrevToken.text += prevToken.text + currentToken.text;
-        prevPrevToken.canonicalReference = currentToken.canonicalReference;
-        mergeCount = 2;
-        currentIndex--;
-      } else if (
-        // If the current and previous tokens are both content tokens, then merge the tokens into a
-        // single content token. For example: Given ["export ", "declare class"], these tokens
-        // might be merged into "export declare class".
-        prevToken.kind === ExcerptTokenKind.Content &&
-        prevToken.kind === currentToken.kind &&
-        !startOrEndIndices.has(currentIndex)
-      ) {
-        prevToken.text += currentToken.text;
-        mergeCount = 1;
-      } else {
-        // Otherwise, no merging can occur here. Continue to the next index.
-        break;
-      }
-
-      // Remove the now redundant excerpt token(s), as they were merged into a previous token.
-      excerptTokens.splice(currentIndex, mergeCount);
-
-      // Update the start and end indices for all token ranges based upon how many excerpt
-      // tokens were merged and in what positions.
-      for (const tokenRange of tokenRanges) {
-        if (tokenRange.startIndex > currentIndex) {
-          tokenRange.startIndex -= mergeCount;
-        }
-
-        if (tokenRange.endIndex > currentIndex) {
-          tokenRange.endIndex -= mergeCount;
-        }
-      }
-
-      // Clear and repopulate our set with the updated indices.
-      startOrEndIndices.clear();
-      for (const tokenRange of tokenRanges) {
-        startOrEndIndices.add(tokenRange.startIndex);
-        startOrEndIndices.add(tokenRange.endIndex);
-      }
-    }
-  }
 }
 
 function _isDeclarationName(name: ts.Identifier): boolean {
