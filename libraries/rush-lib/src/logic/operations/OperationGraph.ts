@@ -85,7 +85,7 @@ interface IExecutionIterationContext extends IOperationExecutionRecordContext {
   promise: Promise<OperationStatus> | undefined;
 
   startTime?: number;
-  getRunnerPersistence: IOperationGraphIterationOptions['getRunnerPersistence'];
+  shouldRunnerPersist: IOperationGraphIterationOptions['shouldRunnerPersist'];
 
   completedOperations: number;
   totalOperations: number;
@@ -576,12 +576,12 @@ export class OperationGraph implements IOperationGraph {
     const {
       startTime = performance.now(),
       inputsSnapshot = await getInputsSnapshotAsync?.(),
-      getRunnerPersistence
+      shouldRunnerPersist
     } = iterationOptions;
     const iterationOptionsForCallbacks: IOperationGraphIterationOptions = {
       startTime,
       inputsSnapshot,
-      getRunnerPersistence
+      shouldRunnerPersist
     };
 
     const { hooks } = this;
@@ -615,7 +615,7 @@ export class OperationGraph implements IOperationGraph {
     const iterationContext: IExecutionIterationContext = {
       abortController,
       startTime,
-      getRunnerPersistence,
+      shouldRunnerPersist,
       streamCollator,
       terminal,
       inputsSnapshot,
@@ -767,7 +767,7 @@ export class OperationGraph implements IOperationGraph {
     const iterationOptions: IOperationGraphIterationOptions = {
       inputsSnapshot: iterationContext.inputsSnapshot,
       startTime: iterationContext.startTime,
-      getRunnerPersistence: iterationContext.getRunnerPersistence
+      shouldRunnerPersist: iterationContext.shouldRunnerPersist
     };
 
     const executionQueue: AsyncOperationQueue = new AsyncOperationQueue(
@@ -1021,11 +1021,14 @@ export class OperationGraph implements IOperationGraph {
       telemetry.log(logEntry);
     }
 
-    const { getRunnerPersistence } = iterationContext;
-    if (getRunnerPersistence) {
+    // IPC operations that executed this iteration release their runner immediately upon completion.
+    // This fallback closes cold runners that remain active because their operation did not execute,
+    // for example due to a cache hit, abort, blocked dependency, or disabled operation.
+    const { shouldRunnerPersist } = iterationContext;
+    if (shouldRunnerPersist) {
       const operationsToClose: Operation[] = [];
       for (const operation of this.operations) {
-        if (!getRunnerPersistence(operation)) {
+        if (!shouldRunnerPersist(operation) && operation.runner?.isActive !== false) {
           operationsToClose.push(operation);
         }
       }

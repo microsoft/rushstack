@@ -70,6 +70,15 @@ export interface IOperationRunnerContext {
   error?: Error;
 
   /**
+   * Whether the host wants this operation's runner to remain resident (kept warm) after the
+   * operation completes for the current iteration. Defaults to `true` when the host provides no
+   * persistence policy. Runners that own a long-lived child process (such as `IPCOperationRunner`)
+   * must release that process as soon as the operation completes when this is `false`, so that the
+   * subprocess does not consume memory while downstream operations execute.
+   */
+  shouldRunnerPersist?: boolean;
+
+  /**
    * Returns a callback that invalidates this operation so that it will be re-executed in the next iteration.
    * The returned callback captures only the minimal state needed, avoiding retention of the full context.
    * Callers should store the result rather than calling this method repeatedly.
@@ -134,6 +143,8 @@ export interface IOperationRunner {
    * If true, this runner currently owns some kind of active resource (e.g. a service or a watch process).
    * This can be used to determine if the operation is "in progress" even if it is not currently executing.
    * If the runner supports this property, it should update it as appropriate during execution.
+   * A runner that closes its resource during `executeAsync()` when `context.shouldRunnerPersist` is false
+   * must report `false` afterward so that the graph's fallback cleanup does not close it again.
    * The property is optional to avoid breaking existing implementations of IOperationRunner.
    */
   readonly isActive?: boolean;

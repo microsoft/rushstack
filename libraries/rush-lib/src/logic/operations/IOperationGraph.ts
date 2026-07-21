@@ -26,10 +26,11 @@ export interface IOperationGraphIterationOptions {
    * Returns whether the operation's runner should remain active after this iteration.
    *
    * @remarks
-   * When omitted, all runners remain active. Returning `false` causes the operation's runner to be closed
-   * after the iteration, including when the operation was disabled for that iteration.
+   * When omitted, all runners remain active. Returning `false` causes a runner that supports immediate
+   * teardown to close when its operation completes. Any cold runner that remains active because its operation
+   * did not execute is closed after the iteration.
    */
-  getRunnerPersistence?: (operation: Operation) => boolean;
+  shouldRunnerPersist?: (operation: Operation) => boolean;
 }
 
 /**
