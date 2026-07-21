@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.58.12",
+      "tag": "@microsoft/api-extractor_v7.58.12",
+      "date": "Tue, 21 Jul 2026 02:53:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the performance of the internal excerpt token condensing algorithm from O(n^2) to O(n) by eliminating repeated array splicing and per-merge bookkeeping."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.58.11",
       "tag": "@microsoft/api-extractor_v7.58.11",
       "date": "Fri, 17 Jul 2026 00:15:59 GMT",
