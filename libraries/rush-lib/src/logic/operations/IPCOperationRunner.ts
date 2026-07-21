@@ -96,6 +96,7 @@ export class IPCOperationRunner implements IOperationRunner {
     const invalidate: (reason: string) => void = context.getInvalidateCallback();
     return await context.runWithTerminalAsync(
       async (terminal: ITerminal, terminalProvider: ITerminalProvider): Promise<OperationStatus> => {
+        let isConnected: boolean = false;
         if (!this._ipcProcess || typeof this._ipcProcess.exitCode === 'number') {
           // Log any ignored parameters
           if (this._ignoredParameterValues.length > 0) {
@@ -199,6 +200,7 @@ export class IPCOperationRunner implements IOperationRunner {
           subProcess.on('exit', onExit);
 
           this._processReadyPromise!.then(() => {
+            isConnected = true;
             terminal.writeLine('Child supports IPC protocol. Sending "run" command...');
             const runCommand: IRunCommandMessage = {
               command: 'run'
@@ -206,6 +208,14 @@ export class IPCOperationRunner implements IOperationRunner {
             subProcess.send(runCommand);
           }, reject);
         });
+
+        // If the host does not want this runner kept warm for the next iteration, release the
+        // long-lived subprocess immediately now that the operation has completed. Deferring this to
+        // the end of the iteration would keep the subprocess resident (consuming memory) while
+        // downstream operations execute, risking RAM exhaustion.
+        if (isConnected && context.shouldRunnerPersist === false) {
+          await this.closeAsync();
+        }
 
         // @rushstack/operation-graph does not currently have a concept of "Success with Warning"
         // To match existing ShellOperationRunner behavior we treat any stderr as a warning.

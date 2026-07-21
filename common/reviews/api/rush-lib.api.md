@@ -668,9 +668,9 @@ export interface _IOperationGraphEventSink {
 
 // @alpha
 export interface IOperationGraphIterationOptions {
-    getRunnerPersistence?: (operation: Operation) => boolean;
     // (undocumented)
     inputsSnapshot?: IInputsSnapshot;
+    shouldRunnerPersist?: (operation: Operation) => boolean;
     startTime?: number;
 }
 
@@ -739,6 +739,7 @@ export interface IOperationRunnerContext {
         createLogFile: boolean;
         logFileSuffix?: string;
     }): Promise<T>;
+    shouldRunnerPersist?: boolean;
     status: OperationStatus;
     stopwatch: IStopwatchResult;
 }
