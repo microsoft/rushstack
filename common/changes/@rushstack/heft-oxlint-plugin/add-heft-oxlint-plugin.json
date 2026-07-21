@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/heft-oxlint-plugin",
       "comment": "Initial release of a Heft plugin for running oxlint, the fast Rust-based JavaScript/TypeScript linter.",
-      "type": "none"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-oxlint-plugin",

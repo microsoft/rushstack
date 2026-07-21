@@ -123,9 +123,16 @@ export interface IOxlintPluginOptions {
   noErrorOnUnmatchedPattern?: boolean;
   /** Disable automatic loading of nested configuration files. Maps to `--disable-nested-config`. */
   disableNestedConfig?: boolean;
-  /** Enable rules that require type information. Maps to `--type-aware`. */
+  /**
+   * Enable rules that require type information. Maps to `--type-aware`. Requires the
+   * `oxlint-tsgolint` package, which is resolved from the consuming project or its shared rig.
+   */
   typeAware?: boolean;
-  /** Enable experimental type checking (includes TypeScript compiler diagnostics). Maps to `--type-check`. */
+  /**
+   * Enable experimental type checking (includes TypeScript compiler diagnostics). Maps to
+   * `--type-check`. Requires the `oxlint-tsgolint` package, which is resolved from the consuming
+   * project or its shared rig.
+   */
   typeCheck?: boolean;
   /** Report unused inline disable directives. Maps to `--report-unused-disable-directives`. */
   reportUnusedDisableDirectives?: boolean;
@@ -140,8 +147,9 @@ export interface IOxlintPluginOptions {
 
   /**
    * If specified, a Static Analysis Results Interchange Format (SARIF) log of all findings will be
-   * written to the provided path, relative to the project root. This is produced by an additional
-   * oxlint invocation using `--format=sarif`.
+   * written to the provided path, relative to the project root. When set, oxlint is run once with
+   * `--format=sarif` and the reported diagnostics are extracted from that same SARIF output, so no
+   * additional oxlint invocation is incurred.
    */
   sarifLogPath?: string;
 }
@@ -173,6 +181,37 @@ export interface IOxlintDiagnostic {
 
 export interface IOxlintJsonOutput {
   diagnostics: IOxlintDiagnostic[];
+}
+
+// ----- SARIF types (subset needed for diagnostic extraction) -----
+
+export interface IOxlintSarifRegion {
+  startLine?: number;
+  startColumn?: number;
+}
+
+export interface IOxlintSarifPhysicalLocation {
+  artifactLocation?: { uri?: string };
+  region?: IOxlintSarifRegion;
+}
+
+export interface IOxlintSarifLocation {
+  physicalLocation?: IOxlintSarifPhysicalLocation;
+}
+
+export interface IOxlintSarifResult {
+  level?: string;
+  message?: { text?: string };
+  ruleId?: string;
+  locations?: IOxlintSarifLocation[];
+}
+
+export interface IOxlintSarifRun {
+  results?: IOxlintSarifResult[];
+}
+
+export interface IOxlintSarifLog {
+  runs?: IOxlintSarifRun[];
 }
 
 const DEFAULT_PATHS: ReadonlyArray<string> = ['src'];
@@ -360,4 +399,139 @@ export function createFileErrorForDiagnostic(
     line: span?.line,
     column: span?.column
   });
+}
+
+/**
+ * Extracts diagnostics from an oxlint SARIF log, converting each SARIF result into the common
+ * {@link IOxlintDiagnostic} format used for error reporting.
+ */
+export function extractDiagnosticsFromSarif(sarifLog: IOxlintSarifLog): IOxlintDiagnostic[] {
+  const diagnostics: IOxlintDiagnostic[] = [];
+
+  for (const run of sarifLog.runs ?? []) {
+    for (const result of run.results ?? []) {
+      const location: IOxlintSarifLocation | undefined = result.locations?.[0];
+      const physicalLocation: IOxlintSarifPhysicalLocation | undefined = location?.physicalLocation;
+      const uri: string = physicalLocation?.artifactLocation?.uri ?? '';
+      const region: IOxlintSarifRegion | undefined = physicalLocation?.region;
+
+      let severity: 'error' | 'warning' | 'advice';
+      switch (result.level) {
+        case 'error':
+          severity = 'error';
+          break;
+        case 'note':
+          severity = 'advice';
+          break;
+        default:
+          severity = 'warning';
+          break;
+      }
+
+      const diagnostic: IOxlintDiagnostic = {
+        message: result.message?.text ?? '',
+        code: result.ruleId,
+        severity,
+        filename: uri,
+        labels: region
+          ? [{ span: { offset: 0, length: 0, line: region.startLine ?? 0, column: region.startColumn ?? 0 } }]
+          : undefined
+      };
+
+      diagnostics.push(diagnostic);
+    }
+  }
+
+  return diagnostics;
+}
+
+/**
+ * The maximum length (in characters) permitted for a single oxlint command line.
+ *
+ * @remarks
+ * Windows caps the command line passed to `CreateProcess` at 32767 characters. We stay well under
+ * that limit to leave room for the Node executable path, the oxlint bin path, and any argument
+ * quoting overhead applied by the operating system.
+ */
+export const MAX_COMMAND_LINE_LENGTH: number = 30000;
+
+/**
+ * Splits the positional lint paths into batches such that each resulting oxlint command line stays
+ * within {@link MAX_COMMAND_LINE_LENGTH}. This avoids exceeding the operating system's command-line
+ * length limit (notably on Windows, where a large set of changed files could otherwise overflow the
+ * ~32 KiB `CreateProcess` limit).
+ *
+ * @param prefixArgs - The command-line tokens that precede the paths on every invocation (for
+ *   example the Node executable, the oxlint bin path, and all non-path oxlint arguments).
+ * @param lintPaths - The positional file or folder paths to lint.
+ * @param maxCommandLineLength - The maximum permitted command-line length.
+ * @returns One or more batches of lint paths. A single path that on its own exceeds the limit is
+ *   still returned in its own batch, since it cannot be split any further. Always returns at least
+ *   one batch so that callers can iterate uniformly.
+ */
+export function batchLintPaths(
+  prefixArgs: ReadonlyArray<string>,
+  lintPaths: ReadonlyArray<string>,
+  maxCommandLineLength: number = MAX_COMMAND_LINE_LENGTH
+): string[][] {
+  // Length contributed by the fixed prefix, counting a separating space before each token.
+  let prefixLength: number = 0;
+  for (const arg of prefixArgs) {
+    prefixLength += arg.length + 1;
+  }
+
+  const batches: string[][] = [];
+  let currentBatch: string[] = [];
+  let currentLength: number = prefixLength;
+
+  for (const lintPath of lintPaths) {
+    const pathLength: number = lintPath.length + 1;
+    if (currentBatch.length > 0 && currentLength + pathLength > maxCommandLineLength) {
+      batches.push(currentBatch);
+      currentBatch = [];
+      currentLength = prefixLength;
+    }
+    currentBatch.push(lintPath);
+    currentLength += pathLength;
+  }
+
+  if (currentBatch.length > 0) {
+    batches.push(currentBatch);
+  }
+
+  if (batches.length === 0) {
+    batches.push([]);
+  }
+
+  return batches;
+}
+
+/**
+ * Merges the raw SARIF log output produced by one or more oxlint invocations into a single SARIF
+ * document.
+ *
+ * @remarks
+ * When linting is split into multiple batches (see {@link batchLintPaths}), each batch produces its
+ * own SARIF log. This concatenates the `runs` from every batch into the first log so that all of the
+ * findings are preserved in one file. When only a single log is provided, its original text is
+ * returned unchanged so that the output is byte-for-byte identical to what oxlint emitted.
+ *
+ * @param rawSarifLogs - The raw (unparsed) SARIF stdout captured from each oxlint invocation.
+ * @returns The merged SARIF log serialized as a string.
+ */
+export function mergeSarifLogs(rawSarifLogs: ReadonlyArray<string>): string {
+  if (rawSarifLogs.length === 1) {
+    return rawSarifLogs[0];
+  }
+
+  const base: { runs?: unknown[] } = JSON.parse(rawSarifLogs[0]);
+  base.runs = base.runs ?? [];
+  for (let i: number = 1; i < rawSarifLogs.length; ++i) {
+    const next: { runs?: unknown[] } = JSON.parse(rawSarifLogs[i]);
+    if (next.runs) {
+      base.runs.push(...next.runs);
+    }
+  }
+
+  return JSON.stringify(base, undefined, 2);
 }

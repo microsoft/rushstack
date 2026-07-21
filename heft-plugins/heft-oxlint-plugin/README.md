@@ -3,9 +3,11 @@
 This is a Heft plugin to run [oxlint](https://oxc.rs/docs/guide/usage/linter), the fast Rust-based
 JavaScript/TypeScript linter from the Oxc project.
 
-Unlike `@rushstack/heft-lint-plugin` (ESLint/TSLint), oxlint does not perform type-aware linting and
-does not require a TypeScript program, so this plugin runs as a standalone task that invokes the
-`oxlint` binary and reports its findings through the Heft logger.
+This plugin runs as a standalone task that invokes the `oxlint` binary and reports its findings
+through the Heft logger. Type-aware linting is supported via the `typeAware` option (which passes
+`--type-aware` to oxlint); enabling it additionally requires the `oxlint-tsgolint` package. As with
+the `oxlint` package itself, `oxlint-tsgolint` is resolved from the consuming project or its shared
+rig, so it can be installed once in a rig rather than in every project.
 
 ## Links
 

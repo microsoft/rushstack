@@ -158,11 +158,11 @@
       "type": "boolean"
     },
     "typeAware": {
-      "description": "Enable rules that require type information. Maps to --type-aware.",
+      "description": "Enable rules that require type information. Maps to --type-aware. Requires the oxlint-tsgolint package, which is resolved from the consuming project or its shared rig.",
       "type": "boolean"
     },
     "typeCheck": {
-      "description": "Enable experimental type checking (includes TypeScript compiler diagnostics). Maps to --type-check.",
+      "description": "Enable experimental type checking (includes TypeScript compiler diagnostics). Maps to --type-check. Requires the oxlint-tsgolint package, which is resolved from the consuming project or its shared rig.",
       "type": "boolean"
     },
     "reportUnusedDisableDirectives": {
@@ -177,7 +177,7 @@
 
     "sarifLogPath": {
       "title": "SARIF Log Path",
-      "description": "If specified, a log of all findings will be emitted in the Static Analysis Results Interchange Format (https://sarifweb.azurewebsites.net/) at the provided path, relative to the project root. This is produced by an additional oxlint invocation using --format=sarif.",
+      "description": "If specified, a log of all findings will be emitted in the Static Analysis Results Interchange Format (https://sarifweb.azurewebsites.net/) at the provided path, relative to the project root. When set, oxlint is run once with --format=sarif and the reported diagnostics are extracted from that same SARIF output, so no additional oxlint invocation is incurred.",
       "type": "string"
     }
   }

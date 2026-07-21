@@ -10,8 +10,12 @@ import {
   filterChangedFilePaths,
   formatDiagnosticMessage,
   createFileErrorForDiagnostic,
+  extractDiagnosticsFromSarif,
+  batchLintPaths,
+  mergeSarifLogs,
   type IOxlintPluginOptions,
-  type IOxlintDiagnostic
+  type IOxlintDiagnostic,
+  type IOxlintSarifLog
 } from '../OxlintHelpers';
 
 describe('buildCommonArgs', () => {
@@ -234,5 +238,119 @@ describe('createFileErrorForDiagnostic', () => {
     expect(fileError.absolutePath).toBe(path.resolve(buildFolderPath, 'src/other.ts'));
     expect(fileError.line).toBeUndefined();
     expect(fileError.column).toBeUndefined();
+  });
+});
+
+describe('extractDiagnosticsFromSarif', () => {
+  it('returns an empty array for an empty log', () => {
+    expect(extractDiagnosticsFromSarif({})).toEqual([]);
+    expect(extractDiagnosticsFromSarif({ runs: [] })).toEqual([]);
+    expect(extractDiagnosticsFromSarif({ runs: [{ results: [] }] })).toEqual([]);
+  });
+
+  it('maps SARIF levels to diagnostic severities and reads location data', () => {
+    const sarifLog: IOxlintSarifLog = {
+      runs: [
+        {
+          results: [
+            {
+              level: 'error',
+              ruleId: 'no-unused-vars',
+              message: { text: "'x' is never used" },
+              locations: [
+                {
+                  physicalLocation: {
+                    artifactLocation: { uri: 'src/a.ts' },
+                    region: { startLine: 3, startColumn: 7 }
+                  }
+                }
+              ]
+            },
+            {
+              level: 'warning',
+              message: { text: 'be careful' },
+              locations: [{ physicalLocation: { artifactLocation: { uri: 'src/b.ts' } } }]
+            },
+            {
+              level: 'note',
+              message: { text: 'just advice' }
+            }
+          ]
+        }
+      ]
+    };
+
+    const diagnostics: IOxlintDiagnostic[] = extractDiagnosticsFromSarif(sarifLog);
+    expect(diagnostics).toHaveLength(3);
+
+    expect(diagnostics[0]).toMatchObject({
+      severity: 'error',
+      code: 'no-unused-vars',
+      message: "'x' is never used",
+      filename: 'src/a.ts'
+    });
+    expect(diagnostics[0].labels?.[0]?.span).toMatchObject({ line: 3, column: 7 });
+
+    expect(diagnostics[1]).toMatchObject({
+      severity: 'warning',
+      message: 'be careful',
+      filename: 'src/b.ts'
+    });
+    expect(diagnostics[2]).toMatchObject({ severity: 'advice', message: 'just advice', filename: '' });
+  });
+});
+
+describe('batchLintPaths', () => {
+  it('returns a single batch when everything fits', () => {
+    const paths: string[] = ['src/a.ts', 'src/b.ts', 'src/c.ts'];
+    expect(batchLintPaths(['node', 'oxlint', '--format=json'], paths)).toEqual([paths]);
+  });
+
+  it('always returns at least one batch, even with no paths', () => {
+    expect(batchLintPaths(['node', 'oxlint'], [])).toEqual([[]]);
+  });
+
+  it('splits paths into multiple batches when the command line would be too long', () => {
+    const paths: string[] = ['aaaa', 'bbbb', 'cccc', 'dddd'];
+    // prefix "node oxlint" contributes 5 + 7 = 12; each 4-char path contributes 5.
+    // With a limit of 22, prefix(12) + one path(5) = 17 fits, two paths = 22 fits, three = 27 does not.
+    const batches: string[][] = batchLintPaths(['node', 'oxlint'], paths, 22);
+    expect(batches).toEqual([
+      ['aaaa', 'bbbb'],
+      ['cccc', 'dddd']
+    ]);
+  });
+
+  it('places an oversized single path in its own batch rather than dropping it', () => {
+    const longPath: string = 'x'.repeat(100);
+    const batches: string[][] = batchLintPaths(['node'], ['a', longPath, 'b'], 20);
+    expect(batches).toEqual([['a'], [longPath], ['b']]);
+  });
+
+  it('preserves every path across the produced batches', () => {
+    const paths: string[] = [];
+    for (let index: number = 0; index < 50; ++index) {
+      paths.push(`src/file-${index}.ts`);
+    }
+    const batches: string[][] = batchLintPaths(['node', 'oxlint', '--format=sarif'], paths, 80);
+    expect(batches.flat()).toEqual(paths);
+    expect(batches.length).toBeGreaterThan(1);
+  });
+});
+
+describe('mergeSarifLogs', () => {
+  it('returns the original text unchanged for a single log', () => {
+    const raw: string = '{"runs":[{"results":[]}]}';
+    expect(mergeSarifLogs([raw])).toBe(raw);
+  });
+
+  it('concatenates the runs from multiple logs', () => {
+    const first: string = JSON.stringify({ $schema: 'sarif', version: '2.1.0', runs: [{ results: [1] }] });
+    const second: string = JSON.stringify({ version: '2.1.0', runs: [{ results: [2] }] });
+    const merged: IOxlintSarifLog & { $schema?: string } = JSON.parse(mergeSarifLogs([first, second]));
+    expect(merged.$schema).toBe('sarif');
+    expect(merged.runs).toHaveLength(2);
+    expect(merged.runs?.[0]?.results).toEqual([1]);
+    expect(merged.runs?.[1]?.results).toEqual([2]);
   });
 });
