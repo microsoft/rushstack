@@ -28,7 +28,6 @@ export interface IIPCOperationRunnerOptions {
   initialCommand: string;
   incrementalCommand: string | undefined;
   commandForHash: string;
-  persist: boolean;
   ignoredParameterValues: ReadonlyArray<string>;
 }
 
@@ -58,7 +57,6 @@ export class IPCOperationRunner implements IOperationRunner {
   private readonly _initialCommand: string;
   private readonly _incrementalCommand: string | undefined;
   private readonly _commandForHash: string;
-  private readonly _persist: boolean;
   private readonly _ignoredParameterValues: ReadonlyArray<string>;
 
   private _ipcProcess: ChildProcess | undefined;
@@ -72,7 +70,6 @@ export class IPCOperationRunner implements IOperationRunner {
       initialCommand,
       incrementalCommand,
       commandForHash,
-      persist,
       ignoredParameterValues
     } = options;
     this.name = name;
@@ -83,7 +80,6 @@ export class IPCOperationRunner implements IOperationRunner {
     this._incrementalCommand = incrementalCommand;
     this._commandForHash = commandForHash;
 
-    this._persist = persist;
     this._ignoredParameterValues = ignoredParameterValues;
   }
 
@@ -213,7 +209,11 @@ export class IPCOperationRunner implements IOperationRunner {
           }, reject);
         });
 
-        if (isConnected && !this._persist) {
+        // If the host does not want this runner kept warm for the next iteration, release the
+        // long-lived subprocess immediately now that the operation has completed. Deferring this to
+        // the end of the iteration would keep the subprocess resident (consuming memory) while
+        // downstream operations execute, risking RAM exhaustion.
+        if (isConnected && context.shouldRunnerPersist === false) {
           await this.closeAsync();
         }
 
