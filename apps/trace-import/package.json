@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/trace-import",
-  "version": "0.7.21",
+  "version": "0.7.22",
   "description": "CLI tool for understanding how require() and \"import\" statements get resolved",
   "repository": {
     "type": "git",
