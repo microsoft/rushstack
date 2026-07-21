@@ -12,7 +12,7 @@ import {
 } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import { LastInstallFlag } from '../../api/LastInstallFlag';
+import { doesLastInstallFlagLockFileExistAsync, LastInstallFlag } from '../../api/LastInstallFlag';
 import type { PackageManagerName } from '../../api/packageManager/PackageManager';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
@@ -427,73 +427,108 @@ export class InstallHelpers {
       node: process.versions.node
     });
 
+    const isPackageManagerMarkerValid: boolean = await packageManagerMarker.isValidAsync();
+    const packageManagerInstallLockFileExists: boolean = await doesLastInstallFlagLockFileExistAsync(
+      rushUserFolder,
+      packageManagerAndVersion
+    );
+
+    if (isPackageManagerMarkerValid && !packageManagerInstallLockFileExists) {
+      logIfConsoleOutputIsNotRestricted(
+        `Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`
+      );
+      await _ensureLocalPackageManagerSymlinkAsync(
+        rushConfiguration,
+        packageManager,
+        packageManagerToolFolder,
+        logIfConsoleOutputIsNotRestricted
+      );
+      return;
+    }
+
     logIfConsoleOutputIsNotRestricted(`Trying to acquire lock for ${packageManagerAndVersion}`);
 
     const lock: LockFile = await LockFile.acquireAsync(rushUserFolder, packageManagerAndVersion);
 
     logIfConsoleOutputIsNotRestricted(`Acquired lock for ${packageManagerAndVersion}`);
 
-    if (!(await packageManagerMarker.isValidAsync()) || lock.dirtyWhenAcquired) {
-      logIfConsoleOutputIsNotRestricted(
-        Colorize.bold(`Installing ${packageManager} version ${packageManagerVersion}\n`)
-      );
-
-      // note that this will remove the last-install flag from the directory
-      await Utilities.installPackageInDirectoryAsync({
-        directory: packageManagerToolFolder,
-        packageName: packageManager,
-        version: rushConfiguration.packageManagerToolVersion,
-        tempPackageTitle: `${packageManager}-local-install`,
-        maxInstallAttempts: maxInstallAttempts,
-        // This is using a local configuration to install a package in a shared global location.
-        // Generally that's a bad practice, but in this case if we can successfully install
-        // the package at all, we can reasonably assume it's good for all the repositories.
-        // In particular, we'll assume that two different NPM registries cannot have two
-        // different implementations of the same version of the same package.
-        // This was needed for: https://github.com/microsoft/rushstack/issues/691
-        commonRushConfigFolder: rushConfiguration.commonRushConfigFolder,
-        // Only filter npm-incompatible properties when the repo uses pnpm or yarn.
-        // If the repo uses npm, the .npmrc is already configured for npm, so don't filter.
-        filterNpmIncompatibleProperties: rushConfiguration.packageManager !== 'npm'
-      });
-
-      logIfConsoleOutputIsNotRestricted(
-        `Successfully installed ${packageManager} version ${packageManagerVersion}`
-      );
-    } else {
-      logIfConsoleOutputIsNotRestricted(
-        `Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`
-      );
-    }
-
-    await packageManagerMarker.createAsync();
-
-    // Example: "C:\MyRepo\common\temp"
-    FileSystem.ensureFolder(rushConfiguration.commonTempFolder);
-
-    // Example: "C:\MyRepo\common\temp\pnpm-local"
-    const localPackageManagerToolFolder: string = `${rushConfiguration.commonTempFolder}/${packageManager}-local`;
-
-    logIfConsoleOutputIsNotRestricted(`\nSymlinking "${localPackageManagerToolFolder}"`);
-    logIfConsoleOutputIsNotRestricted(`  --> "${packageManagerToolFolder}"`);
-
-    // We cannot use FileSystem.exists() to test the existence of a symlink, because it will
-    // return false for broken symlinks.  There is no way to test without catching an exception.
     try {
-      await FileSystem.deleteFolderAsync(localPackageManagerToolFolder);
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-        throw error;
+      if (!(await packageManagerMarker.isValidAsync()) || lock.dirtyWhenAcquired) {
+        logIfConsoleOutputIsNotRestricted(
+          Colorize.bold(`Installing ${packageManager} version ${packageManagerVersion}\n`)
+        );
+
+        // note that this will remove the last-install flag from the directory
+        await Utilities.installPackageInDirectoryAsync({
+          directory: packageManagerToolFolder,
+          packageName: packageManager,
+          version: rushConfiguration.packageManagerToolVersion,
+          tempPackageTitle: `${packageManager}-local-install`,
+          maxInstallAttempts: maxInstallAttempts,
+          // This is using a local configuration to install a package in a shared global location.
+          // Generally that's a bad practice, but in this case if we can successfully install
+          // the package at all, we can reasonably assume it's good for all the repositories.
+          // In particular, we'll assume that two different NPM registries cannot have two
+          // different implementations of the same version of the same package.
+          // This was needed for: https://github.com/microsoft/rushstack/issues/691
+          commonRushConfigFolder: rushConfiguration.commonRushConfigFolder,
+          // Only filter npm-incompatible properties when the repo uses pnpm or yarn.
+          // If the repo uses npm, the .npmrc is already configured for npm, so don't filter.
+          filterNpmIncompatibleProperties: rushConfiguration.packageManager !== 'npm'
+        });
+
+        logIfConsoleOutputIsNotRestricted(
+          `Successfully installed ${packageManager} version ${packageManagerVersion}`
+        );
+      } else {
+        logIfConsoleOutputIsNotRestricted(
+          `Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`
+        );
       }
+
+      await packageManagerMarker.createAsync();
+
+      await _ensureLocalPackageManagerSymlinkAsync(
+        rushConfiguration,
+        packageManager,
+        packageManagerToolFolder,
+        logIfConsoleOutputIsNotRestricted
+      );
+    } finally {
+      lock.release();
     }
-
-    await FileSystem.createSymbolicLinkJunctionAsync({
-      linkTargetPath: packageManagerToolFolder,
-      newLinkPath: localPackageManagerToolFolder
-    });
-
-    lock.release();
   }
+}
+
+async function _ensureLocalPackageManagerSymlinkAsync(
+  rushConfiguration: RushConfiguration,
+  packageManager: PackageManagerName,
+  packageManagerToolFolder: string,
+  logIfConsoleOutputIsNotRestricted: (message?: string) => void
+): Promise<void> {
+  // Example: "C:\MyRepo\common\temp"
+  FileSystem.ensureFolder(rushConfiguration.commonTempFolder);
+
+  // Example: "C:\MyRepo\common\temp\pnpm-local"
+  const localPackageManagerToolFolder: string = `${rushConfiguration.commonTempFolder}/${packageManager}-local`;
+
+  logIfConsoleOutputIsNotRestricted(`\nSymlinking "${localPackageManagerToolFolder}"`);
+  logIfConsoleOutputIsNotRestricted(`  --> "${packageManagerToolFolder}"`);
+
+  // We cannot use FileSystem.exists() to test the existence of a symlink, because it will
+  // return false for broken symlinks.  There is no way to test without catching an exception.
+  try {
+    await FileSystem.deleteFolderAsync(localPackageManagerToolFolder);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw error;
+    }
+  }
+
+  await FileSystem.createSymbolicLinkJunctionAsync({
+    linkTargetPath: packageManagerToolFolder,
+    newLinkPath: localPackageManagerToolFolder
+  });
 }
 
 // Helper for getPackageManagerEnvironment

@@ -1,9 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'node:path';
+
 import { pnpmSyncGetJsonVersion } from 'pnpm-sync-lib';
 
-import { JsonFile, type JsonObject, Path, type IPackageJson, Objects } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  JsonFile,
+  LockFile,
+  type JsonObject,
+  Path,
+  type IPackageJson,
+  Objects
+} from '@rushstack/node-core-library';
 
 import type { PackageManagerName } from './packageManager/PackageManager';
 import type { RushConfiguration } from './RushConfiguration';
@@ -180,6 +190,35 @@ export class LastInstallFlag extends FlagFile<Partial<ILastInstallFlagJson>> {
     }
     objectUtilities.merge(this._state, data);
   }
+}
+
+/**
+ * Checks for a LockFile associated with the same install resource as a LastInstallFlag.
+ *
+ * @internal
+ */
+export async function doesLastInstallFlagLockFileExistAsync(
+  folderPath: string,
+  lockFileResourceName: string
+): Promise<boolean> {
+  const lockFileName: string = path.basename(LockFile.getLockFilePath(folderPath, lockFileResourceName));
+  const pidLockFileNameRegExp: RegExp = /^.+#([0-9]+)\.lock$/;
+  const folderItemNames: string[] = await FileSystem.readFolderItemNamesAsync(folderPath);
+  for (const itemName of folderItemNames) {
+    if (itemName === lockFileName) {
+      return true;
+    }
+
+    const match: RegExpMatchArray | null = itemName.match(pidLockFileNameRegExp);
+    if (
+      match &&
+      itemName === path.basename(LockFile.getLockFilePath(folderPath, lockFileResourceName, Number(match[1])))
+    ) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /**
