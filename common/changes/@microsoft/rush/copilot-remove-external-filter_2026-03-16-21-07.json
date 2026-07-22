@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "comment": "In PnpmShrinkwrapFile getIntegrityForImporter, remove the external filter and include workspace-local link: dependencies by recursing into their importer entries, so shrinkwrap-deps.json hashes cover the full dependency tree.",
+      "type": "patch",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
