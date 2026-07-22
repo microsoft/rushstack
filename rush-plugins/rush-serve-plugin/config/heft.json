@@ -20,6 +20,22 @@
               ]
             }
           }
+        },
+        "copy-dashboard-assets": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "src/dashboard",
+                  "destinationFolders": ["lib-commonjs/dashboard", "lib-esm/dashboard"],
+                  "fileExtensions": [".html", ".css"],
+                  "hardlink": true
+                }
+              ]
+            }
+          }
         }
       }
     }

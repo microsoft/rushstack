@@ -22,6 +22,25 @@ This plugin also provides a web socket server that notifies clients of the build
 
 The recommended way to connect to the web socket is to serve a static HTML page from the serve plugin using the `globalRouting` configuration.
 
+This package includes a ready-made dashboard whose source lives under `src/dashboard/` and whose built assets are emitted to `lib-commonjs/dashboard/`. Because the HTML references sibling `dashboard.css` and `dashboard.ts` files, serve the built folder rather than a single file:
+
+```json
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-serve-plugin-options.schema.json",
+  "phasedCommands": ["start"],
+  "buildStatusWebSocketPath": "/ws",
+  "globalRouting": [
+    {
+      "workspaceRelativeFolder": "rush-plugins/rush-serve-plugin/lib-commonjs/dashboard",
+      "servePath": "/dashboard",
+      "immutable": false
+    }
+  ]
+}
+```
+
+Then open `https://localhost:<port>/dashboard/dashboard.html`.
+
 To use the socket:
 
 ```ts
