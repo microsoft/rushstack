@@ -3,5 +3,12 @@
   "phasedCommands": ["start"],
   "portParameterLongName": "--port",
   "buildStatusWebSocketPath": "/ws",
-  "logServePath": "/logs"
+  "logServePath": "/logs",
+  "globalRouting": [
+    {
+      "workspaceRelativeFolder": "rush-plugins/rush-serve-plugin/lib-commonjs/dashboard",
+      "servePath": "/dashboard",
+      "immutable": false
+    }
+  ]
 }

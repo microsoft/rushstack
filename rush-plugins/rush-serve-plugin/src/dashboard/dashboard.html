@@ -1,0 +1,248 @@
+<!-- Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license. -->
+<!-- See LICENSE in the project root for license information. -->
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>rush-serve-plugin Demo</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!-- Codicon (VS Code icon font) -->
+    <link
+      rel="stylesheet"
+      href="https://microsoft.github.io/vscode-codicons/dist/codicon.css"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="./dashboard.css" />
+  </head>
+  <body>
+    <div id="top-bar">
+      <div id="overall-status">
+        <span id="status-emoji" aria-hidden="true">⏸️</span>
+        <span id="status-pill" class="status-pill status-Disconnected">Disconnected</span>
+      </div>
+      <div id="app-title">Rush Serve Dashboard</div>
+      <div id="actions">
+        <!-- Primary execution controls first -->
+        <button
+          class="icon-btn"
+          id="play-pause-btn"
+          disabled
+          aria-label="Automatic mode"
+          title="Toggle automatic/manual"
+        >
+          <span class="codicon codicon-debug-pause" aria-hidden="true"></span>
+        </button>
+        <button class="icon-btn" id="execute-btn" disabled aria-label="Run once" title="Run once">
+          <span class="codicon codicon-debug-continue" aria-hidden="true"></span>
+        </button>
+        <button
+          class="icon-btn stop"
+          id="abort-execution-btn"
+          disabled
+          aria-label="Stop execution"
+          title="Stop execution"
+        >
+          <span class="codicon codicon-debug-stop" aria-hidden="true"></span>
+        </button>
+        <!-- Logging toggles next -->
+        <button
+          class="icon-btn toggle"
+          id="debug-btn"
+          disabled
+          aria-label="Toggle debug"
+          title="Toggle debug output"
+        >
+          <span class="codicon codicon-debug" aria-hidden="true"></span>
+        </button>
+        <button
+          class="icon-btn toggle"
+          id="verbose-btn"
+          disabled
+          aria-label="Toggle verbose"
+          title="Toggle verbose logging"
+        >
+          <span class="codicon codicon-info" aria-hidden="true"></span>
+        </button>
+        <label class="flex-row parallelism-label">
+          <span>Parallelism</span>
+          <input type="number" id="parallelism-input" min="1" step="1" disabled />
+        </label>
+      </div>
+      <div id="graph-state"></div>
+      <div id="view-controls">
+        <label><input type="radio" name="view" value="table" checked /> Table</label>
+        <label><input type="radio" name="view" value="graph" /> Graph</label>
+        <label
+          >Filter
+          <select id="filter-select">
+            <option value="all">All</option>
+            <option value="failed-warn">Failed / Warnings</option>
+          </select>
+        </label>
+        <label class="search-label">
+          Search
+          <input id="name-search" type="search" placeholder="operations" />
+          <button
+            id="select-visible-btn"
+            type="button"
+            class="icon-btn"
+            title="Select all visible operations"
+            aria-label="Select visible operations"
+          >
+            <span class="codicon codicon-check-all" aria-hidden="true"></span>
+          </button>
+        </label>
+      </div>
+      <div class="flex-spacer"></div>
+      <form id="connection-form" class="flex-row">
+        <button
+          id="connect-btn"
+          type="button"
+          title="Connect to WebSocket"
+          aria-label="Connect"
+          class="icon-btn toggle"
+          data-state="disconnected"
+        >
+          <span class="codicon codicon-plug" aria-hidden="true"></span>
+        </button>
+        <button
+          id="toggle-terminal-btn"
+          type="button"
+          title="Show/Hide Terminal"
+          aria-label="Toggle terminal"
+          class="icon-btn toggle"
+          aria-pressed="false"
+        >
+          <span class="codicon codicon-terminal" aria-hidden="true"></span>
+        </button>
+      </form>
+    </div>
+    <!-- Selection action bar (appears only when selection non-empty) -->
+    <div id="selection-bar">
+      <div id="selection-heading">
+        <span id="view-heading-text">Dependency Graph</span>
+        <button class="action selection-count-btn" id="clear-selection-btn" title="Clear selection">
+          <span class="codicon codicon-close" aria-hidden="true"></span>
+          <span id="selection-count">0 selected</span>
+        </button>
+      </div>
+      <div id="selection-actions">
+        <button class="action" id="invalidate-btn" title="Mark selected operations dirty">
+          <span class="codicon codicon-debug-restart" aria-hidden="true"></span>
+          <span>Mark Dirty</span>
+        </button>
+        <button class="action" id="close-runners-btn" title="Close runners for selection">
+          <span class="codicon codicon-close-all" aria-hidden="true"></span>
+          <span>Close Runners</span>
+        </button>
+        <button
+          class="action"
+          id="set-enabled-default-btn"
+          title="Set selected to run if dependencies change"
+          aria-label="Set selected to run if dependencies change"
+        >
+          🟢 Enabled
+        </button>
+        <button
+          class="action"
+          id="set-enabled-ignore-deps-btn"
+          title="Ignore dependency changes (run only if files in the same project change)"
+          aria-label="Ignore dependency changes (run only if files in the same project change)"
+        >
+          🟡 Ignore Deps
+        </button>
+        <button
+          class="action"
+          id="set-enabled-disabled-btn"
+          title="Set selected to never run"
+          aria-label="Set selected to never run"
+        >
+          🔴 Disabled
+        </button>
+        <button
+          class="action toggle"
+          id="selection-mode-btn"
+          title="Toggle between safe (dependency aware) and unsafe (direct) enable state application"
+          aria-label="Toggle selection enable mode"
+          data-mode="safe"
+        >
+          Mode: Safe
+        </button>
+        <button class="action" id="expand-deps-btn" title="Add all (recursive) dependencies of selection">
+          + Deps
+        </button>
+        <button class="action" id="expand-consumers-btn" title="Add all (recursive) consumers of selection">
+          + Consumers
+        </button>
+      </div>
+    </div>
+    <!-- Terminal pane: minimizable, output-only virtual terminal for terminal-chunk events -->
+    <div class="content-wrap">
+      <div id="main">
+        <div id="left" data-view="table">
+          <div id="operations-table-container">
+            <table id="operations-table">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div id="table-stats"></div>
+        </div>
+        <div id="right" data-view="graph">
+          <!-- Graph heading removed; now integrated into selection bar -->
+          <div id="graph-container">
+            <div id="phase-pane">
+              <h3>Phases</h3>
+              <div class="phase-groups"></div>
+            </div>
+            <div id="graph-wrapper">
+              <div id="graph">
+                <svg id="edges">
+                  <defs>
+                    <marker
+                      id="arrowhead"
+                      markerWidth="10"
+                      markerHeight="7"
+                      refX="8"
+                      refY="3.5"
+                      orient="auto"
+                    >
+                      <polygon points="0 0, 10 3.5, 0 7" fill="#4b5563" />
+                    </marker>
+                  </defs>
+                </svg>
+              </div>
+              <div id="graph-legend"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="resizer" role="separator" aria-orientation="vertical"></div>
+      <div id="terminal" class="terminal-container" aria-live="polite">
+        <div class="terminal-header">
+          <div class="terminal-title">Terminal Output</div>
+          <div class="terminal-controls">
+            <!-- Clear: icon-only button matching other action buttons -->
+            <button id="term-clear-btn" class="icon-btn" title="Clear terminal" aria-label="Clear terminal">
+              <span class="codicon codicon-trash" aria-hidden="true"></span>
+            </button>
+            <!-- Auto-scroll: toggle icon button (aria-pressed reflects state) -->
+            <button
+              id="term-autoscroll-btn"
+              class="icon-btn toggle"
+              title="Toggle auto-scroll"
+              aria-label="Toggle auto-scroll"
+              aria-pressed="true"
+            >
+              <span class="codicon codicon-arrow-both vertical" aria-hidden="true"></span>
+            </button>
+            <input id="term-autoscroll" type="checkbox" checked />
+          </div>
+        </div>
+        <div id="terminal-body" class="terminal-body mono" aria-hidden="false"></div>
+      </div>
+    </div>
+    <script type="module" src="./dashboard.js"></script>
+  </body>
+</html>
