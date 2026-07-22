@@ -29,6 +29,7 @@ type ICreateProcessorOptions = Partial<
     | 'dtsOutputFolders'
     | 'exportAsDefault'
     | 'fileExtensions'
+    | 'ignoreDeprecationsInDependencies'
     | 'nonModuleFileExtensions'
     | 'postProcessCssAsync'
     | 'preserveIcssExports'
@@ -593,6 +594,24 @@ describe(SassProcessor.name, () => {
       expect(() =>
         createProcessor(terminalProvider, { silenceDeprecations: ['not-a-real-deprecation-code'] })
       ).toThrow('Unknown deprecation code: not-a-real-deprecation-code');
+    });
+  });
+
+  describe('ignoreDeprecationsInDependencies option', () => {
+    it('emits deprecation warnings from a dependency partial by default', async () => {
+      const { processor, logger } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'use-partial-with-color-deprecation.module.scss');
+      expect(logger.errors).toHaveLength(0);
+      expect(terminalProvider.getWarningOutput()).toContain('Deprecation Warning:');
+    });
+
+    it('suppresses deprecation warnings from a dependency partial when ignoreDeprecationsInDependencies is true', async () => {
+      const { processor, logger } = createProcessor(terminalProvider, {
+        ignoreDeprecationsInDependencies: true
+      });
+      await compileFixtureAsync(processor, 'use-partial-with-color-deprecation.module.scss');
+      expect(logger.errors).toHaveLength(0);
+      expect(terminalProvider.getWarningOutput()).not.toContain('Deprecation Warning:');
     });
   });
 
