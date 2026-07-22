@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/module-minifier",
+      "comment": "Add the ability to disable the minifier result cache to \"LocalMinifier\" and \"WorkerPoolMinifier\".",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier"
+}
