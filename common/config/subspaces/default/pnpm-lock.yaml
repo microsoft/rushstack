@@ -5266,6 +5266,9 @@ importers:
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
+      '@vscode/test-electron':
+        specifier: ^1.6.2
+        version: 1.6.2
 
   ../../../vscode-extensions/rush-vscode-command-webview:
     dependencies:
