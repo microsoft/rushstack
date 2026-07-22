@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Cargo Clippy Plugin Configuration",
+  "description": "Defines options for Cargo clippy plugin execution.",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "release": {
+      "description": "Whether to run cargo clippy in release mode. Default is false.",
+      "type": "boolean"
+    },
+
+    "workspace": {
+      "description": "Whether to run clippy for all packages in the workspace using --workspace flag. Default is false.",
+      "type": "boolean"
+    },
+
+    "fix": {
+      "description": "Whether to automatically apply suggested fixes. Default is false.",
+      "type": "boolean"
+    },
+
+    "warningsAsErrors": {
+      "description": "Whether to treat warnings as errors (uses -D warnings). Default is false.",
+      "type": "boolean"
+    }
+  }
+}
