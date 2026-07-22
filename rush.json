@@ -1414,6 +1414,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "local-vscode-extension-rig",
+      "projectFolder": "rigs/local-vscode-extension-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
       "packageName": "local-web-rig",
       "projectFolder": "rigs/local-web-rig",
       "reviewCategory": "libraries",

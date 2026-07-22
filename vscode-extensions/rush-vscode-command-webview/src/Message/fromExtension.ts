@@ -2,14 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { store } from '../store';
-import { type IProjectState, initializeProjectInfo, onChangeProject } from '../store/slices/project';
-
-export type IFromExtensionMessage = IFromExtensionMessageInitialize;
-
-interface IFromExtensionMessageInitialize {
-  command: string;
-  state: IProjectState;
-}
+import { initializeProjectInfo, onChangeProject } from '../store/slices/project';
+import type { IFromExtensionMessage } from './IFromExtensionMessage';
 
 export const fromExtensionListener: (event: MessageEvent<IFromExtensionMessage>) => void = (
   event: MessageEvent<IFromExtensionMessage>

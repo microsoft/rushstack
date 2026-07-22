@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushSdkLoader, type ISdkCallbackEvent } from '@rushstack/rush-sdk/loader';
-
 import * as vscode from 'vscode';
-import { terminal } from './logger';
 
+import { RushSdkLoader, type ISdkCallbackEvent } from '@rushstack/rush-sdk/loader';
 import type { CommandLineAction } from '@rushstack/rush-vscode-command-webview';
 import type * as RushLib from '@rushstack/rush-sdk';
 import type * as RushCommandLine from '@rushstack/ts-command-line';
+
+import { terminal } from './logger';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 declare let ___DEV___: boolean;

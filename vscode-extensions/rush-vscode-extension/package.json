@@ -302,14 +302,13 @@
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/glob": "7.1.1",
     "@types/mocha": "10.0.6",
     "@types/vscode": "1.103.0",
     "@types/webpack-env": "1.18.8",
     "@vscode/test-electron": "^1.6.2",
     "eslint": "~9.37.0",
-    "glob": "~7.0.5",
-    "@rushstack/heft-vscode-extension-rig": "workspace:*",
+    "fast-glob": "~3.3.1",
+    "local-vscode-extension-rig": "workspace:*",
     "mocha": "^10.1.0"
   },
   "engines": {
