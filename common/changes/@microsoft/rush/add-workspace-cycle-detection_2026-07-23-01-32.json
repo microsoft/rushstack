@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add early validation to `rush install`/`rush update` that immediately fails with a meaningful error message if an undeclared cycle is detected among workspace packages, specifying the cycle path.",
+      "type": "minor"
+    }
+  ]
+}
