@@ -16,10 +16,11 @@ import { RushConstants } from './RushConstants';
  * A cycle means that pnpm would be unable to install the workspace, so it is better to
  * fail fast with a clear message rather than let pnpm produce a cryptic error.
  *
- * The recommended fix is to refactor the code to eliminate the cycle, for example by
- * extracting shared code into a new package that both projects can depend on, or by
- * moving code from one project to another. If the cycle truly cannot be broken,
- * `decoupledLocalDependencies` can be used as a last resort.
+ * The fix is to refactor the code to eliminate the cycle, for example by extracting shared
+ * code into a new package that both projects can depend on, or by moving code from one project
+ * to another. `decoupledLocalDependencies` is intended only for the bootstrapping problem
+ * (e.g. the version of a compiler used to compile itself) and should not be used as a
+ * general escape hatch for cycles.
  */
 export function detectAndReportWorkspaceCycles(
   rushConfiguration: RushConfiguration,
@@ -36,10 +37,9 @@ export function detectAndReportWorkspaceCycles(
           `To fix this, refactor the code to eliminate the cycle. For example, extract the shared ` +
           `code into a new package that both projects can depend on, or move code from one project ` +
           `to another so the dependency only goes in one direction.\n\n` +
-          `If the cycle truly cannot be broken by refactoring, you can use the ` +
-          `"decoupledLocalDependencies" field in ${RushConstants.rushJsonFilename} as a last resort. ` +
-          `This causes Rush to treat that dependency as an external package rather than a local ` +
-          `workspace package, at the cost of losing workspace linking for that edge.`
+          `NOTE: The "decoupledLocalDependencies" setting in ${RushConstants.rushJsonFilename} is ` +
+          `intended only for the bootstrapping problem (for example, the version of a compiler used ` +
+          `to compile itself). It is not a general solution for cyclic dependencies.`
       )
     );
     throw new AlreadyReportedError();
