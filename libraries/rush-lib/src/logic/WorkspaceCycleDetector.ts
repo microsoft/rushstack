@@ -16,8 +16,10 @@ import { RushConstants } from './RushConstants';
  * A cycle means that pnpm would be unable to install the workspace, so it is better to
  * fail fast with a clear message rather than let pnpm produce a cryptic error.
  *
- * If a cycle is intentional, add one of the involved packages to the
- * `decoupledLocalDependencies` field in rush.json.
+ * The recommended fix is to refactor the code to eliminate the cycle, for example by
+ * extracting shared code into a new package that both projects can depend on, or by
+ * moving code from one project to another. If the cycle truly cannot be broken,
+ * `decoupledLocalDependencies` can be used as a last resort.
  */
 export function detectAndReportWorkspaceCycles(
   rushConfiguration: RushConfiguration,
@@ -31,10 +33,13 @@ export function detectAndReportWorkspaceCycles(
       Colorize.red(
         'A cyclic dependency was detected among workspace packages:\n' +
           `  ${cycle.join(' -> ')}\n\n` +
-          `To fix this, add one of the packages in the cycle to the "decoupledLocalDependencies" ` +
-          `field for the dependent project in ${RushConstants.rushJsonFilename}. ` +
-          `This will cause Rush to treat that dependency as an external package ` +
-          `rather than a local workspace package.`
+          `To fix this, refactor the code to eliminate the cycle. For example, extract the shared ` +
+          `code into a new package that both projects can depend on, or move code from one project ` +
+          `to another so the dependency only goes in one direction.\n\n` +
+          `If the cycle truly cannot be broken by refactoring, you can use the ` +
+          `"decoupledLocalDependencies" field in ${RushConstants.rushJsonFilename} as a last resort. ` +
+          `This causes Rush to treat that dependency as an external package rather than a local ` +
+          `workspace package, at the cost of losing workspace linking for that edge.`
       )
     );
     throw new AlreadyReportedError();
