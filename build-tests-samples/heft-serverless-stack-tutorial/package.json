@@ -26,7 +26,7 @@
     "@types/aws-lambda": "8.10.93",
     "@types/jest": "30.0.0",
     "@types/node": "20.17.19",
-    "aws-cdk-lib": "2.189.1",
+    "aws-cdk-lib": "2.260.0",
     "constructs": "~10.0.98",
     "eslint": "~9.37.0",
     "local-eslint-config": "workspace:*",
