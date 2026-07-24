@@ -1,0 +1,108 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license. */
+/* See LICENSE in the project root for license information. */
+
+#operations-table-container {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  background: var(--panel-alt);
+  z-index: 2;
+}
+
+th,
+td {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+tbody tr {
+  cursor: pointer;
+}
+
+tbody tr.selected {
+  background: rgba(var(--rgb-accent), 0.15);
+}
+
+tbody tr:hover {
+  background: rgba(var(--rgb-white), 0.05);
+}
+
+td.pivot-cell.selected {
+  background: rgba(var(--rgb-accent), 0.22);
+}
+
+tr.selected > td.pkg-cell {
+  background: rgba(var(--rgb-accent), 0.18);
+}
+
+/* Prevent brief native text highlight flash during selection interactions */
+td.pivot-cell,
+td.pkg-cell {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+th.sortable {
+  user-select: none;
+}
+
+th.sortable span.sort-indicator {
+  opacity: 0.5;
+  margin-left: 4px;
+}
+
+.status-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.status-row .badges {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-left: 4px;
+}
+
+td.status-cell {
+  white-space: nowrap;
+}
+
+td.status-cell .status-pill {
+  margin-left: 4px;
+}
+
+.pivot-enabled {
+  margin-left: 4px;
+  font-size: 0.75rem;
+}
+
+.pivot-active {
+  margin-left: 4px;
+  font-size: 0.75rem;
+  position: relative;
+  top: 1px;
+}
+
+#table-stats {
+  font-size: 0.6rem;
+  color: var(--muted);
+  padding: 0.25rem 0.75rem 0.5rem;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+}

@@ -195,6 +195,7 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
             servePath,
             express.static(diskPath, {
               dotfiles: 'ignore',
+              extensions: ['js'],
               immutable: rule.immutable,
               index: false,
               redirect: false,

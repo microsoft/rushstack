@@ -1,0 +1,56 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license. */
+/* See LICENSE in the project root for license information. */
+
+#selection-heading {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#selection-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Selection bar (hidden when no selection) */
+#selection-bar {
+  background: var(--panel-alt);
+  border-bottom: 1px solid var(--border);
+  padding: 0.35rem 0.6rem;
+  font-size: 0.65rem;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+#selection-actions button.action {
+  font-size: 0.65rem;
+}
+
+#selection-bar .action {
+  line-height: 1.1;
+}
+
+#selection-bar button.action,
+#selection-bar .selection-count-btn {
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+}
+
+#selection-bar .selection-count-btn[disabled] {
+  opacity: 0.6;
+  cursor: default;
+}
+
+#selection-bar[aria-hidden='true'] {
+  display: none;
+}

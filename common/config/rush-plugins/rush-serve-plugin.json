@@ -6,7 +6,7 @@
   "logServePath": "/logs",
   "globalRouting": [
     {
-      "workspaceRelativeFolder": "rush-plugins/rush-serve-plugin/lib-commonjs/dashboard",
+      "workspaceRelativeFolder": "rush-plugins/rush-serve-plugin/lib-esm/dashboard",
       "servePath": "/dashboard",
       "immutable": false
     }
