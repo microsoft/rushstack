@@ -669,7 +669,10 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
 
     this._globalPatchedDependencies = patchedDependencies;
     this._json.globalPatchedDependencies = patchedDependencies;
-    JsonFile.save(this._json, this._getJsonFilenameOrThrow(), { updateExistingFile: true });
+    JsonFile.save(this._json, this._getJsonFilenameOrThrow(), {
+      updateExistingFile: true,
+      ignoreUndefinedValues: true
+    });
   }
 
   /**

@@ -182,9 +182,17 @@ describe(PnpmOptionsConfiguration.name, () => {
     function update(
       patchedDependencies: Record<string, string> | undefined
     ): Record<string, string> | undefined {
-      // No jsonFilename, so updateGlobalPatchedDependencies won't try to write to disk
-      const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonObject(
-        {},
+      const testConfigPath: string = `${TEST_TEMP_FOLDER}/pnpm-config-patched-deps-test.json`;
+      JsonFile.save(
+        {
+          $schema: 'https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json'
+        },
+        testConfigPath,
+        { ensureFolderExists: true }
+      );
+
+      const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+        testConfigPath,
         fakeCommonTempFolder
       );
       pnpmConfiguration.updateGlobalPatchedDependencies(patchedDependencies);
