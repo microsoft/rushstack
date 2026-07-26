@@ -178,7 +178,6 @@ describe(PnpmOptionsConfiguration.name, () => {
     });
   });
 
-<<<<<<< HEAD
   describe('updateGlobalPatchedDependencies', () => {
     function update(
       patchedDependencies: Record<string, string> | undefined
@@ -229,7 +228,9 @@ describe(PnpmOptionsConfiguration.name, () => {
 
     it('passes through undefined', () => {
       expect(update(undefined)).toBeUndefined();
-=======
+    });
+  });
+
   describe('updateGlobalCatalogs', () => {
     it('updates and saves globalCatalogs to pnpm-config.json', async () => {
       const testConfigPath: string = `${TEST_TEMP_FOLDER}/pnpm-config-update-test.json`;
@@ -394,7 +395,6 @@ describe(PnpmOptionsConfiguration.name, () => {
         'https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json'
       );
       expect(savedConfigJson.globalOnlyBuiltDependencies).toBeUndefined();
->>>>>>> 2ac7a8f2be (Add 'rush-pnpm up' support for catalogs)
     });
   });
 });
