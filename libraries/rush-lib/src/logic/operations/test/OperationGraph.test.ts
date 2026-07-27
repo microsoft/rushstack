@@ -116,15 +116,19 @@ class ClosableRunner extends MockOperationRunner {
 
   public override async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
     this.isActive = true;
-    const status: OperationStatus = await super.executeAsync(context);
-    // Mirror IPCOperationRunner: a runner that owns a long-lived resource must release it
-    // immediately upon completion when the host has opted this operation out of persistence for
-    // the current iteration, rather than waiting until the end of the iteration.
-    if (context.shouldRunnerPersist === false) {
-      await this.closeAsync();
-    }
-    return status;
+    return await super.executeAsync(context);
   }
+}
+
+function configureRunnerPersistence(
+  graph: OperationGraph,
+  shouldRunnerPersist: (operation: Operation) => boolean
+): void {
+  graph.hooks.configureIteration.tap('test-runner-persistence', (records) => {
+    for (const [operation, record] of records) {
+      record.shouldRunnerPersist = shouldRunnerPersist(operation);
+    }
+  });
 }
 
 describe('OperationGraph', () => {
@@ -1164,7 +1168,7 @@ describe('runner persistence policy', () => {
     abortController: new AbortController()
   };
 
-  it('keeps runners active across successive iterations when no policy is provided', async () => {
+  it('keeps runners active across successive iterations by default', async () => {
     const runAsync: jest.Mock<Promise<OperationStatus>, []> = jest.fn(async () => OperationStatus.Success);
     const runner: ClosableRunner = new ClosableRunner('default-persistent', runAsync);
     const graph: OperationGraph = createGraph(graphOptions, runner);
@@ -1178,7 +1182,7 @@ describe('runner persistence policy', () => {
     expect(runner.closeAsync).not.toHaveBeenCalled();
   });
 
-  it('applies per-operation policies independently on each iteration', async () => {
+  it('applies configured record policies independently on each iteration', async () => {
     const persistentRunner: ClosableRunner = new ClosableRunner('persistent');
     const oneShotRunner: ClosableRunner = new ClosableRunner('one-shot');
     const changingRunner: ClosableRunner = new ClosableRunner('changing');
@@ -1207,16 +1211,16 @@ describe('runner persistence policy', () => {
       graphOptions
     );
 
-    await graph.executeAsync({
-      shouldRunnerPersist: (operation) => operation !== oneShotOperation
-    });
+    let persistentOperations: ReadonlySet<Operation> = new Set([persistentOperation, changingOperation]);
+    configureRunnerPersistence(graph, (operation) => persistentOperations.has(operation));
+
+    await graph.executeAsync({});
     expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
     expect(oneShotRunner.closeAsync).toHaveBeenCalledTimes(1);
     expect(changingRunner.closeAsync).not.toHaveBeenCalled();
 
-    await graph.executeAsync({
-      shouldRunnerPersist: (operation) => operation === persistentOperation
-    });
+    persistentOperations = new Set([persistentOperation]);
+    await graph.executeAsync({});
     expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
     expect(oneShotRunner.closeAsync).toHaveBeenCalledTimes(2);
     expect(changingRunner.closeAsync).toHaveBeenCalledTimes(1);
@@ -1258,9 +1262,8 @@ describe('runner persistence policy', () => {
       graphOptions
     );
 
-    await graph.executeAsync({
-      shouldRunnerPersist: (operation) => operation !== upstreamOperation
-    });
+    configureRunnerPersistence(graph, (operation) => operation !== upstreamOperation);
+    await graph.executeAsync({});
 
     expect(upstreamRunner.closeAsync).toHaveBeenCalledTimes(1);
     expect(downstreamRunner.closeAsync).not.toHaveBeenCalled();
@@ -1272,6 +1275,7 @@ describe('runner persistence policy', () => {
   it('closes an active cold runner when an iteration bypasses runner execution', async () => {
     const persistentRunner: ClosableRunner = new ClosableRunner('persistent');
     const coldRunner: ClosableRunner = new ClosableRunner('cold');
+    let coldRunnerWasClosedBeforeAfterIteration: boolean = false;
 
     const persistentOperation: Operation = new Operation({
       runner: persistentRunner,
@@ -1295,17 +1299,21 @@ describe('runner persistence policy', () => {
     expect(persistentRunner.isActive).toBe(true);
     expect(coldRunner.isActive).toBe(true);
 
+    configureRunnerPersistence(graph, (operation) => operation === persistentOperation);
     graph.hooks.beforeExecuteIterationAsync.tapPromise(
       'test',
       async (): Promise<OperationStatus> => OperationStatus.FromCache
     );
-
-    await graph.executeAsync({
-      shouldRunnerPersist: (operation) => operation === persistentOperation
+    graph.hooks.afterExecuteIterationAsync.tapPromise('test', async (status) => {
+      coldRunnerWasClosedBeforeAfterIteration = coldRunner.isActive === false;
+      return status;
     });
+
+    await graph.executeAsync({});
 
     expect(coldRunner.closeAsync).toHaveBeenCalledTimes(1);
     expect(coldRunner.isActive).toBe(false);
+    expect(coldRunnerWasClosedBeforeAfterIteration).toBe(true);
     expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
     expect(persistentRunner.isActive).toBe(true);
   });
