@@ -50,32 +50,39 @@ export function detectAndReportWorkspaceCycles(
  * Finds one cycle in the workspace dependency graph, or returns `undefined` if there are none.
  *
  * Uses depth-first search with a "currently visiting" set for O(V + E) detection.
+ * The `visiting` set doubles as the ordered path: ES6 Sets preserve insertion order,
+ * so iterating it from the cycle-start node yields the cycle without a separate array.
  */
 export function _findWorkspaceCycle(
   projects: ReadonlyArray<RushConfigurationProject>
 ): ReadonlyArray<string> | undefined {
   // Nodes that have been fully explored (no cycles reachable from them)
   const visited: Set<RushConfigurationProject> = new Set();
-  // Nodes currently on the DFS recursion stack
+  // Nodes currently on the DFS recursion stack, in insertion order
   const visiting: Set<RushConfigurationProject> = new Set();
-  // The current DFS path (used to extract the cycle path when one is found)
-  const path: RushConfigurationProject[] = [];
 
   function dfs(node: RushConfigurationProject): ReadonlyArray<string> | undefined {
     if (visited.has(node)) {
       return undefined;
     }
     if (visiting.has(node)) {
-      // We've found a back-edge — extract the cycle from the current path
-      const cycleStartIndex: number = path.indexOf(node);
-      return [
-        ...path.slice(cycleStartIndex).map((p) => p.packageName),
-        node.packageName // append the closing node to make the cycle explicit
-      ];
+      // Back-edge found — iterate `visiting` (insertion order) and collect from
+      // the cycle-start node onward, then close the loop.
+      const cycleNames: string[] = [];
+      let found: boolean = false;
+      for (const n of visiting) {
+        if (n === node) {
+          found = true;
+        }
+        if (found) {
+          cycleNames.push(n.packageName);
+        }
+      }
+      cycleNames.push(node.packageName); // close the cycle
+      return cycleNames;
     }
 
     visiting.add(node);
-    path.push(node);
 
     for (const dep of node.dependencyProjects) {
       const cycle: ReadonlyArray<string> | undefined = dfs(dep);
@@ -84,7 +91,6 @@ export function _findWorkspaceCycle(
       }
     }
 
-    path.pop();
     visiting.delete(node);
     visited.add(node);
     return undefined;
