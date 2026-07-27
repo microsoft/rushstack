@@ -875,19 +875,33 @@ export class OperationGraph implements IOperationGraph {
       });
     }
 
-    const operationsToClose: Operation[] = [];
-    for (const [operation, record] of executionRecords) {
+    const recordsToClose: OperationExecutionRecord[] = [];
+    for (const record of executionRecords.values()) {
       if (!recordsWithRunnerCleanup.has(record) && !record.shouldRunnerPersist) {
-        operationsToClose.push(operation);
+        recordsToClose.push(record);
       }
     }
-    if (operationsToClose.length > 0) {
-      await this.closeRunnersAsync(operationsToClose);
+    function reportRunnerCleanupFailure(record: OperationExecutionRecord, error: Error): void {
+      record.error = error;
+      record.status = OperationStatus.Failure;
+      _reportOperationErrorIfAny(record);
+      state.hasAnyFailures = true;
     }
+    await Async.forEachAsync(
+      recordsToClose,
+      async (record: OperationExecutionRecord) => {
+        try {
+          await this.closeRunnersAsync([record.operation]);
+        } catch (e) {
+          reportRunnerCleanupFailure(record, e);
+        }
+      },
+      { concurrency: this.parallelism }
+    );
 
     const status: OperationStatus = (() => {
-      if (bailStatus) return bailStatus;
       if (state.hasAnyFailures) return OperationStatus.Failure;
+      if (bailStatus) return bailStatus;
       if (state.hasAnyAborted) return OperationStatus.Aborted;
       if (state.hasAnyNonAllowedWarnings) return OperationStatus.SuccessWithWarning;
       if (iterationContext.totalOperations === 0) return OperationStatus.NoOp;

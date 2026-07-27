@@ -1317,6 +1317,61 @@ describe('runner persistence policy', () => {
     expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
     expect(persistentRunner.isActive).toBe(true);
   });
+
+  it('reports a bypassed runner cleanup failure before finalizing the iteration', async () => {
+    const persistentRunner: ClosableRunner = new ClosableRunner('persistent');
+    const coldRunner: ClosableRunner = new ClosableRunner('cold');
+    const closeError: Error = new Error('close failed');
+    const lifecycleEvents: string[] = [];
+
+    const persistentOperation: Operation = new Operation({
+      runner: persistentRunner,
+      logFilenameIdentifier: 'persistent',
+      phase: mockPhase,
+      project: getOrCreateProject('persistent')
+    });
+    const coldOperation: Operation = new Operation({
+      runner: coldRunner,
+      logFilenameIdentifier: 'cold',
+      phase: mockPhase,
+      project: getOrCreateProject('cold')
+    });
+
+    const graph: OperationGraph = new OperationGraph(
+      new Set([persistentOperation, coldOperation]),
+      graphOptions
+    );
+
+    await graph.executeAsync({});
+
+    configureRunnerPersistence(graph, (operation) => operation === persistentOperation);
+    coldRunner.closeAsync.mockImplementationOnce(async () => {
+      lifecycleEvents.push('close');
+      throw closeError;
+    });
+    graph.hooks.beforeExecuteIterationAsync.tapPromise(
+      'test',
+      async (): Promise<OperationStatus> => OperationStatus.FromCache
+    );
+    let afterIterationStatus: OperationStatus | undefined;
+    graph.hooks.afterExecuteIterationAsync.tapPromise('test', async (status) => {
+      lifecycleEvents.push('after-iteration');
+      afterIterationStatus = status;
+      return status;
+    });
+
+    const result: IExecutionResult = await graph.executeAsync({});
+    const coldResult: IOperationExecutionResult | undefined =
+      result.operationResults.get(coldOperation);
+
+    expect(lifecycleEvents).toEqual(['close', 'after-iteration']);
+    expect(afterIterationStatus).toBe(OperationStatus.Failure);
+    expect(result.status).toBe(OperationStatus.Failure);
+    expect(graph.status).toBe(OperationStatus.Failure);
+    expect(coldResult?.status).toBe(OperationStatus.Failure);
+    expect(coldResult?.error).toBe(closeError);
+    expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
+  });
 });
 
 describe('closeRunnersAsync', () => {
