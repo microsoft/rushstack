@@ -85,7 +85,6 @@ interface IExecutionIterationContext extends IOperationExecutionRecordContext {
   promise: Promise<OperationStatus> | undefined;
 
   startTime?: number;
-  shouldRunnerPersist: IOperationGraphIterationOptions['shouldRunnerPersist'];
 
   completedOperations: number;
   totalOperations: number;
@@ -573,16 +572,9 @@ export class OperationGraph implements IOperationGraph {
   ): Promise<IExecutionIterationContext | undefined> {
     const { _getInputsSnapshotAsync: getInputsSnapshotAsync } = this;
 
-    const {
-      startTime = performance.now(),
-      inputsSnapshot = await getInputsSnapshotAsync?.(),
-      shouldRunnerPersist
-    } = iterationOptions;
-    const iterationOptionsForCallbacks: IOperationGraphIterationOptions = {
-      startTime,
-      inputsSnapshot,
-      shouldRunnerPersist
-    };
+    const { startTime = performance.now(), inputsSnapshot = await getInputsSnapshotAsync?.() } =
+      iterationOptions;
+    const iterationOptionsForCallbacks: IOperationGraphIterationOptions = { startTime, inputsSnapshot };
 
     const { hooks } = this;
 
@@ -615,7 +607,6 @@ export class OperationGraph implements IOperationGraph {
     const iterationContext: IExecutionIterationContext = {
       abortController,
       startTime,
-      shouldRunnerPersist,
       streamCollator,
       terminal,
       inputsSnapshot,
@@ -766,8 +757,7 @@ export class OperationGraph implements IOperationGraph {
 
     const iterationOptions: IOperationGraphIterationOptions = {
       inputsSnapshot: iterationContext.inputsSnapshot,
-      startTime: iterationContext.startTime,
-      shouldRunnerPersist: iterationContext.shouldRunnerPersist
+      startTime: iterationContext.startTime
     };
 
     const executionQueue: AsyncOperationQueue = new AsyncOperationQueue(
@@ -809,6 +799,8 @@ export class OperationGraph implements IOperationGraph {
       onStartAsync: onOperationStartAsync,
       onResultAsync: onOperationCompleteAsync
     };
+    const recordsWithRunnerCleanup: Set<OperationExecutionRecord> = new Set();
+    const graph: OperationGraph = this;
 
     if (!this.quietMode) {
       const plural: string = totalOperations === 1 ? '' : 's';
@@ -881,6 +873,16 @@ export class OperationGraph implements IOperationGraph {
           }
         );
       });
+    }
+
+    const operationsToClose: Operation[] = [];
+    for (const [operation, record] of executionRecords) {
+      if (!recordsWithRunnerCleanup.has(record) && !record.shouldRunnerPersist) {
+        operationsToClose.push(operation);
+      }
+    }
+    if (operationsToClose.length > 0) {
+      await this.closeRunnersAsync(operationsToClose);
     }
 
     const status: OperationStatus = (() => {
@@ -1021,20 +1023,6 @@ export class OperationGraph implements IOperationGraph {
       telemetry.log(logEntry);
     }
 
-    // IPC operations that executed this iteration release their runner immediately upon completion.
-    // This fallback closes cold runners that remain active because their operation did not execute,
-    // for example due to a cache hit, abort, blocked dependency, or disabled operation.
-    const { shouldRunnerPersist } = iterationContext;
-    if (shouldRunnerPersist) {
-      const operationsToClose: Operation[] = [];
-      for (const operation of this.operations) {
-        if (!shouldRunnerPersist(operation) && operation.runner?.isActive !== false) {
-          operationsToClose.push(operation);
-        }
-      }
-      await this.closeRunnersAsync(operationsToClose);
-    }
-
     return status;
 
     // This function is a callback because it may write to the collatedWriter before
@@ -1050,6 +1038,16 @@ export class OperationGraph implements IOperationGraph {
           _reportOperationErrorIfAny(record);
           record.error = e;
           record.status = OperationStatus.Failure;
+        }
+        if (!record.shouldRunnerPersist) {
+          recordsWithRunnerCleanup.add(record);
+          try {
+            await graph.closeRunnersAsync([record.operation]);
+          } catch (e) {
+            _reportOperationErrorIfAny(record);
+            record.error = e;
+            record.status = OperationStatus.Failure;
+          }
         }
         _onOperationComplete(record, state);
       }

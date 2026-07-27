@@ -46,7 +46,6 @@ export interface IOperationExecutionRecordContext {
   onOperationStateChanged?: (record: OperationExecutionRecord) => void;
   createEnvironment?: (record: OperationExecutionRecord) => IEnvironment;
   invalidate?: (operations: Iterable<Operation>, reason: string) => void;
-  shouldRunnerPersist?: (operation: Operation) => boolean;
   inputsSnapshot: IInputsSnapshot | undefined;
   maxParallelism: number;
 
@@ -84,6 +83,11 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
    * If true, this operation should be executed. If false, it should be skipped.
    */
   public enabled: boolean;
+
+  /**
+   * If true, this operation's runner should remain active after this iteration.
+   */
+  public shouldRunnerPersist: boolean = true;
 
   /**
    * This number represents how far away this Operation is from the furthest "root" operation (i.e.
@@ -221,14 +225,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   public get environment(): IEnvironment | undefined {
     return this._context.createEnvironment?.(this);
-  }
-
-  /**
-   * Whether this operation's runner should remain resident after the operation completes for the
-   * current iteration. Defaults to `true` (kept warm) when the host supplies no persistence policy.
-   */
-  public get shouldRunnerPersist(): boolean {
-    return this._context.shouldRunnerPersist?.(this.operation) ?? true;
   }
 
   public getInvalidateCallback(): (reason: string) => void {
