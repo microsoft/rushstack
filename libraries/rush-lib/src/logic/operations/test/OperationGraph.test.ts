@@ -1359,6 +1359,10 @@ describe('runner persistence policy', () => {
       afterIterationStatus = status;
       return status;
     });
+    graph.hooks.afterExecuteIterationAsync.tap('test-summary', (status, records) => {
+      _printOperationStatus(mockTerminal, { status, operationResults: records });
+      return status;
+    });
 
     const result: IExecutionResult = await graph.executeAsync({});
     const coldResult: IOperationExecutionResult | undefined =

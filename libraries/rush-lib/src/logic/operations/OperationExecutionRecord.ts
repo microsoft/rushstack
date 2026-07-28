@@ -453,11 +453,18 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       // Delegate global state reporting
       await executeContext.onResultAsync(this);
     } finally {
-      if (this.isTerminal) {
-        this._collatedWriter?.close();
-        this.stdioSummarizer.close();
-        this.problemCollector.close();
-      }
+      this.finalize();
+    }
+  }
+
+  /**
+   * Closes per-record output resources after the record reaches a terminal state.
+   */
+  public finalize(): void {
+    if (this.isTerminal) {
+      this._collatedWriter?.close();
+      this.stdioSummarizer.close();
+      this.problemCollector.close();
     }
   }
 }
