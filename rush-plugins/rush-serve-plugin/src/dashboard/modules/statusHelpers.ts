@@ -53,7 +53,7 @@ export function computeDisplayStatus(
 
   if (!displayStatus) {
     const last: IOperationExecutionStateLike | undefined = lastExecutionResults.get(op.name);
-    if (!last || !last.status) displayStatus = 'Unknown';
+    displayStatus = last?.status || (op.noop ? 'NoOp' : 'Ready');
   }
 
   return displayStatus;
