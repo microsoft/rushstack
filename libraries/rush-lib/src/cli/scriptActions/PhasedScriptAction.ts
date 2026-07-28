@@ -713,7 +713,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     const { graph, ignoreHooks, stopwatch, terminal } = options;
 
     let success: boolean = false;
-    let result: IExecutionResult | undefined;
 
     try {
       const definiteResult: IExecutionResult = await measureAsyncFn(
@@ -722,13 +721,19 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           return await graph.executeAsync(iterationOptions);
         }
       );
-      success = definiteResult.status === OperationStatus.Success;
-      result = definiteResult;
+      // An iteration that produced no operations is not a failure. This happens when a plugin
+      // legitimately consumes the work itself and returns an empty operation set -- for example
+      // `@rushstack/rush-buildxl-graph-plugin`, which writes the graph to disk in response to
+      // `--drop-graph` and then returns `new Set()` because there is nothing left to execute.
+      // Note that `PhasedScriptAction` already treats an empty *project* selection as success, so
+      // treating an empty *operation* set as a failure would be inconsistent.
+      success =
+        definiteResult.status === OperationStatus.Success || definiteResult.status === OperationStatus.NoOp;
 
       stopwatch.stop();
 
       const message: string = `rush ${this.actionName} (${stopwatch.toString()})`;
-      if (result.status === OperationStatus.Success) {
+      if (success) {
         terminal.writeLine(Colorize.green(message));
       } else {
         terminal.writeLine(message);
