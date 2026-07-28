@@ -170,6 +170,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   private readonly _context: IOperationExecutionRecordContext;
 
   private _collatedWriter: CollatedWriter | undefined = undefined;
+  private _isFinalized: boolean = false;
   private _status: OperationStatus;
   private _stateHash: string | undefined;
   private _stateHashComponents: IOperationStateHashComponents | undefined;
@@ -484,14 +485,22 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       // Delegate global state reporting
       await executeContext.onResultAsync(this);
     } finally {
-      if (this.isTerminal) {
-        this._collatedWriter?.close();
-        if (this._collatedWriter) {
-          this._context.eventSink?.onOperationStreamClosed?.(this.name);
-        }
-        this.stdioSummarizer.close();
-        this.problemCollector.close();
+      this.finalize();
+    }
+  }
+
+  /**
+   * Closes per-record output resources after the record reaches a terminal state.
+   */
+  public finalize(): void {
+    if (this.isTerminal && !this._isFinalized) {
+      this._isFinalized = true;
+      this._collatedWriter?.close();
+      if (this._collatedWriter) {
+        this._context.eventSink?.onOperationStreamClosed?.(this.name);
       }
+      this.stdioSummarizer.close();
+      this.problemCollector.close();
     }
   }
 }

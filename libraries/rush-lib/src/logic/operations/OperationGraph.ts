@@ -926,6 +926,9 @@ export class OperationGraph implements IOperationGraph {
       },
       { concurrency: this.parallelism }
     );
+    for (const record of executionRecords.values()) {
+      record.finalize();
+    }
 
     const status: OperationStatus = (() => {
       if (state.hasAnyFailures) return OperationStatus.Failure;
