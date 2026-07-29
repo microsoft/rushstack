@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable @rushstack/no-new-null */
 /* eslint-disable @typescript-eslint/typedef */
 
 import { AnsiSgrParser } from './ansiSgrParser';
@@ -11,13 +10,13 @@ interface ITerminalElementWithState extends HTMLElement {
 }
 
 export interface ITerminalPaneRefs {
-  terminalEl: HTMLElement | null;
-  terminalBody: HTMLElement | null;
-  termClearBtn: HTMLElement | null;
-  termAutoScrollCheckbox: HTMLInputElement | null;
-  termAutoscrollBtn: HTMLElement | null;
-  toggleTerminalBtn: HTMLElement | null;
-  resizerEl: HTMLElement | null;
+  terminalEl: HTMLElement | undefined;
+  terminalBody: HTMLElement | undefined;
+  termClearBtn: HTMLElement | undefined;
+  termAutoScrollCheckbox: HTMLInputElement | undefined;
+  termAutoscrollBtn: HTMLElement | undefined;
+  toggleTerminalBtn: HTMLElement | undefined;
+  resizerEl: HTMLElement | undefined;
 }
 
 export interface ITerminalPaneController {
@@ -70,7 +69,7 @@ function _appendChunk(
   }
 }
 
-function _wireLayoutInit(terminalEl: HTMLElement | null): void {
+function _wireLayoutInit(terminalEl: HTMLElement | undefined): void {
   try {
     if (terminalEl) {
       terminalEl.style.top = '';
@@ -80,7 +79,10 @@ function _wireLayoutInit(terminalEl: HTMLElement | null): void {
   }
 }
 
-function _wireClearButton(terminalBody: HTMLElement | null, termClearBtn: HTMLElement | null): void {
+function _wireClearButton(
+  terminalBody: HTMLElement | undefined,
+  termClearBtn: HTMLElement | undefined
+): void {
   if (!terminalBody || !termClearBtn) return;
 
   termClearBtn.addEventListener('click', () => {
@@ -88,7 +90,7 @@ function _wireClearButton(terminalBody: HTMLElement | null, termClearBtn: HTMLEl
   });
 }
 
-function _wireResizer(terminalEl: HTMLElement | null, resizerEl: HTMLElement | null): void {
+function _wireResizer(terminalEl: HTMLElement | undefined, resizerEl: HTMLElement | undefined): void {
   if (!terminalEl || !resizerEl) return;
 
   const terminalWithState: ITerminalElementWithState = terminalEl as ITerminalElementWithState;

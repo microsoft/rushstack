@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable @rushstack/no-new-null */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/typedef */
 
@@ -11,10 +10,10 @@ export interface IMainBarActionWiringOptions {
   isConnected: () => boolean;
   sendCommand: (cmd: any) => void;
   getGraphSettings: () => any;
-  debugBtn: HTMLElement | null;
-  verboseBtn: HTMLElement | null;
-  parallelismInput: HTMLInputElement | null;
-  playPauseBtn: HTMLElement | null;
+  debugBtn: HTMLElement | undefined;
+  verboseBtn: HTMLElement | undefined;
+  parallelismInput: HTMLInputElement | undefined;
+  playPauseBtn: HTMLElement | undefined;
   getOperationNames: () => string[];
   setSelection: (next: Set<string>) => void;
   clearSelection: () => void;
@@ -40,7 +39,7 @@ export function wireMainBarActions(options: IMainBarActionWiringOptions): void {
     render
   } = options;
 
-  const connectBtn: HTMLElement | null = document.getElementById('connect-btn');
+  const connectBtn: HTMLElement | undefined = document.getElementById('connect-btn') ?? undefined;
   if (connectBtn) {
     connectBtn.addEventListener('click', () => {
       if (isConnected()) {
@@ -51,12 +50,12 @@ export function wireMainBarActions(options: IMainBarActionWiringOptions): void {
     });
   }
 
-  const executeBtn: HTMLElement | null = document.getElementById('execute-btn');
+  const executeBtn: HTMLElement | undefined = document.getElementById('execute-btn') ?? undefined;
   if (executeBtn) {
     executeBtn.addEventListener('click', () => sendCommand({ command: 'execute' }));
   }
 
-  const abortBtn: HTMLElement | null = document.getElementById('abort-execution-btn');
+  const abortBtn: HTMLElement | undefined = document.getElementById('abort-execution-btn') ?? undefined;
   if (abortBtn) {
     abortBtn.addEventListener('click', () => sendCommand({ command: 'abort-execution' }));
   }

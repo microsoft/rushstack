@@ -1,11 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable @typescript-eslint/typedef */
-/* eslint-disable prefer-const */
-/* eslint-disable @rushstack/no-new-null */
-/* eslint-disable @typescript-eslint/no-use-before-define */
-
 import {
   applyExecutionStates as applyExecutionStatesMutation,
   patchOperationsFromPayload,
@@ -105,31 +100,41 @@ interface IGraphViewControllerLike {
   updateGraph(): void;
 }
 
-const statusPill = document.getElementById('status-pill') as HTMLElement;
-const statusEmojiEl = document.getElementById('status-emoji') as HTMLElement;
-const connectBtn = document.getElementById('connect-btn') as HTMLButtonElement | null;
-const appTitleEl = document.getElementById('app-title') as HTMLElement | null;
-const tableEl = document.getElementById('operations-table') as HTMLTableElement;
-const tableHead = tableEl.querySelector('thead');
-const tableBody = tableEl.querySelector('tbody');
-const tableStats = document.getElementById('table-stats') as HTMLElement | null;
-const managerStateEl = document.getElementById('graph-state') as HTMLElement | null;
-const edgesSvg = document.getElementById('edges') as unknown as SVGSVGElement;
-const graphEl = document.getElementById('graph') as HTMLElement;
-const legendEl = document.getElementById('graph-legend') as HTMLElement | null;
-const phasePaneEl = document.getElementById('phase-pane') as HTMLElement | null;
-const phaseGroupsEl = phasePaneEl ? phasePaneEl.querySelector('.phase-groups') : null;
-const playPauseBtn = document.getElementById('play-pause-btn') as HTMLButtonElement | null;
-const parallelismInput = document.getElementById('parallelism-input') as HTMLInputElement | null;
-const debugBtn = document.getElementById('debug-btn') as HTMLButtonElement | null;
-const verboseBtn = document.getElementById('verbose-btn') as HTMLButtonElement | null;
-const terminalEl = document.getElementById('terminal') as HTMLElement | null;
-const terminalBody = document.getElementById('terminal-body') as HTMLElement | null;
-const termClearBtn = document.getElementById('term-clear-btn') as HTMLButtonElement | null;
-const termAutoScroll = document.getElementById('term-autoscroll') as HTMLInputElement | null;
-const termAutoscrollBtn = document.getElementById('term-autoscroll-btn') as HTMLButtonElement | null;
-const toggleTerminalBtn = document.getElementById('toggle-terminal-btn') as HTMLButtonElement | null;
-const resizerEl = document.getElementById('resizer') as HTMLElement | null;
+const statusPill: HTMLElement = document.getElementById('status-pill') as HTMLElement;
+const statusEmojiEl: HTMLElement = document.getElementById('status-emoji') as HTMLElement;
+const connectBtn: HTMLButtonElement | undefined =
+  (document.getElementById('connect-btn') as HTMLButtonElement | null) ?? undefined;
+const appTitleEl: HTMLElement | undefined = document.getElementById('app-title') ?? undefined;
+const tableEl: HTMLTableElement = document.getElementById('operations-table') as HTMLTableElement;
+const tableHead: HTMLTableSectionElement | undefined = tableEl.querySelector('thead') ?? undefined;
+const tableBody: HTMLTableSectionElement | undefined = tableEl.querySelector('tbody') ?? undefined;
+const tableStats: HTMLElement | undefined = document.getElementById('table-stats') ?? undefined;
+const managerStateEl: HTMLElement | undefined = document.getElementById('graph-state') ?? undefined;
+const edgesSvg: SVGSVGElement = document.getElementById('edges') as unknown as SVGSVGElement;
+const graphEl: HTMLElement = document.getElementById('graph') as HTMLElement;
+const legendEl: HTMLElement | undefined = document.getElementById('graph-legend') ?? undefined;
+const phasePaneEl: HTMLElement | undefined = document.getElementById('phase-pane') ?? undefined;
+const phaseGroupsEl: HTMLElement | undefined =
+  phasePaneEl?.querySelector<HTMLElement>('.phase-groups') ?? undefined;
+const playPauseBtn: HTMLButtonElement | undefined =
+  (document.getElementById('play-pause-btn') as HTMLButtonElement | null) ?? undefined;
+const parallelismInput: HTMLInputElement | undefined =
+  (document.getElementById('parallelism-input') as HTMLInputElement | null) ?? undefined;
+const debugBtn: HTMLButtonElement | undefined =
+  (document.getElementById('debug-btn') as HTMLButtonElement | null) ?? undefined;
+const verboseBtn: HTMLButtonElement | undefined =
+  (document.getElementById('verbose-btn') as HTMLButtonElement | null) ?? undefined;
+const terminalEl: HTMLElement | undefined = document.getElementById('terminal') ?? undefined;
+const terminalBody: HTMLElement | undefined = document.getElementById('terminal-body') ?? undefined;
+const termClearBtn: HTMLButtonElement | undefined =
+  (document.getElementById('term-clear-btn') as HTMLButtonElement | null) ?? undefined;
+const termAutoScroll: HTMLInputElement | undefined =
+  (document.getElementById('term-autoscroll') as HTMLInputElement | null) ?? undefined;
+const termAutoscrollBtn: HTMLButtonElement | undefined =
+  (document.getElementById('term-autoscroll-btn') as HTMLButtonElement | null) ?? undefined;
+const toggleTerminalBtn: HTMLButtonElement | undefined =
+  (document.getElementById('toggle-terminal-btn') as HTMLButtonElement | null) ?? undefined;
+const resizerEl: HTMLElement | undefined = document.getElementById('resizer') ?? undefined;
 
 const terminalPane: ITerminalPaneController = createTerminalPaneController({
   terminalEl,
@@ -169,12 +174,12 @@ const disabledControlIds: string[] = [
   'play-pause-btn'
 ];
 
-let operations: Map<string, IOperationInfo> = new Map();
-let executionStates: Map<string, IOperationExecutionState> = new Map();
-let queuedStates: Map<string, IOperationExecutionState> = new Map();
+const operations: Map<string, IOperationInfo> = new Map();
+const executionStates: Map<string, IOperationExecutionState> = new Map();
+const queuedStates: Map<string, IOperationExecutionState> = new Map();
 let lastExecutionResults: Map<string, IOperationExecutionState> = new Map();
 let selection: Set<string> = new Set();
-let graphSettings: IDashboardGraphState | null = null;
+let graphSettings: IDashboardGraphState | undefined;
 let currentView: DashboardView = 'table';
 let currentFilter: DashboardFilter = 'all';
 let searchQuery: string = '';
@@ -186,7 +191,7 @@ function computeDisplayStatus(op: IOperationInfo): string {
 }
 
 function computeVisibleOperations(): IOperationInfo[] {
-  const result = computeFilterSetsCore({
+  const result: ReturnType<typeof computeFilterSetsCore> = computeFilterSetsCore({
     operations,
     executionStates,
     currentFilter,
@@ -198,7 +203,7 @@ function computeVisibleOperations(): IOperationInfo[] {
   return result.visibleOperations;
 }
 
-const tableViewController = createTableViewController({
+const tableViewController: ReturnType<typeof createTableViewController> = createTableViewController({
   tableHead: tableHead || undefined,
   tableBody: tableBody || undefined,
   tableStats: tableStats || undefined,
@@ -220,7 +225,7 @@ const tableViewController = createTableViewController({
   overallStatusText
 });
 
-const phaseLegendController = createPhaseLegendController({
+const phaseLegendController: ReturnType<typeof createPhaseLegendController> = createPhaseLegendController({
   phaseGroupsEl: phaseGroupsEl || undefined,
   legendEl: legendEl || undefined,
   getOperations: () => operations,
@@ -232,12 +237,26 @@ const phaseLegendController = createPhaseLegendController({
   getStatusColors
 });
 
-let graphSelectionController: ReturnType<typeof createGraphSelectionController>;
-
 function selectionChanged(): void {
   updateSelectionUI();
   render();
 }
+
+const graphSelectionController: ReturnType<typeof createGraphSelectionController> =
+  createGraphSelectionController({
+    graphEl,
+    getCurrentView: () => currentView,
+    getSelection: () => selection,
+    setSelection: (nextSelection: Set<string>) => {
+      selection = nextSelection;
+    },
+    getOperations: () => operations,
+    getGraphNodePositions: () => graphState.nodePositions,
+    graphNodeWidth: 28,
+    graphNodeHeight: 28,
+    onSelectionChanged: selectionChanged,
+    onLiveSelectionChanged: updateGraph
+  });
 
 function singleSelect(name: string): void {
   graphSelectionController.singleSelect(name);
@@ -263,21 +282,6 @@ const graphViewController: IGraphViewControllerLike = createGraphViewController(
   renderPhaseLegend: () => phaseLegendController.renderAll(),
   singleSelect,
   toggleSelect
-});
-
-graphSelectionController = createGraphSelectionController({
-  graphEl,
-  getCurrentView: () => currentView,
-  getSelection: () => selection,
-  setSelection: (nextSelection: Set<string>) => {
-    selection = nextSelection;
-  },
-  getOperations: () => operations,
-  getGraphNodePositions: () => graphState.nodePositions,
-  graphNodeWidth: 28,
-  graphNodeHeight: 28,
-  onSelectionChanged: selectionChanged,
-  onLiveSelectionChanged: updateGraph
 });
 
 graphSelectionController.wireGraphMarqueeSelection();
@@ -318,10 +322,6 @@ function updateDerivedUrlDisplay(): void {
   updateTopBarDerivedUrlDisplay(connectBtn);
 }
 
-function updateStatusPill(): void {
-  updateTopBarStatusPill(topBarRefs, socketController.getSocket(), graphSettings, statusEmoji);
-}
-
 function updateManagerState(): void {
   if (!graphSettings) return;
   updateTopBarManagerState(topBarRefs, graphSettings);
@@ -329,37 +329,41 @@ function updateManagerState(): void {
 
 function log(message: string): void {
   const time: string = new Date().toLocaleTimeString();
-  // eslint-disable-next-line no-console
-  console.log('[' + time + '] ' + message);
+  window.console.log('[' + time + '] ' + message);
 }
 
-const socketController = createDashboardWebSocketController({
-  getUrl: () => computeWebSocketUrl(window.location),
-  onConnecting: () => {
-    showConnectingStatus(statusPill, statusEmojiEl, statusEmoji);
-  },
-  onConnectedStateChange: (connected: boolean) => {
-    setConnected(connected);
-  },
-  onOpen: () => {
-    updateStatusPill();
-  },
-  onClose: () => {
-    updateStatusPill();
-  },
-  onError: (event: Event) => {
-    log('WebSocket error: ' + event.type);
-  },
-  onParsedMessage: (message: unknown) => {
-    handleMessage(message as IDashboardMessage);
-  },
-  onParseError: (error: unknown) => {
-    log('Bad JSON: ' + String(error));
-  },
-  onLog: log
-});
+const socketController: ReturnType<typeof createDashboardWebSocketController> =
+  createDashboardWebSocketController({
+    getUrl: () => computeWebSocketUrl(window.location),
+    onConnecting: () => {
+      showConnectingStatus(statusPill, statusEmojiEl, statusEmoji);
+    },
+    onConnectedStateChange: (connected: boolean) => {
+      setConnected(connected);
+    },
+    onOpen: () => {
+      updateStatusPill();
+    },
+    onClose: () => {
+      updateStatusPill();
+    },
+    onError: (event: Event) => {
+      log('WebSocket error: ' + event.type);
+    },
+    onParsedMessage: (message: unknown) => {
+      handleMessage(message as IDashboardMessage);
+    },
+    onParseError: (error: unknown) => {
+      log('Bad JSON: ' + String(error));
+    },
+    onLog: log
+  });
 
-const selectionBarController = createSelectionBarController({
+function updateStatusPill(): void {
+  updateTopBarStatusPill(topBarRefs, socketController.getSocket(), graphSettings, statusEmoji);
+}
+
+const selectionBarController: ReturnType<typeof createSelectionBarController> = createSelectionBarController({
   getSelection: () => selection,
   getCurrentView: () => currentView,
   isConnected: () => socketController.isConnected()
@@ -384,10 +388,10 @@ function handleMessage(msg: IDashboardMessage): void {
       executionStates.clear();
       applyExecutionStatesMutation(operations, executionStates, msg.currentExecutionStates || []);
       setQueuedStates(queuedStates, msg.queuedStates || []);
-      graphSettings = msg.graphState || null;
+      graphSettings = msg.graphState;
       lastExecutionResults = toLastExecutionResultsMap(msg.resultByOperation || []);
       if (appTitleEl && msg.sessionInfo) {
-        const title = `${msg.sessionInfo.actionName} — ${msg.sessionInfo.repositoryIdentifier}`;
+        const title: string = `${msg.sessionInfo.actionName} — ${msg.sessionInfo.repositoryIdentifier}`;
         appTitleEl.textContent = title;
         document.title = title;
       }
@@ -400,7 +404,7 @@ function handleMessage(msg: IDashboardMessage): void {
       break;
     }
     case 'sync-graph-state': {
-      graphSettings = msg.graphState || null;
+      graphSettings = msg.graphState;
       break;
     }
     case 'iteration-scheduled': {
@@ -494,7 +498,7 @@ function wireActions(): void {
   });
 }
 function init(): void {
-  const urlState = loadDashboardUrlState(window.location.search);
+  const urlState: ReturnType<typeof loadDashboardUrlState> = loadDashboardUrlState(window.location.search);
   currentView = urlState.view;
   currentFilter = urlState.filter;
 

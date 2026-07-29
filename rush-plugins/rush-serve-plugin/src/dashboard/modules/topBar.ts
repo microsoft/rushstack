@@ -1,18 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable @rushstack/no-new-null */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export interface ITopBarRefs {
-  connectBtn: HTMLElement | null;
-  statusPill: HTMLElement | null;
-  statusEmojiEl: HTMLElement | null;
-  debugBtn: HTMLElement | null;
-  verboseBtn: HTMLElement | null;
-  playPauseBtn: HTMLElement | null;
-  parallelismInput: HTMLInputElement | null;
-  managerStateEl: HTMLElement | null;
+  connectBtn: HTMLElement | undefined;
+  statusPill: HTMLElement | undefined;
+  statusEmojiEl: HTMLElement | undefined;
+  debugBtn: HTMLElement | undefined;
+  verboseBtn: HTMLElement | undefined;
+  playPauseBtn: HTMLElement | undefined;
+  parallelismInput: HTMLInputElement | undefined;
+  managerStateEl: HTMLElement | undefined;
+}
+
+export interface ITopBarGraphState {
+  status?: string;
+  debugMode?: boolean;
+  verbose?: boolean;
+  pauseNextIteration?: boolean;
+  parallelism?: number | string;
+  hasScheduledIteration?: boolean;
 }
 
 export function overallStatusText(status: string | undefined): string {
@@ -47,7 +53,7 @@ export function computeWsUrl(loc: Location): string {
   return proto + '//' + loc.host + '/ws';
 }
 
-export function updateDerivedUrlDisplay(connectBtn: HTMLElement | null): void {
+export function updateDerivedUrlDisplay(connectBtn: HTMLElement | undefined): void {
   if (!connectBtn) return;
 
   const url: string = computeWsUrl(window.location);
@@ -56,8 +62,8 @@ export function updateDerivedUrlDisplay(connectBtn: HTMLElement | null): void {
 }
 
 export function showConnectingStatus(
-  statusPill: HTMLElement | null,
-  statusEmojiEl: HTMLElement | null,
+  statusPill: HTMLElement | undefined,
+  statusEmojiEl: HTMLElement | undefined,
   statusEmoji: (status: string) => string
 ): void {
   if (!statusPill || !statusEmojiEl) return;
@@ -69,8 +75,8 @@ export function showConnectingStatus(
 
 export function updateStatusPill(
   refs: ITopBarRefs,
-  ws: WebSocket | null,
-  graphSettings: any,
+  ws: WebSocket | undefined,
+  graphSettings: ITopBarGraphState | undefined,
   statusEmoji: (status: string) => string
 ): void {
   if (!refs.statusPill || !refs.statusEmojiEl) return;
@@ -92,10 +98,9 @@ export function setConnected(
   updateSelectionUI: () => void,
   disabledControlIds: string[]
 ): void {
-  const connectBtnEl: HTMLElement | null = refs.connectBtn;
-  const iconSpan: HTMLElement | null = connectBtnEl
-    ? (connectBtnEl.querySelector('span.codicon') as HTMLElement | null)
-    : null;
+  const connectBtnEl: HTMLElement | undefined = refs.connectBtn;
+  const iconSpan: HTMLElement | undefined =
+    (connectBtnEl?.querySelector('span.codicon') as HTMLElement | null) ?? undefined;
 
   if (connectBtnEl) {
     if (connected) {
@@ -113,17 +118,15 @@ export function setConnected(
   }
 
   disabledControlIds.forEach((id) => {
-    const el: HTMLButtonElement | HTMLInputElement | null = document.getElementById(id) as
-      | HTMLButtonElement
-      | HTMLInputElement
-      | null;
+    const el: HTMLButtonElement | HTMLInputElement | undefined =
+      (document.getElementById(id) as HTMLButtonElement | HTMLInputElement | null) ?? undefined;
     if (el) el.disabled = !connected;
   });
 
   updateSelectionUI();
 }
 
-export function updateManagerState(refs: ITopBarRefs, graphSettings: any): void {
+export function updateManagerState(refs: ITopBarRefs, graphSettings: ITopBarGraphState): void {
   if (!graphSettings) return;
 
   const { debugBtn, verboseBtn, playPauseBtn, parallelismInput, managerStateEl } = refs;
@@ -142,9 +145,8 @@ export function updateManagerState(refs: ITopBarRefs, graphSettings: any): void 
     verboseBtn.title = graphSettings.verbose ? 'Turn off verbose logging' : 'Turn on verbose logging';
   }
 
-  const ppIcon: HTMLElement | null = playPauseBtn
-    ? (playPauseBtn.querySelector('.codicon') as HTMLElement | null)
-    : null;
+  const ppIcon: HTMLElement | undefined =
+    (playPauseBtn?.querySelector('.codicon') as HTMLElement | null) ?? undefined;
   if (playPauseBtn) {
     if (!graphSettings.pauseNextIteration) {
       playPauseBtn.classList.add('playing');
@@ -173,7 +175,7 @@ export function updateManagerState(refs: ITopBarRefs, graphSettings: any): void 
     managerStateEl.innerHTML = '';
   }
 
-  const executeBtn: HTMLElement | null = document.getElementById('execute-btn');
+  const executeBtn: HTMLElement | undefined = document.getElementById('execute-btn') ?? undefined;
   if (executeBtn) {
     if (graphSettings.hasScheduledIteration) {
       executeBtn.classList.add('queued');

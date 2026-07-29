@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable @rushstack/no-new-null */
-/* eslint-disable no-control-regex */
-
 export interface IAnsiSegment {
   text: string;
   style: string;
@@ -13,8 +10,8 @@ interface IAnsiState {
   bold: boolean;
   underline: boolean;
   inverse: boolean;
-  fg: string | null;
-  bg: string | null;
+  fg?: string;
+  bg?: string;
 }
 
 export class AnsiSgrParser {
@@ -22,14 +19,13 @@ export class AnsiSgrParser {
     bold: false,
     underline: false,
     inverse: false,
-    fg: null,
-    bg: null
+    fg: undefined,
+    bg: undefined
   };
 
   public process(input: string): IAnsiSegment[] {
-    const csiRegex: RegExp = /\x1b\[[0-9;]*m/g;
-    let match: RegExpExecArray | null;
     let lastIndex: number = 0;
+    let searchIndex: number = 0;
     const segments: IAnsiSegment[] = [];
 
     const pushSegmentIfText = (text: string): void => {
@@ -38,20 +34,31 @@ export class AnsiSgrParser {
       segments.push({ text, style });
     };
 
-    while ((match = csiRegex.exec(input)) !== null) {
-      const idx: number = match.index;
-      if (idx > lastIndex) {
-        pushSegmentIfText(input.slice(lastIndex, idx));
+    while (searchIndex < input.length) {
+      const escapeIndex: number = input.indexOf('\u001b[', searchIndex);
+      if (escapeIndex < 0) break;
+
+      const suffixMatch: RegExpExecArray | undefined =
+        /^[0-9;]*m/.exec(input.slice(escapeIndex + 2)) ?? undefined;
+      if (!suffixMatch) {
+        searchIndex = escapeIndex + 2;
+        continue;
       }
 
-      const seq: string = match[0];
+      if (escapeIndex > lastIndex) {
+        pushSegmentIfText(input.slice(lastIndex, escapeIndex));
+      }
+
+      const sequenceEnd: number = escapeIndex + 2 + suffixMatch[0].length;
+      const seq: string = input.slice(escapeIndex, sequenceEnd);
       try {
         this._applySgr(this._parseSgrParams(seq));
       } catch {
         // Ignore malformed control sequences.
       }
 
-      lastIndex = csiRegex.lastIndex;
+      lastIndex = sequenceEnd;
+      searchIndex = sequenceEnd;
     }
 
     if (lastIndex < input.length) {
@@ -81,8 +88,8 @@ export class AnsiSgrParser {
         this._state.bold = false;
         this._state.underline = false;
         this._state.inverse = false;
-        this._state.fg = null;
-        this._state.bg = null;
+        this._state.fg = undefined;
+        this._state.bg = undefined;
       } else if (p === 1) {
         this._state.bold = true;
       } else if (p === 4) {
@@ -96,11 +103,11 @@ export class AnsiSgrParser {
       } else if (p >= 30 && p <= 37) {
         this._state.fg = this._sgrColorToCss(p - 30, false);
       } else if (p === 39) {
-        this._state.fg = null;
+        this._state.fg = undefined;
       } else if (p >= 40 && p <= 47) {
         this._state.bg = this._sgrColorToCss(p - 40, false);
       } else if (p === 49) {
-        this._state.bg = null;
+        this._state.bg = undefined;
       } else if (p >= 90 && p <= 97) {
         this._state.fg = this._sgrColorToCss(p - 90, true);
       } else if (p >= 100 && p <= 107) {
@@ -109,7 +116,7 @@ export class AnsiSgrParser {
     }
   }
 
-  private _sgrColorToCss(idx: number, bright: boolean): string | null {
+  private _sgrColorToCss(idx: number, bright: boolean): string | undefined {
     const base: string[] = ['#000000', '#a00', '#0a0', '#aa0', '#00a', '#a0a', '#0aa', '#ddd'];
     const brightMap: string[] = [
       '#555',
@@ -121,7 +128,7 @@ export class AnsiSgrParser {
       '#55ffff',
       '#fff'
     ];
-    return bright ? brightMap[idx] || base[idx] : base[idx] || null;
+    return bright ? brightMap[idx] || base[idx] : base[idx];
   }
 
   private _ansiStateToStyle(state: IAnsiState): string {

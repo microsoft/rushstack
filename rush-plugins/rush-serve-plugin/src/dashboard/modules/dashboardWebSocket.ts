@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable @rushstack/no-new-null */
-/* eslint-disable prefer-const */
-
 export interface IDashboardWebSocketControllerOptions {
   getUrl: () => string;
   onConnecting: (url: string) => void;
@@ -21,35 +18,33 @@ export interface IDashboardWebSocketController {
   disconnect: () => void;
   sendCommand: (command: unknown) => void;
   isConnected: () => boolean;
-  getSocket: () => WebSocket | null;
+  getSocket: () => WebSocket | undefined;
 }
 
 export function createDashboardWebSocketController(
   options: IDashboardWebSocketControllerOptions
 ): IDashboardWebSocketController {
-  let ws: WebSocket | null = null;
-  let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  let ws: WebSocket | undefined;
+  let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
   let manualDisconnect: boolean = false;
 
   const isConnected = (): boolean => !!ws && ws.readyState === WebSocket.OPEN;
-  const getSocket = (): WebSocket | null => ws;
-
-  let connect: () => void;
+  const getSocket = (): WebSocket | undefined => ws;
 
   const scheduleReconnect = (): void => {
     if (reconnectTimer) return;
     reconnectTimer = setTimeout(() => {
-      reconnectTimer = null;
+      reconnectTimer = undefined;
       if (!manualDisconnect) connect();
     }, 4000);
   };
 
-  connect = (): void => {
+  function connect(): void {
     if (ws && ws.readyState === WebSocket.OPEN) return;
 
     if (reconnectTimer) {
       clearTimeout(reconnectTimer);
-      reconnectTimer = null;
+      reconnectTimer = undefined;
     }
 
     manualDisconnect = false;
@@ -78,7 +73,7 @@ export function createDashboardWebSocketController(
     ws.addEventListener('close', () => {
       options.onLog('Disconnected');
       options.onConnectedStateChange(false);
-      ws = null;
+      ws = undefined;
       options.onClose();
       if (!manualDisconnect) scheduleReconnect();
     });
@@ -94,13 +89,13 @@ export function createDashboardWebSocketController(
         options.onParseError(error);
       }
     });
-  };
+  }
 
   const disconnect = (): void => {
     manualDisconnect = true;
     if (reconnectTimer) {
       clearTimeout(reconnectTimer);
-      reconnectTimer = null;
+      reconnectTimer = undefined;
     }
     if (ws) {
       try {
@@ -108,7 +103,7 @@ export function createDashboardWebSocketController(
       } catch {
         // ignore close failures
       }
-      ws = null;
+      ws = undefined;
     }
   };
 
