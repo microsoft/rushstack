@@ -11,6 +11,10 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
+      "name": "@jridgewell/sourcemap-codec",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@lifaon/path",
       "allowedCategories": [ "libraries" ]
     },

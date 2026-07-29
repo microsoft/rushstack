@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { ISourcePosition } from '@rushstack/typings-generator';
+
 /**
  * Options for the pseudolocale library.
  *
@@ -32,6 +34,13 @@ export interface ILocalizationFile {
 export interface ILocalizedString {
   value: string;
   comment?: string;
+
+  /**
+   * The zero-based position of this string's declaration in the source file, when the parser is
+   * able to determine it. This is used to emit declaration source maps so that editors can
+   * navigate from generated typings back to the string declaration.
+   */
+  sourcePosition?: ISourcePosition;
 }
 
 /**
