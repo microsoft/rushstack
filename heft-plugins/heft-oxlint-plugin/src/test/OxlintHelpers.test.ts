@@ -3,6 +3,8 @@
 
 import * as path from 'node:path';
 
+import { Path } from '@rushstack/node-core-library';
+
 import {
   buildCommonArgs,
   buildFixArgs,
@@ -18,7 +20,7 @@ import {
   type IOxlintSarifLog
 } from '../OxlintHelpers';
 
-describe('buildCommonArgs', () => {
+describe(buildCommonArgs.name, () => {
   it('returns no arguments when options are undefined', () => {
     expect(buildCommonArgs(undefined)).toEqual([]);
   });
@@ -30,7 +32,7 @@ describe('buildCommonArgs', () => {
   it('maps config and tsconfig paths', () => {
     const options: IOxlintPluginOptions = {
       configFilePath: '.oxlintrc.json',
-      tsConfigFilePath: 'tsconfig.json'
+      tsconfigFilePath: 'tsconfig.json'
     };
     expect(buildCommonArgs(options)).toEqual(['--config', '.oxlintrc.json', '--tsconfig', 'tsconfig.json']);
   });
@@ -101,7 +103,7 @@ describe('buildCommonArgs', () => {
   });
 });
 
-describe('buildFixArgs', () => {
+describe(buildFixArgs.name, () => {
   it('returns no arguments when fix is disabled', () => {
     expect(buildFixArgs(false, { fixSuggestions: true, fixDangerously: true })).toEqual([]);
   });
@@ -119,7 +121,7 @@ describe('buildFixArgs', () => {
   });
 });
 
-describe('resolveLintPaths', () => {
+describe(resolveLintPaths.name, () => {
   it('defaults to ["src"] when no paths are provided', () => {
     expect(resolveLintPaths(undefined)).toEqual(['src']);
     expect(resolveLintPaths({})).toEqual(['src']);
@@ -131,8 +133,8 @@ describe('resolveLintPaths', () => {
   });
 });
 
-describe('filterChangedFilePaths', () => {
-  const buildFolderPath: string = path.resolve('/repo/project');
+describe(filterChangedFilePaths.name, () => {
+  const buildFolderPath: string = '/repo/project';
 
   it('returns an empty array when nothing is provided', () => {
     expect(filterChangedFilePaths([], buildFolderPath)).toEqual([]);
@@ -140,46 +142,42 @@ describe('filterChangedFilePaths', () => {
 
   it('keeps lintable files inside the build folder as sorted relative paths', () => {
     const changed: string[] = [
-      path.resolve(buildFolderPath, 'src/b.ts'),
-      path.resolve(buildFolderPath, 'src/a.tsx'),
-      path.resolve(buildFolderPath, 'src/nested/c.js')
+      `${buildFolderPath}/src/b.ts`,
+      `${buildFolderPath}/src/a.tsx`,
+      `${buildFolderPath}/src/nested/c.js`
     ];
-    expect(filterChangedFilePaths(changed, buildFolderPath)).toEqual([
-      path.join('src', 'a.tsx'),
-      path.join('src', 'b.ts'),
-      path.join('src', 'nested', 'c.js')
+    expect(filterChangedFilePaths(changed, buildFolderPath).map(Path.convertToSlashes)).toEqual([
+      'src/a.tsx',
+      'src/b.ts',
+      'src/nested/c.js'
     ]);
   });
 
   it('excludes files outside the build folder', () => {
-    const changed: string[] = [
-      path.resolve('/repo/other/src/a.ts'),
-      path.resolve(buildFolderPath, '../sibling/b.ts')
-    ];
+    const changed: string[] = [`/repo/other/src/a.ts`, `${buildFolderPath}/../sibling/b.ts`];
     expect(filterChangedFilePaths(changed, buildFolderPath)).toEqual([]);
   });
 
   it('excludes node_modules, declaration files, and non-lintable extensions', () => {
     const changed: string[] = [
-      path.resolve(buildFolderPath, 'node_modules/pkg/index.ts'),
-      path.resolve(buildFolderPath, 'src/types.d.ts'),
-      path.resolve(buildFolderPath, 'src/styles.css'),
-      path.resolve(buildFolderPath, 'src/data.json'),
-      path.resolve(buildFolderPath, 'src/keep.ts')
+      `${buildFolderPath}/node_modules/pkg/index.ts`,
+      `${buildFolderPath}/src/types.d.ts`,
+      `${buildFolderPath}/src/styles.css`,
+      `${buildFolderPath}/src/data.json`,
+      `${buildFolderPath}/src/keep.ts`
     ];
-    expect(filterChangedFilePaths(changed, buildFolderPath)).toEqual([path.join('src', 'keep.ts')]);
+    expect(filterChangedFilePaths(changed, buildFolderPath).map(Path.convertToSlashes)).toEqual([
+      'src/keep.ts'
+    ]);
   });
 
   it('de-duplicates repeated paths', () => {
-    const changed: string[] = [
-      path.resolve(buildFolderPath, 'src/a.ts'),
-      path.resolve(buildFolderPath, 'src/a.ts')
-    ];
-    expect(filterChangedFilePaths(changed, buildFolderPath)).toEqual([path.join('src', 'a.ts')]);
+    const changed: string[] = [`${buildFolderPath}/src/a.ts`, `${buildFolderPath}/src/a.ts`];
+    expect(filterChangedFilePaths(changed, buildFolderPath).map(Path.convertToSlashes)).toEqual(['src/a.ts']);
   });
 });
 
-describe('formatDiagnosticMessage', () => {
+describe(formatDiagnosticMessage.name, () => {
   it('prefixes the rule code when present', () => {
     const diagnostic: IOxlintDiagnostic = {
       message: "'x' is never used",
@@ -200,8 +198,8 @@ describe('formatDiagnosticMessage', () => {
   });
 });
 
-describe('createFileErrorForDiagnostic', () => {
-  const buildFolderPath: string = path.resolve('/repo/project');
+describe(createFileErrorForDiagnostic.name, () => {
+  const buildFolderPath: string = '/repo/project';
 
   it('resolves the absolute path and uses line/column from the first label span', () => {
     const diagnostic: IOxlintDiagnostic = {
@@ -241,7 +239,7 @@ describe('createFileErrorForDiagnostic', () => {
   });
 });
 
-describe('extractDiagnosticsFromSarif', () => {
+describe(extractDiagnosticsFromSarif.name, () => {
   it('returns an empty array for an empty log', () => {
     expect(extractDiagnosticsFromSarif({})).toEqual([]);
     expect(extractDiagnosticsFromSarif({ runs: [] })).toEqual([]);
@@ -300,7 +298,7 @@ describe('extractDiagnosticsFromSarif', () => {
   });
 });
 
-describe('batchLintPaths', () => {
+describe(batchLintPaths.name, () => {
   it('returns a single batch when everything fits', () => {
     const paths: string[] = ['src/a.ts', 'src/b.ts', 'src/c.ts'];
     expect(batchLintPaths(['node', 'oxlint', '--format=json'], paths)).toEqual([paths]);
@@ -338,7 +336,7 @@ describe('batchLintPaths', () => {
   });
 });
 
-describe('mergeSarifLogs', () => {
+describe(mergeSarifLogs.name, () => {
   it('returns the original text unchanged for a single log', () => {
     const raw: string = '{"runs":[{"results":[]}]}';
     expect(mergeSarifLogs([raw])).toBe(raw);

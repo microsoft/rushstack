@@ -256,7 +256,7 @@ export default class OxlintPlugin implements IHeftTaskPlugin<IOxlintPluginOption
       'oxlint',
       logger.terminal
     );
-    const packageJsonPath: string = path.join(packageFolder, 'package.json');
+    const packageJsonPath: string = `${packageFolder}/package.json`;
     const packageJson: { bin?: string | Record<string, string> } = await JsonFile.loadAsync(packageJsonPath);
 
     let relativeBinPath: string | undefined;
@@ -305,7 +305,7 @@ export default class OxlintPlugin implements IHeftTaskPlugin<IOxlintPluginOption
       );
     }
 
-    const binaryPath: string = path.join(path.dirname(nativePackageJsonPath), binaryName);
+    const binaryPath: string = `${path.dirname(nativePackageJsonPath)}/${binaryName}`;
     if (!(await FileSystem.existsAsync(binaryPath))) {
       throw new Error(
         `The tsgolint native binary was not found at the expected location "${binaryPath}". Ensure the ` +

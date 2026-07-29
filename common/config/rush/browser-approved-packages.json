@@ -39,10 +39,6 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
-      "name": "@rushstack/heft-oxlint-plugin",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@rushstack/problem-matcher",
       "allowedCategories": [ "libraries" ]
     },
@@ -64,10 +60,6 @@
     },
     {
       "name": "office-ui-fabric-core",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "oxlint",
       "allowedCategories": [ "libraries" ]
     },
     {

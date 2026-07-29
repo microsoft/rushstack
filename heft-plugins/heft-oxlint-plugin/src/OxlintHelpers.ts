@@ -28,7 +28,7 @@ export interface IOxlintPluginOptions {
   /**
    * Override the TypeScript config used for import resolution. Maps to oxlint's `--tsconfig`.
    */
-  tsConfigFilePath?: string;
+  tsconfigFilePath?: string;
 
   /**
    * The list of file or folder paths (relative to the project root) that oxlint should lint.
@@ -269,20 +269,33 @@ export function buildCommonArgs(options: IOxlintPluginOptions | undefined): stri
     return args;
   }
 
-  if (options.configFilePath) {
-    args.push('--config', options.configFilePath);
+  const {
+    configFilePath,
+    tsconfigFilePath,
+    allow,
+    warn,
+    deny,
+    ignorePath,
+    ignorePattern,
+    maxWarnings,
+    threads,
+    reportUnusedDisableDirectivesSeverity
+  } = options;
+
+  if (configFilePath) {
+    args.push('--config', configFilePath);
   }
-  if (options.tsConfigFilePath) {
-    args.push('--tsconfig', options.tsConfigFilePath);
+  if (tsconfigFilePath) {
+    args.push('--tsconfig', tsconfigFilePath);
   }
 
-  for (const rule of options.allow ?? []) {
+  for (const rule of allow ?? []) {
     args.push('--allow', rule);
   }
-  for (const rule of options.warn ?? []) {
+  for (const rule of warn ?? []) {
     args.push('--warn', rule);
   }
-  for (const rule of options.deny ?? []) {
+  for (const rule of deny ?? []) {
     args.push('--deny', rule);
   }
 
@@ -292,20 +305,20 @@ export function buildCommonArgs(options: IOxlintPluginOptions | undefined): stri
     }
   }
 
-  if (options.ignorePath) {
-    args.push('--ignore-path', options.ignorePath);
+  if (ignorePath) {
+    args.push('--ignore-path', ignorePath);
   }
-  for (const pattern of options.ignorePattern ?? []) {
+  for (const pattern of ignorePattern ?? []) {
     args.push('--ignore-pattern', pattern);
   }
-  if (options.maxWarnings !== undefined) {
-    args.push('--max-warnings', `${options.maxWarnings}`);
+  if (maxWarnings !== undefined) {
+    args.push('--max-warnings', `${maxWarnings}`);
   }
-  if (options.threads !== undefined) {
-    args.push('--threads', `${options.threads}`);
+  if (threads !== undefined) {
+    args.push('--threads', `${threads}`);
   }
-  if (options.reportUnusedDisableDirectivesSeverity) {
-    args.push('--report-unused-disable-directives-severity', options.reportUnusedDisableDirectivesSeverity);
+  if (reportUnusedDisableDirectivesSeverity) {
+    args.push('--report-unused-disable-directives-severity', reportUnusedDisableDirectivesSeverity);
   }
 
   return args;
@@ -350,14 +363,15 @@ export function filterChangedFilePaths(
   for (const absolutePath of changedFilePaths) {
     const relativePath: string = path.relative(buildFolderPath, absolutePath);
 
-    // Skip files that are outside of the build folder (e.g. the TypeScript "lib.d.ts" files or
-    // "@types" packages that appear in the program's source files).
+    // Intentionally skip (not an error): the TypeScript program legitimately reports files outside
+    // the project, e.g. shared "lib.*.d.ts", hoisted "@types", or cross-project references. On
+    // Windows "path.relative" also returns an absolute path across drives. None are lintable here.
     if (!relativePath || relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
       continue;
     }
 
     // Skip dependencies
-    if (relativePath.split(/[\\/]/).includes('node_modules')) {
+    if (relativePath.match(/(^|[\\/])node_modules[\\/]/)) {
       continue;
     }
 
@@ -382,7 +396,8 @@ export function filterChangedFilePaths(
  * Formats an oxlint diagnostic into a human-readable message, prefixing the rule code when present.
  */
 export function formatDiagnosticMessage(diagnostic: IOxlintDiagnostic): string {
-  return diagnostic.code ? `(${diagnostic.code}) ${diagnostic.message}` : diagnostic.message;
+  const { code, message } = diagnostic;
+  return code !== undefined ? `(${code}) ${message}` : message;
 }
 
 /**

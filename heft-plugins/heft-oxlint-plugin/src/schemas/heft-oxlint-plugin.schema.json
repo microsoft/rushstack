@@ -13,7 +13,7 @@
       "type": "string"
     },
 
-    "tsConfigFilePath": {
+    "tsconfigFilePath": {
       "title": "TypeScript Config File Path",
       "description": "Override the TypeScript config used for import resolution. Maps to oxlint's --tsconfig.",
       "type": "string"
