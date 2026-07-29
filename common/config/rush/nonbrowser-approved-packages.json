@@ -243,6 +243,10 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/heft-oxlint-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/heft-rspack-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -916,6 +920,10 @@
     },
     {
       "name": "object-hash",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "oxlint",
       "allowedCategories": [ "libraries" ]
     },
     {
