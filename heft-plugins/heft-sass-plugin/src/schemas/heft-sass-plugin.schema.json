@@ -121,6 +121,11 @@
     "sourceMap": {
       "type": "boolean",
       "description": "If true, a `.css.map` source map file will be written next to each emitted `.css` file, and a `sourceMappingURL` comment will be appended to the `.css`. Defaults to `false`."
+    },
+
+    "generateDeclarationMaps": {
+      "type": "boolean",
+      "description": "If true, a `.d.ts.map` file is emitted next to each generated typings file, allowing editors to resolve \"go to definition\" on a CSS module class to the rule that declares it in the stylesheet instead of the generated typings. Defaults to `false`."
     }
   }
 }
