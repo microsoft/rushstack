@@ -19,7 +19,9 @@
     },
 
     "test": {
-      "cleanFiles": [{ "includeGlobs": ["coverage", "test-results"] }]
-    }
+      "cleanFiles": [{ "includeGlobs": ["coverage", "test-results", "test-results-evaluate"] }]
+    },
+
+    "test-evaluate": {}
   }
 }

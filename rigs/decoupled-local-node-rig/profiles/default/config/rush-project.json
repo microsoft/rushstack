@@ -12,7 +12,7 @@
     },
     {
       "operationName": "_phase:test-evaluate",
-      "outputFolderNames": ["test-results"]
+      "outputFolderNames": ["test-results-evaluate"]
     }
   ]
 }

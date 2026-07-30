@@ -21,6 +21,8 @@ import {
 import {
   DEFAULT_SYNTHETIC_COVERAGE_TEST_NAME,
   DEFAULT_SYNTHETIC_JUNIT_RELATIVE_PATH,
+  type ICoverageMetric,
+  type ICoverageViolation,
   evaluateCoverageThresholds,
   loadCoverageThresholdsAsync,
   readCoberturaMetricsAsync,
@@ -81,7 +83,11 @@ export default class TestEvaluatorPlugin implements IHeftTaskPlugin<ITestEvaluat
         }
 
         junitReportWasFound = true;
-        const failures = await readJunitFailuresAsync(absoluteJunitPath);
+        const failures: {
+          suiteName: string;
+          testName: string;
+          message: string;
+        }[] = await readJunitFailuresAsync(absoluteJunitPath);
         for (const failure of failures) {
           taskSession.logger.emitError(
             new Error(`${failure.suiteName} > ${failure.testName}: ${failure.message}`)
@@ -112,8 +118,12 @@ export default class TestEvaluatorPlugin implements IHeftTaskPlugin<ITestEvaluat
           }
 
           coberturaReportWasFound = true;
-          const coverageMetrics = await readCoberturaMetricsAsync(absoluteCoberturaPath);
-          const violations = evaluateCoverageThresholds(coverageMetrics, configuredThresholds);
+          const coverageMetrics: ICoverageMetric | undefined =
+            await readCoberturaMetricsAsync(absoluteCoberturaPath);
+          const violations: ICoverageViolation[] = evaluateCoverageThresholds(
+            coverageMetrics,
+            configuredThresholds
+          );
           if (violations.length > 0) {
             const syntheticJunitAbsolutePath: string = path.resolve(
               heftConfiguration.buildFolderPath,

@@ -3,7 +3,8 @@
 
 import * as path from 'node:path';
 
-import type { AggregatedResult, AssertionResult, TestResult } from '@jest/reporters';
+import type { AggregatedResult, TestResult } from '@jest/reporters';
+
 import { FileSystem } from '@rushstack/node-core-library';
 
 export interface ICoverageThresholds {
@@ -140,7 +141,7 @@ function serializeJunitResult(buildFolderPath: string, jestResults: AggregatedRe
       suiteXml.push(
         `<testcase classname="${xmlEscape(assertionResult.ancestorTitles.join(' > '))}" name="${xmlEscape(
           assertionResult.title
-        )}" time="${toTestDurationSeconds(assertionResult)}">${
+        )}" time="${toTestDurationSeconds(assertionResult.duration ?? undefined)}">${
           failureXml.length ? failureXml.join('') : ''
         }</testcase>`
       );
@@ -184,9 +185,9 @@ function toSuiteDurationSeconds(testResult: TestResult): string {
     : '0';
 }
 
-function toTestDurationSeconds(assertionResult: AssertionResult): string {
-  if (typeof assertionResult.duration === 'number') {
-    return (assertionResult.duration / 1000).toFixed(3);
+function toTestDurationSeconds(duration: number | undefined): string {
+  if (typeof duration === 'number') {
+    return (duration / 1000).toFixed(3);
   }
   return '0';
 }

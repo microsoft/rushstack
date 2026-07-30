@@ -8,7 +8,8 @@ import { FileSystem } from '@rushstack/node-core-library';
 import type { ICoverageThresholdArtifact, ICoverageThresholds } from './TestResultArtifacts';
 
 export const DEFAULT_SYNTHETIC_COVERAGE_TEST_NAME: string = 'global code coverage';
-export const DEFAULT_SYNTHETIC_JUNIT_RELATIVE_PATH: string = 'test-results/synthetic-coverage.junit.xml';
+export const DEFAULT_SYNTHETIC_JUNIT_RELATIVE_PATH: string =
+  'test-results-evaluate/synthetic-coverage.junit.xml';
 
 export interface IJUnitFailure {
   suiteName: string;
