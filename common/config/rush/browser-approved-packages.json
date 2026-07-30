@@ -43,6 +43,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/rush-serve-dashboard",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rush-themed-ui",
       "allowedCategories": [ "libraries" ]
     },

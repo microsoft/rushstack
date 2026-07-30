@@ -1,0 +1,28 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
+  "extends": "local-web-rig/profiles/app/config/heft.json",
+
+  "phasesByName": {
+    "build": {
+      "tasksByName": {
+        "copy-dashboard-assets": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "src",
+                  "destinationFolders": ["lib-esm"],
+                  "fileExtensions": [".html"],
+                  "hardlink": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

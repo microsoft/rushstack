@@ -28,9 +28,9 @@
             "options": {
               "copyOperations": [
                 {
-                  "sourcePath": "src/dashboard",
+                  "sourcePath": "node_modules/@rushstack/rush-serve-dashboard/lib-esm",
                   "destinationFolders": ["lib-commonjs/dashboard", "lib-esm/dashboard"],
-                  "fileExtensions": [".html", ".css"],
+                  "fileExtensions": [".js", ".js.map", ".html", ".css"],
                   "hardlink": true
                 }
               ]

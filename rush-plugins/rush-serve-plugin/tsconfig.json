@@ -2,7 +2,6 @@
   "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json",
 
   "compilerOptions": {
-    "lib": ["ES2022", "DOM"],
     // express hackery makes this necessary
     "skipLibCheck": true
   }

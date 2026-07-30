@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
+    "@rushstack/rush-serve-dashboard": "workspace:*",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "@types/compression": "~1.7.2",

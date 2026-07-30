@@ -490,6 +490,12 @@
       "versionPolicyName": "rush"
     },
     {
+      "packageName": "@rushstack/rush-serve-dashboard",
+      "projectFolder": "apps/rush-serve-dashboard",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
       "packageName": "@rushstack/trace-import",
       "projectFolder": "apps/trace-import",
       "reviewCategory": "libraries",

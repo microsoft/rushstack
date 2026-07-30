@@ -22,7 +22,7 @@ This plugin also provides a web socket server that notifies clients of the build
 
 The recommended way to connect to the web socket is to serve a static HTML page from the serve plugin using the `globalRouting` configuration.
 
-This package includes a ready-made dashboard whose source lives under `src/dashboard/` and whose browser-ready assets are emitted to `lib-esm/dashboard/`. Because the HTML references `dashboard.js` plus scoped styles under `styles/`, serve the ESM build folder rather than a single file:
+This package includes the reference `@rushstack/rush-serve-dashboard` web app, which speaks the plugin's WebSocket protocol. Its source lives under `apps/rush-serve-dashboard/`, and its browser-ready assets are copied into this package at `lib-esm/dashboard/`. Because the HTML references `dashboard.js` plus scoped styles under `styles/`, serve the ESM build folder rather than a single file:
 
 ```json
 {

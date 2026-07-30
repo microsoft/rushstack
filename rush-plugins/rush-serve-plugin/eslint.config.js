@@ -10,25 +10,6 @@ module.exports = [
   ...friendlyLocalsMixin,
   ...tsdocMixin,
   {
-    files: ['src/dashboard/**/*.ts'],
-    languageOptions: {
-      sourceType: 'module',
-      globals: {
-        URL: 'readonly',
-        URLSearchParams: 'readonly',
-        WebSocket: 'readonly',
-        document: 'readonly',
-        history: 'readonly',
-        location: 'readonly',
-        localStorage: 'readonly',
-        navigator: 'readonly',
-        requestAnimationFrame: 'readonly',
-        self: 'readonly',
-        window: 'readonly'
-      }
-    }
-  },
-  {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       parserOptions: {
