@@ -43,6 +43,22 @@ The Rush server resolves extensionless module requests to emitted `.js` files.
 
 Then open `https://localhost:<port>/dashboard/dashboard.html`.
 
+### Dashboard
+
+The dashboard provides table and dependency-graph views of Rush operations. Use search or the
+failed/warning filter to narrow the current view, select operations to include their dependencies or consumers,
+and open the terminal pane to inspect operation logs. The current view and filter are reflected in the `view`
+and `filter` URL parameters so a dashboard view can be bookmarked.
+
+When connected, the dashboard can execute or abort a build, pause the watcher, change parallelism, invalidate
+operations, close runners, and change operation enabled states. Enabled-state changes default to safe mode;
+unsafe mode enables changes that can leave downstream state inconsistent. The dashboard reconnects
+automatically after an unexpected disconnect. A manual disconnect remains disconnected until the Connect
+button is selected.
+
+Because the WebSocket protocol accepts build-control commands, do not expose the dashboard or socket endpoint
+to untrusted networks. Apply the same authentication and network restrictions used for the served project.
+
 To use the socket:
 
 ```ts
