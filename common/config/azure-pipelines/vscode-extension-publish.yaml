@@ -1,6 +1,8 @@
 variables:
   - name: FORCE_COLOR
     value: 1
+  - name: RUSHSTACK_NPM_AUTH_TOKEN
+    value: $(System.AccessToken)
 
 parameters:
   - name: shouldPublish
@@ -59,6 +61,8 @@ extends:
             steps:
               - checkout: self
                 persistCredentials: true
+
+              - template: /common/config/azure-pipelines/templates/override-rushstack-registry.yaml@self
 
               - template: /common/config/azure-pipelines/templates/install-node.yaml@self
 

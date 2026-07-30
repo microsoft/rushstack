@@ -9,6 +9,8 @@ name: 'Post-publish $(Date:yyyyMMdd).$(Rev:r) (triggered by $(resources.triggeri
 variables:
   - name: FORCE_COLOR
     value: 1
+  - name: RUSHSTACK_NPM_AUTH_TOKEN
+    value: $(System.AccessToken)
 
 # This pipeline is triggered only by pipeline resources (npm publish pipelines),
 # not by CI pushes or PR builds.
@@ -87,6 +89,8 @@ extends:
             steps:
               - checkout: self
                 persistCredentials: true
+
+              - template: /common/config/azure-pipelines/templates/override-rushstack-registry.yaml@self
 
               - template: /common/config/azure-pipelines/templates/install-node.yaml@self
 
@@ -194,6 +198,8 @@ extends:
             steps:
               - checkout: rushstackWebsites
                 persistCredentials: true
+
+              - template: /common/config/azure-pipelines/templates/override-rushstack-registry.yaml@self
 
               - template: /common/config/azure-pipelines/templates/install-node.yaml@self
                 parameters:

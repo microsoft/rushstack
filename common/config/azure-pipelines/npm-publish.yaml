@@ -7,6 +7,8 @@ parameters:
 variables:
   - name: FORCE_COLOR
     value: 1
+  - name: RUSHSTACK_NPM_AUTH_TOKEN
+    value: $(System.AccessToken)
   - name: SourceBranch
     value: $[ replace(replace(resources.repositories.self.ref, 'refs/heads/', ''), 'refs/pull/', 'refs/remotes/pull/') ]
 
@@ -48,6 +50,8 @@ extends:
             steps:
               - checkout: self
                 persistCredentials: true
+
+              - template: /common/config/azure-pipelines/templates/override-rushstack-registry.yaml@self
 
               - template: /common/config/azure-pipelines/templates/install-node.yaml@self
 

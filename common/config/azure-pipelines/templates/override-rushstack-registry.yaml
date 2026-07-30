@@ -1,0 +1,10 @@
+steps:
+  - bash: |
+      cat <<'EOF' > "${HOME}/.npmrc"
+      registry=https://pkgs.dev.azure.com/RushStack/GitHubProjects/_packaging/rushstack-npm/npm/registry/
+      always-auth=true
+      //pkgs.dev.azure.com/RushStack/GitHubProjects/_packaging/rushstack-npm/npm/registry/:_authToken=${RUSHSTACK_NPM_AUTH_TOKEN}
+      EOF
+    displayName: 'Override npm registry for RushStack feed'
+    env:
+      RUSHSTACK_NPM_AUTH_TOKEN: $(RUSHSTACK_NPM_AUTH_TOKEN)
