@@ -21,7 +21,7 @@
       "commandKind": "phased",
       "name": "test",
       "summary": "Builds all projects and runs their tests.",
-      "phases": ["_phase:lite-build", "_phase:build", "_phase:test"],
+      "phases": ["_phase:lite-build", "_phase:build", "_phase:test", "_phase:test-evaluate"],
       "enableParallelism": true,
       "incremental": true
     },
@@ -30,7 +30,7 @@
       "commandKind": "phased",
       "name": "retest",
       "summary": "Rebuilds all projects and reruns their tests.",
-      "phases": ["_phase:lite-build", "_phase:build", "_phase:test"],
+      "phases": ["_phase:lite-build", "_phase:build", "_phase:test", "_phase:test-evaluate"],
       "enableParallelism": true,
       "incremental": false
     },
@@ -50,7 +50,7 @@
         // Act as though `--watch` is always passed. If false, adds support for passing `--watch`.
         "alwaysWatch": true,
         // During watch recompilation run both build and test for affected projects
-        "watchPhases": ["_phase:lite-build", "_phase:build", "_phase:test"]
+        "watchPhases": ["_phase:lite-build", "_phase:build", "_phase:test", "_phase:test-evaluate"]
       }
     },
     // {
@@ -264,6 +264,14 @@
       "dependencies": {
         // Dependency on _phase:lite-build is transitive via _phase:build
         "self": ["_phase:build"]
+      },
+      "missingScriptBehavior": "silent",
+      "allowWarningsOnSuccess": false
+    },
+    {
+      "name": "_phase:test-evaluate",
+      "dependencies": {
+        "self": ["_phase:test"]
       },
       "missingScriptBehavior": "silent",
       "allowWarningsOnSuccess": false
@@ -492,7 +500,7 @@
       "longName": "--no-color",
       "parameterKind": "flag",
       "description": "disable colors in the build log, defaults to 'true'",
-      "associatedPhases": ["_phase:build", "_phase:test"],
+      "associatedPhases": ["_phase:build", "_phase:test", "_phase:test-evaluate"],
       "associatedCommands": ["build", "rebuild", "test", "retest"]
     },
     {
@@ -507,14 +515,14 @@
       "longName": "--update-snapshots",
       "parameterKind": "flag",
       "description": "Update Jest snapshots",
-      "associatedPhases": ["_phase:test"],
+      "associatedPhases": ["_phase:test", "_phase:test-evaluate"],
       "associatedCommands": ["test", "retest"]
     },
     {
       "longName": "--production",
       "parameterKind": "flag",
       "description": "Perform a production build, including minification and localization steps",
-      "associatedPhases": ["_phase:build", "_phase:test"],
+      "associatedPhases": ["_phase:build", "_phase:test", "_phase:test-evaluate"],
       "associatedCommands": ["build", "rebuild", "test", "retest"]
     },
     {

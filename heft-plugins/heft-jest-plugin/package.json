@@ -13,7 +13,8 @@
     "build": "heft test --clean",
     "start": "heft build-watch",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:test": "heft run --only test -- --clean",
+    "_phase:test-evaluate": "heft run --only test-evaluate -- --clean"
   },
   "peerDependencies": {
     "@rushstack/heft": "^1.2.22",

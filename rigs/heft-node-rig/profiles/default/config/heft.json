@@ -60,6 +60,18 @@
           }
         }
       }
+    },
+
+    "test-evaluate": {
+      "phaseDependencies": ["test"],
+      "tasksByName": {
+        "test-results": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-jest-plugin",
+            "pluginName": "test-evaluator-plugin"
+          }
+        }
+      }
     }
   }
 }

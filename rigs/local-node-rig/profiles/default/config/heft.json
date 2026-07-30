@@ -19,7 +19,7 @@
     },
 
     "test": {
-      "cleanFiles": [{ "includeGlobs": ["coverage"] }]
+      "cleanFiles": [{ "includeGlobs": ["coverage", "test-results"] }]
     }
   }
 }

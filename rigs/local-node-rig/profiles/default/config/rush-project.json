@@ -8,7 +8,11 @@
     },
     {
       "operationName": "_phase:test",
-      "outputFolderNames": ["coverage"]
+      "outputFolderNames": ["coverage", "test-results"]
+    },
+    {
+      "operationName": "_phase:test-evaluate",
+      "outputFolderNames": ["test-results"]
     }
   ]
 }

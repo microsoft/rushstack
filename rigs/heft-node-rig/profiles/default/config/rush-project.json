@@ -7,6 +7,14 @@
     {
       "operationName": "build",
       "outputFolderNames": ["dist", "lib", "lib-commonjs", "temp"]
+    },
+    {
+      "operationName": "_phase:test",
+      "outputFolderNames": ["coverage", "temp/coverage", "test-results"]
+    },
+    {
+      "operationName": "_phase:test-evaluate",
+      "outputFolderNames": ["test-results"]
     }
   ]
 }

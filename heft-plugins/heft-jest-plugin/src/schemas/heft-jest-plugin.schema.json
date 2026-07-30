@@ -21,6 +21,11 @@
       "title": "Enable management of the NODE_ENV variable",
       "description": "If set to false, heft-jest-plugin will not set or unset the NODE_ENV variable. Otherwise, NODE_ENV will be set to `test` before execution and cleared after. If the NODE_ENV value is already set to a value that is not `test`, warning message appears.",
       "type": "boolean"
+    },
+    "recordOnly": {
+      "title": "Record-only mode",
+      "description": "If set to true, test failures are recorded in artifacts and do not fail the phase. Infrastructure failures still fail immediately.",
+      "type": "boolean"
     }
   }
 }

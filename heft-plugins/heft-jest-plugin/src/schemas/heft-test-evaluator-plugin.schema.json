@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Heft Test Evaluator Plugin Options Configuration",
+  "description": "Schema for evaluator options that read standard test and code-coverage artifacts.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "junitReportPaths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "coberturaReportPaths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "coverageThresholdsPath": {
+      "type": "string"
+    },
+    "coverageThresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lines": {
+          "type": "number"
+        },
+        "branches": {
+          "type": "number"
+        },
+        "functions": {
+          "type": "number"
+        },
+        "statements": {
+          "type": "number"
+        }
+      }
+    },
+    "syntheticCoverageTestName": {
+      "type": "string"
+    },
+    "syntheticCoverageJUnitPath": {
+      "type": "string"
+    }
+  }
+}

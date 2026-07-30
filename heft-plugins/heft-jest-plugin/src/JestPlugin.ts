@@ -35,6 +35,12 @@ import type { ITerminal } from '@rushstack/terminal';
 
 import type { IHeftJestReporterOptions } from './HeftJestReporter';
 import { jestResolve } from './JestUtils';
+import {
+  getCoverageThresholdsFromJestConfig,
+  getJestFailureSummary,
+  writeCoverageThresholdArtifactAsync,
+  writeJunitArtifactAsync
+} from './TestResultArtifacts';
 import { TerminalWritableStream } from './TerminalWritableStream';
 import anythingSchema from './schemas/anything.schema.json';
 
@@ -99,6 +105,7 @@ export interface IJestPluginOptions {
   findRelatedTests?: string[];
   maxWorkers?: string;
   passWithNoTests?: boolean;
+  recordOnly?: boolean;
   silent?: boolean;
   testNamePattern?: string;
   testPathIgnorePatterns?: string;
@@ -185,6 +192,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     const updateSnapshotsParameter: CommandLineFlagParameter =
       parameters.getFlagParameter('--update-snapshots');
     const logHeapUsageParameter: CommandLineFlagParameter = parameters.getFlagParameter('--log-heap-usage');
+    const recordOnlyParameter: CommandLineFlagParameter = parameters.getFlagParameter('--record-only');
 
     // Strings
     const configParameter: CommandLineStringParameter = parameters.getStringParameter('--config');
@@ -218,6 +226,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       maxWorkers: maxWorkersParameter.value || pluginOptions?.maxWorkers,
       // Default to true and always pass with no tests
       passWithNoTests: true,
+      recordOnly: recordOnlyParameter.value || pluginOptions?.recordOnly,
       silent: silentParameter.value || pluginOptions?.silent,
       testNamePattern: testNamePatternParameter.value || pluginOptions?.testNamePattern,
       testPathIgnorePatterns: testPathIgnorePatternsParameter.value || pluginOptions?.testPathIgnorePatterns,
@@ -261,15 +270,16 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     terminal.writeLine(`Using Jest version ${getVersion()}`);
 
     const buildFolderPath: string = heftConfiguration.buildFolderPath;
-    const jestArgv: Config.Argv | undefined = await this._createJestArgvAsync(
-      taskSession,
-      heftConfiguration,
-      options,
-      false
-    );
-    if (!jestArgv) {
+    const jestArgvAndConfig:
+      | {
+          jestArgv: Config.Argv;
+          jestConfig: IHeftJestConfiguration;
+        }
+      | undefined = await this._createJestArgvAsync(taskSession, heftConfiguration, options, false);
+    if (!jestArgvAndConfig) {
       return;
     }
+    const { jestArgv, jestConfig } = jestArgvAndConfig;
 
     const {
       // Config.Argv is weakly typed.  After updating the jestArgv object, it's a good idea to inspect "globalConfig"
@@ -279,22 +289,17 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       results: jestResults
     } = await runCLI(jestArgv, [buildFolderPath]);
 
+    await writeJunitArtifactAsync(buildFolderPath, jestResults);
+    await writeCoverageThresholdArtifactAsync(
+      buildFolderPath,
+      getCoverageThresholdsFromJestConfig(jestConfig as Record<string, unknown>)
+    );
+
     this._resetNodeEnv();
 
-    if (jestResults.numFailedTests > 0) {
-      logger.emitError(
-        new Error(
-          `${jestResults.numFailedTests} Jest test${jestResults.numFailedTests > 1 ? 's' : ''} failed`
-        )
-      );
-    } else if (jestResults.numFailedTestSuites > 0) {
-      logger.emitError(
-        new Error(
-          `${jestResults.numFailedTestSuites} Jest test suite${
-            jestResults.numFailedTestSuites > 1 ? 's' : ''
-          } failed`
-        )
-      );
+    const jestFailureSummary: string | undefined = getJestFailureSummary(jestResults, !!options.recordOnly);
+    if (jestFailureSummary) {
+      logger.emitError(new Error(jestFailureSummary));
     }
   }
 
@@ -471,16 +476,22 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       terminal.writeLine(`Using Jest version ${getVersion()}`);
 
       const buildFolderPath: string = heftConfiguration.buildFolderPath;
-      const jestArgv: Config.Argv | undefined = await this._createJestArgvAsync(
-        taskSession,
-        heftConfiguration,
-        options,
-        true
-      );
-      if (!jestArgv) {
+      const jestArgvAndConfig:
+        | {
+            jestArgv: Config.Argv;
+            jestConfig: IHeftJestConfiguration;
+          }
+        | undefined = await this._createJestArgvAsync(taskSession, heftConfiguration, options, true);
+      if (!jestArgvAndConfig) {
         this._jestPromise = Promise.resolve();
         return;
       }
+      const { jestArgv, jestConfig } = jestArgvAndConfig;
+
+      await writeCoverageThresholdArtifactAsync(
+        buildFolderPath,
+        getCoverageThresholdsFromJestConfig(jestConfig as Record<string, unknown>)
+      );
 
       this._jestPromise = runCLI(jestArgv, [buildFolderPath]);
     }
@@ -498,20 +509,13 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         pendingTestRuns.delete(pendingTestRun);
         const jestResults: AggregatedResult | undefined = await pendingTestRun();
         if (jestResults) {
-          if (jestResults.numFailedTests > 0) {
-            logger.emitError(
-              new Error(
-                `${jestResults.numFailedTests} Jest test${jestResults.numFailedTests > 1 ? 's' : ''} failed`
-              )
-            );
-          } else if (jestResults.numFailedTestSuites > 0) {
-            logger.emitError(
-              new Error(
-                `${jestResults.numFailedTestSuites} Jest test suite${
-                  jestResults.numFailedTestSuites > 1 ? 's' : ''
-                } failed`
-              )
-            );
+          await writeJunitArtifactAsync(heftConfiguration.buildFolderPath, jestResults);
+          const jestFailureSummary: string | undefined = getJestFailureSummary(
+            jestResults,
+            !!options.recordOnly
+          );
+          if (jestFailureSummary) {
+            logger.emitError(new Error(jestFailureSummary));
           }
         } else {
           terminal.writeLine(`No tests were executed.`);
@@ -537,7 +541,13 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     heftConfiguration: HeftConfiguration,
     options: IJestPluginOptions,
     watch: boolean
-  ): Promise<Config.Argv | undefined> {
+  ): Promise<
+    | {
+        jestArgv: Config.Argv;
+        jestConfig: IHeftJestConfiguration;
+      }
+    | undefined
+  > {
     const logger: IScopedLogger = taskSession.logger;
     const { terminal } = logger;
 
@@ -663,10 +673,26 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       jestConfig.collectCoverage = false;
     }
 
+    if (options.recordOnly && jestConfig.collectCoverage) {
+      const coverageReporters: string[] = Array.isArray(jestConfig.coverageReporters)
+        ? [...(jestConfig.coverageReporters as string[])]
+        : [];
+      if (!coverageReporters.includes('cobertura')) {
+        coverageReporters.push('cobertura');
+      }
+      if (!coverageReporters.includes('json-summary')) {
+        coverageReporters.push('json-summary');
+      }
+      jestConfig.coverageReporters = coverageReporters as Config.CoverageReporterName[];
+    }
+
     // Stringify the config and pass it into Jest directly
     jestArgv.config = JSON.stringify(jestConfig);
 
-    return jestArgv;
+    return {
+      jestArgv,
+      jestConfig
+    };
   }
 
   /**
