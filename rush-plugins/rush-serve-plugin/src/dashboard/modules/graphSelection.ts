@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable @typescript-eslint/typedef */
-
 interface IOperationInfo {
   name: string;
   dependencies?: string[];
@@ -77,10 +75,10 @@ export function createGraphSelectionController(
 
     const newlySelected: Set<string> = new Set<string>();
     for (const [name, pos] of options.getGraphNodePositions().entries()) {
-      const nx1 = pos.x;
-      const ny1 = pos.y;
-      const nx2 = pos.x + options.graphNodeWidth;
-      const ny2 = pos.y + options.graphNodeHeight;
+      const nx1: number = pos.x;
+      const ny1: number = pos.y;
+      const nx2: number = pos.x + options.graphNodeWidth;
+      const ny2: number = pos.y + options.graphNodeHeight;
       if (nx2 < x1 || nx1 > x2 || ny2 < y1 || ny1 > y2) continue;
       newlySelected.add(name);
     }

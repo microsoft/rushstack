@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable @typescript-eslint/typedef */
-
 import { syncDashboardUrlState, type DashboardFilter, type DashboardView } from './urlState';
 
 export interface IViewBarWiringOptions {
@@ -20,7 +18,7 @@ export function wireViewBar(options: IViewBarWiringOptions): void {
 
   document.querySelectorAll('input[name="view"]').forEach((radio: Element) => {
     radio.addEventListener('change', () => {
-      const input = radio as HTMLInputElement;
+      const input: HTMLInputElement = radio as HTMLInputElement;
       if (!input.checked) return;
 
       setView(input.value as DashboardView);

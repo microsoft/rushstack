@@ -1,19 +1,39 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+interface IOperationLogFileURLs {
+  text?: string;
+  error?: string;
+  jsonl?: string;
+}
+
+interface IOperationData {
+  name: string;
+  isActive?: boolean;
+  status?: string;
+  runInThisIteration?: boolean;
+  logFileURLs?: IOperationLogFileURLs;
+}
+
+interface IStateEntry {
+  name: string;
+  isActive?: boolean;
+  status?: string;
+  runInThisIteration?: boolean;
+  logFileURLs?: IOperationLogFileURLs;
+}
 
 export function applyExecutionStates(
-  operations: Map<string, any>,
-  executionStates: Map<string, any>,
-  stateArray: any[]
+  operations: Map<string, IOperationData>,
+  executionStates: Map<string, IStateEntry>,
+  stateArray: IStateEntry[]
 ): void {
   if (!stateArray) return;
 
   stateArray.forEach((stateEntry) => {
     executionStates.set(stateEntry.name, stateEntry);
 
-    const op: any = operations.get(stateEntry.name);
+    const op: IOperationData | undefined = operations.get(stateEntry.name);
     if (!op) return;
 
     op.isActive = stateEntry.isActive;
@@ -23,7 +43,7 @@ export function applyExecutionStates(
   });
 }
 
-export function setQueuedStates(queuedStates: Map<string, any>, stateArray: any[]): void {
+export function setQueuedStates(queuedStates: Map<string, IStateEntry>, stateArray: IStateEntry[]): void {
   queuedStates.clear();
   if (!stateArray) return;
 
@@ -32,17 +52,25 @@ export function setQueuedStates(queuedStates: Map<string, any>, stateArray: any[
   });
 }
 
-export function setOperationsFromPayload(operations: Map<string, any>, operationArray: any[]): void {
+export function setOperationsFromPayload(
+  operations: Map<string, IOperationData>,
+  operationArray: IOperationData[]
+): void {
   operations.clear();
   operationArray.forEach((op) => operations.set(op.name, op));
 }
 
-export function patchOperationsFromPayload(operations: Map<string, any>, operationArray: any[]): void {
+export function patchOperationsFromPayload(
+  operations: Map<string, IOperationData>,
+  operationArray: IOperationData[]
+): void {
   operationArray.forEach((op) => operations.set(op.name, op));
 }
 
-export function toLastExecutionResultsMap(lastExecutionResultsArray: any[] | undefined): Map<string, any> {
-  const result: Map<string, any> = new Map();
+export function toLastExecutionResultsMap(
+  lastExecutionResultsArray: IStateEntry[] | undefined
+): Map<string, IStateEntry> {
+  const result: Map<string, IStateEntry> = new Map();
   if (!lastExecutionResultsArray) return result;
 
   lastExecutionResultsArray.forEach((entry) => {

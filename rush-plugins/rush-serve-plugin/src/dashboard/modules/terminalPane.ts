@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable @typescript-eslint/typedef */
-
 import { AnsiSgrParser } from './ansiSgrParser';
 
 interface ITerminalElementWithState extends HTMLElement {
@@ -47,7 +45,7 @@ function _appendChunk(
   if (!terminalBody) return;
 
   const raw: string = String(text || '');
-  const segments = ansiParser.process(raw);
+  const segments: Array<{ text: string; style?: string }> = ansiParser.process(raw);
 
   if (segments && segments.length) {
     for (const seg of segments) {

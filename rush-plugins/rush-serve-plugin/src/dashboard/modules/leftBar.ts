@@ -1,10 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export interface ILeftBarActionWiringOptions {
-  sendCommand: (cmd: any) => void;
+  sendCommand: (cmd: {
+    command: string;
+    operationNames?: string[];
+    targetState?: string;
+    mode?: string;
+  }) => void;
   getSelection: () => Set<string>;
   clearSelectionAndRender: () => void;
   expandSelectionDependencies: () => void;

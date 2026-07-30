@@ -1,18 +1,40 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+interface IOperationLogFileURLs {
+  text?: string;
+  error?: string;
+  jsonl?: string;
+}
+
+interface IOperationData {
+  name: string;
+  dependencies?: string[];
+  noop?: boolean;
+  runInThisIteration?: boolean;
+  status?: string;
+  isActive?: boolean;
+  logFileURLs?: IOperationLogFileURLs;
+}
+
+interface IExecutionState {
+  name: string;
+  status?: string;
+  runInThisIteration?: boolean;
+  isActive?: boolean;
+  logFileURLs?: IOperationLogFileURLs;
+}
 
 export interface IComputeFilterSetsOptions {
-  operations: Map<string, any>;
-  executionStates: Map<string, any>;
+  operations: Map<string, IOperationData>;
+  executionStates: Map<string, IExecutionState>;
   currentFilter: 'all' | 'failed-warn';
   searchQuery: string;
-  computeDisplayStatus: (op: any) => string;
+  computeDisplayStatus: (op: IOperationData) => string;
 }
 
 export interface IComputeFilterSetsResult {
-  visibleOperations: any[];
+  visibleOperations: IOperationData[];
   filteredOutNames: Set<string>;
   searchFilteredOutNames: Set<string>;
 }
@@ -22,17 +44,17 @@ export function computeFilterSetsCore(options: IComputeFilterSetsOptions): IComp
 
   const filteredOutNames: Set<string> = new Set();
   const searchFilteredOutNames: Set<string> = new Set();
-  const visibleOperations: any[] = [];
+  const visibleOperations: IOperationData[] = [];
   const query: string = searchQuery.trim().toLowerCase();
 
   for (const op of operations.values()) {
-    const state: any = executionStates.get(op.name) || {};
+    const state: IExecutionState | undefined = executionStates.get(op.name) || undefined;
 
     // Merge dynamic fields so rendering logic can treat operation rows uniformly.
-    op.runInThisIteration = state.runInThisIteration;
-    op.status = state.status || op.status;
-    op.isActive = state.isActive;
-    op.logFileURLs = state.logFileURLs;
+    op.runInThisIteration = state?.runInThisIteration;
+    op.status = state?.status || op.status;
+    op.isActive = state?.isActive;
+    op.logFileURLs = state?.logFileURLs;
 
     const effectiveStatus: string = computeDisplayStatus(op);
     if (currentFilter === 'failed-warn') {
@@ -59,10 +81,10 @@ export function computeFilterSetsCore(options: IComputeFilterSetsOptions): IComp
   };
 }
 
-export function pruneGraphOperations(baseOperations: any[]): any[] {
+export function pruneGraphOperations(baseOperations: IOperationData[]): IOperationData[] {
   if (!baseOperations.length) return baseOperations;
 
-  const byName: Map<string, any> = new Map();
+  const byName: Map<string, IOperationData> = new Map();
   baseOperations.forEach((op) => byName.set(op.name, op));
 
   const dependents: Map<string, Set<string>> = new Map();
@@ -104,7 +126,7 @@ export function pruneGraphOperations(baseOperations: any[]): any[] {
     if (!nodeName || !active.has(nodeName)) continue;
 
     active.delete(nodeName);
-    const op: any = byName.get(nodeName);
+    const op: IOperationData | undefined = byName.get(nodeName);
     if (!op) continue;
 
     for (const dependencyName of op.dependencies || []) {
@@ -139,7 +161,7 @@ export function pruneGraphOperations(baseOperations: any[]): any[] {
     if (seen.has(nodeName)) return new Set();
     seen.add(nodeName);
 
-    const op: any = byName.get(nodeName);
+    const op: IOperationData | undefined = byName.get(nodeName);
     const resolved: Set<string> = new Set();
     if (!op) return resolved;
 

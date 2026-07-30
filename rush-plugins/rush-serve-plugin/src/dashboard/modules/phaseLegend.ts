@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable @typescript-eslint/typedef */
-
 interface IPhaseLegendOperation {
   name: string;
   phaseName?: string;
@@ -78,7 +76,7 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
         continue;
       }
 
-      let rec = byPhase.get(phase);
+      let rec: { ops: IPhaseProblemOperation[]; statusSet: Set<string> } | undefined = byPhase.get(phase);
       if (!rec) {
         rec = { ops: [], statusSet: new Set<string>() };
         byPhase.set(phase, rec);
@@ -108,7 +106,7 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
 
       if (!chosen) chosen = 'Ready';
 
-      const problemOps = rec.ops.filter(
+      const problemOps: IPhaseProblemOperation[] = rec.ops.filter(
         ({ displayStatus }) =>
           displayStatus === 'Failure' ||
           displayStatus === 'SuccessWithWarning' ||
@@ -125,11 +123,12 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
   const renderPhasePane = (): void => {
     if (!options.phaseGroupsEl) return;
 
-    const summaries = computePhaseSummaries();
+    const summaries: Array<{ phase: string; status: string; problemOps: IPhaseProblemOperation[] }> =
+      computePhaseSummaries();
     (options.phaseGroupsEl as HTMLElement).innerHTML = '';
 
     if (!summaries.length) {
-      const empty = document.createElement('div');
+      const empty: HTMLDivElement = document.createElement('div');
       empty.className = 'phase-pane-empty';
       empty.textContent = 'No phases';
       options.phaseGroupsEl.appendChild(empty);
@@ -137,17 +136,17 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
     }
 
     for (const summary of summaries) {
-      const group = document.createElement('div');
+      const group: HTMLDivElement = document.createElement('div');
       group.className = 'phase-group';
 
-      const header = document.createElement('div');
+      const header: HTMLDivElement = document.createElement('div');
       header.className = 'phase-header';
 
-      const emoji = document.createElement('span');
+      const emoji: HTMLSpanElement = document.createElement('span');
       emoji.className = 'phase-status-emoji';
       emoji.textContent = options.statusEmoji(summary.status);
 
-      const nameSpan = document.createElement('span');
+      const nameSpan: HTMLSpanElement = document.createElement('span');
       nameSpan.className = 'phase-name';
       nameSpan.textContent = summary.phase.replace(/^_phase:/, '');
 
@@ -156,40 +155,40 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
       group.appendChild(header);
 
       if (summary.problemOps.length) {
-        const list = document.createElement('ul');
+        const list: HTMLUListElement = document.createElement('ul');
         list.className = 'phase-problems';
 
-        const sortedProblems = [...summary.problemOps].sort((a, b) => {
-          const ai = phaseStatusPriorityIndex.get(a.displayStatus) ?? 999;
-          const bi = phaseStatusPriorityIndex.get(b.displayStatus) ?? 999;
+        const sortedProblems: IPhaseProblemOperation[] = [...summary.problemOps].sort((a, b) => {
+          const ai: number = phaseStatusPriorityIndex.get(a.displayStatus) ?? 999;
+          const bi: number = phaseStatusPriorityIndex.get(b.displayStatus) ?? 999;
           if (ai !== bi) return ai - bi;
-          const an = a.op.name.toLowerCase();
-          const bn = b.op.name.toLowerCase();
+          const an: string = a.op.name.toLowerCase();
+          const bn: string = b.op.name.toLowerCase();
           if (an < bn) return -1;
           if (an > bn) return 1;
           return 0;
         });
 
         for (const { op, displayStatus } of sortedProblems) {
-          const item = document.createElement('li');
+          const item: HTMLLIElement = document.createElement('li');
 
-          const status = document.createElement('span');
+          const status: HTMLSpanElement = document.createElement('span');
           status.className = 'phase-problem-emoji';
           status.textContent = options.statusEmoji(displayStatus);
           item.appendChild(status);
 
-          const logUrl =
+          const logUrl: string | undefined =
             (op.logFileURLs && (op.logFileURLs.text || op.logFileURLs.error || op.logFileURLs.jsonl)) ||
             undefined;
           if (logUrl) {
-            const link = document.createElement('a');
+            const link: HTMLAnchorElement = document.createElement('a');
             link.href = logUrl;
             link.target = '_blank';
             link.rel = 'noopener noreferrer';
             link.textContent = op.name;
             item.appendChild(link);
           } else {
-            const span = document.createElement('span');
+            const span: HTMLSpanElement = document.createElement('span');
             span.textContent = op.name;
             item.appendChild(span);
           }
@@ -209,10 +208,10 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
     if (!legendEl) return;
 
     if (!legendEl._initialized) {
-      const header = document.createElement('h4');
+      const header: HTMLHeadingElement = document.createElement('h4');
       header.textContent = 'Legend';
 
-      const toggleBtn = document.createElement('button');
+      const toggleBtn: HTMLButtonElement = document.createElement('button');
       toggleBtn.type = 'button';
       toggleBtn.id = 'legend-collapse-btn';
       toggleBtn.setAttribute('aria-label', 'Collapse legend');
@@ -238,7 +237,7 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
       toggleBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
 
       toggleBtn.addEventListener('click', () => {
-        const isCollapsed = legendEl.classList.toggle('collapsed');
+        const isCollapsed: boolean = legendEl.classList.toggle('collapsed');
         window.localStorage.setItem('rushServeLegendCollapsed', isCollapsed ? '1' : '0');
         toggleBtn.textContent = isCollapsed ? '+' : '−';
         toggleBtn.setAttribute('aria-label', isCollapsed ? 'Expand legend' : 'Collapse legend');
@@ -248,13 +247,13 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
     }
 
     while (legendEl.children.length > 1) {
-      const lastChild = legendEl.lastChild;
+      const lastChild: ChildNode | null = legendEl.lastChild;
       if (!lastChild) break;
       legendEl.removeChild(lastChild);
     }
 
     if (legendEl.classList.contains('collapsed')) {
-      const stub = document.createElement('div');
+      const stub: HTMLDivElement = document.createElement('div');
       stub.style.fontSize = '0.5rem';
       stub.style.opacity = '0.7';
       stub.textContent = 'Collapsed';
@@ -262,31 +261,31 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
       return;
     }
 
-    const statusColors = options.getStatusColors();
+    const statusColors: Record<string, string> = options.getStatusColors();
 
-    const columnsWrap = document.createElement('div');
+    const columnsWrap: HTMLDivElement = document.createElement('div');
     columnsWrap.className = 'legend-columns';
 
-    const colPrimary = document.createElement('div');
+    const colPrimary: HTMLDivElement = document.createElement('div');
     colPrimary.className = 'legend-col';
 
-    const primaryHead = document.createElement('div');
+    const primaryHead: HTMLDivElement = document.createElement('div');
     primaryHead.className = 'legend-heading';
     primaryHead.textContent = 'Statuses';
     colPrimary.appendChild(primaryHead);
 
     for (const status of legendOrder) {
-      const row = document.createElement('div');
+      const row: HTMLDivElement = document.createElement('div');
       row.className = 'legend-row';
 
-      const sample = document.createElement('span');
+      const sample: HTMLSpanElement = document.createElement('span');
       sample.className = 'legend-emoji';
       sample.textContent = options.statusEmoji(status);
       sample.style.borderColor = statusColors[status] || '#4b5563';
 
-      const labelWrap = document.createElement('div');
+      const labelWrap: HTMLDivElement = document.createElement('div');
       labelWrap.className = 'legend-label-wrap';
-      const titleSpan = document.createElement('span');
+      const titleSpan: HTMLSpanElement = document.createElement('span');
       titleSpan.textContent = options.overallStatusText(status);
       labelWrap.appendChild(titleSpan);
 
@@ -295,20 +294,20 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
       colPrimary.appendChild(row);
     }
 
-    const unknownRow = document.createElement('div');
+    const unknownRow: HTMLDivElement = document.createElement('div');
     unknownRow.className = 'legend-row';
 
-    const unknownSample = document.createElement('span');
+    const unknownSample: HTMLSpanElement = document.createElement('span');
     unknownSample.className = 'legend-emoji status-Unknown';
     unknownSample.textContent = '❓';
     unknownSample.style.borderColor = '#4b5563';
 
-    const unknownLabelWrap = document.createElement('div');
+    const unknownLabelWrap: HTMLDivElement = document.createElement('div');
     unknownLabelWrap.className = 'legend-label-wrap';
 
-    const unknownTitle = document.createElement('span');
+    const unknownTitle: HTMLSpanElement = document.createElement('span');
     unknownTitle.textContent = 'UNKNOWN';
-    const unknownDetail = document.createElement('small');
+    const unknownDetail: HTMLElement = document.createElement('small');
     unknownDetail.textContent = 'Never executed';
 
     unknownLabelWrap.appendChild(unknownTitle);
@@ -318,27 +317,27 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
     unknownRow.appendChild(unknownLabelWrap);
     colPrimary.appendChild(unknownRow);
 
-    const colSecondary = document.createElement('div');
+    const colSecondary: HTMLDivElement = document.createElement('div');
     colSecondary.className = 'legend-col';
 
-    const secondaryHead = document.createElement('div');
+    const secondaryHead: HTMLDivElement = document.createElement('div');
     secondaryHead.className = 'legend-heading';
     secondaryHead.textContent = 'State Modifiers';
     colSecondary.appendChild(secondaryHead);
 
     const addModifier = (sampleFactory: () => HTMLElement, label: string, detail?: string): void => {
-      const row = document.createElement('div');
+      const row: HTMLDivElement = document.createElement('div');
       row.className = 'legend-row';
-      const sample = sampleFactory();
+      const sample: HTMLElement = sampleFactory();
 
-      const labelWrap = document.createElement('div');
+      const labelWrap: HTMLDivElement = document.createElement('div');
       labelWrap.className = 'legend-label-wrap';
-      const titleSpan = document.createElement('span');
+      const titleSpan: HTMLSpanElement = document.createElement('span');
       titleSpan.textContent = label;
       labelWrap.appendChild(titleSpan);
 
       if (detail) {
-        const small = document.createElement('small');
+        const small: HTMLElement = document.createElement('small');
         small.textContent = detail;
         labelWrap.appendChild(small);
       }
@@ -349,7 +348,7 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
     };
 
     const makeNodeBox = (borderStyle?: string, boxShadow?: string, borderColor?: string): HTMLElement => {
-      const sample = document.createElement('span');
+      const sample: HTMLSpanElement = document.createElement('span');
       sample.className = 'legend-emoji';
       if (borderStyle) sample.style.borderStyle = borderStyle;
       if (borderColor) sample.style.borderColor = borderColor;
@@ -362,16 +361,16 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
     const makeDotted = (): HTMLElement => makeNodeBox('dotted');
 
     const makeActive = (): HTMLElement => {
-      const wrap = document.createElement('div');
+      const wrap: HTMLDivElement = document.createElement('div');
       wrap.className = 'legend-enabled-sample';
 
-      const base = document.createElement('span');
+      const base: HTMLSpanElement = document.createElement('span');
       base.style.opacity = '0.15';
       base.style.fontSize = '11px';
       base.textContent = '⬜';
       wrap.appendChild(base);
 
-      const rocket = document.createElement('span');
+      const rocket: HTMLSpanElement = document.createElement('span');
       rocket.style.position = 'absolute';
       rocket.style.bottom = '0';
       rocket.style.left = '0';
@@ -384,16 +383,16 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
     };
 
     const makePending = (): HTMLElement => {
-      const wrap = document.createElement('div');
+      const wrap: HTMLDivElement = document.createElement('div');
       wrap.className = 'legend-enabled-sample';
 
-      const base = document.createElement('span');
+      const base: HTMLSpanElement = document.createElement('span');
       base.style.opacity = '0.15';
       base.style.fontSize = '11px';
       base.textContent = '⬜';
       wrap.appendChild(base);
 
-      const clock = document.createElement('span');
+      const clock: HTMLSpanElement = document.createElement('span');
       clock.style.position = 'absolute';
       clock.style.top = '0';
       clock.style.left = '0';
@@ -406,9 +405,9 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
     };
 
     const makeEnabledSample = (emoji: string): HTMLElement => {
-      const wrap = document.createElement('div');
+      const wrap: HTMLDivElement = document.createElement('div');
       wrap.className = 'legend-enabled-sample';
-      const sub = document.createElement('span');
+      const sub: HTMLSpanElement = document.createElement('span');
       sub.className = 'sub';
       sub.textContent = emoji;
       wrap.appendChild(sub);
@@ -420,7 +419,7 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
     addModifier(makeDashed, 'Not in this iteration', 'Excluded this iteration');
     addModifier(makeDotted, 'Filtered out', 'Hidden by view/search');
 
-    const enabledHead = document.createElement('div');
+    const enabledHead: HTMLDivElement = document.createElement('div');
     enabledHead.className = 'legend-subheading';
     enabledHead.textContent = 'Enabled States';
     colSecondary.appendChild(enabledHead);

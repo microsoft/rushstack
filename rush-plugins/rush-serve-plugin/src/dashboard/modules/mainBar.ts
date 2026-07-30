@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/typedef */
-
 export interface IMainBarActionWiringOptions {
   connect: () => void;
   disconnect: () => void;
   isConnected: () => boolean;
-  sendCommand: (cmd: any) => void;
-  getGraphSettings: () => any;
+  sendCommand: (cmd: { command: string; value?: boolean; parallelism?: number }) => void;
+  getGraphSettings: () =>
+    | { debugMode?: boolean; verbose?: boolean; pauseNextIteration?: boolean }
+    | undefined;
   debugBtn: HTMLElement | undefined;
   verboseBtn: HTMLElement | undefined;
   parallelismInput: HTMLInputElement | undefined;
@@ -78,13 +77,16 @@ export function wireMainBarActions(options: IMainBarActionWiringOptions): void {
 
   if (parallelismInput) {
     parallelismInput.addEventListener('change', () => {
-      sendCommand({ command: 'set-parallelism', parallelism: Number(parallelismInput.value) || 1 });
+      const value: number = Number(parallelismInput.value) || 1;
+      sendCommand({ command: 'set-parallelism', parallelism: value });
     });
   }
 
   if (playPauseBtn) {
     playPauseBtn.addEventListener('click', () => {
-      const graphSettings = getGraphSettings();
+      const graphSettings:
+        | { debugMode?: boolean; verbose?: boolean; pauseNextIteration?: boolean }
+        | undefined = getGraphSettings();
       if (!graphSettings) return;
       const next: boolean = !!graphSettings.pauseNextIteration;
       sendCommand({ command: 'set-pause-next-iteration', value: !next });

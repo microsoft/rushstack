@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable @typescript-eslint/typedef */
-
 import { pruneGraphOperations } from './graphFiltering';
 
 interface IOperationLogFileURLs {
@@ -92,7 +90,7 @@ export interface IGraphViewController {
 export function createGraphViewController(options: IGraphViewControllerOptions): IGraphViewController {
   let graphNeedsFullRender: boolean = true;
   function getStatusColors(): Record<string, string> {
-    const cs = getComputedStyle(document.documentElement);
+    const cs: CSSStyleDeclaration = getComputedStyle(document.documentElement);
     return {
       Ready: cs.getPropertyValue('--status-ready').trim(),
       Waiting: cs.getPropertyValue('--status-waiting').trim(),
@@ -111,7 +109,7 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
 
   let statusColors: Record<string, string> = getStatusColors();
 
-  const mo = new MutationObserver(() => {
+  const mo: MutationObserver = new MutationObserver(() => {
     statusColors = getStatusColors();
   });
   mo.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
@@ -137,9 +135,9 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
     queue.forEach((k: string) => level.set(k, 0));
 
     while (queue.length) {
-      const cur = queue.shift();
+      const cur: string | undefined = queue.shift();
       if (!cur) continue;
-      const curLevel = level.get(cur) || 0;
+      const curLevel: number = level.get(cur) || 0;
       filteredOps.forEach((op: IOperationInfo) => {
         if ((op.dependencies || []).includes(cur)) {
           indegree.set(op.name, (indegree.get(op.name) || 0) - 1);
@@ -155,8 +153,8 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
   }
 
   function computeGraphOperations(): IOperationInfo[] {
-    const filteredOutNames = options.getFilteredOutNames();
-    const searchFilteredOutNames = options.getSearchFilteredOutNames();
+    const filteredOutNames: Set<string> = options.getFilteredOutNames();
+    const searchFilteredOutNames: Set<string> = options.getSearchFilteredOutNames();
     const visibleOperations: IOperationInfo[] = [];
 
     for (const op of options.getOperations().values()) {
@@ -168,18 +166,18 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
     return pruneGraphOperations(visibleOperations);
   }
 
-  function dimColor(hex: string, amount = 0.55): string {
+  function dimColor(hex: string, amount: number = 0.55): string {
     if (!hex || !/^#?[0-9a-fA-F]{6}$/.test(hex)) return hex || '#4b5563';
     if (hex[0] === '#') hex = hex.slice(1);
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
-    const br = 30;
-    const bg = 41;
-    const bb = 59;
-    const nr = Math.round(r * (1 - amount) + br * amount);
-    const ng = Math.round(g * (1 - amount) + bg * amount);
-    const nb = Math.round(b * (1 - amount) + bb * amount);
+    const r: number = parseInt(hex.slice(0, 2), 16);
+    const g: number = parseInt(hex.slice(2, 4), 16);
+    const b: number = parseInt(hex.slice(4, 6), 16);
+    const br: number = 30;
+    const bg: number = 41;
+    const bb: number = 59;
+    const nr: number = Math.round(r * (1 - amount) + br * amount);
+    const ng: number = Math.round(g * (1 - amount) + bg * amount);
+    const nb: number = Math.round(b * (1 - amount) + bb * amount);
     return (
       '#' +
       nr.toString(16).padStart(2, '0') +
@@ -200,7 +198,7 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
       '<defs>' +
       Object.entries(statusColors)
         .map(
-          ([status, color]) =>
+          ([status, color]: [string, string]) =>
             `<marker id="arrowhead-${status}" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="${color}" /></marker>`
         )
         .join('') +
@@ -219,7 +217,7 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
     filteredOpsArr.forEach((op: IOperationInfo) => {
       (op.dependencies || []).forEach((dependencyName: string) => {
         if (!options.getOperations().has(dependencyName)) return;
-        let setForDependency = dependentsMap.get(dependencyName);
+        let setForDependency: Set<string> | undefined = dependentsMap.get(dependencyName);
         if (!setForDependency) {
           setForDependency = new Set<string>();
           dependentsMap.set(dependencyName, setForDependency);
@@ -233,9 +231,9 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
     );
     const memoCpl: Map<string, number> = new Map<string, number>();
     function criticalPathLen(name: string): number {
-      const cached = memoCpl.get(name);
+      const cached: number | undefined = memoCpl.get(name);
       if (cached !== undefined) return cached;
-      const op = byNameFiltered.get(name);
+      const op: IOperationInfo | undefined = byNameFiltered.get(name);
       if (!op) {
         memoCpl.set(name, 0);
         return 0;
@@ -245,7 +243,7 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
         memoCpl.set(name, 0);
         return 0;
       }
-      let best = 0;
+      let best: number = 0;
       for (const dependencyName of deps) {
         best = Math.max(best, 1 + criticalPathLen(dependencyName));
       }
@@ -254,32 +252,32 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
     }
 
     sortedLevels.forEach((levelValue: number) => {
-      const nodes = groups[levelValue] || [];
+      const nodes: string[] = groups[levelValue] || [];
       nodes.sort((a: string, b: string) => {
-        const cplA = criticalPathLen(a);
-        const cplB = criticalPathLen(b);
+        const cplA: number = criticalPathLen(a);
+        const cplB: number = criticalPathLen(b);
         if (cplA !== cplB) return cplB - cplA;
-        const consA = (dependentsMap.get(a) || new Set()).size;
-        const consB = (dependentsMap.get(b) || new Set()).size;
+        const consA: number = (dependentsMap.get(a) || new Set()).size;
+        const consB: number = (dependentsMap.get(b) || new Set()).size;
         if (consA !== consB) return consB - consA;
         return a.localeCompare(b);
       });
 
       const levelIndexFromTop: number = maxLevel - levelValue;
       nodes.forEach((name: string, index: number) => {
-        const op = options.getOperations().get(name);
+        const op: IOperationInfo | undefined = options.getOperations().get(name);
         if (!op) return;
-        const x = GRAPH_BASE_X + index * (GRAPH_COL_WIDTH + GRAPH_NODE_GAP);
-        const y = GRAPH_BASE_Y + levelIndexFromTop * GRAPH_LEVEL_GAP;
-        const div = document.createElement('div');
+        const x: number = GRAPH_BASE_X + index * (GRAPH_COL_WIDTH + GRAPH_NODE_GAP);
+        const y: number = GRAPH_BASE_Y + levelIndexFromTop * GRAPH_LEVEL_GAP;
+        const div: HTMLDivElement = document.createElement('div');
         div.className = 'op-node';
         div.dataset.name = name;
         div.style.transform = `translate(${x}px, ${y}px)`;
-        const emojiSpan = document.createElement('span');
+        const emojiSpan: HTMLSpanElement = document.createElement('span');
         emojiSpan.className = 'emoji';
         emojiSpan.textContent = options.getStatusEmoji(options.getComputeDisplayStatus(op));
         div.appendChild(emojiSpan);
-        const enabledSup = document.createElement('span');
+        const enabledSup: HTMLSpanElement = document.createElement('span');
         enabledSup.className = 'enabled-indicator';
         enabledSup.textContent = '';
         div.appendChild(enabledSup);
@@ -299,18 +297,18 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
     );
     const memoReach: Map<string, Set<string>> = new Map<string, Set<string>>();
     function getReachable(name: string): Set<string> {
-      const cached = memoReach.get(name);
+      const cached: Set<string> | undefined = memoReach.get(name);
       if (cached) return cached;
-      const op = byName.get(name);
+      const op: IOperationInfo | undefined = byName.get(name);
       const visited: Set<string> = new Set<string>();
       if (op) {
         const stack: string[] = [...(op.dependencies || [])];
         while (stack.length) {
-          const dependencyName = stack.pop();
+          const dependencyName: string | undefined = stack.pop();
           if (!dependencyName) continue;
           if (visited.has(dependencyName)) continue;
           visited.add(dependencyName);
-          const dependencyOp = byName.get(dependencyName);
+          const dependencyOp: IOperationInfo | undefined = byName.get(dependencyName);
           if (dependencyOp) stack.push(...(dependencyOp.dependencies || []));
         }
       }
@@ -320,10 +318,10 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
 
     const edgeRecords: IGraphEdgeRecord[] = [];
     for (const op of filteredOpsArr) {
-      const deps = op.dependencies || [];
+      const deps: string[] = op.dependencies || [];
       for (const depName of deps) {
         if (!byName.has(depName)) continue;
-        let redundant = false;
+        let redundant: boolean = false;
         for (const intermediate of deps) {
           if (intermediate === depName) continue;
           if (!byName.has(intermediate)) continue;
@@ -333,10 +331,10 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
           }
         }
         if (redundant) continue;
-        const fromPos = graphState.nodePositions.get(op.name);
-        const toPos = graphState.nodePositions.get(depName);
+        const fromPos: IPoint | undefined = graphState.nodePositions.get(op.name);
+        const toPos: IPoint | undefined = graphState.nodePositions.get(depName);
         if (!fromPos || !toPos) continue;
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const path: SVGPathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         edgeRecords.push({ path, from: op.name, to: depName });
         options.edgesSvg.appendChild(path);
       }
@@ -345,9 +343,9 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
     updateGraph();
 
     if (graphState.nodePositions.size) {
-      const maxX =
+      const maxX: number =
         Math.max(...Array.from(graphState.nodePositions.values()).map((p) => p.x)) + GRAPH_NODE_WIDTH + 40;
-      const maxY =
+      const maxY: number =
         Math.max(...Array.from(graphState.nodePositions.values()).map((p) => p.y)) +
         GRAPH_LEVEL_GAP +
         GRAPH_NODE_HEIGHT;
@@ -359,24 +357,28 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
   function updateGraph(): void {
     updateStatusColors();
     for (const [name, div] of graphState.nodeElements.entries()) {
-      const op = options.getOperations().get(name);
+      const op: IOperationInfo | undefined = options.getOperations().get(name);
       if (!op) continue;
-      const displayStatus = options.getComputeDisplayStatus(op);
-      const prevStatus = graphState.nodeStatus.get(name);
-      const state = options.getExecutionStates().get(name);
-      const runInThisIteration = state ? state.runInThisIteration : op.runInThisIteration;
-      const notRunning = runInThisIteration === false || op.noop;
-      const queuedState = options.getQueuedStates().get(name);
-      const isQueuedNext = !!(queuedState && queuedState.runInThisIteration === true);
-      const isFilteredOut = options.getFilteredOutNames().has(name);
-      const isSearchFiltered = options.getSearchFilteredOutNames().has(name);
-      const emojiSpan = div.querySelector('.emoji');
+      const displayStatus: string = options.getComputeDisplayStatus(op);
+      const prevStatus: string | undefined = graphState.nodeStatus.get(name);
+      const state: IOperationExecutionState | undefined = options.getExecutionStates().get(name);
+      const runInThisIteration: boolean | undefined = state
+        ? state.runInThisIteration
+        : op.runInThisIteration;
+      const notRunning: boolean = runInThisIteration === false || !!op.noop;
+      const queuedState: IOperationExecutionState | undefined = options.getQueuedStates().get(name);
+      const isQueuedNext: boolean = !!(queuedState && queuedState.runInThisIteration === true);
+      const isFilteredOut: boolean = options.getFilteredOutNames().has(name);
+      const isSearchFiltered: boolean = options.getSearchFilteredOutNames().has(name);
+      const emojiSpan: Element | null = div.querySelector('.emoji');
       if (emojiSpan && (prevStatus !== displayStatus || !emojiSpan.textContent)) {
         emojiSpan.textContent = options.getStatusEmoji(displayStatus);
       }
-      const enabledSpan = div.querySelector('.enabled-indicator') as HTMLSpanElement | null;
+      const enabledSpan: HTMLSpanElement | null = div.querySelector(
+        '.enabled-indicator'
+      ) as HTMLSpanElement | null;
       if (enabledSpan) {
-        let indicator = '';
+        let indicator: string = '';
         if (op.noop) {
           indicator = '⚪';
           enabledSpan.title = 'No-op operation';
@@ -399,14 +401,16 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
         }
         if (enabledSpan.textContent !== indicator) enabledSpan.textContent = indicator;
       }
-      let baseColor = statusColors[displayStatus] || '#4b5563';
+      let baseColor: string = statusColors[displayStatus] || '#4b5563';
       if (isSearchFiltered) baseColor = dimColor(baseColor, 0.72);
       else if (isFilteredOut) baseColor = dimColor(baseColor, 0.6);
       else if (notRunning) baseColor = dimColor(baseColor, 0.35);
       div.style.borderColor = baseColor;
       if (options.getSelection().has(name)) div.classList.add('selected');
       else div.classList.remove('selected');
-      let activeSpan = div.querySelector('.active-indicator') as HTMLSpanElement | null;
+      let activeSpan: HTMLSpanElement | null = div.querySelector(
+        '.active-indicator'
+      ) as HTMLSpanElement | null;
       if (op.isActive) {
         if (!activeSpan) {
           activeSpan = document.createElement('span');
@@ -418,7 +422,9 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
       } else if (activeSpan) {
         activeSpan.remove();
       }
-      let pendingSpan = div.querySelector('.pending-indicator') as HTMLSpanElement | null;
+      let pendingSpan: HTMLSpanElement | null = div.querySelector(
+        '.pending-indicator'
+      ) as HTMLSpanElement | null;
       if (isQueuedNext) {
         if (!pendingSpan) {
           pendingSpan = document.createElement('span');
@@ -443,69 +449,73 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
     }
 
     for (const rec of graphState.edgeElements) {
-      const fromPos = graphState.nodePositions.get(rec.from);
-      const toPos = graphState.nodePositions.get(rec.to);
+      const fromPos: IPoint | undefined = graphState.nodePositions.get(rec.from);
+      const toPos: IPoint | undefined = graphState.nodePositions.get(rec.to);
       if (!fromPos || !toPos) continue;
-      const startX = fromPos.x + GRAPH_NODE_WIDTH / 2;
-      const startY = fromPos.y + GRAPH_NODE_HEIGHT;
-      const endX = toPos.x + GRAPH_NODE_WIDTH / 2;
-      const endY = toPos.y;
-      const rowsApart = Math.max(1, Math.round((toPos.y - fromPos.y) / GRAPH_LEVEL_GAP));
-      const colStep = GRAPH_COL_WIDTH + GRAPH_NODE_GAP;
+      const startX: number = fromPos.x + GRAPH_NODE_WIDTH / 2;
+      const startY: number = fromPos.y + GRAPH_NODE_HEIGHT;
+      const endX: number = toPos.x + GRAPH_NODE_WIDTH / 2;
+      const endY: number = toPos.y;
+      const rowsApart: number = Math.max(1, Math.round((toPos.y - fromPos.y) / GRAPH_LEVEL_GAP));
+      const colStep: number = GRAPH_COL_WIDTH + GRAPH_NODE_GAP;
       function quadratic(sx: number, sy: number, ex: number, ey: number): string {
-        const mx = (sx + ex) / 2;
-        const my = (sy + ey) / 2;
-        const baseOffset = (ey - sy) / 4;
+        const mx: number = (sx + ex) / 2;
+        const my: number = (sy + ey) / 2;
+        const baseOffset: number = (ey - sy) / 4;
         return `Q ${sx} ${sy + baseOffset} ${mx} ${my} ${ex} ${my + baseOffset} ${ex} ${ey}`;
       }
-      let d = '';
+      let d: string = '';
       if (startX === endX && rowsApart === 1) {
         d = `M ${startX} ${startY} L ${endX} ${endY}`;
       } else if (rowsApart === 1) {
         d = `M ${startX} ${startY} ` + quadratic(startX, startY, endX, endY);
       } else {
-        const dir = Math.sign(endX - startX) || 1;
-        const halfColShift = colStep / 2;
-        const candidateX = startX + (endX - startX) * 0.5;
-        const deltaCols = Math.max(1, Math.round(Math.abs(endX - startX) / colStep));
-        let intermediateX = candidateX;
-        let tooClose = false;
-        for (let k = 0; k <= deltaCols; k++) {
-          const center = startX + dir * k * colStep;
+        const dir: number = Math.sign(endX - startX) || 1;
+        const halfColShift: number = colStep / 2;
+        const candidateX: number = startX + (endX - startX) * 0.5;
+        const deltaCols: number = Math.max(1, Math.round(Math.abs(endX - startX) / colStep));
+        let intermediateX: number = candidateX;
+        let tooClose: boolean = false;
+        for (let k: number = 0; k <= deltaCols; k++) {
+          const center: number = startX + dir * k * colStep;
           if (Math.abs(candidateX - center) < GRAPH_NODE_WIDTH / 2 + 2) {
             tooClose = true;
             break;
           }
         }
         if (tooClose) intermediateX = candidateX + dir * halfColShift;
-        const firstTargetY = fromPos.y + GRAPH_LEVEL_GAP;
-        const bottomOfRowAboveDest = toPos.y - GRAPH_LEVEL_GAP + GRAPH_NODE_HEIGHT;
-        const midY1 = firstTargetY;
-        const midY2 = bottomOfRowAboveDest;
+        const firstTargetY: number = fromPos.y + GRAPH_LEVEL_GAP;
+        const bottomOfRowAboveDest: number = toPos.y - GRAPH_LEVEL_GAP + GRAPH_NODE_HEIGHT;
+        const midY1: number = firstTargetY;
+        const midY2: number = bottomOfRowAboveDest;
         d = `M ${startX} ${startY} ` + quadratic(startX, startY, intermediateX, midY1);
         d += ` L ${intermediateX} ${midY2}`;
         d += ' ' + quadratic(intermediateX, midY2, endX, endY);
       }
       rec.path.setAttribute('d', d);
-      const depStatus = graphState.nodeStatus.get(rec.to) || 'Ready';
+      const depStatus: string = graphState.nodeStatus.get(rec.to) || 'Ready';
       rec.path.setAttribute('stroke', statusColors[depStatus] || '#4b5563');
       rec.path.setAttribute('class', 'edge');
       rec.path.setAttribute('marker-end', `url(#arrowhead-${depStatus})`);
-      const fromOp = options.getOperations().get(rec.from);
+      const fromOp: IOperationInfo | undefined = options.getOperations().get(rec.from);
       if (options.getSelection().has(rec.to) && options.getSelection().has(rec.from))
         rec.path.classList.add('highlight');
       else rec.path.classList.remove('highlight');
       rec.path.classList.remove('dashed', 'dotted', 'filtered-out', 'not-running');
       rec.path.classList.remove('filtered-out-search');
-      const fromState = fromOp ? options.getExecutionStates().get(rec.from) : undefined;
-      const fromRunInThisIteration = fromState ? fromState.runInThisIteration : fromOp?.runInThisIteration;
-      const fromNotRunning = fromOp && (fromRunInThisIteration === false || fromOp.noop);
-      const edgeStatusFiltered =
+      const fromState: IOperationExecutionState | undefined = fromOp
+        ? options.getExecutionStates().get(rec.from)
+        : undefined;
+      const fromRunInThisIteration: boolean | undefined = fromState
+        ? fromState.runInThisIteration
+        : fromOp?.runInThisIteration;
+      const fromNotRunning: boolean = !!(fromOp && (fromRunInThisIteration === false || fromOp.noop));
+      const edgeStatusFiltered: boolean =
         options.getFilteredOutNames().has(rec.from) || options.getFilteredOutNames().has(rec.to);
-      const edgeSearchFiltered =
+      const edgeSearchFiltered: boolean =
         options.getSearchFilteredOutNames().has(rec.from) || options.getSearchFilteredOutNames().has(rec.to);
       if (edgeSearchFiltered || edgeStatusFiltered || fromNotRunning) {
-        let strokeColor = statusColors[depStatus] || '#4b5563';
+        let strokeColor: string = statusColors[depStatus] || '#4b5563';
         if (edgeSearchFiltered) {
           strokeColor = dimColor(strokeColor, 0.78);
           rec.path.style.opacity = '0.22';
@@ -520,7 +530,7 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
         rec.path.setAttribute('marker-end', `url(#arrowhead-${depStatus})`);
       } else {
         rec.path.style.opacity = '';
-        const semImportant = depStatus === 'Executing' || depStatus === 'Failure';
+        const semImportant: boolean = depStatus === 'Executing' || depStatus === 'Failure';
         if (!semImportant && !rec.path.classList.contains('highlight')) {
           rec.path.classList.add('dim');
         } else {
