@@ -143,7 +143,8 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
 
           typings.push({
             exportName: stringName,
-            comment
+            comment,
+            sourcePosition: value.sourcePosition
           });
         }
 

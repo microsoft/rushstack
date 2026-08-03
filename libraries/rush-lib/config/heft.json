@@ -30,7 +30,7 @@
                 {
                   "sourcePath": "src/cli/test",
                   "destinationFolders": ["lib-intermediate-commonjs/cli/test"],
-                  "fileExtensions": [".js"]
+                  "fileExtensions": [".js", ".yaml"]
                 },
                 {
                   "sourcePath": "src/logic/pnpm/test",
