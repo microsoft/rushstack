@@ -22,7 +22,7 @@ This plugin also provides a web socket server that notifies clients of the build
 
 The recommended way to connect to the web socket is to serve a static HTML page from the serve plugin using the `globalRouting` configuration.
 
-This package includes the reference `@rushstack/rush-serve-dashboard` web app, which speaks the plugin's WebSocket protocol. Its source lives under `apps/rush-serve-dashboard/`, and its browser-ready assets are copied into this package at `lib-esm/dashboard/`. Because the HTML references `dashboard.js` plus scoped styles under `styles/`, serve the ESM build folder rather than a single file:
+This package includes the reference `@rushstack/rush-serve-dashboard` web app, which speaks the plugin's WebSocket protocol. Its source lives under `apps/rush-serve-dashboard/`, and its browser-ready JavaScript and CSS bundles are generated in this package at `lib-esm/dashboard/`. Serve the ESM build folder rather than a single file:
 
 ```json
 {
@@ -39,22 +39,17 @@ This package includes the reference `@rushstack/rush-serve-dashboard` web app, w
 }
 ```
 
-The Rush server resolves extensionless module requests to emitted `.js` files.
-
 Then open `https://localhost:<port>/dashboard/dashboard.html`.
 
 ### Dashboard
 
 The dashboard provides table and dependency-graph views of Rush operations. Use search or the
-failed/warning filter to narrow the current view, select operations to include their dependencies or consumers,
-and open the terminal pane to inspect operation logs. The current view and filter are reflected in the `view`
-and `filter` URL parameters so a dashboard view can be bookmarked.
+failed/warning filter to narrow the current view, select operations to include their dependencies or consumers, and open the terminal pane to inspect operation logs. The current view and filter are reflected in the `view` and `filter` URL parameters so a dashboard view can be bookmarked.
 
 When connected, the dashboard can execute or abort a build, pause the watcher, change parallelism, invalidate
 operations, close runners, and change operation enabled states. Enabled-state changes default to safe mode;
 unsafe mode enables changes that can leave downstream state inconsistent. The dashboard reconnects
-automatically after an unexpected disconnect. A manual disconnect remains disconnected until the Connect
-button is selected.
+automatically after an unexpected disconnect. A manual disconnect remains disconnected until the Connect button is selected.
 
 Because the WebSocket protocol accepts build-control commands, do not expose the dashboard or socket endpoint
 to untrusted networks. Apply the same authentication and network restrictions used for the served project.

@@ -110,7 +110,10 @@ const tableHead: HTMLTableSectionElement | undefined = tableEl.querySelector('th
 const tableBody: HTMLTableSectionElement | undefined = tableEl.querySelector('tbody') ?? undefined;
 const tableStats: HTMLElement | undefined = document.getElementById('table-stats') ?? undefined;
 const managerStateEl: HTMLElement | undefined = document.getElementById('graph-state') ?? undefined;
-const edgesSvg: SVGSVGElement = document.getElementById('edges') as unknown as SVGSVGElement;
+const edgesSvg: SVGSVGElement | undefined = document.querySelector<SVGSVGElement>('svg#edges') ?? undefined;
+if (!edgesSvg) {
+  throw new Error('The graph edges SVG element was not found.');
+}
 const graphEl: HTMLElement = document.getElementById('graph') as HTMLElement;
 const legendEl: HTMLElement | undefined = document.getElementById('graph-legend') ?? undefined;
 const phasePaneEl: HTMLElement | undefined = document.getElementById('phase-pane') ?? undefined;

@@ -8,7 +8,11 @@ describe('graph view controller', () => {
     document.documentElement.style.setProperty('--status-success', '#00aa00');
     document.body.innerHTML = '<div id="graph"><svg id="edges"></svg></div>';
     const graphEl: HTMLElement = document.getElementById('graph') as HTMLElement;
-    const edgesSvg: SVGSVGElement = document.getElementById('edges') as unknown as SVGSVGElement;
+    const edgesSvg: SVGSVGElement | undefined =
+      document.querySelector<SVGSVGElement>('svg#edges') ?? undefined;
+    if (!edgesSvg) {
+      throw new Error('The graph edges SVG test fixture was not found.');
+    }
     const operations = new Map([
       ['compile', { name: 'compile', status: 'Success', enabled: 'affected' }],
       ['build', { name: 'build', dependencies: ['compile'], status: 'Success', isActive: true }],
@@ -47,7 +51,14 @@ describe('graph view controller', () => {
     expect(graphState.nodeElements.get('test')?.querySelector('.enabled-indicator')?.textContent).toBe('🔴');
     expect(renderPhaseLegend).toHaveBeenCalled();
 
-    graphState.nodeElements.get('compile')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    const compileNode: HTMLButtonElement | undefined = graphState.nodeElements.get('compile');
+    expect(compileNode).toMatchObject({ type: 'button', tabIndex: 0 });
+    expect(compileNode?.getAttribute('aria-label')).toBe('compile');
+    expect(compileNode?.getAttribute('aria-pressed')).toBe('true');
+    compileNode?.focus();
+    expect(document.activeElement).toBe(compileNode);
+
+    compileNode?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     graphState.nodeElements
       .get('build')
       ?.dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }));

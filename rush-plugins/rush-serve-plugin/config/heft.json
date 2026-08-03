@@ -21,21 +21,10 @@
             }
           }
         },
-        "copy-dashboard-assets": {
+        "webpack": {
+          "taskDependencies": ["typescript"],
           "taskPlugin": {
-            "pluginPackage": "@rushstack/heft",
-            "pluginName": "copy-files-plugin",
-            "options": {
-              "copyOperations": [
-                {
-                  "sourcePath": "node_modules/@rushstack/rush-serve-dashboard/lib-esm",
-                  "destinationFolders": ["lib-commonjs/dashboard", "lib-esm/dashboard"],
-                  "fileExtensions": [".js", ".js.map", ".html", ".css"],
-                  "excludeGlobs": ["test/**"],
-                  "hardlink": true
-                }
-              ]
-            }
+            "pluginPackage": "@rushstack/heft-webpack5-plugin"
           }
         }
       }

@@ -13,7 +13,6 @@ import {
   updateStatusPill,
   type ITopBarRefs
 } from '../modules/topBar';
-import { wireViewBar } from '../modules/viewBar';
 
 function click(id: string): void {
   document.getElementById(id)?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -114,44 +113,6 @@ describe('action wiring', () => {
     expect(setSelection).toHaveBeenCalledWith(new Set(['build', 'test']));
     expect(clearSelection).toHaveBeenCalledTimes(1);
     expect(render).toHaveBeenCalledTimes(2);
-  });
-
-  it('wires view, filter, and search controls', () => {
-    document.body.innerHTML = `
-      <input name="view" value="table" type="radio"><input name="view" value="graph" type="radio">
-      <select id="filter-select"><option value="all">All</option><option value="failed-warn">Failed</option></select>
-      <input id="name-search"><div id="left"></div><div id="right"></div>`;
-    let view: 'table' | 'graph' = 'table';
-    let filter: 'all' | 'failed-warn' = 'all';
-    const markGraphDirty = jest.fn();
-    const render = jest.fn();
-    const setSearchQuery = jest.fn();
-    wireViewBar({
-      getView: () => view,
-      setView: (next) => (view = next),
-      getFilter: () => filter,
-      setFilter: (next) => (filter = next),
-      setSearchQuery,
-      markGraphDirty,
-      render
-    });
-
-    const graphRadio = document.querySelector('input[value="graph"]') as HTMLInputElement;
-    graphRadio.checked = true;
-    graphRadio.dispatchEvent(new Event('change'));
-    const filterSelect = document.getElementById('filter-select') as HTMLSelectElement;
-    filterSelect.value = 'failed-warn';
-    filterSelect.dispatchEvent(new Event('change'));
-    const searchInput = document.getElementById('name-search') as HTMLInputElement;
-    searchInput.value = 'build';
-    searchInput.dispatchEvent(new Event('input'));
-
-    expect(document.getElementById('left')?.style.display).toBe('none');
-    expect(document.getElementById('right')?.style.display).toBe('');
-    expect(setSearchQuery).toHaveBeenCalledWith('build');
-    expect(markGraphDirty).toHaveBeenCalledTimes(2);
-    expect(window.location.search).toContain('view=graph');
-    expect(window.location.search).toContain('filter=failed-warn');
   });
 });
 

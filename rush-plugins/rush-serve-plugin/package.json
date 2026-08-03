@@ -32,13 +32,16 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/rush-serve-dashboard": "workspace:*",
+    "html-webpack-plugin": "~5.5.0",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "@types/compression": "~1.7.2",
     "@types/cors": "~2.8.12",
     "@types/express": "4.17.21",
-    "@types/ws": "8.18.1"
+    "@types/ws": "8.18.1",
+    "webpack": "~5.105.2"
   },
   "exports": {
     ".": {

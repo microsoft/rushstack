@@ -44,7 +44,7 @@ export interface IGraphEdgeRecord {
 export interface IGraphState {
   nodePositions: Map<string, IPoint>;
   nodeStatus: Map<string, string>;
-  nodeElements: Map<string, HTMLDivElement>;
+  nodeElements: Map<string, HTMLButtonElement>;
   edgeElements: IGraphEdgeRecord[];
 }
 
@@ -59,7 +59,7 @@ export const GRAPH_BASE_Y: number = 16;
 export const graphState: IGraphState = {
   nodePositions: new Map<string, IPoint>(),
   nodeStatus: new Map<string, string>(),
-  nodeElements: new Map<string, HTMLDivElement>(),
+  nodeElements: new Map<string, HTMLButtonElement>(),
   edgeElements: []
 };
 
@@ -269,26 +269,28 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
         if (!op) return;
         const x: number = GRAPH_BASE_X + index * (GRAPH_COL_WIDTH + GRAPH_NODE_GAP);
         const y: number = GRAPH_BASE_Y + levelIndexFromTop * GRAPH_LEVEL_GAP;
-        const div: HTMLDivElement = document.createElement('div');
-        div.className = 'op-node';
-        div.dataset.name = name;
-        div.style.transform = `translate(${x}px, ${y}px)`;
+        const button: HTMLButtonElement = document.createElement('button');
+        button.type = 'button';
+        button.setAttribute('aria-label', name);
+        button.className = 'op-node';
+        button.dataset.name = name;
+        button.style.transform = `translate(${x}px, ${y}px)`;
         const emojiSpan: HTMLSpanElement = document.createElement('span');
         emojiSpan.className = 'emoji';
         emojiSpan.textContent = options.getStatusEmoji(options.getComputeDisplayStatus(op));
-        div.appendChild(emojiSpan);
+        button.appendChild(emojiSpan);
         const enabledSup: HTMLSpanElement = document.createElement('span');
         enabledSup.className = 'enabled-indicator';
         enabledSup.textContent = '';
-        div.appendChild(enabledSup);
-        div.addEventListener('click', (e) => {
+        button.appendChild(enabledSup);
+        button.addEventListener('click', (e) => {
           e.stopPropagation();
           if (e.metaKey || e.ctrlKey) options.toggleSelect(name);
           else options.singleSelect(name);
         });
-        options.graphEl.appendChild(div);
+        options.graphEl.appendChild(button);
         graphState.nodePositions.set(name, { x, y });
-        graphState.nodeElements.set(name, div);
+        graphState.nodeElements.set(name, button);
       });
     });
 
@@ -406,7 +408,9 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
       else if (isFilteredOut) baseColor = dimColor(baseColor, 0.6);
       else if (notRunning) baseColor = dimColor(baseColor, 0.35);
       div.style.borderColor = baseColor;
-      if (options.getSelection().has(name)) div.classList.add('selected');
+      const isSelected: boolean = options.getSelection().has(name);
+      div.setAttribute('aria-pressed', String(isSelected));
+      if (isSelected) div.classList.add('selected');
       else div.classList.remove('selected');
       let activeSpan: HTMLSpanElement | null = div.querySelector(
         '.active-indicator'
