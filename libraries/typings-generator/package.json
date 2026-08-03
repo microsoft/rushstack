@@ -44,6 +44,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
+    "@jridgewell/sourcemap-codec": "~1.5.5",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "chokidar": "~3.6.0",
