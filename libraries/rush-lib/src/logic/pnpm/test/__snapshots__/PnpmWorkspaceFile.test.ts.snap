@@ -126,6 +126,13 @@ trustPolicyIgnoreAfter: 1440
 "
 `;
 
+exports[`PnpmWorkspaceFile globalPnpmfile functionality generates workspace file with globalPnpmfile 1`] = `
+"globalPnpmfile: /repo/common/temp/my-subspace/global-pnpmfile.cjs
+packages:
+  - projects/app1
+"
+`;
+
 exports[`PnpmWorkspaceFile minimumReleaseAge functionality generates workspace file with minimumReleaseAge 1`] = `
 "minimumReleaseAge: 20160
 packages:

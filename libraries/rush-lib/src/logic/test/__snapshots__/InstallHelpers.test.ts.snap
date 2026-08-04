@@ -1,6 +1,10 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
+exports[`InstallHelpers generateCommonPackageJsonAsync does not emit the global pnpmfile via pnpm-workspace.yaml for pnpm < 11: Terminal Output 1`] = `Array []`;
+
 exports[`InstallHelpers generateCommonPackageJsonAsync does not generate a "pnpm" field for pnpm 11 (all settings belong in pnpm-workspace.yaml): Terminal Output 1`] = `Array []`;
+
+exports[`InstallHelpers generateCommonPackageJsonAsync emits the subspace global pnpmfile path via pnpm-workspace.yaml for pnpm 11: Terminal Output 1`] = `Array []`;
 
 exports[`InstallHelpers generateCommonPackageJsonAsync generates correct package json with pnpm configurations 1`] = `
 Object {

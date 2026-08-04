@@ -111,6 +111,15 @@ interface IPnpmWorkspaceYaml {
    * (SUPPORTED ONLY IN PNPM 10.16.0 AND NEWER)
    */
   minimumReleaseAgeExclude: string[] | undefined;
+  /**
+   * The path to the "global pnpmfile" that Rush generates when subspaces are enabled, which rewrites
+   * cross-subspace `workspace:*` dependency specifiers to `link:` specifiers. pnpm 11+ only reads
+   * auth/registry settings from `.npmrc`, so the `global-pnpmfile=` line Rush writes there is
+   * silently ignored; for pnpm 11+ the path is emitted here instead. Without it, installation of a
+   * subspace with cross-subspace dependencies fails with ERR_PNPM_WORKSPACE_PKG_NOT_FOUND.
+   * (USED ONLY IN PNPM 11.0.0 AND NEWER)
+   */
+  globalPnpmfile: string | undefined;
 }
 
 export class PnpmWorkspaceFile extends BaseWorkspaceFile {
@@ -133,6 +142,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
   public trustPolicyIgnoreAfter: IPnpmWorkspaceYaml['trustPolicyIgnoreAfter'];
   public minimumReleaseAge: IPnpmWorkspaceYaml['minimumReleaseAge'];
   public minimumReleaseAgeExclude: IPnpmWorkspaceYaml['minimumReleaseAgeExclude'];
+  public globalPnpmfile: IPnpmWorkspaceYaml['globalPnpmfile'];
 
   /**
    * The PNPM workspace file is used to specify the location of workspaces relative to the root
@@ -190,7 +200,8 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
         trustPolicyExclude,
         trustPolicyIgnoreAfter,
         minimumReleaseAge,
-        minimumReleaseAgeExclude
+        minimumReleaseAgeExclude,
+        globalPnpmfile
       } = workspaceYaml;
       workspaceFile.catalogs = catalogs;
       workspaceFile.allowBuilds = allowBuilds;
@@ -205,6 +216,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
       workspaceFile.trustPolicyIgnoreAfter = trustPolicyIgnoreAfter;
       workspaceFile.minimumReleaseAge = minimumReleaseAge;
       workspaceFile.minimumReleaseAgeExclude = minimumReleaseAgeExclude;
+      workspaceFile.globalPnpmfile = globalPnpmfile;
     }
 
     return workspaceFile;
@@ -236,7 +248,8 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
       trustPolicyExclude,
       trustPolicyIgnoreAfter,
       minimumReleaseAge,
-      minimumReleaseAgeExclude
+      minimumReleaseAgeExclude,
+      globalPnpmfile
     } = this;
     // Ensure stable sort order when serializing
     Sort.sortSet(workspacePackages);
@@ -256,7 +269,8 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
       trustPolicyExclude,
       trustPolicyIgnoreAfter,
       minimumReleaseAge,
-      minimumReleaseAgeExclude
+      minimumReleaseAgeExclude,
+      globalPnpmfile
     };
 
     const yamlModule: typeof import('js-yaml') = await import('js-yaml');

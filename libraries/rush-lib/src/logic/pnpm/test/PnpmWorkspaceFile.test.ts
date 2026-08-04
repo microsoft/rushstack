@@ -384,6 +384,19 @@ describe(PnpmWorkspaceFile.name, () => {
         });
       });
 
+      it('reads globalPnpmfile from an existing workspace file', async () => {
+        const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+        workspaceFile.addPackage(`${projectsDir}/app1`);
+        workspaceFile.globalPnpmfile = '/repo/common/temp/my-subspace/global-pnpmfile.cjs';
+        await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+        const loadedWorkspaceFile: PnpmWorkspaceFile | undefined =
+          await PnpmWorkspaceFile.tryLoadAsync(workspaceFilePath);
+        expect(loadedWorkspaceFile?.globalPnpmfile).toEqual(
+          '/repo/common/temp/my-subspace/global-pnpmfile.cjs'
+        );
+      });
+
       it('returns undefined when the workspace file has no patchedDependencies', async () => {
         const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
         workspaceFile.addPackage(`${projectsDir}/app1`);
@@ -441,6 +454,19 @@ describe(PnpmWorkspaceFile.name, () => {
       workspaceFile.trustPolicy = 'no-downgrade';
       workspaceFile.trustPolicyExclude = ['chokidar@4.0.3'];
       workspaceFile.trustPolicyIgnoreAfter = 1440;
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).toMatchSnapshot();
+    });
+  });
+
+  describe('globalPnpmfile functionality', () => {
+    it('generates workspace file with globalPnpmfile', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+
+      workspaceFile.globalPnpmfile = '/repo/common/temp/my-subspace/global-pnpmfile.cjs';
 
       await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
 
