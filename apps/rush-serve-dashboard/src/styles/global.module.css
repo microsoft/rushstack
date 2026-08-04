@@ -1,11 +1,7 @@
 /* Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license. */
 /* See LICENSE in the project root for license information. */
 
-@import './top-bar.css';
-@import './selection-bar.css';
-@import './terminal-pane.css';
-
-:root {
+:global(:root) {
   --bg: #0f1115;
   --panel: #1b1f27;
   --panel-alt: #232a34;
@@ -18,13 +14,7 @@
   --warn: #f59e0b;
   --success: #10b981;
   --rgb-accent: 59, 130, 246;
-  --rgb-accent-hover: 37, 99, 235;
-  --rgb-success: 16, 185, 129;
-  --rgb-warn: 245, 158, 11;
-  --rgb-danger: 239, 68, 68;
   --rgb-white: 255, 255, 255;
-  --rgb-panel-grad-a: 30, 37, 48;
-  --rgb-panel-grad-b: 16, 19, 24;
   --status-ready: #334155;
   --status-waiting: #475569;
   --status-queued: #475569;
@@ -50,73 +40,57 @@
     Arial,
     sans-serif;
 }
-
-html,
-body {
+:global(html),
+:global(body) {
   height: 100%;
   margin: 0;
   background: var(--bg);
   color: var(--text);
 }
-
-body {
+.dashboard {
   display: flex;
   flex-direction: column;
 }
-
-h1 {
+.dashboard h1 {
   font-size: 1.2rem;
   margin: 0 0 0.5rem;
 }
-
-a {
+.dashboard a {
   color: var(--accent);
 }
-
-code {
+.dashboard code {
   background: var(--panel-alt);
   padding: 2px 4px;
   border-radius: 4px;
 }
-
-.flex-spacer {
+.flexSpacer {
   flex: 1 1 auto;
 }
-
-#app-title {
+.appTitle {
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.5px;
   min-width: 180px;
 }
-
-#actions {
+.actions,
+.graphState {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
   align-items: center;
 }
-
-#graph-state {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-}
-
-.parallelism-label {
+.parallelismLabel {
   font-size: 0.65rem;
   align-items: baseline;
   gap: 4px;
 }
-
-.search-label {
+.searchLabel {
   display: flex;
   align-items: center;
   gap: 4px;
 }
-
-#parallelism-input,
-#name-search {
+.parallelismInput,
+.nameSearch {
   background: var(--panel-alt);
   border: 1px solid var(--border);
   color: var(--text);
@@ -124,48 +98,39 @@ code {
   padding: 2px 4px;
   font-size: 0.7rem;
 }
-
-#parallelism-input {
+.parallelismInput {
   width: 60px;
 }
-
-#name-search {
+.nameSearch {
   min-width: 140px;
 }
-
-#connection-form {
+.connectionForm {
   gap: 0.4rem;
 }
-
-.content-wrap {
+.contentWrap {
   display: flex;
   flex: 1;
   min-height: 0;
   overflow: hidden;
 }
-
-#main {
+.main {
   flex: 1;
   display: flex;
   min-height: 0;
 }
-
-#view-controls {
+.viewControls {
   display: flex;
   gap: 0.75rem;
   align-items: center;
   font-size: 0.7rem;
 }
-
-#view-controls label {
+.viewControls label {
   display: flex;
   gap: 0.25rem;
   align-items: center;
   cursor: pointer;
 }
-
-select,
-#filter-select {
+.dashboard select {
   background: var(--panel-alt);
   color: var(--text);
   border: 1px solid var(--border);
@@ -173,43 +138,24 @@ select,
   padding: 2px 4px;
   font-size: 0.7rem;
 }
-
-select:disabled {
+.dashboard select:disabled {
   opacity: 0.6;
 }
-
-#connection-form input {
+.connectionForm input {
   background: var(--panel-alt);
   border: 1px solid var(--border);
   color: var(--text);
   padding: 0.35rem 0.5rem;
   border-radius: var(--radius);
 }
-
-#connection-form button.action {
-  padding: 0.4rem 0.75rem;
-  border-radius: var(--radius);
-  font-weight: 600;
+.dashboard button:not(:disabled) {
   cursor: pointer;
 }
-
-#connection-form button.icon-btn {
-  background: transparent;
-  border: none;
-  color: inherit;
-  padding: 0;
-}
-
-button:not(:disabled) {
-  cursor: pointer;
-}
-
-button:disabled {
+.dashboard button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
-button.action {
+.action {
   background: var(--panel-alt);
   color: var(--text);
   border: 1px solid var(--border);
@@ -217,24 +163,20 @@ button.action {
   border-radius: var(--radius);
   font-size: 0.8rem;
 }
-
-button.action:hover:not(:disabled) {
+.action:hover:not(:disabled) {
   background: #2d3744;
 }
-
-button.primary,
-.icon-btn.primary {
+.primary,
+.iconBtn.primary {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
 }
-
-button.primary:hover:not(:disabled),
-.icon-btn.primary:hover:not(:disabled) {
+.primary:hover:not(:disabled),
+.iconBtn.primary:hover:not(:disabled) {
   background: var(--accent-hover);
 }
-
-.icon-btn {
+.iconBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -248,39 +190,29 @@ button.primary:hover:not(:disabled),
   color: var(--success);
   position: relative;
 }
-
-.icon-btn:hover:not(:disabled) {
+.iconBtn:hover:not(:disabled),
+.iconBtn.stop:hover:not(:disabled) {
   filter: brightness(1.15);
 }
-
-.icon-btn.stop {
+.iconBtn.stop {
   color: var(--danger);
 }
-
-.icon-btn.stop:hover:not(:disabled) {
-  filter: brightness(1.15);
-}
-
-.icon-btn.playing {
+.iconBtn.playing {
   color: var(--accent);
 }
-
-.icon-btn.playing:hover:not(:disabled) {
+.iconBtn.playing:hover:not(:disabled) {
   color: var(--accent-hover);
   filter: none;
 }
-
-.icon-btn:disabled {
+.iconBtn:disabled {
   opacity: 0.45;
 }
-
-.icon-btn:focus-visible {
+.iconBtn:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
 }
-
-.icon-btn.queued::after {
+.iconBtn.queued::after {
   content: '';
   position: absolute;
   width: 18px;
@@ -290,88 +222,67 @@ button.primary:hover:not(:disabled),
   animation: queuedPulse 1.2s linear infinite;
   pointer-events: none;
 }
-
-.icon-btn.toggle {
+.iconBtn.toggle {
   color: var(--muted);
 }
-
-.icon-btn.toggle:hover:not(.active):not(:disabled) {
+.iconBtn.toggle:hover:not(.active):not(:disabled) {
   color: var(--text);
 }
-
-.icon-btn.toggle.active {
+.iconBtn.toggle.active,
+.iconBtn.active {
   color: var(--accent);
 }
-
-.icon-btn.toggle.active:hover:not(:disabled) {
+.iconBtn.toggle.active:hover:not(:disabled) {
   color: var(--accent-hover);
 }
-
 @keyframes queuedPulse {
-  0% {
+  0%,
+  100% {
     opacity: 0.2;
   }
   50% {
     opacity: 0.9;
   }
-  100% {
-    opacity: 0.2;
-  }
 }
-
-.codicon {
+.dashboard :global(.codicon) {
   font-size: 18px;
   line-height: 1;
 }
-
-.icon-btn .codicon {
+.iconBtn :global(.codicon) {
   pointer-events: none;
 }
-
-.icon-btn.stop .codicon {
+.iconBtn.stop :global(.codicon) {
   font-size: 17px;
 }
-
-.icon-btn.queued .icon {
-  transform: scale(1.05);
-}
-
-button.danger {
+.danger {
   background: var(--danger);
   border-color: var(--danger);
   color: #fff;
 }
-
-button.danger:hover:not(:disabled) {
+.danger:hover:not(:disabled) {
   filter: brightness(1.1);
 }
-
-#left,
-#right {
+.pane {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
-
-#left {
+.leftPane {
   border-right: 1px solid var(--border);
 }
-
 .section {
   padding: 0.75rem 0.75rem 0.25rem;
   background: var(--panel);
   border-bottom: 1px solid var(--border);
 }
-
 .section h2 {
   margin: 0 0 0.5rem;
   font-size: 0.95rem;
   letter-spacing: 0.5px;
   font-weight: 600;
 }
-
-.status-pill {
+.statusPill {
   padding: 2px 6px;
   border-radius: 8px;
   font-weight: 600;
@@ -383,77 +294,56 @@ button.danger:hover:not(:disabled) {
   text-align: center;
   box-sizing: border-box;
 }
-
-.status-Ready {
+.statusReady,
+.statusUnspecified,
+.statusUnknown {
   background: var(--status-ready);
 }
-
-.status-Waiting {
+.statusWaiting {
   background: var(--status-waiting);
 }
-
-.status-Queued {
+.statusQueued {
   background: var(--status-queued);
 }
-
-.status-Executing {
+.statusExecuting {
   background: var(--warn);
   color: #000;
 }
-
-.status-Success {
+.statusSuccess {
   background: var(--success);
   color: #000;
 }
-
-.status-SuccessWithWarning {
+.statusSuccessWithWarning {
   background: var(--status-success-warning);
   color: #000;
 }
-
-.status-FromCache {
+.statusFromCache {
   background: var(--status-from-cache);
   color: #000;
 }
-
-.status-Failure {
+.statusFailure {
   background: var(--danger);
 }
-
-.status-Blocked,
-.status-Skipped {
+.statusBlocked,
+.statusSkipped {
   background: var(--status-skipped);
 }
-
-.status-NoOp {
+.statusNoOp {
   background: var(--status-noop);
 }
-
-.status-Aborted {
+.statusAborted,
+.statusCanceled {
   background: var(--status-aborted);
 }
-
-.status-Canceled {
-  background: var(--status-aborted);
-}
-
-.status-Unspecified {
-  background: var(--status-ready);
-}
-
-.status-Unknown {
-  background: var(--status-ready);
+.statusUnknown {
   opacity: 0.85;
 }
-
-.status-Disconnected {
+.statusDisconnected {
   background: var(--status-disconnected);
 }
-
 .mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
 }
-
 .badge {
   background: #334155;
   padding: 2px 4px;
@@ -463,30 +353,24 @@ button.danger:hover:not(:disabled) {
   letter-spacing: 0.5px;
   font-weight: 600;
 }
-
 .badge.silent {
   background: #4b5563;
 }
-
 .badge.active {
   background: var(--accent);
 }
-
 .badge.disabled {
   background: #64748b;
 }
-
-.badge.local-only {
+.badge.localOnly {
   background: var(--warn);
   color: #000;
 }
-
-.badge.not-running {
+.badge.notRunning {
   background: #1e293b;
   border: 1px dashed #475569;
 }
-
-#bottom-bar {
+.bottomBar {
   background: var(--panel);
   border-top: 1px solid var(--border);
   padding: 0.3rem 0.6rem;
@@ -495,63 +379,47 @@ button.danger:hover:not(:disabled) {
   font-size: 0.6rem;
   align-items: center;
 }
-
 .pill {
   background: var(--panel-alt);
   padding: 2px 6px;
   border-radius: 12px;
 }
-
-.flex-row {
+.flexRow {
   display: flex;
   gap: 0.4rem;
   align-items: center;
 }
-
-input[type='number'] {
+.dashboard input[type='number'] {
   width: 70px;
 }
-
-.icon-btn.active,
-.icon-btn.toggle.active {
-  color: var(--accent);
-}
-
 @media (max-width: 1200px) {
-  #main {
+  .main {
     flex-direction: column;
   }
-
-  #left {
+  .leftPane {
     border-right: none;
     border-bottom: 1px solid var(--border);
   }
 }
-
-* {
+.dashboard * {
   scrollbar-color: var(--scroll-thumb) var(--scroll-track);
   scrollbar-width: thin;
 }
-
-::-webkit-scrollbar {
+.dashboard *::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
-
-::-webkit-scrollbar-track {
+.dashboard *::-webkit-scrollbar-track {
   background: var(--scroll-track);
 }
-
-::-webkit-scrollbar-thumb {
+.dashboard *::-webkit-scrollbar-thumb {
   background: var(--scroll-thumb);
   border: 2px solid var(--scroll-track);
   border-radius: 8px;
 }
-
-::-webkit-scrollbar-thumb:hover {
+.dashboard *::-webkit-scrollbar-thumb:hover {
   background: var(--scroll-thumb-hover);
 }
-
-::-webkit-scrollbar-corner {
+.dashboard *::-webkit-scrollbar-corner {
   background: var(--scroll-track);
 }

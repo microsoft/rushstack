@@ -30,7 +30,7 @@ describe('dashboard entrypoint', () => {
       <span id="graph-state"></span><button id="play-pause-btn"></button><input id="parallelism-input">
       <button id="debug-btn"></button><button id="verbose-btn"></button>
       <div id="graph"><svg id="edges"></svg></div><div id="graph-legend"></div>
-      <div id="phase-pane"><div class="phase-groups"></div></div>
+      <div id="phase-pane"><div id="phase-groups"></div></div>
       <div id="terminal"><div id="terminal-body"></div></div><button id="term-clear-btn"></button>
       <input id="term-autoscroll" type="checkbox" checked><button id="term-autoscroll-btn"></button>
       <button id="toggle-terminal-btn"></button><div id="resizer"></div>

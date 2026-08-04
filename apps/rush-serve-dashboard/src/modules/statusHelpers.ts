@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import globalStyles from '../styles/global.module.css';
+
 interface IOperationExecutionStateLike {
   name: string;
   status?: string;
@@ -32,6 +34,29 @@ const statusEmojiMap: Record<string, string> = {
   Disconnected: '⏸️',
   Unknown: '❓'
 };
+
+const statusClassNames: Record<string, string> = {
+  Ready: globalStyles.statusReady,
+  Waiting: globalStyles.statusWaiting,
+  Queued: globalStyles.statusQueued,
+  Executing: globalStyles.statusExecuting,
+  Success: globalStyles.statusSuccess,
+  SuccessWithWarning: globalStyles.statusSuccessWithWarning,
+  Skipped: globalStyles.statusSkipped,
+  FromCache: globalStyles.statusFromCache,
+  Failure: globalStyles.statusFailure,
+  Blocked: globalStyles.statusBlocked,
+  NoOp: globalStyles.statusNoOp,
+  Aborted: globalStyles.statusAborted,
+  Canceled: globalStyles.statusCanceled,
+  Unspecified: globalStyles.statusUnspecified,
+  Unknown: globalStyles.statusUnknown,
+  Disconnected: globalStyles.statusDisconnected
+};
+
+export function getStatusClassName(status: string | undefined): string {
+  return (status && statusClassNames[status]) || globalStyles.statusUnknown;
+}
 
 export function statusEmoji(status: string): string {
   return statusEmojiMap[status] || '•';

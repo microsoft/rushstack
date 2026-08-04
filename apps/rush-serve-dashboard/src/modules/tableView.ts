@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import tableStyles from '../styles/tableView.module.css';
+import globalStyles from '../styles/global.module.css';
+import { getStatusClassName } from './statusHelpers';
 
 interface ITableAnchorCoordinate {
   row: number;
@@ -209,7 +211,7 @@ export function createTableViewController(options: ITableViewControllerOptions):
       if (allSelected) tr.classList.add(tableStyles.selected);
 
       const pkgTd: HTMLTableCellElement = document.createElement('td');
-      pkgTd.className = tableStyles['pkg-cell'];
+      pkgTd.className = tableStyles.pkgCell;
       pkgTd.textContent = pkg.packageName;
       pkgTd.style.fontWeight = '600';
       pkgTd.style.cursor = 'pointer';
@@ -221,7 +223,7 @@ export function createTableViewController(options: ITableViewControllerOptions):
 
       phases.forEach((phase, phaseIndex) => {
         const td: HTMLTableCellElement = document.createElement('td');
-        td.className = tableStyles['pivot-cell'];
+        td.className = tableStyles.pivotCell;
         td.style.whiteSpace = 'nowrap';
 
         const op: ITableOperation | undefined = pkg.byPhase.get(phase);
@@ -230,12 +232,12 @@ export function createTableViewController(options: ITableViewControllerOptions):
           const displayStatus: string = options.computeDisplayStatus(op);
           const glyph: string = options.enabledGlyph(op);
           const active: string = op.isActive
-            ? `<span class="${tableStyles['pivot-active']}" title="Active">⚡</span>`
+            ? `<span class="${tableStyles.pivotActive}" title="Active">⚡</span>`
             : '';
           td.innerHTML = `
                 <span>${options.statusEmoji(displayStatus)}</span>
-                <span title="${escapeHtml(op.name)}" class="status-pill status-${escapeHtml(displayStatus)}">${escapeHtml(options.overallStatusText(displayStatus))}</span>
-                <span class="${tableStyles['pivot-enabled']}" title="${escapeHtml(options.buildRunPolicyText(op))}">${glyph}</span>
+                <span title="${escapeHtml(op.name)}" class="${globalStyles.statusPill} ${getStatusClassName(displayStatus)}">${escapeHtml(options.overallStatusText(displayStatus))}</span>
+                <span class="${tableStyles.pivotEnabled}" title="${escapeHtml(options.buildRunPolicyText(op))}">${glyph}</span>
                 ${active}
               `;
           td.title = options.buildTooltip(op, displayStatus);

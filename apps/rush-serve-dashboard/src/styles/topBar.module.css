@@ -1,8 +1,7 @@
 /* Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license. */
 /* See LICENSE in the project root for license information. */
 
-/* Scoped styles for the dashboard top bar component */
-#top-bar {
+.topBar {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem 0.75rem;
@@ -13,13 +12,11 @@
   max-height: 40vh;
   overflow-y: auto;
 }
-
-#top-bar > * {
+.topBar > * {
   display: flex;
   align-items: baseline;
 }
-
-#top-bar .icon-btn {
+.topBar button {
   width: auto;
   height: auto;
   padding: 0 4px;
@@ -27,27 +24,22 @@
   line-height: 1.05;
   align-items: baseline;
 }
-
-#top-bar .icon-btn .codicon,
-#top-bar .icon-btn span[aria-hidden='true'] {
+.topBar button :global(.codicon),
+.topBar button span[aria-hidden='true'] {
   position: relative;
   top: 2px;
   line-height: 1;
 }
-
-#top-bar #actions,
-#top-bar #graph-state,
-#top-bar #view-controls,
-#top-bar #overall-status {
+.actions,
+.graphState,
+.viewControls {
   align-items: baseline;
 }
-
-#top-bar #overall-status {
+.overallStatus {
   display: flex;
   align-items: center;
 }
-
-#status-emoji {
+.statusEmoji {
   position: relative;
   top: 1px;
   font-size: 1rem;
@@ -58,33 +50,25 @@
   width: 20px;
   height: 20px;
 }
-
-#status-pill {
+.statusPill {
   padding: 2px 10px;
   border-radius: 999px;
   font-size: 0.7rem;
   font-weight: 600;
   line-height: 1.05;
 }
-
-/* Connected (disconnect) state = red foreground */
-#top-bar #connection-form #connect-btn[data-state='connected'] {
+.connectionForm .connectButton[data-state='connected'] {
   color: var(--danger);
 }
-
-/* Disconnected state = accent (blue) foreground */
-#top-bar #connection-form #connect-btn[data-state='disconnected'] {
+.connectionForm .connectButton[data-state='disconnected'] {
   color: var(--accent);
 }
-
-/* Remove default light-mode spinner arrows and supply dark replacements */
-#top-bar input[type='number']::-webkit-inner-spin-button,
-#top-bar input[type='number']::-webkit-outer-spin-button {
+.topBar input[type='number']::-webkit-inner-spin-button,
+.topBar input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-
-#top-bar input[type='number'] {
+.topBar input[type='number'] {
   background-image:
     linear-gradient(135deg, var(--muted) 50%, transparent 50%),
     linear-gradient(315deg, var(--muted) 50%, transparent 50%),
@@ -105,8 +89,7 @@
   appearance: textfield;
   -moz-appearance: textfield;
 }
-
-#top-bar input[type='number']:focus {
+.topBar input[type='number']:focus {
   outline: 1px solid var(--accent);
   outline-offset: 0;
 }

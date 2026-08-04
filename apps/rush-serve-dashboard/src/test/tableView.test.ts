@@ -39,12 +39,12 @@ describe('table view controller', () => {
     expect(document.getElementById('stats')?.textContent).toBe('3 operations');
 
     const firstOperationCell = document.querySelector(
-      `td.${tableStyles['pivot-cell']}[title="a-build"]`
+      `td.${tableStyles.pivotCell}[title="a-build"]`
     ) as HTMLElement;
     firstOperationCell.click();
     expect(selection).toEqual(new Set(['a-build']));
 
-    const firstPackageCell = document.querySelector(`.${tableStyles['pkg-cell']}`) as HTMLElement;
+    const firstPackageCell = document.querySelector(`.${tableStyles.pkgCell}`) as HTMLElement;
     firstPackageCell.click();
     expect(selection).toEqual(new Set(['a-build', 'a-test']));
     expect(onSelectionMutated).toHaveBeenCalledTimes(2);

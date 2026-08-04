@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import globalStyles from '../styles/global.module.css';
+import topBarStyles from '../styles/topBar.module.css';
+import { getStatusClassName } from './statusHelpers';
+
 export interface ITopBarRefs {
   connectBtn: HTMLElement | undefined;
   statusPill: HTMLElement | undefined;
@@ -68,7 +72,7 @@ export function showConnectingStatus(
 ): void {
   if (!statusPill || !statusEmojiEl) return;
 
-  statusPill.className = 'status-pill status-Unspecified';
+  statusPill.className = `${globalStyles.statusPill} ${topBarStyles.statusPill} ${getStatusClassName('Unspecified')}`;
   statusEmojiEl.textContent = statusEmoji('Waiting');
   statusPill.textContent = overallStatusText('Connecting');
 }
@@ -86,8 +90,7 @@ export function updateStatusPill(
     pillStatus = graphSettings?.status || 'Unspecified';
   }
 
-  refs.statusPill.className = '';
-  refs.statusPill.classList.add('status-pill', 'status-' + pillStatus);
+  refs.statusPill.className = `${globalStyles.statusPill} ${topBarStyles.statusPill} ${getStatusClassName(pillStatus)}`;
   refs.statusEmojiEl.textContent = statusEmoji(pillStatus);
   refs.statusPill.textContent = overallStatusText(pillStatus);
 }
@@ -132,15 +135,15 @@ export function updateManagerState(refs: ITopBarRefs, graphSettings: ITopBarGrap
   const { debugBtn, verboseBtn, playPauseBtn, parallelismInput, managerStateEl } = refs;
 
   if (debugBtn) {
-    if (graphSettings.debugMode) debugBtn.classList.add('active');
-    else debugBtn.classList.remove('active');
+    if (graphSettings.debugMode) debugBtn.classList.add(globalStyles.active);
+    else debugBtn.classList.remove(globalStyles.active);
     debugBtn.setAttribute('aria-pressed', graphSettings.debugMode ? 'true' : 'false');
     debugBtn.title = graphSettings.debugMode ? 'Turn off debug logging' : 'Turn on debug logging';
   }
 
   if (verboseBtn) {
-    if (graphSettings.verbose) verboseBtn.classList.add('active');
-    else verboseBtn.classList.remove('active');
+    if (graphSettings.verbose) verboseBtn.classList.add(globalStyles.active);
+    else verboseBtn.classList.remove(globalStyles.active);
     verboseBtn.setAttribute('aria-pressed', graphSettings.verbose ? 'true' : 'false');
     verboseBtn.title = graphSettings.verbose ? 'Turn off verbose logging' : 'Turn on verbose logging';
   }
@@ -149,7 +152,7 @@ export function updateManagerState(refs: ITopBarRefs, graphSettings: ITopBarGrap
     (playPauseBtn?.querySelector('.codicon') as HTMLElement | null) ?? undefined;
   if (playPauseBtn) {
     if (!graphSettings.pauseNextIteration) {
-      playPauseBtn.classList.add('playing');
+      playPauseBtn.classList.add(globalStyles.playing);
       playPauseBtn.setAttribute('aria-label', 'Switch to manual (pause)');
       playPauseBtn.title = 'Pause automatic iterations';
       if (ppIcon) {
@@ -157,7 +160,7 @@ export function updateManagerState(refs: ITopBarRefs, graphSettings: ITopBarGrap
         ppIcon.classList.add('codicon-debug-pause');
       }
     } else {
-      playPauseBtn.classList.remove('playing');
+      playPauseBtn.classList.remove(globalStyles.playing);
       playPauseBtn.setAttribute('aria-label', 'Switch to automatic (play)');
       playPauseBtn.title = 'Resume automatic iterations';
       if (ppIcon) {
@@ -178,11 +181,11 @@ export function updateManagerState(refs: ITopBarRefs, graphSettings: ITopBarGrap
   const executeBtn: HTMLElement | undefined = document.getElementById('execute-btn') ?? undefined;
   if (executeBtn) {
     if (graphSettings.hasScheduledIteration) {
-      executeBtn.classList.add('queued');
+      executeBtn.classList.add(globalStyles.queued);
       executeBtn.title = 'Run once (changes detected)';
       executeBtn.setAttribute('aria-label', 'Run once (changes detected)');
     } else {
-      executeBtn.classList.remove('queued');
+      executeBtn.classList.remove(globalStyles.queued);
       executeBtn.title = 'Run once';
       executeBtn.setAttribute('aria-label', 'Run once');
     }

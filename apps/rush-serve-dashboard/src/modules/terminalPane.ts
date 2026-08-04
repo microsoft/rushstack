@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { AnsiSgrParser } from './ansiSgrParser';
+import globalStyles from '../styles/global.module.css';
+import terminalStyles from '../styles/terminalPane.module.css';
 
 interface ITerminalElementWithState extends HTMLElement {
   _savedWidth?: number;
@@ -50,7 +52,9 @@ function _appendChunk(
   if (segments && segments.length) {
     for (const seg of segments) {
       const span: HTMLSpanElement = document.createElement('span');
-      span.className = 'term-chunk ' + (kind === 'stderr' ? 'stderr' : 'stdout');
+      span.className = `${terminalStyles.termChunk} ${
+        kind === 'stderr' ? terminalStyles.stderr : terminalStyles.stdout
+      }`;
       if (seg.style) span.setAttribute('style', seg.style);
       span.textContent = seg.text;
       terminalBody.appendChild(span);
@@ -61,9 +65,9 @@ function _appendChunk(
     terminalBody.scrollTop = terminalBody.scrollHeight;
   }
 
-  if (terminalEl && !terminalEl.classList.contains('hidden')) {
-    terminalEl.classList.add('term-flash');
-    setTimeout(() => terminalEl.classList.remove('term-flash'), 350);
+  if (terminalEl && !terminalEl.classList.contains(terminalStyles.hidden)) {
+    terminalEl.classList.add(terminalStyles.termFlash);
+    setTimeout(() => terminalEl.classList.remove(terminalStyles.termFlash), 350);
   }
 }
 
@@ -113,7 +117,7 @@ function _wireResizer(terminalEl: HTMLElement | undefined, resizerEl: HTMLElemen
     newW = Math.max(minW, Math.min(maxW, newW));
 
     terminalWithState._savedWidth = newW;
-    if (!terminalWithState.classList.contains('hidden')) {
+    if (!terminalWithState.classList.contains(terminalStyles.hidden)) {
       terminalWithState.style.width = newW + 'px';
       terminalWithState.style.flex = '0 0 ' + newW + 'px';
     }
@@ -139,7 +143,7 @@ function _wireResizer(terminalEl: HTMLElement | undefined, resizerEl: HTMLElemen
     else if (e.key === 'ArrowRight') w = Math.min(maxW, w + step);
 
     terminalWithState._savedWidth = w;
-    if (!terminalWithState.classList.contains('hidden')) {
+    if (!terminalWithState.classList.contains(terminalStyles.hidden)) {
       terminalWithState.style.width = w + 'px';
       terminalWithState.style.flex = '0 0 ' + w + 'px';
     }
@@ -153,11 +157,11 @@ function _wireToggle(refs: ITerminalPaneRefs): void {
   const terminalWithState: ITerminalElementWithState = terminalEl as ITerminalElementWithState;
 
   toggleTerminalBtn.addEventListener('click', () => {
-    const currentlyHidden: boolean = terminalWithState.classList.contains('hidden');
+    const currentlyHidden: boolean = terminalWithState.classList.contains(terminalStyles.hidden);
 
     if (currentlyHidden) {
-      terminalWithState.classList.remove('hidden');
-      if (resizerEl) resizerEl.classList.remove('hidden');
+      terminalWithState.classList.remove(terminalStyles.hidden);
+      if (resizerEl) resizerEl.classList.remove(terminalStyles.hidden);
 
       if (terminalWithState._savedWidth) {
         terminalWithState.style.width = terminalWithState._savedWidth + 'px';
@@ -169,7 +173,7 @@ function _wireToggle(refs: ITerminalPaneRefs): void {
 
       if (resizerEl) resizerEl.tabIndex = 0;
       toggleTerminalBtn.setAttribute('aria-pressed', 'true');
-      toggleTerminalBtn.classList.add('active');
+      toggleTerminalBtn.classList.add(globalStyles.active);
     } else {
       try {
         terminalWithState._savedWidth = terminalWithState.getBoundingClientRect().width;
@@ -177,23 +181,23 @@ function _wireToggle(refs: ITerminalPaneRefs): void {
         // no-op
       }
 
-      terminalWithState.classList.add('hidden');
+      terminalWithState.classList.add(terminalStyles.hidden);
       if (resizerEl) {
-        resizerEl.classList.add('hidden');
+        resizerEl.classList.add(terminalStyles.hidden);
         resizerEl.tabIndex = -1;
       }
 
       terminalWithState.style.width = '';
       terminalWithState.style.flex = '';
       toggleTerminalBtn.setAttribute('aria-pressed', 'false');
-      toggleTerminalBtn.classList.remove('active');
+      toggleTerminalBtn.classList.remove(globalStyles.active);
     }
   });
 
-  const isVisible: boolean = !terminalWithState.classList.contains('hidden');
+  const isVisible: boolean = !terminalWithState.classList.contains(terminalStyles.hidden);
   toggleTerminalBtn.setAttribute('aria-pressed', isVisible ? 'true' : 'false');
-  if (isVisible) toggleTerminalBtn.classList.add('active');
-  else toggleTerminalBtn.classList.remove('active');
+  if (isVisible) toggleTerminalBtn.classList.add(globalStyles.active);
+  else toggleTerminalBtn.classList.remove(globalStyles.active);
 
   if (termAutoscrollBtn && termAutoScrollCheckbox) {
     termAutoscrollBtn.setAttribute('aria-pressed', termAutoScrollCheckbox.checked ? 'true' : 'false');

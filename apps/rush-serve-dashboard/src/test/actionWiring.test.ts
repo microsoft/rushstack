@@ -4,6 +4,7 @@
 import { wireLeftBarActions } from '../modules/leftBar';
 import { wireMainBarActions } from '../modules/mainBar';
 import { createSelectionBarController } from '../modules/selectionBar';
+import globalStyles from '../styles/global.module.css';
 import {
   computeWsUrl,
   overallStatusText,
@@ -152,7 +153,7 @@ describe('top and selection bars', () => {
     expect(refs.statusPill?.textContent).toBe('CONNECTING');
     const socket: WebSocket = { readyState: WebSocket.OPEN } as WebSocket;
     updateStatusPill(refs, socket, { status: 'Success' }, () => 'success');
-    expect(refs.statusPill?.classList.contains('status-Success')).toBe(true);
+    expect(refs.statusPill?.classList.contains(globalStyles.statusSuccess)).toBe(true);
 
     const updateSelectionUI = jest.fn();
     setConnected(refs, true, updateSelectionUI, ['execute-btn']);
@@ -173,7 +174,7 @@ describe('top and selection bars', () => {
     expect(refs.debugBtn?.getAttribute('aria-pressed')).toBe('true');
     expect(refs.playPauseBtn?.title).toBe('Resume automatic iterations');
     expect(refs.parallelismInput?.value).toBe('8');
-    expect(document.getElementById('execute-btn')?.classList.contains('queued')).toBe(true);
+    expect(document.getElementById('execute-btn')?.classList.contains(globalStyles.queued)).toBe(true);
 
     const controller = createSelectionBarController({
       getSelection: () => new Set(['build']),

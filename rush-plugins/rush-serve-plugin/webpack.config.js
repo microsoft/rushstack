@@ -41,7 +41,7 @@ function createWebpackConfig({ production }) {
         filename: 'dashboard.html',
         inject: 'body',
         scriptLoading: 'module',
-        template: path.join(dashboardPackageFolder, 'lib-esm', 'dashboard.html')
+        template: path.join(dashboardPackageFolder, 'assets', 'dashboard.html')
       })
     ]
   }));

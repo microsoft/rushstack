@@ -1,8 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import './styles/global.css';
-
+import globalStyles from './styles/global.module.css';
+import graphStyles from './styles/graphView.module.css';
+import selectionStyles from './styles/selectionBar.module.css';
+import tableStyles from './styles/tableView.module.css';
+import terminalStyles from './styles/terminalPane.module.css';
+import topBarStyles from './styles/topBar.module.css';
 import {
   applyExecutionStates as applyExecutionStatesMutation,
   patchOperationsFromPayload,
@@ -101,6 +105,101 @@ interface IGraphViewControllerLike {
   ensureGraph(): void;
   updateGraph(): void;
 }
+
+function addClasses(id: string, ...classNames: string[]): void {
+  document.getElementById(id)?.classList.add(...classNames);
+}
+
+function applyStaticStyles(): void {
+  document.body.classList.add(globalStyles.dashboard);
+  addClasses('top-bar', topBarStyles.topBar);
+  addClasses('overall-status', topBarStyles.overallStatus);
+  addClasses('status-emoji', topBarStyles.statusEmoji);
+  addClasses(
+    'status-pill',
+    globalStyles.statusPill,
+    topBarStyles.statusPill,
+    globalStyles.statusDisconnected
+  );
+  addClasses('app-title', globalStyles.appTitle);
+  addClasses('actions', globalStyles.actions, topBarStyles.actions);
+  addClasses('graph-state', globalStyles.graphState, topBarStyles.graphState);
+  addClasses('view-controls', globalStyles.viewControls, topBarStyles.viewControls);
+  addClasses('parallelism-label', globalStyles.flexRow, globalStyles.parallelismLabel);
+  addClasses('parallelism-input', globalStyles.parallelismInput);
+  addClasses('search-label', globalStyles.searchLabel);
+  addClasses('name-search', globalStyles.nameSearch);
+  addClasses('top-bar-spacer', globalStyles.flexSpacer);
+  addClasses(
+    'connection-form',
+    globalStyles.flexRow,
+    globalStyles.connectionForm,
+    topBarStyles.connectionForm
+  );
+  addClasses('connect-btn', topBarStyles.connectButton);
+
+  const iconButtonIds: string[] = [
+    'play-pause-btn',
+    'execute-btn',
+    'abort-execution-btn',
+    'debug-btn',
+    'verbose-btn',
+    'select-visible-btn',
+    'connect-btn',
+    'toggle-terminal-btn',
+    'term-clear-btn',
+    'term-autoscroll-btn'
+  ];
+  iconButtonIds.forEach((id) => addClasses(id, globalStyles.iconBtn));
+  addClasses('abort-execution-btn', globalStyles.stop);
+  ['debug-btn', 'verbose-btn', 'connect-btn', 'toggle-terminal-btn', 'term-autoscroll-btn'].forEach((id) =>
+    addClasses(id, globalStyles.toggle)
+  );
+
+  addClasses('selection-bar', selectionStyles.selectionBar);
+  addClasses('selection-heading', selectionStyles.selectionHeading);
+  addClasses('selection-actions', selectionStyles.selectionActions);
+  const actionButtonIds: string[] = [
+    'clear-selection-btn',
+    'invalidate-btn',
+    'close-runners-btn',
+    'set-enabled-default-btn',
+    'set-enabled-ignore-deps-btn',
+    'set-enabled-disabled-btn',
+    'selection-mode-btn',
+    'expand-deps-btn',
+    'expand-consumers-btn'
+  ];
+  actionButtonIds.forEach((id) => addClasses(id, globalStyles.action));
+  addClasses('clear-selection-btn', selectionStyles.selectionCountButton);
+  addClasses('selection-mode-btn', globalStyles.toggle);
+
+  addClasses('content-wrap', globalStyles.contentWrap);
+  addClasses('main', globalStyles.main);
+  addClasses('left', globalStyles.pane, globalStyles.leftPane);
+  addClasses('right', globalStyles.pane);
+  addClasses('operations-table-container', tableStyles.operationsTableContainer);
+  addClasses('operations-table', tableStyles.operationsTable);
+  addClasses('table-stats', tableStyles.tableStats);
+  addClasses('graph-container', graphStyles.graphContainer);
+  addClasses('phase-pane', graphStyles.phasePane);
+  addClasses('phase-groups', graphStyles.phaseGroups);
+  addClasses('graph-wrapper', graphStyles.graphWrapper);
+  addClasses('graph', graphStyles.graph);
+  addClasses('graph-legend', graphStyles.graphLegend);
+
+  addClasses('resizer', terminalStyles.resizer);
+  addClasses('terminal', terminalStyles.terminalContainer);
+  addClasses('terminal-header', terminalStyles.terminalHeader);
+  addClasses('terminal-title', terminalStyles.terminalTitle);
+  addClasses('terminal-controls', terminalStyles.terminalControls);
+  addClasses('terminal-body', terminalStyles.terminalBody);
+  addClasses('term-autoscroll', terminalStyles.termAutoscroll);
+  addClasses('toggle-terminal-btn', terminalStyles.toggleTerminalButton);
+  addClasses('term-autoscroll-icon', terminalStyles.vertical);
+}
+
+applyStaticStyles();
 
 const statusPill: HTMLElement = document.getElementById('status-pill') as HTMLElement;
 const statusEmojiEl: HTMLElement = document.getElementById('status-emoji') as HTMLElement;

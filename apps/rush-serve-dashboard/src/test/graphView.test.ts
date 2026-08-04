@@ -48,13 +48,13 @@ describe('graph view controller', () => {
       'test->build'
     ]);
     expect(
-      graphState.nodeElements.get('build')?.querySelector(`.${graphStyles['active-indicator']}`)
+      graphState.nodeElements.get('build')?.querySelector(`.${graphStyles.activeIndicator}`)
     ).not.toBeNull();
     expect(
-      graphState.nodeElements.get('test')?.querySelector(`.${graphStyles['pending-indicator']}`)
+      graphState.nodeElements.get('test')?.querySelector(`.${graphStyles.pendingIndicator}`)
     ).not.toBeNull();
     expect(
-      graphState.nodeElements.get('test')?.querySelector(`.${graphStyles['enabled-indicator']}`)?.textContent
+      graphState.nodeElements.get('test')?.querySelector(`.${graphStyles.enabledIndicator}`)?.textContent
     ).toBe('🔴');
     expect(renderPhaseLegend).toHaveBeenCalled();
 

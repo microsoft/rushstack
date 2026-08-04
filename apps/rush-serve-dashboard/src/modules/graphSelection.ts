@@ -103,14 +103,14 @@ export function createGraphSelectionController(
   const _beginDragSelection = (e: MouseEvent): void => {
     if (options.getCurrentView() !== 'graph' || e.button !== 0) return;
     const target: Element | null = e.target as Element | null;
-    if (target && target.closest && target.closest(`.${graphStyles['op-node']}`)) return;
+    if (target && target.closest && target.closest(`.${graphStyles.opNode}`)) return;
 
     dragSelecting = true;
     dragStart = _graphPointFromEvent(e);
     dragLast = dragStart;
     preDragSelection = new Set(options.getSelection());
     graphMarqueeEl = document.createElement('div');
-    graphMarqueeEl.className = graphStyles['graph-marquee'];
+    graphMarqueeEl.className = graphStyles.graphMarquee;
     options.graphEl.appendChild(graphMarqueeEl);
     _updateMarquee();
     e.preventDefault();

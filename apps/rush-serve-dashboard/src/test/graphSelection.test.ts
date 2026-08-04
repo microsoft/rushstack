@@ -68,6 +68,6 @@ describe('graph selection controller', () => {
 
     expect(selection).toEqual(new Set(['inside']));
     expect(onLiveSelectionChanged).toHaveBeenCalled();
-    expect(graphEl.querySelector(`.${graphStyles['graph-marquee']}`)).toBeNull();
+    expect(graphEl.querySelector(`.${graphStyles.graphMarquee}`)).toBeNull();
   });
 });

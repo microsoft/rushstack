@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import graphStyles from '../styles/graphView.module.css';
+import { getStatusClassName } from './statusHelpers';
 
 interface IPhaseLegendOperation {
   name: string;
@@ -131,7 +132,7 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
 
     if (!summaries.length) {
       const empty: HTMLDivElement = document.createElement('div');
-      empty.className = graphStyles['phase-pane-empty'];
+      empty.className = graphStyles.phasePaneEmpty;
       empty.textContent = 'No phases';
       options.phaseGroupsEl.appendChild(empty);
       return;
@@ -139,17 +140,17 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
 
     for (const summary of summaries) {
       const group: HTMLDivElement = document.createElement('div');
-      group.className = graphStyles['phase-group'];
+      group.className = graphStyles.phaseGroup;
 
       const header: HTMLDivElement = document.createElement('div');
-      header.className = graphStyles['phase-header'];
+      header.className = graphStyles.phaseHeader;
 
       const emoji: HTMLSpanElement = document.createElement('span');
-      emoji.className = graphStyles['phase-status-emoji'];
+      emoji.className = graphStyles.phaseStatusEmoji;
       emoji.textContent = options.statusEmoji(summary.status);
 
       const nameSpan: HTMLSpanElement = document.createElement('span');
-      nameSpan.className = graphStyles['phase-name'];
+      nameSpan.className = graphStyles.phaseName;
       nameSpan.textContent = summary.phase.replace(/^_phase:/, '');
 
       header.appendChild(emoji);
@@ -158,7 +159,7 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
 
       if (summary.problemOps.length) {
         const list: HTMLUListElement = document.createElement('ul');
-        list.className = graphStyles['phase-problems'];
+        list.className = graphStyles.phaseProblems;
 
         const sortedProblems: IPhaseProblemOperation[] = [...summary.problemOps].sort((a, b) => {
           const ai: number = phaseStatusPriorityIndex.get(a.displayStatus) ?? 999;
@@ -175,7 +176,7 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
           const item: HTMLLIElement = document.createElement('li');
 
           const status: HTMLSpanElement = document.createElement('span');
-          status.className = graphStyles['phase-problem-emoji'];
+          status.className = graphStyles.phaseProblemEmoji;
           status.textContent = options.statusEmoji(displayStatus);
           item.appendChild(status);
 
@@ -266,27 +267,27 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
     const statusColors: Record<string, string> = options.getStatusColors();
 
     const columnsWrap: HTMLDivElement = document.createElement('div');
-    columnsWrap.className = graphStyles['legend-columns'];
+    columnsWrap.className = graphStyles.legendColumns;
 
     const colPrimary: HTMLDivElement = document.createElement('div');
-    colPrimary.className = graphStyles['legend-col'];
+    colPrimary.className = graphStyles.legendCol;
 
     const primaryHead: HTMLDivElement = document.createElement('div');
-    primaryHead.className = graphStyles['legend-heading'];
+    primaryHead.className = graphStyles.legendHeading;
     primaryHead.textContent = 'Statuses';
     colPrimary.appendChild(primaryHead);
 
     for (const status of legendOrder) {
       const row: HTMLDivElement = document.createElement('div');
-      row.className = graphStyles['legend-row'];
+      row.className = graphStyles.legendRow;
 
       const sample: HTMLSpanElement = document.createElement('span');
-      sample.className = graphStyles['legend-emoji'];
+      sample.className = graphStyles.legendEmoji;
       sample.textContent = options.statusEmoji(status);
       sample.style.borderColor = statusColors[status] || '#4b5563';
 
       const labelWrap: HTMLDivElement = document.createElement('div');
-      labelWrap.className = graphStyles['legend-label-wrap'];
+      labelWrap.className = graphStyles.legendLabelWrap;
       const titleSpan: HTMLSpanElement = document.createElement('span');
       titleSpan.textContent = options.overallStatusText(status);
       labelWrap.appendChild(titleSpan);
@@ -297,15 +298,15 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
     }
 
     const unknownRow: HTMLDivElement = document.createElement('div');
-    unknownRow.className = graphStyles['legend-row'];
+    unknownRow.className = graphStyles.legendRow;
 
     const unknownSample: HTMLSpanElement = document.createElement('span');
-    unknownSample.className = `${graphStyles['legend-emoji']} status-Unknown`;
+    unknownSample.className = `${graphStyles.legendEmoji} ${getStatusClassName('Unknown')}`;
     unknownSample.textContent = '❓';
     unknownSample.style.borderColor = '#4b5563';
 
     const unknownLabelWrap: HTMLDivElement = document.createElement('div');
-    unknownLabelWrap.className = graphStyles['legend-label-wrap'];
+    unknownLabelWrap.className = graphStyles.legendLabelWrap;
 
     const unknownTitle: HTMLSpanElement = document.createElement('span');
     unknownTitle.textContent = 'UNKNOWN';
@@ -320,20 +321,20 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
     colPrimary.appendChild(unknownRow);
 
     const colSecondary: HTMLDivElement = document.createElement('div');
-    colSecondary.className = graphStyles['legend-col'];
+    colSecondary.className = graphStyles.legendCol;
 
     const secondaryHead: HTMLDivElement = document.createElement('div');
-    secondaryHead.className = graphStyles['legend-heading'];
+    secondaryHead.className = graphStyles.legendHeading;
     secondaryHead.textContent = 'State Modifiers';
     colSecondary.appendChild(secondaryHead);
 
     const addModifier = (sampleFactory: () => HTMLElement, label: string, detail?: string): void => {
       const row: HTMLDivElement = document.createElement('div');
-      row.className = graphStyles['legend-row'];
+      row.className = graphStyles.legendRow;
       const sample: HTMLElement = sampleFactory();
 
       const labelWrap: HTMLDivElement = document.createElement('div');
-      labelWrap.className = graphStyles['legend-label-wrap'];
+      labelWrap.className = graphStyles.legendLabelWrap;
       const titleSpan: HTMLSpanElement = document.createElement('span');
       titleSpan.textContent = label;
       labelWrap.appendChild(titleSpan);
@@ -351,7 +352,7 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
 
     const makeNodeBox = (borderStyle?: string, boxShadow?: string, borderColor?: string): HTMLElement => {
       const sample: HTMLSpanElement = document.createElement('span');
-      sample.className = graphStyles['legend-emoji'];
+      sample.className = graphStyles.legendEmoji;
       if (borderStyle) sample.style.borderStyle = borderStyle;
       if (borderColor) sample.style.borderColor = borderColor;
       if (boxShadow) sample.style.boxShadow = boxShadow;
@@ -364,7 +365,7 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
 
     const makeActive = (): HTMLElement => {
       const wrap: HTMLDivElement = document.createElement('div');
-      wrap.className = graphStyles['legend-enabled-sample'];
+      wrap.className = graphStyles.legendEnabledSample;
 
       const base: HTMLSpanElement = document.createElement('span');
       base.style.opacity = '0.15';
@@ -386,7 +387,7 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
 
     const makePending = (): HTMLElement => {
       const wrap: HTMLDivElement = document.createElement('div');
-      wrap.className = graphStyles['legend-enabled-sample'];
+      wrap.className = graphStyles.legendEnabledSample;
 
       const base: HTMLSpanElement = document.createElement('span');
       base.style.opacity = '0.15';
@@ -408,7 +409,7 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
 
     const makeEnabledSample = (emoji: string): HTMLElement => {
       const wrap: HTMLDivElement = document.createElement('div');
-      wrap.className = graphStyles['legend-enabled-sample'];
+      wrap.className = graphStyles.legendEnabledSample;
       const sub: HTMLSpanElement = document.createElement('span');
       sub.className = graphStyles.sub;
       sub.textContent = emoji;
@@ -422,7 +423,7 @@ export function createPhaseLegendController(options: IPhaseLegendControllerOptio
     addModifier(makeDotted, 'Filtered out', 'Hidden by view/search');
 
     const enabledHead: HTMLDivElement = document.createElement('div');
-    enabledHead.className = graphStyles['legend-subheading'];
+    enabledHead.className = graphStyles.legendSubheading;
     enabledHead.textContent = 'Enabled States';
     colSecondary.appendChild(enabledHead);
 

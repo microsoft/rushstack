@@ -1,105 +1,105 @@
 /* Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license. */
 /* See LICENSE in the project root for license information. */
 
-:global(#operations-table-container) {
+.operationsTableContainer {
   flex: 1;
   min-height: 0;
   overflow: auto;
 }
 
-table {
+.operationsTable {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.75rem;
 }
 
-thead {
+.operationsTable thead {
   position: sticky;
   top: 0;
   background: var(--panel-alt);
   z-index: 2;
 }
 
-th,
-td {
+.operationsTable th,
+.operationsTable td {
   padding: 0.35rem 0.5rem;
   border-bottom: 1px solid var(--border);
   text-align: left;
   vertical-align: top;
 }
 
-tbody tr {
+.operationsTable tbody tr {
   cursor: pointer;
 }
 
-tbody tr.selected {
+.operationsTable tbody tr.selected {
   background: rgba(var(--rgb-accent), 0.15);
 }
 
-tbody tr:hover {
+.operationsTable tbody tr:hover {
   background: rgba(var(--rgb-white), 0.05);
 }
 
-td.pivot-cell.selected {
+.operationsTable td.pivotCell.selected {
   background: rgba(var(--rgb-accent), 0.22);
 }
 
-tr.selected > td.pkg-cell {
+.operationsTable tr.selected > td.pkgCell {
   background: rgba(var(--rgb-accent), 0.18);
 }
 
 /* Prevent brief native text highlight flash during selection interactions */
-td.pivot-cell,
-td.pkg-cell {
+.operationsTable td.pivotCell,
+.operationsTable td.pkgCell {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
 }
 
-th.sortable {
+.operationsTable th.sortable {
   user-select: none;
 }
 
-th.sortable span.sort-indicator {
+.operationsTable th.sortable span.sortIndicator {
   opacity: 0.5;
   margin-left: 4px;
 }
 
-.status-row {
+.statusRow {
   display: flex;
   gap: 4px;
   align-items: center;
   flex-wrap: wrap;
 }
 
-.status-row .badges {
+.statusRow .badges {
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
   margin-left: 4px;
 }
 
-td.status-cell {
+.operationsTable td.statusCell {
   white-space: nowrap;
 }
 
-td.status-cell .status-pill {
+.operationsTable td.statusCell .statusPill {
   margin-left: 4px;
 }
 
-.pivot-enabled {
+.pivotEnabled {
   margin-left: 4px;
   font-size: 0.75rem;
 }
 
-.pivot-active {
+.pivotActive {
   margin-left: 4px;
   font-size: 0.75rem;
   position: relative;
   top: 1px;
 }
 
-:global(#table-stats) {
+.tableStats {
   font-size: 0.6rem;
   color: var(--muted);
   padding: 0.25rem 0.75rem 0.5rem;

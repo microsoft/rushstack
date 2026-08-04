@@ -3,6 +3,8 @@
 
 import { createPhaseLegendController } from '../modules/phaseLegend';
 import { createTerminalPaneController } from '../modules/terminalPane';
+import graphStyles from '../styles/graphView.module.css';
+import terminalStyles from '../styles/terminalPane.module.css';
 
 describe('phase and legend controller', () => {
   beforeEach(() => {
@@ -49,7 +51,7 @@ describe('phase and legend controller', () => {
       'legend-collapse-btn'
     ) as HTMLButtonElement;
     collapseButton.click();
-    expect(document.getElementById('legend')?.classList.contains('collapsed')).toBe(true);
+    expect(document.getElementById('legend')?.classList.contains(graphStyles.collapsed)).toBe(true);
     expect(window.localStorage.getItem('rushServeLegendCollapsed')).toBe('1');
   });
 });
@@ -82,18 +84,18 @@ describe('terminal pane controller', () => {
     });
 
     controller.appendChunk('stderr', '\u001b[31mfailed');
-    const chunk: HTMLElement = terminalBody.querySelector('.term-chunk') as HTMLElement;
+    const chunk: HTMLElement = terminalBody.querySelector(`.${terminalStyles.termChunk}`) as HTMLElement;
     expect(chunk.textContent).toBe('failed');
-    expect(chunk.classList.contains('stderr')).toBe(true);
+    expect(chunk.classList.contains(terminalStyles.stderr)).toBe(true);
     expect(chunk.style.color).toBe('rgb(170, 0, 0)');
-    expect(terminalEl.classList.contains('term-flash')).toBe(true);
+    expect(terminalEl.classList.contains(terminalStyles.termFlash)).toBe(true);
     jest.advanceTimersByTime(350);
-    expect(terminalEl.classList.contains('term-flash')).toBe(false);
+    expect(terminalEl.classList.contains(terminalStyles.termFlash)).toBe(false);
 
     document.getElementById('autoscroll')?.click();
     expect((document.getElementById('autoscroll-checkbox') as HTMLInputElement).checked).toBe(false);
     document.getElementById('toggle')?.click();
-    expect(terminalEl.classList.contains('hidden')).toBe(true);
+    expect(terminalEl.classList.contains(terminalStyles.hidden)).toBe(true);
     document.getElementById('clear')?.click();
     expect(terminalBody.textContent).toBe('');
   });
