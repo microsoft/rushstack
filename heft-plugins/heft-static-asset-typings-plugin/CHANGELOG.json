@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-static-asset-typings-plugin",
   "entries": [
     {
+      "version": "0.1.19",
+      "tag": "@rushstack/heft-static-asset-typings-plugin_v0.1.19",
+      "date": "Tue, 04 Aug 2026 00:17:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.17.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.18",
       "tag": "@rushstack/heft-static-asset-typings-plugin_v0.1.18",
       "date": "Tue, 21 Jul 2026 02:53:23 GMT",

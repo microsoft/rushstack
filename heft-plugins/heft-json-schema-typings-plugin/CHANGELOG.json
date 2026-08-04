@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-json-schema-typings-plugin",
   "entries": [
     {
+      "version": "1.2.23",
+      "tag": "@rushstack/heft-json-schema-typings-plugin_v1.2.23",
+      "date": "Tue, 04 Aug 2026 00:17:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.17.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.22",
       "tag": "@rushstack/heft-json-schema-typings-plugin_v1.2.22",
       "date": "Tue, 21 Jul 2026 02:53:23 GMT",

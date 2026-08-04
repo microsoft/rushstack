@@ -1,6 +1,13 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Tue, 21 Jul 2026 02:53:23 GMT and should not be manually modified.
+This log was last generated on Tue, 04 Aug 2026 00:17:24 GMT and should not be manually modified.
+
+## 0.17.0
+Tue, 04 Aug 2026 00:17:24 GMT
+
+### Minor changes
+
+- Add opt-in declaration source map generation so editors can resolve go-to-definition from generated typings to the original source file.
 
 ## 0.16.22
 Tue, 21 Jul 2026 02:53:23 GMT

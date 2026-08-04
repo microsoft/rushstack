@@ -2,6 +2,18 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.17.0",
+      "tag": "@rushstack/typings-generator_v0.17.0",
+      "date": "Tue, 04 Aug 2026 00:17:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add opt-in declaration source map generation so editors can resolve go-to-definition from generated typings to the original source file."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.16.22",
       "tag": "@rushstack/typings-generator_v0.16.22",
       "date": "Tue, 21 Jul 2026 02:53:23 GMT",

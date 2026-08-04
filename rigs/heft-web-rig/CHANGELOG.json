@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "1.4.29",
+      "tag": "@rushstack/heft-web-rig_v1.4.29",
+      "date": "Tue, 04 Aug 2026 00:17:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-static-asset-typings-plugin\" to `0.1.19`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.28",
       "tag": "@rushstack/heft-web-rig_v1.4.28",
       "date": "Tue, 21 Jul 2026 02:53:23 GMT",

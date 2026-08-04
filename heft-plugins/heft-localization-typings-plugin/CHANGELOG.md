@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-localization-typings-plugin
 
-This log was last generated on Tue, 21 Jul 2026 02:53:23 GMT and should not be manually modified.
+This log was last generated on Tue, 04 Aug 2026 00:17:24 GMT and should not be manually modified.
+
+## 1.2.0
+Tue, 04 Aug 2026 00:17:24 GMT
+
+### Minor changes
+
+- Add opt-in declaration source map generation so editors can resolve go-to-definition from generated typings to the original source file.
 
 ## 1.1.23
 Tue, 21 Jul 2026 02:53:23 GMT
