@@ -454,6 +454,10 @@ importers:
         version: 5.8.2
 
   ../../../apps/rush-serve-dashboard:
+    dependencies:
+      tslib:
+        specifier: ~2.8.1
+        version: 2.8.1
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -3209,7 +3213,7 @@ importers:
     dependencies:
       '@jest/core':
         specifier: ~30.3.0
-        version: 30.3.0(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))
+        version: 30.3.0
       '@jest/reporters':
         specifier: ~30.3.0
         version: 30.3.0
@@ -3227,7 +3231,7 @@ importers:
         version: link:../../libraries/terminal
       jest-config:
         specifier: ~30.3.0
-        version: 30.3.0(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))
+        version: 30.3.0(@types/node@20.17.19)
       jest-resolve:
         specifier: ~30.3.0
         version: 30.3.0
@@ -3642,7 +3646,7 @@ importers:
         version: 2.4.0
       webpack-dev-server:
         specifier: ^5.1.0
-        version: 5.2.3(@types/webpack@4.41.32)(webpack@5.105.4)
+        version: 5.2.3(webpack@5.105.4)
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -4598,7 +4602,7 @@ importers:
         version: 1.2.22(@types/node@20.17.19)
       '@rushstack/heft-node-rig':
         specifier: 2.11.45
-        version: 2.11.45(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)
+        version: 2.11.45(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/node@20.17.19)(jest-environment-jsdom@30.3.0)
       '@types/jest':
         specifier: 30.0.0
         version: 30.0.0
@@ -4789,7 +4793,7 @@ importers:
         version: 5.8.2
       url-loader:
         specifier: ~4.1.1
-        version: 4.1.1(file-loader@6.2.0(webpack@5.105.4))(webpack@5.105.4)
+        version: 4.1.1(webpack@5.105.4)
       webpack:
         specifier: ~5.105.2
         version: 5.105.4
@@ -22919,7 +22923,7 @@ snapshots:
       - supports-color
       - ts-node
 
-  '@jest/core@30.3.0(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))':
+  '@jest/core@30.3.0':
     dependencies:
       '@jest/console': 30.3.0
       '@jest/pattern': 30.0.1
@@ -22934,7 +22938,7 @@ snapshots:
       exit-x: 0.2.2
       graceful-fs: 4.2.11
       jest-changed-files: 30.3.0
-      jest-config: 30.3.0(@types/node@22.9.3)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))
+      jest-config: 30.3.0(@types/node@22.9.3)
       jest-haste-map: 30.3.0
       jest-message-util: 30.3.0
       jest-regex-util: 30.0.1
@@ -24669,16 +24673,16 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft-jest-plugin@2.0.12(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)':
+  '@rushstack/heft-jest-plugin@2.0.12(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)':
     dependencies:
-      '@jest/core': 30.3.0(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))
+      '@jest/core': 30.3.0
       '@jest/reporters': 30.3.0
       '@jest/transform': 30.3.0
       '@rushstack/heft': 1.2.22(@types/node@20.17.19)
       '@rushstack/heft-config-file': 0.20.12(@types/node@20.17.19)
       '@rushstack/node-core-library': 5.23.3(@types/node@20.17.19)
       '@rushstack/terminal': 0.24.2(@types/node@20.17.19)
-      jest-config: 30.3.0(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))
+      jest-config: 30.3.0(@types/node@20.17.19)
       jest-resolve: 30.3.0
       jest-snapshot: 30.3.0
     optionalDependencies:
@@ -24702,13 +24706,13 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft-node-rig@2.11.45(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)':
+  '@rushstack/heft-node-rig@2.11.45(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/node@20.17.19)(jest-environment-jsdom@30.3.0)':
     dependencies:
       '@microsoft/api-extractor': 7.58.12(@types/node@20.17.19)
       '@rushstack/eslint-config': 4.6.4(eslint@9.37.0)(typescript@5.8.2)
       '@rushstack/heft': 1.2.22(@types/node@20.17.19)
       '@rushstack/heft-api-extractor-plugin': 1.3.22(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/node@20.17.19)
-      '@rushstack/heft-jest-plugin': 2.0.12(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)
+      '@rushstack/heft-jest-plugin': 2.0.12(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)
       '@rushstack/heft-lint-plugin': 1.2.22(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/node@20.17.19)
       '@rushstack/heft-typescript-plugin': 1.3.17(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/node@20.17.19)
       '@types/jest': 30.0.0
@@ -29715,6 +29719,8 @@ snapshots:
 
   dedent@0.7.0: {}
 
+  dedent@1.7.2: {}
+
   dedent@1.7.2(babel-plugin-macros@3.1.0):
     optionalDependencies:
       babel-plugin-macros: 3.1.0
@@ -30258,14 +30264,6 @@ snapshots:
       esbuild: 0.25.12
     transitivePeerDependencies:
       - supports-color
-
-  esbuild-register@3.6.0(esbuild@0.28.0):
-    dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
-      esbuild: 0.28.0
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
 
   esbuild-runner@2.2.2(esbuild@0.14.54):
     dependencies:
@@ -30838,7 +30836,7 @@ snapshots:
 
   eslint@8.57.1:
     dependencies:
-      '@eslint-community/eslint-utils': 4.9.1(eslint@8.57.1)
+      '@eslint-community/eslint-utils': 4.9.1(eslint@9.37.0)
       '@eslint-community/regexpp': 4.12.2
       '@eslint/eslintrc': 2.1.4
       '@eslint/js': 8.57.1
@@ -31427,13 +31425,6 @@ snapshots:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
       webpack: 4.47.0
-
-  file-loader@6.2.0(webpack@5.105.4):
-    dependencies:
-      loader-utils: 2.0.4
-      schema-utils: 3.3.0
-      webpack: 5.105.4
-    optional: true
 
   file-system-cache@1.1.0:
     dependencies:
@@ -32822,7 +32813,7 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  jest-circus@30.3.0(babel-plugin-macros@3.1.0):
+  jest-circus@30.3.0:
     dependencies:
       '@jest/environment': 30.3.0
       '@jest/expect': 30.3.0
@@ -32831,7 +32822,7 @@ snapshots:
       '@types/node': 22.9.3
       chalk: 4.1.2
       co: 4.6.0
-      dedent: 1.7.2(babel-plugin-macros@3.1.0)
+      dedent: 1.7.2
       is-generator-fn: 2.1.0
       jest-each: 30.3.0
       jest-matcher-utils: 30.3.0
@@ -32927,7 +32918,7 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  jest-config@30.3.0(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0)):
+  jest-config@30.3.0(@types/node@20.17.19):
     dependencies:
       '@babel/core': 7.29.0
       '@jest/get-type': 30.1.0
@@ -32940,7 +32931,7 @@ snapshots:
       deepmerge: 4.3.1
       glob: 10.5.0
       graceful-fs: 4.2.11
-      jest-circus: 30.3.0(babel-plugin-macros@3.1.0)
+      jest-circus: 30.3.0
       jest-docblock: 30.2.0
       jest-environment-node: 30.3.0
       jest-regex-util: 30.0.1
@@ -32954,12 +32945,11 @@ snapshots:
       strip-json-comments: 3.1.1
     optionalDependencies:
       '@types/node': 20.17.19
-      esbuild-register: 3.6.0(esbuild@0.28.0)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
 
-  jest-config@30.3.0(@types/node@22.9.3)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0)):
+  jest-config@30.3.0(@types/node@22.9.3):
     dependencies:
       '@babel/core': 7.29.0
       '@jest/get-type': 30.1.0
@@ -32972,7 +32962,7 @@ snapshots:
       deepmerge: 4.3.1
       glob: 10.5.0
       graceful-fs: 4.2.11
-      jest-circus: 30.3.0(babel-plugin-macros@3.1.0)
+      jest-circus: 30.3.0
       jest-docblock: 30.2.0
       jest-environment-node: 30.3.0
       jest-regex-util: 30.0.1
@@ -32986,7 +32976,6 @@ snapshots:
       strip-json-comments: 3.1.1
     optionalDependencies:
       '@types/node': 22.9.3
-      esbuild-register: 3.6.0(esbuild@0.28.0)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -37738,14 +37727,12 @@ snapshots:
     optionalDependencies:
       file-loader: 6.2.0(webpack@4.47.0)
 
-  url-loader@4.1.1(file-loader@6.2.0(webpack@5.105.4))(webpack@5.105.4):
+  url-loader@4.1.1(webpack@5.105.4):
     dependencies:
       loader-utils: 2.0.4
       mime-types: 2.1.35
       schema-utils: 3.3.0
       webpack: 5.105.4
-    optionalDependencies:
-      file-loader: 6.2.0(webpack@5.105.4)
 
   url@0.10.3:
     dependencies:
@@ -37974,6 +37961,17 @@ snapshots:
       '@types/webpack': 4.41.32
       webpack: 5.105.4
 
+  webpack-dev-middleware@7.4.5(webpack@5.105.4):
+    dependencies:
+      colorette: 2.0.20
+      memfs: 4.57.1
+      mime-types: 3.0.2
+      on-finished: 2.4.1
+      range-parser: 1.2.1
+      schema-utils: 4.3.3
+    optionalDependencies:
+      webpack: 5.105.4
+
   webpack-dev-server@4.9.3(@types/webpack@4.41.32)(webpack@4.47.0):
     dependencies:
       '@types/bonjour': 3.5.13
@@ -38057,7 +38055,7 @@ snapshots:
       - utf-8-validate
     optional: true
 
-  webpack-dev-server@5.2.3(@types/webpack@4.41.32)(webpack@5.105.4):
+  webpack-dev-server@5.2.3(webpack@5.105.4):
     dependencies:
       '@types/bonjour': 3.5.13
       '@types/connect-history-api-fallback': 1.5.4
@@ -38086,10 +38084,9 @@ snapshots:
       serve-index: 1.9.2
       sockjs: 0.3.24
       spdy: 4.0.2
-      webpack-dev-middleware: 7.4.5(@types/webpack@4.41.32)(webpack@5.105.4)
+      webpack-dev-middleware: 7.4.5(webpack@5.105.4)
       ws: 8.21.0
     optionalDependencies:
-      '@types/webpack': 4.41.32
       webpack: 5.105.4
     transitivePeerDependencies:
       - bufferutil

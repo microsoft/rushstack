@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import graphStyles from '../styles/graphView.module.css';
 import { pruneGraphOperations } from './graphFiltering';
 
 interface IOperationLogFileURLs {
@@ -272,15 +273,15 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
         const button: HTMLButtonElement = document.createElement('button');
         button.type = 'button';
         button.setAttribute('aria-label', name);
-        button.className = 'op-node';
+        button.className = graphStyles['op-node'];
         button.dataset.name = name;
         button.style.transform = `translate(${x}px, ${y}px)`;
         const emojiSpan: HTMLSpanElement = document.createElement('span');
-        emojiSpan.className = 'emoji';
+        emojiSpan.className = graphStyles.emoji;
         emojiSpan.textContent = options.getStatusEmoji(options.getComputeDisplayStatus(op));
         button.appendChild(emojiSpan);
         const enabledSup: HTMLSpanElement = document.createElement('span');
-        enabledSup.className = 'enabled-indicator';
+        enabledSup.className = graphStyles['enabled-indicator'];
         enabledSup.textContent = '';
         button.appendChild(enabledSup);
         button.addEventListener('click', (e) => {
@@ -372,13 +373,13 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
       const isQueuedNext: boolean = !!(queuedState && queuedState.runInThisIteration === true);
       const isFilteredOut: boolean = options.getFilteredOutNames().has(name);
       const isSearchFiltered: boolean = options.getSearchFilteredOutNames().has(name);
-      const emojiSpan: Element | null = div.querySelector('.emoji');
+      const emojiSpan: Element | undefined = div.getElementsByClassName(graphStyles.emoji)[0];
       if (emojiSpan && (prevStatus !== displayStatus || !emojiSpan.textContent)) {
         emojiSpan.textContent = options.getStatusEmoji(displayStatus);
       }
-      const enabledSpan: HTMLSpanElement | null = div.querySelector(
-        '.enabled-indicator'
-      ) as HTMLSpanElement | null;
+      const enabledSpan: HTMLSpanElement | undefined = div.getElementsByClassName(
+        graphStyles['enabled-indicator']
+      )[0] as HTMLSpanElement | undefined;
       if (enabledSpan) {
         let indicator: string = '';
         if (op.noop) {
@@ -410,15 +411,15 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
       div.style.borderColor = baseColor;
       const isSelected: boolean = options.getSelection().has(name);
       div.setAttribute('aria-pressed', String(isSelected));
-      if (isSelected) div.classList.add('selected');
-      else div.classList.remove('selected');
-      let activeSpan: HTMLSpanElement | null = div.querySelector(
-        '.active-indicator'
-      ) as HTMLSpanElement | null;
+      if (isSelected) div.classList.add(graphStyles.selected);
+      else div.classList.remove(graphStyles.selected);
+      let activeSpan: HTMLSpanElement | undefined = div.getElementsByClassName(
+        graphStyles['active-indicator']
+      )[0] as HTMLSpanElement | undefined;
       if (op.isActive) {
         if (!activeSpan) {
           activeSpan = document.createElement('span');
-          activeSpan.className = 'active-indicator';
+          activeSpan.className = graphStyles['active-indicator'];
           activeSpan.textContent = '⚡';
           div.appendChild(activeSpan);
         }
@@ -426,13 +427,13 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
       } else if (activeSpan) {
         activeSpan.remove();
       }
-      let pendingSpan: HTMLSpanElement | null = div.querySelector(
-        '.pending-indicator'
-      ) as HTMLSpanElement | null;
+      let pendingSpan: HTMLSpanElement | undefined = div.getElementsByClassName(
+        graphStyles['pending-indicator']
+      )[0] as HTMLSpanElement | undefined;
       if (isQueuedNext) {
         if (!pendingSpan) {
           pendingSpan = document.createElement('span');
-          pendingSpan.className = 'pending-indicator';
+          pendingSpan.className = graphStyles['pending-indicator'];
           pendingSpan.textContent = '🕒';
           div.appendChild(pendingSpan);
         }
@@ -440,13 +441,19 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
       } else if (pendingSpan) {
         pendingSpan.remove();
       }
-      div.classList.remove('not-running', 'filtered-out', 'filtered-out-search', 'dashed', 'dotted');
+      div.classList.remove(
+        graphStyles['not-running'],
+        graphStyles['filtered-out'],
+        graphStyles['filtered-out-search'],
+        graphStyles.dashed,
+        graphStyles.dotted
+      );
       if (isSearchFiltered) {
-        div.classList.add('filtered-out-search');
+        div.classList.add(graphStyles['filtered-out-search']);
       } else if (isFilteredOut) {
-        div.classList.add('filtered-out');
+        div.classList.add(graphStyles['filtered-out']);
       } else if (notRunning) {
-        div.classList.add('not-running');
+        div.classList.add(graphStyles['not-running']);
       }
       div.title = `${op.name}\nLast Result: ${(options.getLastExecutionResults().get(name) || {}).status || displayStatus}\n${options.getOverallStatusText(displayStatus)}${op.isActive ? '\nHas in-memory state' : ''}`;
       graphState.nodeStatus.set(name, displayStatus);
@@ -499,14 +506,19 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
       rec.path.setAttribute('d', d);
       const depStatus: string = graphState.nodeStatus.get(rec.to) || 'Ready';
       rec.path.setAttribute('stroke', statusColors[depStatus] || '#4b5563');
-      rec.path.setAttribute('class', 'edge');
+      rec.path.setAttribute('class', graphStyles.edge);
       rec.path.setAttribute('marker-end', `url(#arrowhead-${depStatus})`);
       const fromOp: IOperationInfo | undefined = options.getOperations().get(rec.from);
       if (options.getSelection().has(rec.to) && options.getSelection().has(rec.from))
-        rec.path.classList.add('highlight');
-      else rec.path.classList.remove('highlight');
-      rec.path.classList.remove('dashed', 'dotted', 'filtered-out', 'not-running');
-      rec.path.classList.remove('filtered-out-search');
+        rec.path.classList.add(graphStyles.highlight);
+      else rec.path.classList.remove(graphStyles.highlight);
+      rec.path.classList.remove(
+        graphStyles.dashed,
+        graphStyles.dotted,
+        graphStyles['filtered-out'],
+        graphStyles['not-running']
+      );
+      rec.path.classList.remove(graphStyles['filtered-out-search']);
       const fromState: IOperationExecutionState | undefined = fromOp
         ? options.getExecutionStates().get(rec.from)
         : undefined;
@@ -535,10 +547,10 @@ export function createGraphViewController(options: IGraphViewControllerOptions):
       } else {
         rec.path.style.opacity = '';
         const semImportant: boolean = depStatus === 'Executing' || depStatus === 'Failure';
-        if (!semImportant && !rec.path.classList.contains('highlight')) {
-          rec.path.classList.add('dim');
+        if (!semImportant && !rec.path.classList.contains(graphStyles.highlight)) {
+          rec.path.classList.add(graphStyles.dim);
         } else {
-          rec.path.classList.remove('dim');
+          rec.path.classList.remove(graphStyles.dim);
         }
       }
     }

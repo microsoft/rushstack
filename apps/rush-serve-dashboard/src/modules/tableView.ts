@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import tableStyles from '../styles/tableView.module.css';
+
 interface ITableAnchorCoordinate {
   row: number;
   phase: number;
@@ -183,7 +185,6 @@ export function createTableViewController(options: ITableViewControllerOptions):
       const displayPhase: string = phase.replace(/^_phase:/, '');
       th.textContent = displayPhase;
       if (displayPhase !== phase) th.title = phase;
-      th.className = 'phase-col-header';
       th.style.cursor = 'pointer';
       th.addEventListener('click', (e: Event) => {
         const phaseNames: string[] = [];
@@ -202,14 +203,13 @@ export function createTableViewController(options: ITableViewControllerOptions):
 
     packages.forEach((pkg, rowIndex) => {
       const tr: HTMLTableRowElement = document.createElement('tr');
-      tr.className = 'pkg-row';
 
       const namesInRow: string[] = Array.from(pkg.byPhase.values()).map((op) => op.name);
       const allSelected: boolean = !!namesInRow.length && namesInRow.every((name) => selection.has(name));
-      if (allSelected) tr.classList.add('selected');
+      if (allSelected) tr.classList.add(tableStyles.selected);
 
       const pkgTd: HTMLTableCellElement = document.createElement('td');
-      pkgTd.className = 'pkg-cell';
+      pkgTd.className = tableStyles['pkg-cell'];
       pkgTd.textContent = pkg.packageName;
       pkgTd.style.fontWeight = '600';
       pkgTd.style.cursor = 'pointer';
@@ -221,7 +221,7 @@ export function createTableViewController(options: ITableViewControllerOptions):
 
       phases.forEach((phase, phaseIndex) => {
         const td: HTMLTableCellElement = document.createElement('td');
-        td.className = 'pivot-cell';
+        td.className = tableStyles['pivot-cell'];
         td.style.whiteSpace = 'nowrap';
 
         const op: ITableOperation | undefined = pkg.byPhase.get(phase);
@@ -229,15 +229,17 @@ export function createTableViewController(options: ITableViewControllerOptions):
           opCount++;
           const displayStatus: string = options.computeDisplayStatus(op);
           const glyph: string = options.enabledGlyph(op);
-          const active: string = op.isActive ? '<span class="pivot-active" title="Active">⚡</span>' : '';
+          const active: string = op.isActive
+            ? `<span class="${tableStyles['pivot-active']}" title="Active">⚡</span>`
+            : '';
           td.innerHTML = `
-                <span class="pivot-status-emoji">${options.statusEmoji(displayStatus)}</span>
+                <span>${options.statusEmoji(displayStatus)}</span>
                 <span title="${escapeHtml(op.name)}" class="status-pill status-${escapeHtml(displayStatus)}">${escapeHtml(options.overallStatusText(displayStatus))}</span>
-                <span class="pivot-enabled" title="${escapeHtml(options.buildRunPolicyText(op))}">${glyph}</span>
+                <span class="${tableStyles['pivot-enabled']}" title="${escapeHtml(options.buildRunPolicyText(op))}">${glyph}</span>
                 ${active}
               `;
           td.title = options.buildTooltip(op, displayStatus);
-          if (selection.has(op.name)) td.classList.add('selected');
+          if (selection.has(op.name)) td.classList.add(tableStyles.selected);
           td.style.cursor = 'pointer';
           tableOpOrder.push(op.name);
           td.addEventListener('click', (e: Event) => {

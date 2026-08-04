@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import graphStyles from '../styles/graphView.module.css';
+
 interface IOperationInfo {
   name: string;
   dependencies?: string[];
@@ -101,14 +103,14 @@ export function createGraphSelectionController(
   const _beginDragSelection = (e: MouseEvent): void => {
     if (options.getCurrentView() !== 'graph' || e.button !== 0) return;
     const target: Element | null = e.target as Element | null;
-    if (target && target.closest && target.closest('.op-node')) return;
+    if (target && target.closest && target.closest(`.${graphStyles['op-node']}`)) return;
 
     dragSelecting = true;
     dragStart = _graphPointFromEvent(e);
     dragLast = dragStart;
     preDragSelection = new Set(options.getSelection());
     graphMarqueeEl = document.createElement('div');
-    graphMarqueeEl.className = 'graph-marquee';
+    graphMarqueeEl.className = graphStyles['graph-marquee'];
     options.graphEl.appendChild(graphMarqueeEl);
     _updateMarquee();
     e.preventDefault();

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { createGraphViewController, graphState } from '../modules/graphView';
+import graphStyles from '../styles/graphView.module.css';
 
 describe('graph view controller', () => {
   it('renders nodes, removes transitive edges, updates indicators, and wires selection', () => {
@@ -46,9 +47,15 @@ describe('graph view controller', () => {
       'build->compile',
       'test->build'
     ]);
-    expect(graphState.nodeElements.get('build')?.querySelector('.active-indicator')).not.toBeNull();
-    expect(graphState.nodeElements.get('test')?.querySelector('.pending-indicator')).not.toBeNull();
-    expect(graphState.nodeElements.get('test')?.querySelector('.enabled-indicator')?.textContent).toBe('🔴');
+    expect(
+      graphState.nodeElements.get('build')?.querySelector(`.${graphStyles['active-indicator']}`)
+    ).not.toBeNull();
+    expect(
+      graphState.nodeElements.get('test')?.querySelector(`.${graphStyles['pending-indicator']}`)
+    ).not.toBeNull();
+    expect(
+      graphState.nodeElements.get('test')?.querySelector(`.${graphStyles['enabled-indicator']}`)?.textContent
+    ).toBe('🔴');
     expect(renderPhaseLegend).toHaveBeenCalled();
 
     const compileNode: HTMLButtonElement | undefined = graphState.nodeElements.get('compile');

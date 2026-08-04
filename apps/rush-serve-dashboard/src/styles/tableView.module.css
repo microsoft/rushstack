@@ -1,7 +1,7 @@
 /* Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license. */
 /* See LICENSE in the project root for license information. */
 
-#operations-table-container {
+:global(#operations-table-container) {
   flex: 1;
   min-height: 0;
   overflow: auto;
@@ -99,7 +99,7 @@ td.status-cell .status-pill {
   top: 1px;
 }
 
-#table-stats {
+:global(#table-stats) {
   font-size: 0.6rem;
   color: var(--muted);
   padding: 0.25rem 0.75rem 0.5rem;

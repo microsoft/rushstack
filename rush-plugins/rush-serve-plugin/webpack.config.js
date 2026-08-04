@@ -13,19 +13,20 @@ function createWebpackConfig({ production }) {
     experiments: {
       css: true
     },
-    entry: [
-      path.join(dashboardPackageFolder, 'lib-esm', 'styles', 'dashboard.css'),
-      path.join(dashboardPackageFolder, 'lib-esm', 'styles', 'top-bar.css'),
-      path.join(dashboardPackageFolder, 'lib-esm', 'styles', 'selection-bar.css'),
-      path.join(dashboardPackageFolder, 'lib-esm', 'styles', 'table-view.css'),
-      path.join(dashboardPackageFolder, 'lib-esm', 'styles', 'graph-view.css'),
-      path.join(dashboardPackageFolder, 'lib-esm', 'styles', 'terminal-pane.css'),
-      path.join(dashboardPackageFolder, 'lib-esm', 'dashboard.js')
-    ],
+    entry: path.join(dashboardPackageFolder, 'lib-esm', 'dashboard.js'),
     module: {
       rules: [
         {
+          test: /\.module\.css$/i,
+          type: 'css/module',
+          parser: {
+            dashedIdents: false,
+            namedExports: false
+          }
+        },
+        {
           test: /\.css$/i,
+          exclude: /\.module\.css$/i,
           type: 'css'
         }
       ]

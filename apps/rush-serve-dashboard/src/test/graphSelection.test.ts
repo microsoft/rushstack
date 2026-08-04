@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { createGraphSelectionController } from '../modules/graphSelection';
+import graphStyles from '../styles/graphView.module.css';
 
 describe('graph selection controller', () => {
   it('selects nodes and expands dependencies and consumers transitively', () => {
@@ -67,6 +68,6 @@ describe('graph selection controller', () => {
 
     expect(selection).toEqual(new Set(['inside']));
     expect(onLiveSelectionChanged).toHaveBeenCalled();
-    expect(graphEl.querySelector('.graph-marquee')).toBeNull();
+    expect(graphEl.querySelector(`.${graphStyles['graph-marquee']}`)).toBeNull();
   });
 });

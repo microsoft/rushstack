@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { createTableViewController } from '../modules/tableView';
+import tableStyles from '../styles/tableView.module.css';
 
 describe('table view controller', () => {
   it('renders a package/phase pivot safely and supports cell and group selection', () => {
@@ -37,11 +38,13 @@ describe('table view controller', () => {
     expect(document.querySelector('tbody')?.innerHTML).not.toContain('<package-a>');
     expect(document.getElementById('stats')?.textContent).toBe('3 operations');
 
-    const firstOperationCell = document.querySelector('td.pivot-cell[title="a-build"]') as HTMLElement;
+    const firstOperationCell = document.querySelector(
+      `td.${tableStyles['pivot-cell']}[title="a-build"]`
+    ) as HTMLElement;
     firstOperationCell.click();
     expect(selection).toEqual(new Set(['a-build']));
 
-    const firstPackageCell = document.querySelector('.pkg-cell') as HTMLElement;
+    const firstPackageCell = document.querySelector(`.${tableStyles['pkg-cell']}`) as HTMLElement;
     firstPackageCell.click();
     expect(selection).toEqual(new Set(['a-build', 'a-test']));
     expect(onSelectionMutated).toHaveBeenCalledTimes(2);

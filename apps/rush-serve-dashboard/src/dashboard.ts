@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import './styles/global.css';
+
 import {
   applyExecutionStates as applyExecutionStatesMutation,
   patchOperationsFromPayload,
@@ -116,9 +118,7 @@ if (!edgesSvg) {
 }
 const graphEl: HTMLElement = document.getElementById('graph') as HTMLElement;
 const legendEl: HTMLElement | undefined = document.getElementById('graph-legend') ?? undefined;
-const phasePaneEl: HTMLElement | undefined = document.getElementById('phase-pane') ?? undefined;
-const phaseGroupsEl: HTMLElement | undefined =
-  phasePaneEl?.querySelector<HTMLElement>('.phase-groups') ?? undefined;
+const phaseGroupsEl: HTMLElement | undefined = document.getElementById('phase-groups') ?? undefined;
 const playPauseBtn: HTMLButtonElement | undefined =
   (document.getElementById('play-pause-btn') as HTMLButtonElement | null) ?? undefined;
 const parallelismInput: HTMLInputElement | undefined =

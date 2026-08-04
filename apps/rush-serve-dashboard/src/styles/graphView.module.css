@@ -1,7 +1,7 @@
 /* Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license. */
 /* See LICENSE in the project root for license information. */
 
-#graph-container {
+:global(#graph-container) {
   position: relative;
   flex: 1;
   min-height: 0;
@@ -11,7 +11,7 @@
   gap: 0;
 }
 
-#graph {
+:global(#graph) {
   width: 100%;
   height: 100%;
   position: relative;
@@ -19,7 +19,7 @@
   background: radial-gradient(circle at 25% 20%, #1e2530, #101318);
 }
 
-#phase-pane {
+:global(#phase-pane) {
   width: 220px;
   background: var(--panel);
   border-right: 1px solid var(--border);
@@ -30,7 +30,7 @@
   position: relative;
 }
 
-#phase-pane h3 {
+:global(#phase-pane) h3 {
   margin: 0 0 0.4rem;
   font-size: 0.68rem;
   letter-spacing: 0.5px;
@@ -48,7 +48,7 @@
   min-height: 0;
 }
 
-#phase-pane .phase-groups {
+:global(#phase-groups) {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
@@ -56,7 +56,7 @@
   overflow: hidden;
 }
 
-#phase-pane .phase-groups > .phase-group {
+:global(#phase-groups) > .phase-group {
   flex: 1 1 0;
 }
 
@@ -119,13 +119,13 @@
   font-size: 0.6rem;
 }
 
-#graph-wrapper {
+:global(#graph-wrapper) {
   flex: 1;
   min-height: 0;
   position: relative;
 }
 
-#graph-legend {
+:global(#graph-legend) {
   position: absolute;
   right: 28px;
   bottom: 28px;
@@ -140,31 +140,31 @@
   pointer-events: auto;
 }
 
-#graph-legend .legend-columns {
+:global(#graph-legend) .legend-columns {
   display: flex;
   gap: 10px;
   align-items: flex-start;
 }
 
-#graph-legend .legend-col:first-child {
+:global(#graph-legend) .legend-col:first-child {
   flex: 0 0 130px;
 }
 
-#graph-legend .legend-col:last-child {
+:global(#graph-legend) .legend-col:last-child {
   flex: 1 1 auto;
 }
 
-#graph-legend.collapsed {
+:global(#graph-legend).collapsed {
   width: auto;
   max-width: none;
   padding: 4px 6px;
 }
 
-#graph-legend.collapsed .legend-columns {
+:global(#graph-legend).collapsed .legend-columns {
   display: none;
 }
 
-#graph-legend .legend-col {
+:global(#graph-legend) .legend-col {
   flex: 1 1 0;
   min-width: 0;
   display: flex;
@@ -172,7 +172,7 @@
   gap: 2px;
 }
 
-#graph-legend .legend-heading {
+:global(#graph-legend) .legend-heading {
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -181,26 +181,26 @@
   margin: 0 0 4px;
 }
 
-#graph-legend .legend-row {
+:global(#graph-legend) .legend-row {
   display: flex;
   align-items: center;
   gap: 5px;
   min-width: 0;
 }
 
-#graph-legend .legend-label-wrap {
+:global(#graph-legend) .legend-label-wrap {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
 }
 
-#graph-legend .legend-row small {
+:global(#graph-legend) .legend-row small {
   font-size: 0.5rem;
   opacity: 0.7;
 }
 
-#graph-legend .legend-subheading {
+:global(#graph-legend) .legend-subheading {
   margin: 4px 0 2px;
   font-size: 0.52rem;
   text-transform: uppercase;
@@ -209,7 +209,7 @@
   font-weight: 600;
 }
 
-#graph-legend h4 {
+:global(#graph-legend) h4 {
   margin: 0 0 4px;
   font-size: 0.6rem;
   letter-spacing: 0.6px;
@@ -264,7 +264,7 @@
   text-overflow: ellipsis;
 }
 
-#graph svg {
+:global(#graph) svg {
   position: absolute;
   top: 0;
   left: 0;
