@@ -1,6 +1,18 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 20 Jul 2026 17:49:39 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Aug 2026 19:31:07 GMT and should not be manually modified.
+
+## 5.178.1
+Wed, 05 Aug 2026 19:31:07 GMT
+
+### Patches
+
+- Fix an issue where a phased command exited with a nonzero exit code when its overall execution status was successful but not `SUCCESS`. This covers an iteration that scheduled no operations because a plugin consumed the work itself (which broke `rush <command> --drop-graph` in `@rushstack/rush-buildxl-graph-plugin`), as well as an iteration that a plugin short-circuited with a `SKIPPED` or `FROM CACHE` status.
+
+### Updates
+
+- Add `useDirectFileTransfersForBuildCache` to the `experiments.json` `rush init` template.
+- Add catalog support to `rush-pnpm update`.
 
 ## 5.178.0
 Mon, 20 Jul 2026 17:49:39 GMT
