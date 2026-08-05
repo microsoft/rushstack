@@ -65,6 +65,28 @@ import { measureAsyncFn, measureFn } from '../../utilities/performance';
 const PERF_PREFIX: 'rush:phasedScriptAction' = 'rush:phasedScriptAction';
 
 /**
+ * The set of overall execution statuses that mean the command did what was asked of it and should
+ * exit with code 0.
+ *
+ * - `NoOp` -- the iteration scheduled no non-silent operations. This happens when a plugin
+ *   legitimately consumes the work itself, either by returning an empty operation set from
+ *   `createOperationsAsync` or by disabling every operation during `configureIteration` (a disabled
+ *   record is silent, so both routes converge on this status).
+ * - `Skipped` / `FromCache` -- a tap short-circuited the iteration with a successful bail status,
+ *   for example the bridge-cache plugin performing a cache read/write out of band.
+ *
+ * `PhasedScriptAction` already treats an empty *project* selection as success, so treating an empty
+ * *operation* set as a failure would be inconsistent. `SuccessWithWarning` is deliberately excluded
+ * because non-allowed warnings are expected to fail the command.
+ */
+const SUCCESSFUL_EXECUTION_STATUSES: ReadonlySet<OperationStatus> = new Set([
+  OperationStatus.Success,
+  OperationStatus.Skipped,
+  OperationStatus.FromCache,
+  OperationStatus.NoOp
+]);
+
+/**
  * Constructor parameters for PhasedScriptAction.
  */
 export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPhasedCommandConfig> {
@@ -713,7 +735,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     const { graph, ignoreHooks, stopwatch, terminal } = options;
 
     let success: boolean = false;
-    let result: IExecutionResult | undefined;
 
     try {
       const definiteResult: IExecutionResult = await measureAsyncFn(
@@ -722,13 +743,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           return await graph.executeAsync(iterationOptions);
         }
       );
-      success = definiteResult.status === OperationStatus.Success;
-      result = definiteResult;
+      success = SUCCESSFUL_EXECUTION_STATUSES.has(definiteResult.status);
 
       stopwatch.stop();
 
       const message: string = `rush ${this.actionName} (${stopwatch.toString()})`;
-      if (result.status === OperationStatus.Success) {
+      if (success) {
         terminal.writeLine(Colorize.green(message));
       } else {
         terminal.writeLine(message);

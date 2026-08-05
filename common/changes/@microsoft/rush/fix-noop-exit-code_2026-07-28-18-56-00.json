@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where a phased command exited with a nonzero exit code when its overall execution status was successful but not `SUCCESS`. This covers an iteration that scheduled no operations because a plugin consumed the work itself (which broke `rush <command> --drop-graph` in `@rushstack/rush-buildxl-graph-plugin`), as well as an iteration that a plugin short-circuited with a `SKIPPED` or `FROM CACHE` status.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
