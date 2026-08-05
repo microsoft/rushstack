@@ -60,6 +60,7 @@ import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
 import { FlagFile } from '../../api/FlagFile';
 import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
 import { HotlinkManager } from '../../utilities/HotlinkManager';
+import { detectAndReportWorkspaceCycles } from '../WorkspaceCycleDetector';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -441,6 +442,11 @@ export abstract class BaseInstallManager {
 
     // Check the policies
     await PolicyValidator.validatePolicyAsync(this.rushConfiguration, subspace, variant, this.options);
+
+    // Fail fast if there are undeclared cycles in the workspace package dependency graph.
+    // Pnpm cannot install a workspace with cycles, so this gives a clearer error message
+    // than whatever pnpm would emit.
+    detectAndReportWorkspaceCycles(this.rushConfiguration, terminal);
 
     await this._installGitHooksAsync();
 
