@@ -22,7 +22,9 @@
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
+    "@types/jest": "30.0.0",
     "@rushstack/heft": "workspace:*",
+    "typescript": "~5.8.2",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"
   },
