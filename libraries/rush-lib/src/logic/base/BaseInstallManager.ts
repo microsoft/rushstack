@@ -537,6 +537,9 @@ export abstract class BaseInstallManager {
         extraNpmrcLines.push(...commonNpmrcFileLines);
       }
 
+      // NOTE: pnpm 11+ only reads auth/registry settings from .npmrc, so it ignores this line;
+      // for pnpm 11+ the global pnpmfile path is emitted via the generated pnpm-workspace.yaml
+      // instead (see InstallHelpers.resolvePnpmSettings). The line is kept for pnpm 10 and earlier.
       extraNpmrcLines.push(
         `global-pnpmfile=${subspace.getSubspaceTempFolderPath()}/${RushConstants.pnpmfileGlobalFilename}`
       );

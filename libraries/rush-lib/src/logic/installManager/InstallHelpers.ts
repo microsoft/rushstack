@@ -339,6 +339,16 @@ export class InstallHelpers {
       workspaceFile.trustPolicy = trustPolicy;
       workspaceFile.trustPolicyExclude = trustPolicyExclude;
       workspaceFile.trustPolicyIgnoreAfter = trustPolicyIgnoreAfter;
+
+      if (rushConfiguration.subspacesFeatureEnabled) {
+        // When subspaces are enabled, Rush generates a "global pnpmfile" that rewrites
+        // cross-subspace "workspace:*" dependency specifiers to "link:" specifiers. For pnpm 10 and
+        // earlier it is wired up via a "global-pnpmfile=" line in the generated .npmrc (see
+        // BaseInstallManager), but pnpm 11+ only reads auth/registry settings from .npmrc, so that
+        // line is silently ignored and installation fails with ERR_PNPM_WORKSPACE_PKG_NOT_FOUND.
+        // For pnpm 11+, emit the path via the generated pnpm-workspace.yaml instead.
+        workspaceFile.globalPnpmfile = `${subspace.getSubspaceTempFolderPath()}/${RushConstants.pnpmfileGlobalFilename}`;
+      }
     } else {
       // For older pnpm, these settings live in the "pnpm" field of package.json.
       packageJsonPnpmSection = {

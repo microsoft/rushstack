@@ -117,6 +117,47 @@ describe(InstallHelpers.name, () => {
       expect(workspaceFile?.trustPolicy).toEqual('no-downgrade');
       expect(workspaceFile?.trustPolicyExclude).toEqual(['chokidar@4.0.3']);
       expect(workspaceFile?.trustPolicyIgnoreAfter).toEqual(1440);
+
+      // The subspaces feature is not enabled in this repo, so no global pnpmfile is emitted.
+      expect(workspaceFile?.globalPnpmfile).toBeUndefined();
+    });
+
+    it('emits the subspace global pnpmfile path via pnpm-workspace.yaml for pnpm 11', async () => {
+      const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfigPnpm11Subspaces/rush.json`;
+      const rushConfiguration: RushConfiguration =
+        RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+      const pnpmSettings = InstallHelpers.resolvePnpmSettings(
+        rushConfiguration,
+        rushConfiguration.defaultSubspace,
+        terminal
+      );
+
+      // pnpm 11+ only reads auth/registry settings from .npmrc, so the "global-pnpmfile=" line in
+      // the generated .npmrc is ignored; the path must be emitted via pnpm-workspace.yaml instead,
+      // otherwise cross-subspace "workspace:*" dependencies fail with
+      // ERR_PNPM_WORKSPACE_PKG_NOT_FOUND.
+      const workspaceFile: PnpmWorkspaceFile | undefined =
+        TestUtilities.stripAnnotations(pnpmSettings)?.workspaceFile;
+      expect(workspaceFile?.globalPnpmfile).toEqual(
+        `${rushConfiguration.defaultSubspace.getSubspaceTempFolderPath()}/global-pnpmfile.cjs`
+      );
+    });
+
+    it('does not emit the global pnpmfile via pnpm-workspace.yaml for pnpm < 11', async () => {
+      const RUSH_JSON_FILENAME: string = `${__dirname}/repoWithSubspaces/rush.json`;
+      const rushConfiguration: RushConfiguration =
+        RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+      const pnpmSettings = InstallHelpers.resolvePnpmSettings(
+        rushConfiguration,
+        rushConfiguration.defaultSubspace,
+        terminal
+      );
+
+      // For pnpm 10 and earlier the global pnpmfile stays wired up via the generated .npmrc
+      // (see BaseInstallManager); the workspace file must not carry it.
+      const workspaceFile: PnpmWorkspaceFile | undefined =
+        TestUtilities.stripAnnotations(pnpmSettings)?.workspaceFile;
+      expect(workspaceFile?.globalPnpmfile).toBeUndefined();
     });
   });
 });
