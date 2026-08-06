@@ -1,6 +1,6 @@
 {
   "name": "playwright-local-browser-server",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
@@ -47,6 +47,11 @@
       {
         "command": "playwright-local-browser-server.stop",
         "title": "Stop Playwright Browser Tunnel",
+        "category": "Playwright"
+      },
+      {
+        "command": "playwright-local-browser-server.restart",
+        "title": "Restart Playwright Browser Tunnel",
         "category": "Playwright"
       },
       {
