@@ -96,11 +96,12 @@ export class PlaywrightTunnel {
   private readonly _listenPort: number | undefined;
   private readonly _playwrightInstallPath: string;
   private _status: TunnelStatus = 'stopped';
-  private _initWsPromise?: Promise<WebSocket>;
+  private _initWsPromise?: Promise<WebSocket | undefined>;
   private _keepRunning: boolean = false;
   private _ws?: WebSocket;
   private _mode: TunnelMode;
   private _pendingConnectionAttempt?: Promise<WebSocket>;
+  private _cancelPendingConnection?: () => void;
   private _pollInterval?: NodeJS.Timeout;
 
   public constructor(options: IPlaywrightTunnelOptions) {
@@ -144,9 +145,14 @@ export class PlaywrightTunnel {
 
   public async waitForCloseAsync(): Promise<void> {
     const terminal: ITerminal = this._terminal;
-    const initWsPromise: Promise<WebSocket> | undefined = this._initWsPromise;
+    const initWsPromise: Promise<WebSocket | undefined> | undefined = this._initWsPromise;
     if (initWsPromise) {
-      const ws: WebSocket = await initWsPromise;
+      const ws: WebSocket | undefined = await initWsPromise;
+      if (!ws) {
+        terminal.writeDebugLine('WebSocket connection was cancelled before it was established.');
+        this._initWsPromise = undefined;
+        return;
+      }
       await once(ws, 'close');
       terminal.writeDebugLine('WebSocket connection closed. resolving init promise.');
       this._initWsPromise = undefined;
@@ -173,6 +179,15 @@ export class PlaywrightTunnel {
       clearInterval(this._pollInterval);
       this._pollInterval = undefined;
     }
+    if (!this._ws) {
+      this._cancelPendingConnection?.();
+      this._cancelPendingConnection = undefined;
+      this._pendingConnectionAttempt = undefined;
+      this._initWsPromise = undefined;
+      this.status = 'stopped';
+      return;
+    }
+
     await this._initWsPromise?.finally(() => {
       this._ws?.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Tunnel stopped');
     });
@@ -269,9 +284,28 @@ export class PlaywrightTunnel {
 
   // TODO: Only supporting one test at a time.
   // Need to support multiple simultaneous connections for parallel tests.
-  private async _pollConnectionAsync(): Promise<WebSocket> {
+  private async _pollConnectionAsync(): Promise<WebSocket | undefined> {
     this._terminal.writeLine(`Waiting for WebSocket connection`);
-    return await new Promise((resolve, reject) => {
+    return await new Promise<WebSocket | undefined>((resolve) => {
+      let settled: boolean = false;
+      const cleanup = (): void => {
+        if (this._pollInterval) {
+          clearInterval(this._pollInterval);
+          this._pollInterval = undefined;
+        }
+        this._pendingConnectionAttempt = undefined;
+        this._cancelPendingConnection = undefined;
+      };
+
+      this._cancelPendingConnection = (): void => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        cleanup();
+        resolve(undefined);
+      };
+
       this._pollInterval = setInterval(() => {
         if (this._pendingConnectionAttempt) {
           return; // Skip if a connection attempt is already in progress
@@ -280,10 +314,14 @@ export class PlaywrightTunnel {
         this._pendingConnectionAttempt = connectionPromise;
         connectionPromise
           .then((ws: WebSocket) => {
-            clearInterval(this._pollInterval);
-            this._pollInterval = undefined;
+            if (settled || !this._keepRunning) {
+              ws.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Tunnel stopped');
+              return;
+            }
+            settled = true;
+            cleanup();
+            this._ws = ws;
             ws.removeAllListeners();
-            this._pendingConnectionAttempt = undefined;
             resolve(ws);
           })
           .catch(() => {
@@ -519,16 +557,23 @@ export class PlaywrightTunnel {
    * and setting up the browser server.
    * Returns when the handshake is complete and the browser server is running.
    */
-  private async _initPlaywrightBrowserTunnelAsync(): Promise<WebSocket> {
+  private async _initPlaywrightBrowserTunnelAsync(): Promise<WebSocket | undefined> {
     let handshake: IHandshake | undefined = undefined;
     let client: WebSocket | undefined = undefined;
     let browserServer: BrowserServer | undefined = undefined;
 
     this.status = 'waiting-for-connection';
-    const ws: WebSocket =
+    const ws: WebSocket | undefined =
       this._mode === 'poll-connection'
         ? await this._pollConnectionAsync()
         : await this._waitForIncomingConnectionAsync();
+
+    if (!ws) {
+      this._terminal.writeLine('Playwright tunnel start cancelled before a WebSocket connected.');
+      this._initWsPromise = undefined;
+      this.status = 'stopped';
+      return undefined;
+    }
 
     ws.on('open', () => {
       this._terminal.writeLine(`WebSocket connection established`);
@@ -543,6 +588,7 @@ export class PlaywrightTunnel {
       const reasonStr: string = reason.toString() || 'no reason provided';
       const codeDescription: string = getWebSocketCloseReason(code);
       this._initWsPromise = undefined;
+      this._ws = undefined;
       this.status = 'stopped';
       this._terminal.writeLine(
         `WebSocket connection closed - code: ${code} (${codeDescription}), reason: ${reasonStr}`
@@ -601,6 +647,7 @@ export class PlaywrightTunnel {
             }
 
             this.status = 'browser-server-running';
+            this._ws = ws;
 
             // Send ack so that the counterpart also knows to start forwarding messages.
             // NOTE: The 1-second delay is an intentional workaround. In the current
