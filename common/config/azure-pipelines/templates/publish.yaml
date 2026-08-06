@@ -6,6 +6,11 @@ parameters:
     default: $(Build.SourceBranchName)
 
 steps:
+  - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+    parameters:
+      Arguments: '--help'
+      DisplayName: 'Install Rush'
+
   - bash: 'rm -f "$HOME/.npmrc"'
     displayName: 'Clear user npmrc for publish'
 
