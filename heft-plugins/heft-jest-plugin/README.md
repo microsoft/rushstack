@@ -2,13 +2,7 @@
 
 This is a Heft plugin for running Jest.
 
-## Split test/evaluate phases
-
-To opt into a cache-friendly split-phase flow:
-
-1. Run Jest in record-only mode (`--record-only`) in `_phase:test` so failures are written to artifacts.
-2. Run a separate evaluator task in `_phase:test-evaluate` to apply failure policy from JUnit/Cobertura artifacts.
-3. In CI, run `_phase:test` first and then `_phase:test-evaluate`.
+For split test/evaluate workflows, pair this plugin with `@rushstack/heft-test-evaluator-plugin`.
 
 ## Links
 

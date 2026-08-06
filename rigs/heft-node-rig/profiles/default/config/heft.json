@@ -67,7 +67,7 @@
       "tasksByName": {
         "test-results": {
           "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-jest-plugin",
+            "pluginPackage": "@rushstack/heft-test-evaluator-plugin",
             "pluginName": "test-evaluator-plugin"
           }
         }

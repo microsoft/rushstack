@@ -1,0 +1,27 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+  "extends": "decoupled-local-node-rig/profiles/default/config/heft.json",
+
+  "phasesByName": {
+    "build": {
+      "tasksByName": {
+        "copy-json-schemas": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "src/schemas",
+                  "destinationFolders": ["temp/json-schemas/heft/v1"],
+                  "fileExtensions": [".schema.json"],
+                  "hardlink": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

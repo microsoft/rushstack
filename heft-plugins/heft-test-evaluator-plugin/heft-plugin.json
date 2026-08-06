@@ -1,0 +1,32 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
+  "taskPlugins": [
+    {
+      "pluginName": "test-evaluator-plugin",
+      "entryPoint": "./lib-commonjs/TestEvaluatorPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/heft-test-evaluator-plugin.schema.json",
+      "parameterScope": "test-evaluator",
+      "parameters": [
+        {
+          "longName": "--junit-report-path",
+          "parameterKind": "stringList",
+          "argumentName": "RELATIVE_PATH",
+          "description": "Path(s) to JUnit XML report files that should be evaluated."
+        },
+        {
+          "longName": "--cobertura-report-path",
+          "parameterKind": "stringList",
+          "argumentName": "RELATIVE_PATH",
+          "description": "Path(s) to Cobertura XML code-coverage report files used for threshold evaluation."
+        },
+        {
+          "longName": "--coverage-thresholds-path",
+          "parameterKind": "string",
+          "argumentName": "RELATIVE_PATH",
+          "description": "Path to a JSON file containing global coverage thresholds."
+        }
+      ]
+    }
+  ]
+}

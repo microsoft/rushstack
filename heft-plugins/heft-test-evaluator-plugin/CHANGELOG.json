@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/heft-test-evaluator-plugin",
+  "entries": [
+    {
+      "version": "1.0.0",
+      "tag": "@rushstack/heft-test-evaluator-plugin_v1.0.0",
+      "date": "Thu, 06 Aug 2026 00:00:00 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Initial release."
+          }
+        ]
+      }
+    }
+  ]
+}

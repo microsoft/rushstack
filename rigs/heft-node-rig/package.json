@@ -21,6 +21,7 @@
     "@rushstack/heft-api-extractor-plugin": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-test-evaluator-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/jest": "30.0.0",
     "eslint": "~9.37.0",
