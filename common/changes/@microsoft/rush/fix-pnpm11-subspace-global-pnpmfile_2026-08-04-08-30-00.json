@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix cross-subspace \"workspace:*\" dependencies failing with ERR_PNPM_WORKSPACE_PKG_NOT_FOUND under pnpm 11 when subspaces are enabled. The subspace \"global pnpmfile\" was wired up via a \"global-pnpmfile=\" line in the generated .npmrc, but pnpm 11 only reads auth/registry settings from .npmrc; for pnpm 11+ Rush now emits the path via the \"globalPnpmfile\" setting of the generated pnpm-workspace.yaml. Behavior for pnpm 10 and earlier is unchanged.",
-      "type": "none"
+      "comment": "Fix cross-subspace `workspace:*` dependency failures with pnpm 11.",
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/rush"
