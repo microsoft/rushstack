@@ -283,3 +283,28 @@ export type {
 } from './producers/IScopedReporter';
 export type { ReporterExtensionEventName } from './producers/ReporterExtensionEventName';
 export { isReporterExtensionEventName } from './producers/ReporterExtensionEventName';
+
+export type { IReporterPerformanceBudgets } from './perf/PerformanceBudgets';
+export {
+  REPORTER_PERFORMANCE_BUDGETS,
+  computeWallTimeRegressionPercent,
+  isWithinWallTimeBudget,
+  isWithinMemoryBudget
+} from './perf/PerformanceBudgets';
+
+export type { ReporterMigrationPhaseId, IReporterMigrationPhase } from './migration/MigrationPhase';
+export { REPORTER_MIGRATION_PHASES, getReporterMigrationPhase } from './migration/MigrationPhase';
+export type {
+  IReporterMajorDefaults,
+  IAutomaticSelectionContext
+} from './migration/DaemonAlignedMajorDefaults';
+export {
+  REMOVED_TERMINAL_APIS,
+  PRE_FLIP_REPORTER_DEFAULTS,
+  DAEMON_ALIGNED_MAJOR_REPORTER_DEFAULTS,
+  isTerminalApiRemoved,
+  isEmergencyLegacyFallback,
+  isAutomaticSelectionEnabled
+} from './migration/DaemonAlignedMajorDefaults';
+export type { IPluginApplyGateOptions, IPluginApplyDecision } from './migration/PluginApplyGate';
+export { evaluatePluginApplyGate, getBlockedPlugins } from './migration/PluginApplyGate';
