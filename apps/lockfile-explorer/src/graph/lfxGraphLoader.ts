@@ -21,6 +21,8 @@ import * as lockfilePath from './lockfilePath';
 type PnpmLockfileVersion = 54 | 60 | 90;
 type PeerDependenciesMeta = lockfileTypes.LockfilePackageInfo['peerDependenciesMeta'];
 
+let hasWarnedAboutOutdatedFormat: boolean = false;
+
 function createPackageLockfileDependency(options: {
   name: string;
   versionPath: string;
@@ -329,9 +331,16 @@ function createPackageLockfileEntry(options: {
     slashlessRawEntryId = rawEntryId;
   } else {
     if (!rawEntryId.startsWith('/')) {
-      throw new Error('Expecting leading "/" in path: ' + JSON.stringify(rawEntryId));
+      if (!hasWarnedAboutOutdatedFormat) {
+        console.warn(
+          'Your pnpm-lock.yaml contains outdated version formats. Please run "rush update --full" to fix this issue.'
+        );
+        hasWarnedAboutOutdatedFormat = true;
+      }
+      slashlessRawEntryId = rawEntryId;
+    } else {
+      slashlessRawEntryId = rawEntryId.substring(1);
     }
-    slashlessRawEntryId = rawEntryId.substring(1);
   }
 
   let dotPnpmSubfolder: string;
