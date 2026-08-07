@@ -179,7 +179,7 @@
       "Keep command-specific --json unchanged and not an alias for --reporter=json",
       "Fail explicit unsupported reporter requests"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -190,7 +190,7 @@
       "Default the full-detail file reporter to debug",
       "Add log-level filtering tests"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -202,7 +202,7 @@
       "Give machine reporters exclusive stdout and route human progress and emergencies to stderr or files",
       "Record the selection reason in the detailed log"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -215,7 +215,7 @@
       "Keep the live region in watch mode and append one summary per completed cycle",
       "Follow TTY color capability while honoring NO_COLOR and FORCE_COLOR"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -227,7 +227,7 @@
       "Retain StreamCollator-like operation grouping in detailed CI mode",
       "Add stable plaintext snapshot tests"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -239,7 +239,7 @@
       "Keep absolute log paths as local reporter output and never in telemetry",
       "Add stdout-purity tests for JSON and AI"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -252,7 +252,7 @@
       "Delete files older than 14 days, cap at 20 sessions, and let rush purge remove the directory",
       "Treat file creation failure as nonfatal with an emergency warning and unavailable artifact"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -262,7 +262,7 @@
       "Wire RUSH_REPORTER=legacy as an emergency fallback for at least one major",
       "Validate the legacy reporter against the frozen output snapshots"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "refactor",
@@ -274,7 +274,7 @@
       "Feed the same uncollated stream to problem matchers",
       "Remove StreamCollator from the primary path after parity tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -286,7 +286,7 @@
       "Cap duplicate diagnostics and gate default enablement on high-confidence corpus tests",
       "Route older Heft versions through this path"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "refactor",
@@ -297,7 +297,7 @@
       "Suppress duplicate rendering through the bridge",
       "Plan bridge removal after zero first-party usages and published migration guidance"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

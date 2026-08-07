@@ -113,6 +113,13 @@ export type { IEngineSinkResolution } from './compat/LegacyFallbackSink';
 export { LegacyFallbackSink, createEngineSink } from './compat/LegacyFallbackSink';
 export type { IOldEngineOutputAdapterOptions } from './compat/OldEngineOutputAdapter';
 export { OldEngineOutputAdapter } from './compat/OldEngineOutputAdapter';
+export {
+  ALREADY_REPORTED_ERROR_NAME,
+  LEGACY_ERROR_BRIDGE_REMOVAL_CRITERIA,
+  AlreadyReportedError,
+  isAlreadyReportedSentinel,
+  LegacyErrorBridge
+} from './compat/LegacyErrorBridge';
 
 export type { ICreateScopedReporterOptions } from './session/ScopedReporterFactory';
 export { createScopedReporter } from './session/ScopedReporterFactory';
@@ -164,6 +171,94 @@ export {
 } from './exit/ExitStatus';
 export type { IJsonControls } from './exit/CommandJson';
 export { separateJsonControls } from './exit/CommandJson';
+
+export type { ReporterName, ReporterLogLevel } from './config/ReporterNames';
+export {
+  SUPPORTED_REPORTER_NAMES,
+  SUPPORTED_LOG_LEVELS,
+  isSupportedReporterName,
+  isSupportedLogLevel
+} from './config/ReporterNames';
+export {
+  COPILOT_CLI_ENV_VAR,
+  KNOWN_CI_ENV_VARS,
+  isAgentVariableActive,
+  detectAgent,
+  isCiDetected
+} from './config/AgentDetection';
+export type { IReporterOutputTarget } from './config/OutputControl';
+export { parseOutputControl } from './config/OutputControl';
+export type { IReporterSelectionInput, IReporterSelection } from './config/ReporterSelection';
+export { resolveReporterSelection } from './config/ReporterSelection';
+export {
+  FILE_REPORTER_DEFAULT_LOG_LEVEL,
+  getLogLevelRank,
+  getEventMinimumLogLevel,
+  shouldRenderAtLogLevel,
+  filterEventsForLogLevel
+} from './config/LogLevelFilter';
+export type {
+  PlaintextVariant,
+  IReporterPlanEntry,
+  IAutomaticReporterPlan
+} from './config/AutomaticReporterMatrix';
+export {
+  isMachineReporter,
+  planAutomaticReporters,
+  describeReporterPlan
+} from './config/AutomaticReporterMatrix';
+
+export type {
+  ILiveRegionState,
+  IColorizer,
+  IRenderLiveRegionOptions
+} from './reporters/InteractiveRendering';
+export {
+  SPINNER_FRAMES,
+  MIN_REFRESH_INTERVAL_MS,
+  resolveColorEnabled,
+  createColorizer,
+  truncateToWidth,
+  renderActiveProjectsRow,
+  renderLiveRegion,
+  shouldRefresh
+} from './reporters/InteractiveRendering';
+export type {
+  IInteractiveTerminal,
+  IDefaultInteractiveReporterOptions
+} from './reporters/DefaultInteractiveReporter';
+export { DefaultInteractiveReporter } from './reporters/DefaultInteractiveReporter';
+export type { IPlaintextReporterOptions } from './reporters/PlaintextReporter';
+export { PlaintextReporter } from './reporters/PlaintextReporter';
+export type { IJsonReporterOptions } from './reporters/JsonReporter';
+export { JsonReporter } from './reporters/JsonReporter';
+export type {
+  IAiDiagnostic,
+  IAiLogReference,
+  IAiFinalRecord,
+  IAiReporterOptions
+} from './reporters/AiReporter';
+export { AiReporter } from './reporters/AiReporter';
+export type { IFileReporterArtifact, IFileReporterOptions } from './reporters/FileReporter';
+export { FileReporter, RUSH_LOGS_DIR_NAME, LATEST_LOG_NAME } from './reporters/FileReporter';
+export type { ILegacyReporterOptions } from './reporters/LegacyReporter';
+export {
+  LegacyReporter,
+  RUSH_REPORTER_ENV_VAR,
+  isLegacyEmergencyFallbackRequested
+} from './reporters/LegacyReporter';
+
+export type { IOperationStreamEmitterOptions } from './scheduler/OperationStreamEmitter';
+export { OperationStreamEmitter } from './scheduler/OperationStreamEmitter';
+export type { IExternalOutputChunk } from './scheduler/OperationOutputGrouping';
+export { iterateExternalOutput, regroupOperationOutput } from './scheduler/OperationOutputGrouping';
+
+export { normalizeAnsi } from './matchers/AnsiNormalization';
+export type { IProblemMatch, IProblemMatcher } from './matchers/ProblemMatcher';
+export type { IGetMatchersOptions } from './matchers/ProblemMatcherRegistry';
+export { ProblemMatcherRegistry } from './matchers/ProblemMatcherRegistry';
+export type { IRunProblemMatchersOptions, IProblemMatcherResult } from './matchers/ProblemMatcherRunner';
+export { runProblemMatchers } from './matchers/ProblemMatcherRunner';
 
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {

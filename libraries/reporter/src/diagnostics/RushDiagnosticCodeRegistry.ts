@@ -111,6 +111,12 @@ export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly IRushDiagnosticCodeDefin
     summaryKey: 'diagnostic.RUSH_OPERATION_FAILED.summary'
   },
   {
+    code: 'RUSH_EXTERNAL_TOOL_PROBLEM',
+    category: 'operation',
+    defaultSeverity: 'error',
+    summaryKey: 'diagnostic.RUSH_EXTERNAL_TOOL_PROBLEM.summary'
+  },
+  {
     code: 'RUSH_PROTOCOL_UPDATE_REQUIRED',
     category: 'environment',
     defaultSeverity: 'error',
@@ -162,6 +168,7 @@ export const RUSH_DIAGNOSTIC_TEMPLATES: { readonly [resourceKey: string]: string
   'diagnostic.RUSH_NETWORK_AUTH_UNAUTHORIZED.summary':
     'Authentication failed for the registry {registryUrl}.',
   'diagnostic.RUSH_OPERATION_FAILED.summary': 'The operation for {projectName} failed.',
+  'diagnostic.RUSH_EXTERNAL_TOOL_PROBLEM.summary': 'The tool {tool} reported {code}: {message}',
   'diagnostic.RUSH_PROTOCOL_UPDATE_REQUIRED.summary':
     'A reporter protocol feature required by {producerVersion} is not supported by this Rush.',
   'diagnostic.RUSH_PROTOCOL_UPDATE_REQUIRED.detail':
