@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add the NDJSON wire protocol: protocol version and byte limits, an NDJSON encoder and streaming decoder, and hello/helloAck capability negotiation with an update-global-Rush diagnostic",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

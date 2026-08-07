@@ -1,0 +1,209 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`compatibility goldens advertises the current protocol version as the negotiation baseline 1`] = `
+Object {
+  "major": 1,
+  "minor": 0,
+}
+`;
+
+exports[`compatibility goldens freezes negotiation outcomes across supported majors and minors 1`] = `
+Array [
+  Object {
+    "accepted": true,
+    "acceptedCapabilities": Array [],
+    "diagnosticCode": undefined,
+    "name": "same major and minor",
+    "rejectedRequiredFeatures": Array [],
+  },
+  Object {
+    "accepted": true,
+    "acceptedCapabilities": Array [
+      "color",
+    ],
+    "diagnosticCode": undefined,
+    "name": "same major, newer additive minor",
+    "rejectedRequiredFeatures": Array [],
+  },
+  Object {
+    "accepted": true,
+    "acceptedCapabilities": Array [
+      "color",
+    ],
+    "diagnosticCode": undefined,
+    "name": "unknown optional capability is ignored",
+    "rejectedRequiredFeatures": Array [],
+  },
+  Object {
+    "accepted": false,
+    "acceptedCapabilities": Array [],
+    "diagnosticCode": "RUSH_PROTOCOL_UPDATE_REQUIRED",
+    "name": "unknown required feature is rejected",
+    "rejectedRequiredFeatures": Array [
+      "future-required",
+    ],
+  },
+  Object {
+    "accepted": false,
+    "acceptedCapabilities": Array [],
+    "diagnosticCode": "RUSH_PROTOCOL_UPDATE_REQUIRED",
+    "name": "unsupported newer major is rejected",
+    "rejectedRequiredFeatures": Array [],
+  },
+]
+`;
+
+exports[`legacy output snapshots freezes the legacy failure output 1`] = `
+"Starting \\"rush build\\"
+
+==[ @my-company/project-a (build) ]================================[ 1 of 2 ]==
+Building project-a...
+Error: Command failed with exit code 1
+
+==[ @my-company/project-b (build) ]================================[ 2 of 2 ]==
+\\"@my-company/project-b\\" is blocked by a failed dependency.
+
+==[ FAILURE: 1 operation ]=====================================================
+
+The following projects failed to build:
+  @my-company/project-a (build)    X.XX seconds
+
+rush build (X.XX seconds) ==> ERROR: Project(s) failed to build"
+`;
+
+exports[`legacy output snapshots freezes the legacy success output 1`] = `
+"Starting \\"rush build\\"
+
+Executing a maximum of 4 simultaneous processes...
+
+==[ @my-company/project-a (build) ]================================[ 1 of 2 ]==
+Building project-a...
+project-a done.
+
+==[ @my-company/project-b (build) ]================================[ 2 of 2 ]==
+Building project-b...
+project-b done.
+
+
+==[ SUCCESS: 2 operations ]====================================================
+
+These operations completed successfully:
+  @my-company/project-a (build)    X.XX seconds
+  @my-company/project-b (build)    X.XX seconds
+
+rush build (X.XX seconds)"
+`;
+
+exports[`protocol goldens freezes the diagnostic schema 1`] = `
+Object {
+  "category": "dependency-tool",
+  "causeDiagnosticIds": Array [
+    "diag_0000",
+  ],
+  "code": "RUSH_DEPENDENCY_TOOL_FAILED",
+  "detailKey": "diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.detail",
+  "diagnosticId": "diag_0001",
+  "parameters": Object {
+    "command": Object {
+      "privacy": "public",
+      "value": "pnpm install",
+    },
+    "exitCode": Object {
+      "privacy": "public",
+      "value": 1,
+    },
+    "logPath": Object {
+      "privacy": "local-sensitive",
+      "value": "/repo/common/temp/install.log",
+    },
+  },
+  "relatedArtifactIds": Array [
+    "artifact_install_log",
+  ],
+  "remediation": Array [
+    Object {
+      "automatedExecutionSafety": "requires-confirmation",
+      "command": "rush update --purge",
+      "descriptionKey": "remediation.reinstall",
+      "documentationUrl": "https://rushjs.io/pages/commands/rush_update/",
+    },
+  ],
+  "retryable": true,
+  "severity": "error",
+  "source": Object {
+    "file": "common/config/rush/pnpm-config.json",
+    "toolName": "pnpm",
+  },
+  "summaryKey": "diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.summary",
+}
+`;
+
+exports[`protocol goldens freezes the event envelope schema 1`] = `
+Object {
+  "eventId": "evt_0001",
+  "parentOperationId": "op_17",
+  "parentSessionId": "sess_parent",
+  "payload": Object {
+    "argv": Array [
+      "--to",
+      "@my-company/project-a",
+    ],
+    "commandName": "build",
+  },
+  "privacy": "public",
+  "protocolVersion": Object {
+    "major": 1,
+    "minor": 0,
+  },
+  "required": true,
+  "scope": Object {
+    "commandName": "build",
+    "operationId": "op_17",
+    "phaseName": "_phase:build",
+    "projectName": "@my-company/project-a",
+  },
+  "sequence": 5,
+  "sessionId": "sess_root",
+  "source": Object {
+    "component": "PhasedScriptAction",
+    "packageName": "@microsoft/rush-lib",
+    "packageVersion": "5.177.2",
+  },
+  "sourceSequence": 2,
+  "timestamp": "2026-07-12T00:00:00.000Z",
+  "type": "commandStarted",
+}
+`;
+
+exports[`protocol goldens freezes the handshake hello and helloAck schemas: hello 1`] = `
+Object {
+  "capabilities": Array [
+    "color",
+    "watch",
+  ],
+  "kind": "hello",
+  "producerVersion": "@rushstack/heft 1.2.19",
+  "protocolVersion": Object {
+    "major": 1,
+    "minor": 0,
+  },
+  "requiredFeatures": Array [
+    "ordered-sequence",
+  ],
+}
+`;
+
+exports[`protocol goldens freezes the handshake hello and helloAck schemas: helloAck 1`] = `
+Object {
+  "acceptedCapabilities": Array [
+    "color",
+    "watch",
+  ],
+  "kind": "helloAck",
+  "protocolVersion": Object {
+    "major": 1,
+    "minor": 0,
+  },
+  "rejectedRequiredFeatures": Array [],
+}
+`;

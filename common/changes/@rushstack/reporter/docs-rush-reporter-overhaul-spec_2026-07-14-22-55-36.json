@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Initial public beta scaffold of the @rushstack/reporter package",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

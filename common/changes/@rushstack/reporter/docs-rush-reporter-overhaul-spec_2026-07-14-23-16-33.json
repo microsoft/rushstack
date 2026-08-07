@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add the scoped producer API (IReporterEventSink, IScopedReporter) and namespaced extension event names",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
