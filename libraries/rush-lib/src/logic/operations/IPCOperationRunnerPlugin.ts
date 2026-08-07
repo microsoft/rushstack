@@ -81,7 +81,6 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
             initialCommand,
             incrementalCommand,
             commandForHash,
-            persist: true,
             ignoredParameterValues
           });
 
