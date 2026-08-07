@@ -65,7 +65,7 @@ describe('action wiring', () => {
 
   it('wires manager commands and keyboard selection', () => {
     document.body.innerHTML =
-      '<button id="connect-btn"></button><button id="execute-btn"></button><button id="abort-execution-btn"></button>';
+      '<button id="connect-btn"></button><button id="execute-btn"></button><button id="abort-execution-btn"></button><input id="name-search">';
     const debugBtn: HTMLButtonElement = document.createElement('button');
     const verboseBtn: HTMLButtonElement = document.createElement('button');
     const parallelismInput: HTMLInputElement = document.createElement('input');
@@ -100,6 +100,18 @@ describe('action wiring', () => {
     verboseBtn.click();
     parallelismInput.dispatchEvent(new Event('change'));
     playPauseBtn.click();
+    const textField: HTMLInputElement = document.getElementById('name-search') as HTMLInputElement;
+    const textFieldSelectAllEvent: KeyboardEvent = new KeyboardEvent('keydown', {
+      key: 'a',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true
+    });
+    textField.dispatchEvent(textFieldSelectAllEvent);
+    expect(textFieldSelectAllEvent.defaultPrevented).toBe(false);
+    expect(setSelection).not.toHaveBeenCalled();
+    expect(render).not.toHaveBeenCalled();
+
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', ctrlKey: true }));
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
 
