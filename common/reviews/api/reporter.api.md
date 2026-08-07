@@ -5,7 +5,41 @@
 ```ts
 
 // @beta
+export const BOOTSTRAP_BUFFER_MAX_BYTES: number;
+
+// @beta
+export const BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME: 'rush.reporter.bufferTruncated';
+
+// @beta
+export const BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES: number;
+
+// @beta
+export const BOOTSTRAP_HANDOFF_FILE_PREFIX: 'rush-reporter-bootstrap-';
+
+// @beta
+export const BOOTSTRAP_HANDOFF_FILE_SUFFIX: '.ndjson';
+
+// @beta
+export const BOOTSTRAP_PROTOCOL_MAJOR: number;
+
+// @beta
+export class BootstrapEventBuffer {
+    constructor(options: IBootstrapEventBufferOptions);
+    addExternalOutput(stream: 'stdout' | 'stderr', text: string): void;
+    emit(input: IBootstrapEventInput): string;
+    get failed(): boolean;
+    serialize(): string;
+    get truncation(): IBootstrapTruncation;
+}
+
+// @beta
+export type BootstrapPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
+
+// @beta
 export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPrivacyClassification>): ReporterPrivacyClassification;
+
+// @beta
+export function createEngineSink(providedSink?: IReporterEventSink): IEngineSinkResolution;
 
 // @beta
 export function createRushDiagnostic(code: string, options?: ICreateRushDiagnosticOptions): IRushDiagnostic;
@@ -14,13 +48,60 @@ export function createRushDiagnostic(code: string, options?: ICreateRushDiagnost
 export const DEFAULT_FLUSH_TIMEOUT_MS: number;
 
 // @beta
+export const DEFAULT_HANDOFF_RETENTION_MS: number;
+
+// @beta
 export const DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS: number;
+
+// @beta
+export function deleteBootstrapHandoffFileAsync(filePath: string): Promise<void>;
 
 // @beta
 export function encodeNdjsonRecord(value: unknown, options?: INdjsonOptions): string;
 
 // @beta
 export function getPrivacyClassificationRank(classification: ReporterPrivacyClassification): number;
+
+// @beta
+export interface IBootstrapEventBufferOptions {
+    readonly maxBytes?: number;
+    readonly now?: () => string;
+    readonly sessionId: string;
+    readonly source: IBootstrapEventSource;
+}
+
+// @beta
+export interface IBootstrapEventInput {
+    readonly payload?: unknown;
+    readonly privacy?: BootstrapPrivacyClassification;
+    readonly required: boolean;
+    readonly type: string;
+}
+
+// @beta
+export interface IBootstrapEventSource {
+    // (undocumented)
+    readonly packageName: string;
+    // (undocumented)
+    readonly packageVersion: string;
+}
+
+// @beta
+export interface IBootstrapReplayResult {
+    readonly direct: boolean;
+    readonly eventCount: number;
+    readonly handoffPath?: string;
+    readonly replayed: boolean;
+}
+
+// @beta
+export interface IBootstrapTruncation {
+    readonly droppedOther: number;
+    readonly droppedReplaceable: number;
+    readonly droppedRequired: number;
+    readonly failed: boolean;
+    readonly truncated: boolean;
+}
 
 // @beta
 export interface IClassifiedDiagnosticValue {
@@ -43,8 +124,29 @@ export interface ICreateRushDiagnosticOptions {
 }
 
 // @beta
+export interface IEarlyReporterControls {
+    readonly logLevel?: string;
+    readonly reporter?: string;
+}
+
+// @beta
+export interface IEngineSinkResolution {
+    readonly mode: 'structured' | 'legacy-fallback';
+    readonly sink: IReporterEventSink;
+}
+
+// @beta
 export interface INdjsonOptions {
     readonly maxRecordBytes?: number;
+}
+
+// @beta
+export interface IOldEngineOutputAdapterOptions {
+    readonly maxChunkBytes?: number;
+    readonly protocolVersion?: IReporterProtocolVersion;
+    readonly sessionId: string;
+    readonly sink: IReporterEventSink;
+    readonly source: IReporterEventSource;
 }
 
 // @beta
@@ -57,6 +159,15 @@ export interface IReporter {
 }
 
 // @beta
+export interface IReporterCompatibilityDecision {
+    readonly engineRendersLegacy: boolean;
+    readonly legacyRenderingVisible: boolean;
+    readonly mode: ReporterCompatibilityMode;
+    readonly provideSinkToEngine: boolean;
+    readonly reason: string;
+}
+
+// @beta
 export interface IReporterContext {
     readonly destination?: string;
     readonly protocolVersion: IReporterProtocolVersion;
@@ -64,6 +175,12 @@ export interface IReporterContext {
 
 // @beta
 export type IReporterEmitEventInput<TPayload> = Omit<IReporterEventEnvelope<TPayload>, 'eventId' | 'sequence' | 'sourceSequence' | 'timestamp'>;
+
+// @beta
+export interface IReporterEngineDescriptor {
+    readonly protocolMajor?: number;
+    readonly supportsStructuredSink: boolean;
+}
 
 // @beta
 export interface IReporterEventEnvelope<TPayload = unknown> {
@@ -104,6 +221,12 @@ export interface IReporterEventSource {
 }
 
 // @beta
+export interface IReporterFrontendDescriptor {
+    readonly hasManager: boolean;
+    readonly protocolMajor: number;
+}
+
+// @beta
 export interface IReporterHandshakeOptions {
     readonly supportedCapabilities?: readonly string[];
     readonly supportedProtocolVersion: IReporterProtocolVersion;
@@ -131,6 +254,15 @@ export interface IReporterHelloAck {
     readonly kind: 'helloAck';
     readonly protocolVersion: IReporterProtocolVersion;
     readonly rejectedRequiredFeatures: readonly string[];
+}
+
+// @beta
+export interface IReporterHostOptions {
+    readonly env?: Record<string, string | undefined>;
+    readonly handoffDirectory?: string;
+    readonly manager?: ReporterManager;
+    readonly nowMs?: () => number;
+    readonly retentionMs?: number;
 }
 
 // @beta
@@ -204,6 +336,9 @@ export interface IRushRemediationAction {
 }
 
 // @beta
+export function isBootstrapHandoffFileName(fileName: string): boolean;
+
+// @beta
 export interface IScopedMessageOptions {
     readonly privacy?: ReporterPrivacyClassification;
     readonly severity: ReporterMessageSeverity;
@@ -227,6 +362,18 @@ export function isReporterProtocolCompatible(consumer: IReporterProtocolVersion,
 export function isValidRushDiagnosticCode(code: string): boolean;
 
 // @beta
+export interface IWriteBootstrapHandoffOptions {
+    readonly directory?: string;
+    readonly pid?: number;
+}
+
+// @beta
+export class LegacyFallbackSink implements IReporterEventSink {
+    // (undocumented)
+    emit(): string;
+}
+
+// @beta
 export class NdjsonDecoder {
     constructor(options?: INdjsonOptions);
     decode(chunk: string): unknown[];
@@ -243,6 +390,18 @@ export class NdjsonRecordTooLargeError extends Error {
 export function negotiateReporterHello(hello: IReporterHello, options: IReporterHandshakeOptions): IReporterHandshakeResult;
 
 // @beta
+export class OldEngineOutputAdapter {
+    constructor(options: IOldEngineOutputAdapterOptions);
+    capture(stream: 'stdout' | 'stderr', text: string): string[];
+}
+
+// @beta
+export function parseEarlyReporterControls(argv: readonly string[], env: Record<string, string | undefined>): IEarlyReporterControls;
+
+// @beta
+export function readBootstrapHandoffFileAsync(filePath: string): Promise<unknown[]>;
+
+// @beta
 export const REPORTER_EVENT_TYPES: readonly ReporterEventType[];
 
 // @beta
@@ -255,10 +414,22 @@ export const REPORTER_PROTOCOL_LIMITS: IReporterProtocolLimits;
 export const REPORTER_PROTOCOL_VERSION: IReporterProtocolVersion;
 
 // @beta
+export type ReporterCompatibilityMode = 'structured' | 'new-frontend-old-engine' | 'old-frontend-new-engine' | 'legacy';
+
+// @beta
 export type ReporterEventType = 'sessionStarted' | 'sessionCompleted' | 'commandStarted' | 'commandCompleted' | 'operationRegistered' | 'operationStatusChanged' | 'activityChanged' | 'watchCycleCompleted' | 'diagnosticEmitted' | 'externalProcessStarted' | 'externalOutput' | 'externalProcessCompleted' | 'artifactAvailable' | 'commandResult' | 'extension';
 
 // @beta
 export type ReporterExtensionEventName = string;
+
+// @beta
+export class ReporterHost {
+    constructor(options?: IReporterHostOptions);
+    cleanAbandonedHandoffFilesAsync(): Promise<string[]>;
+    getSink(): IReporterEventSink;
+    get manager(): ReporterManager;
+    replayBootstrapHandoffAsync(): Promise<IBootstrapReplayResult>;
+}
 
 // @beta
 export type ReporterJsonNull = null;
@@ -301,6 +472,9 @@ export class ReporterMultiplexer implements IReporter {
 export type ReporterPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
 
 // @beta
+export function resolveReporterCompatibility(frontend: IReporterFrontendDescriptor, engine: IReporterEngineDescriptor): IReporterCompatibilityDecision;
+
+// @beta
 export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly IRushDiagnosticCodeDefinition[];
 
 // @beta
@@ -313,6 +487,9 @@ export const RUSH_DIAGNOSTIC_TEMPLATES: {
 
 // @beta
 export const RUSH_INTERNAL_ERROR_CODE: 'RUSH_INTERNAL_UNEXPECTED';
+
+// @beta
+export const RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_HANDOFF';
 
 // @beta
 export type RushDiagnosticCategory = 'configuration' | 'input' | 'dependency-tool' | 'environment' | 'network-auth' | 'operation' | 'internal';
@@ -329,5 +506,8 @@ export class RushError extends Error {
 
 // @beta
 export type RushRemediationSafety = 'safe' | 'requires-confirmation' | 'unsafe';
+
+// @beta
+export function writeBootstrapHandoffFileAsync(buffer: BootstrapEventBuffer, options?: IWriteBootstrapHandoffOptions): Promise<string>;
 
 ```

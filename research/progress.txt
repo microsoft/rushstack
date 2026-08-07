@@ -119,3 +119,49 @@
   Verify:
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest), 8 snapshots
   Next: Feature 8/28 - Two-stage bootstrap in install-run-rush (handoff file)
+
+[2026-07-14] Feature 8/28 COMPLETE: Two-stage bootstrap handoff (buffer + encoder + handoff + early controls)
+  Files (new):
+    - bootstrap/BootstrapProtocol.ts (BOOTSTRAP_PROTOCOL_MAJOR=1 frozen, BUFFER_MAX 1MiB, EXTERNAL_CHUNK 64KiB, RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR='_RUSH_REPORTER_BOOTSTRAP_HANDOFF', bufferTruncated ext name)
+    - bootstrap/BootstrapEventBuffer.ts (self-contained mini-sink; emit assigns ids/seq/ts; addExternalOutput 64KiB chunking; overflow preserves required+diagnostic, evicts non-preserve, fails if required can't fit; serialize appends bufferTruncated extension event)
+    - bootstrap/BootstrapHandoff.ts (write/read/delete NDJSON handoff via node fs/os)
+    - bootstrap/EarlyReporterControls.ts (parseEarlyReporterControls: --reporter/--log-level/-q/--verbose/--debug + RUSH_REPORTER/RUSH_LOG_LEVEL/RUSH_QUIET_MODE; CLI over env)
+    - test/Bootstrap.test.ts
+  Files (modified): index.ts, common/reviews/api/reporter.api.md
+  SCOPING DECISION (important):
+    - Authored the bootstrap machinery IN @rushstack/reporter as the source of truth (per spec 5.1: install-run-rush embeds a FROZEN copy generated from this package and does NOT import it at runtime).
+    - Did NOT modify the live libraries/rush-lib/src/scripts/install-run-rush.ts / common/scripts/install-run-rush.js bundle: it is zero-dependency, webpack-bundled critical tooling used for every build/test here; wiring live would risk breaking the repo's own tooling. Actual embedding into install-run-rush is a rollout/build-integration step.
+    - BOOTSTRAP_PROTOCOL_MAJOR duplicated (frozen) with a test asserting == REPORTER_PROTOCOL_VERSION.major.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - early-controls parsing, encode/serialize round-trip, 64KiB external chunking, overflow preserve+truncate, required-cannot-preserve fail, handoff write/read/delete tests pass; all exports @beta
+  Next: Feature 9/28 - Frontend ReporterManager host + replay the bootstrap handoff
+
+[2026-07-14] Feature 9/28 COMPLETE: Frontend ReporterManager host + bootstrap handoff replay
+  Files (new):
+    - frontend/ReporterHost.ts (ReporterHost: owns a ReporterManager; getSink()->IReporterEventSink (narrowed, no selection ownership); replayBootstrapHandoffAsync (read+ingestForeignEnvelope+delete; direct when env var absent; tolerates missing/corrupt file); cleanAbandonedHandoffFilesAsync (14d retention default); DEFAULT_HANDOFF_RETENTION_MS)
+    - test/ReporterHost.test.ts
+  Files (modified):
+    - bootstrap/BootstrapHandoff.ts (added BOOTSTRAP_HANDOFF_FILE_PREFIX/SUFFIX + isBootstrapHandoffFileName; writer now uses them)
+    - index.ts, common/reviews/api/reporter.api.md
+  SCOPING (same as F8): host authored in @rushstack/reporter as source of truth. Did NOT wire into live apps/rush start.ts (critical frontend tooling); actual creation "before version selection" is a rollout integration step.
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - replay+delete+rehome(sourceSequence), direct skip, missing-file tolerance, typed sink emit, abandoned-file cleanup (stale deleted, new/non-matching kept) tests pass; all exports @beta
+  Next: Feature 10/28 - Cross-version compatibility adapters (new/old frontend/engine) while keeping legacy rendering visible
+
+[2026-07-14] Feature 10/28 COMPLETE: Cross-version compatibility adapters (both directions)
+  Files (new):
+    - compat/ReporterCompatibility.ts (resolveReporterCompatibility -> mode structured|new-frontend-old-engine|old-frontend-new-engine|legacy; flags provideSinkToEngine/engineRendersLegacy/legacyRenderingVisible=true always)
+    - compat/LegacyFallbackSink.ts (LegacyFallbackSink discards emits; createEngineSink(providedSink?) -> {sink, mode structured|legacy-fallback})
+    - compat/OldEngineOutputAdapter.ts (capture(stream,text) bridges old-engine raw output into externalOutput events, 64KiB chunked, privacy local-sensitive)
+    - test/Compatibility.test.ts
+  Files (modified): index.ts, common/reviews/api/reporter.api.md
+  Notes:
+    - New frontend + old engine: OldEngineOutputAdapter bridges legacy stdout/stderr into structured events without altering visible legacy output.
+    - Old frontend + new engine: createEngineSink falls back to LegacyFallbackSink so a new engine emits safely then renders legacy.
+    - legacyRenderingVisible always true (phase 2: legacy sole visible output). Same source-of-truth scoping (not wired into live apps/rush or rush-lib).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - resolver (5 combos incl newer-major), engine sink (structured + fallback), adapter bridge + chunk-split tests pass; all exports @beta
+  Next: Feature 11/28 - Expose RushSession event sink and scoped producers to actions and plugins

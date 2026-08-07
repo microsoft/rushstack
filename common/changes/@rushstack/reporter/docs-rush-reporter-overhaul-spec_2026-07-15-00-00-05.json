@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add the two-stage bootstrap machinery: a frozen self-contained event buffer/encoder with 1 MiB overflow handling and a bufferTruncated event, temporary NDJSON handoff file helpers, and an early reporter controls parser",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add ReporterHost: the frontend-owned manager that replays and deletes the bootstrap handoff, exposes a typed sink to rush-lib without selection ownership, skips direct invocations, and cleans abandoned handoff files",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

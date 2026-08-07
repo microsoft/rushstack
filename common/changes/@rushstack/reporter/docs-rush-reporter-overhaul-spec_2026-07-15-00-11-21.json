@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add cross-version compatibility adapters: resolveReporterCompatibility, createEngineSink with a LegacyFallbackSink for old-frontend/new-engine fallback, and OldEngineOutputAdapter that bridges an old engine's raw output into structured events",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

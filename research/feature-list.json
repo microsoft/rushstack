@@ -97,7 +97,7 @@
       "Pass the handoff path to the frontend via a private environment variable",
       "Preserve required and diagnostic events on overflow and emit a bufferTruncated event"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -109,7 +109,7 @@
       "Skip the handoff file for direct rush invocations",
       "Clean abandoned handoff files using the OS-temp fallback retention policy"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -120,7 +120,7 @@
       "Keep legacy rendering as the sole visible output in this phase",
       "Add cross-version compatibility tests for both directions"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

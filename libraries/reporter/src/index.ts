@@ -72,6 +72,48 @@ export {
 } from './manager/ReporterManager';
 export { ReporterMultiplexer } from './manager/ReporterMultiplexer';
 
+export {
+  BOOTSTRAP_PROTOCOL_MAJOR,
+  BOOTSTRAP_BUFFER_MAX_BYTES,
+  BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES,
+  RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
+  BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME
+} from './bootstrap/BootstrapProtocol';
+export type {
+  BootstrapPrivacyClassification,
+  IBootstrapEventSource,
+  IBootstrapEventInput,
+  IBootstrapTruncation,
+  IBootstrapEventBufferOptions
+} from './bootstrap/BootstrapEventBuffer';
+export { BootstrapEventBuffer } from './bootstrap/BootstrapEventBuffer';
+export type { IWriteBootstrapHandoffOptions } from './bootstrap/BootstrapHandoff';
+export {
+  BOOTSTRAP_HANDOFF_FILE_PREFIX,
+  BOOTSTRAP_HANDOFF_FILE_SUFFIX,
+  isBootstrapHandoffFileName,
+  writeBootstrapHandoffFileAsync,
+  readBootstrapHandoffFileAsync,
+  deleteBootstrapHandoffFileAsync
+} from './bootstrap/BootstrapHandoff';
+export type { IEarlyReporterControls } from './bootstrap/EarlyReporterControls';
+export { parseEarlyReporterControls } from './bootstrap/EarlyReporterControls';
+
+export type { IReporterHostOptions, IBootstrapReplayResult } from './frontend/ReporterHost';
+export { ReporterHost, DEFAULT_HANDOFF_RETENTION_MS } from './frontend/ReporterHost';
+
+export type {
+  IReporterFrontendDescriptor,
+  IReporterEngineDescriptor,
+  ReporterCompatibilityMode,
+  IReporterCompatibilityDecision
+} from './compat/ReporterCompatibility';
+export { resolveReporterCompatibility } from './compat/ReporterCompatibility';
+export type { IEngineSinkResolution } from './compat/LegacyFallbackSink';
+export { LegacyFallbackSink, createEngineSink } from './compat/LegacyFallbackSink';
+export type { IOldEngineOutputAdapterOptions } from './compat/OldEngineOutputAdapter';
+export { OldEngineOutputAdapter } from './compat/OldEngineOutputAdapter';
+
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,
