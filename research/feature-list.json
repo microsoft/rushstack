@@ -309,7 +309,7 @@
       "Keep the raw-stream and problem-matcher path for older Heft versions",
       "Add old and new Heft descriptor path tests"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "performance",

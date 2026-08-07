@@ -20,6 +20,9 @@ export class AiReporter implements IReporter {
 }
 
 // @beta
+export function allocateChildDescriptor(fdNumber?: number): IChildDescriptorPlan;
+
+// @beta
 export const ALREADY_REPORTED_ERROR_NAME: 'AlreadyReportedError';
 
 // @beta @deprecated
@@ -168,6 +171,25 @@ export function getPrivacyClassificationRank(classification: ReporterPrivacyClas
 export function getSignalExitCode(signal: NodeJS.Signals): number;
 
 // @beta
+export class HeftChildEmitter {
+    constructor(options: IHeftChildEmitterOptions);
+    emitEvent(input: IHeftChildEventInput): string | undefined;
+    readonly mode: HeftChildReporterMode;
+    sendHello(): boolean;
+    writeRaw(stream: 'stdout' | 'stderr', text: string): void;
+}
+
+// @beta
+export type HeftChildReporterMode = 'structured' | 'raw-fallback';
+
+// @beta
+export class HeftDescriptorHost {
+    constructor(options: IHeftDescriptorHostOptions);
+    processChildNdjson(ndjson: string): IHeftChildResult;
+    processChildRecords(records: readonly unknown[]): IHeftChildResult;
+}
+
+// @beta
 export interface IAiDiagnostic {
     // (undocumented)
     readonly category: string;
@@ -282,6 +304,13 @@ export interface IBootstrapTruncation {
     readonly droppedRequired: number;
     readonly failed: boolean;
     readonly truncated: boolean;
+}
+
+// @beta
+export interface IChildDescriptorPlan {
+    readonly env: Record<string, string>;
+    readonly fdNumber: number;
+    readonly stdio: (string | number)[];
 }
 
 // @beta
@@ -402,6 +431,52 @@ export interface IFileReporterOptions {
 export interface IGetMatchersOptions {
     readonly includeDisabled?: boolean;
     readonly version?: string;
+}
+
+// @beta
+export interface IHeftChildEmitterOptions {
+    readonly capabilities?: readonly string[];
+    readonly childSessionId: string;
+    readonly env: Record<string, string | undefined>;
+    readonly now?: () => string;
+    readonly producerVersion: string;
+    readonly protocolVersion?: IReporterProtocolVersion;
+    readonly requiredFeatures?: readonly string[];
+    readonly source: IReporterEventSource;
+    readonly writeDescriptor?: (text: string) => void;
+    readonly writeStderr?: (text: string) => void;
+    readonly writeStdout?: (text: string) => void;
+}
+
+// @beta
+export interface IHeftChildEventInput {
+    // (undocumented)
+    readonly payload?: unknown;
+    // (undocumented)
+    readonly privacy?: 'public' | 'local-sensitive' | 'secret';
+    // (undocumented)
+    readonly required: boolean;
+    // (undocumented)
+    readonly scope?: IReporterEventScope;
+    // (undocumented)
+    readonly type: string;
+}
+
+// @beta
+export interface IHeftChildResult {
+    readonly accepted: boolean;
+    readonly ack?: IReporterHelloAck;
+    readonly diagnostic?: IRushDiagnostic;
+    readonly eventCount: number;
+}
+
+// @beta
+export interface IHeftDescriptorHostOptions {
+    readonly forwardEnvelope: (envelope: IReporterEventEnvelope<unknown>) => void;
+    readonly parentOperationId?: string;
+    readonly parentSessionId: string;
+    readonly supportedCapabilities?: readonly string[];
+    readonly supportedProtocolVersion: IReporterProtocolVersion;
 }
 
 // @beta
@@ -1068,6 +1143,9 @@ export class ProblemMatcherRegistry {
 export function readBootstrapHandoffFileAsync(filePath: string): Promise<unknown[]>;
 
 // @beta
+export function readChildDescriptorFd(env: Record<string, string | undefined>): number | undefined;
+
+// @beta
 export function regroupOperationOutput(events: readonly IReporterEventEnvelope<unknown>[]): Map<string, string>;
 
 // @beta
@@ -1192,6 +1270,9 @@ export const RUSH_PLUGIN_API_VERSION: '1.0.0';
 
 // @beta
 export const RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_HANDOFF';
+
+// @beta
+export const RUSH_REPORTER_CHILD_FD_ENV_VAR: '_RUSH_REPORTER_CHILD_FD';
 
 // @beta
 export const RUSH_REPORTER_ENV_VAR: 'RUSH_REPORTER';
