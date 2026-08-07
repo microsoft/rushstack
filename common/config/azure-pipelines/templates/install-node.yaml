@@ -8,3 +8,9 @@ steps:
     inputs:
       versionSpec: '${{ parameters.NodeMajorVersion }}.x'
     displayName: 'Install Node.js ${{ parameters.NodeMajorVersion }}'
+
+  - bash: |
+      cat > "$HOME/.npmrc" <<'EOF'
+      registry=https://packagefeedproxy.microsoft.io/npm/
+      EOF
+    displayName: 'Set user npm registry to packagefeedproxy'
