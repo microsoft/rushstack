@@ -3415,9 +3415,15 @@ importers:
 
   ../../../heft-plugins/heft-sass-plugin:
     dependencies:
+      '@jridgewell/sourcemap-codec':
+        specifier: ~1.5.5
+        version: 1.5.5
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@rushstack/typings-generator':
+        specifier: workspace:*
+        version: link:../../libraries/typings-generator
       '@types/tapable':
         specifier: 1.0.6
         version: 1.0.6

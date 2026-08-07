@@ -33,6 +33,19 @@ import {
   RealNodeModulePathResolver,
   Sort
 } from '@rushstack/node-core-library';
+import {
+  serializeDeclarationMap,
+  type IDeclarationMapping,
+  type ISourcePosition
+} from '@rushstack/typings-generator';
+
+import {
+  createClassPositionRecorder,
+  resolveSourceUrl,
+  resolveStylesheetPositions,
+  type IClassPositionRecorder,
+  type IResolvedClassPosition
+} from './SassDeclarationMaps';
 
 const SIMPLE_IDENTIFIER_REGEX: RegExp = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
 
@@ -135,6 +148,19 @@ export interface ISassProcessorOptions {
    * sourceMappingURL comment will be appended to the .css. Defaults to false.
    */
   sourceMap?: boolean;
+
+  /**
+   * If true, a `.d.ts.map` file is emitted next to each generated typings file. This allows editors
+   * to resolve "go to definition" on a CSS module class to the rule that declares it in the
+   * stylesheet, instead of stopping at the generated typings.
+   *
+   * Enabling this requests a source map from the Sass compiler even when `sourceMap` is false,
+   * because the declaration map is built by translating positions in the compiled CSS back to the
+   * original stylesheet.
+   *
+   * Defaults to false.
+   */
+  generateDeclarationMaps?: boolean;
 
   /**
    * A callback to further modify the raw CSS text after it has been generated. Only relevant if emitting CSS files.
@@ -271,7 +297,10 @@ export class SassProcessor {
         }
       ],
       silenceDeprecations: deprecationsToSilence,
-      ...(options.sourceMap && { sourceMap: true, sourceMapIncludeSources: true })
+      ...((options.sourceMap || options.generateDeclarationMaps) && {
+        sourceMap: true,
+        sourceMapIncludeSources: options.sourceMap === true
+      })
     };
   }
 
@@ -780,11 +809,13 @@ export class SassProcessor {
       doNotTrimOriginalFileExtension,
       postProcessCssAsync,
       preserveIcssExports,
-      sourceMap
+      sourceMap,
+      generateDeclarationMaps
     } = this._options;
 
     // Handle CSS modules
     let moduleMap: JsonObject | undefined;
+    let classPositions: ReadonlyMap<string, ISourcePosition> | undefined;
     if (record.isModule) {
       const postCssModules: postcss.Plugin = cssModules({
         getJSON: (cssFileName: string, json: JsonObject) => {
@@ -795,8 +826,14 @@ export class SassProcessor {
         generateScopedName: (name: string) => name
       });
 
+      // The recorder must run before postcss-modules, which rewrites class names.
+      const recorder: IClassPositionRecorder | undefined = generateDeclarationMaps
+        ? createClassPositionRecorder()
+        : undefined;
+      classPositions = recorder?.positions;
+
       const postCssResult: postcss.Result = await postcss
-        .default([postCssModules])
+        .default(recorder ? [recorder.plugin, postCssModules] : [postCssModules])
         .process(css, { from: sourceFilePath });
 
       if (!preserveIcssExports) {
@@ -818,18 +855,80 @@ export class SassProcessor {
     // default export at runtime, so treat it as a side-effect-only import just like
     // a non-module file.
     const hasModuleExports: boolean | undefined = moduleMap && Object.keys(moduleMap).length > 0;
-    const dtsContent: string = createDTS(moduleMap, exportAsDefault, hasModuleExports);
+    const declarationPositions: Map<string, ISourcePosition> | undefined = classPositions
+      ? new Map()
+      : undefined;
+    const dtsContent: string = createDTS(moduleMap, exportAsDefault, hasModuleExports, declarationPositions);
 
     const writeFileOptions: IFileSystemWriteFileOptions = {
       ensureFolderExists: true
     };
 
-    for (const dtsOutputFolder of dtsOutputFolders) {
-      await FileSystem.writeFileAsync(
-        path.resolve(dtsOutputFolder, `${relativeFilePath}.d.ts`),
-        dtsContent,
-        writeFileOptions
+    const declarationMappings: IDeclarationMapping[] = [];
+    const declarationMapSources: string[] = [];
+    if (classPositions && declarationPositions && result.sourceMap) {
+      const sourcePositions: Map<string, IResolvedClassPosition> = resolveStylesheetPositions(
+        classPositions,
+        result.sourceMap,
+        path.dirname(sourceFilePath),
+        (source: string, baseFolder: string) =>
+          source.startsWith('heft:') ? heftUrlToPath(source) : resolveSourceUrl(source, baseFolder)
       );
+
+      // Index 0 must be the stylesheet being compiled: serializeDeclarationMap maps generated
+      // line 0 to source 0, so that entry determines where navigating to the module itself lands.
+      // Populating in declaration order would otherwise make an imported partial the primary
+      // source whenever it happens to declare the first class.
+      const sourceIndexByPath: Map<string, number> = new Map([[sourceFilePath, 0]]);
+      declarationMapSources.push(sourceFilePath);
+
+      for (const [className, generated] of declarationPositions) {
+        const source: IResolvedClassPosition | undefined = sourcePositions.get(className);
+        if (!source) {
+          continue;
+        }
+
+        let sourceIndex: number | undefined = sourceIndexByPath.get(source.absoluteSourcePath);
+        if (sourceIndex === undefined) {
+          sourceIndex = declarationMapSources.length;
+          sourceIndexByPath.set(source.absoluteSourcePath, sourceIndex);
+          declarationMapSources.push(source.absoluteSourcePath);
+        }
+
+        declarationMappings.push({
+          generatedLine: generated.line,
+          generatedColumn: generated.column,
+          sourcePosition: { line: source.line, column: source.column },
+          sourceIndex
+        });
+      }
+    }
+
+    for (const dtsOutputFolder of dtsOutputFolders) {
+      const dtsFilePath: string = path.resolve(dtsOutputFolder, `${relativeFilePath}.d.ts`);
+      await FileSystem.writeFileAsync(dtsFilePath, dtsContent, writeFileOptions);
+
+      // A file whose classes could not be mapped gets no map at all, which leaves navigation for
+      // that file exactly as it is without this feature.
+      if (declarationMappings.length > 0) {
+        const dtsFolder: string = path.dirname(dtsFilePath);
+        // Source map paths are POSIX-style regardless of platform, and are relative to the folder
+        // containing the map, so they are recomputed for each output folder.
+        const relativeSources: string[] = declarationMapSources.map((absoluteSourcePath: string) =>
+          Path.convertToSlashes(path.relative(dtsFolder, absoluteSourcePath))
+        );
+
+        await FileSystem.writeFileAsync(
+          `${dtsFilePath}.map`,
+          serializeDeclarationMap(
+            declarationMappings,
+            `${path.basename(relativeFilePath)}.d.ts`,
+            relativeSources,
+            0
+          ),
+          writeFileOptions
+        );
+      }
     }
 
     if (cssOutputFolders && cssOutputFolders.length > 0) {
@@ -899,13 +998,20 @@ export class SassProcessor {
 function createDTS(
   moduleMap: JsonObject | undefined,
   exportAsDefault: boolean,
-  hasModuleExports: boolean | undefined
+  hasModuleExports: boolean | undefined,
+  declarationPositions?: Map<string, ISourcePosition>
 ): string;
-function createDTS(moduleMap: JsonObject, exportAsDefault: boolean, hasModuleExports: true): string;
+function createDTS(
+  moduleMap: JsonObject,
+  exportAsDefault: boolean,
+  hasModuleExports: true,
+  declarationPositions?: Map<string, ISourcePosition>
+): string;
 function createDTS(
   moduleMap: JsonObject | undefined,
   exportAsDefault: boolean,
-  hasModuleExports: boolean | undefined
+  hasModuleExports: boolean | undefined,
+  declarationPositions?: Map<string, ISourcePosition>
 ): string {
   if (hasModuleExports) {
     // Create a source file.
@@ -918,6 +1024,7 @@ function createDTS(
           ? className
           : JSON.stringify(className);
         // Quote and escape class names as needed.
+        declarationPositions?.set(className, { line: source.length, column: 2 });
         source.push(`  ${safeClassName}: string;`);
       }
 
@@ -932,12 +1039,14 @@ function createDTS(
           );
         }
 
+        declarationPositions?.set(className, { line: source.length, column: 'export const '.length });
         source.push(`export const ${className}: string;`);
       }
     }
 
     return source.join('\n');
   } else {
+    declarationPositions?.clear();
     return `export {};`;
   }
 }

@@ -32,6 +32,7 @@ export interface ISassConfigurationJson {
   doNotTrimOriginalFileExtension?: boolean;
   preserveIcssExports?: boolean;
   sourceMap?: boolean;
+  generateDeclarationMaps?: boolean;
 }
 
 const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
@@ -102,7 +103,8 @@ export default class SassPlugin implements IHeftPlugin {
           excludeFiles,
           doNotTrimOriginalFileExtension,
           preserveIcssExports,
-          sourceMap
+          sourceMap,
+          generateDeclarationMaps
         } = sassConfigurationJson || {};
 
         function resolveFolder(folder: string): string {
@@ -132,6 +134,7 @@ export default class SassPlugin implements IHeftPlugin {
           doNotTrimOriginalFileExtension,
           preserveIcssExports,
           sourceMap,
+          generateDeclarationMaps,
           postProcessCssAsync: hooks.postProcessCss.isUsed()
             ? async (cssText: string) => hooks.postProcessCss.promise(cssText)
             : undefined
