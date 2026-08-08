@@ -315,6 +315,12 @@
           "subspaceName": {
             "description": "(EXPERIMENTAL) An optional entry for specifying which subspace this project belongs to if the subspaces feature is enabled.",
             "type": "string"
+          },
+          "access": {
+            "description": "Restricts the project to be accessed by others. There are three possible values:\n\n\"public\" - any package can install this project.\n\"protected\" - only packages from the same subspace can install this project.\n\"private\" - no packages can install this project.\n\nThe default value is \"public\".",
+            "enum": ["public", "private", "protected"],
+            "type": "string",
+            "default": "public"
           }
         },
         "additionalProperties": false,
