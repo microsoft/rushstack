@@ -47,7 +47,7 @@ export enum OperationStatus {
    */
   SuccessWithWarning = 'SUCCESS WITH WARNINGS',
   /**
-   * The Operation was skipped via legacy incremental build logic.
+   * The Operation was skipped via incremental build logic.
    */
   Skipped = 'SKIPPED',
   /**
