@@ -820,6 +820,8 @@ export class OperationGraph implements IOperationGraph {
       onStartAsync: onOperationStartAsync,
       onResultAsync: onOperationCompleteAsync
     };
+    // Track runners closed by normal operation completion so the end-of-iteration fallback does not
+    // issue a concurrent or duplicate closeAsync() call for the same runner.
     const recordsWithRunnerCleanup: Set<OperationExecutionRecord> = new Set();
     const graph: OperationGraph = this;
 
@@ -1085,6 +1087,8 @@ export class OperationGraph implements IOperationGraph {
           record.status = OperationStatus.Failure;
         }
         if (!record.shouldRunnerPersist) {
+          // The runner's executeAsync() and the post-operation hook have both settled before cleanup,
+          // so persistence cleanup cannot race this operation's execution.
           recordsWithRunnerCleanup.add(record);
           try {
             await graph.closeRunnersAsync([record.operation]);
