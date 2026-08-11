@@ -551,7 +551,8 @@
    * PNPM documentation: https://pnpm.io/package_json#pnpmneverbuiltdependencies
    */
   "globalNeverBuiltDependencies": [
-    // "fsevents"
+    // The postinstall script redundantly downloads the platform binding, which PNPM installs as an optional dependency.
+    "unrs-resolver"
   ],
 
   /**
