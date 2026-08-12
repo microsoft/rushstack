@@ -740,6 +740,7 @@ export interface IOperationRunnerContext {
         createLogFile: boolean;
         logFileSuffix?: string;
     }): Promise<T>;
+    readonly shouldRunnerPersist: boolean;
     status: OperationStatus;
     stopwatch: IStopwatchResult;
 }

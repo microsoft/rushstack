@@ -116,7 +116,11 @@ class ClosableRunner extends MockOperationRunner {
 
   public override async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
     this.isActive = true;
-    return await super.executeAsync(context);
+    const status: OperationStatus = await super.executeAsync(context);
+    if (!context.shouldRunnerPersist) {
+      await this.closeAsync();
+    }
+    return status;
   }
 }
 
@@ -1216,14 +1220,14 @@ describe('runner persistence policy', () => {
 
     await graph.executeAsync({});
     expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
-    expect(oneShotRunner.closeAsync).toHaveBeenCalledTimes(1);
+    expect(oneShotRunner.closeAsync).toHaveBeenCalledTimes(2);
     expect(changingRunner.closeAsync).not.toHaveBeenCalled();
 
     persistentOperations = new Set([persistentOperation]);
     await graph.executeAsync({});
     expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
-    expect(oneShotRunner.closeAsync).toHaveBeenCalledTimes(2);
-    expect(changingRunner.closeAsync).toHaveBeenCalledTimes(1);
+    expect(oneShotRunner.closeAsync).toHaveBeenCalledTimes(4);
+    expect(changingRunner.closeAsync).toHaveBeenCalledTimes(2);
   });
 
   it('releases a non-persistent runner before its dependents execute', async () => {
@@ -1234,7 +1238,9 @@ describe('runner persistence policy', () => {
       return OperationStatus.Success;
     });
     upstreamRunner.closeAsync.mockImplementation(async () => {
-      executionOrder.push('upstream:close');
+      if (upstreamRunner.isActive) {
+        executionOrder.push('upstream:close');
+      }
       upstreamRunner.isActive = false;
     });
 
@@ -1265,7 +1271,7 @@ describe('runner persistence policy', () => {
     configureRunnerPersistence(graph, (operation) => operation !== upstreamOperation);
     await graph.executeAsync({});
 
-    expect(upstreamRunner.closeAsync).toHaveBeenCalledTimes(1);
+    expect(upstreamRunner.closeAsync).toHaveBeenCalledTimes(2);
     expect(downstreamRunner.closeAsync).not.toHaveBeenCalled();
     // The non-persistent upstream runner must be released immediately upon its own completion,
     // before the downstream operation begins executing — not deferred to the end of the iteration.
@@ -1365,8 +1371,7 @@ describe('runner persistence policy', () => {
     });
 
     const result: IExecutionResult = await graph.executeAsync({});
-    const coldResult: IOperationExecutionResult | undefined =
-      result.operationResults.get(coldOperation);
+    const coldResult: IOperationExecutionResult | undefined = result.operationResults.get(coldOperation);
 
     expect(lifecycleEvents).toEqual(['close', 'after-iteration']);
     expect(afterIterationStatus).toBe(OperationStatus.Failure);
