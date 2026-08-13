@@ -1327,6 +1327,7 @@ describe('runner persistence policy', () => {
   it('reports a bypassed runner cleanup failure before finalizing the iteration', async () => {
     const persistentRunner: ClosableRunner = new ClosableRunner('persistent');
     const coldRunner: ClosableRunner = new ClosableRunner('cold');
+    const successfulColdRunner: ClosableRunner = new ClosableRunner('successful-cold');
     const closeError: Error = new Error('close failed');
     const lifecycleEvents: string[] = [];
 
@@ -1342,9 +1343,15 @@ describe('runner persistence policy', () => {
       phase: mockPhase,
       project: getOrCreateProject('cold')
     });
+    const successfulColdOperation: Operation = new Operation({
+      runner: successfulColdRunner,
+      logFilenameIdentifier: 'successful-cold',
+      phase: mockPhase,
+      project: getOrCreateProject('successful-cold')
+    });
 
     const graph: OperationGraph = new OperationGraph(
-      new Set([persistentOperation, coldOperation]),
+      new Set([persistentOperation, coldOperation, successfulColdOperation]),
       graphOptions
     );
 
@@ -1372,6 +1379,8 @@ describe('runner persistence policy', () => {
 
     const result: IExecutionResult = await graph.executeAsync({});
     const coldResult: IOperationExecutionResult | undefined = result.operationResults.get(coldOperation);
+    const successfulColdResult: IOperationExecutionResult | undefined =
+      result.operationResults.get(successfulColdOperation);
 
     expect(lifecycleEvents).toEqual(['close', 'after-iteration']);
     expect(afterIterationStatus).toBe(OperationStatus.Failure);
@@ -1379,6 +1388,9 @@ describe('runner persistence policy', () => {
     expect(graph.status).toBe(OperationStatus.Failure);
     expect(coldResult?.status).toBe(OperationStatus.Failure);
     expect(coldResult?.error).toBe(closeError);
+    expect(successfulColdResult?.status).toBe(OperationStatus.Skipped);
+    expect(successfulColdResult?.error).toBeUndefined();
+    expect(successfulColdRunner.closeAsync).toHaveBeenCalledTimes(1);
     expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
   });
 });
