@@ -14,10 +14,34 @@ export function createDaemonHello(protocolVersion: IDaemonProtocolVersion): IDae
 export function createDaemonHelloAck(protocolVersion: IDaemonProtocolVersion, sessionId: string): IDaemonHelloAckMessage;
 
 // @beta
-export const DAEMON_CONTROL_MESSAGE_KINDS: readonly DaemonControlMessageKind[];
+export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
+'hello',
+'helloAck',
+'subscribe',
+'unsubscribe',
+'ping',
+'pong',
+'error'
+];
 
 // @beta
-export const DAEMON_EVENT_TYPES: readonly DaemonEventType[];
+export const DAEMON_EVENT_TYPES: readonly [
+'sessionStarted',
+'sessionCompleted',
+'commandStarted',
+'commandCompleted',
+'operationRegistered',
+'operationStatusChanged',
+'activityChanged',
+'watchCycleCompleted',
+'diagnosticEmitted',
+'externalProcessStarted',
+'externalOutput',
+'externalProcessCompleted',
+'artifactAvailable',
+'commandResult',
+'extension'
+];
 
 // @beta
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion;
@@ -25,10 +49,8 @@ export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion;
 // @beta
 export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonErrorMessage;
 
-// Warning: (ae-forgotten-export) The symbol "CONTROL_KIND_LIST" needs to be exported by the entry point index.d.ts
-//
 // @beta
-export type DaemonControlMessageKind = (typeof CONTROL_KIND_LIST)[number];
+export type DaemonControlMessageKind = (typeof DAEMON_CONTROL_MESSAGE_KINDS)[number];
 
 // @beta
 export type DaemonDiagnosticSeverity = 'debug' | 'info' | 'warning' | 'error';
@@ -39,10 +61,8 @@ export type DaemonEmptyPayload = Record<string, never>;
 // @beta
 export type DaemonEventPrivacy = 'public' | 'local-sensitive' | 'secret';
 
-// Warning: (ae-forgotten-export) The symbol "EVENT_TYPE_LIST" needs to be exported by the entry point index.d.ts
-//
 // @beta
-export type DaemonEventType = (typeof EVENT_TYPE_LIST)[number];
+export type DaemonEventType = (typeof DAEMON_EVENT_TYPES)[number];
 
 // @beta
 export type DaemonExtensionEventName = string;

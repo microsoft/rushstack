@@ -14,7 +14,16 @@
  *
  * @beta
  */
-const EVENT_TYPE_LIST = [
+/**
+ * The runtime list of every core event type, in canonical order.
+ *
+ * @remarks
+ * Annotated as a readonly literal-string tuple, and the {@link DaemonEventType}
+ * union is derived from it, so the list and the type can never drift apart.
+ *
+ * @beta
+ */
+export const DAEMON_EVENT_TYPES: readonly [
   'sessionStarted',
   'sessionCompleted',
   'commandStarted',
@@ -30,29 +39,37 @@ const EVENT_TYPE_LIST = [
   'artifactAvailable',
   'commandResult',
   'extension'
-] as const;
+] = [
+  'sessionStarted',
+  'sessionCompleted',
+  'commandStarted',
+  'commandCompleted',
+  'operationRegistered',
+  'operationStatusChanged',
+  'activityChanged',
+  'watchCycleCompleted',
+  'diagnosticEmitted',
+  'externalProcessStarted',
+  'externalOutput',
+  'externalProcessCompleted',
+  'artifactAvailable',
+  'commandResult',
+  'extension'
+];
 
 /**
  * The closed set of core event type identifiers carried by `0x05` event frames.
  *
  * @remarks
- * Derived from the canonical list, so the list and the type can never drift
- * apart. The set is intentionally closed and mirrors the reporter event
- * contract; producers that need a custom event use the `extension` type with
- * a namespaced identifier instead.
+ * Derived from {@link DAEMON_EVENT_TYPES}. The set is intentionally closed and
+ * mirrors the reporter event contract; producers that need a custom event use
+ * the `extension` type with a namespaced identifier instead.
  *
  * @beta
  */
-export type DaemonEventType = (typeof EVENT_TYPE_LIST)[number];
+export type DaemonEventType = (typeof DAEMON_EVENT_TYPES)[number];
 
-/**
- * The runtime list of every core event type, in canonical order.
- *
- * @beta
- */
-export const DAEMON_EVENT_TYPES: readonly DaemonEventType[] = EVENT_TYPE_LIST;
-
-const DAEMON_EVENT_TYPE_SET: ReadonlySet<string> = new Set(DAEMON_EVENT_TYPES);
+const DAEMON_EVENT_TYPE_SET: ReadonlySet<string> = new Set<string>(DAEMON_EVENT_TYPES);
 
 /**
  * Returns `true` when `value` is a core event type identifier.

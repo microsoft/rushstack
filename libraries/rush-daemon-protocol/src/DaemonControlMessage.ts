@@ -73,7 +73,13 @@ export type DaemonControlMessage =
   | IDaemonPongMessage
   | IDaemonErrorMessage;
 
-const CONTROL_KIND_LIST = [
+/**
+ * The runtime list of control message `kind` discriminants, from which
+ * {@link DaemonControlMessageKind} is derived (single source of truth).
+ *
+ * @beta
+ */
+export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
   'hello',
   'helloAck',
   'subscribe',
@@ -81,18 +87,12 @@ const CONTROL_KIND_LIST = [
   'ping',
   'pong',
   'error'
-] as const;
+] = ['hello', 'helloAck', 'subscribe', 'unsubscribe', 'ping', 'pong', 'error'];
 
 /** The union of control message `kind` discriminants, derived from the list. @beta */
-export type DaemonControlMessageKind = (typeof CONTROL_KIND_LIST)[number];
+export type DaemonControlMessageKind = (typeof DAEMON_CONTROL_MESSAGE_KINDS)[number];
 
-/**
- * The runtime list of control message `kind` discriminants (single source of truth).
- * @beta
- */
-export const DAEMON_CONTROL_MESSAGE_KINDS: readonly DaemonControlMessageKind[] = CONTROL_KIND_LIST;
-
-const CONTROL_KIND_SET: ReadonlySet<string> = new Set(CONTROL_KIND_LIST);
+const CONTROL_KIND_SET: ReadonlySet<string> = new Set<string>(DAEMON_CONTROL_MESSAGE_KINDS);
 
 /** Returns `true` when `value` is a control message `kind`. @beta */
 export function isDaemonControlMessageKind(value: unknown): value is DaemonControlMessageKind {
