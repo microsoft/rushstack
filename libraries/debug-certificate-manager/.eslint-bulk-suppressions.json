@@ -1,0 +1,254 @@
+{
+  "suppressions": [
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._createCACertificateAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._createCACertificateAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._createDevelopmentCertificateAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._createDevelopmentCertificateAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._detectIfCertificateIsTrustedAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._detectIfCertificateIsTrustedAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._detectIfCertificateIsTrustedAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._ensureCertificateInternalAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._ensureCertificateInternalAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._parseMacOsMatchingCertificateHash",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._parseMacOsMatchingCertificateHash",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._trySetFriendlyNameAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._trySetFriendlyNameAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._tryTrustCertificateAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._tryTrustCertificateAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager._tryTrustCertificateAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.ensureCertificateAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.ensureCertificateAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.ensureCertificateAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.untrustCertificateAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.untrustCertificateAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.untrustCertificateAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.validateCertificateAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.validateCertificateAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.validateCertificateAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".IDnsAltName",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".IIPAddressAltName",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".applyDefaultOptions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".isIPAddress",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateStore.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/CertificateStore.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/CertificateStore.ts",
+      "scopeId": ".CertificateStore.caCertificateData",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CertificateStore.ts",
+      "scopeId": ".CertificateStore.certificateData",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CertificateStore.ts",
+      "scopeId": ".CertificateStore.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateStore.ts",
+      "scopeId": ".CertificateStore.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CertificateStore.ts",
+      "scopeId": ".CertificateStore.constructor",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/CertificateStore.ts",
+      "scopeId": ".CertificateStore.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/CertificateStore.ts",
+      "scopeId": ".CertificateStore.keyData",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/runCommand.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/runCommand.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/runCommand.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/runCommand.ts",
+      "scopeId": "._handleChildProcess",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/runCommand.ts",
+      "scopeId": ".darwinRunSudoAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/runCommand.ts",
+      "scopeId": ".darwinRunSudoAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/runCommand.ts",
+      "scopeId": ".randomTmpPath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "suppressions": [
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath._findLongestPrefixMatch",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath._findLongestPrefixMatch",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath._findNodeAtPrefix",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.deleteItem",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.deleteSubtree",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.deleteSubtree",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.entries",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.entries",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.findChildPathFromSegments",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.fromJson",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.fromJson.deserializeNode",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.get",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.groupByChild",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.setItemFromSegments",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.setItemFromSegments",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.toJson",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.toJson.serializeNode",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.toJson.serializeNode",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": "._iteratePrefixes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": "._iteratePrefixes",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getFirstDifferenceInCommonNodes.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/getFirstDifferenceInCommonNodes.ts",
+      "scopeId": ".getFirstDifferenceInCommonNodes",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getFirstDifferenceInCommonNodes.ts",
+      "scopeId": ".getFirstDifferenceInCommonNodesInternal",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getFirstDifferenceInCommonNodes.ts",
+      "scopeId": ".getFirstDifferenceInCommonNodesInternal",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/LookupByPath.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LookupByPath.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/LookupByPath.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/getFirstDifferenceInCommonNodes.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/getFirstDifferenceInCommonNodes.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/getFirstDifferenceInCommonNodes.test.ts",
+      "scopeId": ".customEquals",
+      "rule": "complexity"
+    }
+  ]
+}

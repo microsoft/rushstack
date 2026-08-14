@@ -1,0 +1,739 @@
+{
+  "suppressions": [
+    {
+      "file": "src/CommandLineHelper.ts",
+      "scopeId": ".CommandLineHelper.isTabCompletionActionRequest",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TypeUuidLite.ts",
+      "scopeId": ".TypeUuid.isInstanceOf",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parameters/BaseClasses.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/parameters/BaseClasses.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/parameters/BaseClasses.ts",
+      "scopeId": ".CommandLineParameterBase.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/parameters/BaseClasses.ts",
+      "scopeId": ".CommandLineParameterBase.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parameters/BaseClasses.ts",
+      "scopeId": ".CommandLineParameterBase.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/parameters/BaseClasses.ts",
+      "scopeId": ".CommandLineParameterWithArgument.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/parameters/BaseClasses.ts",
+      "scopeId": ".CommandLineParameterWithArgument.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parameters/CommandLineChoiceListParameter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/parameters/CommandLineChoiceListParameter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/parameters/CommandLineChoiceListParameter.ts",
+      "scopeId": ".CommandLineChoiceListParameter._setValue",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parameters/CommandLineChoiceListParameter.ts",
+      "scopeId": ".CommandLineChoiceListParameter._setValue",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/parameters/CommandLineChoiceListParameter.ts",
+      "scopeId": ".CommandLineChoiceListParameter._setValue",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/parameters/CommandLineChoiceListParameter.ts",
+      "scopeId": ".CommandLineChoiceListParameter.appendToArgList",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/parameters/CommandLineChoiceListParameter.ts",
+      "scopeId": ".CommandLineChoiceListParameter.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/parameters/CommandLineChoiceParameter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/parameters/CommandLineChoiceParameter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/parameters/CommandLineChoiceParameter.ts",
+      "scopeId": ".CommandLineChoiceParameter._setValue",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parameters/CommandLineChoiceParameter.ts",
+      "scopeId": ".CommandLineChoiceParameter._setValue",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/parameters/CommandLineChoiceParameter.ts",
+      "scopeId": ".CommandLineChoiceParameter.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/parameters/CommandLineChoiceParameter.ts",
+      "scopeId": ".CommandLineChoiceParameter.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parameters/CommandLineDefinition.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/parameters/CommandLineFlagParameter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/parameters/CommandLineFlagParameter.ts",
+      "scopeId": ".CommandLineFlagParameter._setValue",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parameters/CommandLineFlagParameter.ts",
+      "scopeId": ".CommandLineFlagParameter._setValue",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/parameters/CommandLineIntegerListParameter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/parameters/CommandLineIntegerListParameter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/parameters/CommandLineIntegerListParameter.ts",
+      "scopeId": ".CommandLineIntegerListParameter._setValue",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/parameters/CommandLineIntegerListParameter.ts",
+      "scopeId": ".CommandLineIntegerListParameter._setValue",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parameters/CommandLineIntegerListParameter.ts",
+      "scopeId": ".CommandLineIntegerListParameter._setValue",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/parameters/CommandLineIntegerListParameter.ts",
+      "scopeId": ".CommandLineIntegerListParameter._setValue",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/parameters/CommandLineIntegerListParameter.ts",
+      "scopeId": ".CommandLineIntegerListParameter.appendToArgList",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/parameters/CommandLineIntegerParameter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/parameters/CommandLineIntegerParameter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/parameters/CommandLineIntegerParameter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/parameters/CommandLineIntegerParameter.ts",
+      "scopeId": ".CommandLineIntegerParameter._setValue",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/parameters/CommandLineIntegerParameter.ts",
+      "scopeId": ".CommandLineIntegerParameter._setValue",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parameters/CommandLineIntegerParameter.ts",
+      "scopeId": ".CommandLineIntegerParameter._setValue",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/parameters/CommandLineRemainder.ts",
+      "scopeId": ".CommandLineRemainder.appendToArgList",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/parameters/CommandLineStringListParameter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/parameters/CommandLineStringListParameter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/parameters/CommandLineStringListParameter.ts",
+      "scopeId": ".CommandLineStringListParameter._setValue",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parameters/CommandLineStringListParameter.ts",
+      "scopeId": ".CommandLineStringListParameter.appendToArgList",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/parameters/CommandLineStringParameter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/parameters/CommandLineStringParameter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/parameters/CommandLineStringParameter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/parameters/CommandLineStringParameter.ts",
+      "scopeId": ".CommandLineStringParameter._getSupplementaryNotes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/parameters/CommandLineStringParameter.ts",
+      "scopeId": ".CommandLineStringParameter._setValue",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parameters/EnvironmentVariableParser.ts",
+      "scopeId": ".EnvironmentVariableParser.parseAsList",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/parameters/EnvironmentVariableParser.ts",
+      "scopeId": ".EnvironmentVariableParser.parseAsList",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parameters/EnvironmentVariableParser.ts",
+      "scopeId": ".EnvironmentVariableParser.parseAsList",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/parameters/EnvironmentVariableParser.ts",
+      "scopeId": ".EnvironmentVariableParser.parseAsList",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/providers/AliasCommandLineAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/providers/AliasCommandLineAction.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/providers/AliasCommandLineAction.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/providers/AliasCommandLineAction.ts",
+      "scopeId": ".AliasCommandLineAction._processParsedData",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/AliasCommandLineAction.ts",
+      "scopeId": ".AliasCommandLineAction._registerDefinedParameters",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/AliasCommandLineAction.ts",
+      "scopeId": ".AliasCommandLineAction._registerDefinedParameters",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/providers/CommandLineAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/providers/CommandLineAction.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._defineAmbiguousParameter",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._defineAmbiguousParameter",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._defineParameter",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._defineParameter",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._getParameter",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._getParameter",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._getParameter",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._processParsedData",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._processParsedData",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._processParsedData",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._processParsedData",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._registerDefinedParameters",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._registerDefinedParameters",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._registerDefinedParameters",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._registerDefinedParameters",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._registerParameter",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._registerParameter",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._registerParameter",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider._throwParserExitError",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider.getParameterStringMap",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider.getParameterStringMap",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/providers/CommandLineParser.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/providers/CommandLineParser.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/providers/CommandLineParser.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/providers/CommandLineParser.ts",
+      "scopeId": ".CommandLineParser._validateDefinitions",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/providers/CommandLineParser.ts",
+      "scopeId": ".CommandLineParser.addAction",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/providers/CommandLineParser.ts",
+      "scopeId": ".CommandLineParser.executeAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/providers/CommandLineParser.ts",
+      "scopeId": ".CommandLineParser.executeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/CommandLineParser.ts",
+      "scopeId": ".CommandLineParser.executeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/providers/CommandLineParser.ts",
+      "scopeId": ".CommandLineParser.executeWithoutErrorHandlingAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/providers/CommandLineParser.ts",
+      "scopeId": ".CommandLineParser.executeWithoutErrorHandlingAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/providers/CommandLineParser.ts",
+      "scopeId": ".CommandLineParser.executeWithoutErrorHandlingAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/CommandLineParser.ts",
+      "scopeId": ".CommandLineParser.executeWithoutErrorHandlingAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/providers/CommandLineParser.ts",
+      "scopeId": ".CommandLineParser.executeWithoutErrorHandlingAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/providers/ScopedCommandLineAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/providers/ScopedCommandLineAction.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/providers/ScopedCommandLineAction.ts",
+      "scopeId": ".InternalScopedCommandLineParser.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/ScopedCommandLineAction.ts",
+      "scopeId": ".ScopedCommandLineAction._executeAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/providers/ScopedCommandLineAction.ts",
+      "scopeId": ".ScopedCommandLineAction._executeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/ScopedCommandLineAction.ts",
+      "scopeId": ".ScopedCommandLineAction._executeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/providers/TabCompletionAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/providers/TabCompletionAction.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/providers/TabCompletionAction.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/providers/TabCompletionAction.ts",
+      "scopeId": ".TabCompleteAction._completeParameterValues",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/providers/TabCompletionAction.ts",
+      "scopeId": ".TabCompleteAction._getGlobalParameterOffset",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/TabCompletionAction.ts",
+      "scopeId": ".TabCompleteAction._getParameterValueCompletionsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/TabCompletionAction.ts",
+      "scopeId": ".TabCompleteAction.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/TabCompletionAction.ts",
+      "scopeId": ".TabCompleteAction.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/providers/TabCompletionAction.ts",
+      "scopeId": ".TabCompleteAction.getCompletionsAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/providers/TabCompletionAction.ts",
+      "scopeId": ".TabCompleteAction.getCompletionsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/TabCompletionAction.ts",
+      "scopeId": ".TabCompleteAction.getCompletionsAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/providers/TabCompletionAction.ts",
+      "scopeId": ".TabCompleteAction.getCompletionsAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ActionlessParser.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AliasedCommandLineAction.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/AliasedCommandLineAction.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/AliasedCommandLineAction.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AmbiguousCommandLineParser.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/AmbiguousCommandLineParser.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AmbiguousCommandLineParser.test.ts",
+      "scopeId": ".AbbreviationScopedAction.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/AmbiguousCommandLineParser.test.ts",
+      "scopeId": ".AmbiguousAction.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AmbiguousCommandLineParser.test.ts",
+      "scopeId": ".AmbiguousScopedAction.onDefineScopedParameters",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AmbiguousCommandLineParser.test.ts",
+      "scopeId": ".AmbiguousScopedAction.onExecuteAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/CommandLineParameter.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/CommandLineParameter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/CommandLineParameter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/CommandLineParameter.test.ts",
+      "scopeId": ".createParser",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/CommandLineParser.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/CommandLineParser.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/CommandLineRemainder.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/CommandLineRemainder.test.ts",
+      "scopeId": ".createParser",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ConflictingCommandLineParser.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ConflictingCommandLineParser.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/EndToEndTest.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ScopedCommandLineAction.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ScopedCommandLineAction.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ScopedCommandLineAction.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/TabCompleteAction.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/TabCompleteAction.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/TabCompleteAction.test.ts",
+      "scopeId": ".getCommandLineParser",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/test-cli/PushAction.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/test-cli/RunAction.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/test/test-cli/WidgetCommandLine.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

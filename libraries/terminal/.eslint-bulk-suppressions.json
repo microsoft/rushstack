@@ -1,0 +1,699 @@
+{
+  "suppressions": [
+    {
+      "file": "src/AnsiEscape.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/AnsiEscape.ts",
+      "scopeId": ".AnsiEscape.formatForTests",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AnsiEscape.ts",
+      "scopeId": ".AnsiEscape.formatForTests",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/AnsiEscape.ts",
+      "scopeId": "._tryGetSgrFriendlyName",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AnsiEscape.ts",
+      "scopeId": "._tryGetSgrFriendlyName",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/CallbackWritable.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/Colorize.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/ConsoleTerminalProvider.ts",
+      "scopeId": ".ConsoleTerminalProvider.write",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DiscardStdoutTransform.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/DiscardStdoutTransform.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/DiscardStdoutTransform.ts",
+      "scopeId": ".DiscardStdoutTransform.onWriteChunk",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DiscardStdoutTransform.ts",
+      "scopeId": ".DiscardStdoutTransform.onWriteChunk",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DiscardStdoutTransform.ts",
+      "scopeId": ".DiscardStdoutTransform.onWriteChunk",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/NormalizeNewlinesTextRewriter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/NormalizeNewlinesTextRewriter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/NormalizeNewlinesTextRewriter.ts",
+      "scopeId": ".NormalizeNewlinesTextRewriter.process",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/NormalizeNewlinesTextRewriter.ts",
+      "scopeId": ".NormalizeNewlinesTextRewriter.process",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/NormalizeNewlinesTextRewriter.ts",
+      "scopeId": ".NormalizeNewlinesTextRewriter.process",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PrefixProxyTerminalProvider.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/PrefixProxyTerminalProvider.ts",
+      "scopeId": ".PrefixProxyTerminalProvider.write",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PrefixProxyTerminalProvider.ts",
+      "scopeId": ".PrefixProxyTerminalProvider.write",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PrintUtilities.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/PrintUtilities.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/PrintUtilities.ts",
+      "scopeId": ".PrintUtilities.printMessageInBox",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PrintUtilities.ts",
+      "scopeId": ".PrintUtilities.printMessageInBox",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PrintUtilities.ts",
+      "scopeId": ".PrintUtilities.printMessageInBox",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PrintUtilities.ts",
+      "scopeId": ".PrintUtilities.wrapWordsToLines",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PrintUtilities.ts",
+      "scopeId": ".PrintUtilities.wrapWordsToLines",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/PrintUtilities.ts",
+      "scopeId": ".PrintUtilities.wrapWordsToLines",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PrintUtilities.ts",
+      "scopeId": ".PrintUtilities.wrapWordsToLines",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/PrintUtilities.ts",
+      "scopeId": ".PrintUtilities.wrapWordsToLines",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ProblemCollector.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/ProblemCollector.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/ProblemCollector.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/ProblemCollector.ts",
+      "scopeId": ".ProblemCollector.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProblemCollector.ts",
+      "scopeId": ".ProblemCollector.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ProblemCollector.ts",
+      "scopeId": ".ProblemCollector.onClose",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProblemCollector.ts",
+      "scopeId": ".ProblemCollector.onClose",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ProblemCollector.ts",
+      "scopeId": ".ProblemCollector.onClose",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/ProblemCollector.ts",
+      "scopeId": ".ProblemCollector.onWriteChunk",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProblemCollector.ts",
+      "scopeId": ".ProblemCollector.onWriteChunk",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RemoveColorsTextRewriter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/RemoveColorsTextRewriter.ts",
+      "scopeId": ".RemoveColorsTextRewriter.process",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RemoveColorsTextRewriter.ts",
+      "scopeId": ".RemoveColorsTextRewriter.process",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RemoveColorsTextRewriter.ts",
+      "scopeId": ".RemoveColorsTextRewriter.process",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/RemoveColorsTextRewriter.ts",
+      "scopeId": ".RemoveColorsTextRewriter.process",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SplitterTransform.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/SplitterTransform.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/SplitterTransform.ts",
+      "scopeId": ".SplitterTransform.onClose",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SplitterTransform.ts",
+      "scopeId": ".SplitterTransform.onClose",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SplitterTransform.ts",
+      "scopeId": ".SplitterTransform.removeDestination",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StdioLineTransform.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/StdioLineTransform.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/StdioLineTransform.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/StdioLineTransform.ts",
+      "scopeId": ".StderrLineTransform.onClose",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/StdioLineTransform.ts",
+      "scopeId": ".StderrLineTransform.onWriteChunk",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/StdioLineTransform.ts",
+      "scopeId": ".StderrLineTransform.onWriteChunk",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StdioLineTransform.ts",
+      "scopeId": ".StderrLineTransform.onWriteChunk",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/StdioSummarizer.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/StdioSummarizer.ts",
+      "scopeId": ".StdioSummarizer",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/StdioSummarizer.ts",
+      "scopeId": ".StdioSummarizer.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/StdioSummarizer.ts",
+      "scopeId": ".StdioSummarizer.constructor",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/StdioSummarizer.ts",
+      "scopeId": ".StdioSummarizer.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StdioSummarizer.ts",
+      "scopeId": ".StdioSummarizer.getReport",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/StdioSummarizer.ts",
+      "scopeId": ".StdioSummarizer.getReport",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StdioSummarizer.ts",
+      "scopeId": ".StdioSummarizer.onWriteChunk",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/StdioSummarizer.ts",
+      "scopeId": ".StdioSummarizer.onWriteChunk",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StdioSummarizer.ts",
+      "scopeId": ".StdioSummarizer.onWriteChunk",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/StringBufferTerminalProvider.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/StringBufferTerminalProvider.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/StringBufferTerminalProvider.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/StringBufferTerminalProvider.ts",
+      "scopeId": ".StringBufferTerminalProvider.getAllOutput",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StringBufferTerminalProvider.ts",
+      "scopeId": ".StringBufferTerminalProvider.getAllOutput",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/StringBufferTerminalProvider.ts",
+      "scopeId": ".StringBufferTerminalProvider.getAllOutputAsChunks",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/StringBufferTerminalProvider.ts",
+      "scopeId": ".StringBufferTerminalProvider.getAllOutputAsChunks",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StringBufferTerminalProvider.ts",
+      "scopeId": ".StringBufferTerminalProvider.getAllOutputAsChunks",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/StringBufferTerminalProvider.ts",
+      "scopeId": ".StringBufferTerminalProvider.getAllOutputAsChunks",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/StringBufferTerminalProvider.ts",
+      "scopeId": ".StringBufferTerminalProvider.write",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/StringBufferTerminalProvider.ts",
+      "scopeId": ".StringBufferTerminalProvider.write",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StringBufferTerminalProvider.ts",
+      "scopeId": ".StringBufferTerminalProvider.write",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Terminal.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/Terminal.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/Terminal.ts",
+      "scopeId": ".Terminal._normalizeWriteParameters",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Terminal.ts",
+      "scopeId": ".Terminal._writeSegmentsToProviders",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Terminal.ts",
+      "scopeId": ".Terminal._writeSegmentsToProviders",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/Terminal.ts",
+      "scopeId": ".Terminal._writeSegmentsToProviders",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TerminalStreamWritable.ts",
+      "scopeId": ".TerminalStreamWritable.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TerminalTable.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/TerminalTable.ts",
+      "scopeId": ".TerminalTable.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TerminalTable.ts",
+      "scopeId": ".TerminalTable.getLines",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TerminalTable.ts",
+      "scopeId": ".TerminalTable.getLines",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TerminalTable.ts",
+      "scopeId": ".TerminalTable.getLines",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/TerminalTable.ts",
+      "scopeId": ".TerminalTable.getLines",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TerminalTable.ts",
+      "scopeId": ".TerminalTable.getLines.buildSepLine",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TerminalTable.ts",
+      "scopeId": ".TerminalTable.getLines.renderRow",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TerminalTable.ts",
+      "scopeId": ".TerminalTable.getLines.renderRow",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TerminalTransform.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/TerminalWritable.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/TerminalWritable.ts",
+      "scopeId": ".TerminalWritable.constructor",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/TextRewriterTransform.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/TextRewriterTransform.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/TextRewriterTransform.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/TextRewriterTransform.ts",
+      "scopeId": ".TextRewriterTransform._closeRewriters",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TextRewriterTransform.ts",
+      "scopeId": ".TextRewriterTransform._closeRewriters",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TextRewriterTransform.ts",
+      "scopeId": ".TextRewriterTransform._processText",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TextRewriterTransform.ts",
+      "scopeId": ".TextRewriterTransform._processText",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TextRewriterTransform.ts",
+      "scopeId": ".TextRewriterTransform.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TextRewriterTransform.ts",
+      "scopeId": ".TextRewriterTransform.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TextRewriterTransform.ts",
+      "scopeId": ".TextRewriterTransform.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/Colorize.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/NormalizeNewlinesTextRewriter.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/PrefixProxyTerminalProvider.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PrefixProxyTerminalProvider.test.ts",
+      "scopeId": ".runTestsForTerminalProvider",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PrintUtilities.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PrintUtilities.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PrintUtilities.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PrintUtilities.test.ts",
+      "scopeId": ".testWrapWordsToLines",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PrintUtilities.test.ts",
+      "scopeId": ".testWrapWordsToLines",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ProblemCollector.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ProblemCollector.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ProblemCollector.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ProblemCollector.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/ProblemCollector.test.ts",
+      "scopeId": ".ErrorLineMatcher.exec",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RemoveColorsTextRewriter.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/SplitterTransform.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/SplitterTransform.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/SplitterTransform.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/SplitterTransform.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/StdioSummarizer.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/StdioSummarizer.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/Terminal.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/Terminal.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/TerminalStreamWritable.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/TerminalTable.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/TerminalTable.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/TerminalTable.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/createColorGrid.ts",
+      "scopeId": ".createColorGrid",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/createColorGrid.ts",
+      "scopeId": ".createColorGrid",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/write-colors.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

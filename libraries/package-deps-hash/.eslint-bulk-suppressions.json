@@ -1,0 +1,299 @@
+{
+  "suppressions": [
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".getGitHashForFiles",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".getGitHashForFiles",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".getGitHashForFiles",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".getPackageDeps",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".getPackageDeps",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".getPackageDeps",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".gitLsTree",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".gitStatus",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitFilename",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitFilename",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitLsTree",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitLsTree",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitLsTree",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitStatus",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitStatus",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitStatus",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".ensureGitMinimumVersion",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getDetailedRepoStateAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getDetailedRepoStateAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getDetailedRepoStateAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getDetailedRepoStateAsync.getFilesToHash",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getGitVersion",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getRepoChanges",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getRepoChanges",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getRepoChanges",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getRepoRoot",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getRepoRoot",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".hashFilesAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".isWindowsReservedPath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitDiffIndex",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitDiffIndex",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitHashObject",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitHashObject",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitHashObject",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitLsTree",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitLsTree",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitLsTree",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitStatus",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitStatus",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitVersion",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".spawnGitAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".spawnGitAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".spawnGitAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/getPackageDeps.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/getPackageDeps.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/getPackageDeps.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/getPackageDeps.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/getRepoDeps.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/getRepoDeps.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/getRepoDeps.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/getRepoDeps.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/getRepoDeps.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/getRepoState.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/getRepoState.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/getRepoState.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

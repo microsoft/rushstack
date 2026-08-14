@@ -1,0 +1,314 @@
+{
+  "suppressions": [
+    {
+      "file": "src/IOperationRunner.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".Operation._executeAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".Operation._executeInnerAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".Operation._executeInnerAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".Operation._executeInnerAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".Operation._executeInnerAsync.innerContext",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".Operation._executeInnerAsync.innerContext",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".Operation.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".Operation.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".Operation.reset",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".Operation.reset",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationExecutionManager.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/OperationExecutionManager.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/OperationExecutionManager.ts",
+      "scopeId": ".OperationExecutionManager.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationExecutionManager.ts",
+      "scopeId": ".OperationExecutionManager.executeAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OperationExecutionManager.ts",
+      "scopeId": ".OperationExecutionManager.executeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationExecutionManager.ts",
+      "scopeId": ".OperationExecutionManager.executeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/OperationExecutionManager.ts",
+      "scopeId": ".OperationExecutionManager.executeAsync.executionContext.afterExecute",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OperationExecutionManager.ts",
+      "scopeId": ".OperationExecutionManager.executeAsync.executionContext.afterExecute",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationExecutionManager.ts",
+      "scopeId": ".OperationExecutionManager.executeAsync.executionContext.afterExecute",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/OperationExecutionManager.ts",
+      "scopeId": ".OperationExecutionManager.executeAsync.executionContext.beforeExecute",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationGroupRecord.ts",
+      "scopeId": ".OperationGroupRecord.duration",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OperationGroupRecord.ts",
+      "scopeId": ".OperationGroupRecord.finished",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OperationGroupRecord.ts",
+      "scopeId": ".OperationGroupRecord.setOperationAsComplete",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OperationGroupRecord.ts",
+      "scopeId": ".OperationGroupRecord.setOperationAsComplete",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Stopwatch.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/Stopwatch.ts",
+      "scopeId": ".Stopwatch.duration",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Stopwatch.ts",
+      "scopeId": ".Stopwatch.duration",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/Stopwatch.ts",
+      "scopeId": ".Stopwatch.toString",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Stopwatch.ts",
+      "scopeId": ".Stopwatch.toString",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WatchLoop.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/WatchLoop.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/WatchLoop.ts",
+      "scopeId": ".WatchLoop.runIPCAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WatchLoop.ts",
+      "scopeId": ".WatchLoop.runIPCAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WatchLoop.ts",
+      "scopeId": ".WatchLoop.runUntilStableAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkQueue.ts",
+      "scopeId": ".WorkQueue",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkQueue.ts",
+      "scopeId": ".WorkQueue._resolvePushDebounced",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/calculateCriticalPath.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/calculateCriticalPath.ts",
+      "scopeId": ".calculateCriticalPathLength",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/calculateCriticalPath.ts",
+      "scopeId": ".calculateCriticalPathLength",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/calculateCriticalPath.ts",
+      "scopeId": ".calculateCriticalPathLength",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/calculateCriticalPath.ts",
+      "scopeId": ".calculateShortestPath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/calculateCriticalPath.ts",
+      "scopeId": ".calculateShortestPath",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/protocol.types.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/OperationExecutionManager.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OperationExecutionManager.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/OperationExecutionManager.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/OperationExecutionManager.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WatchLoop.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WatchLoop.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WatchLoop.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkQueue.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkQueue.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WorkQueue.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkQueue.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/calculateCriticalPath.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/calculateCriticalPath.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/calculateCriticalPath.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/calculateCriticalPath.test.ts",
+      "scopeId": ".createGraph",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/calculateCriticalPath.test.ts",
+      "scopeId": ".createGraph",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

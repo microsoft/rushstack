@@ -1,0 +1,59 @@
+{
+  "suppressions": [
+    {
+      "file": "src/WorkerPool.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/WorkerPool.ts",
+      "scopeId": ".WorkerPool._createWorker",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkerPool.ts",
+      "scopeId": ".WorkerPool._createWorker",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkerPool.ts",
+      "scopeId": ".WorkerPool._destroyWorker",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkerPool.ts",
+      "scopeId": ".WorkerPool._destroyWorker",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkerPool.ts",
+      "scopeId": ".WorkerPool._onError",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkerPool.ts",
+      "scopeId": ".WorkerPool.checkinWorker",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkerPool.ts",
+      "scopeId": ".WorkerPool.checkinWorker",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkerPool.ts",
+      "scopeId": ".WorkerPool.checkoutWorkerAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkerPool.ts",
+      "scopeId": ".WorkerPool.finishAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkerPool.ts",
+      "scopeId": ".WorkerPool.finishAsync",
+      "rule": "complexity"
+    }
+  ]
+}
