@@ -98,23 +98,13 @@ interface IOperationRunnerCloseEntry {
 
 class OperationRunnerCloseError extends Error {
   public readonly operation: Operation;
-  public readonly innerError: Error;
+  public override readonly cause: Error;
 
-  public constructor(operation: Operation, innerError: Error) {
-    super(innerError.message);
+  public constructor(operation: Operation, cause: Error) {
+    super(cause.message, { cause });
     this.name = OperationRunnerCloseError.name;
     this.operation = operation;
-    this.innerError = innerError;
-  }
-}
-
-class OperationRunnersCloseError extends Error {
-  public readonly errors: ReadonlyArray<OperationRunnerCloseError>;
-
-  public constructor(errors: OperationRunnerCloseError[]) {
-    super(`Failed to close ${errors.length} operation runner(s).`);
-    this.name = OperationRunnersCloseError.name;
-    this.errors = errors;
+    this.cause = cause;
   }
 }
 
@@ -463,7 +453,7 @@ export class OperationGraph implements IOperationGraph {
       this.hooks.onExecutionStatesUpdated.call(closedRecords);
     }
     if (errors.length > 0) {
-      throw new OperationRunnersCloseError(errors);
+      throw new AggregateError(errors, `Failed to close ${errors.length} operation runner(s).`);
     }
   }
 
@@ -954,12 +944,12 @@ export class OperationGraph implements IOperationGraph {
       try {
         await this.closeRunnersAsync(recordsToClose.map((record) => record.operation));
       } catch (e) {
-        if (e instanceof OperationRunnersCloseError) {
+        if (e instanceof AggregateError) {
           for (const error of e.errors) {
             if (error instanceof OperationRunnerCloseError) {
               const record: OperationExecutionRecord | undefined = executionRecords.get(error.operation);
               if (record) {
-                reportRunnerCleanupFailure(record, error.innerError);
+                reportRunnerCleanupFailure(record, error.cause);
               }
             }
           }
