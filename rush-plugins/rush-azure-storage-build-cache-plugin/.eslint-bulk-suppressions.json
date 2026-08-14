@@ -1,0 +1,204 @@
+{
+  "suppressions": [
+    {
+      "file": "src/AdoCodespacesAuthCredential.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/AdoCodespacesAuthCredential.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/AdoCodespacesAuthCredential.ts",
+      "scopeId": ".AdoCodespacesAuthCredential._decodeToken",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AdoCodespacesAuthCredential.ts",
+      "scopeId": ".AdoCodespacesAuthCredential.getToken",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AdoCodespacesAuthCredential.ts",
+      "scopeId": ".AdoCodespacesAuthCredential.getToken",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AdoCodespacesAuthCredential.ts",
+      "scopeId": ".AdoCodespacesAuthCredential.getToken",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AzureAuthenticationBase.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/AzureAuthenticationBase.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/AzureAuthenticationBase.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/AzureAuthenticationBase.ts",
+      "scopeId": ".AzureAuthenticationBase._getCredentialAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AzureAuthenticationBase.ts",
+      "scopeId": ".AzureAuthenticationBase._getCredentialAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AzureAuthenticationBase.ts",
+      "scopeId": ".AzureAuthenticationBase.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AzureAuthenticationBase.ts",
+      "scopeId": ".AzureAuthenticationBase.tryGetCachedCredentialAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AzureAuthenticationBase.ts",
+      "scopeId": ".AzureAuthenticationBase.tryGetCachedCredentialAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AzureAuthenticationBase.ts",
+      "scopeId": ".AzureAuthenticationBase.updateCachedCredentialInteractiveAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AzureAuthenticationBase.ts",
+      "scopeId": ".AzureAuthenticationBase.updateCachedCredentialInteractiveAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AzureStorageAuthentication.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AzureStorageAuthentication.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/AzureStorageAuthentication.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/AzureStorageAuthentication.ts",
+      "scopeId": ".AzureStorageAuthentication._getCredentialFromTokenAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AzureStorageBuildCacheProvider.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/AzureStorageBuildCacheProvider.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/AzureStorageBuildCacheProvider.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/AzureStorageBuildCacheProvider.ts",
+      "scopeId": ".AzureStorageBuildCacheProvider._getContainerClientAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AzureStorageBuildCacheProvider.ts",
+      "scopeId": ".AzureStorageBuildCacheProvider._getContainerClientAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AzureStorageBuildCacheProvider.ts",
+      "scopeId": ".AzureStorageBuildCacheProvider._logBlobError",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AzureStorageBuildCacheProvider.ts",
+      "scopeId": ".AzureStorageBuildCacheProvider._logBlobError",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AzureStorageBuildCacheProvider.ts",
+      "scopeId": ".AzureStorageBuildCacheProvider._trySetBlobDataAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AzureStorageBuildCacheProvider.ts",
+      "scopeId": ".AzureStorageBuildCacheProvider._trySetBlobDataAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AzureStorageBuildCacheProvider.ts",
+      "scopeId": ".AzureStorageBuildCacheProvider._trySetBlobDataAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RushAzureInteractiveAuthPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/RushAzureInteractiveAuthPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/RushAzureInteractiveAuthPlugin.ts",
+      "scopeId": ".RushAzureInteractieAuthPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RushAzureInteractiveAuthPlugin.ts",
+      "scopeId": ".RushAzureInteractieAuthPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RushAzureInteractiveAuthPlugin.ts",
+      "scopeId": ".RushAzureInteractieAuthPlugin.apply.handler",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RushAzureInteractiveAuthPlugin.ts",
+      "scopeId": ".RushAzureInteractieAuthPlugin.apply.handler",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RushAzureStorageBuildCachePlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/AzureStorageBuildCacheProvider.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/AzureStorageBuildCacheProvider.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AzureStorageBuildCacheProvider.test.ts",
+      "scopeId": ".testCredentialCache",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    }
+  ]
+}
