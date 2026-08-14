@@ -12,6 +12,7 @@ import {
   type IRushDiagnosticCodeDefinition,
   type RushDiagnosticCode
 } from './RushDiagnosticCodeRegistry';
+import { RUSH_INTERNAL_ERROR_CODE } from './RushDiagnosticCode';
 
 /**
  * Options for {@link createRushDiagnostic}.
@@ -71,9 +72,14 @@ export interface ICreateRushDiagnosticOptions {
  *
  * @param code - a code present in the central registry. The parameter is
  * typed as the union of registered codes, so an unregistered code is a
- * compile error for TypeScript producers.
+ * compile error for TypeScript producers. An unknown code that reaches this
+ * function anyway -- for example, one forced past the type checker or decoded
+ * from a newer producer -- degrades to the stable
+ * {@link RUSH_INTERNAL_ERROR_CODE | internal error} diagnostic instead of
+ * throwing: the requested code is preserved as the
+ * public-classified `requestedCode` parameter, merged with any caller
+ * parameters, and a caller severity override still applies.
  * @param options - instance-specific diagnostic data
- * @throws Error if `code` is not registered
  *
  * @beta
  */
@@ -81,9 +87,19 @@ export function createRushDiagnostic(
   code: RushDiagnosticCode,
   options: ICreateRushDiagnosticOptions = {}
 ): IRushDiagnostic {
-  const definition: IRushDiagnosticCodeDefinition | undefined = RUSH_DIAGNOSTIC_CODES.get(code);
-  if (!definition) {
-    throw new Error(`Unknown Rush diagnostic code: ${code}`);
+  let definition: IRushDiagnosticCodeDefinition | undefined = RUSH_DIAGNOSTIC_CODES.get(code);
+  let parameters: { readonly [name: string]: IClassifiedDiagnosticValue } | undefined =
+    options.parameters;
+  if (definition === undefined) {
+    // Degrade rather than throw: a single unknown code must never wedge the
+    // reporting path. The internal-error entry is a permanent part of the
+    // registry (asserted by the registry unit tests), so this lookup always
+    // succeeds.
+    definition = RUSH_DIAGNOSTIC_CODES.get(RUSH_INTERNAL_ERROR_CODE)!;
+    parameters = {
+      ...options.parameters,
+      requestedCode: { value: code, privacy: 'public' }
+    };
   }
 
   return {
@@ -93,7 +109,7 @@ export function createRushDiagnostic(
     severity: options.severity ?? definition.defaultSeverity,
     summaryKey: definition.summaryKey,
     detailKey: definition.detailKey,
-    parameters: options.parameters,
+    parameters,
     remediation: options.remediation ?? definition.remediation,
     source: options.source,
     causeDiagnosticIds: options.causeDiagnosticIds,

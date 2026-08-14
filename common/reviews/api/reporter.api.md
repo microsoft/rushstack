@@ -23,7 +23,13 @@ export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPr
 export function createRushDiagnostic(code: RushDiagnosticCode, options?: ICreateRushDiagnosticOptions): IRushDiagnostic;
 
 // @beta
+export const DEFAULT_COALESCE_THRESHOLD: number;
+
+// @beta
 export const DEFAULT_FLUSH_TIMEOUT_MS: number;
+
+// @beta
+export const DEFAULT_MAX_QUEUED_EVENTS_PER_REPORTER: number;
 
 // @beta
 export const DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS: number;
@@ -35,10 +41,32 @@ export function encodeNdjsonRecord(value: unknown, options?: INdjsonOptions): st
 export function getPrivacyClassificationRank(classification: ReporterPrivacyClassification): number;
 
 // @beta
+export type IActivityChangedPayload = {
+    readonly completedOperationCount?: number;
+    readonly totalOperationCount?: number;
+    readonly activeOperationCount?: number;
+    readonly text?: string;
+};
+
+// @beta
+export type IArtifactAvailablePayload = {
+    readonly artifactId: string;
+    readonly kind: string;
+    readonly available: boolean;
+    readonly path?: string;
+};
+
+// @beta
 export interface IClassifiedDiagnosticValue {
     readonly privacy: ReporterPrivacyClassification;
     readonly value: ReporterJsonValue;
 }
+
+// @beta
+export type ICommandStartedPayload = {
+    readonly commandName: string;
+    readonly argv: readonly string[];
+};
 
 // @beta
 export interface ICreateRushDiagnosticOptions {
@@ -55,9 +83,21 @@ export interface ICreateRushDiagnosticOptions {
 }
 
 // @beta
+export type IExternalOutputPayload = {
+    readonly stream: 'stdout' | 'stderr';
+    readonly text: string;
+};
+
+// @beta
 export interface INdjsonOptions {
     readonly maxRecordBytes?: number;
 }
+
+// @beta
+export type IOperationStatusChangedPayload = {
+    readonly status: ReporterOperationStatus;
+    readonly durationMs?: number;
+};
 
 // @beta
 export interface IReporter {
@@ -96,6 +136,44 @@ export interface IReporterEventEnvelope<TPayload = unknown> {
 }
 
 // @beta
+export type IReporterEventEnvelopeFor<TType extends ReporterEventType> = Omit<IReporterEventEnvelope<IReporterEventPayloadMap[TType]>, 'type'> & {
+    readonly type: TType;
+};
+
+// @beta
+export interface IReporterEventPayloadMap {
+    // (undocumented)
+    readonly activityChanged: IActivityChangedPayload;
+    // (undocumented)
+    readonly artifactAvailable: IArtifactAvailablePayload;
+    // (undocumented)
+    readonly commandCompleted: ReporterJsonValue;
+    // (undocumented)
+    readonly commandResult: ReporterJsonValue;
+    // (undocumented)
+    readonly commandStarted: ICommandStartedPayload;
+    readonly diagnosticEmitted: ReporterJsonValue;
+    // (undocumented)
+    readonly extension: ReporterJsonValue;
+    // (undocumented)
+    readonly externalOutput: IExternalOutputPayload;
+    // (undocumented)
+    readonly externalProcessCompleted: ReporterJsonValue;
+    // (undocumented)
+    readonly externalProcessStarted: ReporterJsonValue;
+    // (undocumented)
+    readonly operationRegistered: ReporterJsonValue;
+    // (undocumented)
+    readonly operationStatusChanged: IOperationStatusChangedPayload;
+    // (undocumented)
+    readonly sessionCompleted: ReporterJsonValue;
+    // (undocumented)
+    readonly sessionStarted: ReporterJsonValue;
+    // (undocumented)
+    readonly watchCycleCompleted: ReporterJsonValue;
+}
+
+// @beta
 export interface IReporterEventScope {
     readonly commandName?: string;
     readonly operationId?: string;
@@ -105,7 +183,7 @@ export interface IReporterEventScope {
 
 // @beta
 export interface IReporterEventSink {
-    emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string;
+    emit<TPayload extends ReporterJsonValue>(event: IReporterEmitEventInput<TPayload>): string;
 }
 
 // @beta
@@ -117,7 +195,7 @@ export interface IReporterEventSource {
 
 // @beta
 export interface IReporterHandshakeOptions {
-    readonly supportedCapabilities?: readonly string[];
+    readonly supportedCapabilities: readonly string[];
     readonly supportedProtocolVersion: IReporterProtocolVersion;
 }
 
@@ -139,6 +217,7 @@ export interface IReporterHello {
 
 // @beta
 export interface IReporterHelloAck {
+    readonly accepted: boolean;
     readonly acceptedCapabilities: readonly string[];
     readonly kind: 'helloAck';
     readonly protocolVersion: IReporterProtocolVersion;
@@ -149,8 +228,10 @@ export interface IReporterHelloAck {
 export interface IReporterManagerOptions {
     readonly coalesceThreshold?: number;
     readonly emergencyDiagnosticWriter?: (message: string) => void;
+    readonly maxQueuedEventsPerReporter?: number;
     readonly now?: () => string;
     readonly protocolVersion?: IReporterProtocolVersion;
+    readonly sessionId?: string;
 }
 
 // @beta
@@ -228,6 +309,16 @@ export interface IRushRemediationAction {
 }
 
 // @beta
+export interface IScopedActivityOptions extends IActivityChangedPayload {
+    readonly privacy?: ReporterPrivacyClassification;
+}
+
+// @beta
+export interface IScopedArtifactOptions extends IArtifactAvailablePayload {
+    readonly privacy?: ReporterPrivacyClassification;
+}
+
+// @beta
 export interface IScopedMessageOptions {
     readonly privacy?: ReporterPrivacyClassification;
     readonly severity: ReporterMessageSeverity;
@@ -235,32 +326,70 @@ export interface IScopedMessageOptions {
 }
 
 // @beta
-export interface IScopedReporter {
-    emitDiagnostic(diagnostic: IRushDiagnostic): string;
-    emitExtension<TPayload>(name: ReporterExtensionEventName, payload: TPayload): string;
-    emitMessage(options: IScopedMessageOptions): string;
+export interface IScopedOperationStatusOptions extends IOperationStatusChangedPayload {
+    readonly privacy?: ReporterPrivacyClassification;
 }
+
+// @beta
+export interface IScopedReporter {
+    emitActivity(options: IScopedActivityOptions): string;
+    emitArtifact(options: IScopedArtifactOptions): string;
+    emitDiagnostic(diagnostic: IRushDiagnostic): string;
+    emitExtension<TPayload extends ReporterJsonValue>(name: ReporterExtensionEventName, payload: TPayload): string;
+    emitMessage(options: IScopedMessageOptions): string;
+    emitOperationStatus(options: IScopedOperationStatusOptions): string;
+}
+
+// @beta
+export function isReporterEventEnvelope(value: unknown): value is IReporterEventEnvelope;
 
 // @beta
 export function isReporterExtensionEventName(name: string): boolean;
 
 // @beta
+export function isReporterHello(value: unknown): value is IReporterHello;
+
+// @beta
+export function isReporterHelloAck(value: unknown): value is IReporterHelloAck;
+
+// @beta
 export function isReporterProtocolCompatible(consumer: IReporterProtocolVersion, producer: IReporterProtocolVersion): boolean;
+
+// @beta
+export type IsRushDiagnosticCodeSegment<TSegment extends string> = TSegment extends `${RushDiagnosticCodeCharacter}${infer TRest}` ? TRest extends '' ? true : IsRushDiagnosticCodeSegment<TRest> : false;
 
 // @beta
 export function isValidRushDiagnosticCode(code: string): boolean;
 
 // @beta
+export type IsValidRushDiagnosticCodeTail<TTail extends string> = TTail extends `${infer TSegment}_${infer TRest}` ? IsRushDiagnosticCodeSegment<TSegment> extends true ? IsValidRushDiagnosticCodeTail<TRest> : false : IsRushDiagnosticCodeSegment<TTail>;
+
+// @beta
 export class NdjsonDecoder {
     constructor(options?: INdjsonOptions);
-    decode(chunk: string): unknown[];
+    decode(chunk: Buffer | string): unknown[];
     flush(): unknown[];
 }
 
 // @beta
+export class NdjsonEncodeError extends Error {
+    constructor(message: string, cause?: unknown);
+    readonly cause: unknown;
+}
+
+// @beta
+export class NdjsonInvalidRecordError extends Error {
+    constructor(line: string, cause: unknown, partialRecords?: readonly unknown[]);
+    readonly cause: unknown;
+    readonly line: string;
+    readonly partialRecords: readonly unknown[];
+}
+
+// @beta
 export class NdjsonRecordTooLargeError extends Error {
-    constructor(maxRecordBytes: number);
+    constructor(maxRecordBytes: number, partialRecords?: readonly unknown[]);
     readonly maxRecordBytes: number;
+    readonly partialRecords: readonly unknown[];
 }
 
 // @beta
@@ -282,7 +411,10 @@ export const REPORTER_PROTOCOL_VERSION: IReporterProtocolVersion;
 export type ReporterEventType = 'sessionStarted' | 'sessionCompleted' | 'commandStarted' | 'commandCompleted' | 'operationRegistered' | 'operationStatusChanged' | 'activityChanged' | 'watchCycleCompleted' | 'diagnosticEmitted' | 'externalProcessStarted' | 'externalOutput' | 'externalProcessCompleted' | 'artifactAvailable' | 'commandResult' | 'extension';
 
 // @beta
-export type ReporterExtensionEventName = string;
+export type ReporterExtensionEventName = `${ReporterExtensionEventNameSegmentStart}${string}.${ReporterExtensionEventNameSegmentStart}${string}`;
+
+// @beta
+export type ReporterExtensionEventNameSegmentStart = 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z';
 
 // @beta
 export type ReporterJsonNull = null;
@@ -322,6 +454,9 @@ export class ReporterMultiplexer implements IReporter {
 }
 
 // @beta
+export type ReporterOperationStatus = 'ready' | 'executing' | 'success' | 'success-with-warnings' | 'skipped' | 'from-cache' | 'blocked' | 'failure' | 'no-op';
+
+// @beta
 export type ReporterPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
 
 // @beta
@@ -348,6 +483,9 @@ export type RushDiagnosticCategory = 'configuration' | 'input' | 'dependency-too
 export type RushDiagnosticCode = (typeof ALL_RUSH_DIAGNOSTICS)[number]['definition']['code'];
 
 // @beta
+export type RushDiagnosticCodeCharacter = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
+
+// @beta
 export type RushDiagnosticSeverity = 'warning' | 'error';
 
 // @beta
@@ -361,6 +499,6 @@ export class RushError extends Error {
 export type RushRemediationSafety = 'safe' | 'requires-confirmation' | 'unsafe';
 
 // @beta
-export type ValidateRushDiagnosticCode<TCode extends string> = TCode extends `${typeof RUSH_DIAGNOSTIC_CODE_PREFIX}${infer TRest}` ? TRest extends `${infer TDomain}_${infer TName}` ? TDomain extends '' ? never : TName extends '' | `_${string}` ? never : TDomain extends Uppercase<TDomain> ? TName extends Uppercase<TName> ? TCode : never : never : never : never;
+export type ValidateRushDiagnosticCode<TCode extends string> = TCode extends `${typeof RUSH_DIAGNOSTIC_CODE_PREFIX}${infer TBody}` ? TBody extends `${infer TFirstSegment}_${infer TTail}` ? IsRushDiagnosticCodeSegment<TFirstSegment> extends true ? IsValidRushDiagnosticCodeTail<TTail> extends true ? TCode : never : never : never : never;
 
 ```

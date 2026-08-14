@@ -140,11 +140,29 @@ export interface IRushDiagnosticEntry<TCode extends string = string> {
  * drift from the code they belong to.
  *
  * @param input - the authorable content, with a compile-time-validated code
+ *
+ * @beta
  */
 export function defineRushDiagnostic<TCode extends string>(
   input: IDefineRushDiagnosticInput & { readonly code: TCode & ValidateRushDiagnosticCode<TCode> }
-): IRushDiagnosticEntry<TCode> {
-  const code: TCode = input.code;
+): IRushDiagnosticEntry<TCode>;
+/**
+ * The fallback overload reached only when `code` violates the naming
+ * convention. Its parameter type IS the guidance: the compiler reports the
+ * offending literal as not assignable to this message string, so the author
+ * sees the expected `RDC_<DOMAIN>_<NAME>` shape instead of `never`.
+ *
+ * @beta
+ */
+export function defineRushDiagnostic(
+  input: IDefineRushDiagnosticInput & {
+    readonly code: 'Invalid Rush diagnostic code: expected RDC_<DOMAIN>_<NAME> (uppercase A-Z/0-9 segments)';
+  }
+): never;
+export function defineRushDiagnostic(
+  input: IDefineRushDiagnosticInput & { readonly code: string }
+): IRushDiagnosticEntry<string> {
+  const code: string = input.code;
   if (!isValidRushDiagnosticCode(code)) {
     // Untyped (JavaScript) authors bypass the compile-time contract; fail the
     // module load loudly instead of registering a malformed code.

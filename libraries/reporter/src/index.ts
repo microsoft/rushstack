@@ -28,6 +28,16 @@ export type {
   IReporterEventScope,
   IReporterEventEnvelope
 } from './events/IReporterEventEnvelope';
+export type {
+  IActivityChangedPayload,
+  IArtifactAvailablePayload,
+  ICommandStartedPayload,
+  IExternalOutputPayload,
+  IOperationStatusChangedPayload,
+  IReporterEventEnvelopeFor,
+  IReporterEventPayloadMap,
+  ReporterOperationStatus
+} from './events/ReporterEventPayloads';
 
 export type { RushDiagnosticSeverity, IRushDiagnostic } from './diagnostics/IRushDiagnostic';
 export type { RushDiagnosticCategory } from './diagnostics/RushDiagnosticCategory';
@@ -49,7 +59,12 @@ export {
   RUSH_INTERNAL_ERROR_CODE,
   isValidRushDiagnosticCode
 } from './diagnostics/RushDiagnosticCode';
-export type { ValidateRushDiagnosticCode } from './diagnostics/RushDiagnosticCode';
+export type {
+  IsRushDiagnosticCodeSegment,
+  IsValidRushDiagnosticCodeTail,
+  RushDiagnosticCodeCharacter,
+  ValidateRushDiagnosticCode
+} from './diagnostics/RushDiagnosticCode';
 export type { IRushDiagnosticEntry } from './diagnostics/defineRushDiagnostic';
 export { ALL_RUSH_DIAGNOSTICS } from './diagnostics/codes';
 export { RushError } from './diagnostics/RushError';
@@ -63,7 +78,18 @@ export {
   isReporterProtocolCompatible
 } from './protocol/ReporterProtocol';
 export type { INdjsonOptions } from './protocol/Ndjson';
-export { NdjsonRecordTooLargeError, encodeNdjsonRecord, NdjsonDecoder } from './protocol/Ndjson';
+export {
+  NdjsonEncodeError,
+  NdjsonInvalidRecordError,
+  NdjsonRecordTooLargeError,
+  encodeNdjsonRecord,
+  NdjsonDecoder
+} from './protocol/Ndjson';
+export {
+  isReporterEventEnvelope,
+  isReporterHello,
+  isReporterHelloAck
+} from './protocol/ReporterWireGuards';
 export type {
   IReporterHello,
   IReporterHelloAck,
@@ -76,7 +102,9 @@ export type { IReporter, IReporterContext } from './manager/IReporter';
 export type { IReporterRegistrationOptions, IReporterManagerOptions } from './manager/ReporterManager';
 export {
   ReporterManager,
+  DEFAULT_COALESCE_THRESHOLD,
   DEFAULT_FLUSH_TIMEOUT_MS,
+  DEFAULT_MAX_QUEUED_EVENTS_PER_REPORTER,
   DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS
 } from './manager/ReporterManager';
 export { ReporterMultiplexer } from './manager/ReporterMultiplexer';
@@ -84,8 +112,14 @@ export { ReporterMultiplexer } from './manager/ReporterMultiplexer';
 export type { IReporterEmitEventInput, IReporterEventSink } from './producers/IReporterEventSink';
 export type {
   ReporterMessageSeverity,
+  IScopedActivityOptions,
+  IScopedArtifactOptions,
   IScopedMessageOptions,
+  IScopedOperationStatusOptions,
   IScopedReporter
 } from './producers/IScopedReporter';
-export type { ReporterExtensionEventName } from './producers/ReporterExtensionEventName';
+export type {
+  ReporterExtensionEventName,
+  ReporterExtensionEventNameSegmentStart
+} from './producers/ReporterExtensionEventName';
 export { isReporterExtensionEventName } from './producers/ReporterExtensionEventName';

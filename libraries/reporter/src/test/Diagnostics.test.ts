@@ -6,6 +6,7 @@ import {
   RUSH_DIAGNOSTIC_CODES,
   RUSH_DIAGNOSTIC_TEMPLATES,
   RUSH_INTERNAL_ERROR_CODE,
+  ALL_RUSH_DIAGNOSTICS,
   isValidRushDiagnosticCode,
   computeEnvelopePrivacyFloor,
   getPrivacyClassificationRank,
@@ -35,8 +36,12 @@ const VALID_CATEGORIES: readonly RushDiagnosticCategory[] = [
 
 describe('RushDiagnosticCodeRegistry', () => {
   it('uses well-formed, unique, never-reused codes', () => {
+    // Duplicate or malformed codes are caught here, at test time -- the
+    // registry deliberately does not throw at module load, so a bad entry
+    // cannot make the entire package unimportable.
     const seen: Set<string> = new Set();
-    for (const definition of RUSH_DIAGNOSTIC_CODE_DEFINITIONS) {
+    for (const entry of ALL_RUSH_DIAGNOSTICS) {
+      const definition: IRushDiagnosticCodeDefinition = entry.definition;
       expect(isValidRushDiagnosticCode(definition.code)).toBe(true);
       expect(seen.has(definition.code)).toBe(false);
       seen.add(definition.code);
@@ -70,6 +75,25 @@ describe('RushDiagnosticCodeRegistry', () => {
         }
       }
     }
+  });
+
+  it('snapshots the placeholders referenced by every template', () => {
+    // Templates reference `{name}` placeholders that producers must supply as
+    // classified parameters. Pinning the placeholder set per template makes
+    // adding or renaming a placeholder a reviewable diff.
+    const placeholderPattern: RegExp = /\{([A-Za-z0-9_]+)\}/g;
+    const placeholdersByKey: { [resourceKey: string]: string[] } = {};
+    for (const resourceKey of Object.keys(RUSH_DIAGNOSTIC_TEMPLATES).sort()) {
+      const template: string = RUSH_DIAGNOSTIC_TEMPLATES[resourceKey];
+      const placeholders: string[] = [];
+      let match: RegExpExecArray | null = placeholderPattern.exec(template);
+      while (match !== null) {
+        placeholders.push(match[1]);
+        match = placeholderPattern.exec(template);
+      }
+      placeholdersByKey[resourceKey] = placeholders;
+    }
+    expect(placeholdersByKey).toMatchSnapshot();
   });
 
   it('registers the stable internal-error code under the internal category', () => {
@@ -195,6 +219,36 @@ describe('defineRushDiagnostic', () => {
         summary: 'x'
       })
     ).toThrow(/Invalid Rush diagnostic code/);
+    // The compile-time check is exactly as strict as the runtime matcher:
+    // each of the following used to slip past the type while the runtime
+    // rejected it.
+    expect(() =>
+      defineRushDiagnostic({
+        // @ts-expect-error - an empty segment (doubled underscore) is not a valid code
+        code: 'RDC_A_B__C',
+        category: 'internal',
+        defaultSeverity: 'error',
+        summary: 'x'
+      })
+    ).toThrow(/Invalid Rush diagnostic code/);
+    expect(() =>
+      defineRushDiagnostic({
+        // @ts-expect-error - a trailing empty segment is not a valid code
+        code: 'RDC_A_B_',
+        category: 'internal',
+        defaultSeverity: 'error',
+        summary: 'x'
+      })
+    ).toThrow(/Invalid Rush diagnostic code/);
+    expect(() =>
+      defineRushDiagnostic({
+        // @ts-expect-error - a hyphen is outside the A-Z/0-9 segment character set
+        code: 'RDC_CONFIG-INVALID_JSON',
+        category: 'internal',
+        defaultSeverity: 'error',
+        summary: 'x'
+      })
+    ).toThrow(/Invalid Rush diagnostic code/);
   });
 
   it('throws at module load for untyped authors with an invalid code', () => {
@@ -247,7 +301,9 @@ describe('createRushDiagnostic', () => {
 
   it('accepts only registered codes at compile time', () => {
     // @ts-expect-error - not a registered code
-    expect(() => createRushDiagnostic('RDC_NOT_A_REAL_CODE')).toThrow(/Unknown Rush diagnostic code/);
+    const diagnostic: IRushDiagnostic = createRushDiagnostic('RDC_NOT_A_REAL_CODE');
+    // ...but the forced call still degrades instead of throwing.
+    expect(diagnostic.code).toBe(RUSH_INTERNAL_ERROR_CODE);
   });
 
   it('attaches definition-level remediation when the producer does not override it', () => {
@@ -296,10 +352,35 @@ describe('createRushDiagnostic', () => {
     expect(diagnostic.parameters?.projectName.value).toBe('my-project');
   });
 
-  it('throws for an unknown code forced past the type checker', () => {
-    expect(() => createRushDiagnostic('RDC_NOT_A_REAL_CODE' as RushDiagnosticCode)).toThrow(
-      /Unknown Rush diagnostic code/
-    );
+  it('degrades an unknown code forced past the type checker to the internal error', () => {
+    const diagnostic: IRushDiagnostic = createRushDiagnostic('RDC_NOT_A_REAL_CODE' as RushDiagnosticCode, {
+      parameters: {
+        projectName: { value: 'my-project', privacy: 'public' }
+      }
+    });
+    expect(diagnostic.code).toBe(RUSH_INTERNAL_ERROR_CODE);
+    expect(diagnostic.category).toBe('internal');
+    expect(diagnostic.severity).toBe('error');
+    expect(diagnostic.summaryKey).toBe(`diagnostic.${RUSH_INTERNAL_ERROR_CODE}.summary`);
+    // The unknown code is preserved as a public-classified parameter, merged
+    // with the caller's parameters.
+    expect(diagnostic.parameters?.requestedCode).toEqual({
+      value: 'RDC_NOT_A_REAL_CODE',
+      privacy: 'public'
+    });
+    expect(diagnostic.parameters?.projectName).toEqual({ value: 'my-project', privacy: 'public' });
+  });
+
+  it('honors a caller severity override when degrading an unknown code', () => {
+    const diagnostic: IRushDiagnostic = createRushDiagnostic('RDC_NOT_A_REAL_CODE' as RushDiagnosticCode, {
+      severity: 'warning'
+    });
+    expect(diagnostic.code).toBe(RUSH_INTERNAL_ERROR_CODE);
+    expect(diagnostic.severity).toBe('warning');
+    expect(diagnostic.parameters?.requestedCode).toEqual({
+      value: 'RDC_NOT_A_REAL_CODE',
+      privacy: 'public'
+    });
   });
 });
 

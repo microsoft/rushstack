@@ -67,6 +67,14 @@ export interface IReporterEventScope {
  * {@link IReporterEventEnvelope.sourceSequence | sourceSequence} preserves the
  * producer's own local sequence.
  *
+ * `TPayload` is intentionally left unconstrained (defaulting to `unknown`) for
+ * wire tolerance: a decoded foreign envelope from a newer or third-party
+ * producer may carry a payload this process cannot describe, and it must still
+ * round-trip losslessly. The JSON-serializability constraint is instead applied
+ * on the producer side, where events are created — see
+ * {@link IReporterEventSink.emit}. To recover a strongly-typed payload from a
+ * known event type, use `IReporterEventEnvelopeFor`.
+ *
  * @beta
  */
 export interface IReporterEventEnvelope<TPayload = unknown> {

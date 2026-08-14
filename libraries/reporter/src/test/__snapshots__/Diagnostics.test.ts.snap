@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`RushDiagnosticCodeRegistry snapshots the placeholders referenced by every template 1`] = `
+Object {
+  "diagnostic.RDC_CONFIG_INVALID_JSON.summary": Array [
+    "file",
+  ],
+  "diagnostic.RDC_DEPENDENCY_TOOL_FAILED.detail": Array [
+    "command",
+    "logPath",
+  ],
+  "diagnostic.RDC_DEPENDENCY_TOOL_FAILED.summary": Array [
+    "exitCode",
+  ],
+  "diagnostic.RDC_ENVIRONMENT_UNSUPPORTED_NODE.summary": Array [
+    "actualVersion",
+    "expectedRange",
+  ],
+  "diagnostic.RDC_INPUT_UNKNOWN_PROJECT.summary": Array [
+    "projectName",
+  ],
+  "diagnostic.RDC_INTERNAL_UNEXPECTED.detail": Array [
+    "logPath",
+  ],
+  "diagnostic.RDC_INTERNAL_UNEXPECTED.summary": Array [],
+  "diagnostic.RDC_NETWORK_AUTH_UNAUTHORIZED.remediation.0.description": Array [
+    "registryUrl",
+  ],
+  "diagnostic.RDC_NETWORK_AUTH_UNAUTHORIZED.remediation.0.prompt": Array [
+    "registryUrl",
+  ],
+  "diagnostic.RDC_NETWORK_AUTH_UNAUTHORIZED.summary": Array [
+    "registryUrl",
+  ],
+  "diagnostic.RDC_OPERATION_FAILED.summary": Array [
+    "projectName",
+  ],
+  "diagnostic.RDC_PROTOCOL_UPDATE_REQUIRED.detail": Array [
+    "producerVersion",
+    "producerProtocolMajor",
+    "consumerProtocolMajor",
+    "rejectedFeatures",
+  ],
+  "diagnostic.RDC_PROTOCOL_UPDATE_REQUIRED.summary": Array [
+    "producerVersion",
+  ],
+}
+`;

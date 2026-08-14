@@ -195,6 +195,7 @@ Object {
 
 exports[`protocol goldens freezes the handshake hello and helloAck schemas: helloAck 1`] = `
 Object {
+  "accepted": true,
   "acceptedCapabilities": Array [
     "color",
     "watch",

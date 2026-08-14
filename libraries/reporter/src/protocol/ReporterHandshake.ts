@@ -50,6 +50,11 @@ export interface IReporterHelloAck {
   readonly kind: 'helloAck';
 
   /**
+   * Whether the consumer accepted the connection.
+   */
+  readonly accepted: boolean;
+
+  /**
    * The protocol version the consumer implements.
    */
   readonly protocolVersion: IReporterProtocolVersion;
@@ -77,10 +82,11 @@ export interface IReporterHandshakeOptions {
   readonly supportedProtocolVersion: IReporterProtocolVersion;
 
   /**
-   * The capabilities the consumer supports. Anything not listed is treated as
-   * an unknown optional capability and is simply not accepted.
+   * The capabilities and required features the consumer supports. An optional
+   * capability not listed here is simply not accepted; a required feature not
+   * listed here rejects the connection.
    */
-  readonly supportedCapabilities?: readonly string[];
+  readonly supportedCapabilities: readonly string[];
 }
 
 /**
@@ -127,7 +133,7 @@ export function negotiateReporterHello(
   options: IReporterHandshakeOptions
 ): IReporterHandshakeResult {
   const consumerVersion: IReporterProtocolVersion = options.supportedProtocolVersion;
-  const supportedCapabilities: ReadonlySet<string> = new Set(options.supportedCapabilities ?? []);
+  const supportedCapabilities: ReadonlySet<string> = new Set(options.supportedCapabilities);
 
   const acceptedCapabilities: string[] = hello.capabilities.filter((capability: string) =>
     supportedCapabilities.has(capability)
@@ -141,6 +147,7 @@ export function negotiateReporterHello(
 
   const ack: IReporterHelloAck = {
     kind: 'helloAck',
+    accepted,
     protocolVersion: consumerVersion,
     acceptedCapabilities,
     rejectedRequiredFeatures
@@ -153,7 +160,9 @@ export function negotiateReporterHello(
   const diagnostic: IRushDiagnostic = createRushDiagnostic('RDC_PROTOCOL_UPDATE_REQUIRED', {
     parameters: {
       producerVersion: { value: hello.producerVersion, privacy: 'public' },
-      producerProtocolMajor: { value: hello.protocolVersion.major, privacy: 'public' }
+      producerProtocolMajor: { value: hello.protocolVersion.major, privacy: 'public' },
+      consumerProtocolMajor: { value: consumerVersion.major, privacy: 'public' },
+      rejectedFeatures: { value: rejectedRequiredFeatures.join(', '), privacy: 'public' }
     }
   });
 

@@ -83,6 +83,7 @@ describe('protocol goldens', () => {
     const ack: IReporterHelloAck = {
       kind: 'helloAck',
       protocolVersion: { major: 1, minor: 0 },
+      accepted: true,
       acceptedCapabilities: ['color', 'watch'],
       rejectedRequiredFeatures: []
     };

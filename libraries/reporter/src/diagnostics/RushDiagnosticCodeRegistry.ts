@@ -77,15 +77,22 @@ export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly IRushDiagnosticCodeDefin
 /**
  * The permanent registry of Rush diagnostic codes, keyed by code.
  *
+ * @remarks
+ * A duplicate code does NOT throw at module load -- that would make the
+ * entire package unimportable, wedging every diagnostic pathway at once.
+ * Instead the first definition wins, and the registry unit tests assert
+ * uniqueness. Codes are append-only, so duplicates are a test failure, never
+ * a runtime event.
+ *
  * @beta
  */
 export const RUSH_DIAGNOSTIC_CODES: ReadonlyMap<string, IRushDiagnosticCodeDefinition> = (() => {
   const map: Map<string, IRushDiagnosticCodeDefinition> = new Map();
   for (const definition of RUSH_DIAGNOSTIC_CODE_DEFINITIONS) {
-    if (map.has(definition.code)) {
-      throw new Error(`Duplicate Rush diagnostic code: ${definition.code}`);
+    // First definition wins; see the remarks above.
+    if (!map.has(definition.code)) {
+      map.set(definition.code, definition);
     }
-    map.set(definition.code, definition);
   }
   return map;
 })();

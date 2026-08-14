@@ -22,35 +22,67 @@ export const RUSH_DIAGNOSTIC_CODE_PREFIX: 'RDC_' = 'RDC_';
 export const RUSH_INTERNAL_ERROR_CODE: 'RDC_INTERNAL_UNEXPECTED' = 'RDC_INTERNAL_UNEXPECTED';
 
 /**
+ * A single character permitted in a diagnostic code segment: uppercase `A-Z`
+ * or a digit `0-9`.
+ *
+ * @beta
+ */
+export type RushDiagnosticCodeCharacter =
+  | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M'
+  | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
+  | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
+
+/**
+ * Resolves to `true` when `TSegment` is a non-empty run of code characters.
+ *
+ * @beta
+ */
+export type IsRushDiagnosticCodeSegment<TSegment extends string> =
+  TSegment extends `${RushDiagnosticCodeCharacter}${infer TRest}`
+    ? TRest extends ''
+      ? true
+      : IsRushDiagnosticCodeSegment<TRest>
+    : false;
+
+/**
+ * Resolves to `true` when `TTail` -- the text after the first `_` separator
+ * of a code body -- is one or more valid segments joined by single
+ * underscores.
+ *
+ * @beta
+ */
+export type IsValidRushDiagnosticCodeTail<TTail extends string> =
+  TTail extends `${infer TSegment}_${infer TRest}`
+    ? IsRushDiagnosticCodeSegment<TSegment> extends true
+      ? IsValidRushDiagnosticCodeTail<TRest>
+      : false
+    : IsRushDiagnosticCodeSegment<TTail>;
+
+/**
  * Type arithmetic enforcing the `RDC_<DOMAIN>_<NAME>` diagnostic code naming
  * convention at compile time.
  *
  * @remarks
  * Resolves to `TCode` when it is a valid code -- the {@link RUSH_DIAGNOSTIC_CODE_PREFIX}
- * prefix followed by at least two non-empty, uppercase `A-Z`/`0-9` segments --
- * and to `never` otherwise. Authoring APIs accept
+ * prefix followed by at least two non-empty segments of uppercase `A-Z`/`0-9`
+ * characters -- and to `never` otherwise. The check is character-for-character
+ * identical to {@link isValidRushDiagnosticCode} (the runtime matcher for
+ * untyped input such as decoded wire payloads), so a code accepted by one is
+ * accepted by the other. Authoring APIs accept
  * `TCode & ValidateRushDiagnosticCode<TCode>` so that a malformed code is a
  * compile error at the definition site rather than a runtime failure in a
  * producer process.
  *
- * The type system intentionally approximates the character set (it enforces
- * uppercase, not `[A-Z0-9]` exactly); {@link isValidRushDiagnosticCode} is the
- * exact matcher for untyped input such as decoded wire payloads.
- *
  * @beta
  */
 export type ValidateRushDiagnosticCode<TCode extends string> =
-  TCode extends `${typeof RUSH_DIAGNOSTIC_CODE_PREFIX}${infer TRest}`
-    ? TRest extends `${infer TDomain}_${infer TName}`
-      ? TDomain extends ''
-        ? never
-        : TName extends '' | `_${string}`
-          ? never
-          : TDomain extends Uppercase<TDomain>
-            ? TName extends Uppercase<TName>
-              ? TCode
-              : never
-            : never
+  TCode extends `${typeof RUSH_DIAGNOSTIC_CODE_PREFIX}${infer TBody}`
+    ? TBody extends `${infer TFirstSegment}_${infer TTail}`
+      ? IsRushDiagnosticCodeSegment<TFirstSegment> extends true
+        ? IsValidRushDiagnosticCodeTail<TTail> extends true
+          ? TCode
+          : never
+        : never
       : never
     : never;
 

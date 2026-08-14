@@ -620,12 +620,16 @@ Codes use a central permanent never-reused registry:
 RUSH_<DOMAIN>_<NAME>
 ```
 
+> **Amendment (2026-08-14):** Diagnostic codes follow `RDC_<DOMAIN>_<NAME>` (RDC = Rush Diagnostic Code) and are enforced at compile time via template-literal types with a regex-free runtime matcher. Diagnostic templates are authored one-module-per-diagnostic under `libraries/reporter/src/diagnostics/codes/` with derived resource keys.
+
 English templates are keyed by code and resource key. Remediation actions may
 include:
 
 - a command;
 - a documentation URL;
 - a safety classification indicating whether automated execution is safe.
+
+> **Amendment (2026-08-14):** Remediation actions may additionally carry a prompt (resource-keyed) propagated to an agent/user when the remediation is not obvious.
 
 Diagnostic emission returns a diagnostic ID. Propagated failures reference
 that ID. Catch boundaries emit only failures not already represented.

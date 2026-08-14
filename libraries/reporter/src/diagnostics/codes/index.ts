@@ -24,16 +24,35 @@ import type { RUSH_INTERNAL_ERROR_CODE } from '../RushDiagnosticCode';
  *    remediation. Codes follow `RDC_<DOMAIN>_<NAME>` and are checked at
  *    compile time, so a malformed code fails the build at the definition
  *    site. Codes are permanent and never reused: append only, never remove
- *    or repurpose one.
+ *    or repurpose one. A complete minimal module to copy:
+ *
+ * ```ts
+ * // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+ * // See LICENSE in the project root for license information.
+ *
+ * import { defineRushDiagnostic, type IRushDiagnosticEntry } from '../defineRushDiagnostic';
+ *
+ * // Emitted when a Rush configuration file cannot be parsed as JSON.
+ * export const rdcConfigInvalidJson: IRushDiagnosticEntry<'RDC_CONFIG_INVALID_JSON'> = defineRushDiagnostic({
+ *   code: 'RDC_CONFIG_INVALID_JSON',
+ *   category: 'configuration',
+ *   defaultSeverity: 'error',
+ *   summary: 'The configuration file {file} contains invalid JSON.'
+ * });
+ * ```
+ *
  * 2. Add the module's export to the tuple below (annotation and initializer);
  *    the compiler enforces that the two stay in sync.
  *
  * That is the whole contract: resource keys are derived from the code, and
  * the registry, code map, and template table are composed from this list.
  *
- * The explicit tuple annotation keeps each entry's literal code type, so the
- * registry can derive the `RushDiagnosticCode` union from this list; the
- * compiler rejects an initializer that does not match it entry-for-entry.
+ * The explicit tuple annotation buys more than compile-time sync. It preserves
+ * each entry's literal code type, which is what lets the registry derive the
+ * `RushDiagnosticCode` union from this list; and because the tuple is part of
+ * the exported API, adding a diagnostic produces a diff in the API report
+ * (`common/reviews/api/reporter.api.md`) -- a reviewable anchor that keeps a
+ * new permanent code visible to reviewers.
  *
  * @beta
  */
