@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-terminal-renderer",
+      "type": "minor",
+      "comment": "Initial release: client-side renderer host for rushd (StreamCollator-backed per-operation collation, legacy-faithful output), per-client verbosity application, and FORCE_COLOR/COLUMNS child-environment threading."
+    }
+  ],
+  "email": "TheLarkInn@users.noreply.github.com",
+  "packageName": "@rushstack/rush-terminal-renderer"
+}
