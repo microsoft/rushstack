@@ -28,11 +28,16 @@ export class TestWritable extends TerminalWritable {
   }
 }
 
+const OS_NEWLINE: string = process.platform === 'win32' ? '\r\n' : '\n';
+const LF: string = '\n';
+
 function collectByKind(chunks: readonly ITerminalChunk[], kind: TerminalChunkKind): string {
   return chunks
     .filter((chunk: ITerminalChunk) => chunk.kind === kind)
     .map((chunk: ITerminalChunk) => chunk.text)
-    .join('');
+    .join('')
+    .split(LF)
+    .join(OS_NEWLINE);
 }
 
 /** An in-memory renderer terminal (client side). */
