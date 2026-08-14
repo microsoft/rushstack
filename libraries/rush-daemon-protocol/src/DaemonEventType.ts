@@ -5,39 +5,16 @@
 // `@rushstack/reporter` once that package merges into main (#5858).
 
 /**
- * The closed set of core event type identifiers carried by `0x05` event frames.
- *
- * @remarks
- * The set is intentionally closed and mirrors the reporter event contract.
- * Producers that need a custom event use the `extension` type with a namespaced
- * identifier (see {@link isDaemonExtensionEventName}) rather than adding a new
- * core type.
- *
- * @beta
- */
-export type DaemonEventType =
-  | 'sessionStarted'
-  | 'sessionCompleted'
-  | 'commandStarted'
-  | 'commandCompleted'
-  | 'operationRegistered'
-  | 'operationStatusChanged'
-  | 'activityChanged'
-  | 'watchCycleCompleted'
-  | 'diagnosticEmitted'
-  | 'externalProcessStarted'
-  | 'externalOutput'
-  | 'externalProcessCompleted'
-  | 'artifactAvailable'
-  | 'commandResult'
-  | 'extension';
-
-/**
  * The runtime list of every core event type, in canonical order.
  *
+ * @remarks
+ * The `as const` declaration is the single source of truth: the
+ * {@link DaemonEventType} union is derived from it, so the list and the type
+ * can never drift apart.
+ *
  * @beta
  */
-export const DAEMON_EVENT_TYPES: readonly DaemonEventType[] = [
+const EVENT_TYPE_LIST = [
   'sessionStarted',
   'sessionCompleted',
   'commandStarted',
@@ -53,7 +30,29 @@ export const DAEMON_EVENT_TYPES: readonly DaemonEventType[] = [
   'artifactAvailable',
   'commandResult',
   'extension'
-];
+] as const;
+
+/**
+ * The closed set of core event type identifiers carried by `0x05` event frames.
+ *
+ * @remarks
+ * Derived from the canonical list, so the list and the type can never drift
+ * apart. The set is intentionally closed and mirrors the reporter event
+ * contract; producers that need a custom event use the `extension` type with
+ * a namespaced identifier instead.
+ *
+ * @beta
+ */
+export type DaemonEventType = (typeof EVENT_TYPE_LIST)[number];
+
+/**
+ * The runtime list of every core event type, in canonical order.
+ *
+ * @beta
+ */
+export const DAEMON_EVENT_TYPES: readonly DaemonEventType[] = EVENT_TYPE_LIST;
+
+const DAEMON_EVENT_TYPE_SET: ReadonlySet<string> = new Set(DAEMON_EVENT_TYPES);
 
 /**
  * Returns `true` when `value` is a core event type identifier.
@@ -61,5 +60,5 @@ export const DAEMON_EVENT_TYPES: readonly DaemonEventType[] = [
  * @beta
  */
 export function isDaemonEventType(value: unknown): value is DaemonEventType {
-  return typeof value === 'string' && (DAEMON_EVENT_TYPES as readonly string[]).includes(value);
+  return typeof value === 'string' && DAEMON_EVENT_TYPE_SET.has(value);
 }

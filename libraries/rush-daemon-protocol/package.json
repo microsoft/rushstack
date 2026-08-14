@@ -51,13 +51,5 @@
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
   },
-  "peerDependencies": {
-    "@types/node": "*"
-  },
-  "peerDependenciesMeta": {
-    "@types/node": {
-      "optional": true
-    }
-  },
   "sideEffects": false
 }

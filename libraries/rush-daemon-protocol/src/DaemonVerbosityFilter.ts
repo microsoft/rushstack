@@ -15,6 +15,7 @@ export interface IDaemonDiagnosticPayload {
 }
 
 const DIAGNOSTIC_SEVERITIES: readonly DaemonDiagnosticSeverity[] = ['debug', 'info', 'warning', 'error'];
+const DIAGNOSTIC_SEVERITY_SET: ReadonlySet<string> = new Set(DIAGNOSTIC_SEVERITIES);
 
 // The engine only emits activityChanged events for lines it actually printed,
 // so quiet mode still receives the few lines legacy quiet mode shows (for
@@ -42,7 +43,7 @@ const NORMAL_TYPES: ReadonlySet<DaemonEventType> = new Set([
 ]);
 
 function isDiagnosticSeverity(value: unknown): value is DaemonDiagnosticSeverity {
-  return typeof value === 'string' && (DIAGNOSTIC_SEVERITIES as readonly string[]).includes(value);
+  return typeof value === 'string' && DIAGNOSTIC_SEVERITY_SET.has(value);
 }
 
 function readDiagnosticSeverity(payload: unknown): DaemonDiagnosticSeverity | undefined {

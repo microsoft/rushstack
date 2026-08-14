@@ -7,8 +7,7 @@ import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationStatus } from './OperationStatus';
 
 /**
- * Provenance of a status line emitted via
- * {@link IOperationGraphEventSink.onActivity}.
+ * Provenance of a status line emitted via the sink's activity callback.
  *
  * @internal
  */

@@ -12,14 +12,11 @@ import { isDaemonProtocolCompatible } from './DaemonProtocolVersion';
  * @beta
  */
 export function createDaemonHello(protocolVersion: IDaemonProtocolVersion): IDaemonHelloMessage {
-  return { kind: 'hello', protocolVersion };
+  return { kind: 'hello', payload: { protocolVersion } };
 }
 
 /**
  * Creates the `helloAck` message a server replies with when versions match.
- *
- * @param protocolVersion - the server's own protocol version
- * @param sessionId - the session identifier assigned to the connection
  *
  * @beta
  */
@@ -27,7 +24,7 @@ export function createDaemonHelloAck(
   protocolVersion: IDaemonProtocolVersion,
   sessionId: string
 ): IDaemonHelloAckMessage {
-  return { kind: 'helloAck', protocolVersion, sessionId };
+  return { kind: 'helloAck', payload: { protocolVersion, sessionId } };
 }
 
 /**
@@ -50,10 +47,13 @@ export function negotiateDaemonHello(
   localVersion: IDaemonProtocolVersion,
   sessionId: string
 ): DaemonHandshakeOutcome {
-  if (!isDaemonProtocolCompatible(localVersion, hello.protocolVersion)) {
+  if (!isDaemonProtocolCompatible(localVersion, hello.payload.protocolVersion)) {
     return {
       accepted: false,
-      error: new ProtocolVersionMismatchError(localVersion.major, hello.protocolVersion.major)
+      error: new ProtocolVersionMismatchError(
+        localVersion.major,
+        hello.payload.protocolVersion.major
+      )
     };
   }
   return { accepted: true, ack: createDaemonHelloAck(localVersion, sessionId) };

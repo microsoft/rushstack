@@ -25,6 +25,7 @@ export {
   writeDaemonLockfile,
   type IDaemonLockfile
 } from './DaemonLockfile';
+export { tryAcquireReclaimLock, type DaemonReclaimLockOutcome } from './DaemonReclaimLock';
 export { resolveDaemonPaths, type IDaemonPathEnvironment, type IDaemonPaths } from './DaemonPaths';
 export { resolveDaemonPathsFromProcess } from './DaemonPathsFromProcess';
 export { reclaimStaleDaemonAsync } from './DaemonReclaim';

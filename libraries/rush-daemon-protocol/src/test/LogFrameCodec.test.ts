@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { IDaemonFrame } from '../DaemonFrame';
 import { DaemonFrameType } from '../DaemonFrameType';
-import { DaemonProtocolErrorCode } from '../DaemonProtocolError';
 import { MAX_OPERATION_ID_BYTES } from '../FrameConstants';
 import { DaemonFrameDecoder } from '../FrameDecoder';
 import { encodeDaemonFrame } from '../FrameEncoder';
@@ -13,63 +13,86 @@ import { FIRST_INDEX, NON_UTF8_BYTES, SINGLE_COUNT, captureProtocolError } from 
 const TOO_LONG_ID_BYTES: number = MAX_OPERATION_ID_BYTES + SINGLE_COUNT;
 const DECLARED_ID_BYTES: number = 100;
 const SHORT_PAYLOAD_BYTES: number = 1;
-const TRUNCATED_ID_BYTES: number = 2;
-const STREAM_PARITY: number = 2;
+const TRUNCATED_PREFIX_BYTES: number = 2;
+const EMPTY_BYTES: number = 0;
+const WIRE_DECODER: InstanceType<typeof TextDecoder> = new TextDecoder();
+
+/** One step of the interleaving plan: [operationId, text, kind]. */
+const INTERLEAVE_PLAN: readonly [string, string, DaemonFrameType][] = [
+  ['op-a', 'a1', DaemonFrameType.logStdout],
+  ['op-b', 'b1', DaemonFrameType.logStderr],
+  ['op-a', 'a2', DaemonFrameType.logStdout]
+];
+
+function expectBytesEqual(actual: Uint8Array, expected: Uint8Array): void {
+  expect(Buffer.from(actual).equals(Buffer.from(expected))).toBe(true);
+}
 
 it('round-trips an id-tagged log chunk with non-UTF-8 bytes', () => {
   const decoded: ReturnType<typeof decodeDaemonLogChunk> = decodeDaemonLogChunk(
     encodeDaemonLogChunk({ operationId: 'build#my-app', chunk: NON_UTF8_BYTES })
   );
   expect(decoded.operationId).toBe('build#my-app');
-  expect(decoded.chunk.equals(NON_UTF8_BYTES)).toBe(true);
+  expectBytesEqual(decoded.chunk, NON_UTF8_BYTES);
 });
 
-it('reassembles interleaved per-operation streams without reordering', () => {
-  const firstA: Buffer = Buffer.from('a1');
-  const secondA: Buffer = Buffer.from('a2');
-  const firstB: Buffer = Buffer.from('b1');
-  const wire: Buffer = Buffer.concat(
-    [firstA, firstB, secondA].map((chunk: Buffer, index: number) =>
-      encodeDaemonFrame({
-        type: index % STREAM_PARITY === FIRST_INDEX ? DaemonFrameType.logStdout : DaemonFrameType.logStderr,
-        payload: encodeDaemonLogChunk({
-          operationId: index % STREAM_PARITY === FIRST_INDEX ? 'op-a' : 'op-b',
-          chunk
-        })
-      })
-  ));
-  const decoder: DaemonFrameDecoder = new DaemonFrameDecoder();
-  const stdout: string[] = [];
-  const stderr: string[] = [];
-  for (const frame of decoder.push(wire)) {
-    const log: ReturnType<typeof decodeDaemonLogChunk> = decodeDaemonLogChunk(frame.payload);
-    const sink: string[] = log.operationId === 'op-a' ? stdout : stderr;
-    sink.push(log.chunk.toString());
+function decodeStep(
+  decoder: DaemonFrameDecoder,
+  step: readonly [string, string, DaemonFrameType]
+): [string, string][] {
+  const [operationId, text, kind] = step;
+  const frames: IDaemonFrame[] = decoder.push(
+    encodeDaemonFrame({ kind, payload: encodeDaemonLogChunk({ operationId, chunk: Buffer.from(text) }) })
+  );
+  return frames.map(
+    (frame: IDaemonFrame) =>
+      [operationId, WIRE_DECODER.decode(decodeDaemonLogChunk(frame.payload).chunk)] as [string, string]
+  );
+}
+
+function routeStep(
+  decoder: DaemonFrameDecoder,
+  step: readonly [string, string, DaemonFrameType],
+  sinks: Map<string, string[]>
+): void {
+  for (const [operationId, text] of decodeStep(decoder, step)) {
+    sinks.get(operationId)?.push(text);
   }
-  expect(stdout).toEqual(['a1', 'a2']);
-  expect(stderr).toEqual(['b1']);
+}
+
+it('reassembles interleaved per-operation streams without reordering', () => {
+  const decoder: DaemonFrameDecoder = new DaemonFrameDecoder();
+  const sinks: Map<string, string[]> = new Map([
+    ['op-a', []],
+    ['op-b', []]
+  ]);
+  for (const step of INTERLEAVE_PLAN) {
+    routeStep(decoder, step, sinks);
+  }
+  expect(sinks.get('op-a')).toEqual(['a1', 'a2']);
+  expect(sinks.get('op-b')).toEqual(['b1']);
 });
 
 it('rejects an operation id longer than the u16 range', () => {
   const operationId: string = 'x'.repeat(TOO_LONG_ID_BYTES);
   const error: ReturnType<typeof captureProtocolError> = captureProtocolError(() =>
-    encodeDaemonLogChunk({ operationId, chunk: Buffer.alloc(FIRST_INDEX) })
+    encodeDaemonLogChunk({ operationId, chunk: new Uint8Array(EMPTY_BYTES) })
   );
-  expect(error.code).toBe(DaemonProtocolErrorCode.malformedPayload);
+  expect(error.code).toBe('malformedPayload');
 });
 
 it('rejects a truncated log payload', () => {
   const error: ReturnType<typeof captureProtocolError> = captureProtocolError(() =>
-    decodeDaemonLogChunk(Buffer.alloc(SHORT_PAYLOAD_BYTES))
+    decodeDaemonLogChunk(new Uint8Array(SHORT_PAYLOAD_BYTES))
   );
-  expect(error.code).toBe(DaemonProtocolErrorCode.malformedPayload);
+  expect(error.code).toBe('malformedPayload');
 });
 
 it('rejects a log payload whose id prefix overruns it', () => {
-  const payload: Buffer = Buffer.alloc(TRUNCATED_ID_BYTES + SHORT_PAYLOAD_BYTES);
+  const payload: Buffer = Buffer.alloc(TRUNCATED_PREFIX_BYTES + SHORT_PAYLOAD_BYTES);
   payload.writeUInt16LE(DECLARED_ID_BYTES, FIRST_INDEX);
   const error: ReturnType<typeof captureProtocolError> = captureProtocolError(() =>
     decodeDaemonLogChunk(payload)
   );
-  expect(error.code).toBe(DaemonProtocolErrorCode.malformedPayload);
+  expect(error.code).toBe('malformedPayload');
 });

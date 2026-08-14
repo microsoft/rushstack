@@ -32,10 +32,10 @@ it('exchanges a frame over the workspace socket with a written lockfile', async 
     serverSide.onFrame((frame: IDaemonFrame) => {
       void serverSide.sendFrameAsync(frame);
     });
-    await client.sendFrameAsync({ type: DaemonFrameType.logStdout, payload: BINARY_PAYLOAD });
+    await client.sendFrameAsync({ kind: DaemonFrameType.logStdout, payload: BINARY_PAYLOAD });
     const reply: IDaemonFrame = await echoed.promise;
-    expect(reply.type).toBe(DaemonFrameType.logStdout);
-    expect(reply.payload.equals(BINARY_PAYLOAD)).toBe(true);
+    expect(reply.kind).toBe(DaemonFrameType.logStdout);
+    expect(Buffer.from(reply.payload).equals(BINARY_PAYLOAD)).toBe(true);
     expect(readDaemonLockfile(paths.lockfilePath)?.pid).toBe(process.pid);
   } finally {
     await client.closeAsync();

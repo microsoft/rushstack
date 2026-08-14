@@ -22,7 +22,7 @@ async function sendLargeFramesAsync(serverSide: Promise<DaemonFrameConnection>):
   const server: DaemonFrameConnection = await serverSide;
   for (let index: number = FIRST_INDEX; index < FRAME_COUNT; index++) {
     await server.sendFrameAsync({
-      type: DaemonFrameType.logStdout,
+      kind: DaemonFrameType.logStdout,
       payload: Buffer.alloc(MEBIBYTE, FILL_BYTE)
     });
   }
@@ -35,7 +35,7 @@ it('delivers every frame intact when the writer outpaces the reader', async () =
   const pair: ITestDaemonPair = await startTestDaemonPair(paths);
   try {
     pair.client.onFrame((frame: IDaemonFrame) => {
-      received.push(frame.payload);
+      received.push(Buffer.from(frame.payload));
       if (received.length === FRAME_COUNT) {
         allReceived.resolve();
       }

@@ -21,6 +21,8 @@ export class DaemonFrameConnection {
     onClosed(handler: (error: Error | undefined) => void): void;
     onFrame(handler: (frame: IDaemonFrame) => void): void;
     sendFrameAsync(frame: IDaemonFrame): Promise<void>;
+    // @internal
+    get socket(): net.Socket;
 }
 
 // @beta
@@ -28,6 +30,14 @@ export class DaemonFrameListener {
     closeAsync(): Promise<void>;
     static listenAsync(paths: IDaemonPaths, options: IDaemonListenerOptions): Promise<DaemonFrameListener>;
 }
+
+// @beta
+export type DaemonReclaimLockOutcome = {
+    readonly acquired: true;
+} | {
+    readonly acquired: false;
+    readonly reason: 'alreadyHeld';
+};
 
 // @beta
 export class DaemonTransportError extends Error {
@@ -105,6 +115,9 @@ export function resolveDaemonPaths(environment: IDaemonPathEnvironment, workspac
 
 // @beta
 export function resolveDaemonPathsFromProcess(workspaceKey: string): IDaemonPaths;
+
+// @beta
+export function tryAcquireReclaimLock(lockfilePath: string): DaemonReclaimLockOutcome;
 
 // @beta
 export const WORKSPACE_KEY_LENGTH: number;

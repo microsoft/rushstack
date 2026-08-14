@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * The wire frame type byte of the rushd protocol.
+ * The wire frame kind byte of the rushd protocol.
  *
  * @remarks
  * The taxonomy is fixed by the protocol specification:
@@ -23,19 +23,20 @@ export enum DaemonFrameType {
   event = 0x05
 }
 
-const ALL_FRAME_TYPES: readonly DaemonFrameType[] = [
-  DaemonFrameType.controlJson,
-  DaemonFrameType.logStdout,
-  DaemonFrameType.logStderr,
-  DaemonFrameType.stdin,
-  DaemonFrameType.event
-];
+const LOWEST_FRAME_TYPE: DaemonFrameType = DaemonFrameType.controlJson;
+const HIGHEST_FRAME_TYPE: DaemonFrameType = DaemonFrameType.event;
 
 /**
- * Returns `true` when `value` is a byte assigned to a known frame type.
+ * Returns `true` when `value` is a byte assigned to a known frame kind.
+ *
+ * @remarks
+ * The taxonomy is a contiguous range, so the containment test is a numeric
+ * comparison rather than a collection scan.
  *
  * @beta
  */
 export function isDaemonFrameType(value: number): value is DaemonFrameType {
-  return (ALL_FRAME_TYPES as readonly number[]).includes(value);
+  return (
+    Number.isInteger(value) && value >= LOWEST_FRAME_TYPE && value <= HIGHEST_FRAME_TYPE
+  );
 }

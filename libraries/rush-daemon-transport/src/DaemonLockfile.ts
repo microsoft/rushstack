@@ -13,23 +13,7 @@ const NO_SIGNAL: number = 0;
 const DIR_MODE: number = 0o700;
 const FILE_MODE: number = 0o600;
 
-/**
- * Creates the per-user runtime directory (mode `0700`) when the platform has
- * one. Must be called before binding a POSIX socket inside it.
- *
- * @beta
- */
-export function ensureDaemonRuntimeDir(paths: IDaemonPaths): void {
-  if (paths.runtimeDir !== undefined) {
-    fs.mkdirSync(paths.runtimeDir, { recursive: true, mode: DIR_MODE });
-  }
-}
-
-/**
- * The on-disk contents of a daemon PID/lock file.
- *
- * @beta
- */
+/** The on-disk contents of a daemon PID/lock file. @beta */
 export interface IDaemonLockfile {
   /** The process id of the daemon. */
   readonly pid: number;
@@ -41,11 +25,15 @@ export interface IDaemonLockfile {
   readonly socketPath: string;
 }
 
-/**
- * Returns `true` when a process with `pid` exists and is signalable.
- *
- * @beta
- */
+/** Creates the per-user runtime directory (mode `0700`) when the platform has one.
+ * Must be called before binding a POSIX socket inside it. @beta */
+export function ensureDaemonRuntimeDir(paths: IDaemonPaths): void {
+  if (paths.runtimeDir !== undefined) {
+    fs.mkdirSync(paths.runtimeDir, { recursive: true, mode: DIR_MODE });
+  }
+}
+
+/** Returns `true` when a process with `pid` exists and is signalable. @beta */
 export function isDaemonProcessAlive(pid: number): boolean {
   try {
     process.kill(pid, NO_SIGNAL);
@@ -55,36 +43,32 @@ export function isDaemonProcessAlive(pid: number): boolean {
   }
 }
 
-/**
- * Reads and parses a daemon lockfile, or returns `undefined` when absent or unreadable.
- *
- * @beta
- */
+function isDaemonLockfileRecord(value: unknown): value is IDaemonLockfile {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  return typeof (value as IDaemonLockfile).pid === 'number';
+}
+
+/** Reads and parses a daemon lockfile, or returns `undefined` when absent, unreadable,
+ * or malformed (a bare reclaim-mutex record carries no daemon `pid`). @beta */
 export function readDaemonLockfile(lockfilePath: string): IDaemonLockfile | undefined {
+  let parsed: unknown;
   try {
-    return JSON.parse(fs.readFileSync(lockfilePath, UTF8)) as IDaemonLockfile;
+    parsed = JSON.parse(fs.readFileSync(lockfilePath, UTF8));
   } catch {
     return undefined;
   }
+  return isDaemonLockfileRecord(parsed) ? parsed : undefined;
 }
 
-/**
- * Atomically-ish writes the daemon lockfile, creating the runtime directory
- * (mode `0700`) when needed.
- *
- * @beta
- */
+/** Writes the daemon lockfile, creating the runtime directory when needed. @beta */
 export function writeDaemonLockfile(lockfilePath: string, lockfile: IDaemonLockfile): void {
   fs.mkdirSync(path.dirname(lockfilePath), { recursive: true, mode: DIR_MODE });
   fs.writeFileSync(lockfilePath, JSON.stringify(lockfile), { encoding: UTF8, mode: FILE_MODE });
 }
 
-/**
- * Removes the daemon lockfile and (on POSIX) the stale socket file. Missing
- * files are ignored so callers can invoke this idempotently during reclaim.
- *
- * @beta
- */
+/** Removes the daemon lockfile and (on POSIX) the stale socket file; idempotent. @beta */
 export function removeDaemonArtifacts(lockfilePath: string, socketPath: string): void {
   for (const filePath of [lockfilePath, socketPath]) {
     try {

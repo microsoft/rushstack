@@ -6,17 +6,23 @@
  *
  * @beta
  */
-export enum DaemonProtocolErrorCode {
-  /** A frame header declared a payload larger than the configured maximum. */
-  frameTooLarge = 'frameTooLarge',
-  /** A frame header carried a type byte outside the protocol taxonomy. */
-  unknownFrameType = 'unknownFrameType',
-  /** A frame payload was malformed for its frame type. */
-  malformedPayload = 'malformedPayload',
-  /** A control frame did not contain a well-formed control message. */
-  malformedControlMessage = 'malformedControlMessage',
-  /** The peer's protocol major version differs from the local one. */
-  protocolVersionMismatch = 'protocolVersionMismatch'
+export type DaemonProtocolErrorCode =
+  | 'frameTooLarge'
+  | 'unknownFrameType'
+  | 'malformedPayload'
+  | 'malformedControlMessage'
+  | 'protocolVersionMismatch';
+
+/**
+ * Options for {@link DaemonProtocolError} construction.
+ *
+ * @beta
+ */
+export interface IDaemonProtocolErrorOptions {
+  /**
+   * The underlying cause, attached per the standard `Error` `cause` convention.
+   */
+  readonly cause?: unknown;
 }
 
 /**
@@ -35,8 +41,12 @@ export class DaemonProtocolError extends Error {
    */
   public readonly code: DaemonProtocolErrorCode;
 
-  public constructor(code: DaemonProtocolErrorCode, message: string) {
-    super(message);
+  public constructor(
+    code: DaemonProtocolErrorCode,
+    message: string,
+    options?: IDaemonProtocolErrorOptions
+  ) {
+    super(message, options);
     this.name = 'DaemonProtocolError';
     this.code = code;
   }
@@ -59,10 +69,15 @@ export class ProtocolVersionMismatchError extends DaemonProtocolError {
    */
   public readonly actualMajor: number;
 
-  public constructor(expectedMajor: number, actualMajor: number) {
+  public constructor(
+    expectedMajor: number,
+    actualMajor: number,
+    options?: IDaemonProtocolErrorOptions
+  ) {
     super(
-      DaemonProtocolErrorCode.protocolVersionMismatch,
-      `Unsupported rushd protocol major version ${actualMajor}; this peer requires major version ${expectedMajor}.`
+      'protocolVersionMismatch',
+      `Unsupported rushd protocol major version ${actualMajor}; this peer requires major version ${expectedMajor}.`,
+      options
     );
     this.name = 'ProtocolVersionMismatchError';
     this.expectedMajor = expectedMajor;

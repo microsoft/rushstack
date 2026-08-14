@@ -55,10 +55,10 @@ export class WireAdapter implements IOperationGraphEventSink {
   }
 
   public onOperationChunk(operationId: string, chunk: ITerminalChunk): void {
-    const type: DaemonFrameType =
+    const kind: DaemonFrameType =
       chunk.kind === TerminalChunkKind.Stderr ? DaemonFrameType.logStderr : DaemonFrameType.logStdout;
     this.frames.push({
-      type,
+      kind,
       payload: encodeDaemonLogChunk({ operationId, chunk: Buffer.from(chunk.text, UTF8) })
     });
   }
@@ -94,6 +94,6 @@ export class WireAdapter implements IOperationGraphEventSink {
       options
     );
     this._sequence += 1;
-    this.frames.push({ type: DaemonFrameType.event, payload: encodeDaemonEventFrame(envelope) });
+    this.frames.push({ kind: DaemonFrameType.event, payload: encodeDaemonEventFrame(envelope) });
   }
 }

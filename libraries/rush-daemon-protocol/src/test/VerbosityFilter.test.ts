@@ -49,9 +49,10 @@ it('never filters required events regardless of verbosity', () => {
 it('serialization returns undefined for filtered subscriptions and bytes otherwise', () => {
   const envelope: IDaemonEventEnvelope = createTestEnvelope({ type: 'operationStatusChanged' });
   expect(serializeDaemonEventForSubscription('quiet', envelope)).toBeUndefined();
-  const serialized: Buffer | undefined = serializeDaemonEventForSubscription('verbose', envelope);
+  const serialized: Uint8Array | undefined = serializeDaemonEventForSubscription('verbose', envelope);
   expect(serialized).toBeDefined();
-  expect(JSON.parse(serialized?.toString() ?? '{}')).toMatchObject({ type: 'operationStatusChanged' });
+  const text: string = serialized === undefined ? '{}' : new TextDecoder().decode(serialized);
+  expect(JSON.parse(text)).toMatchObject({ type: 'operationStatusChanged' });
 });
 
 it('gives two clients at different verbosities different subsets of one stream', () => {

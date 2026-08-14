@@ -36,7 +36,7 @@ interface ICapturedStream {
 
 function captureFrame(captured: ICapturedStream, frame: IDaemonFrame): void {
   collectLogChunk(captured.perOperation, frame);
-  if (frame.type === DaemonFrameType.event) {
+  if (frame.kind === DaemonFrameType.event) {
     captured.events.push(decodeDaemonEventFrame(frame.payload));
   }
 }

@@ -14,7 +14,7 @@ export function createDaemonHello(protocolVersion: IDaemonProtocolVersion): IDae
 export function createDaemonHelloAck(protocolVersion: IDaemonProtocolVersion, sessionId: string): IDaemonHelloAckMessage;
 
 // @beta
-export const DAEMON_CONTROL_MESSAGE_KINDS: readonly string[];
+export const DAEMON_CONTROL_MESSAGE_KINDS: readonly DaemonControlMessageKind[];
 
 // @beta
 export const DAEMON_EVENT_TYPES: readonly DaemonEventType[];
@@ -22,26 +22,27 @@ export const DAEMON_EVENT_TYPES: readonly DaemonEventType[];
 // @beta
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion;
 
-// Warning: (ae-forgotten-export) The symbol "IDaemonErrorMessage" needs to be exported by the entry point index.d.ts
+// @beta
+export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonErrorMessage;
+
+// Warning: (ae-forgotten-export) The symbol "CONTROL_KIND_LIST" needs to be exported by the entry point index.d.ts
 //
 // @beta
-export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonErrorMessage | {
-    readonly kind: 'unsubscribe';
-} | {
-    readonly kind: 'ping';
-} | {
-    readonly kind: 'pong';
-    readonly uptimeMs: number;
-};
+export type DaemonControlMessageKind = (typeof CONTROL_KIND_LIST)[number];
 
 // @beta
 export type DaemonDiagnosticSeverity = 'debug' | 'info' | 'warning' | 'error';
 
 // @beta
-export type DaemonEventPrivacy = 'public' | 'local-sensitive' | 'secret';
+export type DaemonEmptyPayload = Record<string, never>;
 
 // @beta
-export type DaemonEventType = 'sessionStarted' | 'sessionCompleted' | 'commandStarted' | 'commandCompleted' | 'operationRegistered' | 'operationStatusChanged' | 'activityChanged' | 'watchCycleCompleted' | 'diagnosticEmitted' | 'externalProcessStarted' | 'externalOutput' | 'externalProcessCompleted' | 'artifactAvailable' | 'commandResult' | 'extension';
+export type DaemonEventPrivacy = 'public' | 'local-sensitive' | 'secret';
+
+// Warning: (ae-forgotten-export) The symbol "EVENT_TYPE_LIST" needs to be exported by the entry point index.d.ts
+//
+// @beta
+export type DaemonEventType = (typeof EVENT_TYPE_LIST)[number];
 
 // @beta
 export type DaemonExtensionEventName = string;
@@ -49,7 +50,7 @@ export type DaemonExtensionEventName = string;
 // @beta
 export class DaemonFrameDecoder {
     constructor(options?: IDaemonFrameDecoderOptions);
-    push(chunk: Buffer): IDaemonFrame[];
+    push(chunk: Uint8Array): IDaemonFrame[];
     reset(): void;
 }
 
@@ -81,48 +82,42 @@ export type DaemonJsonValue = string | number | boolean | DaemonJsonNull | reado
 
 // @beta
 export class DaemonProtocolError extends Error {
-    constructor(code: DaemonProtocolErrorCode, message: string);
+    constructor(code: DaemonProtocolErrorCode, message: string, options?: IDaemonProtocolErrorOptions);
     readonly code: DaemonProtocolErrorCode;
 }
 
 // @beta
-export enum DaemonProtocolErrorCode {
-    frameTooLarge = "frameTooLarge",
-    malformedControlMessage = "malformedControlMessage",
-    malformedPayload = "malformedPayload",
-    protocolVersionMismatch = "protocolVersionMismatch",
-    unknownFrameType = "unknownFrameType"
-}
+export type DaemonProtocolErrorCode = 'frameTooLarge' | 'unknownFrameType' | 'malformedPayload' | 'malformedControlMessage' | 'protocolVersionMismatch';
 
 // @beta
 export type DaemonVerbosity = 'quiet' | 'normal' | 'verbose' | 'debug';
 
 // @beta
-export function decodeDaemonControlMessage(payload: Buffer): DaemonControlMessage;
+export function decodeDaemonControlMessage(payload: Uint8Array): DaemonControlMessage;
 
 // @beta
-export function decodeDaemonEventFrame(payload: Buffer): IDaemonEventEnvelope;
+export function decodeDaemonEventFrame(payload: Uint8Array): IDaemonEventEnvelope;
 
 // @beta
-export function decodeDaemonLogChunk(payload: Buffer): IDaemonLogChunk;
+export function decodeDaemonLogChunk(payload: Uint8Array): IDaemonLogChunk;
 
 // @beta
 export const DEFAULT_MAX_PAYLOAD_BYTES: number;
 
 // @beta
-export function encodeDaemonControlMessage(message: DaemonControlMessage): Buffer;
+export function encodeDaemonControlMessage(message: DaemonControlMessage): Uint8Array;
 
 // @beta
-export function encodeDaemonEventFrame(envelope: IDaemonEventEnvelope): Buffer;
+export function encodeDaemonEventFrame(envelope: IDaemonEventEnvelope): Uint8Array;
 
 // @beta
-export function encodeDaemonFrame(frame: IDaemonFrame): Buffer;
+export function encodeDaemonFrame(frame: IDaemonFrame): Uint8Array;
 
 // @beta
-export function encodeDaemonFrames(frames: readonly IDaemonFrame[]): Buffer;
+export function encodeDaemonFrames(frames: readonly IDaemonFrame[]): Uint8Array[];
 
 // @beta
-export function encodeDaemonLogChunk(log: IDaemonLogChunk): Buffer;
+export function encodeDaemonLogChunk(log: IDaemonLogChunk): Uint8Array;
 
 // @beta
 export const FRAME_HEADER_BYTES: number;
@@ -145,6 +140,17 @@ export interface IDaemonClientCaps {
 export interface IDaemonDiagnosticPayload {
     // (undocumented)
     readonly severity: DaemonDiagnosticSeverity;
+}
+
+// @beta
+export interface IDaemonErrorMessage {
+    // (undocumented)
+    readonly kind: 'error';
+    // (undocumented)
+    readonly payload: {
+        readonly code: DaemonProtocolErrorCode;
+        readonly message: string;
+    };
 }
 
 // @beta
@@ -191,8 +197,8 @@ export interface IDaemonExtensionEventPayload<TData = unknown> {
 
 // @beta
 export interface IDaemonFrame {
-    readonly payload: Buffer;
-    readonly type: DaemonFrameType;
+    readonly kind: DaemonFrameType;
+    readonly payload: Uint8Array;
 }
 
 // @beta
@@ -205,9 +211,10 @@ export interface IDaemonHelloAckMessage {
     // (undocumented)
     readonly kind: 'helloAck';
     // (undocumented)
-    readonly protocolVersion: IDaemonProtocolVersion;
-    // (undocumented)
-    readonly sessionId: string;
+    readonly payload: {
+        readonly protocolVersion: IDaemonProtocolVersion;
+        readonly sessionId: string;
+    };
 }
 
 // @beta
@@ -215,12 +222,14 @@ export interface IDaemonHelloMessage {
     // (undocumented)
     readonly kind: 'hello';
     // (undocumented)
-    readonly protocolVersion: IDaemonProtocolVersion;
+    readonly payload: {
+        readonly protocolVersion: IDaemonProtocolVersion;
+    };
 }
 
 // @beta
 export interface IDaemonLogChunk {
-    readonly chunk: Buffer;
+    readonly chunk: Uint8Array;
     readonly operationId: string;
 }
 
@@ -250,6 +259,29 @@ export interface IDaemonOperationStreamClosedPayload {
 }
 
 // @beta
+export interface IDaemonPingMessage {
+    // (undocumented)
+    readonly kind: 'ping';
+    // (undocumented)
+    readonly payload: DaemonEmptyPayload;
+}
+
+// @beta
+export interface IDaemonPongMessage {
+    // (undocumented)
+    readonly kind: 'pong';
+    // (undocumented)
+    readonly payload: {
+        readonly uptimeMs: number;
+    };
+}
+
+// @beta
+export interface IDaemonProtocolErrorOptions {
+    readonly cause?: unknown;
+}
+
+// @beta
 export interface IDaemonProtocolVersion {
     readonly major: number;
     readonly minor: number;
@@ -258,10 +290,27 @@ export interface IDaemonProtocolVersion {
 // @beta
 export interface IDaemonSubscribeMessage {
     // (undocumented)
-    readonly caps: IDaemonClientCaps;
-    // (undocumented)
     readonly kind: 'subscribe';
+    // (undocumented)
+    readonly payload: IDaemonClientCaps;
 }
+
+// @beta
+export interface IDaemonUnsubscribeMessage {
+    // (undocumented)
+    readonly kind: 'unsubscribe';
+    // (undocumented)
+    readonly payload: DaemonEmptyPayload;
+}
+
+// @beta
+export function isDaemonControlMessageKind(value: unknown): value is DaemonControlMessageKind;
+
+// @beta
+export function isDaemonControlRecord(value: unknown): value is Record<string, unknown>;
+
+// @beta
+export function isDaemonEventEnvelope(value: unknown): value is IDaemonEventEnvelope;
 
 // @beta
 export function isDaemonEventType(value: unknown): value is DaemonEventType;
@@ -304,7 +353,7 @@ export const PAYLOAD_OFFSET: number;
 
 // @beta
 export class ProtocolVersionMismatchError extends DaemonProtocolError {
-    constructor(expectedMajor: number, actualMajor: number);
+    constructor(expectedMajor: number, actualMajor: number, options?: IDaemonProtocolErrorOptions);
     readonly actualMajor: number;
     readonly expectedMajor: number;
 }
@@ -319,7 +368,7 @@ export const RUSHD_OPERATION_HEADER: 'rushd.operation-header';
 export const RUSHD_OPERATION_STREAM_CLOSED: 'rushd.operation-stream-closed';
 
 // @beta
-export function serializeDaemonEventForSubscription(verbosity: DaemonVerbosity, envelope: IDaemonEventEnvelope): Buffer | undefined;
+export function serializeDaemonEventForSubscription(verbosity: DaemonVerbosity, envelope: IDaemonEventEnvelope): Uint8Array | undefined;
 
 // @beta
 export function shouldSerializeDaemonEvent(verbosity: DaemonVerbosity, envelope: IDaemonEventEnvelope): boolean;
@@ -332,5 +381,8 @@ export const TYPE_FIELD_OFFSET: number;
 
 // @beta
 export function validateDaemonControlMessage(value: unknown): void;
+
+// @beta
+export function validateDaemonEventEnvelope(value: unknown): IDaemonEventEnvelope;
 
 ```

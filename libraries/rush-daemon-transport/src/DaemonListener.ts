@@ -15,6 +15,7 @@ import { reclaimStaleDaemonAsync } from './DaemonReclaim';
 const FIRST_ATTEMPT: number = 0;
 const RECLAIM_ATTEMPT: number = 1;
 
+
 /** Options for {@link DaemonFrameListener.listenAsync}. @beta */
 export interface IDaemonListenerOptions {
   /** The wire protocol version this daemon speaks (recorded in the lockfile). */
@@ -25,15 +26,12 @@ export interface IDaemonListenerOptions {
   readonly onConnection: (connection: DaemonFrameConnection) => void;
 }
 
-/**
- * The daemon-side framed listener bound to a workspace's socket/pipe path.
- *
+/** The daemon-side framed listener bound to a workspace's socket/pipe path.
  * @remarks
  * Binding reclaims the path from a dead daemon automatically (see
  * {@link reclaimStaleDaemonAsync}); when a live daemon owns the path, a typed
  * `daemonAlreadyRunning` transport error is thrown.
- * @beta
- */
+ * @beta */
 export class DaemonFrameListener {
   private readonly _server: net.Server;
   private readonly _paths: IDaemonPaths;
@@ -51,6 +49,8 @@ export class DaemonFrameListener {
     });
     ensureDaemonRuntimeDir(paths);
     await listenWithReclaimAsync(server, paths);
+    // Lockfile after bind: a pre-existing stale record must read as dead, not
+    // as a live owner that would make reclaim refuse.
     writeDaemonLockfile(paths.lockfilePath, {
       pid: process.pid,
       protocolVersion: options.protocolVersion,

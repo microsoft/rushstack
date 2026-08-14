@@ -3,7 +3,7 @@
 
 import { createDaemonHello, negotiateDaemonHello } from '../DaemonHandshake';
 import type { DaemonHandshakeOutcome } from '../DaemonHandshake';
-import { DaemonProtocolErrorCode, ProtocolVersionMismatchError } from '../DaemonProtocolError';
+import { ProtocolVersionMismatchError } from '../DaemonProtocolError';
 import { DAEMON_PROTOCOL_VERSION } from '../DaemonProtocolVersion';
 
 const NEWER_MAJOR: number = 1;
@@ -19,8 +19,8 @@ it('accepts a matching major version', () => {
   const outcome: DaemonHandshakeOutcome = negotiateDaemonHello(hello, DAEMON_PROTOCOL_VERSION, SESSION_ID);
   expect(outcome.accepted).toBe(true);
   if (outcome.accepted) {
-    expect(outcome.ack.sessionId).toBe(SESSION_ID);
-    expect(outcome.ack.protocolVersion).toEqual(DAEMON_PROTOCOL_VERSION);
+    expect(outcome.ack.payload.sessionId).toBe(SESSION_ID);
+    expect(outcome.ack.payload.protocolVersion).toEqual(DAEMON_PROTOCOL_VERSION);
   }
 });
 
@@ -33,8 +33,18 @@ it('rejects a mismatched major version with a typed error', () => {
   expect(outcome.accepted).toBe(false);
   if (!outcome.accepted) {
     expect(outcome.error).toBeInstanceOf(ProtocolVersionMismatchError);
-    expect(outcome.error.code).toBe(DaemonProtocolErrorCode.protocolVersionMismatch);
+    expect(outcome.error.code).toBe('protocolVersionMismatch');
     expect(outcome.error.expectedMajor).toBe(DAEMON_PROTOCOL_VERSION.major);
     expect(outcome.error.actualMajor).toBe(DAEMON_PROTOCOL_VERSION.major + NEWER_MAJOR);
   }
+});
+
+it('supports the Error cause convention', () => {
+  const cause: Error = new Error('root cause');
+  const error: ProtocolVersionMismatchError = new ProtocolVersionMismatchError(
+    DAEMON_PROTOCOL_VERSION.major,
+    DAEMON_PROTOCOL_VERSION.major + NEWER_MAJOR,
+    { cause }
+  );
+  expect(error.cause).toBe(cause);
 });

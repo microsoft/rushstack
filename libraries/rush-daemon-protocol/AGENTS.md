@@ -46,10 +46,15 @@ toolchain and are **not yet enabled** (the user will wire them up later):
 `no-parent-internal-access`). Write code that would already satisfy them: prefer immutable
 update patterns and named string constants, and never land stubs or `TODO` implementations.
 
+Note on barrels: `src/index.ts` is this package's public API barrel — it contains ONLY
+re-exports of the public surface and is exempt from the deferred barrel notions above.
+Do not restructure `index.ts` under the deferred rules; the enabled rules already pass on it.
+
 ## Design notes for this package
 
-- `src/events/` contains **placeholder** event-contract types that mirror
+- `src/DaemonEvent*.ts` contains **placeholder** event-contract types that mirror
   `@rushstack/reporter`'s `IReporterEventEnvelope` field-for-field. When the reporter
   package merges into `main`, these types are replaced by imports from
   `@rushstack/reporter` — do not fork the shapes.
-- This package must remain dependency-light: Node.js builtins only; no `rush-lib`.
+- This package must remain dependency-light: platform-agnostic `Uint8Array` payloads
+  (no `Buffer` on the wire), no runtime dependencies, no `rush-lib`.

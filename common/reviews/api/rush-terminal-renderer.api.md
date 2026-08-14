@@ -18,7 +18,7 @@ export class DaemonRendererHost {
     constructor(options: IDaemonRendererHostOptions);
     closeAsync(): Promise<void>;
     handleEvent(envelope: IDaemonEventEnvelope): void;
-    handleLogChunk(operationId: string, stream: 'stdout' | 'stderr', chunk: Buffer): void;
+    handleLogChunk(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): void;
     initializeAsync(): Promise<void>;
 }
 

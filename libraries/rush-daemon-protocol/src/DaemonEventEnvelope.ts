@@ -4,7 +4,7 @@
 // TODO(reconcile): replace these placeholder types with `IReporterEventEnvelope`
 // and friends from `@rushstack/reporter` once that package merges into main
 // (#5858). The shapes below mirror the reporter contract field-for-field so the
-// swap is mechanical.
+// swap is mechanical (field order differs: optional fields are declared last).
 
 import type { DaemonEventType } from './DaemonEventType';
 
@@ -41,11 +41,6 @@ export interface IDaemonEventScope {
 /**
  * Classifies how sensitive a value is, and therefore which destinations may receive it.
  *
- * @remarks
- * - `public` values may be written to any destination, including telemetry.
- * - `local-sensitive` values may appear in local reporter output but never in telemetry.
- * - `secret` values must never reach any local log or telemetry.
- *
  * @beta
  */
 export type DaemonEventPrivacy = 'public' | 'local-sensitive' | 'secret';
@@ -55,7 +50,8 @@ export type DaemonEventPrivacy = 'public' | 'local-sensitive' | 'secret';
  *
  * @remarks
  * Envelopes are immutable and JSON-serializable. `sequence` is authoritative for
- * ordering; `timestamp` is informational only.
+ * ordering; `timestamp` is informational only. Required fields are declared
+ * before optional fields to keep the object layout monomorphic.
  *
  * @beta
  */
@@ -66,20 +62,12 @@ export interface IDaemonEventEnvelope<TPayload = unknown> {
   readonly eventId: string;
   /** The identifier of the session that produced this event. */
   readonly sessionId: string;
-  /** The identifier of the parent session, when from a child session. */
-  readonly parentSessionId?: string;
-  /** The identifier of the parent operation that spawned the child session. */
-  readonly parentOperationId?: string;
   /** The authoritative monotonic ordering value assigned by the producer's manager. */
   readonly sequence: number;
-  /** For child sessions, the producer's original local sequence value. */
-  readonly sourceSequence?: number;
   /** The informational ISO 8601 time at which the event was created. */
   readonly timestamp: string;
   /** The code that produced this event. */
   readonly source: IDaemonEventSource;
-  /** The command, operation, project, and phase this event belongs to. */
-  readonly scope?: IDaemonEventScope;
   /** The minimum privacy classification floor for every field in this event. */
   readonly privacy: DaemonEventPrivacy;
   /** Whether this event is correctness-critical and must never be dropped. */
@@ -88,4 +76,12 @@ export interface IDaemonEventEnvelope<TPayload = unknown> {
   readonly type: DaemonEventType;
   /** The JSON-serializable payload for this event type. */
   readonly payload: TPayload;
+  /** The identifier of the parent session, when from a child session. */
+  readonly parentSessionId?: string;
+  /** The identifier of the parent operation that spawned the child session. */
+  readonly parentOperationId?: string;
+  /** For child sessions, the producer's original local sequence value. */
+  readonly sourceSequence?: number;
+  /** The command, operation, project, and phase this event belongs to. */
+  readonly scope?: IDaemonEventScope;
 }
