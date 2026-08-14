@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { EOL } from 'node:os';
+
 import type { IDaemonActivityPayload, IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
 
 import type { IDaemonRenderer, IDaemonRendererContext } from './DaemonRenderer';
@@ -46,7 +48,10 @@ export class LegacyCollatedRenderer implements IDaemonRenderer {
   }
 
   private _writeLine(text: string): void {
-    this._terminal?.write(`${text}\n`, 'stdout');
+    // Emit the client's OS newline, matching the newline normalization the
+    // collated pipeline applies (TextRewriterTransform OsDefault) so global
+    // status lines and collated blocks are consistent on every platform.
+    this._terminal?.write(`${text}${EOL}`, 'stdout');
   }
 
   /** {@inheritDoc IDaemonRenderer.flushAsync} */
