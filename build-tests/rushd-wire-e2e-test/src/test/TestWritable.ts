@@ -28,16 +28,31 @@ export class TestWritable extends TerminalWritable {
   }
 }
 
-const OS_NEWLINE: string = process.platform === 'win32' ? '\r\n' : '\n';
+const WINDOWS_PLATFORM: string = 'win32';
+const CARRIAGE_RETURN: string = '\r';
 const LF: string = '\n';
 
+// Normalize lone-LF newlines to the OS default (the engine's pipeline emits OS
+// newlines to the real console). Already-CRLF sequences are left intact so we
+// never produce CRCRLF on Windows.
+function toOsNewlines(text: string): string {
+  if (process.platform !== WINDOWS_PLATFORM) {
+    return text;
+  }
+  return text.split(LF).map(appendCarriageReturnUnlessPresent).join(LF);
+}
+
+function appendCarriageReturnUnlessPresent(part: string): string {
+  return part.endsWith(CARRIAGE_RETURN) ? part : `${part}${CARRIAGE_RETURN}`;
+}
+
 function collectByKind(chunks: readonly ITerminalChunk[], kind: TerminalChunkKind): string {
-  return chunks
-    .filter((chunk: ITerminalChunk) => chunk.kind === kind)
-    .map((chunk: ITerminalChunk) => chunk.text)
-    .join('')
-    .split(LF)
-    .join(OS_NEWLINE);
+  return toOsNewlines(
+    chunks
+      .filter((chunk: ITerminalChunk) => chunk.kind === kind)
+      .map((chunk: ITerminalChunk) => chunk.text)
+      .join('')
+  );
 }
 
 /** An in-memory renderer terminal (client side). */
