@@ -1,0 +1,354 @@
+{
+  "suppressions": [
+    {
+      "file": "src/LintUtilities.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/LintUtilities.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/LintUtilities.ts",
+      "scopeId": ".getImportPathFromExpression",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LintUtilities.ts",
+      "scopeId": ".getRootDirectoryFromContext",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LintUtilities.ts",
+      "scopeId": ".getRootDirectoryFromContext",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LintUtilities.ts",
+      "scopeId": ".parseImportSpecifierFromExpression",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/hoist-jest-mock.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/hoist-jest-mock.ts",
+      "scopeId": ".hoistJestMock.create",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/hoist-jest-mock.ts",
+      "scopeId": ".hoistJestMock.create.CallExpression",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/hoist-jest-mock.ts",
+      "scopeId": ".hoistJestMock.create.TSImportEqualsDeclaration",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/hoist-jest-mock.ts",
+      "scopeId": ".hoistJestMock.create.findOuterStatement",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/hoist-jest-mock.ts",
+      "scopeId": ".hoistJestMock.create.isHoistableJestCall",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/hoist-jest-mock.ts",
+      "scopeId": ".hoistJestMock.create.isHoistableJestCall",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/import-requires-chunk-name.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/import-requires-chunk-name.ts",
+      "scopeId": ".importRequiresChunkNameRule.create.ImportExpression",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/import-requires-chunk-name.ts",
+      "scopeId": ".importRequiresChunkNameRule.create.ImportExpression",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/no-backslash-imports.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/no-backslash-imports.ts",
+      "scopeId": ".noBackslashImportsRule.create",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/no-backslash-imports.ts",
+      "scopeId": ".noBackslashImportsRule.create.checkImportExpression",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/no-backslash-imports.ts",
+      "scopeId": ".noBackslashImportsRule.create.checkImportExpression",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/no-external-local-imports.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/no-external-local-imports.ts",
+      "scopeId": ".noExternalLocalImportsRule.create",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/no-external-local-imports.ts",
+      "scopeId": ".noExternalLocalImportsRule.create.checkImportExpression",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/no-new-null.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/no-new-null.ts",
+      "scopeId": ".noNewNullRule.create",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/no-new-null.ts",
+      "scopeId": ".noNewNullRule.create.isAccessible",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/no-new-null.ts",
+      "scopeId": ".noNewNullRule.create.isDefinitionExportable",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/no-new-null.ts",
+      "scopeId": ".noNewNullRule.create.isNewNull",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/no-null.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/no-null.ts",
+      "scopeId": ".noNullRule.create.Literal",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/no-transitive-dependency-imports.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/no-transitive-dependency-imports.ts",
+      "scopeId": ".noTransitiveDependencyImportsRule.create",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/no-transitive-dependency-imports.ts",
+      "scopeId": ".noTransitiveDependencyImportsRule.create.checkImportExpression",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/no-transitive-dependency-imports.ts",
+      "scopeId": ".noTransitiveDependencyImportsRule.create.checkImportExpression",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/no-transitive-dependency-imports.ts",
+      "scopeId": ".noTransitiveDependencyImportsRule.create.checkImportExpression",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/no-untyped-underscore.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/no-untyped-underscore.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/no-untyped-underscore.ts",
+      "scopeId": ".noUntypedUnderscoreRule.create",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/no-untyped-underscore.ts",
+      "scopeId": ".noUntypedUnderscoreRule.create",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/no-untyped-underscore.ts",
+      "scopeId": ".noUntypedUnderscoreRule.create.MemberExpression",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/no-untyped-underscore.ts",
+      "scopeId": ".noUntypedUnderscoreRule.create.MemberExpression",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/no-untyped-underscore.ts",
+      "scopeId": ".noUntypedUnderscoreRule.create.MemberExpression",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/no-untyped-underscore.ts",
+      "scopeId": ".noUntypedUnderscoreRule.create.MemberExpression",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/normalized-imports.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/normalized-imports.ts",
+      "scopeId": ".normalizedImportsRule.create",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/normalized-imports.ts",
+      "scopeId": ".normalizedImportsRule.create.checkImportExpression",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/normalized-imports.ts",
+      "scopeId": ".normalizedImportsRule.create.checkImportExpression",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pair-react-dom-render-unmount.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/pair-react-dom-render-unmount.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/pair-react-dom-render-unmount.ts",
+      "scopeId": ".pairReactDomRenderUnmountRule.create",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pair-react-dom-render-unmount.ts",
+      "scopeId": ".pairReactDomRenderUnmountRule.create.CallExpression",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pair-react-dom-render-unmount.ts",
+      "scopeId": ".pairReactDomRenderUnmountRule.create.ImportDeclaration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pair-react-dom-render-unmount.ts",
+      "scopeId": ".pairReactDomRenderUnmountRule.create.ImportDeclaration",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/pair-react-dom-render-unmount.ts",
+      "scopeId": ".pairReactDomRenderUnmountRule.create.ImportDeclaration",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pair-react-dom-render-unmount.ts",
+      "scopeId": ".pairReactDomRenderUnmountRule.create.isNamespaceCallExpression",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/hoist-jest-mock.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/no-backslash-imports.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/no-backslash-imports.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/no-external-local-imports.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/no-new-null.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/no-transitive-dependency-imports.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/no-transitive-dependency-imports.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/normalized-imports.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/normalized-imports.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/pair-react-dom-render-unmount.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/typedef-var.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/typedef-var.ts",
+      "scopeId": ".typedefVar.create",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/typedef-var.ts",
+      "scopeId": ".typedefVar.create.VariableDeclarator",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/typedef-var.ts",
+      "scopeId": ".typedefVar.create.VariableDeclarator",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

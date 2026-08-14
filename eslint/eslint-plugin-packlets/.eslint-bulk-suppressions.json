@@ -1,0 +1,229 @@
+{
+  "suppressions": [
+    {
+      "file": "src/DependencyAnalyzer.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/DependencyAnalyzer.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/DependencyAnalyzer.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/DependencyAnalyzer.ts",
+      "scopeId": ".DependencyAnalyzer.checkEntryPointForCircularImport",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DependencyAnalyzer.ts",
+      "scopeId": ".DependencyAnalyzer.checkEntryPointForCircularImport",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/DependencyAnalyzer.ts",
+      "scopeId": "._walkImports",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DependencyAnalyzer.ts",
+      "scopeId": "._walkImports",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DependencyAnalyzer.ts",
+      "scopeId": "._walkImports",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/DependencyAnalyzer.ts",
+      "scopeId": "._walkImports",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/DependencyAnalyzer.ts",
+      "scopeId": "._walkImports",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/PackletAnalyzer.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/PackletAnalyzer.ts",
+      "scopeId": ".PackletAnalyzer.analyzeImport",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PackletAnalyzer.ts",
+      "scopeId": ".PackletAnalyzer.analyzeImport",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PackletAnalyzer.ts",
+      "scopeId": ".PackletAnalyzer.analyzeImport",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/PackletAnalyzer.ts",
+      "scopeId": ".PackletAnalyzer.analyzeImport",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PackletAnalyzer.ts",
+      "scopeId": ".PackletAnalyzer.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PackletAnalyzer.ts",
+      "scopeId": ".PackletAnalyzer.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PackletAnalyzer.ts",
+      "scopeId": ".PackletAnalyzer.constructor",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/PackletAnalyzer.ts",
+      "scopeId": ".PackletAnalyzer.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Path.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/Path.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/Path.ts",
+      "scopeId": "._relativeCaseInsensitive",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Path.ts",
+      "scopeId": "._relativeCaseInsensitive",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Path.ts",
+      "scopeId": "._relativeCaseInsensitive",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/circular-deps.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/circular-deps.ts",
+      "scopeId": ".circularDeps.create",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/circular-deps.ts",
+      "scopeId": ".circularDeps.create.Program",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/circular-deps.ts",
+      "scopeId": ".circularDeps.create.Program",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/circular-deps.ts",
+      "scopeId": ".circularDeps.create.Program",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/circular-deps.ts",
+      "scopeId": ".circularDeps.create.Program",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/mechanics.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/mechanics.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/mechanics.ts",
+      "scopeId": ".mechanics.create",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/mechanics.ts",
+      "scopeId": ".mechanics.create",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/readme.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/readme.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/readme.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/readme.ts",
+      "scopeId": ".readme.create",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/readme.ts",
+      "scopeId": ".readme.create",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/readme.ts",
+      "scopeId": ".readme.create",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/readme.ts",
+      "scopeId": ".readme.create.Program",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/readme.ts",
+      "scopeId": ".readme.create.Program",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/readme.ts",
+      "scopeId": ".readme.create.Program",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/readme.ts",
+      "scopeId": ".readme.create.Program",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}
