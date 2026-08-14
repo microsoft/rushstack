@@ -1,0 +1,214 @@
+{
+  "suppressions": [
+    {
+      "file": "src/HttpServer.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/HttpServer.ts",
+      "scopeId": ".HttpServer.listenAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LaunchOptionsValidator.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/LaunchOptionsValidator.ts",
+      "scopeId": ".LaunchOptionsValidator.readAllowlistAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LaunchOptionsValidator.ts",
+      "scopeId": ".LaunchOptionsValidator.readAllowlistAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LaunchOptionsValidator.ts",
+      "scopeId": ".LaunchOptionsValidator.validateLaunchOptionsAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LaunchOptionsValidator.ts",
+      "scopeId": ".LaunchOptionsValidator.validateLaunchOptionsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LaunchOptionsValidator.ts",
+      "scopeId": ".LaunchOptionsValidator.validateLaunchOptionsAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LaunchOptionsValidator.ts",
+      "scopeId": ".LaunchOptionsValidator.writeAllowlistAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel._getPlaywrightBrowserServerProxyAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel._initPlaywrightBrowserTunnelAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel._initPlaywrightBrowserTunnelAsync.onMessageHandler",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel._initPlaywrightBrowserTunnelAsync.onMessageHandler",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel._initPlaywrightBrowserTunnelAsync.onMessageHandler",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel._initPlaywrightBrowserTunnelAsync.onMessageHandler",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel._pollConnectionAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel._setupForwardingAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel._validateHandshake",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel._validateHandshake",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel._waitForIncomingConnectionAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel.startAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/tunneledBrowserConnection/TunneledBrowser.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/tunneledBrowserConnection/TunneledBrowser.ts",
+      "scopeId": ".createTunneledBrowserAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/tunneledBrowserConnection/TunneledBrowser.ts",
+      "scopeId": ".createTunneledBrowserAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/tunneledBrowserConnection/TunneledBrowserConnection.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/tunneledBrowserConnection/TunneledBrowserConnection.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/tunneledBrowserConnection/TunneledBrowserConnection.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/tunneledBrowserConnection/TunneledBrowserConnection.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/tunneledBrowserConnection/TunneledBrowserConnection.ts",
+      "scopeId": ".tunneledBrowserConnection",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/tunneledBrowserConnection/TunneledBrowserConnection.ts",
+      "scopeId": ".tunneledBrowserConnection",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/tunneledBrowserConnection/TunneledBrowserConnection.ts",
+      "scopeId": ".tunneledBrowserConnection",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/tunneledBrowserConnection/TunneledBrowserConnection.ts",
+      "scopeId": ".tunneledBrowserConnection",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/tunneledBrowserConnection/TunneledBrowserConnection.ts",
+      "scopeId": ".tunneledBrowserConnection",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/tunneledBrowserConnection/TunneledBrowserConnection.ts",
+      "scopeId": ".tunneledBrowserConnection.maybeSendHandshake",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/utilities.ts",
+      "scopeId": ".WebSocketCloseCode",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities.ts",
+      "scopeId": ".getWebSocketReadyStateString",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities.ts",
+      "scopeId": ".getWebSocketReadyStateString",
+      "rule": "complexity"
+    }
+  ]
+}
