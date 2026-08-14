@@ -3,7 +3,7 @@
     {
       "file": "src/index.ts",
       "scopeId": ".",
-      "rule": "@typescript-eslint/naming-convention"
+      "rule": "max-lines"
     }
   ]
 }
