@@ -1,0 +1,44 @@
+{
+  "suppressions": [
+    {
+      "file": "src/index.ts",
+      "scopeId": ".pitch",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".pitch",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/LoadThemedStylesLoader.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LoadThemedStylesLoader.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/LoadThemedStylesLoader.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/LoadThemedStylesLoader.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/testData/getCompiler.ts",
+      "scopeId": ".getCompiler",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/testData/getCompiler.ts",
+      "scopeId": ".getCompiler",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}
