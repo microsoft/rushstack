@@ -1,0 +1,364 @@
+{
+  "suppressions": [
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter._formatWithPlural",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter._writeConsoleOutput",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter._writeConsoleOutput",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter._writeConsoleOutput",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter._writeConsoleOutputWithLabel",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter._writeConsoleOutputWithLabel",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter.onRunComplete",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter.onRunComplete",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter.onTestResult",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter.onTestResult",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter.onTestResult",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/HeftJestResolver.ts",
+      "scopeId": ".resolve",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/HeftJestResolver.ts",
+      "scopeId": ".resolve",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._createJestArgvAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._createJestArgvAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._createJestArgvAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._getJestConfigurationLoader",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._getJestConfigurationLoader.deepObjectInheritanceFunc",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._getJestConfigurationLoader.shallowObjectInheritanceFunc",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._runJestAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._runJestAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._runJestAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._runJestWatchAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._runJestWatchAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._runJestWatchAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._runJestWatchAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._runJestWatchAsync.runJest.patchedRunJest",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._runJestWatchAsync.runJest.patchedRunJest",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._runJestWatchAsync.runJest.patchedRunJest",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._runJestWatchAsync.watch.patchedWatch",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._runJestWatchAsync.watch.patchedWatch",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin._setNodeEnvIfRequested",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": "._extractHeftJestReporters",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": "._extractHeftJestReporters",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": "._extractHeftJestReporters",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": "._findIndexes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": "._findIndexes",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": "._getJsonPathMetadata",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": "._getJsonPathMetadata.customResolver",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": "._getJsonPathMetadata.customResolver",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": "._getJsonPathMetadata.customResolver",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JestRealPathPatch.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/JestRealPathPatch.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/JestRealPathPatch.ts",
+      "scopeId": ".customTryRealpath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JestUtils.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/JestUtils.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/JestUtils.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/JestUtils.ts",
+      "scopeId": ".jestResolve",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SourceMapSnapshotResolver.ts",
+      "scopeId": ".findSourcePath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/patches/jestWorkerPatch.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/patches/jestWorkerPatch.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/patches/jestWorkerPatch.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/patches/jestWorkerPatch.ts",
+      "scopeId": ".applyPatch",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/patches/jestWorkerPatch.ts",
+      "scopeId": ".applyPatch",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/patches/jestWorkerPatch.ts",
+      "scopeId": ".applyPatch",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/JestPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/JestPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/test/JestPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/JestPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/JestPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/JestPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/transformers/IdentityMockTransformer.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/transformers/StringMockTransformer.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}
