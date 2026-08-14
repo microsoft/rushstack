@@ -3,15 +3,21 @@
 
 import type { RushDiagnosticCategory } from './RushDiagnosticCategory';
 import type { RushDiagnosticSeverity } from './IRushDiagnostic';
+import type { IRushRemediationAction } from './IRushRemediationAction';
+import { ALL_RUSH_DIAGNOSTICS } from './codes';
 
 /**
  * A permanent registry entry describing a Rush diagnostic code.
+ *
+ * @remarks
+ * Entries are authored one-per-module under `diagnostics/codes/` using
+ * `defineRushDiagnostic`, which derives the resource keys from the code.
  *
  * @beta
  */
 export interface IRushDiagnosticCodeDefinition {
   /**
-   * The stable `RUSH_<DOMAIN>_<NAME>` code.
+   * The stable `RDC_<DOMAIN>_<NAME>` code.
    */
   readonly code: string;
 
@@ -34,102 +40,55 @@ export interface IRushDiagnosticCodeDefinition {
    * The resource key of an optional detailed template.
    */
   readonly detailKey?: string;
+
+  /**
+   * Default remediation actions, attached by `createRushDiagnostic` when the
+   * producer does not supply per-instance remediation.
+   */
+  readonly remediation?: readonly IRushRemediationAction[];
 }
 
 /**
- * The stable code used for unexpected internal (programmer) failures.
+ * The union of every registered Rush diagnostic code.
+ *
+ * @remarks
+ * `createRushDiagnostic` accepts this union, so an unregistered code is a
+ * compile error rather than a runtime failure. The wire DTO
+ * ({@link IRushDiagnostic.code}) remains `string` so that consumers tolerate
+ * codes added by newer producers than their local registry knows about.
  *
  * @beta
  */
-export const RUSH_INTERNAL_ERROR_CODE: 'RUSH_INTERNAL_UNEXPECTED' = 'RUSH_INTERNAL_UNEXPECTED';
-
-const RUSH_DIAGNOSTIC_CODE_REGEXP: RegExp = /^RUSH_[A-Z0-9]+(?:_[A-Z0-9]+)+$/;
-
-/**
- * Returns `true` if `code` is shaped like a valid `RUSH_<DOMAIN>_<NAME>` code.
- *
- * @param code - the candidate diagnostic code
- *
- * @beta
- */
-export function isValidRushDiagnosticCode(code: string): boolean {
-  return RUSH_DIAGNOSTIC_CODE_REGEXP.test(code);
-}
+export type RushDiagnosticCode = (typeof ALL_RUSH_DIAGNOSTICS)[number]['definition']['code'];
 
 /**
  * The permanent, never-reused list of Rush diagnostic code definitions.
  *
  * @remarks
  * Codes are append-only. A code is never removed or repurposed, so consumers can
- * rely on a code always meaning the same thing.
+ * rely on a code always meaning the same thing. To add a diagnostic, create a
+ * module under `diagnostics/codes/` and register it in `codes/index.ts`.
  *
  * @beta
  */
-export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly IRushDiagnosticCodeDefinition[] = [
-  {
-    code: 'RUSH_CONFIG_INVALID_JSON',
-    category: 'configuration',
-    defaultSeverity: 'error',
-    summaryKey: 'diagnostic.RUSH_CONFIG_INVALID_JSON.summary'
-  },
-  {
-    code: 'RUSH_INPUT_UNKNOWN_PROJECT',
-    category: 'input',
-    defaultSeverity: 'error',
-    summaryKey: 'diagnostic.RUSH_INPUT_UNKNOWN_PROJECT.summary'
-  },
-  {
-    code: 'RUSH_DEPENDENCY_TOOL_FAILED',
-    category: 'dependency-tool',
-    defaultSeverity: 'error',
-    summaryKey: 'diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.summary',
-    detailKey: 'diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.detail'
-  },
-  {
-    code: 'RUSH_ENVIRONMENT_UNSUPPORTED_NODE',
-    category: 'environment',
-    defaultSeverity: 'error',
-    summaryKey: 'diagnostic.RUSH_ENVIRONMENT_UNSUPPORTED_NODE.summary'
-  },
-  {
-    code: 'RUSH_NETWORK_AUTH_UNAUTHORIZED',
-    category: 'network-auth',
-    defaultSeverity: 'error',
-    summaryKey: 'diagnostic.RUSH_NETWORK_AUTH_UNAUTHORIZED.summary'
-  },
-  {
-    code: 'RUSH_OPERATION_FAILED',
-    category: 'operation',
-    defaultSeverity: 'error',
-    summaryKey: 'diagnostic.RUSH_OPERATION_FAILED.summary'
-  },
-  {
-    code: 'RUSH_PROTOCOL_UPDATE_REQUIRED',
-    category: 'environment',
-    defaultSeverity: 'error',
-    summaryKey: 'diagnostic.RUSH_PROTOCOL_UPDATE_REQUIRED.summary',
-    detailKey: 'diagnostic.RUSH_PROTOCOL_UPDATE_REQUIRED.detail'
-  },
-  {
-    code: RUSH_INTERNAL_ERROR_CODE,
-    category: 'internal',
-    defaultSeverity: 'error',
-    summaryKey: 'diagnostic.RUSH_INTERNAL_UNEXPECTED.summary',
-    detailKey: 'diagnostic.RUSH_INTERNAL_UNEXPECTED.detail'
-  }
-];
+export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly IRushDiagnosticCodeDefinition[] =
+  ALL_RUSH_DIAGNOSTICS.map((entry) => entry.definition);
 
 /**
  * The permanent registry of Rush diagnostic codes, keyed by code.
  *
  * @beta
  */
-export const RUSH_DIAGNOSTIC_CODES: ReadonlyMap<string, IRushDiagnosticCodeDefinition> = new Map(
-  RUSH_DIAGNOSTIC_CODE_DEFINITIONS.map((definition: IRushDiagnosticCodeDefinition) => [
-    definition.code,
-    definition
-  ])
-);
+export const RUSH_DIAGNOSTIC_CODES: ReadonlyMap<string, IRushDiagnosticCodeDefinition> = (() => {
+  const map: Map<string, IRushDiagnosticCodeDefinition> = new Map();
+  for (const definition of RUSH_DIAGNOSTIC_CODE_DEFINITIONS) {
+    if (map.has(definition.code)) {
+      throw new Error(`Duplicate Rush diagnostic code: ${definition.code}`);
+    }
+    map.set(definition.code, definition);
+  }
+  return map;
+})();
 
 /**
  * The English templates for Rush diagnostics, keyed by resource key.
@@ -137,25 +96,15 @@ export const RUSH_DIAGNOSTIC_CODES: ReadonlyMap<string, IRushDiagnosticCodeDefin
  * @remarks
  * Placeholders of the form `{name}` are substituted with the diagnostic's
  * classified parameters at render time. Only English is provided in v1.
+ * Templates are authored in the per-diagnostic modules under
+ * `diagnostics/codes/`; this table is composed from them.
  *
  * @beta
  */
-export const RUSH_DIAGNOSTIC_TEMPLATES: { readonly [resourceKey: string]: string } = {
-  'diagnostic.RUSH_CONFIG_INVALID_JSON.summary': 'The configuration file {file} contains invalid JSON.',
-  'diagnostic.RUSH_INPUT_UNKNOWN_PROJECT.summary': 'The project {projectName} was not found in rush.json.',
-  'diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.summary': 'The package manager exited with code {exitCode}.',
-  'diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.detail':
-    'The command {command} failed. See {logPath} for the full output.',
-  'diagnostic.RUSH_ENVIRONMENT_UNSUPPORTED_NODE.summary':
-    'Node.js {actualVersion} is not supported; expected {expectedRange}.',
-  'diagnostic.RUSH_NETWORK_AUTH_UNAUTHORIZED.summary':
-    'Authentication failed for the registry {registryUrl}.',
-  'diagnostic.RUSH_OPERATION_FAILED.summary': 'The operation for {projectName} failed.',
-  'diagnostic.RUSH_PROTOCOL_UPDATE_REQUIRED.summary':
-    'A reporter protocol feature required by {producerVersion} is not supported by this Rush.',
-  'diagnostic.RUSH_PROTOCOL_UPDATE_REQUIRED.detail':
-    'The producer advertised protocol major {producerProtocolMajor}. Update your global Rush installation to a version that supports it.',
-  'diagnostic.RUSH_INTERNAL_UNEXPECTED.summary': 'An unexpected internal error occurred in Rush.',
-  'diagnostic.RUSH_INTERNAL_UNEXPECTED.detail':
-    'This is a bug in Rush. See {logPath} for details, then report it upstream.'
-};
+export const RUSH_DIAGNOSTIC_TEMPLATES: { readonly [resourceKey: string]: string } = (() => {
+  const templates: { [resourceKey: string]: string } = {};
+  for (const entry of ALL_RUSH_DIAGNOSTICS) {
+    Object.assign(templates, entry.templates);
+  }
+  return templates;
+})();

@@ -13,9 +13,15 @@ import {
   RushError,
   type IRushDiagnostic,
   type IRushDiagnosticCodeDefinition,
+  type IRushRemediationAction,
   type RushDiagnosticCategory,
+  type RushDiagnosticCode,
   type ReporterPrivacyClassification
 } from '../index';
+import {
+  defineRushDiagnostic,
+  type IRushDiagnosticEntry
+} from '../diagnostics/defineRushDiagnostic';
 
 const VALID_CATEGORIES: readonly RushDiagnosticCategory[] = [
   'configuration',
@@ -51,11 +57,17 @@ describe('RushDiagnosticCodeRegistry', () => {
     }
   });
 
-  it('provides an English template for every summary and detail key', () => {
+  it('provides an English template for every summary, detail, and remediation key', () => {
     for (const definition of RUSH_DIAGNOSTIC_CODE_DEFINITIONS) {
       expect(typeof RUSH_DIAGNOSTIC_TEMPLATES[definition.summaryKey]).toBe('string');
       if (definition.detailKey !== undefined) {
         expect(typeof RUSH_DIAGNOSTIC_TEMPLATES[definition.detailKey]).toBe('string');
+      }
+      for (const action of definition.remediation ?? []) {
+        expect(typeof RUSH_DIAGNOSTIC_TEMPLATES[action.descriptionKey]).toBe('string');
+        if (action.promptKey !== undefined) {
+          expect(typeof RUSH_DIAGNOSTIC_TEMPLATES[action.promptKey]).toBe('string');
+        }
       }
     }
   });
@@ -66,12 +78,134 @@ describe('RushDiagnosticCodeRegistry', () => {
     expect(definition).toBeDefined();
     expect(definition?.category).toBe('internal');
   });
+});
+
+describe('isValidRushDiagnosticCode', () => {
+  it('accepts well-formed RDC_ codes', () => {
+    expect(isValidRushDiagnosticCode('RDC_CONFIG_INVALID_JSON')).toBe(true);
+    expect(isValidRushDiagnosticCode('RDC_A_B')).toBe(true);
+    expect(isValidRushDiagnosticCode('RDC_TOOL_V2_FAILED')).toBe(true);
+  });
 
   it('rejects malformed codes', () => {
-    expect(isValidRushDiagnosticCode('rush_config_invalid')).toBe(false); // lowercase
-    expect(isValidRushDiagnosticCode('RUSH_CONFIG')).toBe(false); // missing name segment
-    expect(isValidRushDiagnosticCode('CONFIG_INVALID_JSON')).toBe(false); // missing RUSH_ prefix
-    expect(isValidRushDiagnosticCode('RUSH__DOUBLE')).toBe(false); // empty segment
+    expect(isValidRushDiagnosticCode('rdc_config_invalid')).toBe(false); // lowercase
+    expect(isValidRushDiagnosticCode('RDC_CONFIG')).toBe(false); // missing name segment
+    expect(isValidRushDiagnosticCode('CONFIG_INVALID_JSON')).toBe(false); // missing RDC_ prefix
+    expect(isValidRushDiagnosticCode('RDC__DOUBLE')).toBe(false); // empty segment
+    expect(isValidRushDiagnosticCode('RDC_CONFIG_')).toBe(false); // trailing empty segment
+    expect(isValidRushDiagnosticCode('RDC_')).toBe(false); // empty body
+    expect(isValidRushDiagnosticCode('RDC_CONFIG-INVALID')).toBe(false); // invalid character
+    expect(isValidRushDiagnosticCode('')).toBe(false);
+  });
+
+  it('rejects the retired RUSH_ prefix', () => {
+    expect(isValidRushDiagnosticCode('RUSH_CONFIG_INVALID_JSON')).toBe(false);
+  });
+});
+
+describe('defineRushDiagnostic', () => {
+  it('derives resource keys from the code', () => {
+    const entry: IRushDiagnosticEntry<'RDC_TEST_DERIVED'> = defineRushDiagnostic({
+      code: 'RDC_TEST_DERIVED',
+      category: 'internal',
+      defaultSeverity: 'warning',
+      summary: 'A summary mentioning {thing}.',
+      detail: 'A detail.'
+    });
+
+    expect(entry.definition.code).toBe('RDC_TEST_DERIVED');
+    expect(entry.definition.category).toBe('internal');
+    expect(entry.definition.defaultSeverity).toBe('warning');
+    expect(entry.definition.summaryKey).toBe('diagnostic.RDC_TEST_DERIVED.summary');
+    expect(entry.definition.detailKey).toBe('diagnostic.RDC_TEST_DERIVED.detail');
+    expect(entry.templates).toEqual({
+      'diagnostic.RDC_TEST_DERIVED.summary': 'A summary mentioning {thing}.',
+      'diagnostic.RDC_TEST_DERIVED.detail': 'A detail.'
+    });
+  });
+
+  it('derives remediation description and prompt keys and defaults', () => {
+    const entry: IRushDiagnosticEntry<'RDC_TEST_REMEDIATION'> = defineRushDiagnostic({
+      code: 'RDC_TEST_REMEDIATION',
+      category: 'network-auth',
+      defaultSeverity: 'error',
+      summary: 'Auth failed.',
+      remediation: [
+        {
+          description: 'Fix the thing.',
+          prompt: 'Follow these steps to fix the thing.',
+          automatedExecutionSafety: 'unsafe'
+        },
+        {
+          description: 'Run the fixer.',
+          command: 'rush fix',
+          automatedExecutionSafety: 'requires-confirmation'
+        }
+      ]
+    });
+
+    const actions: readonly IRushRemediationAction[] = entry.definition.remediation!;
+    expect(actions).toHaveLength(2);
+    expect(actions[0]).toEqual({
+      descriptionKey: 'diagnostic.RDC_TEST_REMEDIATION.remediation.0.description',
+      promptKey: 'diagnostic.RDC_TEST_REMEDIATION.remediation.0.prompt',
+      command: undefined,
+      documentationUrl: undefined,
+      automatedExecutionSafety: 'unsafe'
+    });
+    expect(actions[1]).toEqual({
+      descriptionKey: 'diagnostic.RDC_TEST_REMEDIATION.remediation.1.description',
+      promptKey: undefined,
+      command: 'rush fix',
+      documentationUrl: undefined,
+      automatedExecutionSafety: 'requires-confirmation'
+    });
+    expect(entry.templates['diagnostic.RDC_TEST_REMEDIATION.remediation.0.prompt']).toBe(
+      'Follow these steps to fix the thing.'
+    );
+  });
+
+  it('enforces the RDC_ naming convention at compile time', () => {
+    // Each of these is a compile error via ValidateRushDiagnosticCode; the
+    // runtime guard then rejects the forced call for untyped authors.
+    expect(() =>
+      defineRushDiagnostic({
+        // @ts-expect-error - lowercase codes violate the naming convention
+        code: 'rdc_lower_case',
+        category: 'internal',
+        defaultSeverity: 'error',
+        summary: 'x'
+      })
+    ).toThrow(/Invalid Rush diagnostic code/);
+    expect(() =>
+      defineRushDiagnostic({
+        // @ts-expect-error - codes without the RDC_ prefix violate the naming convention
+        code: 'CONFIG_INVALID_JSON',
+        category: 'internal',
+        defaultSeverity: 'error',
+        summary: 'x'
+      })
+    ).toThrow(/Invalid Rush diagnostic code/);
+    expect(() =>
+      defineRushDiagnostic({
+        // @ts-expect-error - a single segment is not a valid code
+        code: 'RDC_CONFIG',
+        category: 'internal',
+        defaultSeverity: 'error',
+        summary: 'x'
+      })
+    ).toThrow(/Invalid Rush diagnostic code/);
+  });
+
+  it('throws at module load for untyped authors with an invalid code', () => {
+    expect(() =>
+      defineRushDiagnostic({
+        code: 'RDC_lower_case' as unknown as 'RDC_LOWER_CASE',
+        category: 'internal',
+        defaultSeverity: 'error',
+        summary: 'x'
+      })
+    ).toThrow(/Invalid Rush diagnostic code/);
   });
 });
 
@@ -103,24 +237,54 @@ describe('DiagnosticPrivacy', () => {
 
 describe('createRushDiagnostic', () => {
   it('derives category, severity, and template keys from the registry', () => {
-    const diagnostic: IRushDiagnostic = createRushDiagnostic('RUSH_DEPENDENCY_TOOL_FAILED');
-    expect(diagnostic.code).toBe('RUSH_DEPENDENCY_TOOL_FAILED');
+    const diagnostic: IRushDiagnostic = createRushDiagnostic('RDC_DEPENDENCY_TOOL_FAILED');
+    expect(diagnostic.code).toBe('RDC_DEPENDENCY_TOOL_FAILED');
     expect(diagnostic.category).toBe('dependency-tool');
     expect(diagnostic.severity).toBe('error');
-    expect(diagnostic.summaryKey).toBe('diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.summary');
-    expect(diagnostic.detailKey).toBe('diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.detail');
+    expect(diagnostic.summaryKey).toBe('diagnostic.RDC_DEPENDENCY_TOOL_FAILED.summary');
+    expect(diagnostic.detailKey).toBe('diagnostic.RDC_DEPENDENCY_TOOL_FAILED.detail');
+  });
+
+  it('accepts only registered codes at compile time', () => {
+    // @ts-expect-error - not a registered code
+    expect(() => createRushDiagnostic('RDC_NOT_A_REAL_CODE')).toThrow(/Unknown Rush diagnostic code/);
+  });
+
+  it('attaches definition-level remediation when the producer does not override it', () => {
+    const diagnostic: IRushDiagnostic = createRushDiagnostic('RDC_NETWORK_AUTH_UNAUTHORIZED', {
+      parameters: {
+        registryUrl: { value: 'https://registry.example.com', privacy: 'public' }
+      }
+    });
+    expect(diagnostic.remediation).toHaveLength(1);
+    const action: IRushRemediationAction = diagnostic.remediation![0];
+    expect(action.descriptionKey).toBe('diagnostic.RDC_NETWORK_AUTH_UNAUTHORIZED.remediation.0.description');
+    expect(action.promptKey).toBe('diagnostic.RDC_NETWORK_AUTH_UNAUTHORIZED.remediation.0.prompt');
+    expect(action.automatedExecutionSafety).toBe('unsafe');
+    expect(typeof RUSH_DIAGNOSTIC_TEMPLATES[action.promptKey!]).toBe('string');
+  });
+
+  it('prefers per-instance remediation over the definition default', () => {
+    const override: IRushRemediationAction = {
+      descriptionKey: 'remediation.custom',
+      automatedExecutionSafety: 'safe'
+    };
+    const diagnostic: IRushDiagnostic = createRushDiagnostic('RDC_NETWORK_AUTH_UNAUTHORIZED', {
+      remediation: [override]
+    });
+    expect(diagnostic.remediation).toEqual([override]);
   });
 
   it('generates a unique diagnostic id when none is supplied', () => {
-    const first: IRushDiagnostic = createRushDiagnostic('RUSH_OPERATION_FAILED');
-    const second: IRushDiagnostic = createRushDiagnostic('RUSH_OPERATION_FAILED');
+    const first: IRushDiagnostic = createRushDiagnostic('RDC_OPERATION_FAILED');
+    const second: IRushDiagnostic = createRushDiagnostic('RDC_OPERATION_FAILED');
     expect(typeof first.diagnosticId).toBe('string');
     expect(first.diagnosticId.length).toBeGreaterThan(0);
     expect(first.diagnosticId).not.toBe(second.diagnosticId);
   });
 
   it('honors an explicit diagnostic id, severity, and parameters', () => {
-    const diagnostic: IRushDiagnostic = createRushDiagnostic('RUSH_INPUT_UNKNOWN_PROJECT', {
+    const diagnostic: IRushDiagnostic = createRushDiagnostic('RDC_INPUT_UNKNOWN_PROJECT', {
       diagnosticId: 'diag_fixed',
       severity: 'warning',
       parameters: {
@@ -132,14 +296,16 @@ describe('createRushDiagnostic', () => {
     expect(diagnostic.parameters?.projectName.value).toBe('my-project');
   });
 
-  it('throws for an unknown code', () => {
-    expect(() => createRushDiagnostic('RUSH_NOT_A_REAL_CODE')).toThrow(/Unknown Rush diagnostic code/);
+  it('throws for an unknown code forced past the type checker', () => {
+    expect(() => createRushDiagnostic('RDC_NOT_A_REAL_CODE' as RushDiagnosticCode)).toThrow(
+      /Unknown Rush diagnostic code/
+    );
   });
 });
 
 describe('RushError', () => {
   it('wraps a diagnostic and references its id', () => {
-    const diagnostic: IRushDiagnostic = createRushDiagnostic('RUSH_OPERATION_FAILED', {
+    const diagnostic: IRushDiagnostic = createRushDiagnostic('RDC_OPERATION_FAILED', {
       diagnosticId: 'diag_err'
     });
     const error: RushError = new RushError(diagnostic);
@@ -149,6 +315,6 @@ describe('RushError', () => {
     expect(error.name).toBe('RushError');
     expect(error.diagnostic).toBe(diagnostic);
     expect(error.diagnosticId).toBe('diag_err');
-    expect(error.message).toBe('RUSH_OPERATION_FAILED');
+    expect(error.message).toBe('RDC_OPERATION_FAILED');
   });
 });

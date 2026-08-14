@@ -5,10 +5,22 @@
 ```ts
 
 // @beta
+export const ALL_RUSH_DIAGNOSTICS: readonly [
+IRushDiagnosticEntry<'RDC_CONFIG_INVALID_JSON'>,
+IRushDiagnosticEntry<'RDC_INPUT_UNKNOWN_PROJECT'>,
+IRushDiagnosticEntry<'RDC_DEPENDENCY_TOOL_FAILED'>,
+IRushDiagnosticEntry<'RDC_ENVIRONMENT_UNSUPPORTED_NODE'>,
+IRushDiagnosticEntry<'RDC_NETWORK_AUTH_UNAUTHORIZED'>,
+IRushDiagnosticEntry<'RDC_OPERATION_FAILED'>,
+IRushDiagnosticEntry<'RDC_PROTOCOL_UPDATE_REQUIRED'>,
+IRushDiagnosticEntry<typeof RUSH_INTERNAL_ERROR_CODE>
+];
+
+// @beta
 export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPrivacyClassification>): ReporterPrivacyClassification;
 
 // @beta
-export function createRushDiagnostic(code: string, options?: ICreateRushDiagnosticOptions): IRushDiagnostic;
+export function createRushDiagnostic(code: RushDiagnosticCode, options?: ICreateRushDiagnosticOptions): IRushDiagnostic;
 
 // @beta
 export const DEFAULT_FLUSH_TIMEOUT_MS: number;
@@ -184,7 +196,18 @@ export interface IRushDiagnosticCodeDefinition {
     readonly code: string;
     readonly defaultSeverity: RushDiagnosticSeverity;
     readonly detailKey?: string;
+    readonly remediation?: readonly IRushRemediationAction[];
     readonly summaryKey: string;
+}
+
+// @beta
+export interface IRushDiagnosticEntry<TCode extends string = string> {
+    readonly definition: IRushDiagnosticCodeDefinition & {
+        readonly code: TCode;
+    };
+    readonly templates: {
+        readonly [resourceKey: string]: string;
+    };
 }
 
 // @beta
@@ -201,6 +224,7 @@ export interface IRushRemediationAction {
     readonly command?: string;
     readonly descriptionKey: string;
     readonly documentationUrl?: string;
+    readonly promptKey?: string;
 }
 
 // @beta
@@ -304,6 +328,9 @@ export type ReporterPrivacyClassification = 'public' | 'local-sensitive' | 'secr
 export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly IRushDiagnosticCodeDefinition[];
 
 // @beta
+export const RUSH_DIAGNOSTIC_CODE_PREFIX: 'RDC_';
+
+// @beta
 export const RUSH_DIAGNOSTIC_CODES: ReadonlyMap<string, IRushDiagnosticCodeDefinition>;
 
 // @beta
@@ -312,10 +339,13 @@ export const RUSH_DIAGNOSTIC_TEMPLATES: {
 };
 
 // @beta
-export const RUSH_INTERNAL_ERROR_CODE: 'RUSH_INTERNAL_UNEXPECTED';
+export const RUSH_INTERNAL_ERROR_CODE: 'RDC_INTERNAL_UNEXPECTED';
 
 // @beta
 export type RushDiagnosticCategory = 'configuration' | 'input' | 'dependency-tool' | 'environment' | 'network-auth' | 'operation' | 'internal';
+
+// @beta
+export type RushDiagnosticCode = (typeof ALL_RUSH_DIAGNOSTICS)[number]['definition']['code'];
 
 // @beta
 export type RushDiagnosticSeverity = 'warning' | 'error';
@@ -329,5 +359,8 @@ export class RushError extends Error {
 
 // @beta
 export type RushRemediationSafety = 'safe' | 'requires-confirmation' | 'unsafe';
+
+// @beta
+export type ValidateRushDiagnosticCode<TCode extends string> = TCode extends `${typeof RUSH_DIAGNOSTIC_CODE_PREFIX}${infer TRest}` ? TRest extends `${infer TDomain}_${infer TName}` ? TDomain extends '' ? never : TName extends '' | `_${string}` ? never : TDomain extends Uppercase<TDomain> ? TName extends Uppercase<TName> ? TCode : never : never : never : never;
 
 ```

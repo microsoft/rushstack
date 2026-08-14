@@ -43,7 +43,7 @@ describe('protocol goldens', () => {
     payload: { commandName: 'build', argv: ['--to', '@my-company/project-a'] }
   };
 
-  const goldenDiagnostic: IRushDiagnostic = createRushDiagnostic('RUSH_DEPENDENCY_TOOL_FAILED', {
+  const goldenDiagnostic: IRushDiagnostic = createRushDiagnostic('RDC_DEPENDENCY_TOOL_FAILED', {
     diagnosticId: 'diag_0001',
     parameters: {
       exitCode: { value: 1, privacy: 'public' },

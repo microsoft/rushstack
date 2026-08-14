@@ -37,7 +37,7 @@ Array [
   Object {
     "accepted": false,
     "acceptedCapabilities": Array [],
-    "diagnosticCode": "RUSH_PROTOCOL_UPDATE_REQUIRED",
+    "diagnosticCode": "RDC_PROTOCOL_UPDATE_REQUIRED",
     "name": "unknown required feature is rejected",
     "rejectedRequiredFeatures": Array [
       "future-required",
@@ -46,7 +46,7 @@ Array [
   Object {
     "accepted": false,
     "acceptedCapabilities": Array [],
-    "diagnosticCode": "RUSH_PROTOCOL_UPDATE_REQUIRED",
+    "diagnosticCode": "RDC_PROTOCOL_UPDATE_REQUIRED",
     "name": "unsupported newer major is rejected",
     "rejectedRequiredFeatures": Array [],
   },
@@ -100,8 +100,8 @@ Object {
   "causeDiagnosticIds": Array [
     "diag_0000",
   ],
-  "code": "RUSH_DEPENDENCY_TOOL_FAILED",
-  "detailKey": "diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.detail",
+  "code": "RDC_DEPENDENCY_TOOL_FAILED",
+  "detailKey": "diagnostic.RDC_DEPENDENCY_TOOL_FAILED.detail",
   "diagnosticId": "diag_0001",
   "parameters": Object {
     "command": Object {
@@ -134,7 +134,7 @@ Object {
     "file": "common/config/rush/pnpm-config.json",
     "toolName": "pnpm",
   },
-  "summaryKey": "diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.summary",
+  "summaryKey": "diagnostic.RDC_DEPENDENCY_TOOL_FAILED.summary",
 }
 `;
 

@@ -150,7 +150,7 @@ export function negotiateReporterHello(
     return { accepted: true, ack };
   }
 
-  const diagnostic: IRushDiagnostic = createRushDiagnostic('RUSH_PROTOCOL_UPDATE_REQUIRED', {
+  const diagnostic: IRushDiagnostic = createRushDiagnostic('RDC_PROTOCOL_UPDATE_REQUIRED', {
     parameters: {
       producerVersion: { value: hello.producerVersion, privacy: 'public' },
       producerProtocolMajor: { value: hello.protocolVersion.major, privacy: 'public' }

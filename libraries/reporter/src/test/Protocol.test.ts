@@ -107,7 +107,7 @@ describe('negotiateReporterHello', () => {
     );
     expect(result.accepted).toBe(false);
     expect(result.ack.rejectedRequiredFeatures).toEqual(['streaming-artifacts']);
-    expect(result.diagnostic?.code).toBe('RUSH_PROTOCOL_UPDATE_REQUIRED');
+    expect(result.diagnostic?.code).toBe('RDC_PROTOCOL_UPDATE_REQUIRED');
     expect(result.diagnostic?.category).toBe('environment');
   });
 
@@ -117,7 +117,7 @@ describe('negotiateReporterHello', () => {
       { supportedProtocolVersion: { major: 1, minor: 0 } }
     );
     expect(result.accepted).toBe(false);
-    expect(result.diagnostic?.code).toBe('RUSH_PROTOCOL_UPDATE_REQUIRED');
+    expect(result.diagnostic?.code).toBe('RDC_PROTOCOL_UPDATE_REQUIRED');
     expect(result.diagnostic?.parameters?.producerProtocolMajor.value).toBe(2);
   });
 

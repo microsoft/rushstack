@@ -35,14 +35,23 @@ export type { RushRemediationSafety, IRushRemediationAction } from './diagnostic
 export type { IRushDiagnosticSource } from './diagnostics/IRushDiagnosticSource';
 export type { IClassifiedDiagnosticValue } from './diagnostics/IClassifiedDiagnosticValue';
 export { getPrivacyClassificationRank, computeEnvelopePrivacyFloor } from './diagnostics/DiagnosticPrivacy';
-export type { IRushDiagnosticCodeDefinition } from './diagnostics/RushDiagnosticCodeRegistry';
+export type {
+  IRushDiagnosticCodeDefinition,
+  RushDiagnosticCode
+} from './diagnostics/RushDiagnosticCodeRegistry';
 export {
-  RUSH_INTERNAL_ERROR_CODE,
-  isValidRushDiagnosticCode,
   RUSH_DIAGNOSTIC_CODE_DEFINITIONS,
   RUSH_DIAGNOSTIC_CODES,
   RUSH_DIAGNOSTIC_TEMPLATES
 } from './diagnostics/RushDiagnosticCodeRegistry';
+export {
+  RUSH_DIAGNOSTIC_CODE_PREFIX,
+  RUSH_INTERNAL_ERROR_CODE,
+  isValidRushDiagnosticCode
+} from './diagnostics/RushDiagnosticCode';
+export type { ValidateRushDiagnosticCode } from './diagnostics/RushDiagnosticCode';
+export type { IRushDiagnosticEntry } from './diagnostics/defineRushDiagnostic';
+export { ALL_RUSH_DIAGNOSTICS } from './diagnostics/codes';
 export { RushError } from './diagnostics/RushError';
 export type { ICreateRushDiagnosticOptions } from './diagnostics/createRushDiagnostic';
 export { createRushDiagnostic } from './diagnostics/createRushDiagnostic';

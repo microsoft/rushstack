@@ -7,7 +7,11 @@ import type { IRushDiagnostic, RushDiagnosticSeverity } from './IRushDiagnostic'
 import type { IClassifiedDiagnosticValue } from './IClassifiedDiagnosticValue';
 import type { IRushRemediationAction } from './IRushRemediationAction';
 import type { IRushDiagnosticSource } from './IRushDiagnosticSource';
-import { RUSH_DIAGNOSTIC_CODES, type IRushDiagnosticCodeDefinition } from './RushDiagnosticCodeRegistry';
+import {
+  RUSH_DIAGNOSTIC_CODES,
+  type IRushDiagnosticCodeDefinition,
+  type RushDiagnosticCode
+} from './RushDiagnosticCodeRegistry';
 
 /**
  * Options for {@link createRushDiagnostic}.
@@ -61,18 +65,20 @@ export interface ICreateRushDiagnosticOptions {
  *
  * @remarks
  * The registry is the single source of truth for the category, default
- * severity, and template keys, so producers supply only the code and
- * instance-specific data. A fresh {@link IRushDiagnostic.diagnosticId} is
- * generated unless one is provided.
+ * severity, template keys, and default remediation, so producers supply only
+ * the code and instance-specific data. A fresh
+ * {@link IRushDiagnostic.diagnosticId} is generated unless one is provided.
  *
- * @param code - a code present in the central registry
+ * @param code - a code present in the central registry. The parameter is
+ * typed as the union of registered codes, so an unregistered code is a
+ * compile error for TypeScript producers.
  * @param options - instance-specific diagnostic data
  * @throws Error if `code` is not registered
  *
  * @beta
  */
 export function createRushDiagnostic(
-  code: string,
+  code: RushDiagnosticCode,
   options: ICreateRushDiagnosticOptions = {}
 ): IRushDiagnostic {
   const definition: IRushDiagnosticCodeDefinition | undefined = RUSH_DIAGNOSTIC_CODES.get(code);
@@ -88,7 +94,7 @@ export function createRushDiagnostic(
     summaryKey: definition.summaryKey,
     detailKey: definition.detailKey,
     parameters: options.parameters,
-    remediation: options.remediation,
+    remediation: options.remediation ?? definition.remediation,
     source: options.source,
     causeDiagnosticIds: options.causeDiagnosticIds,
     retryable: options.retryable,

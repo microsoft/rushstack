@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Rework the diagnostic registry per PR review: diagnostic codes now use the distinctive RDC_ prefix enforced at compile time by template-literal type arithmetic (replacing runtime regex validation); message templates moved out of the registry into one module per diagnostic under diagnostics/codes/ with a defineRushDiagnostic authoring helper that derives resource keys; IRushRemediationAction gains an optional promptKey so a remediation can propagate as a prompt to an agent or user; createRushDiagnostic now accepts the union of registered codes and falls back to definition-level default remediation",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

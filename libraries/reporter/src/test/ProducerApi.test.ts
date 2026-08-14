@@ -80,10 +80,10 @@ describe('IScopedReporter', () => {
 
     const diagnostic: IRushDiagnostic = {
       diagnosticId: 'diag_0001',
-      code: 'RUSH_CONFIG_INVALID_JSON',
+      code: 'RDC_CONFIG_INVALID_JSON',
       category: 'configuration',
       severity: 'error',
-      summaryKey: 'diagnostic.RUSH_CONFIG_INVALID_JSON.summary'
+      summaryKey: 'diagnostic.RDC_CONFIG_INVALID_JSON.summary'
     };
 
     expect(reporter.emitMessage({ severity: 'info', text: 'Building...' })).toBe('evt_1');

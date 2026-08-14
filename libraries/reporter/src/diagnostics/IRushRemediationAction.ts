@@ -31,6 +31,18 @@ export interface IRushRemediationAction {
   readonly descriptionKey: string;
 
   /**
+   * The resource key of an optional prompt that an agent or user can follow
+   * to perform this remediation.
+   *
+   * @remarks
+   * When the specific remediation is not obvious to the agent or user -- for
+   * example, when a user misconfigured their package authentication and the
+   * corrective steps depend on their environment -- the producer propagates
+   * the remediation as a prompt rather than as a bare command.
+   */
+  readonly promptKey?: string;
+
+  /**
    * An optional shell command that performs the remediation.
    */
   readonly command?: string;

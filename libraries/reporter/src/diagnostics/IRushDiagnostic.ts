@@ -37,8 +37,13 @@ export interface IRushDiagnostic {
   readonly diagnosticId: string;
 
   /**
-   * A stable, never-reused code of the form `RUSH_<DOMAIN>_<NAME>` that
+   * A stable, never-reused code of the form `RDC_<DOMAIN>_<NAME>` that
    * identifies the diagnostic and keys its English template.
+   *
+   * @remarks
+   * Typed as `string` (rather than the registered-code union) so that a
+   * consumer tolerates codes registered by a newer producer than its local
+   * registry knows about.
    */
   readonly code: string;
 
