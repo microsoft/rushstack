@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "1.2.23",
+      "tag": "@rushstack/heft_v1.2.23",
+      "date": "Fri, 14 Aug 2026 00:18:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/operation-graph\" to `0.7.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.22",
       "tag": "@rushstack/heft_v1.2.22",
       "date": "Tue, 21 Jul 2026 02:53:22 GMT",

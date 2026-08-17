@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "type": "minor",
+      "comment": "Initial release: rushd wire frame taxonomy (0x01-0x05), length-prefixed binary codec, DAEMON_PROTOCOL_VERSION, hello/version negotiation with typed mismatch errors, placeholder event envelope mirroring @rushstack/reporter, and per-subscription verbosity filtering."
+    }
+  ],
+  "email": "TheLarkInn@users.noreply.github.com",
+  "packageName": "@rushstack/rush-daemon-protocol"
+}

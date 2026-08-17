@@ -20,6 +20,14 @@ export interface IMainBarActionWiringOptions {
   render: () => void;
 }
 
+function isTextEditingTarget(target: EventTarget | undefined): boolean {
+  return (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    (target instanceof HTMLElement && target.isContentEditable)
+  );
+}
+
 export function wireMainBarActions(options: IMainBarActionWiringOptions): void {
   const {
     connect,
@@ -94,7 +102,7 @@ export function wireMainBarActions(options: IMainBarActionWiringOptions): void {
   }
 
   window.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (e.key === 'a' && (e.metaKey || e.ctrlKey)) {
+    if (e.key === 'a' && (e.metaKey || e.ctrlKey) && !isTextEditingTarget(e.target ?? undefined)) {
       e.preventDefault();
       setSelection(new Set(getOperationNames()));
       render();

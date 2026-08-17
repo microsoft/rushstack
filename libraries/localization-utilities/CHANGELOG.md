@@ -1,6 +1,11 @@
 # Change Log - @rushstack/localization-utilities
 
-This log was last generated on Tue, 04 Aug 2026 00:17:24 GMT and should not be manually modified.
+This log was last generated on Fri, 14 Aug 2026 00:18:07 GMT and should not be manually modified.
+
+## 0.16.1
+Fri, 14 Aug 2026 00:18:07 GMT
+
+_Version update only_
 
 ## 0.16.0
 Tue, 04 Aug 2026 00:17:24 GMT

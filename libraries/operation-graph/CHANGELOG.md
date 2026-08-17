@@ -1,6 +1,13 @@
 # Change Log - @rushstack/operation-graph
 
-This log was last generated on Fri, 17 Jul 2026 00:15:59 GMT and should not be manually modified.
+This log was last generated on Fri, 14 Aug 2026 00:18:07 GMT and should not be manually modified.
+
+## 0.7.0
+Fri, 14 Aug 2026 00:18:07 GMT
+
+### Minor changes
+
+- Add Rush-compatible operation statuses in preparation for graph convergence.
 
 ## 0.6.11
 Fri, 17 Jul 2026 00:15:59 GMT
