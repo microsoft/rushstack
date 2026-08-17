@@ -15,6 +15,7 @@ import { NewlineKind, Async, InternalError, AlreadyReportedError } from '@rushst
 import { AsyncOperationQueue, type IOperationSortFunction } from './AsyncOperationQueue';
 import type { Operation } from './Operation';
 import { OperationStatus, SUCCESS_STATUSES, TERMINAL_STATUSES } from './OperationStatus';
+import type { IOperationGraphEventSink } from './OperationEventSink';
 import {
   type IOperationExecutionContext,
   type IOperationExecutionRecordContext,
@@ -171,6 +172,18 @@ export class OperationGraph implements IOperationGraph {
   private _scheduledIteration: IExecutionIterationContext | undefined = undefined;
 
   private _terminalSplitter: SplitterTransform;
+
+  /**
+   * Optional structured event sink enabling "dual-emit": every operation state
+   * transition and every colorized status line is also emitted as structured
+   * events. Terminal output is unchanged whether or not a sink is assigned.
+   * The sink is captured when an iteration is scheduled; assign it before
+   * calling {@link IOperationGraph.scheduleIterationAsync}.
+   *
+   * @internal
+   */
+  public eventSink: IOperationGraphEventSink | undefined = undefined;
+
   private _idleTimeout: NodeJS.Timeout | undefined = undefined;
   /** Tracks if a graph state change notification has been scheduled for next tick. */
   private _graphStateChangeScheduled: boolean = false;
@@ -625,10 +638,12 @@ export class OperationGraph implements IOperationGraph {
       records: new Map(),
       promise: undefined,
       completedOperations: 0,
-      totalOperations: 0
+      totalOperations: 0,
+      eventSink: this.eventSink
     };
 
     const executionRecords: Map<Operation, OperationExecutionRecord> = iterationContext.records;
+    const { eventSink } = this;
     for (const operation of sortedOperations) {
       const executionRecord: OperationExecutionRecord = new OperationExecutionRecord(
         operation,
@@ -636,6 +651,7 @@ export class OperationGraph implements IOperationGraph {
       );
 
       executionRecords.set(operation, executionRecord);
+      eventSink?.onOperationRegistered?.(executionRecord.name, executionRecord.silent);
     }
 
     for (const [operation, record] of executionRecords) {
@@ -680,9 +696,9 @@ export class OperationGraph implements IOperationGraph {
       this.hooks.onIterationScheduled.call(iterationContext.records);
     } catch (e) {
       // Surface configuration-time issues clearly
-      terminal.writeStderrLine(
-        Colorize.red(`An error occurred in onIterationScheduled hook: ${(e as Error).message}`)
-      );
+      const errorMessage: string = `An error occurred in onIterationScheduled hook: ${(e as Error).message}`;
+      eventSink?.onActivity?.(errorMessage, { stderr: true });
+      terminal.writeStderrLine(Colorize.red(errorMessage));
       throw e;
     }
     if (!this._currentIteration) {
@@ -695,6 +711,11 @@ export class OperationGraph implements IOperationGraph {
     function onWriterActive(writer: CollatedWriter | undefined): void {
       if (writer) {
         iterationContext.completedOperations++;
+        eventSink?.onOperationHeader?.(
+          writer.taskName,
+          iterationContext.completedOperations,
+          iterationContext.totalOperations
+        );
         // Format a header like this
         //
         // ==[ @rushstack/the-long-thing ]=================[ 1 of 1000 ]==
@@ -800,9 +821,12 @@ export class OperationGraph implements IOperationGraph {
       onResultAsync: onOperationCompleteAsync
     };
 
+    const { eventSink } = this;
     if (!this.quietMode) {
       const plural: string = totalOperations === 1 ? '' : 's';
-      terminal.writeStdoutLine(`Selected ${totalOperations} operation${plural}:`);
+      const selectedLine: string = `Selected ${totalOperations} operation${plural}:`;
+      terminal.writeStdoutLine(selectedLine);
+      eventSink?.onActivity?.(selectedLine);
       const nonSilentOperations: string[] = [];
       for (const record of executionRecords.values()) {
         if (!record.silent) {
@@ -812,13 +836,17 @@ export class OperationGraph implements IOperationGraph {
       nonSilentOperations.sort();
       for (const name of nonSilentOperations) {
         terminal.writeStdoutLine(`  ${name}`);
+        eventSink?.onActivity?.(`  ${name}`);
       }
       terminal.writeStdoutLine('');
+      eventSink?.onActivity?.('');
     }
 
     const maxSimultaneousProcesses: number = Math.min(totalOperations, this.parallelism);
     // For logging purposes, don't confuse the user by suggesting we might run more operations in parallel than are scheduled.
-    terminal.writeStdoutLine(`Executing a maximum of ${maxSimultaneousProcesses} simultaneous processes...`);
+    const parallelismLine: string = `Executing a maximum of ${maxSimultaneousProcesses} simultaneous processes...`;
+    terminal.writeStdoutLine(parallelismLine);
+    eventSink?.onActivity?.(parallelismLine);
 
     const bailStatus: OperationStatus | undefined | void = abortSignal.aborted
       ? OperationStatus.Aborted
@@ -1123,13 +1151,16 @@ function _handleOperationFailure(record: OperationExecutionRecord, context: ISta
 
   const { name } = record;
   const { terminal } = record.collatedWriter; // Creates the writer if needed
+  record.eventSink?.onActivity?.(`"${name}" failed to build.`, { operationId: name, stderr: true });
   terminal.writeStderrLine(Colorize.red(`"${name}" failed to build.`));
 
   const blockedQueue: Set<OperationExecutionRecord> = new Set(record.consumers);
   for (const blockedRecord of blockedQueue) {
     if (blockedRecord.status === OperationStatus.Waiting) {
       if (!blockedRecord.silent) {
-        terminal.writeStdoutLine(`"${blockedRecord.name}" is blocked by "${name}".`);
+        const blockedLine: string = `"${blockedRecord.name}" is blocked by "${name}".`;
+        record.eventSink?.onActivity?.(blockedLine, { operationId: blockedRecord.name });
+        terminal.writeStdoutLine(blockedLine);
       }
       blockedRecord.status = OperationStatus.Blocked;
       context.executionQueue.complete(blockedRecord);
@@ -1157,6 +1188,9 @@ function _handleOperationFromCache(
   context: IStatefulExecutionContext
 ): void {
   if (!record.silent) {
+    record.eventSink?.onActivity?.(`"${record.name}" was restored from the build cache.`, {
+      operationId: record.name
+    });
     record.collatedWriter.terminal.writeStdoutLine(
       Colorize.green(`"${record.name}" was restored from the build cache.`)
     );
@@ -1171,6 +1205,7 @@ function _handleOperationSkipped(record: OperationExecutionRecord, context: ISta
   // Do not set resultByOperation here. "Skipped" means the operation was not executed,
   // so it should not be considered the last *execution* result.
   if (!record.silent) {
+    record.eventSink?.onActivity?.(`"${record.name}" was skipped.`, { operationId: record.name });
     record.collatedWriter.terminal.writeStdoutLine(Colorize.green(`"${record.name}" was skipped.`));
   }
 }
@@ -1180,6 +1215,9 @@ function _handleOperationSkipped(record: OperationExecutionRecord, context: ISta
  */
 function _handleOperationNoOp(record: OperationExecutionRecord, context: IStatefulExecutionContext): void {
   if (!record.silent) {
+    record.eventSink?.onActivity?.(`"${record.name}" did not define any work.`, {
+      operationId: record.name
+    });
     record.collatedWriter.terminal.writeStdoutLine(
       Colorize.gray(`"${record.name}" did not define any work.`)
     );
@@ -1193,6 +1231,10 @@ function _handleOperationNoOp(record: OperationExecutionRecord, context: IStatef
 function _handleOperationSuccess(record: OperationExecutionRecord, context: IStatefulExecutionContext): void {
   const stopwatch: IStopwatchResult = _getOperationStopwatch(record);
   if (!record.silent) {
+    record.eventSink?.onActivity?.(
+      `"${record.name}" completed successfully in ${stopwatch.toString()}.`,
+      { operationId: record.name }
+    );
     record.collatedWriter.terminal.writeStdoutLine(
       Colorize.green(`"${record.name}" completed successfully in ${stopwatch.toString()}.`)
     );
@@ -1209,6 +1251,10 @@ function _handleOperationSuccessWithWarning(
 ): void {
   const stopwatch: IStopwatchResult = _getOperationStopwatch(record);
   if (!record.silent) {
+    record.eventSink?.onActivity?.(
+      `"${record.name}" completed with warnings in ${stopwatch.toString()}.`,
+      { operationId: record.name, stderr: true }
+    );
     record.collatedWriter.terminal.writeStderrLine(
       Colorize.yellow(`"${record.name}" completed with warnings in ${stopwatch.toString()}.`)
     );

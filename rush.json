@@ -1321,6 +1321,30 @@
       "shouldPublish": false
     },
     {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "projectFolder": "libraries/rush-daemon-protocol",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "rushd-wire-e2e-test",
+      "projectFolder": "build-tests/rushd-wire-e2e-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "projectFolder": "libraries/rush-daemon-transport",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/rush-terminal-renderer",
+      "projectFolder": "libraries/rush-terminal-renderer",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/stream-collator",
       "projectFolder": "libraries/stream-collator",
       "reviewCategory": "libraries",
