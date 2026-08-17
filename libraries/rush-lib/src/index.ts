@@ -182,6 +182,10 @@ export {
   PhasedCommandHooks
 } from './pluginFramework/PhasedCommandHooks';
 export type { IOperationGraph, IOperationGraphIterationOptions } from './logic/operations/IOperationGraph';
+export type {
+  IOperationGraphEventSink as _IOperationGraphEventSink,
+  IOperationActivityOptions as _IOperationActivityOptions
+} from './logic/operations/OperationEventSink';
 export { OperationGraphHooks } from './pluginFramework/OperationGraphHooks';
 
 export type { IRushPlugin } from './pluginFramework/IRushPlugin';
