@@ -23,6 +23,8 @@ export enum RequestSchedulerErrorCode {
   WaitTimeout = 'WAIT_TIMEOUT'
 }
 
+const MAX_TIMER_DELAY_MS: number = 0x7fffffff;
+
 /**
  * An error raised when a request cannot be admitted.
  *
@@ -65,7 +67,8 @@ export interface IRequestSchedulerAcquireOptions {
   abortSignal?: AbortSignal;
 
   /**
-   * Called with the request's one-based position whenever the queue changes.
+   * Called with the request's one-based position whenever the queue changes. If the callback throws,
+   * the scheduler reports the error as a process warning and continues processing the queue.
    */
   onQueuePositionChanged?: (position: number) => void;
 }
@@ -120,7 +123,11 @@ export class RequestScheduler {
    * Waits until the request is compatible with all active requests and earlier queued requests.
    */
   public acquireAsync(options: IRequestSchedulerAcquireOptions): Promise<IRequestLease> {
-    this._validateOptions(options);
+    try {
+      this._validateOptions(options);
+    } catch (error) {
+      return Promise.reject(error);
+    }
 
     if (options.abortSignal?.aborted) {
       return Promise.reject(
@@ -180,9 +187,11 @@ export class RequestScheduler {
   private _validateOptions(options: IRequestSchedulerAcquireOptions): void {
     if (
       options.waitTimeoutMs !== undefined &&
-      (!Number.isFinite(options.waitTimeoutMs) || options.waitTimeoutMs < 0)
+      (!Number.isFinite(options.waitTimeoutMs) ||
+        options.waitTimeoutMs < 0 ||
+        options.waitTimeoutMs > MAX_TIMER_DELAY_MS)
     ) {
-      throw new RangeError('waitTimeoutMs must be a nonnegative finite number.');
+      throw new RangeError(`waitTimeoutMs must be between 0 and ${MAX_TIMER_DELAY_MS}.`);
     }
   }
 
@@ -263,7 +272,13 @@ export class RequestScheduler {
 
   private _notifyQueuePositions(): void {
     for (let index: number = 0; index < this._queue.length; index++) {
-      this._queue[index].options.onQueuePositionChanged?.(index + 1);
+      try {
+        this._queue[index].options.onQueuePositionChanged?.(index + 1);
+      } catch (error) {
+        process.emitWarning(error instanceof Error ? error : String(error), {
+          code: 'RUSH_DAEMON_QUEUE_POSITION_CALLBACK_ERROR'
+        });
+      }
     }
   }
 }

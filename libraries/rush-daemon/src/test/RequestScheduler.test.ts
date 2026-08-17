@@ -164,4 +164,68 @@ describe(RequestScheduler.name, () => {
     first.release();
     second.release();
   });
+
+  it('continues scheduling when a queue position callback throws', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const active: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive
+    });
+    const callbackError: Error = new Error('position callback failed');
+    const emitWarningSpy: jest.SpiedFunction<typeof process.emitWarning> = jest
+      .spyOn(process, 'emitWarning')
+      .mockImplementation(() => undefined);
+    const waitingPromise: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedRead,
+      onQueuePositionChanged: () => {
+        throw callbackError;
+      }
+    });
+
+    expect(scheduler.queuedRequestCount).toBe(1);
+    expect(emitWarningSpy).toHaveBeenCalledWith(callbackError, {
+      code: 'RUSH_DAEMON_QUEUE_POSITION_CALLBACK_ERROR'
+    });
+
+    active.release();
+    const waiting: IRequestLease = await waitingPromise;
+    expect(scheduler.activeRequestCount).toBe(1);
+    waiting.release();
+    expect(scheduler.activeRequestCount).toBe(0);
+    emitWarningSpy.mockRestore();
+  });
+
+  it('rejects invalid timeout values asynchronously', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+
+    await expect(
+      scheduler.acquireAsync({
+        exclusivityClass: RequestExclusivityClass.SharedRead,
+        waitTimeoutMs: 0x80000000
+      })
+    ).rejects.toThrow(/between 0 and 2147483647/);
+  });
+
+  it('releases a lease only once', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const active: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive
+    });
+    let admissionCount: number = 0;
+    const waitingPromise: Promise<IRequestLease> = scheduler
+      .acquireAsync({ exclusivityClass: RequestExclusivityClass.SharedRead })
+      .then((lease) => {
+        admissionCount++;
+        return lease;
+      });
+
+    active.release();
+    active.release();
+    const waiting: IRequestLease = await waitingPromise;
+
+    expect(admissionCount).toBe(1);
+    expect(scheduler.activeRequestCount).toBe(1);
+    waiting.release();
+    waiting.release();
+    expect(scheduler.activeRequestCount).toBe(0);
+  });
 });
