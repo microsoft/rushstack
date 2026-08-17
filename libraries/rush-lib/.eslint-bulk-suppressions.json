@@ -5861,6 +5861,11 @@
       "rule": "complexity"
     },
     {
+      "file": "src/logic/operations/OperationChunkTap.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
       "file": "src/logic/operations/OperationExecutionRecord.ts",
       "scopeId": ".",
       "rule": "import/order"
@@ -5919,6 +5924,11 @@
       "file": "src/logic/operations/OperationExecutionRecord.ts",
       "scopeId": ".OperationExecutionRecord.runWithTerminalAsync",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/logic/operations/OperationExecutionRecord.ts",
+      "scopeId": ".OperationExecutionRecord.status",
+      "rule": "complexity"
     },
     {
       "file": "src/logic/operations/OperationGraph.ts",
@@ -5999,6 +6009,11 @@
       "file": "src/logic/operations/OperationGraph.ts",
       "scopeId": ".OperationGraph._scheduleIterationAsync.onWriterActive",
       "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/logic/operations/OperationGraph.ts",
+      "scopeId": ".OperationGraph._scheduleIterationAsync.onWriterActive",
+      "rule": "complexity"
     },
     {
       "file": "src/logic/operations/OperationGraph.ts",
@@ -6094,6 +6109,31 @@
       "file": "src/logic/operations/OperationGraph.ts",
       "scopeId": "._handleOperationFailure",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/logic/operations/OperationGraph.ts",
+      "scopeId": "._handleOperationFromCache",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/logic/operations/OperationGraph.ts",
+      "scopeId": "._handleOperationNoOp",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/logic/operations/OperationGraph.ts",
+      "scopeId": "._handleOperationSkipped",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/logic/operations/OperationGraph.ts",
+      "scopeId": "._handleOperationSuccess",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/logic/operations/OperationGraph.ts",
+      "scopeId": "._handleOperationSuccessWithWarning",
+      "rule": "complexity"
     },
     {
       "file": "src/logic/operations/OperationGraph.ts",
@@ -6644,6 +6684,26 @@
       "file": "src/logic/operations/test/OperationGraph.test.ts",
       "scopeId": ".trackingRun",
       "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/logic/operations/test/OperationGraphEventSink.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/logic/operations/test/OperationGraphEventSink.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/logic/operations/test/OperationGraphEventSink.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/logic/operations/test/OperationGraphEventSink.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
     },
     {
       "file": "src/logic/operations/test/OperationMetadataManager.test.ts",
