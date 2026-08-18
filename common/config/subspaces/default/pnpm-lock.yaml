@@ -4079,6 +4079,9 @@ importers:
 
   ../../../libraries/rush-daemon:
     dependencies:
+      '@microsoft/rush-lib':
+        specifier: workspace:*
+        version: link:../rush-lib
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../node-core-library
