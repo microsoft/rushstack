@@ -1,13 +1,13 @@
 {
-  "name": "@rushstack/rush-terminal-renderer",
+  "name": "@rushstack/rush-daemon",
   "version": "0.2.0",
-  "description": "Client-side renderer for the Rush daemon (rushd): hosts reporters and per-operation stream collation, applies per-client verbosity, and threads terminal capabilities to child processes. (public beta)",
+  "description": "The long-lived Rush workspace daemon host",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
-  "types": "./dist/rush-terminal-renderer.d.ts",
+  "types": "./dist/rush-daemon.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/rush-terminal-renderer.d.ts",
+      "types": "./dist/rush-daemon.d.ts",
       "node": "./lib-commonjs/index.js",
       "import": "./lib-esm/index.js",
       "require": "./lib-commonjs/index.js"
@@ -27,30 +27,16 @@
       ]
     }
   },
-  "keywords": [
-    "rush",
-    "rushd",
-    "daemon",
-    "renderer",
-    "terminal",
-    "reporter"
-  ],
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
     "type": "git",
-    "directory": "libraries/rush-terminal-renderer"
+    "directory": "libraries/rush-daemon"
   },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
     "_phase:test": "heft run --only test -- --clean"
-  },
-  "dependencies": {
-    "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/rush-daemon-protocol": "workspace:*",
-    "@rushstack/stream-collator": "workspace:*",
-    "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",

@@ -1,0 +1,94 @@
+{
+  "suppressions": [
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler._canAdmit",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler._cleanupQueuedRequest",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler._createLease.release",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler._drainQueue",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler._drainQueue",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler._notifyQueuePositions",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler._notifyQueuePositions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler._rejectQueuedRequest",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler._validateOptions",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler._validateOptions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler.acquireAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler.acquireAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler.acquireAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RequestScheduler.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RequestScheduler.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/RequestScheduler.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

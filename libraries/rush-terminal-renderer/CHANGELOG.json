@@ -1,0 +1,22 @@
+{
+  "name": "@rushstack/rush-terminal-renderer",
+  "entries": [
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/rush-terminal-renderer_v0.2.0",
+      "date": "Tue, 18 Aug 2026 00:18:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release: client-side renderer host for rushd (StreamCollator-backed per-operation collation, legacy-faithful output), per-client verbosity application, and FORCE_COLOR/COLUMNS child-environment threading."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-protocol\" to `0.2.0`"
+          }
+        ]
+      }
+    }
+  ]
+}
