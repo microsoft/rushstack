@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/lockfile-explorer",
-      "comment": "Use AbortSignal.timeout() for npm registry request timeouts.",
+      "comment": "Use `AbortSignal.timeout()` for npm registry request timeouts.",
       "type": "patch"
     }
   ],

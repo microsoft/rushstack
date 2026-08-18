@@ -570,8 +570,7 @@ function _formatJsonHeaderComment(headerComment: string): string {
   if (headerComment === '') {
     return '';
   }
-  const lines: string[] = headerComment.split('\n');
-  const result: string[] = [];
+  const lines: string[] = Text.convertToLf(headerComment).split('\n');
   for (const line of lines) {
     if (!/^\s*$/.test(line) && !/^\s*\/\//.test(line)) {
       throw new Error(
@@ -580,7 +579,6 @@ function _formatJsonHeaderComment(headerComment: string): string {
           JSON.stringify(line)
       );
     }
-    result.push(line.replaceAll('\r', ''));
   }
   return lines.join('\n') + '\n';
 }

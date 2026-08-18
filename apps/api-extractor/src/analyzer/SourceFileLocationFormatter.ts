@@ -47,7 +47,7 @@ export class SourceFileLocationFormatter {
     }
 
     // Convert it to a Unix-style path
-    scrubbedPath = scrubbedPath.replaceAll('\\', '/');
+    scrubbedPath = Path.convertToSlashes(scrubbedPath);
     result += scrubbedPath;
 
     if (options.sourceFileLine) {

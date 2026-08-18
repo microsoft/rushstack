@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Deprecate Text.replaceAll() in favor of the native String.prototype.replaceAll() method.",
-      "type": "patch"
+      "comment": "Deprecate `Text.replaceAll()` in favor of the native `String.prototype.replaceAll()` function.",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/node-core-library",

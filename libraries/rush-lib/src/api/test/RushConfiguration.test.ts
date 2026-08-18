@@ -11,7 +11,7 @@ import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
 import { DependencyType } from '../PackageJsonEditor';
 
 function normalizePathForComparison(pathToNormalize: string): string {
-  return pathToNormalize.replaceAll('\\', '/').toUpperCase();
+  return Path.convertToSlashes(pathToNormalize).toUpperCase();
 }
 
 function assertPathProperty(validatedPropertyName: string, absolutePath: string, relativePath: string): void {
