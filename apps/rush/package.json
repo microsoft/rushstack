@@ -32,7 +32,6 @@
   "bin": {
     "rush": "./bin/rush",
     "rush-pnpm": "./bin/rush-pnpm",
-    "rushd": "./bin/rushd",
     "rushx": "./bin/rushx"
   },
   "license": "MIT",

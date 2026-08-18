@@ -4079,6 +4079,9 @@ importers:
 
   ../../../libraries/rush-daemon:
     dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../node-core-library
       '@rushstack/rush-daemon-protocol':
         specifier: workspace:*
         version: link:../rush-daemon-protocol
@@ -4168,9 +4171,6 @@ importers:
       '@rushstack/rig-package':
         specifier: workspace:*
         version: link:../rig-package
-      '@rushstack/rush-daemon':
-        specifier: workspace:*
-        version: link:../rush-daemon
       '@rushstack/rush-pnpm-kit-v10':
         specifier: workspace:*
         version: link:../rush-pnpm-kit-v10

@@ -15,7 +15,6 @@ import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor'
 import { EnvironmentVariableNames } from './EnvironmentConfiguration';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { RushPnpmCommandLine } from '../cli/RushPnpmCommandLine';
-import { RushDaemonCommandLine } from '../cli/RushDaemonCommandLine';
 import { measureAsyncFn } from '../utilities/performance';
 
 /**
@@ -120,19 +119,6 @@ export class Rush {
   public static launchRushPnpm(launcherVersion: string, options: ILaunchOptions): void {
     _assignRushInvokedFolder();
     RushPnpmCommandLine.launch(launcherVersion, { ...options });
-  }
-
-  /**
-   * This API is used by the `@microsoft/rush` front end to launch the opt-in "rushd" command.
-   *
-   * @internal
-   */
-  public static launchRushDaemon(): void {
-    _assignRushInvokedFolder();
-    RushDaemonCommandLine.launchAsync().catch((error: Error) => {
-      process.stderr.write(`${error.stack ?? error.message}\n`);
-      process.exitCode = 1;
-    });
   }
 
   /**

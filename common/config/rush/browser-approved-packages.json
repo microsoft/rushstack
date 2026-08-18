@@ -47,10 +47,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@rushstack/rush-daemon",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@rushstack/rush-daemon-protocol",
       "allowedCategories": [ "libraries", "tests" ]
     },

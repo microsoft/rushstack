@@ -6,7 +6,7 @@ import * as path from 'node:path';
 import type { ILaunchOptions } from '@microsoft/rush-lib/lib/index';
 import { Colorize } from '@rushstack/terminal';
 
-type CommandName = 'rush' | 'rush-pnpm' | 'rushd' | 'rushx' | undefined;
+type CommandName = 'rush' | 'rush-pnpm' | 'rushx' | undefined;
 
 /**
  * Both "rush" and "rushx" share the same src/start.ts entry point.  This makes it
@@ -39,15 +39,7 @@ export class RushCommandSelector {
 
     const commandName: CommandName = _getCommandName();
 
-    if (commandName === 'rushd') {
-      if (!Rush.launchRushDaemon) {
-        _failWithError(
-          `This repository is using Rush version ${Rush.version}` +
-            ` which does not support the "rushd" command`
-        );
-      }
-      Rush.launchRushDaemon();
-    } else if (commandName === 'rush-pnpm') {
+    if (commandName === 'rush-pnpm') {
       if (!Rush.launchRushPnpm) {
         _failWithError(
           `This repository is using Rush version ${Rush.version}` +
@@ -88,9 +80,6 @@ function _getCommandName(): CommandName {
     }
     if (basename === 'RUSH-PNPM') {
       return 'rush-pnpm';
-    }
-    if (basename === 'RUSHD') {
-      return 'rushd';
     }
     if (basename === 'RUSHX') {
       return 'rushx';

@@ -5,6 +5,9 @@
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
   "types": "./dist/rush-daemon.d.ts",
+  "bin": {
+    "rushd": "./lib-commonjs/start.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/rush-daemon.d.ts",
@@ -42,6 +45,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-daemon-protocol": "workspace:*",
     "@rushstack/rush-daemon-transport": "workspace:*"
   },

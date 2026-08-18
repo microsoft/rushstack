@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/rush-daemon",
-      "comment": "Add workspace-keyed daemon host bootstrap with handshake, liveness, readiness, and clean shutdown lifecycle.",
+      "comment": "Add the rushd executable and workspace-keyed daemon host bootstrap with handshake, liveness, readiness, and clean shutdown lifecycle.",
       "type": "minor"
     }
   ],
