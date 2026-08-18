@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "comment": "Fix `PlaywrightTunnel.stopAsync()` hanging when the tunnel is stopped in poll-connection mode before any client has connected.",
+      "type": "patch",
+      "packageName": "@rushstack/playwright-browser-tunnel"
+    }
+  ],
+  "packageName": "@rushstack/playwright-browser-tunnel"
+}

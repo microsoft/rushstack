@@ -87,6 +87,15 @@ interface IBrowserServerProxy {
  * Hosts a Playwright browser server and forwards traffic over a WebSocket tunnel.
  * @beta
  */
+/**
+ * Thrown internally to settle a connection wait that was still pending when the tunnel was stopped.
+ */
+class TunnelStoppedError extends Error {
+  public constructor() {
+    super('The tunnel was stopped while waiting for a connection');
+  }
+}
+
 export class PlaywrightTunnel {
   private readonly _terminal: ITerminal;
   private readonly _onStatusChange: (status: TunnelStatus) => void;
@@ -97,6 +106,7 @@ export class PlaywrightTunnel {
   private readonly _playwrightInstallPath: string;
   private _status: TunnelStatus = 'stopped';
   private _initWsPromise?: Promise<WebSocket>;
+  private _cancelPollConnection?: (error: Error) => void;
   private _keepRunning: boolean = false;
   private _ws?: WebSocket;
   private _mode: TunnelMode;
@@ -163,7 +173,14 @@ export class PlaywrightTunnel {
       } else {
         terminal.writeLine(`Tunnel is already running with status: ${this.status}`);
       }
-      await this.waitForCloseAsync();
+      try {
+        await this.waitForCloseAsync();
+      } catch (error) {
+        // stopAsync() settles a pending connection wait; that is an ordinary shutdown, not a failure
+        if (this._keepRunning || !(error instanceof TunnelStoppedError)) {
+          throw error;
+        }
+      }
     }
   }
 
@@ -173,9 +190,28 @@ export class PlaywrightTunnel {
       clearInterval(this._pollInterval);
       this._pollInterval = undefined;
     }
-    await this._initWsPromise?.finally(() => {
-      this._ws?.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Tunnel stopped');
-    });
+    this._pendingConnectionAttempt = undefined;
+
+    // In poll-connection mode the init promise only settles once a client connects. Clearing the
+    // interval stops the polling but leaves that promise pending forever, so stopping before any
+    // client arrived would never complete. Settle it explicitly as part of the teardown.
+    const cancelPollConnection: ((error: Error) => void) | undefined = this._cancelPollConnection;
+    this._cancelPollConnection = undefined;
+    cancelPollConnection?.(new TunnelStoppedError());
+
+    const initWsPromise: Promise<WebSocket> | undefined = this._initWsPromise;
+    this._initWsPromise = undefined;
+    try {
+      await initWsPromise?.finally(() => {
+        this._ws?.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Tunnel stopped');
+      });
+    } catch (error) {
+      if (!(error instanceof TunnelStoppedError)) {
+        throw error;
+      }
+    }
+
+    this.status = 'stopped';
   }
 
   public async [Symbol.asyncDispose](): Promise<void> {
@@ -272,6 +308,14 @@ export class PlaywrightTunnel {
   private async _pollConnectionAsync(): Promise<WebSocket> {
     this._terminal.writeLine(`Waiting for WebSocket connection`);
     return await new Promise((resolve, reject) => {
+      this._cancelPollConnection = (error: Error): void => {
+        if (this._pollInterval) {
+          clearInterval(this._pollInterval);
+          this._pollInterval = undefined;
+        }
+        this._pendingConnectionAttempt = undefined;
+        reject(error);
+      };
       this._pollInterval = setInterval(() => {
         if (this._pendingConnectionAttempt) {
           return; // Skip if a connection attempt is already in progress
@@ -284,6 +328,7 @@ export class PlaywrightTunnel {
             this._pollInterval = undefined;
             ws.removeAllListeners();
             this._pendingConnectionAttempt = undefined;
+            this._cancelPollConnection = undefined;
             resolve(ws);
           })
           .catch(() => {
