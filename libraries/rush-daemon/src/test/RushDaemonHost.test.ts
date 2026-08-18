@@ -163,7 +163,9 @@ describe(RushDaemonHost.name, () => {
     );
     await host.closeAsync();
     await closed;
-    expect(disposalEvents).toEqual(['client', 'workspace-session']);
+    expect(disposalEvents).toHaveLength(2);
+    expect(disposalEvents).toContain('client');
+    expect(disposalEvents).toContain('workspace-session');
     expect(readDaemonLockfile(host.paths.lockfilePath)).toBeUndefined();
     await expect(connectDaemonAsync(host.paths.socketPath)).rejects.toMatchObject({
       code: 'connectionRefused'

@@ -25,6 +25,7 @@ describe(WorkspaceSessionProvider.name, () => {
     const first: Promise<IWorkspaceSession> = provider.getSessionAsync();
     const second: Promise<IWorkspaceSession> = provider.getSessionAsync();
     expect(first).toBe(second);
+    await Promise.resolve();
     expect(factoryCalls).toBe(1);
 
     resolveFactory?.(session);
@@ -83,6 +84,7 @@ describe(WorkspaceSessionProvider.name, () => {
 
     const initialization: Promise<IWorkspaceSession> = provider.getSessionAsync();
     const disposal: Promise<void> = provider.disposeAsync();
+    await Promise.resolve();
     resolveFactory?.(session);
 
     await expect(initialization).rejects.toThrow('disposed during initialization');
