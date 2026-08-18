@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for Node 26.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
