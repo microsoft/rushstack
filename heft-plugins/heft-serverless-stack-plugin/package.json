@@ -7,6 +7,9 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "heft-plugins/heft-serverless-stack-plugin"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",

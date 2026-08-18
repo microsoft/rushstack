@@ -34,7 +34,7 @@
     "directory": "webpack/webpack4-module-minifier-plugin"
   },
   "engines": {
-    "node": ">=10.17.1"
+    "node": ">=20.9.0"
   },
   "scripts": {
     "build": "heft build --clean",

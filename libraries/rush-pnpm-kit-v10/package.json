@@ -2,6 +2,9 @@
   "name": "@rushstack/rush-pnpm-kit-v10",
   "version": "0.2.24",
   "description": "rush pnpm kit v10",
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "license": "MIT",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",

@@ -32,6 +32,9 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/package-extractor"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "build": "heft build --clean",
     "test": "heft test --clean",
