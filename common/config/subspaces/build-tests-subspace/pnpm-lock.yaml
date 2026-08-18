@@ -995,6 +995,25 @@ packages:
   '@rushstack/rig-package@file:../../../libraries/rig-package':
     resolution: {directory: ../../../libraries/rig-package, type: directory}
 
+  '@rushstack/rush-daemon-protocol@file:../../../libraries/rush-daemon-protocol':
+    resolution: {directory: ../../../libraries/rush-daemon-protocol, type: directory}
+
+  '@rushstack/rush-daemon-transport@file:../../../libraries/rush-daemon-transport':
+    resolution: {directory: ../../../libraries/rush-daemon-transport, type: directory}
+    peerDependencies:
+      '@types/node': '*'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@rushstack/rush-daemon@file:../../../libraries/rush-daemon':
+    resolution: {directory: ../../../libraries/rush-daemon, type: directory}
+    peerDependencies:
+      '@types/node': '*'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
   '@rushstack/rush-pnpm-kit-v10@file:../../../libraries/rush-pnpm-kit-v10':
     resolution: {directory: ../../../libraries/rush-pnpm-kit-v10, type: directory}
 
@@ -4326,6 +4345,7 @@ snapshots:
       '@rushstack/package-deps-hash': file:../../../libraries/package-deps-hash(@types/node@20.17.19)
       '@rushstack/package-extractor': file:../../../libraries/package-extractor(@types/node@20.17.19)
       '@rushstack/rig-package': file:../../../libraries/rig-package
+      '@rushstack/rush-daemon': file:../../../libraries/rush-daemon(@types/node@20.17.19)
       '@rushstack/rush-pnpm-kit-v10': file:../../../libraries/rush-pnpm-kit-v10
       '@rushstack/rush-pnpm-kit-v8': file:../../../libraries/rush-pnpm-kit-v8
       '@rushstack/rush-pnpm-kit-v9': file:../../../libraries/rush-pnpm-kit-v9
@@ -4921,6 +4941,21 @@ snapshots:
     dependencies:
       jju: 1.4.0
       resolve: 1.22.11
+
+  '@rushstack/rush-daemon-protocol@file:../../../libraries/rush-daemon-protocol': {}
+
+  '@rushstack/rush-daemon-transport@file:../../../libraries/rush-daemon-transport(@types/node@20.17.19)':
+    dependencies:
+      '@rushstack/rush-daemon-protocol': file:../../../libraries/rush-daemon-protocol
+    optionalDependencies:
+      '@types/node': 20.17.19
+
+  '@rushstack/rush-daemon@file:../../../libraries/rush-daemon(@types/node@20.17.19)':
+    dependencies:
+      '@rushstack/rush-daemon-protocol': file:../../../libraries/rush-daemon-protocol
+      '@rushstack/rush-daemon-transport': file:../../../libraries/rush-daemon-transport(@types/node@20.17.19)
+    optionalDependencies:
+      '@types/node': 20.17.19
 
   '@rushstack/rush-pnpm-kit-v10@file:../../../libraries/rush-pnpm-kit-v10':
     dependencies:
