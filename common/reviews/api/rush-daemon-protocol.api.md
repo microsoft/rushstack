@@ -49,13 +49,13 @@ export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion;
 // @beta
 export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonErrorMessage;
 
-// @beta
+// @beta (undocumented)
 export type DaemonControlMessageKind = (typeof DAEMON_CONTROL_MESSAGE_KINDS)[number];
 
 // @beta
 export type DaemonDiagnosticSeverity = 'debug' | 'info' | 'warning' | 'error';
 
-// @beta
+// @beta (undocumented)
 export type DaemonEmptyPayload = Record<string, never>;
 
 // @beta
@@ -292,6 +292,8 @@ export interface IDaemonPongMessage {
     readonly kind: 'pong';
     // (undocumented)
     readonly payload: {
+        readonly daemonVersion: string;
+        readonly protocolVersion: IDaemonProtocolVersion;
         readonly uptimeMs: number;
     };
 }
@@ -326,7 +328,7 @@ export interface IDaemonUnsubscribeMessage {
 // @beta
 export function isDaemonControlMessageKind(value: unknown): value is DaemonControlMessageKind;
 
-// @beta
+// @beta (undocumented)
 export function isDaemonControlRecord(value: unknown): value is Record<string, unknown>;
 
 // @beta

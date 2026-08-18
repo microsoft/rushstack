@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add an opt-in rushd launcher through the version-selected rush-lib entry point.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "mojazayeri@users.noreply.github.com"
+}

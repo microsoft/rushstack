@@ -11,3 +11,5 @@ export {
   RequestSchedulerError,
   RequestSchedulerErrorCode
 } from './RequestScheduler';
+export { RushDaemonHost, type IRushDaemonHostOptions } from './RushDaemonHost';
+export { serveRushDaemonAsync, type IRushDaemonServeOptions } from './serveRushDaemon';

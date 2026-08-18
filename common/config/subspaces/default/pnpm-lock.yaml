@@ -4078,6 +4078,13 @@ importers:
         version: 9.37.0
 
   ../../../libraries/rush-daemon:
+    dependencies:
+      '@rushstack/rush-daemon-protocol':
+        specifier: workspace:*
+        version: link:../rush-daemon-protocol
+      '@rushstack/rush-daemon-transport':
+        specifier: workspace:*
+        version: link:../rush-daemon-transport
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -4161,6 +4168,9 @@ importers:
       '@rushstack/rig-package':
         specifier: workspace:*
         version: link:../rig-package
+      '@rushstack/rush-daemon':
+        specifier: workspace:*
+        version: link:../rush-daemon
       '@rushstack/rush-pnpm-kit-v10':
         specifier: workspace:*
         version: link:../rush-pnpm-kit-v10

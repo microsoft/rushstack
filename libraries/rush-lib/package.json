@@ -50,6 +50,7 @@
     "@rushstack/package-deps-hash": "workspace:*",
     "@rushstack/package-extractor": "workspace:*",
     "@rushstack/rig-package": "workspace:*",
+    "@rushstack/rush-daemon": "workspace:*",
     "@rushstack/rush-pnpm-kit-v10": "workspace:*",
     "@rushstack/rush-pnpm-kit-v8": "workspace:*",
     "@rushstack/rush-pnpm-kit-v9": "workspace:*",

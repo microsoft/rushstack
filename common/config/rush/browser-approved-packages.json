@@ -47,12 +47,16 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/rush-daemon",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rush-daemon-protocol",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/rush-daemon-transport",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/rush-serve-dashboard",

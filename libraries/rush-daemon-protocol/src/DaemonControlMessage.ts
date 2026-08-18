@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import type { IDaemonClientCaps } from './DaemonClientCaps';
+import type { IDaemonPongMessage } from './DaemonPongMessage';
 import type { DaemonProtocolErrorCode } from './DaemonProtocolError';
 import type { IDaemonProtocolVersion } from './DaemonProtocolVersion';
 
-/** The empty payload of control messages that carry no data. @beta */
+/** @beta */
 export type DaemonEmptyPayload = Record<string, never>;
 
 /** The first frame a client sends on a new connection. @beta */
@@ -39,12 +40,6 @@ export interface IDaemonUnsubscribeMessage {
 export interface IDaemonPingMessage {
   readonly kind: 'ping';
   readonly payload: DaemonEmptyPayload;
-}
-
-/** The liveness reply. @beta */
-export interface IDaemonPongMessage {
-  readonly kind: 'pong';
-  readonly payload: { readonly uptimeMs: number };
 }
 
 /** A protocol error sent on the wire. @beta */
@@ -89,7 +84,7 @@ export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
   'error'
 ] = ['hello', 'helloAck', 'subscribe', 'unsubscribe', 'ping', 'pong', 'error'];
 
-/** The union of control message `kind` discriminants, derived from the list. @beta */
+/** @beta */
 export type DaemonControlMessageKind = (typeof DAEMON_CONTROL_MESSAGE_KINDS)[number];
 
 const CONTROL_KIND_SET: ReadonlySet<string> = new Set<string>(DAEMON_CONTROL_MESSAGE_KINDS);

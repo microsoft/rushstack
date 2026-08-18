@@ -1372,6 +1372,8 @@ export class RepoStateFile {
 // @public
 export class Rush {
     static launch(launcherVersion: string, options: ILaunchOptions): void;
+    // @internal
+    static launchRushDaemon(): void;
     static launchRushPnpm(launcherVersion: string, options: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
     // (undocumented)
