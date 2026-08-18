@@ -7,6 +7,9 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "heft-plugins/heft-lint-plugin"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "homepage": "https://rushstack.io/pages/heft/overview/",
   "license": "MIT",
   "scripts": {

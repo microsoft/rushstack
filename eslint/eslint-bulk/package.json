@@ -24,6 +24,9 @@
     "type": "git",
     "directory": "eslint/eslint-bulk"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "homepage": "https://rushstack.io",
   "bin": {
     "eslint-bulk": "./bin/eslint-bulk"
