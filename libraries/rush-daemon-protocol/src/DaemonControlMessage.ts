@@ -6,7 +6,7 @@ import type { IDaemonPongMessage } from './DaemonPongMessage';
 import type { DaemonProtocolErrorCode } from './DaemonProtocolError';
 import type { IDaemonProtocolVersion } from './DaemonProtocolVersion';
 
-/** @beta */
+/** The empty payload of control messages that carry no data. @beta */
 export type DaemonEmptyPayload = Record<string, never>;
 
 /** The first frame a client sends on a new connection. @beta */
@@ -84,7 +84,7 @@ export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
   'error'
 ] = ['hello', 'helloAck', 'subscribe', 'unsubscribe', 'ping', 'pong', 'error'];
 
-/** @beta */
+/** The union of control message `kind` discriminants, derived from the runtime list. @beta */
 export type DaemonControlMessageKind = (typeof DAEMON_CONTROL_MESSAGE_KINDS)[number];
 
 const CONTROL_KIND_SET: ReadonlySet<string> = new Set<string>(DAEMON_CONTROL_MESSAGE_KINDS);

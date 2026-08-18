@@ -7,8 +7,10 @@ import type { IDaemonProtocolVersion } from './DaemonProtocolVersion';
 export interface IDaemonPongMessage {
   readonly kind: 'pong';
   readonly payload: {
-    readonly daemonVersion: string;
-    readonly protocolVersion: IDaemonProtocolVersion;
+    /** The daemon implementation version, when reported by protocol 0.2 or newer. */
+    readonly daemonVersion?: string;
+    /** The daemon wire protocol version, when reported by protocol 0.2 or newer. */
+    readonly protocolVersion?: IDaemonProtocolVersion;
     readonly uptimeMs: number;
   };
 }

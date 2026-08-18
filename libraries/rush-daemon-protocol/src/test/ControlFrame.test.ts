@@ -17,6 +17,7 @@ const MESSAGES: readonly DaemonControlMessage[] = [
   { kind: 'subscribe', payload: { isTTY: true, verbosity: 'verbose', columns: COLUMNS } },
   { kind: 'unsubscribe', payload: {} },
   { kind: 'ping', payload: {} },
+  { kind: 'pong', payload: { uptimeMs: UPTIME_MS } },
   {
     kind: 'pong',
     payload: {

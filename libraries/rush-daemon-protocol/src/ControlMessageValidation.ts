@@ -5,7 +5,7 @@ import { isDaemonControlMessageKind } from './DaemonControlMessage';
 import { DaemonProtocolError } from './DaemonProtocolError';
 import { isDaemonVerbosity } from './DaemonVerbosity';
 
-/** @beta */
+/** Returns `true` when `value` is a non-null object usable as a control record. @beta */
 export function isDaemonControlRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
@@ -46,8 +46,8 @@ function validateHelloAck(payload: Record<string, unknown>): void {
 }
 
 function validatePong(payload: Record<string, unknown>): void {
-  requireStringField(payload, 'daemonVersion');
-  requireVersion(payload);
+  if (payload.daemonVersion !== undefined) requireStringField(payload, 'daemonVersion');
+  if (payload.protocolVersion !== undefined) requireVersion(payload);
   requireNumberField(payload, 'uptimeMs');
 }
 
