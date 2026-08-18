@@ -22,6 +22,7 @@ import { IPackageJson } from '@rushstack/node-core-library';
 import { IPrefixMatch } from '@rushstack/lookup-by-path';
 import type { IProblemCollector } from '@rushstack/terminal';
 import { ITerminal } from '@rushstack/terminal';
+import type { ITerminalChunk } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
 import { JsonNull } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
@@ -407,6 +408,7 @@ export interface ICobuildLockProvider {
 // @alpha
 export interface IConfigurableOperation extends IBaseOperationExecutionResult {
     enabled: boolean;
+    shouldRunnerPersist: boolean;
 }
 
 // @public
@@ -598,6 +600,12 @@ export class IndividualVersionPolicy extends VersionPolicy {
 export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
+// @internal
+export interface _IOperationActivityOptions {
+    readonly operationId?: string;
+    readonly stderr?: boolean;
+}
+
 // @internal (undocumented)
 export interface _IOperationBuildCacheOptions {
     buildCacheConfiguration: BuildCacheConfiguration;
@@ -613,6 +621,7 @@ export interface IOperationExecutionResult extends IBaseOperationExecutionResult
     readonly logFilePaths: ILogFilePaths | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly problemCollector: IProblemCollector;
+    readonly shouldRunnerPersist: boolean;
     readonly silent: boolean;
     readonly status: OperationStatus;
     readonly stdioSummarizer: StdioSummarizer;
@@ -647,6 +656,16 @@ export interface IOperationGraph {
 // @alpha
 export interface IOperationGraphContext extends ICreateOperationsContext {
     readonly initialSnapshot?: IInputsSnapshot;
+}
+
+// @internal
+export interface _IOperationGraphEventSink {
+    onActivity?(text: string, options?: _IOperationActivityOptions): void;
+    onOperationChunk?(operationId: string, chunk: ITerminalChunk): void;
+    onOperationHeader?(operationId: string, completedOperations: number, totalOperations: number): void;
+    onOperationRegistered?(operationId: string, silent: boolean): void;
+    onOperationStatusChanged?(result: IOperationExecutionResult, previousStatus: OperationStatus): void;
+    onOperationStreamClosed?(operationId: string): void;
 }
 
 // @alpha
@@ -721,6 +740,7 @@ export interface IOperationRunnerContext {
         createLogFile: boolean;
         logFileSuffix?: string;
     }): Promise<T>;
+    readonly shouldRunnerPersist: boolean;
     status: OperationStatus;
     stopwatch: IStopwatchResult;
 }

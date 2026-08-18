@@ -15,6 +15,7 @@ import { NewlineKind, Async, InternalError, AlreadyReportedError } from '@rushst
 import { AsyncOperationQueue, type IOperationSortFunction } from './AsyncOperationQueue';
 import type { Operation } from './Operation';
 import { OperationStatus, SUCCESS_STATUSES, TERMINAL_STATUSES } from './OperationStatus';
+import type { IOperationGraphEventSink } from './OperationEventSink';
 import {
   type IOperationExecutionContext,
   type IOperationExecutionRecordContext,
@@ -88,6 +89,23 @@ interface IExecutionIterationContext extends IOperationExecutionRecordContext {
 
   completedOperations: number;
   totalOperations: number;
+}
+
+interface IOperationRunnerCloseEntry {
+  operation: Operation;
+  closeAsync: () => Promise<void>;
+}
+
+class OperationRunnerCloseError extends Error {
+  public readonly operation: Operation;
+  public override readonly cause: Error;
+
+  public constructor(operation: Operation, cause: Error) {
+    super(cause.message, { cause });
+    this.name = OperationRunnerCloseError.name;
+    this.operation = operation;
+    this.cause = cause;
+  }
 }
 
 /**
@@ -171,6 +189,18 @@ export class OperationGraph implements IOperationGraph {
   private _scheduledIteration: IExecutionIterationContext | undefined = undefined;
 
   private _terminalSplitter: SplitterTransform;
+
+  /**
+   * Optional structured event sink enabling "dual-emit": every operation state
+   * transition and every colorized status line is also emitted as structured
+   * events. Terminal output is unchanged whether or not a sink is assigned.
+   * The sink is captured when an iteration is scheduled; assign it before
+   * calling {@link IOperationGraph.scheduleIterationAsync}.
+   *
+   * @internal
+   */
+  public eventSink: IOperationGraphEventSink | undefined = undefined;
+
   private _idleTimeout: NodeJS.Timeout | undefined = undefined;
   /** Tracks if a graph state change notification has been scheduled for next tick. */
   private _graphStateChangeScheduled: boolean = false;
@@ -390,30 +420,40 @@ export class OperationGraph implements IOperationGraph {
     }
   }
 
-  public async closeRunnersAsync(operations?: Operation[]): Promise<void> {
-    const promises: Promise<void>[] = [];
+  public async closeRunnersAsync(operations?: Iterable<Operation>): Promise<void> {
+    const runnersToClose: IOperationRunnerCloseEntry[] = [];
     const recordMap: ReadonlyMap<Operation, OperationExecutionRecord> =
       this._currentIteration?.records ?? this.resultByOperation;
     const closedRecords: Set<OperationExecutionRecord> = new Set();
     for (const operation of operations ?? this.operations) {
-      if (operation.runner?.closeAsync) {
-        const record: OperationExecutionRecord | undefined = recordMap.get(operation);
-        promises.push(
-          operation.runner.closeAsync().then(() => {
-            if (record) {
-              // Collect for batched notification
-              closedRecords.add(record);
-            }
-          })
-        );
+      const closeAsync: (() => Promise<void>) | undefined = operation.runner?.closeAsync;
+      if (closeAsync) {
+        runnersToClose.push({ operation, closeAsync: closeAsync.bind(operation.runner) });
       }
     }
-    await Promise.all(promises);
-    if (this.abortController.signal.aborted) {
-      return;
+    const results: PromiseSettledResult<void>[] = await Promise.allSettled(
+      runnersToClose.map((entry) => entry.closeAsync())
+    );
+    const errors: OperationRunnerCloseError[] = [];
+    for (let index: number = 0; index < results.length; index++) {
+      const operation: Operation = runnersToClose[index].operation;
+      const result: PromiseSettledResult<void> = results[index];
+      if (result.status === 'fulfilled') {
+        const record: OperationExecutionRecord | undefined = recordMap.get(operation);
+        if (record) {
+          closedRecords.add(record);
+        }
+      } else {
+        const innerError: Error =
+          result.reason instanceof Error ? result.reason : new Error(String(result.reason));
+        errors.push(new OperationRunnerCloseError(operation, innerError));
+      }
     }
-    if (closedRecords.size) {
+    if (!this.abortController.signal.aborted && closedRecords.size) {
       this.hooks.onExecutionStatesUpdated.call(closedRecords);
+    }
+    if (errors.length > 0) {
+      throw new AggregateError(errors, `Failed to close ${errors.length} operation runner(s).`);
     }
   }
 
@@ -625,10 +665,12 @@ export class OperationGraph implements IOperationGraph {
       records: new Map(),
       promise: undefined,
       completedOperations: 0,
-      totalOperations: 0
+      totalOperations: 0,
+      eventSink: this.eventSink
     };
 
     const executionRecords: Map<Operation, OperationExecutionRecord> = iterationContext.records;
+    const { eventSink } = this;
     for (const operation of sortedOperations) {
       const executionRecord: OperationExecutionRecord = new OperationExecutionRecord(
         operation,
@@ -636,6 +678,7 @@ export class OperationGraph implements IOperationGraph {
       );
 
       executionRecords.set(operation, executionRecord);
+      eventSink?.onOperationRegistered?.(executionRecord.name, executionRecord.silent);
     }
 
     for (const [operation, record] of executionRecords) {
@@ -680,9 +723,9 @@ export class OperationGraph implements IOperationGraph {
       this.hooks.onIterationScheduled.call(iterationContext.records);
     } catch (e) {
       // Surface configuration-time issues clearly
-      terminal.writeStderrLine(
-        Colorize.red(`An error occurred in onIterationScheduled hook: ${(e as Error).message}`)
-      );
+      const errorMessage: string = `An error occurred in onIterationScheduled hook: ${(e as Error).message}`;
+      eventSink?.onActivity?.(errorMessage, { stderr: true });
+      terminal.writeStderrLine(Colorize.red(errorMessage));
       throw e;
     }
     if (!this._currentIteration) {
@@ -695,6 +738,11 @@ export class OperationGraph implements IOperationGraph {
     function onWriterActive(writer: CollatedWriter | undefined): void {
       if (writer) {
         iterationContext.completedOperations++;
+        eventSink?.onOperationHeader?.(
+          writer.taskName,
+          iterationContext.completedOperations,
+          iterationContext.totalOperations
+        );
         // Format a header like this
         //
         // ==[ @rushstack/the-long-thing ]=================[ 1 of 1000 ]==
@@ -800,9 +848,12 @@ export class OperationGraph implements IOperationGraph {
       onResultAsync: onOperationCompleteAsync
     };
 
+    const { eventSink } = this;
     if (!this.quietMode) {
       const plural: string = totalOperations === 1 ? '' : 's';
-      terminal.writeStdoutLine(`Selected ${totalOperations} operation${plural}:`);
+      const selectedLine: string = `Selected ${totalOperations} operation${plural}:`;
+      terminal.writeStdoutLine(selectedLine);
+      eventSink?.onActivity?.(selectedLine);
       const nonSilentOperations: string[] = [];
       for (const record of executionRecords.values()) {
         if (!record.silent) {
@@ -812,13 +863,17 @@ export class OperationGraph implements IOperationGraph {
       nonSilentOperations.sort();
       for (const name of nonSilentOperations) {
         terminal.writeStdoutLine(`  ${name}`);
+        eventSink?.onActivity?.(`  ${name}`);
       }
       terminal.writeStdoutLine('');
+      eventSink?.onActivity?.('');
     }
 
     const maxSimultaneousProcesses: number = Math.min(totalOperations, this.parallelism);
     // For logging purposes, don't confuse the user by suggesting we might run more operations in parallel than are scheduled.
-    terminal.writeStdoutLine(`Executing a maximum of ${maxSimultaneousProcesses} simultaneous processes...`);
+    const parallelismLine: string = `Executing a maximum of ${maxSimultaneousProcesses} simultaneous processes...`;
+    terminal.writeStdoutLine(parallelismLine);
+    eventSink?.onActivity?.(parallelismLine);
 
     const bailStatus: OperationStatus | undefined | void = abortSignal.aborted
       ? OperationStatus.Aborted
@@ -873,9 +928,46 @@ export class OperationGraph implements IOperationGraph {
       });
     }
 
+    const recordsToClose: OperationExecutionRecord[] = [];
+    for (const record of executionRecords.values()) {
+      if (!record.shouldRunnerPersist) {
+        recordsToClose.push(record);
+      }
+    }
+    function reportRunnerCleanupFailure(record: OperationExecutionRecord, error: Error): void {
+      record.error = error;
+      record.status = OperationStatus.Failure;
+      _reportOperationErrorIfAny(record);
+      state.hasAnyFailures = true;
+    }
+    if (recordsToClose.length > 0) {
+      try {
+        await this.closeRunnersAsync(recordsToClose.map((record) => record.operation));
+      } catch (e) {
+        if (e instanceof AggregateError) {
+          for (const error of e.errors) {
+            if (error instanceof OperationRunnerCloseError) {
+              const record: OperationExecutionRecord | undefined = executionRecords.get(error.operation);
+              if (record) {
+                reportRunnerCleanupFailure(record, error.cause);
+              }
+            }
+          }
+        } else {
+          for (const record of recordsToClose) {
+            reportRunnerCleanupFailure(record, e);
+          }
+        }
+      }
+    }
+    for (const record of executionRecords.values()) {
+      record.stdioSummarizer.close();
+      record.problemCollector.close();
+    }
+
     const status: OperationStatus = (() => {
-      if (bailStatus) return bailStatus;
       if (state.hasAnyFailures) return OperationStatus.Failure;
+      if (bailStatus) return bailStatus;
       if (state.hasAnyAborted) return OperationStatus.Aborted;
       if (state.hasAnyNonAllowedWarnings) return OperationStatus.SuccessWithWarning;
       if (iterationContext.totalOperations === 0) return OperationStatus.NoOp;
@@ -1123,13 +1215,16 @@ function _handleOperationFailure(record: OperationExecutionRecord, context: ISta
 
   const { name } = record;
   const { terminal } = record.collatedWriter; // Creates the writer if needed
+  record.eventSink?.onActivity?.(`"${name}" failed to build.`, { operationId: name, stderr: true });
   terminal.writeStderrLine(Colorize.red(`"${name}" failed to build.`));
 
   const blockedQueue: Set<OperationExecutionRecord> = new Set(record.consumers);
   for (const blockedRecord of blockedQueue) {
     if (blockedRecord.status === OperationStatus.Waiting) {
       if (!blockedRecord.silent) {
-        terminal.writeStdoutLine(`"${blockedRecord.name}" is blocked by "${name}".`);
+        const blockedLine: string = `"${blockedRecord.name}" is blocked by "${name}".`;
+        record.eventSink?.onActivity?.(blockedLine, { operationId: blockedRecord.name });
+        terminal.writeStdoutLine(blockedLine);
       }
       blockedRecord.status = OperationStatus.Blocked;
       context.executionQueue.complete(blockedRecord);
@@ -1157,6 +1252,9 @@ function _handleOperationFromCache(
   context: IStatefulExecutionContext
 ): void {
   if (!record.silent) {
+    record.eventSink?.onActivity?.(`"${record.name}" was restored from the build cache.`, {
+      operationId: record.name
+    });
     record.collatedWriter.terminal.writeStdoutLine(
       Colorize.green(`"${record.name}" was restored from the build cache.`)
     );
@@ -1171,6 +1269,7 @@ function _handleOperationSkipped(record: OperationExecutionRecord, context: ISta
   // Do not set resultByOperation here. "Skipped" means the operation was not executed,
   // so it should not be considered the last *execution* result.
   if (!record.silent) {
+    record.eventSink?.onActivity?.(`"${record.name}" was skipped.`, { operationId: record.name });
     record.collatedWriter.terminal.writeStdoutLine(Colorize.green(`"${record.name}" was skipped.`));
   }
 }
@@ -1180,6 +1279,9 @@ function _handleOperationSkipped(record: OperationExecutionRecord, context: ISta
  */
 function _handleOperationNoOp(record: OperationExecutionRecord, context: IStatefulExecutionContext): void {
   if (!record.silent) {
+    record.eventSink?.onActivity?.(`"${record.name}" did not define any work.`, {
+      operationId: record.name
+    });
     record.collatedWriter.terminal.writeStdoutLine(
       Colorize.gray(`"${record.name}" did not define any work.`)
     );
@@ -1193,6 +1295,10 @@ function _handleOperationNoOp(record: OperationExecutionRecord, context: IStatef
 function _handleOperationSuccess(record: OperationExecutionRecord, context: IStatefulExecutionContext): void {
   const stopwatch: IStopwatchResult = _getOperationStopwatch(record);
   if (!record.silent) {
+    record.eventSink?.onActivity?.(
+      `"${record.name}" completed successfully in ${stopwatch.toString()}.`,
+      { operationId: record.name }
+    );
     record.collatedWriter.terminal.writeStdoutLine(
       Colorize.green(`"${record.name}" completed successfully in ${stopwatch.toString()}.`)
     );
@@ -1209,6 +1315,10 @@ function _handleOperationSuccessWithWarning(
 ): void {
   const stopwatch: IStopwatchResult = _getOperationStopwatch(record);
   if (!record.silent) {
+    record.eventSink?.onActivity?.(
+      `"${record.name}" completed with warnings in ${stopwatch.toString()}.`,
+      { operationId: record.name, stderr: true }
+    );
     record.collatedWriter.terminal.writeStderrLine(
       Colorize.yellow(`"${record.name}" completed with warnings in ${stopwatch.toString()}.`)
     );

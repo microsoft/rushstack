@@ -5,9 +5,7 @@
   "operationSettings": [
     {
       "operationName": "_phase:lite-build",
-      "outputFolderNames": ["dist"],
-      // This project builds differently between Node 18 and other versions of Node
-      "dependsOnNodeVersion": "major"
+      "outputFolderNames": ["dist"]
     }
   ]
 }

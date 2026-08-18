@@ -20,6 +20,8 @@ import { CollatedTerminal, type CollatedWriter, type StreamCollator } from '@rus
 
 import { coerceParallelism } from './ParseParallelism';
 import { OperationStatus, TERMINAL_STATUSES } from './OperationStatus';
+import type { IOperationGraphEventSink } from './OperationEventSink';
+import { OperationChunkTap } from './OperationChunkTap';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import type { Operation } from './Operation';
 import { Stopwatch } from '../../utilities/Stopwatch';
@@ -48,6 +50,12 @@ export interface IOperationExecutionRecordContext {
   invalidate?: (operations: Iterable<Operation>, reason: string) => void;
   inputsSnapshot: IInputsSnapshot | undefined;
   maxParallelism: number;
+
+  /**
+   * Optional structured event sink for dual-emit. When present, every status
+   * transition and raw output chunk is also emitted as structured events.
+   */
+  eventSink?: IOperationGraphEventSink;
 
   debugMode: boolean;
   quietMode: boolean;
@@ -83,6 +91,11 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
    * If true, this operation should be executed. If false, it should be skipped.
    */
   public enabled: boolean;
+
+  /**
+   * If true, this operation's runner should remain active after this iteration.
+   */
+  public shouldRunnerPersist: boolean = true;
 
   /**
    * This number represents how far away this Operation is from the furthest "root" operation (i.e.
@@ -252,8 +265,18 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     if (newStatus === this._status) {
       return;
     }
+    const previousStatus: OperationStatus = this._status;
     this._status = newStatus;
+    this._context.eventSink?.onOperationStatusChanged?.(this, previousStatus);
     this._context.onOperationStateChanged?.(this);
+  }
+
+  /**
+   * The iteration's structured event sink, when dual-emit is enabled.
+   * @internal
+   */
+  public get eventSink(): IOperationGraphEventSink | undefined {
+    return this._context.eventSink;
   }
 
   public get silent(): boolean {
@@ -373,12 +396,25 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         newlineKind: NewlineKind.Lf // for StdioSummarizer
       });
 
+      const chunkTapDestinations: TerminalWritable[] = [];
+      const eventSink: IOperationGraphEventSink | undefined = this._context.eventSink;
+      if (eventSink?.onOperationChunk) {
+        // Tap the stream upstream of the quiet-mode discard so the sink observes
+        // the exact bytes the collated writer would receive, regardless of verbosity.
+        chunkTapDestinations.push(
+          new OperationChunkTap(this.name, (operationId, chunk) =>
+            eventSink.onOperationChunk?.(operationId, chunk)
+          )
+        );
+      }
+
       const splitterTransform1: SplitterTransform = new SplitterTransform({
         destinations: [
           this.quietMode
             ? new DiscardStdoutTransform({ destination: this.collatedWriter })
             : this.collatedWriter,
-          stderrLineTransform
+          stderrLineTransform,
+          ...chunkTapDestinations
         ]
       });
 
@@ -450,6 +486,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     } finally {
       if (this.isTerminal) {
         this._collatedWriter?.close();
+        if (this._collatedWriter) {
+          this._context.eventSink?.onOperationStreamClosed?.(this.name);
+        }
         this.stdioSummarizer.close();
         this.problemCollector.close();
       }

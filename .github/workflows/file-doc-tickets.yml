@@ -25,7 +25,7 @@ jobs:
       - name: Use nodejs
         uses: actions/setup-node@v6
         with:
-          node-version: 16
+          node-version: 20
       - name: Parse PR body
         run: |
           cat <<-"EOF" > event.json

@@ -40,6 +40,9 @@
     "type": "git",
     "directory": "libraries/lookup-by-path"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",

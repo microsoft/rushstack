@@ -7,6 +7,9 @@
     "type": "git",
     "directory": "rush-plugins/rush-mcp-docs-plugin"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "homepage": "https://rushjs.io",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",

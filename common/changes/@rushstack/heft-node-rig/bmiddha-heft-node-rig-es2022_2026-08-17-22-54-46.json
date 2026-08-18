@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-node-rig",
+      "comment": "Update the default TypeScript library definitions to ES2022.",
+      "type": "patch"
+    }
+  ]
+}

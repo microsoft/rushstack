@@ -42,7 +42,7 @@
    * LTS schedule: https://nodejs.org/en/about/releases/
    * LTS versions: https://nodejs.org/en/download/releases/
    */
-  "nodeSupportedVersionRange": ">=18.15.0 <19.0.0 || >=20.9.0 <21.0.0 || >=22.12.0 <23.0.0 || >=24.11.1 <25.0.0",
+  "nodeSupportedVersionRange": ">=20.9.0 <21.0.0 || >=22.12.0 <23.0.0 || >=24.11.1 <25.0.0 || >=26.7.0 <27.0.0",
 
   /**
    * If the version check above fails, Rush will display a message showing the current
@@ -1284,6 +1284,12 @@
       "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/rush-daemon",
+      "projectFolder": "libraries/rush-daemon",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/package-deps-hash",
       "projectFolder": "libraries/package-deps-hash",
       "reviewCategory": "libraries",
@@ -1319,6 +1325,30 @@
       "projectFolder": "libraries/rushell",
       "reviewCategory": "libraries",
       "shouldPublish": false
+    },
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "projectFolder": "libraries/rush-daemon-protocol",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "rushd-wire-e2e-test",
+      "projectFolder": "build-tests/rushd-wire-e2e-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "projectFolder": "libraries/rush-daemon-transport",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/rush-terminal-renderer",
+      "projectFolder": "libraries/rush-terminal-renderer",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
     {
       "packageName": "@rushstack/stream-collator",

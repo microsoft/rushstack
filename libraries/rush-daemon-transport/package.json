@@ -1,0 +1,69 @@
+{
+  "name": "@rushstack/rush-daemon-transport",
+  "version": "0.2.0",
+  "description": "Workspace-keyed socket/pipe transport for the Rush daemon (rushd): path derivation, net listener/connector, and PID/lockfile handling. (public beta)",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/rush-daemon-transport.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/rush-daemon-transport.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
+  "keywords": [
+    "rush",
+    "rushd",
+    "daemon",
+    "transport",
+    "socket",
+    "named-pipe"
+  ],
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "libraries/rush-daemon-transport"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "dependencies": {
+    "@rushstack/rush-daemon-protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
+  },
+  "peerDependencies": {
+    "@types/node": "*"
+  },
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    }
+  },
+  "sideEffects": false
+}

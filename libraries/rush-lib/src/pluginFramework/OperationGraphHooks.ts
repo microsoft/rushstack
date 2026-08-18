@@ -42,7 +42,8 @@ export class OperationGraphHooks {
   /**
    * Hook invoked to decide what work a potential new iteration contains.
    * Use the `lastExecutedRecords` to determine which operations are new or have had their inputs changed.
-   * Set the `enabled` states on the values in `initialRecords` to control which operations will be executed.
+   * Set `enabled` and `shouldRunnerPersist` on the values in `initialRecords` to control which operations
+   * execute and which runners remain active after the iteration.
    *
    * @remarks
    * This hook is synchronous to guarantee that the `lastExecutedRecords` map remains stable for the

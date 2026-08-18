@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/rush-daemon-protocol",
+  "entries": [
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/rush-daemon-protocol_v0.2.0",
+      "date": "Tue, 18 Aug 2026 00:18:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release: rushd wire frame taxonomy (0x01-0x05), length-prefixed binary codec, DAEMON_PROTOCOL_VERSION, hello/version negotiation with typed mismatch errors, placeholder event envelope mirroring @rushstack/reporter, and per-subscription verbosity filtering."
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -58,6 +58,11 @@ export interface IOperationRunnerContext {
   status: OperationStatus;
 
   /**
+   * True if the runner should remain active after this execution, false otherwise.
+   */
+  readonly shouldRunnerPersist: boolean;
+
+  /**
    * The environment in which the operation is being executed.
    * A return value of `undefined` indicates that it should inherit the environment from the parent process.
    */

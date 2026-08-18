@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "Compile package output for ES2022.",
+      "type": "patch"
+    }
+  ]
+}

@@ -34,7 +34,7 @@
     "directory": "webpack/webpack-workspace-resolve-plugin"
   },
   "engines": {
-    "node": ">=18.19.0"
+    "node": ">=20.9.0"
   },
   "scripts": {
     "build": "heft build --clean",
