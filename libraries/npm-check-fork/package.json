@@ -7,6 +7,9 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/npm-check-fork"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "homepage": "https://github.com/dylang/npm-check",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",

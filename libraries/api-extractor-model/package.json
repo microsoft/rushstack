@@ -7,6 +7,9 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/api-extractor-model"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "homepage": "https://api-extractor.com",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",

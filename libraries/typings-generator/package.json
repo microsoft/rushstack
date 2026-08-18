@@ -38,6 +38,9 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/typings-generator"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",

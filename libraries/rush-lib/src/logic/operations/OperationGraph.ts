@@ -91,6 +91,23 @@ interface IExecutionIterationContext extends IOperationExecutionRecordContext {
   totalOperations: number;
 }
 
+interface IOperationRunnerCloseEntry {
+  operation: Operation;
+  closeAsync: () => Promise<void>;
+}
+
+class OperationRunnerCloseError extends Error {
+  public readonly operation: Operation;
+  public override readonly cause: Error;
+
+  public constructor(operation: Operation, cause: Error) {
+    super(cause.message, { cause });
+    this.name = OperationRunnerCloseError.name;
+    this.operation = operation;
+    this.cause = cause;
+  }
+}
+
 /**
  * Telemetry data for a phased execution
  */
@@ -403,30 +420,40 @@ export class OperationGraph implements IOperationGraph {
     }
   }
 
-  public async closeRunnersAsync(operations?: Operation[]): Promise<void> {
-    const promises: Promise<void>[] = [];
+  public async closeRunnersAsync(operations?: Iterable<Operation>): Promise<void> {
+    const runnersToClose: IOperationRunnerCloseEntry[] = [];
     const recordMap: ReadonlyMap<Operation, OperationExecutionRecord> =
       this._currentIteration?.records ?? this.resultByOperation;
     const closedRecords: Set<OperationExecutionRecord> = new Set();
     for (const operation of operations ?? this.operations) {
-      if (operation.runner?.closeAsync) {
-        const record: OperationExecutionRecord | undefined = recordMap.get(operation);
-        promises.push(
-          operation.runner.closeAsync().then(() => {
-            if (record) {
-              // Collect for batched notification
-              closedRecords.add(record);
-            }
-          })
-        );
+      const closeAsync: (() => Promise<void>) | undefined = operation.runner?.closeAsync;
+      if (closeAsync) {
+        runnersToClose.push({ operation, closeAsync: closeAsync.bind(operation.runner) });
       }
     }
-    await Promise.all(promises);
-    if (this.abortController.signal.aborted) {
-      return;
+    const results: PromiseSettledResult<void>[] = await Promise.allSettled(
+      runnersToClose.map((entry) => entry.closeAsync())
+    );
+    const errors: OperationRunnerCloseError[] = [];
+    for (let index: number = 0; index < results.length; index++) {
+      const operation: Operation = runnersToClose[index].operation;
+      const result: PromiseSettledResult<void> = results[index];
+      if (result.status === 'fulfilled') {
+        const record: OperationExecutionRecord | undefined = recordMap.get(operation);
+        if (record) {
+          closedRecords.add(record);
+        }
+      } else {
+        const innerError: Error =
+          result.reason instanceof Error ? result.reason : new Error(String(result.reason));
+        errors.push(new OperationRunnerCloseError(operation, innerError));
+      }
     }
-    if (closedRecords.size) {
+    if (!this.abortController.signal.aborted && closedRecords.size) {
       this.hooks.onExecutionStatesUpdated.call(closedRecords);
+    }
+    if (errors.length > 0) {
+      throw new AggregateError(errors, `Failed to close ${errors.length} operation runner(s).`);
     }
   }
 
@@ -901,9 +928,46 @@ export class OperationGraph implements IOperationGraph {
       });
     }
 
+    const recordsToClose: OperationExecutionRecord[] = [];
+    for (const record of executionRecords.values()) {
+      if (!record.shouldRunnerPersist) {
+        recordsToClose.push(record);
+      }
+    }
+    function reportRunnerCleanupFailure(record: OperationExecutionRecord, error: Error): void {
+      record.error = error;
+      record.status = OperationStatus.Failure;
+      _reportOperationErrorIfAny(record);
+      state.hasAnyFailures = true;
+    }
+    if (recordsToClose.length > 0) {
+      try {
+        await this.closeRunnersAsync(recordsToClose.map((record) => record.operation));
+      } catch (e) {
+        if (e instanceof AggregateError) {
+          for (const error of e.errors) {
+            if (error instanceof OperationRunnerCloseError) {
+              const record: OperationExecutionRecord | undefined = executionRecords.get(error.operation);
+              if (record) {
+                reportRunnerCleanupFailure(record, error.cause);
+              }
+            }
+          }
+        } else {
+          for (const record of recordsToClose) {
+            reportRunnerCleanupFailure(record, e);
+          }
+        }
+      }
+    }
+    for (const record of executionRecords.values()) {
+      record.stdioSummarizer.close();
+      record.problemCollector.close();
+    }
+
     const status: OperationStatus = (() => {
-      if (bailStatus) return bailStatus;
       if (state.hasAnyFailures) return OperationStatus.Failure;
+      if (bailStatus) return bailStatus;
       if (state.hasAnyAborted) return OperationStatus.Aborted;
       if (state.hasAnyNonAllowedWarnings) return OperationStatus.SuccessWithWarning;
       if (iterationContext.totalOperations === 0) return OperationStatus.NoOp;

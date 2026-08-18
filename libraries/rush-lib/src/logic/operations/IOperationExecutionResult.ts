@@ -67,6 +67,12 @@ export interface IConfigurableOperation extends IBaseOperationExecutionResult {
    * True if the operation should execute in this iteration, false otherwise.
    */
   enabled: boolean;
+
+  /**
+   * True if the operation's runner should remain active after this iteration, false otherwise.
+   * Defaults to true.
+   */
+  shouldRunnerPersist: boolean;
 }
 
 /**
@@ -94,6 +100,10 @@ export interface IOperationExecutionResult extends IBaseOperationExecutionResult
    * True if the operation should execute in this iteration, false otherwise.
    */
   readonly enabled: boolean;
+  /**
+   * True if the operation's runner should remain active after this iteration, false otherwise.
+   */
+  readonly shouldRunnerPersist: boolean;
   /**
    * Object tracking execution timing.
    */

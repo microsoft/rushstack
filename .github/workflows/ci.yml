@@ -24,6 +24,12 @@ jobs:
           - NodeVersion: 24.11.x
             NodeVersionDisplayName: 24
             OS: windows-latest
+          - NodeVersion: 26.7.x
+            NodeVersionDisplayName: 26
+            OS: ubuntu-latest
+          - NodeVersion: 26.7.x
+            NodeVersionDisplayName: 26
+            OS: windows-latest
     name: Node.js v${{ matrix.NodeVersionDisplayName }} (${{ matrix.OS }})
     runs-on: ${{ matrix.OS }}
     env:
@@ -73,6 +79,8 @@ jobs:
       - name: Rush retest (install-run-rush)
         run: node common/scripts/install-run-rush.js retest --verbose --production
         working-directory: repo-a
+        env:
+          NODE_OPTIONS: ${{ matrix.NodeVersionDisplayName == 26 && '--no-experimental-webstorage' || '' }}
 
       - name: Run package manager integration tests
         run: npm run test
@@ -109,7 +117,11 @@ jobs:
       - name: Rush test (rush-lib)
         run: node ${{ github.workspace }}/repo-a/apps/rush/lib-commonjs/start-dev.js test --verbose --production --timeline
         working-directory: repo-b
+        env:
+          NODE_OPTIONS: ${{ matrix.NodeVersionDisplayName == 26 && '--no-experimental-webstorage' || '' }}
 
       - name: Rush test (rush-lib) again to verify build cache hits
         run: node ${{ github.workspace }}/repo-a/apps/rush/lib-commonjs/start-dev.js test --verbose --production --timeline
         working-directory: repo-b
+        env:
+          NODE_OPTIONS: ${{ matrix.NodeVersionDisplayName == 26 && '--no-experimental-webstorage' || '' }}

@@ -107,6 +107,34 @@ function createGraph(
   return new OperationGraph(new Set([operation]), graphOptions);
 }
 
+class ClosableRunner extends MockOperationRunner {
+  public isActive: boolean = false;
+
+  public readonly closeAsync: jest.Mock<Promise<void>, []> = jest.fn(async () => {
+    this.isActive = false;
+  });
+
+  public override async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
+    this.isActive = true;
+    const status: OperationStatus = await super.executeAsync(context);
+    if (!context.shouldRunnerPersist) {
+      await this.closeAsync();
+    }
+    return status;
+  }
+}
+
+function configureRunnerPersistence(
+  graph: OperationGraph,
+  shouldRunnerPersist: (operation: Operation) => boolean
+): void {
+  graph.hooks.configureIteration.tap('test-runner-persistence', (records) => {
+    for (const [operation, record] of records) {
+      record.shouldRunnerPersist = shouldRunnerPersist(operation);
+    }
+  });
+}
+
 describe('OperationGraph', () => {
   let graphOptions: IOperationGraphOptions;
   let graphIterationOptions: IOperationGraphIterationOptions;
@@ -1134,13 +1162,240 @@ describe('deferred invalidation during active iteration', () => {
   });
 });
 
-describe('closeRunnersAsync', () => {
-  class ClosableRunner extends MockOperationRunner {
-    public readonly closeAsync: jest.Mock<Promise<void>, []> = jest.fn(async () => {
-      /* no-op */
-    });
-  }
+describe('runner persistence policy', () => {
+  const graphOptions: IOperationGraphOptions = {
+    quietMode: false,
+    debugMode: false,
+    parallelism: 3,
+    allowOversubscription: true,
+    destinations: [mockWritable],
+    abortController: new AbortController()
+  };
 
+  it('keeps runners active across successive iterations by default', async () => {
+    const runAsync: jest.Mock<Promise<OperationStatus>, []> = jest.fn(async () => OperationStatus.Success);
+    const runner: ClosableRunner = new ClosableRunner('default-persistent', runAsync);
+    const graph: OperationGraph = createGraph(graphOptions, runner);
+
+    await graph.executeAsync({});
+    expect(runAsync).toHaveBeenCalledTimes(1);
+    expect(runner.closeAsync).not.toHaveBeenCalled();
+
+    await graph.executeAsync({});
+    expect(runAsync).toHaveBeenCalledTimes(2);
+    expect(runner.closeAsync).not.toHaveBeenCalled();
+  });
+
+  it('applies configured record policies independently on each iteration', async () => {
+    const persistentRunner: ClosableRunner = new ClosableRunner('persistent');
+    const oneShotRunner: ClosableRunner = new ClosableRunner('one-shot');
+    const changingRunner: ClosableRunner = new ClosableRunner('changing');
+
+    const persistentOperation: Operation = new Operation({
+      runner: persistentRunner,
+      logFilenameIdentifier: 'persistent',
+      phase: mockPhase,
+      project: getOrCreateProject('persistent')
+    });
+    const oneShotOperation: Operation = new Operation({
+      runner: oneShotRunner,
+      logFilenameIdentifier: 'one-shot',
+      phase: mockPhase,
+      project: getOrCreateProject('one-shot')
+    });
+    const changingOperation: Operation = new Operation({
+      runner: changingRunner,
+      logFilenameIdentifier: 'changing',
+      phase: mockPhase,
+      project: getOrCreateProject('changing')
+    });
+
+    const graph: OperationGraph = new OperationGraph(
+      new Set([persistentOperation, oneShotOperation, changingOperation]),
+      graphOptions
+    );
+
+    let persistentOperations: ReadonlySet<Operation> = new Set([persistentOperation, changingOperation]);
+    configureRunnerPersistence(graph, (operation) => persistentOperations.has(operation));
+
+    await graph.executeAsync({});
+    expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
+    expect(oneShotRunner.closeAsync).toHaveBeenCalledTimes(2);
+    expect(changingRunner.closeAsync).not.toHaveBeenCalled();
+
+    persistentOperations = new Set([persistentOperation]);
+    await graph.executeAsync({});
+    expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
+    expect(oneShotRunner.closeAsync).toHaveBeenCalledTimes(4);
+    expect(changingRunner.closeAsync).toHaveBeenCalledTimes(2);
+  });
+
+  it('releases a non-persistent runner before its dependents execute', async () => {
+    const executionOrder: string[] = [];
+
+    const upstreamRunner: ClosableRunner = new ClosableRunner('upstream', async () => {
+      executionOrder.push('upstream:run');
+      return OperationStatus.Success;
+    });
+    upstreamRunner.closeAsync.mockImplementation(async () => {
+      if (upstreamRunner.isActive) {
+        executionOrder.push('upstream:close');
+      }
+      upstreamRunner.isActive = false;
+    });
+
+    const downstreamRunner: ClosableRunner = new ClosableRunner('downstream', async () => {
+      executionOrder.push('downstream:run');
+      return OperationStatus.Success;
+    });
+
+    const upstreamOperation: Operation = new Operation({
+      runner: upstreamRunner,
+      logFilenameIdentifier: 'upstream',
+      phase: mockPhase,
+      project: getOrCreateProject('upstream')
+    });
+    const downstreamOperation: Operation = new Operation({
+      runner: downstreamRunner,
+      logFilenameIdentifier: 'downstream',
+      phase: mockPhase,
+      project: getOrCreateProject('downstream')
+    });
+    downstreamOperation.addDependency(upstreamOperation);
+
+    const graph: OperationGraph = new OperationGraph(
+      new Set([upstreamOperation, downstreamOperation]),
+      graphOptions
+    );
+
+    configureRunnerPersistence(graph, (operation) => operation !== upstreamOperation);
+    await graph.executeAsync({});
+
+    expect(upstreamRunner.closeAsync).toHaveBeenCalledTimes(2);
+    expect(downstreamRunner.closeAsync).not.toHaveBeenCalled();
+    // The non-persistent upstream runner must be released immediately upon its own completion,
+    // before the downstream operation begins executing — not deferred to the end of the iteration.
+    expect(executionOrder).toEqual(['upstream:run', 'upstream:close', 'downstream:run']);
+  });
+
+  it('closes an active cold runner when an iteration bypasses runner execution', async () => {
+    const persistentRunner: ClosableRunner = new ClosableRunner('persistent');
+    const coldRunner: ClosableRunner = new ClosableRunner('cold');
+    let coldRunnerWasClosedBeforeAfterIteration: boolean = false;
+
+    const persistentOperation: Operation = new Operation({
+      runner: persistentRunner,
+      logFilenameIdentifier: 'persistent',
+      phase: mockPhase,
+      project: getOrCreateProject('persistent')
+    });
+    const coldOperation: Operation = new Operation({
+      runner: coldRunner,
+      logFilenameIdentifier: 'cold',
+      phase: mockPhase,
+      project: getOrCreateProject('cold')
+    });
+
+    const graph: OperationGraph = new OperationGraph(
+      new Set([persistentOperation, coldOperation]),
+      graphOptions
+    );
+
+    await graph.executeAsync({});
+    expect(persistentRunner.isActive).toBe(true);
+    expect(coldRunner.isActive).toBe(true);
+
+    configureRunnerPersistence(graph, (operation) => operation === persistentOperation);
+    graph.hooks.beforeExecuteIterationAsync.tapPromise(
+      'test',
+      async (): Promise<OperationStatus> => OperationStatus.FromCache
+    );
+    graph.hooks.afterExecuteIterationAsync.tapPromise('test', async (status) => {
+      coldRunnerWasClosedBeforeAfterIteration = coldRunner.isActive === false;
+      return status;
+    });
+
+    await graph.executeAsync({});
+
+    expect(coldRunner.closeAsync).toHaveBeenCalledTimes(1);
+    expect(coldRunner.isActive).toBe(false);
+    expect(coldRunnerWasClosedBeforeAfterIteration).toBe(true);
+    expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
+    expect(persistentRunner.isActive).toBe(true);
+  });
+
+  it('reports a bypassed runner cleanup failure before finalizing the iteration', async () => {
+    const persistentRunner: ClosableRunner = new ClosableRunner('persistent');
+    const coldRunner: ClosableRunner = new ClosableRunner('cold');
+    const successfulColdRunner: ClosableRunner = new ClosableRunner('successful-cold');
+    const closeError: Error = new Error('close failed');
+    const lifecycleEvents: string[] = [];
+
+    const persistentOperation: Operation = new Operation({
+      runner: persistentRunner,
+      logFilenameIdentifier: 'persistent',
+      phase: mockPhase,
+      project: getOrCreateProject('persistent')
+    });
+    const coldOperation: Operation = new Operation({
+      runner: coldRunner,
+      logFilenameIdentifier: 'cold',
+      phase: mockPhase,
+      project: getOrCreateProject('cold')
+    });
+    const successfulColdOperation: Operation = new Operation({
+      runner: successfulColdRunner,
+      logFilenameIdentifier: 'successful-cold',
+      phase: mockPhase,
+      project: getOrCreateProject('successful-cold')
+    });
+
+    const graph: OperationGraph = new OperationGraph(
+      new Set([persistentOperation, coldOperation, successfulColdOperation]),
+      graphOptions
+    );
+
+    await graph.executeAsync({});
+
+    configureRunnerPersistence(graph, (operation) => operation === persistentOperation);
+    coldRunner.closeAsync.mockImplementationOnce(async () => {
+      lifecycleEvents.push('close');
+      throw closeError;
+    });
+    graph.hooks.beforeExecuteIterationAsync.tapPromise(
+      'test',
+      async (): Promise<OperationStatus> => OperationStatus.FromCache
+    );
+    let afterIterationStatus: OperationStatus | undefined;
+    graph.hooks.afterExecuteIterationAsync.tapPromise('test', async (status) => {
+      lifecycleEvents.push('after-iteration');
+      afterIterationStatus = status;
+      return status;
+    });
+    graph.hooks.afterExecuteIterationAsync.tap('test-summary', (status, records) => {
+      _printOperationStatus(mockTerminal, { status, operationResults: records });
+      return status;
+    });
+
+    const result: IExecutionResult = await graph.executeAsync({});
+    const coldResult: IOperationExecutionResult | undefined = result.operationResults.get(coldOperation);
+    const successfulColdResult: IOperationExecutionResult | undefined =
+      result.operationResults.get(successfulColdOperation);
+
+    expect(lifecycleEvents).toEqual(['close', 'after-iteration']);
+    expect(afterIterationStatus).toBe(OperationStatus.Failure);
+    expect(result.status).toBe(OperationStatus.Failure);
+    expect(graph.status).toBe(OperationStatus.Failure);
+    expect(coldResult?.status).toBe(OperationStatus.Failure);
+    expect(coldResult?.error).toBe(closeError);
+    expect(successfulColdResult?.status).toBe(OperationStatus.Skipped);
+    expect(successfulColdResult?.error).toBeUndefined();
+    expect(successfulColdRunner.closeAsync).toHaveBeenCalledTimes(1);
+    expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
+  });
+});
+
+describe('closeRunnersAsync', () => {
   it('invokes closeAsync on runners and triggers onExecutionStatesUpdated hook', async () => {
     const localOptions: IOperationGraphOptions = {
       quietMode: false,

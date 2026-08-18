@@ -7,6 +7,9 @@
     "url": "https://github.com/microsoft/rushstack",
     "directory": "rush-plugins/rush-buildxl-graph-plugin"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "homepage": "https://rushjs.io",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "playwright-local-browser-server",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
@@ -99,7 +99,7 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/vscode-shared": "workspace:*",
-    "playwright-core": "~1.56.1",
+    "playwright-core": "~1.62.1",
     "tslib": "~2.8.1"
   },
   "devDependencies": {

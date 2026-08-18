@@ -408,6 +408,7 @@ export interface ICobuildLockProvider {
 // @alpha
 export interface IConfigurableOperation extends IBaseOperationExecutionResult {
     enabled: boolean;
+    shouldRunnerPersist: boolean;
 }
 
 // @public
@@ -620,6 +621,7 @@ export interface IOperationExecutionResult extends IBaseOperationExecutionResult
     readonly logFilePaths: ILogFilePaths | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly problemCollector: IProblemCollector;
+    readonly shouldRunnerPersist: boolean;
     readonly silent: boolean;
     readonly status: OperationStatus;
     readonly stdioSummarizer: StdioSummarizer;
@@ -738,6 +740,7 @@ export interface IOperationRunnerContext {
         createLogFile: boolean;
         logFileSuffix?: string;
     }): Promise<T>;
+    readonly shouldRunnerPersist: boolean;
     status: OperationStatus;
     stopwatch: IStopwatchResult;
 }

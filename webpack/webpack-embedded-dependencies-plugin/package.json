@@ -33,6 +33,9 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "webpack/webpack-embedded-dependencies-plugin"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "build": "heft build --clean",
     "test": "heft run --only test",

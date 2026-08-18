@@ -8,6 +8,9 @@
     "type": "git",
     "directory": "rush-plugins/rush-serve-plugin"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
   "types": "./dist/index.d.ts",

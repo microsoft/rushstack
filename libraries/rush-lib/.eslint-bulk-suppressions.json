@@ -6038,7 +6038,17 @@
     {
       "file": "src/logic/operations/OperationGraph.ts",
       "scopeId": ".OperationGraph.closeRunnersAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/logic/operations/OperationGraph.ts",
+      "scopeId": ".OperationGraph.closeRunnersAsync",
       "rule": "complexity"
+    },
+    {
+      "file": "src/logic/operations/OperationGraph.ts",
+      "scopeId": ".OperationGraph.closeRunnersAsync",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/logic/operations/OperationGraph.ts",
