@@ -17,7 +17,6 @@ import {
   PackageJsonLookup,
   type INodePackageJson,
   PackageName,
-  Text,
   InternalError,
   Path,
   NewlineKind
@@ -1310,8 +1309,8 @@ function _expandStringWithTokens(
 ): string {
   value = value ? value.trim() : '';
   if (value !== '') {
-    value = Text.replaceAll(value, '<unscopedPackageName>', tokenContext.unscopedPackageName);
-    value = Text.replaceAll(value, '<packageName>', tokenContext.packageName);
+    value = value.replaceAll('<unscopedPackageName>', tokenContext.unscopedPackageName);
+    value = value.replaceAll('<packageName>', tokenContext.packageName);
 
     const projectFolderToken: string = '<projectFolder>';
     if (value.indexOf(projectFolderToken) === 0) {

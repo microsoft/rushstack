@@ -9,12 +9,12 @@ import * as ssri from 'ssri';
 
 import {
   JsonFile,
-  Text,
   FileSystem,
   FileConstants,
   Sort,
   InternalError,
-  AlreadyReportedError
+  AlreadyReportedError,
+  Path
 } from '@rushstack/node-core-library';
 import { Colorize, PrintUtilities } from '@rushstack/terminal';
 
@@ -558,11 +558,8 @@ export class RushInstallManager extends BaseInstallManager {
           // eslint-disable-next-line no-console
           console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
           // Glob can't handle Windows paths
-          const normalizedPathToDeleteWithoutStar: string = Text.replaceAll(
-            pathToDeleteWithoutStar,
-            '\\',
-            '/'
-          );
+          const normalizedPathToDeleteWithoutStar: string =
+            Path.convertToSlashes(pathToDeleteWithoutStar);
 
           const { default: glob } = await import('fast-glob');
           const tempModulePaths: string[] = await glob(
@@ -693,7 +690,7 @@ export class RushInstallManager extends BaseInstallManager {
       RushConstants.rushTempNpmScope
     );
     // Glob can't handle Windows paths
-    const normalizedPathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
+    const normalizedPathToDeleteWithoutStar: string = Path.convertToSlashes(pathToDeleteWithoutStar);
 
     let anyChanges: boolean = false;
 

@@ -88,10 +88,8 @@ const CACHE_FOLDER: string = `${homedir()}/.rushstack/update-checks`;
 
 async function _tryFetchLatestVersionAsync(packageName: string): Promise<string | undefined> {
   const url: string = `${REGISTRY_BASE_URL}/${encodeURIComponent(packageName)}/latest`;
-  const controller: AbortController = new AbortController();
-  const timeout: NodeJS.Timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const response: Response = await fetch(url, { signal: controller.signal });
+    const response: Response = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
     if (!response.ok) {
       return undefined;
     }
@@ -101,8 +99,6 @@ async function _tryFetchLatestVersionAsync(packageName: string): Promise<string 
   } catch {
     // Network errors, timeouts, and parse failures are all silent.
     return undefined;
-  } finally {
-    clearTimeout(timeout);
   }
 }
 
