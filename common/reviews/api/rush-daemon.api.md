@@ -6,6 +6,8 @@
 
 /// <reference types="node" />
 
+import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
+
 // @public
 export interface IRequestLease {
     // (undocumented)
@@ -21,6 +23,21 @@ export interface IRequestSchedulerAcquireOptions {
     noWait?: boolean;
     onQueuePositionChanged?: (position: number) => void;
     waitTimeoutMs?: number;
+}
+
+// @beta
+export interface IRushDaemonHostOptions {
+    readonly daemonVersion: string;
+    readonly onError?: (error: Error) => void;
+    readonly repoRoot: string;
+    readonly rushVersion: string;
+    readonly startupOptions?: Readonly<Record<string, unknown>>;
+}
+
+// @beta
+export interface IRushDaemonServeOptions extends IRushDaemonHostOptions {
+    readonly onReady?: (host: RushDaemonHost) => void | Promise<void>;
+    readonly shutdownSignal?: AbortSignal;
 }
 
 // @public
@@ -56,6 +73,17 @@ export enum RequestSchedulerErrorCode {
     // (undocumented)
     WaitTimeout = "WAIT_TIMEOUT"
 }
+
+// @beta
+export class RushDaemonHost {
+    closeAsync(): Promise<void>;
+    // (undocumented)
+    readonly paths: IDaemonPaths;
+    static startAsync(options: IRushDaemonHostOptions): Promise<RushDaemonHost>;
+}
+
+// @beta
+export function serveRushDaemonAsync(options: IRushDaemonServeOptions): Promise<void>;
 
 // (No @packageDocumentation comment for this package)
 

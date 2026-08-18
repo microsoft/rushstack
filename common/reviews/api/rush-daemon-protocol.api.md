@@ -292,6 +292,8 @@ export interface IDaemonPongMessage {
     readonly kind: 'pong';
     // (undocumented)
     readonly payload: {
+        readonly daemonVersion?: string;
+        readonly protocolVersion?: IDaemonProtocolVersion;
         readonly uptimeMs: number;
     };
 }

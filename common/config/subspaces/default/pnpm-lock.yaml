@@ -4078,6 +4078,16 @@ importers:
         version: 9.37.0
 
   ../../../libraries/rush-daemon:
+    dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../node-core-library
+      '@rushstack/rush-daemon-protocol':
+        specifier: workspace:*
+        version: link:../rush-daemon-protocol
+      '@rushstack/rush-daemon-transport':
+        specifier: workspace:*
+        version: link:../rush-daemon-transport
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
