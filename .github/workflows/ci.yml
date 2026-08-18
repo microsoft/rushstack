@@ -21,7 +21,6 @@ jobs:
           - NodeVersion: 24.11.x
             NodeVersionDisplayName: 24
             OS: ubuntu-latest
-          # TODO: Remove when the Windows+Node 24 branch policy is removed
           - NodeVersion: 24.11.x
             NodeVersionDisplayName: 24
             OS: windows-latest
