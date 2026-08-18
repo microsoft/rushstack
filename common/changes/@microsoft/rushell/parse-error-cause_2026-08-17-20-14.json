@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rushell",
+      "comment": "Expose a ParseError's underlying error through the standard Error.cause property while retaining innerError as an alias.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rushell"
+}
