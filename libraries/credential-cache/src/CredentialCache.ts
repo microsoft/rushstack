@@ -3,20 +3,9 @@
 
 import * as path from 'node:path';
 
-import {
-  Disposables,
-  FileSystem,
-  JsonFile,
-  JsonSchema,
-  LockFile,
-  User,
-  Objects
-} from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, JsonSchema, LockFile, User, Objects } from '@rushstack/node-core-library';
 
 import schemaJson from './schemas/credentials.schema.json';
-
-// Polyfill for node 18
-Disposables.polyfillDisposeSymbols();
 
 /**
  * The name of the default folder in the user's home directory where Rush stores user-specific data.
