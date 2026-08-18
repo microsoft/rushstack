@@ -19,12 +19,15 @@ export class ParseError extends Error {
   public readonly unformattedMessage: string;
 
   /**
-   * The underlying error, if this error is resulted from an earlier error.
+   * The underlying error, if this error resulted from an earlier error.
+   *
+   * @remarks
+   * This property is a backwards-compatible alias for {@link Error.cause}.
    */
   public readonly innerError: Error | undefined;
 
   public constructor(message: string, range: TextRange, innerError?: Error) {
-    super(_formatMessage(message, range));
+    super(_formatMessage(message, range), innerError === undefined ? undefined : { cause: innerError });
 
     // Boilerplate for extending a system class
     //
