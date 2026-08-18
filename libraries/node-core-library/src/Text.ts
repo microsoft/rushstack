@@ -97,15 +97,20 @@ function* readLinesFromChunk(
  */
 export class Text {
   /**
-   * Returns the same thing as targetString.replace(searchValue, replaceValue), except that
-   * all matches are replaced, rather than just the first match.
+   * Replaces every occurrence of `searchValue` with `replaceValue`.
+   *
+   * @remarks
+   * This method has the same behavior as {@link https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/replaceAll | String.prototype.replaceAll}.
+   * In particular, if `searchValue` is an empty string, `replaceValue` is inserted before the first
+   * UTF-16 code unit, between each code unit, and after the last code unit.
+   *
    * @param input         - The string to be modified
    * @param searchValue   - The value to search for
    * @param replaceValue  - The replacement text
    */
-  public static replaceAll(input: string, searchValue: string, replaceValue: string): string {
-    return input.split(searchValue).join(replaceValue);
-  }
+   public static replaceAll(input: string, searchValue: string, replaceValue: string): string {
+     return input.replaceAll(searchValue, replaceValue);
+   }
 
   /**
    * Converts all newlines in the provided string to use Windows-style CRLF end of line characters.

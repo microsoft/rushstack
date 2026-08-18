@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Delegate Text.replaceAll() to the native implementation, including native empty search string behavior.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "5100938+bmiddha@users.noreply.github.com"
+}
