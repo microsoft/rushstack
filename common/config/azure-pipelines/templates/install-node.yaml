@@ -1,7 +1,7 @@
 parameters:
   - name: NodeMajorVersion
     type: number
-    default: 22
+    default: 24
 
 steps:
   - task: NodeTool@0

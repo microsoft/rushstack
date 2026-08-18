@@ -29,8 +29,15 @@ jobs:
           - NodeVersion: 24.11.x
             NodeVersionDisplayName: 24
             OS: ubuntu-latest
+          # TODO: Remove when the Windows+Node 24 branch policy is removed
           - NodeVersion: 24.11.x
             NodeVersionDisplayName: 24
+            OS: windows-latest
+          - NodeVersion: 26.7.x
+            NodeVersionDisplayName: 26
+            OS: ubuntu-latest
+          - NodeVersion: 26.7.x
+            NodeVersionDisplayName: 26
             OS: windows-latest
     name: Node.js v${{ matrix.NodeVersionDisplayName }} (${{ matrix.OS }})
     runs-on: ${{ matrix.OS }}
@@ -64,6 +71,11 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.NodeVersion }}
+
+      - name: Disable experimental web storage
+        if: matrix.NodeVersionDisplayName == 26
+        shell: pwsh
+        run: Add-Content -Path $env:GITHUB_ENV -Value 'NODE_OPTIONS=--no-experimental-webstorage'
 
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
