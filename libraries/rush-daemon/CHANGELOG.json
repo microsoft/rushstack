@@ -1,4 +1,17 @@
 {
   "name": "@rushstack/rush-daemon",
-  "entries": []
+  "entries": [
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/rush-daemon_v0.2.0",
+      "date": "Tue, 18 Aug 2026 00:18:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add the initial daemon request scheduler."
+          }
+        ]
+      }
+    }
+  ]
 }
