@@ -5,7 +5,7 @@ import * as path from 'node:path';
 
 import type * as ts from 'typescript';
 
-import { Path, Text } from '@rushstack/node-core-library';
+import { Path } from '@rushstack/node-core-library';
 
 export interface ISourceFileLocationFormatOptions {
   sourceFileLine?: number;
@@ -47,7 +47,7 @@ export class SourceFileLocationFormatter {
     }
 
     // Convert it to a Unix-style path
-    scrubbedPath = Text.replaceAll(scrubbedPath, '\\', '/');
+    scrubbedPath = scrubbedPath.replaceAll('\\', '/');
     result += scrubbedPath;
 
     if (options.sourceFileLine) {

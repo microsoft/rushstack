@@ -107,10 +107,12 @@ export class Text {
    * @param input         - The string to be modified
    * @param searchValue   - The value to search for
    * @param replaceValue  - The replacement text
+   *
+   * @deprecated Use `String.prototype.replaceAll()` instead.
    */
-   public static replaceAll(input: string, searchValue: string, replaceValue: string): string {
-     return input.replaceAll(searchValue, replaceValue);
-   }
+  public static replaceAll(input: string, searchValue: string, replaceValue: string): string {
+    return input.replaceAll(searchValue, replaceValue);
+  }
 
   /**
    * Converts all newlines in the provided string to use Windows-style CRLF end of line characters.

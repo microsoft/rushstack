@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Delegate Text.replaceAll() to the native implementation, including native empty search string behavior.",
+      "comment": "Deprecate Text.replaceAll() in favor of the native String.prototype.replaceAll() method.",
       "type": "patch"
     }
   ],

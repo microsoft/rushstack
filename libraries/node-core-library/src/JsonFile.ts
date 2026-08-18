@@ -580,7 +580,7 @@ function _formatJsonHeaderComment(headerComment: string): string {
           JSON.stringify(line)
       );
     }
-    result.push(Text.replaceAll(line, '\r', ''));
+    result.push(line.replaceAll('\r', ''));
   }
   return lines.join('\n') + '\n';
 }

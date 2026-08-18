@@ -3,7 +3,6 @@
 
 import type * as child_process from 'node:child_process';
 
-import { Text } from '@rushstack/node-core-library';
 import { type ITerminal, type ITerminalProvider, TerminalProviderSeverity } from '@rushstack/terminal';
 
 import type { IPhase } from '../../api/CommandLineConfiguration';
@@ -200,7 +199,7 @@ export function convertSlashesForWindows(command: string): string {
       // "bin\blarg --path ./config/blah.json && a/b"
       //
       // NOTE: we don't attempt to process the path parameter or stuff after "&&"
-      return Text.replaceAll(commandPart, '/', '\\') + remainder;
+      return commandPart.replaceAll('/', '\\') + remainder;
     }
   }
 

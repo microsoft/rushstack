@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import { JsonFile, Path, Text } from '@rushstack/node-core-library';
+import { JsonFile, Path } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../RushConfiguration';
 import type { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
 import { RushConfigurationProject } from '../RushConfigurationProject';
@@ -11,7 +11,7 @@ import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
 import { DependencyType } from '../PackageJsonEditor';
 
 function normalizePathForComparison(pathToNormalize: string): string {
-  return Text.replaceAll(pathToNormalize, '\\', '/').toUpperCase();
+  return pathToNormalize.replaceAll('\\', '/').toUpperCase();
 }
 
 function assertPathProperty(validatedPropertyName: string, absolutePath: string, relativePath: string): void {

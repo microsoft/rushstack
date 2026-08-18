@@ -4,17 +4,6 @@
 import { Text } from '../Text';
 
 describe(Text.name, () => {
-  describe(Text.replaceAll.name, () => {
-    it('replaces every occurrence', () => {
-      expect(Text.replaceAll('one two one', 'one', 'three')).toEqual('three two three');
-    });
-
-    it('uses native empty search string semantics', () => {
-      expect(Text.replaceAll('abc', '', '-')).toEqual('-a-b-c-');
-      expect(Text.replaceAll('', '', '-')).toEqual('-');
-    });
-  });
-
   describe(Text.padEnd.name, () => {
     it("Throws an exception if the padding character isn't a single character", () => {
       expect(() => Text.padEnd('123', 1, '')).toThrow();

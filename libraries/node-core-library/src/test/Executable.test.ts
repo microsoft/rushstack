@@ -17,7 +17,6 @@ import {
 } from '../Executable';
 import { FileSystem } from '../FileSystem';
 import { PosixModeBits } from '../PosixModeBits';
-import { Text } from '../Text';
 import { Readable } from 'node:stream';
 
 describe('Executable process tests', () => {
@@ -101,7 +100,7 @@ describe('Executable process tests', () => {
   test('Executable.tryResolve() pathless', () => {
     const resolved: string | undefined = Executable.tryResolve('npm-binary-wrapper', options);
     expect(resolved).toBeDefined();
-    const resolvedRelative: string = Text.replaceAll(path.relative(executableFolder, resolved!), '\\', '/');
+    const resolvedRelative: string = path.relative(executableFolder, resolved!).replaceAll('\\', '/');
 
     if (os.platform() === 'win32') {
       // On Windows, we should find npm-binary-wrapper.cmd instead of npm-binary-wrapper
