@@ -103,12 +103,12 @@
     "tslib": "~2.8.1"
   },
   "devDependencies": {
-    "@rushstack/heft-vscode-extension-rig": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/node": "20.17.19",
     "@types/vscode": "1.103.0",
-    "@types/webpack-env": "1.18.8"
+    "@types/webpack-env": "1.18.8",
+    "local-vscode-extension-rig": "workspace:*"
   },
   "sideEffects": false
 }

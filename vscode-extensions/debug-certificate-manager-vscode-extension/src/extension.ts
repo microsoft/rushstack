@@ -5,15 +5,15 @@ import * as vscode from 'vscode';
 
 import { Async } from '@rushstack/node-core-library/lib/Async';
 import { Terminal } from '@rushstack/terminal';
-import {
+import type {
   CertificateManager,
   ICertificateStoreOptions,
   ICertificateValidationResult,
-  type ICertificate
+  ICertificate
 } from '@rushstack/debug-certificate-manager';
-
 import { runWorkspaceCommandAsync } from '@rushstack/vscode-shared/lib/runWorkspaceCommandAsync';
 import { VScodeOutputChannelTerminalProvider } from '@rushstack/vscode-shared/lib/VScodeOutputChannelTerminalProvider';
+
 import { getCertificateManager } from './certificates';
 import { getConfig } from './config';
 import {
@@ -229,7 +229,7 @@ export function activate(context: vscode.ExtensionContext): void {
             throw new Error('Failed to parse home directory from command output');
           }
         } else {
-          homeDir = require('os').homedir();
+          homeDir = require('node:os').homedir();
         }
 
         terminal.writeLine(`Resolved home directory: ${homeDir}`);

@@ -3,6 +3,7 @@
 
 import * as os from 'node:os';
 import * as path from 'node:path';
+
 import * as vscode from 'vscode';
 
 import type {
@@ -11,19 +12,16 @@ import type {
   ILaunchOptionsAllowlist,
   ILaunchOptionsValidationResult
 } from '@rushstack/playwright-browser-tunnel';
-
 import { PlaywrightTunnel } from '@rushstack/playwright-browser-tunnel/lib/PlaywrightBrowserTunnel';
-
 import {
   EXTENSION_INSTALLED_FILENAME,
   getNormalizedErrorString
 } from '@rushstack/playwright-browser-tunnel/lib/utilities';
 import { LaunchOptionsValidator } from '@rushstack/playwright-browser-tunnel/lib/LaunchOptionsValidator';
-
 import { Terminal, type ITerminal, type ITerminalProvider } from '@rushstack/terminal';
-
 import { runWorkspaceCommandAsync } from '@rushstack/vscode-shared/lib/runWorkspaceCommandAsync';
 import { VScodeOutputChannelTerminalProvider } from '@rushstack/vscode-shared/lib/VScodeOutputChannelTerminalProvider';
+
 import packageJson from '../package.json';
 
 const EXTENSION_DISPLAY_NAME: string = 'Playwright Local Browser Server';
@@ -348,6 +346,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
           outputChannel.appendLine(`Tunnel status changed: ${status}`);
           updateStatusBar(status);
         },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         onBeforeLaunch: async (handshake: IHandshake) => {
           // Validate launch options against the allowlist
           const validationResult: ILaunchOptionsValidationResult =

@@ -1,4 +1,9 @@
 {
   "$schema": "http://json.schemastore.org/tsconfig",
-  "extends": "./node_modules/@rushstack/heft-vscode-extension-rig/profiles/default/tsconfig-base.json"
+  "extends": "./node_modules/local-vscode-extension-rig/profiles/default/tsconfig-base.json",
+  "compilerOptions": {
+    // playwright-core's type definitions reference DOM types (Node, HTMLElement, SVGElement, etc.),
+    // so include the DOM lib to satisfy them, matching apps/playwright-browser-tunnel.
+    "lib": ["DOM"]
+  }
 }
