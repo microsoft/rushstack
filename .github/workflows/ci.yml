@@ -72,11 +72,6 @@ jobs:
         with:
           node-version: ${{ matrix.NodeVersion }}
 
-      - name: Disable experimental web storage
-        if: matrix.NodeVersionDisplayName == 26
-        shell: pwsh
-        run: Add-Content -Path $env:GITHUB_ENV -Value 'NODE_OPTIONS=--no-experimental-webstorage'
-
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
         working-directory: repo-a
@@ -93,6 +88,8 @@ jobs:
       - name: Rush retest (install-run-rush)
         run: node common/scripts/install-run-rush.js retest --verbose --production
         working-directory: repo-a
+        env:
+          NODE_OPTIONS: ${{ matrix.NodeVersionDisplayName == 26 && '--no-experimental-webstorage' || '' }}
 
       - name: Run package manager integration tests
         run: npm run test
@@ -129,7 +126,11 @@ jobs:
       - name: Rush test (rush-lib)
         run: node ${{ github.workspace }}/repo-a/apps/rush/lib-commonjs/start-dev.js test --verbose --production --timeline
         working-directory: repo-b
+        env:
+          NODE_OPTIONS: ${{ matrix.NodeVersionDisplayName == 26 && '--no-experimental-webstorage' || '' }}
 
       - name: Rush test (rush-lib) again to verify build cache hits
         run: node ${{ github.workspace }}/repo-a/apps/rush/lib-commonjs/start-dev.js test --verbose --production --timeline
         working-directory: repo-b
+        env:
+          NODE_OPTIONS: ${{ matrix.NodeVersionDisplayName == 26 && '--no-experimental-webstorage' || '' }}
