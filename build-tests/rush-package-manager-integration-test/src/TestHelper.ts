@@ -85,7 +85,7 @@ export class TestHelper {
     ];
 
     // Update nodeSupportedVersionRange to match current environment
-    rushJson.nodeSupportedVersionRange = '>=18.0.0';
+    rushJson.nodeSupportedVersionRange = '>=20.0.0';
 
     await JsonFile.saveAsync(rushJson, rushJsonPath, { updateExistingFile: true });
   }

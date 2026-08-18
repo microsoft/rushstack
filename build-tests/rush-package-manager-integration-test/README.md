@@ -35,7 +35,7 @@ Tests Rush yarn mode by:
 Before running these tests:
 1. Build Rush locally: `rush build --to rush`
 2. Build this test project: `rush build --to rush-package-manager-integration-test`
-3. Ensure you have Node.js 18+ installed
+3. Ensure you have Node.js 20+ installed
 
 ## Running the Tests
 
