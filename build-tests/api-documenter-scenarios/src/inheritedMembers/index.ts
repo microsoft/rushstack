@@ -48,7 +48,7 @@ export class Class2<T> extends Namespace1.Class3 {
 export class Class1 extends Class2<number> {
   /** A second prop. Overrides `Class2.secondProp`. */
   // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
-  override secondProp: boolean;
+  declare secondProp: boolean;
 
   /** A fourth prop */
   // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
