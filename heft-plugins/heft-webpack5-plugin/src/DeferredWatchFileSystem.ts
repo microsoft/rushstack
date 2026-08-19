@@ -36,8 +36,8 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
   public readonly watcherOptions: WatchOptions;
   public watcher: Watchpack | undefined;
 
-  private readonly _onChange: () => void;
-  private _state: IWatchState | undefined;
+  readonly #onChange: () => void;
+  #state: IWatchState | undefined;
 
   public constructor(inputFileSystem: InputFileSystem, onChange: () => void) {
     this.inputFileSystem = inputFileSystem;
@@ -45,11 +45,11 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
       aggregateTimeout: 0
     };
     this.watcher = new Watchpack(this.watcherOptions);
-    this._onChange = onChange;
+    this.#onChange = onChange;
   }
 
   public flush(): boolean {
-    const state: IWatchState | undefined = this._state;
+    const state: IWatchState | undefined = this.#state;
 
     if (!state) {
       return false;
@@ -105,7 +105,7 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
     const changes: Set<string> = new Set();
     const removals: Set<string> = new Set();
 
-    this._state = {
+    this.#state = {
       changes,
       removals,
 
@@ -122,7 +122,7 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
         removals.add(removal);
       }
 
-      this._onChange();
+      this.#onChange();
     });
 
     this.watcher.watch({
@@ -197,10 +197,10 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
 
 export class OverrideNodeWatchFSPlugin implements WebpackPluginInstance {
   public readonly fileSystems: Set<DeferredWatchFileSystem> = new Set();
-  private readonly _onChange: () => void;
+  readonly #onChange: () => void;
 
   public constructor(onChange: () => void) {
-    this._onChange = onChange;
+    this.#onChange = onChange;
   }
 
   public apply(compiler: Compiler): void {
@@ -211,7 +211,7 @@ export class OverrideNodeWatchFSPlugin implements WebpackPluginInstance {
 
     const watchFileSystem: DeferredWatchFileSystem = new DeferredWatchFileSystem(
       inputFileSystem,
-      this._onChange
+      this.#onChange
     );
     this.fileSystems.add(watchFileSystem);
     compiler.watchFileSystem = watchFileSystem;

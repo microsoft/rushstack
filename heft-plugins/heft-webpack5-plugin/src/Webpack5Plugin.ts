@@ -41,28 +41,28 @@ const WEBPACK_DEV_MIDDLEWARE_PACKAGE_NAME: 'webpack-dev-middleware' = 'webpack-d
  * @internal
  */
 export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOptions> {
-  private _accessor: IWebpackPluginAccessor | undefined;
-  private _isServeMode: boolean = false;
-  private _webpack: typeof TWebpack | undefined;
-  private _webpackCompiler: TWebpack.Compiler | TWebpack.MultiCompiler | undefined;
-  private _webpackConfiguration: IWebpackConfiguration | undefined | false = false;
-  private _webpackCompilationDonePromise: Promise<void> | undefined;
-  private _webpackCompilationDonePromiseResolveFn: (() => void) | undefined;
-  private _watchFileSystems: Set<DeferredWatchFileSystem> | undefined;
+  #accessor: IWebpackPluginAccessor | undefined;
+  #isServeMode: boolean = false;
+  #webpack: typeof TWebpack | undefined;
+  #webpackCompiler: TWebpack.Compiler | TWebpack.MultiCompiler | undefined;
+  #webpackConfiguration: IWebpackConfiguration | undefined | false = false;
+  #webpackCompilationDonePromise: Promise<void> | undefined;
+  #webpackCompilationDonePromiseResolveFn: (() => void) | undefined;
+  #watchFileSystems: Set<DeferredWatchFileSystem> | undefined;
 
-  private _warnings: Error[] = [];
-  private _errors: Error[] = [];
+  #warnings: Error[] = [];
+  #errors: Error[] = [];
 
   public get accessor(): IWebpackPluginAccessor {
-    if (!this._accessor) {
-      this._accessor = {
+    if (!this.#accessor) {
+      this.#accessor = {
         hooks: _createAccessorHooks(),
         parameters: {
-          isServeMode: this._isServeMode
+          isServeMode: this.#isServeMode
         }
       };
     }
-    return this._accessor;
+    return this.#accessor;
   }
 
   public apply(
@@ -70,8 +70,8 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     heftConfiguration: HeftConfiguration,
     options: IWebpackPluginOptions = {}
   ): void {
-    this._isServeMode = taskSession.parameters.getFlagParameter(SERVE_PARAMETER_LONG_NAME).value;
-    if (this._isServeMode && !taskSession.parameters.watch) {
+    this.#isServeMode = taskSession.parameters.getFlagParameter(SERVE_PARAMETER_LONG_NAME).value;
+    if (this.#isServeMode && !taskSession.parameters.watch) {
       throw new Error(
         `The ${JSON.stringify(
           SERVE_PARAMETER_LONG_NAME
@@ -99,13 +99,13 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     options: IWebpackPluginOptions,
     requestRun?: () => void
   ): Promise<IWebpackConfiguration | undefined> {
-    if (this._webpackConfiguration === false) {
+    if (this.#webpackConfiguration === false) {
       const webpackConfiguration: IWebpackConfiguration | undefined = await tryLoadWebpackConfigurationAsync(
         {
           taskSession,
           heftConfiguration,
           hooks: this.accessor.hooks,
-          serveMode: this._isServeMode,
+          serveMode: this.#isServeMode,
           loadWebpackAsyncFn: this._loadWebpackAsync.bind(this, taskSession, heftConfiguration)
         },
         options
@@ -113,7 +113,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
 
       if (webpackConfiguration && requestRun) {
         const overrideWatchFSPlugin: OverrideNodeWatchFSPlugin = new OverrideNodeWatchFSPlugin(requestRun);
-        this._watchFileSystems = overrideWatchFSPlugin.fileSystems;
+        this.#watchFileSystems = overrideWatchFSPlugin.fileSystems;
         for (const config of Array.isArray(webpackConfiguration)
           ? webpackConfiguration
           : [webpackConfiguration]) {
@@ -125,31 +125,31 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
         }
       }
 
-      this._webpackConfiguration = webpackConfiguration;
+      this.#webpackConfiguration = webpackConfiguration;
     }
 
-    return this._webpackConfiguration;
+    return this.#webpackConfiguration;
   }
 
   private async _loadWebpackAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<typeof TWebpack> {
-    if (!this._webpack) {
+    if (!this.#webpack) {
       try {
         const webpackPackagePath: string = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
           WEBPACK_PACKAGE_NAME,
           taskSession.logger.terminal
         );
-        this._webpack = await import(webpackPackagePath);
+        this.#webpack = await import(webpackPackagePath);
         taskSession.logger.terminal.writeDebugLine(`Using Webpack from rig package at "${webpackPackagePath}"`);
       } catch (e) {
         // Fallback to bundled version if not found in rig.
-        this._webpack = await import(WEBPACK_PACKAGE_NAME);
+        this.#webpack = await import(WEBPACK_PACKAGE_NAME);
         taskSession.logger.terminal.writeDebugLine(`Using Webpack from built-in "${WEBPACK_PACKAGE_NAME}"`);
       }
     }
-    return this._webpack!;
+    return this.#webpack!;
   }
 
   private async _getWebpackCompilerAsync(
@@ -157,14 +157,14 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     heftConfiguration: HeftConfiguration,
     webpackConfiguration: IWebpackConfiguration
   ): Promise<TWebpack.Compiler | TWebpack.MultiCompiler> {
-    if (!this._webpackCompiler) {
+    if (!this.#webpackCompiler) {
       const webpack: typeof TWebpack = await this._loadWebpackAsync(taskSession, heftConfiguration);
       taskSession.logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
-      this._webpackCompiler = Array.isArray(webpackConfiguration)
+      this.#webpackCompiler = Array.isArray(webpackConfiguration)
         ? webpack.default(webpackConfiguration) /* (webpack.Compilation[]) => MultiCompiler */
         : webpack.default(webpackConfiguration); /* (webpack.Compilation) => Compiler */
     }
-    return this._webpackCompiler;
+    return this.#webpackCompiler;
   }
 
   private async _runWebpackAsync(
@@ -173,7 +173,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     options: IWebpackPluginOptions
   ): Promise<void> {
     this._validateEnvironmentVariable(taskSession);
-    if (taskSession.parameters.watch || this._isServeMode) {
+    if (taskSession.parameters.watch || this.#isServeMode) {
       // Should never happen, but just in case
       throw new InternalError('Cannot run Webpack in compilation mode when watch mode is enabled');
     }
@@ -223,11 +223,11 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   ): Promise<void> {
     // Save a handle to the original promise, since the this-scoped promise will be replaced whenever
     // the compilation completes.
-    let webpackCompilationDonePromise: Promise<void> | undefined = this._webpackCompilationDonePromise;
+    let webpackCompilationDonePromise: Promise<void> | undefined = this.#webpackCompilationDonePromise;
 
     let isInitial: boolean = false;
 
-    if (!this._webpackCompiler) {
+    if (!this.#webpackCompiler) {
       isInitial = true;
       this._validateEnvironmentVariable(taskSession);
       if (!taskSession.parameters.watch) {
@@ -251,14 +251,14 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
 
       // Set up the hook to detect when the watcher completes the watcher compilation. We will also log out
       // errors from the compilation if present from the output stats object.
-      this._webpackCompilationDonePromise = new Promise((resolve: () => void) => {
-        this._webpackCompilationDonePromiseResolveFn = resolve;
+      this.#webpackCompilationDonePromise = new Promise((resolve: () => void) => {
+        this.#webpackCompilationDonePromiseResolveFn = resolve;
       });
-      webpackCompilationDonePromise = this._webpackCompilationDonePromise;
+      webpackCompilationDonePromise = this.#webpackCompilationDonePromise;
       compiler.hooks.done.tap(PLUGIN_NAME, (stats?: TWebpack.Stats | TWebpack.MultiStats) => {
-        this._webpackCompilationDonePromiseResolveFn!();
-        this._webpackCompilationDonePromise = new Promise((resolve: () => void) => {
-          this._webpackCompilationDonePromiseResolveFn = resolve;
+        this.#webpackCompilationDonePromiseResolveFn!();
+        this.#webpackCompilationDonePromise = new Promise((resolve: () => void) => {
+          this.#webpackCompilationDonePromiseResolveFn = resolve;
         });
 
         if (stats) {
@@ -268,7 +268,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
 
       // Determine how we will run the compiler. When serving, we will run the compiler
       // via the webpack-dev-server. Otherwise, we will run the compiler directly.
-      if (this._isServeMode) {
+      if (this.#isServeMode) {
         const defaultDevServerOptions: TWebpackDevServer.Configuration = {
           host: 'localhost',
           devMiddleware: {
@@ -397,9 +397,9 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     }
 
     let hasChanges: boolean = true;
-    if (!isInitial && this._watchFileSystems) {
+    if (!isInitial && this.#watchFileSystems) {
       hasChanges = false;
-      for (const watchFileSystem of this._watchFileSystems) {
+      for (const watchFileSystem of this.#watchFileSystems) {
         hasChanges = watchFileSystem.flush() || hasChanges;
       }
     }
@@ -420,7 +420,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   }
 
   private _validateEnvironmentVariable(taskSession: IHeftTaskSession): void {
-    if (!this._isServeMode && process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
+    if (!this.#isServeMode && process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
       taskSession.logger.emitWarning(
         new Error(
           `The "${WEBPACK_DEV_SERVER_ENV_VAR_NAME}" environment variable is set, ` +
@@ -432,17 +432,17 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   }
 
   private _emitErrors(logger: IScopedLogger): void {
-    for (const warning of this._warnings) {
+    for (const warning of this.#warnings) {
       logger.emitWarning(warning);
     }
-    for (const error of this._errors) {
+    for (const error of this.#errors) {
       logger.emitError(error);
     }
   }
 
   private _recordErrors(stats: TWebpack.Stats | TWebpack.MultiStats, buildFolderPath: string): void {
-    const errors: Error[] = this._errors;
-    const warnings: Error[] = this._warnings;
+    const errors: Error[] = this.#errors;
+    const warnings: Error[] = this.#warnings;
 
     errors.length = 0;
     warnings.length = 0;
