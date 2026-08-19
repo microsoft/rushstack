@@ -56,7 +56,7 @@ export class Logger implements ILogger {
   public emitError(error: Error): void {
     this.#errors.push(error);
     this.terminal.writeErrorLine(`Error: ${Logger.getErrorMessage(error)}`);
-    if (this._shouldPrintStacks && error.stack) {
+    if (this.#shouldPrintStacks && error.stack) {
       this.terminal.writeErrorLine(error.stack);
     }
   }
@@ -67,12 +67,12 @@ export class Logger implements ILogger {
   public emitWarning(warning: Error): void {
     this.#warnings.push(warning);
     this.terminal.writeWarningLine(`Warning: ${Logger.getErrorMessage(warning)}`);
-    if (this._shouldPrintStacks && warning.stack) {
+    if (this.#shouldPrintStacks && warning.stack) {
       this.terminal.writeWarningLine(warning.stack);
     }
   }
 
-  private get _shouldPrintStacks(): boolean {
+  get #shouldPrintStacks(): boolean {
     return this.#options.getShouldPrintStacks();
   }
 }

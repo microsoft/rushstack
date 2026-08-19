@@ -383,7 +383,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       });
     }
 
-    measureFn(`${PERF_PREFIX}:doBeforeTask`, () => this._doBeforeTask());
+    measureFn(`${PERF_PREFIX}:doBeforeTask`, () => this.#doBeforeTask());
 
     const hooks: PhasedCommandHooks = this.hooks;
     const terminal: ITerminal = this.#terminal;
@@ -724,7 +724,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       } else {
         await measureAsyncFn(`${PERF_PREFIX}:runInitialPhases`, () =>
           measureAsyncFn(`${PERF_PREFIX}:executeOperations`, () =>
-            this._executeOperationsAsync(executeOptions, initialIterationOptions)
+            this.#executeOperationsAsync(executeOptions, initialIterationOptions)
           )
         );
       }
@@ -738,7 +738,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   /**
    * Runs a set of operations and reports the results.
    */
-  private async _executeOperationsAsync(
+  async #executeOperationsAsync(
     options: IExecuteOperationsOptions,
     iterationOptions: IOperationGraphIterationOptions
   ): Promise<void> {
@@ -783,7 +783,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     }
 
     if (!ignoreHooks) {
-      measureFn(`${PERF_PREFIX}:doAfterTask`, () => this._doAfterTask());
+      measureFn(`${PERF_PREFIX}:doAfterTask`, () => this.#doAfterTask());
     }
 
     if (!success) {
@@ -791,7 +791,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     }
   }
 
-  private _doBeforeTask(): void {
+  #doBeforeTask(): void {
     if (
       this.actionName !== RushConstants.buildCommandName &&
       this.actionName !== RushConstants.rebuildCommandName
@@ -805,7 +805,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     this.eventHooksManager.handle(Event.preRushBuild, this.parser.isDebug, this.#ignoreHooksParameter.value);
   }
 
-  private _doAfterTask(): void {
+  #doAfterTask(): void {
     if (
       this.actionName !== RushConstants.buildCommandName &&
       this.actionName !== RushConstants.rebuildCommandName

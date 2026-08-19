@@ -106,7 +106,7 @@ export class PackageJsonEditor {
       dependenciesMeta = {}
     } = data;
 
-    const _onChange: () => void = this._onChange.bind(this);
+    const _onChange: () => void = this.#onChange.bind(this);
 
     const optionalDependenciesSet: Set<string> = new Set(Object.keys(optionalDependencies));
     const peerDependenciesSet: Set<string> = new Set(Object.keys(peerDependencies));
@@ -263,7 +263,7 @@ export class PackageJsonEditor {
       packageName,
       newVersion,
       dependencyType,
-      this._onChange.bind(this)
+      this.#onChange.bind(this)
     );
 
     // Rush collapses everything that isn't a devDependency into the dependencies
@@ -327,7 +327,7 @@ export class PackageJsonEditor {
   public saveIfModified(): boolean {
     if (this.#modified) {
       this.#modified = false;
-      this.#sourceData = this._normalize(this.#sourceData);
+      this.#sourceData = this.#normalize(this.#sourceData);
       JsonFile.save(this.#sourceData, this.filePath, {
         updateExistingFile: true,
         jsonSyntax: JsonSyntax.Strict
@@ -341,7 +341,7 @@ export class PackageJsonEditor {
   public async saveIfModifiedAsync(): Promise<boolean> {
     if (this.#modified) {
       this.#modified = false;
-      this.#sourceData = this._normalize(this.#sourceData);
+      this.#sourceData = this.#normalize(this.#sourceData);
       await JsonFile.saveAsync(this.#sourceData, this.filePath, {
         updateExistingFile: true,
         jsonSyntax: JsonSyntax.Strict
@@ -360,12 +360,12 @@ export class PackageJsonEditor {
    */
   public saveToObject(): IPackageJson {
     // Only normalize if we need to
-    const sourceData: IPackageJson = this.#modified ? this._normalize(this.#sourceData) : this.#sourceData;
+    const sourceData: IPackageJson = this.#modified ? this.#normalize(this.#sourceData) : this.#sourceData;
     // Provide a clone to avoid reference back to the original data object
     return cloneDeep(sourceData);
   }
 
-  private _onChange(): void {
+  #onChange(): void {
     this.#modified = true;
   }
 
@@ -375,7 +375,7 @@ export class PackageJsonEditor {
    * it will still need to be deep-cloned to avoid propogating changes back to the
    * original dataset.
    */
-  private _normalize(source: IPackageJson): IPackageJson {
+  #normalize(source: IPackageJson): IPackageJson {
     const normalizedData: IPackageJson = { ...source };
     delete normalizedData.dependencies;
     delete normalizedData.optionalDependencies;

@@ -84,7 +84,7 @@ export class VersionPolicyConfiguration {
   public constructor(jsonFileName: string) {
     this.#jsonFileName = jsonFileName;
     this.versionPolicies = new Map<string, VersionPolicy>();
-    this._loadFile();
+    this.#loadFile();
   }
 
   /**
@@ -144,7 +144,7 @@ export class VersionPolicyConfiguration {
         }
       });
     }
-    this._saveFile(!!shouldCommit);
+    this.#saveFile(!!shouldCommit);
   }
 
   /**
@@ -162,11 +162,11 @@ export class VersionPolicyConfiguration {
     if (lockStepVersionPolicy.update(newVersion)) {
       // eslint-disable-next-line no-console
       console.log(`\nUpdate version policy ${versionPolicyName} from ${previousVersion} to ${newVersion}`);
-      this._saveFile(!!shouldCommit);
+      this.#saveFile(!!shouldCommit);
     }
   }
 
-  private _loadFile(): void {
+  #loadFile(): void {
     if (!FileSystem.exists(this.#jsonFileName)) {
       return;
     }
@@ -180,7 +180,7 @@ export class VersionPolicyConfiguration {
     });
   }
 
-  private _saveFile(shouldCommit: boolean): void {
+  #saveFile(shouldCommit: boolean): void {
     const versionPolicyJson: IVersionPolicyJson[] = [];
     this.versionPolicies.forEach((versionPolicy) => {
       versionPolicyJson.push(versionPolicy._json);

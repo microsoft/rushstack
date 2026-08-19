@@ -63,7 +63,7 @@ export class AsyncRecycler {
     Utilities.createFolderWithRetry(this.recyclerFolder);
 
     Utilities.retryUntilTimeout(
-      () => this._renameOrRecurseInFolder(folderPath),
+      () => this.#renameOrRecurseInFolder(folderPath),
       maxWaitTimeMs,
       (e) =>
         new Error(`Error: ${e}\nOften this is caused by a file lock from a process like the virus scanner.`),
@@ -86,7 +86,7 @@ export class AsyncRecycler {
       if (!excludeSet.has(normalizedMemberName)) {
         const absolutePath: string = path.resolve(folderPath, dirent.name);
         if (dirent.isDirectory()) {
-          this._renameOrRecurseInFolder(absolutePath);
+          this.#renameOrRecurseInFolder(absolutePath);
         } else {
           FileSystem.deleteFile(absolutePath);
         }
@@ -183,7 +183,7 @@ export class AsyncRecycler {
     process.unref();
   }
 
-  private _renameOrRecurseInFolder(folderPath: string): void {
+  #renameOrRecurseInFolder(folderPath: string): void {
     const ordinal: number = this.#movedFolderCount++;
     const targetDir: string = `${this.recyclerFolder}/${this.#prefix}_${ordinal}`;
     try {
@@ -203,7 +203,7 @@ export class AsyncRecycler {
     for (const child of children) {
       const absoluteChild: string = `${folderPath}/${child.name}`;
       if (child.isDirectory()) {
-        this._renameOrRecurseInFolder(absoluteChild);
+        this.#renameOrRecurseInFolder(absoluteChild);
       } else {
         FileSystem.deleteFile(absoluteChild);
       }

@@ -132,7 +132,7 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
     return parameter as TParameter;
   }
 
-  private async _prepareAutoinstallerNameAsync(): Promise<void> {
+  async #prepareAutoinstallerNameAsync(): Promise<void> {
     const autoInstaller: Autoinstaller = new Autoinstaller({
       autoinstallerName: this.#autoinstallerName,
       rushConfiguration: this.rushConfiguration,
@@ -184,7 +184,7 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
 
     if (this.#autoinstallerName) {
       await measureAsyncFn('rush:globalScriptAction:prepareAutoinstaller', () =>
-        this._prepareAutoinstallerNameAsync()
+        this.#prepareAutoinstallerNameAsync()
       );
 
       const autoinstallerNameBinPath: string = path.join(this.#autoinstallerFullPath, 'node_modules', '.bin');
@@ -216,9 +216,9 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
     const shellCommandTokenContext: IShellCommandTokenContext | undefined =
       this.commandLineConfiguration?.shellCommandTokenContext;
     if (shellCommandTokenContext) {
-      shellCommand = this._expandShellCommandWithTokens(shellCommand, shellCommandTokenContext);
+      shellCommand = this.#expandShellCommandWithTokens(shellCommand, shellCommandTokenContext);
     }
-    this._rejectAnyTokensInShellCommand(shellCommand, shellCommandTokenContext);
+    this.#rejectAnyTokensInShellCommand(shellCommand, shellCommandTokenContext);
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
@@ -257,7 +257,7 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
     }
   }
 
-  private _expandShellCommandWithTokens(
+  #expandShellCommandWithTokens(
     shellCommand: string,
     tokenContext: IShellCommandTokenContext
   ): string {
@@ -268,7 +268,7 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
     return expandedShellCommand;
   }
 
-  private _rejectAnyTokensInShellCommand(
+  #rejectAnyTokensInShellCommand(
     shellCommand: string,
     tokenContext?: IShellCommandTokenContext
   ): void {

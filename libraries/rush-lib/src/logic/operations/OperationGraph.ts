@@ -347,7 +347,7 @@ export class OperationGraph implements IOperationGraph {
     const coerced: number = coerceParallelism(value, this.#maxParallelism, 1);
     if (coerced !== this.#parallelism) {
       this.#parallelism = coerced;
-      this._scheduleManagerStateChanged();
+      this.#scheduleManagerStateChanged();
     }
   }
 
@@ -357,7 +357,7 @@ export class OperationGraph implements IOperationGraph {
   public set debugMode(value: boolean) {
     if (value !== this.#debugMode) {
       this.#debugMode = value;
-      this._scheduleManagerStateChanged();
+      this.#scheduleManagerStateChanged();
     }
   }
 
@@ -367,7 +367,7 @@ export class OperationGraph implements IOperationGraph {
   public set quietMode(value: boolean) {
     if (value !== this.#quietMode) {
       this.#quietMode = value;
-      this._scheduleManagerStateChanged();
+      this.#scheduleManagerStateChanged();
     }
   }
 
@@ -377,7 +377,7 @@ export class OperationGraph implements IOperationGraph {
   public set allowOversubscription(value: boolean) {
     if (value !== this.#allowOversubscription) {
       this.#allowOversubscription = value;
-      this._scheduleManagerStateChanged();
+      this.#scheduleManagerStateChanged();
     }
   }
 
@@ -387,9 +387,9 @@ export class OperationGraph implements IOperationGraph {
   public set pauseNextIteration(value: boolean) {
     if (value !== this.#pauseNextIteration) {
       this.#pauseNextIteration = value;
-      this._scheduleManagerStateChanged();
+      this.#scheduleManagerStateChanged();
 
-      this._setIdleTimeout();
+      this.#setIdleTimeout();
     }
   }
 
@@ -405,18 +405,18 @@ export class OperationGraph implements IOperationGraph {
     return this.#terminalSplitter.destinations;
   }
 
-  private _setStatus(newStatus: OperationStatus): void {
+  #setStatus(newStatus: OperationStatus): void {
     if (this.#status !== newStatus) {
       this.#status = newStatus;
-      this._scheduleManagerStateChanged();
+      this.#scheduleManagerStateChanged();
     }
   }
 
-  private _setScheduledIteration(iteration: IExecutionIterationContext | undefined): void {
+  #setScheduledIteration(iteration: IExecutionIterationContext | undefined): void {
     const hadScheduled: boolean = !!this.#scheduledIteration;
     this.#scheduledIteration = iteration;
     if (hadScheduled !== !!this.#scheduledIteration) {
-      this._scheduleManagerStateChanged();
+      this.#scheduleManagerStateChanged();
     }
   }
 
@@ -482,7 +482,7 @@ export class OperationGraph implements IOperationGraph {
       this.hooks.onInvalidateOperations.call(invalidated, reason);
     }
     if (!currentIteration) {
-      this._setStatus(OperationStatus.Ready);
+      this.#setStatus(OperationStatus.Ready);
     }
   }
 
@@ -495,7 +495,7 @@ export class OperationGraph implements IOperationGraph {
   public async executeAsync(iterationOptions: IOperationGraphIterationOptions): Promise<IExecutionResult> {
     await this.abortCurrentIterationAsync();
     const scheduled: IExecutionIterationContext | undefined =
-      await this._scheduleIterationAsync(iterationOptions);
+      await this.#scheduleIterationAsync(iterationOptions);
     if (!scheduled) {
       return {
         operationResults: this.resultByOperation,
@@ -515,7 +515,7 @@ export class OperationGraph implements IOperationGraph {
    * @returns A promise that resolves to true if the iteration was successfully queued, or false if it was not.
    */
   public async scheduleIterationAsync(iterationOptions: IOperationGraphIterationOptions): Promise<boolean> {
-    return !!(await this._scheduleIterationAsync(iterationOptions));
+    return !!(await this.#scheduleIterationAsync(iterationOptions));
   }
 
   /**
@@ -532,9 +532,9 @@ export class OperationGraph implements IOperationGraph {
     }
 
     this.#currentIteration = iteration;
-    this._setScheduledIteration(undefined);
+    this.#setScheduledIteration(undefined);
 
-    iteration.promise = this._executeInnerAsync(this.#currentIteration).finally(() => {
+    iteration.promise = this.#executeInnerAsync(this.#currentIteration).finally(() => {
       this.#currentIteration = undefined;
 
       // Apply any status resets that were deferred because the records were part of the
@@ -555,7 +555,7 @@ export class OperationGraph implements IOperationGraph {
         this.hooks.onInvalidateOperations.call(ops, deferredReason);
       }
 
-      this._setIdleTimeout();
+      this.#setIdleTimeout();
     });
 
     await iteration.promise;
@@ -573,7 +573,7 @@ export class OperationGraph implements IOperationGraph {
       }
     }
 
-    this._setIdleTimeout();
+    this.#setIdleTimeout();
   }
 
   public addTerminalDestination(destination: TerminalWritable): void {
@@ -584,7 +584,7 @@ export class OperationGraph implements IOperationGraph {
     return this.#terminalSplitter.removeDestination(destination, close);
   }
 
-  private _setIdleTimeout(): void {
+  #setIdleTimeout(): void {
     if (this.#currentIteration || this.abortController.signal.aborted) {
       return;
     }
@@ -607,7 +607,7 @@ export class OperationGraph implements IOperationGraph {
     }
   };
 
-  private async _scheduleIterationAsync(
+  async #scheduleIterationAsync(
     iterationOptions: IOperationGraphIterationOptions
   ): Promise<IExecutionIterationContext | undefined> {
     const getInputsSnapshotAsync: (() => Promise<IInputsSnapshot | undefined>) | undefined =
@@ -718,7 +718,7 @@ export class OperationGraph implements IOperationGraph {
       return;
     }
 
-    this._setScheduledIteration(iterationContext);
+    this.#setScheduledIteration(iterationContext);
     // Notify listeners that an iteration has been scheduled with the planned operation records
     try {
       this.hooks.onIterationScheduled.call(iterationContext.records);
@@ -730,7 +730,7 @@ export class OperationGraph implements IOperationGraph {
       throw e;
     }
     if (!this.#currentIteration) {
-      this._setIdleTimeout();
+      this.#setIdleTimeout();
     } else if (!this.pauseNextIteration) {
       void this.abortCurrentIterationAsync();
     }
@@ -780,7 +780,7 @@ export class OperationGraph implements IOperationGraph {
    * only trigger the hook once. This avoids redundant re-computation in listeners (e.g. UI refresh) while preserving
    * ordering guarantees that the notification occurs after the initiating state changes are fully applied.
    */
-  private _scheduleManagerStateChanged(): void {
+  #scheduleManagerStateChanged(): void {
     if (this.#graphStateChangeScheduled || this.abortController.signal.aborted) {
       return;
     }
@@ -795,8 +795,8 @@ export class OperationGraph implements IOperationGraph {
    * Executes all operations which have been registered, returning a promise which is resolved when all operations have been processed to a final state.
    * The abortController can be used to cancel the execution of any operations that have not yet begun execution.
    */
-  private async _executeInnerAsync(iterationContext: IExecutionIterationContext): Promise<OperationStatus> {
-    this._setStatus(OperationStatus.Executing);
+  async #executeInnerAsync(iterationContext: IExecutionIterationContext): Promise<OperationStatus> {
+    this.#setStatus(OperationStatus.Executing);
 
     const { hooks } = this;
 
@@ -975,7 +975,7 @@ export class OperationGraph implements IOperationGraph {
       return OperationStatus.Success;
     })();
 
-    this._setStatus(
+    this.#setStatus(
       (await measureAsyncFn(`${PERF_PREFIX}:afterExecuteIterationAsync`, async () => {
         return await hooks.afterExecuteIterationAsync.promise(status, executionRecords, iterationOptions);
       })) ?? status

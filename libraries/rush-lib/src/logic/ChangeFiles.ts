@@ -231,15 +231,15 @@ export class ChangeFiles {
         { concurrency: 5 }
       );
 
-      return await this._deleteFilesAsync(terminal, filesToDelete, shouldDelete);
+      return await this.#deleteFilesAsync(terminal, filesToDelete, shouldDelete);
     } else {
       // Delete all change files.
       const files: string[] = await this.getAllChangeFilesAsync();
-      return await this._deleteFilesAsync(terminal, files, shouldDelete);
+      return await this.#deleteFilesAsync(terminal, files, shouldDelete);
     }
   }
 
-  private async _deleteFilesAsync(
+  async #deleteFilesAsync(
     terminal: ITerminal,
     files: string[],
     shouldDelete: boolean

@@ -91,7 +91,7 @@ export class ApprovedPackagesConfiguration {
     let item: ApprovedPackagesItem | undefined = this.#itemsByName.get(packageName);
     if (!item) {
       item = new ApprovedPackagesItem(packageName);
-      this._addItem(item);
+      this.#addItem(item);
       changed = true;
     }
 
@@ -136,7 +136,7 @@ export class ApprovedPackagesConfiguration {
     this.clear();
 
     for (const browserPackage of approvedPackagesJson.packages) {
-      this._addItemJson(browserPackage, this.#jsonFilename);
+      this.#addItemJson(browserPackage, this.#jsonFilename);
     }
   }
 
@@ -188,7 +188,7 @@ export class ApprovedPackagesConfiguration {
   /**
    * Helper function only used by the constructor when loading the file.
    */
-  private _addItemJson(itemJson: IApprovedPackagesItemJson, jsonFilename: string): void {
+  #addItemJson(itemJson: IApprovedPackagesItemJson, jsonFilename: string): void {
     if (this.#itemsByName.has(itemJson.name)) {
       throw new Error(
         `Error loading package review file ${jsonFilename}:\n` +
@@ -202,14 +202,14 @@ export class ApprovedPackagesConfiguration {
         item.allowedCategories.add(allowedCategory);
       }
     }
-    this._addItem(item);
+    this.#addItem(item);
   }
 
   /**
    * Helper function that adds an already created ApprovedPackagesItem to the
    * list and set.
    */
-  private _addItem(item: ApprovedPackagesItem): void {
+  #addItem(item: ApprovedPackagesItem): void {
     if (this.#itemsByName.has(item.packageName)) {
       throw new InternalError('Duplicate key');
     }

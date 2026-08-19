@@ -203,7 +203,7 @@ export class ProjectChangeAnalyzer {
 
       // Detect changes to pnpm catalog entries in pnpm-config.json
       if (rushConfiguration.isPnpm) {
-        await this._detectCatalogChangesAsync(
+        await this.#detectCatalogChangesAsync(
           subspace,
           rushConfiguration,
           changedFiles,
@@ -485,7 +485,7 @@ export class ProjectChangeAnalyzer {
     rootDir: string,
     terminal: ITerminal
   ): Promise<Map<string, T>> {
-    const ignoreMatcher: Ignore | undefined = await this._getIgnoreMatcherForProjectAsync(project, terminal);
+    const ignoreMatcher: Ignore | undefined = await this.#getIgnoreMatcherForProjectAsync(project, terminal);
     if (!ignoreMatcher) {
       return unfilteredProjectData;
     }
@@ -507,7 +507,7 @@ export class ProjectChangeAnalyzer {
     return filteredProjectData;
   }
 
-  private async _getIgnoreMatcherForProjectAsync(
+  async #getIgnoreMatcherForProjectAsync(
     project: RushConfigurationProject,
     terminal: ITerminal
   ): Promise<Ignore | undefined> {
@@ -525,7 +525,7 @@ export class ProjectChangeAnalyzer {
    * Detects changes to pnpm catalog entries in a subspace's pnpm-config.json and marks
    * affected projects as changed.
    */
-  private async _detectCatalogChangesAsync(
+  async #detectCatalogChangesAsync(
     subspace: Subspace,
     rushConfiguration: RushConfiguration,
     changedFiles: Map<string, IFileDiffStatus>,

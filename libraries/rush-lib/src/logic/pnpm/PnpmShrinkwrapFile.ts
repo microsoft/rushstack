@@ -466,7 +466,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // when computing the hash, since the main concern is changes to the overall external dependency footprint
     const { omitImportersFromPreventManualShrinkwrapChanges } = experimentsConfig || {};
 
-    const shrinkwrapContent: string = this._serializeInternal(
+    const shrinkwrapContent: string = this.#serializeInternal(
       omitImportersFromPreventManualShrinkwrapChanges
     );
     return crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
@@ -476,7 +476,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * Determine whether `pnpm-lock.yaml` contains insecure sha1 hashes.
    * @internal
    */
-  private _disallowInsecureSha1(
+  #disallowInsecureSha1(
     customTipsConfiguration: CustomTipsConfiguration,
     exemptPackageVersions: Record<string, string[]>,
     terminal: ITerminal,
@@ -485,14 +485,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const exemptPackageList: Map<string, boolean> = new Map();
     for (const [pkgName, versions] of Object.entries(exemptPackageVersions)) {
       for (const version of versions) {
-        exemptPackageList.set(this._getPackageId(pkgName, version), true);
+        exemptPackageList.set(this.#getPackageId(pkgName, version), true);
       }
     }
 
     for (const [pkgName, { resolution }] of this.packages) {
       if (
         resolution?.integrity?.startsWith('sha1') &&
-        !exemptPackageList.has(this._parseDependencyPath(pkgName))
+        !exemptPackageList.has(this.#parseDependencyPath(pkgName))
       ) {
         terminal.writeErrorLine(
           'Error: An integrity field with "sha1" was detected in the pnpm-lock.yaml file located in subspace ' +
@@ -518,7 +518,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     let invalidPoliciesCount: number = 0;
 
     if (pnpmLockfilePolicies?.disallowInsecureSha1?.enabled) {
-      const isError: boolean = this._disallowInsecureSha1(
+      const isError: boolean = this.#disallowInsecureSha1(
         rushConfiguration.customTipsConfiguration,
         pnpmLockfilePolicies.disallowInsecureSha1.exemptPackageVersions,
         terminal,
@@ -589,7 +589,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * This operation exactly mirrors the behavior of PNPM's own implementation:
    * https://github.com/pnpm/pnpm/blob/73ebfc94e06d783449579cda0c30a40694d210e4/lockfile/lockfile-file/src/experiments/inlineSpecifiersLockfileConverters.ts#L162
    */
-  private _convertLockfileV6DepPathToV5DepPath(newDepPath: string): string {
+  #convertLockfileV6DepPathToV5DepPath(newDepPath: string): string {
     if (!newDepPath.includes('@', 2) || newDepPath.startsWith('file:')) return newDepPath;
     const index: number = newDepPath.indexOf('@', newDepPath.indexOf('/@') + 2);
     if (newDepPath.includes('(') && index > pnpmKitV8.dependencyPath.indexOfPeersSuffix(newDepPath))
@@ -602,7 +602,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * Example: "/eslint-utils@3.0.0(eslint@8.23.1)" --> "/eslint-utils@3.0.0"
    * Example: "/@typescript-eslint/experimental-utils/5.9.1_eslint@8.6.0+typescript@4.4.4" --> "/@typescript-eslint/experimental-utils/5.9.1"
    */
-  private _parseDependencyPath(packagePath: string): string {
+  #parseDependencyPath(packagePath: string): string {
     let name: string | undefined;
     let version: string | undefined;
 
@@ -616,7 +616,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       ({ name, version } = pnpmKitV9.dependencyPath.parse(packagePath));
     } else {
       if (this.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V6) {
-        packagePath = this._convertLockfileV6DepPathToV5DepPath(packagePath);
+        packagePath = this.#convertLockfileV6DepPathToV5DepPath(packagePath);
       }
 
       ({ name, version } = pnpmKitV8.dependencyPath.parse(packagePath));
@@ -626,7 +626,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       throw new InternalError(`Unable to parse package path: ${packagePath}`);
     }
 
-    return this._getPackageId(name, version);
+    return this.#getPackageId(name, version);
   }
 
   public override getTempProjectNames(): ReadonlyArray<string> {
@@ -798,7 +798,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     name: string,
     version: IPnpmVersionSpecifier
   ): IPnpmShrinkwrapDependencyYaml | undefined {
-    const packageId: string = this._getPackageId(name, version);
+    const packageId: string = this.#getPackageId(name, version);
     return this.packages.get(packageId);
   }
 
@@ -806,7 +806,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * Serializes the PNPM Shrinkwrap file
    */
   protected override serialize(): string {
-    return this._serializeInternal(false);
+    return this.#serializeInternal(false);
   }
 
   /**
@@ -834,7 +834,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined =
-      this._getPackageDescription(tempProjectDependencyKey);
+      this.#getPackageDescription(tempProjectDependencyKey);
     if (
       !packageDescription ||
       !packageDescription.dependencies ||
@@ -844,7 +844,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     const dependencyKey: IPnpmVersionSpecifier = packageDescription.dependencies[packageName];
-    return this._parsePnpmDependencyKey(packageName, dependencyKey);
+    return this.#parsePnpmDependencyKey(packageName, dependencyKey);
   }
 
   public override findOrphanedProjects(
@@ -938,7 +938,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
               externalDeps[name] = versionSpecifier;
             }
           }
-          this._addIntegrities(resolvedIntegrityMap, externalDeps, optional);
+          this.#addIntegrities(resolvedIntegrityMap, externalDeps, optional);
         };
 
         if (dependencies) {
@@ -1233,7 +1233,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return false;
   }
 
-  private _getIntegrityForPackage(specifier: string, optional: boolean): Map<string, string> {
+  #getIntegrityForPackage(specifier: string, optional: boolean): Map<string, string> {
     const integrities: Map<string, Map<string, string>> = this.#integrities;
 
     let integrityMap: Map<string, string> | undefined = integrities.get(specifier);
@@ -1271,17 +1271,17 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const { dependencies, optionalDependencies } = shrinkwrapEntry;
 
     if (dependencies) {
-      this._addIntegrities(integrityMap, dependencies, false);
+      this.#addIntegrities(integrityMap, dependencies, false);
     }
 
     if (optionalDependencies) {
-      this._addIntegrities(integrityMap, optionalDependencies, true);
+      this.#addIntegrities(integrityMap, optionalDependencies, true);
     }
 
     return integrityMap;
   }
 
-  private _addIntegrities(
+  #addIntegrities(
     integrityMap: Map<string, string>,
     collection: Record<string, IPnpmVersionSpecifier>,
     optional: boolean
@@ -1300,13 +1300,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
           }
         }
       } else {
-        const packageId: string = this._getPackageId(name, version);
+        const packageId: string = this.#getPackageId(name, version);
         if (integrityMap.has(packageId)) {
           // The entry could already have been added as a nested dependency
           continue;
         }
 
-        const contribution: Map<string, string> = this._getIntegrityForPackage(packageId, optional);
+        const contribution: Map<string, string> = this.#getIntegrityForPackage(packageId, optional);
         for (const [dep, integrity] of contribution) {
           integrityMap.set(dep, integrity);
         }
@@ -1317,7 +1317,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   /**
    * Gets the package description for a tempProject from the shrinkwrap file.
    */
-  private _getPackageDescription(
+  #getPackageDescription(
     tempProjectDependencyKey: string
   ): IPnpmShrinkwrapDependencyYaml | undefined {
     const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined =
@@ -1326,7 +1326,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return packageDescription && packageDescription.dependencies ? packageDescription : undefined;
   }
 
-  private _getPackageId(name: string, versionSpecifier: IPnpmVersionSpecifier): string {
+  #getPackageId(name: string, versionSpecifier: IPnpmVersionSpecifier): string {
     const version: string = normalizePnpmVersionSpecifier(versionSpecifier);
     if (this.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V9) {
       return PnpmShrinkwrapFile.getLockfileV9PackageId(name, version);
@@ -1343,7 +1343,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
   }
 
-  private _parsePnpmDependencyKey(
+  #parsePnpmDependencyKey(
     dependencyName: string,
     pnpmDependencyKey: IPnpmVersionSpecifier
   ): DependencySpecifier | undefined {
@@ -1366,7 +1366,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
   }
 
-  private _serializeInternal(omitImporters: boolean = false): string {
+  #serializeInternal(omitImporters: boolean = false): string {
     // Ensure that if any of the top-level properties are provided but empty are removed. We populate the object
     // properties when we read the shrinkwrap but PNPM does not set these top-level properties unless they are present.
     const shrinkwrapToSerialize: { [key: string]: unknown } = {};

@@ -32,12 +32,12 @@ export class KeyboardLoop {
     return this.#readlineInterface !== undefined;
   }
 
-  private _captureInput(): void {
+  #captureInput(): void {
     if (this.#readlineInterface) {
       return;
     }
 
-    this._checkForTTY();
+    this.#checkForTTY();
 
     this.#readlineInterface = readline.createInterface({ input: this.stdin });
 
@@ -46,7 +46,7 @@ export class KeyboardLoop {
     this.stdin.addListener('keypress', this.#onKeypress);
   }
 
-  private _checkForTTY(): void {
+  #checkForTTY(): void {
     // Typescript thinks setRawMode always extists, but we're testing that assumption here.
     if (this.stdin.isTTY && (this.stdin as Partial<NodeJS.ReadStream>).setRawMode) {
       return;
@@ -83,7 +83,7 @@ export class KeyboardLoop {
     throw new AlreadyReportedError();
   }
 
-  private _uncaptureInput(): void {
+  #uncaptureInput(): void {
     if (!this.#readlineInterface) {
       return;
     }
@@ -112,14 +112,14 @@ export class KeyboardLoop {
 
   public async startAsync(): Promise<void> {
     try {
-      this._captureInput();
+      this.#captureInput();
       this.onStart();
       await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
         this.#resolvePromise = resolve;
         this.#rejectPromise = reject;
       });
     } finally {
-      this._uncaptureInput();
+      this.#uncaptureInput();
       this.unhideCursor();
     }
   }

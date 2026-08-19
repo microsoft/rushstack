@@ -127,7 +127,7 @@ export class CommonVersionsConfiguration {
     rushConfiguration: RushConfiguration | undefined
   ) {
     this.#preferredVersions = new ProtectableMap<string, string>({
-      onSet: this._onSetPreferredVersions.bind(this)
+      onSet: this.#onSetPreferredVersions.bind(this)
     });
     this.preferredVersions = this.#preferredVersions.protectedView;
 
@@ -138,7 +138,7 @@ export class CommonVersionsConfiguration {
     }
 
     this.#allowedAlternativeVersions = new ProtectableMap<string, string[]>({
-      onSet: this._onSetAllowedAlternativeVersions.bind(this)
+      onSet: this.#onSetAllowedAlternativeVersions.bind(this)
     });
     this.allowedAlternativeVersions = this.#allowedAlternativeVersions.protectedView;
 
@@ -239,7 +239,7 @@ export class CommonVersionsConfiguration {
    */
   public save(): boolean {
     if (this.#modified) {
-      JsonFile.save(this._serialize(), this.filePath, {
+      JsonFile.save(this.#serialize(), this.filePath, {
         updateExistingFile: true,
         ignoreUndefinedValues: true
       });
@@ -255,7 +255,7 @@ export class CommonVersionsConfiguration {
    */
   public async saveAsync(): Promise<boolean> {
     if (this.#modified) {
-      await JsonFile.saveAsync(this._serialize(), this.filePath, {
+      await JsonFile.saveAsync(this.#serialize(), this.filePath, {
         updateExistingFile: true,
         ignoreUndefinedValues: true
       });
@@ -275,7 +275,7 @@ export class CommonVersionsConfiguration {
     return allPreferredVersions;
   }
 
-  private _onSetPreferredVersions(
+  #onSetPreferredVersions(
     source: ProtectableMap<string, string>,
     key: string,
     value: string
@@ -287,7 +287,7 @@ export class CommonVersionsConfiguration {
     return value;
   }
 
-  private _onSetAllowedAlternativeVersions(
+  #onSetAllowedAlternativeVersions(
     source: ProtectableMap<string, string[]>,
     key: string,
     value: string[]
@@ -299,7 +299,7 @@ export class CommonVersionsConfiguration {
     return value;
   }
 
-  private _serialize(): ICommonVersionsJson {
+  #serialize(): ICommonVersionsJson {
     let preferredVersions: ICommonVersionsJsonVersionMap | undefined;
     if (this.#preferredVersions.size) {
       preferredVersions = _serializeTable(this.preferredVersions);

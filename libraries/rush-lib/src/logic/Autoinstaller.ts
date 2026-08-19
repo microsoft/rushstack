@@ -101,7 +101,7 @@ export class Autoinstaller {
       autoinstallerFullPath
     );
 
-    this._logIfConsoleOutputIsNotRestricted(`Acquiring lock for "${relativePathForLogs}" folder...`);
+    this.#logIfConsoleOutputIsNotRestricted(`Acquiring lock for "${relativePathForLogs}" folder...`);
 
     const lock: LockFile = await LockFile.acquireAsync(autoinstallerFullPath, 'autoinstaller');
 
@@ -132,7 +132,7 @@ export class Autoinstaller {
 
       if (isLastInstallFlagDirty || lock.dirtyWhenAcquired) {
         if (FileSystem.exists(nodeModulesFolder)) {
-          this._logIfConsoleOutputIsNotRestricted('Deleting old files from ' + nodeModulesFolder);
+          this.#logIfConsoleOutputIsNotRestricted('Deleting old files from ' + nodeModulesFolder);
           const recycler: AsyncRecycler = new AsyncRecycler(
             `${this.#rushConfiguration.commonTempFolder}/${RushConstants.rushRecyclerFolderName}`
           );
@@ -150,7 +150,7 @@ export class Autoinstaller {
           )
         });
 
-        this._logIfConsoleOutputIsNotRestricted(
+        this.#logIfConsoleOutputIsNotRestricted(
           `Installing dependencies under ${autoinstallerFullPath}...\n`
         );
 
@@ -158,7 +158,7 @@ export class Autoinstaller {
           command: this.#rushConfiguration.packageManagerToolFilename,
           args: ['install', '--frozen-lockfile'],
           workingDirectory: autoinstallerFullPath,
-          environment: this._getPackageManagerEnvironment(autoinstallerFullPath),
+          environment: this.#getPackageManagerEnvironment(autoinstallerFullPath),
           keepEnvironment: true
         });
 
@@ -170,9 +170,9 @@ export class Autoinstaller {
           'If this file is deleted, Rush will assume that the node_modules folder has been cleaned and will reinstall it.'
         );
 
-        this._logIfConsoleOutputIsNotRestricted('Auto install completed successfully\n');
+        this.#logIfConsoleOutputIsNotRestricted('Auto install completed successfully\n');
       } else {
-        this._logIfConsoleOutputIsNotRestricted('Autoinstaller folder is already up to date\n');
+        this.#logIfConsoleOutputIsNotRestricted('Autoinstaller folder is already up to date\n');
       }
     } finally {
       // Ensure the lockfile is released when we are finished.
@@ -194,7 +194,7 @@ export class Autoinstaller {
       throw new Error(`The specified autoinstaller path does not exist: ` + autoinstallerPackageJsonPath);
     }
 
-    this._logIfConsoleOutputIsNotRestricted(
+    this.#logIfConsoleOutputIsNotRestricted(
       `Updating autoinstaller package: ${autoinstallerPackageJsonPath}`
     );
 
@@ -202,7 +202,7 @@ export class Autoinstaller {
 
     if (await FileSystem.existsAsync(this.shrinkwrapFilePath)) {
       oldFileContents = FileSystem.readFile(this.shrinkwrapFilePath, { convertLineEndings: NewlineKind.Lf });
-      this._logIfConsoleOutputIsNotRestricted('Deleting ' + this.shrinkwrapFilePath);
+      this.#logIfConsoleOutputIsNotRestricted('Deleting ' + this.shrinkwrapFilePath);
       await FileSystem.deleteFileAsync(this.shrinkwrapFilePath);
       if (this.#rushConfiguration.isPnpm) {
         // Workaround for https://github.com/pnpm/pnpm/issues/1890
@@ -229,7 +229,7 @@ export class Autoinstaller {
       );
     }
 
-    this._logIfConsoleOutputIsNotRestricted();
+    this.#logIfConsoleOutputIsNotRestricted();
 
     Utilities.syncNpmrc({
       sourceNpmrcFolder: this.#rushConfiguration.commonRushConfigFolder,
@@ -244,22 +244,22 @@ export class Autoinstaller {
       command: this.#rushConfiguration.packageManagerToolFilename,
       args: ['install'],
       workingDirectory: this.folderFullPath,
-      environment: this._getPackageManagerEnvironment(this.folderFullPath),
+      environment: this.#getPackageManagerEnvironment(this.folderFullPath),
       keepEnvironment: true
     });
 
-    this._logIfConsoleOutputIsNotRestricted();
+    this.#logIfConsoleOutputIsNotRestricted();
 
     if (this.#rushConfiguration.packageManager === 'npm') {
-      this._logIfConsoleOutputIsNotRestricted(Colorize.bold('Running "npm shrinkwrap"...'));
+      this.#logIfConsoleOutputIsNotRestricted(Colorize.bold('Running "npm shrinkwrap"...'));
       await Utilities.executeCommandAsync({
         command: this.#rushConfiguration.packageManagerToolFilename,
         args: ['shrinkwrap'],
         workingDirectory: this.folderFullPath,
         keepEnvironment: true
       });
-      this._logIfConsoleOutputIsNotRestricted('"npm shrinkwrap" completed');
-      this._logIfConsoleOutputIsNotRestricted();
+      this.#logIfConsoleOutputIsNotRestricted('"npm shrinkwrap" completed');
+      this.#logIfConsoleOutputIsNotRestricted();
     }
 
     if (!(await FileSystem.existsAsync(this.shrinkwrapFilePath))) {
@@ -272,16 +272,16 @@ export class Autoinstaller {
       convertLineEndings: NewlineKind.Lf
     });
     if (oldFileContents !== newFileContents) {
-      this._logIfConsoleOutputIsNotRestricted(
+      this.#logIfConsoleOutputIsNotRestricted(
         Colorize.green('The shrinkwrap file has been updated.') + '  Please commit the updated file:'
       );
-      this._logIfConsoleOutputIsNotRestricted(`\n  ${this.shrinkwrapFilePath}`);
+      this.#logIfConsoleOutputIsNotRestricted(`\n  ${this.shrinkwrapFilePath}`);
     } else {
-      this._logIfConsoleOutputIsNotRestricted(Colorize.green('Already up to date.'));
+      this.#logIfConsoleOutputIsNotRestricted(Colorize.green('Already up to date.'));
     }
   }
 
-  private _logIfConsoleOutputIsNotRestricted(message?: string): void {
+  #logIfConsoleOutputIsNotRestricted(message?: string): void {
     if (!this.#restrictConsoleOutput) {
       // eslint-disable-next-line no-console
       console.log(message ?? '');
@@ -292,14 +292,14 @@ export class Autoinstaller {
    * Returns the environment to invoke the package manager with, or `undefined` to inherit this
    * process's environment. See the `provideNpmrcCredentialsViaEnvironment` experiment.
    */
-  private _getPackageManagerEnvironment(npmrcFolder: string): NodeJS.ProcessEnv | undefined {
-    if (!InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(this._rushConfiguration)) {
+  #getPackageManagerEnvironment(npmrcFolder: string): NodeJS.ProcessEnv | undefined {
+    if (!InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(this.#rushConfiguration)) {
       return undefined;
     }
 
     const npmrcEnvironmentVariables: Record<string, string> | undefined = getNpmrcEnvironmentVariables({
       npmrcFolder,
-      supportEnvVarFallbackSyntax: this._rushConfiguration.isPnpm
+      supportEnvVarFallbackSyntax: this.#rushConfiguration.isPnpm
     });
 
     return npmrcEnvironmentVariables && { ...process.env, ...npmrcEnvironmentVariables };

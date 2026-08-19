@@ -44,16 +44,16 @@ export class DisjointSet<T extends object> {
    * Unions the sets that contain two objects
    */
   public union(a: T, b: T): void {
-    let x: T = this._find(a);
-    let y: T = this._find(b);
+    let x: T = this.#find(a);
+    let y: T = this.#find(b);
 
     if (x === y) {
       // x and y are already in the same set
       return;
     }
 
-    const xSize: number = this._getSize(x);
-    const ySize: number = this._getSize(y);
+    const xSize: number = this.#getSize(x);
+    const ySize: number = this.#getSize(y);
     if (xSize < ySize) {
       const t: T = x;
       x = y;
@@ -69,7 +69,7 @@ export class DisjointSet<T extends object> {
       this.#setByElement = new Map<T, Set<T>>();
 
       for (const element of this.#forest) {
-        const root: T = this._find(element);
+        const root: T = this.#find(element);
         let set: Set<T> | undefined = this.#setByElement.get(root);
         if (set === undefined) {
           set = new Set<T>();
@@ -85,22 +85,22 @@ export class DisjointSet<T extends object> {
    * Returns true if x and y are in the same set
    */
   public isConnected(x: T, y: T): boolean {
-    return this._find(x) === this._find(y);
+    return this.#find(x) === this.#find(y);
   }
 
-  private _find(a: T): T {
+  #find(a: T): T {
     let x: T = a;
-    let parent: T = this._getParent(x);
+    let parent: T = this.#getParent(x);
     while (parent !== x) {
-      parent = this._getParent(parent);
+      parent = this.#getParent(parent);
       this.#parentMap.set(x, parent);
       x = parent;
-      parent = this._getParent(x);
+      parent = this.#getParent(x);
     }
     return x;
   }
 
-  private _getParent(x: T): T {
+  #getParent(x: T): T {
     const parent: T | undefined = this.#parentMap.get(x);
     if (parent === undefined) {
       // This should not happen
@@ -109,7 +109,7 @@ export class DisjointSet<T extends object> {
     return parent;
   }
 
-  private _getSize(x: T): number {
+  #getSize(x: T): number {
     const size: number | undefined = this.#sizeMap.get(x);
     if (size === undefined) {
       // This should not happen

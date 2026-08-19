@@ -24,7 +24,7 @@ import { cloneDeep } from '../utilities/objectUtilities';
  * @internalRemarks
  * This is a copy of the semver ReleaseType enum, but with the `none` value added and
  * the `premajor` and `prepatch` omitted.
- * See {@link LockStepVersionPolicy._getReleaseType}.
+ * See `LockStepVersionPolicy.#getReleaseType`.
  *
  * TODO: Consider supporting `premajor` and `prepatch` in the future.
  */
@@ -124,11 +124,11 @@ export abstract class VersionPolicy {
    */
   public readonly _json: IVersionPolicyJson;
 
-  private get _versionFormatForCommit(): VersionFormatForCommit {
+  get #versionFormatForCommit(): VersionFormatForCommit {
     return this._json.dependencies?.versionFormatForCommit ?? 'original';
   }
 
-  private get _versionFormatForPublish(): VersionFormatForPublish {
+  get #versionFormatForPublish(): VersionFormatForPublish {
     return this._json.dependencies?.versionFormatForPublish ?? 'original';
   }
 
@@ -227,7 +227,7 @@ export abstract class VersionPolicy {
     const packageJsonEditor: PackageJsonEditor | undefined = updateDependenciesBeforePublish(
       packageName,
       configuration,
-      this._versionFormatForPublish
+      this.#versionFormatForPublish
     );
 
     packageJsonEditor?.saveIfModified();
@@ -244,7 +244,7 @@ export abstract class VersionPolicy {
     const packageJsonEditor: PackageJsonEditor | undefined = updateDependenciesBeforePublish(
       packageName,
       configuration,
-      this._versionFormatForPublish
+      this.#versionFormatForPublish
     );
 
     await packageJsonEditor?.saveIfModifiedAsync();
@@ -257,7 +257,7 @@ export abstract class VersionPolicy {
     const packageJsonEditor: PackageJsonEditor | undefined = updateDependenciesBeforeCommit(
       packageName,
       configuration,
-      this._versionFormatForCommit
+      this.#versionFormatForCommit
     );
 
     packageJsonEditor?.saveIfModified();
@@ -274,7 +274,7 @@ export abstract class VersionPolicy {
     const packageJsonEditor: PackageJsonEditor | undefined = updateDependenciesBeforeCommit(
       packageName,
       configuration,
-      this._versionFormatForCommit
+      this.#versionFormatForCommit
     );
 
     await packageJsonEditor?.saveIfModifiedAsync();
@@ -343,7 +343,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
         ` is higher than locked version ${this.#version.format()}.`;
       throw new Error(errorMessage);
     }
-    return this._updatePackageVersion(project, this.#version);
+    return this.#updatePackageVersion(project, this.#version);
   }
 
   /**
@@ -360,7 +360,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
       return;
     }
 
-    this.#version.inc(this._getReleaseType(nextBump), identifier);
+    this.#version.inc(this.#getReleaseType(nextBump), identifier);
     this._json.version = this.version;
   }
 
@@ -391,13 +391,13 @@ export class LockStepVersionPolicy extends VersionPolicy {
     }
   }
 
-  private _updatePackageVersion(project: IPackageJson, newVersion: semver.SemVer): IPackageJson {
+  #updatePackageVersion(project: IPackageJson, newVersion: semver.SemVer): IPackageJson {
     const updatedProject: IPackageJson = cloneDeep(project);
     updatedProject.version = newVersion.format();
     return updatedProject;
   }
 
-  private _getReleaseType(bumpType: BumpType): semver.ReleaseType {
+  #getReleaseType(bumpType: BumpType): semver.ReleaseType {
     // Eventually we should just use ReleaseType and get rid of bump type.
     return BumpType[bumpType] as semver.ReleaseType;
   }

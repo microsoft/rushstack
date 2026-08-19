@@ -82,7 +82,7 @@ export class SetupPackageRegistry {
     };
   }
 
-  private _writeInstructionBlock(message: string): void {
+  #writeInstructionBlock(message: string): void {
     if (message === '') {
       return;
     }
@@ -221,7 +221,7 @@ export class SetupPackageRegistry {
       return;
     }
 
-    this._writeInstructionBlock(this.#messages.introduction);
+    this.#writeInstructionBlock(this.#messages.introduction);
 
     const hasArtifactoryAccount: boolean = await TerminalInput.promptYesNoAsync({
       message: 'Do you already have an Artifactory user account?'
@@ -229,12 +229,12 @@ export class SetupPackageRegistry {
     this.#terminal.writeLine();
 
     if (!hasArtifactoryAccount) {
-      this._writeInstructionBlock(this.#messages.obtainAnAccount);
+      this.#writeInstructionBlock(this.#messages.obtainAnAccount);
       throw new AlreadyReportedError();
     }
 
     if (this.#messages.visitWebsite) {
-      this._writeInstructionBlock(this.#messages.visitWebsite);
+      this.#writeInstructionBlock(this.#messages.visitWebsite);
 
       const artifactoryWebsiteUrl: string =
         this.#artifactoryConfiguration.configuration.packageRegistry.artifactoryWebsiteUrl;
@@ -245,7 +245,7 @@ export class SetupPackageRegistry {
       }
     }
 
-    this._writeInstructionBlock(this.#messages.locateUserName);
+    this.#writeInstructionBlock(this.#messages.locateUserName);
 
     let artifactoryUser: string = await TerminalInput.promptLineAsync({
       message: this.#messages.userNamePrompt
@@ -259,7 +259,7 @@ export class SetupPackageRegistry {
       throw new AlreadyReportedError();
     }
 
-    this._writeInstructionBlock(this.#messages.locateApiKey);
+    this.#writeInstructionBlock(this.#messages.locateApiKey);
 
     let artifactoryKey: string = await TerminalInput.promptPasswordLineAsync({
       message: this.#messages.apiKeyPrompt
@@ -273,14 +273,14 @@ export class SetupPackageRegistry {
       throw new AlreadyReportedError();
     }
 
-    await this._fetchTokenAndUpdateNpmrcAsync(artifactoryUser, artifactoryKey, packageRegistry);
+    await this.#fetchTokenAndUpdateNpmrcAsync(artifactoryUser, artifactoryKey, packageRegistry);
   }
 
   /**
    * Fetch a valid NPM token from the Artifactory service and add it to the `~/.npmrc` file,
    * preserving other settings in that file.
    */
-  private async _fetchTokenAndUpdateNpmrcAsync(
+  async #fetchTokenAndUpdateNpmrcAsync(
     artifactoryUser: string,
     artifactoryKey: string,
     packageRegistry: IArtifactoryPackageRegistryJson
@@ -356,7 +356,7 @@ export class SetupPackageRegistry {
 
     const npmrcPath: string = path.join(User.getHomeFolder(), '.npmrc');
 
-    this._mergeLinesIntoNpmrc(npmrcPath, linesToAdd);
+    this.#mergeLinesIntoNpmrc(npmrcPath, linesToAdd);
   }
 
   /**
@@ -373,7 +373,7 @@ export class SetupPackageRegistry {
    * - Under no circumstances is a duplicate key/value added to the file; in the case of
    *   duplicates, the earliest line in `linesToAdd` takes precedence
    */
-  private _mergeLinesIntoNpmrc(npmrcPath: string, linesToAdd: readonly string[]): void {
+  #mergeLinesIntoNpmrc(npmrcPath: string, linesToAdd: readonly string[]): void {
     // We'll replace entries with "undefined" if they get discarded
     const workingLinesToAdd: (string | undefined)[] = [...linesToAdd];
 

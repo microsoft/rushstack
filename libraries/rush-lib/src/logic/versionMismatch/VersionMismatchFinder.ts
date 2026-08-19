@@ -63,7 +63,7 @@ export class VersionMismatchFinder {
     this.#projects = projects;
     this.#mismatches = new Map<string, Map<string, VersionMismatchFinderEntity[]>>();
     this.#allowedAlternativeVersion = allowedAlternativeVersions || new Map<string, ReadonlyArray<string>>();
-    this._analyze();
+    this.#analyze();
   }
 
   public static rushCheck(
@@ -138,11 +138,11 @@ export class VersionMismatchFinder {
   }
 
   public getMismatches(): string[] {
-    return this._getKeys(this.#mismatches);
+    return this.#getKeys(this.#mismatches);
   }
 
   public getVersionsOfMismatch(mismatch: string): string[] | undefined {
-    return this.#mismatches.has(mismatch) ? this._getKeys(this.#mismatches.get(mismatch)) : undefined;
+    return this.#mismatches.has(mismatch) ? this.#getKeys(this.#mismatches.get(mismatch)) : undefined;
   }
 
   public getConsumersOfMismatch(
@@ -228,7 +228,7 @@ export class VersionMismatchFinder {
     });
   }
 
-  private _analyze(): void {
+  #analyze(): void {
     this.#projects.forEach((project: VersionMismatchFinderEntity) => {
       if (!project.skipRushCheck) {
         // NOTE: We do not consider peer dependencies here.  The purpose of "rush check" is
@@ -244,7 +244,7 @@ export class VersionMismatchFinder {
 
             const isCyclic: boolean = project.decoupledLocalDependencies.has(dependency.name);
 
-            if (this._isVersionAllowedAlternative(dependency.name, version)) {
+            if (this.#isVersionAllowedAlternative(dependency.name, version)) {
               return;
             }
 
@@ -277,14 +277,14 @@ export class VersionMismatchFinder {
     });
   }
 
-  private _isVersionAllowedAlternative(dependency: string, version: string): boolean {
+  #isVersionAllowedAlternative(dependency: string, version: string): boolean {
     const allowedAlternatives: ReadonlyArray<string> | undefined =
       this.#allowedAlternativeVersion.get(dependency);
     return Boolean(allowedAlternatives && allowedAlternatives.indexOf(version) > -1);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _getKeys(iterable: Map<string, any> | undefined): string[] {
+  #getKeys(iterable: Map<string, any> | undefined): string[] {
     const keys: string[] = [];
     if (iterable) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
