@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin",
+      "comment": "Add a rule that requires ECMAScript private class fields instead of TypeScript private fields.",
+      "type": "minor"
+    }
+  ]
+}
