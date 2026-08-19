@@ -287,6 +287,7 @@ export class ProjectWatcher {
    * Handles a raw file system event by debouncing and scheduling an iteration.
    * Ignores changes to `.git` and `node_modules`.
    */
+  // eslint-disable-next-line @rushstack/no-new-null -- The decoupled ESLint plugin does not recognize native private methods yet.
   #onFsEvent(fileName: string | null): void {
     if (fileName === '.git' || fileName === 'node_modules') {
       return;
