@@ -39,7 +39,7 @@ export interface IBaseRushActionOptions extends ICommandLineActionOptions {
  * can be used without a rush.json configuration.
  */
 export abstract class BaseConfiglessRushAction extends CommandLineAction implements IRushCommand {
-  private _safeForSimultaneousRushProcesses: boolean;
+  #safeForSimultaneousRushProcesses: boolean;
 
   protected readonly rushConfiguration: RushConfiguration | undefined;
   protected readonly terminal: ITerminal;
@@ -53,7 +53,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
     const { parser, safeForSimultaneousRushProcesses } = options;
     this.parser = parser;
     const { rushConfiguration, terminal, rushSession, rushGlobalFolder } = parser;
-    this._safeForSimultaneousRushProcesses = !!safeForSimultaneousRushProcesses;
+    this.#safeForSimultaneousRushProcesses = !!safeForSimultaneousRushProcesses;
     this.rushConfiguration = rushConfiguration;
     this.terminal = terminal;
     this.rushSession = rushSession;
@@ -64,7 +64,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
     this._ensureEnvironment();
 
     if (this.rushConfiguration) {
-      if (!this._safeForSimultaneousRushProcesses) {
+      if (!this.#safeForSimultaneousRushProcesses) {
         if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
           this.terminal.writeLine(
             Colorize.red(`Another Rush command is already running in this repository.`)
@@ -105,14 +105,14 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
  * The base class that most Rush command-line actions should extend.
  */
 export abstract class BaseRushAction extends BaseConfiglessRushAction {
-  private _eventHooksManager: EventHooksManager | undefined;
+  #eventHooksManager: EventHooksManager | undefined;
 
   protected get eventHooksManager(): EventHooksManager {
-    if (!this._eventHooksManager) {
-      this._eventHooksManager = new EventHooksManager(this.rushConfiguration);
+    if (!this.#eventHooksManager) {
+      this.#eventHooksManager = new EventHooksManager(this.rushConfiguration);
     }
 
-    return this._eventHooksManager;
+    return this.#eventHooksManager;
   }
 
   protected declare readonly rushConfiguration: RushConfiguration;

@@ -61,7 +61,7 @@ declare module 'tar' {
  * This class implements common logic between "rush install" and "rush update".
  */
 export class RushInstallManager extends BaseInstallManager {
-  private _tempProjectHelper: TempProjectHelper;
+  #tempProjectHelper: TempProjectHelper;
 
   public constructor(
     rushConfiguration: RushConfiguration,
@@ -70,7 +70,7 @@ export class RushInstallManager extends BaseInstallManager {
     options: IInstallManagerOptions
   ) {
     super(rushConfiguration, rushGlobalFolder, purgeManager, options);
-    this._tempProjectHelper = new TempProjectHelper(
+    this.#tempProjectHelper = new TempProjectHelper(
       this.rushConfiguration,
       rushConfiguration.defaultSubspace
     );
@@ -182,7 +182,7 @@ export class RushInstallManager extends BaseInstallManager {
       const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
-      const tarballFile: string = this._tempProjectHelper.getTarballFilePath(rushProject);
+      const tarballFile: string = this.#tempProjectHelper.getTarballFilePath(rushProject);
 
       // Example: dependencies["@rush-temp/my-project-2"] = "file:./projects/my-project-2.tgz"
       commonDependencies.set(
@@ -282,7 +282,7 @@ export class RushInstallManager extends BaseInstallManager {
       }
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2"
-      const tempProjectFolder: string = this._tempProjectHelper.getTempProjectFolder(rushProject);
+      const tempProjectFolder: string = this.#tempProjectHelper.getTempProjectFolder(rushProject);
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
       const tempPackageJsonFilename: string = path.join(tempProjectFolder, FileConstants.PackageJson);
@@ -319,7 +319,7 @@ export class RushInstallManager extends BaseInstallManager {
           JsonFile.save(tempPackageJson, tempPackageJsonFilename);
 
           // Delete the existing tarball and create a new one
-          this._tempProjectHelper.createTempProjectTarball(rushProject);
+          this.#tempProjectHelper.createTempProjectTarball(rushProject);
 
           // eslint-disable-next-line no-console
           console.log(`Updating ${tarballFile}`);
@@ -435,7 +435,7 @@ export class RushInstallManager extends BaseInstallManager {
       const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml =
         shrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey)!;
       const newIntegrity: string = (
-        await ssri.fromStream(fs.createReadStream(this._tempProjectHelper.getTarballFilePath(rushProject)))
+        await ssri.fromStream(fs.createReadStream(this.#tempProjectHelper.getTarballFilePath(rushProject)))
       ).toString();
 
       if (!parentShrinkwrapEntry.resolution || parentShrinkwrapEntry.resolution.integrity !== newIntegrity) {
@@ -464,7 +464,7 @@ export class RushInstallManager extends BaseInstallManager {
     // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
     potentiallyChangedFiles.push(
       ...this.rushConfiguration.projects.map((x) => {
-        return this._tempProjectHelper.getTarballFilePath(x);
+        return this.#tempProjectHelper.getTarballFilePath(x);
       })
     );
 
@@ -479,7 +479,7 @@ export class RushInstallManager extends BaseInstallManager {
     // This ensures that any existing tarballs with older header bits will be regenerated.
     // It is safe to assume that temp project pacakge.jsons already exist.
     for (const rushProject of this.rushConfiguration.projects) {
-      this._tempProjectHelper.createTempProjectTarball(rushProject);
+      this.#tempProjectHelper.createTempProjectTarball(rushProject);
     }
 
     // NOTE: The PNPM store is supposed to be transactionally safe, so we don't delete it automatically.

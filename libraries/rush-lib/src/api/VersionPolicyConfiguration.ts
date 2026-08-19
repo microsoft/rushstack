@@ -71,7 +71,7 @@ const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
  * @public
  */
 export class VersionPolicyConfiguration {
-  private _jsonFileName: string;
+  #jsonFileName: string;
 
   /**
    * Gets all the version policies
@@ -82,7 +82,7 @@ export class VersionPolicyConfiguration {
    * @internal
    */
   public constructor(jsonFileName: string) {
-    this._jsonFileName = jsonFileName;
+    this.#jsonFileName = jsonFileName;
     this.versionPolicies = new Map<string, VersionPolicy>();
     this._loadFile();
   }
@@ -167,10 +167,10 @@ export class VersionPolicyConfiguration {
   }
 
   private _loadFile(): void {
-    if (!FileSystem.exists(this._jsonFileName)) {
+    if (!FileSystem.exists(this.#jsonFileName)) {
       return;
     }
-    const versionPolicyJson: IVersionPolicyJson[] = JsonFile.loadAndValidate(this._jsonFileName, _jsonSchema);
+    const versionPolicyJson: IVersionPolicyJson[] = JsonFile.loadAndValidate(this.#jsonFileName, _jsonSchema);
 
     versionPolicyJson.forEach((policyJson) => {
       const policy: VersionPolicy | undefined = VersionPolicy.load(policyJson);
@@ -186,7 +186,7 @@ export class VersionPolicyConfiguration {
       versionPolicyJson.push(versionPolicy._json);
     });
     if (shouldCommit) {
-      JsonFile.save(versionPolicyJson, this._jsonFileName, { updateExistingFile: true });
+      JsonFile.save(versionPolicyJson, this.#jsonFileName, { updateExistingFile: true });
     }
   }
 }

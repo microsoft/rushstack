@@ -4,10 +4,10 @@
 import type { BasePackage } from './base/BasePackage';
 
 export class PackageLookup {
-  private _packageMap: Map<string, BasePackage>;
+  #packageMap: Map<string, BasePackage>;
 
   public constructor() {
-    this._packageMap = new Map<string, BasePackage>();
+    this.#packageMap = new Map<string, BasePackage>();
   }
 
   public loadTree(root: BasePackage): void {
@@ -28,13 +28,13 @@ export class PackageLookup {
 
       const key: string = current.nameAndVersion;
 
-      if (!this._packageMap.has(key)) {
-        this._packageMap.set(key, current);
+      if (!this.#packageMap.has(key)) {
+        this.#packageMap.set(key, current);
       }
     }
   }
 
   public getPackage(nameAndVersion: string): BasePackage | undefined {
-    return this._packageMap.get(nameAndVersion);
+    return this.#packageMap.get(nameAndVersion);
   }
 }

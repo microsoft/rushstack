@@ -17,19 +17,19 @@ import { RushConstants } from '../RushConstants';
 export class AsyncOperationQueue
   implements AsyncIterable<OperationExecutionRecord>, AsyncIterator<OperationExecutionRecord>
 {
-  private readonly _queue: OperationExecutionRecord[];
-  private readonly _pendingIterators: ((result: IteratorResult<OperationExecutionRecord>) => void)[];
-  private readonly _totalOperations: number;
-  private readonly _completedOperations: Set<OperationExecutionRecord>;
+  readonly #queue: OperationExecutionRecord[];
+  readonly #pendingIterators: ((result: IteratorResult<OperationExecutionRecord>) => void)[];
+  readonly #totalOperations: number;
+  readonly #completedOperations: Set<OperationExecutionRecord>;
 
   /**
    * Tracks how many times each operation has been assigned to an execution slot.
    * Operations that have been assigned more times (e.g. cobuild retries) are sorted
    * after operations with fewer attempts, so untried work is preferred.
    */
-  private readonly _numberOfTimesQueuedByOperation: Map<OperationExecutionRecord, number>;
+  readonly #numberOfTimesQueuedByOperation: Map<OperationExecutionRecord, number>;
 
-  private _isDone: boolean;
+  #isDone: boolean;
 
   /**
    * @param operations - The set of operations to be executed
@@ -39,12 +39,12 @@ export class AsyncOperationQueue
    *   - Returning 0 indicates no preference.
    */
   public constructor(operations: Iterable<OperationExecutionRecord>, sortFn: IOperationSortFunction) {
-    this._queue = computeTopologyAndSort(operations, sortFn);
-    this._pendingIterators = [];
-    this._totalOperations = this._queue.length;
-    this._isDone = false;
-    this._completedOperations = new Set<OperationExecutionRecord>();
-    this._numberOfTimesQueuedByOperation = new Map();
+    this.#queue = computeTopologyAndSort(operations, sortFn);
+    this.#pendingIterators = [];
+    this.#totalOperations = this.#queue.length;
+    this.#isDone = false;
+    this.#completedOperations = new Set<OperationExecutionRecord>();
+    this.#numberOfTimesQueuedByOperation = new Map();
   }
 
   /**
@@ -52,7 +52,8 @@ export class AsyncOperationQueue
    * @see {AsyncIterator}
    */
   public next(): Promise<IteratorResult<OperationExecutionRecord>> {
-    const { _pendingIterators: waitingIterators } = this;
+    const waitingIterators: Array<(result: IteratorResult<OperationExecutionRecord>) => void> =
+      this.#pendingIterators;
 
     const promise: Promise<IteratorResult<OperationExecutionRecord>> = new Promise(
       (resolve: (result: IteratorResult<OperationExecutionRecord>) => void) => {
@@ -70,8 +71,8 @@ export class AsyncOperationQueue
    * If all operations are completed, set the queue to done, resolve all pending iterators in next cycle.
    */
   public complete(record: OperationExecutionRecord): void {
-    this._completedOperations.add(record);
-    this._numberOfTimesQueuedByOperation.delete(record);
+    this.#completedOperations.add(record);
+    this.#numberOfTimesQueuedByOperation.delete(record);
 
     // Apply status changes to direct dependents
     if (record.status !== OperationStatus.Failure && record.status !== OperationStatus.Blocked) {
@@ -90,8 +91,8 @@ export class AsyncOperationQueue
 
     this.assignOperations();
 
-    if (this._completedOperations.size === this._totalOperations) {
-      this._isDone = true;
+    if (this.#completedOperations.size === this.#totalOperations) {
+      this.#isDone = true;
     }
   }
 
@@ -100,11 +101,10 @@ export class AsyncOperationQueue
    * if the caller does not update operation dependencies prior to calling `next()`, may need to be invoked manually.
    */
   public assignOperations(): void {
-    const {
-      _queue: queue,
-      _pendingIterators: waitingIterators,
-      _numberOfTimesQueuedByOperation: timesQueued
-    } = this;
+    const queue: OperationExecutionRecord[] = this.#queue;
+    const waitingIterators: Array<(result: IteratorResult<OperationExecutionRecord>) => void> =
+      this.#pendingIterators;
+    const timesQueued: Map<OperationExecutionRecord, number> = this.#numberOfTimesQueuedByOperation;
 
     const readyOperations: OperationExecutionRecord[] = [];
 
@@ -164,10 +164,10 @@ export class AsyncOperationQueue
 
     // Since items only get removed from the queue when they have a final status, this should be safe.
     if (queue.length === 0) {
-      this._isDone = true;
+      this.#isDone = true;
     }
 
-    if (this._isDone) {
+    if (this.#isDone) {
       for (const resolveAsyncIterator of waitingIterators.splice(0)) {
         resolveAsyncIterator({
           value: undefined,

@@ -16,9 +16,9 @@ import { IS_WINDOWS } from './executionUtilities';
  * background process to recursively delete that folder.
  */
 export class AsyncRecycler {
-  private _movedFolderCount: number;
-  private _deleting: boolean;
-  private _prefix: string;
+  #movedFolderCount: number;
+  #deleting: boolean;
+  #prefix: string;
 
   /**
    * The full path of the recycler folder.
@@ -28,9 +28,9 @@ export class AsyncRecycler {
 
   public constructor(recyclerFolder: string) {
     this.recyclerFolder = path.resolve(recyclerFolder);
-    this._movedFolderCount = 0;
-    this._deleting = false;
-    this._prefix = `${Date.now()}`;
+    this.#movedFolderCount = 0;
+    this.#deleting = false;
+    this.#prefix = `${Date.now()}`;
   }
 
   /**
@@ -39,7 +39,7 @@ export class AsyncRecycler {
    * deleteAll() must be called to actually delete the contents of the recycler folder.
    */
   public moveFolder(folderPath: string): void {
-    if (this._deleting) {
+    if (this.#deleting) {
       throw new Error('AsyncRecycler.moveFolder() must not be called after deleteAll() has started');
     }
 
@@ -51,7 +51,7 @@ export class AsyncRecycler {
       return;
     }
 
-    ++this._movedFolderCount;
+    ++this.#movedFolderCount;
 
     // We need to do a simple "fs.renameSync" here, however if the folder we're trying to rename
     // has a lock, or if its destination container doesn't exist yet,
@@ -102,15 +102,15 @@ export class AsyncRecycler {
    * MUST NOT be called again after deleteAll() has started.
    */
   public async startDeleteAllAsync(): Promise<void> {
-    if (this._deleting) {
+    if (this.#deleting) {
       throw new Error(
         `${AsyncRecycler.name}.${this.startDeleteAllAsync.name}() must not be called more than once`
       );
     }
 
-    this._deleting = true;
+    this.#deleting = true;
 
-    if (this._movedFolderCount === 0) {
+    if (this.#movedFolderCount === 0) {
       // Nothing to do
       return;
     }
@@ -184,8 +184,8 @@ export class AsyncRecycler {
   }
 
   private _renameOrRecurseInFolder(folderPath: string): void {
-    const ordinal: number = this._movedFolderCount++;
-    const targetDir: string = `${this.recyclerFolder}/${this._prefix}_${ordinal}`;
+    const ordinal: number = this.#movedFolderCount++;
+    const targetDir: string = `${this.recyclerFolder}/${this.#prefix}_${ordinal}`;
     try {
       fs.renameSync(folderPath, targetDir);
       return;

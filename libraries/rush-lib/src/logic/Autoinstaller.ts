@@ -35,15 +35,15 @@ export interface IAutoinstallerOptions {
 export class Autoinstaller {
   public readonly name: string;
 
-  private readonly _rushConfiguration: RushConfiguration;
-  private readonly _rushGlobalFolder: RushGlobalFolder;
-  private readonly _restrictConsoleOutput: boolean;
+  readonly #rushConfiguration: RushConfiguration;
+  readonly #rushGlobalFolder: RushGlobalFolder;
+  readonly #restrictConsoleOutput: boolean;
 
   public constructor(options: IAutoinstallerOptions) {
     this.name = options.autoinstallerName;
-    this._rushConfiguration = options.rushConfiguration;
-    this._rushGlobalFolder = options.rushGlobalFolder;
-    this._restrictConsoleOutput =
+    this.#rushConfiguration = options.rushConfiguration;
+    this.#rushGlobalFolder = options.rushGlobalFolder;
+    this.#restrictConsoleOutput =
       options.restrictConsoleOutput ?? RushCommandLineParser.shouldRestrictConsoleOutput();
 
     Autoinstaller.validateName(this.name);
@@ -51,21 +51,21 @@ export class Autoinstaller {
 
   // Example: .../common/autoinstallers/my-task
   public get folderFullPath(): string {
-    return path.join(this._rushConfiguration.commonAutoinstallersFolder, this.name);
+    return path.join(this.#rushConfiguration.commonAutoinstallersFolder, this.name);
   }
 
   // Example: .../common/autoinstallers/my-task/package-lock.yaml
   public get shrinkwrapFilePath(): string {
     return path.join(
-      this._rushConfiguration.commonAutoinstallersFolder,
+      this.#rushConfiguration.commonAutoinstallersFolder,
       this.name,
-      this._rushConfiguration.shrinkwrapFilename
+      this.#rushConfiguration.shrinkwrapFilename
     );
   }
 
   // Example: .../common/autoinstallers/my-task/package.json
   public get packageJsonPath(): string {
-    return path.join(this._rushConfiguration.commonAutoinstallersFolder, this.name, 'package.json');
+    return path.join(this.#rushConfiguration.commonAutoinstallersFolder, this.name, 'package.json');
   }
 
   public static validateName(autoinstallerName: string): void {
@@ -88,15 +88,15 @@ export class Autoinstaller {
     }
 
     await InstallHelpers.ensureLocalPackageManagerAsync(
-      this._rushConfiguration,
-      this._rushGlobalFolder,
+      this.#rushConfiguration,
+      this.#rushGlobalFolder,
       RushConstants.defaultMaxInstallAttempts,
-      this._restrictConsoleOutput
+      this.#restrictConsoleOutput
     );
 
     // Example: common/autoinstallers/my-task/package.json
     const relativePathForLogs: string = path.relative(
-      this._rushConfiguration.rushJsonFolder,
+      this.#rushConfiguration.rushJsonFolder,
       autoinstallerFullPath
     );
 
@@ -117,10 +117,10 @@ export class Autoinstaller {
 
       const lastInstallFlag: LastInstallFlag = new LastInstallFlag(lastInstallFlagPath, {
         node: process.versions.node,
-        packageManager: this._rushConfiguration.packageManager,
-        packageManagerVersion: this._rushConfiguration.packageManagerToolVersion,
+        packageManager: this.#rushConfiguration.packageManager,
+        packageManagerVersion: this.#rushConfiguration.packageManagerToolVersion,
         packageJson: packageJson,
-        rushJsonFolder: this._rushConfiguration.rushJsonFolder
+        rushJsonFolder: this.#rushConfiguration.rushJsonFolder
       });
 
       // Example: ../common/autoinstallers/my-task/node_modules
@@ -133,7 +133,7 @@ export class Autoinstaller {
         if (FileSystem.exists(nodeModulesFolder)) {
           this._logIfConsoleOutputIsNotRestricted('Deleting old files from ' + nodeModulesFolder);
           const recycler: AsyncRecycler = new AsyncRecycler(
-            `${this._rushConfiguration.commonTempFolder}/${RushConstants.rushRecyclerFolderName}`
+            `${this.#rushConfiguration.commonTempFolder}/${RushConstants.rushRecyclerFolderName}`
           );
           recycler.moveFolder(nodeModulesFolder);
           await recycler.startDeleteAllAsync();
@@ -141,9 +141,9 @@ export class Autoinstaller {
 
         // Copy: .../common/autoinstallers/my-task/.npmrc
         Utilities.syncNpmrc({
-          sourceNpmrcFolder: this._rushConfiguration.commonRushConfigFolder,
+          sourceNpmrcFolder: this.#rushConfiguration.commonRushConfigFolder,
           targetNpmrcFolder: autoinstallerFullPath,
-          supportEnvVarFallbackSyntax: this._rushConfiguration.isPnpm
+          supportEnvVarFallbackSyntax: this.#rushConfiguration.isPnpm
         });
 
         this._logIfConsoleOutputIsNotRestricted(
@@ -151,7 +151,7 @@ export class Autoinstaller {
         );
 
         await Utilities.executeCommandAsync({
-          command: this._rushConfiguration.packageManagerToolFilename,
+          command: this.#rushConfiguration.packageManagerToolFilename,
           args: ['install', '--frozen-lockfile'],
           workingDirectory: autoinstallerFullPath,
           keepEnvironment: true
@@ -177,10 +177,10 @@ export class Autoinstaller {
 
   public async updateAsync(): Promise<void> {
     await InstallHelpers.ensureLocalPackageManagerAsync(
-      this._rushConfiguration,
-      this._rushGlobalFolder,
+      this.#rushConfiguration,
+      this.#rushGlobalFolder,
       RushConstants.defaultMaxInstallAttempts,
-      this._restrictConsoleOutput
+      this.#restrictConsoleOutput
     );
 
     const autoinstallerPackageJsonPath: string = path.join(this.folderFullPath, 'package.json');
@@ -199,14 +199,14 @@ export class Autoinstaller {
       oldFileContents = FileSystem.readFile(this.shrinkwrapFilePath, { convertLineEndings: NewlineKind.Lf });
       this._logIfConsoleOutputIsNotRestricted('Deleting ' + this.shrinkwrapFilePath);
       await FileSystem.deleteFileAsync(this.shrinkwrapFilePath);
-      if (this._rushConfiguration.isPnpm) {
+      if (this.#rushConfiguration.isPnpm) {
         // Workaround for https://github.com/pnpm/pnpm/issues/1890
         //
         // When "rush update-autoinstaller" is run, Rush deletes "common/autoinstallers/my-task/pnpm-lock.yaml"
         // so that a new lockfile will be generated. However "pnpm install" by design will try to recover
         // "pnpm-lock.yaml" from "my-task/node_modules/.pnpm/lock.yaml", which may prevent a full upgrade.
         // Deleting both files ensures that a new lockfile will always be generated.
-        const pnpmPackageManager: PnpmPackageManager = this._rushConfiguration
+        const pnpmPackageManager: PnpmPackageManager = this.#rushConfiguration
           .packageManagerWrapper as PnpmPackageManager;
         await FileSystem.deleteFileAsync(
           path.join(this.folderFullPath, pnpmPackageManager.internalShrinkwrapRelativePath)
@@ -227,13 +227,13 @@ export class Autoinstaller {
     this._logIfConsoleOutputIsNotRestricted();
 
     Utilities.syncNpmrc({
-      sourceNpmrcFolder: this._rushConfiguration.commonRushConfigFolder,
+      sourceNpmrcFolder: this.#rushConfiguration.commonRushConfigFolder,
       targetNpmrcFolder: this.folderFullPath,
-      supportEnvVarFallbackSyntax: this._rushConfiguration.isPnpm
+      supportEnvVarFallbackSyntax: this.#rushConfiguration.isPnpm
     });
 
     await Utilities.executeCommandAsync({
-      command: this._rushConfiguration.packageManagerToolFilename,
+      command: this.#rushConfiguration.packageManagerToolFilename,
       args: ['install'],
       workingDirectory: this.folderFullPath,
       keepEnvironment: true
@@ -241,10 +241,10 @@ export class Autoinstaller {
 
     this._logIfConsoleOutputIsNotRestricted();
 
-    if (this._rushConfiguration.packageManager === 'npm') {
+    if (this.#rushConfiguration.packageManager === 'npm') {
       this._logIfConsoleOutputIsNotRestricted(Colorize.bold('Running "npm shrinkwrap"...'));
       await Utilities.executeCommandAsync({
-        command: this._rushConfiguration.packageManagerToolFilename,
+        command: this.#rushConfiguration.packageManagerToolFilename,
         args: ['shrinkwrap'],
         workingDirectory: this.folderFullPath,
         keepEnvironment: true
@@ -273,7 +273,7 @@ export class Autoinstaller {
   }
 
   private _logIfConsoleOutputIsNotRestricted(message?: string): void {
-    if (!this._restrictConsoleOutput) {
+    if (!this.#restrictConsoleOutput) {
       // eslint-disable-next-line no-console
       console.log(message ?? '');
     }

@@ -75,9 +75,9 @@ const gitLfsHooks: ReadonlySet<string> = new Set(['post-checkout', 'post-commit'
  * This class implements common logic between "rush install" and "rush update".
  */
 export abstract class BaseInstallManager {
-  private readonly _commonTempLinkFlag: FlagFile;
-  private _npmSetupValidated: boolean = false;
-  private _syncNpmrcAlreadyCalled: boolean = false;
+  readonly #commonTempLinkFlag: FlagFile;
+  #npmSetupValidated: boolean = false;
+  #syncNpmrcAlreadyCalled: boolean = false;
 
   protected readonly _terminal: ITerminal;
 
@@ -100,7 +100,7 @@ export abstract class BaseInstallManager {
     this.installRecycler = purgeManager.commonTempFolderRecycler;
     this.options = options;
 
-    this._commonTempLinkFlag = new FlagFile(
+    this.#commonTempLinkFlag = new FlagFile(
       options.subspace.getSubspaceTempFolderPath(),
       RushConstants.lastLinkFlagFilename,
       {}
@@ -244,7 +244,7 @@ export abstract class BaseInstallManager {
 
         // Since we're going to be tampering with common/node_modules, delete the "rush link" flag file if it exists;
         // this ensures that a full "rush link" is required next time
-        await this._commonTempLinkFlag.clearAsync();
+        await this.#commonTempLinkFlag.clearAsync();
       }
 
       // Give plugins an opportunity to act before invoking the installation process
@@ -561,7 +561,7 @@ export abstract class BaseInstallManager {
       createIfMissing: this.rushConfiguration.subspacesFeatureEnabled,
       supportEnvVarFallbackSyntax: this.rushConfiguration.isPnpm
     });
-    this._syncNpmrcAlreadyCalled = true;
+    this.#syncNpmrcAlreadyCalled = true;
 
     const npmrcHash: string | undefined = npmrcText
       ? crypto.createHash('sha1').update(npmrcText).digest('hex')
@@ -1160,7 +1160,7 @@ ${gitLfsHookHandling}
   }
 
   protected async validateNpmSetupAsync(): Promise<void> {
-    if (this._npmSetupValidated) {
+    if (this.#npmSetupValidated) {
       return;
     }
 
@@ -1168,7 +1168,7 @@ ${gitLfsHookHandling}
       const setupPackageRegistry: SetupPackageRegistry = new SetupPackageRegistry({
         rushConfiguration: this.rushConfiguration,
         isDebug: this.options.debug,
-        syncNpmrcAlreadyCalled: this._syncNpmrcAlreadyCalled
+        syncNpmrcAlreadyCalled: this.#syncNpmrcAlreadyCalled
       });
       const valid: boolean = await setupPackageRegistry.checkOnlyAsync();
       if (!valid) {
@@ -1189,6 +1189,6 @@ ${gitLfsHookHandling}
       }
     }
 
-    this._npmSetupValidated = true;
+    this.#npmSetupValidated = true;
   }
 }

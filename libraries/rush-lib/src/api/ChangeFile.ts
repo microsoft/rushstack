@@ -15,8 +15,8 @@ import { Git } from '../logic/Git';
  * This class represents a single change file.
  */
 export class ChangeFile {
-  private _changeFileData: IChangeFile;
-  private _rushConfiguration: RushConfiguration;
+  #changeFileData: IChangeFile;
+  #rushConfiguration: RushConfiguration;
 
   /**
    * @internal
@@ -30,8 +30,8 @@ export class ChangeFile {
       throw new Error(`rushConfiguration does not have a value`);
     }
 
-    this._changeFileData = changeFileData;
-    this._rushConfiguration = rushConfiguration;
+    this.#changeFileData = changeFileData;
+    this.#rushConfiguration = rushConfiguration;
   }
 
   /**
@@ -39,7 +39,7 @@ export class ChangeFile {
    * @param data - change information
    */
   public addChange(data: IChangeInfo): void {
-    this._changeFileData.changes.push(data);
+    this.#changeFileData.changes.push(data);
   }
 
   /**
@@ -48,7 +48,7 @@ export class ChangeFile {
    */
   public getChanges(packageName: string): IChangeInfo[] {
     const changes: IChangeInfo[] = [];
-    for (const info of this._changeFileData.changes) {
+    for (const info of this.#changeFileData.changes) {
       if (info.packageName === packageName) {
         changes.push(info);
       }
@@ -63,7 +63,7 @@ export class ChangeFile {
    */
   public writeSync(): string {
     const filePath: string = this.generatePath();
-    JsonFile.save(this._changeFileData, filePath, {
+    JsonFile.save(this.#changeFileData, filePath, {
       ensureFolderExists: true
     });
     return filePath;
@@ -76,7 +76,7 @@ export class ChangeFile {
    */
   public generatePath(): string {
     let branch: string | undefined = undefined;
-    const git: Git = new Git(this._rushConfiguration);
+    const git: Git = new Git(this.#rushConfiguration);
     const repoInfo: gitInfo.GitRepoInfo | undefined = git.getGitInfo();
     branch = repoInfo && repoInfo.branch;
     if (!branch) {
@@ -94,8 +94,8 @@ export class ChangeFile {
       ? this._escapeFilename(`${branch}_${timestamp}.json`)
       : `${timestamp}.json`;
     const filePath: string = path.join(
-      this._rushConfiguration.changesFolder,
-      ...this._changeFileData.packageName.split('/'),
+      this.#rushConfiguration.changesFolder,
+      ...this.#changeFileData.packageName.split('/'),
       filename
     );
     return filePath;

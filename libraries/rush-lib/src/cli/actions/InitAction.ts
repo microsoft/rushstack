@@ -18,12 +18,12 @@ import { assetsFolderPath } from '../../utilities/PathConstants';
 import { copyTemplateFileAsync } from '../../utilities/templateUtilities';
 
 export class InitAction extends BaseConfiglessRushAction {
-  private readonly _overwriteParameter: CommandLineFlagParameter;
-  private readonly _rushExampleParameter: CommandLineFlagParameter;
-  private readonly _experimentsParameter: CommandLineFlagParameter;
+  readonly #overwriteParameter: CommandLineFlagParameter;
+  readonly #rushExampleParameter: CommandLineFlagParameter;
+  readonly #experimentsParameter: CommandLineFlagParameter;
 
   // template section name --> whether it should be commented out
-  private _commentedBySectionName: Map<string, boolean> = new Map<string, boolean>();
+  #commentedBySectionName: Map<string, boolean> = new Map<string, boolean>();
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -35,21 +35,21 @@ export class InitAction extends BaseConfiglessRushAction {
       parser
     });
 
-    this._overwriteParameter = this.defineFlagParameter({
+    this.#overwriteParameter = this.defineFlagParameter({
       parameterLongName: '--overwrite-existing',
       description:
         'By default "rush init" will not overwrite existing config files.' +
         ' Specify this switch to override that. This can be useful when upgrading' +
         ' your repo to a newer release of Rush. WARNING: USE WITH CARE!'
     });
-    this._rushExampleParameter = this.defineFlagParameter({
+    this.#rushExampleParameter = this.defineFlagParameter({
       parameterLongName: '--rush-example-repo',
       description:
         'When copying the template config files, this uncomments fragments that are used' +
         ' by the "rush-example" GitHub repo, which is a sample monorepo that illustrates many Rush' +
         ' features. This option is primarily intended for maintaining that example.'
     });
-    this._experimentsParameter = this.defineFlagParameter({
+    this.#experimentsParameter = this.defineFlagParameter({
       parameterLongName: '--include-experiments',
       description:
         'Include features that may not be complete features, useful for demoing specific future features' +
@@ -60,7 +60,7 @@ export class InitAction extends BaseConfiglessRushAction {
   protected async runAsync(): Promise<void> {
     const initFolder: string = process.cwd();
 
-    if (!this._overwriteParameter.value) {
+    if (!this.#overwriteParameter.value) {
       if (!this._validateFolderIsEmpty(initFolder)) {
         throw new AlreadyReportedError();
       }
@@ -143,7 +143,7 @@ export class InitAction extends BaseConfiglessRushAction {
 
     const experimentalTemplateFilePaths: string[] = ['common/config/rush/rush-alerts.json'];
 
-    if (this._experimentsParameter.value) {
+    if (this.#experimentsParameter.value) {
       templateFilePaths.push(...experimentalTemplateFilePaths);
     }
 
@@ -163,8 +163,8 @@ export class InitAction extends BaseConfiglessRushAction {
       await copyTemplateFileAsync(
         sourcePath,
         destinationPath,
-        this._overwriteParameter.value,
-        !this._rushExampleParameter.value
+        this.#overwriteParameter.value,
+        !this.#rushExampleParameter.value
       );
     }
   }

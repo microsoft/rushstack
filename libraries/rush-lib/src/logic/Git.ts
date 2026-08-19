@@ -31,29 +31,29 @@ export interface IGetBlobOptions {
 }
 
 export class Git {
-  private readonly _rushConfiguration: RushConfiguration;
-  private _checkedGitPath: boolean = false;
-  private _gitPath: string | undefined;
-  private _checkedGitInfo: boolean = false;
-  private _gitInfo: gitInfo.GitRepoInfo | undefined;
+  readonly #rushConfiguration: RushConfiguration;
+  #checkedGitPath: boolean = false;
+  #gitPath: string | undefined;
+  #checkedGitInfo: boolean = false;
+  #gitInfo: gitInfo.GitRepoInfo | undefined;
 
-  private _gitEmailResult: IResultOrError<string> | undefined = undefined;
-  private _gitHooksPath: IResultOrError<string> | undefined = undefined;
+  #gitEmailResult: IResultOrError<string> | undefined = undefined;
+  #gitHooksPath: IResultOrError<string> | undefined = undefined;
 
   public constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
+    this.#rushConfiguration = rushConfiguration;
   }
 
   /**
    * Returns the path to the Git binary if found. Otherwise, return undefined.
    */
   public get gitPath(): string | undefined {
-    if (!this._checkedGitPath) {
-      this._gitPath = EnvironmentConfiguration.gitBinaryPath || Executable.tryResolve('git');
-      this._checkedGitPath = true;
+    if (!this.#checkedGitPath) {
+      this.#gitPath = EnvironmentConfiguration.gitBinaryPath || Executable.tryResolve('git');
+      this.#checkedGitPath = true;
     }
 
-    return this._gitPath;
+    return this.#gitPath;
   }
 
   public getGitPathOrThrow(): string {
@@ -127,7 +127,7 @@ export class Git {
           '',
           `If you didn't configure your email yet, try something like this:`,
           '',
-          ...GitEmailPolicy.getEmailExampleLines(this._rushConfiguration),
+          ...GitEmailPolicy.getEmailExampleLines(this.#rushConfiguration),
           ''
         ].join('\n')
       );
@@ -180,7 +180,7 @@ export class Git {
 
     if (hooksResult.result) {
       const absoluteHooksPath: string = path.resolve(
-        this._rushConfiguration.rushJsonFolder,
+        this.#rushConfiguration.rushJsonFolder,
         hooksResult.result
       );
       return absoluteHooksPath === defaultHooksPath;
@@ -208,21 +208,21 @@ export class Git {
    * Returns undefined if rush.json is not under a Git working tree.
    */
   public getGitInfo(): Readonly<gitInfo.GitRepoInfo> | undefined {
-    if (!this._checkedGitInfo) {
+    if (!this.#checkedGitInfo) {
       let repoInfo: gitInfo.GitRepoInfo | undefined;
       try {
         // gitInfo() shouldn't usually throw, but wrapping in a try/catch just in case
-        repoInfo = gitInfo(this._rushConfiguration.rushJsonFolder);
+        repoInfo = gitInfo(this.#rushConfiguration.rushJsonFolder);
       } catch (ex) {
         // if there's an error, assume we're not in a Git working tree
       }
 
       if (repoInfo && this.isPathUnderGitWorkingTree(repoInfo)) {
-        this._gitInfo = repoInfo;
+        this.#gitInfo = repoInfo;
       }
-      this._checkedGitInfo = true;
+      this.#checkedGitInfo = true;
     }
-    return this._gitInfo;
+    return this.#gitInfo;
   }
 
   public async getMergeBaseAsync(
@@ -320,7 +320,7 @@ export class Git {
    * @param rushConfiguration - rush configuration
    */
   public async getRemoteDefaultBranchAsync(): Promise<string> {
-    const repositoryUrls: string[] = this._rushConfiguration.repositoryUrls;
+    const repositoryUrls: string[] = this.#rushConfiguration.repositoryUrls;
     if (repositoryUrls.length > 0) {
       const gitPath: string = this.getGitPathOrThrow();
       const output: string = (await this._executeGitCommandAndCaptureOutputAsync(gitPath, ['remote'])).trim();
@@ -365,7 +365,7 @@ export class Git {
           );
         }
 
-        return `${matchingRemotes[0]}/${this._rushConfiguration.repositoryDefaultBranch}`;
+        return `${matchingRemotes[0]}/${this.#rushConfiguration.repositoryDefaultBranch}`;
       } else {
         const errorMessage: string =
           repositoryUrls.length > 1
@@ -376,7 +376,7 @@ export class Git {
         // eslint-disable-next-line no-console
         console.log(Colorize.yellow(errorMessage + 'Detected changes are likely to be incorrect.'));
 
-        return this._rushConfiguration.repositoryDefaultFullyQualifiedRemoteBranch;
+        return this.#rushConfiguration.repositoryDefaultFullyQualifiedRemoteBranch;
       }
     } else {
       // eslint-disable-next-line no-console
@@ -385,7 +385,7 @@ export class Git {
           `A git remote URL has not been specified in ${RushConstants.rushJsonFilename}. Setting the baseline remote URL is recommended.`
         )
       );
-      return this._rushConfiguration.repositoryDefaultFullyQualifiedRemoteBranch;
+      return this.#rushConfiguration.repositoryDefaultFullyQualifiedRemoteBranch;
     }
   }
 
@@ -427,7 +427,7 @@ export class Git {
   }
 
   public getTagSeparator(): string {
-    return this._rushConfiguration.gitTagSeparator || DEFAULT_GIT_TAG_SEPARATOR;
+    return this.#rushConfiguration.gitTagSeparator || DEFAULT_GIT_TAG_SEPARATOR;
   }
 
   public async getGitStatusAsync(): Promise<Iterable<IGitStatusEntry>> {
@@ -538,12 +538,12 @@ export class Git {
       await this._executeGitCommandAndCaptureOutputAsync(
         gitPath,
         ['add', '--', ...pattern],
-        this._rushConfiguration.changesFolder
+        this.#rushConfiguration.changesFolder
       );
       await this._executeGitCommandAndCaptureOutputAsync(
         gitPath,
         ['commit', '-m', message, '--', ...pattern],
-        this._rushConfiguration.changesFolder
+        this.#rushConfiguration.changesFolder
       );
     } catch (error) {
       terminal.writeErrorLine(`ERROR: Cannot stage and commit git changes ${(error as Error).message}`);
@@ -555,41 +555,41 @@ export class Git {
    * command or an error.
    */
   private async _tryGetGitEmailAsync(): Promise<IResultOrError<string>> {
-    if (this._gitEmailResult === undefined) {
+    if (this.#gitEmailResult === undefined) {
       const gitPath: string = this.getGitPathOrThrow();
       try {
-        this._gitEmailResult = {
+        this.#gitEmailResult = {
           result: (
             await this._executeGitCommandAndCaptureOutputAsync(gitPath, ['config', 'user.email'])
           ).trim()
         };
       } catch (e) {
-        this._gitEmailResult = {
+        this.#gitEmailResult = {
           error: e as Error
         };
       }
     }
 
-    return this._gitEmailResult;
+    return this.#gitEmailResult;
   }
 
   private async _tryGetGitHooksPathAsync(): Promise<IResultOrError<string>> {
-    if (this._gitHooksPath === undefined) {
+    if (this.#gitHooksPath === undefined) {
       const gitPath: string = this.getGitPathOrThrow();
       try {
-        this._gitHooksPath = {
+        this.#gitHooksPath = {
           result: (
             await this._executeGitCommandAndCaptureOutputAsync(gitPath, ['rev-parse', '--git-path', 'hooks'])
           ).trim()
         };
       } catch (e) {
-        this._gitHooksPath = {
+        this.#gitHooksPath = {
           error: e as Error
         };
       }
     }
 
-    return this._gitHooksPath;
+    return this.#gitHooksPath;
   }
 
   private _tryFetchRemoteBranch(remoteBranchName: string): boolean {
@@ -631,7 +631,7 @@ export class Git {
   public async _executeGitCommandAndCaptureOutputAsync(
     gitPath: string,
     args: string[],
-    workingDirectory: string = this._rushConfiguration.rushJsonFolder
+    workingDirectory: string = this.#rushConfiguration.rushJsonFolder
   ): Promise<string> {
     try {
       return await Utilities.executeCommandAndCaptureOutputAsync({

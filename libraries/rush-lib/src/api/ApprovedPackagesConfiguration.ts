@@ -59,13 +59,13 @@ const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 export class ApprovedPackagesConfiguration {
   public items: ApprovedPackagesItem[] = [];
 
-  private _itemsByName: Map<string, ApprovedPackagesItem> = new Map<string, ApprovedPackagesItem>();
+  #itemsByName: Map<string, ApprovedPackagesItem> = new Map<string, ApprovedPackagesItem>();
 
-  private _loadedJson!: IApprovedPackagesJson;
-  private _jsonFilename: string;
+  #loadedJson!: IApprovedPackagesJson;
+  #jsonFilename: string;
 
   public constructor(jsonFilename: string) {
-    this._jsonFilename = jsonFilename;
+    this.#jsonFilename = jsonFilename;
     this.clear();
   }
 
@@ -73,8 +73,8 @@ export class ApprovedPackagesConfiguration {
    * Clears all the settings, returning to an empty state.
    */
   public clear(): void {
-    this._itemsByName.clear();
-    this._loadedJson = {
+    this.#itemsByName.clear();
+    this.#loadedJson = {
       // Ensure this comes first in the key ordering
       $schema: '',
       packages: []
@@ -82,13 +82,13 @@ export class ApprovedPackagesConfiguration {
   }
 
   public getItemByName(packageName: string): ApprovedPackagesItem | undefined {
-    return this._itemsByName.get(packageName);
+    return this.#itemsByName.get(packageName);
   }
 
   public addOrUpdatePackage(packageName: string, reviewCategory: string): boolean {
     let changed: boolean = false;
 
-    let item: ApprovedPackagesItem | undefined = this._itemsByName.get(packageName);
+    let item: ApprovedPackagesItem | undefined = this.#itemsByName.get(packageName);
     if (!item) {
       item = new ApprovedPackagesItem(packageName);
       this._addItem(item);
@@ -107,7 +107,7 @@ export class ApprovedPackagesConfiguration {
    * If the file exists, calls loadFromFile().
    */
   public tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean {
-    if (!FileSystem.exists(this._jsonFilename)) {
+    if (!FileSystem.exists(this.#jsonFilename)) {
       return false;
     }
 
@@ -116,7 +116,7 @@ export class ApprovedPackagesConfiguration {
     if (!approvedPackagesPolicyEnabled) {
       // eslint-disable-next-line no-console
       console.log(
-        `Warning: Ignoring "${path.basename(this._jsonFilename)}" because the` +
+        `Warning: Ignoring "${path.basename(this.#jsonFilename)}" because the` +
           ` "approvedPackagesPolicy" setting was not specified in ${RushConstants.rushJsonFilename}`
       );
     }
@@ -129,14 +129,14 @@ export class ApprovedPackagesConfiguration {
    */
   public loadFromFile(): void {
     const approvedPackagesJson: IApprovedPackagesJson = JsonFile.loadAndValidate(
-      this._jsonFilename,
+      this.#jsonFilename,
       _jsonSchema
     );
 
     this.clear();
 
     for (const browserPackage of approvedPackagesJson.packages) {
-      this._addItemJson(browserPackage, this._jsonFilename);
+      this._addItemJson(browserPackage, this.#jsonFilename);
     }
   }
 
@@ -148,9 +148,9 @@ export class ApprovedPackagesConfiguration {
     // (which passed schema validation).
 
     // eslint-disable-next-line dot-notation
-    this._loadedJson['$schema'] = JsonSchemaUrls.approvedPackages;
+    this.#loadedJson['$schema'] = JsonSchemaUrls.approvedPackages;
 
-    this._loadedJson.packages = [];
+    this.#loadedJson.packages = [];
 
     this.items.sort((a: ApprovedPackagesItem, b: ApprovedPackagesItem) => {
       return a.packageName.localeCompare(b.packageName);
@@ -166,11 +166,11 @@ export class ApprovedPackagesConfiguration {
         allowedCategories: allowedCategories
       };
 
-      this._loadedJson.packages.push(itemJson);
+      this.#loadedJson.packages.push(itemJson);
     }
 
     // Save the file
-    let body: string = JsonFile.stringify(this._loadedJson);
+    let body: string = JsonFile.stringify(this.#loadedJson);
 
     // Unindent the allowedCategories array to improve readability
     body = body.replace(/("allowedCategories": +\[)([^\]]+)/g, (substring: string, ...args: string[]) => {
@@ -180,7 +180,7 @@ export class ApprovedPackagesConfiguration {
     // Add a header
     body = '// DO NOT ADD COMMENTS IN THIS FILE.  They will be lost when the Rush tool resaves it.\n' + body;
 
-    FileSystem.writeFile(this._jsonFilename, body, {
+    FileSystem.writeFile(this.#jsonFilename, body, {
       convertLineEndings: NewlineKind.CrLf
     });
   }
@@ -189,7 +189,7 @@ export class ApprovedPackagesConfiguration {
    * Helper function only used by the constructor when loading the file.
    */
   private _addItemJson(itemJson: IApprovedPackagesItemJson, jsonFilename: string): void {
-    if (this._itemsByName.has(itemJson.name)) {
+    if (this.#itemsByName.has(itemJson.name)) {
       throw new Error(
         `Error loading package review file ${jsonFilename}:\n` +
           ` the name "${itemJson.name}" appears more than once`
@@ -210,10 +210,10 @@ export class ApprovedPackagesConfiguration {
    * list and set.
    */
   private _addItem(item: ApprovedPackagesItem): void {
-    if (this._itemsByName.has(item.packageName)) {
+    if (this.#itemsByName.has(item.packageName)) {
       throw new InternalError('Duplicate key');
     }
     this.items.push(item);
-    this._itemsByName.set(item.packageName, item);
+    this.#itemsByName.set(item.packageName, item);
   }
 }

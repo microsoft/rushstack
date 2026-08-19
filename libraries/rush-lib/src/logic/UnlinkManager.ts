@@ -16,10 +16,10 @@ import { RushConstants } from './RushConstants';
  * This class implements the logic for "rush unlink"
  */
 export class UnlinkManager {
-  private _rushConfiguration: RushConfiguration;
+  #rushConfiguration: RushConfiguration;
 
   public constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
+    this.#rushConfiguration = rushConfiguration;
   }
 
   /**
@@ -30,7 +30,7 @@ export class UnlinkManager {
    */
   public async unlinkAsync(force: boolean = false): Promise<boolean> {
     const useWorkspaces: boolean =
-      this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
+      this.#rushConfiguration.pnpmOptions && this.#rushConfiguration.pnpmOptions.useWorkspaces;
     if (!force && useWorkspaces) {
       // eslint-disable-next-line no-console
       console.log(
@@ -43,7 +43,7 @@ export class UnlinkManager {
     }
 
     await new FlagFile(
-      this._rushConfiguration.defaultSubspace.getSubspaceTempFolderPath(),
+      this.#rushConfiguration.defaultSubspace.getSubspaceTempFolderPath(),
       RushConstants.lastLinkFlagFilename,
       {}
     ).clearAsync();
@@ -60,7 +60,7 @@ export class UnlinkManager {
   private _deleteProjectFiles(): boolean {
     let didDeleteAnything: boolean = false;
 
-    for (const rushProject of this._rushConfiguration.projects) {
+    for (const rushProject of this.#rushConfiguration.projects) {
       const localModuleFolder: string = path.join(rushProject.projectFolder, 'node_modules');
       if (FileSystem.exists(localModuleFolder)) {
         // eslint-disable-next-line no-console

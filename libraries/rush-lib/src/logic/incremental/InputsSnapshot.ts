@@ -198,26 +198,26 @@ export class InputsSnapshot implements IInputsSnapshot {
   /**
    * The metadata for each project. This is a superset of the information in `projectMap` and includes caching of queries.
    */
-  private readonly _projectMetadataMap: Map<
+  readonly #projectMetadataMap: Map<
     IRushConfigurationProjectForSnapshot,
     IInternalInputsSnapshotProjectMetadata
   >;
   /**
    * Hashes of files to be included in all result sets.
    */
-  private readonly _globalAdditionalHashes: ReadonlyMap<string, string> | undefined;
+  readonly #globalAdditionalHashes: ReadonlyMap<string, string> | undefined;
   /**
    * Hashes for files selected by `dependsOnAdditionalFiles`.
    */
-  private readonly _additionalHashes: ReadonlyMap<string, string> | undefined;
+  readonly #additionalHashes: ReadonlyMap<string, string> | undefined;
   /**
    * The environment to use for `dependsOnEnvVars`.
    */
-  private readonly _environment: Record<string, string | undefined>;
+  readonly #environment: Record<string, string | undefined>;
   /**
    * Pre-computed Node.js version strings at each granularity level for `dependsOnNodeVersion`.
    */
-  private readonly _nodeVersionByGranularity: Readonly<Record<NodeVersionGranularity, string>>;
+  readonly #nodeVersionByGranularity: Readonly<Record<NodeVersionGranularity, string>>;
 
   /**
    *
@@ -283,13 +283,13 @@ export class InputsSnapshot implements IInputsSnapshot {
       Sort.sortMapKeys(record.hashes);
     }
 
-    this._projectMetadataMap = projectMetadataMap;
-    this._additionalHashes = additionalHashes;
-    this._globalAdditionalHashes = globalAdditionalHashes;
+    this.#projectMetadataMap = projectMetadataMap;
+    this.#additionalHashes = additionalHashes;
+    this.#globalAdditionalHashes = globalAdditionalHashes;
     // Snapshot the environment so that queries are not impacted by when they happen
-    this._environment = environment;
+    this.#environment = environment;
     // Parse Node.js version once so it doesn't need to be re-parsed per operation
-    this._nodeVersionByGranularity = _parseNodeVersion(nodeVersion);
+    this.#nodeVersionByGranularity = _parseNodeVersion(nodeVersion);
     this.hashes = hashes;
     this.hasUncommittedChanges = hasUncommittedChanges;
     this.rootDirectory = rootDir;
@@ -302,7 +302,7 @@ export class InputsSnapshot implements IInputsSnapshot {
     project: IRushConfigurationProjectForSnapshot,
     operationName?: string
   ): ReadonlyMap<string, string> {
-    const record: IInternalInputsSnapshotProjectMetadata | undefined = this._projectMetadataMap.get(project);
+    const record: IInternalInputsSnapshotProjectMetadata | undefined = this.#projectMetadataMap.get(project);
     if (!record) {
       throw new InternalError(`No information available for project at ${project.projectFolder}`);
     }
@@ -342,7 +342,7 @@ export class InputsSnapshot implements IInputsSnapshot {
         }
       }
 
-      const { _globalAdditionalHashes: globalAdditionalHashes } = this;
+      const globalAdditionalHashes: ReadonlyMap<string, string> | undefined = this.#globalAdditionalHashes;
       if (globalAdditionalHashes) {
         for (const [file, hash] of globalAdditionalHashes) {
           record.hashes.set(file, hash);
@@ -379,7 +379,7 @@ export class InputsSnapshot implements IInputsSnapshot {
     project: IRushConfigurationProjectForSnapshot,
     operationName?: string
   ): string {
-    const record: IInternalInputsSnapshotProjectMetadata | undefined = this._projectMetadataMap.get(project);
+    const record: IInternalInputsSnapshotProjectMetadata | undefined = this.#projectMetadataMap.get(project);
     if (!record) {
       throw new Error(`No information available for project at ${project.projectFolder}`);
     }
@@ -403,14 +403,14 @@ export class InputsSnapshot implements IInputsSnapshot {
             // As long as we enumerate environment variables in a consistent order, we will get a stable hash.
             // Changing the order in rush-project.json will change the hash anyway since the file contents are part of the hash.
             for (const envVar of dependsOnEnvVars) {
-              hasher.update(`${hashDelimiter}$${envVar}=${this._environment[envVar] || ''}`);
+              hasher.update(`${hashDelimiter}$${envVar}=${this.#environment[envVar] || ''}`);
             }
           }
 
           if (dependsOnNodeVersion) {
             const granularity: NodeVersionGranularity =
               dependsOnNodeVersion === true ? 'patch' : dependsOnNodeVersion;
-            hasher.update(`${hashDelimiter}nodeVersion=${this._nodeVersionByGranularity[granularity]}`);
+            hasher.update(`${hashDelimiter}nodeVersion=${this.#nodeVersionByGranularity[granularity]}`);
           }
 
           if (outputFolderNames) {
@@ -433,10 +433,11 @@ export class InputsSnapshot implements IInputsSnapshot {
   }
 
   private *_resolveHashes(filePaths: Iterable<string>): Generator<[string, string]> {
-    const { hashes, _additionalHashes } = this;
+    const { hashes } = this;
+    const additionalHashes: ReadonlyMap<string, string> | undefined = this.#additionalHashes;
 
     for (const filePath of filePaths) {
-      const hash: string | undefined = hashes.get(filePath) ?? _additionalHashes?.get(filePath);
+      const hash: string | undefined = hashes.get(filePath) ?? additionalHashes?.get(filePath);
       if (!hash) {
         throw new Error(`Could not find hash for file path "${filePath}"`);
       }

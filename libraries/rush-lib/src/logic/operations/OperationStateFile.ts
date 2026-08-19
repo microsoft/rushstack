@@ -26,7 +26,7 @@ export interface IOperationStateJson {
  * @internal
  */
 export class OperationStateFile {
-  private _state: IOperationStateJson | undefined;
+  #state: IOperationStateJson | undefined;
 
   /**
    * The path of the state json file.
@@ -51,25 +51,25 @@ export class OperationStateFile {
   }
 
   public get state(): IOperationStateJson | undefined {
-    return this._state;
+    return this.#state;
   }
 
   public async writeAsync(json: IOperationStateJson): Promise<void> {
     await JsonFile.saveAsync(json, this.filepath, { ensureFolderExists: true, ignoreUndefinedValues: true });
-    this._state = json;
+    this.#state = json;
   }
 
   public async tryRestoreAsync(): Promise<IOperationStateJson | undefined> {
     try {
-      this._state = await JsonFile.loadAsync(this.filepath);
+      this.#state = await JsonFile.loadAsync(this.filepath);
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
-        this._state = undefined;
+        this.#state = undefined;
       } else {
         // This should not happen
         throw new InternalError(error);
       }
     }
-    return this._state;
+    return this.#state;
   }
 }

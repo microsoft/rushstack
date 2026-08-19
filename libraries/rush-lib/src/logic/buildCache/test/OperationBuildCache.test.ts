@@ -71,7 +71,7 @@ describe(OperationBuildCache.name, () => {
   describe(OperationBuildCache.getOperationBuildCache.name, () => {
     it('returns an OperationBuildCache with a calculated cacheId value', () => {
       const subject: OperationBuildCache = prepareSubject({});
-      expect(subject['_cacheId']).toMatchInlineSnapshot(
+      expect(subject.cacheId).toMatchInlineSnapshot(
         `"acme-wizard/1926f30e8ed24cb47be89aea39e7efd70fcda075"`
       );
     });

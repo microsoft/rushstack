@@ -56,29 +56,29 @@ export interface ISetupPackageRegistryOptions {
 }
 
 export class SetupPackageRegistry {
-  private readonly _options: ISetupPackageRegistryOptions;
+  readonly #options: ISetupPackageRegistryOptions;
   public readonly rushConfiguration: RushConfiguration;
-  private readonly _terminal: Terminal;
-  private readonly _artifactoryConfiguration: ArtifactoryConfiguration;
-  private readonly _messages: IArtifactoryCustomizableMessages;
+  readonly #terminal: Terminal;
+  readonly #artifactoryConfiguration: ArtifactoryConfiguration;
+  readonly #messages: IArtifactoryCustomizableMessages;
 
   public constructor(options: ISetupPackageRegistryOptions) {
-    this._options = options;
+    this.#options = options;
     this.rushConfiguration = options.rushConfiguration;
 
-    this._terminal = new Terminal(
+    this.#terminal = new Terminal(
       new ConsoleTerminalProvider({
         verboseEnabled: options.isDebug
       })
     );
 
-    this._artifactoryConfiguration = new ArtifactoryConfiguration(
+    this.#artifactoryConfiguration = new ArtifactoryConfiguration(
       path.join(this.rushConfiguration.commonRushConfigFolder, 'artifactory.json')
     );
 
-    this._messages = {
+    this.#messages = {
       ...defaultMessages,
-      ...this._artifactoryConfiguration.configuration.packageRegistry.messageOverrides
+      ...this.#artifactoryConfiguration.configuration.packageRegistry.messageOverrides
     };
   }
 
@@ -87,8 +87,8 @@ export class SetupPackageRegistry {
       return;
     }
 
-    this._terminal.writeLine(PrintUtilities.wrapWords(message));
-    this._terminal.writeLine();
+    this.#terminal.writeLine(PrintUtilities.wrapWords(message));
+    this.#terminal.writeLine();
   }
 
   /**
@@ -98,9 +98,9 @@ export class SetupPackageRegistry {
    */
   public async checkOnlyAsync(): Promise<boolean> {
     const packageRegistry: IArtifactoryPackageRegistryJson =
-      this._artifactoryConfiguration.configuration.packageRegistry;
+      this.#artifactoryConfiguration.configuration.packageRegistry;
     if (!packageRegistry.enabled) {
-      this._terminal.writeVerbose('Skipping package registry setup because packageRegistry.enabled=false');
+      this.#terminal.writeVerbose('Skipping package registry setup because packageRegistry.enabled=false');
       return true;
     }
 
@@ -109,7 +109,7 @@ export class SetupPackageRegistry {
       throw new Error('The "registryUrl" setting in artifactory.json is missing or empty');
     }
 
-    if (!this._options.syncNpmrcAlreadyCalled) {
+    if (!this.#options.syncNpmrcAlreadyCalled) {
       Utilities.syncNpmrc({
         sourceNpmrcFolder: this.rushConfiguration.commonRushConfigFolder,
         targetNpmrcFolder: this.rushConfiguration.commonTempFolder,
@@ -128,7 +128,7 @@ export class SetupPackageRegistry {
       '--registry=' + packageRegistry.registryUrl
     ];
 
-    this._terminal.writeLine('Testing access to private NPM registry: ' + packageRegistry.registryUrl);
+    this.#terminal.writeLine('Testing access to private NPM registry: ' + packageRegistry.registryUrl);
 
     const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync('npm', npmArgs, {
       currentWorkingDirectory: this.rushConfiguration.commonTempFolder,
@@ -136,7 +136,7 @@ export class SetupPackageRegistry {
       // Wait at most 10 seconds for "npm view" to succeed
       timeoutMs: 10 * 1000
     });
-    this._terminal.writeLine();
+    this.#terminal.writeLine();
 
     // (This is not exactly correct, for example Node.js puts a string in error.errno instead of a string.)
     const error: (Error & Partial<NodeJS.ErrnoException>) | undefined = result.error;
@@ -168,30 +168,30 @@ export class SetupPackageRegistry {
     try {
       jsonOutput = JSON.parse(jsonContent);
     } catch (e) {
-      this._terminal.writeVerboseLine('NPM response:\n\n--------\n' + jsonContent + '\n--------\n\n');
+      this.#terminal.writeVerboseLine('NPM response:\n\n--------\n' + jsonContent + '\n--------\n\n');
       throw new InternalError('The "npm view" command returned an invalid JSON structure');
     }
 
     const errorCode: JsonObject = jsonOutput?.error?.code;
     if (typeof errorCode !== 'string') {
-      this._terminal.writeVerboseLine('NPM response:\n' + JSON.stringify(jsonOutput, undefined, 2) + '\n\n');
+      this.#terminal.writeVerboseLine('NPM response:\n' + JSON.stringify(jsonOutput, undefined, 2) + '\n\n');
       throw new InternalError('The "npm view" command returned unexpected output');
     }
 
     switch (errorCode) {
       case 'E404':
-        this._terminal.writeLine('NPM credentials are working');
-        this._terminal.writeLine();
+        this.#terminal.writeLine('NPM credentials are working');
+        this.#terminal.writeLine();
         return true;
       case 'E401':
       case 'E403':
-        this._terminal.writeVerboseLine(
+        this.#terminal.writeVerboseLine(
           'NPM response:\n' + JSON.stringify(jsonOutput, undefined, 2) + '\n\n'
         );
         // Credentials are missing or expired
         return false;
       default:
-        this._terminal.writeVerboseLine(
+        this.#terminal.writeVerboseLine(
           'NPM response:\n' + JSON.stringify(jsonOutput, undefined, 2) + '\n\n'
         );
         throw new Error(`The "npm view" command returned an unexpected error code "${errorCode}"`);
@@ -206,70 +206,70 @@ export class SetupPackageRegistry {
       return;
     }
 
-    this._terminal.writeWarningLine('NPM credentials are missing or expired');
-    this._terminal.writeLine();
+    this.#terminal.writeWarningLine('NPM credentials are missing or expired');
+    this.#terminal.writeLine();
 
     const packageRegistry: IArtifactoryPackageRegistryJson =
-      this._artifactoryConfiguration.configuration.packageRegistry;
+      this.#artifactoryConfiguration.configuration.packageRegistry;
 
     const fixThisProblem: boolean = await TerminalInput.promptYesNoAsync({
       message: 'Fix this problem now?',
       defaultValue: false
     });
-    this._terminal.writeLine();
+    this.#terminal.writeLine();
     if (!fixThisProblem) {
       return;
     }
 
-    this._writeInstructionBlock(this._messages.introduction);
+    this._writeInstructionBlock(this.#messages.introduction);
 
     const hasArtifactoryAccount: boolean = await TerminalInput.promptYesNoAsync({
       message: 'Do you already have an Artifactory user account?'
     });
-    this._terminal.writeLine();
+    this.#terminal.writeLine();
 
     if (!hasArtifactoryAccount) {
-      this._writeInstructionBlock(this._messages.obtainAnAccount);
+      this._writeInstructionBlock(this.#messages.obtainAnAccount);
       throw new AlreadyReportedError();
     }
 
-    if (this._messages.visitWebsite) {
-      this._writeInstructionBlock(this._messages.visitWebsite);
+    if (this.#messages.visitWebsite) {
+      this._writeInstructionBlock(this.#messages.visitWebsite);
 
       const artifactoryWebsiteUrl: string =
-        this._artifactoryConfiguration.configuration.packageRegistry.artifactoryWebsiteUrl;
+        this.#artifactoryConfiguration.configuration.packageRegistry.artifactoryWebsiteUrl;
 
       if (artifactoryWebsiteUrl) {
-        this._terminal.writeLine('  ', Colorize.cyan(artifactoryWebsiteUrl));
-        this._terminal.writeLine();
+        this.#terminal.writeLine('  ', Colorize.cyan(artifactoryWebsiteUrl));
+        this.#terminal.writeLine();
       }
     }
 
-    this._writeInstructionBlock(this._messages.locateUserName);
+    this._writeInstructionBlock(this.#messages.locateUserName);
 
     let artifactoryUser: string = await TerminalInput.promptLineAsync({
-      message: this._messages.userNamePrompt
+      message: this.#messages.userNamePrompt
     });
-    this._terminal.writeLine();
+    this.#terminal.writeLine();
 
     artifactoryUser = artifactoryUser.trim();
     if (artifactoryUser.length === 0) {
-      this._terminal.writeLine(Colorize.red('Operation aborted because the input was empty'));
-      this._terminal.writeLine();
+      this.#terminal.writeLine(Colorize.red('Operation aborted because the input was empty'));
+      this.#terminal.writeLine();
       throw new AlreadyReportedError();
     }
 
-    this._writeInstructionBlock(this._messages.locateApiKey);
+    this._writeInstructionBlock(this.#messages.locateApiKey);
 
     let artifactoryKey: string = await TerminalInput.promptPasswordLineAsync({
-      message: this._messages.apiKeyPrompt
+      message: this.#messages.apiKeyPrompt
     });
-    this._terminal.writeLine();
+    this.#terminal.writeLine();
 
     artifactoryKey = artifactoryKey.trim();
     if (artifactoryKey.length === 0) {
-      this._terminal.writeLine(Colorize.red('Operation aborted because the input was empty'));
-      this._terminal.writeLine();
+      this.#terminal.writeLine(Colorize.red('Operation aborted because the input was empty'));
+      this.#terminal.writeLine();
       throw new AlreadyReportedError();
     }
 
@@ -285,7 +285,7 @@ export class SetupPackageRegistry {
     artifactoryKey: string,
     packageRegistry: IArtifactoryPackageRegistryJson
   ): Promise<void> {
-    this._terminal.writeLine('\nFetching an NPM token from the Artifactory service...');
+    this.#terminal.writeLine('\nFetching an NPM token from the Artifactory service...');
 
     // Defer this import since it is conditionally needed.
     const { WebClient } = await import('../../utilities/WebClient');
@@ -398,8 +398,8 @@ export class SetupPackageRegistry {
       }
     }
 
-    this._terminal.writeLine();
-    this._terminal.writeLine(Colorize.green('Adding Artifactory token to: '), npmrcPath);
+    this.#terminal.writeLine();
+    this.#terminal.writeLine(Colorize.green('Adding Artifactory token to: '), npmrcPath);
 
     const npmrcLines: string[] = [];
 

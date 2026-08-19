@@ -27,14 +27,14 @@ export interface ILoggerOptions {
 }
 
 export class Logger implements ILogger {
-  private readonly _options: ILoggerOptions;
-  private readonly _errors: Error[] = [];
-  private readonly _warnings: Error[] = [];
+  readonly #options: ILoggerOptions;
+  readonly #errors: Error[] = [];
+  readonly #warnings: Error[] = [];
 
   public readonly terminal: Terminal;
 
   public constructor(options: ILoggerOptions) {
-    this._options = options;
+    this.#options = options;
     this.terminal = new Terminal(options.terminalProvider);
   }
 
@@ -54,7 +54,7 @@ export class Logger implements ILogger {
    * {@inheritdoc ILogger.emitError}
    */
   public emitError(error: Error): void {
-    this._errors.push(error);
+    this.#errors.push(error);
     this.terminal.writeErrorLine(`Error: ${Logger.getErrorMessage(error)}`);
     if (this._shouldPrintStacks && error.stack) {
       this.terminal.writeErrorLine(error.stack);
@@ -65,7 +65,7 @@ export class Logger implements ILogger {
    * {@inheritdoc ILogger.emitWarning}
    */
   public emitWarning(warning: Error): void {
-    this._warnings.push(warning);
+    this.#warnings.push(warning);
     this.terminal.writeWarningLine(`Warning: ${Logger.getErrorMessage(warning)}`);
     if (this._shouldPrintStacks && warning.stack) {
       this.terminal.writeWarningLine(warning.stack);
@@ -73,6 +73,6 @@ export class Logger implements ILogger {
   }
 
   private get _shouldPrintStacks(): boolean {
-    return this._options.getShouldPrintStacks();
+    return this.#options.getShouldPrintStacks();
   }
 }

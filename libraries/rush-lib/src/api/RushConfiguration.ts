@@ -227,7 +227,7 @@ const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
  * @public
  */
 export class RushConfiguration {
-  private readonly _pathTrees: Map<string, LookupByPath<RushConfigurationProject>>;
+  readonly #pathTrees: Map<string, LookupByPath<RushConfigurationProject>>;
 
   /**
    * @internal
@@ -235,17 +235,17 @@ export class RushConfiguration {
   public _currentVariantJsonLoadingPromise: Promise<ICurrentVariantJson | undefined> | undefined;
 
   // Lazily loaded when the projects() getter is called.
-  private _projects: RushConfigurationProject[] | undefined;
+  #projects: RushConfigurationProject[] | undefined;
 
   // Lazily loaded when the projectsByName() getter is called.
-  private _projectsByName: Map<string, RushConfigurationProject> | undefined;
+  #projectsByName: Map<string, RushConfigurationProject> | undefined;
 
   // Lazily loaded when the projectsByTag() getter is called.
-  private _projectsByTag: ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> | undefined;
+  #projectsByTag: ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> | undefined;
 
   // subspaceName -> subspace
-  private readonly _subspacesByName: Map<string, Subspace>;
-  private readonly _subspaces: Subspace[] = [];
+  readonly #subspacesByName: Map<string, Subspace>;
+  readonly #subspaces: Subspace[] = [];
 
   /**
    * The name of the package manager being used to install dependencies
@@ -663,7 +663,7 @@ export class RushConfiguration {
     this.subspacesConfiguration = SubspacesConfiguration.tryLoadFromDefaultLocation(this);
     this.subspacesFeatureEnabled = !!this.subspacesConfiguration?.subspacesEnabled;
 
-    this._subspacesByName = new Map();
+    this.#subspacesByName = new Map();
 
     const experimentsConfigFile: string = path.join(
       this.commonRushConfigFolder,
@@ -880,14 +880,14 @@ export class RushConfiguration {
 
     this.variants = variants;
 
-    this._pathTrees = new Map();
+    this.#pathTrees = new Map();
   }
 
   private _initializeAndValidateLocalProjects(): void {
-    this._projects = [];
-    this._projectsByName = new Map<string, RushConfigurationProject>();
-    this._subspacesByName.clear();
-    this._subspaces.length = 0;
+    this.#projects = [];
+    this.#projectsByName = new Map<string, RushConfigurationProject>();
+    this.#subspacesByName.clear();
+    this.#subspaces.length = 0;
 
     // Build the subspaces map
     const subspaceNames: string[] = [];
@@ -910,10 +910,10 @@ export class RushConfiguration {
         rushConfiguration: this,
         splitWorkspaceCompatibility
       });
-      this._subspacesByName.set(subspaceName, subspace);
-      this._subspaces.push(subspace);
+      this.#subspacesByName.set(subspaceName, subspace);
+      this.#subspaces.push(subspace);
     }
-    const defaultSubspace: Subspace | undefined = this._subspacesByName.get(
+    const defaultSubspace: Subspace | undefined = this.#subspacesByName.get(
       RushConstants.defaultSubspaceName
     );
     if (!defaultSubspace) {
@@ -938,7 +938,7 @@ export class RushConfiguration {
       let subspace: Subspace | undefined = undefined;
       if (this.subspacesFeatureEnabled) {
         if (projectJson.subspaceName) {
-          subspace = this._subspacesByName.get(projectJson.subspaceName);
+          subspace = this.#subspacesByName.get(projectJson.subspaceName);
           if (subspace === undefined) {
             throw new Error(
               `The project "${projectJson.packageName}" in ${RushConstants.rushJsonFilename} references` +
@@ -960,17 +960,17 @@ export class RushConfiguration {
       });
       subspace._addProject(project);
 
-      this._projects.push(project);
-      if (this._projectsByName.has(project.packageName)) {
+      this.#projects.push(project);
+      if (this.#projectsByName.has(project.packageName)) {
         throw new Error(
           `The project name "${project.packageName}" was specified more than once` +
             ` in the ${RushConstants.rushJsonFilename} configuration file.`
         );
       }
-      this._projectsByName.set(project.packageName, project);
+      this.#projectsByName.set(project.packageName, project);
     }
 
-    for (const project of this._projects) {
+    for (const project of this.#projects) {
       project.decoupledLocalDependencies.forEach((decoupledLocalDependency: string) => {
         if (!this.getProjectByName(decoupledLocalDependency)) {
           throw new Error(
@@ -1191,11 +1191,11 @@ export class RushConfiguration {
   }
 
   public get projects(): RushConfigurationProject[] {
-    if (!this._projects) {
+    if (!this.#projects) {
       this._initializeAndValidateLocalProjects();
     }
 
-    return this._projects!;
+    return this.#projects!;
   }
 
   /**
@@ -1203,7 +1203,7 @@ export class RushConfiguration {
    */
   public get defaultSubspace(): Subspace {
     // TODO: Enable the default subspace to be obtained without initializing the full set of all projects
-    if (!this._projects) {
+    if (!this.#projects) {
       this._initializeAndValidateLocalProjects();
     }
     const defaultSubspace: Subspace | undefined = this.tryGetSubspace(RushConstants.defaultSubspaceName);
@@ -1218,20 +1218,20 @@ export class RushConfiguration {
    * @beta
    */
   public get subspaces(): readonly Subspace[] {
-    if (!this._projects) {
+    if (!this.#projects) {
       this._initializeAndValidateLocalProjects();
     }
-    return this._subspaces;
+    return this.#subspaces;
   }
 
   /**
    * @beta
    */
   public tryGetSubspace(subspaceName: string): Subspace | undefined {
-    if (!this._projects) {
+    if (!this.#projects) {
       this._initializeAndValidateLocalProjects();
     }
-    const subspace: Subspace | undefined = this._subspacesByName.get(subspaceName);
+    const subspace: Subspace | undefined = this.#subspacesByName.get(subspaceName);
     if (!subspace) {
       // If the name is not even valid, that is more important information than if the subspace doesn't exist
       SubspacesConfiguration.requireValidSubspaceName(
@@ -1258,7 +1258,7 @@ export class RushConfiguration {
    * @beta
    */
   public getSubspacesForProjects(projects: Iterable<RushConfigurationProject>): ReadonlySet<Subspace> {
-    if (!this._projects) {
+    if (!this.#projects) {
       this._initializeAndValidateLocalProjects();
     }
 
@@ -1274,11 +1274,11 @@ export class RushConfiguration {
    * @beta
    */
   public get projectsByName(): ReadonlyMap<string, RushConfigurationProject> {
-    if (!this._projectsByName) {
+    if (!this.#projectsByName) {
       this._initializeAndValidateLocalProjects();
     }
 
-    return this._projectsByName!;
+    return this.#projectsByName!;
   }
 
   /**
@@ -1286,7 +1286,7 @@ export class RushConfiguration {
    * @beta
    */
   public get projectsByTag(): ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> {
-    if (!this._projectsByTag) {
+    if (!this.#projectsByTag) {
       const projectsByTag: Map<string, Set<RushConfigurationProject>> = new Map();
       for (const project of this.projects) {
         for (const tag of project.tags) {
@@ -1297,9 +1297,9 @@ export class RushConfiguration {
           collection.add(project);
         }
       }
-      this._projectsByTag = projectsByTag;
+      this.#projectsByTag = projectsByTag;
     }
-    return this._projectsByTag;
+    return this.#projectsByTag;
   }
 
   /**
@@ -1445,9 +1445,9 @@ export class RushConfiguration {
    * @beta
    */
   public getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject> {
-    let pathTree: LookupByPath<RushConfigurationProject> | undefined = this._pathTrees.get(rootPath);
+    let pathTree: LookupByPath<RushConfigurationProject> | undefined = this.#pathTrees.get(rootPath);
     if (!pathTree) {
-      this._pathTrees.set(rootPath, (pathTree = new LookupByPath()));
+      this.#pathTrees.set(rootPath, (pathTree = new LookupByPath()));
       for (const project of this.projects) {
         const relativePath: string = path.relative(rootPath, project.projectFolder);
         pathTree.setItemFromSegments(LookupByPath.iteratePathSegments(relativePath, path.sep), project);

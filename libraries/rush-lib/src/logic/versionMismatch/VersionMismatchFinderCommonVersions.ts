@@ -7,7 +7,7 @@ import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfig
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 
 export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEntity {
-  private _fileManager: CommonVersionsConfiguration;
+  #fileManager: CommonVersionsConfiguration;
 
   public constructor(commonVersionsConfiguration: CommonVersionsConfiguration) {
     super({
@@ -15,17 +15,17 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
       decoupledLocalDependencies: new Set<string>()
     });
 
-    this._fileManager = commonVersionsConfiguration;
+    this.#fileManager = commonVersionsConfiguration;
   }
 
   public get filePath(): string {
-    return this._fileManager.filePath;
+    return this.#fileManager.filePath;
   }
 
   public get allDependencies(): ReadonlyArray<PackageJsonDependency> {
     const dependencies: PackageJsonDependency[] = [];
 
-    this._fileManager.getAllPreferredVersions().forEach((version, dependencyName) => {
+    this.#fileManager.getAllPreferredVersions().forEach((version, dependencyName) => {
       dependencies.push(this._getPackageJsonDependency(dependencyName, version));
     });
 
@@ -33,7 +33,7 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
   }
 
   public tryGetDependency(packageName: string): PackageJsonDependency | undefined {
-    const version: string | undefined = this._fileManager.getAllPreferredVersions().get(packageName);
+    const version: string | undefined = this.#fileManager.getAllPreferredVersions().get(packageName);
     if (!version) {
       return undefined;
     } else {
@@ -56,7 +56,7 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
       );
     }
 
-    this._fileManager.preferredVersions.set(packageName, newVersion);
+    this.#fileManager.preferredVersions.set(packageName, newVersion);
   }
 
   public removeDependency(packageName: string): void {
@@ -64,7 +64,7 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
   }
 
   public async saveIfModifiedAsync(): Promise<boolean> {
-    return await this._fileManager.saveAsync();
+    return await this.#fileManager.saveAsync();
   }
 
   private _getPackageJsonDependency(dependencyName: string, version: string): PackageJsonDependency {

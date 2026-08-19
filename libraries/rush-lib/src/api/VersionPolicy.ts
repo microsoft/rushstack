@@ -290,7 +290,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
    * @internal
    */
   declare public readonly _json: ILockStepVersionJson;
-  private _version: semver.SemVer;
+  #version: semver.SemVer;
 
   /**
    * The type of bump for next bump.
@@ -316,14 +316,14 @@ export class LockStepVersionPolicy extends VersionPolicy {
    */
   public constructor(versionPolicyJson: ILockStepVersionJson) {
     super(versionPolicyJson);
-    this._version = new semver.SemVer(versionPolicyJson.version);
+    this.#version = new semver.SemVer(versionPolicyJson.version);
   }
 
   /**
    * The value of the lockstep version
    */
   public get version(): string {
-    return this._version.format();
+    return this.#version.format();
   }
 
   /**
@@ -334,16 +334,16 @@ export class LockStepVersionPolicy extends VersionPolicy {
    */
   public ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined {
     const packageVersion: semver.SemVer = new semver.SemVer(project.version);
-    const compareResult: number = packageVersion.compare(this._version);
+    const compareResult: number = packageVersion.compare(this.#version);
     if (compareResult === 0) {
       return undefined;
     } else if (compareResult > 0 && !force) {
       const errorMessage: string =
         `Version ${project.version} in package ${project.name}` +
-        ` is higher than locked version ${this._version.format()}.`;
+        ` is higher than locked version ${this.#version.format()}.`;
       throw new Error(errorMessage);
     }
-    return this._updatePackageVersion(project, this._version);
+    return this._updatePackageVersion(project, this.#version);
   }
 
   /**
@@ -360,7 +360,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
       return;
     }
 
-    this._version.inc(this._getReleaseType(nextBump), identifier);
+    this.#version.inc(this._getReleaseType(nextBump), identifier);
     this._json.version = this.version;
   }
 
@@ -370,10 +370,10 @@ export class LockStepVersionPolicy extends VersionPolicy {
    */
   public update(newVersionString: string): boolean {
     const newVersion: semver.SemVer = new semver.SemVer(newVersionString);
-    if (!newVersion || this._version === newVersion) {
+    if (!newVersion || this.#version === newVersion) {
       return false;
     }
-    this._version = newVersion;
+    this.#version = newVersion;
     this._json.version = this.version;
     return true;
   }
@@ -386,7 +386,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
    */
   public validate(versionString: string, packageName: string): void {
     const versionToTest: semver.SemVer = new semver.SemVer(versionString, false);
-    if (this._version.compare(versionToTest) !== 0) {
+    if (this.#version.compare(versionToTest) !== 0) {
       throw new Error(`Invalid version ${versionString} in ${packageName}`);
     }
   }

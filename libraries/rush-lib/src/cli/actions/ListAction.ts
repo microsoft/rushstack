@@ -56,12 +56,12 @@ export interface IJsonOutput {
 }
 
 export class ListAction extends BaseRushAction {
-  private readonly _version: CommandLineFlagParameter;
-  private readonly _path: CommandLineFlagParameter;
-  private readonly _fullPath: CommandLineFlagParameter;
-  private readonly _jsonFlag: CommandLineFlagParameter;
-  private readonly _detailedFlag: CommandLineFlagParameter;
-  private readonly _selectionParameters: SelectionParameterSet;
+  readonly #version: CommandLineFlagParameter;
+  readonly #path: CommandLineFlagParameter;
+  readonly #fullPath: CommandLineFlagParameter;
+  readonly #jsonFlag: CommandLineFlagParameter;
+  readonly #detailedFlag: CommandLineFlagParameter;
+  readonly #selectionParameters: SelectionParameterSet;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -75,7 +75,7 @@ export class ListAction extends BaseRushAction {
       safeForSimultaneousRushProcesses: true
     });
 
-    this._version = this.defineFlagParameter({
+    this.#version = this.defineFlagParameter({
       parameterLongName: '--version',
       parameterShortName: '-v',
       description:
@@ -83,7 +83,7 @@ export class ListAction extends BaseRushAction {
         'displayed in a column along with the package name.'
     });
 
-    this._path = this.defineFlagParameter({
+    this.#path = this.defineFlagParameter({
       parameterLongName: '--path',
       parameterShortName: '-p',
       description:
@@ -91,14 +91,14 @@ export class ListAction extends BaseRushAction {
         'displayed in a column along with the package name.'
     });
 
-    this._fullPath = this.defineFlagParameter({
+    this.#fullPath = this.defineFlagParameter({
       parameterLongName: '--full-path',
       description:
         'If this flag is specified, the project full path will ' +
         'be displayed in a column along with the package name.'
     });
 
-    this._detailedFlag = this.defineFlagParameter({
+    this.#detailedFlag = this.defineFlagParameter({
       parameterLongName: '--detailed',
       description:
         'For the non --json view, if this flag is specified, ' +
@@ -107,12 +107,12 @@ export class ListAction extends BaseRushAction {
         'shouldPublish, reviewPolicy, and tags fields.'
     });
 
-    this._jsonFlag = this.defineFlagParameter({
+    this.#jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',
       description: 'If this flag is specified, output will be in JSON format.'
     });
 
-    this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
+    this.#selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
       gitOptions: {
         // Include lockfile processing since this expands the selection, and we need to select
         // at least the same projects selected with the same query to "rush build"
@@ -128,15 +128,15 @@ export class ListAction extends BaseRushAction {
   protected async runAsync(): Promise<void> {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
     const selection: Set<RushConfigurationProject> =
-      await this._selectionParameters.getSelectedProjectsAsync(terminal);
+      await this.#selectionParameters.getSelectedProjectsAsync(terminal);
     Sort.sortSetBy(selection, (x: RushConfigurationProject) => x.packageName);
-    if (this._jsonFlag.value && this._detailedFlag.value) {
+    if (this.#jsonFlag.value && this.#detailedFlag.value) {
       throw new Error(`The parameters "--json" and "--detailed" cannot be used together.`);
     }
 
-    if (this._jsonFlag.value) {
+    if (this.#jsonFlag.value) {
       this._printJson(selection);
-    } else if (this._version.value || this._path.value || this._fullPath.value || this._detailedFlag.value) {
+    } else if (this.#version.value || this.#path.value || this.#fullPath.value || this.#detailedFlag.value) {
       await this._printListTableAsync(selection);
     } else {
       this._printList(selection);
@@ -200,19 +200,19 @@ export class ListAction extends BaseRushAction {
       tableHeader.push('Subspace');
     }
 
-    if (this._version.value || this._detailedFlag.value) {
+    if (this.#version.value || this.#detailedFlag.value) {
       tableHeader.push('Version');
     }
 
-    if (this._path.value || this._detailedFlag.value) {
+    if (this.#path.value || this.#detailedFlag.value) {
       tableHeader.push('Path');
     }
 
-    if (this._fullPath.value) {
+    if (this.#fullPath.value) {
       tableHeader.push('Full Path');
     }
 
-    if (this._detailedFlag.value) {
+    if (this.#detailedFlag.value) {
       tableHeader.push('Version policy');
       tableHeader.push('Version policy name');
       tableHeader.push('Should publish');
@@ -236,19 +236,19 @@ export class ListAction extends BaseRushAction {
         appendToPackageRow(project.subspace.subspaceName);
       }
 
-      if (this._version.value || this._detailedFlag.value) {
+      if (this.#version.value || this.#detailedFlag.value) {
         appendToPackageRow(project.packageJson.version);
       }
 
-      if (this._path.value || this._detailedFlag.value) {
+      if (this.#path.value || this.#detailedFlag.value) {
         appendToPackageRow(project.projectRelativeFolder);
       }
 
-      if (this._fullPath.value) {
+      if (this.#fullPath.value) {
         appendToPackageRow(project.projectFolder);
       }
 
-      if (this._detailedFlag.value) {
+      if (this.#detailedFlag.value) {
         // When we HAVE a version policy
         let versionPolicyDefinitionName: string = '';
         let versionPolicyName: string = '';

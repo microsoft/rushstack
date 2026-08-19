@@ -14,10 +14,10 @@ interface IUpgradeInteractiveDeps {
 }
 
 export class InteractiveUpgrader {
-  private readonly _rushConfiguration: RushConfiguration;
+  readonly #rushConfiguration: RushConfiguration;
 
   public constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
+    this.#rushConfiguration = rushConfiguration;
   }
 
   public async upgradeAsync(): Promise<IUpgradeInteractiveDeps> {
@@ -38,7 +38,7 @@ export class InteractiveUpgrader {
   }
 
   private async _getUserSelectedProjectForUpgradeAsync(): Promise<RushConfigurationProject> {
-    const projects: RushConfigurationProject[] | undefined = this._rushConfiguration.projects;
+    const projects: RushConfigurationProject[] | undefined = this.#rushConfiguration.projects;
 
     const { default: search } = await import('@inquirer/search');
 
