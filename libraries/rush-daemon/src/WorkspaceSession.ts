@@ -181,6 +181,8 @@ export class WorkspaceSession implements IWorkspaceSession {
       await projectWatcher.startAsync((changedPath: string | undefined) =>
         invalidations.invalidate(changedPath)
       );
+      // Changes before the watcher registered its callbacks cannot be observed path-by-path.
+      invalidations.invalidate();
       return session;
     } catch (error) {
       const cleanupErrors: unknown[] = [];

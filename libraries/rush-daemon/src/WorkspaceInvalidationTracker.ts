@@ -17,6 +17,8 @@ export interface IWorkspaceInvalidationSnapshot {
   readonly sequence: number;
 }
 
+const MAX_TRACKED_CHANGED_PATHS: number = 10_000;
+
 /**
  * Retains workspace invalidations until a future request explicitly acknowledges them.
  *
@@ -31,11 +33,21 @@ export class WorkspaceInvalidationTracker {
   /** Records a path-specific or unknown workspace change. */
   public invalidate(changedPath?: string): void {
     const sequence: number = ++this._latestSequence;
-    if (changedPath === undefined) {
+    if (changedPath === undefined || this._unknownChangeSequence !== undefined) {
       this._unknownChangeSequence = sequence;
-    } else {
-      this._sequenceByPath.set(changedPath, sequence);
+      return;
     }
+
+    if (
+      !this._sequenceByPath.has(changedPath) &&
+      this._sequenceByPath.size >= MAX_TRACKED_CHANGED_PATHS
+    ) {
+      this._sequenceByPath.clear();
+      this._unknownChangeSequence = sequence;
+      return;
+    }
+
+    this._sequenceByPath.set(changedPath, sequence);
   }
 
   /**

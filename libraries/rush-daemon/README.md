@@ -10,7 +10,9 @@ for the nearest `rush.json`; it does not change the default behavior of `rush`, 
 
 The host loads `RushConfiguration` once before signaling readiness and keeps a headless file watcher
 active for the daemon lifetime. Its invalidation tracker retains changes while no clients are
-connected so a later request can reconcile them. Reusable operation graph, plugin, and input snapshot
-state can be supplied through the session component factory; the default session does not construct
-those command-specific resources while the reusable runner lifetime tracked by
+connected so a later request can reconcile them. The tracker starts with a conservative unknown
+invalidation covering session startup, and excessive distinct paths are compacted into the same
+full-workspace signal. Reusable operation graph, plugin, and input snapshot state can be supplied
+through the session component factory; the default session does not construct those command-specific
+resources while the reusable runner lifetime tracked by
 [rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) remains incomplete.

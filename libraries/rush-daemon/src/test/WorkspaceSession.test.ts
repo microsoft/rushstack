@@ -7,6 +7,7 @@ import type {
 } from '../WorkspaceSession';
 import { WorkspaceSession } from '../WorkspaceSession';
 import type { IWorkspaceInvalidationSnapshot } from '../WorkspaceInvalidationTracker';
+import { WorkspaceInvalidationTracker } from '../WorkspaceInvalidationTracker';
 import { TEST_REPO_ROOT } from './TestWorkspaceSession';
 
 class TestInvalidationWatcher implements IWorkspaceInvalidationWatcher {
@@ -68,6 +69,15 @@ describe(WorkspaceSession.name, () => {
       Array.from(session.rushConfiguration.projectsByName.keys()).sort()
     );
 
+    const initialSnapshot: IWorkspaceInvalidationSnapshot = session.invalidations.getSnapshot();
+    expect(initialSnapshot).toEqual({
+      changedPaths: [],
+      hasUnknownChanges: true,
+      isWatcherHealthy: true,
+      sequence: 1
+    });
+    session.invalidations.acknowledgeThrough(initialSnapshot.sequence);
+
     watcher.invalidate('packages/a/src/index.ts');
     const firstSnapshot: IWorkspaceInvalidationSnapshot = session.invalidations.getSnapshot();
     watcher.invalidate('packages/a/src/index.ts');
@@ -78,7 +88,7 @@ describe(WorkspaceSession.name, () => {
       changedPaths: ['packages/a/src/index.ts'],
       hasUnknownChanges: true,
       isWatcherHealthy: true,
-      sequence: 3
+      sequence: 4
     });
 
     await session.disposeAsync();
@@ -104,6 +114,31 @@ describe(WorkspaceSession.name, () => {
       isWatcherHealthy: false
     });
     await session.disposeAsync();
+  });
+
+  it('compacts excessive path changes into an unknown invalidation', () => {
+    const invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
+    for (let index: number = 0; index <= 10_000; index++) {
+      invalidations.invalidate(`packages/project-${index}/lib/output.js`);
+    }
+
+    const overflowSnapshot: IWorkspaceInvalidationSnapshot = invalidations.getSnapshot();
+    expect(overflowSnapshot).toEqual({
+      changedPaths: [],
+      hasUnknownChanges: true,
+      isWatcherHealthy: true,
+      sequence: 10_001
+    });
+
+    invalidations.invalidate('packages/later-change/src/index.ts');
+    invalidations.acknowledgeThrough(overflowSnapshot.sequence);
+    expect(invalidations.getSnapshot()).toMatchObject({
+      changedPaths: [],
+      hasUnknownChanges: true,
+      sequence: 10_002
+    });
+    invalidations.acknowledgeThrough(10_002);
+    expect(invalidations.getSnapshot().hasUnknownChanges).toBe(false);
   });
 
   it('disposes components when watcher startup fails', async () => {

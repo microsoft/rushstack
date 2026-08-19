@@ -12,6 +12,7 @@ import type { IWorkspaceInvalidationWatcher } from './WorkspaceSession';
 export interface IWorkspaceSessionFileWatcherOptions {
   readonly onError?: (error: Error) => void;
   readonly rushConfiguration: RushConfiguration;
+  readonly watchFactory?: WorkspaceWatchFactory;
 }
 
 interface IWatchPath {
@@ -19,8 +20,15 @@ interface IWatchPath {
   readonly recursive: boolean;
 }
 
+type WorkspaceWatchFactory = (
+  folderPath: string,
+  options: { encoding: 'utf8'; recursive: boolean },
+  listener: fs.WatchListener<string>
+) => fs.FSWatcher;
+
 export class WorkspaceSessionFileWatcher implements IWorkspaceInvalidationWatcher {
   private readonly _onError: ((error: Error) => void) | undefined;
+  private readonly _watchFactory: WorkspaceWatchFactory;
   private readonly _watchPaths: ReadonlyArray<IWatchPath>;
   private readonly _watchers: Set<fs.FSWatcher> = new Set();
   private _onInvalidation: ((changedPath?: string) => void) | undefined;
@@ -28,6 +36,7 @@ export class WorkspaceSessionFileWatcher implements IWorkspaceInvalidationWatche
 
   public constructor(options: IWorkspaceSessionFileWatcherOptions) {
     this._onError = options.onError;
+    this._watchFactory = options.watchFactory ?? fs.watch;
     this._watchPaths = getWatchPaths(options.rushConfiguration);
   }
 
@@ -66,7 +75,7 @@ export class WorkspaceSessionFileWatcher implements IWorkspaceInvalidationWatche
   }
 
   private _createWatcher(watchPath: IWatchPath): fs.FSWatcher {
-    const watcher: fs.FSWatcher = fs.watch(
+    const watcher: fs.FSWatcher = this._watchFactory(
       watchPath.folderPath,
       { encoding: 'utf8', recursive: watchPath.recursive },
       (eventType: string, filename: string | null) => {
