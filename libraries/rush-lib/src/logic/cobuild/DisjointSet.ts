@@ -7,37 +7,37 @@ import { InternalError } from '@rushstack/node-core-library';
  * A disjoint set data structure
  */
 export class DisjointSet<T extends object> {
-  private _forest: Set<T>;
-  private _parentMap: Map<T, T>;
-  private _sizeMap: Map<T, number>;
-  private _setByElement: Map<T, Set<T>> | undefined;
+  #forest: Set<T>;
+  #parentMap: Map<T, T>;
+  #sizeMap: Map<T, number>;
+  #setByElement: Map<T, Set<T>> | undefined;
 
   public constructor() {
-    this._forest = new Set<T>();
-    this._parentMap = new Map<T, T>();
-    this._sizeMap = new Map<T, number>();
-    this._setByElement = new Map<T, Set<T>>();
+    this.#forest = new Set<T>();
+    this.#parentMap = new Map<T, T>();
+    this.#sizeMap = new Map<T, number>();
+    this.#setByElement = new Map<T, Set<T>>();
   }
 
   public destroy(): void {
-    this._forest.clear();
-    this._parentMap.clear();
-    this._sizeMap.clear();
-    this._setByElement?.clear();
+    this.#forest.clear();
+    this.#parentMap.clear();
+    this.#sizeMap.clear();
+    this.#setByElement?.clear();
   }
 
   /**
    * Adds a new set containing specific object
    */
   public add(x: T): void {
-    if (this._forest.has(x)) {
+    if (this.#forest.has(x)) {
       return;
     }
 
-    this._forest.add(x);
-    this._parentMap.set(x, x);
-    this._sizeMap.set(x, 1);
-    this._setByElement = undefined;
+    this.#forest.add(x);
+    this.#parentMap.set(x, x);
+    this.#sizeMap.set(x, 1);
+    this.#setByElement = undefined;
   }
 
   /**
@@ -59,26 +59,26 @@ export class DisjointSet<T extends object> {
       x = y;
       y = t;
     }
-    this._parentMap.set(y, x);
-    this._sizeMap.set(x, xSize + ySize);
-    this._setByElement = undefined;
+    this.#parentMap.set(y, x);
+    this.#sizeMap.set(x, xSize + ySize);
+    this.#setByElement = undefined;
   }
 
   public getAllSets(): Iterable<Set<T>> {
-    if (this._setByElement === undefined) {
-      this._setByElement = new Map<T, Set<T>>();
+    if (this.#setByElement === undefined) {
+      this.#setByElement = new Map<T, Set<T>>();
 
-      for (const element of this._forest) {
+      for (const element of this.#forest) {
         const root: T = this._find(element);
-        let set: Set<T> | undefined = this._setByElement.get(root);
+        let set: Set<T> | undefined = this.#setByElement.get(root);
         if (set === undefined) {
           set = new Set<T>();
-          this._setByElement.set(root, set);
+          this.#setByElement.set(root, set);
         }
         set.add(element);
       }
     }
-    return this._setByElement.values();
+    return this.#setByElement.values();
   }
 
   /**
@@ -93,7 +93,7 @@ export class DisjointSet<T extends object> {
     let parent: T = this._getParent(x);
     while (parent !== x) {
       parent = this._getParent(parent);
-      this._parentMap.set(x, parent);
+      this.#parentMap.set(x, parent);
       x = parent;
       parent = this._getParent(x);
     }
@@ -101,7 +101,7 @@ export class DisjointSet<T extends object> {
   }
 
   private _getParent(x: T): T {
-    const parent: T | undefined = this._parentMap.get(x);
+    const parent: T | undefined = this.#parentMap.get(x);
     if (parent === undefined) {
       // This should not happen
       throw new InternalError(`Can not find parent`);
@@ -110,7 +110,7 @@ export class DisjointSet<T extends object> {
   }
 
   private _getSize(x: T): number {
-    const size: number | undefined = this._sizeMap.get(x);
+    const size: number | undefined = this.#sizeMap.get(x);
     if (size === undefined) {
       // This should not happen
       throw new InternalError(`Can not get size`);

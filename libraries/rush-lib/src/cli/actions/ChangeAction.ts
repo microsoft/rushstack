@@ -36,20 +36,20 @@ const BULK_MESSAGE_LONG_NAME: string = '--message';
 const BULK_BUMP_TYPE_LONG_NAME: string = '--bump-type';
 
 export class ChangeAction extends BaseRushAction {
-  private readonly _git: Git;
-  private readonly _verifyParameter: CommandLineFlagParameter;
-  private readonly _verifyAllParameter: CommandLineFlagParameter;
-  private readonly _noFetchParameter: CommandLineFlagParameter;
-  private readonly _targetBranchParameter: CommandLineStringParameter;
-  private readonly _changeEmailParameter: CommandLineStringParameter;
-  private readonly _bulkChangeParameter: CommandLineFlagParameter;
-  private readonly _bulkChangeMessageParameter: CommandLineStringParameter;
-  private readonly _bulkChangeBumpTypeParameter: CommandLineChoiceParameter;
-  private readonly _overwriteFlagParameter: CommandLineFlagParameter;
-  private readonly _commitChangesFlagParameter: CommandLineFlagParameter;
-  private readonly _commitChangesMessageStringParameter: CommandLineStringParameter;
+  readonly #git: Git;
+  readonly #verifyParameter: CommandLineFlagParameter;
+  readonly #verifyAllParameter: CommandLineFlagParameter;
+  readonly #noFetchParameter: CommandLineFlagParameter;
+  readonly #targetBranchParameter: CommandLineStringParameter;
+  readonly #changeEmailParameter: CommandLineStringParameter;
+  readonly #bulkChangeParameter: CommandLineFlagParameter;
+  readonly #bulkChangeMessageParameter: CommandLineStringParameter;
+  readonly #bulkChangeBumpTypeParameter: CommandLineChoiceParameter;
+  readonly #overwriteFlagParameter: CommandLineFlagParameter;
+  readonly #commitChangesFlagParameter: CommandLineFlagParameter;
+  readonly #commitChangesMessageStringParameter: CommandLineStringParameter;
 
-  private _targetBranchName: string | undefined;
+  #targetBranchName: string | undefined;
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string = [
@@ -91,15 +91,15 @@ export class ChangeAction extends BaseRushAction {
       parser
     });
 
-    this._git = new Git(this.rushConfiguration);
+    this.#git = new Git(this.rushConfiguration);
 
-    this._verifyParameter = this.defineFlagParameter({
+    this.#verifyParameter = this.defineFlagParameter({
       parameterLongName: '--verify',
       parameterShortName: '-v',
       description: 'Verify the change file has been generated and that it is a valid JSON file'
     });
 
-    this._verifyAllParameter = this.defineFlagParameter({
+    this.#verifyAllParameter = this.defineFlagParameter({
       parameterLongName: '--verify-all',
       description:
         'Validate all change files in the repository, not just those added in the current branch. ' +
@@ -107,12 +107,12 @@ export class ChangeAction extends BaseRushAction {
         'in a lockstepped version policy. Requires the "strictChangefileValidation" experiment to be enabled.'
     });
 
-    this._noFetchParameter = this.defineFlagParameter({
+    this.#noFetchParameter = this.defineFlagParameter({
       parameterLongName: '--no-fetch',
       description: 'Skips fetching the baseline branch before running "git diff" to detect changes.'
     });
 
-    this._targetBranchParameter = this.defineStringParameter({
+    this.#targetBranchParameter = this.defineStringParameter({
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
       argumentName: 'BRANCH',
@@ -122,26 +122,26 @@ export class ChangeAction extends BaseRushAction {
         'is compared against the "main" branch.'
     });
 
-    this._overwriteFlagParameter = this.defineFlagParameter({
+    this.#overwriteFlagParameter = this.defineFlagParameter({
       parameterLongName: '--overwrite',
       description:
         `If a changefile already exists, overwrite without prompting ` +
         `(or erroring in ${BULK_LONG_NAME} mode).`
     });
 
-    this._commitChangesFlagParameter = this.defineFlagParameter({
+    this.#commitChangesFlagParameter = this.defineFlagParameter({
       parameterLongName: '--commit',
       parameterShortName: '-c',
       description: `If this flag is specified generated changefiles will be commited automatically.`
     });
 
-    this._commitChangesMessageStringParameter = this.defineStringParameter({
+    this.#commitChangesMessageStringParameter = this.defineStringParameter({
       parameterLongName: '--commit-message',
       argumentName: 'COMMIT_MESSAGE',
       description: `If this parameter is specified generated changefiles will be commited automatically with the specified commit message.`
     });
 
-    this._changeEmailParameter = this.defineStringParameter({
+    this.#changeEmailParameter = this.defineStringParameter({
       parameterLongName: '--email',
       argumentName: 'EMAIL',
       description:
@@ -149,7 +149,7 @@ export class ChangeAction extends BaseRushAction {
         'will be detected or prompted for in interactive mode.'
     });
 
-    this._bulkChangeParameter = this.defineFlagParameter({
+    this.#bulkChangeParameter = this.defineFlagParameter({
       parameterLongName: BULK_LONG_NAME,
       description:
         'If this flag is specified, apply the same change message and bump type to all changed projects. ' +
@@ -157,13 +157,13 @@ export class ChangeAction extends BaseRushAction {
         `${BULK_LONG_NAME} parameter is specified`
     });
 
-    this._bulkChangeMessageParameter = this.defineStringParameter({
+    this.#bulkChangeMessageParameter = this.defineStringParameter({
       parameterLongName: BULK_MESSAGE_LONG_NAME,
       argumentName: 'MESSAGE',
       description: `The message to apply to all changed projects if the ${BULK_LONG_NAME} flag is provided.`
     });
 
-    this._bulkChangeBumpTypeParameter = this.defineChoiceParameter({
+    this.#bulkChangeBumpTypeParameter = this.defineChoiceParameter({
       parameterLongName: BULK_BUMP_TYPE_LONG_NAME,
       alternatives: [...Object.keys(this._getBumpOptions())],
       description: `The bump type to apply to all changed projects if the ${BULK_LONG_NAME} flag is provided.`
@@ -171,25 +171,25 @@ export class ChangeAction extends BaseRushAction {
   }
 
   public async runAsync(): Promise<void> {
-    if (this._verifyAllParameter.value) {
+    if (this.#verifyAllParameter.value) {
       const incompatibleParameters: (
         | CommandLineFlagParameter
         | CommandLineStringParameter
         | CommandLineChoiceParameter
       )[] = [
-        this._verifyParameter,
-        this._bulkChangeParameter,
-        this._bulkChangeMessageParameter,
-        this._bulkChangeBumpTypeParameter,
-        this._overwriteFlagParameter,
-        this._commitChangesFlagParameter
+        this.#verifyParameter,
+        this.#bulkChangeParameter,
+        this.#bulkChangeMessageParameter,
+        this.#bulkChangeBumpTypeParameter,
+        this.#overwriteFlagParameter,
+        this.#commitChangesFlagParameter
       ];
       const errors: string[] = incompatibleParameters
         .filter((parameter) => parameter.value)
         .map(
           (parameter) =>
             `The ${parameter.longName} parameter cannot be provided with the ` +
-            `${this._verifyAllParameter.longName} parameter`
+            `${this.#verifyAllParameter.longName} parameter`
         );
       if (errors.length > 0) {
         errors.forEach((error) => {
@@ -205,23 +205,23 @@ export class ChangeAction extends BaseRushAction {
     const targetBranch: string = await this._getTargetBranchAsync();
     this.terminal.writeLine(`The target branch is ${targetBranch}`);
 
-    if (this._verifyParameter.value) {
+    if (this.#verifyParameter.value) {
       const incompatibleParameters: (
         | CommandLineFlagParameter
         | CommandLineStringParameter
         | CommandLineChoiceParameter
       )[] = [
-        this._bulkChangeParameter,
-        this._bulkChangeMessageParameter,
-        this._bulkChangeBumpTypeParameter,
-        this._overwriteFlagParameter,
-        this._commitChangesFlagParameter
+        this.#bulkChangeParameter,
+        this.#bulkChangeMessageParameter,
+        this.#bulkChangeBumpTypeParameter,
+        this.#overwriteFlagParameter,
+        this.#commitChangesFlagParameter
       ];
       const errors: string[] = incompatibleParameters
         .map((parameter) => {
           return parameter.value
             ? `The ${parameter.longName} parameter cannot be provided with the ` +
-                `${this._verifyParameter.longName} parameter`
+                `${this.#verifyParameter.longName} parameter`
             : '';
         })
         .filter((error) => error !== '');
@@ -247,34 +247,34 @@ export class ChangeAction extends BaseRushAction {
 
     let changeFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
     let interactiveMode: boolean = false;
-    if (this._bulkChangeParameter.value) {
+    if (this.#bulkChangeParameter.value) {
       if (
-        !this._bulkChangeBumpTypeParameter.value ||
-        (!this._bulkChangeMessageParameter.value &&
-          this._bulkChangeBumpTypeParameter.value !== ChangeType[ChangeType.none])
+        !this.#bulkChangeBumpTypeParameter.value ||
+        (!this.#bulkChangeMessageParameter.value &&
+          this.#bulkChangeBumpTypeParameter.value !== ChangeType[ChangeType.none])
       ) {
         throw new Error(
-          `The ${this._bulkChangeBumpTypeParameter.longName} and ${this._bulkChangeMessageParameter.longName} ` +
-            `parameters must provided if the ${this._bulkChangeParameter.longName} flag is provided. If the value ` +
+          `The ${this.#bulkChangeBumpTypeParameter.longName} and ${this.#bulkChangeMessageParameter.longName} ` +
+            `parameters must provided if the ${this.#bulkChangeParameter.longName} flag is provided. If the value ` +
             `"${ChangeType[ChangeType.none]}" is provided to the ${
-              this._bulkChangeBumpTypeParameter.longName
+              this.#bulkChangeBumpTypeParameter.longName
             } ` +
-            `parameter, the ${this._bulkChangeMessageParameter.longName} parameter may be omitted.`
+            `parameter, the ${this.#bulkChangeMessageParameter.longName} parameter may be omitted.`
         );
       }
 
-      const email: string | undefined = this._changeEmailParameter.value || this._detectEmail();
+      const email: string | undefined = this.#changeEmailParameter.value || this._detectEmail();
       if (!email) {
         throw new Error(
           "Unable to detect Git email and an email address wasn't provided using the " +
-            `${this._changeEmailParameter.longName} parameter.`
+            `${this.#changeEmailParameter.longName} parameter.`
         );
       }
 
       const errors: string[] = [];
 
-      const comment: string = this._bulkChangeMessageParameter.value || '';
-      const changeType: string = this._bulkChangeBumpTypeParameter.value;
+      const comment: string = this.#bulkChangeMessageParameter.value || '';
+      const changeType: string = this.#bulkChangeBumpTypeParameter.value;
       for (const packageName of sortedProjectList) {
         const allowedBumpTypes: string[] = Object.keys(this._getBumpOptions(packageName));
         let projectChangeType: string = changeType;
@@ -307,10 +307,10 @@ export class ChangeAction extends BaseRushAction {
 
         throw new AlreadyReportedError();
       }
-    } else if (this._bulkChangeBumpTypeParameter.value || this._bulkChangeMessageParameter.value) {
+    } else if (this.#bulkChangeBumpTypeParameter.value || this.#bulkChangeMessageParameter.value) {
       throw new Error(
-        `The ${this._bulkChangeParameter.longName} flag must be provided with the ` +
-          `${this._bulkChangeBumpTypeParameter.longName} and ${this._bulkChangeMessageParameter.longName} parameters.`
+        `The ${this.#bulkChangeParameter.longName} flag must be provided with the ` +
+          `${this.#bulkChangeBumpTypeParameter.longName} and ${this.#bulkChangeMessageParameter.longName} parameters.`
       );
     } else {
       interactiveMode = true;
@@ -325,8 +325,8 @@ export class ChangeAction extends BaseRushAction {
       );
 
       if (this._isEmailRequired(changeFileData)) {
-        const email: string = this._changeEmailParameter.value
-          ? this._changeEmailParameter.value
+        const email: string = this.#changeEmailParameter.value
+          ? this.#changeEmailParameter.value
           : await this._detectOrAskForEmailAsync();
         changeFileData.forEach((changeFile: IChangeFile) => {
           changeFile.email = this.rushConfiguration.getProjectByName(changeFile.packageName)?.versionPolicy
@@ -340,17 +340,17 @@ export class ChangeAction extends BaseRushAction {
     try {
       changefiles = await this._writeChangeFilesAsync(
         changeFileData,
-        this._overwriteFlagParameter.value,
+        this.#overwriteFlagParameter.value,
         interactiveMode
       );
     } catch (error) {
       throw new Error(`There was an error creating a change file: ${(error as Error).toString()}`);
     }
-    if (this._commitChangesFlagParameter.value || this._commitChangesMessageStringParameter.value) {
+    if (this.#commitChangesFlagParameter.value || this.#commitChangesMessageStringParameter.value) {
       if (changefiles && changefiles.length !== 0) {
-        await this._git.stageAndCommitGitChangesAsync(
+        await this.#git.stageAndCommitGitChangesAsync(
           changefiles,
-          this._commitChangesMessageStringParameter.value ||
+          this.#commitChangesMessageStringParameter.value ||
             this.rushConfiguration.gitChangefilesCommitMessage ||
             'Rush change',
           this.terminal
@@ -408,12 +408,12 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private async _getTargetBranchAsync(): Promise<string> {
-    if (!this._targetBranchName) {
-      this._targetBranchName =
-        this._targetBranchParameter.value || (await this._git.getRemoteDefaultBranchAsync());
+    if (!this.#targetBranchName) {
+      this.#targetBranchName =
+        this.#targetBranchParameter.value || (await this.#git.getRemoteDefaultBranchAsync());
     }
 
-    return this._targetBranchName;
+    return this.#targetBranchName;
   }
 
   private async _getChangedProjectNamesAsync(): Promise<string[]> {
@@ -422,7 +422,7 @@ export class ChangeAction extends BaseRushAction {
       await projectChangeAnalyzer.getChangedProjectsAsync({
         targetBranchName: await this._getTargetBranchAsync(),
         terminal: this.terminal,
-        shouldFetch: !this._noFetchParameter.value,
+        shouldFetch: !this.#noFetchParameter.value,
         // Lockfile evaluation will expand the set of projects that request change files
         // Not enabling, since this would be a breaking change
         includeExternalDependencies: false,
@@ -449,7 +449,7 @@ export class ChangeAction extends BaseRushAction {
   private async _validateAllChangeFilesAsync(): Promise<void> {
     if (!this.rushConfiguration.experimentsConfiguration.configuration.strictChangefileValidation) {
       throw new Error(
-        `The ${this._verifyAllParameter.longName} parameter requires the ` +
+        `The ${this.#verifyAllParameter.longName} parameter requires the ` +
           '"strictChangefileValidation" experiment to be enabled.'
       );
     }
@@ -472,12 +472,12 @@ export class ChangeAction extends BaseRushAction {
   private async _getDeletedProjectNamesAsync(): Promise<Set<string>> {
     const repoRoot: string = getRepoRoot(this.rushConfiguration.rushJsonFolder);
     const targetBranch: string = await this._getTargetBranchAsync();
-    const mergeBase: string = await this._git.getMergeBaseAsync(targetBranch, this.terminal);
+    const mergeBase: string = await this.#git.getMergeBaseAsync(targetBranch, this.terminal);
 
     let oldRushJsonContent: string;
     try {
       const rushJsonRelativePath: string = path.relative(repoRoot, this.rushConfiguration.rushJsonFile);
-      oldRushJsonContent = await this._git.getBlobContentAsync({
+      oldRushJsonContent = await this.#git.getBlobContentAsync({
         blobSpec: `${mergeBase}:${rushJsonRelativePath}`,
         repositoryRoot: repoRoot
       });
@@ -504,7 +504,7 @@ export class ChangeAction extends BaseRushAction {
     const repoRoot: string = getRepoRoot(this.rushConfiguration.rushJsonFolder);
     const relativeChangesFolder: string = path.relative(repoRoot, this.rushConfiguration.changesFolder);
     const targetBranch: string = await this._getTargetBranchAsync();
-    const changedFiles: string[] = await this._git.getChangedFilesAsync(
+    const changedFiles: string[] = await this.#git.getChangedFilesAsync(
       targetBranch,
       this.terminal,
       true,
@@ -732,7 +732,7 @@ export class ChangeAction extends BaseRushAction {
 
   private async _warnUnstagedChangesAsync(): Promise<void> {
     try {
-      const hasUnstagedChanges: boolean = await this._git.hasUnstagedChangesAsync();
+      const hasUnstagedChanges: boolean = await this.#git.hasUnstagedChangesAsync();
       if (hasUnstagedChanges) {
         this.terminal.writeLine(
           '\n' +

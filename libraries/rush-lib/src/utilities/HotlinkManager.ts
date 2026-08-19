@@ -59,17 +59,17 @@ interface IRushLinkOptions {
 const PROJECT_LINKS_STATE_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schema);
 
 export class HotlinkManager {
-  private _linksBySubspaceName: LinksBySubspaceNameMap;
-  private readonly _rushLinkStateFilePath: string;
+  #linksBySubspaceName: LinksBySubspaceNameMap;
+  readonly #rushLinkStateFilePath: string;
 
   private constructor(options: IRushLinkOptions) {
     const { rushLinkStateFilePath, linksBySubspaceName } = options;
-    this._rushLinkStateFilePath = rushLinkStateFilePath;
-    this._linksBySubspaceName = linksBySubspaceName;
+    this.#rushLinkStateFilePath = rushLinkStateFilePath;
+    this.#linksBySubspaceName = linksBySubspaceName;
   }
 
   public hasAnyHotlinksInSubspace(subspaceName: string): boolean {
-    return !!this._linksBySubspaceName.get(subspaceName)?.length;
+    return !!this.#linksBySubspaceName.get(subspaceName)?.length;
   }
 
   private async _hardLinkToLinkedPackageAsync(
@@ -101,13 +101,13 @@ export class HotlinkManager {
   private async _modifyAndSaveLinkStateAsync(
     cb: (linkState: LinksBySubspaceNameMap) => Promise<LinksBySubspaceNameMap> | LinksBySubspaceNameMap
   ): Promise<void> {
-    const newLinksBySubspaceName: LinksBySubspaceNameMap = await cb(this._linksBySubspaceName);
-    this._linksBySubspaceName = newLinksBySubspaceName;
+    const newLinksBySubspaceName: LinksBySubspaceNameMap = await cb(this.#linksBySubspaceName);
+    this.#linksBySubspaceName = newLinksBySubspaceName;
     const linkStateJson: IProjectLinksStateJson = {
       fileVersion: 0,
       linksBySubspace: Object.fromEntries(newLinksBySubspaceName)
     };
-    await JsonFile.saveAsync(linkStateJson, this._rushLinkStateFilePath);
+    await JsonFile.saveAsync(linkStateJson, this.#rushLinkStateFilePath);
   }
 
   public async purgeLinksAsync(terminal: ITerminal, subspaceName: string): Promise<boolean> {

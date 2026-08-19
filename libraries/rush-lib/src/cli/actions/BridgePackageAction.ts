@@ -16,8 +16,8 @@ import type { Subspace } from '../../api/Subspace';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 export class BridgePackageAction extends BaseHotlinkPackageAction {
-  private readonly _versionParameter: IRequiredCommandLineStringParameter;
-  private readonly _subspaceNamesParameter: CommandLineStringListParameter;
+  readonly #versionParameter: IRequiredCommandLineStringParameter;
+  readonly #subspaceNamesParameter: CommandLineStringListParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -35,14 +35,14 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
       parser
     });
 
-    this._versionParameter = this.defineStringParameter({
+    this.#versionParameter = this.defineStringParameter({
       parameterLongName: '--version',
       argumentName: 'SEMVER_RANGE',
       defaultValue: '*',
       description: 'Specify which installed versions should be hotlinked.'
     });
 
-    this._subspaceNamesParameter = this.defineStringListParameter({
+    this.#subspaceNamesParameter = this.defineStringListParameter({
       parameterLongName: '--subspace',
       argumentName: 'SUBSPACE_NAME',
       description: 'The name of the subspace to use for the hotlinked package.'
@@ -51,7 +51,7 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
 
   private _getSubspacesToBridgeAsync(): Set<Subspace> {
     const subspaceToBridge: Set<Subspace> = new Set();
-    const subspaceNames: readonly string[] = this._subspaceNamesParameter.values;
+    const subspaceNames: readonly string[] = this.#subspaceNamesParameter.values;
 
     if (subspaceNames.length > 0) {
       for (const subspaceName of subspaceNames) {
@@ -79,7 +79,7 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
     linkedPackagePath: string,
     hotlinkManager: HotlinkManager
   ): Promise<void> {
-    const version: string = this._versionParameter.value;
+    const version: string = this.#versionParameter.value;
     const subspaces: Set<Subspace> = await this._getSubspacesToBridgeAsync();
     await Async.forEachAsync(
       subspaces,

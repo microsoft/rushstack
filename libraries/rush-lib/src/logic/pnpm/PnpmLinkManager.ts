@@ -35,7 +35,7 @@ import { IS_WINDOWS } from '../../utilities/executionUtilities';
 const DEBUG: boolean = false;
 
 export class PnpmLinkManager extends BaseLinkManager {
-  private readonly _pnpmVersion: semver.SemVer = new semver.SemVer(
+  readonly #pnpmVersion: semver.SemVer = new semver.SemVer(
     this._rushConfiguration.packageManagerToolVersion
   );
 
@@ -295,7 +295,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     folderSuffix: string,
     tempProjectDependencyKey: string
   ): Promise<string> {
-    if (this._pnpmVersion.major === 6) {
+    if (this.#pnpmVersion.major === 6) {
       // PNPM 6 changed formatting to replace all ':' and '/' chars with '+'. Additionally, folder names > 120
       // are trimmed and hashed. NOTE: PNPM internally uses fs.realpath.native, which will cause additional
       // issues in environments that do not support long paths.
@@ -323,7 +323,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         folderName,
         RushConstants.nodeModulesFolderName
       );
-    } else if (this._pnpmVersion.major >= 10) {
+    } else if (this.#pnpmVersion.major >= 10) {
       const pnpmKitV10: typeof import('@rushstack/rush-pnpm-kit-v10') = await import(
         '@rushstack/rush-pnpm-kit-v10'
       );
@@ -343,7 +343,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         folderName,
         RushConstants.nodeModulesFolderName
       );
-    } else if (this._pnpmVersion.major >= 9) {
+    } else if (this.#pnpmVersion.major >= 9) {
       const pnpmKitV9: typeof import('@rushstack/rush-pnpm-kit-v9') = await import(
         '@rushstack/rush-pnpm-kit-v9'
       );
@@ -359,7 +359,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         folderName,
         RushConstants.nodeModulesFolderName
       );
-    } else if (this._pnpmVersion.major >= 8) {
+    } else if (this.#pnpmVersion.major >= 8) {
       const pnpmKitV8: typeof import('@rushstack/rush-pnpm-kit-v8') = await import(
         '@rushstack/rush-pnpm-kit-v8'
       );
@@ -376,7 +376,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         folderName,
         RushConstants.nodeModulesFolderName
       );
-    } else if (this._pnpmVersion.major >= 7) {
+    } else if (this.#pnpmVersion.major >= 7) {
       const { depPathToFilename } = await import('dependency-path');
       // PNPM 7 changed the local path format again and the hashing algorithm
       // See https://github.com/pnpm/pnpm/releases/tag/v7.0.0

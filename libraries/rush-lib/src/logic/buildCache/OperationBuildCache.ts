@@ -129,15 +129,15 @@ export function _setTarUtilityPromiseForTesting(
  * @internal
  */
 export class OperationBuildCache {
-  private readonly _project: RushConfigurationProject;
-  private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
-  private readonly _cloudBuildCacheProvider: ICloudBuildCacheProvider | undefined;
-  private readonly _buildCacheEnabled: boolean;
-  private readonly _cacheWriteEnabled: boolean;
-  private readonly _projectOutputFolderNames: ReadonlyArray<string>;
-  private readonly _cacheId: string | undefined;
-  private readonly _excludeAppleDoubleFiles: boolean;
-  private readonly _useDirectFileTransfersForBuildCache: boolean;
+  readonly #project: RushConfigurationProject;
+  readonly #localBuildCacheProvider: FileSystemBuildCacheProvider;
+  readonly #cloudBuildCacheProvider: ICloudBuildCacheProvider | undefined;
+  readonly #buildCacheEnabled: boolean;
+  readonly #cacheWriteEnabled: boolean;
+  readonly #projectOutputFolderNames: ReadonlyArray<string>;
+  readonly #cacheId: string | undefined;
+  readonly #excludeAppleDoubleFiles: boolean;
+  readonly #useDirectFileTransfersForBuildCache: boolean;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
     const {
@@ -152,19 +152,19 @@ export class OperationBuildCache {
       excludeAppleDoubleFiles,
       useDirectFileTransfersForBuildCache
     } = options;
-    this._project = project;
-    this._localBuildCacheProvider = localCacheProvider;
-    this._cloudBuildCacheProvider = cloudCacheProvider;
-    this._buildCacheEnabled = buildCacheEnabled;
-    this._cacheWriteEnabled = cacheWriteEnabled;
-    this._projectOutputFolderNames = projectOutputFolderNames || [];
-    this._cacheId = cacheId;
-    this._excludeAppleDoubleFiles = excludeAppleDoubleFiles && process.platform === 'darwin';
-    this._useDirectFileTransfersForBuildCache = useDirectFileTransfersForBuildCache;
+    this.#project = project;
+    this.#localBuildCacheProvider = localCacheProvider;
+    this.#cloudBuildCacheProvider = cloudCacheProvider;
+    this.#buildCacheEnabled = buildCacheEnabled;
+    this.#cacheWriteEnabled = cacheWriteEnabled;
+    this.#projectOutputFolderNames = projectOutputFolderNames || [];
+    this.#cacheId = cacheId;
+    this.#excludeAppleDoubleFiles = excludeAppleDoubleFiles && process.platform === 'darwin';
+    this.#useDirectFileTransfersForBuildCache = useDirectFileTransfersForBuildCache;
   }
 
   public get cacheId(): string | undefined {
-    return this._cacheId;
+    return this.#cacheId;
   }
 
   public static getOperationBuildCache(options: IProjectBuildCacheOptions): OperationBuildCache {
@@ -202,33 +202,33 @@ export class OperationBuildCache {
   }
 
   public async tryRestoreFromCacheAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean> {
-    const cacheId: string | undefined = specifiedCacheId || this._cacheId;
+    const cacheId: string | undefined = specifiedCacheId || this.#cacheId;
     if (!cacheId) {
       terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
       return false;
     }
 
-    if (!this._buildCacheEnabled) {
+    if (!this.#buildCacheEnabled) {
       // Skip reading local and cloud build caches, without any noise
       return false;
     }
 
     let localCacheEntryPath: string | undefined =
-      await this._localBuildCacheProvider.tryGetCacheEntryPathByIdAsync(terminal, cacheId);
+      await this.#localBuildCacheProvider.tryGetCacheEntryPathByIdAsync(terminal, cacheId);
     let cloudCacheHit: boolean = false;
     let updateLocalCacheSuccess: boolean | undefined;
-    if (!localCacheEntryPath && this._cloudBuildCacheProvider) {
+    if (!localCacheEntryPath && this.#cloudBuildCacheProvider) {
       terminal.writeVerboseLine(
         'This project was not found in the local build cache. Querying the cloud build cache.'
       );
 
       if (
-        this._useDirectFileTransfersForBuildCache &&
-        this._cloudBuildCacheProvider.tryDownloadCacheEntryToFileAsync
+        this.#useDirectFileTransfersForBuildCache &&
+        this.#cloudBuildCacheProvider.tryDownloadCacheEntryToFileAsync
       ) {
         // Use file-based path to avoid loading the entire cache entry into memory.
         // The provider downloads directly to a temp file that is atomically moved into place.
-        const targetPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
+        const targetPath: string = this.#localBuildCacheProvider.getCacheEntryPath(cacheId);
 
         // If multiple local Rush processes race to restore the same cache entry (e.g. parallel
         // "rush build" invocations on the same machine or CI agent), avoid redundant downloads by
@@ -264,7 +264,7 @@ export class OperationBuildCache {
             const tempTargetPath: string = _getTempLocalCacheEntryPath(targetPath);
             try {
               const downloadedToTempFile: boolean =
-                await this._cloudBuildCacheProvider.tryDownloadCacheEntryToFileAsync(
+                await this.#cloudBuildCacheProvider.tryDownloadCacheEntryToFileAsync(
                   terminal,
                   cacheId,
                   tempTargetPath
@@ -305,11 +305,11 @@ export class OperationBuildCache {
         }
       } else {
         const cacheEntryBuffer: Buffer | undefined =
-          await this._cloudBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(terminal, cacheId);
+          await this.#cloudBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(terminal, cacheId);
         if (cacheEntryBuffer) {
           cloudCacheHit = true;
           try {
-            localCacheEntryPath = await this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
+            localCacheEntryPath = await this.#localBuildCacheProvider.trySetCacheEntryBufferAsync(
               terminal,
               cacheId,
               cacheEntryBuffer
@@ -331,12 +331,12 @@ export class OperationBuildCache {
     terminal.writeLine('Build cache hit.');
     terminal.writeVerboseLine(`Cache key: ${cacheId}`);
 
-    const projectFolderPath: string = this._project.projectFolder;
+    const projectFolderPath: string = this.#project.projectFolder;
 
     // Purge output folders
-    terminal.writeVerboseLine(`Clearing cached folders: ${this._projectOutputFolderNames.join(', ')}`);
+    terminal.writeVerboseLine(`Clearing cached folders: ${this.#projectOutputFolderNames.join(', ')}`);
     await Promise.all(
-      this._projectOutputFolderNames.map((outputFolderName: string) =>
+      this.#projectOutputFolderNames.map((outputFolderName: string) =>
         FileSystem.deleteFolderAsync(`${projectFolderPath}/${outputFolderName}`)
       )
     );
@@ -369,12 +369,12 @@ export class OperationBuildCache {
   }
 
   public async trySetCacheEntryAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean> {
-    if (!this._cacheWriteEnabled) {
+    if (!this.#cacheWriteEnabled) {
       // Skip writing local and cloud build caches, without any noise
       return true;
     }
 
-    const cacheId: string | undefined = specifiedCacheId || this._cacheId;
+    const cacheId: string | undefined = specifiedCacheId || this.#cacheId;
     if (!cacheId) {
       terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
       return false;
@@ -393,14 +393,14 @@ export class OperationBuildCache {
 
     const tarUtility: TarExecutable | undefined = await _tryGetTarUtility(terminal);
     if (tarUtility) {
-      const finalLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
+      const finalLocalCacheEntryPath: string = this.#localBuildCacheProvider.getCacheEntryPath(cacheId);
       const tempLocalCacheEntryPath: string = _getTempLocalCacheEntryPath(finalLocalCacheEntryPath);
 
       const logFilePath: string = this._getTarLogFilePath(cacheId, 'tar');
       const tarExitCode: number = await tarUtility.tryCreateArchiveFromProjectPathsAsync({
         archivePath: tempLocalCacheEntryPath,
         paths: filesToCache.outputFilePaths,
-        project: this._project,
+        project: this.#project,
         logFilePath
       });
 
@@ -447,25 +447,25 @@ export class OperationBuildCache {
     // the configured CLOUD cache. If the cache is enabled, rush is always allowed to read from and
     // write to the local build cache.
 
-    if (this._cloudBuildCacheProvider?.isCacheWriteAllowed) {
+    if (this.#cloudBuildCacheProvider?.isCacheWriteAllowed) {
       if (!localCacheEntryPath) {
         throw new InternalError('Expected the local cache entry path to be set.');
       }
 
       if (
-        this._useDirectFileTransfersForBuildCache &&
-        this._cloudBuildCacheProvider.tryUploadCacheEntryFromFileAsync
+        this.#useDirectFileTransfersForBuildCache &&
+        this.#cloudBuildCacheProvider.tryUploadCacheEntryFromFileAsync
       ) {
         // Use file-based upload to avoid loading the entire cache entry into memory.
         // The provider reads from the local cache file directly.
-        setCloudCacheEntryPromise = this._cloudBuildCacheProvider.tryUploadCacheEntryFromFileAsync(
+        setCloudCacheEntryPromise = this.#cloudBuildCacheProvider.tryUploadCacheEntryFromFileAsync(
           terminal,
           cacheId,
           localCacheEntryPath
         );
       } else {
         const cacheEntryBuffer: Buffer = await FileSystem.readFileToBufferAsync(localCacheEntryPath);
-        setCloudCacheEntryPromise = this._cloudBuildCacheProvider.trySetCacheEntryBufferAsync(
+        setCloudCacheEntryPromise = this.#cloudBuildCacheProvider.trySetCacheEntryBufferAsync(
           terminal,
           cacheId,
           cacheEntryBuffer
@@ -496,14 +496,14 @@ export class OperationBuildCache {
    *   symbolic link was encountered.
    */
   private async _tryCollectPathsToCacheAsync(terminal: ITerminal): Promise<IPathsToCache | undefined> {
-    const projectFolderPath: string = this._project.projectFolder;
+    const projectFolderPath: string = this.#project.projectFolder;
     const outputFilePaths: string[] = [];
     const queue: [string, string][] = [];
 
     const filteredOutputFolderNames: string[] = [];
 
     let hasSymbolicLinks: boolean = false;
-    const excludeAppleDoubleFiles: boolean = this._excludeAppleDoubleFiles;
+    const excludeAppleDoubleFiles: boolean = this.#excludeAppleDoubleFiles;
 
     // Adds child directories to the queue, files to the path list, and bails on symlinks
     function processChildren(relativePath: string, diskPath: string, children: FolderItem[]): void {
@@ -540,7 +540,7 @@ export class OperationBuildCache {
     }
 
     // Handle declared output folders.
-    for (const outputFolder of this._projectOutputFolderNames) {
+    for (const outputFolder of this.#projectOutputFolderNames) {
       const diskPath: string = `${projectFolderPath}/${outputFolder}`;
       try {
         const children: FolderItem[] = await FileSystem.readFolderItemsAsync(diskPath);
@@ -576,6 +576,6 @@ export class OperationBuildCache {
   }
 
   private _getTarLogFilePath(cacheId: string, mode: 'tar' | 'untar'): string {
-    return path.join(this._project.projectRushTempFolder, `${cacheId}.${mode}.log`);
+    return path.join(this.#project.projectRushTempFolder, `${cacheId}.${mode}.log`);
   }
 }

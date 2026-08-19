@@ -233,7 +233,7 @@ export class CommandLineConfiguration {
   /**
    * A map of bulk command names to their corresponding synthetic phase identifiers
    */
-  private readonly _syntheticPhasesByTranslatedBulkCommandName: Map<string, IPhase> = new Map();
+  readonly #syntheticPhasesByTranslatedBulkCommandName: Map<string, IPhase> = new Map();
 
   /**
    * Use CommandLineConfiguration.loadFromFile()
@@ -545,7 +545,7 @@ export class CommandLineConfiguration {
         if (normalizedParameter.associatedCommands) {
           for (const associatedCommandName of normalizedParameter.associatedCommands) {
             const syntheticPhase: IPhase | undefined =
-              this._syntheticPhasesByTranslatedBulkCommandName.get(associatedCommandName);
+              this.#syntheticPhasesByTranslatedBulkCommandName.get(associatedCommandName);
             if (syntheticPhase) {
               // If this parameter was associated with a bulk command, include the association
               // with the synthetic phase
@@ -730,7 +730,7 @@ export class CommandLineConfiguration {
     }
 
     this.phases.set(phaseName, phase);
-    this._syntheticPhasesByTranslatedBulkCommandName.set(command.name, phase);
+    this.#syntheticPhasesByTranslatedBulkCommandName.set(command.name, phase);
 
     const phases: Set<IPhase> = new Set([phase]);
 

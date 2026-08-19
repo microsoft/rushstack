@@ -28,10 +28,10 @@ export interface ICreateArchiveOptions extends ITarOptionsBase {
 }
 
 export class TarExecutable {
-  private _tarExecutablePath: string;
+  #tarExecutablePath: string;
 
   private constructor(tarExecutablePath: string) {
-    this._tarExecutablePath = tarExecutablePath;
+    this.#tarExecutablePath = tarExecutablePath;
   }
 
   public static async tryInitializeAsync(terminal: ITerminal): Promise<TarExecutable | undefined> {
@@ -141,7 +141,7 @@ export class TarExecutable {
     fileWriter.write(
       [
         `Start time: ${new Date().toString()}`,
-        `Invoking "${this._tarExecutablePath} ${args.join(' ')}"`,
+        `Invoking "${this.#tarExecutablePath} ${args.join(' ')}"`,
         '',
         `======= BEGIN PROCESS INPUT ======`,
         input || '',
@@ -151,7 +151,7 @@ export class TarExecutable {
       ].join('\n')
     );
 
-    const childProcess: ChildProcess = Executable.spawn(this._tarExecutablePath, args, {
+    const childProcess: ChildProcess = Executable.spawn(this.#tarExecutablePath, args, {
       currentWorkingDirectory: currentWorkingDirectory
     });
 

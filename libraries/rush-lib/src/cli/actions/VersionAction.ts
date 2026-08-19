@@ -22,15 +22,15 @@ export const DEFAULT_PACKAGE_UPDATE_MESSAGE: string = 'Bump versions [skip ci]';
 export const DEFAULT_CHANGELOG_UPDATE_MESSAGE: string = 'Update changelogs [skip ci]';
 
 export class VersionAction extends BaseRushAction {
-  private readonly _ensureVersionPolicy: CommandLineFlagParameter;
-  private readonly _overrideVersion: CommandLineStringParameter;
-  private readonly _bumpVersion: CommandLineFlagParameter;
-  private readonly _versionPolicy: CommandLineStringParameter;
-  private readonly _bypassPolicy: CommandLineFlagParameter;
-  private readonly _targetBranch: CommandLineStringParameter;
-  private readonly _overwriteBump: CommandLineStringParameter;
-  private readonly _prereleaseIdentifier: CommandLineStringParameter;
-  private readonly _ignoreGitHooksParameter: CommandLineFlagParameter;
+  readonly #ensureVersionPolicy: CommandLineFlagParameter;
+  readonly #overrideVersion: CommandLineStringParameter;
+  readonly #bumpVersion: CommandLineFlagParameter;
+  readonly #versionPolicy: CommandLineStringParameter;
+  readonly #bypassPolicy: CommandLineFlagParameter;
+  readonly #targetBranch: CommandLineStringParameter;
+  readonly #overwriteBump: CommandLineStringParameter;
+  readonly #prereleaseIdentifier: CommandLineStringParameter;
+  readonly #ignoreGitHooksParameter: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -40,37 +40,37 @@ export class VersionAction extends BaseRushAction {
       parser
     });
 
-    this._targetBranch = this.defineStringParameter({
+    this.#targetBranch = this.defineStringParameter({
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
       argumentName: 'BRANCH',
       description: 'If this flag is specified, changes will be committed and merged into the target branch.'
     });
-    this._ensureVersionPolicy = this.defineFlagParameter({
+    this.#ensureVersionPolicy = this.defineFlagParameter({
       parameterLongName: '--ensure-version-policy',
       description: 'Updates package versions if needed to satisfy version policies.'
     });
-    this._overrideVersion = this.defineStringParameter({
+    this.#overrideVersion = this.defineStringParameter({
       parameterLongName: '--override-version',
       argumentName: 'NEW_VERSION',
       description:
         'Override the version in the specified --version-policy. ' +
         'This setting only works for lock-step version policy and when --ensure-version-policy is specified.'
     });
-    this._bumpVersion = this.defineFlagParameter({
+    this.#bumpVersion = this.defineFlagParameter({
       parameterLongName: '--bump',
       description: 'Bumps package version based on version policies.'
     });
-    this._bypassPolicy = this.defineFlagParameter({
+    this.#bypassPolicy = this.defineFlagParameter({
       parameterLongName: RushConstants.bypassPolicyFlagLongName,
       description: 'Overrides "gitPolicy" enforcement (use honorably!)'
     });
-    this._versionPolicy = this.defineStringParameter({
+    this.#versionPolicy = this.defineStringParameter({
       parameterLongName: '--version-policy',
       argumentName: 'POLICY',
       description: 'The name of the version policy'
     });
-    this._overwriteBump = this.defineStringParameter({
+    this.#overwriteBump = this.defineStringParameter({
       parameterLongName: '--override-bump',
       argumentName: 'BUMPTYPE',
       description:
@@ -78,7 +78,7 @@ export class VersionAction extends BaseRushAction {
         'Valid BUMPTYPE values include: prerelease, patch, preminor, minor, major. ' +
         'This setting only works for lock-step version policy in bump action.'
     });
-    this._prereleaseIdentifier = this.defineStringParameter({
+    this.#prereleaseIdentifier = this.defineStringParameter({
       parameterLongName: '--override-prerelease-id',
       argumentName: 'ID',
       description:
@@ -88,7 +88,7 @@ export class VersionAction extends BaseRushAction {
         'This setting increases to new prerelease id when "--bump" is provided but only replaces the ' +
         'prerelease name when "--ensure-version-policy" is provided.'
     });
-    this._ignoreGitHooksParameter = this.defineFlagParameter({
+    this.#ignoreGitHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-git-hooks',
       description: `Skips execution of all git hooks. Make sure you know what you are skipping.`
     });
@@ -100,7 +100,7 @@ export class VersionAction extends BaseRushAction {
     for (const subspace of this.rushConfiguration.subspaces) {
       await PolicyValidator.validatePolicyAsync(this.rushConfiguration, subspace, currentlyInstalledVariant, {
         bypassPolicyAllowed: true,
-        bypassPolicy: this._bypassPolicy.value
+        bypassPolicy: this.#bypassPolicy.value
       });
     }
     const git: Git = new Git(this.rushConfiguration);
@@ -117,76 +117,76 @@ export class VersionAction extends BaseRushAction {
       this.rushConfiguration.versionPolicyConfiguration
     );
 
-    if (this._ensureVersionPolicy.value) {
+    if (this.#ensureVersionPolicy.value) {
       this._overwritePolicyVersionIfNeeded();
       const tempBranch: string = 'version/ensure-' + new Date().getTime();
       versionManager.ensure(
-        this._versionPolicy.value,
+        this.#versionPolicy.value,
         true,
-        !!this._overrideVersion.value || !!this._prereleaseIdentifier.value
+        !!this.#overrideVersion.value || !!this.#prereleaseIdentifier.value
       );
 
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       if (updatedPackages.size > 0) {
         // eslint-disable-next-line no-console
         console.log(`${updatedPackages.size} packages are getting updated.`);
-        await this._gitProcessAsync(tempBranch, this._targetBranch.value, currentlyInstalledVariant);
+        await this._gitProcessAsync(tempBranch, this.#targetBranch.value, currentlyInstalledVariant);
       }
-    } else if (this._bumpVersion.value) {
+    } else if (this.#bumpVersion.value) {
       const tempBranch: string = 'version/bump-' + new Date().getTime();
       await versionManager.bumpAsync(
         this.terminal,
-        this._versionPolicy.value,
-        this._overwriteBump.value ? Enum.getValueByKey(BumpType, this._overwriteBump.value) : undefined,
-        this._prereleaseIdentifier.value,
+        this.#versionPolicy.value,
+        this.#overwriteBump.value ? Enum.getValueByKey(BumpType, this.#overwriteBump.value) : undefined,
+        this.#prereleaseIdentifier.value,
         true
       );
-      await this._gitProcessAsync(tempBranch, this._targetBranch.value, currentlyInstalledVariant);
+      await this._gitProcessAsync(tempBranch, this.#targetBranch.value, currentlyInstalledVariant);
     }
   }
 
   private _overwritePolicyVersionIfNeeded(): void {
-    if (!this._overrideVersion.value && !this._prereleaseIdentifier.value) {
+    if (!this.#overrideVersion.value && !this.#prereleaseIdentifier.value) {
       // No need to overwrite policy version
       return;
     }
-    if (this._overrideVersion.value && this._prereleaseIdentifier.value) {
+    if (this.#overrideVersion.value && this.#prereleaseIdentifier.value) {
       throw new Error(
         `The parameters "--override-version" and "--override-prerelease-id" cannot be used together.`
       );
     }
 
-    if (this._versionPolicy.value) {
+    if (this.#versionPolicy.value) {
       const versionConfig: VersionPolicyConfiguration = this.rushConfiguration.versionPolicyConfiguration;
       const policy: LockStepVersionPolicy = versionConfig.getVersionPolicy(
-        this._versionPolicy.value
+        this.#versionPolicy.value
       ) as LockStepVersionPolicy;
       if (!policy || !policy.isLockstepped) {
         throw new Error(`The lockstep version policy "${policy.policyName}" is not found.`);
       }
       let newVersion: string | undefined = undefined;
-      if (this._overrideVersion.value) {
-        newVersion = this._overrideVersion.value;
-      } else if (this._prereleaseIdentifier.value) {
+      if (this.#overrideVersion.value) {
+        newVersion = this.#overrideVersion.value;
+      } else if (this.#prereleaseIdentifier.value) {
         const newPolicyVersion: semver.SemVer = new semver.SemVer(policy.version);
         if (newPolicyVersion.prerelease.length) {
           // Update 1.5.0-alpha.10 to 1.5.0-beta.10
           // For example, if we are parsing "1.5.0-alpha.10" then the newPolicyVersion.prerelease array
           // would contain [ "alpha", 10 ], so we would replace "alpha" with "beta"
           newPolicyVersion.prerelease = [
-            this._prereleaseIdentifier.value,
+            this.#prereleaseIdentifier.value,
             ...newPolicyVersion.prerelease.slice(1)
           ];
         } else {
           // Update 1.5.0 to 1.5.0-beta
           // Since there is no length, we can just set to a new array
-          newPolicyVersion.prerelease = [this._prereleaseIdentifier.value];
+          newPolicyVersion.prerelease = [this.#prereleaseIdentifier.value];
         }
         newVersion = newPolicyVersion.format();
       }
 
       if (newVersion) {
-        versionConfig.update(this._versionPolicy.value, newVersion, true);
+        versionConfig.update(this.#versionPolicy.value, newVersion, true);
       }
     } else {
       throw new Error(
@@ -196,11 +196,11 @@ export class VersionAction extends BaseRushAction {
   }
 
   private _validateInput(): void {
-    if (this._bumpVersion.value && this._ensureVersionPolicy.value) {
+    if (this.#bumpVersion.value && this.#ensureVersionPolicy.value) {
       throw new Error('Please choose --bump or --ensure-version-policy but not together.');
     }
 
-    if (this._overwriteBump.value && !Enum.tryGetValueByKey(BumpType, this._overwriteBump.value)) {
+    if (this.#overwriteBump.value && !Enum.tryGetValueByKey(BumpType, this.#overwriteBump.value)) {
       throw new Error(
         'The value of override-bump is not valid.  ' +
           'Valid values include prerelease, patch, preminor, minor, and major'
@@ -262,7 +262,7 @@ export class VersionAction extends BaseRushAction {
       await publishGit.addChangesAsync(':/**/CHANGELOG.md');
       await publishGit.commitAsync(
         this.rushConfiguration.gitChangeLogUpdateCommitMessage || DEFAULT_CHANGELOG_UPDATE_MESSAGE,
-        !this._ignoreGitHooksParameter.value
+        !this.#ignoreGitHooksParameter.value
       );
     }
 
@@ -276,25 +276,25 @@ export class VersionAction extends BaseRushAction {
       await publishGit.addChangesAsync(':/**/package.json');
       await publishGit.commitAsync(
         this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE,
-        !this._ignoreGitHooksParameter.value
+        !this.#ignoreGitHooksParameter.value
       );
     }
 
     if (changeLogUpdated || packageJsonUpdated) {
-      await publishGit.pushAsync(tempBranch, !this._ignoreGitHooksParameter.value, false);
+      await publishGit.pushAsync(tempBranch, !this.#ignoreGitHooksParameter.value, false);
 
       // Now merge to target branch.
       await publishGit.fetchAsync();
       await publishGit.checkoutAsync(targetBranch);
-      await publishGit.pullAsync(!this._ignoreGitHooksParameter.value);
-      await publishGit.mergeAsync(tempBranch, !this._ignoreGitHooksParameter.value);
-      await publishGit.pushAsync(targetBranch, !this._ignoreGitHooksParameter.value, false);
-      await publishGit.deleteBranchAsync(tempBranch, true, !this._ignoreGitHooksParameter.value);
+      await publishGit.pullAsync(!this.#ignoreGitHooksParameter.value);
+      await publishGit.mergeAsync(tempBranch, !this.#ignoreGitHooksParameter.value);
+      await publishGit.pushAsync(targetBranch, !this.#ignoreGitHooksParameter.value, false);
+      await publishGit.deleteBranchAsync(tempBranch, true, !this.#ignoreGitHooksParameter.value);
     } else {
       // skip commits
       await publishGit.fetchAsync();
       await publishGit.checkoutAsync(targetBranch);
-      await publishGit.deleteBranchAsync(tempBranch, false, !this._ignoreGitHooksParameter.value);
+      await publishGit.deleteBranchAsync(tempBranch, false, !this.#ignoreGitHooksParameter.value);
     }
   }
 }

@@ -81,19 +81,19 @@ export class RushCommandLineParser extends CommandLineParser {
   public readonly rushSession: RushSession;
   public readonly pluginManager: PluginManager;
 
-  private readonly _debugParameter: CommandLineFlagParameter;
-  private readonly _quietParameter: CommandLineFlagParameter;
-  private readonly _restrictConsoleOutput: boolean = RushCommandLineParser.shouldRestrictConsoleOutput();
-  private readonly _rushOptions: IRushCommandLineParserOptions;
-  private readonly _terminalProvider: ConsoleTerminalProvider;
-  private readonly _terminal: Terminal;
-  private readonly _autocreateBuildCommand: boolean;
+  readonly #debugParameter: CommandLineFlagParameter;
+  readonly #quietParameter: CommandLineFlagParameter;
+  readonly #restrictConsoleOutput: boolean = RushCommandLineParser.shouldRestrictConsoleOutput();
+  readonly #rushOptions: IRushCommandLineParserOptions;
+  readonly #terminalProvider: ConsoleTerminalProvider;
+  readonly #terminal: Terminal;
+  readonly #autocreateBuildCommand: boolean;
 
   /**
    * The current working directory that was used to find the Rush configuration.
    */
   public get cwd(): string {
-    return this._rushOptions.cwd;
+    return this.#rushOptions.cwd;
   }
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
@@ -111,30 +111,30 @@ export class RushCommandLineParser extends CommandLineParser {
       enableTabCompletionAction: true
     });
 
-    this._debugParameter = this.defineFlagParameter({
+    this.#debugParameter = this.defineFlagParameter({
       parameterLongName: '--debug',
       parameterShortName: '-d',
       description: 'Show the full call stack if an error occurs while executing the tool'
     });
 
-    this._quietParameter = this.defineFlagParameter({
+    this.#quietParameter = this.defineFlagParameter({
       parameterLongName: '--quiet',
       parameterShortName: '-q',
       description: 'Hide rush startup information'
     });
 
     const terminalProvider: ConsoleTerminalProvider = new ConsoleTerminalProvider();
-    this._terminalProvider = terminalProvider;
-    const terminal: Terminal = new Terminal(this._terminalProvider);
-    this._terminal = terminal;
-    this._rushOptions = this._normalizeOptions(options || {});
-    const { cwd, alreadyReportedNodeTooNewError, builtInPluginConfigurations } = this._rushOptions;
+    this.#terminalProvider = terminalProvider;
+    const terminal: Terminal = new Terminal(this.#terminalProvider);
+    this.#terminal = terminal;
+    this.#rushOptions = this._normalizeOptions(options || {});
+    const { cwd, alreadyReportedNodeTooNewError, builtInPluginConfigurations } = this.#rushOptions;
 
     let rushJsonFilePath: string | undefined;
     try {
       rushJsonFilePath = RushConfiguration.tryFindRushJsonLocation({
         startingFolder: cwd,
-        showVerbose: !this._restrictConsoleOutput
+        showVerbose: !this.#restrictConsoleOutput
       });
 
       initializeDotEnv(terminal, rushJsonFilePath);
@@ -163,7 +163,7 @@ export class RushCommandLineParser extends CommandLineParser {
       rushConfiguration: this.rushConfiguration,
       terminal,
       builtInPluginConfigurations,
-      restrictConsoleOutput: this._restrictConsoleOutput,
+      restrictConsoleOutput: this.#restrictConsoleOutput,
       rushGlobalFolder: this.rushGlobalFolder
     });
 
@@ -175,7 +175,7 @@ export class RushCommandLineParser extends CommandLineParser {
     );
 
     // If the plugin has a build command, we don't need to autocreate the default build command.
-    this._autocreateBuildCommand = !hasBuildCommandInPlugin;
+    this.#autocreateBuildCommand = !hasBuildCommandInPlugin;
 
     this._populateActions();
 
@@ -195,15 +195,15 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   public get isDebug(): boolean {
-    return this._debugParameter.value;
+    return this.#debugParameter.value;
   }
 
   public get isQuiet(): boolean {
-    return this._quietParameter.value;
+    return this.#quietParameter.value;
   }
 
   public get terminal(): ITerminal {
-    return this._terminal;
+    return this.#terminal;
   }
 
   /**
@@ -235,7 +235,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
   public override async executeAsync(args?: string[]): Promise<boolean> {
     // debugParameter will be correctly parsed during super.executeAsync(), so manually parse here.
-    this._terminalProvider.verboseEnabled = this._terminalProvider.debugEnabled =
+    this.#terminalProvider.verboseEnabled = this.#terminalProvider.debugEnabled =
       process.argv.indexOf('--debug') >= 0;
 
     await measureAsyncFn('rush:initializeUnassociatedPlugins', () =>
@@ -253,7 +253,7 @@ export class RushCommandLineParser extends CommandLineParser {
     // -- if it falsely appears to succeed, we could merge bad PRs, publish empty packages, etc.
     process.exitCode = 1;
 
-    if (this._debugParameter.value) {
+    if (this.#debugParameter.value) {
       InternalError.breakInDebugger = true;
     }
 
@@ -274,10 +274,10 @@ export class RushCommandLineParser extends CommandLineParser {
 
             // only display alerts when certain specific actions are triggered
             if (RushAlerts.alertTriggerActions.includes(actionName)) {
-              this._terminal.writeDebugLine('Checking Rush alerts...');
+              this.#terminal.writeDebugLine('Checking Rush alerts...');
               const rushAlerts: RushAlerts = await RushAlerts.loadFromConfigurationAsync(
                 this.rushConfiguration,
-                this._terminal
+                this.#terminal
               );
               // Print out alerts if have after each successful command actions
               await rushAlerts.printAlertsAsync();
@@ -289,8 +289,8 @@ export class RushCommandLineParser extends CommandLineParser {
           }
           // Generally the RushAlerts implementation should handle its own error reporting; if not,
           // clarify the source, since the Rush Alerts behavior is nondeterministic and may not repro easily:
-          this._terminal.writeErrorLine(`\nAn unexpected error was encountered by the Rush alerts feature:`);
-          this._terminal.writeErrorLine(error.message);
+          this.#terminal.writeErrorLine(`\nAn unexpected error was encountered by the Rush alerts feature:`);
+          this.#terminal.writeErrorLine(error.message);
           throw new AlreadyReportedError();
         }
       }
@@ -375,7 +375,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     // If a build action is already added by a plugin, we don't want to add a default "build" script
-    const doNotIncludeDefaultBuildCommands: boolean = !this._autocreateBuildCommand;
+    const doNotIncludeDefaultBuildCommands: boolean = !this.#autocreateBuildCommand;
 
     const commandLineConfiguration: CommandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(
       commandLineConfigFilePath,
@@ -525,7 +525,7 @@ export class RushCommandLineParser extends CommandLineParser {
       console.error(`\n${message}`);
     }
 
-    if (this._debugParameter.value) {
+    if (this.#debugParameter.value) {
       // If catchSyncErrors() called this, then show a call stack similar to what Node.js
       // would show for an uncaught error
       // eslint-disable-next-line no-console

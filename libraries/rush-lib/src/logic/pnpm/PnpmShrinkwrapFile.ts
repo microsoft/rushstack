@@ -323,14 +323,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly packageExtensionsChecksum: undefined | string;
   public readonly hash: string;
 
-  private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
-  private readonly _integrities: Map<string, Map<string, string>>;
-  private _pnpmfileConfiguration: PnpmfileConfiguration | undefined;
+  readonly #shrinkwrapJson: IPnpmShrinkwrapYaml;
+  readonly #integrities: Map<string, Map<string, string>>;
+  #pnpmfileConfiguration: PnpmfileConfiguration | undefined;
 
   private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, hash: string, subspaceHasNoProjects: boolean) {
     super();
     this.hash = hash;
-    this._shrinkwrapJson = shrinkwrapJson;
+    this.#shrinkwrapJson = shrinkwrapJson;
     cacheByLockfileHash.set(hash, this);
 
     // Normalize the data
@@ -371,7 +371,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     this.isWorkspaceCompatible = isWorkspaceCompatible;
 
-    this._integrities = new Map();
+    this.#integrities = new Map();
   }
 
   public static getLockfileV9PackageId(name: string, version: string): string {
@@ -630,7 +630,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   public override getTempProjectNames(): ReadonlyArray<string> {
-    return this._getTempProjectNames(this._shrinkwrapJson.dependencies || {});
+    return this._getTempProjectNames(this.#shrinkwrapJson.dependencies || {});
   }
 
   /**
@@ -896,13 +896,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public getIntegrityForImporter(importerKey: string): Map<string, string> | undefined {
     // This logic formerly lived in PnpmProjectShrinkwrapFile. Moving it here allows caching of the external
     // dependency integrity relationships across projects
-    let integrityMap: Map<string, string> | undefined = this._integrities.get(importerKey);
+    let integrityMap: Map<string, string> | undefined = this.#integrities.get(importerKey);
     if (!integrityMap) {
       const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getImporter(importerKey);
       if (importer) {
         const resolvedIntegrityMap: Map<string, string> = new Map();
         integrityMap = resolvedIntegrityMap;
-        this._integrities.set(importerKey, resolvedIntegrityMap);
+        this.#integrities.set(importerKey, resolvedIntegrityMap);
 
         const sha256Digest: string = crypto
           .createHash('sha256')
@@ -977,8 +977,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const packageJson: IPackageJson = project.packageJsonEditor.saveToObject();
 
     // Initialize the pnpmfile if it doesn't exist
-    if (!this._pnpmfileConfiguration) {
-      this._pnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
+    if (!this.#pnpmfileConfiguration) {
+      this.#pnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
         project.rushConfiguration,
         subspace,
         variant
@@ -1044,7 +1044,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the
     // found versions much simpler.
     const { dependencyList, devDependencyList, dependencyMetaList } = PackageJsonEditor.fromObject(
-      this._pnpmfileConfiguration.transform(transformedPackageJson),
+      this.#pnpmfileConfiguration.transform(transformedPackageJson),
       project.packageJsonEditor.filePath
     );
 
@@ -1234,7 +1234,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   private _getIntegrityForPackage(specifier: string, optional: boolean): Map<string, string> {
-    const integrities: Map<string, Map<string, string>> = this._integrities;
+    const integrities: Map<string, Map<string, string>> = this.#integrities;
 
     let integrityMap: Map<string, string> | undefined = integrities.get(specifier);
     if (integrityMap) {
@@ -1370,7 +1370,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // Ensure that if any of the top-level properties are provided but empty are removed. We populate the object
     // properties when we read the shrinkwrap but PNPM does not set these top-level properties unless they are present.
     const shrinkwrapToSerialize: { [key: string]: unknown } = {};
-    for (const [key, value] of Object.entries(this._shrinkwrapJson)) {
+    for (const [key, value] of Object.entries(this.#shrinkwrapJson)) {
       if (omitImporters && key === 'importers') {
         continue;
       }

@@ -10,7 +10,7 @@ import { Telemetry, type ITelemetryData, type ITelemetryMachineInfo } from '../T
 import { RushSession } from '../../pluginFramework/RushSession';
 
 interface ITelemetryPrivateMembers extends Omit<Telemetry, '_flushAsyncTasks'> {
-  _flushAsyncTasks: Map<symbol, Promise<void>>;
+  _flushAsyncTasks: Set<Promise<void>>;
 }
 
 describe(Telemetry.name, () => {

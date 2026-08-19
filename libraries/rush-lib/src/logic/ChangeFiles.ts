@@ -30,13 +30,13 @@ export class ChangeFiles {
   /**
    * Change file path relative to changes folder.
    */
-  private _files: string[] | undefined;
-  private readonly _rushConfiguration: RushConfiguration;
-  private readonly _changesPath: string;
+  #files: string[] | undefined;
+  readonly #rushConfiguration: RushConfiguration;
+  readonly #changesPath: string;
 
   public constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
-    this._changesPath = rushConfiguration.changesFolder;
+    this.#rushConfiguration = rushConfiguration;
+    this.#changesPath = rushConfiguration.changesFolder;
   }
 
   /**
@@ -45,7 +45,7 @@ export class ChangeFiles {
   public async validateAsync(options: IValidateOptions): Promise<void> {
     const { terminal, filesToValidate, changedProjectNames, deletedProjectNames } = options;
     const schema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-    const rushConfiguration: RushConfiguration = this._rushConfiguration;
+    const rushConfiguration: RushConfiguration = this.#rushConfiguration;
     const {
       hotfixChangeEnabled,
       experimentsConfiguration: {
@@ -180,19 +180,19 @@ export class ChangeFiles {
    * Get the array of absolute paths of change files.
    */
   public async getAllChangeFilesAsync(): Promise<string[]> {
-    if (!this._files) {
+    if (!this.#files) {
       const { default: glob } = await import('fast-glob');
-      this._files = (await glob('**/*.json', { cwd: this._changesPath, absolute: true })) || [];
+      this.#files = (await glob('**/*.json', { cwd: this.#changesPath, absolute: true })) || [];
     }
 
-    return this._files;
+    return this.#files;
   }
 
   /**
    * Get the path of changes folder.
    */
   public getChangesPath(): string {
-    return this._changesPath;
+    return this.#changesPath;
   }
 
   /**
