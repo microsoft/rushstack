@@ -425,23 +425,23 @@ export type IOnConfigurationFileNotFoundCallback = (
  * @beta
  */
 export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions extends {}> {
-  private readonly _getSchema: () => JsonSchema;
+  readonly #getSchema: () => JsonSchema;
 
-  private readonly _jsonPathMetadata: readonly [string, IJsonPathMetadata<TConfigurationFile>][];
-  private readonly _propertyInheritanceTypes: IPropertiesInheritance<TConfigurationFile>;
-  private readonly _defaultPropertyInheritance: IPropertyInheritanceDefaults;
-  private readonly _customValidationFunction: CustomValidationFunction<TConfigurationFile> | undefined;
-  private __schema: JsonSchema | undefined;
+  readonly #jsonPathMetadata: readonly [string, IJsonPathMetadata<TConfigurationFile>][];
+  readonly #propertyInheritanceTypes: IPropertiesInheritance<TConfigurationFile>;
+  readonly #defaultPropertyInheritance: IPropertyInheritanceDefaults;
+  readonly #customValidationFunction: CustomValidationFunction<TConfigurationFile> | undefined;
+  #_schema: JsonSchema | undefined;
   private get _schema(): JsonSchema {
-    if (!this.__schema) {
-      this.__schema = this._getSchema();
+    if (!this.#_schema) {
+      this.#_schema = this.#getSchema();
     }
 
-    return this.__schema;
+    return this.#_schema;
   }
 
-  private readonly _configCache: Map<string, IConfigurationFileCacheEntry<TConfigurationFile>> = new Map();
-  private readonly _configPromiseCache: Map<
+  readonly #configCache: Map<string, IConfigurationFileCacheEntry<TConfigurationFile>> = new Map();
+  readonly #configPromiseCache: Map<
     string,
     Promise<IConfigurationFileCacheEntry<TConfigurationFile>>
   > = new Map();
@@ -456,15 +456,15 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
       customValidationFunction
     } = options;
     if (jsonSchemaObject) {
-      this._getSchema = () => JsonSchema.fromLoadedObject(jsonSchemaObject);
+      this.#getSchema = () => JsonSchema.fromLoadedObject(jsonSchemaObject);
     } else {
-      this._getSchema = () => JsonSchema.fromFile(jsonSchemaPath);
+      this.#getSchema = () => JsonSchema.fromFile(jsonSchemaPath);
     }
 
-    this._jsonPathMetadata = Object.entries(jsonPathMetadata);
-    this._propertyInheritanceTypes = propertyInheritance;
-    this._defaultPropertyInheritance = propertyInheritanceDefaults;
-    this._customValidationFunction = customValidationFunction;
+    this.#jsonPathMetadata = Object.entries(jsonPathMetadata);
+    this.#propertyInheritanceTypes = propertyInheritance;
+    this.#defaultPropertyInheritance = propertyInheritanceDefaults;
+    this.#customValidationFunction = customValidationFunction;
   }
 
   /**
@@ -569,7 +569,7 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     }
     visitedConfigurationFilePaths.add(resolvedConfigurationFilePath);
 
-    let cacheEntry: IConfigurationFileCacheEntry<TConfigurationFile> | undefined = this._configCache.get(
+    let cacheEntry: IConfigurationFileCacheEntry<TConfigurationFile> | undefined = this.#configCache.get(
       resolvedConfigurationFilePath
     );
     if (!cacheEntry) {
@@ -579,7 +579,7 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
         visitedConfigurationFilePaths,
         onFileNotFound
       );
-      this._configCache.set(resolvedConfigurationFilePath, cacheEntry);
+      this.#configCache.set(resolvedConfigurationFilePath, cacheEntry);
     }
 
     return cacheEntry;
@@ -603,7 +603,7 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     visitedConfigurationFilePaths.add(resolvedConfigurationFilePath);
 
     let cacheEntryPromise: Promise<IConfigurationFileCacheEntry<TConfigurationFile>> | undefined =
-      this._configPromiseCache.get(resolvedConfigurationFilePath);
+      this.#configPromiseCache.get(resolvedConfigurationFilePath);
     if (!cacheEntryPromise) {
       cacheEntryPromise = this._loadConfigurationFileEntryAsync(
         terminal,
@@ -611,10 +611,10 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
         visitedConfigurationFilePaths,
         onConfigurationFileNotFound
       ).then((value: IConfigurationFileCacheEntry<TConfigurationFile>) => {
-        this._configCache.set(resolvedConfigurationFilePath, value);
+        this.#configCache.set(resolvedConfigurationFilePath, value);
         return value;
       });
-      this._configPromiseCache.set(resolvedConfigurationFilePath, cacheEntryPromise);
+      this.#configPromiseCache.set(resolvedConfigurationFilePath, cacheEntryPromise);
     }
 
     return await cacheEntryPromise;
@@ -659,7 +659,7 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
 
     this._annotateProperties(resolvedConfigurationFilePath, result);
 
-    for (const [jsonPath, metadata] of this._jsonPathMetadata) {
+    for (const [jsonPath, metadata] of this.#jsonPathMetadata) {
       JSONPath({
         path: jsonPath,
         json: result,
@@ -740,8 +740,8 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     }
 
     if (
-      this._customValidationFunction &&
-      !this._customValidationFunction(
+      this.#customValidationFunction &&
+      !this.#customValidationFunction(
         result as TConfigurationFile,
         resolvedConfigurationFilePathForLogging,
         terminal
@@ -1006,8 +1006,8 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
       parentConfiguration as { [key: string]: unknown },
       configurationJson as { [key: string]: unknown },
       resolvedConfigurationFilePath,
-      this._defaultPropertyInheritance,
-      this._propertyInheritanceTypes as IPropertiesInheritance<{ [key: string]: unknown }>,
+      this.#defaultPropertyInheritance,
+      this.#propertyInheritanceTypes as IPropertiesInheritance<{ [key: string]: unknown }>,
       ignoreProperties
     ) as Partial<TConfigurationFile>;
 

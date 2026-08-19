@@ -83,32 +83,32 @@ export class Collector {
    */
   public readonly bundledPackageNames: ReadonlySet<string>;
 
-  private readonly _program: ts.Program;
+  readonly #program: ts.Program;
 
-  private readonly _tsdocParser: tsdoc.TSDocParser;
+  readonly #tsdocParser: tsdoc.TSDocParser;
 
-  private _astEntryPoint: AstModule | undefined;
+  #astEntryPoint: AstModule | undefined;
 
-  private readonly _entities: CollectorEntity[] = [];
-  private readonly _entitiesByAstEntity: Map<AstEntity, CollectorEntity> = new Map<
+  readonly #entities: CollectorEntity[] = [];
+  readonly #entitiesByAstEntity: Map<AstEntity, CollectorEntity> = new Map<
     AstEntity,
     CollectorEntity
   >();
-  private readonly _entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
+  readonly #entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
 
-  private readonly _starExportedExternalModulePaths: string[] = [];
+  readonly #starExportedExternalModulePaths: string[] = [];
 
-  private readonly _dtsTypeReferenceDirectives: Set<string> = new Set<string>();
-  private readonly _dtsLibReferenceDirectives: Set<string> = new Set<string>();
+  readonly #dtsTypeReferenceDirectives: Set<string> = new Set<string>();
+  readonly #dtsLibReferenceDirectives: Set<string> = new Set<string>();
 
   // Used by getOverloadIndex()
-  private readonly _cachedOverloadIndexesByDeclaration: Map<AstDeclaration, number>;
+  readonly #cachedOverloadIndexesByDeclaration: Map<AstDeclaration, number>;
 
   public constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
 
     const { program, extractorConfig, sourceMapper, messageRouter } = options;
-    this._program = program;
+    this.#program = program;
     this.extractorConfig = extractorConfig;
     this.sourceMapper = sourceMapper;
 
@@ -138,7 +138,7 @@ export class Collector {
     this.typeChecker = program.getTypeChecker();
     this.globalVariableAnalyzer = TypeScriptInternals.getGlobalVariableAnalyzer(this.program);
 
-    this._tsdocParser = new tsdoc.TSDocParser(this.extractorConfig.tsdocConfiguration);
+    this.#tsdocParser = new tsdoc.TSDocParser(this.extractorConfig.tsdocConfiguration);
 
     // Resolve package name patterns and store concrete set of bundled package dependency names
     this.bundledPackageNames = _resolveBundledPackagePatterns(
@@ -155,7 +155,7 @@ export class Collector {
     );
     this.astReferenceResolver = new AstReferenceResolver(this);
 
-    this._cachedOverloadIndexesByDeclaration = new Map<AstDeclaration, number>();
+    this.#cachedOverloadIndexesByDeclaration = new Map<AstDeclaration, number>();
   }
 
   /**a
@@ -166,7 +166,7 @@ export class Collector {
    * ```
    */
   public get dtsTypeReferenceDirectives(): ReadonlySet<string> {
-    return this._dtsTypeReferenceDirectives;
+    return this.#dtsTypeReferenceDirectives;
   }
 
   /**
@@ -177,11 +177,11 @@ export class Collector {
    * ```
    */
   public get dtsLibReferenceDirectives(): ReadonlySet<string> {
-    return this._dtsLibReferenceDirectives;
+    return this.#dtsLibReferenceDirectives;
   }
 
   public get entities(): ReadonlyArray<CollectorEntity> {
-    return this._entities;
+    return this.#entities;
   }
 
   /**
@@ -189,21 +189,21 @@ export class Collector {
    * as star exports (e.g. `export * from "@rushstack/node-core-library/lib/FileSystem"`).
    */
   public get starExportedExternalModulePaths(): ReadonlyArray<string> {
-    return this._starExportedExternalModulePaths;
+    return this.#starExportedExternalModulePaths;
   }
 
   /**
    * Perform the analysis.
    */
   public analyze(): void {
-    if (this._astEntryPoint) {
+    if (this.#astEntryPoint) {
       throw new Error('DtsRollupGenerator.analyze() was already called');
     }
 
     // This runs a full type analysis, and then augments the Abstract Syntax Tree (i.e. declarations)
     // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
     // compile errors that would result from a full compilation.
-    for (const diagnostic of this._program.getSemanticDiagnostics()) {
+    for (const diagnostic of this.#program.getSemanticDiagnostics()) {
       this.messageRouter.addCompilerDiagnostic(diagnostic);
     }
 
@@ -244,7 +244,7 @@ export class Collector {
 
     const astEntryPoint: AstModule =
       this.astSymbolTable.fetchAstModuleFromWorkingPackage(entryPointSourceFile);
-    this._astEntryPoint = astEntryPoint;
+    this.#astEntryPoint = astEntryPoint;
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
       entryPointSourceFile,
@@ -258,7 +258,7 @@ export class Collector {
         packageDocCommentTextRange.end
       );
 
-      this.workingPackage.tsdocParserContext = this._tsdocParser.parseRange(range);
+      this.workingPackage.tsdocParserContext = this.#tsdocParser.parseRange(range);
 
       this.messageRouter.addTsdocMessages(this.workingPackage.tsdocParserContext, entryPointSourceFile);
 
@@ -313,14 +313,14 @@ export class Collector {
 
     for (const starExportedExternalModule of starExportedExternalModules) {
       if (starExportedExternalModule.externalModulePath !== undefined) {
-        this._starExportedExternalModulePaths.push(starExportedExternalModule.externalModulePath);
+        this.#starExportedExternalModulePaths.push(starExportedExternalModule.externalModulePath);
       }
     }
 
-    Sort.sortBy(this._entities, (x) => x.getSortKey());
-    Sort.sortSet(this._dtsTypeReferenceDirectives);
-    Sort.sortSet(this._dtsLibReferenceDirectives);
-    this._starExportedExternalModulePaths.sort();
+    Sort.sortBy(this.#entities, (x) => x.getSortKey());
+    Sort.sortSet(this.#dtsTypeReferenceDirectives);
+    Sort.sortSet(this.#dtsLibReferenceDirectives);
+    this.#starExportedExternalModulePaths.sort();
   }
 
   /**
@@ -332,7 +332,7 @@ export class Collector {
   public tryGetEntityForNode(identifier: ts.Identifier | ts.ImportTypeNode): CollectorEntity | undefined {
     const astEntity: AstEntity | undefined = this.astSymbolTable.tryGetEntityForNode(identifier);
     if (astEntity) {
-      return this._entitiesByAstEntity.get(astEntity);
+      return this.#entitiesByAstEntity.get(astEntity);
     }
     return undefined;
   }
@@ -342,14 +342,14 @@ export class Collector {
    * doesn't refer to anything interesting.
    */
   public tryGetEntityForSymbol(symbol: ts.Symbol): CollectorEntity | undefined {
-    return this._entitiesBySymbol.get(symbol);
+    return this.#entitiesBySymbol.get(symbol);
   }
 
   /**
    * Returns the associated `CollectorEntity` for the given `astEntity`, if one was created during analysis.
    */
   public tryGetCollectorEntity(astEntity: AstEntity): CollectorEntity | undefined {
-    return this._entitiesByAstEntity.get(astEntity);
+    return this.#entitiesByAstEntity.get(astEntity);
   }
 
   public fetchSymbolMetadata(astSymbol: AstSymbol): SymbolMetadata {
@@ -436,7 +436,7 @@ export class Collector {
       return 1; // trivial case
     }
 
-    let overloadIndex: number | undefined = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
+    let overloadIndex: number | undefined = this.#cachedOverloadIndexesByDeclaration.get(astDeclaration);
 
     if (overloadIndex === undefined) {
       // TSDoc index selectors are positive integers counting from 1
@@ -445,11 +445,11 @@ export class Collector {
         // Filter out other declarations that are not overloads.  For example, an overloaded function can also
         // be a namespace.
         if (other.declaration.kind === astDeclaration.declaration.kind) {
-          this._cachedOverloadIndexesByDeclaration.set(other, nextIndex);
+          this.#cachedOverloadIndexesByDeclaration.set(other, nextIndex);
           ++nextIndex;
         }
       }
-      overloadIndex = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
+      overloadIndex = this.#cachedOverloadIndexesByDeclaration.get(astDeclaration);
     }
 
     if (overloadIndex === undefined) {
@@ -465,18 +465,18 @@ export class Collector {
     exportName?: string,
     parent?: CollectorEntity
   ): CollectorEntity {
-    let entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astEntity);
+    let entity: CollectorEntity | undefined = this.#entitiesByAstEntity.get(astEntity);
 
     if (!entity) {
       entity = new CollectorEntity(astEntity);
 
-      this._entitiesByAstEntity.set(astEntity, entity);
+      this.#entitiesByAstEntity.set(astEntity, entity);
       if (astEntity instanceof AstSymbol) {
-        this._entitiesBySymbol.set(astEntity.followedSymbol, entity);
+        this.#entitiesBySymbol.set(astEntity.followedSymbol, entity);
       } else if (astEntity instanceof AstNamespaceImport) {
-        this._entitiesBySymbol.set(astEntity.symbol, entity);
+        this.#entitiesBySymbol.set(astEntity.symbol, entity);
       }
-      this._entities.push(entity);
+      this.#entities.push(entity);
       this._collectReferenceDirectives(astEntity);
     }
 
@@ -516,7 +516,7 @@ export class Collector {
 
     if (astEntity instanceof AstNamespaceImport) {
       const astModuleExportInfo: IAstModuleExportInfo = astEntity.fetchAstModuleExportInfo(this);
-      const parentEntity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astEntity);
+      const parentEntity: CollectorEntity | undefined = this.#entitiesByAstEntity.get(astEntity);
       if (!parentEntity) {
         // This should never happen, as we've already created entities for all AstNamespaceImports.
         throw new InternalError(
@@ -558,7 +558,7 @@ export class Collector {
     const usedNames: Set<string> = new Set<string>();
 
     // First collect the names of explicit package exports, and perform a sanity check.
-    for (const entity of this._entities) {
+    for (const entity of this.#entities) {
       for (const exportName of entity.exportNames) {
         if (usedNames.has(exportName)) {
           // This should be impossible
@@ -569,7 +569,7 @@ export class Collector {
     }
 
     // Ensure that each entity has a unique nameForEmit
-    for (const entity of this._entities) {
+    for (const entity of this.#entities) {
       // What name would we ideally want to emit it as?
       let idealNameForEmit: string;
 
@@ -874,7 +874,7 @@ export class Collector {
         // Don't report missing release tags for forgotten exports (unless we're including forgotten exports
         // in either the API report or doc model).
         const astSymbol: AstSymbol = astDeclaration.astSymbol;
-        const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
+        const entity: CollectorEntity | undefined = this.#entitiesByAstEntity.get(astSymbol.rootAstSymbol);
         if (
           entity &&
           (entity.consumable ||
@@ -956,7 +956,7 @@ export class Collector {
       range.end
     );
 
-    const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(tsdocTextRange);
+    const parserContext: tsdoc.ParserContext = this.#tsdocParser.parseRange(tsdocTextRange);
 
     this.messageRouter.addTsdocMessages(parserContext, declaration.getSourceFile(), astDeclaration);
 
@@ -1017,7 +1017,7 @@ export class Collector {
               onlyIncludeExplicitlyPreserved
             );
             if (name) {
-              this._dtsTypeReferenceDirectives.add(name);
+              this.#dtsTypeReferenceDirectives.add(name);
             }
           }
 
@@ -1028,7 +1028,7 @@ export class Collector {
               onlyIncludeExplicitlyPreserved
             );
             if (reference) {
-              this._dtsLibReferenceDirectives.add(reference);
+              this.#dtsLibReferenceDirectives.add(reference);
             }
           }
         }

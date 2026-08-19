@@ -11,7 +11,7 @@ import { RunAction } from './RunAction';
 import { InitAction } from './InitAction';
 
 export class ApiExtractorCommandLine extends CommandLineParser {
-  private readonly _debugParameter: CommandLineFlagParameter;
+  readonly #debugParameter: CommandLineFlagParameter;
 
   public constructor() {
     super({
@@ -25,7 +25,7 @@ export class ApiExtractorCommandLine extends CommandLineParser {
     });
     this._populateActions();
 
-    this._debugParameter = this.defineFlagParameter({
+    this.#debugParameter = this.defineFlagParameter({
       parameterLongName: '--debug',
       parameterShortName: '-d',
       description: 'Show the full call stack if an error occurs while executing the tool'
@@ -33,7 +33,7 @@ export class ApiExtractorCommandLine extends CommandLineParser {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    if (this._debugParameter.value) {
+    if (this.#debugParameter.value) {
       InternalError.breakInDebugger = true;
     }
 
@@ -43,7 +43,7 @@ export class ApiExtractorCommandLine extends CommandLineParser {
       process.exitCode = 0;
     } catch (error) {
       if (!(error instanceof AlreadyReportedError)) {
-        if (this._debugParameter.value) {
+        if (this.#debugParameter.value) {
           console.error(os.EOL + error.stack);
         } else {
           console.error(os.EOL + Colorize.red('ERROR: ' + error.message.trim()));

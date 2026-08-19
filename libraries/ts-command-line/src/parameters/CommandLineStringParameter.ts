@@ -20,7 +20,7 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
   /** {@inheritDoc ICommandLineStringDefinition.defaultValue} */
   public readonly defaultValue: string | undefined;
 
-  private _value: string | undefined = undefined;
+  #value: string | undefined = undefined;
 
   /** {@inheritDoc CommandLineParameterBase.kind} */
   public readonly kind: CommandLineParameterKind.String = CommandLineParameterKind.String;
@@ -43,7 +43,7 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
       if (typeof data !== 'string') {
         this.reportInvalidData(data);
       }
-      this._value = data;
+      this.#value = data;
       return;
     }
 
@@ -53,17 +53,17 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
       if (environmentValue !== undefined) {
         // NOTE: If the environment variable is defined as an empty string,
         // here we will accept the empty string as our value.  (For number/flag we don't do that.)
-        this._value = environmentValue;
+        this.#value = environmentValue;
         return;
       }
     }
 
     if (this.defaultValue !== undefined) {
-      this._value = this.defaultValue;
+      this.#value = this.defaultValue;
       return;
     }
 
-    this._value = undefined;
+    this.#value = undefined;
   }
 
   /**
@@ -88,7 +88,7 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
    * or if the parameter was omitted and has no default value.
    */
   public get value(): string | undefined {
-    return this._value;
+    return this.#value;
   }
 
   /** {@inheritDoc CommandLineParameterBase.appendToArgList} */

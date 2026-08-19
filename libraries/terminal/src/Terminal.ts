@@ -12,24 +12,24 @@ import { AnsiEscape } from './AnsiEscape';
  * @beta
  */
 export class Terminal implements ITerminal {
-  private readonly _providers: Set<ITerminalProvider>;
+  readonly #providers: Set<ITerminalProvider>;
 
   public constructor(provider: ITerminalProvider) {
-    this._providers = new Set<ITerminalProvider>([provider]);
+    this.#providers = new Set<ITerminalProvider>([provider]);
   }
 
   /**
    * {@inheritdoc ITerminal.registerProvider}
    */
   public registerProvider(provider: ITerminalProvider): void {
-    this._providers.add(provider);
+    this.#providers.add(provider);
   }
 
   /**
    * {@inheritdoc ITerminal.unregisterProvider}
    */
   public unregisterProvider(provider: ITerminalProvider): void {
-    this._providers.delete(provider);
+    this.#providers.delete(provider);
   }
 
   /**
@@ -158,7 +158,7 @@ export class Terminal implements ITerminal {
 
     const concatenatedLinesWithColorByNewlineChar: Map<string, string> = new Map();
     const concatenatedLinesWithoutColorByNewlineChar: Map<string, string> = new Map();
-    for (const provider of this._providers) {
+    for (const provider of this.#providers) {
       let textToWrite: string | undefined;
       const eol: string = provider.eolCharacter;
       if (provider.supportsColor) {

@@ -70,35 +70,35 @@ export class IndentedWriter {
    */
   public trimLeadingSpaces: boolean = false;
 
-  private readonly _builder: IStringBuilder;
+  readonly #builder: IStringBuilder;
 
-  private _latestChunk: string | undefined;
-  private _previousChunk: string | undefined;
-  private _atStartOfLine: boolean;
+  #latestChunk: string | undefined;
+  #previousChunk: string | undefined;
+  #atStartOfLine: boolean;
 
-  private readonly _indentStack: string[];
-  private _indentText: string;
+  readonly #indentStack: string[];
+  #indentText: string;
 
-  private _previousLineIsBlank: boolean;
-  private _currentLineIsBlank: boolean;
+  #previousLineIsBlank: boolean;
+  #currentLineIsBlank: boolean;
 
   public constructor(builder?: IStringBuilder) {
-    this._builder = builder === undefined ? new StringBuilder() : builder;
-    this._latestChunk = undefined;
-    this._previousChunk = undefined;
-    this._atStartOfLine = true;
-    this._previousLineIsBlank = true;
-    this._currentLineIsBlank = true;
+    this.#builder = builder === undefined ? new StringBuilder() : builder;
+    this.#latestChunk = undefined;
+    this.#previousChunk = undefined;
+    this.#atStartOfLine = true;
+    this.#previousLineIsBlank = true;
+    this.#currentLineIsBlank = true;
 
-    this._indentStack = [];
-    this._indentText = '';
+    this.#indentStack = [];
+    this.#indentText = '';
   }
 
   /**
    * Retrieves the output that was built so far.
    */
   public getText(): string {
-    return this._builder.toString();
+    return this.#builder.toString();
   }
 
   public toString(): string {
@@ -113,7 +113,7 @@ export class IndentedWriter {
    * corresponding call to IndentedWriter.decreaseIndent().
    */
   public increaseIndent(indentPrefix?: string): void {
-    this._indentStack.push(indentPrefix !== undefined ? indentPrefix : this.defaultIndentPrefix);
+    this.#indentStack.push(indentPrefix !== undefined ? indentPrefix : this.defaultIndentPrefix);
     this._updateIndentText();
   }
 
@@ -122,7 +122,7 @@ export class IndentedWriter {
    * to IndentedWriter.increaseIndent().
    */
   public decreaseIndent(): void {
-    this._indentStack.pop();
+    this.#indentStack.pop();
     this._updateIndentText();
   }
 
@@ -153,7 +153,7 @@ export class IndentedWriter {
    */
   public ensureSkippedLine(): void {
     this.ensureNewLine();
-    if (!this._previousLineIsBlank) {
+    if (!this.#previousLineIsBlank) {
       this._writeNewLine();
     }
   }
@@ -162,8 +162,8 @@ export class IndentedWriter {
    * Returns the last character that was written, or an empty string if no characters have been written yet.
    */
   public peekLastCharacter(): string {
-    if (this._latestChunk !== undefined) {
-      return this._latestChunk.substr(-1, 1);
+    if (this.#latestChunk !== undefined) {
+      return this.#latestChunk.substr(-1, 1);
     }
     return '';
   }
@@ -173,12 +173,12 @@ export class IndentedWriter {
    * have been written yet.
    */
   public peekSecondLastCharacter(): string {
-    if (this._latestChunk !== undefined) {
-      if (this._latestChunk.length > 1) {
-        return this._latestChunk.substr(-2, 1);
+    if (this.#latestChunk !== undefined) {
+      if (this.#latestChunk.length > 1) {
+        return this.#latestChunk.substr(-2, 1);
       }
-      if (this._previousChunk !== undefined) {
-        return this._previousChunk.substr(-1, 1);
+      if (this.#previousChunk !== undefined) {
+        return this.#previousChunk.substr(-1, 1);
       }
     }
     return '';
@@ -231,44 +231,44 @@ export class IndentedWriter {
   private _writeLinePart(message: string): void {
     let trimmedMessage: string = message;
 
-    if (this.trimLeadingSpaces && this._atStartOfLine) {
+    if (this.trimLeadingSpaces && this.#atStartOfLine) {
       trimmedMessage = message.replace(/^ +/, '');
     }
 
     if (trimmedMessage.length > 0) {
-      if (this._atStartOfLine && this._indentText.length > 0) {
-        this._write(this._indentText);
+      if (this.#atStartOfLine && this.#indentText.length > 0) {
+        this._write(this.#indentText);
       }
       this._write(trimmedMessage);
-      if (this._currentLineIsBlank) {
+      if (this.#currentLineIsBlank) {
         if (/\S/.test(trimmedMessage)) {
-          this._currentLineIsBlank = false;
+          this.#currentLineIsBlank = false;
         }
       }
-      this._atStartOfLine = false;
+      this.#atStartOfLine = false;
     }
   }
 
   private _writeNewLine(): void {
     if (this.indentBlankLines) {
-      if (this._atStartOfLine && this._indentText.length > 0) {
-        this._write(this._indentText);
+      if (this.#atStartOfLine && this.#indentText.length > 0) {
+        this._write(this.#indentText);
       }
     }
 
-    this._previousLineIsBlank = this._currentLineIsBlank;
+    this.#previousLineIsBlank = this.#currentLineIsBlank;
     this._write('\n');
-    this._currentLineIsBlank = true;
-    this._atStartOfLine = true;
+    this.#currentLineIsBlank = true;
+    this.#atStartOfLine = true;
   }
 
   private _write(s: string): void {
-    this._previousChunk = this._latestChunk;
-    this._latestChunk = s;
-    this._builder.append(s);
+    this.#previousChunk = this.#latestChunk;
+    this.#latestChunk = s;
+    this.#builder.append(s);
   }
 
   private _updateIndentText(): void {
-    this._indentText = this._indentStack.join('');
+    this.#indentText = this.#indentStack.join('');
   }
 }

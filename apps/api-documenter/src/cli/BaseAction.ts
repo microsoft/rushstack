@@ -26,13 +26,13 @@ export interface IBuildApiModelResult {
 }
 
 export abstract class BaseAction extends CommandLineAction {
-  private readonly _inputFolderParameter: CommandLineStringParameter;
-  private readonly _outputFolderParameter: CommandLineStringParameter;
+  readonly #inputFolderParameter: CommandLineStringParameter;
+  readonly #outputFolderParameter: CommandLineStringParameter;
 
   protected constructor(options: ICommandLineActionOptions) {
     super(options);
 
-    this._inputFolderParameter = this.defineStringParameter({
+    this.#inputFolderParameter = this.defineStringParameter({
       parameterLongName: '--input-folder',
       parameterShortName: '-i',
       argumentName: 'FOLDER1',
@@ -41,7 +41,7 @@ export abstract class BaseAction extends CommandLineAction {
         ` If omitted, the default is "./input"`
     });
 
-    this._outputFolderParameter = this.defineStringParameter({
+    this.#outputFolderParameter = this.defineStringParameter({
       parameterLongName: '--output-folder',
       parameterShortName: '-o',
       argumentName: 'FOLDER2',
@@ -55,12 +55,12 @@ export abstract class BaseAction extends CommandLineAction {
   protected buildApiModel(): IBuildApiModelResult {
     const apiModel: ApiModel = new ApiModel();
 
-    const inputFolder: string = this._inputFolderParameter.value || './input';
+    const inputFolder: string = this.#inputFolderParameter.value || './input';
     if (!FileSystem.exists(inputFolder)) {
       throw new Error('The input folder does not exist: ' + inputFolder);
     }
 
-    const outputFolder: string = this._outputFolderParameter.value || `./${this.actionName}`;
+    const outputFolder: string = this.#outputFolderParameter.value || `./${this.actionName}`;
     FileSystem.ensureFolder(outputFolder);
 
     for (const filename of FileSystem.readFolderItemNames(inputFolder)) {

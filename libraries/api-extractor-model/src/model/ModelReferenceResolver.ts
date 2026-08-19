@@ -37,10 +37,10 @@ export interface IResolveDeclarationReferenceResult {
  * which resolves declaration references by walking the compiler state.
  */
 export class ModelReferenceResolver {
-  private readonly _apiModel: ApiModel;
+  readonly #apiModel: ApiModel;
 
   public constructor(apiModel: ApiModel) {
-    this._apiModel = apiModel;
+    this.#apiModel = apiModel;
   }
 
   public resolve(
@@ -56,7 +56,7 @@ export class ModelReferenceResolver {
 
     // Is this an absolute reference?
     if (declarationReference.packageName !== undefined) {
-      apiPackage = this._apiModel.tryGetPackageByName(declarationReference.packageName);
+      apiPackage = this.#apiModel.tryGetPackageByName(declarationReference.packageName);
       if (apiPackage === undefined) {
         result.errorMessage = `The package "${declarationReference.packageName}" could not be located`;
         return result;
