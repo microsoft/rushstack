@@ -93,6 +93,9 @@ export class WorkspaceSessionFileWatcher implements IWorkspaceInvalidationWatche
 
 function getWatchPaths(rushConfiguration: RushConfiguration): ReadonlyArray<IWatchPath> {
   const recursiveFolders: Set<string> = new Set([rushConfiguration.commonRushConfigFolder]);
+  for (const subspace of rushConfiguration.subspaces) {
+    recursiveFolders.add(subspace.getSubspaceConfigFolderPath());
+  }
   for (const project of rushConfiguration.projects) {
     recursiveFolders.add(project.projectFolder);
   }
