@@ -72,9 +72,9 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
       runOptions: IHeftTaskRunHookOptions & Partial<IHeftTaskRunIncrementalHookOptions>
     ): Promise<void> => {
       const result: IApiExtractorConfigurationResult | undefined =
-        await this._getApiExtractorConfigurationAsync(taskSession, heftConfiguration);
+        await this.#getApiExtractorConfigurationAsync(taskSession, heftConfiguration);
       if (result) {
-        await this._runApiExtractorAsync(
+        await this.#runApiExtractorAsync(
           taskSession,
           heftConfiguration,
           runOptions,
@@ -88,7 +88,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     taskSession.hooks.runIncremental.tapPromise(PLUGIN_NAME, runAsync);
   }
 
-  private async _getApiExtractorConfigurationFilePathAsync(
+  async #getApiExtractorConfigurationFilePathAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<string | undefined> {
@@ -113,7 +113,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     return this.#apiExtractorConfigurationFilePath;
   }
 
-  private async _getApiExtractorConfigurationAsync(
+  async #getApiExtractorConfigurationAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     ignoreMissingEntryPoint?: boolean
@@ -122,14 +122,14 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     // including support for rig.json.  However, Heft does not load the @microsoft/api-extractor package at all
     // unless it sees a config/api-extractor.json file.  Thus we need to do our own lookup here.
     const apiExtractorConfigurationFilePath: string | undefined =
-      await this._getApiExtractorConfigurationFilePathAsync(taskSession, heftConfiguration);
+      await this.#getApiExtractorConfigurationFilePathAsync(taskSession, heftConfiguration);
     if (!apiExtractorConfigurationFilePath) {
       return undefined;
     }
 
     // Since the config file exists, we can assume that API Extractor is available. Attempt to resolve
     // and import the package. If the resolution fails, a helpful error is thrown.
-    const apiExtractorPackage: typeof TApiExtractor = await this._getApiExtractorPackageAsync(
+    const apiExtractorPackage: typeof TApiExtractor = await this.#getApiExtractorPackageAsync(
       taskSession,
       heftConfiguration
     );
@@ -149,7 +149,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     return { apiExtractorPackage, apiExtractorConfiguration };
   }
 
-  private async _getApiExtractorPackageAsync(
+  async #getApiExtractorPackageAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<typeof TApiExtractor> {
@@ -163,7 +163,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     return this.#apiExtractor;
   }
 
-  private async _runApiExtractorAsync(
+  async #runApiExtractorAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     runOptions: IHeftTaskRunHookOptions & Partial<IHeftTaskRunIncrementalHookOptions>,

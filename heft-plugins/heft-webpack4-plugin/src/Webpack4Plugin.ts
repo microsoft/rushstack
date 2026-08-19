@@ -113,18 +113,18 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     }
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await this._runWebpackAsync(taskSession, heftConfiguration, options);
+      await this.#runWebpackAsync(taskSession, heftConfiguration, options);
     });
 
     taskSession.hooks.runIncremental.tapPromise(
       PLUGIN_NAME,
       async (runOptions: IHeftTaskRunIncrementalHookOptions) => {
-        await this._runWebpackWatchAsync(taskSession, heftConfiguration, options, runOptions.requestRun);
+        await this.#runWebpackWatchAsync(taskSession, heftConfiguration, options, runOptions.requestRun);
       }
     );
   }
 
-  private async _getWebpackConfigurationAsync(
+  async #getWebpackConfigurationAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options: IWebpackPluginOptions,
@@ -137,7 +137,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           heftConfiguration,
           hooks: this.accessor.hooks,
           serveMode: this.#isServeMode,
-          loadWebpackAsyncFn: this._loadWebpackAsync.bind(this)
+          loadWebpackAsyncFn: this.#loadWebpackAsync.bind(this)
         },
         options
       );
@@ -162,7 +162,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     return this.#webpackConfiguration;
   }
 
-  private async _loadWebpackAsync(): Promise<typeof TWebpack> {
+  async #loadWebpackAsync(): Promise<typeof TWebpack> {
     if (!this.#webpack) {
       // Allow this to fail if webpack is not installed
       this.#webpack = await import(WEBPACK_PACKAGE_NAME);
@@ -170,12 +170,12 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     return this.#webpack!;
   }
 
-  private async _getWebpackCompilerAsync(
+  async #getWebpackCompilerAsync(
     taskSession: IHeftTaskSession,
     webpackConfiguration: IWebpackConfiguration
   ): Promise<ExtendedCompiler | ExtendedMultiCompiler> {
     if (!this.#webpackCompiler) {
-      const webpack: typeof TWebpack = await this._loadWebpackAsync();
+      const webpack: typeof TWebpack = await this.#loadWebpackAsync();
       taskSession.logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
       this.#webpackCompiler = Array.isArray(webpackConfiguration)
         ? (webpack.default(
@@ -186,19 +186,19 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     return this.#webpackCompiler;
   }
 
-  private async _runWebpackAsync(
+  async #runWebpackAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options: IWebpackPluginOptions
   ): Promise<void> {
-    this._validateEnvironmentVariable(taskSession);
+    this.#validateEnvironmentVariable(taskSession);
     if (taskSession.parameters.watch || this.#isServeMode) {
       // Should never happen, but just in case
       throw new InternalError('Cannot run Webpack in compilation mode when watch mode is enabled');
     }
 
     // Load the config and compiler, and return if there is no config found
-    const webpackConfiguration: IWebpackConfiguration | undefined = await this._getWebpackConfigurationAsync(
+    const webpackConfiguration: IWebpackConfiguration | undefined = await this.#getWebpackConfigurationAsync(
       taskSession,
       heftConfiguration,
       options
@@ -206,7 +206,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     if (!webpackConfiguration) {
       return;
     }
-    const compiler: ExtendedCompiler | ExtendedMultiCompiler = await this._getWebpackCompilerAsync(
+    const compiler: ExtendedCompiler | ExtendedMultiCompiler = await this.#getWebpackCompilerAsync(
       taskSession,
       webpackConfiguration
     );
@@ -224,15 +224,15 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
 
     // Emit the errors from the stats object, if present
     if (stats) {
-      this._recordErrors(stats);
+      this.#recordErrors(stats);
       if (this.accessor.hooks.onEmitStats.isUsed()) {
         await this.accessor.hooks.onEmitStats.promise(stats);
       }
-      this._emitErrors(taskSession.logger);
+      this.#emitErrors(taskSession.logger);
     }
   }
 
-  private async _runWebpackWatchAsync(
+  async #runWebpackWatchAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options: IWebpackPluginOptions,
@@ -246,7 +246,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
 
     if (!this.#webpackCompiler) {
       isInitial = true;
-      this._validateEnvironmentVariable(taskSession);
+      this.#validateEnvironmentVariable(taskSession);
       if (!taskSession.parameters.watch) {
         // Should never happen, but just in case
         throw new InternalError('Cannot run Webpack in watch mode when compilation mode is enabled');
@@ -254,13 +254,13 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
 
       // Load the config and compiler, and return if there is no config found
       const webpackConfiguration: IWebpackConfiguration | undefined =
-        await this._getWebpackConfigurationAsync(taskSession, heftConfiguration, options, requestRun);
+        await this.#getWebpackConfigurationAsync(taskSession, heftConfiguration, options, requestRun);
       if (!webpackConfiguration) {
         return;
       }
 
       // Get the compiler which will be used for both serve and watch mode
-      const compiler: ExtendedCompiler | ExtendedMultiCompiler = await this._getWebpackCompilerAsync(
+      const compiler: ExtendedCompiler | ExtendedMultiCompiler = await this.#getWebpackCompilerAsync(
         taskSession,
         webpackConfiguration
       );
@@ -277,7 +277,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           this.#webpackCompilationDonePromiseResolveFn = resolve;
         });
         if (stats) {
-          this._recordErrors(stats);
+          this.#recordErrors(stats);
         }
       });
 
@@ -415,10 +415,10 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
       );
     }
 
-    this._emitErrors(taskSession.logger);
+    this.#emitErrors(taskSession.logger);
   }
 
-  private _validateEnvironmentVariable(taskSession: IHeftTaskSession): void {
+  #validateEnvironmentVariable(taskSession: IHeftTaskSession): void {
     if (!this.#isServeMode && process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
       taskSession.logger.emitWarning(
         new Error(
@@ -430,7 +430,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     }
   }
 
-  private _emitErrors(logger: IScopedLogger): void {
+  #emitErrors(logger: IScopedLogger): void {
     for (const warning of this.#warnings) {
       logger.emitWarning(warning);
     }
@@ -439,7 +439,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     }
   }
 
-  private _recordErrors(stats: TWebpack.Stats | TWebpack.compilation.MultiStats): void {
+  #recordErrors(stats: TWebpack.Stats | TWebpack.compilation.MultiStats): void {
     this.#errors.length = 0;
     this.#warnings.length = 0;
 

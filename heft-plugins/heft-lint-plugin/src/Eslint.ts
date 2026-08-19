@@ -325,14 +325,14 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       if (fixMessages) {
         for (const fixMessage of fixMessages) {
           const formattedMessage: string = `[FIXED] ${getFormattedErrorMessage(fixMessage)}`;
-          const errorObject: FileError = this._getLintFileError(lintResult, fixMessage, formattedMessage);
+          const errorObject: FileError = this.#getLintFileError(lintResult, fixMessage, formattedMessage);
           this._scopedLogger.emitWarning(errorObject);
         }
       }
 
       // Report linter errors and warnings to the logger
       for (const lintMessage of lintResult.messages) {
-        const errorObject: FileError = this._getLintFileError(lintResult, lintMessage);
+        const errorObject: FileError = this.#getLintFileError(lintResult, lintMessage);
         switch (lintMessage.severity) {
           case EslintMessageSeverity.error: {
             this._scopedLogger.emitError(errorObject);
@@ -380,7 +380,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     });
   }
 
-  private _getLintFileError(
+  #getLintFileError(
     lintResult: TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult,
     lintMessage: TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage,
     message?: string

@@ -49,7 +49,7 @@ export default class HeftJestReporter implements Reporter {
   public async onTestStart(test: Test): Promise<void> {
     this.#terminal.writeLine(
       Colorize.whiteBackground(Colorize.black('START')),
-      ` ${this._getTestPath(test.path)}`
+      ` ${this.#getTestPath(test.path)}`
     );
   }
 
@@ -59,7 +59,7 @@ export default class HeftJestReporter implements Reporter {
     testResult: TestResult,
     aggregatedResult: AggregatedResult
   ): Promise<void> {
-    this._writeConsoleOutput(testResult);
+    this.#writeConsoleOutput(testResult);
     const {
       numPassingTests,
       numFailingTests,
@@ -80,7 +80,7 @@ export default class HeftJestReporter implements Reporter {
     const memUsage: string = memoryUsage ? `, ${Math.floor(memoryUsage / 1000000)}MB heap size` : '';
 
     const message: string =
-      ` ${this._getTestPath(test.path)} ` +
+      ` ${this.#getTestPath(test.path)} ` +
       `(duration: ${duration}, ${numPassingTests} passed, ${numFailingTests} failed${memUsage})`;
 
     if (numFailingTests > 0) {
@@ -100,19 +100,19 @@ export default class HeftJestReporter implements Reporter {
 
     if (updatedSnapshots) {
       this.#terminal.writeErrorLine(
-        `Updated ${this._formatWithPlural(updatedSnapshots, 'snapshot', 'snapshots')}`
+        `Updated ${this.#formatWithPlural(updatedSnapshots, 'snapshot', 'snapshots')}`
       );
     }
 
     if (addedSnapshots) {
       this.#terminal.writeErrorLine(
-        `Added ${this._formatWithPlural(addedSnapshots, 'snapshot', 'snapshots')}`
+        `Added ${this.#formatWithPlural(addedSnapshots, 'snapshot', 'snapshots')}`
       );
     }
 
     if (uncheckedSnapshots) {
       this.#terminal.writeWarningLine(
-        `${this._formatWithPlural(uncheckedSnapshots, 'snapshot was', 'snapshots were')} not checked`
+        `${this.#formatWithPlural(uncheckedSnapshots, 'snapshot was', 'snapshots were')} not checked`
       );
     }
   }
@@ -122,30 +122,30 @@ export default class HeftJestReporter implements Reporter {
   // a build failure and searching its log output for errors.  To reduce confusion, we add a prefix
   // like "|console.error|" to each output line, to clearly distinguish test logging from regular
   // task output.  You can suppress test logging entirely using the "--silent" CLI parameter.
-  private _writeConsoleOutput(testResult: TestResult): void {
+  #writeConsoleOutput(testResult: TestResult): void {
     if (testResult.console) {
       for (const logEntry of testResult.console) {
         switch (logEntry.type) {
           case 'debug':
-            this._writeConsoleOutputWithLabel('console.debug', logEntry.message);
+            this.#writeConsoleOutputWithLabel('console.debug', logEntry.message);
             break;
           case 'log':
-            this._writeConsoleOutputWithLabel('console.log', logEntry.message);
+            this.#writeConsoleOutputWithLabel('console.log', logEntry.message);
             break;
           case 'warn':
-            this._writeConsoleOutputWithLabel('console.warn', logEntry.message);
+            this.#writeConsoleOutputWithLabel('console.warn', logEntry.message);
             break;
           case 'error':
-            this._writeConsoleOutputWithLabel('console.error', logEntry.message);
+            this.#writeConsoleOutputWithLabel('console.error', logEntry.message);
             break;
           case 'info':
-            this._writeConsoleOutputWithLabel('console.info', logEntry.message);
+            this.#writeConsoleOutputWithLabel('console.info', logEntry.message);
             break;
 
           case 'groupCollapsed':
             if (this.#debugMode) {
               // The "groupCollapsed" name is too long
-              this._writeConsoleOutputWithLabel('collapsed', logEntry.message);
+              this.#writeConsoleOutputWithLabel('collapsed', logEntry.message);
             }
             break;
 
@@ -156,7 +156,7 @@ export default class HeftJestReporter implements Reporter {
           case 'group':
           case 'time':
             if (this.#debugMode) {
-              this._writeConsoleOutputWithLabel(
+              this.#writeConsoleOutputWithLabel(
                 logEntry.type,
                 `(${logEntry.type}) ${logEntry.message}`,
                 true
@@ -172,7 +172,7 @@ export default class HeftJestReporter implements Reporter {
     }
   }
 
-  private _writeConsoleOutputWithLabel(label: string, message: string, debug?: boolean): void {
+  #writeConsoleOutputWithLabel(label: string, message: string, debug?: boolean): void {
     if (message === '') {
       return;
     }
@@ -198,7 +198,7 @@ export default class HeftJestReporter implements Reporter {
     // and print a newline.
     this.#terminal.writeLine('\u001b[0m');
     this.#terminal.writeLine(
-      `Run start. ${this._formatWithPlural(aggregatedResult.numTotalTestSuites, 'test suite', 'test suites')}`
+      `Run start. ${this.#formatWithPlural(aggregatedResult.numTotalTestSuites, 'test suite', 'test suites')}`
     );
   }
 
@@ -238,11 +238,11 @@ export default class HeftJestReporter implements Reporter {
     // This reporter doesn't have any errors to throw
   }
 
-  private _getTestPath(fullTestPath: string): string {
+  #getTestPath(fullTestPath: string): string {
     return path.relative(this.#buildFolderPath, fullTestPath);
   }
 
-  private _formatWithPlural(num: number, singular: string, plural: string): string {
+  #formatWithPlural(num: number, singular: string, plural: string): string {
     return `${num} ${num === 1 ? singular : plural}`;
   }
 }

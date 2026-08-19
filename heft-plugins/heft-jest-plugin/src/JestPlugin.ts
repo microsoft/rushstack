@@ -228,13 +228,13 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     };
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await this._runJestAsync(taskSession, heftConfiguration, options);
+      await this.#runJestAsync(taskSession, heftConfiguration, options);
     });
 
     taskSession.hooks.runIncremental.tapPromise(
       PLUGIN_NAME,
       async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
-        await this._runJestWatchAsync(
+        await this.#runJestWatchAsync(
           taskSession,
           heftConfiguration,
           options,
@@ -247,7 +247,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   /**
    * Runs Jest using the provided options.
    */
-  private async _runJestAsync(
+  async #runJestAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options: IJestPluginOptions
@@ -255,13 +255,13 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     const logger: IScopedLogger = taskSession.logger;
     const terminal: ITerminal = logger.terminal;
 
-    this._setNodeEnvIfRequested(options, logger);
+    this.#setNodeEnvIfRequested(options, logger);
 
     const { getVersion, runCLI } = await import(`@jest/core`);
     terminal.writeLine(`Using Jest version ${getVersion()}`);
 
     const buildFolderPath: string = heftConfiguration.buildFolderPath;
-    const jestArgv: Config.Argv | undefined = await this._createJestArgvAsync(
+    const jestArgv: Config.Argv | undefined = await this.#createJestArgvAsync(
       taskSession,
       heftConfiguration,
       options,
@@ -279,7 +279,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       results: jestResults
     } = await runCLI(jestArgv, [buildFolderPath]);
 
-    this._resetNodeEnv();
+    this.#resetNodeEnv();
 
     if (jestResults.numFailedTests > 0) {
       logger.emitError(
@@ -301,7 +301,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   /**
    * Runs Jest using the provided options.
    */
-  private async _runJestWatchAsync(
+  async #runJestWatchAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options: IJestPluginOptions,
@@ -471,7 +471,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       terminal.writeLine(`Using Jest version ${getVersion()}`);
 
       const buildFolderPath: string = heftConfiguration.buildFolderPath;
-      const jestArgv: Config.Argv | undefined = await this._createJestArgvAsync(
+      const jestArgv: Config.Argv | undefined = await this.#createJestArgvAsync(
         taskSession,
         heftConfiguration,
         options,
@@ -491,7 +491,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     await Promise.resolve();
 
     if (pendingTestRuns.size > 0) {
-      this._setNodeEnvIfRequested(options, logger);
+      this.#setNodeEnvIfRequested(options, logger);
 
       this.#executing = true;
       for (const pendingTestRun of pendingTestRuns) {
@@ -518,7 +518,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         }
       }
 
-      this._resetNodeEnv();
+      this.#resetNodeEnv();
 
       if (!logger.hasErrors) {
         // If we ran tests and they succeeded, consider the files to no longer be changed.
@@ -532,7 +532,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     }
   }
 
-  private async _createJestArgvAsync(
+  async #createJestArgvAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options: IJestPluginOptions,
@@ -796,7 +796,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     return _jestConfigurationFileLoader;
   }
 
-  private _setNodeEnvIfRequested(options: IJestPluginOptions, logger: IScopedLogger): void {
+  #setNodeEnvIfRequested(options: IJestPluginOptions, logger: IScopedLogger): void {
     if (options.enableNodeEnvManagement) {
       if (process.env.NODE_ENV) {
         if (process.env.NODE_ENV !== 'test') {
@@ -812,7 +812,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     }
   }
 
-  private _resetNodeEnv(): void {
+  #resetNodeEnv(): void {
     // unset the NODE_ENV only if we have set it
     if (this.#nodeEnvSet) {
       delete process.env.NODE_ENV;

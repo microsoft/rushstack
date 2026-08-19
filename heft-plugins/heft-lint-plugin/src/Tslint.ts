@@ -180,14 +180,14 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     if (lintResult.fixes?.length) {
       for (const fixedTslintFailure of lintResult.fixes) {
         const formattedMessage: string = `[FIXED] ${getFormattedErrorMessage(fixedTslintFailure)}`;
-        const errorObject: FileError = this._getLintFileError(fixedTslintFailure, formattedMessage);
+        const errorObject: FileError = this.#getLintFileError(fixedTslintFailure, formattedMessage);
         this._scopedLogger.emitWarning(errorObject);
       }
     }
 
     // Report linter errors and warnings to the logger
     for (const tslintFailure of lintResult.failures) {
-      const errorObject: FileError = this._getLintFileError(tslintFailure);
+      const errorObject: FileError = this.#getLintFileError(tslintFailure);
       switch (tslintFailure.getRuleSeverity()) {
         case 'error': {
           this._scopedLogger.emitError(errorObject);
@@ -210,7 +210,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     return lintResults.length > 0;
   }
 
-  private _getLintFileError(tslintFailure: TTslint.RuleFailure, message?: string): FileError {
+  #getLintFileError(tslintFailure: TTslint.RuleFailure, message?: string): FileError {
     if (!message) {
       message = getFormattedErrorMessage(tslintFailure);
     }
