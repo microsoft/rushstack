@@ -43,15 +43,13 @@ class CountingReporter implements IReporter {
 
 function makeInput(
   type: ReporterEventType,
-  payload: ReporterJsonValue = {},
-  required: boolean = false
+  payload: ReporterJsonValue = {}
 ): IReporterEmitEventInput<ReporterJsonValue> {
   return {
     protocolVersion: { major: 1, minor: 0 },
     sessionId: 'sess',
     source: { packageName: '@microsoft/rush-lib', packageVersion: '5.177.2' },
     privacy: 'public',
-    required,
     type,
     payload
   };
@@ -178,18 +176,19 @@ describe('reporter queue pressure', () => {
     manager.addReporter(reporter);
     await manager.initializeAsync();
 
-    const requiredCount: number = 250;
-    for (let i: number = 0; i < requiredCount; i++) {
-      manager.emit(makeInput('activityChanged', { i }, /* required */ true));
+    const protectedCount: number = 250;
+    for (let i: number = 0; i < protectedCount; i++) {
+      manager.emit(makeInput('operationStatusChanged', { i }));
     }
     for (let i: number = 0; i < 2000; i++) {
-      manager.emit(makeInput('activityChanged', { i }, /* required */ false));
+      manager.emit(makeInput('activityChanged', { i }));
     }
     await manager.flushAsync();
 
-    // Required events are protected, so all of them survive even under pressure,
-    // while the optional ones are coalesced.
-    expect(reporter.counts.get('activityChanged') ?? 0).toBeGreaterThanOrEqual(requiredCount);
-    expect(reporter.counts.get('activityChanged') ?? 0).toBeLessThan(requiredCount + 2000);
+    // Protected events are never coalesced, so all of them survive even under
+    // pressure, while the replaceable activityChanged events are coalesced.
+    expect(reporter.counts.get('operationStatusChanged') ?? 0).toBe(protectedCount);
+    expect(reporter.counts.get('activityChanged') ?? 0).toBeGreaterThan(0);
+    expect(reporter.counts.get('activityChanged') ?? 0).toBeLessThan(2000);
   });
 });
