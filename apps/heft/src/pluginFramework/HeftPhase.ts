@@ -43,7 +43,7 @@ export class HeftPhase implements IHeftPhase {
     this.#phaseName = phaseName;
     this.#phaseSpecifier = phaseSpecifier;
 
-    this._validate();
+    this.#validate();
   }
 
   /**
@@ -118,7 +118,7 @@ export class HeftPhase implements IHeftPhase {
    * Returns the set of tasks contained by this phase.
    */
   public get tasks(): ReadonlySet<HeftTask> {
-    this._ensureTasks();
+    this.#ensureTasks();
     return this.#tasks!;
   }
 
@@ -126,11 +126,11 @@ export class HeftPhase implements IHeftPhase {
    * Returns a map of tasks by name.
    */
   public get tasksByName(): ReadonlyMap<string, HeftTask> {
-    this._ensureTasks();
+    this.#ensureTasks();
     return this.#tasksByName!;
   }
 
-  private _ensureTasks(): void {
+  #ensureTasks(): void {
     if (!this.#tasks || !this.#tasksByName) {
       this.#tasks = new Set();
       this.#tasksByName = new Map();
@@ -142,7 +142,7 @@ export class HeftPhase implements IHeftPhase {
     }
   }
 
-  private _validate(): void {
+  #validate(): void {
     if (RESERVED_PHASE_NAMES.has(this.phaseName)) {
       throw new Error(
         `Phase name ${JSON.stringify(this.phaseName)} is reserved and cannot be used as a phase name.`

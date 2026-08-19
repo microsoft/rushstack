@@ -73,7 +73,7 @@ export class HeftCommandLineParser extends CommandLineParser {
 
     // Pre-initialize with known argument values to determine state of "--debug"
     const preInitializationArgumentValues: IPreInitializationArgumentValues =
-      this._getPreInitializationArgumentValues();
+      this.#getPreInitializationArgumentValues();
     this.#debug = !!preInitializationArgumentValues.debug;
 
     // Enable debug and verbose logging if the "--debug" flag is set
@@ -105,7 +105,7 @@ export class HeftCommandLineParser extends CommandLineParser {
     process.exitCode = 1;
 
     try {
-      this._normalizeCwd();
+      this.#normalizeCwd();
 
       const internalHeftSession: InternalHeftSession = await InternalHeftSession.initializeAsync({
         debug: this.#debug,
@@ -172,7 +172,7 @@ export class HeftCommandLineParser extends CommandLineParser {
 
       return await super.executeAsync(args);
     } catch (e) {
-      await this._reportErrorAndSetExitCodeAsync(e as Error);
+      await this.#reportErrorAndSetExitCodeAsync(e as Error);
       return false;
     }
   }
@@ -199,14 +199,14 @@ export class HeftCommandLineParser extends CommandLineParser {
       };
       await super.onExecuteAsync();
     } catch (e) {
-      await this._reportErrorAndSetExitCodeAsync(e as Error);
+      await this.#reportErrorAndSetExitCodeAsync(e as Error);
     }
 
     // If we make it here, things are fine and reset the exit code back to 0
     process.exitCode = 0;
   }
 
-  private _normalizeCwd(): void {
+  #normalizeCwd(): void {
     const buildFolder: string = this.#heftConfiguration.buildFolderPath;
     const currentCwd: string = process.cwd();
     if (currentCwd !== buildFolder) {
@@ -220,7 +220,7 @@ export class HeftCommandLineParser extends CommandLineParser {
     }
   }
 
-  private _getPreInitializationArgumentValues(
+  #getPreInitializationArgumentValues(
     args: string[] = process.argv
   ): IPreInitializationArgumentValues {
     if (!this.#debugFlag) {
@@ -239,7 +239,7 @@ export class HeftCommandLineParser extends CommandLineParser {
     };
   }
 
-  private async _reportErrorAndSetExitCodeAsync(error: Error): Promise<void> {
+  async #reportErrorAndSetExitCodeAsync(error: Error): Promise<void> {
     if (!(error instanceof AlreadyReportedError)) {
       this.globalTerminal.writeErrorLine(error.toString());
     }

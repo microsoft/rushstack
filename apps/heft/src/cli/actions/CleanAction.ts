@@ -84,7 +84,7 @@ export class CleanAction extends CommandLineAction implements IHeftAction {
     this.#metricsCollector.setStartTime();
     initializeHeft(heftConfiguration, this.#terminal, this.#verboseFlag.value);
     await runWithLoggingAsync(
-      this._cleanFilesAsync.bind(this),
+      this.#cleanFilesAsync.bind(this),
       this,
       this.#internalHeftSession.loggingManager,
       this.#terminal,
@@ -93,7 +93,7 @@ export class CleanAction extends CommandLineAction implements IHeftAction {
     );
   }
 
-  private async _cleanFilesAsync(): Promise<OperationStatus> {
+  async #cleanFilesAsync(): Promise<OperationStatus> {
     const deleteOperations: IDeleteOperation[] = [];
     for (const phase of this.selectedPhases) {
       // Add the temp folder and cache folder (if requested) for each task

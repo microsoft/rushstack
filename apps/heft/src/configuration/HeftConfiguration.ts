@@ -183,7 +183,7 @@ export class HeftConfiguration {
     options: IProjectConfigurationFileSpecification<TConfigFile>,
     terminal: ITerminal
   ): TConfigFile | undefined {
-    const loader: ProjectConfigurationFile<TConfigFile> = this._getConfigFileLoader(options);
+    const loader: ProjectConfigurationFile<TConfigFile> = this.#getConfigFileLoader(options);
     return loader.tryLoadConfigurationFileForProject(terminal, this.buildFolderPath, this.#rigConfig);
   }
 
@@ -197,7 +197,7 @@ export class HeftConfiguration {
     options: IProjectConfigurationFileSpecification<TConfigFile>,
     terminal: ITerminal
   ): Promise<TConfigFile | undefined> {
-    const loader: ProjectConfigurationFile<TConfigFile> = this._getConfigFileLoader(options);
+    const loader: ProjectConfigurationFile<TConfigFile> = this.#getConfigFileLoader(options);
     return loader.tryLoadConfigurationFileForProjectAsync(terminal, this.buildFolderPath, this.#rigConfig);
   }
 
@@ -228,7 +228,7 @@ export class HeftConfiguration {
     return configuration;
   }
 
-  private _getConfigFileLoader<TConfigFile>(
+  #getConfigFileLoader<TConfigFile>(
     options: IProjectConfigurationFileSpecification<TConfigFile>
   ): ProjectConfigurationFile<TConfigFile> {
     let entry: IProjectConfigurationFileEntry<TConfigFile> | undefined = this.#knownConfigurationFiles.get(

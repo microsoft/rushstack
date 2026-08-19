@@ -311,7 +311,7 @@ export class HeftActionRunner {
     initializeHeft(this.#heftConfiguration, terminal, this.parameterManager.defaultParameters.verbose);
 
     const operations: ReadonlySet<Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>> =
-      this._generateOperations();
+      this.#generateOperations();
 
     const executionManager: OperationExecutionManager<
       IHeftTaskOperationMetadata,
@@ -324,7 +324,7 @@ export class HeftActionRunner {
       await _startLifecycleAsync(this.#internalHeftSession);
 
       if (this.#action.watch) {
-        const watchLoop: WatchLoop = this._createWatchLoop(executionManager);
+        const watchLoop: WatchLoop = this.#createWatchLoop(executionManager);
 
         if (process.send) {
           await watchLoop.runIPCAsync();
@@ -335,7 +335,7 @@ export class HeftActionRunner {
           });
         }
       } else {
-        await this._executeOnceAsync(executionManager, cliAbortSignal);
+        await this.#executeOnceAsync(executionManager, cliAbortSignal);
       }
     } finally {
       // Invoke this here both to ensure it always runs and that it does so after recordMetrics
@@ -346,7 +346,7 @@ export class HeftActionRunner {
     }
   }
 
-  private _createWatchLoop(executionManager: OperationExecutionManager): WatchLoop {
+  #createWatchLoop(executionManager: OperationExecutionManager): WatchLoop {
     const terminal: ITerminal = this.#terminal;
     const watchLoop: WatchLoop = new WatchLoop({
       onBeforeExecute: () => {
@@ -356,7 +356,7 @@ export class HeftActionRunner {
         terminal.writeLine(Colorize.bold('Starting incremental build...'));
       },
       executeAsync: (state: IWatchLoopState): Promise<OperationStatus> => {
-        return this._executeOnceAsync(executionManager, state.abortSignal, state.requestRun);
+        return this.#executeOnceAsync(executionManager, state.abortSignal, state.requestRun);
       },
       onRequestRun: (requestor?: string) => {
         terminal.writeLine(Colorize.bold(`New run requested by ${requestor || 'unknown task'}`));
@@ -368,7 +368,7 @@ export class HeftActionRunner {
     return watchLoop;
   }
 
-  private async _executeOnceAsync(
+  async #executeOnceAsync(
     executionManager: OperationExecutionManager<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>,
     abortSignal: AbortSignal,
     requestRun?: OperationRequestRunCallback
@@ -428,7 +428,7 @@ export class HeftActionRunner {
     );
   }
 
-  private _generateOperations(): Set<Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>> {
+  #generateOperations(): Set<Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>> {
     const { selectedPhases } = this.#action;
 
     const operations: Map<

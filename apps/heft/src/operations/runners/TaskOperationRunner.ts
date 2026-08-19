@@ -82,10 +82,10 @@ export class TaskOperationRunner implements IOperationRunner {
     const { parentPhase } = task;
     const phaseSession: HeftPhaseSession = internalHeftSession.getSessionForPhase(parentPhase);
     const taskSession: HeftTaskSession = phaseSession.getSessionForTask(task);
-    return await this._executeTaskAsync(context, taskSession);
+    return await this.#executeTaskAsync(context, taskSession);
   }
 
-  private async _executeTaskAsync(
+  async #executeTaskAsync(
     context: IOperationRunnerContext,
     taskSession: HeftTaskSession
   ): Promise<OperationStatus> {

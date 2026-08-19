@@ -54,7 +54,7 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
 
   /** { @inheritdoc fs.lstatSync } */
   public lstatSync: FileSystemAdapter['lstatSync'] = ((filePath: string) => {
-    filePath = this._normalizePath(filePath);
+    filePath = this.#normalizePath(filePath);
     const entry: IVirtualFileSystemEntry | undefined = this.#directoryMap.get(filePath);
     if (!entry) {
       const error: NodeJS.ErrnoException = new Error(`ENOENT: no such file or directory, stat '${filePath}'`);
@@ -126,7 +126,7 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
 
   /** { @inheritdoc fs.readdirSync } */
   public readdirSync: FileSystemAdapter['readdirSync'] = ((filePath: string, options?: IReaddirOptions) => {
-    filePath = this._normalizePath(filePath);
+    filePath = this.#normalizePath(filePath);
     const virtualDirectory: IVirtualFileSystemEntry | undefined = this.#directoryMap.get(filePath);
     if (!virtualDirectory) {
       // Immitate a missing directory read from fs.readdir
@@ -183,7 +183,7 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
    * Add a file and it's parent directories to the static virtual filesystem.
    */
   public addFile(filePath: string): void {
-    filePath = this._normalizePath(filePath);
+    filePath = this.#normalizePath(filePath);
     const existingPath: IVirtualFileSystemEntry | undefined = this.#directoryMap.get(filePath);
     if (!existingPath) {
       // Set an entry without children for the file. Entries with undefined children are assumed to be files.
@@ -219,7 +219,7 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
    * Remove a file from the static virtual filesystem.
    */
   public removeFile(filePath: string): void {
-    filePath = this._normalizePath(filePath);
+    filePath = this.#normalizePath(filePath);
     const existingEntry: IVirtualFileSystemEntry | undefined = this.#directoryMap.get(filePath);
     if (existingEntry) {
       // Remove the entry from the map and the parent's children set
@@ -235,7 +235,7 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
     this.#directoryMap.clear();
   }
 
-  private _normalizePath(filePath: string): string {
+  #normalizePath(filePath: string): string {
     // On Windows, normalize to backslashes so that errors have the correct path format
     return IS_WINDOWS ? Path.convertToBackslashes(filePath) : filePath;
   }
