@@ -245,13 +245,13 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
     }
 
     if (!this.#promise) {
-      this.#promise = this._executeInnerAsync(context, state);
+      this.#promise = this.#executeInnerAsync(context, state);
     }
 
     return this.#promise;
   }
 
-  private async _executeInnerAsync(
+  async #executeInnerAsync(
     context: IExecuteOperationContext,
     rawState: IOperationState
   ): Promise<OperationStatus> {

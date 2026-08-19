@@ -117,7 +117,7 @@ export class CredentialCache implements Disposable {
   }
 
   public setCacheEntry(cacheId: string, entry: ICredentialCacheEntry): void {
-    this._validate(true);
+    this.#validate(true);
 
     const { expires, credential, credentialMetadata } = entry;
     const expiresMilliseconds: number = expires?.getTime() || 0;
@@ -137,7 +137,7 @@ export class CredentialCache implements Disposable {
   }
 
   public tryGetCacheEntry(cacheId: string): ICredentialCacheEntry | undefined {
-    this._validate(false);
+    this.#validate(false);
 
     const cacheEntry: ICacheEntryJson | undefined = this.#cacheEntries.get(cacheId);
     if (cacheEntry) {
@@ -154,7 +154,7 @@ export class CredentialCache implements Disposable {
   }
 
   public deleteCacheEntry(cacheId: string): void {
-    this._validate(true);
+    this.#validate(true);
 
     if (this.#cacheEntries.has(cacheId)) {
       this.#modified = true;
@@ -163,7 +163,7 @@ export class CredentialCache implements Disposable {
   }
 
   public trimExpiredEntries(): void {
-    this._validate(true);
+    this.#validate(true);
 
     const now: number = Date.now();
     for (const [cacheId, cacheEntry] of this.#cacheEntries.entries()) {
@@ -175,7 +175,7 @@ export class CredentialCache implements Disposable {
   }
 
   public async saveIfModifiedAsync(): Promise<void> {
-    this._validate(true);
+    this.#validate(true);
 
     if (this.#modified) {
       const cacheEntriesJson: { [cacheId: string]: ICacheEntryJson } = {};
@@ -206,7 +206,7 @@ export class CredentialCache implements Disposable {
     this.#disposed = true;
   }
 
-  private _validate(requiresEditing: boolean): void {
+  #validate(requiresEditing: boolean): void {
     if (!this.#supportsEditing && requiresEditing) {
       throw new Error(`This instance of ${CredentialCache.name} does not support editing.`);
     }

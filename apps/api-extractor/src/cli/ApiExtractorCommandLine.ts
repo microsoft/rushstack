@@ -23,7 +23,7 @@ export class ApiExtractorCommandLine extends CommandLineParser {
         ' published with your NPM package, and a doc model file (.api.json) to be used with a documentation' +
         ' tool such as api-documenter.  For details, please visit the web site.'
     });
-    this._populateActions();
+    this.#populateActions();
 
     this.#debugParameter = this.defineFlagParameter({
       parameterLongName: '--debug',
@@ -52,7 +52,7 @@ export class ApiExtractorCommandLine extends CommandLineParser {
     }
   }
 
-  private _populateActions(): void {
+  #populateActions(): void {
     this.addAction(new InitAction(this));
     this.addAction(new RunAction(this));
   }

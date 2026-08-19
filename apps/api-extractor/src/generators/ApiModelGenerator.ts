@@ -115,7 +115,7 @@ export class ApiModelGenerator {
       // `AstNamespaceImport` entities will be processed by `_processAstNamespaceImport`. However, if
       // we are including forgotten exports, then process everything.
       if (entity.exportedFromEntryPoint || this.#collector.extractorConfig.docModelIncludeForgottenExports) {
-        this._processAstEntity(entity.astEntity, {
+        this.#processAstEntity(entity.astEntity, {
           name: entity.nameForEmit!,
           isExported: entity.exportedFromEntryPoint,
           parentApiItem: apiEntryPoint
@@ -126,11 +126,11 @@ export class ApiModelGenerator {
     return apiPackage;
   }
 
-  private _processAstEntity(astEntity: AstEntity, context: IProcessAstEntityContext): void {
+  #processAstEntity(astEntity: AstEntity, context: IProcessAstEntityContext): void {
     if (astEntity instanceof AstSymbol) {
       // Skip ancillary declarations; we will process them with the main declaration
       for (const astDeclaration of this.#collector.getNonAncillaryDeclarations(astEntity)) {
-        this._processDeclaration(astDeclaration, context);
+        this.#processDeclaration(astDeclaration, context);
       }
       return;
     }
@@ -150,7 +150,7 @@ export class ApiModelGenerator {
       //
       // This could be improved in the future, but it requires a stable mechanism for choosing an associated parent.
       // For thoughts about this:  https://github.com/microsoft/rushstack/issues/1308
-      this._processAstNamespaceImport(astEntity, context);
+      this.#processAstNamespaceImport(astEntity, context);
       return;
     }
 
@@ -159,14 +159,14 @@ export class ApiModelGenerator {
     // form "export { X } from 'external-package'".  We can also use this to solve GitHub issue #950.
   }
 
-  private _processAstNamespaceImport(
+  #processAstNamespaceImport(
     astNamespaceImport: AstNamespaceImport,
     context: IProcessAstEntityContext
   ): void {
     const astModule: AstModule = astNamespaceImport.astModule;
     const { name, isExported, parentApiItem } = context;
     const containerKey: string = ApiNamespace.getContainerKey(name);
-    const fileUrlPath: string = this._getFileUrlPath(astNamespaceImport.declaration);
+    const fileUrlPath: string = this.#getFileUrlPath(astNamespaceImport.declaration);
 
     let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMemberByKey(
       containerKey
@@ -186,7 +186,7 @@ export class ApiModelGenerator {
 
     astModule.astModuleExportInfo!.exportedLocalEntities.forEach(
       (exportedEntity: AstEntity, exportedName: string) => {
-        this._processAstEntity(exportedEntity, {
+        this.#processAstEntity(exportedEntity, {
           name: exportedName,
           isExported: true,
           parentApiItem: apiNamespace!
@@ -195,7 +195,7 @@ export class ApiModelGenerator {
     );
   }
 
-  private _processDeclaration(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  #processDeclaration(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     if ((astDeclaration.modifierFlags & ts.ModifierFlags.Private) !== 0) {
       return; // trim out private declarations
     }
@@ -208,81 +208,81 @@ export class ApiModelGenerator {
 
     switch (astDeclaration.declaration.kind) {
       case ts.SyntaxKind.CallSignature:
-        this._processApiCallSignature(astDeclaration, context);
+        this.#processApiCallSignature(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.Constructor:
-        this._processApiConstructor(astDeclaration, context);
+        this.#processApiConstructor(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.ConstructSignature:
-        this._processApiConstructSignature(astDeclaration, context);
+        this.#processApiConstructSignature(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.ClassDeclaration:
-        this._processApiClass(astDeclaration, context);
+        this.#processApiClass(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.EnumDeclaration:
-        this._processApiEnum(astDeclaration, context);
+        this.#processApiEnum(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.EnumMember:
-        this._processApiEnumMember(astDeclaration, context);
+        this.#processApiEnumMember(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.FunctionDeclaration:
-        this._processApiFunction(astDeclaration, context);
+        this.#processApiFunction(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.GetAccessor:
-        this._processApiProperty(astDeclaration, context);
+        this.#processApiProperty(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.SetAccessor:
-        this._processApiProperty(astDeclaration, context);
+        this.#processApiProperty(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.IndexSignature:
-        this._processApiIndexSignature(astDeclaration, context);
+        this.#processApiIndexSignature(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.InterfaceDeclaration:
-        this._processApiInterface(astDeclaration, context);
+        this.#processApiInterface(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.MethodDeclaration:
-        this._processApiMethod(astDeclaration, context);
+        this.#processApiMethod(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.MethodSignature:
-        this._processApiMethodSignature(astDeclaration, context);
+        this.#processApiMethodSignature(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.ModuleDeclaration:
-        this._processApiNamespace(astDeclaration, context);
+        this.#processApiNamespace(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.PropertyDeclaration:
-        this._processApiProperty(astDeclaration, context);
+        this.#processApiProperty(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.PropertySignature:
-        this._processApiPropertySignature(astDeclaration, context);
+        this.#processApiPropertySignature(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.TypeAliasDeclaration:
-        this._processApiTypeAlias(astDeclaration, context);
+        this.#processApiTypeAlias(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.VariableDeclaration:
         // check for arrow functions in variable declaration
         const functionDeclaration: ts.FunctionDeclaration | undefined =
-          this._tryFindFunctionDeclaration(astDeclaration);
+          this.#tryFindFunctionDeclaration(astDeclaration);
         if (functionDeclaration) {
-          this._processApiFunction(astDeclaration, context, functionDeclaration);
+          this.#processApiFunction(astDeclaration, context, functionDeclaration);
         } else {
-          this._processApiVariable(astDeclaration, context);
+          this.#processApiVariable(astDeclaration, context);
         }
         break;
 
@@ -291,23 +291,23 @@ export class ApiModelGenerator {
     }
   }
 
-  private _tryFindFunctionDeclaration(astDeclaration: AstDeclaration): ts.FunctionDeclaration | undefined {
+  #tryFindFunctionDeclaration(astDeclaration: AstDeclaration): ts.FunctionDeclaration | undefined {
     const children: readonly ts.Node[] = astDeclaration.declaration.getChildren(
       astDeclaration.declaration.getSourceFile()
     );
     return children.find(ts.isFunctionTypeNode) as ts.FunctionDeclaration | undefined;
   }
 
-  private _processChildDeclarations(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  #processChildDeclarations(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     for (const childDeclaration of astDeclaration.children) {
-      this._processDeclaration(childDeclaration, {
+      this.#processDeclaration(childDeclaration, {
         ...context,
         name: childDeclaration.astSymbol.localName
       });
     }
   }
 
-  private _processApiCallSignature(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  #processApiCallSignature(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     const { parentApiItem } = context;
     const overloadIndex: number = this.#collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiCallSignature.getContainerKey(overloadIndex);
@@ -327,21 +327,21 @@ export class ApiModelGenerator {
         nodeTransforms.push({ node: callSignature.type, captureTokenRange: returnTypeTokenRange });
       }
 
-      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
+      const typeParameters: IApiTypeParameterOptions[] = this.#captureTypeParameters(
         nodeTransforms,
         callSignature.typeParameters
       );
 
-      const parameters: IApiParameterOptions[] = this._captureParameters(
+      const parameters: IApiParameterOptions[] = this.#captureParameters(
         nodeTransforms,
         callSignature.parameters
       );
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const fileUrlPath: string = this._getFileUrlPath(callSignature);
+      const fileUrlPath: string = this.#getFileUrlPath(callSignature);
 
       apiCallSignature = new ApiCallSignature({
         docComment,
@@ -358,7 +358,7 @@ export class ApiModelGenerator {
     }
   }
 
-  private _processApiConstructor(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  #processApiConstructor(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     const { parentApiItem } = context;
     const overloadIndex: number = this.#collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiConstructor.getContainerKey(overloadIndex);
@@ -373,17 +373,17 @@ export class ApiModelGenerator {
 
       const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
-      const parameters: IApiParameterOptions[] = this._captureParameters(
+      const parameters: IApiParameterOptions[] = this.#captureParameters(
         nodeTransforms,
         constructorDeclaration.parameters
       );
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
-      const fileUrlPath: string = this._getFileUrlPath(constructorDeclaration);
+      const fileUrlPath: string = this.#getFileUrlPath(constructorDeclaration);
 
       apiConstructor = new ApiConstructor({
         docComment,
@@ -399,7 +399,7 @@ export class ApiModelGenerator {
     }
   }
 
-  private _processApiClass(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  #processApiClass(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     const { name, isExported, parentApiItem } = context;
     const containerKey: string = ApiClass.getContainerKey(name);
 
@@ -410,7 +410,7 @@ export class ApiModelGenerator {
 
       const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
-      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
+      const typeParameters: IApiTypeParameterOptions[] = this.#captureTypeParameters(
         nodeTransforms,
         classDeclaration.typeParameters
       );
@@ -433,13 +433,13 @@ export class ApiModelGenerator {
         }
       }
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isAbstract: boolean =
         (ts.getCombinedModifierFlags(classDeclaration) & ts.ModifierFlags.Abstract) !== 0;
-      const fileUrlPath: string = this._getFileUrlPath(classDeclaration);
+      const fileUrlPath: string = this.#getFileUrlPath(classDeclaration);
 
       apiClass = new ApiClass({
         name,
@@ -457,13 +457,13 @@ export class ApiModelGenerator {
       parentApiItem.addMember(apiClass);
     }
 
-    this._processChildDeclarations(astDeclaration, {
+    this.#processChildDeclarations(astDeclaration, {
       ...context,
       parentApiItem: apiClass
     });
   }
 
-  private _processApiConstructSignature(
+  #processApiConstructSignature(
     astDeclaration: AstDeclaration,
     context: IProcessAstEntityContext
   ): void {
@@ -486,21 +486,21 @@ export class ApiModelGenerator {
         nodeTransforms.push({ node: constructSignature.type, captureTokenRange: returnTypeTokenRange });
       }
 
-      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
+      const typeParameters: IApiTypeParameterOptions[] = this.#captureTypeParameters(
         nodeTransforms,
         constructSignature.typeParameters
       );
 
-      const parameters: IApiParameterOptions[] = this._captureParameters(
+      const parameters: IApiParameterOptions[] = this.#captureParameters(
         nodeTransforms,
         constructSignature.parameters
       );
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const fileUrlPath: string = this._getFileUrlPath(constructSignature);
+      const fileUrlPath: string = this.#getFileUrlPath(constructSignature);
 
       apiConstructSignature = new ApiConstructSignature({
         docComment,
@@ -517,20 +517,20 @@ export class ApiModelGenerator {
     }
   }
 
-  private _processApiEnum(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  #processApiEnum(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     const { name, isExported, parentApiItem } = context;
     const containerKey: string = ApiEnum.getContainerKey(name);
 
     let apiEnum: ApiEnum | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiEnum;
 
     if (apiEnum === undefined) {
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, []);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, []);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const preserveMemberOrder: boolean =
         this.#collector.extractorConfig.enumMemberOrder === EnumMemberOrder.Preserve;
-      const fileUrlPath: string = this._getFileUrlPath(astDeclaration.declaration);
+      const fileUrlPath: string = this.#getFileUrlPath(astDeclaration.declaration);
 
       apiEnum = new ApiEnum({
         name,
@@ -544,13 +544,13 @@ export class ApiModelGenerator {
       parentApiItem.addMember(apiEnum);
     }
 
-    this._processChildDeclarations(astDeclaration, {
+    this.#processChildDeclarations(astDeclaration, {
       ...context,
       parentApiItem: apiEnum
     });
   }
 
-  private _processApiEnumMember(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  #processApiEnumMember(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     const { name, parentApiItem } = context;
     const containerKey: string = ApiEnumMember.getContainerKey(name);
 
@@ -569,11 +569,11 @@ export class ApiModelGenerator {
         nodeTransforms.push({ node: enumMember.initializer, captureTokenRange: initializerTokenRange });
       }
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const fileUrlPath: string = this._getFileUrlPath(enumMember);
+      const fileUrlPath: string = this.#getFileUrlPath(enumMember);
 
       apiEnumMember = new ApiEnumMember({
         name,
@@ -588,7 +588,7 @@ export class ApiModelGenerator {
     }
   }
 
-  private _processApiFunction(
+  #processApiFunction(
     astDeclaration: AstDeclaration,
     context: IProcessAstEntityContext,
     altFunctionDeclaration?: ts.FunctionDeclaration
@@ -611,21 +611,21 @@ export class ApiModelGenerator {
         nodeTransforms.push({ node: functionDeclaration.type, captureTokenRange: returnTypeTokenRange });
       }
 
-      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
+      const typeParameters: IApiTypeParameterOptions[] = this.#captureTypeParameters(
         nodeTransforms,
         functionDeclaration.typeParameters
       );
 
-      const parameters: IApiParameterOptions[] = this._captureParameters(
+      const parameters: IApiParameterOptions[] = this.#captureParameters(
         nodeTransforms,
         functionDeclaration.parameters
       );
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const fileUrlPath: string = this._getFileUrlPath(functionDeclaration);
+      const fileUrlPath: string = this.#getFileUrlPath(functionDeclaration);
 
       apiFunction = new ApiFunction({
         name,
@@ -644,7 +644,7 @@ export class ApiModelGenerator {
     }
   }
 
-  private _processApiIndexSignature(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  #processApiIndexSignature(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     const { parentApiItem } = context;
     const overloadIndex: number = this.#collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiIndexSignature.getContainerKey(overloadIndex);
@@ -662,17 +662,17 @@ export class ApiModelGenerator {
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodeTransforms.push({ node: indexSignature.type, captureTokenRange: returnTypeTokenRange });
 
-      const parameters: IApiParameterOptions[] = this._captureParameters(
+      const parameters: IApiParameterOptions[] = this.#captureParameters(
         nodeTransforms,
         indexSignature.parameters
       );
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const isReadonly: boolean = this._isReadonly(astDeclaration);
-      const fileUrlPath: string = this._getFileUrlPath(indexSignature);
+      const isReadonly: boolean = this.#isReadonly(astDeclaration);
+      const fileUrlPath: string = this.#getFileUrlPath(indexSignature);
 
       apiIndexSignature = new ApiIndexSignature({
         docComment,
@@ -689,7 +689,7 @@ export class ApiModelGenerator {
     }
   }
 
-  private _processApiInterface(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  #processApiInterface(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     const { name, isExported, parentApiItem } = context;
     const containerKey: string = ApiInterface.getContainerKey(name);
 
@@ -703,7 +703,7 @@ export class ApiModelGenerator {
 
       const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
-      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
+      const typeParameters: IApiTypeParameterOptions[] = this.#captureTypeParameters(
         nodeTransforms,
         interfaceDeclaration.typeParameters
       );
@@ -720,11 +720,11 @@ export class ApiModelGenerator {
         }
       }
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const fileUrlPath: string = this._getFileUrlPath(interfaceDeclaration);
+      const fileUrlPath: string = this.#getFileUrlPath(interfaceDeclaration);
 
       apiInterface = new ApiInterface({
         name,
@@ -740,13 +740,13 @@ export class ApiModelGenerator {
       parentApiItem.addMember(apiInterface);
     }
 
-    this._processChildDeclarations(astDeclaration, {
+    this.#processChildDeclarations(astDeclaration, {
       ...context,
       parentApiItem: apiInterface
     });
   }
 
-  private _processApiMethod(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  #processApiMethod(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     const { name, parentApiItem } = context;
     const isStatic: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Static) !== 0;
     const overloadIndex: number = this.#collector.getOverloadIndex(astDeclaration);
@@ -764,17 +764,17 @@ export class ApiModelGenerator {
         nodeTransforms.push({ node: methodDeclaration.type, captureTokenRange: returnTypeTokenRange });
       }
 
-      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
+      const typeParameters: IApiTypeParameterOptions[] = this.#captureTypeParameters(
         nodeTransforms,
         methodDeclaration.typeParameters
       );
 
-      const parameters: IApiParameterOptions[] = this._captureParameters(
+      const parameters: IApiParameterOptions[] = this.#captureParameters(
         nodeTransforms,
         methodDeclaration.parameters
       );
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -785,7 +785,7 @@ export class ApiModelGenerator {
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
       const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
       const isAbstract: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Abstract) !== 0;
-      const fileUrlPath: string = this._getFileUrlPath(methodDeclaration);
+      const fileUrlPath: string = this.#getFileUrlPath(methodDeclaration);
 
       apiMethod = new ApiMethod({
         name,
@@ -807,7 +807,7 @@ export class ApiModelGenerator {
     }
   }
 
-  private _processApiMethodSignature(
+  #processApiMethodSignature(
     astDeclaration: AstDeclaration,
     context: IProcessAstEntityContext
   ): void {
@@ -829,23 +829,23 @@ export class ApiModelGenerator {
         nodeTransforms.push({ node: methodSignature.type, captureTokenRange: returnTypeTokenRange });
       }
 
-      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
+      const typeParameters: IApiTypeParameterOptions[] = this.#captureTypeParameters(
         nodeTransforms,
         methodSignature.typeParameters
       );
 
-      const parameters: IApiParameterOptions[] = this._captureParameters(
+      const parameters: IApiParameterOptions[] = this.#captureParameters(
         nodeTransforms,
         methodSignature.parameters
       );
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
-      const fileUrlPath: string = this._getFileUrlPath(methodSignature);
+      const fileUrlPath: string = this.#getFileUrlPath(methodSignature);
 
       apiMethodSignature = new ApiMethodSignature({
         name,
@@ -864,7 +864,7 @@ export class ApiModelGenerator {
     }
   }
 
-  private _processApiNamespace(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  #processApiNamespace(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     const { name, isExported, parentApiItem } = context;
     const containerKey: string = ApiNamespace.getContainerKey(name);
 
@@ -873,11 +873,11 @@ export class ApiModelGenerator {
     ) as ApiNamespace;
 
     if (apiNamespace === undefined) {
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, []);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, []);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const fileUrlPath: string = this._getFileUrlPath(astDeclaration.declaration);
+      const fileUrlPath: string = this.#getFileUrlPath(astDeclaration.declaration);
 
       apiNamespace = new ApiNamespace({
         name,
@@ -890,13 +890,13 @@ export class ApiModelGenerator {
       parentApiItem.addMember(apiNamespace);
     }
 
-    this._processChildDeclarations(astDeclaration, {
+    this.#processChildDeclarations(astDeclaration, {
       ...context,
       parentApiItem: apiNamespace
     });
   }
 
-  private _processApiProperty(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  #processApiProperty(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     const { name, parentApiItem } = context;
     const isStatic: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Static) !== 0;
     const containerKey: string = ApiProperty.getContainerKey(name, isStatic);
@@ -929,7 +929,7 @@ export class ApiModelGenerator {
         nodeTransforms.push({ node: declaration.initializer, captureTokenRange: initializerTokenRange });
       }
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
@@ -937,8 +937,8 @@ export class ApiModelGenerator {
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
       const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
       const isAbstract: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Abstract) !== 0;
-      const isReadonly: boolean = this._isReadonly(astDeclaration);
-      const fileUrlPath: string = this._getFileUrlPath(declaration);
+      const isReadonly: boolean = this.#isReadonly(astDeclaration);
+      const fileUrlPath: string = this.#getFileUrlPath(declaration);
 
       apiProperty = new ApiProperty({
         name,
@@ -961,7 +961,7 @@ export class ApiModelGenerator {
     }
   }
 
-  private _processApiPropertySignature(
+  #processApiPropertySignature(
     astDeclaration: AstDeclaration,
     context: IProcessAstEntityContext
   ): void {
@@ -982,14 +982,14 @@ export class ApiModelGenerator {
         nodeTransforms.push({ node: propertySignature.type, captureTokenRange: propertyTypeTokenRange });
       }
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
-      const isReadonly: boolean = this._isReadonly(astDeclaration);
-      const fileUrlPath: string = this._getFileUrlPath(propertySignature);
+      const isReadonly: boolean = this.#isReadonly(astDeclaration);
+      const fileUrlPath: string = this.#getFileUrlPath(propertySignature);
 
       apiPropertySignature = new ApiPropertySignature({
         name,
@@ -1009,7 +1009,7 @@ export class ApiModelGenerator {
     }
   }
 
-  private _processApiTypeAlias(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  #processApiTypeAlias(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     const { name, isExported, parentApiItem } = context;
 
     const containerKey: string = ApiTypeAlias.getContainerKey(name);
@@ -1024,7 +1024,7 @@ export class ApiModelGenerator {
 
       const nodeTransforms: IExcerptBuilderNodeTransform[] = [];
 
-      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(
+      const typeParameters: IApiTypeParameterOptions[] = this.#captureTypeParameters(
         nodeTransforms,
         typeAliasDeclaration.typeParameters
       );
@@ -1032,11 +1032,11 @@ export class ApiModelGenerator {
       const typeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodeTransforms.push({ node: typeAliasDeclaration.type, captureTokenRange: typeTokenRange });
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const fileUrlPath: string = this._getFileUrlPath(typeAliasDeclaration);
+      const fileUrlPath: string = this.#getFileUrlPath(typeAliasDeclaration);
 
       apiTypeAlias = new ApiTypeAlias({
         name,
@@ -1053,7 +1053,7 @@ export class ApiModelGenerator {
     }
   }
 
-  private _processApiVariable(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  #processApiVariable(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     const { name, isExported, parentApiItem } = context;
 
     const containerKey: string = ApiVariable.getContainerKey(name);
@@ -1080,12 +1080,12 @@ export class ApiModelGenerator {
         });
       }
 
-      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodeTransforms);
+      const excerptTokens: IExcerptToken[] = this.#buildExcerptTokens(astDeclaration, nodeTransforms);
       const apiItemMetadata: ApiItemMetadata = this.#collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const isReadonly: boolean = this._isReadonly(astDeclaration);
-      const fileUrlPath: string = this._getFileUrlPath(variableDeclaration);
+      const isReadonly: boolean = this.#isReadonly(astDeclaration);
+      const fileUrlPath: string = this.#getFileUrlPath(variableDeclaration);
 
       apiVariable = new ApiVariable({
         name,
@@ -1106,7 +1106,7 @@ export class ApiModelGenerator {
   /**
    * @param nodeTransforms - A list of child nodes whose token ranges we want to capture
    */
-  private _buildExcerptTokens(
+  #buildExcerptTokens(
     astDeclaration: AstDeclaration,
     nodeTransforms: IExcerptBuilderNodeTransform[]
   ): IExcerptToken[] {
@@ -1131,7 +1131,7 @@ export class ApiModelGenerator {
     return excerptTokens;
   }
 
-  private _captureTypeParameters(
+  #captureTypeParameters(
     nodeTransforms: IExcerptBuilderNodeTransform[],
     typeParameterNodes: ts.NodeArray<ts.TypeParameterDeclaration> | undefined
   ): IApiTypeParameterOptions[] {
@@ -1158,7 +1158,7 @@ export class ApiModelGenerator {
     return typeParameters;
   }
 
-  private _captureParameters(
+  #captureParameters(
     nodeTransforms: IExcerptBuilderNodeTransform[],
     parameterNodes: ts.NodeArray<ts.ParameterDeclaration>
   ): IApiParameterOptions[] {
@@ -1187,7 +1187,7 @@ export class ApiModelGenerator {
     return parameters;
   }
 
-  private _isReadonly(astDeclaration: AstDeclaration): boolean {
+  #isReadonly(astDeclaration: AstDeclaration): boolean {
     switch (astDeclaration.declaration.kind) {
       case ts.SyntaxKind.GetAccessor:
       case ts.SyntaxKind.IndexSignature:
@@ -1218,7 +1218,7 @@ export class ApiModelGenerator {
     }
   }
 
-  private _getFileUrlPath(declaration: ts.Declaration): string {
+  #getFileUrlPath(declaration: ts.Declaration): string {
     const sourceFile: ts.SourceFile = declaration.getSourceFile();
     const sourceLocation: ISourceLocation = this.#collector.sourceMapper.getSourceLocation({
       sourceFile,

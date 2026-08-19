@@ -84,7 +84,7 @@ export class NpmRegistryClient {
    * @param packageName - The name of the package
    * @returns The full URL for fetching the package metadata
    */
-  private _buildPackageUrl(packageName: string): string {
+  #buildPackageUrl(packageName: string): string {
     // Scoped packages need the slash encoded
     // @scope/name -> @scope%2Fname
     const encodedName: string = packageName.replace(/\//g, '%2F');
@@ -109,7 +109,7 @@ export class NpmRegistryClient {
    * ```
    */
   public async fetchPackageMetadataAsync(packageName: string): Promise<INpmRegistryClientResult> {
-    const url: string = this._buildPackageUrl(packageName);
+    const url: string = this.#buildPackageUrl(packageName);
 
     return new Promise<INpmRegistryClientResult>((resolve) => {
       const parsedUrl: URL = new URL(url);

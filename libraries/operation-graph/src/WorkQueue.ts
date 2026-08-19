@@ -55,11 +55,11 @@ export class WorkQueue {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.#abortPromise.finally(() => resolve(OperationStatus.Aborted));
 
-      this._resolvePushDebounced();
+      this.#resolvePushDebounced();
     });
   }
 
-  private _resolvePushDebounced(): void {
+  #resolvePushDebounced(): void {
     if (!this.#resolvePushTimeout) {
       this.#resolvePushTimeout = setTimeout(() => {
         this.#resolvePushTimeout = undefined;

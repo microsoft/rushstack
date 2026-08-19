@@ -109,7 +109,7 @@ export class AstSymbolTable {
 
     this.#exportAnalyzer = new ExportAnalyzer(this.#program, this.#typeChecker, bundledPackageNames, {
       analyze: this.analyze.bind(this),
-      fetchAstSymbol: this._fetchAstSymbol.bind(this)
+      fetchAstSymbol: this.#fetchAstSymbol.bind(this)
     });
 
     this.#alreadyWarnedGlobalNames = new Set<string>();
@@ -152,11 +152,11 @@ export class AstSymbolTable {
    */
   public analyze(astEntity: AstEntity): void {
     if (astEntity instanceof AstSymbol) {
-      return this._analyzeAstSymbol(astEntity);
+      return this.#analyzeAstSymbol(astEntity);
     }
 
     if (astEntity instanceof AstNamespaceImport) {
-      return this._analyzeAstNamespaceImport(astEntity);
+      return this.#analyzeAstNamespaceImport(astEntity);
     }
   }
 
@@ -277,7 +277,7 @@ export class AstSymbolTable {
     return unquotedName;
   }
 
-  private _analyzeAstNamespaceImport(astNamespaceImport: AstNamespaceImport): void {
+  #analyzeAstNamespaceImport(astNamespaceImport: AstNamespaceImport): void {
     if (astNamespaceImport.analyzed) {
       return;
     }
@@ -294,7 +294,7 @@ export class AstSymbolTable {
     }
   }
 
-  private _analyzeAstSymbol(astSymbol: AstSymbol): void {
+  #analyzeAstSymbol(astSymbol: AstSymbol): void {
     if (astSymbol.analyzed) {
       return;
     }
@@ -310,7 +310,7 @@ export class AstSymbolTable {
 
     // Calculate the full child tree for each definition
     for (const astDeclaration of rootAstSymbol.astDeclarations) {
-      this._analyzeChildTree(astDeclaration.declaration, astDeclaration);
+      this.#analyzeChildTree(astDeclaration.declaration, astDeclaration);
     }
 
     rootAstSymbol._notifyAnalyzed();
@@ -324,13 +324,13 @@ export class AstSymbolTable {
           // Walk up to the root of the tree, looking for any imports along the way
           if (referencedAstEntity instanceof AstSymbol) {
             if (!referencedAstEntity.isExternal) {
-              this._analyzeAstSymbol(referencedAstEntity);
+              this.#analyzeAstSymbol(referencedAstEntity);
             }
           }
 
           if (referencedAstEntity instanceof AstNamespaceImport) {
             if (!referencedAstEntity.astModule.isExternal) {
-              this._analyzeAstNamespaceImport(referencedAstEntity);
+              this.#analyzeAstNamespaceImport(referencedAstEntity);
             }
           }
         }
@@ -341,7 +341,7 @@ export class AstSymbolTable {
   /**
    * Used by analyze to recursively analyze the entire child tree.
    */
-  private _analyzeChildTree(node: ts.Node, governingAstDeclaration: AstDeclaration): void {
+  #analyzeChildTree(node: ts.Node, governingAstDeclaration: AstDeclaration): void {
     switch (node.kind) {
       case ts.SyntaxKind.JSDocComment: // Skip JSDoc comments - TS considers @param tags TypeReference nodes
         return;
@@ -433,7 +433,7 @@ export class AstSymbolTable {
             let referencedAstEntity: AstEntity | undefined = undefined;
 
             if (symbol === governingAstDeclaration.astSymbol.followedSymbol) {
-              referencedAstEntity = this._fetchEntityForNode(identifierNode, governingAstDeclaration);
+              referencedAstEntity = this.#fetchEntityForNode(identifierNode, governingAstDeclaration);
             }
 
             this.#entitiesByNode.set(identifierNode, referencedAstEntity);
@@ -447,7 +447,7 @@ export class AstSymbolTable {
           let referencedAstEntity: AstEntity | undefined = this.#entitiesByNode.get(importTypeNode);
 
           if (!this.#entitiesByNode.has(importTypeNode)) {
-            referencedAstEntity = this._fetchEntityForNode(importTypeNode, governingAstDeclaration);
+            referencedAstEntity = this.#fetchEntityForNode(importTypeNode, governingAstDeclaration);
 
             if (!referencedAstEntity) {
               // This should never happen
@@ -465,17 +465,17 @@ export class AstSymbolTable {
     }
 
     // Is this node declaring a new AstSymbol?
-    const newGoverningAstDeclaration: AstDeclaration | undefined = this._fetchAstDeclaration(
+    const newGoverningAstDeclaration: AstDeclaration | undefined = this.#fetchAstDeclaration(
       node,
       governingAstDeclaration.astSymbol.isExternal
     );
 
     for (const childNode of node.getChildren()) {
-      this._analyzeChildTree(childNode, newGoverningAstDeclaration || governingAstDeclaration);
+      this.#analyzeChildTree(childNode, newGoverningAstDeclaration || governingAstDeclaration);
     }
   }
 
-  private _fetchEntityForNode(
+  #fetchEntityForNode(
     node: ts.Identifier | ts.ImportTypeNode,
     governingAstDeclaration: AstDeclaration
   ): AstEntity | undefined {
@@ -503,7 +503,7 @@ export class AstSymbolTable {
     return referencedAstEntity;
   }
 
-  private _fetchAstDeclaration(node: ts.Node, isExternal: boolean): AstDeclaration | undefined {
+  #fetchAstDeclaration(node: ts.Node, isExternal: boolean): AstDeclaration | undefined {
     if (!AstDeclaration.isSupportedSyntaxKind(node.kind)) {
       return undefined;
     }
@@ -516,7 +516,7 @@ export class AstSymbolTable {
       throw new InternalError('Unable to find symbol for node');
     }
 
-    const astSymbol: AstSymbol | undefined = this._fetchAstSymbol({
+    const astSymbol: AstSymbol | undefined = this.#fetchAstSymbol({
       followedSymbol: symbol,
       isExternal: isExternal,
       includeNominalAnalysis: true,
@@ -536,7 +536,7 @@ export class AstSymbolTable {
     return astDeclaration;
   }
 
-  private _fetchAstSymbol(options: IFetchAstSymbolOptions): AstSymbol | undefined {
+  #fetchAstSymbol(options: IFetchAstSymbolOptions): AstSymbol | undefined {
     const followedSymbol: ts.Symbol = options.followedSymbol;
 
     // Filter out symbols representing constructs that we don't care about
@@ -618,7 +618,7 @@ export class AstSymbolTable {
         // Is there a parent AstSymbol?  First we check to see if there is a parent declaration:
         if (arbitraryDeclaration) {
           const arbitraryParentDeclaration: ts.Node | undefined =
-            this._tryFindFirstAstDeclarationParent(arbitraryDeclaration);
+            this.#tryFindFirstAstDeclarationParent(arbitraryDeclaration);
 
           if (arbitraryParentDeclaration) {
             const parentSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(
@@ -626,7 +626,7 @@ export class AstSymbolTable {
               this.#typeChecker
             );
 
-            parentAstSymbol = this._fetchAstSymbol({
+            parentAstSymbol = this.#fetchAstSymbol({
               followedSymbol: parentSymbol,
               isExternal: options.isExternal,
               includeNominalAnalysis: false,
@@ -658,7 +658,7 @@ export class AstSymbolTable {
       for (const declaration of followedSymbol.declarations || []) {
         let parentAstDeclaration: AstDeclaration | undefined = undefined;
         if (parentAstSymbol) {
-          const parentDeclaration: ts.Node | undefined = this._tryFindFirstAstDeclarationParent(declaration);
+          const parentDeclaration: ts.Node | undefined = this.#tryFindFirstAstDeclarationParent(declaration);
 
           if (!parentDeclaration) {
             throw new InternalError('Missing parent declaration');
@@ -694,7 +694,7 @@ export class AstSymbolTable {
   /**
    * Returns the first parent satisfying isAstDeclaration(), or undefined if none is found.
    */
-  private _tryFindFirstAstDeclarationParent(node: ts.Node): ts.Node | undefined {
+  #tryFindFirstAstDeclarationParent(node: ts.Node): ts.Node | undefined {
     let currentNode: ts.Node | undefined = node.parent;
     while (currentNode) {
       if (AstDeclaration.isSupportedSyntaxKind(currentNode.kind)) {

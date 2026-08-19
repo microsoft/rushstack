@@ -149,7 +149,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
         this.#apiItemsByCanonicalReference = new Map<string, ApiItem>();
 
         for (const apiPackage of this.packages) {
-          this._initApiItemsRecursive(apiPackage, this.#apiItemsByCanonicalReference);
+          this.#initApiItemsRecursive(apiPackage, this.#apiItemsByCanonicalReference);
         }
       }
 
@@ -178,7 +178,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
     }
   }
 
-  private _initApiItemsRecursive(apiItem: ApiItem, apiItemsByCanonicalReference: Map<string, ApiItem>): void {
+  #initApiItemsRecursive(apiItem: ApiItem, apiItemsByCanonicalReference: Map<string, ApiItem>): void {
     if (apiItem.canonicalReference && !apiItem.canonicalReference.isEmpty) {
       apiItemsByCanonicalReference.set(apiItem.canonicalReference.toString(), apiItem);
     }
@@ -186,7 +186,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
     // Recurse container members
     if (ApiItemContainerMixin.isBaseClassOf(apiItem)) {
       for (const apiMember of apiItem.members) {
-        this._initApiItemsRecursive(apiMember, apiItemsByCanonicalReference);
+        this.#initApiItemsRecursive(apiMember, apiItemsByCanonicalReference);
       }
     }
   }
