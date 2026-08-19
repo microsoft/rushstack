@@ -170,7 +170,7 @@ export class PackageUpdateChecker {
       return undefined;
     }
 
-    const cacheFilePath: string = this._getCacheFilePath();
+    const cacheFilePath: string = this.#getCacheFilePath();
 
     let latestVersion: string | undefined;
     if (!this.#forceCheck) {
@@ -200,7 +200,7 @@ export class PackageUpdateChecker {
     };
   }
 
-  private _getCacheFilePath(): string {
+  #getCacheFilePath(): string {
     // Replace characters that are unsafe in file names (e.g. the "/" in scoped package names).
     const sanitizedName: string = this.#packageName.replace(/[^a-zA-Z0-9._-]/g, '_');
     return `${CACHE_FOLDER}/${sanitizedName}.json`;

@@ -65,7 +65,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     this.#isCacheWriteAllowedByConfiguration = options.isCacheWriteAllowed;
   }
 
-  private get _s3Endpoint(): string {
+  get #s3Endpoint(): string {
     const options: IAmazonS3BuildCacheProviderOptionsSimple | IAmazonS3BuildCacheProviderOptionsAdvanced =
       this.#options;
     if ('s3Bucket' in options) {
@@ -81,9 +81,9 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     return options.s3Endpoint;
   }
 
-  private get _credentialCacheId(): string {
+  get #credentialCacheId(): string {
     if (!this.#_credentialCacheId) {
-      const cacheIdParts: string[] = ['aws-s3', this.#options.s3Region, this._s3Endpoint];
+      const cacheIdParts: string[] = ['aws-s3', this.#options.s3Region, this.#s3Endpoint];
 
       if (this.#isCacheWriteAllowedByConfiguration) {
         cacheIdParts.push('cacheWriteAllowed');
@@ -95,7 +95,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     return this.#_credentialCacheId;
   }
 
-  private async _getS3ClientAsync(terminal: ITerminal): Promise<AmazonS3Client> {
+  async #getS3ClientAsync(terminal: ITerminal): Promise<AmazonS3Client> {
     if (!this.#_s3Client) {
       let credentials: IAmazonS3Credentials | undefined = fromRushEnv() ?? fromAmazonEnv();
 
@@ -108,7 +108,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
             supportEditing: false
           },
           (credentialsCache: CredentialCache) => {
-            cacheEntry = credentialsCache.tryGetCacheEntry(this._credentialCacheId);
+            cacheEntry = credentialsCache.tryGetCacheEntry(this.#credentialCacheId);
           }
         );
 
@@ -137,7 +137,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
         {
           ...this.#options,
           // advanced options
-          s3Endpoint: this._s3Endpoint
+          s3Endpoint: this.#s3Endpoint
         },
         new WebClient(),
         terminal
@@ -152,8 +152,8 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     cacheId: string
   ): Promise<Buffer | undefined> {
     try {
-      const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
-      return await client.getObjectAsync(this._getObjectName(cacheId));
+      const client: AmazonS3Client = await this.#getS3ClientAsync(terminal);
+      return await client.getObjectAsync(this.#getObjectName(cacheId));
     } catch (e) {
       terminal.writeWarningLine(`Error getting cache entry from S3: ${e}`);
       return undefined;
@@ -165,13 +165,13 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     cacheId: string,
     objectBuffer: Buffer
   ): Promise<boolean> {
-    if (!this._validateWriteAllowed(terminal, cacheId)) {
+    if (!this.#validateWriteAllowed(terminal, cacheId)) {
       return false;
     }
 
     try {
-      const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
-      await client.uploadObjectAsync(this._getObjectName(cacheId), objectBuffer);
+      const client: AmazonS3Client = await this.#getS3ClientAsync(terminal);
+      await client.uploadObjectAsync(this.#getObjectName(cacheId), objectBuffer);
       return true;
     } catch (e) {
       terminal.writeWarningLine(`Error uploading cache entry to S3: ${e}`);
@@ -185,8 +185,8 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     localFilePath: string
   ): Promise<boolean> {
     try {
-      const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
-      return await client.downloadObjectToFileAsync(this._getObjectName(cacheId), localFilePath);
+      const client: AmazonS3Client = await this.#getS3ClientAsync(terminal);
+      return await client.downloadObjectToFileAsync(this.#getObjectName(cacheId), localFilePath);
     } catch (e) {
       terminal.writeWarningLine(`Error downloading cache entry from S3: ${e}`);
       return false;
@@ -198,13 +198,13 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     cacheId: string,
     localFilePath: string
   ): Promise<boolean> {
-    if (!this._validateWriteAllowed(terminal, cacheId)) {
+    if (!this.#validateWriteAllowed(terminal, cacheId)) {
       return false;
     }
 
     try {
-      const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
-      await client.uploadObjectFromFileAsync(this._getObjectName(cacheId), localFilePath);
+      const client: AmazonS3Client = await this.#getS3ClientAsync(terminal);
+      await client.uploadObjectFromFileAsync(this.#getObjectName(cacheId), localFilePath);
       return true;
     } catch (e) {
       terminal.writeWarningLine(`Error uploading cache entry to S3: ${e}`);
@@ -212,11 +212,11 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     }
   }
 
-  private _getObjectName(cacheId: string): string {
+  #getObjectName(cacheId: string): string {
     return this.#s3Prefix ? `${this.#s3Prefix}/${cacheId}` : cacheId;
   }
 
-  private _validateWriteAllowed(terminal: ITerminal, cacheId: string): boolean {
+  #validateWriteAllowed(terminal: ITerminal, cacheId: string): boolean {
     if (!this.isCacheWriteAllowed) {
       terminal.writeErrorLine('Writing to S3 cache is not allowed in the current configuration.');
       return false;
@@ -232,7 +232,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
         supportEditing: true
       },
       async (credentialsCache: CredentialCache) => {
-        credentialsCache.setCacheEntry(this._credentialCacheId, { credential });
+        credentialsCache.setCacheEntry(this.#credentialCacheId, { credential });
         await credentialsCache.saveIfModifiedAsync();
       }
     );
@@ -253,7 +253,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
         supportEditing: true
       },
       async (credentialsCache: CredentialCache) => {
-        credentialsCache.deleteCacheEntry(this._credentialCacheId);
+        credentialsCache.deleteCacheEntry(this.#credentialCacheId);
         await credentialsCache.saveIfModifiedAsync();
       }
     );

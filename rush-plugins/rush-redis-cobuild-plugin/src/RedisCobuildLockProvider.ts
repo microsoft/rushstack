@@ -135,7 +135,7 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     const terminal: ITerminal = this.#terminal;
     const { lockKey, lockExpireTimeInSeconds, runnerId } = context;
     let result: boolean = false;
-    const lockKeyIdentifier: string = this._getLockKeyIdentifier(context);
+    const lockKeyIdentifier: string = this.#getLockKeyIdentifier(context);
     try {
       // According to the doc, the reply of set command is either "OK" or nil. The reply doesn't matter
       await this.#redisClient.set(lockKey, runnerId, {
@@ -167,7 +167,7 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
   public async renewLockAsync(context: ICobuildContext): Promise<void> {
     const terminal: ITerminal = this.#terminal;
     const { lockKey, lockExpireTimeInSeconds } = context;
-    const lockKeyIdentifier: string = this._getLockKeyIdentifier(context);
+    const lockKeyIdentifier: string = this.#getLockKeyIdentifier(context);
     try {
       await this.#redisClient.expire(lockKey, lockExpireTimeInSeconds);
     } catch (e) {
@@ -182,8 +182,8 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
   ): Promise<void> {
     const terminal: ITerminal = this.#terminal;
     const { completedStateKey: key } = context;
-    const value: string = this._serializeCompletedState(state);
-    const completedStateKeyIdentifier: string = this._getCompletedStateKeyIdentifier(context);
+    const value: string = this.#serializeCompletedState(state);
+    const completedStateKeyIdentifier: string = this.#getCompletedStateKeyIdentifier(context);
     try {
       await this.#redisClient.set(key, value);
     } catch (e) {
@@ -195,12 +195,12 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
   public async getCompletedStateAsync(context: ICobuildContext): Promise<ICobuildCompletedState | undefined> {
     const terminal: ITerminal = this.#terminal;
     const { completedStateKey: key } = context;
-    const completedStateKeyIdentifier: string = this._getCompletedStateKeyIdentifier(context);
+    const completedStateKeyIdentifier: string = this.#getCompletedStateKeyIdentifier(context);
     let state: ICobuildCompletedState | undefined;
     try {
       const value: string | null = await this.#redisClient.get(key);
       if (value) {
-        state = this._deserializeCompletedState(value);
+        state = this.#deserializeCompletedState(value);
       }
       terminal.writeDebugLine(`Get ${completedStateKeyIdentifier}: ${value}`);
     } catch (e) {
@@ -209,19 +209,19 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     return state;
   }
 
-  private _serializeCompletedState(state: ICobuildCompletedState): string {
+  #serializeCompletedState(state: ICobuildCompletedState): string {
     // Example: SUCCESS;1234567890
     // Example: FAILURE;1234567890
     const { status, cacheId } = state;
     return [status, cacheId].join(COMPLETED_STATE_SEPARATOR);
   }
 
-  private _deserializeCompletedState(state: string): ICobuildCompletedState | undefined {
+  #deserializeCompletedState(state: string): ICobuildCompletedState | undefined {
     const [status, cacheId] = state.split(COMPLETED_STATE_SEPARATOR);
     return { status: status as ICobuildCompletedState['status'], cacheId };
   }
 
-  private _getLockKeyIdentifier(context: ICobuildContext): string {
+  #getLockKeyIdentifier(context: ICobuildContext): string {
     let lockKeyIdentifier: string | undefined = this.#lockKeyIdentifierMap.get(context);
     if (lockKeyIdentifier === undefined) {
       const { lockKey, packageName, phaseName } = context;
@@ -231,7 +231,7 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     return lockKeyIdentifier;
   }
 
-  private _getCompletedStateKeyIdentifier(context: ICobuildContext): string {
+  #getCompletedStateKeyIdentifier(context: ICobuildContext): string {
     let completedStateKeyIdentifier: string | undefined = this.#completedStateKeyIdentifierMap.get(context);
     if (completedStateKeyIdentifier === undefined) {
       const { completedStateKey, packageName, phaseName } = context;

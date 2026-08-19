@@ -59,7 +59,7 @@ export class CheckAction extends CommandLineAction {
     this.#docMap = new Map();
   }
 
-  private async _checkVersionCompatibilityAsync(
+  async #checkVersionCompatibilityAsync(
     shrinkwrapFileMajorVersion: number,
     packages: lockfileTypes.PackageSnapshots | undefined,
     dependencyPath: pnpmTypes.DepPath,
@@ -79,7 +79,7 @@ export class CheckAction extends CommandLineAction {
       await Promise.all(
         Object.entries(packages[dependencyPath].dependencies ?? {}).map(
           async ([dependencyPackageName, dependencyPackageVersion]) => {
-            await this._checkVersionCompatibilityAsync(
+            await this.#checkVersionCompatibilityAsync(
               shrinkwrapFileMajorVersion,
               packages,
               splicePackageWithVersion(
@@ -96,7 +96,7 @@ export class CheckAction extends CommandLineAction {
     }
   }
 
-  private async _searchAndValidateDependenciesAsync(
+  async #searchAndValidateDependenciesAsync(
     project: RushConfigurationProject,
     requiredVersions: Record<string, string>
   ): Promise<void> {
@@ -139,10 +139,10 @@ export class CheckAction extends CommandLineAction {
                 this.#rushConfiguration.getProjectByName(dependencyName);
               if (dependencyProject && !this.#checkedProjects?.has(dependencyProject)) {
                 this.#checkedProjects!.add(project);
-                await this._searchAndValidateDependenciesAsync(dependencyProject, requiredVersions);
+                await this.#searchAndValidateDependenciesAsync(dependencyProject, requiredVersions);
               }
             } else {
-              await this._checkVersionCompatibilityAsync(
+              await this.#checkVersionCompatibilityAsync(
                 shrinkwrapFileMajorVersion,
                 packages,
                 fullDependencyPath,
@@ -156,7 +156,7 @@ export class CheckAction extends CommandLineAction {
     );
   }
 
-  private async _performVersionRestrictionCheckAsync(
+  async #performVersionRestrictionCheckAsync(
     requiredVersions: Record<string, string>,
     projectName: string
   ): Promise<string | undefined> {
@@ -169,7 +169,7 @@ export class CheckAction extends CommandLineAction {
         );
       }
       this.#checkedProjects.add(project);
-      await this._searchAndValidateDependenciesAsync(project, requiredVersions);
+      await this.#searchAndValidateDependenciesAsync(project, requiredVersions);
       return undefined;
     } catch (e) {
       return e.message;
@@ -201,7 +201,7 @@ export class CheckAction extends CommandLineAction {
       async ({ requiredVersions, project, rule }) => {
         switch (rule) {
           case 'restrict-versions': {
-            const message: string | undefined = await this._performVersionRestrictionCheckAsync(
+            const message: string | undefined = await this.#performVersionRestrictionCheckAsync(
               requiredVersions,
               project
             );

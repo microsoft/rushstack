@@ -44,10 +44,10 @@ export class LegacyCollatedRenderer implements IDaemonRenderer {
     if (event.type !== 'activityChanged' || !isActivityPayload(event.payload)) {
       return;
     }
-    this._writeLine(event.payload.text);
+    this.#writeLine(event.payload.text);
   }
 
-  private _writeLine(text: string): void {
+  #writeLine(text: string): void {
     // Emit the client's OS newline, matching the newline normalization the
     // collated pipeline applies (TextRewriterTransform OsDefault) so global
     // status lines and collated blocks are consistent on every platform.

@@ -112,11 +112,11 @@ export class GraphProcessor {
   public processOperations(operations: Set<Operation>): IGraphNode[] {
     const nodeMap: Map<string, IGraphNodeInternal> = new Map();
     for (const operation of operations) {
-      const entry: IGraphNodeInternal = this._operationAsHashedEntry(operation);
+      const entry: IGraphNodeInternal = this.#operationAsHashedEntry(operation);
       nodeMap.set(entry.id, entry);
     }
 
-    return this._pruneNoOps(nodeMap);
+    return this.#pruneNoOps(nodeMap);
   }
 
   /*
@@ -156,7 +156,7 @@ export class GraphProcessor {
    * remove all entries with empty commands
    * if an entry has a dependency with an empty command, it should inherit the dependencies of the empty command
    */
-  private _pruneNoOps(inputNodeMap: NodeMap): IGraphNode[] {
+  #pruneNoOps(inputNodeMap: NodeMap): IGraphNode[] {
     // Cache for the non-empty upstream dependencies of each operation
     const nonEmptyDependenciesByOperation: Map<IGraphNodeInternal, Set<string>> = new Map();
     function getNonEmptyDependencies(node: IGraphNodeInternal): ReadonlySet<string> {
@@ -199,7 +199,7 @@ export class GraphProcessor {
   /*
    * Convert an operation into a graph node
    */
-  private _operationAsHashedEntry(operation: Operation): IGraphNodeInternal {
+  #operationAsHashedEntry(operation: Operation): IGraphNodeInternal {
     const {
       runner,
       associatedPhase: { name: task },

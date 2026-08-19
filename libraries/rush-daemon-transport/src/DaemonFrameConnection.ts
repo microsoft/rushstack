@@ -24,9 +24,9 @@ export class DaemonFrameConnection {
   #receiveQueue: Promise<void> = Promise.resolve();
   public constructor(socket: net.Socket) {
     this.#socket = socket;
-    socket.on('data', (chunk: Buffer) => this._onData(chunk));
-    socket.on('error', (error: Error) => this._onError(error));
-    socket.on('close', () => this._onClose());
+    socket.on('data', (chunk: Buffer) => this.#onData(chunk));
+    socket.on('error', (error: Error) => this.#onError(error));
+    socket.on('close', () => this.#onClose());
   }
   /** Registers the serialized, backpressured handler invoked for each decoded frame. */
   public onFrame(handler: (frame: IDaemonFrame) => void | Promise<void>): void {
@@ -38,7 +38,7 @@ export class DaemonFrameConnection {
   }
   /** Encodes and writes a frame, resolving when the socket has drained it. @throws {@link DaemonTransportError} when closed. */
   public async sendFrameAsync(frame: IDaemonFrame): Promise<void> {
-    this._assertOpen();
+    this.#assertOpen();
     if (!this.#socket.write(encodeDaemonFrame(frame))) {
       await once(this.#socket, 'drain');
     }
@@ -57,7 +57,7 @@ export class DaemonFrameConnection {
   public get socket(): net.Socket {
     return this.#socket;
   }
-  private _assertOpen(): void {
+  #assertOpen(): void {
     if (this.#closedError !== undefined || this.#socket.closed) {
       throw new DaemonTransportError(
         DaemonTransportErrorCode.transportClosed,
@@ -65,36 +65,36 @@ export class DaemonFrameConnection {
       );
     }
   }
-  private _onData(chunk: Buffer): void {
+  #onData(chunk: Buffer): void {
     let frames: IDaemonFrame[];
     try {
       frames = this.#decoder.push(chunk);
     } catch (error) {
-      this._fail(error);
+      this.#fail(error);
       return;
     }
     this.#socket.pause();
     this.#receiveQueue = this.#receiveQueue
-      .then(() => this._dispatchFramesAsync(frames))
+      .then(() => this.#dispatchFramesAsync(frames))
       .then(() => {
         this.#socket.resume();
       })
-      .catch((error: unknown) => this._fail(error));
+      .catch((error: unknown) => this.#fail(error));
   }
-  private async _dispatchFramesAsync(frames: ReadonlyArray<IDaemonFrame>): Promise<void> {
+  async #dispatchFramesAsync(frames: ReadonlyArray<IDaemonFrame>): Promise<void> {
     for (const frame of frames) {
       await this.#frameHandler?.(frame);
     }
   }
-  private _fail(error: unknown): void {
+  #fail(error: unknown): void {
     const cause: Error = error instanceof Error ? error : new Error(String(error));
     this.#closedError = this.#closedError ?? cause;
     this.#socket.destroy(cause);
   }
-  private _onError(error: Error): void {
+  #onError(error: Error): void {
     this.#closedError = this.#closedError ?? error;
   }
-  private _onClose(): void {
+  #onClose(): void {
     this.#closedHandler?.(this.#closedError);
   }
 }

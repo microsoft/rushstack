@@ -118,7 +118,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     cacheId: string
   ): Promise<Buffer | undefined> {
     try {
-      const result: boolean | Buffer = await this._makeHttpRequestAsync({
+      const result: boolean | Buffer = await this.#makeHttpRequestAsync({
         terminal,
         relUrl: `${this.#cacheKeyPrefix}${cacheId}`,
         method: 'GET',
@@ -140,12 +140,12 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     cacheId: string,
     objectBuffer: Buffer
   ): Promise<boolean> {
-    if (!this._validateWriteAllowed(terminal, cacheId)) {
+    if (!this.#validateWriteAllowed(terminal, cacheId)) {
       return false;
     }
 
     try {
-      const result: boolean | Buffer = await this._makeHttpRequestAsync({
+      const result: boolean | Buffer = await this.#makeHttpRequestAsync({
         terminal,
         relUrl: `${this.#cacheKeyPrefix}${cacheId}`,
         method: this.#uploadMethod,
@@ -168,7 +168,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     localFilePath: string
   ): Promise<boolean> {
     try {
-      const result: IWebClientStreamResponse | false = await this._makeHttpStreamRequestAsync({
+      const result: IWebClientStreamResponse | false = await this.#makeHttpStreamRequestAsync({
         terminal,
         relUrl: `${this.#cacheKeyPrefix}${cacheId}`,
         method: 'GET',
@@ -197,14 +197,14 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     cacheId: string,
     localFilePath: string
   ): Promise<boolean> {
-    if (!this._validateWriteAllowed(terminal, cacheId)) {
+    if (!this.#validateWriteAllowed(terminal, cacheId)) {
       return false;
     }
 
     try {
       const { size } = await FileSystem.getStatisticsAsync(localFilePath);
       const entryStream: FileSystemReadStream = FileSystem.createReadStream(localFilePath);
-      const result: IWebClientStreamResponse | false = await this._makeHttpStreamRequestAsync({
+      const result: IWebClientStreamResponse | false = await this.#makeHttpStreamRequestAsync({
         terminal,
         relUrl: `${this.#cacheKeyPrefix}${cacheId}`,
         method: this.#uploadMethod,
@@ -239,7 +239,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         supportEditing: true
       },
       async (credentialsCache: CredentialCache) => {
-        credentialsCache.setCacheEntry(this._credentialCacheId, {
+        credentialsCache.setCacheEntry(this.#credentialCacheId, {
           credential
         });
         await credentialsCache.saveIfModifiedAsync();
@@ -287,13 +287,13 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         supportEditing: true
       },
       async (credentialsCache: CredentialCache) => {
-        credentialsCache.deleteCacheEntry(this._credentialCacheId);
+        credentialsCache.deleteCacheEntry(this.#credentialCacheId);
         await credentialsCache.saveIfModifiedAsync();
       }
     );
   }
 
-  private get _credentialCacheId(): string {
+  get #credentialCacheId(): string {
     if (!this.#_credentialCacheId) {
       const cacheIdParts: string[] = [this.#url.href];
 
@@ -311,7 +311,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
    * Common validation for write operations. Returns `true` if writing is allowed,
    * `false` if it is not (and logs an error to the terminal).
    */
-  private _validateWriteAllowed(terminal: ITerminal, cacheId: string): boolean {
+  #validateWriteAllowed(terminal: ITerminal, cacheId: string): boolean {
     if (!this.isCacheWriteAllowed) {
       terminal.writeErrorLine('Writing to cache is not allowed in the current configuration.');
       return false;
@@ -321,7 +321,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     return true;
   }
 
-  private async _makeHttpRequestAsync(options: {
+  async #makeHttpRequestAsync(options: {
     terminal: ITerminal;
     relUrl: string;
     method: 'GET' | UploadMethod;
@@ -333,7 +333,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   }): Promise<Buffer | boolean> {
     const { readBody } = options;
     // The stream: false flag ensures the response is an IWebClientResponse
-    const response: IWebClientResponse | false = (await this._makeHttpCoreRequestAsync({
+    const response: IWebClientResponse | false = (await this.#makeHttpCoreRequestAsync({
       ...options,
       stream: false
     })) as IWebClientResponse | false;
@@ -352,7 +352,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     return result;
   }
 
-  private async _makeHttpStreamRequestAsync(options: {
+  async #makeHttpStreamRequestAsync(options: {
     terminal: ITerminal;
     relUrl: string;
     method: 'GET' | UploadMethod;
@@ -363,7 +363,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     credentialOptions?: CredentialsOptions;
   }): Promise<IWebClientStreamResponse | false> {
     // The stream: true flag ensures the response is an IWebClientStreamResponse
-    const response: IWebClientStreamResponse | false = (await this._makeHttpCoreRequestAsync({
+    const response: IWebClientStreamResponse | false = (await this.#makeHttpCoreRequestAsync({
       ...options,
       stream: true
     })) as IWebClientStreamResponse | false;
@@ -383,7 +383,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
    * Shared request core for both buffer-based and streaming HTTP requests.
    * Handles credentials resolution, header construction, retry logic, and failure reporting.
    */
-  private async _makeHttpCoreRequestAsync(options: {
+  async #makeHttpCoreRequestAsync(options: {
     terminal: ITerminal;
     relUrl: string;
     method: 'GET' | UploadMethod;
@@ -463,7 +463,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
           // required. Re-attempt the request, requiring credentials this time.
           //
           // This counts as part of the "first attempt", so it is not included in the max attempts
-          return await this._makeHttpCoreRequestAsync({
+          return await this.#makeHttpCoreRequestAsync({
             ...options,
             credentialOptions: CredentialsOptions.Required
           });
@@ -479,10 +479,10 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
         await Async.sleepAsync(retryDelay);
 
-        return await this._makeHttpCoreRequestAsync({ ...options, maxAttempts: options.maxAttempts - 1 });
+        return await this.#makeHttpCoreRequestAsync({ ...options, maxAttempts: options.maxAttempts - 1 });
       }
 
-      this._reportFailure(terminal, method, response, false, warningText);
+      this.#reportFailure(terminal, method, response, false, warningText);
       return false;
     }
 
@@ -501,7 +501,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     let credentials: string | undefined = this.#environmentCredential;
 
     if (credentials === undefined) {
-      credentials = await this._tryGetCredentialsFromCacheAsync();
+      credentials = await this.#tryGetCredentialsFromCacheAsync();
     }
 
     if (typeof credentials !== 'string' && options === CredentialsOptions.Required) {
@@ -521,7 +521,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     return credentials;
   }
 
-  private async _tryGetCredentialsFromCacheAsync(): Promise<string | undefined> {
+  async #tryGetCredentialsFromCacheAsync(): Promise<string | undefined> {
     let cacheEntry: ICredentialCacheEntry | undefined;
 
     await CredentialCache.usingAsync(
@@ -529,7 +529,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         supportEditing: false
       },
       (credentialsCache: CredentialCache) => {
-        cacheEntry = credentialsCache.tryGetCacheEntry(this._credentialCacheId);
+        cacheEntry = credentialsCache.tryGetCacheEntry(this.#credentialCacheId);
       }
     );
 
@@ -541,7 +541,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     }
   }
 
-  private _getFailureType(
+  #getFailureType(
     requestMethod: string,
     response: IWebClientResponse | IWebClientStreamResponse,
     isRedirect: boolean
@@ -592,14 +592,14 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     return FailureType.Warning;
   }
 
-  private _reportFailure(
+  #reportFailure(
     terminal: ITerminal,
     requestMethod: string,
     response: IWebClientResponse | IWebClientStreamResponse,
     isRedirect: boolean,
     message: string
   ): void {
-    switch (this._getFailureType(requestMethod, response, isRedirect)) {
+    switch (this.#getFailureType(requestMethod, response, isRedirect)) {
       default: {
         terminal.writeErrorLine(`${message}: HTTP ${response.status}: ${response.statusText}`);
         break;
