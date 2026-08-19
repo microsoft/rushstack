@@ -82,8 +82,7 @@ export class OperationStreamEmitter {
       'operationRegistered',
       { operationId, projectName, phaseName },
       { operationId, projectName, phaseName },
-      'public',
-      true
+      'public'
     );
   }
 
@@ -95,8 +94,7 @@ export class OperationStreamEmitter {
       'operationStatusChanged',
       { operationId, status, durationMs },
       { operationId },
-      'public',
-      true
+      'public'
     );
   }
 
@@ -118,7 +116,7 @@ export class OperationStreamEmitter {
       }
       const chunk: string = text.slice(offset, end === offset ? offset + 1 : end);
       eventIds.push(
-        this._emit('externalOutput', { stream, text: chunk }, { operationId }, 'local-sensitive', false)
+        this._emit('externalOutput', { stream, text: chunk }, { operationId }, 'local-sensitive')
       );
       offset += chunk.length;
     }
@@ -138,8 +136,7 @@ export class OperationStreamEmitter {
       'commandResult',
       { commandName, succeeded, exitCode, operationCounts },
       { commandName },
-      'public',
-      true
+      'public'
     );
   }
 
@@ -147,8 +144,7 @@ export class OperationStreamEmitter {
     type: 'operationRegistered' | 'operationStatusChanged' | 'externalOutput' | 'commandResult',
     payload: unknown,
     scopeOverride: IReporterEventScope,
-    privacy: 'public' | 'local-sensitive' | 'secret',
-    required: boolean
+    privacy: 'public' | 'local-sensitive' | 'secret'
   ): string {
     const scope: IReporterEventScope = { ...this._scope, ...scopeOverride };
     return this._sink.emit({
@@ -157,7 +153,6 @@ export class OperationStreamEmitter {
       source: this._source,
       scope,
       privacy,
-      required,
       type,
       payload
     });

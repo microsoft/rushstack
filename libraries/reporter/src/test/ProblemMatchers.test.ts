@@ -104,7 +104,13 @@ describe('runProblemMatchers', () => {
     const diagnostic = result.diagnostics[0];
     expect(diagnostic.code).toBe('RUSH_EXTERNAL_TOOL_PROBLEM');
     expect(diagnostic.severity).toBe('error');
-    expect(diagnostic.source).toEqual({ file: 'src/example.ts', line: 12, column: 5, toolName: 'tsc' });
+    expect(diagnostic.source).toEqual({
+      kind: 'file',
+      file: 'src/example.ts',
+      line: 12,
+      column: 5,
+      toolName: 'tsc'
+    });
     expect(diagnostic.parameters?.code.value).toBe('TS1005');
     expect(diagnostic.relatedArtifactIds).toEqual(['op1']);
     expect(result.matchedLineCount).toBe(1);

@@ -131,12 +131,16 @@ function buildDiagnostic(
       code: { value: problem.code ?? '', privacy: 'public' },
       message: { value: problem.message, privacy: 'local-sensitive' }
     },
-    source: {
-      file: problem.file,
-      line: problem.line,
-      column: problem.column,
-      toolName: matcher.tool
-    },
+    source:
+      problem.file !== undefined
+        ? {
+            kind: 'file',
+            file: problem.file,
+            line: problem.line,
+            column: problem.column,
+            toolName: matcher.tool
+          }
+        : { kind: 'tool', toolName: matcher.tool },
     relatedArtifactIds: operationId !== undefined ? [operationId] : undefined
   });
 }

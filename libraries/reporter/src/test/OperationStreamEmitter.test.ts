@@ -7,6 +7,7 @@ import {
   iterateExternalOutput,
   PlaintextReporter,
   DefaultInteractiveReporter,
+  isReporterEventRequired,
   type IExternalOutputChunk,
   type IInteractiveTerminal,
   type IReporterEmitEventInput,
@@ -68,7 +69,8 @@ describe('OperationStreamEmitter', () => {
     ]);
     expect(sink.inputs[2].scope).toEqual({ commandName: 'build', operationId: 'op1' });
     expect(sink.inputs[2].privacy).toBe('local-sensitive');
-    expect(sink.inputs[2].required).toBe(false);
+    // externalOutput is protected (never coalesced/dropped); the manager derives `required`.
+    expect(isReporterEventRequired('externalOutput')).toBe(true);
   });
 
   it('splits raw output into uncollated chunks', () => {
