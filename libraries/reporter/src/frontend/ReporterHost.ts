@@ -8,11 +8,15 @@ import * as path from 'node:path';
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { IReporterEventSink } from '../producers/IReporterEventSink';
 import { ReporterManager } from '../manager/ReporterManager';
-import { RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR } from '../bootstrap/BootstrapProtocol';
+import {
+  RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
+  RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR
+} from '../bootstrap/BootstrapProtocol';
 import {
   readBootstrapHandoffFileAsync,
   deleteBootstrapHandoffFileAsync,
-  isBootstrapHandoffFileName
+  isBootstrapHandoffFileName,
+  type IBootstrapHandoffHeader
 } from '../bootstrap/BootstrapHandoff';
 
 /**
@@ -80,6 +84,12 @@ export interface IBootstrapReplayResult {
    * The handoff file path, when one was present.
    */
   readonly handoffPath?: string;
+
+  /**
+   * The reason no events were replayed, when a handoff path was present.
+   * `nonce-mismatch` means the file failed authentication and was rejected.
+   */
+  readonly skipReason?: 'unreadable' | 'nonce-mismatch';
 }
 
 /**
@@ -133,7 +143,9 @@ export class ReporterHost {
    * @remarks
    * When the private handoff environment variable is absent, this was a direct
    * `rush` invocation and there is nothing to replay. A missing or unreadable
-   * handoff file is tolerated: the frontend continues without replay.
+   * handoff file is tolerated: the frontend continues without replay. When a
+   * nonce is present in the environment, the file's header nonce must match
+   * it; a mismatch rejects the file as stale or foreign.
    */
   public async replayBootstrapHandoffAsync(): Promise<IBootstrapReplayResult> {
     const handoffPath: string | undefined = this._env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR];
@@ -141,13 +153,22 @@ export class ReporterHost {
       return { direct: true, replayed: false, eventCount: 0 };
     }
 
+    let header: IBootstrapHandoffHeader | undefined;
     let events: unknown[];
     try {
-      events = await readBootstrapHandoffFileAsync(handoffPath);
+      ({ header, events } = await readBootstrapHandoffFileAsync(handoffPath));
     } catch {
       // The handoff file is missing or corrupt; continue without replay.
       await deleteBootstrapHandoffFileAsync(handoffPath);
-      return { direct: false, replayed: false, eventCount: 0, handoffPath };
+      return { direct: false, replayed: false, eventCount: 0, handoffPath, skipReason: 'unreadable' };
+    }
+
+    const expectedNonce: string | undefined = this._env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR];
+    if (expectedNonce !== undefined && header?.nonce !== expectedNonce) {
+      // The file was not written by the bootstrap process that set this
+      // environment (stale or foreign handoff); reject it.
+      await deleteBootstrapHandoffFileAsync(handoffPath);
+      return { direct: false, replayed: false, eventCount: 0, handoffPath, skipReason: 'nonce-mismatch' };
     }
 
     for (const event of events) {

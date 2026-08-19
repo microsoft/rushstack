@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -33,6 +34,43 @@ export function isBootstrapHandoffFileName(fileName: string): boolean {
 }
 
 /**
+ * The envelope written as the first line of a handoff file, carrying the
+ * one-time nonce that authenticates the file to the frontend.
+ *
+ * @beta
+ */
+export interface IBootstrapHandoffHeader {
+  /**
+   * Discriminates the header record from event records.
+   */
+  readonly kind: 'bootstrapHandoff';
+
+  /**
+   * The one-time nonce. The frontend compares this against the value in the
+   * private nonce environment variable and rejects the file on mismatch.
+   */
+  readonly nonce: string;
+}
+
+/**
+ * The result of writing a bootstrap handoff file.
+ *
+ * @beta
+ */
+export interface IBootstrapHandoffWriteResult {
+  /**
+   * The absolute path to the handoff file.
+   */
+  readonly handoffPath: string;
+
+  /**
+   * The nonce the caller publishes through the private nonce environment
+   * variable.
+   */
+  readonly nonce: string;
+}
+
+/**
  * Options for {@link writeBootstrapHandoffFileAsync}.
  *
  * @beta
@@ -53,40 +91,60 @@ export interface IWriteBootstrapHandoffOptions {
  * Writes a bootstrap buffer to a temporary NDJSON handoff file.
  *
  * @remarks
- * The frontend reads this file, replays the events, and deletes it. The path is
- * communicated to the frontend through the private handoff environment variable.
+ * The frontend reads this file, replays the events, and deletes it. The path
+ * is communicated to the frontend through the private handoff environment
+ * variable, and a one-time nonce is written as the file's first line; the
+ * caller publishes the nonce through the private nonce environment variable
+ * so the frontend can reject a stale or foreign handoff file.
  *
- * @returns the absolute path to the handoff file
+ * The file is created with owner-only permissions (`0o600`) where supported.
+ *
+ * @returns the handoff path and nonce
  *
  * @beta
  */
 export async function writeBootstrapHandoffFileAsync(
   buffer: BootstrapEventBuffer,
   options: IWriteBootstrapHandoffOptions = {}
-): Promise<string> {
+): Promise<IBootstrapHandoffWriteResult> {
   const directory: string = options.directory ?? os.tmpdir();
   const pid: number = options.pid ?? process.pid;
   const fileName: string = `${BOOTSTRAP_HANDOFF_FILE_PREFIX}${pid}-${Date.now()}${BOOTSTRAP_HANDOFF_FILE_SUFFIX}`;
-  const filePath: string = path.join(directory, fileName);
-  await fs.promises.writeFile(filePath, buffer.serialize(), { encoding: 'utf8' });
-  return filePath;
+  const handoffPath: string = path.join(directory, fileName);
+  const nonce: string = crypto.randomUUID();
+  const header: IBootstrapHandoffHeader = { kind: 'bootstrapHandoff', nonce };
+  await fs.promises.writeFile(handoffPath, `${JSON.stringify(header)}\n${buffer.serialize()}`, {
+    encoding: 'utf8',
+    mode: 0o600
+  });
+  return { handoffPath, nonce };
 }
 
 /**
- * Reads and decodes a bootstrap handoff NDJSON file into an array of events.
+ * Reads and decodes a bootstrap handoff NDJSON file into its header and events.
  *
  * @beta
  */
-export async function readBootstrapHandoffFileAsync(filePath: string): Promise<unknown[]> {
+export async function readBootstrapHandoffFileAsync(
+  filePath: string
+): Promise<{ header: IBootstrapHandoffHeader | undefined; events: unknown[] }> {
   const contents: string = await fs.promises.readFile(filePath, { encoding: 'utf8' });
   const events: unknown[] = [];
+  let header: IBootstrapHandoffHeader | undefined;
+  let first: boolean = true;
   for (const line of contents.split('\n')) {
     const trimmed: string = line.trim();
     if (trimmed.length > 0) {
-      events.push(JSON.parse(trimmed));
+      const record: unknown = JSON.parse(trimmed);
+      if (first && (record as { kind?: string }).kind === 'bootstrapHandoff') {
+        header = record as IBootstrapHandoffHeader;
+      } else {
+        events.push(record);
+      }
     }
+    first = false;
   }
-  return events;
+  return { header, events };
 }
 
 /**

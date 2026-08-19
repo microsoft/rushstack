@@ -107,7 +107,6 @@ describe('createEngineSink', () => {
       sessionId: 'sess',
       source: { packageName: '@microsoft/rush-lib', packageVersion: '5.177.2' },
       privacy: 'public',
-      required: true,
       type: 'commandStarted',
       payload: {}
     });

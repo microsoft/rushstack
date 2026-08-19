@@ -101,6 +101,7 @@ export {
   BOOTSTRAP_BUFFER_MAX_BYTES,
   BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES,
   RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
+  RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR,
   BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME
 } from './bootstrap/BootstrapProtocol';
 export type {
@@ -111,7 +112,11 @@ export type {
   IBootstrapEventBufferOptions
 } from './bootstrap/BootstrapEventBuffer';
 export { BootstrapEventBuffer } from './bootstrap/BootstrapEventBuffer';
-export type { IWriteBootstrapHandoffOptions } from './bootstrap/BootstrapHandoff';
+export type {
+  IWriteBootstrapHandoffOptions,
+  IBootstrapHandoffHeader,
+  IBootstrapHandoffWriteResult
+} from './bootstrap/BootstrapHandoff';
 export {
   BOOTSTRAP_HANDOFF_FILE_PREFIX,
   BOOTSTRAP_HANDOFF_FILE_SUFFIX,

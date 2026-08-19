@@ -11,6 +11,7 @@ import {
   BootstrapEventBuffer,
   writeBootstrapHandoffFileAsync,
   RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
+  RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR,
   type IBootstrapReplayResult,
   type IReporter,
   type IReporterEventEnvelope,
@@ -61,7 +62,7 @@ describe('ReporterHost handoff replay', () => {
       const buffer: BootstrapEventBuffer = makeBuffer();
       buffer.emit({ type: 'sessionStarted', required: true, payload: {} });
       buffer.emit({ type: 'commandStarted', required: true, payload: { commandName: 'build' } });
-      const handoffPath: string = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
 
       const manager: ReporterManager = new ReporterManager();
       const reporter: RecordingReporter = new RecordingReporter();
@@ -70,7 +71,10 @@ describe('ReporterHost handoff replay', () => {
 
       const host: ReporterHost = new ReporterHost({
         manager,
-        env: { [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath }
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
+        }
       });
 
       const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
@@ -105,6 +109,36 @@ describe('ReporterHost handoff replay', () => {
     expect(result.direct).toBe(false);
     expect(result.replayed).toBe(false);
     expect(result.eventCount).toBe(0);
+    expect(result.skipReason).toBe('unreadable');
+  });
+
+  it('rejects a handoff file whose nonce does not match the environment', async () => {
+    await withTempDir(async (directory: string) => {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({ type: 'sessionStarted', required: true, payload: {} });
+      const { handoffPath } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+
+      const manager: ReporterManager = new ReporterManager();
+      const reporter: RecordingReporter = new RecordingReporter();
+      manager.addReporter(reporter);
+      await manager.initializeAsync();
+
+      const host: ReporterHost = new ReporterHost({
+        manager,
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: 'not-the-real-nonce'
+        }
+      });
+
+      const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
+      await manager.flushAsync();
+
+      expect(result.replayed).toBe(false);
+      expect(result.skipReason).toBe('nonce-mismatch');
+      expect(reporter.reported).toHaveLength(0);
+      expect(fs.existsSync(handoffPath)).toBe(false);
+    });
   });
 });
 
@@ -122,7 +156,6 @@ describe('ReporterHost sink', () => {
       sessionId: 'sess',
       source: { packageName: '@microsoft/rush-lib', packageVersion: '5.177.2' },
       privacy: 'public',
-      required: true,
       type: 'commandStarted',
       payload: {}
     });

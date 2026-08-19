@@ -159,14 +159,17 @@ describe('bootstrap handoff', () => {
       buffer.emit({ type: 'sessionStarted', required: true, payload: { argv: ['build'] } });
       buffer.emit({ type: 'commandStarted', required: true, payload: { commandName: 'build' } });
 
-      const filePath: string = await writeBootstrapHandoffFileAsync(buffer, {
+      const { handoffPath: filePath, nonce } = await writeBootstrapHandoffFileAsync(buffer, {
         directory,
         pid: 4242
       });
       expect(filePath.startsWith(directory)).toBe(true);
       expect(filePath).toContain('4242');
+      expect(nonce).toHaveLength(36);
 
-      const events: unknown[] = await readBootstrapHandoffFileAsync(filePath);
+      const { header, events } = await readBootstrapHandoffFileAsync(filePath);
+      expect(header?.kind).toBe('bootstrapHandoff');
+      expect(header?.nonce).toBe(nonce);
       expect(events).toHaveLength(2);
       expect((events[0] as Record<string, unknown>).type).toBe('sessionStarted');
       expect((events[1] as Record<string, unknown>).type).toBe('commandStarted');

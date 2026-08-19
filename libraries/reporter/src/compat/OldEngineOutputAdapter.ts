@@ -88,7 +88,6 @@ export class OldEngineOutputAdapter {
           sessionId: this._sessionId,
           source: this._source,
           privacy: 'local-sensitive',
-          required: false,
           type: 'externalOutput',
           payload: { stream, text: chunk }
         })
