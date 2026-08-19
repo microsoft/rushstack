@@ -425,6 +425,37 @@ enum E {
 let e: E._PrivateMember = E._PrivateMember; // okay, because _PrivateMember is declared by E
 ```
 
+## `@rushstack/prefer-ecmascript-private-fields`
+
+Require ECMAScript private fields instead of fields declared with TypeScript's `private` modifier.
+
+#### Rule Details
+
+ECMAScript `#` fields provide runtime privacy. TypeScript's `private` modifier is erased during compilation,
+allowing the field to be read or written through JavaScript, bracket notation, or type assertions.
+
+This rule applies only to class fields. Private methods, accessors, and constructor parameter properties are
+not affected. The rule does not provide an autofix because converting a field requires updating every reference
+and may change runtime behavior for reflection or objects created without invoking the constructor.
+
+#### Examples
+
+The following pattern is considered a problem:
+
+```ts
+class Example {
+  private value: string = ''; // error
+}
+```
+
+The following pattern is NOT considered a problem:
+
+```ts
+class Example {
+  #value: string = '';
+}
+```
+
 ## `@rushstack/normalized-imports`
 
 Require relative import paths to be written in a normalized minimal form and autofix unnecessary directory traversals.
