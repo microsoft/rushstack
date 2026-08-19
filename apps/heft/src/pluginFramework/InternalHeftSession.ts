@@ -145,12 +145,12 @@ export class InternalHeftSession {
   }
 
   public get phases(): ReadonlySet<HeftPhase> {
-    this._ensurePhases();
+    this.#ensurePhases();
     return this.#phases!;
   }
 
   public get phasesByName(): ReadonlyMap<string, HeftPhase> {
-    this._ensurePhases();
+    this.#ensurePhases();
     return this.#phasesByName!;
   }
 
@@ -163,7 +163,7 @@ export class InternalHeftSession {
     return phaseSession;
   }
 
-  private _ensurePhases(): void {
+  #ensurePhases(): void {
     if (!this.#phases || !this.#phasesByName) {
       this.#phasesByName = new Map();
       for (const [phaseName, phaseSpecifier] of Object.entries(

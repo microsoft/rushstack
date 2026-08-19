@@ -79,7 +79,7 @@ export class GitUtilities {
               `status ${result.status}: ${result.stderr}`
           );
         }
-        this.#gitVersion = this._parseGitVersion(result.stdout);
+        this.#gitVersion = this.#parseGitVersion(result.stdout);
       } else {
         this.#gitVersion = undefined;
       }
@@ -120,11 +120,11 @@ export class GitUtilities {
       return;
     }
     const gitRepoRootPath: string = gitInfo.root;
-    const ignoreMatcherMap: Map<string, IIgnoreMatcher> = await this._getIgnoreMatchersAsync(gitRepoRootPath);
+    const ignoreMatcherMap: Map<string, IIgnoreMatcher> = await this.#getIgnoreMatchersAsync(gitRepoRootPath);
 
     const matcherFiltersByMatcher: Map<IIgnoreMatcher, (filePath: string) => boolean> = new Map();
     return (filePath: string) => {
-      const matcher: IIgnoreMatcher = this._findIgnoreMatcherForFilePath(filePath, ignoreMatcherMap);
+      const matcher: IIgnoreMatcher = this.#findIgnoreMatcherForFilePath(filePath, ignoreMatcherMap);
       let matcherFilter: ((filePath: string) => boolean) | undefined = matcherFiltersByMatcher.get(matcher);
       if (!matcherFilter) {
         matcherFilter = matcher.createFilter();
@@ -140,7 +140,7 @@ export class GitUtilities {
     };
   }
 
-  private _findIgnoreMatcherForFilePath(
+  #findIgnoreMatcherForFilePath(
     filePath: string,
     ignoreMatcherMap: Map<string, IIgnoreMatcher>
   ): IIgnoreMatcher {
@@ -172,7 +172,7 @@ export class GitUtilities {
     return foundMatcher;
   }
 
-  private async _getIgnoreMatchersAsync(gitRepoRootPath: string): Promise<Map<string, IIgnoreMatcher>> {
+  async #getIgnoreMatchersAsync(gitRepoRootPath: string): Promise<Map<string, IIgnoreMatcher>> {
     // Return early if we've already parsed the .gitignore matchers
     if (this.#ignoreMatcherByGitignoreFolder !== undefined) {
       return this.#ignoreMatcherByGitignoreFolder;
@@ -191,7 +191,7 @@ export class GitUtilities {
     while (currentPath.length >= gitRepoRootPath.length) {
       const gitIgnoreFilePath: string = `${currentPath}/.gitignore`;
       const gitIgnorePatterns: string[] | undefined =
-        await this._tryReadGitIgnoreFileAsync(gitIgnoreFilePath);
+        await this.#tryReadGitIgnoreFileAsync(gitIgnoreFilePath);
       if (gitIgnorePatterns) {
         rawIgnorePatternsByGitignoreFolder.set(currentPath, gitIgnorePatterns);
       }
@@ -199,11 +199,11 @@ export class GitUtilities {
     }
 
     // Load the .gitignore files for all subdirectories
-    const gitignoreRelativeFilePaths: string[] = await this._findUnignoredFilesAsync('*.gitignore');
+    const gitignoreRelativeFilePaths: string[] = await this.#findUnignoredFilesAsync('*.gitignore');
     for (const gitignoreRelativeFilePath of gitignoreRelativeFilePaths) {
       const gitignoreFilePath: string = `${normalizedWorkingDirectory}/${gitignoreRelativeFilePath}`;
       const gitIgnorePatterns: string[] | undefined =
-        await this._tryReadGitIgnoreFileAsync(gitignoreFilePath);
+        await this.#tryReadGitIgnoreFileAsync(gitignoreFilePath);
       if (gitIgnorePatterns) {
         const parentPath: string = gitignoreFilePath.slice(0, gitignoreFilePath.lastIndexOf('/'));
         rawIgnorePatternsByGitignoreFolder.set(parentPath, gitIgnorePatterns);
@@ -272,7 +272,7 @@ export class GitUtilities {
     return this.#ignoreMatcherByGitignoreFolder;
   }
 
-  private async _tryReadGitIgnoreFileAsync(filePath: string): Promise<string[] | undefined> {
+  async #tryReadGitIgnoreFileAsync(filePath: string): Promise<string[] | undefined> {
     let gitIgnoreContent: string | undefined;
     try {
       gitIgnoreContent = await FileSystem.readFileAsync(filePath);
@@ -299,9 +299,9 @@ export class GitUtilities {
     return foundIgnorePatterns.length ? foundIgnorePatterns : undefined;
   }
 
-  private async _findUnignoredFilesAsync(searchPattern: string | undefined): Promise<string[]> {
-    this._ensureGitMinimumVersion({ major: 2, minor: 22, patch: 0 });
-    this._ensurePathIsUnderGitWorkingTree();
+  async #findUnignoredFilesAsync(searchPattern: string | undefined): Promise<string[]> {
+    this.#ensureGitMinimumVersion({ major: 2, minor: 22, patch: 0 });
+    this.#ensurePathIsUnderGitWorkingTree();
 
     const args: string[] = [
       '--cached',
@@ -314,17 +314,17 @@ export class GitUtilities {
     if (searchPattern) {
       args.push(searchPattern);
     }
-    return await this._executeGitCommandAndCaptureOutputAsync({
+    return await this.#executeGitCommandAndCaptureOutputAsync({
       command: 'ls-files',
       args,
       delimiter: '\0'
     });
   }
 
-  private async _executeGitCommandAndCaptureOutputAsync(
+  async #executeGitCommandAndCaptureOutputAsync(
     options: IExecuteGitCommandOptions
   ): Promise<string[]> {
-    const gitPath: string = this._getGitPathOrThrow();
+    const gitPath: string = this.#getGitPathOrThrow();
     const processArgs: string[] = [options.command].concat(options.args || []);
     const childProcess: ChildProcess = Executable.spawn(gitPath, processArgs, {
       currentWorkingDirectory: this.#workingDirectory,
@@ -370,7 +370,7 @@ export class GitUtilities {
     });
   }
 
-  private _getGitPathOrThrow(): string {
+  #getGitPathOrThrow(): string {
     const gitPath: string | undefined = this.gitPath;
     if (!gitPath) {
       throw new Error('Git is not present');
@@ -379,7 +379,7 @@ export class GitUtilities {
     }
   }
 
-  private _ensureGitMinimumVersion(minimumGitVersion: IGitVersion): void {
+  #ensureGitMinimumVersion(minimumGitVersion: IGitVersion): void {
     const gitVersion: IGitVersion | undefined = this.getGitVersion();
     if (!gitVersion) {
       throw new Error('Git is not present');
@@ -398,13 +398,13 @@ export class GitUtilities {
     }
   }
 
-  private _ensurePathIsUnderGitWorkingTree(): void {
+  #ensurePathIsUnderGitWorkingTree(): void {
     if (!this.isPathUnderGitWorkingTree()) {
       throw new Error(`The path "${this.#workingDirectory}" is not under a Git working tree`);
     }
   }
 
-  private _parseGitVersion(gitVersionOutput: string): IGitVersion {
+  #parseGitVersion(gitVersionOutput: string): IGitVersion {
     // This regexp matches output of "git version" that looks like
     // `git version <number>.<number>.<number>(+whatever)`
     // Examples:

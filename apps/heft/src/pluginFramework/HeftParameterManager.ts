@@ -191,7 +191,7 @@ export class HeftParameterManager {
     }
     this.#isFinalized = true;
     for (const pluginDefinition of this.#parametersByDefinition.keys()) {
-      this._addParametersToProvider(pluginDefinition, commandLineParameterProvider);
+      this.#addParametersToProvider(pluginDefinition, commandLineParameterProvider);
     }
   }
 
@@ -218,19 +218,19 @@ export class HeftParameterManager {
         ...this.defaultParameters,
 
         getChoiceParameter: (parameterLongName: string) =>
-          this._getParameter(parameters, parameterLongName, CommandLineParameterKind.Choice),
+          this.#getParameter(parameters, parameterLongName, CommandLineParameterKind.Choice),
         getChoiceListParameter: (parameterLongName: string) =>
-          this._getParameter(parameters, parameterLongName, CommandLineParameterKind.ChoiceList),
+          this.#getParameter(parameters, parameterLongName, CommandLineParameterKind.ChoiceList),
         getFlagParameter: (parameterLongName: string) =>
-          this._getParameter(parameters, parameterLongName, CommandLineParameterKind.Flag),
+          this.#getParameter(parameters, parameterLongName, CommandLineParameterKind.Flag),
         getIntegerParameter: (parameterLongName: string) =>
-          this._getParameter(parameters, parameterLongName, CommandLineParameterKind.Integer),
+          this.#getParameter(parameters, parameterLongName, CommandLineParameterKind.Integer),
         getIntegerListParameter: (parameterLongName: string) =>
-          this._getParameter(parameters, parameterLongName, CommandLineParameterKind.IntegerList),
+          this.#getParameter(parameters, parameterLongName, CommandLineParameterKind.IntegerList),
         getStringParameter: (parameterLongName: string) =>
-          this._getParameter(parameters, parameterLongName, CommandLineParameterKind.String),
+          this.#getParameter(parameters, parameterLongName, CommandLineParameterKind.String),
         getStringListParameter: (parameterLongName: string) =>
-          this._getParameter(parameters, parameterLongName, CommandLineParameterKind.StringList)
+          this.#getParameter(parameters, parameterLongName, CommandLineParameterKind.StringList)
       };
       this.#heftParametersByDefinition.set(pluginDefinition, heftParameters);
     }
@@ -244,7 +244,7 @@ export class HeftParameterManager {
    * "--<parameterScope>:<parameterName>". If there is no duplicate parameter, it will also be
    * referenceable by the CLI argument "--<parameterName>".
    */
-  private _addParametersToProvider(
+  #addParametersToProvider(
     pluginDefinition: HeftPluginDefinitionBase,
     commandLineParameterProvider: CommandLineParameterProvider
   ): void {
@@ -376,7 +376,7 @@ export class HeftParameterManager {
     }
   }
 
-  private _getParameter<T extends CommandLineParameter>(
+  #getParameter<T extends CommandLineParameter>(
     parametersByLongName: Map<string, CommandLineParameter>,
     parameterLongName: string,
     expectedParameterKind: CommandLineParameterKind
