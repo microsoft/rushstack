@@ -883,7 +883,7 @@ export class RushConfiguration {
     this.#pathTrees = new Map();
   }
 
-  private _initializeAndValidateLocalProjects(): void {
+  #initializeAndValidateLocalProjects(): void {
     this.#projects = [];
     this.#projectsByName = new Map<string, RushConfigurationProject>();
     this.#subspacesByName.clear();
@@ -1192,7 +1192,7 @@ export class RushConfiguration {
 
   public get projects(): RushConfigurationProject[] {
     if (!this.#projects) {
-      this._initializeAndValidateLocalProjects();
+      this.#initializeAndValidateLocalProjects();
     }
 
     return this.#projects!;
@@ -1204,7 +1204,7 @@ export class RushConfiguration {
   public get defaultSubspace(): Subspace {
     // TODO: Enable the default subspace to be obtained without initializing the full set of all projects
     if (!this.#projects) {
-      this._initializeAndValidateLocalProjects();
+      this.#initializeAndValidateLocalProjects();
     }
     const defaultSubspace: Subspace | undefined = this.tryGetSubspace(RushConstants.defaultSubspaceName);
     if (!defaultSubspace) {
@@ -1219,7 +1219,7 @@ export class RushConfiguration {
    */
   public get subspaces(): readonly Subspace[] {
     if (!this.#projects) {
-      this._initializeAndValidateLocalProjects();
+      this.#initializeAndValidateLocalProjects();
     }
     return this.#subspaces;
   }
@@ -1229,7 +1229,7 @@ export class RushConfiguration {
    */
   public tryGetSubspace(subspaceName: string): Subspace | undefined {
     if (!this.#projects) {
-      this._initializeAndValidateLocalProjects();
+      this.#initializeAndValidateLocalProjects();
     }
     const subspace: Subspace | undefined = this.#subspacesByName.get(subspaceName);
     if (!subspace) {
@@ -1259,7 +1259,7 @@ export class RushConfiguration {
    */
   public getSubspacesForProjects(projects: Iterable<RushConfigurationProject>): ReadonlySet<Subspace> {
     if (!this.#projects) {
-      this._initializeAndValidateLocalProjects();
+      this.#initializeAndValidateLocalProjects();
     }
 
     const subspaceSet: Set<Subspace> = new Set();
@@ -1275,7 +1275,7 @@ export class RushConfiguration {
    */
   public get projectsByName(): ReadonlyMap<string, RushConfigurationProject> {
     if (!this.#projectsByName) {
-      this._initializeAndValidateLocalProjects();
+      this.#initializeAndValidateLocalProjects();
     }
 
     return this.#projectsByName!;
@@ -1324,7 +1324,7 @@ export class RushConfiguration {
    */
   public async getCurrentlyInstalledVariantAsync(): Promise<string | undefined> {
     if (!this._currentVariantJsonLoadingPromise) {
-      this._currentVariantJsonLoadingPromise = this._loadCurrentVariantJsonAsync();
+      this._currentVariantJsonLoadingPromise = this.#loadCurrentVariantJsonAsync();
     }
 
     return (await this._currentVariantJsonLoadingPromise)?.variant ?? undefined;
@@ -1474,7 +1474,7 @@ export class RushConfiguration {
     return undefined;
   }
 
-  private async _loadCurrentVariantJsonAsync(): Promise<ICurrentVariantJson | undefined> {
+  async #loadCurrentVariantJsonAsync(): Promise<ICurrentVariantJson | undefined> {
     try {
       return await JsonFile.loadAsync(this.currentVariantJsonFilePath);
     } catch (e) {

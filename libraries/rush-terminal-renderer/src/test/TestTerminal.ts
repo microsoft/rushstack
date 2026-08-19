@@ -21,15 +21,15 @@ export class CollectingWritable extends TerminalWritable {
 
   /** The concatenated text of all stdout chunks. */
   public get stdout(): string {
-    return this._collect(TerminalChunkKind.Stdout);
+    return this.#collect(TerminalChunkKind.Stdout);
   }
 
   /** The concatenated text of all stderr chunks. */
   public get stderr(): string {
-    return this._collect(TerminalChunkKind.Stderr);
+    return this.#collect(TerminalChunkKind.Stderr);
   }
 
-  private _collect(kind: TerminalChunkKind): string {
+  #collect(kind: TerminalChunkKind): string {
     return this.chunks
       .filter((chunk: ITerminalChunk) => chunk.kind === kind)
       .map((chunk: ITerminalChunk) => chunk.text)
@@ -49,15 +49,15 @@ export class TestTerminal implements IDaemonRendererTerminal {
 
   /** All stdout text written so far, concatenated. */
   public get stdout(): string {
-    return this._collect('stdout');
+    return this.#collect('stdout');
   }
 
   /** All stderr text written so far, concatenated. */
   public get stderr(): string {
-    return this._collect('stderr');
+    return this.#collect('stderr');
   }
 
-  private _collect(stream: DaemonRenderStream): string {
+  #collect(stream: DaemonRenderStream): string {
     return this.#writes
       .filter(([s]: [DaemonRenderStream, string]) => s === stream)
       .map(([, text]: [DaemonRenderStream, string]) => text)

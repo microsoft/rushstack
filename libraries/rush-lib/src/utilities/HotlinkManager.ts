@@ -72,7 +72,7 @@ export class HotlinkManager {
     return !!this.#linksBySubspaceName.get(subspaceName)?.length;
   }
 
-  private async _hardLinkToLinkedPackageAsync(
+  async #hardLinkToLinkedPackageAsync(
     terminal: ITerminal,
     sourcePath: string,
     targetFolder: Set<string>,
@@ -98,7 +98,7 @@ export class HotlinkManager {
     });
   }
 
-  private async _modifyAndSaveLinkStateAsync(
+  async #modifyAndSaveLinkStateAsync(
     cb: (linkState: LinksBySubspaceNameMap) => Promise<LinksBySubspaceNameMap> | LinksBySubspaceNameMap
   ): Promise<void> {
     const newLinksBySubspaceName: LinksBySubspaceNameMap = await cb(this.#linksBySubspaceName);
@@ -119,7 +119,7 @@ export class HotlinkManager {
       PnpmSyncUtilities.processLogMessage(logMessageOptions, terminal);
     };
 
-    await this._modifyAndSaveLinkStateAsync(async (linksBySubspaceName) => {
+    await this.#modifyAndSaveLinkStateAsync(async (linksBySubspaceName) => {
       const rushLinkFileState: IProjectLinkInSubspaceJson[] = linksBySubspaceName.get(subspaceName) ?? [];
       await Async.forEachAsync(
         rushLinkFileState,
@@ -150,7 +150,7 @@ export class HotlinkManager {
     return true;
   }
 
-  private async _getLinkedPackageInfoAsync(linkedPackagePath: string): Promise<ILinkedPackageInfo> {
+  async #getLinkedPackageInfoAsync(linkedPackagePath: string): Promise<ILinkedPackageInfo> {
     const linkedPackageJsonPath: string = `${linkedPackagePath}/${FileConstants.PackageJson}`;
 
     const linkedPackageJsonExists: boolean = await FileSystem.existsAsync(linkedPackageJsonPath);
@@ -185,7 +185,7 @@ export class HotlinkManager {
     };
   }
 
-  private async _getPackagePathsMatchingNameAndVersionAsync(
+  async #getPackagePathsMatchingNameAndVersionAsync(
     consumerPackagePnpmDependenciesFolderPath: string,
     packageName: string,
     versionRange: string
@@ -214,11 +214,11 @@ export class HotlinkManager {
   ): Promise<void> {
     const subspaceName: string = subspace.subspaceName;
     try {
-      const { packageName } = await this._getLinkedPackageInfoAsync(linkedPackagePath);
+      const { packageName } = await this.#getLinkedPackageInfoAsync(linkedPackagePath);
       const consumerPackagePnpmDependenciesFolderPath: string = `${subspace.getSubspaceTempFolderPath()}/${
         RushConstants.nodeModulesFolderName
       }/${RushConstants.pnpmVirtualStoreFolderName}`;
-      const sourcePathSet: Set<string> = await this._getPackagePathsMatchingNameAndVersionAsync(
+      const sourcePathSet: Set<string> = await this.#getPackagePathsMatchingNameAndVersionAsync(
         consumerPackagePnpmDependenciesFolderPath,
         packageName,
         version
@@ -228,8 +228,8 @@ export class HotlinkManager {
           `Cannot find package ${packageName} ${version} in ${consumerPackagePnpmDependenciesFolderPath}`
         );
       }
-      await this._hardLinkToLinkedPackageAsync(terminal, linkedPackagePath, sourcePathSet, subspaceName);
-      await this._modifyAndSaveLinkStateAsync((linksBySubspaceName) => {
+      await this.#hardLinkToLinkedPackageAsync(terminal, linkedPackagePath, sourcePathSet, subspaceName);
+      await this.#modifyAndSaveLinkStateAsync((linksBySubspaceName) => {
         const newConsumerPackageLinks: IProjectLinkInSubspaceJson[] = [
           ...(linksBySubspaceName.get(subspaceName) ?? [])
         ];
@@ -275,7 +275,7 @@ export class HotlinkManager {
   ): Promise<void> {
     const consumerPackageName: string = consumerPackage.packageName;
     try {
-      const { packageName: linkedPackageName } = await this._getLinkedPackageInfoAsync(linkedPackagePath);
+      const { packageName: linkedPackageName } = await this.#getLinkedPackageInfoAsync(linkedPackagePath);
 
       const slashIndex: number = linkedPackageName.indexOf('/');
       const [scope, packageBaseName] =
@@ -301,7 +301,7 @@ export class HotlinkManager {
       });
 
       // Record the link information between the consumer package and the linked package
-      await this._modifyAndSaveLinkStateAsync((linksBySubspaceName) => {
+      await this.#modifyAndSaveLinkStateAsync((linksBySubspaceName) => {
         const subspaceName: string = consumerPackage.subspace.subspaceName;
         const newConsumerPackageLinks: IProjectLinkInSubspaceJson[] = [
           ...(linksBySubspaceName.get(subspaceName) ?? [])

@@ -68,14 +68,14 @@ export class WatchProject {
     if (this.#state === WatchState.Succeeded) {
       // If we are leaving the Succeeded state, mark all the downstream consumers as dead
       if (this.#live) {
-        this._markDeadRecursive();
+        this.#markDeadRecursive();
       }
     }
     this.#state = state;
     if (this.state === WatchState.Succeeded) {
       // If we just entered the Succeeded state, then mark the immediate consumers as live
       if (this.#live) {
-        this._markLiveRecursive();
+        this.#markLiveRecursive();
       }
     }
 
@@ -85,20 +85,20 @@ export class WatchProject {
     }
   }
 
-  private _markDeadRecursive(): void {
+  #markDeadRecursive(): void {
     for (const consumer of this.consumers) {
       if (consumer.#live) {
         consumer.#live = false;
-        consumer._markDeadRecursive();
+        consumer.#markDeadRecursive();
       }
     }
   }
 
-  private _markLiveRecursive(): void {
+  #markLiveRecursive(): void {
     for (const consumer of this.consumers) {
       consumer.#live = true;
       if (consumer.#state === WatchState.Succeeded) {
-        consumer._markLiveRecursive();
+        consumer.#markLiveRecursive();
       }
     }
   }

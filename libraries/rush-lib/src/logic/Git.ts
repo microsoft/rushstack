@@ -97,7 +97,7 @@ export class Git {
   public async getGitEmailAsync(): Promise<string> {
     // Determine the user's account
     // Ex: "bob@example.com"
-    const { error, result } = await this._tryGetGitEmailAsync();
+    const { error, result } = await this.#tryGetGitEmailAsync();
     if (error) {
       // eslint-disable-next-line no-console
       console.log(
@@ -162,7 +162,7 @@ export class Git {
       /* ignore errors from true-case-path */
     }
     const defaultHooksPath: string = path.resolve(commonGitDir, 'hooks');
-    const hooksResult: IResultOrError<string> = await this._tryGetGitHooksPathAsync();
+    const hooksResult: IResultOrError<string> = await this.#tryGetGitHooksPathAsync();
     if (hooksResult.error) {
       // eslint-disable-next-line no-console
       console.log(
@@ -231,7 +231,7 @@ export class Git {
     shouldFetch: boolean = false
   ): Promise<string> {
     if (shouldFetch) {
-      this._fetchRemoteBranch(targetBranch, terminal);
+      this.#fetchRemoteBranch(targetBranch, terminal);
     }
 
     const gitPath: string = this.getGitPathOrThrow();
@@ -282,7 +282,7 @@ export class Git {
     pathPrefix?: string
   ): Promise<string[]> {
     if (!skipFetch) {
-      this._fetchRemoteBranch(targetBranch, terminal);
+      this.#fetchRemoteBranch(targetBranch, terminal);
     }
 
     const gitPath: string = this.getGitPathOrThrow();
@@ -524,7 +524,7 @@ export class Git {
    * returns user.email config
    */
   public async tryGetGitEmailAsync(): Promise<string | undefined> {
-    const { result } = await this._tryGetGitEmailAsync();
+    const { result } = await this.#tryGetGitEmailAsync();
     return result;
   }
 
@@ -554,7 +554,7 @@ export class Git {
    * Returns an object containing either the result of the `git config user.email`
    * command or an error.
    */
-  private async _tryGetGitEmailAsync(): Promise<IResultOrError<string>> {
+  async #tryGetGitEmailAsync(): Promise<IResultOrError<string>> {
     if (this.#gitEmailResult === undefined) {
       const gitPath: string = this.getGitPathOrThrow();
       try {
@@ -573,7 +573,7 @@ export class Git {
     return this.#gitEmailResult;
   }
 
-  private async _tryGetGitHooksPathAsync(): Promise<IResultOrError<string>> {
+  async #tryGetGitHooksPathAsync(): Promise<IResultOrError<string>> {
     if (this.#gitHooksPath === undefined) {
       const gitPath: string = this.getGitPathOrThrow();
       try {
@@ -592,7 +592,7 @@ export class Git {
     return this.#gitHooksPath;
   }
 
-  private _tryFetchRemoteBranch(remoteBranchName: string): boolean {
+  #tryFetchRemoteBranch(remoteBranchName: string): boolean {
     const firstSlashIndex: number = remoteBranchName.indexOf('/');
     if (firstSlashIndex === -1) {
       throw new Error(
@@ -614,10 +614,10 @@ export class Git {
     return spawnResult.status === 0;
   }
 
-  private _fetchRemoteBranch(remoteBranchName: string, terminal: ITerminal): void {
+  #fetchRemoteBranch(remoteBranchName: string, terminal: ITerminal): void {
     // eslint-disable-next-line no-console
     console.log(`Checking for updates to ${remoteBranchName}...`);
-    const fetchResult: boolean = this._tryFetchRemoteBranch(remoteBranchName);
+    const fetchResult: boolean = this.#tryFetchRemoteBranch(remoteBranchName);
     if (!fetchResult) {
       terminal.writeWarningLine(
         `Error fetching git remote branch ${remoteBranchName}. Detected changed files may be incorrect.`

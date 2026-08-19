@@ -51,7 +51,7 @@ export class HeftPluginConfiguration {
     this.#heftPluginConfigurationJson = heftPluginConfigurationJson;
     this.packageRoot = packageRoot;
     this.packageName = packageName;
-    this._validate(heftPluginConfigurationJson, packageName);
+    this.#validate(heftPluginConfigurationJson, packageName);
   }
 
   /**
@@ -87,8 +87,8 @@ export class HeftPluginConfiguration {
   ): HeftPluginDefinitionBase {
     if (!pluginSpecifier.pluginName) {
       const pluginDefinitions: HeftPluginDefinitionBase[] = ([] as HeftPluginDefinitionBase[]).concat(
-        Array.from(this._getLifecyclePluginDefinitions()),
-        Array.from(this._getTaskPluginDefinitions())
+        Array.from(this.#getLifecyclePluginDefinitions()),
+        Array.from(this.#getTaskPluginDefinitions())
       );
       // Make an attempt at resolving the plugin without the name by looking for the first plugin
       if (pluginDefinitions.length > 1) {
@@ -119,7 +119,7 @@ export class HeftPluginConfiguration {
   public isLifecyclePluginDefinition(
     pluginDefinition: HeftPluginDefinitionBase
   ): pluginDefinition is HeftLifecyclePluginDefinition {
-    return this._getLifecyclePluginDefinitions().has(pluginDefinition);
+    return this.#getLifecyclePluginDefinitions().has(pluginDefinition);
   }
 
   /**
@@ -128,7 +128,7 @@ export class HeftPluginConfiguration {
   public isTaskPluginDefinition(
     pluginDefinition: HeftPluginDefinitionBase
   ): pluginDefinition is HeftTaskPluginDefinition {
-    return this._getTaskPluginDefinitions().has(pluginDefinition);
+    return this.#getTaskPluginDefinitions().has(pluginDefinition);
   }
 
   /**
@@ -140,7 +140,7 @@ export class HeftPluginConfiguration {
   ): HeftLifecyclePluginDefinition | undefined {
     if (!this.#lifecyclePluginDefinitionsMap) {
       this.#lifecyclePluginDefinitionsMap = new Map(
-        Array.from(this._getLifecyclePluginDefinitions()).map((d: HeftLifecyclePluginDefinition) => [
+        Array.from(this.#getLifecyclePluginDefinitions()).map((d: HeftLifecyclePluginDefinition) => [
           d.pluginName,
           d
         ])
@@ -156,13 +156,13 @@ export class HeftPluginConfiguration {
   public tryGetTaskPluginDefinitionByName(taskPluginName: string): HeftTaskPluginDefinition | undefined {
     if (!this.#taskPluginDefinitionsMap) {
       this.#taskPluginDefinitionsMap = new Map(
-        Array.from(this._getTaskPluginDefinitions()).map((d: HeftTaskPluginDefinition) => [d.pluginName, d])
+        Array.from(this.#getTaskPluginDefinitions()).map((d: HeftTaskPluginDefinition) => [d.pluginName, d])
       );
     }
     return this.#taskPluginDefinitionsMap.get(taskPluginName);
   }
 
-  private _getLifecyclePluginDefinitions(): ReadonlySet<HeftLifecyclePluginDefinition> {
+  #getLifecyclePluginDefinitions(): ReadonlySet<HeftLifecyclePluginDefinition> {
     if (!this.#lifecyclePluginDefinitions) {
       this.#lifecyclePluginDefinitions = new Set();
       for (const lifecyclePluginDefinitionJson of this.#heftPluginConfigurationJson.lifecyclePlugins || []) {
@@ -181,7 +181,7 @@ export class HeftPluginConfiguration {
   /**
    * Task plugin definitions sourced from the heft-plugin.json file.
    */
-  private _getTaskPluginDefinitions(): ReadonlySet<HeftTaskPluginDefinition> {
+  #getTaskPluginDefinitions(): ReadonlySet<HeftTaskPluginDefinition> {
     if (!this.#taskPluginDefinitions) {
       this.#taskPluginDefinitions = new Set();
       for (const taskPluginDefinitionJson of this.#heftPluginConfigurationJson.taskPlugins || []) {
@@ -197,7 +197,7 @@ export class HeftPluginConfiguration {
     return this.#taskPluginDefinitions;
   }
 
-  private _validate(heftPluginConfigurationJson: IHeftPluginConfigurationJson, packageName: string): void {
+  #validate(heftPluginConfigurationJson: IHeftPluginConfigurationJson, packageName: string): void {
     if (
       !heftPluginConfigurationJson.lifecyclePlugins?.length &&
       !heftPluginConfigurationJson.taskPlugins?.length

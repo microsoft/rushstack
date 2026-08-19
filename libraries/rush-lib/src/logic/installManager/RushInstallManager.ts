@@ -144,7 +144,7 @@ export class RushInstallManager extends BaseInstallManager {
         }
       });
 
-      if (this._findMissingTempProjects(shrinkwrapFile)) {
+      if (this.#findMissingTempProjects(shrinkwrapFile)) {
         // If any Rush project's tarball is missing from the shrinkwrap file, then we need to update
         // the shrinkwrap file.
         shrinkwrapIsUpToDate = false;
@@ -203,7 +203,7 @@ export class RushInstallManager extends BaseInstallManager {
       // These can be regular, optional, or peer dependencies (but NOT dev dependencies).
       // (A given packageName will never appear more than once in this list.)
       for (const dependency of packageJson.dependencyList) {
-        if (this.options.fullUpgrade && this._revertWorkspaceNotation(dependency)) {
+        if (this.options.fullUpgrade && this.#revertWorkspaceNotation(dependency)) {
           shrinkwrapIsUpToDate = false;
         }
 
@@ -219,7 +219,7 @@ export class RushInstallManager extends BaseInstallManager {
       }
 
       for (const dependency of packageJson.devDependencyList) {
-        if (this.options.fullUpgrade && this._revertWorkspaceNotation(dependency)) {
+        if (this.options.fullUpgrade && this.#revertWorkspaceNotation(dependency)) {
           shrinkwrapIsUpToDate = false;
         }
 
@@ -340,7 +340,7 @@ export class RushInstallManager extends BaseInstallManager {
         this.rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall
       ) {
         const pnpmShrinkwrapFile: PnpmShrinkwrapFile = shrinkwrapFile as PnpmShrinkwrapFile;
-        const tarballIntegrityValid: boolean = await this._validateRushProjectTarballIntegrityAsync(
+        const tarballIntegrityValid: boolean = await this.#validateRushProjectTarballIntegrityAsync(
           pnpmShrinkwrapFile,
           rushProject
         );
@@ -396,7 +396,7 @@ export class RushInstallManager extends BaseInstallManager {
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
   }
 
-  private _revertWorkspaceNotation(dependency: PackageJsonDependency): boolean {
+  #revertWorkspaceNotation(dependency: PackageJsonDependency): boolean {
     const specifier: DependencySpecifier = DependencySpecifier.parseWithCache(
       dependency.name,
       dependency.version
@@ -420,7 +420,7 @@ export class RushInstallManager extends BaseInstallManager {
     return true;
   }
 
-  private async _validateRushProjectTarballIntegrityAsync(
+  async #validateRushProjectTarballIntegrityAsync(
     shrinkwrapFile: PnpmShrinkwrapFile | undefined,
     rushProject: RushConfigurationProject
   ): Promise<boolean> {
@@ -653,7 +653,7 @@ export class RushInstallManager extends BaseInstallManager {
       // eslint-disable-next-line no-console
       console.log('"npm shrinkwrap" completed\n');
 
-      await this._fixupNpm5RegressionAsync();
+      await this.#fixupNpm5RegressionAsync();
     }
   }
 
@@ -683,7 +683,7 @@ export class RushInstallManager extends BaseInstallManager {
    * Our workaround is to rewrite the package.json files for each of the @rush-temp projects
    * in the node_modules folder, after "npm install" completes.
    */
-  private async _fixupNpm5RegressionAsync(): Promise<void> {
+  async #fixupNpm5RegressionAsync(): Promise<void> {
     const pathToDeleteWithoutStar: string = path.join(
       this.rushConfiguration.commonTempFolder,
       'node_modules',
@@ -725,7 +725,7 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * @returns true if orphans were found, or false if everything is okay
    */
-  private _findMissingTempProjects(shrinkwrapFile: BaseShrinkwrapFile): boolean {
+  #findMissingTempProjects(shrinkwrapFile: BaseShrinkwrapFile): boolean {
     const tempProjectNames: Set<string> = new Set(shrinkwrapFile.getTempProjectNames());
 
     for (const rushProject of this.rushConfiguration.projects) {

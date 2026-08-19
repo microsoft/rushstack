@@ -41,7 +41,7 @@ export class LinkPackageAction extends BaseHotlinkPackageAction {
     });
   }
 
-  private async _getProjectsToLinkAsync(): Promise<Set<RushConfigurationProject>> {
+  async #getProjectsToLinkAsync(): Promise<Set<RushConfigurationProject>> {
     const projectsToLink: Set<RushConfigurationProject> = new Set();
     const projectNames: readonly string[] = this._projectListParameter.values;
 
@@ -70,7 +70,7 @@ export class LinkPackageAction extends BaseHotlinkPackageAction {
     linkedPackagePath: string,
     hotlinkManager: HotlinkManager
   ): Promise<void> {
-    const projectsToLink: Set<RushConfigurationProject> = await this._getProjectsToLinkAsync();
+    const projectsToLink: Set<RushConfigurationProject> = await this.#getProjectsToLinkAsync();
     await Async.forEachAsync(
       projectsToLink,
       async (project) => {

@@ -106,7 +106,7 @@ export class VersionAction extends BaseRushAction {
     const git: Git = new Git(this.rushConfiguration);
     const userEmail: string = await git.getGitEmailAsync();
 
-    this._validateInput();
+    this.#validateInput();
     const versionManagerModule: typeof VersionManagerType = await import(
       /* webpackChunkName: 'VersionManager' */
       '../../logic/VersionManager'
@@ -118,7 +118,7 @@ export class VersionAction extends BaseRushAction {
     );
 
     if (this.#ensureVersionPolicy.value) {
-      this._overwritePolicyVersionIfNeeded();
+      this.#overwritePolicyVersionIfNeeded();
       const tempBranch: string = 'version/ensure-' + new Date().getTime();
       versionManager.ensure(
         this.#versionPolicy.value,
@@ -130,7 +130,7 @@ export class VersionAction extends BaseRushAction {
       if (updatedPackages.size > 0) {
         // eslint-disable-next-line no-console
         console.log(`${updatedPackages.size} packages are getting updated.`);
-        await this._gitProcessAsync(tempBranch, this.#targetBranch.value, currentlyInstalledVariant);
+        await this.#gitProcessAsync(tempBranch, this.#targetBranch.value, currentlyInstalledVariant);
       }
     } else if (this.#bumpVersion.value) {
       const tempBranch: string = 'version/bump-' + new Date().getTime();
@@ -141,11 +141,11 @@ export class VersionAction extends BaseRushAction {
         this.#prereleaseIdentifier.value,
         true
       );
-      await this._gitProcessAsync(tempBranch, this.#targetBranch.value, currentlyInstalledVariant);
+      await this.#gitProcessAsync(tempBranch, this.#targetBranch.value, currentlyInstalledVariant);
     }
   }
 
-  private _overwritePolicyVersionIfNeeded(): void {
+  #overwritePolicyVersionIfNeeded(): void {
     if (!this.#overrideVersion.value && !this.#prereleaseIdentifier.value) {
       // No need to overwrite policy version
       return;
@@ -195,7 +195,7 @@ export class VersionAction extends BaseRushAction {
     }
   }
 
-  private _validateInput(): void {
+  #validateInput(): void {
     if (this.#bumpVersion.value && this.#ensureVersionPolicy.value) {
       throw new Error('Please choose --bump or --ensure-version-policy but not together.');
     }
@@ -208,7 +208,7 @@ export class VersionAction extends BaseRushAction {
     }
   }
 
-  private _validateResult(variant: string | undefined): void {
+  #validateResult(variant: string | undefined): void {
     // Load the config from file to avoid using inconsistent in-memory data.
     const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
       this.rushConfiguration.rushJsonFile
@@ -234,13 +234,13 @@ export class VersionAction extends BaseRushAction {
     }
   }
 
-  private async _gitProcessAsync(
+  async #gitProcessAsync(
     tempBranch: string,
     targetBranch: string | undefined,
     variant: string | undefined
   ): Promise<void> {
     // Validate the result before commit.
-    this._validateResult(variant);
+    this.#validateResult(variant);
 
     const git: Git = new Git(this.rushConfiguration);
     const publishGit: PublishGit = new PublishGit(git, targetBranch);

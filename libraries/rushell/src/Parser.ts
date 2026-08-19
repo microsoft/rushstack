@@ -17,15 +17,15 @@ export class Parser {
   public parse(): AstScript {
     const script: AstScript = new AstScript();
 
-    const startingToken: Token = this._peekToken();
+    const startingToken: Token = this.#peekToken();
 
-    const astCommand: AstCommand | undefined = this._parseCommand();
+    const astCommand: AstCommand | undefined = this.#parseCommand();
 
     if (!astCommand) {
       throw new ParseError('Expecting a command', startingToken.range);
     }
 
-    const nextToken: Token = this._peekToken();
+    const nextToken: Token = this.#peekToken();
 
     if (nextToken.kind !== TokenKind.EndOfInput) {
       throw new ParseError(`Unexpected token: ${TokenKind[nextToken.kind]}`, nextToken.range);
@@ -36,19 +36,19 @@ export class Parser {
     return script;
   }
 
-  private _parseCommand(): AstCommand | undefined {
-    this._skipWhitespace();
+  #parseCommand(): AstCommand | undefined {
+    this.#skipWhitespace();
 
-    const startingToken: Token = this._peekToken();
+    const startingToken: Token = this.#peekToken();
 
     const command: AstCommand = new AstCommand();
-    command.commandPath = this._parseCompoundWord();
+    command.commandPath = this.#parseCompoundWord();
     if (!command.commandPath) {
       throw new ParseError('Expecting a command path', startingToken.range);
     }
 
-    while (this._skipWhitespace()) {
-      const compoundWord: AstCompoundWord | undefined = this._parseCompoundWord();
+    while (this.#skipWhitespace()) {
+      const compoundWord: AstCompoundWord | undefined = this.#parseCompoundWord();
       if (!compoundWord) {
         break;
       }
@@ -58,11 +58,11 @@ export class Parser {
     return command;
   }
 
-  private _parseCompoundWord(): AstCompoundWord | undefined {
+  #parseCompoundWord(): AstCompoundWord | undefined {
     const compoundWord: AstCompoundWord = new AstCompoundWord();
 
     for (;;) {
-      const node: AstNode | undefined = this._parseText();
+      const node: AstNode | undefined = this.#parseText();
       if (!node) {
         break;
       }
@@ -77,11 +77,11 @@ export class Parser {
     return compoundWord;
   }
 
-  private _parseText(): AstText | undefined {
-    const token: Token = this._peekToken();
+  #parseText(): AstText | undefined {
+    const token: Token = this.#peekToken();
 
     if (token.kind === TokenKind.Text) {
-      this._readToken();
+      this.#readToken();
 
       const astText: AstText = new AstText();
       astText.token = token;
@@ -95,19 +95,19 @@ export class Parser {
   /**
    * Skips any whitespace tokens.  Returns true if any whitespace was actually encountered.
    */
-  private _skipWhitespace(): boolean {
+  #skipWhitespace(): boolean {
     let sawWhitespace: boolean = false;
-    while (this._peekToken().kind === TokenKind.Spaces) {
-      this._readToken();
+    while (this.#peekToken().kind === TokenKind.Spaces) {
+      this.#readToken();
       sawWhitespace = true;
     }
-    if (this._peekToken().kind === TokenKind.EndOfInput) {
+    if (this.#peekToken().kind === TokenKind.EndOfInput) {
       sawWhitespace = true;
     }
     return sawWhitespace;
   }
 
-  private _readToken(): Token {
+  #readToken(): Token {
     if (this.#peekedToken) {
       const token: Token = this.#peekedToken;
       this.#peekedToken = undefined;
@@ -117,7 +117,7 @@ export class Parser {
     }
   }
 
-  private _peekToken(): Token {
+  #peekToken(): Token {
     if (!this.#peekedToken) {
       this.#peekedToken = this.#tokenizer.readToken();
     }

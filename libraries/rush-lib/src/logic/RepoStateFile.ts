@@ -249,17 +249,17 @@ export class RepoStateFile {
     // Now that the file has been refreshed, we know its contents are valid
     this.#isValid = true;
 
-    return this._saveIfModified();
+    return this.#saveIfModified();
   }
 
   /**
    * Writes the "repo-state.json" file to disk, using the filename that was passed to loadFromFile().
    */
-  private _saveIfModified(): boolean {
+  #saveIfModified(): boolean {
     if (this.#modified) {
       const content: string =
         '// DO NOT MODIFY THIS FILE MANUALLY BUT DO COMMIT IT. It is generated and used by Rush.' +
-        `${NewlineKind.Lf}${this._serialize()}`;
+        `${NewlineKind.Lf}${this.#serialize()}`;
       FileSystem.writeFile(this.filePath, content);
       this.#modified = false;
       return true;
@@ -268,7 +268,7 @@ export class RepoStateFile {
     return false;
   }
 
-  private _serialize(): string {
+  #serialize(): string {
     // We need to set these one-by-one, since JsonFile.stringify does not like undefined values
     const repoStateJson: IRepoStateJson = {};
     if (this.#pnpmShrinkwrapHash) {

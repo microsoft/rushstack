@@ -47,7 +47,7 @@ export class OperationStreamRegistry {
     this.#collatedTerminal = new CollatedTerminal(transform);
     this.#collator = new StreamCollator({
       destination: transform,
-      onWriterActive: (writer: CollatedWriter | undefined) => this._onWriterActive(writer)
+      onWriterActive: (writer: CollatedWriter | undefined) => this.#onWriterActive(writer)
     });
   }
 
@@ -74,7 +74,7 @@ export class OperationStreamRegistry {
     }
   }
 
-  private _onWriterActive(writer: CollatedWriter | undefined): void {
+  #onWriterActive(writer: CollatedWriter | undefined): void {
     if (writer === undefined) {
       return;
     }

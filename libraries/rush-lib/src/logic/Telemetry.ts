@@ -193,7 +193,7 @@ export class Telemetry {
       return;
     }
 
-    const fullPath: string = this._getFilePath();
+    const fullPath: string = this.#getFilePath();
     JsonFile.save(this.#store, fullPath, { ensureFolderExists: true, ignoreUndefinedValues: true });
     if (this.#rushSession.hooks.flushTelemetry.isUsed()) {
       /**
@@ -213,7 +213,7 @@ export class Telemetry {
     }
 
     this.#store = [];
-    this._cleanUp();
+    this.#cleanUp();
   }
 
   /**
@@ -230,7 +230,7 @@ export class Telemetry {
   /**
    * When there are too many log files, delete the old ones.
    */
-  private _cleanUp(): void {
+  #cleanUp(): void {
     if (FileSystem.exists(this.#dataFolder)) {
       const files: string[] = FileSystem.readFolderItemNames(this.#dataFolder);
       if (files.length > MAX_FILE_COUNT) {
@@ -262,7 +262,7 @@ export class Telemetry {
     }
   }
 
-  private _getFilePath(): string {
+  #getFilePath(): string {
     let fileName: string = `telemetry_${new Date().toISOString()}`;
     fileName = fileName.replace(/[\-\:\.]/g, '_') + '.json';
     return path.join(this.#dataFolder, fileName);

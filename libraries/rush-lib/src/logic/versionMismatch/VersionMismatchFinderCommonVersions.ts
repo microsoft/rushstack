@@ -26,7 +26,7 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
     const dependencies: PackageJsonDependency[] = [];
 
     this.#fileManager.getAllPreferredVersions().forEach((version, dependencyName) => {
-      dependencies.push(this._getPackageJsonDependency(dependencyName, version));
+      dependencies.push(this.#getPackageJsonDependency(dependencyName, version));
     });
 
     return dependencies;
@@ -37,7 +37,7 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
     if (!version) {
       return undefined;
     } else {
-      return this._getPackageJsonDependency(packageName, version);
+      return this.#getPackageJsonDependency(packageName, version);
     }
   }
 
@@ -67,7 +67,7 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
     return await this.#fileManager.saveAsync();
   }
 
-  private _getPackageJsonDependency(dependencyName: string, version: string): PackageJsonDependency {
+  #getPackageJsonDependency(dependencyName: string, version: string): PackageJsonDependency {
     return new PackageJsonDependency(dependencyName, version, DependencyType.Regular, () =>
       this.addOrUpdateDependency(dependencyName, version, DependencyType.Regular)
     );

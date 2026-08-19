@@ -19,7 +19,7 @@ export class ApprovedPackagesChecker {
     this.#filesAreOutOfDate = false;
 
     if (this.#approvedPackagesPolicy.enabled) {
-      this._updateApprovedPackagesPolicy();
+      this.#updateApprovedPackagesPolicy();
     }
   }
 
@@ -46,18 +46,18 @@ export class ApprovedPackagesChecker {
     }
   }
 
-  private _updateApprovedPackagesPolicy(): void {
+  #updateApprovedPackagesPolicy(): void {
     for (const rushProject of this.#rushConfiguration.projects) {
       const packageJson: IPackageJson = rushProject.packageJson;
 
-      this._collectDependencies(packageJson.dependencies, this.#approvedPackagesPolicy, rushProject);
-      this._collectDependencies(packageJson.devDependencies, this.#approvedPackagesPolicy, rushProject);
-      this._collectDependencies(packageJson.peerDependencies, this.#approvedPackagesPolicy, rushProject);
-      this._collectDependencies(packageJson.optionalDependencies, this.#approvedPackagesPolicy, rushProject);
+      this.#collectDependencies(packageJson.dependencies, this.#approvedPackagesPolicy, rushProject);
+      this.#collectDependencies(packageJson.devDependencies, this.#approvedPackagesPolicy, rushProject);
+      this.#collectDependencies(packageJson.peerDependencies, this.#approvedPackagesPolicy, rushProject);
+      this.#collectDependencies(packageJson.optionalDependencies, this.#approvedPackagesPolicy, rushProject);
     }
   }
 
-  private _collectDependencies(
+  #collectDependencies(
     dependencies: { [key: string]: string } | undefined,
     approvedPackagesPolicy: ApprovedPackagesPolicy,
     rushProject: RushConfigurationProject

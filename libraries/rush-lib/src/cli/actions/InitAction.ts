@@ -61,16 +61,16 @@ export class InitAction extends BaseConfiglessRushAction {
     const initFolder: string = process.cwd();
 
     if (!this.#overwriteParameter.value) {
-      if (!this._validateFolderIsEmpty(initFolder)) {
+      if (!this.#validateFolderIsEmpty(initFolder)) {
         throw new AlreadyReportedError();
       }
     }
 
-    await this._copyTemplateFilesAsync(initFolder);
+    await this.#copyTemplateFilesAsync(initFolder);
   }
 
   // Check whether it's safe to run "rush init" in the current working directory.
-  private _validateFolderIsEmpty(initFolder: string): boolean {
+  #validateFolderIsEmpty(initFolder: string): boolean {
     if (this.rushConfiguration !== undefined) {
       // eslint-disable-next-line no-console
       console.error(
@@ -113,7 +113,7 @@ export class InitAction extends BaseConfiglessRushAction {
     return true;
   }
 
-  private async _copyTemplateFilesAsync(initFolder: string): Promise<void> {
+  async #copyTemplateFilesAsync(initFolder: string): Promise<void> {
     // The "[dot]" base name is used for hidden files to prevent various tools from interpreting them.
     // For example, "npm publish" will always exclude the filename ".gitignore"
     const templateFilePaths: string[] = [

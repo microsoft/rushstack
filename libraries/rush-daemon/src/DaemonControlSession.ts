@@ -35,7 +35,7 @@ export class DaemonControlSession {
   public constructor(connection: DaemonFrameConnection, options: IDaemonControlSessionOptions) {
     this.#connection = connection;
     this.#options = options;
-    connection.onFrame((frame: IDaemonFrame) => this._onFrame(frame));
+    connection.onFrame((frame: IDaemonFrame) => this.#onFrame(frame));
     connection.onClosed((error: Error | undefined) => options.onClosed(this, error));
   }
 
@@ -43,7 +43,7 @@ export class DaemonControlSession {
     return this.#connection.closeAsync();
   }
 
-  private _onFrame(frame: IDaemonFrame): void {
+  #onFrame(frame: IDaemonFrame): void {
     if (frame.kind !== DaemonFrameType.controlJson) {
       throw new DaemonProtocolError(
         'malformedControlMessage',
@@ -52,9 +52,9 @@ export class DaemonControlSession {
     }
     const message: DaemonControlMessage = decodeDaemonControlMessage(frame.payload);
     if (!this.#handshakeComplete) {
-      this._handleHello(message);
+      this.#handleHello(message);
     } else if (message.kind === 'ping') {
-      this._send(this._createPong());
+      this.#send(this.#createPong());
     } else {
       throw new DaemonProtocolError(
         'malformedControlMessage',
@@ -63,7 +63,7 @@ export class DaemonControlSession {
     }
   }
 
-  private _handleHello(message: DaemonControlMessage): void {
+  #handleHello(message: DaemonControlMessage): void {
     if (message.kind !== 'hello') {
       throw new DaemonProtocolError(
         'malformedControlMessage',
@@ -77,17 +77,17 @@ export class DaemonControlSession {
     );
     if (outcome.accepted) {
       this.#handshakeComplete = true;
-      this._send(outcome.ack);
+      this.#send(outcome.ack);
     } else {
       const errorMessage: IDaemonErrorMessage = {
         kind: 'error',
         payload: { code: outcome.error.code, message: outcome.error.message }
       };
-      this._send(errorMessage, true);
+      this.#send(errorMessage, true);
     }
   }
 
-  private _createPong(): IDaemonPongMessage {
+  #createPong(): IDaemonPongMessage {
     return {
       kind: 'pong',
       payload: {
@@ -98,7 +98,7 @@ export class DaemonControlSession {
     };
   }
 
-  private _send(message: DaemonControlMessage, closeAfterSend: boolean = false): void {
+  #send(message: DaemonControlMessage, closeAfterSend: boolean = false): void {
     const frame: IDaemonFrame = {
       kind: DaemonFrameType.controlJson,
       payload: encodeDaemonControlMessage(message)
@@ -106,10 +106,10 @@ export class DaemonControlSession {
     this.#sendQueue = this.#sendQueue
       .then(() => this.#connection.sendFrameAsync(frame))
       .then(() => (closeAfterSend ? this.#connection.closeAsync() : undefined))
-      .catch((error: unknown) => this._handleSendErrorAsync(error));
+      .catch((error: unknown) => this.#handleSendErrorAsync(error));
   }
 
-  private async _handleSendErrorAsync(error: unknown): Promise<void> {
+  async #handleSendErrorAsync(error: unknown): Promise<void> {
     const normalizedError: Error = error instanceof Error ? error : new Error(String(error));
     this.#options.onError(normalizedError);
     await this.#connection.closeAsync();

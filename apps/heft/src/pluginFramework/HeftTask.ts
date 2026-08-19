@@ -112,12 +112,12 @@ export class HeftTask implements IHeftTask {
     this.#taskName = taskName;
     this.#taskSpecifier = taskSpecifier;
 
-    this._validate();
+    this.#validate();
   }
 
   public async ensureInitializedAsync(): Promise<void> {
     if (!this.#taskPluginDefinition) {
-      this.#taskPluginDefinition = await this._loadTaskPluginDefinitionAsync();
+      this.#taskPluginDefinition = await this.#loadTaskPluginDefinitionAsync();
       this.pluginDefinition.validateOptions(this.pluginOptions);
     }
   }
@@ -130,7 +130,7 @@ export class HeftTask implements IHeftTask {
     return this.#taskPlugin;
   }
 
-  private async _loadTaskPluginDefinitionAsync(): Promise<HeftTaskPluginDefinition> {
+  async #loadTaskPluginDefinitionAsync(): Promise<HeftTaskPluginDefinition> {
     // taskPlugin.pluginPackage should already be resolved to the package root.
     // See CoreConfigFiles.heftConfigFileLoader
     const pluginSpecifier: IHeftConfigurationJsonPluginSpecifier = this.#taskSpecifier.taskPlugin;
@@ -151,7 +151,7 @@ export class HeftTask implements IHeftTask {
     return pluginDefinition;
   }
 
-  private _validate(): void {
+  #validate(): void {
     if (RESERVED_TASK_NAMES.has(this.taskName)) {
       throw new Error(
         `Task name ${JSON.stringify(this.taskName)} is reserved and cannot be used as a task name.`

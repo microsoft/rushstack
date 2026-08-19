@@ -116,12 +116,12 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
     taskSession.hooks.runIncremental.tapPromise(
       PLUGIN_NAME,
       async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
-        await this._runCommandAsync(taskSession, heftConfiguration);
+        await this.#runCommandAsync(taskSession, heftConfiguration);
       }
     );
   }
 
-  private async _loadStageConfigurationAsync(
+  async #loadStageConfigurationAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
@@ -184,21 +184,21 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
     }
   }
 
-  private async _runCommandAsync(
+  async #runCommandAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
-    await this._loadStageConfigurationAsync(taskSession, heftConfiguration);
+    await this.#loadStageConfigurationAsync(taskSession, heftConfiguration);
     if (!this.#pluginEnabled) {
       return;
     }
 
     this.#logger.terminal.writeLine(`Starting Node service...`);
-    await this._stopChildAsync();
-    this._startChild();
+    await this.#stopChildAsync();
+    this.#startChild();
   }
 
-  private async _stopChildAsync(): Promise<void> {
+  async #stopChildAsync(): Promise<void> {
     if (this.#state !== State.Running) {
       if (this.#childProcessExitPromise) {
         // If we have an active process but are not in the running state, we must be in the process of
@@ -210,7 +210,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
 
     if (_isWindows) {
       // On Windows, SIGTERM can kill Cmd.exe and leave its children running in the background
-      this._transitionToKilling();
+      this.#transitionToKilling();
     } else {
       if (!this.#activeChildProcess) {
         // All the code paths that set _activeChildProcess=undefined should also leave the Running state
@@ -229,12 +229,12 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
         process.kill(-pid, 'SIGTERM');
       }
 
-      this._clearTimeout();
+      this.#clearTimeout();
       this.#timeout = setTimeout(() => {
         try {
           if (this.#state !== State.Stopped) {
             this.#logger.terminal.writeWarningLine('The service process is taking too long to terminate');
-            this._transitionToKilling();
+            this.#transitionToKilling();
           }
         } catch (e: unknown) {
           this.#childProcessExitPromiseRejectFn!(e);
@@ -245,7 +245,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
     await this.#childProcessExitPromise;
   }
 
-  private _transitionToKilling(): void {
+  #transitionToKilling(): void {
     this.#state = State.Killing;
 
     if (!this.#activeChildProcess) {
@@ -257,14 +257,14 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
 
     SubprocessTerminator.killProcessTree(this.#activeChildProcess, SubprocessTerminator.RECOMMENDED_OPTIONS);
 
-    this._clearTimeout();
+    this.#clearTimeout();
     this.#timeout = setTimeout(() => {
       try {
         if (this.#state !== State.Stopped) {
           this.#logger.terminal.writeErrorLine(
             'Abandoning the service process because it could not be killed'
           );
-          this._transitionToStopped();
+          this.#transitionToStopped();
         }
       } catch (e: unknown) {
         this.#childProcessExitPromiseRejectFn!(e);
@@ -272,21 +272,21 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
     }, this.#configuration.waitForKillMs);
   }
 
-  private _transitionToStopped(): void {
+  #transitionToStopped(): void {
     // Failed to start
     this.#state = State.Stopped;
-    this._clearTimeout();
+    this.#clearTimeout();
     this.#activeChildProcess = undefined;
     this.#childProcessExitPromiseResolveFn!();
   }
 
-  private _startChild(): void {
+  #startChild(): void {
     if (this.#state !== State.Stopped) {
       throw new InternalError('Invalid state');
     }
 
     this.#state = State.Running;
-    this._clearTimeout();
+    this.#clearTimeout();
     this.#logger.terminal.writeLine(`Invoking command: "${this.#shellCommand!}"`);
 
     const childProcess: child_process.ChildProcess = child_process.spawn(this.#shellCommand!, {
@@ -324,18 +324,18 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
           if (this.#state === State.Running) {
             this.#logger.terminal.writeWarningLine(
               `The service process #${childPid} terminated unexpectedly` +
-                this._formatCodeOrSignal(exitCode, signal)
+                this.#formatCodeOrSignal(exitCode, signal)
             );
-            this._transitionToStopped();
+            this.#transitionToStopped();
             return;
           }
 
           if (this.#state === State.Stopping || this.#state === State.Killing) {
             this.#logger.terminal.writeVerboseLine(
               `The service process #${childPid} terminated successfully` +
-                this._formatCodeOrSignal(exitCode, signal)
+                this.#formatCodeOrSignal(exitCode, signal)
             );
-            this._transitionToStopped();
+            this.#transitionToStopped();
             return;
           }
         } catch (e: unknown) {
@@ -348,7 +348,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
           // Under normal conditions we don't reject the promise here, because 'data' events can continue
           // to fire as data is flushed, before finally concluding with the 'close' event.
           this.#logger.terminal.writeVerboseLine(
-            `The service process fired its "exit" event` + this._formatCodeOrSignal(code, signal)
+            `The service process fired its "exit" event` + this.#formatCodeOrSignal(code, signal)
           );
         } catch (e: unknown) {
           reject(e);
@@ -367,7 +367,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
 
           if (this.#state === State.Running) {
             this.#logger.terminal.writeErrorLine(`Failed to start: ` + err.toString());
-            this._transitionToStopped();
+            this.#transitionToStopped();
             return;
           }
 
@@ -375,7 +375,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
             this.#logger.terminal.writeWarningLine(
               `The service process #${childPid} rejected the shutdown signal: ` + err.toString()
             );
-            this._transitionToKilling();
+            this.#transitionToKilling();
             return;
           }
 
@@ -383,7 +383,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
             this.#logger.terminal.writeErrorLine(
               `The service process #${childPid} could not be killed: ` + err.toString()
             );
-            this._transitionToStopped();
+            this.#transitionToStopped();
             return;
           }
         } catch (e: unknown) {
@@ -395,14 +395,15 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
     this.#activeChildProcess = childProcess;
   }
 
-  private _clearTimeout(): void {
+  #clearTimeout(): void {
     if (this.#timeout) {
       clearTimeout(this.#timeout);
       this.#timeout = undefined;
     }
   }
 
-  private _formatCodeOrSignal(code: number | null | undefined, signal: string | null | undefined): string {
+  // eslint-disable-next-line @rushstack/no-new-null -- The decoupled ESLint plugin does not recognize native private methods yet.
+  #formatCodeOrSignal(code: number | null | undefined, signal: string | null | undefined): string {
     if (signal) {
       return ` (signal=${code})`;
     }

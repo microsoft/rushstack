@@ -19,7 +19,7 @@ export class WatchManager {
     this.projects.push(...projects);
 
     for (const project of projects) {
-      this._calculateCriticalPathLength(project);
+      this.#calculateCriticalPathLength(project);
     }
   }
 
@@ -37,7 +37,7 @@ export class WatchManager {
 
     if (project.live) {
       if (this.activeProject === undefined) {
-        this._activateProject(project);
+        this.#activateProject(project);
       } else if (project.live) {
         project.printBufferedLines(this.#terminal);
       }
@@ -49,10 +49,10 @@ export class WatchManager {
 
     // If this project was active, print its results
     if (this.activeProject === project) {
-      this._clearActiveProject();
+      this.#clearActiveProject();
     }
 
-    this._printCompletedAndActivateSomething();
+    this.#printCompletedAndActivateSomething();
   }
 
   public markFailed(project: WatchProject): void {
@@ -62,7 +62,7 @@ export class WatchManager {
       // If this failure caused the currently active project to become dead, then interrupt it
       if (!this.activeProject.live) {
         this.#terminal.writeLine(`>>> (interrupted by upstream project)`);
-        this._clearActiveProject();
+        this.#clearActiveProject();
       } else {
         // If we wanted to see failures as soon as possible, we could also interrupt a live
         // project that is still building.  However being "live" means that its
@@ -70,10 +70,10 @@ export class WatchManager {
       }
     }
 
-    this._printCompletedAndActivateSomething();
+    this.#printCompletedAndActivateSomething();
   }
 
-  private _printCompletedAndActivateSomething(): void {
+  #printCompletedAndActivateSomething(): void {
     if (this.activeProject !== undefined) {
       return;
     }
@@ -94,8 +94,8 @@ export class WatchManager {
       for (const project of this.projects) {
         if (project.live && project.state === WatchState.Succeeded && !project.reported) {
           // Flush the project's output
-          this._activateProject(project);
-          this._clearActiveProject();
+          this.#activateProject(project);
+          this.#clearActiveProject();
         }
       }
     }
@@ -104,8 +104,8 @@ export class WatchManager {
     for (const project of this.projects) {
       if (project.live && project.state === WatchState.Failed && !project.reported) {
         // Flush the project's output
-        this._activateProject(project);
-        this._clearActiveProject();
+        this.#activateProject(project);
+        this.#clearActiveProject();
         anyFailuresReported = true;
       }
     }
@@ -124,12 +124,12 @@ export class WatchManager {
         }
       }
       if (candidate !== undefined) {
-        this._activateProject(candidate);
+        this.#activateProject(candidate);
       }
     }
   }
 
-  private _calculateCriticalPathLength(project: WatchProject): void {
+  #calculateCriticalPathLength(project: WatchProject): void {
     if (project.criticalPathLength >= 0) {
       return; // already calculated
     }
@@ -140,7 +140,7 @@ export class WatchManager {
     project.criticalPathLength = -2;
     let max: number = 0;
     for (const consumer of project.consumers) {
-      this._calculateCriticalPathLength(consumer);
+      this.#calculateCriticalPathLength(consumer);
       if (consumer.criticalPathLength > max) {
         max = consumer.criticalPathLength;
       }
@@ -148,14 +148,14 @@ export class WatchManager {
     project.criticalPathLength = max;
   }
 
-  private _activateProject(project: WatchProject): void {
+  #activateProject(project: WatchProject): void {
     this.activeProject = project;
     this.#terminal.writeLine(`>>> REBUILD ${project.name} -----------------------------------`);
     // Print any buffered data
     project.printBufferedLines(this.#terminal);
   }
 
-  private _clearActiveProject(): void {
+  #clearActiveProject(): void {
     if (this.activeProject !== undefined) {
       this.activeProject.printBufferedLines(this.#terminal);
       let verb: string;

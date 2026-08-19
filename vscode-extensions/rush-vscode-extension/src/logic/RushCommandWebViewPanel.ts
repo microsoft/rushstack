@@ -73,7 +73,7 @@ export class RushCommandWebViewPanel {
       // eslint-disable-next-line no-console
       console.log('message', message);
       thisWebview.webview.options = { enableScripts: true };
-      thisWebview.webview.html = this._getWebviewContent();
+      thisWebview.webview.html = this.#getWebviewContent();
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       thisWebview.webview.postMessage(message);
     };
@@ -153,14 +153,14 @@ export class RushCommandWebViewPanel {
     // }
   }
 
-  private _setWebviewContent(state: IRootState): void {
+  #setWebviewContent(state: IRootState): void {
     if (!this.#panel) {
       return;
     }
-    this.#panel.webview.html = this._getWebviewContent(state);
+    this.#panel.webview.html = this.#getWebviewContent(state);
   }
 
-  private _getWebviewContent(state: unknown = {}): string {
+  #getWebviewContent(state: unknown = {}): string {
     // eslint-disable-next-line no-console
     console.log('loading rush command webview html and bundle');
     let html: string = FileSystem.readFile(

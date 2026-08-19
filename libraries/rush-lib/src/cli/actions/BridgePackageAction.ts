@@ -49,7 +49,7 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
     });
   }
 
-  private _getSubspacesToBridgeAsync(): Set<Subspace> {
+  #getSubspacesToBridgeAsync(): Set<Subspace> {
     const subspaceToBridge: Set<Subspace> = new Set();
     const subspaceNames: readonly string[] = this.#subspaceNamesParameter.values;
 
@@ -80,7 +80,7 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
     hotlinkManager: HotlinkManager
   ): Promise<void> {
     const version: string = this.#versionParameter.value;
-    const subspaces: Set<Subspace> = await this._getSubspacesToBridgeAsync();
+    const subspaces: Set<Subspace> = await this.#getSubspacesToBridgeAsync();
     await Async.forEachAsync(
       subspaces,
       async (subspace) => {

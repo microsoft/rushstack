@@ -29,13 +29,13 @@ export class RushMCPServer extends McpServer {
   }
 
   public async startAsync(): Promise<void> {
-    this._initializeTools();
-    this._registerTools();
+    this.#initializeTools();
+    this.#registerTools();
 
     await this.#pluginLoader.loadAsync();
   }
 
-  private _initializeTools(): void {
+  #initializeTools(): void {
     this.#tools.push(new RushConflictResolverTool());
     this.#tools.push(new RushMigrateProjectTool(this.#rushWorkspacePath));
     this.#tools.push(new RushCommandValidatorTool());
@@ -43,7 +43,7 @@ export class RushMCPServer extends McpServer {
     this.#tools.push(new RushProjectDetailsTool());
   }
 
-  private _registerTools(): void {
+  #registerTools(): void {
     process.chdir(this.#rushWorkspacePath);
 
     for (const tool of this.#tools) {

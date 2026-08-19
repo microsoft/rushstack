@@ -104,7 +104,7 @@ export class HeftLifecycle extends HeftPluginHost {
         });
       }
       loadPluginPromises.push(
-        this._getLifecyclePluginForPluginDefinitionAsync(pluginDefinition, lifecycleContext.lifecycleSession)
+        this.#getLifecyclePluginForPluginDefinitionAsync(pluginDefinition, lifecycleContext.lifecycleSession)
       );
     }
 
@@ -219,7 +219,7 @@ export class HeftLifecycle extends HeftPluginHost {
     return lifecycleContext.lifecycleSession;
   }
 
-  private async _getLifecyclePluginForPluginDefinitionAsync(
+  async #getLifecyclePluginForPluginDefinitionAsync(
     pluginDefinition: HeftLifecyclePluginDefinition,
     lifecycleSession: IHeftLifecycleSession
   ): Promise<IHeftLifecyclePlugin<object | void>> {

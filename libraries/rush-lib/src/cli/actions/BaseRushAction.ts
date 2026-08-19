@@ -61,7 +61,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    this._ensureEnvironment();
+    this.#ensureEnvironment();
 
     if (this.rushConfiguration) {
       if (!this.#safeForSimultaneousRushProcesses) {
@@ -87,7 +87,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
    */
   protected abstract runAsync(): Promise<void>;
 
-  private _ensureEnvironment(): void {
+  #ensureEnvironment(): void {
     if (this.rushConfiguration) {
       // eslint-disable-next-line dot-notation
       let environmentPath: string | undefined = process.env['PATH'];
@@ -122,13 +122,13 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
       throw Utilities.getRushConfigNotFoundError();
     }
 
-    this._throwPluginErrorIfNeed();
+    this.#throwPluginErrorIfNeed();
 
     await measureAsyncFn(`${PERF_PREFIX}:initializePluginsAsync`, () =>
       this.parser.pluginManager.tryInitializeAssociatedCommandPluginsAsync(this.actionName)
     );
 
-    this._throwPluginErrorIfNeed();
+    this.#throwPluginErrorIfNeed();
 
     const { hooks: sessionHooks } = this.rushSession;
     await measureAsyncFn(`${PERF_PREFIX}:initializePlugins`, async () => {
@@ -145,7 +145,7 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
    * If an error is encountered while trying to load plugins, it is saved in the `PluginManager.error`
    * property, so we can defer throwing it until when `_throwPluginErrorIfNeed()` is called.
    */
-  private _throwPluginErrorIfNeed(): void {
+  #throwPluginErrorIfNeed(): void {
     // If the plugin configuration is broken, these three commands are used to fix the problem:
     //
     //   "rush update"
