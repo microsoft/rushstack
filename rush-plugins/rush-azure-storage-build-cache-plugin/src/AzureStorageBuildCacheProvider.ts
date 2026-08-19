@@ -46,15 +46,15 @@ export class AzureStorageBuildCacheProvider
   extends AzureStorageAuthentication
   implements ICloudBuildCacheProvider
 {
-  private readonly _blobPrefix: string | undefined;
-  private readonly _environmentCredential: string | undefined;
-  private readonly _readRequiresAuthentication: boolean;
+  readonly #blobPrefix: string | undefined;
+  readonly #environmentCredential: string | undefined;
+  readonly #readRequiresAuthentication: boolean;
 
   public get isCacheWriteAllowed(): boolean {
     return EnvironmentConfiguration.buildCacheWriteAllowed ?? this._isCacheWriteAllowedByConfiguration;
   }
 
-  private _containerClient: ContainerClient | undefined;
+  #containerClient: ContainerClient | undefined;
 
   public constructor(options: IAzureStorageBuildCacheProviderOptions) {
     super({
@@ -62,9 +62,9 @@ export class AzureStorageBuildCacheProvider
       ...options
     });
 
-    this._blobPrefix = options.blobPrefix;
-    this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
-    this._readRequiresAuthentication = !!options.readRequiresAuthentication;
+    this.#blobPrefix = options.blobPrefix;
+    this.#environmentCredential = EnvironmentConfiguration.buildCacheCredential;
+    this.#readRequiresAuthentication = !!options.readRequiresAuthentication;
 
     if (!(this._azureEnvironment in AzureAuthorityHosts)) {
       throw new Error(
@@ -212,7 +212,7 @@ export class AzureStorageBuildCacheProvider
 
   private async _getBlobClientForCacheIdAsync(cacheId: string, terminal: ITerminal): Promise<BlobClient> {
     const client: ContainerClient = await this._getContainerClientAsync(terminal);
-    const blobName: string = this._blobPrefix ? `${this._blobPrefix}/${cacheId}` : cacheId;
+    const blobName: string = this.#blobPrefix ? `${this.#blobPrefix}/${cacheId}` : cacheId;
     return client.getBlobClient(blobName);
   }
 
@@ -253,8 +253,8 @@ export class AzureStorageBuildCacheProvider
   }
 
   private async _getContainerClientAsync(terminal: ITerminal): Promise<ContainerClient> {
-    if (!this._containerClient) {
-      let sasString: string | undefined = this._environmentCredential;
+    if (!this.#containerClient) {
+      let sasString: string | undefined = this.#environmentCredential;
       if (!sasString) {
         const credentialEntry: ICredentialCacheEntry | undefined = await this.tryGetCachedCredentialAsync({
           expiredCredentialBehavior: 'logWarning',
@@ -268,7 +268,7 @@ export class AzureStorageBuildCacheProvider
       if (sasString) {
         const connectionString: string = this._getConnectionString(sasString);
         blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
-      } else if (!this._readRequiresAuthentication && !this._isCacheWriteAllowedByConfiguration) {
+      } else if (!this.#readRequiresAuthentication && !this._isCacheWriteAllowedByConfiguration) {
         // If we don't have a credential and read doesn't require authentication, we can still read from the cache.
         blobServiceClient = new BlobServiceClient(this._storageAccountUrl);
       } else {
@@ -280,10 +280,10 @@ export class AzureStorageBuildCacheProvider
         );
       }
 
-      this._containerClient = blobServiceClient.getContainerClient(this._storageContainerName);
+      this.#containerClient = blobServiceClient.getContainerClient(this._storageContainerName);
     }
 
-    return this._containerClient;
+    return this.#containerClient;
   }
 
   private _getConnectionString(sasString: string | undefined): string {

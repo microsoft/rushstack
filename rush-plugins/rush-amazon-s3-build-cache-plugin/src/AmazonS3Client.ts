@@ -100,13 +100,13 @@ async function _hashFileAsync(filePath: string): Promise<string> {
  * @public
  */
 export class AmazonS3Client {
-  private readonly _credentials: IAmazonS3Credentials | undefined;
-  private readonly _s3Endpoint: string;
-  private readonly _s3Region: string;
+  readonly #credentials: IAmazonS3Credentials | undefined;
+  readonly #s3Endpoint: string;
+  readonly #s3Region: string;
 
-  private readonly _webClient: WebClient;
+  readonly #webClient: WebClient;
 
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(
     credentials: IAmazonS3Credentials | undefined,
@@ -114,15 +114,15 @@ export class AmazonS3Client {
     webClient: WebClient,
     terminal: ITerminal
   ) {
-    this._credentials = credentials;
-    this._terminal = terminal;
+    this.#credentials = credentials;
+    this.#terminal = terminal;
 
     this._validateEndpoint(options.s3Endpoint);
 
-    this._s3Endpoint = options.s3Endpoint;
-    this._s3Region = options.s3Region;
+    this.#s3Endpoint = options.s3Endpoint;
+    this.#s3Region = options.s3Region;
 
-    this._webClient = webClient;
+    this.#webClient = webClient;
   }
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html#create-signature-presign-entire-payload
@@ -159,7 +159,7 @@ export class AmazonS3Client {
   }
 
   public async uploadObjectAsync(objectName: string, objectBuffer: Buffer): Promise<void> {
-    if (!this._credentials) {
+    if (!this.#credentials) {
       throw new Error('Credentials are required to upload objects to S3.');
     }
 
@@ -219,7 +219,7 @@ export class AmazonS3Client {
    * because the stream is consumed after the first attempt.
    */
   public async uploadObjectFromFileAsync(objectName: string, localFilePath: string): Promise<void> {
-    if (!this._credentials) {
+    if (!this.#credentials) {
       throw new Error('Credentials are required to upload objects to S3.');
     }
 
@@ -246,7 +246,7 @@ export class AmazonS3Client {
   private _writeDebugLine(...messageParts: string[]): void {
     // if the terminal has been closed then don't bother sending a debug message
     try {
-      this._terminal.writeDebugLine(...messageParts);
+      this.#terminal.writeDebugLine(...messageParts);
     } catch (err) {
       // ignore error
     }
@@ -255,7 +255,7 @@ export class AmazonS3Client {
   private _writeWarningLine(...messageParts: string[]): void {
     // if the terminal has been closed then don't bother sending a warning message
     try {
-      this._terminal.writeWarningLine(...messageParts);
+      this.#terminal.writeWarningLine(...messageParts);
     } catch (err) {
       // ignore error
     }
@@ -283,7 +283,7 @@ export class AmazonS3Client {
         hasNetworkError: false,
         response: undefined
       };
-    } else if ((status === 400 || status === 401 || status === 403) && !this._credentials) {
+    } else if ((status === 400 || status === 401 || status === 403) && !this.#credentials) {
       cleanup?.();
       // unauthorized due to not providing credentials,
       // silence error for better DX when e.g. running locally without credentials
@@ -357,9 +357,9 @@ export class AmazonS3Client {
           };
 
     if (stream) {
-      return await this._webClient.fetchStreamAsync(url, webFetchOptions);
+      return await this.#webClient.fetchStreamAsync(url, webFetchOptions);
     } else {
-      return await this._webClient.fetchAsync(url, webFetchOptions);
+      return await this.#webClient.fetchAsync(url, webFetchOptions);
     }
   }
 
@@ -381,11 +381,11 @@ export class AmazonS3Client {
     }
 
     // the host can be e.g. https://s3.aws.com or http://localhost:9000
-    const host: string = this._s3Endpoint.replace(protocolRegex, '');
+    const host: string = this.#s3Endpoint.replace(protocolRegex, '');
     const canonicalUri: string = AmazonS3Client.UriEncode(`/${objectName}`);
     this._writeDebugLine(Colorize.bold('Canonical URI: '), canonicalUri);
 
-    if (this._credentials) {
+    if (this.#credentials) {
       // Compute the authorization header. See https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
       const canonicalHeaders: string[] = [
         `${HOST_HEADER_NAME}:${host}`,
@@ -394,8 +394,8 @@ export class AmazonS3Client {
       ];
 
       // Handle signing with temporary credentials (via sts:assume-role)
-      if (this._credentials.sessionToken) {
-        canonicalHeaders.push(`${SECURITY_TOKEN_HEADER_NAME}:${this._credentials.sessionToken}`);
+      if (this.#credentials.sessionToken) {
+        canonicalHeaders.push(`${SECURITY_TOKEN_HEADER_NAME}:${this.#credentials.sessionToken}`);
       }
 
       // the canonical headers must be sorted by header name
@@ -441,7 +441,7 @@ export class AmazonS3Client {
       ].join('\n');
       const canonicalRequestHash: string = this._getBufferSha256(canonicalRequest);
 
-      const scope: string = `${isoDateString.date}/${this._s3Region}/s3/aws4_request`;
+      const scope: string = `${isoDateString.date}/${this.#s3Region}/s3/aws4_request`;
       // The string to sign looks like this:
       // AWS4-HMAC-SHA256
       // 20130524T423589Z
@@ -455,24 +455,24 @@ export class AmazonS3Client {
       ].join('\n');
 
       const dateKey: Buffer = this._getSha256Hmac(
-        `AWS4${this._credentials.secretAccessKey}`,
+        `AWS4${this.#credentials.secretAccessKey}`,
         isoDateString.date
       );
-      const dateRegionKey: Buffer = this._getSha256Hmac(dateKey, this._s3Region);
+      const dateRegionKey: Buffer = this._getSha256Hmac(dateKey, this.#s3Region);
       const dateRegionServiceKey: Buffer = this._getSha256Hmac(dateRegionKey, 's3');
       const signingKey: Buffer = this._getSha256Hmac(dateRegionServiceKey, 'aws4_request');
       const signature: string = this._getSha256Hmac(signingKey, stringToSign, 'hex');
 
-      const authorizationHeader: string = `AWS4-HMAC-SHA256 Credential=${this._credentials.accessKeyId}/${scope},SignedHeaders=${signedHeaderNamesString},Signature=${signature}`;
+      const authorizationHeader: string = `AWS4-HMAC-SHA256 Credential=${this.#credentials.accessKeyId}/${scope},SignedHeaders=${signedHeaderNamesString},Signature=${signature}`;
 
       headers[AUTHORIZATION_HEADER_NAME] = authorizationHeader;
-      if (this._credentials.sessionToken) {
+      if (this.#credentials.sessionToken) {
         // Handle signing with temporary credentials (via sts:assume-role)
-        headers['X-Amz-Security-Token'] = this._credentials.sessionToken;
+        headers['X-Amz-Security-Token'] = this.#credentials.sessionToken;
       }
     }
 
-    const url: string = `${this._s3Endpoint}${canonicalUri}`;
+    const url: string = `${this.#s3Endpoint}${canonicalUri}`;
 
     this._writeDebugLine(Colorize.bold(Colorize.underline('Sending request to S3')));
     this._writeDebugLine(Colorize.bold('HOST: '), url);

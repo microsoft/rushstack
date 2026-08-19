@@ -45,10 +45,10 @@ const DROP_GRAPH_PARAMETER_LONG_NAME: '--drop-graph' = '--drop-graph';
  */
 export class DropBuildGraphPlugin implements IRushPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
-  private readonly _buildXLCommandNames: string[];
+  readonly #buildXLCommandNames: string[];
 
   public constructor(options: IDropGraphPluginOptions) {
-    this._buildXLCommandNames = options.buildXLCommandNames;
+    this.#buildXLCommandNames = options.buildXLCommandNames;
   }
 
   public apply(session: RushSession, rushConfiguration: RushConfiguration): void {
@@ -95,7 +95,7 @@ export class DropBuildGraphPlugin implements IRushPlugin {
       }
     }
 
-    for (const buildXLCommandName of this._buildXLCommandNames) {
+    for (const buildXLCommandName of this.#buildXLCommandNames) {
       session.hooks.runPhasedCommand.for(buildXLCommandName).tap(PLUGIN_NAME, (command: IPhasedCommand) => {
         command.hooks.createOperationsAsync.tapPromise(
           {

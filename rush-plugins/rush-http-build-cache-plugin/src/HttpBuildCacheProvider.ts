@@ -70,21 +70,21 @@ const MAX_HTTP_CACHE_ATTEMPTS: number = 3;
 const DEFAULT_MIN_HTTP_RETRY_DELAY_MS: number = 2500;
 
 export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
-  private readonly _pluginName: string;
-  private readonly _rushProjectRoot: string;
-  private readonly _environmentCredential: string | undefined;
-  private readonly _isCacheWriteAllowedByConfiguration: boolean;
-  private readonly _url: URL;
-  private readonly _uploadMethod: UploadMethod;
-  private readonly _headers: Record<string, string>;
-  private readonly _cacheKeyPrefix: string;
-  private readonly _tokenHandler: IHttpBuildCacheTokenHandler | undefined;
-  private readonly _minHttpRetryDelayMs: number;
-  private readonly _webClient: WebClient = new WebClient();
-  private __credentialCacheId: string | undefined;
+  readonly #pluginName: string;
+  readonly #rushProjectRoot: string;
+  readonly #environmentCredential: string | undefined;
+  readonly #isCacheWriteAllowedByConfiguration: boolean;
+  readonly #url: URL;
+  readonly #uploadMethod: UploadMethod;
+  readonly #headers: Record<string, string>;
+  readonly #cacheKeyPrefix: string;
+  readonly #tokenHandler: IHttpBuildCacheTokenHandler | undefined;
+  readonly #minHttpRetryDelayMs: number;
+  readonly #webClient: WebClient = new WebClient();
+  #_credentialCacheId: string | undefined;
 
   public get isCacheWriteAllowed(): boolean {
-    return EnvironmentConfiguration.buildCacheWriteAllowed ?? this._isCacheWriteAllowedByConfiguration;
+    return EnvironmentConfiguration.buildCacheWriteAllowed ?? this.#isCacheWriteAllowedByConfiguration;
   }
 
   public constructor(options: IHttpBuildCacheProviderOptions, rushSession: RushSession) {
@@ -100,17 +100,17 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
       minHttpRetryDelayMs = DEFAULT_MIN_HTTP_RETRY_DELAY_MS
     } = options;
 
-    this._pluginName = pluginName;
-    this._rushProjectRoot = rushJsonFolder;
+    this.#pluginName = pluginName;
+    this.#rushProjectRoot = rushJsonFolder;
 
-    this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
-    this._isCacheWriteAllowedByConfiguration = isCacheWriteAllowed;
-    this._url = new URL(url.endsWith('/') ? url : url + '/');
-    this._uploadMethod = uploadMethod;
-    this._headers = headers;
-    this._tokenHandler = tokenHandler;
-    this._cacheKeyPrefix = cacheKeyPrefix;
-    this._minHttpRetryDelayMs = minHttpRetryDelayMs;
+    this.#environmentCredential = EnvironmentConfiguration.buildCacheCredential;
+    this.#isCacheWriteAllowedByConfiguration = isCacheWriteAllowed;
+    this.#url = new URL(url.endsWith('/') ? url : url + '/');
+    this.#uploadMethod = uploadMethod;
+    this.#headers = headers;
+    this.#tokenHandler = tokenHandler;
+    this.#cacheKeyPrefix = cacheKeyPrefix;
+    this.#minHttpRetryDelayMs = minHttpRetryDelayMs;
   }
 
   public async tryGetCacheEntryBufferByIdAsync(
@@ -120,7 +120,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     try {
       const result: boolean | Buffer = await this._makeHttpRequestAsync({
         terminal,
-        relUrl: `${this._cacheKeyPrefix}${cacheId}`,
+        relUrl: `${this.#cacheKeyPrefix}${cacheId}`,
         method: 'GET',
         body: undefined,
         warningText: 'Could not get cache entry',
@@ -147,8 +147,8 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     try {
       const result: boolean | Buffer = await this._makeHttpRequestAsync({
         terminal,
-        relUrl: `${this._cacheKeyPrefix}${cacheId}`,
-        method: this._uploadMethod,
+        relUrl: `${this.#cacheKeyPrefix}${cacheId}`,
+        method: this.#uploadMethod,
         body: objectBuffer,
         warningText: 'Could not write cache entry',
         readBody: false,
@@ -170,7 +170,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     try {
       const result: IWebClientStreamResponse | false = await this._makeHttpStreamRequestAsync({
         terminal,
-        relUrl: `${this._cacheKeyPrefix}${cacheId}`,
+        relUrl: `${this.#cacheKeyPrefix}${cacheId}`,
         method: 'GET',
         body: undefined,
         warningText: 'Could not get cache entry',
@@ -206,8 +206,8 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
       const entryStream: FileSystemReadStream = FileSystem.createReadStream(localFilePath);
       const result: IWebClientStreamResponse | false = await this._makeHttpStreamRequestAsync({
         terminal,
-        relUrl: `${this._cacheKeyPrefix}${cacheId}`,
-        method: this._uploadMethod,
+        relUrl: `${this.#cacheKeyPrefix}${cacheId}`,
+        method: this.#uploadMethod,
         body: entryStream,
         headers: {
           'Content-Length': `${size}`
@@ -248,22 +248,22 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   }
 
   public async updateCachedCredentialInteractiveAsync(terminal: ITerminal): Promise<void> {
-    if (!this._tokenHandler) {
+    if (!this.#tokenHandler) {
       throw new Error(
         `The interactive cloud credentials flow is not configured.\n` +
-          `Set the 'tokenHandler' setting in 'common/config/rush-plugins/${this._pluginName}.json' to a command that writes your credentials to standard output and exits with code 0 ` +
+          `Set the 'tokenHandler' setting in 'common/config/rush-plugins/${this.#pluginName}.json' to a command that writes your credentials to standard output and exits with code 0 ` +
           `or provide your credentials to rush using the --credential flag instead. Credentials must be the ` +
-          `'Authorization' header expected by ${this._url.href}`
+          `'Authorization' header expected by ${this.#url.href}`
       );
     }
 
-    const cmd: string = `${this._tokenHandler.exec} ${(this._tokenHandler.args || []).join(' ')}`;
+    const cmd: string = `${this.#tokenHandler.exec} ${(this.#tokenHandler.args || []).join(' ')}`;
     terminal.writeVerboseLine(`Running '${cmd}' to get credentials`);
     const result: SpawnSyncReturns<string> = Executable.spawnSync(
-      this._tokenHandler.exec,
-      this._tokenHandler.args || [],
+      this.#tokenHandler.exec,
+      this.#tokenHandler.args || [],
       {
-        currentWorkingDirectory: this._rushProjectRoot
+        currentWorkingDirectory: this.#rushProjectRoot
       }
     );
 
@@ -294,17 +294,17 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   }
 
   private get _credentialCacheId(): string {
-    if (!this.__credentialCacheId) {
-      const cacheIdParts: string[] = [this._url.href];
+    if (!this.#_credentialCacheId) {
+      const cacheIdParts: string[] = [this.#url.href];
 
-      if (this._isCacheWriteAllowedByConfiguration) {
+      if (this.#isCacheWriteAllowedByConfiguration) {
         cacheIdParts.push('cacheWriteAllowed');
       }
 
-      this.__credentialCacheId = cacheIdParts.join('|');
+      this.#_credentialCacheId = cacheIdParts.join('|');
     }
 
-    return this.__credentialCacheId;
+    return this.#_credentialCacheId;
   }
 
   /**
@@ -344,7 +344,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
     const result: Buffer | boolean = readBody ? await response.getBufferAsync() : true;
     options.terminal.writeDebugLine(
-      `[http-build-cache] actual response: ${response.status} ${new URL(options.relUrl, this._url).href} ${
+      `[http-build-cache] actual response: ${response.status} ${new URL(options.relUrl, this.#url).href} ${
         result === true ? 'true' : result.length
       } bytes`
     );
@@ -373,7 +373,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     }
 
     options.terminal.writeDebugLine(
-      `[http-build-cache] stream response: ${response.status} ${new URL(options.relUrl, this._url).href}`
+      `[http-build-cache] stream response: ${response.status} ${new URL(options.relUrl, this.#url).href}`
     );
 
     return response;
@@ -406,14 +406,14 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     } = options;
     const safeCredentialOptions: CredentialsOptions = credentialOptions ?? CredentialsOptions.Optional;
     const credentials: string | undefined = await this._tryGetCredentialsAsync(safeCredentialOptions);
-    const url: string = new URL(relUrl, this._url).href;
+    const url: string = new URL(relUrl, this.#url).href;
 
     const headers: Record<string, string> = {};
     if (typeof credentials === 'string') {
       headers.Authorization = credentials;
     }
 
-    for (const [key, value] of Object.entries(this._headers)) {
+    for (const [key, value] of Object.entries(this.#headers)) {
       if (typeof value === 'string') {
         headers[key] = value;
       }
@@ -438,8 +438,8 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     };
 
     const response: IWebClientResponse | IWebClientStreamResponse = stream
-      ? await this._webClient.fetchStreamAsync(url, fetchOptions)
-      : await this._webClient.fetchAsync(url, fetchOptions);
+      ? await this.#webClient.fetchStreamAsync(url, fetchOptions)
+      : await this.#webClient.fetchAsync(url, fetchOptions);
 
     if (!response.ok) {
       // Drain the response body on stream responses so the connection can be reused
@@ -475,7 +475,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         // Add some random jitter to the retry so we can spread out load on the remote service
         // A proper solution might add exponential back off in case the retry count is high (10 or more)
         const factor: number = 1.0 + Math.random(); // A random number between 1.0 and 2.0
-        const retryDelay: number = Math.floor(factor * this._minHttpRetryDelayMs);
+        const retryDelay: number = Math.floor(factor * this.#minHttpRetryDelayMs);
 
         await Async.sleepAsync(retryDelay);
 
@@ -498,7 +498,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
       return;
     }
 
-    let credentials: string | undefined = this._environmentCredential;
+    let credentials: string | undefined = this.#environmentCredential;
 
     if (credentials === undefined) {
       credentials = await this._tryGetCredentialsFromCacheAsync();
@@ -507,7 +507,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     if (typeof credentials !== 'string' && options === CredentialsOptions.Required) {
       throw new Error(
         [
-          `Credentials for ${this._url.href} have not been provided.`,
+          `Credentials for ${this.#url.href} have not been provided.`,
           `In CI, verify that RUSH_BUILD_CACHE_CREDENTIAL contains a valid Authorization header value.`,
           ``,
           `For local developers, run:`,
@@ -623,7 +623,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
       case FailureType.Authentication: {
         throw new Error(
           [
-            `${this._url.href} responded with ${response.status}: ${response.statusText}.`,
+            `${this.#url.href} responded with ${response.status}: ${response.statusText}.`,
             `Credentials may be misconfigured or have expired.`,
             `In CI, verify that RUSH_BUILD_CACHE_CREDENTIAL contains a valid Authorization header value.`,
             ``,

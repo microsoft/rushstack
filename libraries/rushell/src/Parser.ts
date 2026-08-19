@@ -6,12 +6,12 @@ import { type Tokenizer, type Token, TokenKind } from './Tokenizer';
 import { type AstNode, AstScript, AstCommand, AstCompoundWord, AstText } from './AstNode';
 
 export class Parser {
-  private readonly _tokenizer: Tokenizer;
-  private _peekedToken: Token | undefined;
+  readonly #tokenizer: Tokenizer;
+  #peekedToken: Token | undefined;
 
   public constructor(tokenizer: Tokenizer) {
-    this._tokenizer = tokenizer;
-    this._peekedToken = undefined;
+    this.#tokenizer = tokenizer;
+    this.#peekedToken = undefined;
   }
 
   public parse(): AstScript {
@@ -108,19 +108,19 @@ export class Parser {
   }
 
   private _readToken(): Token {
-    if (this._peekedToken) {
-      const token: Token = this._peekedToken;
-      this._peekedToken = undefined;
+    if (this.#peekedToken) {
+      const token: Token = this.#peekedToken;
+      this.#peekedToken = undefined;
       return token;
     } else {
-      return this._tokenizer.readToken();
+      return this.#tokenizer.readToken();
     }
   }
 
   private _peekToken(): Token {
-    if (!this._peekedToken) {
-      this._peekedToken = this._tokenizer.readToken();
+    if (!this.#peekedToken) {
+      this.#peekedToken = this.#tokenizer.readToken();
     }
-    return this._peekedToken;
+    return this.#peekedToken;
   }
 }

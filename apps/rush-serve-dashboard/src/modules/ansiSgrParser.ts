@@ -15,7 +15,7 @@ interface IAnsiState {
 }
 
 export class AnsiSgrParser {
-  private readonly _state: IAnsiState = {
+  readonly #state: IAnsiState = {
     bold: false,
     underline: false,
     inverse: false,
@@ -30,7 +30,7 @@ export class AnsiSgrParser {
 
     const pushSegmentIfText = (text: string): void => {
       if (!text) return;
-      const style: string = this._ansiStateToStyle(this._state);
+      const style: string = this._ansiStateToStyle(this.#state);
       segments.push({ text, style });
     };
 
@@ -85,33 +85,33 @@ export class AnsiSgrParser {
 
     for (const p of params) {
       if (p === 0) {
-        this._state.bold = false;
-        this._state.underline = false;
-        this._state.inverse = false;
-        this._state.fg = undefined;
-        this._state.bg = undefined;
+        this.#state.bold = false;
+        this.#state.underline = false;
+        this.#state.inverse = false;
+        this.#state.fg = undefined;
+        this.#state.bg = undefined;
       } else if (p === 1) {
-        this._state.bold = true;
+        this.#state.bold = true;
       } else if (p === 4) {
-        this._state.underline = true;
+        this.#state.underline = true;
       } else if (p === 7) {
-        this._state.inverse = true;
+        this.#state.inverse = true;
       } else if (p === 22) {
-        this._state.bold = false;
+        this.#state.bold = false;
       } else if (p === 24) {
-        this._state.underline = false;
+        this.#state.underline = false;
       } else if (p >= 30 && p <= 37) {
-        this._state.fg = this._sgrColorToCss(p - 30, false);
+        this.#state.fg = this._sgrColorToCss(p - 30, false);
       } else if (p === 39) {
-        this._state.fg = undefined;
+        this.#state.fg = undefined;
       } else if (p >= 40 && p <= 47) {
-        this._state.bg = this._sgrColorToCss(p - 40, false);
+        this.#state.bg = this._sgrColorToCss(p - 40, false);
       } else if (p === 49) {
-        this._state.bg = undefined;
+        this.#state.bg = undefined;
       } else if (p >= 90 && p <= 97) {
-        this._state.fg = this._sgrColorToCss(p - 90, true);
+        this.#state.fg = this._sgrColorToCss(p - 90, true);
       } else if (p >= 100 && p <= 107) {
-        this._state.bg = this._sgrColorToCss(p - 100, true);
+        this.#state.bg = this._sgrColorToCss(p - 100, true);
       }
     }
   }

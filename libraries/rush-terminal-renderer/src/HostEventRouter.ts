@@ -24,18 +24,18 @@ function readScopeOperationId(envelope: IDaemonEventEnvelope): string | undefine
 
 /** Routes decoded events between the operation collator and renderer. @internal */
 export class HostEventRouter {
-  private readonly _streams: OperationStreamRegistry;
-  private readonly _renderer: IDaemonRenderer;
-  private readonly _verbosity: DaemonVerbosity;
+  readonly #streams: OperationStreamRegistry;
+  readonly #renderer: IDaemonRenderer;
+  readonly #verbosity: DaemonVerbosity;
 
   public constructor(
     streams: OperationStreamRegistry,
     renderer: IDaemonRenderer,
     verbosity: DaemonVerbosity
   ) {
-    this._streams = streams;
-    this._renderer = renderer;
-    this._verbosity = verbosity;
+    this.#streams = streams;
+    this.#renderer = renderer;
+    this.#verbosity = verbosity;
   }
 
   public routeEvent(envelope: IDaemonEventEnvelope): void {
@@ -43,8 +43,8 @@ export class HostEventRouter {
     if (this._routeScopedActivity(envelope)) {
       return;
     }
-    if (shouldSerializeDaemonEvent(this._verbosity, envelope)) {
-      this._renderer.report(envelope);
+    if (shouldSerializeDaemonEvent(this.#verbosity, envelope)) {
+      this.#renderer.report(envelope);
     }
   }
 
@@ -59,7 +59,7 @@ export class HostEventRouter {
 
   private _trackRegistered(payload: IDaemonOperationRegisteredPayload): void {
     if (!payload.silent) {
-      this._streams.registerOperation();
+      this.#streams.registerOperation();
     }
   }
 
@@ -71,7 +71,7 @@ export class HostEventRouter {
     if (payload.name === RUSHD_OPERATION_STREAM_CLOSED) {
       const data: IDaemonOperationStreamClosedPayload =
         payload.data as IDaemonOperationStreamClosedPayload;
-      this._streams.closeOperation(data.operationId);
+      this.#streams.closeOperation(data.operationId);
     }
   }
 
@@ -89,7 +89,7 @@ export class HostEventRouter {
     const text: unknown = (activity as { text?: unknown }).text;
     const stream: unknown = (activity as { stream?: unknown }).stream;
     if (typeof text === 'string') {
-      this._streams.writeChunk(operationId, {
+      this.#streams.writeChunk(operationId, {
         kind: stream === 'stderr' ? TerminalChunkKind.Stderr : TerminalChunkKind.Stdout,
         text: `${text}\n`
       });

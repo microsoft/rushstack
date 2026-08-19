@@ -63,7 +63,7 @@ const variableCharacterRegExp: RegExp = /[a-z0-9_]/i;
 
 export class Tokenizer {
   public readonly input: TextRange;
-  private _currentIndex: number;
+  #currentIndex: number;
 
   public constructor(input: TextRange | string) {
     if (typeof input === 'string') {
@@ -71,17 +71,17 @@ export class Tokenizer {
     } else {
       this.input = input;
     }
-    this._currentIndex = this.input.pos;
+    this.#currentIndex = this.input.pos;
   }
 
   public get currentIndex(): number {
-    return this._currentIndex;
+    return this.#currentIndex;
   }
 
   public readToken(): Token {
     const input: TextRange = this.input;
 
-    const startIndex: number = this._currentIndex;
+    const startIndex: number = this.#currentIndex;
     const firstChar: string | undefined = this._peekCharacter();
 
     // Reached end of input yet?
@@ -97,7 +97,7 @@ export class Tokenizer {
         this._readCharacter();
       }
 
-      return new Token(TokenKind.Spaces, input.getNewRange(startIndex, this._currentIndex));
+      return new Token(TokenKind.Spaces, input.getNewRange(startIndex, this.#currentIndex));
     }
 
     // Is it a newline?
@@ -106,10 +106,10 @@ export class Tokenizer {
       if (this._peekCharacter() === '\n') {
         this._readCharacter();
       }
-      return new Token(TokenKind.NewLine, input.getNewRange(startIndex, this._currentIndex));
+      return new Token(TokenKind.NewLine, input.getNewRange(startIndex, this.#currentIndex));
     } else if (firstChar === '\n') {
       this._readCharacter();
-      return new Token(TokenKind.NewLine, input.getNewRange(startIndex, this._currentIndex));
+      return new Token(TokenKind.NewLine, input.getNewRange(startIndex, this.#currentIndex));
     }
 
     // Is it a double-quoted string?
@@ -122,13 +122,13 @@ export class Tokenizer {
         if (c === undefined) {
           throw new ParseError(
             'The double-quoted string is missing the ending quote',
-            input.getNewRange(startIndex, this._currentIndex)
+            input.getNewRange(startIndex, this.#currentIndex)
           );
         }
         if (c === '\r' || c === '\n') {
           throw new ParseError(
             'Newlines are not supported inside strings',
-            input.getNewRange(this._currentIndex, this._currentIndex + 1)
+            input.getNewRange(this.#currentIndex, this.#currentIndex + 1)
           );
         }
 
@@ -145,7 +145,7 @@ export class Tokenizer {
           if (this._peekCharacter() === undefined) {
             throw new ParseError(
               'A backslash must be followed by another character',
-              input.getNewRange(this._currentIndex, this._currentIndex + 1)
+              input.getNewRange(this.#currentIndex, this.#currentIndex + 1)
             );
           }
           // Add the escaped character
@@ -158,7 +158,7 @@ export class Tokenizer {
       }
       this._readCharacter(); // consume the closing quote
 
-      return new Token(TokenKind.DoubleQuotedText, input.getNewRange(startIndex, this._currentIndex), text);
+      return new Token(TokenKind.DoubleQuotedText, input.getNewRange(startIndex, this.#currentIndex), text);
     }
 
     // Is it a text token?
@@ -171,7 +171,7 @@ export class Tokenizer {
           if (this._peekCharacter() === undefined) {
             throw new ParseError(
               'A backslash must be followed by another character',
-              input.getNewRange(this._currentIndex, this._currentIndex + 1)
+              input.getNewRange(this.#currentIndex, this.#currentIndex + 1)
             );
           }
           // Add the escaped character
@@ -183,7 +183,7 @@ export class Tokenizer {
         c = this._peekCharacter();
       } while (c && textCharacterRegExp.test(c));
 
-      return new Token(TokenKind.Text, input.getNewRange(startIndex, this._currentIndex), text);
+      return new Token(TokenKind.Text, input.getNewRange(startIndex, this.#currentIndex), text);
     }
 
     // Is it a dollar variable?  The valid environment variable names are [A-Z_][A-Z0-9_]*
@@ -194,7 +194,7 @@ export class Tokenizer {
       if (!startVariableCharacterRegExp.test(name)) {
         throw new ParseError(
           'The "$" symbol must be followed by a letter or underscore',
-          input.getNewRange(startIndex, this._currentIndex)
+          input.getNewRange(startIndex, this.#currentIndex)
         );
       }
 
@@ -203,7 +203,7 @@ export class Tokenizer {
         name += this._readCharacter();
         c = this._peekCharacter();
       }
-      return new Token(TokenKind.DollarVariable, input.getNewRange(startIndex, this._currentIndex), name);
+      return new Token(TokenKind.DollarVariable, input.getNewRange(startIndex, this.#currentIndex), name);
     }
 
     // Is it the "&&" token?
@@ -211,13 +211,13 @@ export class Tokenizer {
       if (this._peekCharacterAfter() === '&') {
         this._readCharacter();
         this._readCharacter();
-        return new Token(TokenKind.AndIf, input.getNewRange(startIndex, this._currentIndex));
+        return new Token(TokenKind.AndIf, input.getNewRange(startIndex, this.#currentIndex));
       }
     }
 
     // Otherwise treat it as an "other" character
     this._readCharacter();
-    return new Token(TokenKind.OtherCharacter, input.getNewRange(startIndex, this._currentIndex));
+    return new Token(TokenKind.OtherCharacter, input.getNewRange(startIndex, this.#currentIndex));
   }
 
   public readTokens(): Token[] {
@@ -235,10 +235,10 @@ export class Tokenizer {
    * @returns a string of length 1, or undefined if the end of input is reached
    */
   private _readCharacter(): string | undefined {
-    if (this._currentIndex >= this.input.end) {
+    if (this.#currentIndex >= this.input.end) {
       return undefined;
     }
-    return this.input.buffer[this._currentIndex++];
+    return this.input.buffer[this.#currentIndex++];
   }
 
   /**
@@ -246,10 +246,10 @@ export class Tokenizer {
    * @returns a string of length 1, or undefined if the end of input is reached
    */
   private _peekCharacter(): string | undefined {
-    if (this._currentIndex >= this.input.end) {
+    if (this.#currentIndex >= this.input.end) {
       return undefined;
     }
-    return this.input.buffer[this._currentIndex];
+    return this.input.buffer[this.#currentIndex];
   }
 
   /**
@@ -257,10 +257,10 @@ export class Tokenizer {
    * @returns a string of length 1, or undefined if the end of input is reached
    */
   private _peekCharacterAfter(): string | undefined {
-    if (this._currentIndex + 1 >= this.input.end) {
+    if (this.#currentIndex + 1 >= this.input.end) {
       return undefined;
     }
-    return this.input.buffer[this._currentIndex + 1];
+    return this.input.buffer[this.#currentIndex + 1];
   }
 }
 

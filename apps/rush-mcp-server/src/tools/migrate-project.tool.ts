@@ -15,7 +15,7 @@ import { BaseTool, type CallToolResult } from './base.tool';
 import { getRushConfiguration } from '../utilities/common';
 
 export class RushMigrateProjectTool extends BaseTool {
-  private _rushWorkspacePath: string;
+  #rushWorkspacePath: string;
 
   public constructor(rushWorkspacePath: string) {
     super({
@@ -28,7 +28,7 @@ export class RushMigrateProjectTool extends BaseTool {
       }
     });
 
-    this._rushWorkspacePath = rushWorkspacePath;
+    this.#rushWorkspacePath = rushWorkspacePath;
   }
 
   private async _modifyAndSaveSubspaceJsonFileAsync(
@@ -81,7 +81,7 @@ export class RushMigrateProjectTool extends BaseTool {
       };
     }
 
-    const rootPath: string = this._rushWorkspacePath;
+    const rootPath: string = this.#rushWorkspacePath;
     const sourceProjectSubspaceName: string = project.subspace.subspaceName;
     const sourceProjectPath: string = project.projectFolder;
     const destinationPath: string = path.resolve(rootPath, targetProjectPath);

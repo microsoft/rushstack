@@ -16,49 +16,49 @@ import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTranspor
  * slow consumer loses nothing.
  * @beta */
 export class DaemonFrameConnection {
-  private readonly _socket: net.Socket;
-  private readonly _decoder: DaemonFrameDecoder = new DaemonFrameDecoder();
-  private _frameHandler: ((frame: IDaemonFrame) => void | Promise<void>) | undefined;
-  private _closedHandler: ((error: Error | undefined) => void) | undefined;
-  private _closedError: Error | undefined;
-  private _receiveQueue: Promise<void> = Promise.resolve();
+  readonly #socket: net.Socket;
+  readonly #decoder: DaemonFrameDecoder = new DaemonFrameDecoder();
+  #frameHandler: ((frame: IDaemonFrame) => void | Promise<void>) | undefined;
+  #closedHandler: ((error: Error | undefined) => void) | undefined;
+  #closedError: Error | undefined;
+  #receiveQueue: Promise<void> = Promise.resolve();
   public constructor(socket: net.Socket) {
-    this._socket = socket;
+    this.#socket = socket;
     socket.on('data', (chunk: Buffer) => this._onData(chunk));
     socket.on('error', (error: Error) => this._onError(error));
     socket.on('close', () => this._onClose());
   }
   /** Registers the serialized, backpressured handler invoked for each decoded frame. */
   public onFrame(handler: (frame: IDaemonFrame) => void | Promise<void>): void {
-    this._frameHandler = handler;
+    this.#frameHandler = handler;
   }
   /** Registers the close handler, invoked at most once with the cause. */
   public onClosed(handler: (error: Error | undefined) => void): void {
-    this._closedHandler = handler;
+    this.#closedHandler = handler;
   }
   /** Encodes and writes a frame, resolving when the socket has drained it. @throws {@link DaemonTransportError} when closed. */
   public async sendFrameAsync(frame: IDaemonFrame): Promise<void> {
     this._assertOpen();
-    if (!this._socket.write(encodeDaemonFrame(frame))) {
-      await once(this._socket, 'drain');
+    if (!this.#socket.write(encodeDaemonFrame(frame))) {
+      await once(this.#socket, 'drain');
     }
   }
   /** Half-closes the writable side and releases the socket. */
   public async closeAsync(): Promise<void> {
-    this._socket.end();
-    this._socket.destroySoon();
+    this.#socket.end();
+    this.#socket.destroySoon();
   }
   /** Immediately closes a connection whose graceful drain cannot make progress. @internal */
   public abort(error: Error): void {
-    this._closedError = this._closedError ?? error;
-    this._socket.destroy(error);
+    this.#closedError = this.#closedError ?? error;
+    this.#socket.destroy(error);
   }
   /** The wrapped socket, for the internal raw-write test hook. @internal */
   public get socket(): net.Socket {
-    return this._socket;
+    return this.#socket;
   }
   private _assertOpen(): void {
-    if (this._closedError !== undefined || this._socket.closed) {
+    if (this.#closedError !== undefined || this.#socket.closed) {
       throw new DaemonTransportError(
         DaemonTransportErrorCode.transportClosed,
         'Cannot send a frame on a closed connection.'
@@ -68,33 +68,33 @@ export class DaemonFrameConnection {
   private _onData(chunk: Buffer): void {
     let frames: IDaemonFrame[];
     try {
-      frames = this._decoder.push(chunk);
+      frames = this.#decoder.push(chunk);
     } catch (error) {
       this._fail(error);
       return;
     }
-    this._socket.pause();
-    this._receiveQueue = this._receiveQueue
+    this.#socket.pause();
+    this.#receiveQueue = this.#receiveQueue
       .then(() => this._dispatchFramesAsync(frames))
       .then(() => {
-        this._socket.resume();
+        this.#socket.resume();
       })
       .catch((error: unknown) => this._fail(error));
   }
   private async _dispatchFramesAsync(frames: ReadonlyArray<IDaemonFrame>): Promise<void> {
     for (const frame of frames) {
-      await this._frameHandler?.(frame);
+      await this.#frameHandler?.(frame);
     }
   }
   private _fail(error: unknown): void {
     const cause: Error = error instanceof Error ? error : new Error(String(error));
-    this._closedError = this._closedError ?? cause;
-    this._socket.destroy(cause);
+    this.#closedError = this.#closedError ?? cause;
+    this.#socket.destroy(cause);
   }
   private _onError(error: Error): void {
-    this._closedError = this._closedError ?? error;
+    this.#closedError = this.#closedError ?? error;
   }
   private _onClose(): void {
-    this._closedHandler?.(this._closedError);
+    this.#closedHandler?.(this.#closedError);
   }
 }
