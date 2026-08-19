@@ -95,7 +95,7 @@ export class ProjectWatcher {
     this.#repoRoot = Path.convertToSlashes(getRepoRoot(rushConfiguration.rushJsonFolder, gitPath));
 
     // Initialize stdin listener early so keybinds are available immediately
-    this._ensureStdin();
+    this.#ensureStdin();
 
     // Capture snapshot (if provided) prior to executing next iteration (will replace initial snapshot)
     graph.hooks.beforeExecuteIterationAsync.tapPromise(
@@ -106,20 +106,20 @@ export class ProjectWatcher {
       ): Promise<void> => {
         this.clearStatus();
         this.#lastSnapshot = iterationOptions.inputsSnapshot;
-        await this._stopWatchingAsync();
+        await this.#stopWatchingAsync();
       }
     );
 
     // Start watching once execution loop enters waiting state
     graph.hooks.onIdle.tap('ProjectWatcher', () => {
-      this._startWatching();
+      this.#startWatching();
     });
 
     // Dispose stdin listener when session aborts
     graph.abortController.signal.addEventListener(
       'abort',
       () => {
-        this._disposeStdin();
+        this.#disposeStdin();
       },
       { once: true }
     );
@@ -137,7 +137,7 @@ export class ProjectWatcher {
    * Re-renders the most recent status line (or a default) in place.
    */
   public rerenderStatus(): void {
-    this._setStatus(this.#lastStatus ?? 'Waiting for changes...');
+    this.#setStatus(this.#lastStatus ?? 'Waiting for changes...');
   }
 
   /**
@@ -145,7 +145,7 @@ export class ProjectWatcher {
    * and keybind help when stdin is active. Overwrites previously rendered status lines
    * when not mid-execution.
    */
-  private _setStatus(status: string): void {
+  #setStatus(status: string): void {
     const graph: IOperationGraph = this.#graph;
     const isPaused: boolean = graph.pauseNextIteration === true;
     const hasScheduledIteration: boolean = graph.hasScheduledIteration;
@@ -180,7 +180,7 @@ export class ProjectWatcher {
    * On platforms without native recursive watch support (Linux), enumerates nested
    * folders from the last snapshot to set up individual watchers.
    */
-  private _startWatching(): void {
+  #startWatching(): void {
     if (this.#isWatching) {
       return;
     }
@@ -230,7 +230,7 @@ export class ProjectWatcher {
             recursive: recursive && useNativeRecursiveWatch,
             signal: sessionAbortSignal
           },
-          (eventType, fileName) => this._onFsEvent(fileName)
+          (eventType, fileName) => this.#onFsEvent(fileName)
         );
         watchers.set(watchedPath, watcher);
         this.#closePromises.push(
@@ -257,13 +257,13 @@ export class ProjectWatcher {
         addWatcher(folder, true);
       }
     }
-    this._setStatus('Waiting for changes...');
+    this.#setStatus('Waiting for changes...');
   }
 
   /**
    * Closes all active file system watchers and waits for their close events to settle.
    */
-  private async _stopWatchingAsync(): Promise<void> {
+  async #stopWatchingAsync(): Promise<void> {
     if (!this.#isWatching) {
       return;
     }
@@ -287,21 +287,22 @@ export class ProjectWatcher {
    * Handles a raw file system event by debouncing and scheduling an iteration.
    * Ignores changes to `.git` and `node_modules`.
    */
-  private _onFsEvent(fileName: string | null): void {
+  // eslint-disable-next-line @rushstack/no-new-null -- The decoupled ESLint plugin does not recognize native private methods yet.
+  #onFsEvent(fileName: string | null): void {
     if (fileName === '.git' || fileName === 'node_modules') {
       return;
     }
     if (this.#debounceHandle) {
       clearTimeout(this.#debounceHandle);
     }
-    this.#debounceHandle = setTimeout(() => this._scheduleIteration(), this.#debounceMs);
+    this.#debounceHandle = setTimeout(() => this.#scheduleIteration(), this.#debounceMs);
   }
 
   /**
    * Schedules a new execution iteration on the graph in response to detected file changes.
    */
-  private _scheduleIteration(): void {
-    this._setStatus('File change detected. Queuing new iteration...');
+  #scheduleIteration(): void {
+    this.#setStatus('File change detected. Queuing new iteration...');
     this.#graph
       .scheduleIterationAsync({})
       .catch((e: unknown) =>
@@ -313,7 +314,7 @@ export class ProjectWatcher {
    * Sets up a raw-mode stdin listener so the user can interact with the watch session
    * via single-key keybinds. Captures the previous raw-mode state for restoration on dispose.
    */
-  private _ensureStdin(): void {
+  #ensureStdin(): void {
     if (this.#stdinListening || !process.stdin.isTTY) {
       return;
     }
@@ -331,7 +332,7 @@ export class ProjectWatcher {
     }
     stdin.resume();
     stdin.setEncoding('utf8');
-    const handler = (chunk: Buffer | string): void => this._onStdinData(chunk.toString());
+    const handler = (chunk: Buffer | string): void => this.#onStdinData(chunk.toString());
     stdin.on('data', handler);
     this.#onStdinDataBound = handler;
     this.#stdinListening = true;
@@ -340,7 +341,7 @@ export class ProjectWatcher {
   /**
    * Removes the stdin listener and restores the previous raw-mode state.
    */
-  private _disposeStdin(): void {
+  #disposeStdin(): void {
     if (!this.#stdinListening) {
       return;
     }
@@ -362,7 +363,7 @@ export class ProjectWatcher {
    * Processes a chunk of stdin data, dispatching each character to the appropriate
    * keybind action on the operation graph.
    */
-  private _onStdinData(chunk: string): void {
+  #onStdinData(chunk: string): void {
     const graph: IOperationGraph = this.#graph;
     if (!chunk) return;
     for (const ch of chunk) {
@@ -382,43 +383,43 @@ export class ProjectWatcher {
         }
         case KEY_ABORT: {
           void graph.abortCurrentIterationAsync().then(() => {
-            this._setStatus('Current iteration aborted');
+            this.#setStatus('Current iteration aborted');
           });
           break;
         }
         case KEY_INVALIDATE: {
           graph.invalidateOperations(undefined, 'manual-invalidation');
-          this._setStatus('All operations invalidated');
+          this.#setStatus('All operations invalidated');
           break;
         }
         case KEY_CLOSE_RUNNERS: {
           void graph.closeRunnersAsync().then(() => {
-            this._setStatus('Closed all runners');
+            this.#setStatus('Closed all runners');
           });
           break;
         }
         case KEY_DEBUG: {
           graph.debugMode = !graph.debugMode;
-          this._setStatus(`Debug mode ${graph.debugMode ? 'enabled' : 'disabled'}`);
+          this.#setStatus(`Debug mode ${graph.debugMode ? 'enabled' : 'disabled'}`);
           break;
         }
         case KEY_VERBOSE: {
           graph.quietMode = !graph.quietMode;
-          this._setStatus(`Verbose mode ${!graph.quietMode ? 'enabled' : 'disabled'}`);
+          this.#setStatus(`Verbose mode ${!graph.quietMode ? 'enabled' : 'disabled'}`);
           break;
         }
         case KEY_PAUSE_RESUME: {
           graph.pauseNextIteration = !graph.pauseNextIteration;
-          this._setStatus(graph.pauseNextIteration ? 'Watch paused' : 'Watch resumed');
+          this.#setStatus(graph.pauseNextIteration ? 'Watch paused' : 'Watch resumed');
           break;
         }
         case KEY_PARALLELISM_UP:
         case '=': {
-          this._adjustParallelism(1);
+          this.#adjustParallelism(1);
           break;
         }
         case KEY_PARALLELISM_DOWN: {
-          this._adjustParallelism(-1);
+          this.#adjustParallelism(-1);
           break;
         }
         case KEY_BUILD: {
@@ -427,9 +428,9 @@ export class ProjectWatcher {
               if (graph.pauseNextIteration === true) {
                 void graph.executeScheduledIterationAsync();
               }
-              this._setStatus('Build iteration queued');
+              this.#setStatus('Build iteration queued');
             } else {
-              this._setStatus('No work to queue');
+              this.#setStatus('No work to queue');
             }
           });
           break;
@@ -446,12 +447,12 @@ export class ProjectWatcher {
    * Adjusts the parallelism on the operation graph by the given delta
    * and reports the result.
    */
-  private _adjustParallelism(delta: number): void {
+  #adjustParallelism(delta: number): void {
     const graph: IOperationGraph = this.#graph;
     const previous: number = graph.parallelism;
     graph.parallelism = previous + delta; // setter will clamp/normalize
     const effective: number = graph.parallelism;
-    this._setStatus(`Parallelism ${effective !== previous ? 'set to' : 'remains'} ${effective}`);
+    this.#setStatus(`Parallelism ${effective !== previous ? 'set to' : 'remains'} ${effective}`);
   }
 }
 

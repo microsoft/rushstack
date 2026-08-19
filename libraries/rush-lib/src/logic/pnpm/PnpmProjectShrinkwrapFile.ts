@@ -107,18 +107,18 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
       if (name.indexOf(`${RushConstants.rushTempNpmScope}/`) < 0) {
         // Only select the shrinkwrap dependencies that are non-local since we already handle local
         // project changes
-        this._addDependencyRecursive(projectShrinkwrapMap, name, version, parentShrinkwrapEntry);
+        this.#addDependencyRecursive(projectShrinkwrapMap, name, version, parentShrinkwrapEntry);
       }
     }
 
     // Since peer dependencies within on external packages may be hoisted up to the top-level package,
     // we need to resolve and add these dependencies directly
-    this._resolveAndAddPeerDependencies(projectShrinkwrapMap, parentShrinkwrapEntry);
+    this.#resolveAndAddPeerDependencies(projectShrinkwrapMap, parentShrinkwrapEntry);
 
     return projectShrinkwrapMap;
   }
 
-  private _addDependencyRecursive(
+  #addDependencyRecursive(
     projectShrinkwrapMap: Map<string, string>,
     name: string,
     version: IPnpmVersionSpecifier,
@@ -159,14 +159,14 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
 
     // Add the dependencies of the dependency
     for (const [dependencyName, dependencyVersion] of Object.entries(shrinkwrapEntry.dependencies || {})) {
-      this._addDependencyRecursive(projectShrinkwrapMap, dependencyName, dependencyVersion, shrinkwrapEntry);
+      this.#addDependencyRecursive(projectShrinkwrapMap, dependencyName, dependencyVersion, shrinkwrapEntry);
     }
 
     // Add the optional dependencies of the dependency, and don't blow up if they don't exist
     for (const [dependencyName, dependencyVersion] of Object.entries(
       shrinkwrapEntry.optionalDependencies || {}
     )) {
-      this._addDependencyRecursive(
+      this.#addDependencyRecursive(
         projectShrinkwrapMap,
         dependencyName,
         dependencyVersion,
@@ -180,11 +180,11 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
     // is no need to look for peer dependencies, since it is simply a constraint to be validated by the
     // package manager.
     if (!this.shrinkwrapFile.isWorkspaceCompatible) {
-      this._resolveAndAddPeerDependencies(projectShrinkwrapMap, shrinkwrapEntry, parentShrinkwrapEntry);
+      this.#resolveAndAddPeerDependencies(projectShrinkwrapMap, shrinkwrapEntry, parentShrinkwrapEntry);
     }
   }
 
-  private _resolveAndAddPeerDependencies(
+  #resolveAndAddPeerDependencies(
     projectShrinkwrapMap: Map<string, string>,
     shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
     parentShrinkwrapEntry?: IPnpmShrinkwrapDependencyYaml
@@ -215,7 +215,7 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
         this.shrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
 
       if (topLevelDependencySpecifier) {
-        this._addDependencyRecursive(
+        this.#addDependencyRecursive(
           projectShrinkwrapMap,
           peerDependencyName,
           this.shrinkwrapFile.getTopLevelDependencyKey(peerDependencyName)!,

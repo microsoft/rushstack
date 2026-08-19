@@ -165,7 +165,7 @@ export class ChangeAction extends BaseRushAction {
 
     this.#bulkChangeBumpTypeParameter = this.defineChoiceParameter({
       parameterLongName: BULK_BUMP_TYPE_LONG_NAME,
-      alternatives: [...Object.keys(this._getBumpOptions())],
+      alternatives: [...Object.keys(this.#getBumpOptions())],
       description: `The bump type to apply to all changed projects if the ${BULK_LONG_NAME} flag is provided.`
     });
   }
@@ -198,11 +198,11 @@ export class ChangeAction extends BaseRushAction {
         throw new AlreadyReportedError();
       }
 
-      await this._validateAllChangeFilesAsync();
+      await this.#validateAllChangeFilesAsync();
       return;
     }
 
-    const targetBranch: string = await this._getTargetBranchAsync();
+    const targetBranch: string = await this.#getTargetBranchAsync();
     this.terminal.writeLine(`The target branch is ${targetBranch}`);
 
     if (this.#verifyParameter.value) {
@@ -232,18 +232,18 @@ export class ChangeAction extends BaseRushAction {
         throw new AlreadyReportedError();
       }
 
-      await this._verifyAsync();
+      await this.#verifyAsync();
       return;
     }
 
-    const sortedProjectList: string[] = (await this._getChangedProjectNamesAsync()).sort();
+    const sortedProjectList: string[] = (await this.#getChangedProjectNamesAsync()).sort();
     if (sortedProjectList.length === 0) {
-      this._logNoChangeFileRequired();
-      await this._warnUnstagedChangesAsync();
+      this.#logNoChangeFileRequired();
+      await this.#warnUnstagedChangesAsync();
       return;
     }
 
-    await this._warnUnstagedChangesAsync();
+    await this.#warnUnstagedChangesAsync();
 
     let changeFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
     let interactiveMode: boolean = false;
@@ -263,7 +263,7 @@ export class ChangeAction extends BaseRushAction {
         );
       }
 
-      const email: string | undefined = this.#changeEmailParameter.value || this._detectEmail();
+      const email: string | undefined = this.#changeEmailParameter.value || this.#detectEmail();
       if (!email) {
         throw new Error(
           "Unable to detect Git email and an email address wasn't provided using the " +
@@ -276,7 +276,7 @@ export class ChangeAction extends BaseRushAction {
       const comment: string = this.#bulkChangeMessageParameter.value || '';
       const changeType: string = this.#bulkChangeBumpTypeParameter.value;
       for (const packageName of sortedProjectList) {
-        const allowedBumpTypes: string[] = Object.keys(this._getBumpOptions(packageName));
+        const allowedBumpTypes: string[] = Object.keys(this.#getBumpOptions(packageName));
         let projectChangeType: string = changeType;
         if (allowedBumpTypes.length === 0) {
           projectChangeType = ChangeType[ChangeType.none];
@@ -317,17 +317,17 @@ export class ChangeAction extends BaseRushAction {
 
       const existingChangeComments: Map<string, string[]> = ChangeFiles.getChangeComments(
         this.terminal,
-        await this._getChangeFilesSinceBaseBranchAsync()
+        await this.#getChangeFilesSinceBaseBranchAsync()
       );
-      changeFileData = await this._promptForChangeFileDataAsync(
+      changeFileData = await this.#promptForChangeFileDataAsync(
         sortedProjectList,
         existingChangeComments
       );
 
-      if (this._isEmailRequired(changeFileData)) {
+      if (this.#isEmailRequired(changeFileData)) {
         const email: string = this.#changeEmailParameter.value
           ? this.#changeEmailParameter.value
-          : await this._detectOrAskForEmailAsync();
+          : await this.#detectOrAskForEmailAsync();
         changeFileData.forEach((changeFile: IChangeFile) => {
           changeFile.email = this.rushConfiguration.getProjectByName(changeFile.packageName)?.versionPolicy
             ?.includeEmailInChangeFile
@@ -338,7 +338,7 @@ export class ChangeAction extends BaseRushAction {
     }
     let changefiles: string[];
     try {
-      changefiles = await this._writeChangeFilesAsync(
+      changefiles = await this.#writeChangeFilesAsync(
         changeFileData,
         this.#overwriteFlagParameter.value,
         interactiveMode
@@ -361,7 +361,7 @@ export class ChangeAction extends BaseRushAction {
     }
   }
 
-  private _generateHostMap(): Map<RushConfigurationProject, string> {
+  #generateHostMap(): Map<RushConfigurationProject, string> {
     const hostMap: Map<RushConfigurationProject, string> = new Map();
     for (const project of this.rushConfiguration.projects) {
       let hostProjectName: string = project.packageName;
@@ -376,8 +376,8 @@ export class ChangeAction extends BaseRushAction {
     return hostMap;
   }
 
-  private async _verifyAsync(): Promise<void> {
-    const changedProjectNames: string[] = await this._getChangedProjectNamesAsync();
+  async #verifyAsync(): Promise<void> {
+    const changedProjectNames: string[] = await this.#getChangedProjectNamesAsync();
     const strictValidation: boolean | undefined =
       this.rushConfiguration.experimentsConfiguration.configuration.strictChangefileValidation;
 
@@ -388,12 +388,12 @@ export class ChangeAction extends BaseRushAction {
     if (strictValidation) {
       filesToValidate = await changeFilesInstance.getAllChangeFilesAsync();
     } else {
-      filesToValidate = await this._getChangeFilesSinceBaseBranchAsync();
+      filesToValidate = await this.#getChangeFilesSinceBaseBranchAsync();
     }
 
     if (changedProjectNames.length > 0 || filesToValidate.length > 0) {
       const deletedProjectNames: Set<string> | undefined = strictValidation
-        ? await this._getDeletedProjectNamesAsync()
+        ? await this.#getDeletedProjectNamesAsync()
         : undefined;
 
       await changeFilesInstance.validateAsync({
@@ -403,11 +403,11 @@ export class ChangeAction extends BaseRushAction {
         deletedProjectNames
       });
     } else {
-      this._logNoChangeFileRequired();
+      this.#logNoChangeFileRequired();
     }
   }
 
-  private async _getTargetBranchAsync(): Promise<string> {
+  async #getTargetBranchAsync(): Promise<string> {
     if (!this.#targetBranchName) {
       this.#targetBranchName =
         this.#targetBranchParameter.value || (await this.#git.getRemoteDefaultBranchAsync());
@@ -416,11 +416,11 @@ export class ChangeAction extends BaseRushAction {
     return this.#targetBranchName;
   }
 
-  private async _getChangedProjectNamesAsync(): Promise<string[]> {
+  async #getChangedProjectNamesAsync(): Promise<string[]> {
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
     const changedProjects: Set<RushConfigurationProject> =
       await projectChangeAnalyzer.getChangedProjectsAsync({
-        targetBranchName: await this._getTargetBranchAsync(),
+        targetBranchName: await this.#getTargetBranchAsync(),
         terminal: this.terminal,
         shouldFetch: !this.#noFetchParameter.value,
         // Lockfile evaluation will expand the set of projects that request change files
@@ -431,7 +431,7 @@ export class ChangeAction extends BaseRushAction {
         // Exclude version-only changes to prevent 'rush version --bump' from triggering 'rush change --verify'
         excludeVersionOnlyChanges: true
       });
-    const projectHostMap: Map<RushConfigurationProject, string> = this._generateHostMap();
+    const projectHostMap: Map<RushConfigurationProject, string> = this.#generateHostMap();
 
     const changedProjectNames: Set<string> = new Set<string>();
     for (const changedProject of changedProjects) {
@@ -446,7 +446,7 @@ export class ChangeAction extends BaseRushAction {
     return Array.from(changedProjectNames);
   }
 
-  private async _validateAllChangeFilesAsync(): Promise<void> {
+  async #validateAllChangeFilesAsync(): Promise<void> {
     if (!this.rushConfiguration.experimentsConfiguration.configuration.strictChangefileValidation) {
       throw new Error(
         `The ${this.#verifyAllParameter.longName} parameter requires the ` +
@@ -456,7 +456,7 @@ export class ChangeAction extends BaseRushAction {
 
     const changeFiles: ChangeFiles = new ChangeFiles(this.rushConfiguration);
     const allChangeFiles: string[] = await changeFiles.getAllChangeFilesAsync();
-    const deletedProjectNames: Set<string> = await this._getDeletedProjectNamesAsync();
+    const deletedProjectNames: Set<string> = await this.#getDeletedProjectNamesAsync();
     await changeFiles.validateAsync({
       terminal: this.terminal,
       filesToValidate: allChangeFiles,
@@ -469,9 +469,9 @@ export class ChangeAction extends BaseRushAction {
    * Compares the current rush.json project list against the target branch to find
    * projects that were removed.
    */
-  private async _getDeletedProjectNamesAsync(): Promise<Set<string>> {
+  async #getDeletedProjectNamesAsync(): Promise<Set<string>> {
     const repoRoot: string = getRepoRoot(this.rushConfiguration.rushJsonFolder);
-    const targetBranch: string = await this._getTargetBranchAsync();
+    const targetBranch: string = await this.#getTargetBranchAsync();
     const mergeBase: string = await this.#git.getMergeBaseAsync(targetBranch, this.terminal);
 
     let oldRushJsonContent: string;
@@ -500,10 +500,10 @@ export class ChangeAction extends BaseRushAction {
     return deletedProjectNames;
   }
 
-  private async _getChangeFilesSinceBaseBranchAsync(): Promise<string[]> {
+  async #getChangeFilesSinceBaseBranchAsync(): Promise<string[]> {
     const repoRoot: string = getRepoRoot(this.rushConfiguration.rushJsonFolder);
     const relativeChangesFolder: string = path.relative(repoRoot, this.rushConfiguration.changesFolder);
-    const targetBranch: string = await this._getTargetBranchAsync();
+    const targetBranch: string = await this.#getTargetBranchAsync();
     const changedFiles: string[] = await this.#git.getChangedFilesAsync(
       targetBranch,
       this.terminal,
@@ -522,14 +522,14 @@ export class ChangeAction extends BaseRushAction {
   /**
    * The main loop which prompts the user for information on changed projects.
    */
-  private async _promptForChangeFileDataAsync(
+  async #promptForChangeFileDataAsync(
     sortedProjectList: string[],
     existingChangeComments: Map<string, string[]>
   ): Promise<Map<string, IChangeFile>> {
     const changedFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
 
     for (const projectName of sortedProjectList) {
-      const changeInfo: IChangeInfo | undefined = await this._askQuestionsAsync(
+      const changeInfo: IChangeInfo | undefined = await this.#askQuestionsAsync(
         projectName,
         existingChangeComments
       );
@@ -555,7 +555,7 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Asks all questions which are needed to generate changelist for a project.
    */
-  private async _askQuestionsAsync(
+  async #askQuestionsAsync(
     packageName: string,
     existingChangeComments: Map<string, string[]>
   ): Promise<IChangeInfo | undefined> {
@@ -585,17 +585,17 @@ export class ChangeAction extends BaseRushAction {
       if (appendComment === 'skip') {
         return undefined;
       } else {
-        return await this._promptForCommentsAsync(packageName);
+        return await this.#promptForCommentsAsync(packageName);
       }
     } else {
-      return await this._promptForCommentsAsync(packageName);
+      return await this.#promptForCommentsAsync(packageName);
     }
   }
 
-  private async _promptForCommentsAsync(
+  async #promptForCommentsAsync(
     packageName: string
   ): Promise<IChangeInfo | undefined> {
-    const bumpOptions: { [type: string]: string } = this._getBumpOptions(packageName);
+    const bumpOptions: { [type: string]: string } = this.#getBumpOptions(packageName);
     const { default: input } = await import('@inquirer/input');
     const comment: string = await input({ message: `Describe changes, or ENTER if no changes:` });
 
@@ -626,7 +626,7 @@ export class ChangeAction extends BaseRushAction {
     }
   }
 
-  private _getBumpOptions(packageName?: string): { [type: string]: string } {
+  #getBumpOptions(packageName?: string): { [type: string]: string } {
     let bumpOptions: { [type: string]: string } =
       this.rushConfiguration && this.rushConfiguration.hotfixChangeEnabled
         ? {
@@ -667,7 +667,7 @@ export class ChangeAction extends BaseRushAction {
     return bumpOptions;
   }
 
-  private _isEmailRequired(changeFileData: Map<string, IChangeFile>): boolean {
+  #isEmailRequired(changeFileData: Map<string, IChangeFile>): boolean {
     return [...changeFileData.values()].some(
       (changeFile) =>
         !!this.rushConfiguration.getProjectByName(changeFile.packageName)?.versionPolicy
@@ -679,14 +679,14 @@ export class ChangeAction extends BaseRushAction {
    * Will determine a user's email by first detecting it from their Git config,
    * or will ask for it if it is not found or the Git config is wrong.
    */
-  private async _detectOrAskForEmailAsync(): Promise<string> {
+  async #detectOrAskForEmailAsync(): Promise<string> {
     return (
-      (await this._detectAndConfirmEmailAsync()) ||
-      (await this._promptForEmailAsync())
+      (await this.#detectAndConfirmEmailAsync()) ||
+      (await this.#promptForEmailAsync())
     );
   }
 
-  private _detectEmail(): string | undefined {
+  #detectEmail(): string | undefined {
     try {
       return child_process
         .execSync('git config user.email')
@@ -702,8 +702,8 @@ export class ChangeAction extends BaseRushAction {
    * Detects the user's email address from their Git configuration, prompts the user to approve the
    * detected email. It returns undefined if it cannot be detected.
    */
-  private async _detectAndConfirmEmailAsync(): Promise<string | undefined> {
-    const email: string | undefined = this._detectEmail();
+  async #detectAndConfirmEmailAsync(): Promise<string | undefined> {
+    const email: string | undefined = this.#detectEmail();
 
     if (email) {
       const { default: confirm } = await import('@inquirer/confirm');
@@ -720,7 +720,7 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Asks the user for their email address
    */
-  private async _promptForEmailAsync(): Promise<string> {
+  async #promptForEmailAsync(): Promise<string> {
     const { default: input } = await import('@inquirer/input');
     return await input({
       message: 'What is your email address?',
@@ -730,7 +730,7 @@ export class ChangeAction extends BaseRushAction {
     });
   }
 
-  private async _warnUnstagedChangesAsync(): Promise<void> {
+  async #warnUnstagedChangesAsync(): Promise<void> {
     try {
       const hasUnstagedChanges: boolean = await this.#git.hasUnstagedChangesAsync();
       if (hasUnstagedChanges) {
@@ -750,14 +750,14 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Writes change files to the common/changes folder. Will prompt for overwrite if file already exists.
    */
-  private async _writeChangeFilesAsync(
+  async #writeChangeFilesAsync(
     changeFileData: Map<string, IChangeFile>,
     overwrite: boolean,
     interactiveMode: boolean
   ): Promise<string[]> {
     const writtenFiles: string[] = [];
     await changeFileData.forEach(async (changeFile: IChangeFile) => {
-      const writtenFile: string | undefined = await this._writeChangeFileAsync(
+      const writtenFile: string | undefined = await this.#writeChangeFileAsync(
         changeFile,
         overwrite,
         interactiveMode
@@ -769,7 +769,7 @@ export class ChangeAction extends BaseRushAction {
     return writtenFiles;
   }
 
-  private async _writeChangeFileAsync(
+  async #writeChangeFileAsync(
     changeFileData: IChangeFile,
     overwrite: boolean,
     interactiveMode: boolean
@@ -782,19 +782,19 @@ export class ChangeAction extends BaseRushAction {
     const shouldWrite: boolean =
       !fileExists ||
       overwrite ||
-      (interactiveMode ? await this._promptForOverwriteAsync(filePath) : false);
+      (interactiveMode ? await this.#promptForOverwriteAsync(filePath) : false);
 
     if (!interactiveMode && fileExists && !overwrite) {
       throw new Error(`Changefile ${filePath} already exists`);
     }
 
     if (shouldWrite) {
-      this._writeFile(filePath, output, shouldWrite && fileExists);
+      this.#writeFile(filePath, output, shouldWrite && fileExists);
       return filePath;
     }
   }
 
-  private async _promptForOverwriteAsync(
+  async #promptForOverwriteAsync(
     filePath: string
   ): Promise<boolean> {
     const { default: confirm } = await import('@inquirer/confirm');
@@ -813,7 +813,7 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Writes a file to disk, ensuring the directory structure up to that point exists
    */
-  private _writeFile(fileName: string, output: string, isOverwrite: boolean): void {
+  #writeFile(fileName: string, output: string, isOverwrite: boolean): void {
     FileSystem.writeFile(fileName, output, { ensureFolderExists: true });
     if (isOverwrite) {
       this.terminal.writeLine(`Overwrote file: ${fileName}`);
@@ -822,7 +822,7 @@ export class ChangeAction extends BaseRushAction {
     }
   }
 
-  private _logNoChangeFileRequired(): void {
+  #logNoChangeFileRequired(): void {
     this.terminal.writeLine('No changes were detected to relevant packages on this branch. Nothing to do.');
   }
 }

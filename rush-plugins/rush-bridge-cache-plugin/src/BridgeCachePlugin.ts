@@ -48,7 +48,7 @@ export class BridgeCachePlugin implements IRushPlugin {
     session.hooks.runAnyPhasedCommand.tapPromise(PLUGIN_NAME, async (command: IPhasedCommand) => {
       command.hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, async (graph, context) => {
         const { customParameters, buildCacheConfiguration } = context;
-        const cacheAction: CacheAction | undefined = this._getCacheAction(customParameters);
+        const cacheAction: CacheAction | undefined = this.#getCacheAction(customParameters);
 
         if (cacheAction !== undefined) {
           if (!buildCacheConfiguration?.buildCacheEnabled) {
@@ -70,7 +70,7 @@ export class BridgeCachePlugin implements IRushPlugin {
 
           const logger: ILogger = session.getLogger(PLUGIN_NAME);
           const { terminal } = logger;
-          const requireOutputFolders: boolean = this._isRequireOutputFoldersFlagSet(customParameters);
+          const requireOutputFolders: boolean = this.#isRequireOutputFoldersFlagSet(customParameters);
 
           graph.hooks.beforeExecuteIterationAsync.tapPromise(
             PLUGIN_NAME,
@@ -171,7 +171,7 @@ export class BridgeCachePlugin implements IRushPlugin {
     });
   }
 
-  private _getCacheAction(
+  #getCacheAction(
     customParameters: ReadonlyMap<string, CommandLineParameter>
   ): CacheAction | undefined {
     const cacheActionParameter: CommandLineParameter | undefined = customParameters.get(
@@ -212,7 +212,7 @@ export class BridgeCachePlugin implements IRushPlugin {
     return undefined;
   }
 
-  private _isRequireOutputFoldersFlagSet(
+  #isRequireOutputFoldersFlagSet(
     customParameters: ReadonlyMap<string, CommandLineParameter>
   ): boolean {
     if (!this.#requireOutputFoldersParameterName) {

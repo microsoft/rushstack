@@ -48,13 +48,13 @@ export class LegacyPipelineReplica {
     this.#terminal = new CollatedTerminal(transform);
     this.#collator = new StreamCollator({
       destination: transform,
-      onWriterActive: (writer: CollatedWriter | undefined) => this._legacyOnWriterActive(writer)
+      onWriterActive: (writer: CollatedWriter | undefined) => this.#legacyOnWriterActive(writer)
     });
   }
 
   public writeChunk(operationId: string, chunk: ITerminalChunk): void {
     // Legacy quiet mode installs a DiscardStdoutTransform upstream of the collator.
-    if (this._isDiscarded(chunk)) {
+    if (this.#isDiscarded(chunk)) {
       return;
     }
     let writer: CollatedWriter | undefined = this.#writers.get(operationId);
@@ -65,7 +65,7 @@ export class LegacyPipelineReplica {
     writer.writeChunk(chunk);
   }
 
-  private _isDiscarded(chunk: ITerminalChunk): boolean {
+  #isDiscarded(chunk: ITerminalChunk): boolean {
     return this.#quiet && chunk.kind === TerminalChunkKind.Stdout;
   }
 
@@ -76,7 +76,7 @@ export class LegacyPipelineReplica {
     }
   }
 
-  private _legacyOnWriterActive(writer: CollatedWriter | undefined): void {
+  #legacyOnWriterActive(writer: CollatedWriter | undefined): void {
     if (!writer) {
       return;
     }

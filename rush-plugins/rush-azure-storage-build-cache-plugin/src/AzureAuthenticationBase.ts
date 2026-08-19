@@ -240,7 +240,7 @@ export abstract class AzureAuthenticationBase {
           }
         }
 
-        const credential: ICredentialResult = await this._getCredentialAsync(
+        const credential: ICredentialResult = await this.#getCredentialAsync(
           terminal,
           this._loginFlow,
           credentialsCache
@@ -322,7 +322,7 @@ export abstract class AzureAuthenticationBase {
     credentialsCache: CredentialCache
   ): Promise<ICredentialResult>;
 
-  private async _getCredentialAsync(
+  async #getCredentialAsync(
     terminal: ITerminal,
     loginFlow: LoginFlowType,
     credentialsCache: CredentialCache

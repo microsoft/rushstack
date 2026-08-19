@@ -70,14 +70,14 @@ export class RigPackageResolver implements IRigPackageResolver {
     const cacheKey: string = `${projectFolder};${packageName}`;
     let resolutionPromise: Promise<string> | undefined = this.#resolverCache.get(cacheKey);
     if (!resolutionPromise) {
-      resolutionPromise = this._resolvePackageInnerAsync(packageName, terminal);
+      resolutionPromise = this.#resolvePackageInnerAsync(packageName, terminal);
       this.#resolverCache.set(cacheKey, resolutionPromise);
     }
 
     return await resolutionPromise;
   }
 
-  private async _resolvePackageInnerAsync(toolPackageName: string, terminal: ITerminal): Promise<string> {
+  async #resolvePackageInnerAsync(toolPackageName: string, terminal: ITerminal): Promise<string> {
     // See if the project has a devDependency on the package
     if (
       this.#projectPackageJson.devDependencies &&

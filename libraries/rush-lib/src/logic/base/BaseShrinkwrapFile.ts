@@ -66,7 +66,7 @@ export abstract class BaseShrinkwrapFile {
       return false;
     }
 
-    return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency);
+    return this.#checkDependencyVersion(dependencySpecifier, shrinkwrapDependency);
   }
 
   /**
@@ -100,7 +100,7 @@ export abstract class BaseShrinkwrapFile {
       return false;
     }
 
-    return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency);
+    return this.#checkDependencyVersion(dependencySpecifier, shrinkwrapDependency);
   }
 
   /**
@@ -180,7 +180,7 @@ export abstract class BaseShrinkwrapFile {
     return result;
   }
 
-  private _checkDependencyVersion(
+  #checkDependencyVersion(
     projectDependency: DependencySpecifier,
     shrinkwrapDependency: DependencySpecifier
   ): boolean {

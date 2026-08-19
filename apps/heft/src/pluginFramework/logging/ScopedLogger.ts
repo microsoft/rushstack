@@ -61,7 +61,7 @@ export class ScopedLogger implements IScopedLogger {
   #errors: Error[] = [];
   #warnings: Error[] = [];
 
-  private get _shouldPrintStacks(): boolean {
+  get #shouldPrintStacks(): boolean {
     // TODO: Consider dumping stacks and more verbose logging to a file
     return this.#options.getShouldPrintStacks();
   }
@@ -108,7 +108,7 @@ export class ScopedLogger implements IScopedLogger {
     this.#options.errorHasBeenEmittedCallback();
     this.#errors.push(error);
     this.terminal.writeErrorLine(`Error: ${LoggingManager.getErrorMessage(error)}`);
-    if (this._shouldPrintStacks && error.stack) {
+    if (this.#shouldPrintStacks && error.stack) {
       this.terminal.writeErrorLine(error.stack);
     }
   }
@@ -120,7 +120,7 @@ export class ScopedLogger implements IScopedLogger {
     this.#options.warningHasBeenEmittedCallback();
     this.#warnings.push(warning);
     this.terminal.writeWarningLine(`Warning: ${LoggingManager.getErrorMessage(warning)}`);
-    if (this._shouldPrintStacks && warning.stack) {
+    if (this.#shouldPrintStacks && warning.stack) {
       this.terminal.writeWarningLine(warning.stack);
     }
   }

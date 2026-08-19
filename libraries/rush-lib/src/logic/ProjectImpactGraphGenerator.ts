@@ -81,7 +81,7 @@ export class ProjectImpactGraphGenerator {
   /**
    * Load global excluded globs
    */
-  private async _loadGlobalExcludedGlobsAsync(): Promise<string[] | undefined> {
+  async #loadGlobalExcludedGlobsAsync(): Promise<string[] | undefined> {
     const filePath: string = `${this.#repositoryRoot}/${RushConstants.mergeQueueIgnoreFileName}`;
     return await tryReadFileLinesAsync(filePath);
   }
@@ -90,7 +90,7 @@ export class ProjectImpactGraphGenerator {
    * Load project excluded globs
    * @param projectRootRelativePath - project root relative path
    */
-  private async _tryLoadProjectExcludedGlobsAsync(
+  async #tryLoadProjectExcludedGlobsAsync(
     projectRootRelativePath: string
   ): Promise<string[] | undefined> {
     const filePath: string = `${this.#repositoryRoot}/${projectRootRelativePath}/${RushConstants.mergeQueueIgnoreFileName}`;
@@ -112,7 +112,7 @@ export class ProjectImpactGraphGenerator {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     const [globalExcludedGlobs = DEFAULT_GLOBAL_EXCLUDED_GLOBS, projectEntries] = await Promise.all([
-      this._loadGlobalExcludedGlobsAsync(),
+      this.#loadGlobalExcludedGlobsAsync(),
       Async.mapAsync<RushConfigurationProject, [string, IProjectImpactGraphProjectConfiguration]>(
         this.#rushConfiguration.projects,
         async ({ packageName, consumingProjects, projectRelativeFolder }) => {
@@ -127,7 +127,7 @@ export class ProjectImpactGraphGenerator {
           };
 
           const projectExcludedGlobs: string[] | undefined =
-            await this._tryLoadProjectExcludedGlobsAsync(projectRelativeFolder);
+            await this.#tryLoadProjectExcludedGlobsAsync(projectRelativeFolder);
           if (projectExcludedGlobs) {
             projectImpactGraphProjectConfiguration.excludedGlobs = projectExcludedGlobs;
           }

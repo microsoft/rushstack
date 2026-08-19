@@ -77,7 +77,7 @@ export class DependencyAnalyzer {
 
     let analysisForSubspace: IDependencyAnalysis | undefined = analysisForVariant.get(subspaceToAnalyze);
     if (!analysisForSubspace) {
-      analysisForSubspace = this._getAnalysisInternal(subspaceToAnalyze, variant, addAction);
+      analysisForSubspace = this.#getAnalysisInternal(subspaceToAnalyze, variant, addAction);
 
       analysisForVariant.set(subspaceToAnalyze, analysisForSubspace);
     }
@@ -91,7 +91,7 @@ export class DependencyAnalyzer {
    * @remarks
    * The result of this function is not cached.
    */
-  private _getAnalysisInternal(
+  #getAnalysisInternal(
     subspace: Subspace,
     variant: string | undefined,
     addAction: boolean

@@ -89,9 +89,9 @@ export class ChangeFile {
     // flag rarely had any effect, and a second invocation would silently clobber the
     // change file written by the first one. See GitHub issue #2195.
     // example filename: yourbranchname_2017-05-01-20-20-30.json
-    const timestamp: string | undefined = this._getTimestamp(true);
+    const timestamp: string | undefined = this.#getTimestamp(true);
     const filename: string = branch
-      ? this._escapeFilename(`${branch}_${timestamp}.json`)
+      ? this.#escapeFilename(`${branch}_${timestamp}.json`)
       : `${timestamp}.json`;
     const filePath: string = path.join(
       this.#rushConfiguration.changesFolder,
@@ -105,7 +105,7 @@ export class ChangeFile {
    * Gets the current time, formatted as YYYY-MM-DD-HH-MM
    * When useSeconds is true, the seconds are appended as well: YYYY-MM-DD-HH-MM-SS
    */
-  private _getTimestamp(useSeconds: boolean = false): string | undefined {
+  #getTimestamp(useSeconds: boolean = false): string | undefined {
     // Create a date string with the current time
 
     // dateString === "2016-10-19T22:47:49.606Z"
@@ -137,7 +137,7 @@ export class ChangeFile {
     return undefined;
   }
 
-  private _escapeFilename(filename: string, replacer: string = '-'): string {
+  #escapeFilename(filename: string, replacer: string = '-'): string {
     // Removes / ? < > \ : * | ", really anything that isn't a letter, number, '.' '_' or '-'
     const badCharacters: RegExp = /[^a-zA-Z0-9._-]/g;
     return filename.replace(badCharacters, replacer);

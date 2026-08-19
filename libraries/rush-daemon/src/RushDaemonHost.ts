@@ -96,11 +96,11 @@ export class RushDaemonHost {
 
   /** Closes active connections, stops listening, and removes transport artifacts. */
   public closeAsync(): Promise<void> {
-    this.#closePromise ??= this._closeOnceAsync();
+    this.#closePromise ??= this.#closeOnceAsync();
     return this.#closePromise;
   }
 
-  private async _closeOnceAsync(): Promise<void> {
+  async #closeOnceAsync(): Promise<void> {
     this.#lifecycle.closing = true;
     await Promise.all(Array.from(this.#sessions, (session: DaemonControlSession) => session.closeAsync()));
     await this.#listener.closeAsync();

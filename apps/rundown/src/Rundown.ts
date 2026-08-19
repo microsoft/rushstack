@@ -34,7 +34,7 @@ export class Rundown {
     // ["path/to/launcher.js", "path/to/target-script.js", "first-target-arg"]
     const nodeArgs: string[] = [path.join(__dirname, 'launcher.js'), absoluteScriptPath, ...expandedArgs];
 
-    await this._spawnLauncherAsync(nodeArgs, quiet, ignoreExitCode);
+    await this.#spawnLauncherAsync(nodeArgs, quiet, ignoreExitCode);
 
     if (!quiet) {
       console.log();
@@ -107,7 +107,7 @@ export class Rundown {
     FileSystem.writeFile(reportPath, data);
   }
 
-  private async _spawnLauncherAsync(
+  async #spawnLauncherAsync(
     nodeArgs: string[],
     quiet: boolean,
     ignoreExitCode: boolean

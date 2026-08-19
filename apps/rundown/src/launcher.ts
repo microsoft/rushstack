@@ -31,7 +31,7 @@ class Launcher {
     return [nodeArg, this.targetScriptPathArg, ...remainderArgs];
   }
 
-  private _sendIpcTraceBatch(): void {
+  #sendIpcTraceBatch(): void {
     if (this.#ipcTraceRecordsBatch.length > 0) {
       const batch: IIpcTraceRecord[] = [...this.#ipcTraceRecordsBatch];
       this.#ipcTraceRecordsBatch.length = 0;
@@ -49,7 +49,7 @@ class Launcher {
     const importedModules: Set<unknown> = this.#importedModules; // for closure
     const importedModulePaths: Set<string> = this.#importedModulePaths; // for closure
     const ipcTraceRecordsBatch: IIpcTraceRecord[] = this.#ipcTraceRecordsBatch; // for closure
-    const sendIpcTraceBatch: () => void = this._sendIpcTraceBatch.bind(this); // for closure
+    const sendIpcTraceBatch: () => void = this.#sendIpcTraceBatch.bind(this); // for closure
 
     function hookedRequire(this: NodeModule, moduleName: string): unknown {
       // NOTE: The "this" pointer is the calling NodeModule, so we rely on closure
@@ -100,7 +100,7 @@ class Launcher {
     _copyProperties(hookedRequire, realRequire);
 
     process.on('exit', () => {
-      this._sendIpcTraceBatch();
+      this.#sendIpcTraceBatch();
       process.send!({
         id: 'done'
       } as IIpcDone);

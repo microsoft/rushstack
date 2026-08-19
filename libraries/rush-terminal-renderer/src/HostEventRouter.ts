@@ -42,8 +42,8 @@ export class HostEventRouter {
 
   /** Routes one decoded `0x05` event envelope. */
   public routeEvent(envelope: IDaemonEventEnvelope): void {
-    this._trackOperationLifecycle(envelope);
-    if (this._routeScopedActivity(envelope)) {
+    this.#trackOperationLifecycle(envelope);
+    if (this.#routeScopedActivity(envelope)) {
       return;
     }
     if (shouldSerializeDaemonEvent(this.#verbosity, envelope)) {
@@ -51,22 +51,22 @@ export class HostEventRouter {
     }
   }
 
-  private _trackOperationLifecycle(envelope: IDaemonEventEnvelope): void {
+  #trackOperationLifecycle(envelope: IDaemonEventEnvelope): void {
     if (envelope.type === 'operationRegistered') {
-      this._trackRegistered(envelope.payload as IDaemonOperationRegisteredPayload);
+      this.#trackRegistered(envelope.payload as IDaemonOperationRegisteredPayload);
     }
     if (envelope.type === 'extension') {
-      this._trackExtension(envelope.payload as IDaemonExtensionEventPayload);
+      this.#trackExtension(envelope.payload as IDaemonExtensionEventPayload);
     }
   }
 
-  private _trackRegistered(payload: IDaemonOperationRegisteredPayload): void {
+  #trackRegistered(payload: IDaemonOperationRegisteredPayload): void {
     if (!payload.silent) {
       this.#streams.registerOperation();
     }
   }
 
-  private _trackExtension(payload: IDaemonExtensionEventPayload): void {
+  #trackExtension(payload: IDaemonExtensionEventPayload): void {
     if (payload.name === RUSHD_OPERATION_STREAM_CLOSED) {
       const data: IDaemonOperationStreamClosedPayload =
         payload.data as IDaemonOperationStreamClosedPayload;
@@ -77,16 +77,16 @@ export class HostEventRouter {
   // Operation-scoped activity lines are part of the operation's output block
   // (legacy writes them to the operation's collated stream, bypassing the
   // quiet-mode stdout discard), so they route to the collator, not the renderer.
-  private _routeScopedActivity(envelope: IDaemonEventEnvelope): boolean {
+  #routeScopedActivity(envelope: IDaemonEventEnvelope): boolean {
     const operationId: string | undefined = readScopeOperationId(envelope);
     if (envelope.type !== 'activityChanged' || operationId === undefined) {
       return false;
     }
-    this._writeActivityLine(operationId, envelope.payload);
+    this.#writeActivityLine(operationId, envelope.payload);
     return true;
   }
 
-  private _writeActivityLine(operationId: string, payload: unknown): void {
+  #writeActivityLine(operationId: string, payload: unknown): void {
     const activity: unknown = payload;
     const text: unknown = (activity as { text?: unknown }).text;
     const stream: unknown = (activity as { stream?: unknown }).stream;

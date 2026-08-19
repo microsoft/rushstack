@@ -73,7 +73,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       }
 
       for (const rushProject of this._rushConfiguration.projects) {
-        await this._linkProjectAsync(rushProject, pnpmShrinkwrapFile);
+        await this.#linkProjectAsync(rushProject, pnpmShrinkwrapFile);
       }
     } else {
       // eslint-disable-next-line no-console
@@ -91,7 +91,7 @@ export class PnpmLinkManager extends BaseLinkManager {
    * @param project             The local project that we will create symlinks for
    * @param rushLinkJson        The common/temp/rush-link.json output file
    */
-  private async _linkProjectAsync(
+  async #linkProjectAsync(
     project: RushConfigurationProject,
     pnpmShrinkwrapFile: PnpmShrinkwrapFile
   ): Promise<void> {
@@ -228,7 +228,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         : '';
 
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules
-    const pathToLocalInstallation: string = await this._getPathToLocalInstallationAsync(
+    const pathToLocalInstallation: string = await this.#getPathToLocalInstallationAsync(
       tarballEntry,
       absolutePathToTgzFile,
       folderNameSuffix,
@@ -244,7 +244,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     }
 
     for (const dependencyName of Object.keys(commonPackage.packageJson!.dependencies || {})) {
-      const newLocalPackage: BasePackage = this._createLocalPackageForDependency(
+      const newLocalPackage: BasePackage = this.#createLocalPackageForDependency(
         project,
         parentShrinkwrapEntry,
         localPackage,
@@ -289,7 +289,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     });
   }
 
-  private async _getPathToLocalInstallationAsync(
+  async #getPathToLocalInstallationAsync(
     tarballEntry: string,
     absolutePathToTgzFile: string,
     folderSuffix: string,
@@ -410,7 +410,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       );
     }
   }
-  private _createLocalPackageForDependency(
+  #createLocalPackageForDependency(
     project: RushConfigurationProject,
     parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
     localPackage: BasePackage,
