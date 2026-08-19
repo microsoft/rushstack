@@ -67,6 +67,7 @@ export interface IGetSourceLocationOptions {
 
 export class SourceMapper {
   // Map from .d.ts file path --> ISourceMap if a source map was found, or null if not found
+  // eslint-disable-next-line @rushstack/no-new-null -- The decoupled ESLint plugin does not recognize native private fields yet.
   #sourceMapByFilePath: Map<string, ISourceMap | null> = new Map<string, ISourceMap | null>();
 
   // Cache the FileSystem.exists() result for mapped .ts files
