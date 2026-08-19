@@ -6,14 +6,27 @@
 
 /// <reference types="node" />
 
+import type { GetInputsSnapshotAsyncFn } from '@microsoft/rush-lib';
 import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import type { IInputsSnapshot } from '@microsoft/rush-lib';
 import type { IOperationGraph } from '@microsoft/rush-lib';
+import type { Operation } from '@microsoft/rush-lib';
 import { RushConfiguration } from '@microsoft/rush-lib';
+import type { RushConfigurationProject } from '@microsoft/rush-lib';
 import type { RushSession } from '@microsoft/rush-lib';
 
 // @beta
+export type CreateWorkspaceEngineComponentsAsync = (options: ICreateWorkspaceEngineComponentsOptions) => Promise<IWorkspaceEngineComponents>;
+
+// @beta
 export type CreateWorkspaceSessionComponentsAsync = (options: ICreateWorkspaceSessionComponentsOptions) => Promise<IWorkspaceSessionComponents>;
+
+// @beta
+export interface ICreateWorkspaceEngineComponentsOptions extends IWorkspaceEngineShape {
+    readonly projectSelection: ReadonlySet<RushConfigurationProject>;
+    // (undocumented)
+    readonly rushConfiguration: RushConfiguration;
+}
 
 // @beta
 export interface ICreateWorkspaceSessionComponentsOptions {
@@ -23,6 +36,18 @@ export interface ICreateWorkspaceSessionComponentsOptions {
     readonly onError?: (error: Error) => void;
     // (undocumented)
     readonly rushConfiguration: RushConfiguration;
+}
+
+// @beta
+export interface IMapWorkspaceInvalidationsOptions {
+    // (undocumented)
+    readonly changedPaths: ReadonlyArray<string>;
+    // (undocumented)
+    readonly currentInputsSnapshot: IInputsSnapshot;
+    // (undocumented)
+    readonly nextInputsSnapshot: IInputsSnapshot;
+    // (undocumented)
+    readonly operationGraph: IOperationGraph;
 }
 
 // @public
@@ -59,6 +84,49 @@ export interface IRushDaemonServeOptions extends IRushDaemonHostOptions {
 }
 
 // @beta
+export interface IWorkspaceEngineComponentFactoryOptions {
+    // (undocumented)
+    readonly createEngineComponentsAsync: CreateWorkspaceEngineComponentsAsync;
+    // (undocumented)
+    readonly mapInvalidationsToOperationsAsync: MapWorkspaceInvalidationsToOperationsAsync;
+    // (undocumented)
+    readonly shape: IWorkspaceEngineShape;
+}
+
+// @beta
+export interface IWorkspaceEngineComponents extends AsyncDisposable {
+    [Symbol.asyncDispose](): Promise<void>;
+    // (undocumented)
+    readonly getInputsSnapshotAsync: GetInputsSnapshotAsyncFn;
+    // (undocumented)
+    readonly inputsSnapshot: IInputsSnapshot;
+    // (undocumented)
+    readonly operationGraph: IOperationGraph;
+    // (undocumented)
+    readonly rushSession: RushSession;
+}
+
+// @beta
+export interface IWorkspaceEngineShape {
+    // (undocumented)
+    readonly phaseNames: ReadonlyArray<string>;
+    // (undocumented)
+    readonly pluginNames: ReadonlyArray<string>;
+}
+
+// @beta
+export interface IWorkspaceInvalidationReconciliation {
+    // (undocumented)
+    readonly inputsSnapshot: IInputsSnapshot;
+    // (undocumented)
+    readonly invalidatedOperationCount: number;
+    // (undocumented)
+    readonly isFullInvalidation: boolean;
+    // (undocumented)
+    readonly sequence: number;
+}
+
+// @beta
 export interface IWorkspaceInvalidationSnapshot {
     readonly changedPaths: ReadonlyArray<string>;
     readonly hasUnknownChanges: boolean;
@@ -75,6 +143,8 @@ export interface IWorkspaceInvalidationWatcher extends AsyncDisposable {
 // @beta
 export interface IWorkspaceSession extends AsyncDisposable {
     // (undocumented)
+    readonly engineShape: IWorkspaceEngineShape | undefined;
+    // (undocumented)
     readonly inputsSnapshot: IInputsSnapshot | undefined;
     // (undocumented)
     readonly invalidations: WorkspaceInvalidationTracker;
@@ -82,6 +152,8 @@ export interface IWorkspaceSession extends AsyncDisposable {
     readonly metadata: IWorkspaceSessionMetadata;
     // (undocumented)
     readonly operationGraph: IOperationGraph | undefined;
+    // (undocumented)
+    reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined>;
     // (undocumented)
     readonly rushConfiguration: RushConfiguration;
     // (undocumented)
@@ -91,10 +163,14 @@ export interface IWorkspaceSession extends AsyncDisposable {
 // @beta
 export interface IWorkspaceSessionComponents extends AsyncDisposable {
     // (undocumented)
+    readonly engineShape?: IWorkspaceEngineShape;
+    // (undocumented)
     readonly inputsSnapshot?: IInputsSnapshot;
     // (undocumented)
     readonly operationGraph?: IOperationGraph;
     readonly projectWatcher?: IWorkspaceInvalidationWatcher;
+    // (undocumented)
+    readonly reconcileInvalidationsAsync?: () => Promise<IWorkspaceInvalidationReconciliation>;
     // (undocumented)
     readonly rushSession?: RushSession;
 }
@@ -124,6 +200,9 @@ export interface IWorkspaceSessionOptions {
     // (undocumented)
     readonly rushVersion: string;
 }
+
+// @beta
+export type MapWorkspaceInvalidationsToOperationsAsync = (options: IMapWorkspaceInvalidationsOptions) => Promise<Iterable<Operation>>;
 
 // @public
 export enum RequestExclusivityClass {
@@ -172,6 +251,15 @@ export class RushDaemonHost {
 export function serveRushDaemonAsync(options: IRushDaemonServeOptions): Promise<void>;
 
 // @beta
+export class WorkspaceEngineComponentFactory {
+    constructor(options: IWorkspaceEngineComponentFactoryOptions);
+    // (undocumented)
+    readonly createAsync: CreateWorkspaceSessionComponentsAsync;
+    // (undocumented)
+    readonly shape: IWorkspaceEngineShape;
+}
+
+// @beta
 export class WorkspaceInvalidationTracker {
     acknowledgeThrough(sequence: number): void;
     getSnapshot(): IWorkspaceInvalidationSnapshot;
@@ -184,13 +272,16 @@ export class WorkspaceSession implements IWorkspaceSession {
     [Symbol.asyncDispose](): Promise<void>;
     static createAsync(options: IWorkspaceSessionOptions): Promise<WorkspaceSession>;
     // (undocumented)
-    readonly inputsSnapshot: IInputsSnapshot | undefined;
+    get engineShape(): IWorkspaceEngineShape | undefined;
+    // (undocumented)
+    get inputsSnapshot(): IInputsSnapshot | undefined;
     // (undocumented)
     readonly invalidations: WorkspaceInvalidationTracker;
     // (undocumented)
     readonly metadata: IWorkspaceSessionMetadata;
     // (undocumented)
     readonly operationGraph: IOperationGraph | undefined;
+    reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined>;
     // (undocumented)
     readonly rushConfiguration: RushConfiguration;
     // (undocumented)

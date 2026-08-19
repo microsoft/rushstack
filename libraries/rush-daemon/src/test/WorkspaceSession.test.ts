@@ -213,4 +213,36 @@ describe(WorkspaceSession.name, () => {
       new Error('component cleanup failed')
     ]);
   });
+
+  it('rejects reconciliation as soon as disposal starts', async () => {
+    let finishWatcherDisposal: (() => void) | undefined;
+    const watcher: IWorkspaceInvalidationWatcher = {
+      startAsync: () => Promise.resolve(),
+      [Symbol.asyncDispose]: () =>
+        new Promise<void>((resolve: () => void) => {
+          finishWatcherDisposal = resolve;
+        })
+    };
+    const reconcileInvalidationsAsync: jest.Mock = jest.fn(() =>
+      Promise.reject(new Error('Reconciliation must not start.'))
+    );
+    const session: WorkspaceSession = await WorkspaceSession.createAsync({
+      repoRoot: TEST_REPO_ROOT,
+      rushVersion: '5.178.0',
+      createComponentsAsync: () =>
+        Promise.resolve<IWorkspaceSessionComponents>({
+          projectWatcher: watcher,
+          reconcileInvalidationsAsync,
+          [Symbol.asyncDispose]: () => watcher[Symbol.asyncDispose]()
+        })
+    });
+
+    const disposalPromise: Promise<void> = session[Symbol.asyncDispose]();
+    await expect(session.reconcileInvalidationsAsync()).rejects.toThrow(
+      'workspace session is being disposed'
+    );
+    expect(reconcileInvalidationsAsync).not.toHaveBeenCalled();
+    finishWatcherDisposal?.();
+    await disposalPromise;
+  });
 });

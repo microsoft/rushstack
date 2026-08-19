@@ -14,6 +14,17 @@ export {
 export { RushDaemonHost, type IRushDaemonHostOptions } from './RushDaemonHost';
 export { serveRushDaemonAsync, type IRushDaemonServeOptions } from './serveRushDaemon';
 export {
+  WorkspaceEngineComponentFactory,
+  type CreateWorkspaceEngineComponentsAsync,
+  type ICreateWorkspaceEngineComponentsOptions,
+  type IMapWorkspaceInvalidationsOptions,
+  type IWorkspaceEngineComponentFactoryOptions,
+  type IWorkspaceEngineComponents,
+  type IWorkspaceEngineShape,
+  type IWorkspaceInvalidationReconciliation,
+  type MapWorkspaceInvalidationsToOperationsAsync
+} from './WorkspaceEngineComponentFactory';
+export {
   WorkspaceSession,
   type CreateWorkspaceSessionComponentsAsync,
   type ICreateWorkspaceSessionComponentsOptions,
