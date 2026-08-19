@@ -134,38 +134,38 @@ export interface IHeftParameterManagerOptions {
 }
 
 export class HeftParameterManager {
-  private readonly _options: IHeftParameterManagerOptions;
+  readonly #options: IHeftParameterManagerOptions;
   // plugin definition => parameter accessors and defaults
-  private readonly _heftParametersByDefinition: Map<HeftPluginDefinitionBase, IHeftParameters> = new Map();
+  readonly #heftParametersByDefinition: Map<HeftPluginDefinitionBase, IHeftParameters> = new Map();
   // plugin definition => Map< parameter long name => applied parameter >
-  private readonly _parametersByDefinition: Map<HeftPluginDefinitionBase, Map<string, CommandLineParameter>> =
+  readonly #parametersByDefinition: Map<HeftPluginDefinitionBase, Map<string, CommandLineParameter>> =
     new Map();
   // parameter scope => plugin definition
-  private readonly _pluginDefinitionsByScope: Map<string, HeftPluginDefinitionBase> = new Map();
+  readonly #pluginDefinitionsByScope: Map<string, HeftPluginDefinitionBase> = new Map();
 
-  private _isFinalized: boolean = false;
+  #isFinalized: boolean = false;
 
-  private _defaultParameters: IHeftDefaultParameters | undefined;
+  #defaultParameters: IHeftDefaultParameters | undefined;
   public get defaultParameters(): IHeftDefaultParameters {
-    if (!this._isFinalized) {
+    if (!this.#isFinalized) {
       throw new InternalError('Parameters have not yet been finalized.');
     }
 
-    if (!this._defaultParameters) {
-      this._defaultParameters = {
-        clean: this._options.getIsClean(),
-        debug: this._options.getIsDebug(),
-        verbose: this._options.getIsVerbose(),
-        production: this._options.getIsProduction(),
-        locales: this._options.getLocales(),
-        watch: this._options.getIsWatch()
+    if (!this.#defaultParameters) {
+      this.#defaultParameters = {
+        clean: this.#options.getIsClean(),
+        debug: this.#options.getIsDebug(),
+        verbose: this.#options.getIsVerbose(),
+        production: this.#options.getIsProduction(),
+        locales: this.#options.getLocales(),
+        watch: this.#options.getIsWatch()
       };
     }
-    return this._defaultParameters;
+    return this.#defaultParameters;
   }
 
   public constructor(options: IHeftParameterManagerOptions) {
-    this._options = options;
+    this.#options = options;
   }
 
   /**
@@ -173,11 +173,11 @@ export class HeftParameterManager {
    * command line parameter provider after finalization.
    */
   public addPluginParameters(pluginDefinition: HeftPluginDefinitionBase): void {
-    if (this._isFinalized) {
+    if (this.#isFinalized) {
       throw new InternalError('Parameters have already been finalized.');
     }
-    if (!this._parametersByDefinition.has(pluginDefinition)) {
-      this._parametersByDefinition.set(pluginDefinition, new Map());
+    if (!this.#parametersByDefinition.has(pluginDefinition)) {
+      this.#parametersByDefinition.set(pluginDefinition, new Map());
     }
   }
 
@@ -186,11 +186,11 @@ export class HeftParameterManager {
    * can only be finalized once.
    */
   public finalizeParameters(commandLineParameterProvider: CommandLineParameterProvider): void {
-    if (this._isFinalized) {
+    if (this.#isFinalized) {
       throw new InternalError('Parameters have already been finalized.');
     }
-    this._isFinalized = true;
-    for (const pluginDefinition of this._parametersByDefinition.keys()) {
+    this.#isFinalized = true;
+    for (const pluginDefinition of this.#parametersByDefinition.keys()) {
       this._addParametersToProvider(pluginDefinition, commandLineParameterProvider);
     }
   }
@@ -199,14 +199,14 @@ export class HeftParameterManager {
    * Get the finalized parameters for the specified plugin definition.
    */
   public getParametersForPlugin(pluginDefinition: HeftPluginDefinitionBase): IHeftParameters {
-    if (!this._isFinalized) {
+    if (!this.#isFinalized) {
       throw new InternalError('Parameters have not yet been finalized.');
     }
 
-    let heftParameters: IHeftParameters | undefined = this._heftParametersByDefinition.get(pluginDefinition);
+    let heftParameters: IHeftParameters | undefined = this.#heftParametersByDefinition.get(pluginDefinition);
     if (!heftParameters) {
       const parameters: Map<string, CommandLineParameter> | undefined =
-        this._parametersByDefinition.get(pluginDefinition);
+        this.#parametersByDefinition.get(pluginDefinition);
       if (!parameters) {
         throw new InternalError(
           `Parameters from plugin ${JSON.stringify(pluginDefinition.pluginName)} in package ` +
@@ -232,7 +232,7 @@ export class HeftParameterManager {
         getStringListParameter: (parameterLongName: string) =>
           this._getParameter(parameters, parameterLongName, CommandLineParameterKind.StringList)
       };
-      this._heftParametersByDefinition.set(pluginDefinition, heftParameters);
+      this.#heftParametersByDefinition.set(pluginDefinition, heftParameters);
     }
     return heftParameters;
   }
@@ -255,7 +255,7 @@ export class HeftParameterManager {
       pluginParameters
     } = pluginDefinition;
     const existingDefinitionWithScope: HeftPluginDefinitionBase | undefined =
-      this._pluginDefinitionsByScope.get(parameterScope);
+      this.#pluginDefinitionsByScope.get(parameterScope);
     if (existingDefinitionWithScope && existingDefinitionWithScope !== pluginDefinition) {
       const { pluginName: existingScopePluginName, pluginPackageName: existingScopePluginPackageName } =
         existingDefinitionWithScope;
@@ -267,11 +267,11 @@ export class HeftParameterManager {
           `${JSON.stringify(existingScopePluginPackageName)}.`
       );
     } else {
-      this._pluginDefinitionsByScope.set(parameterScope, pluginDefinition);
+      this.#pluginDefinitionsByScope.set(parameterScope, pluginDefinition);
     }
 
     const definedPluginParametersByName: Map<string, CommandLineParameter> =
-      this._parametersByDefinition.get(pluginDefinition)!;
+      this.#parametersByDefinition.get(pluginDefinition)!;
 
     for (const parameter of pluginParameters) {
       let definedParameter: CommandLineParameter;
