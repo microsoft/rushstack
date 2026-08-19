@@ -136,8 +136,7 @@ export class PlaywrightTunnel {
     return this.#status;
   }
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  private set status(newStatus: TunnelStatus) {
+  #setStatus(newStatus: TunnelStatus): void {
     this.#status = newStatus;
     this.#onStatusChange(newStatus);
   }
@@ -524,7 +523,7 @@ export class PlaywrightTunnel {
     let client: WebSocket | undefined = undefined;
     let browserServer: BrowserServer | undefined = undefined;
 
-    this.status = 'waiting-for-connection';
+    this.#setStatus('waiting-for-connection');
     const ws: WebSocket =
       this.#mode === 'poll-connection'
         ? await this.#pollConnectionAsync()
@@ -543,7 +542,7 @@ export class PlaywrightTunnel {
       const reasonStr: string = reason.toString() || 'no reason provided';
       const codeDescription: string = getWebSocketCloseReason(code);
       this.#initWsPromise = undefined;
-      this.status = 'stopped';
+      this.#setStatus('stopped');
       this.#terminal.writeLine(
         `WebSocket connection closed - code: ${code} (${codeDescription}), reason: ${reasonStr}`
       );
@@ -580,7 +579,7 @@ export class PlaywrightTunnel {
               terminal.writeLine('User approved browser server launch.');
             }
 
-            this.status = 'setting-up-browser-server';
+            this.#setStatus('setting-up-browser-server');
             const browserServerProxy: IBrowserServerProxy =
               await this.#getPlaywrightBrowserServerProxyAsync(handshake);
             client = browserServerProxy.client;
@@ -600,7 +599,7 @@ export class PlaywrightTunnel {
               terminal.writeDebugLine('Warning: Browser server process handle not available for monitoring');
             }
 
-            this.status = 'browser-server-running';
+            this.#setStatus('browser-server-running');
 
             // Send ack so that the counterpart also knows to start forwarding messages.
             // NOTE: The 1-second delay is an intentional workaround. In the current
@@ -623,7 +622,7 @@ export class PlaywrightTunnel {
             resolve(ws);
           } catch (error) {
             terminal.writeLine(`Error processing handshake: ${error}`);
-            this.status = 'error';
+            this.#setStatus('error');
 
             // Cleanup and close connection on error
             ws.off('message', onMessageHandler);
