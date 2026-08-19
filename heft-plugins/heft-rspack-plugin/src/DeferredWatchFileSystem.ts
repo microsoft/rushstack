@@ -91,9 +91,9 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
     }
 
     if (changes.size > 0 || removals.size > 0) {
-      this._purge(removals, changes);
+      this.#purge(removals, changes);
 
-      const { fileTimeInfoEntries, contextTimeInfoEntries } = this._fetchTimeInfo();
+      const { fileTimeInfoEntries, contextTimeInfoEntries } = this.#fetchTimeInfo();
 
       callback(null, fileTimeInfoEntries, contextTimeInfoEntries, changes, removals);
 
@@ -167,8 +167,8 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
       getInfo: () => {
         const newRemovals: Set<string> | undefined = this.watcher?.aggregatedRemovals;
         const newChanges: Set<string> | undefined = this.watcher?.aggregatedChanges;
-        this._purge(newRemovals, newChanges);
-        const { fileTimeInfoEntries, contextTimeInfoEntries } = this._fetchTimeInfo();
+        this.#purge(newRemovals, newChanges);
+        const { fileTimeInfoEntries, contextTimeInfoEntries } = this.#fetchTimeInfo();
         return {
           changes: newChanges!,
           removals: newRemovals!,
@@ -177,24 +177,24 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
         };
       },
       getContextTimeInfoEntries: () => {
-        const { contextTimeInfoEntries } = this._fetchTimeInfo();
+        const { contextTimeInfoEntries } = this.#fetchTimeInfo();
         return contextTimeInfoEntries;
       },
       getFileTimeInfoEntries: () => {
-        const { fileTimeInfoEntries } = this._fetchTimeInfo();
+        const { fileTimeInfoEntries } = this.#fetchTimeInfo();
         return fileTimeInfoEntries;
       }
     };
   }
 
-  private _fetchTimeInfo(): ITimeInfoEntries {
+  #fetchTimeInfo(): ITimeInfoEntries {
     const fileTimeInfoEntries: IRawFileSystemMap = new Map();
     const contextTimeInfoEntries: IRawFileSystemMap = new Map();
     this.watcher?.collectTimeInfoEntries(fileTimeInfoEntries, contextTimeInfoEntries);
     return { fileTimeInfoEntries, contextTimeInfoEntries };
   }
 
-  private _purge(removals: Set<string> | undefined, changes: Set<string> | undefined): void {
+  #purge(removals: Set<string> | undefined, changes: Set<string> | undefined): void {
     const fs: InputFileSystem = this.inputFileSystem;
     if (fs.purge) {
       if (removals) {

@@ -146,7 +146,7 @@ export class TypeScriptBuilder {
 
   #nextRequestId: number = 0;
 
-  private get _tsCacheFilePath(): string {
+  get #tsCacheFilePath(): string {
     if (!this.#_tsCacheFilePath) {
       // TypeScript internally handles if the tsconfig options have changed from when the tsbuildinfo file was created.
       // We only need to hash our additional Heft configuration.
@@ -337,9 +337,9 @@ export class TypeScriptBuilder {
         const _tsconfig: TTypescript.ParsedCommandLine = loadTsconfig({
           tool,
           tsconfigPath: this.#configuration.tsconfigPath,
-          tsCacheFilePath: this._tsCacheFilePath
+          tsCacheFilePath: this.#tsCacheFilePath
         });
-        this._validateTsconfig(ts, _tsconfig);
+        this.#validateTsconfig(ts, _tsconfig);
 
         return {
           tsconfig: _tsconfig
@@ -349,7 +349,7 @@ export class TypeScriptBuilder {
       //#endregion
 
       if (this.#useSolutionBuilder) {
-        const solutionHost: TWatchSolutionHost = this._buildWatchSolutionBuilderHost(tool);
+        const solutionHost: TWatchSolutionHost = this.#buildWatchSolutionBuilderHost(tool);
         const builder: TTypescript.SolutionBuilder<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram> =
           ts.createSolutionBuilderWithWatch(solutionHost, [this.#configuration.tsconfigPath], {});
 
@@ -357,7 +357,7 @@ export class TypeScriptBuilder {
 
         builder.build();
       } else {
-        const compilerHost: TWatchCompilerHost = this._buildWatchCompilerHost(tool, tsconfig);
+        const compilerHost: TWatchCompilerHost = this.#buildWatchCompilerHost(tool, tsconfig);
         tool.watchProgram = ts.createWatchProgram(compilerHost);
       }
     }
@@ -380,7 +380,7 @@ export class TypeScriptBuilder {
       // eslint-disable-next-line require-atomic-updates
       tool.executing = false;
     }
-    this._logDiagnostics(ts, rawDiagnostics, this.#useSolutionBuilder);
+    this.#logDiagnostics(ts, rawDiagnostics, this.#useSolutionBuilder);
   }
 
   public async _runBuildAsync(tool: ITypeScriptTool): Promise<void> {
@@ -395,11 +395,11 @@ export class TypeScriptBuilder {
       const _tsconfig: TTypescript.ParsedCommandLine = loadTsconfig({
         tool,
         tsconfigPath: this.#configuration.tsconfigPath,
-        tsCacheFilePath: this._tsCacheFilePath
+        tsCacheFilePath: this.#tsCacheFilePath
       });
-      this._validateTsconfig(ts, _tsconfig);
+      this.#validateTsconfig(ts, _tsconfig);
 
-      const _compilerHost: TTypescript.CompilerHost = this._buildIncrementalCompilerHost(tool, _tsconfig);
+      const _compilerHost: TTypescript.CompilerHost = this.#buildIncrementalCompilerHost(tool, _tsconfig);
 
       return {
         tsconfig: _tsconfig,
@@ -450,12 +450,12 @@ export class TypeScriptBuilder {
     // Prefer the builder program, since it is what gives us incremental builds
     const genericProgram: TTypescript.BuilderProgram | TTypescript.Program = builderProgram || innerProgram;
 
-    this._logReadPerformance(ts);
+    this.#logReadPerformance(ts);
     //#endregion
 
     if (isolatedModules) {
       // Kick the transpilation worker.
-      this._queueTranspileInWorker(tool, genericProgram.getCompilerOptions(), filesToTranspile);
+      this.#queueTranspileInWorker(tool, genericProgram.getCompilerOptions(), filesToTranspile);
     }
 
     //#region ANALYSIS
@@ -487,11 +487,11 @@ export class TypeScriptBuilder {
       undefined
     );
 
-    this._cleanupWorker();
+    this.#cleanupWorker();
     //#endregion
 
-    this._emitModulePackageJsonFiles(ts);
-    this._logEmitPerformance(ts);
+    this.#emitModulePackageJsonFiles(ts);
+    this.#logEmitPerformance(ts);
 
     //#region FINAL_ANALYSIS
     // Need to ensure that we include emit diagnostics, since they might not be part of the other sets
@@ -509,7 +509,7 @@ export class TypeScriptBuilder {
       }
     }
 
-    this._logDiagnostics(ts, rawDiagnostics);
+    this.#logDiagnostics(ts, rawDiagnostics);
     // Reset performance counters in case any are used in the callback
     ts.performance.disable();
     ts.performance.enable();
@@ -527,11 +527,11 @@ export class TypeScriptBuilder {
         const _tsconfig: TTypescript.ParsedCommandLine = loadTsconfig({
           tool,
           tsconfigPath: this.#configuration.tsconfigPath,
-          tsCacheFilePath: this._tsCacheFilePath
+          tsCacheFilePath: this.#tsCacheFilePath
         });
-        this._validateTsconfig(ts, _tsconfig);
+        this.#validateTsconfig(ts, _tsconfig);
 
-        const _solutionBuilderHost: TSolutionHost = this._buildSolutionBuilderHost(tool);
+        const _solutionBuilderHost: TSolutionHost = this.#buildSolutionBuilderHost(tool);
 
         return {
           solutionBuilderHost: _solutionBuilderHost
@@ -555,10 +555,10 @@ export class TypeScriptBuilder {
     //#region EMIT
     // Ignoring the exit status because we only care about presence of diagnostics
     tool.solutionBuilder.build();
-    this._cleanupWorker();
+    this.#cleanupWorker();
     //#endregion
 
-    this._emitModulePackageJsonFiles(ts);
+    this.#emitModulePackageJsonFiles(ts);
 
     if (pendingTranspilePromises.size) {
       const emitResults: TTypescript.EmitResult[] = await Promise.all(pendingTranspilePromises.values());
@@ -569,10 +569,10 @@ export class TypeScriptBuilder {
       }
     }
 
-    this._logDiagnostics(ts, rawDiagnostics, true);
+    this.#logDiagnostics(ts, rawDiagnostics, true);
   }
 
-  private _logDiagnostics(
+  #logDiagnostics(
     ts: ExtendedTypeScript,
     rawDiagnostics: TTypescript.Diagnostic[],
     isSolutionMode?: boolean
@@ -587,7 +587,7 @@ export class TypeScriptBuilder {
         `Encountered ${diagnostics.length} TypeScript issue${diagnostics.length > 1 ? 's' : ''}:`
       );
       for (const diagnostic of diagnostics) {
-        const diagnosticCategory: TTypescript.DiagnosticCategory = this._getAdjustedDiagnosticCategory(
+        const diagnosticCategory: TTypescript.DiagnosticCategory = this.#getAdjustedDiagnosticCategory(
           diagnostic,
           ts
         );
@@ -598,7 +598,7 @@ export class TypeScriptBuilder {
           hasError = true;
         }
 
-        this._printDiagnosticMessage(ts, diagnostic, diagnosticCategory);
+        this.#printDiagnosticMessage(ts, diagnostic, diagnosticCategory);
       }
 
       if (isSolutionMode && warningCount > 0 && !hasError) {
@@ -612,7 +612,7 @@ export class TypeScriptBuilder {
     }
   }
 
-  private _logEmitPerformance(ts: ExtendedTypeScript): void {
+  #logEmitPerformance(ts: ExtendedTypeScript): void {
     this.#typescriptTerminal.writeVerboseLine(`Bind: ${ts.performance.getDuration('Bind')}ms`);
     this.#typescriptTerminal.writeVerboseLine(`Check: ${ts.performance.getDuration('Check')}ms`);
     this.#typescriptTerminal.writeVerboseLine(
@@ -633,7 +633,7 @@ export class TypeScriptBuilder {
     );
   }
 
-  private _logReadPerformance(ts: ExtendedTypeScript): void {
+  #logReadPerformance(ts: ExtendedTypeScript): void {
     this.#typescriptTerminal.writeVerboseLine(
       `I/O Read: ${ts.performance.getDuration('I/O Read')}ms (${ts.performance.getCount(
         'beforeIORead'
@@ -647,10 +647,10 @@ export class TypeScriptBuilder {
     );
   }
 
-  private _printDiagnosticMessage(
+  #printDiagnosticMessage(
     ts: ExtendedTypeScript,
     diagnostic: TTypescript.Diagnostic,
-    diagnosticCategory: TTypescript.DiagnosticCategory = this._getAdjustedDiagnosticCategory(diagnostic, ts)
+    diagnosticCategory: TTypescript.DiagnosticCategory = this.#getAdjustedDiagnosticCategory(diagnostic, ts)
   ): void {
     // Code taken from reference example
     let diagnosticMessage: string;
@@ -689,7 +689,7 @@ export class TypeScriptBuilder {
     }
   }
 
-  private _getAdjustedDiagnosticCategory(
+  #getAdjustedDiagnosticCategory(
     diagnostic: TTypescript.Diagnostic,
     ts: ExtendedTypeScript
   ): TTypescript.DiagnosticCategory {
@@ -712,7 +712,7 @@ export class TypeScriptBuilder {
     return diagnostic.category;
   }
 
-  private _validateTsconfig(ts: ExtendedTypeScript, tsconfig: TTypescript.ParsedCommandLine): void {
+  #validateTsconfig(ts: ExtendedTypeScript, tsconfig: TTypescript.ParsedCommandLine): void {
     if (
       (tsconfig.options.module && !tsconfig.options.outDir) ||
       (!tsconfig.options.module && tsconfig.options.outDir)
@@ -734,7 +734,7 @@ export class TypeScriptBuilder {
     }
 
     if (this.#configuration.emitCjsExtensionForCommonJS) {
-      this._addModuleKindToEmit(
+      this.#addModuleKindToEmit(
         ts.ModuleKind.CommonJS,
         tsconfig.options.outDir!,
         /* isPrimary */ tsconfig.options.module === ts.ModuleKind.CommonJS,
@@ -754,7 +754,7 @@ export class TypeScriptBuilder {
     }
 
     if (this.#configuration.emitMjsExtensionForESModule) {
-      this._addModuleKindToEmit(
+      this.#addModuleKindToEmit(
         ts.ModuleKind.ESNext,
         tsconfig.options.outDir!,
         /* isPrimary */ tsconfig.options.module === ts.ModuleKind.ESNext,
@@ -774,7 +774,7 @@ export class TypeScriptBuilder {
     }
 
     if (!specifiedKinds.has(tsconfig.options.module)) {
-      this._addModuleKindToEmit(
+      this.#addModuleKindToEmit(
         tsconfig.options.module,
         tsconfig.options.outDir!,
         /* isPrimary */ true,
@@ -796,7 +796,7 @@ export class TypeScriptBuilder {
     if (this.#configuration.additionalModuleKindsToEmit) {
       for (const { moduleKind: moduleKindString, outFolderName, emitModulePackageJson = false } of this
         .#configuration.additionalModuleKindsToEmit) {
-        const moduleKind: TTypescript.ModuleKind = this._parseModuleKind(ts, moduleKindString);
+        const moduleKind: TTypescript.ModuleKind = this.#parseModuleKind(ts, moduleKindString);
 
         const outDirKey: string = `${outFolderName}:.js`;
         const moduleKindReason: IModuleKindReason = {
@@ -818,7 +818,7 @@ export class TypeScriptBuilder {
             `Output folder "${outFolderName}" already contains module kind ${existingDir.kind} with extension '${existingDir.extension}', specified by option ${existingDir.reason}.`
           );
         } else {
-          const outFolderKey: string | undefined = this._addModuleKindToEmit(
+          const outFolderKey: string | undefined = this.#addModuleKindToEmit(
             moduleKind,
             outFolderName,
             /* isPrimary */ false,
@@ -835,7 +835,7 @@ export class TypeScriptBuilder {
     }
   }
 
-  private _addModuleKindToEmit(
+  #addModuleKindToEmit(
     moduleKind: TTypescript.ModuleKind,
     outFolderPath: string,
     isPrimary: boolean,
@@ -898,7 +898,7 @@ export class TypeScriptBuilder {
     return `${outFolderName}:${jsExtensionOverride || '.js'}`;
   }
 
-  private _getCreateBuilderProgram(
+  #getCreateBuilderProgram(
     ts: ExtendedTypeScript
   ): TTypescript.CreateProgram<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram> {
     const { emitChangedFilesCallback } = this.#configuration;
@@ -929,7 +929,7 @@ export class TypeScriptBuilder {
           projectReferences
         );
 
-      this._logReadPerformance(ts);
+      this.#logReadPerformance(ts);
 
       const isolatedModules: boolean =
         !!this.#configuration.useTranspilerWorker && !!compilerOptions!.isolatedModules;
@@ -938,7 +938,7 @@ export class TypeScriptBuilder {
       if (isolatedModules) {
         // Kick the transpilation worker.
         const filesToTranspile: Map<string, string> = getFilesToTranspileFromBuilderProgram(newProgram);
-        this._queueTranspileInWorker(this.#tool!, compilerOptions!, filesToTranspile);
+        this.#queueTranspileInWorker(this.#tool!, compilerOptions!, filesToTranspile);
       }
 
       const { emit: originalEmit } = newProgram;
@@ -976,8 +976,8 @@ export class TypeScriptBuilder {
           `Emitting program "${innerCompilerOptions!.configFilePath}"`
         );
 
-        this._emitModulePackageJsonFiles(ts);
-        this._logEmitPerformance(ts);
+        this.#emitModulePackageJsonFiles(ts);
+        this.#logEmitPerformance(ts);
 
         // Reset performance counters
         ts.performance.disable();
@@ -996,7 +996,7 @@ export class TypeScriptBuilder {
     return createMultiEmitBuilderProgram;
   }
 
-  private _buildSolutionBuilderHost(tool: ITypeScriptTool): TSolutionHost {
+  #buildSolutionBuilderHost(tool: ITypeScriptTool): TSolutionHost {
     const reportSolutionBuilderStatus: TTypescript.DiagnosticReporter = tool.reportDiagnostic;
     const reportEmitErrorSummary: TTypescript.ReportEmitErrorSummary = (errorCount: number): void => {
       // Do nothing
@@ -1007,7 +1007,7 @@ export class TypeScriptBuilder {
     const solutionBuilderHost: TTypescript.SolutionBuilderHost<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram> =
       ts.createSolutionBuilderHost(
         system,
-        this._getCreateBuilderProgram(ts),
+        this.#getCreateBuilderProgram(ts),
         tool.reportDiagnostic,
         reportSolutionBuilderStatus,
         reportEmitErrorSummary
@@ -1027,7 +1027,7 @@ export class TypeScriptBuilder {
     return solutionBuilderHost;
   }
 
-  private _buildIncrementalCompilerHost(
+  #buildIncrementalCompilerHost(
     tool: ITypeScriptTool,
     tsconfig: TTypescript.ParsedCommandLine
   ): TTypescript.CompilerHost {
@@ -1045,26 +1045,26 @@ export class TypeScriptBuilder {
       );
     }
 
-    this._changeCompilerHostToUseCache(compilerHost, tool);
+    this.#changeCompilerHostToUseCache(compilerHost, tool);
 
     return compilerHost;
   }
 
-  private _buildWatchCompilerHost(
+  #buildWatchCompilerHost(
     tool: ITypeScriptTool,
     tsconfig: TTypescript.ParsedCommandLine
   ): TWatchCompilerHost {
     const { ts, system } = tool;
 
     const reportWatchStatus: TTypescript.DiagnosticReporter = (diagnostic: TTypescript.Diagnostic): void => {
-      this._printDiagnosticMessage(ts, diagnostic);
+      this.#printDiagnosticMessage(ts, diagnostic);
     };
 
     const compilerHost: TWatchCompilerHost = ts.createWatchCompilerHost(
       tsconfig.fileNames,
       tsconfig.options,
       system,
-      this._getCreateBuilderProgram(ts),
+      this.#getCreateBuilderProgram(ts),
       tool.reportDiagnostic,
       reportWatchStatus,
       tsconfig.projectReferences,
@@ -1074,7 +1074,7 @@ export class TypeScriptBuilder {
     return compilerHost;
   }
 
-  private _changeCompilerHostToUseCache(compilerHost: TTypescript.CompilerHost, tool: ITypeScriptTool): void {
+  #changeCompilerHostToUseCache(compilerHost: TTypescript.CompilerHost, tool: ITypeScriptTool): void {
     const { sourceFileCache } = tool;
 
     const { getSourceFile: innerGetSourceFile } = compilerHost;
@@ -1119,12 +1119,12 @@ export class TypeScriptBuilder {
     compilerHost.getSourceFile = getSourceFile;
   }
 
-  private _buildWatchSolutionBuilderHost(tool: ITypeScriptTool): TWatchSolutionHost {
+  #buildWatchSolutionBuilderHost(tool: ITypeScriptTool): TWatchSolutionHost {
     const { reportDiagnostic, ts, system } = tool;
 
     const host: TWatchSolutionHost = ts.createSolutionBuilderWithWatchHost(
       system,
-      this._getCreateBuilderProgram(ts),
+      this.#getCreateBuilderProgram(ts),
       reportDiagnostic,
       reportDiagnostic,
       reportDiagnostic
@@ -1138,7 +1138,7 @@ export class TypeScriptBuilder {
    * `package.json` with the appropriate `"type"` field to ensure Node.js correctly
    * interprets `.js` files in the output folder.
    */
-  private _emitModulePackageJsonFiles(ts: ExtendedTypeScript): void {
+  #emitModulePackageJsonFiles(ts: ExtendedTypeScript): void {
     for (const { emitModulePackageJson, moduleKind, outFolderPath } of this.#moduleKindsToEmit) {
       if (!emitModulePackageJson) {
         continue;
@@ -1184,7 +1184,7 @@ export class TypeScriptBuilder {
     }
   }
 
-  private _parseModuleKind(ts: ExtendedTypeScript, moduleKindName: string): TTypescript.ModuleKind {
+  #parseModuleKind(ts: ExtendedTypeScript, moduleKindName: string): TTypescript.ModuleKind {
     switch (moduleKindName.toLowerCase()) {
       case 'commonjs':
         return ts.ModuleKind.CommonJS;
@@ -1209,7 +1209,7 @@ export class TypeScriptBuilder {
     }
   }
 
-  private _queueTranspileInWorker(
+  #queueTranspileInWorker(
     tool: ITypeScriptTool,
     compilerOptions: TTypescript.CompilerOptions,
     filesToTranspile: Map<string, string>
@@ -1290,7 +1290,7 @@ export class TypeScriptBuilder {
     pendingTranspilePromises.set(requestId, transpilePromise);
   }
 
-  private _cleanupWorker(): void {
+  #cleanupWorker(): void {
     const tool: ITypeScriptTool | undefined = this.#tool;
     if (!tool) {
       return;

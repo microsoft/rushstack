@@ -66,7 +66,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
 
       taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
         // TODO: Handle watch / serve mode
-        await this._runServerlessStackAsync({
+        await this.#runServerlessStackAsync({
           taskSession,
           heftConfiguration,
           sstStage: sstStageParameter.value
@@ -75,7 +75,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     }
   }
 
-  private async _runServerlessStackAsync(options: {
+  async #runServerlessStackAsync(options: {
     taskSession: IHeftTaskSession;
     heftConfiguration: HeftConfiguration;
     sstStage?: string;
@@ -99,7 +99,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
       return;
     }
 
-    const sstCliEntryPoint: string = this._getSstCliEntryPoint(sstCliPackagePath);
+    const sstCliEntryPoint: string = this.#getSstCliEntryPoint(sstCliPackagePath);
 
     this.#logger.terminal.writeVerboseLine('Found SST package in' + sstCliPackagePath);
 
@@ -121,7 +121,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
 
     this.#logger.terminal.writeVerboseLine('Launching child process: ' + JSON.stringify(sstCommandArgs));
 
-    const sstCommandEnv: NodeJS.ProcessEnv = this._getWorkaroundEnvironment(sstCliPackagePath);
+    const sstCommandEnv: NodeJS.ProcessEnv = this.#getWorkaroundEnvironment(sstCliPackagePath);
 
     const sstCommandResult: child_process.ChildProcess = child_process.spawn(
       process.execPath,
@@ -145,10 +145,10 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     });
 
     sstCommandResult.stdout?.on('data', (chunk: Buffer) => {
-      this._writeOutput(chunk.toString(), (x) => this.#logger.terminal.write(x));
+      this.#writeOutput(chunk.toString(), (x) => this.#logger.terminal.write(x));
     });
     sstCommandResult.stderr?.on('data', (chunk: Buffer) => {
-      this._writeOutput(chunk.toString(), (x) => this.#logger.terminal.writeError(x));
+      this.#writeOutput(chunk.toString(), (x) => this.#logger.terminal.writeError(x));
     });
 
     sstCommandResult.on('exit', (code: number | null) => {
@@ -170,7 +170,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     return completionPromise;
   }
 
-  private _writeOutput(chunk: string, write: (message: string) => void): void {
+  #writeOutput(chunk: string, write: (message: string) => void): void {
     const lines: string[] = chunk.split('\n');
     const lastLine: string = lines.pop() || '';
 
@@ -180,7 +180,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     }
   }
 
-  private _getSstCliEntryPoint(sstCliPackagePath: string): string {
+  #getSstCliEntryPoint(sstCliPackagePath: string): string {
     // Entry point for SST prior to v1.2.0
     let sstCliEntryPoint: string = path.join(sstCliPackagePath, 'bin/scripts.js');
     if (FileSystem.exists(sstCliEntryPoint)) {
@@ -208,7 +208,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
   //
   // Since we're invoking the "@serverless-stack/cli/bin/scripts.js" entry point directly, we need to
   // reproduce this workaround.
-  private _getWorkaroundEnvironment(sstCliPackagePath: string): NodeJS.ProcessEnv {
+  #getWorkaroundEnvironment(sstCliPackagePath: string): NodeJS.ProcessEnv {
     const sstCommandEnv: NodeJS.ProcessEnv = {
       ...process.env
     };

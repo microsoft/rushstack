@@ -134,11 +134,11 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
       globFs: glob.FileSystemAdapter
     ): Promise<void> {
       if (!this.expression) {
-        this.expression = await this._collectAssetsAndGetExpressionAsync(compilation, globFs);
+        this.expression = await this.#collectAssetsAndGetExpressionAsync(compilation, globFs);
       }
     }
 
-    private async _collectAssetsAndGetExpressionAsync(
+    async #collectAssetsAndGetExpressionAsync(
       compilation: webpack.Compilation,
       globFs: glob.FileSystemAdapter
     ): Promise<string> {

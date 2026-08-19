@@ -155,7 +155,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     // https://github.com/webpack/webpack-dev-server/pull/1929/files#diff-15fb51940da53816af13330d8ce69b4eR66
     const isWebpackDevServer: boolean = process.env.WEBPACK_DEV_SERVER === 'true';
 
-    const { errors, warnings } = this._initializeAndValidateOptions(compiler, isWebpackDevServer);
+    const { errors, warnings } = this.#initializeAndValidateOptions(compiler, isWebpackDevServer);
 
     if (errors.length > 0 || warnings.length > 0) {
       compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Compilation) => {
@@ -492,7 +492,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     localizedResourceData: ILocalizationFile
   ): Promise<Record<string, string>> {
     const locFileData: ReadonlyMap<string, string> = convertLocalizationFileToLocData(localizedResourceData);
-    const fileInfo: IFileTranslationInfo = this._addLocFileAndGetPlaceholders(
+    const fileInfo: IFileTranslationInfo = this.#addLocFileAndGetPlaceholders(
       this.#defaultLocale,
       localizedFileKey,
       locFileData
@@ -614,7 +614,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     return this.#customDataPlaceholderBySuffix.get(suffix);
   }
 
-  private _addLocFileAndGetPlaceholders(
+  #addLocFileAndGetPlaceholders(
     localeName: string,
     localizedFileKey: string,
     localizedFileData: ReadonlyMap<string, string>
@@ -658,7 +658,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     return fileInfo;
   }
 
-  private _initializeAndValidateOptions(
+  #initializeAndValidateOptions(
     compiler: Compiler,
     isWebpackDevServer: boolean
   ): { errors: WebpackError[]; warnings: WebpackError[] } {

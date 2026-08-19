@@ -126,7 +126,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       // If we are not in the typescript phase, we need to create a typescript program
       // from the tsconfig file
       if (!inTypescriptPhase) {
-        const tsProgram: IExtendedProgram = await this._createTypescriptProgramAsync(
+        const tsProgram: IExtendedProgram = await this.#createTypescriptProgramAsync(
           heftConfiguration,
           taskSession
         );
@@ -136,7 +136,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       // Run the linters to completion. Linters emit errors and warnings to the logger.
       for (const [tsProgram, changedFiles] of typescriptChangedFiles) {
         try {
-          await this._lintAsync({
+          await this.#lintAsync({
             taskSession,
             heftConfiguration,
             tsProgram,
@@ -163,7 +163,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     });
   }
 
-  private async _createTypescriptProgramAsync(
+  async #createTypescriptProgramAsync(
     heftConfiguration: HeftConfiguration,
     taskSession: IHeftTaskSession
   ): Promise<IExtendedProgram> {
@@ -187,18 +187,18 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     return program;
   }
 
-  private async _ensureInitializedAsync(
+  async #ensureInitializedAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
     // Make sure that we only ever init once by memoizing the init promise
     if (!this.#initPromise) {
-      this.#initPromise = this._initInnerAsync(heftConfiguration, taskSession.logger);
+      this.#initPromise = this.#initInnerAsync(heftConfiguration, taskSession.logger);
     }
     await this.#initPromise;
   }
 
-  private async _initInnerAsync(heftConfiguration: HeftConfiguration, logger: IScopedLogger): Promise<void> {
+  async #initInnerAsync(heftConfiguration: HeftConfiguration, logger: IScopedLogger): Promise<void> {
     // Locate the tslint linter if enabled
     this.#tslintConfigFilePath = await Tslint.resolveTslintConfigFilePathAsync(heftConfiguration);
     if (this.#tslintConfigFilePath) {
@@ -221,12 +221,12 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     }
   }
 
-  private async _lintAsync(options: ILintOptions): Promise<void> {
+  async #lintAsync(options: ILintOptions): Promise<void> {
     const { taskSession, heftConfiguration, tsProgram, changedFiles, fix, sarifLogPath } = options;
 
     // Ensure that we have initialized. This promise is cached, so calling init
     // multiple times will only init once.
-    await this._ensureInitializedAsync(taskSession, heftConfiguration);
+    await this.#ensureInitializedAsync(taskSession, heftConfiguration);
 
     const linters: LinterBase<unknown>[] = [];
     if (this.#eslintConfigFilePath && this.#eslintToolPath) {
@@ -257,10 +257,10 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     }
 
     // Now that we know we have initialized properly, run the linter(s)
-    await Promise.all(linters.map((linter) => this._runLinterAsync(linter, tsProgram, changedFiles)));
+    await Promise.all(linters.map((linter) => this.#runLinterAsync(linter, tsProgram, changedFiles)));
   }
 
-  private async _runLinterAsync(
+  async #runLinterAsync(
     linter: LinterBase<unknown>,
     tsProgram: IExtendedProgram,
     changedFiles?: ReadonlySet<IExtendedSourceFile> | undefined
