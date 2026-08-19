@@ -405,7 +405,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
       stream
     } = options;
     const safeCredentialOptions: CredentialsOptions = credentialOptions ?? CredentialsOptions.Optional;
-    const credentials: string | undefined = await this._tryGetCredentialsAsync(safeCredentialOptions);
+    const credentials: string | undefined = await this.#tryGetCredentialsAsync(safeCredentialOptions);
     const url: string = new URL(relUrl, this.#url).href;
 
     const headers: Record<string, string> = {};
@@ -489,11 +489,11 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     return response;
   }
 
-  private async _tryGetCredentialsAsync(options: CredentialsOptions.Required): Promise<string>;
-  private async _tryGetCredentialsAsync(options: CredentialsOptions.Optional): Promise<string | undefined>;
-  private async _tryGetCredentialsAsync(options: CredentialsOptions.Omit): Promise<undefined>;
-  private async _tryGetCredentialsAsync(options: CredentialsOptions): Promise<string | undefined>;
-  private async _tryGetCredentialsAsync(options: CredentialsOptions): Promise<string | undefined> {
+  async #tryGetCredentialsAsync(options: CredentialsOptions.Required): Promise<string>;
+  async #tryGetCredentialsAsync(options: CredentialsOptions.Optional): Promise<string | undefined>;
+  async #tryGetCredentialsAsync(options: CredentialsOptions.Omit): Promise<undefined>;
+  async #tryGetCredentialsAsync(options: CredentialsOptions): Promise<string | undefined>;
+  async #tryGetCredentialsAsync(options: CredentialsOptions): Promise<string | undefined> {
     if (options === CredentialsOptions.Omit) {
       return;
     }

@@ -153,7 +153,7 @@ export class AmazonS3Client {
   public async getObjectAsync(objectName: string): Promise<Buffer | undefined> {
     this.#writeDebugLine('Reading object from S3');
     return await this.#sendCacheRequestWithRetriesAsync(async () => {
-      const response: IWebClientResponse = await this._makeSignedRequestAsync('GET', objectName);
+      const response: IWebClientResponse = await this.#makeSignedRequestAsync('GET', objectName);
       return this.#handleGetResponseAsync(response, async () => await response.getBufferAsync());
     });
   }
@@ -164,7 +164,7 @@ export class AmazonS3Client {
     }
 
     await this.#sendCacheRequestWithRetriesAsync(async () => {
-      const response: IWebClientResponse = await this._makeSignedRequestAsync(
+      const response: IWebClientResponse = await this.#makeSignedRequestAsync(
         'PUT',
         objectName,
         objectBuffer
@@ -191,7 +191,7 @@ export class AmazonS3Client {
   public async downloadObjectToFileAsync(objectName: string, localFilePath: string): Promise<boolean> {
     this.#writeDebugLine('Downloading object from S3 to file');
     const result: boolean | undefined = await this.#sendCacheRequestWithRetriesAsync(async () => {
-      const response: IWebClientStreamResponse = await this._makeSignedRequestAsync(
+      const response: IWebClientStreamResponse = await this.#makeSignedRequestAsync(
         'GET',
         objectName,
         undefined,
@@ -229,7 +229,7 @@ export class AmazonS3Client {
     const entryStream: FileSystemReadStream = FileSystem.createReadStream(localFilePath);
 
     // Streaming uploads cannot be retried because the stream is consumed after the first attempt.
-    const response: IWebClientStreamResponse = await this._makeSignedRequestAsync(
+    const response: IWebClientStreamResponse = await this.#makeSignedRequestAsync(
       'PUT',
       objectName,
       entryStream as Readable,
@@ -318,12 +318,12 @@ export class AmazonS3Client {
     return new Error(`Amazon S3 responded with status code ${status} (${statusText})`);
   }
 
-  private async _makeSignedRequestAsync(
+  async #makeSignedRequestAsync(
     verb: 'GET' | 'PUT',
     objectName: string,
     body?: Buffer
   ): Promise<IWebClientResponse>;
-  private async _makeSignedRequestAsync(
+  async #makeSignedRequestAsync(
     verb: 'GET' | 'PUT',
     objectName: string,
     body: Readable | undefined,
@@ -331,7 +331,7 @@ export class AmazonS3Client {
     contentHash?: string,
     contentLength?: number
   ): Promise<IWebClientStreamResponse>;
-  private async _makeSignedRequestAsync(
+  async #makeSignedRequestAsync(
     verb: 'GET' | 'PUT',
     objectName: string,
     body?: Buffer | Readable,
