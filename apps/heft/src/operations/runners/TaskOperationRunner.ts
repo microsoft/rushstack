@@ -60,25 +60,25 @@ export async function runAndMeasureAsync<T = void>(
 }
 
 export class TaskOperationRunner implements IOperationRunner {
-  private readonly _options: ITaskOperationRunnerOptions;
+  readonly #options: ITaskOperationRunnerOptions;
 
-  private _fileOperations: IHeftTaskFileOperations | undefined = undefined;
-  private _copyConfigHash: string | undefined;
-  private _watchFileSystemAdapter: WatchFileSystemAdapter | undefined = undefined;
+  #fileOperations: IHeftTaskFileOperations | undefined = undefined;
+  #copyConfigHash: string | undefined;
+  #watchFileSystemAdapter: WatchFileSystemAdapter | undefined = undefined;
 
   public readonly silent: boolean = false;
 
   public get name(): string {
-    const { taskName, parentPhase } = this._options.task;
+    const { taskName, parentPhase } = this.#options.task;
     return `Task ${JSON.stringify(taskName)} of phase ${JSON.stringify(parentPhase.phaseName)}`;
   }
 
   public constructor(options: ITaskOperationRunnerOptions) {
-    this._options = options;
+    this.#options = options;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    const { internalHeftSession, task } = this._options;
+    const { internalHeftSession, task } = this.#options;
     const { parentPhase } = task;
     const phaseSession: HeftPhaseSession = internalHeftSession.getSessionForPhase(parentPhase);
     const taskSession: HeftTaskSession = phaseSession.getSessionForTask(task);
@@ -96,7 +96,7 @@ export class TaskOperationRunner implements IOperationRunner {
     // if this is an immediate rerun
     logger.resetErrorsAndWarnings();
 
-    const rootFolderPath: string = this._options.internalHeftSession.heftConfiguration.buildFolderPath;
+    const rootFolderPath: string = this.#options.internalHeftSession.heftConfiguration.buildFolderPath;
     const isWatchMode: boolean = taskSession.parameters.watch && !!requestRun;
 
     const { terminal } = logger;
@@ -106,7 +106,7 @@ export class TaskOperationRunner implements IOperationRunner {
       return OperationStatus.Aborted;
     }
 
-    if (!this._fileOperations && hooks.registerFileOperations.isUsed()) {
+    if (!this.#fileOperations && hooks.registerFileOperations.isUsed()) {
       const fileOperations: IHeftTaskFileOperations = await hooks.registerFileOperations.promise({
         copyOperations: new Set(),
         deleteOperations: new Set()
@@ -135,22 +135,22 @@ export class TaskOperationRunner implements IOperationRunner {
         copyConfigHash = hasher.digest('base64');
       }
 
-      this._fileOperations = fileOperations;
-      this._copyConfigHash = copyConfigHash;
+      this.#fileOperations = fileOperations;
+      this.#copyConfigHash = copyConfigHash;
     }
 
     const shouldRunIncremental: boolean = isWatchMode && hooks.runIncremental.isUsed();
     let watchFileSystemAdapter: WatchFileSystemAdapter | undefined;
     const getWatchFileSystemAdapter = (): WatchFileSystemAdapter => {
       if (!watchFileSystemAdapter) {
-        watchFileSystemAdapter = this._watchFileSystemAdapter ||= new WatchFileSystemAdapter();
+        watchFileSystemAdapter = this.#watchFileSystemAdapter ||= new WatchFileSystemAdapter();
         watchFileSystemAdapter.setBaseline();
       }
       return watchFileSystemAdapter;
     };
 
     const shouldRun: boolean = hooks.run.isUsed() || shouldRunIncremental;
-    if (!shouldRun && !this._fileOperations) {
+    if (!shouldRun && !this.#fileOperations) {
       terminal.writeVerboseLine('Task execution skipped, no implementation provided');
       return OperationStatus.NoOp;
     }
@@ -211,9 +211,9 @@ export class TaskOperationRunner implements IOperationRunner {
       : // This branch only occurs if only file operations are defined.
         OperationStatus.Success;
 
-    if (this._fileOperations) {
-      const { copyOperations, deleteOperations } = this._fileOperations;
-      const copyConfigHash: string | undefined = this._copyConfigHash;
+    if (this.#fileOperations) {
+      const { copyOperations, deleteOperations } = this.#fileOperations;
+      const copyConfigHash: string | undefined = this.#copyConfigHash;
 
       await Promise.all([
         copyConfigHash

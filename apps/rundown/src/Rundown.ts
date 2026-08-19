@@ -12,7 +12,7 @@ import type { IpcMessage } from './LauncherTypes';
 
 export class Rundown {
   // Map from required path --> caller path
-  private _importedModuleMap: Map<string, string> = new Map();
+  #importedModuleMap: Map<string, string> = new Map();
 
   public async invokeAsync(
     scriptPath: string,
@@ -46,7 +46,7 @@ export class Rundown {
     console.log('Writing report file: ' + reportPath);
 
     const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-    const importedPaths: string[] = [...this._importedModuleMap.keys()];
+    const importedPaths: string[] = [...this.#importedModuleMap.keys()];
     const importedPackageFolders: Set<string> = new Set();
 
     for (const importedPath of importedPaths) {
@@ -75,7 +75,7 @@ export class Rundown {
     const reportPath: string = 'rundown-inspect.log';
     console.log('Writing report file: ' + reportPath);
 
-    const importedPaths: string[] = [...this._importedModuleMap.keys()];
+    const importedPaths: string[] = [...this.#importedModuleMap.keys()];
     importedPaths.sort();
 
     let data: string = '';
@@ -87,7 +87,7 @@ export class Rundown {
         let current: string = importedPath;
         const visited: Set<string> = new Set();
         for (;;) {
-          const callerPath: string | undefined = this._importedModuleMap.get(current);
+          const callerPath: string | undefined = this.#importedModuleMap.get(current);
           if (!callerPath) {
             break;
           }
@@ -122,7 +122,7 @@ export class Rundown {
       switch (message.id) {
         case 'trace':
           for (const record of message.records) {
-            this._importedModuleMap.set(record.importedModule, record.callingModule);
+            this.#importedModuleMap.set(record.importedModule, record.callingModule);
           }
           break;
         case 'done':

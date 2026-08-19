@@ -41,10 +41,10 @@ export class CollectingWritable extends TerminalWritable {
 export class TestTerminal implements IDaemonRendererTerminal {
   public readonly columns: number = DEFAULT_TEST_COLUMNS;
   public readonly isTTY: boolean = false;
-  private readonly _writes: [DaemonRenderStream, string][] = [];
+  readonly #writes: [DaemonRenderStream, string][] = [];
 
   public write(text: string, stream: DaemonRenderStream): void {
-    this._writes.push([stream, text]);
+    this.#writes.push([stream, text]);
   }
 
   /** All stdout text written so far, concatenated. */
@@ -58,7 +58,7 @@ export class TestTerminal implements IDaemonRendererTerminal {
   }
 
   private _collect(stream: DaemonRenderStream): string {
-    return this._writes
+    return this.#writes
       .filter(([s]: [DaemonRenderStream, string]) => s === stream)
       .map(([, text]: [DaemonRenderStream, string]) => text)
       .join('');

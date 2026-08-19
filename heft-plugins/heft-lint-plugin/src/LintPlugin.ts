@@ -70,11 +70,11 @@ function getSarifLogPath(
 
 export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
   // These are initliazed by _initAsync
-  private _initPromise!: Promise<void>;
-  private _eslintToolPath: string | undefined;
-  private _eslintConfigFilePath: string | undefined;
-  private _tslintToolPath: string | undefined;
-  private _tslintConfigFilePath: string | undefined;
+  #initPromise!: Promise<void>;
+  #eslintToolPath: string | undefined;
+  #eslintConfigFilePath: string | undefined;
+  #tslintToolPath: string | undefined;
+  #tslintConfigFilePath: string | undefined;
 
   public apply(
     taskSession: IHeftTaskSession,
@@ -192,27 +192,27 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
     // Make sure that we only ever init once by memoizing the init promise
-    if (!this._initPromise) {
-      this._initPromise = this._initInnerAsync(heftConfiguration, taskSession.logger);
+    if (!this.#initPromise) {
+      this.#initPromise = this._initInnerAsync(heftConfiguration, taskSession.logger);
     }
-    await this._initPromise;
+    await this.#initPromise;
   }
 
   private async _initInnerAsync(heftConfiguration: HeftConfiguration, logger: IScopedLogger): Promise<void> {
     // Locate the tslint linter if enabled
-    this._tslintConfigFilePath = await Tslint.resolveTslintConfigFilePathAsync(heftConfiguration);
-    if (this._tslintConfigFilePath) {
-      this._tslintToolPath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
+    this.#tslintConfigFilePath = await Tslint.resolveTslintConfigFilePathAsync(heftConfiguration);
+    if (this.#tslintConfigFilePath) {
+      this.#tslintToolPath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
         'tslint',
         logger.terminal
       );
     }
 
     // Locate the eslint linter if enabled
-    this._eslintConfigFilePath = await Eslint.resolveEslintConfigFilePathAsync(heftConfiguration);
-    if (this._eslintConfigFilePath) {
-      logger.terminal.writeVerboseLine(`ESLint config file path: ${this._eslintConfigFilePath}`);
-      this._eslintToolPath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
+    this.#eslintConfigFilePath = await Eslint.resolveEslintConfigFilePathAsync(heftConfiguration);
+    if (this.#eslintConfigFilePath) {
+      logger.terminal.writeVerboseLine(`ESLint config file path: ${this.#eslintConfigFilePath}`);
+      this.#eslintToolPath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
         'eslint',
         logger.terminal
       );
@@ -229,27 +229,27 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     await this._ensureInitializedAsync(taskSession, heftConfiguration);
 
     const linters: LinterBase<unknown>[] = [];
-    if (this._eslintConfigFilePath && this._eslintToolPath) {
+    if (this.#eslintConfigFilePath && this.#eslintToolPath) {
       const eslintLinter: Eslint = await Eslint.initializeAsync({
         tsProgram,
         fix,
         sarifLogPath,
         scopedLogger: taskSession.logger,
-        linterToolPath: this._eslintToolPath,
-        linterConfigFilePath: this._eslintConfigFilePath,
+        linterToolPath: this.#eslintToolPath,
+        linterConfigFilePath: this.#eslintConfigFilePath,
         buildFolderPath: heftConfiguration.buildFolderPath,
         buildMetadataFolderPath: taskSession.tempFolderPath
       });
       linters.push(eslintLinter);
     }
 
-    if (this._tslintConfigFilePath && this._tslintToolPath) {
+    if (this.#tslintConfigFilePath && this.#tslintToolPath) {
       const tslintLinter: Tslint = await Tslint.initializeAsync({
         tsProgram,
         fix,
         scopedLogger: taskSession.logger,
-        linterToolPath: this._tslintToolPath,
-        linterConfigFilePath: this._tslintConfigFilePath,
+        linterToolPath: this.#tslintToolPath,
+        linterConfigFilePath: this.#tslintConfigFilePath,
         buildFolderPath: heftConfiguration.buildFolderPath,
         buildMetadataFolderPath: taskSession.tempFolderPath
       });

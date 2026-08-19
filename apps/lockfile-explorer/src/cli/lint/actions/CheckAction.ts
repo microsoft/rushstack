@@ -38,11 +38,11 @@ export interface ILintIssue {
 }
 
 export class CheckAction extends CommandLineAction {
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
-  private _rushConfiguration!: RushConfiguration;
-  private _checkedProjects: Set<RushConfigurationProject>;
-  private _docMap: Map<string, lockfileTypes.LockfileObject>;
+  #rushConfiguration!: RushConfiguration;
+  #checkedProjects: Set<RushConfigurationProject>;
+  #docMap: Map<string, lockfileTypes.LockfileObject>;
 
   public constructor(terminal: ITerminal) {
     super({
@@ -54,9 +54,9 @@ export class CheckAction extends CommandLineAction {
         ', reporting any problems found in your PNPM workspace.'
     });
 
-    this._terminal = terminal;
-    this._checkedProjects = new Set();
-    this._docMap = new Map();
+    this.#terminal = terminal;
+    this.#checkedProjects = new Set();
+    this.#docMap = new Map();
   }
 
   private async _checkVersionCompatibilityAsync(
@@ -100,18 +100,18 @@ export class CheckAction extends CommandLineAction {
     project: RushConfigurationProject,
     requiredVersions: Record<string, string>
   ): Promise<void> {
-    this._terminal.writeLine(`Checking project "${project.packageName}"`);
+    this.#terminal.writeLine(`Checking project "${project.packageName}"`);
 
     const projectFolder: string = project.projectFolder;
     const subspace: Subspace = project.subspace;
     const shrinkwrapFilename: string = subspace.getCommittedShrinkwrapFilePath();
     let doc: lockfileTypes.LockfileObject;
-    if (this._docMap.has(shrinkwrapFilename)) {
-      doc = this._docMap.get(shrinkwrapFilename)!;
+    if (this.#docMap.has(shrinkwrapFilename)) {
+      doc = this.#docMap.get(shrinkwrapFilename)!;
     } else {
       const pnpmLockfileText: string = await FileSystem.readFileAsync(shrinkwrapFilename);
       doc = yaml.load(pnpmLockfileText) as lockfileTypes.LockfileObject;
-      this._docMap.set(shrinkwrapFilename, doc);
+      this.#docMap.set(shrinkwrapFilename, doc);
     }
     const { importers, lockfileVersion, packages } = doc;
     const shrinkwrapFileMajorVersion: number = getShrinkwrapFileMajorVersion(lockfileVersion);
@@ -136,9 +136,9 @@ export class CheckAction extends CommandLineAction {
             ) as pnpmTypes.DepPath;
             if (fullDependencyPath.includes('link:')) {
               const dependencyProject: RushConfigurationProject | undefined =
-                this._rushConfiguration.getProjectByName(dependencyName);
-              if (dependencyProject && !this._checkedProjects?.has(dependencyProject)) {
-                this._checkedProjects!.add(project);
+                this.#rushConfiguration.getProjectByName(dependencyName);
+              if (dependencyProject && !this.#checkedProjects?.has(dependencyProject)) {
+                this.#checkedProjects!.add(project);
                 await this._searchAndValidateDependenciesAsync(dependencyProject, requiredVersions);
               }
             } else {
@@ -162,13 +162,13 @@ export class CheckAction extends CommandLineAction {
   ): Promise<string | undefined> {
     try {
       const project: RushConfigurationProject | undefined =
-        this._rushConfiguration?.getProjectByName(projectName);
+        this.#rushConfiguration?.getProjectByName(projectName);
       if (!project) {
         throw new Error(
           `Specified project "${projectName}" does not exist in ${LOCKFILE_LINT_JSON_FILENAME}`
         );
       }
-      this._checkedProjects.add(project);
+      this.#checkedProjects.add(project);
       await this._searchAndValidateDependenciesAsync(project, requiredVersions);
       return undefined;
     } catch (e) {
@@ -183,10 +183,10 @@ export class CheckAction extends CommandLineAction {
         'The "lockfile-explorer check" must be executed in a folder that is under a Rush workspace folder'
       );
     }
-    this._rushConfiguration = rushConfiguration!;
+    this.#rushConfiguration = rushConfiguration!;
 
     const lintingFile: string = path.resolve(
-      this._rushConfiguration.commonFolder,
+      this.#rushConfiguration.commonFolder,
       'config',
       LOCKFILE_EXPLORER_FOLDERNAME,
       LOCKFILE_LINT_JSON_FILENAME
@@ -219,7 +219,7 @@ export class CheckAction extends CommandLineAction {
       { concurrency: 50 }
     );
     if (issues.length > 0) {
-      this._terminal.writeLine();
+      this.#terminal.writeLine();
 
       // Deterministic order
       for (const issue of issues.sort((a, b): number => {
@@ -233,13 +233,13 @@ export class CheckAction extends CommandLineAction {
         }
         return a.message.localeCompare(b.message);
       })) {
-        this._terminal.writeLine(
+        this.#terminal.writeLine(
           Colorize.red('PROBLEM: ') + Colorize.cyan(`[${issue.rule}] `) + issue.message + '\n'
         );
       }
 
       throw new AlreadyReportedError();
     }
-    this._terminal.writeLine(Colorize.green('SUCCESS: ') + 'All checks passed.');
+    this.#terminal.writeLine(Colorize.green('SUCCESS: ') + 'All checks passed.');
   }
 }

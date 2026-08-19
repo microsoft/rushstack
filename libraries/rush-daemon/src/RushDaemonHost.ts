@@ -40,11 +40,11 @@ export interface IRushDaemonHostOptions {
  * @beta
  */
 export class RushDaemonHost {
-  private readonly _listener: DaemonFrameListener;
-  private readonly _sessions: Set<DaemonControlSession>;
-  private readonly _lifecycle: { closing: boolean };
+  readonly #listener: DaemonFrameListener;
+  readonly #sessions: Set<DaemonControlSession>;
+  readonly #lifecycle: { closing: boolean };
   public readonly paths: IDaemonPaths;
-  private _closePromise: Promise<void> | undefined;
+  #closePromise: Promise<void> | undefined;
 
   private constructor(
     listener: DaemonFrameListener,
@@ -52,10 +52,10 @@ export class RushDaemonHost {
     sessions: Set<DaemonControlSession>,
     lifecycle: { closing: boolean }
   ) {
-    this._listener = listener;
+    this.#listener = listener;
     this.paths = paths;
-    this._sessions = sessions;
-    this._lifecycle = lifecycle;
+    this.#sessions = sessions;
+    this.#lifecycle = lifecycle;
   }
 
   /** Resolves only after the transport is bound and its lockfile has been written. */
@@ -96,13 +96,13 @@ export class RushDaemonHost {
 
   /** Closes active connections, stops listening, and removes transport artifacts. */
   public closeAsync(): Promise<void> {
-    this._closePromise ??= this._closeOnceAsync();
-    return this._closePromise;
+    this.#closePromise ??= this._closeOnceAsync();
+    return this.#closePromise;
   }
 
   private async _closeOnceAsync(): Promise<void> {
-    this._lifecycle.closing = true;
-    await Promise.all(Array.from(this._sessions, (session: DaemonControlSession) => session.closeAsync()));
-    await this._listener.closeAsync();
+    this.#lifecycle.closing = true;
+    await Promise.all(Array.from(this.#sessions, (session: DaemonControlSession) => session.closeAsync()));
+    await this.#listener.closeAsync();
   }
 }

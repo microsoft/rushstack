@@ -67,16 +67,16 @@ export interface IStdioLineTransformOptions extends ITerminalTransformOptions {
  * @beta
  */
 export class StderrLineTransform extends TerminalTransform {
-  private _accumulatedLine: string;
-  private _accumulatedStderr: boolean;
+  #accumulatedLine: string;
+  #accumulatedStderr: boolean;
 
   public readonly newline: string;
 
   public constructor(options: IStdioLineTransformOptions) {
     super(options);
 
-    this._accumulatedLine = '';
-    this._accumulatedStderr = false;
+    this.#accumulatedLine = '';
+    this.#accumulatedStderr = false;
 
     this.newline = Text.getNewline(options.newlineKind || NewlineKind.Lf);
   }
@@ -93,18 +93,18 @@ export class StderrLineTransform extends TerminalTransform {
 
     while (startIndex < text.length) {
       if (chunk.kind === TerminalChunkKind.Stderr) {
-        this._accumulatedStderr = true;
+        this.#accumulatedStderr = true;
       }
 
       const endIndex: number = text.indexOf('\n', startIndex);
       if (endIndex < 0) {
         // we did not find \n, so simply append
-        this._accumulatedLine += text.substring(startIndex);
+        this.#accumulatedLine += text.substring(startIndex);
         break;
       }
 
       // append everything up to \n
-      this._accumulatedLine += text.substring(startIndex, endIndex);
+      this.#accumulatedLine += text.substring(startIndex, endIndex);
 
       this._processAccumulatedLine();
 
@@ -114,28 +114,28 @@ export class StderrLineTransform extends TerminalTransform {
   }
 
   protected onClose(): void {
-    if (this._accumulatedLine.length > 0) {
+    if (this.#accumulatedLine.length > 0) {
       this._processAccumulatedLine();
     }
     this.autocloseDestination();
   }
 
   private _processAccumulatedLine(): void {
-    this._accumulatedLine += this.newline;
+    this.#accumulatedLine += this.newline;
 
-    if (this._accumulatedStderr) {
+    if (this.#accumulatedStderr) {
       this.destination.writeChunk({
         kind: TerminalChunkKind.Stderr,
-        text: this._accumulatedLine
+        text: this.#accumulatedLine
       });
     } else {
       this.destination.writeChunk({
         kind: TerminalChunkKind.Stdout,
-        text: this._accumulatedLine
+        text: this.#accumulatedLine
       });
     }
 
-    this._accumulatedLine = '';
-    this._accumulatedStderr = false;
+    this.#accumulatedLine = '';
+    this.#accumulatedStderr = false;
   }
 }

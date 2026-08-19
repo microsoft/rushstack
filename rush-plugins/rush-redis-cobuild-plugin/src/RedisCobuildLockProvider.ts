@@ -35,36 +35,36 @@ const COMPLETED_STATE_SEPARATOR: ';' = ';';
  * @beta
  */
 export class RedisCobuildLockProvider implements ICobuildLockProvider {
-  private readonly _options: IRedisCobuildLockProviderOptions;
-  private readonly _terminal: ITerminal;
-  private readonly _lockKeyIdentifierMap: WeakMap<ICobuildContext, string> = new WeakMap<
+  readonly #options: IRedisCobuildLockProviderOptions;
+  readonly #terminal: ITerminal;
+  readonly #lockKeyIdentifierMap: WeakMap<ICobuildContext, string> = new WeakMap<
     ICobuildContext,
     string
   >();
-  private readonly _completedStateKeyIdentifierMap: WeakMap<ICobuildContext, string> = new WeakMap<
+  readonly #completedStateKeyIdentifierMap: WeakMap<ICobuildContext, string> = new WeakMap<
     ICobuildContext,
     string
   >();
 
-  private readonly _redisClient: RedisClientType<RedisModules, RedisFunctions, RedisScripts, 2 | 3>;
+  readonly #redisClient: RedisClientType<RedisModules, RedisFunctions, RedisScripts, 2 | 3>;
 
   public constructor(options: IRedisCobuildLockProviderOptions, rushSession: RushSession) {
-    this._options = RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(options);
+    this.#options = RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(options);
     // Detect half-dead connections quickly. Without `socketTimeout`, a silently-dropped
     // TCP connection (NAT/firewall) can stall in-flight commands for many minutes while
     // the kernel waits to surface the failure.
-    this._options.socket = {
+    this.#options.socket = {
       connectTimeout: 10_000,
       socketTimeout: 30_000,
       reconnectStrategy: (count: number) => {
-        this._terminal.writeErrorLine(`Redis client reconnecting attempt #${count}`);
+        this.#terminal.writeErrorLine(`Redis client reconnecting attempt #${count}`);
         return count < 5 ? count * 1000 : false;
       },
-      ...this._options.socket
+      ...this.#options.socket
     };
-    this._terminal = rushSession.getLogger('RedisCobuildLockProvider').terminal;
+    this.#terminal = rushSession.getLogger('RedisCobuildLockProvider').terminal;
     try {
-      this._redisClient = createClient(this._options);
+      this.#redisClient = createClient(this.#options);
     } catch (e) {
       throw new Error(`Failed to create redis client: ${e.message}`);
     }
@@ -101,26 +101,26 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
 
   public async connectAsync(): Promise<void> {
     try {
-      await this._redisClient.connect();
+      await this.#redisClient.connect();
       // Check the connection works at early stage
-      await this._redisClient.ping();
+      await this.#redisClient.ping();
     } catch (e) {
       throw new Error(`Failed to connect to redis server: ${e.message}`);
     }
 
     // Register error event handler to avoid process exit when redis client error occurs.
-    this._redisClient.on('error', (e: Error) => {
+    this.#redisClient.on('error', (e: Error) => {
       if (e.message) {
-        this._terminal.writeErrorLine(`Redis client error: ${e.message}`);
+        this.#terminal.writeErrorLine(`Redis client error: ${e.message}`);
       } else {
-        this._terminal.writeErrorLine(`Redis client error: ${e}`);
+        this.#terminal.writeErrorLine(`Redis client error: ${e}`);
       }
     });
   }
 
   public async disconnectAsync(): Promise<void> {
     try {
-      await this._redisClient.destroy();
+      await this.#redisClient.destroy();
     } catch (e) {
       throw new Error(`Failed to disconnect to redis server: ${e.message}`);
     }
@@ -132,20 +132,20 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
    * NOTE: this is a reentrant lock implementation
    */
   public async acquireLockAsync(context: ICobuildContext): Promise<boolean> {
-    const { _terminal: terminal } = this;
+    const terminal: ITerminal = this.#terminal;
     const { lockKey, lockExpireTimeInSeconds, runnerId } = context;
     let result: boolean = false;
     const lockKeyIdentifier: string = this._getLockKeyIdentifier(context);
     try {
       // According to the doc, the reply of set command is either "OK" or nil. The reply doesn't matter
-      await this._redisClient.set(lockKey, runnerId, {
+      await this.#redisClient.set(lockKey, runnerId, {
         NX: true,
         // call EXPIRE in an atomic command
         EX: lockExpireTimeInSeconds
         // Do not specify GET here since using NX ane GET together requires Redis@7.
       });
       // Just read the value by lock key to see wether it equals current runner id
-      const value: string | null = await this._redisClient.get(lockKey);
+      const value: string | null = await this.#redisClient.get(lockKey);
       if (value === null) {
         // This should not happen.
         throw new Error(`Get redis key failed: ${lockKey}`);
@@ -165,11 +165,11 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
   }
 
   public async renewLockAsync(context: ICobuildContext): Promise<void> {
-    const { _terminal: terminal } = this;
+    const terminal: ITerminal = this.#terminal;
     const { lockKey, lockExpireTimeInSeconds } = context;
     const lockKeyIdentifier: string = this._getLockKeyIdentifier(context);
     try {
-      await this._redisClient.expire(lockKey, lockExpireTimeInSeconds);
+      await this.#redisClient.expire(lockKey, lockExpireTimeInSeconds);
     } catch (e) {
       throw new Error(`Failed to renew ${lockKeyIdentifier}: ${e.message}`);
     }
@@ -180,12 +180,12 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     context: ICobuildContext,
     state: ICobuildCompletedState
   ): Promise<void> {
-    const { _terminal: terminal } = this;
+    const terminal: ITerminal = this.#terminal;
     const { completedStateKey: key } = context;
     const value: string = this._serializeCompletedState(state);
     const completedStateKeyIdentifier: string = this._getCompletedStateKeyIdentifier(context);
     try {
-      await this._redisClient.set(key, value);
+      await this.#redisClient.set(key, value);
     } catch (e) {
       throw new Error(`Failed to set ${completedStateKeyIdentifier}: ${e.message}`);
     }
@@ -193,12 +193,12 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
   }
 
   public async getCompletedStateAsync(context: ICobuildContext): Promise<ICobuildCompletedState | undefined> {
-    const { _terminal: terminal } = this;
+    const terminal: ITerminal = this.#terminal;
     const { completedStateKey: key } = context;
     const completedStateKeyIdentifier: string = this._getCompletedStateKeyIdentifier(context);
     let state: ICobuildCompletedState | undefined;
     try {
-      const value: string | null = await this._redisClient.get(key);
+      const value: string | null = await this.#redisClient.get(key);
       if (value) {
         state = this._deserializeCompletedState(value);
       }
@@ -222,21 +222,21 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
   }
 
   private _getLockKeyIdentifier(context: ICobuildContext): string {
-    let lockKeyIdentifier: string | undefined = this._lockKeyIdentifierMap.get(context);
+    let lockKeyIdentifier: string | undefined = this.#lockKeyIdentifierMap.get(context);
     if (lockKeyIdentifier === undefined) {
       const { lockKey, packageName, phaseName } = context;
       lockKeyIdentifier = `lock(${lockKey})_package(${packageName})_phase(${phaseName})`;
-      this._lockKeyIdentifierMap.set(context, lockKeyIdentifier);
+      this.#lockKeyIdentifierMap.set(context, lockKeyIdentifier);
     }
     return lockKeyIdentifier;
   }
 
   private _getCompletedStateKeyIdentifier(context: ICobuildContext): string {
-    let completedStateKeyIdentifier: string | undefined = this._completedStateKeyIdentifierMap.get(context);
+    let completedStateKeyIdentifier: string | undefined = this.#completedStateKeyIdentifierMap.get(context);
     if (completedStateKeyIdentifier === undefined) {
       const { completedStateKey, packageName, phaseName } = context;
       completedStateKeyIdentifier = `completed_state(${completedStateKey})_package(${packageName})_phase(${phaseName})`;
-      this._completedStateKeyIdentifierMap.set(context, completedStateKeyIdentifier);
+      this.#completedStateKeyIdentifierMap.set(context, completedStateKeyIdentifier);
     }
     return completedStateKeyIdentifier;
   }

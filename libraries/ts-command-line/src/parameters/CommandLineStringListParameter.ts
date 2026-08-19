@@ -10,7 +10,7 @@ import { EnvironmentVariableParser } from './EnvironmentVariableParser';
  * @public
  */
 export class CommandLineStringListParameter extends CommandLineParameterWithArgument {
-  private _values: string[] = [];
+  #values: string[] = [];
 
   /** {@inheritDoc CommandLineParameterBase.kind} */
   public readonly kind: CommandLineParameterKind.StringList = CommandLineParameterKind.StringList;
@@ -35,7 +35,7 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
           this.reportInvalidData(data);
         }
       }
-      this._values = data;
+      this.#values = data;
       return;
     }
 
@@ -43,14 +43,14 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
     if (this.environmentVariable !== undefined) {
       const values: string[] | undefined = EnvironmentVariableParser.parseAsList(this.environmentVariable);
       if (values) {
-        this._values = values;
+        this.#values = values;
         return;
       }
     }
 
     // (No default value for string lists)
 
-    this._values = [];
+    this.#values = [];
   }
 
   /**
@@ -61,7 +61,7 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
    * or if the parameter was omitted and has no default value.
    */
   public get values(): ReadonlyArray<string> {
-    return this._values;
+    return this.#values;
   }
 
   /** {@inheritDoc CommandLineParameterBase.appendToArgList} */

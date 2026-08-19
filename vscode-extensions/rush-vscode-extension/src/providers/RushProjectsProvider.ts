@@ -67,20 +67,20 @@ class RushProjectScript extends vscode.TreeItem {
 type RushProjectsTreeItem = RushProject | RushProjectScript;
 
 export class RushProjectsProvider implements vscode.TreeDataProvider<RushProjectsTreeItem> {
-  private _rushConfiguration: RushConfiguration | undefined;
-  private readonly _onDidChangeTreeData: vscode.EventEmitter<RushProjectsTreeItem | undefined> =
+  #rushConfiguration: RushConfiguration | undefined;
+  readonly #onDidChangeTreeData: vscode.EventEmitter<RushProjectsTreeItem | undefined> =
     new vscode.EventEmitter();
 
   public readonly onDidChangeTreeData: vscode.Event<RushProjectsTreeItem | undefined> =
-    this._onDidChangeTreeData.event;
+    this.#onDidChangeTreeData.event;
 
   public constructor(context: vscode.ExtensionContext) {
     const rushWorkspace: RushWorkspace = RushWorkspace.getCurrentInstance();
     RushWorkspace.onDidChangeWorkspace((newWorkspace: RushWorkspace) => {
-      this._rushConfiguration = newWorkspace.rushConfiguration;
+      this.#rushConfiguration = newWorkspace.rushConfiguration;
       this.refresh();
     });
-    this._rushConfiguration = rushWorkspace.rushConfiguration;
+    this.#rushConfiguration = rushWorkspace.rushConfiguration;
 
     const commandNames: readonly ['revealInExplorer', 'revealProjectDetail', 'runProjectScript'] = [
       'revealInExplorer',
@@ -100,7 +100,7 @@ export class RushProjectsProvider implements vscode.TreeDataProvider<RushProject
 
   public refresh(): void {
     terminal.writeDebugLine('Refreshing Rush projects');
-    this._onDidChangeTreeData.fire(undefined);
+    this.#onDidChangeTreeData.fire(undefined);
   }
 
   public async refreshEntryAsync(): Promise<void> {
@@ -149,7 +149,7 @@ export class RushProjectsProvider implements vscode.TreeDataProvider<RushProject
   public getChildren(
     element?: RushProject | RushProjectScript
   ): Thenable<RushProject[] | RushProjectScript[]> {
-    if (!this._rushConfiguration) {
+    if (!this.#rushConfiguration) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       vscode.window.showInformationMessage('No RushProjects in empty workspace');
       return Promise.resolve([]);
@@ -157,7 +157,7 @@ export class RushProjectsProvider implements vscode.TreeDataProvider<RushProject
 
     // top-level
     if (!element) {
-      const rushProjectTreeItems: RushProject[] = this._rushConfiguration.projects.map(
+      const rushProjectTreeItems: RushProject[] = this.#rushConfiguration.projects.map(
         (project: RushConfigurationProject) =>
           new RushProject({
             label: project.packageName,

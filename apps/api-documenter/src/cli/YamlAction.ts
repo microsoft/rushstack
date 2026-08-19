@@ -12,9 +12,9 @@ import { YamlDocumenter, type YamlFormat } from '../documenters/YamlDocumenter';
 import { OfficeYamlDocumenter } from '../documenters/OfficeYamlDocumenter';
 
 export class YamlAction extends BaseAction {
-  private readonly _officeParameter: CommandLineFlagParameter;
-  private readonly _newDocfxNamespacesParameter: CommandLineFlagParameter;
-  private readonly _yamlFormatParameter: IRequiredCommandLineChoiceParameter<YamlFormat>;
+  readonly #officeParameter: CommandLineFlagParameter;
+  readonly #newDocfxNamespacesParameter: CommandLineFlagParameter;
+  readonly #yamlFormatParameter: IRequiredCommandLineChoiceParameter<YamlFormat>;
 
   public constructor(parser: ApiDocumenterCommandLine) {
     super({
@@ -26,11 +26,11 @@ export class YamlAction extends BaseAction {
         ' pipeline.'
     });
 
-    this._officeParameter = this.defineFlagParameter({
+    this.#officeParameter = this.defineFlagParameter({
       parameterLongName: '--office',
       description: `Enables some additional features specific to Office Add-ins`
     });
-    this._newDocfxNamespacesParameter = this.defineFlagParameter({
+    this.#newDocfxNamespacesParameter = this.defineFlagParameter({
       parameterLongName: '--new-docfx-namespaces',
       description:
         `This enables an experimental feature that will be officially released with the next major version` +
@@ -38,7 +38,7 @@ export class YamlAction extends BaseAction {
         ` adds them to the table of contents.  This will also affect file layout as namespaced items will be nested` +
         ` under a directory for the namespace instead of just within the package.`
     });
-    this._yamlFormatParameter = this.defineChoiceParameter<YamlFormat>({
+    this.#yamlFormatParameter = this.defineChoiceParameter<YamlFormat>({
       parameterLongName: '--yaml-format',
       alternatives: ['udp', 'sdp'],
       defaultValue: 'sdp',
@@ -52,12 +52,12 @@ export class YamlAction extends BaseAction {
   protected override async onExecuteAsync(): Promise<void> {
     const { apiModel, inputFolder, outputFolder } = this.buildApiModel();
 
-    const yamlDocumenter: YamlDocumenter = this._officeParameter.value
-      ? new OfficeYamlDocumenter(apiModel, inputFolder, this._newDocfxNamespacesParameter.value)
+    const yamlDocumenter: YamlDocumenter = this.#officeParameter.value
+      ? new OfficeYamlDocumenter(apiModel, inputFolder, this.#newDocfxNamespacesParameter.value)
       : new YamlDocumenter(
           apiModel,
-          this._newDocfxNamespacesParameter.value,
-          this._yamlFormatParameter.value
+          this.#newDocfxNamespacesParameter.value,
+          this.#yamlFormatParameter.value
         );
 
     yamlDocumenter.generateFiles(outputFolder);

@@ -15,12 +15,12 @@ import type { MinimalRushConfiguration } from './MinimalRushConfiguration';
 const MAX_INSTALL_ATTEMPTS: number = 3;
 
 export class RushVersionSelector {
-  private _rushGlobalFolder: _RushGlobalFolder;
-  private _currentPackageVersion: string;
+  #rushGlobalFolder: _RushGlobalFolder;
+  #currentPackageVersion: string;
 
   public constructor(currentPackageVersion: string) {
-    this._rushGlobalFolder = new _RushGlobalFolder();
-    this._currentPackageVersion = currentPackageVersion;
+    this.#rushGlobalFolder = new _RushGlobalFolder();
+    this.#currentPackageVersion = currentPackageVersion;
   }
 
   public async ensureRushVersionInstalledAsync(
@@ -29,7 +29,7 @@ export class RushVersionSelector {
     executeOptions: ILaunchOptions
   ): Promise<void> {
     const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
-    const expectedRushPath: string = path.join(this._rushGlobalFolder.nodeSpecificPath, `rush-${version}`);
+    const expectedRushPath: string = path.join(this.#rushGlobalFolder.nodeSpecificPath, `rush-${version}`);
 
     const installMarker: _FlagFile = new _FlagFile(expectedRushPath, 'last-install', {
       node: process.versions.node
@@ -97,7 +97,7 @@ export class RushVersionSelector {
       });
       const rushCliEntrypoint: typeof import('@microsoft/rush-lib') = require(rushLibEntrypoint);
       // For newer rush-lib, RushCommandSelector can test whether "rushx" is supported or not
-      RushCommandSelector.execute(this._currentPackageVersion, rushCliEntrypoint, executeOptions);
+      RushCommandSelector.execute(this.#currentPackageVersion, rushCliEntrypoint, executeOptions);
     }
   }
 }

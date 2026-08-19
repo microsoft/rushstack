@@ -12,15 +12,15 @@ import type { IDaemonRendererTerminal } from './DaemonRendererTerminal';
  * @beta
  */
 export class TerminalSinkWritable extends TerminalWritable {
-  private readonly _terminal: IDaemonRendererTerminal;
+  readonly #terminal: IDaemonRendererTerminal;
 
   public constructor(terminal: IDaemonRendererTerminal) {
     super({ preventAutoclose: true });
-    this._terminal = terminal;
+    this.#terminal = terminal;
   }
 
   /** {@inheritDoc @rushstack/terminal#TerminalWritable.onWriteChunk} */
   public onWriteChunk(chunk: ITerminalChunk): void {
-    this._terminal.write(chunk.text, chunk.kind === TerminalChunkKind.Stderr ? 'stderr' : 'stdout');
+    this.#terminal.write(chunk.text, chunk.kind === TerminalChunkKind.Stderr ? 'stderr' : 'stdout');
   }
 }

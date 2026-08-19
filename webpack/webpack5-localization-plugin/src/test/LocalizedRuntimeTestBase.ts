@@ -14,15 +14,15 @@ import { type ITrueHashPluginOptions, TrueHashPlugin } from '../TrueHashPlugin';
 import { markEntity } from '../utilities/EntityMarker';
 
 class InjectCustomPlaceholderPlugin implements webpack.WebpackPluginInstance {
-  private readonly _localizationPlugin: LocalizationPlugin;
-  private readonly _localizedChunkNameByLocaleName: Map<string, Record<string, string>>;
+  readonly #localizationPlugin: LocalizationPlugin;
+  readonly #localizedChunkNameByLocaleName: Map<string, Record<string, string>>;
 
   public constructor(
     localizationPlugin: LocalizationPlugin,
     localizedChunkNameByLocaleName: Map<string, Record<string, string>>
   ) {
-    this._localizationPlugin = localizationPlugin;
-    this._localizedChunkNameByLocaleName = localizedChunkNameByLocaleName;
+    this.#localizationPlugin = localizationPlugin;
+    this.#localizedChunkNameByLocaleName = localizedChunkNameByLocaleName;
   }
 
   public apply(compiler: Compiler): void {
@@ -30,9 +30,9 @@ class InjectCustomPlaceholderPlugin implements webpack.WebpackPluginInstance {
     const printLocalizedChunkName: 'printLocalizedChunkName' = 'printLocalizedChunkName';
 
     const { runtime, RuntimeModule, Template, RuntimeGlobals } = compiler.webpack;
-    const localizationPlugin: LocalizationPlugin = this._localizationPlugin;
+    const localizationPlugin: LocalizationPlugin = this.#localizationPlugin;
     const localizedChunkNameByLocaleName: Map<string, Record<string, string>> = this
-      ._localizedChunkNameByLocaleName;
+      .#localizedChunkNameByLocaleName;
 
     function getLocalizedChunkNamesString(locale: string): string {
       return `/* ${locale} */ ${JSON.stringify(localizedChunkNameByLocaleName.get(locale))}`;

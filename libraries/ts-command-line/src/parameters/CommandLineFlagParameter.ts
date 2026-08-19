@@ -9,7 +9,7 @@ import { CommandLineParameterBase, CommandLineParameterKind } from './BaseClasse
  * @public
  */
 export class CommandLineFlagParameter extends CommandLineParameterBase {
-  private _value: boolean = false;
+  #value: boolean = false;
 
   /** {@inheritDoc CommandLineParameterBase.kind} */
   public readonly kind: CommandLineParameterKind.Flag = CommandLineParameterKind.Flag;
@@ -34,7 +34,7 @@ export class CommandLineFlagParameter extends CommandLineParameterBase {
       // This design prevents a syntax such as "--flag=false", probably because argparse prefers "--no-flag".
       // If we switch to a new CLI parser, we should try to add support for "--flag=false".
       if (data) {
-        this._value = data;
+        this.#value = data;
         return;
       }
     }
@@ -49,12 +49,12 @@ export class CommandLineFlagParameter extends CommandLineParameterBase {
               ` ${this.environmentVariable}.  Valid choices are 0 or 1.`
           );
         }
-        this._value = environmentValue === '1';
+        this.#value = environmentValue === '1';
         return;
       }
     }
 
-    this._value = false;
+    this.#value = false;
   }
 
   /**
@@ -65,7 +65,7 @@ export class CommandLineFlagParameter extends CommandLineParameterBase {
    * or if the flag was not used.
    */
   public get value(): boolean {
-    return this._value;
+    return this.#value;
   }
 
   /** {@inheritDoc CommandLineParameterBase.appendToArgList} */

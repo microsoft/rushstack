@@ -6,12 +6,12 @@ import { type ITerminal, type ITerminalProvider, Terminal } from '@rushstack/ter
 import { type WatchProject, WatchState } from './WatchProject';
 
 export class WatchManager {
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
   public readonly projects: WatchProject[] = [];
   public activeProject: WatchProject | undefined;
 
   public constructor(provider: ITerminalProvider) {
-    this._terminal = new Terminal(provider);
+    this.#terminal = new Terminal(provider);
   }
 
   public initialize(projects: WatchProject[]): void {
@@ -30,7 +30,7 @@ export class WatchManager {
     if (this.activeProject !== undefined && this.activeProject !== project) {
       if (!this.activeProject.live) {
         // Interrupt the currently active project
-        this._terminal.writeLine(`>>> (interrupted by upstream project)`);
+        this.#terminal.writeLine(`>>> (interrupted by upstream project)`);
         this.activeProject = undefined;
       }
     }
@@ -39,7 +39,7 @@ export class WatchManager {
       if (this.activeProject === undefined) {
         this._activateProject(project);
       } else if (project.live) {
-        project.printBufferedLines(this._terminal);
+        project.printBufferedLines(this.#terminal);
       }
     }
   }
@@ -61,7 +61,7 @@ export class WatchManager {
     if (this.activeProject !== undefined) {
       // If this failure caused the currently active project to become dead, then interrupt it
       if (!this.activeProject.live) {
-        this._terminal.writeLine(`>>> (interrupted by upstream project)`);
+        this.#terminal.writeLine(`>>> (interrupted by upstream project)`);
         this._clearActiveProject();
       } else {
         // If we wanted to see failures as soon as possible, we could also interrupt a live
@@ -150,14 +150,14 @@ export class WatchManager {
 
   private _activateProject(project: WatchProject): void {
     this.activeProject = project;
-    this._terminal.writeLine(`>>> REBUILD ${project.name} -----------------------------------`);
+    this.#terminal.writeLine(`>>> REBUILD ${project.name} -----------------------------------`);
     // Print any buffered data
-    project.printBufferedLines(this._terminal);
+    project.printBufferedLines(this.#terminal);
   }
 
   private _clearActiveProject(): void {
     if (this.activeProject !== undefined) {
-      this.activeProject.printBufferedLines(this._terminal);
+      this.activeProject.printBufferedLines(this.#terminal);
       let verb: string;
       switch (this.activeProject.state) {
         case WatchState.Succeeded:
@@ -169,7 +169,7 @@ export class WatchManager {
         default:
           throw new Error('Invalid state');
       }
-      this._terminal.writeLine(`>>> ${verb} ${this.activeProject.name} -----------------------------------`);
+      this.#terminal.writeLine(`>>> ${verb} ${this.activeProject.name} -----------------------------------`);
       this.activeProject = undefined;
     }
   }

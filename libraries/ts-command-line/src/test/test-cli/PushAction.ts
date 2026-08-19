@@ -12,8 +12,8 @@ import { BusinessLogic } from './BusinessLogic';
 type Protocol = 'ftp' | 'webdav' | 'scp';
 
 export class PushAction extends CommandLineAction {
-  private readonly _force: CommandLineFlagParameter;
-  private readonly _protocol: IRequiredCommandLineChoiceParameter<Protocol>;
+  readonly #force: CommandLineFlagParameter;
+  readonly #protocol: IRequiredCommandLineChoiceParameter<Protocol>;
 
   public constructor() {
     super({
@@ -22,13 +22,13 @@ export class PushAction extends CommandLineAction {
       documentation: 'Here we provide a longer description of how our action works.'
     });
 
-    this._force = this.defineFlagParameter({
+    this.#force = this.defineFlagParameter({
       parameterLongName: '--force',
       parameterShortName: '-f',
       description: 'Push and overwrite any existing state'
     });
 
-    this._protocol = this.defineChoiceParameter<Protocol>({
+    this.#protocol = this.defineChoiceParameter<Protocol>({
       parameterLongName: '--protocol',
       description: 'Specify the protocol to use',
       alternatives: ['ftp', 'webdav', 'scp'],
@@ -39,6 +39,6 @@ export class PushAction extends CommandLineAction {
 
   protected onExecuteAsync(): Promise<void> {
     // abstract
-    return BusinessLogic.doTheWorkAsync(this._force.value, this._protocol.value);
+    return BusinessLogic.doTheWorkAsync(this.#force.value, this.#protocol.value);
   }
 }

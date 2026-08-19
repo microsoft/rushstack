@@ -37,21 +37,21 @@ export interface IStreamCollatorOptions {
  * @beta
  */
 export class StreamCollator {
-  private _taskNames: Set<string> = new Set();
-  private _writers: Set<CollatedWriter> = new Set();
+  #taskNames: Set<string> = new Set();
+  #writers: Set<CollatedWriter> = new Set();
 
   // The writer whose output is being shown in realtime, or undefined if none
-  private _activeWriter: CollatedWriter | undefined = undefined;
+  #activeWriter: CollatedWriter | undefined = undefined;
 
   // Writers that are not closed yet, and have never been active
-  private _openInactiveWriters: Set<CollatedWriter> = new Set();
+  #openInactiveWriters: Set<CollatedWriter> = new Set();
 
   // Writers that are now closed, but have accumulated buffered chunks, and have never been active
-  private _closedInactiveWriters: Set<CollatedWriter> = new Set();
+  #closedInactiveWriters: Set<CollatedWriter> = new Set();
 
-  private _onWriterActive: ((writer: CollatedWriter) => void) | undefined;
+  #onWriterActive: ((writer: CollatedWriter) => void) | undefined;
 
-  private _preventReentrantCall: boolean = false;
+  #preventReentrantCall: boolean = false;
 
   public readonly destination: TerminalWritable;
   public readonly terminal: CollatedTerminal;
@@ -59,7 +59,7 @@ export class StreamCollator {
   public constructor(options: IStreamCollatorOptions) {
     this.destination = options.destination;
     this.terminal = new CollatedTerminal(this.destination);
-    this._onWriterActive = options.onWriterActive;
+    this.#onWriterActive = options.onWriterActive;
   }
 
   /**
@@ -67,7 +67,7 @@ export class StreamCollator {
    * is active yet.
    */
   public get activeWriter(): CollatedWriter | undefined {
-    return this._activeWriter;
+    return this.#activeWriter;
   }
 
   /**
@@ -75,8 +75,8 @@ export class StreamCollator {
    * currently active writer, or an empty string if no writer is active.
    */
   public get activeTaskName(): string {
-    if (this._activeWriter) {
-      return this._activeWriter.taskName;
+    if (this.#activeWriter) {
+      return this.#activeWriter.taskName;
     }
     return '';
   }
@@ -86,7 +86,7 @@ export class StreamCollator {
    * in the order that they were registered.
    */
   public get writers(): ReadonlySet<CollatedWriter> {
-    return this._writers;
+    return this.#writers;
   }
 
   /**
@@ -94,19 +94,19 @@ export class StreamCollator {
    * to receive its input.
    */
   public registerTask(taskName: string): CollatedWriter {
-    if (this._taskNames.has(taskName)) {
+    if (this.#taskNames.has(taskName)) {
       throw new Error('A task with that name has already been registered');
     }
 
     const writer: CollatedWriter = new CollatedWriter(taskName, this);
 
-    this._writers.add(writer);
-    this._taskNames.add(writer.taskName);
+    this.#writers.add(writer);
+    this.#taskNames.add(writer.taskName);
 
     // When a task is initially registered, it is open and has not accumulated any buffered chunks
-    this._openInactiveWriters.add(writer);
+    this.#openInactiveWriters.add(writer);
 
-    if (this._activeWriter === undefined) {
+    if (this.#activeWriter === undefined) {
       // If there is no active writer, then the first one to be registered becomes active.
       this._assignActiveWriter(writer);
     }
@@ -122,7 +122,7 @@ export class StreamCollator {
   ): void {
     this._checkForReentrantCall();
 
-    if (this._activeWriter === undefined) {
+    if (this.#activeWriter === undefined) {
       // If no writer is currently active, then the first one to write something becomes active
       this._assignActiveWriter(writer);
     }
@@ -141,22 +141,22 @@ export class StreamCollator {
     if (writer.isActive) {
       writer._flushBufferedChunks();
 
-      this._activeWriter = undefined;
+      this.#activeWriter = undefined;
 
       // If any buffered writers are already closed, activate them each immediately
       // We copy the set, since _assignActiveWriter() will be deleting from it.
-      for (const closedInactiveWriter of [...this._closedInactiveWriters]) {
+      for (const closedInactiveWriter of [...this.#closedInactiveWriters]) {
         try {
           this._assignActiveWriter(closedInactiveWriter);
         } finally {
-          this._activeWriter = undefined;
+          this.#activeWriter = undefined;
         }
       }
 
       let writerToActivate: CollatedWriter | undefined = undefined;
 
       // Try to activate a writer that already accumulated some data
-      for (const openInactiveWriter of this._openInactiveWriters) {
+      for (const openInactiveWriter of this.#openInactiveWriters) {
         if (openInactiveWriter.bufferedChunks.length > 0) {
           writerToActivate = openInactiveWriter;
           break;
@@ -164,7 +164,7 @@ export class StreamCollator {
       }
       if (!writerToActivate) {
         // Otherwise just take the first one
-        for (const openInactiveWriter of this._openInactiveWriters) {
+        for (const openInactiveWriter of this.#openInactiveWriters) {
           writerToActivate = openInactiveWriter;
           break;
         }
@@ -174,23 +174,23 @@ export class StreamCollator {
         this._assignActiveWriter(writerToActivate);
       }
     } else {
-      this._openInactiveWriters.delete(writer);
-      this._closedInactiveWriters.add(writer);
+      this.#openInactiveWriters.delete(writer);
+      this.#closedInactiveWriters.add(writer);
     }
   }
 
   private _assignActiveWriter(writer: CollatedWriter): void {
-    this._activeWriter = writer;
+    this.#activeWriter = writer;
 
-    this._closedInactiveWriters.delete(writer);
-    this._openInactiveWriters.delete(writer);
+    this.#closedInactiveWriters.delete(writer);
+    this.#openInactiveWriters.delete(writer);
 
-    if (this._onWriterActive) {
-      this._preventReentrantCall = true;
+    if (this.#onWriterActive) {
+      this.#preventReentrantCall = true;
       try {
-        this._onWriterActive(writer);
+        this.#onWriterActive(writer);
       } finally {
-        this._preventReentrantCall = false;
+        this.#preventReentrantCall = false;
       }
     }
 
@@ -198,7 +198,7 @@ export class StreamCollator {
   }
 
   private _checkForReentrantCall(): void {
-    if (this._preventReentrantCall) {
+    if (this.#preventReentrantCall) {
       throw new InternalError('Reentrant call to StreamCollator');
     }
   }

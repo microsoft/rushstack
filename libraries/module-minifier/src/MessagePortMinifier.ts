@@ -19,11 +19,11 @@ import type {
 export class MessagePortMinifier implements IModuleMinifier {
   public readonly port: WorkerThreads.MessagePort;
 
-  private readonly _callbacks: Map<string, IModuleMinificationCallback[]>;
+  readonly #callbacks: Map<string, IModuleMinificationCallback[]>;
 
   public constructor(port: WorkerThreads.MessagePort) {
     this.port = port;
-    this._callbacks = new Map();
+    this.#callbacks = new Map();
   }
 
   /**
@@ -34,13 +34,13 @@ export class MessagePortMinifier implements IModuleMinifier {
   public minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void {
     const { hash } = request;
 
-    const callbacks: IModuleMinificationCallback[] | undefined = this._callbacks.get(hash);
+    const callbacks: IModuleMinificationCallback[] | undefined = this.#callbacks.get(hash);
     if (callbacks) {
       callbacks.push(callback);
       return;
     }
 
-    this._callbacks.set(hash, [callback]);
+    this.#callbacks.set(hash, [callback]);
 
     this.port.postMessage(request);
   }
@@ -53,7 +53,7 @@ export class MessagePortMinifier implements IModuleMinifier {
     this.port.postMessage('initialize');
     const configHash: string = await configHashPromise;
 
-    const callbacks: Map<string, IModuleMinificationCallback[]> = this._callbacks;
+    const callbacks: Map<string, IModuleMinificationCallback[]> = this.#callbacks;
 
     function handler(message: IModuleMinificationResult | number | false): void {
       if (typeof message === 'object') {
