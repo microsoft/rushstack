@@ -161,6 +161,61 @@ describe('HeftDescriptorHost new descriptor path', () => {
     expect(forwarded.sourceSequence).toBe(1);
   });
 
+  it('drains the descriptor incrementally so a chatty child never blocks a full pipe', async () => {
+    // A child emitting >64 KiB of NDJSON would block on an undrained OS pipe
+    // buffer; the streaming processor drains as chunks arrive instead of
+    // waiting for the child to exit.
+    let descriptor: string = '';
+    const child: HeftChildEmitter = new HeftChildEmitter({
+      env: { [RUSH_REPORTER_CHILD_FD_ENV_VAR]: '3' },
+      childSessionId: 'child-sess',
+      source: SOURCE,
+      producerVersion: '@rushstack/heft 1.2.19',
+      now: () => '2026-01-01T00:00:00.000Z',
+      writeDescriptor: (text: string) => (descriptor += text)
+    });
+    child.sendHello();
+
+    const manager: ReporterManager = new ReporterManager();
+    const recording: RecordingReporter = new RecordingReporter();
+    manager.addReporter(recording);
+    await manager.initializeAsync();
+
+    const host: HeftDescriptorHost = new HeftDescriptorHost({
+      parentSessionId: 'parent-sess',
+      supportedProtocolVersion: { major: 1, minor: 0 },
+      forwardEnvelope: (envelope: IReporterEventEnvelope<unknown>) => manager.ingestForeignEnvelope(envelope)
+    });
+    const processor = host.createStreamProcessor();
+
+    // Write the hello, then feed events in multiple chunks (including a split
+    // record) to prove incremental decode and immediate forwarding.
+    const helloLineEnd: number = descriptor.indexOf('\n') + 1;
+    processor.write(descriptor.slice(0, helloLineEnd));
+    descriptor = descriptor.slice(helloLineEnd);
+
+    let pending: string = '';
+    for (let i: number = 0; i < 5; i++) {
+      child.emitEvent({
+        type: 'operationStatusChanged',
+        required: true,
+        payload: { operationId: `c${i}`, status: 'success' }
+      });
+    }
+    // Simulate chunked delivery: split mid-record.
+    pending = descriptor;
+    const mid: number = Math.floor(pending.length / 2);
+    processor.write(pending.slice(0, mid));
+    processor.write(pending.slice(mid));
+    const result: IHeftChildResult = processor.flush();
+    await manager.flushAsync();
+
+    expect(result.accepted).toBe(true);
+    expect(result.eventCount).toBe(5);
+    expect(recording.reported).toHaveLength(5);
+    expect(recording.reported[0].sessionId).toBe('child-sess');
+  });
+
   it('rejects an unsupported child protocol with an update-global-Rush diagnostic', () => {
     let descriptor: string = '';
     const child: HeftChildEmitter = new HeftChildEmitter({
