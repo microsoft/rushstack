@@ -402,6 +402,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
     }
   }
 
+  // eslint-disable-next-line @rushstack/no-new-null -- The decoupled ESLint plugin does not recognize native private methods yet.
   #formatCodeOrSignal(code: number | null | undefined, signal: string | null | undefined): string {
     if (signal) {
       return ` (signal=${code})`;
