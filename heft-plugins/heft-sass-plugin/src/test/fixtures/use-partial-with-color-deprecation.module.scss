@@ -1,0 +1,7 @@
+// This file @use's a partial that contains a deprecated Sass function.
+// It exists only to test the ignoreDeprecationsInDependencies option.
+@use 'partial-with-color-deprecation';
+
+.container {
+  color: red;
+}
