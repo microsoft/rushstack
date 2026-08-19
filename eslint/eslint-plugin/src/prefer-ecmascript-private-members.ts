@@ -3,20 +3,20 @@
 
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
 
-type MessageIds = 'use-ecmascript-private-field';
+type MessageIds = 'use-ecmascript-private-member';
 type Options = [];
 
-const preferEcmascriptPrivateFieldsRule: TSESLint.RuleModule<MessageIds, Options> = {
+const preferEcmascriptPrivateMembersRule: TSESLint.RuleModule<MessageIds, Options> = {
   defaultOptions: [],
   meta: {
     type: 'suggestion',
     messages: {
-      'use-ecmascript-private-field':
-        'Use an ECMAScript private field ("#field") instead of the TypeScript "private" modifier.'
+      'use-ecmascript-private-member':
+        'Use ECMAScript private syntax ("#member") instead of the TypeScript "private" modifier.'
     },
     schema: [],
     docs: {
-      description: 'Require ECMAScript private fields instead of TypeScript private class fields',
+      description: 'Require ECMAScript private syntax for private class fields, methods, and accessors',
       recommended: 'recommended',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
     } as TSESLint.RuleMetaDataDocs
@@ -26,11 +26,19 @@ const preferEcmascriptPrivateFieldsRule: TSESLint.RuleModule<MessageIds, Options
       if (node.accessibility === 'private') {
         context.report({
           node,
-          messageId: 'use-ecmascript-private-field'
+          messageId: 'use-ecmascript-private-member'
+        });
+      }
+    },
+    MethodDefinition(node: TSESTree.MethodDefinition): void {
+      if (node.accessibility === 'private' && node.kind !== 'constructor') {
+        context.report({
+          node,
+          messageId: 'use-ecmascript-private-member'
         });
       }
     }
   })
 };
 
-export { preferEcmascriptPrivateFieldsRule };
+export { preferEcmascriptPrivateMembersRule };

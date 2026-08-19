@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/eslint-config",
-      "comment": "Enable the rule that prefers ECMAScript private class fields.",
+      "comment": "Enable the rule that prefers ECMAScript private class members.",
       "type": "minor"
     }
   ]
