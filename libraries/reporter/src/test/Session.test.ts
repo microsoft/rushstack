@@ -10,6 +10,7 @@ import {
   RUSH_PLUGIN_API_VERSION,
   isPluginApiVersionSupported,
   createPluginApiIncompatibleDiagnostic,
+  isReporterEventRequired,
   type IReporter,
   type IReporterEventEnvelope,
   type IReporterEventScope,
@@ -65,19 +66,24 @@ describe('createScopedReporter', () => {
     });
 
     reporter.emitMessage({ severity: 'info', text: 'hello' });
-    expect(sink.inputs[0].type).toBe('activityChanged');
+    expect(sink.inputs[0].type).toBe('messageEmitted');
     expect(sink.inputs[0].scope).toEqual(scope);
-    expect(sink.inputs[0].required).toBe(false);
-    expect(sink.inputs[0].payload).toEqual({ kind: 'message', severity: 'info', text: 'hello' });
+    // The manager derives `required`; messages are never coalescible.
+    expect(isReporterEventRequired('messageEmitted')).toBe(true);
+    // Message text fails safe at local-sensitive by default.
+    expect(sink.inputs[0].privacy).toBe('local-sensitive');
+    expect(sink.inputs[0].payload).toEqual({ severity: 'info', text: 'hello' });
   });
 
-  it('marks warning and error messages as required', () => {
+  it('emits messages on the messageEmitted channel for every severity', () => {
     const sink: CapturingSink = new CapturingSink();
     const reporter: IScopedReporter = createScopedReporter({ sink, sessionId: 'sess', source: SOURCE });
     reporter.emitMessage({ severity: 'warning', text: 'careful' });
     reporter.emitMessage({ severity: 'error', text: 'boom' });
-    expect(sink.inputs[0].required).toBe(true);
-    expect(sink.inputs[1].required).toBe(true);
+    expect(sink.inputs[0].type).toBe('messageEmitted');
+    expect(sink.inputs[0].payload).toEqual({ severity: 'warning', text: 'careful' });
+    expect(sink.inputs[1].type).toBe('messageEmitted');
+    expect(sink.inputs[1].payload).toEqual({ severity: 'error', text: 'boom' });
   });
 
   it('emits diagnostics with the envelope privacy floor', () => {
@@ -93,7 +99,7 @@ describe('createScopedReporter', () => {
     expect(sink.inputs[0].type).toBe('diagnosticEmitted');
     // Least sensitive field is the floor.
     expect(sink.inputs[0].privacy).toBe('public');
-    expect(sink.inputs[0].required).toBe(true);
+    expect(isReporterEventRequired('diagnosticEmitted')).toBe(true);
     expect(sink.inputs[0].payload).toBe(diagnostic);
   });
 
@@ -103,7 +109,9 @@ describe('createScopedReporter', () => {
     reporter.emitExtension('acme.cache-warmed', { hits: 3 });
     expect(sink.inputs[0].type).toBe('extension');
     expect(sink.inputs[0].payload).toEqual({ name: 'acme.cache-warmed', payload: { hits: 3 } });
-    expect(() => reporter.emitExtension('notnamespaced', {})).toThrow(/Invalid extension event name/);
+    expect(() => reporter.emitExtension('notnamespaced' as Parameters<IScopedReporter['emitExtension']>[0], {})).toThrow(
+      /Invalid extension event name/
+    );
   });
 
   it('exposes only emit methods, hiding modes, destinations, and thresholds', () => {

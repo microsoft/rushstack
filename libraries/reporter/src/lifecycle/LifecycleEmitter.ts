@@ -149,7 +149,6 @@ export class LifecycleEmitter {
       source: this._source,
       scope,
       privacy,
-      required: true,
       type,
       payload
     });

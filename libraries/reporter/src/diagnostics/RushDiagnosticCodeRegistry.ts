@@ -130,6 +130,13 @@ export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS = [
     defaultSeverity: 'error',
     summaryKey: 'diagnostic.RUSH_INTERNAL_UNEXPECTED.summary',
     detailKey: 'diagnostic.RUSH_INTERNAL_UNEXPECTED.detail'
+  },
+  {
+    code: 'RUSH_PLUGIN_API_INCOMPATIBLE',
+    category: 'configuration',
+    defaultSeverity: 'error',
+    summaryKey: 'diagnostic.RUSH_PLUGIN_API_INCOMPATIBLE.summary',
+    detailKey: undefined
   }
 ] as const satisfies readonly IRushDiagnosticCodeDefinition[];
 
