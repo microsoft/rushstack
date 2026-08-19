@@ -282,7 +282,7 @@ export class SassProcessor {
 
     try {
       const serializedConfig: string = await FileSystem.readFileAsync(this.#configFilePath);
-      this._cache = serializedConfig;
+      this.#cache = serializedConfig;
     } catch (err) {
       if (!FileSystem.isNotExistError(err)) {
         this.#options.logger.terminal.writeVerboseLine(`Error reading cache file: ${err}`);
@@ -404,7 +404,7 @@ export class SassProcessor {
     );
 
     if (this.#configFilePath) {
-      const serializedConfig: string = this._cache;
+      const serializedConfig: string = this.#cache;
       try {
         await FileSystem.writeFileAsync(this.#configFilePath, serializedConfig, {
           ensureFolderExists: true
@@ -610,7 +610,7 @@ export class SassProcessor {
     return null;
   }
 
-  private get _cache(): string {
+  get #cache(): string {
     const serializedRecords: ISerializedFileRecord[] = Array.from(this.#fileInfo.values(), (record) => {
       return {
         relativePath: record.relativePath,
@@ -627,7 +627,7 @@ export class SassProcessor {
    * Configures the state of this processor using the specified cache file content.
    * @param cacheFileContent - The contents of the cache file
    */
-  private set _cache(cacheFileContent: string) {
+  set #cache(cacheFileContent: string) {
     this.#fileInfo.clear();
 
     const serializedRecords: ISerializedFileRecord[] = JSON.parse(cacheFileContent);
