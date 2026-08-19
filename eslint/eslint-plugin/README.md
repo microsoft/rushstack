@@ -425,18 +425,20 @@ enum E {
 let e: E._PrivateMember = E._PrivateMember; // okay, because _PrivateMember is declared by E
 ```
 
-## `@rushstack/prefer-ecmascript-private-fields`
+## `@rushstack/prefer-ecmascript-private-members`
 
-Require ECMAScript private fields instead of fields declared with TypeScript's `private` modifier.
+Require ECMAScript private syntax for fields, methods, and accessors declared with TypeScript's `private`
+modifier.
 
 #### Rule Details
 
-ECMAScript `#` fields provide runtime privacy. TypeScript's `private` modifier is erased during compilation,
-allowing the field to be read or written through JavaScript, bracket notation, or type assertions.
+ECMAScript `#` members provide runtime privacy. TypeScript's `private` modifier is erased during compilation,
+allowing the member to be accessed through JavaScript, bracket notation, or type assertions.
 
-This rule applies only to class fields. Private methods, accessors, and constructor parameter properties are
-not affected. The rule does not provide an autofix because converting a field requires updating every reference
-and may change runtime behavior for reflection or objects created without invoking the constructor.
+This rule applies to class fields, methods, and accessors. Private constructors and constructor parameter
+properties are not affected. The rule does not provide an autofix because converting a member requires updating
+every reference and may change runtime behavior for reflection or objects created without invoking the
+constructor.
 
 #### Examples
 
@@ -445,6 +447,7 @@ The following pattern is considered a problem:
 ```ts
 class Example {
   private value: string = ''; // error
+  private calculate(): number {} // error
 }
 ```
 
@@ -453,6 +456,7 @@ The following pattern is NOT considered a problem:
 ```ts
 class Example {
   #value: string = '';
+  #calculate(): number {}
 }
 ```
 

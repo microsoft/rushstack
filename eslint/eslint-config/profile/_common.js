@@ -237,7 +237,7 @@ function buildRules(profile) {
           '@rushstack/no-new-null': 'warn',
 
           // RATIONALE:         See the @rushstack/eslint-plugin documentation
-          '@rushstack/prefer-ecmascript-private-fields': 'warn',
+          '@rushstack/prefer-ecmascript-private-members': 'warn',
 
           // RATIONALE:         See the @rushstack/eslint-plugin documentation
           '@rushstack/typedef-var': 'warn',
