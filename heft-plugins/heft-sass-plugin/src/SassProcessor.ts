@@ -200,15 +200,15 @@ export class SassProcessor {
   public readonly sourceFolderPath: string;
 
   // Map of input file path -> record
-  private readonly _fileInfo: Map<string, IFileRecord>;
-  private readonly _resolutions: Map<string, SyncOrAsyncResolution>;
+  readonly #fileInfo: Map<string, IFileRecord>;
+  readonly #resolutions: Map<string, SyncOrAsyncResolution>;
 
-  private readonly _isFileModule: (filePath: string) => boolean;
-  private readonly _options: ISassProcessorOptions;
-  private readonly _realpathSync: (path: string) => string;
-  private readonly _scssOptions: Options<'async'>;
+  readonly #isFileModule: (filePath: string) => boolean;
+  readonly #options: ISassProcessorOptions;
+  readonly #realpathSync: (path: string) => string;
+  readonly #scssOptions: Options<'async'>;
 
-  private _configFilePath: string | undefined;
+  #configFilePath: string | undefined;
 
   public constructor(options: ISassProcessorOptions) {
     const { silenceDeprecations, excludeFiles } = options;
@@ -255,13 +255,13 @@ export class SassProcessor {
     this.inputFileGlob = `**/*+(${allFileExtensions.join('|')})`;
     this.sourceFolderPath = options.srcFolder;
 
-    this._configFilePath = undefined;
-    this._fileInfo = new Map();
-    this._isFileModule = isFileModule;
-    this._resolutions = new Map();
-    this._options = options;
-    this._realpathSync = new RealNodeModulePathResolver().realNodeModulePath;
-    this._scssOptions = {
+    this.#configFilePath = undefined;
+    this.#fileInfo = new Map();
+    this.#isFileModule = isFileModule;
+    this.#resolutions = new Map();
+    this.#options = options;
+    this.#realpathSync = new RealNodeModulePathResolver().realNodeModulePath;
+    this.#scssOptions = {
       style: 'expanded', // leave minification to clean-css
       importers: [
         {
@@ -276,23 +276,23 @@ export class SassProcessor {
   }
 
   public async loadCacheAsync(tempFolderPath: string): Promise<void> {
-    const configHash: string = getContentsHash('sass.json', JSON.stringify(this._options)).slice(0, 8);
+    const configHash: string = getContentsHash('sass.json', JSON.stringify(this.#options)).slice(0, 8);
 
-    this._configFilePath = path.join(tempFolderPath, `sass_${configHash}.json`);
+    this.#configFilePath = path.join(tempFolderPath, `sass_${configHash}.json`);
 
     try {
-      const serializedConfig: string = await FileSystem.readFileAsync(this._configFilePath);
+      const serializedConfig: string = await FileSystem.readFileAsync(this.#configFilePath);
       this._cache = serializedConfig;
     } catch (err) {
       if (!FileSystem.isNotExistError(err)) {
-        this._options.logger.terminal.writeVerboseLine(`Error reading cache file: ${err}`);
+        this.#options.logger.terminal.writeVerboseLine(`Error reading cache file: ${err}`);
       }
     }
   }
 
   public async compileFilesAsync(filepaths: Set<string>): Promise<void> {
     // Incremental resolve is complicated, so just clear it for now
-    this._resolutions.clear();
+    this.#resolutions.clear();
 
     // Expand affected files using dependency graph
     // If this is the initial compilation, the graph will be empty, so this will no-op'
@@ -306,7 +306,7 @@ export class SassProcessor {
     const {
       concurrency,
       logger: { terminal }
-    } = this._options;
+    } = this.#options;
 
     terminal.writeVerboseLine(`Checking for changes to ${filepaths.size} files...`);
     for (const record of affectedRecords) {
@@ -367,9 +367,9 @@ export class SassProcessor {
           affectedRecords,
           async (record, i) => {
             try {
-              await this._compileFileAsync(compilers[i % compilerCount], record, this._scssOptions);
+              await this._compileFileAsync(compilers[i % compilerCount], record, this.#scssOptions);
             } catch (err) {
-              this._options.logger.emitError(err);
+              this.#options.logger.emitError(err);
             }
           },
           {
@@ -383,7 +383,7 @@ export class SassProcessor {
 
     // Find all newly-referenced files and update the incremental build state data.
     const newRecords: Set<IFileRecord> = new Set();
-    for (const record of this._fileInfo.values()) {
+    for (const record of this.#fileInfo.values()) {
       if (!record.version) {
         newRecords.add(record);
       }
@@ -403,10 +403,10 @@ export class SassProcessor {
       }
     );
 
-    if (this._configFilePath) {
+    if (this.#configFilePath) {
       const serializedConfig: string = this._cache;
       try {
-        await FileSystem.writeFileAsync(this._configFilePath, serializedConfig, {
+        await FileSystem.writeFileAsync(this.#configFilePath, serializedConfig, {
           ensureFolderExists: true
         });
       } catch (err) {
@@ -424,10 +424,10 @@ export class SassProcessor {
   private async _canonicalizeFileAsync(url: string, context: CanonicalizeContext): AsyncResolution {
     // The logic between `this._resolutions.get()` and `this._resolutions.set()` must be 100% synchronous
     // Otherwise we could end up with multiple promises for the same URL
-    let resolution: SyncOrAsyncResolution | undefined = this._resolutions.get(url);
+    let resolution: SyncOrAsyncResolution | undefined = this.#resolutions.get(url);
     if (resolution === undefined) {
       resolution = this._canonicalizeFileInnerAsync(url, context);
-      this._resolutions.set(url, resolution);
+      this.#resolutions.set(url, resolution);
     }
     return await resolution;
   }
@@ -484,12 +484,12 @@ export class SassProcessor {
     const cacheKey: string = `${containingUrl.href}\0${url}`;
     // The logic between `this._resolutions.get()` and `this._resolutions.set()` must be 100% synchronous
     // Otherwise we could end up with multiple promises for the same URL
-    let resolution: SyncOrAsyncResolution | undefined = this._resolutions.get(cacheKey);
+    let resolution: SyncOrAsyncResolution | undefined = this.#resolutions.get(cacheKey);
     if (resolution === undefined) {
       // Since the cache doesn't have an entry, get the promise for the resolution
       // and inject it into the cache before other callers have a chance to try
       resolution = this._canonicalizePackageInnerAsync(url, context);
-      this._resolutions.set(cacheKey, resolution);
+      this.#resolutions.set(cacheKey, resolution);
     }
     return await resolution;
   }
@@ -522,7 +522,7 @@ export class SassProcessor {
     const resolvedPackagePath: string = await Import.resolvePackageAsync({
       packageName,
       baseFolderPath,
-      getRealPath: this._realpathSync
+      getRealPath: this.#realpathSync
     });
     const modulePath: string = nodeModulesQuery.slice(linkEnd);
     const resolvedPath: string = `${resolvedPackagePath}${modulePath}`;
@@ -538,12 +538,12 @@ export class SassProcessor {
    */
   private async _canonicalizeHeftUrlAsync(url: string, context: CanonicalizeContext): AsyncResolution {
     // The logic between `this._resolutions.get()` and `this._resolutions.set()` must be 100% synchronous
-    let resolution: SyncOrAsyncResolution | undefined = this._resolutions.get(url);
+    let resolution: SyncOrAsyncResolution | undefined = this.#resolutions.get(url);
     if (resolution === undefined) {
       // Since the cache doesn't have an entry, get the promise for the resolution
       // and inject it into the cache before other callers have a chance to try
       resolution = this._canonicalizeHeftInnerAsync(url, context);
-      this._resolutions.set(url, resolution);
+      this.#resolutions.set(url, resolution);
     }
 
     return await resolution;
@@ -611,7 +611,7 @@ export class SassProcessor {
   }
 
   private get _cache(): string {
-    const serializedRecords: ISerializedFileRecord[] = Array.from(this._fileInfo.values(), (record) => {
+    const serializedRecords: ISerializedFileRecord[] = Array.from(this.#fileInfo.values(), (record) => {
       return {
         relativePath: record.relativePath,
         version: record.version,
@@ -628,11 +628,11 @@ export class SassProcessor {
    * @param cacheFileContent - The contents of the cache file
    */
   private set _cache(cacheFileContent: string) {
-    this._fileInfo.clear();
+    this.#fileInfo.clear();
 
     const serializedRecords: ISerializedFileRecord[] = JSON.parse(cacheFileContent);
     const records: IFileRecord[] = [];
-    const buildFolder: string = this._options.buildFolder;
+    const buildFolder: string = this.#options.buildFolder;
     for (const record of serializedRecords) {
       const { relativePath, version, cssVersion } = record;
       // relativePath may start with `../` or similar, so need to use a library join function.
@@ -641,7 +641,7 @@ export class SassProcessor {
 
       const isPartial: boolean = isSassPartial(absolutePath);
       // SCSS partials are not modules, insofar as they cannot be imported directly.
-      const isModule: boolean = isPartial ? false : this._isFileModule(absolutePath);
+      const isModule: boolean = isPartial ? false : this.#isFileModule(absolutePath);
 
       const fileRecord: IFileRecord = {
         absolutePath,
@@ -657,8 +657,8 @@ export class SassProcessor {
         dependencies: new Set()
       };
       records.push(fileRecord);
-      this._fileInfo.set(absolutePath, fileRecord);
-      this._resolutions.set(absolutePath, url);
+      this.#fileInfo.set(absolutePath, fileRecord);
+      this.#resolutions.set(absolutePath, url);
     }
 
     for (let i: number = 0, len: number = serializedRecords.length; i < len; i++) {
@@ -701,26 +701,26 @@ export class SassProcessor {
    */
   private _getOrCreateRecord(filePath: string): IFileRecord {
     filePath = path.resolve(filePath);
-    let record: IFileRecord | undefined = this._fileInfo.get(filePath);
+    let record: IFileRecord | undefined = this.#fileInfo.get(filePath);
     if (!record) {
       const isPartial: boolean = isSassPartial(filePath);
-      const isModule: boolean = isPartial ? false : this._isFileModule(filePath);
+      const isModule: boolean = isPartial ? false : this.#isFileModule(filePath);
       const url: URL = pathToHeftUrl(filePath);
       record = {
         absolutePath: filePath,
         url,
         isPartial,
         isModule,
-        index: this._fileInfo.size,
-        relativePath: Path.convertToSlashes(path.relative(this._options.buildFolder, filePath)),
+        index: this.#fileInfo.size,
+        relativePath: Path.convertToSlashes(path.relative(this.#options.buildFolder, filePath)),
         version: '',
         content: undefined,
         cssVersion: undefined,
         consumers: new Set(),
         dependencies: new Set()
       };
-      this._resolutions.set(filePath, record.url);
-      this._fileInfo.set(filePath, record);
+      this.#resolutions.set(filePath, record.url);
+      this.#fileInfo.set(filePath, record);
     }
     return record;
   }
@@ -751,7 +751,7 @@ export class SassProcessor {
         absolutePath: span.url ? heftUrlToPath(span.url.href ?? span.url) : 'unknown', // This property should always be present
         line: span.start.line,
         column: span.start.column,
-        projectFolder: this._options.buildFolder
+        projectFolder: this.#options.buildFolder
       });
     }
 
@@ -781,7 +781,7 @@ export class SassProcessor {
       postProcessCssAsync,
       preserveIcssExports,
       sourceMap
-    } = this._options;
+    } = this.#options;
 
     // Handle CSS modules
     let moduleMap: JsonObject | undefined;

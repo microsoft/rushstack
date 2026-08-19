@@ -31,16 +31,16 @@ export interface IWorkspaceResolvePluginOptions {
  * @beta
  */
 export class WorkspaceResolvePlugin implements WebpackPluginInstance {
-  private readonly _cache: WorkspaceLayoutCache;
-  private readonly _resolverNames: Set<string>;
+  readonly #cache: WorkspaceLayoutCache;
+  readonly #resolverNames: Set<string>;
 
   public constructor(options: IWorkspaceResolvePluginOptions) {
-    this._cache = options.cache;
-    this._resolverNames = new Set(options.resolverNames ?? ['normal', 'context', 'loader']);
+    this.#cache = options.cache;
+    this.#resolverNames = new Set(options.resolverNames ?? ['normal', 'context', 'loader']);
   }
 
   public apply(compiler: Compiler): void {
-    const cache: WorkspaceLayoutCache = this._cache;
+    const cache: WorkspaceLayoutCache = this.#cache;
 
     function handler(resolveOptions: ResolveOptions): ResolveOptions {
       // Omit default `node_modules`
@@ -75,7 +75,7 @@ export class WorkspaceResolvePlugin implements WebpackPluginInstance {
 
       return resolveOptions;
     }
-    for (const resolverName of this._resolverNames) {
+    for (const resolverName of this.#resolverNames) {
       compiler.resolverFactory.hooks.resolveOptions
         .for(resolverName)
         .tap(WorkspaceResolvePlugin.name, handler);

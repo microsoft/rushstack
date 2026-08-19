@@ -163,10 +163,10 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
   public readonly hooks: IModuleMinifierPluginHooks;
   public minifier: IModuleMinifier;
 
-  private readonly _enhancers: webpack.Plugin[];
-  private readonly _sourceMap: boolean | undefined;
+  readonly #enhancers: webpack.Plugin[];
+  readonly #sourceMap: boolean | undefined;
 
-  private readonly _optionsForHash: IOptionsForHash;
+  readonly #optionsForHash: IOptionsForHash;
 
   public constructor(options: IModuleMinifierPluginOptions) {
     this.hooks = {
@@ -179,26 +179,26 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
 
     const { minifier, sourceMap, usePortableModules = false, compressAsyncImports = false } = options;
 
-    this._optionsForHash = {
+    this.#optionsForHash = {
       ...options,
       minifier: undefined,
       revision: CODE_GENERATION_REVISION
     };
 
-    this._enhancers = [];
+    this.#enhancers = [];
 
     if (usePortableModules) {
-      this._enhancers.push(new PortableMinifierModuleIdsPlugin(this.hooks));
+      this.#enhancers.push(new PortableMinifierModuleIdsPlugin(this.hooks));
     }
 
     if (compressAsyncImports) {
-      this._enhancers.push(new AsyncImportCompressionPlugin(this.hooks));
+      this.#enhancers.push(new AsyncImportCompressionPlugin(this.hooks));
     }
 
     this.hooks.rehydrateAssets.tap(PLUGIN_NAME, defaultRehydrateAssets);
     this.minifier = minifier;
 
-    this._sourceMap = sourceMap;
+    this.#sourceMap = sourceMap;
   }
 
   public static getCompilationStatistics(
@@ -208,7 +208,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
   }
 
   public apply(compiler: webpack.Compiler): void {
-    for (const enhancer of this._enhancers) {
+    for (const enhancer of this.#enhancers) {
       enhancer.apply(compiler);
     }
 
@@ -217,14 +217,14 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
     } = compiler;
     // The explicit setting is preferred due to accuracy, but try to guess based on devtool
     const useSourceMaps: boolean =
-      typeof this._sourceMap === 'boolean'
-        ? this._sourceMap
+      typeof this.#sourceMap === 'boolean'
+        ? this.#sourceMap
         : typeof devtool === 'string'
           ? devtool.endsWith('source-map')
           : mode === 'production' && devtool !== false;
 
-    this._optionsForHash.sourceMap = useSourceMaps;
-    const binaryConfig: Uint8Array = Buffer.from(JSON.stringify(this._optionsForHash), 'utf-8');
+    this.#optionsForHash.sourceMap = useSourceMaps;
+    const binaryConfig: Uint8Array = Buffer.from(JSON.stringify(this.#optionsForHash), 'utf-8');
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
