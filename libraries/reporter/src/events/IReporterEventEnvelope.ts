@@ -77,6 +77,12 @@ export interface IReporterEventEnvelope<TPayload = unknown> {
 
   /**
    * A unique identifier for this event, assigned by the sink on emission.
+   *
+   * @remarks
+   * Uniqueness is scoped to the session: two sessions may reuse the same
+   * `eventId` (for example a child session's `evt_5` ingested alongside the
+   * parent's own `evt_5`). The identity of an event is therefore the
+   * `(sessionId, eventId)` tuple.
    */
   readonly eventId: string;
 

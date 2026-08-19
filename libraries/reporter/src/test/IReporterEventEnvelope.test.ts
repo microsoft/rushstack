@@ -21,6 +21,7 @@ describe('ReporterEventType', () => {
       'activityChanged',
       'watchCycleCompleted',
       'diagnosticEmitted',
+      'messageEmitted',
       'externalProcessStarted',
       'externalOutput',
       'externalProcessCompleted',
@@ -61,7 +62,7 @@ describe('IReporterEventEnvelope', () => {
       type,
       payload: {
         commandName: 'build',
-        argv: ['--to', '@rushstack/reporter']
+        argv: ['--to', '@rushstack/rush-reporter']
       }
     };
   }

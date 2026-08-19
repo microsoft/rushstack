@@ -45,7 +45,9 @@ export interface IReporterProtocolLimits {
  *
  * @remarks
  * The bootstrap buffer and NDJSON record are each 1 MiB, and a raw
- * external-output chunk is 64 KiB.
+ * external-output chunk is 64 KiB. These are contract constants: they are
+ * frozen as part of the wire protocol and do not change without a protocol
+ * conversation (unlike tuning constants such as flush timeouts).
  *
  * @beta
  */

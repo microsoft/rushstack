@@ -15,7 +15,7 @@ command parser, operation scheduler, plugins, and child processes. This makes
 output verbose, difficult to adapt for terminals, CI, and agents, and unable to
 provide a consistent structured error or remediation contract.
 
-This RFC introduces `@rushstack/reporter`, a public beta package containing the
+This RFC introduces `@rushstack/rush-reporter`, a public beta package containing the
 canonical event protocol, reporter manager, and built-in reporters. Rush-owned
 code emits presentation-free structured events through a scoped sink.
 Reporters independently render concise interactive output, append-only
@@ -87,7 +87,7 @@ flowchart TD
 
 ### 3.1 Functional Goals
 
-- [ ] Create `@rushstack/reporter` as a public beta package containing the
+- [ ] Create `@rushstack/rush-reporter` as a public beta package containing the
       event contracts, wire protocol, reporter manager, and built-in reporters.
 - [ ] Initialize reporting in a two-stage bootstrap before repository
       `rush-lib` loads.
@@ -124,7 +124,7 @@ flowchart TD
 ```mermaid
 flowchart TB
     Wrapper["install-run-rush prelude"]
-    ReporterPackage["@rushstack/reporter"]
+    ReporterPackage["@rushstack/rush-reporter"]
     Frontend["@microsoft/rush frontend"]
     Manager["ReporterManager"]
     Engine["Repository-selected rush-lib"]
@@ -176,11 +176,11 @@ The design uses a publisher-subscriber event architecture:
 
 | Component | Responsibility | Location |
 | --- | --- | --- |
-| `@rushstack/reporter` | Contracts, event types, manager, wire adapters, and built-in reporters | New package |
+| `@rushstack/rush-reporter` | Contracts, event types, manager, wire adapters, and built-in reporters | New package |
 | Bootstrap prelude | Parse early controls and buffer Rush-owned startup events | `install-run-rush` |
 | Frontend reporter host | Create the authoritative manager before version selection | `apps/rush` |
 | Event sink | Provide scoped producer APIs without exposing reporter instances | `rush-lib` / future Heft |
-| Wire adapter | Exchange negotiated NDJSON on an inherited descriptor | `@rushstack/reporter` |
+| Wire adapter | Exchange negotiated NDJSON on an inherited descriptor | `@rushstack/rush-reporter` |
 | Compatibility adapters | Bridge old engines, legacy renderer, telemetry, and sentinel errors | `apps/rush` / `rush-lib` |
 | Problem matcher registry | Recover structured diagnostics from raw child output | `rush-lib` / Heft integrations |
 
@@ -188,7 +188,7 @@ The design uses a publisher-subscriber event architecture:
 
 ### 5.1 Package Boundary
 
-`@rushstack/reporter` contains:
+`@rushstack/rush-reporter` contains:
 
 - public beta TypeScript contracts;
 - core event and diagnostic DTOs;
@@ -206,7 +206,7 @@ the canonical producer contract.
 
 The committed zero-dependency `install-run-rush` bundle does not import the
 package at runtime. Its build embeds only a minimal frozen bootstrap envelope
-encoder and protocol-major constant generated from `@rushstack/reporter`.
+encoder and protocol-major constant generated from `@rushstack/rush-reporter`.
 
 Third-party reporter loading is deferred. Namespaced extension events are
 public beta in v1, but only built-in reporters are instantiated.
@@ -280,7 +280,12 @@ Reporter implementations and destinations are never exposed to producers.
 ```ts
 export interface IReporterEventSink {
   emit<TPayload>(
-    event: Omit<IReporterEventEnvelope<TPayload>, 'eventId' | 'sequence' | 'timestamp'>
+    event: Omit<
+      IReporterEventEnvelope<TPayload>,
+      // The sink assigns eventId/sequence/timestamp and derives `required`
+      // from the event type; producers never supply them.
+      'eventId' | 'sequence' | 'sourceSequence' | 'timestamp' | 'required'
+    >
   ): string;
 }
 
@@ -710,7 +715,7 @@ The shared protocol is Heft-capable in P0, but native Heft emission does not
 block Rush v1.
 
 - Older Heft versions continue through raw streams and problem matchers.
-- A future Heft breaking major depends on `@rushstack/reporter`.
+- A future Heft breaking major depends on `@rushstack/rush-reporter`.
 - Heft evolves `LoggingManager` and `ScopedLogger` into structured emitters.
 - Rush passes a dynamic descriptor and correlates child events using child
   session ID, parent session ID, and parent operation ID.
@@ -788,7 +793,7 @@ shows material producer-side cost.
 ### 8.1 Migration Phases
 
 1. **Contracts and baselines**
-   - Publish `@rushstack/reporter`.
+   - Publish `@rushstack/rush-reporter`.
    - Freeze legacy output snapshots.
    - Add protocol and compatibility goldens.
 2. **Bootstrap and compatibility adapters**
@@ -900,3 +905,63 @@ The following are explicitly deferred rather than unresolved:
 - category-mapped exit codes;
 - removal of existing per-project logs;
 - removal of the `@rushstack/stream-collator` package itself.
+
+## 10. Design Realignments (2026-08-18 review session)
+
+The following decisions were made in a post-RFC design review of the PR stack
+(#5865–#5870) and supersede the corresponding sections above:
+
+1. **Package name** — the package is `@rushstack/rush-reporter`, not
+   `@rushstack/reporter`; the contracts are Rush-domain contracts.
+2. **`messageEmitted` core event type** — human-oriented scoped messages carry
+   `{severity, text}` as a 16th core event type; message text privacy defaults
+   to `local-sensitive` (fail-safe).
+3. **Diagnostic codes are type-level** — template-literal types enforce
+   `RUSH_<DOMAIN>_<NAME>`; the registry is `as const satisfies` with derived
+   `RushDiagnosticCodes`/`RushDiagnosticTemplateKey` unions, so a missing
+   template is a compile-time error. Templates are authored in per-domain
+   modules. The runtime validator remains for untrusted wire data, implemented
+   as a plain string matcher.
+4. **Categories are forward-compatible** — `RushDiagnosticCategory` is
+   `KnownRushDiagnosticCategory | (string & {})`; unknown future categories
+   degrade gracefully.
+5. **Event identity is `(sessionId, eventId)`** — `eventId` is unique per
+   session only; cross-session reuse is legal.
+6. **`required` is manager-derived** — producers never set it; only
+   `activityChanged` is droppable/coalescible. A failed required reporter
+   writes its emergency stderr diagnostic once.
+7. **Diagnostic sources are a discriminated union** — `kind: 'file' | 'tool'`,
+   self-contained in the package.
+8. **Agent detection config** — the frontend parses the `rush.json`
+   `reporting` block early and fail-safe (malformed = ignored; built-in
+   `COPILOT_CLI` detection still applies).
+9. **Handshake capabilities are governed** — one wire namespace with a
+   `REPORTER_KNOWN_CAPABILITIES` registry; additions go through API review.
+10. **Two-tier constants** — contract constants (size limits, retention,
+    heartbeat, AI caps) are frozen; tuning constants (coalesce threshold,
+    flush timeouts) are provisional and may change in any release.
+11. **Beta policy** — full beta license until 1.0; breaking wire changes
+    require a protocol-major bump so the handshake diagnostic catches skew.
+12. **Bootstrap handoff hardening** — owner-only permissions plus a nonce in
+    the handoff env var matched against the handoff header.
+13. **`--output` is repeatable** — per-reporter key registry, reserved
+    `stdout`/`stderr` targets, ownership conflicts produce a structured
+    diagnostic.
+14. **AI reporter truncation** — errors ordered by root-cause chains first,
+    warnings collapse to counts when failures exist, and truncation appends a
+    terminal marker record; a deterministic in-repo corpus gates CI.
+15. **Interactive diagnostics** — errors scroll above the live region
+    immediately; warnings are held for the end-of-run summary.
+16. **Heft channel is streaming** — the parent drains the child pipe
+    continuously (fixes a >64 KiB pipe-buffer deadlock and enables live child
+    progress); `helloAck` remains a parent-side artifact.
+17. **Remediation is display-only in v1** — agents may execute `safe` actions
+    under their own sandbox policy; documented context is repo root and the
+    platform default shell; Rush never executes.
+18. **Problem matchers are Rush-authored** in the reporter package,
+    version-scoped and corpus-gated; third-party matcher registration is
+    deferred with third-party reporters.
+19. **Plugin gating uses a Rush semver range** declared in the plugin manifest;
+    a missing field warns pre-flip and gates at the major.
+20. **Remediation of `AlreadyReportedError`** — unchanged: bridge in the
+    opt-in phase, removal in a later major per §8.1.

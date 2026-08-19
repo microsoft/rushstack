@@ -5,8 +5,12 @@
  * Canonical event protocol, reporter manager, and built-in reporters for Rush.
  *
  * @remarks
- * This package is released as a public beta. Exported contracts may change
- * before the stable release.
+ * This package is released as a public beta with a **full beta license until
+ * 1.0**: both the TypeScript API surface and the wire format may change in
+ * 0.x releases. A breaking wire change always ships with a protocol-major
+ * bump, so cross-process peers detect the skew through the handshake
+ * `RUSH_PROTOCOL_UPDATE_REQUIRED` diagnostic rather than failing silently.
+ * Frozen golden snapshots are regression detectors, not stability promises.
  *
  * @packageDocumentation
  */
@@ -16,26 +20,45 @@
  *
  * @beta
  */
-export const REPORTER_PACKAGE_NAME: '@rushstack/reporter' = '@rushstack/reporter';
+export const REPORTER_PACKAGE_NAME: '@rushstack/rush-reporter' = '@rushstack/rush-reporter';
 
 export type { IReporterProtocolVersion } from './events/ReporterProtocolVersion';
 export type { ReporterPrivacyClassification } from './events/ReporterPrivacyClassification';
 export type { ReporterJsonNull, ReporterJsonValue } from './events/ReporterJsonValue';
 export type { ReporterEventType } from './events/ReporterEventType';
-export { REPORTER_EVENT_TYPES } from './events/ReporterEventType';
+export { REPORTER_EVENT_TYPES, isReporterEventRequired } from './events/ReporterEventType';
 export type {
   IReporterEventSource,
   IReporterEventScope,
   IReporterEventEnvelope
 } from './events/IReporterEventEnvelope';
+export type { IMessageEmittedPayload } from './events/IMessageEmittedPayload';
 
 export type { RushDiagnosticSeverity, IRushDiagnostic } from './diagnostics/IRushDiagnostic';
-export type { RushDiagnosticCategory } from './diagnostics/RushDiagnosticCategory';
+export type {
+  KnownRushDiagnosticCategory,
+  RushDiagnosticCategory
+} from './diagnostics/RushDiagnosticCategory';
+export type {
+  OneOrMoreRushDiagnosticCodeSegments,
+  RushDiagnosticCode,
+  RushDiagnosticCodeSegment
+} from './diagnostics/RushDiagnosticCode';
 export type { RushRemediationSafety, IRushRemediationAction } from './diagnostics/IRushRemediationAction';
-export type { IRushDiagnosticSource } from './diagnostics/IRushDiagnosticSource';
+export type {
+  IRushDiagnosticSource,
+  IRushFileDiagnosticSource,
+  IRushToolDiagnosticSource
+} from './diagnostics/IRushDiagnosticSource';
 export type { IClassifiedDiagnosticValue } from './diagnostics/IClassifiedDiagnosticValue';
 export { getPrivacyClassificationRank, computeEnvelopePrivacyFloor } from './diagnostics/DiagnosticPrivacy';
-export type { IRushDiagnosticCodeDefinition } from './diagnostics/RushDiagnosticCodeRegistry';
+export type {
+  IRushDiagnosticCodeDefinition,
+  RushDiagnosticCodes,
+  RushDiagnosticDetailKey,
+  RushDiagnosticSummaryKey,
+  RushDiagnosticTemplateKey
+} from './diagnostics/RushDiagnosticCodeRegistry';
 export {
   RUSH_INTERNAL_ERROR_CODE,
   isValidRushDiagnosticCode,
@@ -59,9 +82,10 @@ export type {
   IReporterHello,
   IReporterHelloAck,
   IReporterHandshakeOptions,
-  IReporterHandshakeResult
+  IReporterHandshakeResult,
+  ReporterCapability
 } from './protocol/ReporterHandshake';
-export { negotiateReporterHello } from './protocol/ReporterHandshake';
+export { negotiateReporterHello, REPORTER_KNOWN_CAPABILITIES } from './protocol/ReporterHandshake';
 
 export type { IReporter, IReporterContext } from './manager/IReporter';
 export type { IReporterRegistrationOptions, IReporterManagerOptions } from './manager/ReporterManager';

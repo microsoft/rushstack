@@ -8,13 +8,15 @@ import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
  *
  * @remarks
  * The sink assigns `eventId`, the authoritative `sequence`, `sourceSequence`,
- * and the `timestamp`, so producers never provide them.
+ * and the `timestamp`, so producers never provide them. The sink also derives
+ * `required` from the event type (see {@link isReporterEventRequired}), so a
+ * producer cannot mark drop-safe events as required or vice versa.
  *
  * @beta
  */
 export type IReporterEmitEventInput<TPayload> = Omit<
   IReporterEventEnvelope<TPayload>,
-  'eventId' | 'sequence' | 'sourceSequence' | 'timestamp'
+  'eventId' | 'sequence' | 'sourceSequence' | 'timestamp' | 'required'
 >;
 
 /**

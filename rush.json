@@ -1227,7 +1227,7 @@
       "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
-      "packageName": "@rushstack/reporter",
+      "packageName": "@rushstack/rush-reporter",
       "projectFolder": "libraries/reporter",
       "reviewCategory": "libraries",
       "shouldPublish": true

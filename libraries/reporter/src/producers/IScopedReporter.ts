@@ -33,7 +33,9 @@ export interface IScopedMessageOptions {
   readonly text: string;
 
   /**
-   * The privacy classification of the message text. Defaults to `public`.
+   * The privacy classification of the message text. Defaults to
+   * `local-sensitive`: free-form text fails safe, so a hand-written path or
+   * token never reaches a telemetry-class destination by default.
    */
   readonly privacy?: ReporterPrivacyClassification;
 }

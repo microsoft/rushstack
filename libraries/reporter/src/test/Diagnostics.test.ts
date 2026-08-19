@@ -133,7 +133,12 @@ describe('createRushDiagnostic', () => {
   });
 
   it('throws for an unknown code', () => {
-    expect(() => createRushDiagnostic('RUSH_NOT_A_REAL_CODE')).toThrow(/Unknown Rush diagnostic code/);
+    // The code parameter is typed to the registry union, so Rush-owned code gets
+    // compile-time checking; the runtime throw guards untrusted wire data.
+    const unregistered: string = 'RUSH_NOT_A_REAL_CODE';
+    expect(() => createRushDiagnostic(unregistered as Parameters<typeof createRushDiagnostic>[0])).toThrow(
+      /Unknown Rush diagnostic code/
+    );
   });
 });
 

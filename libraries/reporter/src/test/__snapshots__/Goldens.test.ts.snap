@@ -132,6 +132,7 @@ Object {
   "severity": "error",
   "source": Object {
     "file": "common/config/rush/pnpm-config.json",
+    "kind": "file",
     "toolName": "pnpm",
   },
   "summaryKey": "diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.summary",

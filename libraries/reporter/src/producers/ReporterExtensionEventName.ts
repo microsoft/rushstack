@@ -11,9 +11,14 @@
  * event names from colliding with the closed core event set, which remains
  * controlled by Rush.
  *
+ * The template-literal type enforces the two-segment lowercase shape at
+ * compile time; {@link isReporterExtensionEventName} remains the exact
+ * wire-level validator for untrusted data (types cannot express rules such as
+ * "no empty segments" or "no leading digit").
+ *
  * @beta
  */
-export type ReporterExtensionEventName = string;
+export type ReporterExtensionEventName = `${Lowercase<string>}.${Lowercase<string>}`;
 
 const EXTENSION_EVENT_NAME_REGEXP: RegExp =
   /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?:\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*)+$/;

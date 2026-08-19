@@ -49,15 +49,13 @@ class RecordingReporter implements IReporter {
 
 function makeInput(
   type: ReporterEventType,
-  payload: ReporterJsonValue = {},
-  required: boolean = false
+  payload: ReporterJsonValue = {}
 ): IReporterEmitEventInput<ReporterJsonValue> {
   return {
     protocolVersion: { major: 1, minor: 0 },
     sessionId: 'sess',
     source: { packageName: '@microsoft/rush-lib', packageVersion: '5.177.2' },
     privacy: 'public',
-    required,
     type,
     payload
   };
@@ -104,6 +102,59 @@ describe('ReporterManager ordering and assignment', () => {
     expect(reporter.reported.map((e: IReporterEventEnvelope<unknown>) => e.sequence)).toEqual([1, 2]);
     expect(reporter.reported[0].eventId).toBe('evt_1');
     expect(reporter.reported[0].timestamp).toBe('2026-01-01T00:00:00.000Z');
+  });
+
+  it('derives the required flag from the event type, ignoring producer input', async () => {
+    const manager: ReporterManager = new ReporterManager();
+    const reporter: RecordingReporter = new RecordingReporter('a');
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+
+    manager.emit(makeInput('activityChanged'));
+    manager.emit(makeInput('messageEmitted'));
+    manager.emit(makeInput('commandStarted'));
+    await manager.flushAsync();
+
+    expect(reporter.reported.map((e: IReporterEventEnvelope<unknown>) => e.required)).toEqual([
+      false,
+      true,
+      true
+    ]);
+  });
+
+  it('treats (sessionId, eventId) as event identity, allowing cross-session id reuse', async () => {
+    const manager: ReporterManager = new ReporterManager();
+    const reporter: RecordingReporter = new RecordingReporter('a');
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+
+    // The parent's own first event is evt_1 in session "sess".
+    manager.emit(makeInput('commandStarted'));
+
+    // A child session's envelope may reuse the same eventId without collision:
+    // the (sessionId, eventId) tuple is the identity.
+    const foreign: IReporterEventEnvelope<unknown> = {
+      protocolVersion: { major: 1, minor: 0 },
+      eventId: 'evt_1',
+      sessionId: 'child',
+      sequence: 1,
+      timestamp: '2026-01-01T00:00:01.000Z',
+      source: { packageName: '@rushstack/heft', packageVersion: '1.2.19' },
+      privacy: 'public',
+      required: true,
+      type: 'commandCompleted',
+      payload: {}
+    };
+    manager.ingestForeignEnvelope(foreign);
+    await manager.flushAsync();
+
+    const byIdentity: [string, string][] = reporter.reported.map(
+      (e: IReporterEventEnvelope<unknown>) => [e.sessionId, e.eventId]
+    );
+    expect(byIdentity).toEqual([
+      ['sess', 'evt_1'],
+      ['child', 'evt_1']
+    ]);
   });
 
   it('rehomes a foreign envelope with a new sequence and preserved sourceSequence', async () => {
@@ -208,6 +259,25 @@ describe('ReporterManager failure handling', () => {
 
     manager.emit(makeInput('activityChanged'));
     await expect(manager.flushAsync()).rejects.toThrow(/report failed/);
+  });
+
+  it('writes the emergency diagnostic only once for a failed required reporter', async () => {
+    const emergency: string[] = [];
+    const manager: ReporterManager = new ReporterManager({
+      emergencyDiagnosticWriter: (message: string) => emergency.push(message)
+    });
+    const bad: RecordingReporter = new RecordingReporter('bad');
+    bad.throwOnReportType = 'activityChanged';
+    manager.addReporter(bad, { required: true });
+    await manager.initializeAsync();
+
+    manager.emit(makeInput('activityChanged'));
+    manager.emit(makeInput('activityChanged'));
+    manager.emit(makeInput('activityChanged'));
+    await expect(manager.flushAsync()).rejects.toThrow(/report failed/);
+
+    expect(emergency).toHaveLength(1);
+    expect(emergency[0]).toContain('Required reporter "bad" failed');
   });
 });
 

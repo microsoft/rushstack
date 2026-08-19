@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Apply design-review realignments to the reporter contracts: rename the package to @rushstack/rush-reporter; add the messageEmitted core event type with a fail-safe local-sensitive default for message text; enforce diagnostic codes and template keys at the type level with per-domain template modules; make diagnostic categories forward-compatible; make diagnostic sources a kind-tagged discriminated union; scope event identity to (sessionId, eventId); derive the envelope required flag from the event type in ReporterManager; govern handshake capabilities with a registry; and document the two-tier constant policy and full beta license.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

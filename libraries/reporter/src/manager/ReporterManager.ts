@@ -3,12 +3,17 @@
 
 import type { IReporterProtocolVersion } from '../events/ReporterProtocolVersion';
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
+import { isReporterEventRequired } from '../events/ReporterEventType';
 import type { IReporterEmitEventInput, IReporterEventSink } from '../producers/IReporterEventSink';
 import { REPORTER_PROTOCOL_VERSION } from '../protocol/ReporterProtocol';
 import type { IReporter, IReporterContext } from './IReporter';
 
 /**
  * The default flush timeout for normal and error completion, in milliseconds.
+ *
+ * @remarks
+ * This is a tuning constant, not a wire contract: it is provisional and may
+ * change in any release as benchmark data arrives.
  *
  * @beta
  */
@@ -17,10 +22,15 @@ export const DEFAULT_FLUSH_TIMEOUT_MS: number = 10000;
 /**
  * The default best-effort flush timeout used on signal termination, in milliseconds.
  *
+ * @remarks
+ * This is a tuning constant, not a wire contract: it is provisional and may
+ * change in any release as benchmark data arrives.
+ *
  * @beta
  */
 export const DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS: number = 2000;
 
+// Tuning constant (provisional; not wire contract). May change in any release.
 const DEFAULT_COALESCE_THRESHOLD: number = 64;
 
 /**
@@ -63,7 +73,8 @@ export interface IReporterManagerOptions {
 
   /**
    * The pending-queue length at which replaceable status events begin to
-   * coalesce. Defaults to 64.
+   * coalesce. Defaults to 64. This is a provisional tuning constant, not a
+   * wire contract.
    */
   readonly coalesceThreshold?: number;
 
@@ -79,6 +90,7 @@ interface IReporterEntry {
   readonly destination: string | undefined;
   readonly required: boolean;
   disabled: boolean;
+  failureNotified: boolean;
   readonly queue: IReporterEventEnvelope<unknown>[];
   draining: boolean;
   drainPromise: Promise<void>;
@@ -110,16 +122,20 @@ export class ReporterManager implements IReporterEventSink {
   private _fatalError: Error | undefined;
 
   public constructor(options: IReporterManagerOptions = {}) {
+    const {
+      protocolVersion = REPORTER_PROTOCOL_VERSION,
+      now = () => new Date().toISOString(),
+      coalesceThreshold = DEFAULT_COALESCE_THRESHOLD,
+      emergencyDiagnosticWriter = (message: string) => {
+        process.stderr.write(`${message}\n`);
+      }
+    } = options;
     this._entries = [];
     this._ownedDestinations = new Set();
-    this._protocolVersion = options.protocolVersion ?? REPORTER_PROTOCOL_VERSION;
-    this._now = options.now ?? (() => new Date().toISOString());
-    this._coalesceThreshold = options.coalesceThreshold ?? DEFAULT_COALESCE_THRESHOLD;
-    this._emergencyDiagnosticWriter =
-      options.emergencyDiagnosticWriter ??
-      ((message: string) => {
-        process.stderr.write(`${message}\n`);
-      });
+    this._protocolVersion = protocolVersion;
+    this._now = now;
+    this._coalesceThreshold = coalesceThreshold;
+    this._emergencyDiagnosticWriter = emergencyDiagnosticWriter;
     this._nextSequence = 1;
     this._nextEventId = 1;
     this._initialized = false;
@@ -150,6 +166,7 @@ export class ReporterManager implements IReporterEventSink {
       destination,
       required: options.required ?? false,
       disabled: false,
+      failureNotified: false,
       queue: [],
       draining: false,
       drainPromise: Promise.resolve()
@@ -177,12 +194,17 @@ export class ReporterManager implements IReporterEventSink {
   /**
    * Publishes an in-process event, assigning its `eventId`, `sequence`, and
    * `timestamp`, and returns the assigned `eventId`.
+   *
+   * @remarks
+   * The manager derives the envelope `required` flag from the event type via
+   * {@link isReporterEventRequired}; producers never set it.
    */
   public emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string {
     this._ensureInitialized();
     const eventId: string = `evt_${this._nextEventId++}`;
     const envelope: IReporterEventEnvelope<TPayload> = {
       ...event,
+      required: isReporterEventRequired(event.type),
       eventId,
       sequence: this._nextSequence++,
       timestamp: this._now()
@@ -329,9 +351,14 @@ export class ReporterManager implements IReporterEventSink {
       if (!this._fatalError) {
         this._fatalError = error;
       }
-      this._emergencyDiagnosticWriter(
-        `[reporter] Required reporter ${JSON.stringify(entry.reporter.name)} failed: ${error.message}`
-      );
+      // Write the emergency diagnostic once; a failed required reporter keeps
+      // receiving events until teardown, and a per-event line would spam stderr.
+      if (!entry.failureNotified) {
+        entry.failureNotified = true;
+        this._emergencyDiagnosticWriter(
+          `[reporter] Required reporter ${JSON.stringify(entry.reporter.name)} failed: ${error.message}`
+        );
+      }
       return;
     }
     entry.disabled = true;

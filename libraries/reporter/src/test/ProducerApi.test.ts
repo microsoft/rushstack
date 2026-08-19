@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import {
+  isReporterEventRequired,
   isReporterExtensionEventName,
   type IReporterEmitEventInput,
   type IReporterEventEnvelope,
@@ -21,6 +22,7 @@ describe('IReporterEventSink', () => {
         const eventId: string = `evt_${sequence}`;
         published.push({
           ...event,
+          required: isReporterEventRequired(event.type),
           eventId,
           sequence,
           timestamp: '2026-07-12T00:00:00.000Z'
@@ -29,13 +31,12 @@ describe('IReporterEventSink', () => {
       }
     };
 
-    // The producer never supplies eventId, sequence, or timestamp.
+    // The producer never supplies eventId, sequence, timestamp, or required.
     const input: IReporterEmitEventInput<{ commandName: string }> = {
       protocolVersion: { major: 1, minor: 0 },
       sessionId: 'sess_root',
       source: { packageName: '@microsoft/rush-lib', packageVersion: '5.177.2' },
       privacy: 'public',
-      required: true,
       type: 'commandStarted',
       payload: { commandName: 'build' }
     };
@@ -47,6 +48,7 @@ describe('IReporterEventSink', () => {
     expect(published[0].sequence).toBe(1);
     expect(published[0].eventId).toBe('evt_1');
     expect(published[0].timestamp).toBe('2026-07-12T00:00:00.000Z');
+    expect(published[0].required).toBe(true);
     expect(published[0].payload).toEqual({ commandName: 'build' });
   });
 });

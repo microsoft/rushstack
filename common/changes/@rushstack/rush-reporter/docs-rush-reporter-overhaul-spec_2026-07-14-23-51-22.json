@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "packageName": "@rushstack/reporter",
+      "packageName": "@rushstack/rush-reporter",
       "comment": "Add protocol, compatibility, and legacy output golden tests (test-only baselines)",
       "type": "none"
     }
   ],
-  "packageName": "@rushstack/reporter",
+  "packageName": "@rushstack/rush-reporter",
   "email": "TheLarkInn@users.noreply.github.com"
 }

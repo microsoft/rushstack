@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { RushDiagnosticCategory } from './RushDiagnosticCategory';
+import type { RushDiagnosticCode } from './RushDiagnosticCode';
 import type { IClassifiedDiagnosticValue } from './IClassifiedDiagnosticValue';
 import type { IRushRemediationAction } from './IRushRemediationAction';
 import type { IRushDiagnosticSource } from './IRushDiagnosticSource';
@@ -31,16 +32,17 @@ export type RushDiagnosticSeverity = 'warning' | 'error';
  */
 export interface IRushDiagnostic {
   /**
-   * A unique identifier for this diagnostic instance. Propagated failures
-   * reference this id rather than re-rendering the diagnostic.
+   * A unique identifier (a GUID) for this diagnostic instance. Propagated
+   * failures reference this id rather than re-rendering the diagnostic.
    */
   readonly diagnosticId: string;
 
   /**
    * A stable, never-reused code of the form `RUSH_<DOMAIN>_<NAME>` that
-   * identifies the diagnostic and keys its English template.
+   * identifies the diagnostic and keys its English template, for example
+   * `RUSH_DEPENDENCY_TOOL_FAILED`.
    */
-  readonly code: string;
+  readonly code: RushDiagnosticCode;
 
   /**
    * The root-cause category of the diagnostic.
@@ -53,12 +55,15 @@ export interface IRushDiagnostic {
   readonly severity: RushDiagnosticSeverity;
 
   /**
-   * The resource key of the human-readable summary template for this diagnostic.
+   * The resource key of the human-readable summary template for this
+   * diagnostic, for example `diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.summary`,
+   * which resolves to `The package manager exited with code {exitCode}.`
    */
   readonly summaryKey: string;
 
   /**
-   * The resource key of an optional detailed template for this diagnostic.
+   * The resource key of an optional detailed template for this diagnostic,
+   * for example `diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.detail`.
    */
   readonly detailKey?: string;
 

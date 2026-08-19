@@ -7,7 +7,11 @@ import type { IRushDiagnostic, RushDiagnosticSeverity } from './IRushDiagnostic'
 import type { IClassifiedDiagnosticValue } from './IClassifiedDiagnosticValue';
 import type { IRushRemediationAction } from './IRushRemediationAction';
 import type { IRushDiagnosticSource } from './IRushDiagnosticSource';
-import { RUSH_DIAGNOSTIC_CODES, type IRushDiagnosticCodeDefinition } from './RushDiagnosticCodeRegistry';
+import {
+  RUSH_DIAGNOSTIC_CODES,
+  type IRushDiagnosticCodeDefinition,
+  type RushDiagnosticCodes
+} from './RushDiagnosticCodeRegistry';
 
 /**
  * Options for {@link createRushDiagnostic}.
@@ -16,7 +20,7 @@ import { RUSH_DIAGNOSTIC_CODES, type IRushDiagnosticCodeDefinition } from './Rus
  */
 export interface ICreateRushDiagnosticOptions {
   /**
-   * A pre-assigned diagnostic id. When omitted, a new id is generated.
+   * A pre-assigned diagnostic id. When omitted, a new GUID is generated.
    */
   readonly diagnosticId?: string;
 
@@ -72,7 +76,7 @@ export interface ICreateRushDiagnosticOptions {
  * @beta
  */
 export function createRushDiagnostic(
-  code: string,
+  code: RushDiagnosticCodes,
   options: ICreateRushDiagnosticOptions = {}
 ): IRushDiagnostic {
   const definition: IRushDiagnosticCodeDefinition | undefined = RUSH_DIAGNOSTIC_CODES.get(code);
@@ -80,18 +84,36 @@ export function createRushDiagnostic(
     throw new Error(`Unknown Rush diagnostic code: ${code}`);
   }
 
+  const {
+    code: registeredCode,
+    category,
+    defaultSeverity,
+    summaryKey,
+    detailKey
+  } = definition;
+  const {
+    diagnosticId = randomUUID(),
+    severity = defaultSeverity,
+    parameters,
+    remediation,
+    source,
+    causeDiagnosticIds,
+    retryable,
+    relatedArtifactIds
+  } = options;
+
   return {
-    diagnosticId: options.diagnosticId ?? randomUUID(),
-    code: definition.code,
-    category: definition.category,
-    severity: options.severity ?? definition.defaultSeverity,
-    summaryKey: definition.summaryKey,
-    detailKey: definition.detailKey,
-    parameters: options.parameters,
-    remediation: options.remediation,
-    source: options.source,
-    causeDiagnosticIds: options.causeDiagnosticIds,
-    retryable: options.retryable,
-    relatedArtifactIds: options.relatedArtifactIds
+    diagnosticId,
+    code: registeredCode,
+    category,
+    severity,
+    summaryKey,
+    detailKey,
+    parameters,
+    remediation,
+    source,
+    causeDiagnosticIds,
+    retryable,
+    relatedArtifactIds
   };
 }

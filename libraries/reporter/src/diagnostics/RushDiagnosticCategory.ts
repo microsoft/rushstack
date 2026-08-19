@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * The category of a Rush diagnostic.
+ * The set of Rush diagnostic categories known to this version of the package.
  *
  * @remarks
  * Categories group diagnostics by root-cause domain. They are used for
@@ -10,7 +10,7 @@
  *
  * @beta
  */
-export type RushDiagnosticCategory =
+export type KnownRushDiagnosticCategory =
   | 'configuration'
   | 'input'
   | 'dependency-tool'
@@ -18,3 +18,16 @@ export type RushDiagnosticCategory =
   | 'network-auth'
   | 'operation'
   | 'internal';
+
+/**
+ * The category of a Rush diagnostic.
+ *
+ * @remarks
+ * This is {@link KnownRushDiagnosticCategory} loosened with `string & {}` so
+ * that a category introduced by a newer producer flows through an older
+ * consumer without breaking it, per the protocol's graceful-degradation rule.
+ * Known members keep autocomplete; unknown members render as-is.
+ *
+ * @beta
+ */
+export type RushDiagnosticCategory = KnownRushDiagnosticCategory | (string & {});

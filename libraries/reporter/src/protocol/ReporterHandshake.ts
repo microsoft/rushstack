@@ -66,6 +66,32 @@ export interface IReporterHelloAck {
 }
 
 /**
+ * The governed registry of capabilities the reporter protocol knows about.
+ *
+ * @remarks
+ * Capabilities and handshake `requiredFeatures` share one wire namespace: a
+ * required feature is simply a capability the producer cannot operate
+ * without. On the wire both are untrusted strings — unknown capabilities are
+ * ignored and unknown required features cause rejection, per protocol rules.
+ * This registry makes the Rush-known set explicit; additions go through API
+ * review like every other contract change. The registry is intentionally
+ * empty until the first negotiated capability ships.
+ *
+ * @beta
+ */
+// eslint-disable-next-line @typescript-eslint/typedef -- literal inference feeds the derived ReporterCapability type
+export const REPORTER_KNOWN_CAPABILITIES = [] as const;
+
+/**
+ * A wire capability name. Known members keep autocomplete; unknown members
+ * are representable so a newer producer's capabilities degrade gracefully in
+ * an older consumer.
+ *
+ * @beta
+ */
+export type ReporterCapability = (typeof REPORTER_KNOWN_CAPABILITIES)[number] | (string & {});
+
+/**
  * Options for {@link negotiateReporterHello}.
  *
  * @beta
@@ -80,7 +106,7 @@ export interface IReporterHandshakeOptions {
    * The capabilities the consumer supports. Anything not listed is treated as
    * an unknown optional capability and is simply not accepted.
    */
-  readonly supportedCapabilities?: readonly string[];
+  readonly supportedCapabilities?: readonly ReporterCapability[];
 }
 
 /**

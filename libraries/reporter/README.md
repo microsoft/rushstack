@@ -1,4 +1,4 @@
-# @rushstack/reporter
+# @rushstack/rush-reporter
 
 Canonical event protocol, reporter manager, and built-in reporters for Rush.
 
@@ -10,4 +10,4 @@ This package is released as a public beta. Exported contracts may change before 
   what's new in the latest version
 - [API Reference](https://api.rushstack.io/pages/reporter/)
 
-`@rushstack/reporter` is part of the [Rush Stack](https://rushstack.io/) family of projects.
+`@rushstack/rush-reporter` is part of the [Rush Stack](https://rushstack.io/) family of projects.

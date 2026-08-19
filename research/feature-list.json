@@ -1,13 +1,13 @@
 [
   {
     "category": "functional",
-    "description": "Scaffold @rushstack/reporter as a public beta package with no dependency on rush-lib",
+    "description": "Scaffold @rushstack/rush-reporter as a public beta package with no dependency on rush-lib",
     "steps": [
-      "Create libraries/reporter as the @rushstack/reporter package",
+      "Create libraries/reporter as the @rushstack/rush-reporter package",
       "Configure API Extractor to mark exported contracts public beta",
       "Ensure package.json declares no dependency on rush-lib",
       "Register the package in rush.json projects",
-      "Verify rush build --to @rushstack/reporter succeeds"
+      "Verify rush build --to @rushstack/rush-reporter succeeds"
     ],
     "passes": true
   },

@@ -6,7 +6,7 @@ Object {
   "payload": Object {
     "argv": Array [
       "--to",
-      "@rushstack/reporter",
+      "@rushstack/rush-reporter",
     ],
     "commandName": "build",
   },

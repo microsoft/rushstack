@@ -58,7 +58,7 @@ describe('protocol goldens', () => {
         automatedExecutionSafety: 'requires-confirmation'
       }
     ],
-    source: { file: 'common/config/rush/pnpm-config.json', toolName: 'pnpm' },
+    source: { kind: 'file', file: 'common/config/rush/pnpm-config.json', toolName: 'pnpm' },
     causeDiagnosticIds: ['diag_0000'],
     retryable: true,
     relatedArtifactIds: ['artifact_install_log']

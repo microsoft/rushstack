@@ -1,16 +1,16 @@
-[2026-07-14] Feature 1/28 COMPLETE: Scaffold @rushstack/reporter public beta package
+[2026-07-14] Feature 1/28 COMPLETE: Scaffold @rushstack/rush-reporter public beta package
   Files:
-    - libraries/reporter/package.json (name @rushstack/reporter v0.1.0, no rush-lib dep)
+    - libraries/reporter/package.json (name @rushstack/rush-reporter v0.1.0, no rush-lib dep)
     - libraries/reporter/tsconfig.json, config/{api-extractor,jest,rig}.json, eslint.config.js
     - libraries/reporter/.npmignore, LICENSE, README.md
     - libraries/reporter/src/index.ts (REPORTER_PACKAGE_NAME, @beta)
-    - rush.json (registered @rushstack/reporter after problem-matcher)
+    - rush.json (registered @rushstack/rush-reporter after problem-matcher)
     - common/reviews/api/reporter.api.md (generated, shows // @beta)
     - common/config/subspaces/default/pnpm-lock.yaml (rush update)
   Verify:
     - rush update: success (~20s)
-    - rush build --to @rushstack/reporter: success
-    - rush build --only @rushstack/reporter: clean SUCCESS, no warnings
+    - rush build --to @rushstack/rush-reporter: success
+    - rush build --only @rushstack/rush-reporter: clean SUCCESS, no warnings
     - api report confirms @beta release tag on exports
     - no rush-lib reference in package.json
   Next: Feature 2/28 - Define canonical event envelope and closed core event type union
@@ -26,7 +26,7 @@
     - libraries/reporter/src/test/IReporterEventEnvelope.test.ts (+ __snapshots__ golden)
     - common/reviews/api/reporter.api.md (regenerated, all @beta)
   Verify:
-    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - rush test --only @rushstack/rush-reporter: clean SUCCESS (build + jest)
     - golden envelope snapshot + JSON round-trip + closed-set + sourceSequence + Error-not-serialized tests pass
     - api report confirms all exports @beta, envelope fields readonly
   Next: Feature 3/28 - Producer API (IReporterEventSink, IScopedReporter)
@@ -44,7 +44,7 @@
     - emitDiagnostic requires IRushDiagnostic; introduced a MINIMAL stub now. Feature 4 must EXPAND it
       (add RushDiagnosticCategory, remediation, source, classified parameters, field privacy, code registry, templates, tests) - not recreate.
   Verify:
-    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest), no warnings
+    - rush test --only @rushstack/rush-reporter: clean SUCCESS (build + jest), no warnings
     - sink Omit contract, scoped emit ids, emit-only surface, extension-name validation tests pass
   Next: Feature 4/28 - Structured diagnostics (registry, categories, remediation, field privacy)
 
@@ -66,7 +66,7 @@
   Notes:
     - Privacy floor = MIN sensitivity across fields (spec: "minimum classification floor for every field"); field-level classification remains authoritative for redaction.
   Verify:
-    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - rush test --only @rushstack/rush-reporter: clean SUCCESS (build + jest)
     - registry validation (code pattern/uniqueness/category/templates/internal-code), privacy floor, factory, RushError tests pass
     - all 35 exports @beta
   Next: Feature 5/28 - NDJSON wire protocol (handshake, versioning, size limits)
@@ -84,7 +84,7 @@
     - Capabilities optional (accepted = intersection; unknown ignored). Only unknown requiredFeatures or unsupported major reject + emit RUSH_PROTOCOL_UPDATE_REQUIRED. Minor additive.
     - Byte limits enforced via Buffer.byteLength (utf8), incl. oversized partial-line guard in decoder.
   Verify:
-    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - rush test --only @rushstack/rush-reporter: clean SUCCESS (build + jest)
     - encode/decode round-trip, chunk-split reassembly, blank-line skip, record/partial size limits, negotiation (compat major, minor additive, unknown required, unsupported major, supported required) tests pass
     - all exports @beta
   Next: Feature 6/28 - ReporterManager lifecycle, ordering, and fan-out
@@ -101,7 +101,7 @@
     - Optional reporter runtime failure -> disabled + 1 emergency stderr line; required failure -> captured, flush/close reject (fatal). Init failure always fatal.
     - report() is sync; drain loop yields via await Promise.resolve() between events so flush is the sync point.
   Verify:
-    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - rush test --only @rushstack/rush-reporter: clean SUCCESS (build + jest)
     - ordering/sequence/eventId/timestamp, foreign rehome, destination exclusivity, multiplexer, add-after-init guard, init-fatal, optional-disable, required-fatal-flush, coalescing (protected preserved), flush/close, flush-timeout tests pass
     - all exports @beta
   Next: Feature 7/28 - Freeze legacy output snapshots + protocol/compatibility goldens
@@ -117,5 +117,5 @@
     - Legacy goldens: success + failure output frozen.
     - Change file type=none (test-only, no version bump).
   Verify:
-    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest), 8 snapshots
+    - rush test --only @rushstack/rush-reporter: clean SUCCESS (build + jest), 8 snapshots
   Next: Feature 8/28 - Two-stage bootstrap in install-run-rush (handoff file)
