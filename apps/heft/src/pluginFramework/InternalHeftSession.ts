@@ -35,13 +35,13 @@ function* getAllTasks(phases: Iterable<HeftPhase>): IterableIterator<HeftTask> {
 }
 
 export class InternalHeftSession {
-  private readonly _phaseSessionsByPhase: Map<HeftPhase, HeftPhaseSession> = new Map();
-  private readonly _heftConfigurationJson: IHeftConfigurationJson;
-  private _actionReferencesByAlias: ReadonlyMap<string, IHeftConfigurationJsonActionReference> | undefined;
-  private _lifecycle: HeftLifecycle | undefined;
-  private _phases: Set<HeftPhase> | undefined;
-  private _phasesByName: Map<string, HeftPhase> | undefined;
-  private _parameterManager: HeftParameterManager | undefined;
+  readonly #phaseSessionsByPhase: Map<HeftPhase, HeftPhaseSession> = new Map();
+  readonly #heftConfigurationJson: IHeftConfigurationJson;
+  #actionReferencesByAlias: ReadonlyMap<string, IHeftConfigurationJsonActionReference> | undefined;
+  #lifecycle: HeftLifecycle | undefined;
+  #phases: Set<HeftPhase> | undefined;
+  #phasesByName: Map<string, HeftPhase> | undefined;
+  #parameterManager: HeftParameterManager | undefined;
 
   public readonly heftConfiguration: HeftConfiguration;
 
@@ -58,7 +58,7 @@ export class InternalHeftSession {
     this.loggingManager = options.loggingManager;
     this.metricsCollector = options.metricsCollector;
     this.debug = options.debug;
-    this._heftConfigurationJson = heftConfigurationJson;
+    this.#heftConfigurationJson = heftConfigurationJson;
   }
 
   public static async initializeAsync(options: IInternalHeftSessionOptions): Promise<InternalHeftSession> {
@@ -118,61 +118,61 @@ export class InternalHeftSession {
   }
 
   public get parameterManager(): HeftParameterManager {
-    if (!this._parameterManager) {
+    if (!this.#parameterManager) {
       throw new InternalError('A parameter manager for the session has not been provided.');
     }
-    return this._parameterManager;
+    return this.#parameterManager;
   }
 
   public set parameterManager(value: HeftParameterManager) {
-    this._parameterManager = value;
+    this.#parameterManager = value;
   }
 
   public get actionReferencesByAlias(): ReadonlyMap<string, IHeftConfigurationJsonActionReference> {
-    if (!this._actionReferencesByAlias) {
-      this._actionReferencesByAlias = new Map(
-        Object.entries(this._heftConfigurationJson.aliasesByName || {})
+    if (!this.#actionReferencesByAlias) {
+      this.#actionReferencesByAlias = new Map(
+        Object.entries(this.#heftConfigurationJson.aliasesByName || {})
       );
     }
-    return this._actionReferencesByAlias;
+    return this.#actionReferencesByAlias;
   }
 
   public get lifecycle(): HeftLifecycle {
-    if (!this._lifecycle) {
-      this._lifecycle = new HeftLifecycle(this, this._heftConfigurationJson.heftPlugins || []);
+    if (!this.#lifecycle) {
+      this.#lifecycle = new HeftLifecycle(this, this.#heftConfigurationJson.heftPlugins || []);
     }
-    return this._lifecycle;
+    return this.#lifecycle;
   }
 
   public get phases(): ReadonlySet<HeftPhase> {
     this._ensurePhases();
-    return this._phases!;
+    return this.#phases!;
   }
 
   public get phasesByName(): ReadonlyMap<string, HeftPhase> {
     this._ensurePhases();
-    return this._phasesByName!;
+    return this.#phasesByName!;
   }
 
   public getSessionForPhase(phase: HeftPhase): HeftPhaseSession {
-    let phaseSession: HeftPhaseSession | undefined = this._phaseSessionsByPhase.get(phase);
+    let phaseSession: HeftPhaseSession | undefined = this.#phaseSessionsByPhase.get(phase);
     if (!phaseSession) {
       phaseSession = new HeftPhaseSession({ internalHeftSession: this, phase });
-      this._phaseSessionsByPhase.set(phase, phaseSession);
+      this.#phaseSessionsByPhase.set(phase, phaseSession);
     }
     return phaseSession;
   }
 
   private _ensurePhases(): void {
-    if (!this._phases || !this._phasesByName) {
-      this._phasesByName = new Map();
+    if (!this.#phases || !this.#phasesByName) {
+      this.#phasesByName = new Map();
       for (const [phaseName, phaseSpecifier] of Object.entries(
-        this._heftConfigurationJson.phasesByName || {}
+        this.#heftConfigurationJson.phasesByName || {}
       )) {
         const phase: HeftPhase = new HeftPhase(this, phaseName, phaseSpecifier);
-        this._phasesByName.set(phaseName, phase);
+        this.#phasesByName.set(phaseName, phase);
       }
-      this._phases = new Set(this._phasesByName.values());
+      this.#phases = new Set(this.#phasesByName.values());
     }
   }
 }
