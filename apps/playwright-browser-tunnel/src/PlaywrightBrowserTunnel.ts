@@ -159,7 +159,7 @@ export class PlaywrightTunnel {
     terminal.writeLine(`keepRunning: ${this.#keepRunning}`);
     while (this.#keepRunning) {
       if (!this.#initWsPromise) {
-        this.#initWsPromise = this._initPlaywrightBrowserTunnelAsync();
+        this.#initWsPromise = this.#initPlaywrightBrowserTunnelAsync();
       } else {
         terminal.writeLine(`Tunnel is already running with status: ${this.status}`);
       }
@@ -197,7 +197,7 @@ export class PlaywrightTunnel {
   // TODO: We should implement an uninstall command to remove installed Playwright browsers
   // public async uninstallPlaywrightBrowsersAsync(): Promise<void> {}
 
-  private async _runCommandAsync(command: string, args: string[]): Promise<void> {
+  async #runCommandAsync(command: string, args: string[]): Promise<void> {
     const tmpPath: string = this.#playwrightInstallPath;
     await FileSystem.ensureFolderAsync(tmpPath);
     this.#terminal.writeLine(`Running command: ${command} ${args.join(' ')} in ${tmpPath}`);
@@ -227,30 +227,30 @@ export class PlaywrightTunnel {
     await Executable.waitForExitAsync(cp, { throwOnNonZeroExitCode: true, throwOnSignal: true });
   }
 
-  private async _installPlaywrightCoreAsync({
+  async #installPlaywrightCoreAsync({
     playwrightVersion
   }: Pick<IHandshake, 'playwrightVersion'>): Promise<void> {
     this.#terminal.writeLine(`Installing playwright-core version ${playwrightVersion}`);
-    await this._runCommandAsync('npm', [
+    await this.#runCommandAsync('npm', [
       'install',
       `playwright-core-${playwrightVersion}@npm:playwright-core@${playwrightVersion}`
     ]);
   }
 
-  private async _installPlaywrightBrowsersAsync({
+  async #installPlaywrightBrowsersAsync({
     playwrightVersion,
     browserName
   }: Pick<IHandshake, 'playwrightVersion' | 'browserName'>): Promise<void> {
-    await this._installPlaywrightCoreAsync({ playwrightVersion });
+    await this.#installPlaywrightCoreAsync({ playwrightVersion });
     this.#terminal.writeLine(`Executing playwright-core version ${playwrightVersion}`);
-    await this._runCommandAsync('node', [
+    await this.#runCommandAsync('node', [
       `node_modules/playwright-core-${playwrightVersion}/cli.js`,
       'install',
       browserName
     ]);
   }
 
-  private async _tryConnectAsync(): Promise<WebSocket> {
+  async #tryConnectAsync(): Promise<WebSocket> {
     const wsEndpoint: string | undefined = this.#wsEndpoint;
     if (!wsEndpoint) {
       throw new Error('WebSocket endpoint is not defined');
@@ -269,14 +269,14 @@ export class PlaywrightTunnel {
 
   // TODO: Only supporting one test at a time.
   // Need to support multiple simultaneous connections for parallel tests.
-  private async _pollConnectionAsync(): Promise<WebSocket> {
+  async #pollConnectionAsync(): Promise<WebSocket> {
     this.#terminal.writeLine(`Waiting for WebSocket connection`);
     return await new Promise((resolve, reject) => {
       this.#pollInterval = setInterval(() => {
         if (this.#pendingConnectionAttempt) {
           return; // Skip if a connection attempt is already in progress
         }
-        const connectionPromise: Promise<WebSocket> = this._tryConnectAsync();
+        const connectionPromise: Promise<WebSocket> = this.#tryConnectAsync();
         this.#pendingConnectionAttempt = connectionPromise;
         connectionPromise
           .then((ws: WebSocket) => {
@@ -294,7 +294,7 @@ export class PlaywrightTunnel {
     });
   }
 
-  private async _waitForIncomingConnectionAsync(): Promise<WebSocket> {
+  async #waitForIncomingConnectionAsync(): Promise<WebSocket> {
     this.#terminal.writeLine('Waiting for incoming WebSocket connection');
 
     return await new Promise<WebSocket>((resolve, reject) => {
@@ -334,7 +334,7 @@ export class PlaywrightTunnel {
   // TODO: If a user runs this for the first time, `this._playwrightBrowsersInstalled` will be empty
   // and it will try to install the browsers every time. We should persist this information. Maybe a cache file with text per
   // machine instance?
-  private async _setupPlaywrightAsync({
+  async #setupPlaywrightAsync({
     playwrightVersion,
     browserName
   }: Pick<IHandshake, 'playwrightVersion' | 'browserName'>): Promise<typeof import('playwright-core')> {
@@ -344,7 +344,7 @@ export class PlaywrightTunnel {
       this.#terminal.writeLine(
         `Playwright browser not found. Installing playwright-core version ${playwrightVersion}`
       );
-      await this._installPlaywrightBrowsersAsync({ playwrightVersion, browserName });
+      await this.#installPlaywrightBrowsersAsync({ playwrightVersion, browserName });
       this.#playwrightBrowsersInstalled.add(browserKey);
     }
 
@@ -352,7 +352,7 @@ export class PlaywrightTunnel {
     return await import(`${this.#playwrightInstallPath}/node_modules/playwright-core-${playwrightVersion}`);
   }
 
-  private async _getPlaywrightBrowserServerProxyAsync({
+  async #getPlaywrightBrowserServerProxyAsync({
     browserName,
     playwrightVersion,
     launchOptions
@@ -385,7 +385,7 @@ export class PlaywrightTunnel {
       `Launch options after validation: ${JSON.stringify(logOptions)} (headless: false enforced)`
     );
 
-    const playwright: typeof import('playwright-core') = await this._setupPlaywrightAsync({
+    const playwright: typeof import('playwright-core') = await this.#setupPlaywrightAsync({
       playwrightVersion,
       browserName
     });
@@ -410,7 +410,7 @@ export class PlaywrightTunnel {
     };
   }
 
-  private _validateHandshake(rawHandshake: unknown): IHandshake {
+  #validateHandshake(rawHandshake: unknown): IHandshake {
     if (
       typeof rawHandshake !== 'object' ||
       rawHandshake === null ||
@@ -447,7 +447,7 @@ export class PlaywrightTunnel {
   }
 
   // ws1 is the tunnel websocket, ws2 is the browser server websocket
-  private async _setupForwardingAsync(ws1: WebSocket, ws2: WebSocket): Promise<void> {
+  async #setupForwardingAsync(ws1: WebSocket, ws2: WebSocket): Promise<void> {
     this.#terminal.writeLine('Setting up message forwarding between ws1 and ws2');
     this.#terminal.writeLine(`  ws1 (tunnel) readyState: ${getWebSocketReadyStateString(ws1.readyState)}`);
     this.#terminal.writeLine(`  ws2 (browser) readyState: ${getWebSocketReadyStateString(ws2.readyState)}`);
@@ -519,7 +519,7 @@ export class PlaywrightTunnel {
    * and setting up the browser server.
    * Returns when the handshake is complete and the browser server is running.
    */
-  private async _initPlaywrightBrowserTunnelAsync(): Promise<WebSocket> {
+  async #initPlaywrightBrowserTunnelAsync(): Promise<WebSocket> {
     let handshake: IHandshake | undefined = undefined;
     let client: WebSocket | undefined = undefined;
     let browserServer: BrowserServer | undefined = undefined;
@@ -527,8 +527,8 @@ export class PlaywrightTunnel {
     this.status = 'waiting-for-connection';
     const ws: WebSocket =
       this.#mode === 'poll-connection'
-        ? await this._pollConnectionAsync()
-        : await this._waitForIncomingConnectionAsync();
+        ? await this.#pollConnectionAsync()
+        : await this.#waitForIncomingConnectionAsync();
 
     ws.on('open', () => {
       this.#terminal.writeLine(`WebSocket connection established`);
@@ -564,7 +564,7 @@ export class PlaywrightTunnel {
             const rawHandshakeString: string = data.toString();
             const rawHandshake: unknown = JSON.parse(rawHandshakeString);
             terminal.writeLine(`Received handshake: ${rawHandshakeString}`);
-            handshake = this._validateHandshake(rawHandshake);
+            handshake = this.#validateHandshake(rawHandshake);
 
             // Call the onBeforeLaunch callback if provided
             if (this.#onBeforeLaunch) {
@@ -582,7 +582,7 @@ export class PlaywrightTunnel {
 
             this.status = 'setting-up-browser-server';
             const browserServerProxy: IBrowserServerProxy =
-              await this._getPlaywrightBrowserServerProxyAsync(handshake);
+              await this.#getPlaywrightBrowserServerProxyAsync(handshake);
             client = browserServerProxy.client;
             browserServer = browserServerProxy.browserServer;
 
@@ -616,7 +616,7 @@ export class PlaywrightTunnel {
             await Async.sleepAsync(2000);
 
             ws.send(JSON.stringify({ action: 'handshakeAck' }));
-            await this._setupForwardingAsync(ws, client);
+            await this.#setupForwardingAsync(ws, client);
 
             // Clean up message handler after successful handshake
             ws.off('message', onMessageHandler);

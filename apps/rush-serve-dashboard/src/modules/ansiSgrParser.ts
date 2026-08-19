@@ -30,7 +30,7 @@ export class AnsiSgrParser {
 
     const pushSegmentIfText = (text: string): void => {
       if (!text) return;
-      const style: string = this._ansiStateToStyle(this.#state);
+      const style: string = this.#ansiStateToStyle(this.#state);
       segments.push({ text, style });
     };
 
@@ -52,7 +52,7 @@ export class AnsiSgrParser {
       const sequenceEnd: number = escapeIndex + 2 + suffixMatch[0].length;
       const seq: string = input.slice(escapeIndex, sequenceEnd);
       try {
-        this._applySgr(this._parseSgrParams(seq));
+        this.#applySgr(this.#parseSgrParams(seq));
       } catch {
         // Ignore malformed control sequences.
       }
@@ -68,7 +68,7 @@ export class AnsiSgrParser {
     return segments;
   }
 
-  private _parseSgrParams(seq: string): number[] {
+  #parseSgrParams(seq: string): number[] {
     let s: string = seq;
     if (s.startsWith('\u001b[')) {
       s = s.slice(2);
@@ -80,7 +80,7 @@ export class AnsiSgrParser {
     return s.split(';').map((p) => Number(p || 0));
   }
 
-  private _applySgr(params: number[]): void {
+  #applySgr(params: number[]): void {
     if (!params || !params.length) params = [0];
 
     for (const p of params) {
@@ -101,22 +101,22 @@ export class AnsiSgrParser {
       } else if (p === 24) {
         this.#state.underline = false;
       } else if (p >= 30 && p <= 37) {
-        this.#state.fg = this._sgrColorToCss(p - 30, false);
+        this.#state.fg = this.#sgrColorToCss(p - 30, false);
       } else if (p === 39) {
         this.#state.fg = undefined;
       } else if (p >= 40 && p <= 47) {
-        this.#state.bg = this._sgrColorToCss(p - 40, false);
+        this.#state.bg = this.#sgrColorToCss(p - 40, false);
       } else if (p === 49) {
         this.#state.bg = undefined;
       } else if (p >= 90 && p <= 97) {
-        this.#state.fg = this._sgrColorToCss(p - 90, true);
+        this.#state.fg = this.#sgrColorToCss(p - 90, true);
       } else if (p >= 100 && p <= 107) {
-        this.#state.bg = this._sgrColorToCss(p - 100, true);
+        this.#state.bg = this.#sgrColorToCss(p - 100, true);
       }
     }
   }
 
-  private _sgrColorToCss(idx: number, bright: boolean): string | undefined {
+  #sgrColorToCss(idx: number, bright: boolean): string | undefined {
     const base: string[] = ['#000000', '#a00', '#0a0', '#aa0', '#00a', '#a0a', '#0aa', '#ddd'];
     const brightMap: string[] = [
       '#555',
@@ -131,7 +131,7 @@ export class AnsiSgrParser {
     return bright ? brightMap[idx] || base[idx] : base[idx];
   }
 
-  private _ansiStateToStyle(state: IAnsiState): string {
+  #ansiStateToStyle(state: IAnsiState): string {
     const styles: string[] = [];
     if (state.fg) styles.push('color: ' + state.fg);
     if (state.bg) styles.push('background-color: ' + state.bg);
