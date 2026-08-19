@@ -1,8 +1,3 @@
 {
-  "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json",
-
-  "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["ES2020"]
-  }
+  "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json"
 }

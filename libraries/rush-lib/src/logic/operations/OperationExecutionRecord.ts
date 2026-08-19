@@ -93,6 +93,11 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   public enabled: boolean;
 
   /**
+   * If true, this operation's runner should remain active after this iteration.
+   */
+  public shouldRunnerPersist: boolean = true;
+
+  /**
    * This number represents how far away this Operation is from the furthest "root" operation (i.e.
    * an operation with no consumers). This helps us to calculate the critical path (i.e. the
    * longest chain of projects which must be executed in order, thereby limiting execution speed

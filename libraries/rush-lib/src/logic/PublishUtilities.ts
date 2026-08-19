@@ -15,7 +15,6 @@ import {
   type IPackageJson,
   JsonFile,
   FileConstants,
-  Text,
   Enum,
   InternalError,
   Executable
@@ -282,7 +281,7 @@ export class PublishUtilities {
 
     if (secretSubstring && secretSubstring.length > 0) {
       // Avoid printing the NPM publish token on the console when displaying the commandArgs
-      commandArgs = Text.replaceAll(commandArgs, secretSubstring, '<<SECRET>>');
+      commandArgs = commandArgs.replaceAll(secretSubstring, '<<SECRET>>');
     }
 
     // eslint-disable-next-line no-console

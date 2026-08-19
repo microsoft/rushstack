@@ -33,6 +33,9 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "webpack/set-webpack-public-path-plugin"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean"

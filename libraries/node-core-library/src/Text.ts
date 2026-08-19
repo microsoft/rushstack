@@ -97,14 +97,21 @@ function* readLinesFromChunk(
  */
 export class Text {
   /**
-   * Returns the same thing as targetString.replace(searchValue, replaceValue), except that
-   * all matches are replaced, rather than just the first match.
+   * Replaces every occurrence of `searchValue` with `replaceValue`.
+   *
+   * @remarks
+   * This method has the same behavior as {@link https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/replaceAll | String.prototype.replaceAll}.
+   * In particular, if `searchValue` is an empty string, `replaceValue` is inserted before the first
+   * UTF-16 code unit, between each code unit, and after the last code unit.
+   *
    * @param input         - The string to be modified
    * @param searchValue   - The value to search for
    * @param replaceValue  - The replacement text
+   *
+   * @deprecated Use `String.prototype.replaceAll()` instead.
    */
   public static replaceAll(input: string, searchValue: string, replaceValue: string): string {
-    return input.split(searchValue).join(replaceValue);
+    return input.replaceAll(searchValue, replaceValue);
   }
 
   /**

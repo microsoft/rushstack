@@ -5,6 +5,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import type * as child_process from 'node:child_process';
 import { once } from 'node:events';
+import { Readable } from 'node:stream';
 
 import {
   Executable,
@@ -16,9 +17,8 @@ import {
   type IWaitForExitResultWithoutOutput
 } from '../Executable';
 import { FileSystem } from '../FileSystem';
+import { Path } from '../Path';
 import { PosixModeBits } from '../PosixModeBits';
-import { Text } from '../Text';
-import { Readable } from 'node:stream';
 
 describe('Executable process tests', () => {
   // The PosixModeBits are intended to be used with bitwise operations.
@@ -101,7 +101,7 @@ describe('Executable process tests', () => {
   test('Executable.tryResolve() pathless', () => {
     const resolved: string | undefined = Executable.tryResolve('npm-binary-wrapper', options);
     expect(resolved).toBeDefined();
-    const resolvedRelative: string = Text.replaceAll(path.relative(executableFolder, resolved!), '\\', '/');
+    const resolvedRelative: string = Path.convertToSlashes(path.relative(executableFolder, resolved!));
 
     if (os.platform() === 'win32') {
       // On Windows, we should find npm-binary-wrapper.cmd instead of npm-binary-wrapper

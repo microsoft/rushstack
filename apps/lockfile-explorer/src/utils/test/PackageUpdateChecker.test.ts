@@ -120,6 +120,37 @@ describe(PackageUpdateChecker.name, () => {
     expect(saveSpy).not.toHaveBeenCalled();
   });
 
+  it('returns undefined when the registry request times out', async () => {
+    loadSpy.mockRejectedValue(new Error('ENOENT'));
+
+    const nativeTimeout: typeof AbortSignal.timeout = AbortSignal.timeout.bind(AbortSignal);
+    const timeoutSpy: jest.SpyInstance = jest
+      .spyOn(AbortSignal, 'timeout')
+      .mockImplementation(() => nativeTimeout(1));
+
+    let fetchSignal: AbortSignal | undefined;
+    fetchSpy.mockImplementation(
+      async (input: Parameters<typeof fetch>[0], init?: RequestInit): Promise<Response> => {
+        void input;
+        fetchSignal = init?.signal as AbortSignal;
+        await new Promise<void>((resolve) => {
+          fetchSignal!.addEventListener('abort', () => resolve(), { once: true });
+        });
+        throw fetchSignal.reason;
+      }
+    );
+
+    const checker: PackageUpdateChecker = new PackageUpdateChecker({
+      packageName: PACKAGE_NAME,
+      currentVersion: CURRENT_VERSION
+    });
+    expect(await checker.tryGetUpdateAsync()).toBeUndefined();
+    expect(fetchSignal?.aborted).toBe(true);
+    expect((fetchSignal?.reason as DOMException).name).toBe('TimeoutError');
+    expect(timeoutSpy).toHaveBeenCalledWith(5000);
+    expect(saveSpy).not.toHaveBeenCalled();
+  });
+
   it('returns undefined on non-ok HTTP response', async () => {
     loadSpy.mockRejectedValue(new Error('ENOENT'));
     fetchSpy.mockResolvedValue(makeFetchResponse('', false));

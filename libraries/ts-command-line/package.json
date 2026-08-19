@@ -7,6 +7,9 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/ts-command-line"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
   "types": "./dist/ts-command-line.d.ts",

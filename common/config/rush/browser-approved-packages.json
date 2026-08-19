@@ -52,7 +52,7 @@
     },
     {
       "name": "@rushstack/rush-daemon-transport",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/rush-serve-dashboard",

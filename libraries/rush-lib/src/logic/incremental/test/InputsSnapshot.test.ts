@@ -439,7 +439,7 @@ describe(InputsSnapshot.name, () => {
             }
           ]
         ]),
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v20.10.0'
       });
 
       const result1: string = input1.getOperationOwnStateHash(project, '_phase:build');
@@ -457,7 +457,7 @@ describe(InputsSnapshot.name, () => {
             }
           ]
         ]),
-        nodeVersion: 'v20.10.0'
+        nodeVersion: 'v22.12.0'
       });
 
       const result2: string = input2.getOperationOwnStateHash(project, '_phase:build');
@@ -486,13 +486,13 @@ describe(InputsSnapshot.name, () => {
       const input1: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v20.10.0'
       });
 
       const input2: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
-        nodeVersion: 'v18.20.3'
+        nodeVersion: 'v20.18.3'
       });
 
       const result1: string = input1.getOperationOwnStateHash(project, '_phase:build');
@@ -504,7 +504,7 @@ describe(InputsSnapshot.name, () => {
       const input3: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
-        nodeVersion: 'v20.10.0'
+        nodeVersion: 'v22.12.0'
       });
 
       const result3: string = input3.getOperationOwnStateHash(project, '_phase:build');
@@ -531,13 +531,13 @@ describe(InputsSnapshot.name, () => {
       const input1: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v20.10.0'
       });
 
       const input2: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
-        nodeVersion: 'v18.17.5'
+        nodeVersion: 'v20.10.5'
       });
 
       const result1: string = input1.getOperationOwnStateHash(project, '_phase:build');
@@ -549,7 +549,7 @@ describe(InputsSnapshot.name, () => {
       const input3: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
-        nodeVersion: 'v18.20.0'
+        nodeVersion: 'v20.18.0'
       });
 
       const result3: string = input3.getOperationOwnStateHash(project, '_phase:build');
@@ -638,7 +638,7 @@ describe(InputsSnapshot.name, () => {
             }
           ]
         ]),
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v20.10.0'
       });
 
       const input2: InputsSnapshot = new InputsSnapshot({
@@ -651,7 +651,7 @@ describe(InputsSnapshot.name, () => {
             }
           ]
         ]),
-        nodeVersion: 'v20.10.0'
+        nodeVersion: 'v22.12.0'
       });
 
       const result1: string = input1.getOperationOwnStateHash(project, '_phase:build');

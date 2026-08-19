@@ -7,6 +7,9 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "apps/rush-sdk"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "homepage": "https://rushjs.io",
   "main": "./lib-shim/index.js",
   "types": "./dist/rush-lib.d.ts",

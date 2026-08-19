@@ -41,7 +41,7 @@
     "directory": "apps/rush-mcp-server"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=20.9.0"
   },
   "engineStrict": true,
   "homepage": "https://rushstack.io",

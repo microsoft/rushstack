@@ -8,6 +8,9 @@
     "type": "git",
     "directory": "eslint/eslint-config"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "homepage": "https://rushstack.io",
   "scripts": {
     "build": "",
