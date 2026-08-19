@@ -344,7 +344,7 @@ export class OperationBuildCache {
     const tarUtility: TarExecutable | undefined = await _tryGetTarUtility(terminal);
     let restoreSuccess: boolean = false;
     if (tarUtility && localCacheEntryPath) {
-      const logFilePath: string = this._getTarLogFilePath(cacheId, 'untar');
+      const logFilePath: string = this.#getTarLogFilePath(cacheId, 'untar');
       const tarExitCode: number = await tarUtility.tryUntarAsync({
         archivePath: localCacheEntryPath,
         outputFolderPath: projectFolderPath,
@@ -396,7 +396,7 @@ export class OperationBuildCache {
       const finalLocalCacheEntryPath: string = this.#localBuildCacheProvider.getCacheEntryPath(cacheId);
       const tempLocalCacheEntryPath: string = _getTempLocalCacheEntryPath(finalLocalCacheEntryPath);
 
-      const logFilePath: string = this._getTarLogFilePath(cacheId, 'tar');
+      const logFilePath: string = this.#getTarLogFilePath(cacheId, 'tar');
       const tarExitCode: number = await tarUtility.tryCreateArchiveFromProjectPathsAsync({
         archivePath: tempLocalCacheEntryPath,
         paths: filesToCache.outputFilePaths,
@@ -575,7 +575,7 @@ export class OperationBuildCache {
     };
   }
 
-  private _getTarLogFilePath(cacheId: string, mode: 'tar' | 'untar'): string {
+  #getTarLogFilePath(cacheId: string, mode: 'tar' | 'untar'): string {
     return path.join(this.#project.projectRushTempFolder, `${cacheId}.${mode}.log`);
   }
 }

@@ -287,7 +287,7 @@ export class SelectionParameterSet {
       impactedByExceptProjects
     ] = await Promise.all(
       selectors.map((param: CommandLineStringListParameter) => {
-        return this._evaluateProjectParameterAsync(param, terminal);
+        return this.#evaluateProjectParameterAsync(param, terminal);
       })
     );
 
@@ -352,20 +352,20 @@ export class SelectionParameterSet {
     const args: string[] = [];
 
     // Include exactly these projects (--only)
-    for (const project of await this._evaluateProjectParameterAsync(this.#onlyProject, terminal)) {
+    for (const project of await this.#evaluateProjectParameterAsync(this.#onlyProject, terminal)) {
       args.push(project.packageName);
     }
 
     // Include all projects that depend on these projects, and all dependencies thereof
     const fromProjects: Set<RushConfigurationProject> = Selection.union(
       // --from
-      await this._evaluateProjectParameterAsync(this.#fromProject, terminal)
+      await this.#evaluateProjectParameterAsync(this.#fromProject, terminal)
     );
 
     // All specified projects and all projects that they depend on
     for (const project of Selection.union(
       // --to
-      await this._evaluateProjectParameterAsync(this.#toProject, terminal),
+      await this.#evaluateProjectParameterAsync(this.#toProject, terminal),
       // --from / --from-version-policy
       Selection.expandAllConsumers(fromProjects)
     )) {
@@ -374,19 +374,19 @@ export class SelectionParameterSet {
 
     // --to-except
     // All projects that the project directly or indirectly declares as a dependency
-    for (const project of await this._evaluateProjectParameterAsync(this.#toExceptProject, terminal)) {
+    for (const project of await this.#evaluateProjectParameterAsync(this.#toExceptProject, terminal)) {
       args.push(`${project.packageName}^...`);
     }
 
     // --impacted-by
     // The project and all projects directly or indirectly declare it as a dependency
-    for (const project of await this._evaluateProjectParameterAsync(this.#impactedByProject, terminal)) {
+    for (const project of await this.#evaluateProjectParameterAsync(this.#impactedByProject, terminal)) {
       args.push(`...${project.packageName}`);
     }
 
     // --impacted-by-except
     // All projects that directly or indirectly declare the specified project as a dependency
-    for (const project of await this._evaluateProjectParameterAsync(
+    for (const project of await this.#evaluateProjectParameterAsync(
       this.#impactedByExceptProject,
       terminal
     )) {
@@ -417,7 +417,7 @@ export class SelectionParameterSet {
    * Computes the referents of parameters that accept a project identifier.
    * Handles '.', unscoped names, and scoped names.
    */
-  private async _evaluateProjectParameterAsync(
+  async #evaluateProjectParameterAsync(
     listParameter: CommandLineStringListParameter,
     terminal: ITerminal
   ): Promise<Set<RushConfigurationProject>> {

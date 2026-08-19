@@ -239,21 +239,21 @@ export class PublishAction extends BaseRushAction {
       return;
     }
 
-    this._validate();
+    this.#validate();
 
-    this._addNpmPublishHome(this.rushConfiguration.isPnpm);
+    this.#addNpmPublishHome(this.rushConfiguration.isPnpm);
 
     const git: Git = new Git(this.rushConfiguration);
     const publishGit: PublishGit = new PublishGit(git, this.#targetBranch.value);
     if (this.#includeAll.value) {
-      await this._publishAllAsync(publishGit, allPackages);
+      await this.#publishAllAsync(publishGit, allPackages);
     } else {
       this.#prereleaseToken = new PrereleaseToken(
         this.#prereleaseName.value,
         this.#suffix.value,
         this.#partialPrerelease.value
       );
-      await this._publishChangesAsync(git, publishGit, allPackages);
+      await this.#publishChangesAsync(git, publishGit, allPackages);
     }
 
     // eslint-disable-next-line no-console
@@ -263,7 +263,7 @@ export class PublishAction extends BaseRushAction {
   /**
    * Validate some input parameters
    */
-  private _validate(): void {
+  #validate(): void {
     if (this.#pack.value && !this.#includeAll.value) {
       throw new Error('--pack can only be used with --include-all');
     }
@@ -275,7 +275,7 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private async _publishChangesAsync(
+  async #publishChangesAsync(
     git: Git,
     publishGit: PublishGit,
     allPackages: ReadonlyMap<string, RushConfigurationProject>
@@ -290,13 +290,13 @@ export class PublishAction extends BaseRushAction {
       // Make changes in temp branch.
       await publishGit.checkoutAsync(tempBranchName, true);
 
-      await this._setDependenciesBeforePublishAsync();
+      await this.#setDependenciesBeforePublishAsync();
 
       // Make changes to package.json and change logs.
       changeManager.apply(this.#apply.value);
       await changeManager.updateChangelogAsync(this.terminal, this.#apply.value);
 
-      await this._setDependenciesBeforeCommitAsync();
+      await this.#setDependenciesBeforeCommitAsync();
 
       if (await git.hasUncommittedChangesAsync()) {
         // Stage, commit, and push the changes to remote temp branch.
@@ -307,7 +307,7 @@ export class PublishAction extends BaseRushAction {
         );
         await publishGit.pushAsync(tempBranchName, !this.#ignoreGitHooksParameter.value);
 
-        await this._setDependenciesBeforePublishAsync();
+        await this.#setDependenciesBeforePublishAsync();
 
         // Override tag parameter if there is a hotfix change.
         for (const change of orderedChanges) {
@@ -322,8 +322,8 @@ export class PublishAction extends BaseRushAction {
           if (change.changeType && change.changeType > ChangeType.dependency) {
             const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);
             if (project) {
-              if (!(await this._packageExistsAsync(project))) {
-                await this._npmPublishAsync(change.packageName, project.publishFolder);
+              if (!(await this.#packageExistsAsync(project))) {
+                await this.#npmPublishAsync(change.packageName, project.publishFolder);
               } else {
                 // eslint-disable-next-line no-console
                 console.log(`Skip ${change.packageName}. Package exists.`);
@@ -335,10 +335,10 @@ export class PublishAction extends BaseRushAction {
           }
         }
 
-        await this._setDependenciesBeforeCommitAsync();
+        await this.#setDependenciesBeforeCommitAsync();
 
         // Create and push appropriate Git tags.
-        await this._gitAddTagsAsync(publishGit, orderedChanges);
+        await this.#gitAddTagsAsync(publishGit, orderedChanges);
         await publishGit.pushAsync(tempBranchName, !this.#ignoreGitHooksParameter.value);
 
         // Now merge to target branch.
@@ -354,7 +354,7 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private async _publishAllAsync(
+  async #publishAllAsync(
     git: PublishGit,
     allPackages: ReadonlyMap<string, RushConfigurationProject>
   ): Promise<void> {
@@ -396,11 +396,11 @@ export class PublishAction extends BaseRushAction {
 
         if (this.#pack.value) {
           // packs to tarball instead of publishing to NPM repository
-          await this._npmPackAsync(packageName, packageConfig);
+          await this.#npmPackAsync(packageName, packageConfig);
           await applyTagAsync(this.#applyGitTagsOnPack.value);
-        } else if (this.#force.value || !(await this._packageExistsAsync(packageConfig))) {
+        } else if (this.#force.value || !(await this.#packageExistsAsync(packageConfig))) {
           // Publish to npm repository
-          await this._npmPublishAsync(packageName, packageConfig.publishFolder);
+          await this.#npmPublishAsync(packageName, packageConfig.publishFolder);
           await applyTagAsync(true);
         } else {
           // eslint-disable-next-line no-console
@@ -414,7 +414,7 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private async _gitAddTagsAsync(git: PublishGit, orderedChanges: IChangeInfo[]): Promise<void> {
+  async #gitAddTagsAsync(git: PublishGit, orderedChanges: IChangeInfo[]): Promise<void> {
     for (const change of orderedChanges) {
       if (
         change.changeType &&
@@ -432,12 +432,12 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private async _npmPublishAsync(packageName: string, packagePath: string): Promise<void> {
+  async #npmPublishAsync(packageName: string, packagePath: string): Promise<void> {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     const args: string[] = ['publish'];
 
     if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
-      this._addSharedNpmConfig(env, args);
+      this.#addSharedNpmConfig(env, args);
 
       if (this.#npmTag.value) {
         args.push(`--tag`, this.#npmTag.value);
@@ -481,10 +481,10 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private async _packageExistsAsync(packageConfig: RushConfigurationProject): Promise<boolean> {
+  async #packageExistsAsync(packageConfig: RushConfigurationProject): Promise<boolean> {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     const args: string[] = [];
-    this._addSharedNpmConfig(env, args);
+    this.#addSharedNpmConfig(env, args);
 
     const publishedVersions: string[] = await Npm.getPublishedVersionsAsync(
       packageConfig.packageName,
@@ -515,7 +515,7 @@ export class PublishAction extends BaseRushAction {
     return publishedVersions.indexOf(normalizedVersion) >= 0;
   }
 
-  private async _npmPackAsync(packageName: string, project: RushConfigurationProject): Promise<void> {
+  async #npmPackAsync(packageName: string, project: RushConfigurationProject): Promise<void> {
     const args: string[] = ['pack'];
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
 
@@ -529,7 +529,7 @@ export class PublishAction extends BaseRushAction {
 
     if (this.#publish.value) {
       // Copy the tarball the release folder
-      const tarballName: string = this._calculateTarballName(project);
+      const tarballName: string = this.#calculateTarballName(project);
       const tarballPath: string = path.join(project.publishFolder, tarballName);
       const destFolder: string = this.#releaseFolder.value
         ? this.#releaseFolder.value
@@ -543,7 +543,7 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _calculateTarballName(project: RushConfigurationProject): string {
+  #calculateTarballName(project: RushConfigurationProject): string {
     // Same logic as how npm forms the tarball name
     const packageName: string = project.packageName;
     const name: string = packageName[0] === '@' ? packageName.substr(1).replace(/\//g, '-') : packageName;
@@ -556,7 +556,7 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private async _setDependenciesBeforePublishAsync(): Promise<void> {
+  async #setDependenciesBeforePublishAsync(): Promise<void> {
     const rushConfiguration: RushConfiguration = this.rushConfiguration;
     await Async.forEachAsync(
       rushConfiguration.projects,
@@ -569,7 +569,7 @@ export class PublishAction extends BaseRushAction {
     );
   }
 
-  private async _setDependenciesBeforeCommitAsync(): Promise<void> {
+  async #setDependenciesBeforeCommitAsync(): Promise<void> {
     const rushConfiguration: RushConfiguration = this.rushConfiguration;
     await Async.forEachAsync(
       rushConfiguration.projects,
@@ -582,7 +582,7 @@ export class PublishAction extends BaseRushAction {
     );
   }
 
-  private _addNpmPublishHome(supportEnvVarFallbackSyntax: boolean): void {
+  #addNpmPublishHome(supportEnvVarFallbackSyntax: boolean): void {
     // Create "common\temp\publish-home" folder, if it doesn't exist
     Utilities.createFolderWithRetry(this.#targetNpmrcPublishFolder);
 
@@ -595,7 +595,7 @@ export class PublishAction extends BaseRushAction {
     });
   }
 
-  private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {
+  #addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {
     const userHomeEnvVariable: string = IS_WINDOWS ? 'USERPROFILE' : 'HOME';
     let registry: string = '//registry.npmjs.org/';
 

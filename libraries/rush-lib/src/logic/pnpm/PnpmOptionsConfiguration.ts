@@ -638,7 +638,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     return new PnpmOptionsConfiguration(json, commonTempFolder);
   }
 
-  private _getJsonFilenameOrThrow(): string {
+  #getJsonFilenameOrThrow(): string {
     if (!this.jsonFilename) {
       throw new Error('Cannot save pnpm-config.json because no jsonFilename was provided.');
     }
@@ -669,7 +669,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
 
     this.#globalPatchedDependencies = patchedDependencies;
     this.#json.globalPatchedDependencies = patchedDependencies;
-    JsonFile.save(this.#json, this._getJsonFilenameOrThrow(), {
+    JsonFile.save(this.#json, this.#getJsonFilenameOrThrow(), {
       updateExistingFile: true,
       ignoreUndefinedValues: true
     });
@@ -697,7 +697,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     onlyBuiltDependencies: string[] | undefined
   ): Promise<void> {
     this.#json.globalOnlyBuiltDependencies = onlyBuiltDependencies;
-    await JsonFile.saveAsync(this.#json, this._getJsonFilenameOrThrow(), {
+    await JsonFile.saveAsync(this.#json, this.#getJsonFilenameOrThrow(), {
       updateExistingFile: true,
       ignoreUndefinedValues: true
     });
@@ -710,7 +710,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     catalogs: Record<string, Record<string, string>> | undefined
   ): Promise<void> {
     this.#json.globalCatalogs = catalogs;
-    await JsonFile.saveAsync(this.#json, this._getJsonFilenameOrThrow(), {
+    await JsonFile.saveAsync(this.#json, this.#getJsonFilenameOrThrow(), {
       updateExistingFile: true,
       ignoreUndefinedValues: true
     });

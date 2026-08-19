@@ -97,7 +97,7 @@ export class Subspace {
     return this.#cachedPnpmOptions;
   }
 
-  private _ensureDetail(): ISubspaceDetail {
+  #ensureDetail(): ISubspaceDetail {
     if (!this.#detail) {
       const rushConfiguration: RushConfiguration = this.#rushConfiguration;
       let subspaceConfigFolderPath: string;
@@ -228,7 +228,7 @@ export class Subspace {
    * @beta
    */
   public getSubspaceConfigFolderPath(): string {
-    return this._ensureDetail().subspaceConfigFolderPath;
+    return this.#ensureDetail().subspaceConfigFolderPath;
   }
 
   /**
@@ -239,7 +239,7 @@ export class Subspace {
    * @beta
    */
   public getSubspacePnpmPatchesFolderPath(): string {
-    return this._ensureDetail().subspacePnpmPatchesFolderPath;
+    return this.#ensureDetail().subspacePnpmPatchesFolderPath;
   }
 
   /**
@@ -250,7 +250,7 @@ export class Subspace {
    * @beta
    */
   public getSubspaceTempFolderPath(): string {
-    return this._ensureDetail().subspaceTempFolderPath;
+    return this.#ensureDetail().subspaceTempFolderPath;
   }
 
   /**
@@ -265,7 +265,7 @@ export class Subspace {
    * @beta
    */
   public getTempShrinkwrapFilename(): string {
-    return this._ensureDetail().tempShrinkwrapFilePath;
+    return this.#ensureDetail().tempShrinkwrapFilePath;
   }
 
   /**
@@ -286,7 +286,7 @@ export class Subspace {
    * @beta
    */
   public getTempShrinkwrapPreinstallFilePath(): string {
-    return this._ensureDetail().tempShrinkwrapPreinstallFilePath;
+    return this.#ensureDetail().tempShrinkwrapPreinstallFilePath;
   }
 
   /**

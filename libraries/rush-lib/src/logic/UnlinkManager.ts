@@ -47,7 +47,7 @@ export class UnlinkManager {
       RushConstants.lastLinkFlagFilename,
       {}
     ).clearAsync();
-    return this._deleteProjectFiles();
+    return this.#deleteProjectFiles();
   }
 
   /**
@@ -57,7 +57,7 @@ export class UnlinkManager {
    *
    * Returns true if anything was deleted
    * */
-  private _deleteProjectFiles(): boolean {
+  #deleteProjectFiles(): boolean {
     let didDeleteAnything: boolean = false;
 
     for (const rushProject of this.#rushConfiguration.projects) {

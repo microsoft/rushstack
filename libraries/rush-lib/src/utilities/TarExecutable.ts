@@ -52,7 +52,7 @@ export class TarExecutable {
    * The "tar" exit code
    */
   public async tryUntarAsync(options: IUntarOptions): Promise<number> {
-    return await this._spawnTarWithLoggingAsync(
+    return await this.#spawnTarWithLoggingAsync(
       // These parameters are chosen for compatibility with the very primitive bsdtar 3.3.2 shipped with Windows 10.
       [
         // [Windows bsdtar 3.3.2] Extract: tar -x [options] [<patterns>]
@@ -82,7 +82,7 @@ export class TarExecutable {
     await FileSystem.ensureFolderAsync(path.dirname(archivePath));
 
     const projectFolderPath: string = project.projectFolder;
-    const tarExitCode: number = await this._spawnTarWithLoggingAsync(
+    const tarExitCode: number = await this.#spawnTarWithLoggingAsync(
       // These parameters are chosen for compatibility with the very primitive bsdtar 3.3.2 shipped with Windows 10.
       [
         // [Windows bsdtar 3.3.2] -c Create
@@ -105,7 +105,7 @@ export class TarExecutable {
     return tarExitCode;
   }
 
-  private async _spawnTarWithLoggingAsync(
+  async #spawnTarWithLoggingAsync(
     args: string[],
     currentWorkingDirectory: string,
     logFilePath: string,

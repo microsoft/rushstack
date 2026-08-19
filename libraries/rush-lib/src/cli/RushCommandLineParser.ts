@@ -127,7 +127,7 @@ export class RushCommandLineParser extends CommandLineParser {
     this.#terminalProvider = terminalProvider;
     const terminal: Terminal = new Terminal(this.#terminalProvider);
     this.#terminal = terminal;
-    this.#rushOptions = this._normalizeOptions(options || {});
+    this.#rushOptions = this.#normalizeOptions(options || {});
     const { cwd, alreadyReportedNodeTooNewError, builtInPluginConfigurations } = this.#rushOptions;
 
     let rushJsonFilePath: string | undefined;
@@ -177,11 +177,11 @@ export class RushCommandLineParser extends CommandLineParser {
     // If the plugin has a build command, we don't need to autocreate the default build command.
     this.#autocreateBuildCommand = !hasBuildCommandInPlugin;
 
-    this._populateActions();
+    this.#populateActions();
 
     for (const { commandLineConfiguration, pluginLoader } of pluginCommandLineConfigurations) {
       try {
-        this._addCommandLineConfigActions(commandLineConfiguration);
+        this.#addCommandLineConfigActions(commandLineConfiguration);
       } catch (e) {
         this._reportErrorAndSetExitCode(
           new Error(
@@ -258,7 +258,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     try {
-      await this._wrapOnExecuteAsync();
+      await this.#wrapOnExecuteAsync();
 
       // TODO: rushConfiguration is typed as "!: RushConfiguration" here, but can sometimes be undefined
       if (this.rushConfiguration) {
@@ -305,7 +305,7 @@ export class RushCommandLineParser extends CommandLineParser {
     await this.telemetry?.ensureFlushedAsync();
   }
 
-  private _normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {
+  #normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {
     return {
       cwd: options.cwd || process.cwd(),
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false,
@@ -313,7 +313,7 @@ export class RushCommandLineParser extends CommandLineParser {
     };
   }
 
-  private async _wrapOnExecuteAsync(): Promise<void> {
+  async #wrapOnExecuteAsync(): Promise<void> {
     if (this.rushConfiguration) {
       this.telemetry = new Telemetry(this.rushConfiguration, this.rushSession);
     }
@@ -327,7 +327,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
   }
 
-  private _populateActions(): void {
+  #populateActions(): void {
     try {
       // Alphabetical order
       this.addAction(new AddAction(this));
@@ -357,13 +357,13 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new BridgePackageAction(this));
       this.addAction(new LinkPackageAction(this));
 
-      this._populateScriptActions();
+      this.#populateScriptActions();
     } catch (error) {
       this._reportErrorAndSetExitCode(error as Error);
     }
   }
 
-  private _populateScriptActions(): void {
+  #populateScriptActions(): void {
     // If there is not a rush.json file, we still want "build" and "rebuild" to appear in the
     // command-line help
     let commandLineConfigFilePath: string | undefined;
@@ -381,17 +381,17 @@ export class RushCommandLineParser extends CommandLineParser {
       commandLineConfigFilePath,
       doNotIncludeDefaultBuildCommands
     );
-    this._addCommandLineConfigActions(commandLineConfiguration);
+    this.#addCommandLineConfigActions(commandLineConfiguration);
   }
 
-  private _addCommandLineConfigActions(commandLineConfiguration: CommandLineConfiguration): void {
+  #addCommandLineConfigActions(commandLineConfiguration: CommandLineConfiguration): void {
     // Register each custom command
     for (const command of commandLineConfiguration.commands.values()) {
-      this._addCommandLineConfigAction(commandLineConfiguration, command);
+      this.#addCommandLineConfigAction(commandLineConfiguration, command);
     }
   }
 
-  private _addCommandLineConfigAction(
+  #addCommandLineConfigAction(
     commandLineConfiguration: CommandLineConfiguration,
     command: Command
   ): void {
@@ -404,12 +404,12 @@ export class RushCommandLineParser extends CommandLineParser {
 
     switch (command.commandKind) {
       case RushConstants.globalCommandKind: {
-        this._addGlobalScriptAction(commandLineConfiguration, command);
+        this.#addGlobalScriptAction(commandLineConfiguration, command);
         break;
       }
 
       case RushConstants.phasedCommandKind: {
-        this._addPhasedCommandLineConfigAction(commandLineConfiguration, command);
+        this.#addPhasedCommandLineConfigAction(commandLineConfiguration, command);
         break;
       }
 
@@ -421,7 +421,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
   }
 
-  private _getSharedCommandActionOptions<TCommand extends Command>(
+  #getSharedCommandActionOptions<TCommand extends Command>(
     commandLineConfiguration: CommandLineConfiguration,
     command: TCommand
   ): IBaseScriptActionOptions<TCommand> {
@@ -437,7 +437,7 @@ export class RushCommandLineParser extends CommandLineParser {
     };
   }
 
-  private _addGlobalScriptAction(
+  #addGlobalScriptAction(
     commandLineConfiguration: CommandLineConfiguration,
     command: IGlobalCommandConfig
   ): void {
@@ -452,7 +452,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     const sharedCommandOptions: IBaseScriptActionOptions<IGlobalCommandConfig> =
-      this._getSharedCommandActionOptions(commandLineConfiguration, command);
+      this.#getSharedCommandActionOptions(commandLineConfiguration, command);
 
     this.addAction(
       new GlobalScriptAction({
@@ -465,12 +465,12 @@ export class RushCommandLineParser extends CommandLineParser {
     );
   }
 
-  private _addPhasedCommandLineConfigAction(
+  #addPhasedCommandLineConfigAction(
     commandLineConfiguration: CommandLineConfiguration,
     command: IPhasedCommandConfig
   ): void {
     const baseCommandOptions: IBaseScriptActionOptions<IPhasedCommandConfig> =
-      this._getSharedCommandActionOptions(commandLineConfiguration, command);
+      this.#getSharedCommandActionOptions(commandLineConfiguration, command);
 
     const {
       enableParallelism,

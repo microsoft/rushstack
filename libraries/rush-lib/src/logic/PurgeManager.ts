@@ -58,7 +58,7 @@ export class PurgeManager {
 
     this.commonTempFolderRecycler.moveAllItemsInFolder(
       this.#rushConfiguration.commonTempFolder,
-      this._getMembersToExclude(this.#rushConfiguration.commonTempFolder, true)
+      this.#getMembersToExclude(this.#rushConfiguration.commonTempFolder, true)
     );
   }
 
@@ -79,13 +79,13 @@ export class PurgeManager {
     // First purge the node-specific folder, e.g. ~/.rush/node-v4.5.6/* except for rush-1.2.3:
     this.#rushUserFolderRecycler.moveAllItemsInFolder(
       this.#rushGlobalFolder.nodeSpecificPath,
-      this._getMembersToExclude(this.#rushGlobalFolder.nodeSpecificPath, true)
+      this.#getMembersToExclude(this.#rushGlobalFolder.nodeSpecificPath, true)
     );
 
     // Then purge the the global folder, e.g. ~/.rush/* except for node-v4.5.6
     this.#rushUserFolderRecycler.moveAllItemsInFolder(
       this.#rushGlobalFolder.path,
-      this._getMembersToExclude(this.#rushGlobalFolder.path, false)
+      this.#getMembersToExclude(this.#rushGlobalFolder.path, false)
     );
 
     if (
@@ -99,7 +99,7 @@ export class PurgeManager {
     }
   }
 
-  private _getMembersToExclude(folderToRecycle: string, showWarning: boolean): string[] {
+  #getMembersToExclude(folderToRecycle: string, showWarning: boolean): string[] {
     // Don't recycle the recycler
     const membersToExclude: string[] = [RushConstants.rushRecyclerFolderName];
 

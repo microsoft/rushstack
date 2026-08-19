@@ -135,15 +135,15 @@ export class ListAction extends BaseRushAction {
     }
 
     if (this.#jsonFlag.value) {
-      this._printJson(selection);
+      this.#printJson(selection);
     } else if (this.#version.value || this.#path.value || this.#fullPath.value || this.#detailedFlag.value) {
-      await this._printListTableAsync(selection);
+      await this.#printListTableAsync(selection);
     } else {
-      this._printList(selection);
+      this.#printList(selection);
     }
   }
 
-  private _printJson(selection: Set<RushConfigurationProject>): void {
+  #printJson(selection: Set<RushConfigurationProject>): void {
     const projects: IJsonEntry[] = Array.from(selection, (config: RushConfigurationProject): IJsonEntry => {
       let reviewCategory: undefined | string;
       let shouldPublish: undefined | boolean;
@@ -187,14 +187,14 @@ export class ListAction extends BaseRushAction {
     console.log(JSON.stringify(output, undefined, 2));
   }
 
-  private _printList(selection: Set<RushConfigurationProject>): void {
+  #printList(selection: Set<RushConfigurationProject>): void {
     for (const project of selection) {
       // eslint-disable-next-line no-console
       console.log(project.packageName);
     }
   }
 
-  private async _printListTableAsync(selection: Set<RushConfigurationProject>): Promise<void> {
+  async #printListTableAsync(selection: Set<RushConfigurationProject>): Promise<void> {
     const tableHeader: string[] = ['Project'];
     if (this.rushConfiguration.subspacesFeatureEnabled) {
       tableHeader.push('Subspace');

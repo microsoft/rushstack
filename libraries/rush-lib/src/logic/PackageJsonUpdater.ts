@@ -138,14 +138,14 @@ export class PackageJsonUpdater {
     const peerDependenciesToUpdate: Record<string, string> = {};
 
     for (const { moduleName, latest: latestVersion, packageJson, devDependency } of packagesToAdd) {
-      const inferredRangeStyle: SemVerStyle = this._cheaplyDetectSemVerRangeStyle(packageJson);
+      const inferredRangeStyle: SemVerStyle = this.#cheaplyDetectSemVerRangeStyle(packageJson);
       const implicitlyPreferredVersion: string | undefined =
         implicitlyPreferredVersionByPackageName.get(moduleName);
 
       const explicitlyPreferredVersion: string | undefined =
         commonVersionsConfiguration.preferredVersions.get(moduleName);
 
-      const version: string = await this._getNormalizedVersionSpecAsync(
+      const version: string = await this.#getNormalizedVersionSpecAsync(
         projects,
         moduleName,
         latestVersion,
@@ -218,7 +218,7 @@ export class PackageJsonUpdater {
         this.#rushConfiguration,
         options
       );
-      for (const update of this._getUpdates(mismatchFinder, allDependenciesToUpdate)) {
+      for (const update of this.#getUpdates(mismatchFinder, allDependenciesToUpdate)) {
         this.updateProject(update);
         allPackageUpdates.set(update.project.filePath, update.project);
       }
@@ -241,10 +241,10 @@ export class PackageJsonUpdater {
           options.projects
         );
         for (const subspace of subspaceSet) {
-          await this._doUpdateAsync(debugInstall, subspace, variant);
+          await this.#doUpdateAsync(debugInstall, subspace, variant);
         }
       } else {
-        await this._doUpdateAsync(debugInstall, this.#rushConfiguration.defaultSubspace, variant);
+        await this.#doUpdateAsync(debugInstall, this.#rushConfiguration.defaultSubspace, variant);
       }
     }
   }
@@ -252,9 +252,9 @@ export class PackageJsonUpdater {
   public async doRushUpdateAsync(options: IPackageJsonUpdaterRushBaseUpdateOptions): Promise<void> {
     let allPackageUpdates: IUpdateProjectOptions[] = [];
     if (options.actionName === 'add') {
-      allPackageUpdates = await this._doRushAddAsync(options as IPackageJsonUpdaterRushAddOptions);
+      allPackageUpdates = await this.#doRushAddAsync(options as IPackageJsonUpdaterRushAddOptions);
     } else if (options.actionName === 'remove') {
-      allPackageUpdates = await this._doRushRemoveAsync(options as IPackageJsonUpdaterRushRemoveOptions);
+      allPackageUpdates = await this.#doRushRemoveAsync(options as IPackageJsonUpdaterRushRemoveOptions);
     } else {
       throw new Error('only accept "rush add" or "rush remove"');
     }
@@ -277,15 +277,15 @@ export class PackageJsonUpdater {
           options.projects
         );
         for (const subspace of subspaceSet) {
-          await this._doUpdateAsync(debugInstall, subspace, variant);
+          await this.#doUpdateAsync(debugInstall, subspace, variant);
         }
       } else {
-        await this._doUpdateAsync(debugInstall, this.#rushConfiguration.defaultSubspace, variant);
+        await this.#doUpdateAsync(debugInstall, this.#rushConfiguration.defaultSubspace, variant);
       }
     }
   }
 
-  private async _doUpdateAsync(
+  async #doUpdateAsync(
     debugInstall: boolean,
     subspace: Subspace,
     variant: string | undefined
@@ -330,7 +330,7 @@ export class PackageJsonUpdater {
   /**
    * Adds a dependency to a particular project. The core business logic for "rush add".
    */
-  private async _doRushAddAsync(
+  async #doRushAddAsync(
     options: IPackageJsonUpdaterRushAddOptions
   ): Promise<IUpdateProjectOptions[]> {
     const { projects } = options;
@@ -347,13 +347,13 @@ export class PackageJsonUpdater {
     const subspaceSet: ReadonlySet<Subspace> = this.#rushConfiguration.getSubspacesForProjects(projects);
     for (const subspace of subspaceSet) {
       // Projects for this subspace
-      allPackageUpdates.push(...(await this._updateProjectsAsync(subspace, dependencyAnalyzer, options)));
+      allPackageUpdates.push(...(await this.#updateProjectsAsync(subspace, dependencyAnalyzer, options)));
     }
 
     return allPackageUpdates;
   }
 
-  private async _updateProjectsAsync(
+  async #updateProjectsAsync(
     subspace: Subspace,
     dependencyAnalyzer: DependencyAnalyzer,
     options: IPackageJsonUpdaterRushAddOptions
@@ -381,7 +381,7 @@ export class PackageJsonUpdater {
       const explicitlyPreferredVersion: string | undefined =
         commonVersionsConfiguration.preferredVersions.get(packageName);
 
-      const version: string = await this._getNormalizedVersionSpecAsync(
+      const version: string = await this.#getNormalizedVersionSpecAsync(
         subspaceProjects,
         packageName,
         initialVersion,
@@ -439,7 +439,7 @@ export class PackageJsonUpdater {
             variant
           }
         );
-        otherPackageUpdates = this._getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));
+        otherPackageUpdates = this.#getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));
       }
 
       this.updateProjects(otherPackageUpdates);
@@ -450,7 +450,7 @@ export class PackageJsonUpdater {
     return allPackageUpdates;
   }
 
-  private _getUpdates(
+  #getUpdates(
     mismatchFinder: VersionMismatchFinder,
     dependenciesToUpdate: Iterable<[string, string]>
   ): IUpdateProjectOptions[] {
@@ -481,7 +481,7 @@ export class PackageJsonUpdater {
   /**
    * Remove a dependency from a particular project. The core business logic for "rush remove".
    */
-  private async _doRushRemoveAsync(
+  async #doRushRemoveAsync(
     options: IPackageJsonUpdaterRushRemoveOptions
   ): Promise<IRemoveProjectOptions[]> {
     const { projects, packagesToUpdate } = options;
@@ -568,7 +568,7 @@ export class PackageJsonUpdater {
    * @param rangeStyle - if this version is selected by querying registry, then this range specifier is prepended to
    *   the selected version.
    */
-  private async _getNormalizedVersionSpecAsync(
+  async #getNormalizedVersionSpecAsync(
     projects: RushConfigurationProject[],
     packageName: string,
     initialSpec: string | undefined,
@@ -648,7 +648,7 @@ export class PackageJsonUpdater {
     }
 
     // determine if the package is a project in the local repository and if the version exists
-    const localProject: RushConfigurationProject | undefined = this._tryGetLocalProject(
+    const localProject: RushConfigurationProject | undefined = this.#tryGetLocalProject(
       packageName,
       projects
     );
@@ -803,7 +803,7 @@ export class PackageJsonUpdater {
     return normalizedVersion;
   }
 
-  private _collectAllDownstreamDependencies(
+  #collectAllDownstreamDependencies(
     project: RushConfigurationProject
   ): Set<RushConfigurationProject> {
     const allProjectDownstreamDependencies: Set<RushConfigurationProject> =
@@ -843,7 +843,7 @@ export class PackageJsonUpdater {
    * This function throws an error if adding the discovered local project as a dependency
    * would create a dependency cycle, or if it would be added to multiple projects.
    */
-  private _tryGetLocalProject(
+  #tryGetLocalProject(
     packageName: string,
     projects: RushConfigurationProject[]
   ): RushConfigurationProject | undefined {
@@ -877,7 +877,7 @@ export class PackageJsonUpdater {
 
     // Are we attempting to create a cycle?
     const downstreamDependencies: Set<RushConfigurationProject> =
-      this._collectAllDownstreamDependencies(project);
+      this.#collectAllDownstreamDependencies(project);
     if (downstreamDependencies.has(foundProject)) {
       throw new Error(
         `Adding "${foundProject.packageName}" as a direct or indirect dependency of ` +
@@ -888,7 +888,7 @@ export class PackageJsonUpdater {
     return foundProject;
   }
 
-  private _cheaplyDetectSemVerRangeStyle(version: string): SemVerStyle {
+  #cheaplyDetectSemVerRangeStyle(version: string): SemVerStyle {
     // create a swtich statement to detect the first character of the version string and determine the range style
     // TODO: This is a temporary solution until we have a better way to detect more complext range styles
     // TODO: Should we handle/care about peerDependencies?
@@ -905,12 +905,12 @@ export class PackageJsonUpdater {
     }
   }
 
-  private _normalizeDepsToUpgrade(deps: INpmCheckPackageSummary[]): IPackageForRushAdd[] {
+  #normalizeDepsToUpgrade(deps: INpmCheckPackageSummary[]): IPackageForRushAdd[] {
     return deps.map((dep) => {
       return {
         packageName: dep.moduleName,
         version: dep.latest,
-        rangeStyle: this._cheaplyDetectSemVerRangeStyle(dep.packageJson)
+        rangeStyle: this.#cheaplyDetectSemVerRangeStyle(dep.packageJson)
       };
     });
   }

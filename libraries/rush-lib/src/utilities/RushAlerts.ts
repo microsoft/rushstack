@@ -148,7 +148,7 @@ export class RushAlerts {
     });
   }
 
-  private _ensureAlertStateIsUpToDate(): void {
+  #ensureAlertStateIsUpToDate(): void {
     // ensure `temp/rush-alerts.json` is up to date
     if (this.#rushAlertsConfig) {
       for (const alert of this.#rushAlertsConfig.alerts) {
@@ -164,17 +164,17 @@ export class RushAlerts {
   public async printAlertsAsync(): Promise<void> {
     if (!this.#rushAlertsConfig || this.#rushAlertsConfig.alerts.length === 0) return;
 
-    this._ensureAlertStateIsUpToDate();
+    this.#ensureAlertStateIsUpToDate();
 
     this.#terminal.writeLine();
 
-    const alert: IRushAlertsConfigEntry | undefined = await this._selectAlertByPriorityAsync();
+    const alert: IRushAlertsConfigEntry | undefined = await this.#selectAlertByPriorityAsync();
     if (alert) {
-      this._printMessageInBoxStyle(alert);
+      this.#printMessageInBoxStyle(alert);
       this.#rushAlertsState[alert.alertId].lastDisplayTime = new Date().toISOString();
     }
 
-    await this._writeRushAlertStateAsync();
+    await this.#writeRushAlertStateAsync();
   }
 
   public async printAllAlertsAsync(): Promise<void> {
@@ -186,7 +186,7 @@ export class RushAlerts {
 
     await Promise.all(
       allAlerts.map(async (alert) => {
-        const isAlertValid: boolean = await this._isAlertValidAsync(alert);
+        const isAlertValid: boolean = await this.#isAlertValidAsync(alert);
         const alertState: IRushAlertStateEntry = this.#rushAlertsState[alert.alertId];
 
         if (!isAlertValid) {
@@ -194,7 +194,7 @@ export class RushAlerts {
           return;
         }
 
-        if (this._isSnoozing(alertState)) {
+        if (this.#isSnoozing(alertState)) {
           snoozedAlerts.push(alert);
           return;
         }
@@ -203,12 +203,12 @@ export class RushAlerts {
       })
     );
 
-    this._printAlerts(activeAlerts, 'active');
-    this._printAlerts(snoozedAlerts, 'snoozed');
-    this._printAlerts(inactiveAlerts, 'inactive');
+    this.#printAlerts(activeAlerts, 'active');
+    this.#printAlerts(snoozedAlerts, 'snoozed');
+    this.#printAlerts(inactiveAlerts, 'inactive');
   }
 
-  private _printAlerts(alerts: IRushAlertsConfigEntry[], status: AlertStatus): void {
+  #printAlerts(alerts: IRushAlertsConfigEntry[], status: AlertStatus): void {
     if (alerts.length === 0) return;
     switch (status) {
       case 'active':
@@ -226,7 +226,7 @@ export class RushAlerts {
   }
 
   public async snoozeAlertsByAlertIdAsync(alertId: string, forever: boolean = false): Promise<void> {
-    this._ensureAlertStateIsUpToDate();
+    this.#ensureAlertStateIsUpToDate();
     if (forever) {
       this.#rushAlertsState[alertId].snooze = true;
     } else {
@@ -235,21 +235,21 @@ export class RushAlerts {
       snoozeEndTime.setDate(snoozeEndTime.getDate() + 7);
       this.#rushAlertsState[alertId].snoozeEndTime = snoozeEndTime.toISOString();
     }
-    await this._writeRushAlertStateAsync();
+    await this.#writeRushAlertStateAsync();
   }
 
-  private async _selectAlertByPriorityAsync(): Promise<IRushAlertsConfigEntry | undefined> {
+  async #selectAlertByPriorityAsync(): Promise<IRushAlertsConfigEntry | undefined> {
     const alerts: Array<IRushAlertsConfigEntry> = this.#rushAlertsConfig!.alerts;
     const alertsState: IRushAlertsState = this.#rushAlertsState;
 
     const needDisplayAlerts: Array<IRushAlertsConfigEntry> = (
       await Promise.all(
         alerts.map(async (alert) => {
-          const isAlertValid: boolean = await this._isAlertValidAsync(alert);
+          const isAlertValid: boolean = await this.#isAlertValidAsync(alert);
           const alertState: IRushAlertStateEntry = alertsState[alert.alertId];
           if (
             isAlertValid &&
-            !this._isSnoozing(alertState) &&
+            !this.#isSnoozing(alertState) &&
             (!alertState.lastDisplayTime ||
               Number(new Date()) - Number(new Date(alertState.lastDisplayTime)) >
                 RushAlerts.alertDisplayIntervalDurations.get(
@@ -271,14 +271,14 @@ export class RushAlerts {
     return alertsSortedByPriority[0];
   }
 
-  private _isSnoozing(alertState: IRushAlertStateEntry): boolean {
+  #isSnoozing(alertState: IRushAlertStateEntry): boolean {
     return (
       Boolean(alertState.snooze) &&
       (!alertState.snoozeEndTime || Number(new Date()) < Number(new Date(alertState.snoozeEndTime)))
     );
   }
 
-  private async _isAlertValidAsync(alert: IRushAlertsConfigEntry): Promise<boolean> {
+  async #isAlertValidAsync(alert: IRushAlertsConfigEntry): Promise<boolean> {
     const timeNow: Date = new Date();
 
     if (alert.startTime) {
@@ -369,7 +369,7 @@ export class RushAlerts {
     return true;
   }
 
-  private _printMessageInBoxStyle(alert: IRushAlertsConfigEntry): void {
+  #printMessageInBoxStyle(alert: IRushAlertsConfigEntry): void {
     const boxTitle: string = alert.title.toUpperCase();
 
     const boxMessage: string = typeof alert.message === 'string' ? alert.message : alert.message.join('');
@@ -413,7 +413,7 @@ export class RushAlerts {
     this.#terminal.writeLine(`To stop seeing this alert, run "rush alert --snooze ${alert.alertId}"`);
   }
 
-  private async _writeRushAlertStateAsync(): Promise<void> {
+  async #writeRushAlertStateAsync(): Promise<void> {
     await JsonFile.saveAsync(this.#rushAlertsState, this.rushAlertsStateFilePath, {
       ignoreUndefinedValues: true,
       headerComment: '// THIS FILE IS MACHINE-GENERATED -- DO NOT MODIFY',

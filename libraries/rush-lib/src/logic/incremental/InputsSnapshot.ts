@@ -336,7 +336,7 @@ export class InputsSnapshot implements IInputsSnapshot {
         if (additionalFilesForOperation) {
           // Sort the additional files to ensure deterministic hash computation
           const sortedAdditionalFiles: string[] = Array.from(additionalFilesForOperation).sort();
-          for (const [filePath, hash] of this._resolveHashes(sortedAdditionalFiles)) {
+          for (const [filePath, hash] of this.#resolveHashes(sortedAdditionalFiles)) {
             hashes.set(filePath, hash);
           }
         }
@@ -432,7 +432,7 @@ export class InputsSnapshot implements IInputsSnapshot {
     return hash;
   }
 
-  private *_resolveHashes(filePaths: Iterable<string>): Generator<[string, string]> {
+  *#resolveHashes(filePaths: Iterable<string>): Generator<[string, string]> {
     const { hashes } = this;
     const additionalHashes: ReadonlyMap<string, string> | undefined = this.#additionalHashes;
 

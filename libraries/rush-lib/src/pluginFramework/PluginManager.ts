@@ -151,14 +151,14 @@ export class PluginManager {
 
   public async tryInitializeUnassociatedPluginsAsync(): Promise<void> {
     try {
-      const autoinstallerPluginLoaders: AutoinstallerPluginLoader[] = this._getUnassociatedPluginLoaders(
+      const autoinstallerPluginLoaders: AutoinstallerPluginLoader[] = this.#getUnassociatedPluginLoaders(
         this.#autoinstallerPluginLoaders
       );
       await this._preparePluginAutoinstallersAsync(autoinstallerPluginLoaders);
-      const builtInPluginLoaders: BuiltInPluginLoader[] = this._getUnassociatedPluginLoaders(
+      const builtInPluginLoaders: BuiltInPluginLoader[] = this.#getUnassociatedPluginLoaders(
         this.#builtInPluginLoaders
       );
-      this._initializePlugins([...builtInPluginLoaders, ...autoinstallerPluginLoaders]);
+      this.#initializePlugins([...builtInPluginLoaders, ...autoinstallerPluginLoaders]);
     } catch (e) {
       this.#error = e as Error;
     }
@@ -166,16 +166,16 @@ export class PluginManager {
 
   public async tryInitializeAssociatedCommandPluginsAsync(commandName: string): Promise<void> {
     try {
-      const autoinstallerPluginLoaders: AutoinstallerPluginLoader[] = this._getPluginLoadersForCommand(
+      const autoinstallerPluginLoaders: AutoinstallerPluginLoader[] = this.#getPluginLoadersForCommand(
         commandName,
         this.#autoinstallerPluginLoaders
       );
       await this._preparePluginAutoinstallersAsync(autoinstallerPluginLoaders);
-      const builtInPluginLoaders: BuiltInPluginLoader[] = this._getPluginLoadersForCommand(
+      const builtInPluginLoaders: BuiltInPluginLoader[] = this.#getPluginLoadersForCommand(
         commandName,
         this.#builtInPluginLoaders
       );
-      this._initializePlugins([...builtInPluginLoaders, ...autoinstallerPluginLoaders]);
+      this.#initializePlugins([...builtInPluginLoaders, ...autoinstallerPluginLoaders]);
     } catch (e) {
       this.#error = e as Error;
     }
@@ -196,7 +196,7 @@ export class PluginManager {
     return commandLineConfigurationInfos;
   }
 
-  private _initializePlugins(pluginLoaders: PluginLoaderBase[]): void {
+  #initializePlugins(pluginLoaders: PluginLoaderBase[]): void {
     for (const pluginLoader of pluginLoaders) {
       const pluginName: string = pluginLoader.pluginName;
       if (this.#loadedPluginNames.has(pluginName)) {
@@ -205,12 +205,12 @@ export class PluginManager {
       const plugin: IRushPlugin | undefined = pluginLoader.load();
       this.#loadedPluginNames.add(pluginName);
       if (plugin) {
-        this._applyPlugin(plugin, pluginName);
+        this.#applyPlugin(plugin, pluginName);
       }
     }
   }
 
-  private _getUnassociatedPluginLoaders<T extends AutoinstallerPluginLoader | BuiltInPluginLoader>(
+  #getUnassociatedPluginLoaders<T extends AutoinstallerPluginLoader | BuiltInPluginLoader>(
     pluginLoaders: T[]
   ): T[] {
     return pluginLoaders.filter((pluginLoader) => {
@@ -218,7 +218,7 @@ export class PluginManager {
     });
   }
 
-  private _getPluginLoadersForCommand<T extends AutoinstallerPluginLoader | BuiltInPluginLoader>(
+  #getPluginLoadersForCommand<T extends AutoinstallerPluginLoader | BuiltInPluginLoader>(
     commandName: string,
     pluginLoaders: T[]
   ): T[] {
@@ -227,7 +227,7 @@ export class PluginManager {
     });
   }
 
-  private _applyPlugin(plugin: IRushPlugin, pluginName: string): void {
+  #applyPlugin(plugin: IRushPlugin, pluginName: string): void {
     try {
       plugin.apply(this.#rushSession, this.#rushConfiguration);
     } catch (e) {
