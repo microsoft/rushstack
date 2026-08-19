@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/typings-generator",
+      "comment": "Support multiple sources in \"serializeDeclarationMap\", and add \"originalPositionFor\" so that generators which compile their input can translate a position in the compiled output back to the original file.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator"
+}
