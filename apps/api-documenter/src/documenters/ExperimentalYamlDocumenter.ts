@@ -14,22 +14,22 @@ import type { DocumenterConfig } from './DocumenterConfig';
  * API Documenter.  It is not ready for general usage yet.  Its design may change in the future.
  */
 export class ExperimentalYamlDocumenter extends YamlDocumenter {
-  private _config: IConfigTableOfContents;
-  private _tocPointerMap: { [key: string]: IYamlTocItem };
-  private _catchAllPointer: IYamlTocItem | undefined;
+  #config: IConfigTableOfContents;
+  #tocPointerMap: { [key: string]: IYamlTocItem };
+  #catchAllPointer: IYamlTocItem | undefined;
 
   public constructor(apiModel: ApiModel, documenterConfig: DocumenterConfig) {
     super(apiModel, documenterConfig.configFile.newDocfxNamespaces);
-    this._config = documenterConfig.configFile.tableOfContents!;
+    this.#config = documenterConfig.configFile.tableOfContents!;
 
-    this._tocPointerMap = {};
+    this.#tocPointerMap = {};
 
-    this._generateTocPointersMap(this._config.tocConfig);
+    this._generateTocPointersMap(this.#config.tocConfig);
   }
 
   protected override buildYamlTocFile(apiItems: ReadonlyArray<ApiItem>): IYamlTocFile {
     this._buildTocItems2(apiItems);
-    return this._config.tocConfig;
+    return this.#config.tocConfig;
   }
 
   private _buildTocItems2(apiItems: ReadonlyArray<ApiItem>): IYamlTocItem[] {
@@ -69,7 +69,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
 
   // Parses the tocConfig object to build a pointers map of nodes where we want to sort out the API items
   private _generateTocPointersMap(tocConfig: IYamlTocFile | IYamlTocItem): void {
-    const { catchAllCategory } = this._config;
+    const { catchAllCategory } = this.#config;
 
     if (tocConfig.items) {
       for (const tocItem of tocConfig.items) {
@@ -78,9 +78,9 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
         } else {
           // check for presence of the `catchAllCategory` config option
           if (catchAllCategory && tocItem.name === catchAllCategory) {
-            this._catchAllPointer = tocItem;
+            this.#catchAllPointer = tocItem;
           } else {
-            this._tocPointerMap[tocItem.name] = tocItem;
+            this.#tocPointerMap[tocItem.name] = tocItem;
           }
         }
       }
@@ -91,7 +91,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
    * Filtering out the api-item by inlineTags or category name presence in the item name.
    */
   private _filterItem(apiItem: ApiItem, tocItem: IYamlTocItem): void {
-    const { categoryInlineTag, categorizeByName } = this._config;
+    const { categoryInlineTag, categorizeByName } = this.#config;
     const { name: itemName } = tocItem;
     let filtered: boolean = false;
 
@@ -104,20 +104,20 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
       const tagContent: string | undefined =
         docInlineTag && docInlineTag.tagContent && docInlineTag.tagContent.trim();
 
-      if (tagContent && this._tocPointerMap[tagContent]) {
+      if (tagContent && this.#tocPointerMap[tagContent]) {
         // null assertion used because when pointer map was created we checked for presence of empty `items` array
-        this._tocPointerMap[tagContent].items!.push(tocItem);
+        this.#tocPointerMap[tagContent].items!.push(tocItem);
         filtered = true;
       }
     }
 
     // If not filtered by inline tag and `categorizeByName` config is enabled attempt to filter it by category name.
     if (!filtered && categorizeByName) {
-      const pointers: string[] = Object.keys(this._tocPointerMap);
+      const pointers: string[] = Object.keys(this.#tocPointerMap);
       for (let i: number = 0, length: number = pointers.length; i < length; i++) {
         if (itemName.indexOf(pointers[i]) !== -1) {
           // null assertion used because when pointer map was created we checked for presence of empty `items` array
-          this._tocPointerMap[pointers[i]].items!.push(tocItem);
+          this.#tocPointerMap[pointers[i]].items!.push(tocItem);
           filtered = true;
           break;
         }
@@ -125,8 +125,8 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
     }
 
     // If item still not filtered and a `catchAllCategory` config provided push it to it.
-    if (!filtered && this._catchAllPointer && this._catchAllPointer.items) {
-      this._catchAllPointer.items.push(tocItem);
+    if (!filtered && this.#catchAllPointer && this.#catchAllPointer.items) {
+      this.#catchAllPointer.items.push(tocItem);
     }
   }
 
@@ -155,7 +155,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
   }
 
   private _shouldNotIncludeInPointersMap(item: IYamlTocItem): boolean {
-    const { nonEmptyCategoryNodeNames } = this._config;
+    const { nonEmptyCategoryNodeNames } = this.#config;
     if (nonEmptyCategoryNodeNames && nonEmptyCategoryNodeNames.length) {
       return nonEmptyCategoryNodeNames.indexOf(item.name) === -1;
     }

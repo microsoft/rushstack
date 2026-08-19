@@ -95,12 +95,12 @@ export class SpanModification {
    */
   public indentDocComment: IndentDocCommentScope = IndentDocCommentScope.None;
 
-  private readonly _span: Span;
-  private _prefix: string | undefined;
-  private _suffix: string | undefined;
+  readonly #span: Span;
+  #prefix: string | undefined;
+  #suffix: string | undefined;
 
   public constructor(span: Span) {
-    this._span = span;
+    this.#span = span;
     this.reset();
   }
 
@@ -108,22 +108,22 @@ export class SpanModification {
    * Allows the Span.prefix text to be changed.
    */
   public get prefix(): string {
-    return this._prefix !== undefined ? this._prefix : this._span.prefix;
+    return this.#prefix !== undefined ? this.#prefix : this.#span.prefix;
   }
 
   public set prefix(value: string) {
-    this._prefix = value;
+    this.#prefix = value;
   }
 
   /**
    * Allows the Span.suffix text to be changed.
    */
   public get suffix(): string {
-    return this._suffix !== undefined ? this._suffix : this._span.suffix;
+    return this.#suffix !== undefined ? this.#suffix : this.#span.suffix;
   }
 
   public set suffix(value: string) {
-    this._suffix = value;
+    this.#suffix = value;
   }
 
   /**
@@ -134,9 +134,9 @@ export class SpanModification {
     this.omitSeparatorAfter = false;
     this.sortChildren = false;
     this.sortKey = undefined;
-    this._prefix = undefined;
-    this._suffix = undefined;
-    if (this._span.kind === ts.SyntaxKind.JSDocComment) {
+    this.#prefix = undefined;
+    this.#suffix = undefined;
+    if (this.#span.kind === ts.SyntaxKind.JSDocComment) {
       this.indentDocComment = IndentDocCommentScope.SpanAndChildren;
     }
   }
@@ -189,19 +189,19 @@ export class Span {
 
   public readonly modification: SpanModification;
 
-  private _parent: Span | undefined;
-  private _previousSibling: Span | undefined;
-  private _nextSibling: Span | undefined;
+  #parent: Span | undefined;
+  #previousSibling: Span | undefined;
+  #nextSibling: Span | undefined;
 
-  private _separatorStartIndex: number;
-  private _separatorEndIndex: number;
+  #separatorStartIndex: number;
+  #separatorEndIndex: number;
 
   public constructor(node: ts.Node) {
     this.node = node;
     this.startIndex = node.kind === ts.SyntaxKind.SourceFile ? node.getFullStart() : node.getStart();
     this.endIndex = node.end;
-    this._separatorStartIndex = 0;
-    this._separatorEndIndex = 0;
+    this.#separatorStartIndex = 0;
+    this.#separatorEndIndex = 0;
     this.children = [];
     this.modification = new SpanModification(this);
 
@@ -209,11 +209,11 @@ export class Span {
 
     for (const childNode of this.node.getChildren() || []) {
       const childSpan: Span = new Span(childNode);
-      childSpan._parent = this;
-      childSpan._previousSibling = previousChildSpan;
+      childSpan.#parent = this;
+      childSpan.#previousSibling = previousChildSpan;
 
       if (previousChildSpan) {
-        previousChildSpan._nextSibling = childSpan;
+        previousChildSpan.#nextSibling = childSpan;
       }
 
       this.children.push(childSpan);
@@ -245,8 +245,8 @@ export class Span {
             }
             separatorRecipient = lastChild;
           }
-          separatorRecipient._separatorStartIndex = previousChildSpan.endIndex;
-          separatorRecipient._separatorEndIndex = childSpan.startIndex;
+          separatorRecipient.#separatorStartIndex = previousChildSpan.endIndex;
+          separatorRecipient.#separatorEndIndex = childSpan.startIndex;
         }
       }
 
@@ -264,7 +264,7 @@ export class Span {
    * may have a parent in the AST.
    */
   public get parent(): Span | undefined {
-    return this._parent;
+    return this.#parent;
   }
 
   /**
@@ -274,7 +274,7 @@ export class Span {
    * may have a previous sibling in the AST.
    */
   public get previousSibling(): Span | undefined {
-    return this._previousSibling;
+    return this.#previousSibling;
   }
 
   /**
@@ -284,7 +284,7 @@ export class Span {
    * may have a previous sibling in the AST.
    */
   public get nextSibling(): Span | undefined {
-    return this._nextSibling;
+    return this.#nextSibling;
   }
 
   /**
@@ -317,7 +317,7 @@ export class Span {
    * Here we mean "next" according to an inorder traversal, not necessarily a sibling.
    */
   public get separator(): string {
-    return this._getSubstring(this._separatorStartIndex, this._separatorEndIndex);
+    return this._getSubstring(this.#separatorStartIndex, this.#separatorEndIndex);
   }
 
   /**

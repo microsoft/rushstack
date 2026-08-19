@@ -187,13 +187,13 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
   /**
    * A cached execution promise for the current OperationExecutionManager invocation of this operation.
    */
-  private _promise: Promise<OperationStatus> | undefined = undefined;
+  #promise: Promise<OperationStatus> | undefined = undefined;
 
   /**
    * If true, then a run of this operation is currently wanted.
    * This is used to track state from the `requestRun` callback passed to the runner.
    */
-  private _runPending: boolean = true;
+  #runPending: boolean = true;
 
   public readonly metadata: TMetadata;
 
@@ -231,8 +231,8 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
       stopwatch: new Stopwatch()
     };
 
-    this._promise = undefined;
-    this._runPending = true;
+    this.#promise = undefined;
+    this.#runPending = true;
   }
 
   /**
@@ -244,11 +244,11 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
       throw new Error(`Operation state has not been initialized.`);
     }
 
-    if (!this._promise) {
-      this._promise = this._executeInnerAsync(context, state);
+    if (!this.#promise) {
+      this.#promise = this._executeInnerAsync(context, state);
     }
 
-    return this._promise;
+    return this.#promise;
   }
 
   private async _executeInnerAsync(
@@ -299,7 +299,7 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
                 // This variable is on the Operation instead of the
                 // containing closure to deal with scenarios in which
                 // the runner hangs on to an old copy of the callback.
-                this._runPending = true;
+                this.#runPending = true;
                 return;
 
               case OperationStatus.Blocked:
@@ -340,8 +340,8 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
       // Mark that the operation has been started at least once.
       innerState.hasBeenRun = true;
 
-      while (this._runPending) {
-        this._runPending = false;
+      while (this.#runPending) {
+        this.#runPending = false;
         try {
           // We don't support aborting in the middle of a runner's execution.
           innerState.status = runner ? await runner.executeAsync(innerContext) : OperationStatus.NoOp;
@@ -359,7 +359,7 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
         // and if it becomes a problem, the retry loop will need to be moved outside of the `queueWork` call.
         // This introduces complexity regarding tracking of timing and start/end logging, however.
 
-        if (this._runPending) {
+        if (this.#runPending) {
           if (abortSignal.aborted) {
             innerState.status = OperationStatus.Aborted;
             break;

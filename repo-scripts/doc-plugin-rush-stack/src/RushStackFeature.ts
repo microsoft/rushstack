@@ -23,7 +23,7 @@ interface INavigationFile {
 }
 
 export class RushStackFeature extends MarkdownDocumenterFeature {
-  private _apiItemsWithPages: Set<ApiItem> = new Set<ApiItem>();
+  #apiItemsWithPages: Set<ApiItem> = new Set<ApiItem>();
 
   public override onInitialized(): void {
     // eslint-disable-next-line no-console
@@ -42,7 +42,7 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
     ].join('\n');
     eventArgs.pageContent = header + eventArgs.pageContent;
 
-    this._apiItemsWithPages.add(eventArgs.apiItem);
+    this.#apiItemsWithPages.add(eventArgs.apiItem);
   }
 
   public override onFinished(eventArgs: IMarkdownDocumenterFeatureOnFinishedArgs): void {
@@ -64,7 +64,7 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
 
   private _buildNavigation(parentNodes: INavigationNode[], parentApiItem: ApiItem): void {
     for (const apiItem of parentApiItem.members) {
-      if (this._apiItemsWithPages.has(apiItem)) {
+      if (this.#apiItemsWithPages.has(apiItem)) {
         const newNode: INavigationNode = {
           title: apiItem.displayName,
           url: path.posix

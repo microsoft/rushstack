@@ -114,42 +114,42 @@ export abstract class CommandLineParameterProvider {
   /** @internal */
   protected readonly _registeredParameterParserKeysByName: Map<string, string>;
 
-  private readonly _parameters: CommandLineParameter[];
-  private readonly _parametersByLongName: Map<string, CommandLineParameter[]>;
-  private readonly _parametersByShortName: Map<string, CommandLineParameter[]>;
-  private readonly _parameterGroupsByName: Map<
+  readonly #parameters: CommandLineParameter[];
+  readonly #parametersByLongName: Map<string, CommandLineParameter[]>;
+  readonly #parametersByShortName: Map<string, CommandLineParameter[]>;
+  readonly #parameterGroupsByName: Map<
     string | typeof SCOPING_PARAMETER_GROUP,
     argparse.ArgumentGroup
   >;
-  private _parametersHaveBeenRegistered: boolean;
-  private _parametersHaveBeenProcessed: boolean;
-  private _remainder: CommandLineRemainder | undefined;
+  #parametersHaveBeenRegistered: boolean;
+  #parametersHaveBeenProcessed: boolean;
+  #remainder: CommandLineRemainder | undefined;
 
   /** @internal */
   // Third party code should not inherit subclasses or call this constructor
   public constructor() {
-    this._parameters = [];
-    this._parametersByLongName = new Map();
-    this._parametersByShortName = new Map();
-    this._parameterGroupsByName = new Map();
+    this.#parameters = [];
+    this.#parametersByLongName = new Map();
+    this.#parametersByShortName = new Map();
+    this.#parameterGroupsByName = new Map();
     this._ambiguousParameterParserKeysByName = new Map();
     this._registeredParameterParserKeysByName = new Map();
-    this._parametersHaveBeenRegistered = false;
-    this._parametersHaveBeenProcessed = false;
+    this.#parametersHaveBeenRegistered = false;
+    this.#parametersHaveBeenProcessed = false;
   }
 
   /**
    * Returns a collection of the parameters that were defined for this object.
    */
   public get parameters(): ReadonlyArray<CommandLineParameter> {
-    return this._parameters;
+    return this.#parameters;
   }
 
   /**
    * Informs the caller if the argparse data has been processed into parameters.
    */
   public get parametersProcessed(): boolean {
-    return this._parametersHaveBeenProcessed;
+    return this.#parametersHaveBeenProcessed;
   }
 
   /**
@@ -157,7 +157,7 @@ export abstract class CommandLineParameterProvider {
    * this object captures any remaining command line arguments after the recognized portion.
    */
   public get remainder(): CommandLineRemainder | undefined {
-    return this._remainder;
+    return this.#remainder;
   }
 
   /**
@@ -420,11 +420,11 @@ export abstract class CommandLineParameterProvider {
    * In the "--help" documentation, the remainder rule will be represented as "...".
    */
   public defineCommandLineRemainder(definition: ICommandLineRemainderDefinition): CommandLineRemainder {
-    if (this._remainder) {
+    if (this.#remainder) {
       throw new Error('defineRemainingArguments() has already been called for this provider');
     }
-    this._remainder = new CommandLineRemainder(definition);
-    return this._remainder;
+    this.#remainder = new CommandLineRemainder(definition);
+    return this.#remainder;
   }
 
   /**
@@ -517,7 +517,7 @@ export abstract class CommandLineParameterProvider {
 
   /** @internal */
   public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
-    if (this._parametersHaveBeenRegistered) {
+    if (this.#parametersHaveBeenRegistered) {
       // We prevent new parameters from being defined after the first call to _registerDefinedParameters,
       // so we can already ensure that all parameters were registered.
       return;
@@ -527,7 +527,7 @@ export abstract class CommandLineParameterProvider {
     // since we can't prefix scopes to short names in order to deduplicate them. The duplicate short names will
     // be reported as errors if the user attempts to use them.
     const parametersWithDuplicateShortNames: Set<CommandLineParameterBase> = new Set();
-    for (const [shortName, shortNameParameters] of this._parametersByShortName.entries()) {
+    for (const [shortName, shortNameParameters] of this.#parametersByShortName.entries()) {
       if (shortNameParameters.length > 1) {
         for (const parameter of shortNameParameters) {
           this._defineAmbiguousParameter(shortName);
@@ -539,7 +539,7 @@ export abstract class CommandLineParameterProvider {
     // Then, loop through all parameters and register them. If there are any duplicates, ensure that they have
     // provided a scope and register them with the scope. The duplicate long names will be reported as an error
     // if the user attempts to use them.
-    for (const longNameParameters of this._parametersByLongName.values()) {
+    for (const longNameParameters of this.#parametersByLongName.values()) {
       const useScopedLongName: boolean = longNameParameters.length > 1;
       for (const parameter of longNameParameters) {
         if (useScopedLongName) {
@@ -576,9 +576,9 @@ export abstract class CommandLineParameterProvider {
     }
 
     // Need to add the remainder parameter last
-    if (this._remainder) {
+    if (this.#remainder) {
       const argparseOptions: argparse.ArgumentOptions = {
-        help: this._remainder.description,
+        help: this.#remainder.description,
         nargs: argparse.Const.REMAINDER,
         metavar: '"..."'
       };
@@ -586,7 +586,7 @@ export abstract class CommandLineParameterProvider {
       this._getArgumentParser().addArgument(argparse.Const.REMAINDER, argparseOptions);
     }
 
-    this._parametersHaveBeenRegistered = true;
+    this.#parametersHaveBeenRegistered = true;
   }
 
   /**
@@ -600,7 +600,7 @@ export abstract class CommandLineParameterProvider {
    * @internal
    */
   public _preParse(): void {
-    for (const parameter of this._parameters) {
+    for (const parameter of this.#parameters) {
       parameter._preParse?.();
     }
   }
@@ -610,7 +610,7 @@ export abstract class CommandLineParameterProvider {
    * @internal
    */
   public _postParse(): void {
-    for (const parameter of this._parameters) {
+    for (const parameter of this.#parameters) {
       parameter._postParse?.();
     }
   }
@@ -620,11 +620,11 @@ export abstract class CommandLineParameterProvider {
    * @internal
    */
   public _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
-    if (!this._parametersHaveBeenRegistered) {
+    if (!this.#parametersHaveBeenRegistered) {
       throw new Error('Parameters have not been registered');
     }
 
-    if (this._parametersHaveBeenProcessed) {
+    if (this.#parametersHaveBeenProcessed) {
       throw new Error('Command Line Parser Data was already processed');
     }
 
@@ -640,14 +640,14 @@ export abstract class CommandLineParameterProvider {
         // Determine if the ambiguous parameter is a short name or a long name, since the process of finding
         // the non-ambiguous name is different for each.
         const duplicateShortNameParameters: CommandLineParameterBase[] | undefined =
-          this._parametersByShortName.get(parameterName);
+          this.#parametersByShortName.get(parameterName);
         if (duplicateShortNameParameters) {
           // We also need to make sure we get the non-ambiguous long name for the parameter, since it is
           // possible for that the long name is ambiguous as well.
           const nonAmbiguousLongNames: string[] = [];
           for (const parameter of duplicateShortNameParameters) {
             const matchingLongNameParameters: CommandLineParameterBase[] | undefined =
-              this._parametersByLongName.get(parameter.longName);
+              this.#parametersByLongName.get(parameter.longName);
             if (!matchingLongNameParameters?.length) {
               // This should never happen
               throw new Error(
@@ -681,7 +681,7 @@ export abstract class CommandLineParameterProvider {
         }
 
         const duplicateLongNameParameters: CommandLineParameterBase[] | undefined =
-          this._parametersByLongName.get(parameterName);
+          this.#parametersByLongName.get(parameterName);
         if (duplicateLongNameParameters) {
           const nonAmbiguousLongNames: string[] = duplicateLongNameParameters.map(
             (p: CommandLineParameterBase) => {
@@ -713,7 +713,7 @@ export abstract class CommandLineParameterProvider {
     }
 
     // Fill in the values for the parameters
-    for (const parameter of this._parameters) {
+    for (const parameter of this.#parameters) {
       const value: unknown = data[parameter._parserKey!];
       parameter._setValue(value);
       parameter._validateValue?.();
@@ -723,38 +723,38 @@ export abstract class CommandLineParameterProvider {
       this.remainder._setValue(data[argparse.Const.REMAINDER]);
     }
 
-    this._parametersHaveBeenProcessed = true;
+    this.#parametersHaveBeenProcessed = true;
   }
 
   /** @internal */
   protected _defineParameter(parameter: CommandLineParameter): void {
-    if (this._parametersHaveBeenRegistered) {
+    if (this.#parametersHaveBeenRegistered) {
       throw new Error('Parameters have already been registered for this provider');
     }
 
     // Generate and set the parser key at definition time
     parameter._parserKey = this._generateKey();
 
-    this._parameters.push(parameter);
+    this.#parameters.push(parameter);
 
     // Collect all parameters with the same long name. We will perform conflict resolution at registration.
-    let longNameParameters: CommandLineParameter[] | undefined = this._parametersByLongName.get(
+    let longNameParameters: CommandLineParameter[] | undefined = this.#parametersByLongName.get(
       parameter.longName
     );
     if (!longNameParameters) {
       longNameParameters = [];
-      this._parametersByLongName.set(parameter.longName, longNameParameters);
+      this.#parametersByLongName.set(parameter.longName, longNameParameters);
     }
     longNameParameters.push(parameter);
 
     // Collect all parameters with the same short name. We will perform conflict resolution at registration.
     if (parameter.shortName) {
-      let shortNameParameters: CommandLineParameter[] | undefined = this._parametersByShortName.get(
+      let shortNameParameters: CommandLineParameter[] | undefined = this.#parametersByShortName.get(
         parameter.shortName
       );
       if (!shortNameParameters) {
         shortNameParameters = [];
-        this._parametersByShortName.set(parameter.shortName, shortNameParameters);
+        this.#parametersByShortName.set(parameter.shortName, shortNameParameters);
       }
       shortNameParameters.push(parameter);
     }
@@ -762,7 +762,7 @@ export abstract class CommandLineParameterProvider {
 
   /** @internal */
   protected _defineAmbiguousParameter(name: string): string {
-    if (this._parametersHaveBeenRegistered) {
+    if (this.#parametersHaveBeenRegistered) {
       throw new Error('Parameters have already been registered for this provider');
     }
 
@@ -871,7 +871,7 @@ export abstract class CommandLineParameterProvider {
     const argumentParser: IExtendedArgumentParser = this._getArgumentParser() as IExtendedArgumentParser;
     let argumentGroup: argparse.ArgumentGroup | undefined;
     if (parameterGroup) {
-      argumentGroup = this._parameterGroupsByName.get(parameterGroup);
+      argumentGroup = this.#parameterGroupsByName.get(parameterGroup);
       if (!argumentGroup) {
         let parameterGroupName: string;
         if (typeof parameterGroup === 'string') {
@@ -885,7 +885,7 @@ export abstract class CommandLineParameterProvider {
         argumentGroup = argumentParser.addArgumentGroup({
           title: `Optional ${parameterGroupName} arguments`
         });
-        this._parameterGroupsByName.set(parameterGroup, argumentGroup);
+        this.#parameterGroupsByName.set(parameterGroup, argumentGroup);
       }
     } else {
       argumentGroup = argumentParser;
@@ -985,7 +985,7 @@ export abstract class CommandLineParameterProvider {
     parameterScope = scope || parameterScope;
 
     const parameters: CommandLineParameterBase[] | undefined =
-      this._parametersByLongName.get(parameterLongName);
+      this.#parametersByLongName.get(parameterLongName);
     if (!parameters) {
       throw new Error(`The parameter "${parameterLongName}" is not defined`);
     }

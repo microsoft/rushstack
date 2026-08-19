@@ -14,30 +14,30 @@ import { Stopwatch } from './Stopwatch';
  * @beta
  */
 export class OperationGroupRecord<TMetadata extends {} = {}> {
-  private readonly _operations: Set<Operation> = new Set();
-  private _remainingOperations: Set<Operation> = new Set();
+  readonly #operations: Set<Operation> = new Set();
+  #remainingOperations: Set<Operation> = new Set();
 
-  private _groupStopwatch: Stopwatch = new Stopwatch();
-  private _hasCancellations: boolean = false;
-  private _hasFailures: boolean = false;
+  #groupStopwatch: Stopwatch = new Stopwatch();
+  #hasCancellations: boolean = false;
+  #hasFailures: boolean = false;
 
   public readonly name: string;
   public readonly metadata: TMetadata;
 
   public get duration(): number {
-    return this._groupStopwatch ? this._groupStopwatch.duration : 0;
+    return this.#groupStopwatch ? this.#groupStopwatch.duration : 0;
   }
 
   public get finished(): boolean {
-    return this._remainingOperations.size === 0;
+    return this.#remainingOperations.size === 0;
   }
 
   public get hasCancellations(): boolean {
-    return this._hasCancellations;
+    return this.#hasCancellations;
   }
 
   public get hasFailures(): boolean {
-    return this._hasFailures;
+    return this.#hasFailures;
   }
 
   public constructor(name: string, metadata: TMetadata = {} as TMetadata) {
@@ -46,35 +46,35 @@ export class OperationGroupRecord<TMetadata extends {} = {}> {
   }
 
   public addOperation(operation: Operation): void {
-    this._operations.add(operation);
+    this.#operations.add(operation);
   }
 
   public startTimer(): void {
     // Keep this undefined until needed, then start to avoid subsequent calls to startTimer()
-    this._groupStopwatch.start();
+    this.#groupStopwatch.start();
   }
 
   public setOperationAsComplete(operation: Operation, state: IOperationState): void {
-    if (!this._remainingOperations.has(operation)) {
+    if (!this.#remainingOperations.has(operation)) {
       throw new InternalError(`Operation ${operation.name} is not in the group ${this.name}`);
     }
 
     if (state.status === OperationStatus.Aborted) {
-      this._hasCancellations = true;
+      this.#hasCancellations = true;
     } else if (state.status === OperationStatus.Failure) {
-      this._hasFailures = true;
+      this.#hasFailures = true;
     }
 
-    this._remainingOperations.delete(operation);
-    if (this._remainingOperations.size === 0) {
-      this._groupStopwatch.stop();
+    this.#remainingOperations.delete(operation);
+    if (this.#remainingOperations.size === 0) {
+      this.#groupStopwatch.stop();
     }
   }
 
   public reset(): void {
-    this._remainingOperations = new Set(this._operations);
-    this._groupStopwatch.reset();
-    this._hasCancellations = false;
-    this._hasFailures = false;
+    this.#remainingOperations = new Set(this.#operations);
+    this.#groupStopwatch.reset();
+    this.#hasCancellations = false;
+    this.#hasFailures = false;
   }
 }

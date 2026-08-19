@@ -98,23 +98,23 @@ export type YamlFormat = 'udp' | 'sdp';
  */
 export class YamlDocumenter {
   protected readonly newDocfxNamespaces: boolean;
-  private readonly _yamlFormat: string;
-  private readonly _apiModel: ApiModel;
-  private readonly _markdownEmitter: CustomMarkdownEmitter;
+  readonly #yamlFormat: string;
+  readonly #apiModel: ApiModel;
+  readonly #markdownEmitter: CustomMarkdownEmitter;
 
-  private _apiItemsByCanonicalReference: Map<string, ApiItem>;
-  private _yamlReferences: IYamlReferences | undefined;
+  #apiItemsByCanonicalReference: Map<string, ApiItem>;
+  #yamlReferences: IYamlReferences | undefined;
 
   public constructor(
     apiModel: ApiModel,
     newDocfxNamespaces: boolean = false,
     yamlFormat: YamlFormat = 'sdp'
   ) {
-    this._apiModel = apiModel;
+    this.#apiModel = apiModel;
     this.newDocfxNamespaces = newDocfxNamespaces;
-    this._yamlFormat = yamlFormat;
-    this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
-    this._apiItemsByCanonicalReference = new Map<string, ApiItem>();
+    this.#yamlFormat = yamlFormat;
+    this.#markdownEmitter = new CustomMarkdownEmitter(this.#apiModel);
+    this.#apiItemsByCanonicalReference = new Map<string, ApiItem>();
 
     this._initApiItems();
   }
@@ -124,16 +124,16 @@ export class YamlDocumenter {
     console.log();
     this._deleteOldOutputFiles(outputFolder);
 
-    for (const apiPackage of this._apiModel.packages) {
+    for (const apiPackage of this.#apiModel.packages) {
       console.log(`Writing ${apiPackage.name} package`);
       this._visitApiItems(outputFolder, apiPackage, undefined);
     }
 
-    if (this._yamlFormat === 'sdp') {
+    if (this.#yamlFormat === 'sdp') {
       convertUDPYamlToSDP(outputFolder);
     }
 
-    this._writeTocFile(outputFolder, this._apiModel.packages);
+    this._writeTocFile(outputFolder, this.#apiModel.packages);
   }
 
   /** @virtual */
@@ -158,8 +158,8 @@ export class YamlDocumenter {
   ): boolean {
     let savedYamlReferences: IYamlReferences | undefined;
     if (!this._shouldEmbed(apiItem.kind)) {
-      savedYamlReferences = this._yamlReferences;
-      this._yamlReferences = undefined;
+      savedYamlReferences = this.#yamlReferences;
+      this.#yamlReferences = undefined;
     }
 
     const yamlItem: IYamlItem | undefined = this._generateYamlItem(apiItem);
@@ -192,11 +192,11 @@ export class YamlDocumenter {
         }
       }
 
-      if (this._yamlReferences && this._yamlReferences.references.length > 0) {
-        newYamlFile.references = this._yamlReferences.references;
+      if (this.#yamlReferences && this.#yamlReferences.references.length > 0) {
+        newYamlFile.references = this.#yamlReferences.references;
       }
 
-      this._yamlReferences = savedYamlReferences;
+      this.#yamlReferences = savedYamlReferences;
 
       const yamlFilePath: string = this._getYamlFilePath(outputFolder, apiItem);
 
@@ -741,7 +741,7 @@ export class YamlDocumenter {
   private _renderMarkdown(docSection: DocSection, contextApiItem: ApiItem): string {
     const stringBuilder: StringBuilder = new StringBuilder();
 
-    this._markdownEmitter.emit(stringBuilder, docSection, {
+    this.#markdownEmitter.emit(stringBuilder, docSection, {
       contextApiItem,
       onGetFilenameForApiItem: (apiItem: ApiItem) => {
         // NOTE: GitHub's markdown renderer does not resolve relative hyperlinks correctly
@@ -804,7 +804,7 @@ export class YamlDocumenter {
    * Initialize the _apiItemsByCanonicalReference data structure.
    */
   private _initApiItems(): void {
-    this._initApiItemsRecursive(this._apiModel);
+    this._initApiItemsRecursive(this.#apiModel);
   }
 
   /**
@@ -812,7 +812,7 @@ export class YamlDocumenter {
    */
   private _initApiItemsRecursive(apiItem: ApiItem): void {
     if (apiItem.canonicalReference && !apiItem.canonicalReference.isEmpty) {
-      this._apiItemsByCanonicalReference.set(apiItem.canonicalReference.toString(), apiItem);
+      this.#apiItemsByCanonicalReference.set(apiItem.canonicalReference.toString(), apiItem);
     }
 
     // Recurse container members
@@ -824,14 +824,14 @@ export class YamlDocumenter {
   }
 
   private _ensureYamlReferences(): IYamlReferences {
-    if (!this._yamlReferences) {
-      this._yamlReferences = {
+    if (!this.#yamlReferences) {
+      this.#yamlReferences = {
         references: [],
         typeNameToUid: new Map(),
         uidTypeReferenceCounters: new Map()
       };
     }
-    return this._yamlReferences;
+    return this.#yamlReferences;
   }
 
   private _renderInheritance(
@@ -842,7 +842,7 @@ export class YamlDocumenter {
     for (const heritageType of heritageTypes) {
       const type: string = this._renderType(contextUid, heritageType.excerpt);
       const yamlInheritance: IYamlInheritanceTree = { type };
-      const apiItem: ApiItem | undefined = this._apiItemsByCanonicalReference.get(type);
+      const apiItem: ApiItem | undefined = this.#apiItemsByCanonicalReference.get(type);
       if (apiItem) {
         if (apiItem instanceof ApiClass) {
           if (apiItem.extendsType) {
@@ -902,7 +902,7 @@ export class YamlDocumenter {
       excerptTokens[0].canonicalReference
     ) {
       const excerptRef: string = excerptTokens[0].canonicalReference.toString();
-      const apiItem: ApiItem | undefined = this._apiItemsByCanonicalReference.get(excerptRef);
+      const apiItem: ApiItem | undefined = this.#apiItemsByCanonicalReference.get(excerptRef);
       return this._recordYamlReference(
         yamlReferences,
         excerptTokens[0].canonicalReference.toString(),
@@ -948,7 +948,7 @@ export class YamlDocumenter {
           const spec: IYamlReferenceSpec = {};
           const specUid: string | undefined = token.canonicalReference && token.canonicalReference.toString();
           const apiItem: ApiItem | undefined = specUid
-            ? this._apiItemsByCanonicalReference.get(specUid)
+            ? this.#apiItemsByCanonicalReference.get(specUid)
             : undefined;
           if (specUid) {
             spec.uid = specUid;

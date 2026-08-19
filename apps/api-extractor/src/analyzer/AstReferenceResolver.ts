@@ -42,21 +42,21 @@ export class ResolverFailure {
  * which resolves declaration references by walking the hierarchy loaded from an .api.json file.
  */
 export class AstReferenceResolver {
-  private readonly _collector: Collector;
-  private readonly _astSymbolTable: AstSymbolTable;
-  private readonly _workingPackage: WorkingPackage;
+  readonly #collector: Collector;
+  readonly #astSymbolTable: AstSymbolTable;
+  readonly #workingPackage: WorkingPackage;
 
   public constructor(collector: Collector) {
-    this._collector = collector;
-    this._astSymbolTable = collector.astSymbolTable;
-    this._workingPackage = collector.workingPackage;
+    this.#collector = collector;
+    this.#astSymbolTable = collector.astSymbolTable;
+    this.#workingPackage = collector.workingPackage;
   }
 
   public resolve(declarationReference: tsdoc.DocDeclarationReference): AstDeclaration | ResolverFailure {
     // Is it referring to the working package?
     if (
       declarationReference.packageName !== undefined &&
-      declarationReference.packageName !== this._workingPackage.name
+      declarationReference.packageName !== this.#workingPackage.name
     ) {
       return new ResolverFailure('External package references are not supported');
     }
@@ -66,8 +66,8 @@ export class AstReferenceResolver {
       return new ResolverFailure('Import paths are not supported');
     }
 
-    const astModule: AstModule = this._astSymbolTable.fetchAstModuleFromWorkingPackage(
-      this._workingPackage.entryPointSourceFile
+    const astModule: AstModule = this.#astSymbolTable.fetchAstModuleFromWorkingPackage(
+      this.#workingPackage.entryPointSourceFile
     );
 
     if (declarationReference.memberReferences.length === 0) {
@@ -81,14 +81,14 @@ export class AstReferenceResolver {
       return exportName;
     }
 
-    const rootAstEntity: AstEntity | undefined = this._astSymbolTable.tryGetExportOfAstModule(
+    const rootAstEntity: AstEntity | undefined = this.#astSymbolTable.tryGetExportOfAstModule(
       exportName,
       astModule
     );
 
     if (rootAstEntity === undefined) {
       return new ResolverFailure(
-        `The package "${this._workingPackage.name}" does not have an export "${exportName}"`
+        `The package "${this.#workingPackage.name}" does not have an export "${exportName}"`
       );
     }
 
@@ -250,7 +250,7 @@ export class AstReferenceResolver {
 
     const matches: AstDeclaration[] = [];
     for (const astDeclaration of astDeclarations) {
-      const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
+      const overloadIndex: number = this.#collector.getOverloadIndex(astDeclaration);
       if (overloadIndex === selectorOverloadIndex) {
         matches.push(astDeclaration);
       }
@@ -288,7 +288,7 @@ export class AstReferenceResolver {
     let result: AstDeclaration | undefined = undefined;
 
     for (const match of matches) {
-      const declarationMetadata: DeclarationMetadata = this._collector.fetchDeclarationMetadata(match);
+      const declarationMetadata: DeclarationMetadata = this.#collector.fetchDeclarationMetadata(match);
       if (!declarationMetadata.isAncillary) {
         if (result) {
           return undefined; // more than one match

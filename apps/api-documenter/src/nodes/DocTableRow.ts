@@ -15,12 +15,12 @@ export interface IDocTableRowParameters extends IDocNodeParameters {}
  * Represents table row, similar to an HTML `<tr>` element.
  */
 export class DocTableRow extends DocNode {
-  private readonly _cells: DocTableCell[];
+  readonly #cells: DocTableCell[];
 
   public constructor(parameters: IDocTableRowParameters, cells?: ReadonlyArray<DocTableCell>) {
     super(parameters);
 
-    this._cells = [];
+    this.#cells = [];
     if (cells) {
       for (const cell of cells) {
         this.addCell(cell);
@@ -33,11 +33,11 @@ export class DocTableRow extends DocNode {
   }
 
   public get cells(): ReadonlyArray<DocTableCell> {
-    return this._cells;
+    return this.#cells;
   }
 
   public addCell(cell: DocTableCell): void {
-    this._cells.push(cell);
+    this.#cells.push(cell);
   }
 
   public createAndAddCell(): DocTableCell {
@@ -58,6 +58,6 @@ export class DocTableRow extends DocNode {
   }
 
   protected override onGetChildNodes(): ReadonlyArray<DocNode | undefined> {
-    return this._cells;
+    return this.#cells;
   }
 }

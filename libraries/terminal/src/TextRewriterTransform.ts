@@ -60,8 +60,8 @@ export interface ITextRewriterTransformOptions extends ITerminalTransformOptions
  * @public
  */
 export class TextRewriterTransform extends TerminalTransform {
-  private readonly _stderrStates: TextRewriterState[];
-  private readonly _stdoutStates: TextRewriterState[];
+  readonly #stderrStates: TextRewriterState[];
+  readonly #stdoutStates: TextRewriterState[];
 
   public readonly textRewriters: ReadonlyArray<TextRewriter>;
 
@@ -95,15 +95,15 @@ export class TextRewriterTransform extends TerminalTransform {
 
     this.textRewriters = textRewriters;
 
-    this._stderrStates = this.textRewriters.map((x) => x.initialize());
-    this._stdoutStates = this.textRewriters.map((x) => x.initialize());
+    this.#stderrStates = this.textRewriters.map((x) => x.initialize());
+    this.#stdoutStates = this.textRewriters.map((x) => x.initialize());
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
     if (chunk.kind === TerminalChunkKind.Stderr) {
-      this._processText(chunk, this._stderrStates);
+      this._processText(chunk, this.#stderrStates);
     } else if (chunk.kind === TerminalChunkKind.Stdout) {
-      this._processText(chunk, this._stdoutStates);
+      this._processText(chunk, this.#stdoutStates);
     } else {
       this.destination.writeChunk(chunk);
     }
@@ -146,8 +146,8 @@ export class TextRewriterTransform extends TerminalTransform {
   }
 
   protected onClose(): void {
-    this._closeRewriters(this._stderrStates, TerminalChunkKind.Stderr);
-    this._closeRewriters(this._stdoutStates, TerminalChunkKind.Stdout);
+    this._closeRewriters(this.#stderrStates, TerminalChunkKind.Stderr);
+    this._closeRewriters(this.#stdoutStates, TerminalChunkKind.Stdout);
 
     this.autocloseDestination();
   }

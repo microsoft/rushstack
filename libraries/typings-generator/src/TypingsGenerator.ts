@@ -104,13 +104,13 @@ export interface ITypingsGeneratorOptionsWithCustomReadFile<
  */
 export class TypingsGenerator<TFileContents = string> {
   // Map of resolved consumer file path -> Set<resolved dependency file path>
-  private readonly _dependenciesOfFile: Map<string, Set<string>>;
+  readonly #dependenciesOfFile: Map<string, Set<string>>;
 
   // Map of resolved dependency file path -> Set<resolved consumer file path>
-  private readonly _consumersOfFile: Map<string, Set<string>>;
+  readonly #consumersOfFile: Map<string, Set<string>>;
 
   // Map of resolved file path -> relative file path
-  private readonly _relativePaths: Map<string, string>;
+  readonly #relativePaths: Map<string, string>;
 
   protected readonly _options: ITypingsGeneratorOptionsWithCustomReadFile<
     string | IGeneratedTypings | undefined,
@@ -186,9 +186,9 @@ export class TypingsGenerator<TFileContents = string> {
 
     this._options.fileExtensions = this._normalizeFileExtensions(fileExtensions);
 
-    this._dependenciesOfFile = new Map();
-    this._consumersOfFile = new Map();
-    this._relativePaths = new Map();
+    this.#dependenciesOfFile = new Map();
+    this.#consumersOfFile = new Map();
+    this.#relativePaths = new Map();
 
     this.inputFileGlob = `**/*+(${this._options.fileExtensions.join('|')})`;
   }
@@ -288,17 +288,17 @@ export class TypingsGenerator<TFileContents = string> {
     // Need to normalize slashes in the dependency path
     const dependency: string = path.resolve(this._options.srcFolder, rawDependency);
 
-    let dependencies: Set<string> | undefined = this._dependenciesOfFile.get(consumer);
+    let dependencies: Set<string> | undefined = this.#dependenciesOfFile.get(consumer);
     if (!dependencies) {
       dependencies = new Set();
-      this._dependenciesOfFile.set(consumer, dependencies);
+      this.#dependenciesOfFile.set(consumer, dependencies);
     }
     dependencies.add(dependency);
 
-    let consumers: Set<string> | undefined = this._consumersOfFile.get(dependency);
+    let consumers: Set<string> | undefined = this.#consumersOfFile.get(dependency);
     if (!consumers) {
       consumers = new Set();
-      this._consumersOfFile.set(dependency, consumers);
+      this.#consumersOfFile.set(dependency, consumers);
     }
     consumers.add(consumer);
   }
@@ -330,13 +330,13 @@ export class TypingsGenerator<TFileContents = string> {
 
       const relativePath: string = Path.convertToSlashes(rawPath);
       const resolvedPath: string = path.resolve(this._options.srcFolder, rawPath);
-      this._relativePaths.set(resolvedPath, relativePath);
+      this.#relativePaths.set(resolvedPath, relativePath);
       toProcess.add(resolvedPath);
     }
 
     // Expand out all registered consumers, according to the current dependency graph
     for (const file of toProcess) {
-      const consumers: Set<string> | undefined = this._consumersOfFile.get(file);
+      const consumers: Set<string> | undefined = this.#consumersOfFile.get(file);
       if (consumers) {
         for (const consumer of consumers) {
           toProcess.add(consumer);
@@ -348,7 +348,7 @@ export class TypingsGenerator<TFileContents = string> {
     await Async.forEachAsync(
       toProcess,
       async (resolvedPath: string) => {
-        const relativePath: string | undefined = this._relativePaths.get(resolvedPath);
+        const relativePath: string | undefined = this.#relativePaths.get(resolvedPath);
         if (!relativePath) {
           throw new Error(`Missing relative path for file ${resolvedPath}`);
         }
@@ -427,10 +427,10 @@ export class TypingsGenerator<TFileContents = string> {
    * Removes the consumer from all extant dependencies
    */
   private _clearDependencies(consumer: string): void {
-    const dependencies: Set<string> | undefined = this._dependenciesOfFile.get(consumer);
+    const dependencies: Set<string> | undefined = this.#dependenciesOfFile.get(consumer);
     if (dependencies) {
       for (const dependency of dependencies) {
-        this._consumersOfFile.get(dependency)!.delete(consumer);
+        this.#consumersOfFile.get(dependency)!.delete(consumer);
       }
       dependencies.clear();
     }

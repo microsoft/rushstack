@@ -25,14 +25,14 @@ interface ISnippetsFile {
  * Extends YamlDocumenter with some custom logic that is specific to Office Add-ins.
  */
 export class OfficeYamlDocumenter extends YamlDocumenter {
-  private _snippets: ISnippetsFile;
-  private _snippetsAll: ISnippetsFile;
+  #snippets: ISnippetsFile;
+  #snippetsAll: ISnippetsFile;
 
   // Default API Set URL when no product match is found.
-  private _apiSetUrlDefault: string = '/office/dev/add-ins/reference/javascript-api-for-office';
+  #apiSetUrlDefault: string = '/office/dev/add-ins/reference/javascript-api-for-office';
 
   // Hash set of API Set URLs based on product.
-  private _apiSetUrls: Record<string, string> = {
+  #apiSetUrls: Record<string, string> = {
     Excel: '/javascript/api/requirement-sets/excel/excel-api-requirement-sets',
     OneNote: '/javascript/api/requirement-sets/onenote/onenote-api-requirement-sets',
     Outlook: '/javascript/api/requirement-sets/outlook/outlook-api-requirement-sets',
@@ -49,8 +49,8 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     console.log('Loading snippets from ' + snippetsFilePath);
 
     const snippetsContent: string = FileSystem.readFile(snippetsFilePath);
-    this._snippets = yaml.load(snippetsContent, { filename: snippetsFilePath }) as ISnippetsFile;
-    this._snippetsAll = yaml.load(snippetsContent, { filename: snippetsFilePath }) as ISnippetsFile;
+    this.#snippets = yaml.load(snippetsContent, { filename: snippetsFilePath }) as ISnippetsFile;
+    this.#snippetsAll = yaml.load(snippetsContent, { filename: snippetsFilePath }) as ISnippetsFile;
   }
 
   public override generateFiles(outputFolder: string): void {
@@ -58,7 +58,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
 
     // After we generate everything, check for any unused snippets
     console.log();
-    for (const apiName of Object.keys(this._snippets)) {
+    for (const apiName of Object.keys(this.#snippets)) {
       console.error(Colorize.yellow('Warning: Unused snippet ' + apiName));
     }
   }
@@ -80,9 +80,9 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
       yamlItem.remarks = this._fixupApiSet(yamlItem.remarks, yamlItem.uid);
     }
 
-    const snippets: string[] | undefined = this._snippetsAll[nameWithoutPackage];
+    const snippets: string[] | undefined = this.#snippetsAll[nameWithoutPackage];
     if (snippets) {
-      delete this._snippets[nameWithoutPackage];
+      delete this.#snippets[nameWithoutPackage];
       const snippetText: string = this._generateExampleSnippetText(snippets);
       if (yamlItem.remarks) {
         yamlItem.remarks += snippetText;
@@ -109,13 +109,13 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
 
   // Gets the link to the API set based on product context. Seeks a case-insensitive match in the hash set.
   private _getApiSetUrl(uid: string): string {
-    for (const key of Object.keys(this._apiSetUrls)) {
+    for (const key of Object.keys(this.#apiSetUrls)) {
       const regexp: RegExp = new RegExp(key, 'i');
       if (regexp.test(uid)) {
-        return this._apiSetUrls[key];
+        return this.#apiSetUrls[key];
       }
     }
-    return this._apiSetUrlDefault; // match not found.
+    return this.#apiSetUrlDefault; // match not found.
   }
 
   private _generateExampleSnippetText(snippets: string[]): string {

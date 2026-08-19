@@ -62,22 +62,22 @@ export class CommandLineParser extends CommandLineParameterProvider {
    */
   public selectedAction: CommandLineAction | undefined;
 
-  private readonly _argumentParser: argparse.ArgumentParser;
-  private _actionsSubParser: argparse.SubParser | undefined;
-  private readonly _options: ICommandLineParserOptions;
-  private readonly _actionsByName: Map<string, CommandLineAction>;
-  private _executed: boolean = false;
-  private _tabCompleteActionWasAdded: boolean = false;
+  readonly #argumentParser: argparse.ArgumentParser;
+  #actionsSubParser: argparse.SubParser | undefined;
+  readonly #options: ICommandLineParserOptions;
+  readonly #actionsByName: Map<string, CommandLineAction>;
+  #executed: boolean = false;
+  #tabCompleteActionWasAdded: boolean = false;
 
   public constructor(options: ICommandLineParserOptions) {
     super();
 
-    this._options = options;
-    this._actionsByName = new Map<string, CommandLineAction>();
+    this.#options = options;
+    this.#actionsByName = new Map<string, CommandLineAction>();
 
     const { toolFilename, toolDescription, toolEpilog } = options;
 
-    this._argumentParser = new CustomArgumentParser({
+    this.#argumentParser = new CustomArgumentParser({
       addHelp: true,
       prog: toolFilename,
       description: escapeSprintf(toolDescription),
@@ -93,22 +93,22 @@ export class CommandLineParser extends CommandLineParameterProvider {
    * Returns the list of actions that were defined for this CommandLineParser object.
    */
   public get actions(): ReadonlyArray<CommandLineAction> {
-    return Array.from(this._actionsByName.values());
+    return Array.from(this.#actionsByName.values());
   }
 
   /**
    * Defines a new action that can be used with the CommandLineParser instance.
    */
   public addAction(action: CommandLineAction): void {
-    if (!this._actionsSubParser) {
-      this._actionsSubParser = this._argumentParser.addSubparsers({
+    if (!this.#actionsSubParser) {
+      this.#actionsSubParser = this.#argumentParser.addSubparsers({
         metavar: '<command>',
         dest: 'action'
       });
     }
 
-    action._buildParser(this._actionsSubParser);
-    this._actionsByName.set(action.actionName, action);
+    action._buildParser(this.#actionsSubParser);
+    this.#actionsByName.set(action.actionName, action);
   }
 
   /**
@@ -128,7 +128,7 @@ export class CommandLineParser extends CommandLineParameterProvider {
    * undefined is returned.
    */
   public tryGetAction(actionName: string): CommandLineAction | undefined {
-    return this._actionsByName.get(actionName);
+    return this.#actionsByName.get(actionName);
   }
 
   /**
@@ -149,9 +149,9 @@ export class CommandLineParser extends CommandLineParameterProvider {
    *               the process.argv will be used
    */
   public async executeAsync(args?: string[]): Promise<boolean> {
-    if (this._options.enableTabCompletionAction && !this._tabCompleteActionWasAdded) {
+    if (this.#options.enableTabCompletionAction && !this.#tabCompleteActionWasAdded) {
       this.addAction(new TabCompleteAction(this.actions, this.parameters));
-      this._tabCompleteActionWasAdded = true;
+      this.#tabCompleteActionWasAdded = true;
     }
 
     try {
@@ -201,13 +201,13 @@ export class CommandLineParser extends CommandLineParameterProvider {
    */
   public async executeWithoutErrorHandlingAsync(args?: string[]): Promise<void> {
     try {
-      if (this._executed) {
+      if (this.#executed) {
         // In the future we could allow the same parser to be invoked multiple times
         // with different arguments.  We'll do that work as soon as someone encounters
         // a real world need for it.
         throw new Error('executeAsync() was already called for this parser instance');
       }
-      this._executed = true;
+      this.#executed = true;
 
       this._validateDefinitions();
 
@@ -225,7 +225,7 @@ export class CommandLineParser extends CommandLineParameterProvider {
         if (args.length === 0) {
           // Parsers that use actions should print help when 0 args are provided. Allow
           // actionless parsers to continue on zero args.
-          this._argumentParser.printHelp();
+          this.#argumentParser.printHelp();
           return;
         }
         // Alias actions may provide a list of default params to add after the action name.
@@ -261,16 +261,16 @@ export class CommandLineParser extends CommandLineParameterProvider {
       }
 
       this._preParse();
-      patchFormatUsageForArgumentParser(this._argumentParser);
+      patchFormatUsageForArgumentParser(this.#argumentParser);
       for (const action of this.actions) {
         action._preParse();
         patchFormatUsageForArgumentParser(action._getArgumentParser());
       }
 
-      const data: ICommandLineParserData = this._argumentParser.parseArgs(args);
+      const data: ICommandLineParserData = this.#argumentParser.parseArgs(args);
 
       postParse();
-      this._processParsedData(this._options, data);
+      this._processParsedData(this.#options, data);
 
       this.selectedAction = this.tryGetAction(data.action);
       if (this.actions.length > 0 && !this.selectedAction) {
@@ -278,7 +278,7 @@ export class CommandLineParser extends CommandLineParameterProvider {
         throw new Error(`An action must be specified (${actions.join(', ')})`);
       }
 
-      this.selectedAction?._processParsedData(this._options, data);
+      this.selectedAction?._processParsedData(this.#options, data);
       await this.onExecuteAsync();
     } catch (err) {
       if (err instanceof CommandLineParserExitError) {
@@ -311,7 +311,7 @@ export class CommandLineParser extends CommandLineParameterProvider {
       ...state,
       parentParameterNames: updatedParentParameterNames
     };
-    for (const action of this._actionsByName.values()) {
+    for (const action of this.#actionsByName.values()) {
       action._registerDefinedParameters(parentState);
     }
   }
@@ -328,7 +328,7 @@ export class CommandLineParser extends CommandLineParameterProvider {
    * @internal
    */
   protected override _getArgumentParser(): argparse.ArgumentParser {
-    return this._argumentParser;
+    return this.#argumentParser;
   }
 
   /**

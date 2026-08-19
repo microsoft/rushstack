@@ -22,17 +22,17 @@ import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 export class DeclarationReferenceGenerator {
   public static readonly unknownReference: string = '?';
 
-  private _collector: Collector;
+  #collector: Collector;
 
   public constructor(collector: Collector) {
-    this._collector = collector;
+    this.#collector = collector;
   }
 
   /**
    * Gets the UID for a TypeScript Identifier that references a type.
    */
   public getDeclarationReferenceForIdentifier(node: ts.Identifier): DeclarationReference | undefined {
-    const symbol: ts.Symbol | undefined = this._collector.typeChecker.getSymbolAtLocation(node);
+    const symbol: ts.Symbol | undefined = this.#collector.typeChecker.getSymbolAtLocation(node);
     if (symbol !== undefined) {
       const isExpression: boolean = _isInExpressionContext(node);
       return (
@@ -68,7 +68,7 @@ export class DeclarationReferenceGenerator {
     // global symbols or external library symbols to be Locals.
     const isGlobal: boolean = !!sourceFile && !ts.isExternalModule(sourceFile);
     const isFromExternalLibrary: boolean =
-      !!sourceFile && this._collector.program.isSourceFileFromExternalLibrary(sourceFile);
+      !!sourceFile && this.#collector.program.isSourceFileFromExternalLibrary(sourceFile);
     if (isGlobal || isFromExternalLibrary) {
       if (parent && parent.members && _isSameSymbol(parent.members.get(symbol.escapedName), symbol)) {
         return Navigation.Members;
@@ -81,7 +81,7 @@ export class DeclarationReferenceGenerator {
     // `CollectorEntity`, then use Exports. We use `consumable` here instead of `exported` because
     // if the symbol is exported from a non-consumable `AstNamespaceImport`, we don't want to use
     // Exports. We should use Locals instead.
-    const entity: CollectorEntity | undefined = this._collector.tryGetEntityForSymbol(symbol);
+    const entity: CollectorEntity | undefined = this.#collector.tryGetEntityForSymbol(symbol);
     if (entity?.consumable) {
       return Navigation.Exports;
     }
@@ -114,10 +114,10 @@ export class DeclarationReferenceGenerator {
 
     let followedSymbol: ts.Symbol = symbol;
     if (followedSymbol.flags & ts.SymbolFlags.ExportValue) {
-      followedSymbol = this._collector.typeChecker.getExportSymbolOfSymbol(followedSymbol);
+      followedSymbol = this.#collector.typeChecker.getExportSymbolOfSymbol(followedSymbol);
     }
     if (followedSymbol.flags & ts.SymbolFlags.Alias) {
-      followedSymbol = this._collector.typeChecker.getAliasedSymbol(followedSymbol);
+      followedSymbol = this.#collector.typeChecker.getAliasedSymbol(followedSymbol);
 
       // Without this logic, we end up following the symbol `ns` in `import * as ns from './file'` to
       // the actual file `file.ts`. We don't want to do this, so revert to the original symbol.
@@ -144,7 +144,7 @@ export class DeclarationReferenceGenerator {
     }
 
     let localName: string = followedSymbol.name;
-    const entity: CollectorEntity | undefined = this._collector.tryGetEntityForSymbol(followedSymbol);
+    const entity: CollectorEntity | undefined = this.#collector.tryGetEntityForSymbol(followedSymbol);
     if (entity?.nameForEmit) {
       localName = entity.nameForEmit;
     }
@@ -192,7 +192,7 @@ export class DeclarationReferenceGenerator {
     // Note that it's possible for a symbol to be exported from an entry point as well as one or more
     // namespaces. In that case, it's not clear what to choose as its parent. Today's logic is neither
     // perfect nor particularly stable to API items being renamed and shuffled around.
-    const entity: CollectorEntity | undefined = this._collector.tryGetEntityForSymbol(symbol);
+    const entity: CollectorEntity | undefined = this.#collector.tryGetEntityForSymbol(symbol);
     if (entity) {
       if (entity.exportedFromEntryPoint) {
         return new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
@@ -206,7 +206,7 @@ export class DeclarationReferenceGenerator {
       ) {
         const parentSymbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(
           firstExportingConsumableParent.astEntity.declaration,
-          this._collector.typeChecker
+          this.#collector.typeChecker
         );
         if (parentSymbol) {
           return this._symbolToDeclarationReference(
@@ -244,7 +244,7 @@ export class DeclarationReferenceGenerator {
     if (grandParent && ts.isModuleDeclaration(grandParent)) {
       const grandParentSymbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(
         grandParent,
-        this._collector.typeChecker
+        this.#collector.typeChecker
       );
       if (grandParentSymbol) {
         return this._symbolToDeclarationReference(
@@ -264,27 +264,27 @@ export class DeclarationReferenceGenerator {
   }
 
   private _getPackageName(sourceFile: ts.SourceFile): string {
-    if (this._collector.program.isSourceFileFromExternalLibrary(sourceFile)) {
+    if (this.#collector.program.isSourceFileFromExternalLibrary(sourceFile)) {
       const packageJson: INodePackageJson | undefined =
-        this._collector.packageJsonLookup.tryLoadNodePackageJsonFor(sourceFile.fileName);
+        this.#collector.packageJsonLookup.tryLoadNodePackageJsonFor(sourceFile.fileName);
 
       if (packageJson && packageJson.name) {
         return packageJson.name;
       }
       return DeclarationReferenceGenerator.unknownReference;
     }
-    return this._collector.workingPackage.name;
+    return this.#collector.workingPackage.name;
   }
 
   private _sourceFileToModuleSource(sourceFile: ts.SourceFile | undefined): GlobalSource | ModuleSource {
     if (sourceFile && ts.isExternalModule(sourceFile)) {
       const packageName: string = this._getPackageName(sourceFile);
 
-      if (this._collector.bundledPackageNames.has(packageName)) {
+      if (this.#collector.bundledPackageNames.has(packageName)) {
         // The api-extractor.json config file has a "bundledPackages" setting, which causes imports from
         // certain NPM packages to be treated as part of the working project.  In this case, we need to
         // substitute the working package name.
-        return new ModuleSource(this._collector.workingPackage.name);
+        return new ModuleSource(this.#collector.workingPackage.name);
       } else {
         return new ModuleSource(packageName);
       }

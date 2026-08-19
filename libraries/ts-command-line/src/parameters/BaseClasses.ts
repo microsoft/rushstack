@@ -81,7 +81,7 @@ export type CommandLineParameter =
  * @public
  */
 export abstract class CommandLineParameterBase {
-  private _shortNameValue: string | undefined;
+  #shortNameValue: string | undefined;
 
   /**
    * A unique internal key used to retrieve the value from the parser's dictionary.
@@ -137,7 +137,7 @@ export abstract class CommandLineParameterBase {
   /** @internal */
   public constructor(definition: IBaseCommandLineDefinition) {
     this.longName = definition.parameterLongName;
-    this._shortNameValue = definition.parameterShortName;
+    this.#shortNameValue = definition.parameterShortName;
     this.parameterGroup = definition.parameterGroup;
     this.parameterScope = definition.parameterScope;
     this.description = definition.description;
@@ -205,7 +205,7 @@ export abstract class CommandLineParameterBase {
 
   /** {@inheritDoc IBaseCommandLineDefinition.parameterShortName} */
   public get shortName(): string | undefined {
-    return this._shortNameValue;
+    return this.#shortNameValue;
   }
 
   /**

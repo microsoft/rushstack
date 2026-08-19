@@ -11,61 +11,61 @@ interface IQueueItem {
 }
 
 export class WorkQueue {
-  private readonly _queue: MinimumHeap<IQueueItem>;
-  private readonly _abortSignal: AbortSignal;
-  private readonly _abortPromise: Promise<void>;
+  readonly #queue: MinimumHeap<IQueueItem>;
+  readonly #abortSignal: AbortSignal;
+  readonly #abortPromise: Promise<void>;
 
-  private _pushPromise: Promise<void>;
-  private _resolvePush: () => void;
-  private _resolvePushTimeout: NodeJS.Timeout | undefined;
+  #pushPromise: Promise<void>;
+  #resolvePush: () => void;
+  #resolvePushTimeout: NodeJS.Timeout | undefined;
 
   public constructor(abortSignal: AbortSignal) {
     // Sort by priority descending. Thus the comparator returns a negative number if a has higher priority than b.
-    this._queue = new MinimumHeap((a: IQueueItem, b: IQueueItem) => b.priority - a.priority);
-    this._abortSignal = abortSignal;
-    this._abortPromise = abortSignal.aborted
+    this.#queue = new MinimumHeap((a: IQueueItem, b: IQueueItem) => b.priority - a.priority);
+    this.#abortSignal = abortSignal;
+    this.#abortPromise = abortSignal.aborted
       ? Promise.resolve()
       : new Promise<void>((resolve) => {
           abortSignal.addEventListener('abort', () => resolve(), { once: true });
         });
 
-    [this._pushPromise, this._resolvePush] = Async.getSignal();
-    this._resolvePushTimeout = undefined;
+    [this.#pushPromise, this.#resolvePush] = Async.getSignal();
+    this.#resolvePushTimeout = undefined;
   }
 
   public async *[Symbol.asyncIterator](): AsyncIterableIterator<() => Promise<void>> {
-    while (!this._abortSignal.aborted) {
-      while (this._queue.size > 0) {
-        const item: IQueueItem = this._queue.poll()!;
+    while (!this.#abortSignal.aborted) {
+      while (this.#queue.size > 0) {
+        const item: IQueueItem = this.#queue.poll()!;
         yield item.task;
       }
 
-      await Promise.race([this._pushPromise, this._abortPromise]);
+      await Promise.race([this.#pushPromise, this.#abortPromise]);
     }
   }
 
   public pushAsync(task: () => Promise<OperationStatus>, priority: number): Promise<OperationStatus> {
     return new Promise((resolve, reject) => {
-      this._queue.push({
+      this.#queue.push({
         task: () => task().then(resolve, reject),
         priority
       });
 
       // ESLINT: "Promises must be awaited, end with a call to .catch, end with a call to .then ..."
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      this._abortPromise.finally(() => resolve(OperationStatus.Aborted));
+      this.#abortPromise.finally(() => resolve(OperationStatus.Aborted));
 
       this._resolvePushDebounced();
     });
   }
 
   private _resolvePushDebounced(): void {
-    if (!this._resolvePushTimeout) {
-      this._resolvePushTimeout = setTimeout(() => {
-        this._resolvePushTimeout = undefined;
-        this._resolvePush();
+    if (!this.#resolvePushTimeout) {
+      this.#resolvePushTimeout = setTimeout(() => {
+        this.#resolvePushTimeout = undefined;
+        this.#resolvePush();
 
-        [this._pushPromise, this._resolvePush] = Async.getSignal();
+        [this.#pushPromise, this.#resolvePush] = Async.getSignal();
       });
     }
   }
