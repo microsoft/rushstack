@@ -13,12 +13,12 @@ export enum WatchState {
 
 export class WatchProject {
   public readonly name: string;
-  private _state: WatchState = WatchState.Start;
+  #state: WatchState = WatchState.Start;
 
   public readonly dependencies: WatchProject[] = [];
   public readonly consumers: WatchProject[] = [];
 
-  private _live: boolean = false;
+  #live: boolean = false;
 
   public readonly bufferedLines: string[] = [];
 
@@ -42,12 +42,12 @@ export class WatchProject {
         dependency.consumers.push(this);
       }
     } else {
-      this._live = true;
+      this.#live = true;
     }
   }
 
   public get state(): WatchState {
-    return this._state;
+    return this.#state;
   }
 
   public get reported(): boolean {
@@ -58,23 +58,23 @@ export class WatchProject {
    * A project is "live" if and only if (the transitive closure of) its dependencies have `State.Succeeded`.
    */
   public get live(): boolean {
-    return this._live;
+    return this.#live;
   }
 
   public setState(state: WatchState): void {
-    if (this._state === state) {
+    if (this.#state === state) {
       return;
     }
-    if (this._state === WatchState.Succeeded) {
+    if (this.#state === WatchState.Succeeded) {
       // If we are leaving the Succeeded state, mark all the downstream consumers as dead
-      if (this._live) {
+      if (this.#live) {
         this._markDeadRecursive();
       }
     }
-    this._state = state;
+    this.#state = state;
     if (this.state === WatchState.Succeeded) {
       // If we just entered the Succeeded state, then mark the immediate consumers as live
-      if (this._live) {
+      if (this.#live) {
         this._markLiveRecursive();
       }
     }
@@ -87,8 +87,8 @@ export class WatchProject {
 
   private _markDeadRecursive(): void {
     for (const consumer of this.consumers) {
-      if (consumer._live) {
-        consumer._live = false;
+      if (consumer.#live) {
+        consumer.#live = false;
         consumer._markDeadRecursive();
       }
     }
@@ -96,8 +96,8 @@ export class WatchProject {
 
   private _markLiveRecursive(): void {
     for (const consumer of this.consumers) {
-      consumer._live = true;
-      if (consumer._state === WatchState.Succeeded) {
+      consumer.#live = true;
+      if (consumer.#state === WatchState.Succeeded) {
         consumer._markLiveRecursive();
       }
     }

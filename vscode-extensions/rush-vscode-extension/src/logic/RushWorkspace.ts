@@ -27,16 +27,16 @@ let _rushWorkspace: RushWorkspace | undefined;
 const _onDidChangeWorkspace: vscode.EventEmitter<RushWorkspace> = new vscode.EventEmitter();
 
 export class RushWorkspace {
-  private _rushLib: typeof RushLib | undefined;
-  private _startingFolderPath: string;
-  private _rushConfiguration: RushLib.RushConfiguration;
-  private _rushCommandLineParser: RushCommandLine.CommandLineParser | undefined;
+  #rushLib: typeof RushLib | undefined;
+  #startingFolderPath: string;
+  #rushConfiguration: RushLib.RushConfiguration;
+  #rushCommandLineParser: RushCommandLine.CommandLineParser | undefined;
 
   public static readonly onDidChangeWorkspace: vscode.Event<RushWorkspace> = _onDidChangeWorkspace.event;
 
   private constructor({ rushLib, startingFolder }: IRushWorkspace) {
-    this._rushLib = rushLib;
-    this._startingFolderPath = startingFolder;
+    this.#rushLib = rushLib;
+    this.#startingFolderPath = startingFolder;
     const { RushConfiguration } = rushLib;
     // existence check for API
     if (!RushConfiguration) {
@@ -50,7 +50,7 @@ export class RushWorkspace {
       throw new Error('RushConfiguration not found');
     }
     terminal.writeDebugLine(`rushConfiguration loaded from: ${startingFolder}`);
-    this._rushConfiguration = rushConfiguration;
+    this.#rushConfiguration = rushConfiguration;
 
     // if (RushCommandLine) {
     //   this._rushCommandLineParser = new RushCommandLine({
@@ -133,14 +133,14 @@ export class RushWorkspace {
   }
 
   public get rushConfiguration(): RushLib.RushConfiguration {
-    return this._rushConfiguration;
+    return this.#rushConfiguration;
   }
 
   public get workspaceRootPath(): string {
-    return this._rushConfiguration.rushJsonFolder;
+    return this.#rushConfiguration.rushJsonFolder;
   }
 
   public get commandLineActions(): CommandLineAction[] {
-    return (this._rushCommandLineParser?.actions || []).slice() as unknown as CommandLineAction[];
+    return (this.#rushCommandLineParser?.actions || []).slice() as unknown as CommandLineAction[];
   }
 }

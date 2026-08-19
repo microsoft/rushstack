@@ -101,22 +101,22 @@ interface IQueuedRequest {
  * @public
  */
 export class RequestScheduler {
-  private readonly _queue: IQueuedRequest[] = [];
-  private _activeClass: RequestExclusivityClass | undefined;
-  private _activeRequestCount: number = 0;
+  readonly #queue: IQueuedRequest[] = [];
+  #activeClass: RequestExclusivityClass | undefined;
+  #activeRequestCount: number = 0;
 
   /**
    * The number of requests currently waiting for admission.
    */
   public get queuedRequestCount(): number {
-    return this._queue.length;
+    return this.#queue.length;
   }
 
   /**
    * The number of requests that currently hold a lease.
    */
   public get activeRequestCount(): number {
-    return this._activeRequestCount;
+    return this.#activeRequestCount;
   }
 
   /**
@@ -135,7 +135,7 @@ export class RequestScheduler {
       );
     }
 
-    if (this._queue.length === 0 && this._canAdmit(options.exclusivityClass)) {
+    if (this.#queue.length === 0 && this._canAdmit(options.exclusivityClass)) {
       return Promise.resolve(this._createLease(options.exclusivityClass));
     }
 
@@ -178,7 +178,7 @@ export class RequestScheduler {
         };
         options.abortSignal.addEventListener('abort', request.abortListener, { once: true });
       }
-      this._queue.push(request);
+      this.#queue.push(request);
       this._notifyQueuePositions();
       this._drainQueue();
     });
@@ -196,18 +196,18 @@ export class RequestScheduler {
   }
 
   private _canAdmit(exclusivityClass: RequestExclusivityClass): boolean {
-    if (this._activeRequestCount === 0) {
+    if (this.#activeRequestCount === 0) {
       return true;
     }
 
     return (
-      exclusivityClass !== RequestExclusivityClass.Exclusive && exclusivityClass === this._activeClass
+      exclusivityClass !== RequestExclusivityClass.Exclusive && exclusivityClass === this.#activeClass
     );
   }
 
   private _createLease(exclusivityClass: RequestExclusivityClass): IRequestLease {
-    this._activeClass = exclusivityClass;
-    this._activeRequestCount++;
+    this.#activeClass = exclusivityClass;
+    this.#activeRequestCount++;
 
     let released: boolean = false;
     return {
@@ -218,9 +218,9 @@ export class RequestScheduler {
         }
 
         released = true;
-        this._activeRequestCount--;
-        if (this._activeRequestCount === 0) {
-          this._activeClass = undefined;
+        this.#activeRequestCount--;
+        if (this.#activeRequestCount === 0) {
+          this.#activeClass = undefined;
         }
         this._drainQueue();
       }
@@ -229,13 +229,13 @@ export class RequestScheduler {
 
   private _drainQueue(): void {
     let admittedRequest: boolean = false;
-    while (this._queue.length > 0) {
-      const request: IQueuedRequest = this._queue[0];
+    while (this.#queue.length > 0) {
+      const request: IQueuedRequest = this.#queue[0];
       if (!this._canAdmit(request.options.exclusivityClass)) {
         break;
       }
 
-      this._queue.shift();
+      this.#queue.shift();
       this._cleanupQueuedRequest(request);
       request.resolve(this._createLease(request.options.exclusivityClass));
       admittedRequest = true;
@@ -247,12 +247,12 @@ export class RequestScheduler {
   }
 
   private _rejectQueuedRequest(request: IQueuedRequest, error: Error): void {
-    const index: number = this._queue.indexOf(request);
+    const index: number = this.#queue.indexOf(request);
     if (index < 0) {
       return;
     }
 
-    this._queue.splice(index, 1);
+    this.#queue.splice(index, 1);
     this._cleanupQueuedRequest(request);
     request.reject(error);
     this._notifyQueuePositions();
@@ -271,9 +271,9 @@ export class RequestScheduler {
   }
 
   private _notifyQueuePositions(): void {
-    for (let index: number = 0; index < this._queue.length; index++) {
+    for (let index: number = 0; index < this.#queue.length; index++) {
       try {
-        this._queue[index].options.onQueuePositionChanged?.(index + 1);
+        this.#queue[index].options.onQueuePositionChanged?.(index + 1);
       } catch (error) {
         process.emitWarning(error instanceof Error ? error : String(error), {
           code: 'RUSH_DAEMON_QUEUE_POSITION_CALLBACK_ERROR'

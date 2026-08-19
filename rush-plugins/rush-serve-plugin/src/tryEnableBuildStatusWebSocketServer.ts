@@ -72,11 +72,11 @@ export function getLogServePathForProject(logServePath: string, packageName: str
 }
 
 export class WebSocketTerminalWritable extends TerminalWritable {
-  private _webSockets: ReadonlySet<WebSocket>;
+  #webSockets: ReadonlySet<WebSocket>;
 
   public constructor(webSockets: ReadonlySet<WebSocket>) {
     super();
-    this._webSockets = webSockets;
+    this.#webSockets = webSockets;
   }
 
   protected override onWriteChunk(chunk: ITerminalChunk): void {
@@ -86,7 +86,7 @@ export class WebSocketTerminalWritable extends TerminalWritable {
       text: chunk.text
     };
     const stringifiedMessage: string = JSON.stringify(message);
-    for (const ws of this._webSockets) {
+    for (const ws of this.#webSockets) {
       ws.send(stringifiedMessage);
     }
   }

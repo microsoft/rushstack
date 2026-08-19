@@ -32,11 +32,11 @@ function isActivityPayload(payload: unknown): payload is IDaemonActivityPayload 
  */
 export class LegacyCollatedRenderer implements IDaemonRenderer {
   public readonly name: string = RENDERER_NAME;
-  private _terminal: IDaemonRendererTerminal | undefined;
+  #terminal: IDaemonRendererTerminal | undefined;
 
   /** {@inheritDoc IDaemonRenderer.initializeAsync} */
   public async initializeAsync(context: IDaemonRendererContext): Promise<void> {
-    this._terminal = context.terminal;
+    this.#terminal = context.terminal;
   }
 
   /** {@inheritDoc IDaemonRenderer.report} */
@@ -51,7 +51,7 @@ export class LegacyCollatedRenderer implements IDaemonRenderer {
     // Emit the client's OS newline, matching the newline normalization the
     // collated pipeline applies (TextRewriterTransform OsDefault) so global
     // status lines and collated blocks are consistent on every platform.
-    this._terminal?.write(`${text}${EOL}`, 'stdout');
+    this.#terminal?.write(`${text}${EOL}`, 'stdout');
   }
 
   /** {@inheritDoc IDaemonRenderer.flushAsync} */
@@ -61,6 +61,6 @@ export class LegacyCollatedRenderer implements IDaemonRenderer {
 
   /** {@inheritDoc IDaemonRenderer.closeAsync} */
   public async closeAsync(): Promise<void> {
-    this._terminal = undefined;
+    this.#terminal = undefined;
   }
 }
