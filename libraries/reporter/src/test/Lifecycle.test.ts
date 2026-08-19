@@ -7,6 +7,7 @@ import {
   summarizeShadowResult,
   createRushDiagnostic,
   ReporterManager,
+  isReporterEventRequired,
   type IReporter,
   type IReporterEventEnvelope,
   type IReporterEventSink,
@@ -63,7 +64,8 @@ describe('LifecycleEmitter', () => {
     emitter.emitOperationRegistered({ operationId: 'op1', projectName: 'p', phaseName: '_phase:build' });
 
     expect(sink.inputs[0].type).toBe('operationRegistered');
-    expect(sink.inputs[0].required).toBe(true);
+    // Lifecycle events are protected; the manager derives `required` from the type.
+    expect(isReporterEventRequired('operationRegistered')).toBe(true);
     expect(sink.inputs[0].scope).toEqual({
       commandName: 'build',
       operationId: 'op1',
@@ -82,7 +84,7 @@ describe('LifecycleEmitter', () => {
     );
     expect(sink.inputs[0].type).toBe('diagnosticEmitted');
     expect(sink.inputs[0].privacy).toBe('local-sensitive');
-    expect(sink.inputs[0].required).toBe(true);
+    expect(isReporterEventRequired('diagnosticEmitted')).toBe(true);
   });
 
   it('writes nothing to stdout or stderr while events flow (shadow mode)', () => {

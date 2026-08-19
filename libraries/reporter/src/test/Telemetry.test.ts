@@ -46,7 +46,6 @@ function rawInput(type: string, payload: unknown): IReporterEmitEventInput<unkno
     sessionId: 'sess',
     source: SOURCE,
     privacy: 'public',
-    required: false,
     type: type as IReporterEmitEventInput<unknown>['type'],
     payload
   };

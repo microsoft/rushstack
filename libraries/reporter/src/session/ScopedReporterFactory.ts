@@ -66,16 +66,15 @@ export function createScopedReporter(options: ICreateScopedReporterOptions): ISc
 
   return {
     emitMessage(messageOptions: IScopedMessageOptions): string {
-      const required: boolean = messageOptions.severity === 'warning' || messageOptions.severity === 'error';
       return sink.emit({
         protocolVersion,
         sessionId,
         source,
         scope,
-        privacy: messageOptions.privacy ?? 'public',
-        required,
-        type: 'activityChanged',
-        payload: { kind: 'message', severity: messageOptions.severity, text: messageOptions.text }
+        // Message text fails safe at local-sensitive by default.
+        privacy: messageOptions.privacy ?? 'local-sensitive',
+        type: 'messageEmitted',
+        payload: { severity: messageOptions.severity, text: messageOptions.text }
       });
     },
 
@@ -89,7 +88,6 @@ export function createScopedReporter(options: ICreateScopedReporterOptions): ISc
         source,
         scope,
         privacy: computeEnvelopePrivacyFloor(classifications),
-        required: diagnostic.severity === 'error',
         type: 'diagnosticEmitted',
         payload: diagnostic
       });
@@ -105,7 +103,6 @@ export function createScopedReporter(options: ICreateScopedReporterOptions): ISc
         source,
         scope,
         privacy: 'public',
-        required: false,
         type: 'extension',
         payload: { name, payload }
       });
