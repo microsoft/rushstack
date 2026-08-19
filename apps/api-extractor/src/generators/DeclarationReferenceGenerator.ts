@@ -56,10 +56,10 @@ export class DeclarationReferenceGenerator {
     symbol: ts.Symbol,
     meaning: ts.SymbolFlags
   ): DeclarationReference | undefined {
-    return this._symbolToDeclarationReference(symbol, meaning, /*includeModuleSymbols*/ false);
+    return this.#symbolToDeclarationReference(symbol, meaning, /*includeModuleSymbols*/ false);
   }
 
-  private _getNavigationToSymbol(symbol: ts.Symbol): Navigation {
+  #getNavigationToSymbol(symbol: ts.Symbol): Navigation {
     const declaration: ts.Declaration | undefined = TypeScriptHelpers.tryGetADeclaration(symbol);
     const sourceFile: ts.SourceFile | undefined = declaration?.getSourceFile();
     const parent: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(symbol);
@@ -104,7 +104,7 @@ export class DeclarationReferenceGenerator {
     return Navigation.Locals;
   }
 
-  private _symbolToDeclarationReference(
+  #symbolToDeclarationReference(
     symbol: ts.Symbol,
     meaning: ts.SymbolFlags,
     includeModuleSymbols: boolean
@@ -130,7 +130,7 @@ export class DeclarationReferenceGenerator {
       if (!includeModuleSymbols) {
         return undefined;
       }
-      return new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
+      return new DeclarationReference(this.#sourceFileToModuleSource(sourceFile));
     }
 
     // Do not generate a declaration reference for a type parameter.
@@ -138,7 +138,7 @@ export class DeclarationReferenceGenerator {
       return undefined;
     }
 
-    let parentRef: DeclarationReference | undefined = this._getParentReference(followedSymbol);
+    let parentRef: DeclarationReference | undefined = this.#getParentReference(followedSymbol);
     if (!parentRef) {
       return undefined;
     }
@@ -173,7 +173,7 @@ export class DeclarationReferenceGenerator {
       }
     }
 
-    const navigation: Navigation = this._getNavigationToSymbol(followedSymbol);
+    const navigation: Navigation = this.#getNavigationToSymbol(followedSymbol);
 
     // If the symbol is a global, ensure the source is global.
     if (sourceFile && !ts.isExternalModule(sourceFile) && parentRef.source !== GlobalSource.instance) {
@@ -185,7 +185,7 @@ export class DeclarationReferenceGenerator {
       .withMeaning(_getMeaningOfSymbol(followedSymbol, meaning));
   }
 
-  private _getParentReference(symbol: ts.Symbol): DeclarationReference | undefined {
+  #getParentReference(symbol: ts.Symbol): DeclarationReference | undefined {
     const declaration: ts.Node | undefined = TypeScriptHelpers.tryGetADeclaration(symbol);
     const sourceFile: ts.SourceFile | undefined = declaration?.getSourceFile();
 
@@ -195,7 +195,7 @@ export class DeclarationReferenceGenerator {
     const entity: CollectorEntity | undefined = this.#collector.tryGetEntityForSymbol(symbol);
     if (entity) {
       if (entity.exportedFromEntryPoint) {
-        return new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
+        return new DeclarationReference(this.#sourceFileToModuleSource(sourceFile));
       }
 
       const firstExportingConsumableParent: CollectorEntity | undefined =
@@ -209,7 +209,7 @@ export class DeclarationReferenceGenerator {
           this.#collector.typeChecker
         );
         if (parentSymbol) {
-          return this._symbolToDeclarationReference(
+          return this.#symbolToDeclarationReference(
             parentSymbol,
             parentSymbol.flags,
             /*includeModuleSymbols*/ true
@@ -221,7 +221,7 @@ export class DeclarationReferenceGenerator {
     // Next, try to find a parent symbol via the symbol tree.
     const parentSymbol: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(symbol);
     if (parentSymbol) {
-      return this._symbolToDeclarationReference(
+      return this.#symbolToDeclarationReference(
         parentSymbol,
         parentSymbol.flags,
         /*includeModuleSymbols*/ true
@@ -247,7 +247,7 @@ export class DeclarationReferenceGenerator {
         this.#collector.typeChecker
       );
       if (grandParentSymbol) {
-        return this._symbolToDeclarationReference(
+        return this.#symbolToDeclarationReference(
           grandParentSymbol,
           grandParentSymbol.flags,
           /*includeModuleSymbols*/ true
@@ -257,13 +257,13 @@ export class DeclarationReferenceGenerator {
 
     // At this point, we have a local symbol in a module.
     if (sourceFile && ts.isExternalModule(sourceFile)) {
-      return new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
+      return new DeclarationReference(this.#sourceFileToModuleSource(sourceFile));
     } else {
       return new DeclarationReference(GlobalSource.instance);
     }
   }
 
-  private _getPackageName(sourceFile: ts.SourceFile): string {
+  #getPackageName(sourceFile: ts.SourceFile): string {
     if (this.#collector.program.isSourceFileFromExternalLibrary(sourceFile)) {
       const packageJson: INodePackageJson | undefined =
         this.#collector.packageJsonLookup.tryLoadNodePackageJsonFor(sourceFile.fileName);
@@ -276,9 +276,9 @@ export class DeclarationReferenceGenerator {
     return this.#collector.workingPackage.name;
   }
 
-  private _sourceFileToModuleSource(sourceFile: ts.SourceFile | undefined): GlobalSource | ModuleSource {
+  #sourceFileToModuleSource(sourceFile: ts.SourceFile | undefined): GlobalSource | ModuleSource {
     if (sourceFile && ts.isExternalModule(sourceFile)) {
-      const packageName: string = this._getPackageName(sourceFile);
+      const packageName: string = this.#getPackageName(sourceFile);
 
       if (this.#collector.bundledPackageNames.has(packageName)) {
         // The api-extractor.json config file has a "bundledPackages" setting, which causes imports from

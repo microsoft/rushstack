@@ -184,7 +184,7 @@ export class TypingsGenerator<TFileContents = string> {
 
     this.terminal = terminal;
 
-    this._options.fileExtensions = this._normalizeFileExtensions(fileExtensions);
+    this._options.fileExtensions = this.#normalizeFileExtensions(fileExtensions);
 
     this.#dependenciesOfFile = new Map();
     this.#consumersOfFile = new Map();
@@ -210,7 +210,7 @@ export class TypingsGenerator<TFileContents = string> {
       });
     }
 
-    await this._reprocessFilesAsync(relativeFilePaths!, checkFilePaths);
+    await this.#reprocessFilesAsync(relativeFilePaths!, checkFilePaths);
   }
 
   public async runWatcherAsync(): Promise<void> {
@@ -232,7 +232,7 @@ export class TypingsGenerator<TFileContents = string> {
 
         const toProcess: string[] = Array.from(queue);
         queue.clear();
-        this._reprocessFilesAsync(toProcess, false)
+        this.#reprocessFilesAsync(toProcess, false)
           .then(() => {
             processing = false;
             // If the timeout was invoked again, immediately re-execute with the changed files.
@@ -269,7 +269,7 @@ export class TypingsGenerator<TFileContents = string> {
       watcher.on('change', onChange);
       watcher.on('unlink', async (relativePath) => {
         await Promise.all(
-          this._getOutputFilePathsWithoutCheck(relativePath).map(async (outputFile: string) => {
+          this.#getOutputFilePathsWithoutCheck(relativePath).map(async (outputFile: string) => {
             await FileSystem.deleteFileAsync(outputFile);
           })
         );
@@ -308,16 +308,16 @@ export class TypingsGenerator<TFileContents = string> {
       throw new Error(`"${relativePath}" must be relative`);
     }
 
-    return this._getOutputFilePathsWithoutCheck(relativePath);
+    return this.#getOutputFilePathsWithoutCheck(relativePath);
   }
 
-  private _getOutputFilePathsWithoutCheck(relativePath: string): string[] {
-    const typingsFilePaths: Iterable<string> = this._getTypingsFilePaths(relativePath);
+  #getOutputFilePathsWithoutCheck(relativePath: string): string[] {
+    const typingsFilePaths: Iterable<string> = this.#getTypingsFilePaths(relativePath);
     const additionalPaths: string[] | undefined = this._options.getAdditionalOutputFiles?.(relativePath);
     return additionalPaths ? [...typingsFilePaths, ...additionalPaths] : Array.from(typingsFilePaths);
   }
 
-  private async _reprocessFilesAsync(
+  async #reprocessFilesAsync(
     relativePaths: Iterable<string>,
     checkFilePaths: boolean
   ): Promise<void> {
@@ -352,15 +352,15 @@ export class TypingsGenerator<TFileContents = string> {
         if (!relativePath) {
           throw new Error(`Missing relative path for file ${resolvedPath}`);
         }
-        await this._parseFileAndGenerateTypingsAsync(relativePath, resolvedPath);
+        await this.#parseFileAndGenerateTypingsAsync(relativePath, resolvedPath);
       },
       { concurrency: 20 }
     );
   }
 
-  private async _parseFileAndGenerateTypingsAsync(relativePath: string, resolvedPath: string): Promise<void> {
+  async #parseFileAndGenerateTypingsAsync(relativePath: string, resolvedPath: string): Promise<void> {
     // Clear registered dependencies prior to reprocessing.
-    this._clearDependencies(resolvedPath);
+    this.#clearDependencies(resolvedPath);
 
     try {
       const fileContents: TFileContents = await this._options.readFile(resolvedPath, relativePath);
@@ -389,7 +389,7 @@ export class TypingsGenerator<TFileContents = string> {
         declarationMappings.length > 0
       );
 
-      const generatedTsFilePaths: Iterable<string> = this._getTypingsFilePaths(relativePath);
+      const generatedTsFilePaths: Iterable<string> = this.#getTypingsFilePaths(relativePath);
       for (const generatedTsFilePath of generatedTsFilePaths) {
         const outputLines: string[] = [...headerLines, typingsData];
         if (emitDeclarationMap) {
@@ -426,7 +426,7 @@ export class TypingsGenerator<TFileContents = string> {
   /**
    * Removes the consumer from all extant dependencies
    */
-  private _clearDependencies(consumer: string): void {
+  #clearDependencies(consumer: string): void {
     const dependencies: Set<string> | undefined = this.#dependenciesOfFile.get(consumer);
     if (dependencies) {
       for (const dependency of dependencies) {
@@ -436,7 +436,7 @@ export class TypingsGenerator<TFileContents = string> {
     }
   }
 
-  private *_getTypingsFilePaths(relativePath: string): Iterable<string> {
+  *#getTypingsFilePaths(relativePath: string): Iterable<string> {
     const { generatedTsFolder, secondaryGeneratedTsFolders } = this._options;
     const dtsFilename: string = `${relativePath}.d.ts`;
     yield `${generatedTsFolder}/${dtsFilename}`;
@@ -447,7 +447,7 @@ export class TypingsGenerator<TFileContents = string> {
     }
   }
 
-  private _normalizeFileExtensions(fileExtensions: string[]): string[] {
+  #normalizeFileExtensions(fileExtensions: string[]): string[] {
     const result: Set<string> = new Set();
     for (const fileExtension of fileExtensions) {
       if (!fileExtension.startsWith('.')) {

@@ -107,13 +107,13 @@ export class MessageRouter {
     this.showVerboseMessages = showVerboseMessages || showDiagnostics;
     this.showDiagnostics = showDiagnostics;
 
-    this._applyMessagesConfig(messagesConfig);
+    this.#applyMessagesConfig(messagesConfig);
   }
 
   /**
    * Read the api-extractor.json configuration and build up the tables of routing rules.
    */
-  private _applyMessagesConfig(messagesConfig: IExtractorMessagesConfig): void {
+  #applyMessagesConfig(messagesConfig: IExtractorMessagesConfig): void {
     if (messagesConfig.compilerMessageReporting) {
       for (const messageId of Object.getOwnPropertyNames(messagesConfig.compilerMessageReporting)) {
         const reportingRule: IReportingRule = _getNormalizedRule(
@@ -244,7 +244,7 @@ export class MessageRouter {
       properties
     );
 
-    this._associateMessageWithAstDeclaration(extractorMessage, astDeclaration);
+    this.#associateMessageWithAstDeclaration(extractorMessage, astDeclaration);
   }
 
   /**
@@ -274,7 +274,7 @@ export class MessageRouter {
       const extractorMessage: ExtractorMessage = new ExtractorMessage(options);
 
       if (astDeclaration) {
-        this._associateMessageWithAstDeclaration(extractorMessage, astDeclaration);
+        this.#associateMessageWithAstDeclaration(extractorMessage, astDeclaration);
       }
 
       this.#messages.push(extractorMessage);
@@ -302,7 +302,7 @@ export class MessageRouter {
   /**
    * Record this message in  _associatedMessagesForAstDeclaration
    */
-  private _associateMessageWithAstDeclaration(
+  #associateMessageWithAstDeclaration(
     extractorMessage: ExtractorMessage,
     astDeclaration: AstDeclaration
   ): void {
@@ -361,7 +361,7 @@ export class MessageRouter {
       // Make sure we didn't already report this message for some reason
       if (!associatedMessage.handled) {
         // Is this message type configured to go in the API report file?
-        const reportingRule: IReportingRule = this._getRuleForMessage(associatedMessage);
+        const reportingRule: IReportingRule = this.#getRuleForMessage(associatedMessage);
         if (reportingRule.addToApiReportFile) {
           // Include it in the result, and record that it went to the API report file
           messagesForApiReportFile.push(associatedMessage);
@@ -370,7 +370,7 @@ export class MessageRouter {
       }
     }
 
-    this._sortMessagesForOutput(messagesForApiReportFile);
+    this.#sortMessagesForOutput(messagesForApiReportFile);
     return messagesForApiReportFile;
   }
 
@@ -385,7 +385,7 @@ export class MessageRouter {
       // Make sure we didn't already report this message for some reason
       if (!unassociatedMessage.handled) {
         // Is this message type configured to go in the API report file?
-        const reportingRule: IReportingRule = this._getRuleForMessage(unassociatedMessage);
+        const reportingRule: IReportingRule = this.#getRuleForMessage(unassociatedMessage);
         if (reportingRule.addToApiReportFile) {
           // Include it in the result, and record that it went to the API report file
           messagesForApiReportFile.push(unassociatedMessage);
@@ -394,7 +394,7 @@ export class MessageRouter {
       }
     }
 
-    this._sortMessagesForOutput(messagesForApiReportFile);
+    this.#sortMessagesForOutput(messagesForApiReportFile);
     return messagesForApiReportFile;
   }
 
@@ -413,10 +413,10 @@ export class MessageRouter {
       }
     }
 
-    this._sortMessagesForOutput(messagesForLogger);
+    this.#sortMessagesForOutput(messagesForLogger);
 
     for (const message of messagesForLogger) {
-      this._handleMessage(message);
+      this.#handleMessage(message);
     }
   }
 
@@ -425,7 +425,7 @@ export class MessageRouter {
     message: string,
     properties?: IExtractorMessageProperties
   ): void {
-    this._handleMessage(
+    this.#handleMessage(
       new ExtractorMessage({
         category: ExtractorMessageCategory.Console,
         messageId,
@@ -441,7 +441,7 @@ export class MessageRouter {
     message: string,
     properties?: IExtractorMessageProperties
   ): void {
-    this._handleMessage(
+    this.#handleMessage(
       new ExtractorMessage({
         category: ExtractorMessageCategory.Console,
         messageId,
@@ -457,7 +457,7 @@ export class MessageRouter {
     message: string,
     properties?: IExtractorMessageProperties
   ): void {
-    this._handleMessage(
+    this.#handleMessage(
       new ExtractorMessage({
         category: ExtractorMessageCategory.Console,
         messageId,
@@ -473,7 +473,7 @@ export class MessageRouter {
     message: string,
     properties?: IExtractorMessageProperties
   ): void {
-    this._handleMessage(
+    this.#handleMessage(
       new ExtractorMessage({
         category: ExtractorMessageCategory.Console,
         messageId,
@@ -503,7 +503,7 @@ export class MessageRouter {
   /**
    * Give the calling application a chance to handle the `ExtractorMessage`, and if not, display it on the console.
    */
-  private _handleMessage(message: ExtractorMessage): void {
+  #handleMessage(message: ExtractorMessage): void {
     // Don't tally messages that were already "handled" by writing them into the API report
     if (message.handled) {
       return;
@@ -513,7 +513,7 @@ export class MessageRouter {
     if (message.category === ExtractorMessageCategory.Console) {
       // Console messages have their category log level assigned via logInfo(), logVerbose(), etc.
     } else {
-      const reportingRule: IReportingRule = this._getRuleForMessage(message);
+      const reportingRule: IReportingRule = this.#getRuleForMessage(message);
       message.logLevel = reportingRule.logLevel;
     }
 
@@ -573,7 +573,7 @@ export class MessageRouter {
   /**
    * For a given message, determine the IReportingRule based on the rule tables.
    */
-  private _getRuleForMessage(message: ExtractorMessage): IReportingRule {
+  #getRuleForMessage(message: ExtractorMessage): IReportingRule {
     const reportingRule: IReportingRule | undefined = this.#reportingRuleByMessageId.get(message.messageId);
     if (reportingRule) {
       return reportingRule;
@@ -593,7 +593,7 @@ export class MessageRouter {
   /**
    * Sorts an array of messages according to a reasonable ordering
    */
-  private _sortMessagesForOutput(messages: ExtractorMessage[]): void {
+  #sortMessagesForOutput(messages: ExtractorMessage[]): void {
     messages.sort((a, b) => {
       let diff: number;
       // First sort by file name

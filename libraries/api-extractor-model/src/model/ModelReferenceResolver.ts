@@ -124,10 +124,10 @@ export class ModelReferenceResolver {
         let memberSelectorResult: IResolveDeclarationReferenceResult;
         switch (memberSelector.selectorKind) {
           case SelectorKind.System:
-            memberSelectorResult = this._selectUsingSystemSelector(foundMembers, memberSelector, identifier);
+            memberSelectorResult = this.#selectUsingSystemSelector(foundMembers, memberSelector, identifier);
             break;
           case SelectorKind.Index:
-            memberSelectorResult = this._selectUsingIndexSelector(foundMembers, memberSelector, identifier);
+            memberSelectorResult = this.#selectUsingIndexSelector(foundMembers, memberSelector, identifier);
             break;
           default:
             result.errorMessage = `The selector "${memberSelector.selector}" is not a supported selector type`;
@@ -143,7 +143,7 @@ export class ModelReferenceResolver {
     return result;
   }
 
-  private _selectUsingSystemSelector(
+  #selectUsingSystemSelector(
     foundMembers: ReadonlyArray<ApiItem>,
     memberSelector: DocMemberSelector,
     identifier: string
@@ -197,7 +197,7 @@ export class ModelReferenceResolver {
     return result;
   }
 
-  private _selectUsingIndexSelector(
+  #selectUsingIndexSelector(
     foundMembers: ReadonlyArray<ApiItem>,
     memberSelector: DocMemberSelector,
     identifier: string

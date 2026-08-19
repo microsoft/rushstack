@@ -74,16 +74,16 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
   protected override onCustomizeYamlItem(yamlItem: IYamlItem): void {
     const nameWithoutPackage: string = yamlItem.uid.replace(/^[^.]+\!/, '');
     if (yamlItem.summary) {
-      yamlItem.summary = this._fixupApiSet(yamlItem.summary, yamlItem.uid);
+      yamlItem.summary = this.#fixupApiSet(yamlItem.summary, yamlItem.uid);
     }
     if (yamlItem.remarks) {
-      yamlItem.remarks = this._fixupApiSet(yamlItem.remarks, yamlItem.uid);
+      yamlItem.remarks = this.#fixupApiSet(yamlItem.remarks, yamlItem.uid);
     }
 
     const snippets: string[] | undefined = this.#snippetsAll[nameWithoutPackage];
     if (snippets) {
       delete this.#snippets[nameWithoutPackage];
-      const snippetText: string = this._generateExampleSnippetText(snippets);
+      const snippetText: string = this.#generateExampleSnippetText(snippets);
       if (yamlItem.remarks) {
         yamlItem.remarks += snippetText;
       } else if (yamlItem.syntax && yamlItem.syntax.return) {
@@ -97,18 +97,18 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     }
   }
 
-  private _fixupApiSet(markup: string, uid: string): string {
+  #fixupApiSet(markup: string, uid: string): string {
     // Search for a pattern such as this:
     // \[Api set: ExcelApi 1.1\]
     //
     // Hyperlink it like this:
     // \[ [API set: ExcelApi 1.1](http://bing.com?type=excel) \]
     markup = markup.replace(/Api/, 'API');
-    return markup.replace(/\\\[(API set:[^\]]+)\\\]/, '\\[ [$1](' + this._getApiSetUrl(uid) + ') \\]');
+    return markup.replace(/\\\[(API set:[^\]]+)\\\]/, '\\[ [$1](' + this.#getApiSetUrl(uid) + ') \\]');
   }
 
   // Gets the link to the API set based on product context. Seeks a case-insensitive match in the hash set.
-  private _getApiSetUrl(uid: string): string {
+  #getApiSetUrl(uid: string): string {
     for (const key of Object.keys(this.#apiSetUrls)) {
       const regexp: RegExp = new RegExp(key, 'i');
       if (regexp.test(uid)) {
@@ -118,7 +118,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     return this.#apiSetUrlDefault; // match not found.
   }
 
-  private _generateExampleSnippetText(snippets: string[]): string {
+  #generateExampleSnippetText(snippets: string[]): string {
     const text: string[] = ['\n\n#### Examples\n'];
     for (const snippet of snippets) {
       text.push(`\`\`\`TypeScript\n${snippet}\n\`\`\``);

@@ -106,7 +106,7 @@ export class StderrLineTransform extends TerminalTransform {
       // append everything up to \n
       this.#accumulatedLine += text.substring(startIndex, endIndex);
 
-      this._processAccumulatedLine();
+      this.#processAccumulatedLine();
 
       // skip the \n
       startIndex = endIndex + 1;
@@ -115,12 +115,12 @@ export class StderrLineTransform extends TerminalTransform {
 
   protected onClose(): void {
     if (this.#accumulatedLine.length > 0) {
-      this._processAccumulatedLine();
+      this.#processAccumulatedLine();
     }
     this.autocloseDestination();
   }
 
-  private _processAccumulatedLine(): void {
+  #processAccumulatedLine(): void {
     this.#accumulatedLine += this.newline;
 
     if (this.#accumulatedStderr) {

@@ -209,7 +209,7 @@ export class CommandLineParser extends CommandLineParameterProvider {
       }
       this.#executed = true;
 
-      this._validateDefinitions();
+      this.#validateDefinitions();
 
       // Register the parameters before we print help or parse the CLI
       const initialState: IRegisterDefinedParametersState = {
@@ -316,7 +316,7 @@ export class CommandLineParser extends CommandLineParameterProvider {
     }
   }
 
-  private _validateDefinitions(): void {
+  #validateDefinitions(): void {
     if (this.remainder && this.actions.length > 0) {
       // This is apparently not supported by argparse
       throw new Error('defineCommandLineRemainder() cannot be called for a CommandLineParser with actions');

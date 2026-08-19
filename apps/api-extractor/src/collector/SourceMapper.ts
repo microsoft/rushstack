@@ -90,11 +90,11 @@ export class SourceMapper {
       return sourceLocation;
     }
 
-    const mappedSourceLocation: ISourceLocation | undefined = this._getMappedSourceLocation(sourceLocation);
+    const mappedSourceLocation: ISourceLocation | undefined = this.#getMappedSourceLocation(sourceLocation);
     return mappedSourceLocation || sourceLocation;
   }
 
-  private _getMappedSourceLocation(sourceLocation: ISourceLocation): ISourceLocation | undefined {
+  #getMappedSourceLocation(sourceLocation: ISourceLocation): ISourceLocation | undefined {
     const { sourceFilePath, sourceFileLine, sourceFileColumn } = sourceLocation;
 
     if (!FileSystem.exists(sourceFilePath)) {
@@ -102,7 +102,7 @@ export class SourceMapper {
       throw new InternalError('The referenced path was not found: ' + sourceFilePath);
     }
 
-    const sourceMap: ISourceMap | null = this._getSourceMap(sourceFilePath);
+    const sourceMap: ISourceMap | null = this.#getSourceMap(sourceFilePath);
     if (!sourceMap) return;
 
     const nearestMappingItem: MappingItem | undefined = _findNearestMappingItem(sourceMap.mappingItems, {
@@ -167,7 +167,7 @@ export class SourceMapper {
     }
   }
 
-  private _getSourceMap(sourceFilePath: string): ISourceMap | null {
+  #getSourceMap(sourceFilePath: string): ISourceMap | null {
     let sourceMap: ISourceMap | null | undefined = this.#sourceMapByFilePath.get(sourceFilePath);
 
     if (sourceMap === undefined) {

@@ -208,7 +208,7 @@ export abstract class CommandLineParameterProvider {
    * This method throws an exception if the parameter is not defined.
    */
   public getChoiceParameter(parameterLongName: string, parameterScope?: string): CommandLineChoiceParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.Choice, parameterScope);
+    return this.#getParameter(parameterLongName, CommandLineParameterKind.Choice, parameterScope);
   }
 
   /**
@@ -239,7 +239,7 @@ export abstract class CommandLineParameterProvider {
     parameterLongName: string,
     parameterScope?: string
   ): CommandLineChoiceListParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.ChoiceList, parameterScope);
+    return this.#getParameter(parameterLongName, CommandLineParameterKind.ChoiceList, parameterScope);
   }
 
   /**
@@ -264,7 +264,7 @@ export abstract class CommandLineParameterProvider {
    * This method throws an exception if the parameter is not defined.
    */
   public getFlagParameter(parameterLongName: string, parameterScope?: string): CommandLineFlagParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.Flag, parameterScope);
+    return this.#getParameter(parameterLongName, CommandLineParameterKind.Flag, parameterScope);
   }
 
   /**
@@ -310,7 +310,7 @@ export abstract class CommandLineParameterProvider {
     parameterLongName: string,
     parameterScope?: string
   ): CommandLineIntegerParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.Integer, parameterScope);
+    return this.#getParameter(parameterLongName, CommandLineParameterKind.Integer, parameterScope);
   }
 
   /**
@@ -340,7 +340,7 @@ export abstract class CommandLineParameterProvider {
     parameterLongName: string,
     parameterScope?: string
   ): CommandLineIntegerListParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.IntegerList, parameterScope);
+    return this.#getParameter(parameterLongName, CommandLineParameterKind.IntegerList, parameterScope);
   }
 
   /**
@@ -383,7 +383,7 @@ export abstract class CommandLineParameterProvider {
    * This method throws an exception if the parameter is not defined.
    */
   public getStringParameter(parameterLongName: string, parameterScope?: string): CommandLineStringParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.String, parameterScope);
+    return this.#getParameter(parameterLongName, CommandLineParameterKind.String, parameterScope);
   }
 
   /**
@@ -436,7 +436,7 @@ export abstract class CommandLineParameterProvider {
     parameterLongName: string,
     parameterScope?: string
   ): CommandLineStringListParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.StringList, parameterScope);
+    return this.#getParameter(parameterLongName, CommandLineParameterKind.StringList, parameterScope);
   }
 
   /**
@@ -634,7 +634,7 @@ export abstract class CommandLineParameterProvider {
         // When the parser key matches the actually registered parameter, we know that this is an ambiguous
         // parameter sourced from the parent action or tool
         if (this._registeredParameterParserKeysByName.get(parameterName) === parserKey) {
-          this._throwParserExitError(parserOptions, data, 1, `Ambiguous option: "${parameterName}".`);
+          this.#throwParserExitError(parserOptions, data, 1, `Ambiguous option: "${parameterName}".`);
         }
 
         // Determine if the ambiguous parameter is a short name or a long name, since the process of finding
@@ -672,7 +672,7 @@ export abstract class CommandLineParameterProvider {
           // Throw an error including the non-ambiguous long names for the parameters that have the ambiguous
           // short name, ex.
           // Error: Ambiguous option "-p" could match "--param1", "--param2"
-          this._throwParserExitError(
+          this.#throwParserExitError(
             parserOptions,
             data,
             1,
@@ -699,7 +699,7 @@ export abstract class CommandLineParameterProvider {
           // Throw an error including the non-ambiguous scoped long names for the parameters that have the
           // ambiguous long name, ex.
           // Error: Ambiguous option: "--param" could match --scope1:param, --scope2:param
-          this._throwParserExitError(
+          this.#throwParserExitError(
             parserOptions,
             data,
             1,
@@ -708,7 +708,7 @@ export abstract class CommandLineParameterProvider {
         }
 
         // This shouldn't happen, but we also shouldn't allow the user to use the ambiguous parameter
-        this._throwParserExitError(parserOptions, data, 1, `Ambiguous option: "${parameterName}".`);
+        this.#throwParserExitError(parserOptions, data, 1, `Ambiguous option: "${parameterName}".`);
       }
     }
 
@@ -733,7 +733,7 @@ export abstract class CommandLineParameterProvider {
     }
 
     // Generate and set the parser key at definition time
-    parameter._parserKey = this._generateKey();
+    parameter._parserKey = this.#generateKey();
 
     this.#parameters.push(parameter);
 
@@ -772,7 +772,7 @@ export abstract class CommandLineParameterProvider {
       this._registeredParameterParserKeysByName.get(name) ||
       this._ambiguousParameterParserKeysByName.get(name);
     if (!existingParserKey) {
-      existingParserKey = this._generateKey();
+      existingParserKey = this.#generateKey();
     }
 
     this._ambiguousParameterParserKeysByName.set(name, existingParserKey);
@@ -970,11 +970,11 @@ export abstract class CommandLineParameterProvider {
     });
   }
 
-  private _generateKey(): string {
+  #generateKey(): string {
     return 'key_' + (_keyCounter++).toString();
   }
 
-  private _getParameter<T extends CommandLineParameterBase>(
+  #getParameter<T extends CommandLineParameterBase>(
     parameterLongName: string,
     expectedKind: CommandLineParameterKind,
     parameterScope?: string
@@ -1015,7 +1015,7 @@ export abstract class CommandLineParameterProvider {
     return parameter as T;
   }
 
-  private _throwParserExitError(
+  #throwParserExitError(
     parserOptions: ICommandLineParserOptions,
     data: ICommandLineParserData,
     errorCode: number,

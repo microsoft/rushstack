@@ -86,17 +86,17 @@ export class TabCompleteAction extends CommandLineAction {
     const actions: Map<string, Map<string, CommandLineParameter>> = this.#actions;
 
     if (!commandLine || !caretPosition) {
-      yield* this._getAllActions();
+      yield* this.#getAllActions();
       return;
     }
 
     const tokens: string[] = Array.from(this.tokenizeCommandLine(commandLine));
 
     // offset arguments by the number of global params in the input
-    const globalParameterOffset: number = this._getGlobalParameterOffset(tokens);
+    const globalParameterOffset: number = this.#getGlobalParameterOffset(tokens);
 
     if (tokens.length < 2 + globalParameterOffset) {
-      yield* this._getAllActions();
+      yield* this.#getAllActions();
       return;
     }
 
@@ -122,20 +122,20 @@ export class TabCompleteAction extends CommandLineAction {
           if (completePartialWord) {
             for (const parameterName of parameterNames) {
               if (parameterName === secondLastToken) {
-                const values: ReadonlySet<string> = await this._getParameterValueCompletionsAsync(
+                const values: ReadonlySet<string> = await this.#getParameterValueCompletionsAsync(
                   parameterNameMap.get(parameterName)!
                 );
                 if (values.size > 0) {
-                  yield* this._completeParameterValues(values, lastToken);
+                  yield* this.#completeParameterValues(values, lastToken);
                   return;
                 }
               }
             }
-            yield* this._completeParameterValues(parameterNames, lastToken);
+            yield* this.#completeParameterValues(parameterNames, lastToken);
           } else {
             for (const parameterName of parameterNames) {
               if (parameterName === lastToken) {
-                const values: ReadonlySet<string> = await this._getParameterValueCompletionsAsync(
+                const values: ReadonlySet<string> = await this.#getParameterValueCompletionsAsync(
                   parameterNameMap.get(parameterName)!
                 );
                 if (values.size > 0) {
@@ -163,7 +163,7 @@ export class TabCompleteAction extends CommandLineAction {
     }
   }
 
-  private *_getAllActions(): IterableIterator<string> {
+  *#getAllActions(): IterableIterator<string> {
     yield* this.#actions.keys();
     yield* this.#globalParameters.keys();
   }
@@ -172,7 +172,7 @@ export class TabCompleteAction extends CommandLineAction {
     return stringArgv(commandLine);
   }
 
-  private async _getParameterValueCompletionsAsync(
+  async #getParameterValueCompletionsAsync(
     parameter: CommandLineParameter
   ): Promise<ReadonlySet<string>> {
     let choiceParameterValues: ReadonlySet<string> | undefined;
@@ -198,7 +198,7 @@ export class TabCompleteAction extends CommandLineAction {
     return choiceParameterValues ?? new Set();
   }
 
-  private _getGlobalParameterOffset(tokens: string[]): number {
+  #getGlobalParameterOffset(tokens: string[]): number {
     const globalParameters: Map<string, CommandLineParameter> = this.#globalParameters;
     let count: number = 0;
 
@@ -214,7 +214,7 @@ export class TabCompleteAction extends CommandLineAction {
     return count;
   }
 
-  private *_completeParameterValues(
+  *#completeParameterValues(
     choiceParameterValues: ReadonlyArray<string> | ReadonlySet<string>,
     lastToken: string
   ): IterableIterator<string> {

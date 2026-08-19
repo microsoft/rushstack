@@ -165,7 +165,7 @@ export class AssetHandler {
       this.#terminal.writeLine('Creating symlinks');
       const linksToCopy: ILinkInfo[] = this.#symlinkAnalyzer.reportSymlinks();
       await Async.forEachAsync(linksToCopy, async (linkToCopy: ILinkInfo) => {
-        await this._extractSymlinkAsync(linkToCopy);
+        await this.#extractSymlinkAsync(linkToCopy);
       });
     }
 
@@ -182,7 +182,7 @@ export class AssetHandler {
   /**
    * Create a symlink as described by the ILinkInfo object.
    */
-  private async _extractSymlinkAsync(linkInfo: ILinkInfo): Promise<void> {
+  async #extractSymlinkAsync(linkInfo: ILinkInfo): Promise<void> {
     const { kind, linkPath, targetPath } = {
       ...linkInfo,
       linkPath: remapSourcePathForTargetFolder({

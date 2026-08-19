@@ -108,7 +108,7 @@ export class StreamCollator {
 
     if (this.#activeWriter === undefined) {
       // If there is no active writer, then the first one to be registered becomes active.
-      this._assignActiveWriter(writer);
+      this.#assignActiveWriter(writer);
     }
 
     return writer;
@@ -120,11 +120,11 @@ export class StreamCollator {
     chunk: ITerminalChunk,
     bufferedChunks: ITerminalChunk[]
   ): void {
-    this._checkForReentrantCall();
+    this.#checkForReentrantCall();
 
     if (this.#activeWriter === undefined) {
       // If no writer is currently active, then the first one to write something becomes active
-      this._assignActiveWriter(writer);
+      this.#assignActiveWriter(writer);
     }
 
     if (writer.isActive) {
@@ -136,7 +136,7 @@ export class StreamCollator {
 
   /** @internal */
   public _writerClose(writer: CollatedWriter, bufferedChunks: ITerminalChunk[]): void {
-    this._checkForReentrantCall();
+    this.#checkForReentrantCall();
 
     if (writer.isActive) {
       writer._flushBufferedChunks();
@@ -147,7 +147,7 @@ export class StreamCollator {
       // We copy the set, since _assignActiveWriter() will be deleting from it.
       for (const closedInactiveWriter of [...this.#closedInactiveWriters]) {
         try {
-          this._assignActiveWriter(closedInactiveWriter);
+          this.#assignActiveWriter(closedInactiveWriter);
         } finally {
           this.#activeWriter = undefined;
         }
@@ -171,7 +171,7 @@ export class StreamCollator {
       }
 
       if (writerToActivate) {
-        this._assignActiveWriter(writerToActivate);
+        this.#assignActiveWriter(writerToActivate);
       }
     } else {
       this.#openInactiveWriters.delete(writer);
@@ -179,7 +179,7 @@ export class StreamCollator {
     }
   }
 
-  private _assignActiveWriter(writer: CollatedWriter): void {
+  #assignActiveWriter(writer: CollatedWriter): void {
     this.#activeWriter = writer;
 
     this.#closedInactiveWriters.delete(writer);
@@ -197,7 +197,7 @@ export class StreamCollator {
     writer._flushBufferedChunks();
   }
 
-  private _checkForReentrantCall(): void {
+  #checkForReentrantCall(): void {
     if (this.#preventReentrantCall) {
       throw new InternalError('Reentrant call to StreamCollator');
     }
