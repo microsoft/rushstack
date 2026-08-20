@@ -24,15 +24,15 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
 
     this.#tocPointerMap = {};
 
-    this._generateTocPointersMap(this.#config.tocConfig);
+    this.#generateTocPointersMap(this.#config.tocConfig);
   }
 
   protected override buildYamlTocFile(apiItems: ReadonlyArray<ApiItem>): IYamlTocFile {
-    this._buildTocItems2(apiItems);
+    this.#buildTocItems2(apiItems);
     return this.#config.tocConfig;
   }
 
-  private _buildTocItems2(apiItems: ReadonlyArray<ApiItem>): IYamlTocItem[] {
+  #buildTocItems2(apiItems: ReadonlyArray<ApiItem>): IYamlTocItem[] {
     const tocItems: IYamlTocItem[] = [];
     for (const apiItem of apiItems) {
       let tocItem: IYamlTocItem;
@@ -52,14 +52,14 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
         };
 
         if (apiItem.kind !== ApiItemKind.Package) {
-          this._filterItem(apiItem, tocItem);
+          this.#filterItem(apiItem, tocItem);
         }
       }
 
       tocItems.push(tocItem);
 
       const children: ApiItem[] = this._getLogicalChildren(apiItem);
-      const childItems: IYamlTocItem[] = this._buildTocItems2(children);
+      const childItems: IYamlTocItem[] = this.#buildTocItems2(children);
       if (childItems.length > 0) {
         tocItem.items = childItems;
       }
@@ -68,13 +68,13 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
   }
 
   // Parses the tocConfig object to build a pointers map of nodes where we want to sort out the API items
-  private _generateTocPointersMap(tocConfig: IYamlTocFile | IYamlTocItem): void {
+  #generateTocPointersMap(tocConfig: IYamlTocFile | IYamlTocItem): void {
     const { catchAllCategory } = this.#config;
 
     if (tocConfig.items) {
       for (const tocItem of tocConfig.items) {
-        if (tocItem.items && tocItem.items.length > 0 && this._shouldNotIncludeInPointersMap(tocItem)) {
-          this._generateTocPointersMap(tocItem);
+        if (tocItem.items && tocItem.items.length > 0 && this.#shouldNotIncludeInPointersMap(tocItem)) {
+          this.#generateTocPointersMap(tocItem);
         } else {
           // check for presence of the `catchAllCategory` config option
           if (catchAllCategory && tocItem.name === catchAllCategory) {
@@ -90,7 +90,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
   /**
    * Filtering out the api-item by inlineTags or category name presence in the item name.
    */
-  private _filterItem(apiItem: ApiItem, tocItem: IYamlTocItem): void {
+  #filterItem(apiItem: ApiItem, tocItem: IYamlTocItem): void {
     const { categoryInlineTag, categorizeByName } = this.#config;
     const { name: itemName } = tocItem;
     let filtered: boolean = false;
@@ -98,7 +98,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
     // First we attempt to filter by inline tag if provided.
     if (apiItem instanceof ApiDocumentedItem) {
       const docInlineTag: DocInlineTag | undefined = categoryInlineTag
-        ? this._findInlineTagByName(categoryInlineTag, apiItem.tsdocComment)
+        ? this.#findInlineTagByName(categoryInlineTag, apiItem.tsdocComment)
         : undefined;
 
       const tagContent: string | undefined =
@@ -132,7 +132,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
 
   // This is a direct copy of a @docCategory inline tag finder in office-ui-fabric-react,
   // but is generic enough to be used for any inline tag
-  private _findInlineTagByName(
+  #findInlineTagByName(
     tagName: string,
     docComment: DocComment | undefined
   ): DocInlineTag | undefined {
@@ -145,7 +145,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
     }
     if (docComment) {
       for (const childNode of docComment.getChildNodes()) {
-        const result: DocInlineTag | undefined = this._findInlineTagByName(tagName, childNode as DocComment);
+        const result: DocInlineTag | undefined = this.#findInlineTagByName(tagName, childNode as DocComment);
         if (result !== undefined) {
           return result;
         }
@@ -154,7 +154,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
     return undefined;
   }
 
-  private _shouldNotIncludeInPointersMap(item: IYamlTocItem): boolean {
+  #shouldNotIncludeInPointersMap(item: IYamlTocItem): boolean {
     const { nonEmptyCategoryNodeNames } = this.#config;
     if (nonEmptyCategoryNodeNames && nonEmptyCategoryNodeNames.length) {
       return nonEmptyCategoryNodeNames.indexOf(item.name) === -1;

@@ -373,7 +373,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
    * If the node has children with values, they will be retained.
    */
   public deleteItem(query: string, delimeter: string = this.delimiter): boolean {
-    const node: IPathTrieNode<TItem> | undefined = this._findNodeAtPrefix(query, delimeter);
+    const node: IPathTrieNode<TItem> | undefined = this.#findNodeAtPrefix(query, delimeter);
     if (node?.value !== undefined) {
       node.value = undefined;
       this.#size--;
@@ -390,7 +390,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
    * @returns `true` if any nodes were deleted, `false` otherwise
    */
   public deleteSubtree(query: string, delimeter: string = this.delimiter): boolean {
-    const queryNode: IPathTrieNode<TItem> | undefined = this._findNodeAtPrefix(query, delimeter);
+    const queryNode: IPathTrieNode<TItem> | undefined = this.#findNodeAtPrefix(query, delimeter);
     if (!queryNode) {
       return false;
     }
@@ -461,7 +461,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
     query: string,
     delimiter: string = this.delimiter
   ): IPrefixMatch<TItem> | undefined {
-    return this._findLongestPrefixMatch(_iteratePrefixes(query, delimiter));
+    return this.#findLongestPrefixMatch(_iteratePrefixes(query, delimiter));
   }
 
   /**
@@ -535,7 +535,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
   public *entries(query?: string, delimiter: string = this.delimiter): IterableIterator<[string, TItem]> {
     let root: IPathTrieNode<TItem> | undefined;
     if (query) {
-      root = this._findNodeAtPrefix(query, delimiter);
+      root = this.#findNodeAtPrefix(query, delimiter);
       if (!root) {
         return;
       }
@@ -574,7 +574,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
     query: string,
     delimiter: string = this.delimiter
   ): IReadonlyPathTrieNode<TItem> | undefined {
-    return this._findNodeAtPrefix(query, delimiter);
+    return this.#findNodeAtPrefix(query, delimiter);
   }
 
   /**
@@ -677,7 +677,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
    *
    * @returns the found item, or `undefined` if no item was found
    */
-  private _findLongestPrefixMatch(prefixes: Iterable<IPrefixEntry>): IPrefixMatch<TItem> | undefined {
+  #findLongestPrefixMatch(prefixes: Iterable<IPrefixEntry>): IPrefixMatch<TItem> | undefined {
     let node: IPathTrieNode<TItem> = this.#root;
     let best: IPrefixMatch<TItem> | undefined = node.value
       ? {
@@ -716,7 +716,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
    * @param query - The path to the node to search for
    * @returns The trie node at the specified path, or `undefined` if no node was found
    */
-  private _findNodeAtPrefix(
+  #findNodeAtPrefix(
     query: string,
     delimiter: string = this.delimiter
   ): IPathTrieNode<TItem> | undefined {

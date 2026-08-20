@@ -99,7 +99,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
    */
   public get sourceLocation(): SourceLocation {
     if (!this.#sourceLocation) {
-      this.#sourceLocation = this._buildSourceLocation();
+      this.#sourceLocation = this.#buildSourceLocation();
     }
     return this.#sourceLocation;
   }
@@ -163,7 +163,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
   /**
    * Builds the cached object used by the `sourceLocation` property.
    */
-  private _buildSourceLocation(): SourceLocation {
+  #buildSourceLocation(): SourceLocation {
     const projectFolderUrl: string | undefined = this.getAssociatedPackage()?.projectFolderUrl;
 
     let fileUrlPath: string | undefined;

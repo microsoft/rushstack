@@ -54,7 +54,7 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
         }
       ]
     };
-    this._buildNavigation(navigationFile.api_nav, this.context.apiModel);
+    this.#buildNavigation(navigationFile.api_nav, this.context.apiModel);
 
     const navFilePath: string = path.join(this.context.outputFolder, '..', 'api_nav.yaml');
     const navFileContent: string = yaml.dump(navigationFile, { lineWidth: 120 });
@@ -62,7 +62,7 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
     FileSystem.writeFile(navFilePath, navFileContent, { ensureFolderExists: true });
   }
 
-  private _buildNavigation(parentNodes: INavigationNode[], parentApiItem: ApiItem): void {
+  #buildNavigation(parentNodes: INavigationNode[], parentApiItem: ApiItem): void {
     for (const apiItem of parentApiItem.members) {
       if (this.#apiItemsWithPages.has(apiItem)) {
         const newNode: INavigationNode = {
@@ -74,12 +74,12 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
         parentNodes.push(newNode);
 
         const newNodeSubitems: INavigationNode[] = [];
-        this._buildNavigation(newNodeSubitems, apiItem);
+        this.#buildNavigation(newNodeSubitems, apiItem);
         if (newNodeSubitems.length > 0) {
           newNode.subitems = newNodeSubitems;
         }
       } else {
-        this._buildNavigation(parentNodes, apiItem);
+        this.#buildNavigation(parentNodes, apiItem);
       }
     }
   }

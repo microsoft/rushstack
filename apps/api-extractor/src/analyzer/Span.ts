@@ -293,9 +293,9 @@ export class Span {
   public get prefix(): string {
     if (this.children.length) {
       // Everything up to the first child
-      return this._getSubstring(this.startIndex, this.children[0].startIndex);
+      return this.#getSubstring(this.startIndex, this.children[0].startIndex);
     } else {
-      return this._getSubstring(this.startIndex, this.endIndex);
+      return this.#getSubstring(this.startIndex, this.endIndex);
     }
   }
 
@@ -306,7 +306,7 @@ export class Span {
   public get suffix(): string {
     if (this.children.length) {
       // Everything after the last child
-      return this._getSubstring(this.children[this.children.length - 1].endIndex, this.endIndex);
+      return this.#getSubstring(this.children[this.children.length - 1].endIndex, this.endIndex);
     } else {
       return '';
     }
@@ -317,7 +317,7 @@ export class Span {
    * Here we mean "next" according to an inorder traversal, not necessarily a sibling.
    */
   public get separator(): string {
-    return this._getSubstring(this.#separatorStartIndex, this.#separatorEndIndex);
+    return this.#getSubstring(this.#separatorStartIndex, this.#separatorEndIndex);
   }
 
   /**
@@ -385,7 +385,7 @@ export class Span {
     const writer: IndentedWriter = new IndentedWriter();
     writer.trimLeadingSpaces = true;
 
-    this._writeModifiedText({
+    this.#writeModifiedText({
       writer: writer,
       separatorOverride: undefined,
       indentDocCommentState: IndentDocCommentState.Inactive
@@ -395,7 +395,7 @@ export class Span {
   }
 
   public writeModifiedText(output: IndentedWriter): void {
-    this._writeModifiedText({
+    this.#writeModifiedText({
       writer: output,
       separatorOverride: undefined,
       indentDocCommentState: IndentDocCommentState.Inactive
@@ -410,13 +410,13 @@ export class Span {
     let result: string = indent + ts.SyntaxKind[this.node.kind] + ': ';
 
     if (this.prefix) {
-      result += ' pre=[' + this._getTrimmed(this.prefix) + ']';
+      result += ' pre=[' + this.#getTrimmed(this.prefix) + ']';
     }
     if (this.suffix) {
-      result += ' suf=[' + this._getTrimmed(this.suffix) + ']';
+      result += ' suf=[' + this.#getTrimmed(this.suffix) + ']';
     }
     if (this.separator) {
-      result += ' sep=[' + this._getTrimmed(this.separator) + ']';
+      result += ' sep=[' + this.#getTrimmed(this.separator) + ']';
     }
     result += '\n';
 
@@ -434,13 +434,13 @@ export class Span {
     let result: string = indent + ts.SyntaxKind[this.node.kind] + ': ';
 
     if (this.prefix) {
-      result += ' pre=[' + this._getTrimmed(this.modification.prefix) + ']';
+      result += ' pre=[' + this.#getTrimmed(this.modification.prefix) + ']';
     }
     if (this.suffix) {
-      result += ' suf=[' + this._getTrimmed(this.modification.suffix) + ']';
+      result += ' suf=[' + this.#getTrimmed(this.modification.suffix) + ']';
     }
     if (this.separator) {
-      result += ' sep=[' + this._getTrimmed(this.separator) + ']';
+      result += ' sep=[' + this.#getTrimmed(this.separator) + ']';
     }
     if (this.modification.indentDocComment !== IndentDocCommentScope.None) {
       result += ' indentDocComment=' + IndentDocCommentScope[this.modification.indentDocComment];
@@ -473,7 +473,7 @@ export class Span {
   /**
    * Recursive implementation of `getModifiedText()` and `writeModifiedText()`.
    */
-  private _writeModifiedText(options: IWriteModifiedTextOptions): void {
+  #writeModifiedText(options: IWriteModifiedTextOptions): void {
     // Apply indentation based on "{" and "}"
     if (this.prefix === '{') {
       options.writer.increaseIndent();
@@ -482,13 +482,13 @@ export class Span {
     }
 
     if (this.modification.indentDocComment !== IndentDocCommentScope.None) {
-      this._beginIndentDocComment(options);
+      this.#beginIndentDocComment(options);
     }
 
-    this._write(this.modification.prefix, options);
+    this.#write(this.modification.prefix, options);
 
     if (this.modification.indentDocComment === IndentDocCommentScope.PrefixOnly) {
-      this._endIndentDocComment(options);
+      this.#endIndentDocComment(options);
     }
 
     let sortedSubset: Span[] | undefined;
@@ -538,7 +538,7 @@ export class Span {
           }
         }
 
-        current._writeModifiedText(childOptions);
+        current.#writeModifiedText(childOptions);
       }
     } else {
       // This is the normal case that does not need to sort children
@@ -559,45 +559,45 @@ export class Span {
             ) {
               const childOptions: IWriteModifiedTextOptions = { ...options };
               childOptions.separatorOverride = undefined;
-              child._writeModifiedText(childOptions);
+              child.#writeModifiedText(childOptions);
             } else {
-              child._writeModifiedText(options);
+              child.#writeModifiedText(options);
             }
           }
         } else {
           // The normal simple case
           for (const child of this.children) {
-            child._writeModifiedText(options);
+            child.#writeModifiedText(options);
           }
         }
       }
 
-      this._write(this.modification.suffix, options);
+      this.#write(this.modification.suffix, options);
 
       if (options.separatorOverride !== undefined) {
         if (this.separator || childrenLength === 0) {
-          this._write(options.separatorOverride, options);
+          this.#write(options.separatorOverride, options);
         }
       } else {
         if (!this.modification.omitSeparatorAfter) {
-          this._write(this.separator, options);
+          this.#write(this.separator, options);
         }
       }
     }
 
     if (this.modification.indentDocComment === IndentDocCommentScope.SpanAndChildren) {
-      this._endIndentDocComment(options);
+      this.#endIndentDocComment(options);
     }
   }
 
-  private _beginIndentDocComment(options: IWriteModifiedTextOptions): void {
+  #beginIndentDocComment(options: IWriteModifiedTextOptions): void {
     if (options.indentDocCommentState !== IndentDocCommentState.Inactive) {
       throw new InternalError('indentDocComment cannot be nested');
     }
     options.indentDocCommentState = IndentDocCommentState.AwaitingOpenDelimiter;
   }
 
-  private _endIndentDocComment(options: IWriteModifiedTextOptions): void {
+  #endIndentDocComment(options: IWriteModifiedTextOptions): void {
     if (options.indentDocCommentState === IndentDocCommentState.AwaitingCloseDelimiter) {
       throw new InternalError('missing "*/" delimiter for comment block');
     }
@@ -607,7 +607,7 @@ export class Span {
   /**
    * Writes one chunk of `text` to the `options.writer`, applying the `indentDocComment` rewriting.
    */
-  private _write(text: string, options: IWriteModifiedTextOptions): void {
+  #write(text: string, options: IWriteModifiedTextOptions): void {
     let parsedText: string = text;
 
     if (options.indentDocCommentState === IndentDocCommentState.AwaitingOpenDelimiter) {
@@ -637,11 +637,11 @@ export class Span {
     options.writer.write(parsedText);
   }
 
-  private _getTrimmed(text: string): string {
+  #getTrimmed(text: string): string {
     return Text.truncateWithEllipsis(Text.convertToLf(text), 100);
   }
 
-  private _getSubstring(startIndex: number, endIndex: number): string {
+  #getSubstring(startIndex: number, endIndex: number): string {
     if (startIndex === endIndex) {
       return '';
     }

@@ -184,7 +184,7 @@ export class WorkerPool {
 
     let worker: Worker | undefined = this.#idle.shift();
     if (!worker && allowCreate) {
-      worker = this._createWorker();
+      worker = this.#createWorker();
     }
 
     if (worker) {
@@ -199,7 +199,7 @@ export class WorkerPool {
   /**
    * Creates a new worker if allowed by maxSize.
    */
-  private _createWorker(): Worker | undefined {
+  #createWorker(): Worker | undefined {
     if (this.#alive.length >= this.maxWorkers) {
       return;
     }
@@ -218,15 +218,15 @@ export class WorkerPool {
     this.#alive.push(worker);
 
     worker.on('error', (err) => {
-      this._onError(err);
-      this._destroyWorker(worker);
+      this.#onError(err);
+      this.#destroyWorker(worker);
     });
 
     worker.once('exit', (exitCode) => {
       if (exitCode !== 0) {
-        this._onError(new Error(`Worker ${id} exited with code ${exitCode}`));
+        this.#onError(new Error(`Worker ${id} exited with code ${exitCode}`));
       }
-      this._destroyWorker(worker);
+      this.#destroyWorker(worker);
     });
 
     if (this.#prepare) {
@@ -239,7 +239,7 @@ export class WorkerPool {
   /**
    * Cleans up a worker
    */
-  private _destroyWorker(worker: Worker): void {
+  #destroyWorker(worker: Worker): void {
     const aliveIndex: number = this.#alive.indexOf(worker);
     if (aliveIndex >= 0) {
       this.#alive.splice(aliveIndex, 1);
@@ -266,7 +266,7 @@ export class WorkerPool {
   /**
    * Notifies all pending callbacks that an error has occurred and switches this pool into error state.
    */
-  private _onError(error: Error): void {
+  #onError(error: Error): void {
     this.#error = error;
 
     for (const [, reject] of this.#pending.splice(0)) {
