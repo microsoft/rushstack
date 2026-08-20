@@ -1,9 +1,0 @@
-{
-  "changes": [
-    {
-      "packageName": "@rushstack/webpack5-localization-plugin",
-      "comment": "Compile package output for ES2022.",
-      "type": "patch"
-    }
-  ]
-}
