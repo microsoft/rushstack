@@ -1,9 +1,0 @@
-{
-  "changes": [
-    {
-      "packageName": "@rushstack/credential-cache",
-      "comment": "Remove the Node.js 18 explicit resource management symbol polyfill.",
-      "type": "patch"
-    }
-  ]
-}

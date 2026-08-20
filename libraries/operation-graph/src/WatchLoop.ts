@@ -97,7 +97,7 @@ export class WatchLoop implements IWatchLoopState {
           return OperationStatus.Aborted;
         }
 
-        result = await this._runIterationAsync();
+        result = await this.#runIterationAsync();
       } while (this.#runRequested);
 
       // Even if the run has finished, if the abort signal was aborted, we should return `Aborted` just in case.
@@ -262,7 +262,7 @@ export class WatchLoop implements IWatchLoopState {
   /**
    * Resets the abort signal and run request state.
    */
-  private _reset(): void {
+  #reset(): void {
     if (this.#abortController.signal.aborted) {
       this.#abortController = new AbortController();
     }
@@ -279,8 +279,8 @@ export class WatchLoop implements IWatchLoopState {
    * Runs a single iteration of the loop.
    * @returns The status of the iteration.
    */
-  private async _runIterationAsync(): Promise<OperationStatus> {
-    this._reset();
+  async #runIterationAsync(): Promise<OperationStatus> {
+    this.#reset();
 
     this.#options.onBeforeExecute();
     try {

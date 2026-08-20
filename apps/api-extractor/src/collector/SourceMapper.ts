@@ -67,6 +67,7 @@ export interface IGetSourceLocationOptions {
 
 export class SourceMapper {
   // Map from .d.ts file path --> ISourceMap if a source map was found, or null if not found
+  // eslint-disable-next-line @rushstack/no-new-null -- The decoupled ESLint plugin does not recognize native private fields yet.
   #sourceMapByFilePath: Map<string, ISourceMap | null> = new Map<string, ISourceMap | null>();
 
   // Cache the FileSystem.exists() result for mapped .ts files
@@ -90,11 +91,11 @@ export class SourceMapper {
       return sourceLocation;
     }
 
-    const mappedSourceLocation: ISourceLocation | undefined = this._getMappedSourceLocation(sourceLocation);
+    const mappedSourceLocation: ISourceLocation | undefined = this.#getMappedSourceLocation(sourceLocation);
     return mappedSourceLocation || sourceLocation;
   }
 
-  private _getMappedSourceLocation(sourceLocation: ISourceLocation): ISourceLocation | undefined {
+  #getMappedSourceLocation(sourceLocation: ISourceLocation): ISourceLocation | undefined {
     const { sourceFilePath, sourceFileLine, sourceFileColumn } = sourceLocation;
 
     if (!FileSystem.exists(sourceFilePath)) {
@@ -102,7 +103,7 @@ export class SourceMapper {
       throw new InternalError('The referenced path was not found: ' + sourceFilePath);
     }
 
-    const sourceMap: ISourceMap | null = this._getSourceMap(sourceFilePath);
+    const sourceMap: ISourceMap | null = this.#getSourceMap(sourceFilePath);
     if (!sourceMap) return;
 
     const nearestMappingItem: MappingItem | undefined = _findNearestMappingItem(sourceMap.mappingItems, {
@@ -167,7 +168,8 @@ export class SourceMapper {
     }
   }
 
-  private _getSourceMap(sourceFilePath: string): ISourceMap | null {
+  // eslint-disable-next-line @rushstack/no-new-null -- The decoupled ESLint plugin does not recognize native private fields yet.
+  #getSourceMap(sourceFilePath: string): ISourceMap | null {
     let sourceMap: ISourceMap | null | undefined = this.#sourceMapByFilePath.get(sourceFilePath);
 
     if (sourceMap === undefined) {

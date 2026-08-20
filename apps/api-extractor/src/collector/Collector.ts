@@ -271,7 +271,7 @@ export class Collector {
     // Create a CollectorEntity for each top-level export.
     const processedAstEntities: AstEntity[] = [];
     for (const [exportName, astEntity] of exportedLocalEntities) {
-      this._createCollectorEntity(astEntity, exportName);
+      this.#createCollectorEntity(astEntity, exportName);
       processedAstEntities.push(astEntity);
     }
 
@@ -279,7 +279,7 @@ export class Collector {
     // have been processed.
     const alreadySeenAstEntities: Set<AstEntity> = new Set<AstEntity>();
     for (const astEntity of processedAstEntities) {
-      this._recursivelyCreateEntities(astEntity, alreadySeenAstEntities);
+      this.#recursivelyCreateEntities(astEntity, alreadySeenAstEntities);
       if (astEntity instanceof AstSymbol) {
         this.fetchSymbolMetadata(astEntity);
       }
@@ -307,9 +307,9 @@ export class Collector {
     // It is intuitive for developers to include references that they explicitly want part of
     // their public API in a file like the entrypoint, which is likely to only contain reexports,
     // and this picks those up.
-    this._collectReferenceDirectivesFromSourceFiles(nonExternalSourceFiles, true);
+    this.#collectReferenceDirectivesFromSourceFiles(nonExternalSourceFiles, true);
 
-    this._makeUniqueNames();
+    this.#makeUniqueNames();
 
     for (const starExportedExternalModule of starExportedExternalModules) {
       if (starExportedExternalModule.externalModulePath !== undefined) {
@@ -354,7 +354,7 @@ export class Collector {
 
   public fetchSymbolMetadata(astSymbol: AstSymbol): SymbolMetadata {
     if (astSymbol.symbolMetadata === undefined) {
-      this._fetchSymbolMetadata(astSymbol);
+      this.#fetchSymbolMetadata(astSymbol);
     }
     return astSymbol.symbolMetadata as SymbolMetadata;
   }
@@ -362,7 +362,7 @@ export class Collector {
   public fetchDeclarationMetadata(astDeclaration: AstDeclaration): DeclarationMetadata {
     if (astDeclaration.declarationMetadata === undefined) {
       // Fetching the SymbolMetadata always constructs the DeclarationMetadata
-      this._fetchSymbolMetadata(astDeclaration.astSymbol);
+      this.#fetchSymbolMetadata(astDeclaration.astSymbol);
     }
     return astDeclaration.declarationMetadata as DeclarationMetadata;
   }
@@ -370,7 +370,7 @@ export class Collector {
   public fetchApiItemMetadata(astDeclaration: AstDeclaration): ApiItemMetadata {
     if (astDeclaration.apiItemMetadata === undefined) {
       // Fetching the SymbolMetadata always constructs the ApiItemMetadata
-      this._fetchSymbolMetadata(astDeclaration.astSymbol);
+      this.#fetchSymbolMetadata(astDeclaration.astSymbol);
     }
     return astDeclaration.apiItemMetadata as ApiItemMetadata;
   }
@@ -460,7 +460,7 @@ export class Collector {
     return overloadIndex;
   }
 
-  private _createCollectorEntity(
+  #createCollectorEntity(
     astEntity: AstEntity,
     exportName?: string,
     parent?: CollectorEntity
@@ -477,7 +477,7 @@ export class Collector {
         this.#entitiesBySymbol.set(astEntity.symbol, entity);
       }
       this.#entities.push(entity);
-      this._collectReferenceDirectives(astEntity);
+      this.#collectReferenceDirectives(astEntity);
     }
 
     if (exportName) {
@@ -491,7 +491,7 @@ export class Collector {
     return entity;
   }
 
-  private _recursivelyCreateEntities(astEntity: AstEntity, alreadySeenAstEntities: Set<AstEntity>): void {
+  #recursivelyCreateEntities(astEntity: AstEntity, alreadySeenAstEntities: Set<AstEntity>): void {
     if (alreadySeenAstEntities.has(astEntity)) return;
     alreadySeenAstEntities.add(astEntity);
 
@@ -503,13 +503,13 @@ export class Collector {
             // nested inside a namespace, only the namespace gets a collector entity. Note that this
             // is not true for AstNamespaceImports below.
             if (referencedAstEntity.parentAstSymbol === undefined) {
-              this._createCollectorEntity(referencedAstEntity);
+              this.#createCollectorEntity(referencedAstEntity);
             }
           } else {
-            this._createCollectorEntity(referencedAstEntity);
+            this.#createCollectorEntity(referencedAstEntity);
           }
 
-          this._recursivelyCreateEntities(referencedAstEntity, alreadySeenAstEntities);
+          this.#recursivelyCreateEntities(referencedAstEntity, alreadySeenAstEntities);
         }
       });
     }
@@ -526,8 +526,8 @@ export class Collector {
 
       for (const [localExportName, localAstEntity] of astModuleExportInfo.exportedLocalEntities) {
         // Create a CollectorEntity for each local export within an AstNamespaceImport entity.
-        this._createCollectorEntity(localAstEntity, localExportName, parentEntity);
-        this._recursivelyCreateEntities(localAstEntity, alreadySeenAstEntities);
+        this.#createCollectorEntity(localAstEntity, localExportName, parentEntity);
+        this.#recursivelyCreateEntities(localAstEntity, alreadySeenAstEntities);
       }
     }
   }
@@ -535,7 +535,7 @@ export class Collector {
   /**
    * Ensures a unique name for each item in the package typings file.
    */
-  private _makeUniqueNames(): void {
+  #makeUniqueNames(): void {
     // The following examples illustrate the nameForEmit heuristics:
     //
     // Example 1:
@@ -618,7 +618,7 @@ export class Collector {
     }
   }
 
-  private _fetchSymbolMetadata(astSymbol: AstSymbol): void {
+  #fetchSymbolMetadata(astSymbol: AstSymbol): void {
     if (astSymbol.symbolMetadata) {
       return;
     }
@@ -626,15 +626,15 @@ export class Collector {
     // When we solve an astSymbol, then we always also solve all of its parents and all of its declarations.
     // The parent is solved first.
     if (astSymbol.parentAstSymbol && astSymbol.parentAstSymbol.symbolMetadata === undefined) {
-      this._fetchSymbolMetadata(astSymbol.parentAstSymbol);
+      this.#fetchSymbolMetadata(astSymbol.parentAstSymbol);
     }
 
     // Construct the DeclarationMetadata objects, and detect any ancillary declarations
-    this._calculateDeclarationMetadataForDeclarations(astSymbol);
+    this.#calculateDeclarationMetadataForDeclarations(astSymbol);
 
     // Calculate the ApiItemMetadata objects
     for (const astDeclaration of astSymbol.astDeclarations) {
-      this._calculateApiItemMetadata(astDeclaration);
+      this.#calculateApiItemMetadata(astDeclaration);
     }
 
     // The most public effectiveReleaseTag for all declarations
@@ -657,7 +657,7 @@ export class Collector {
     });
   }
 
-  private _calculateDeclarationMetadataForDeclarations(astSymbol: AstSymbol): void {
+  #calculateDeclarationMetadataForDeclarations(astSymbol: AstSymbol): void {
     // Initialize DeclarationMetadata for each declaration
     for (const astDeclaration of astSymbol.astDeclarations) {
       if (astDeclaration.declarationMetadata) {
@@ -667,7 +667,7 @@ export class Collector {
       }
 
       const metadata: InternalDeclarationMetadata = new InternalDeclarationMetadata();
-      metadata.tsdocParserContext = this._parseTsdocForAstDeclaration(astDeclaration);
+      metadata.tsdocParserContext = this.#parseTsdocForAstDeclaration(astDeclaration);
 
       astDeclaration.declarationMetadata = metadata;
     }
@@ -680,7 +680,7 @@ export class Collector {
         for (const getterAstDeclaration of astDeclaration.astSymbol.astDeclarations) {
           if (getterAstDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor) {
             // Associate it with the getter
-            this._addAncillaryDeclaration(getterAstDeclaration, astDeclaration);
+            this.#addAncillaryDeclaration(getterAstDeclaration, astDeclaration);
 
             foundGetter = true;
           }
@@ -697,7 +697,7 @@ export class Collector {
     }
   }
 
-  private _addAncillaryDeclaration(
+  #addAncillaryDeclaration(
     mainAstDeclaration: AstDeclaration,
     ancillaryAstDeclaration: AstDeclaration
   ): void {
@@ -741,7 +741,7 @@ export class Collector {
     mainMetadata.ancillaryDeclarations.push(ancillaryAstDeclaration);
   }
 
-  private _calculateApiItemMetadata(astDeclaration: AstDeclaration): void {
+  #calculateApiItemMetadata(astDeclaration: AstDeclaration): void {
     const declarationMetadata: InternalDeclarationMetadata =
       astDeclaration.declarationMetadata as InternalDeclarationMetadata;
     if (declarationMetadata.isAncillary) {
@@ -910,7 +910,7 @@ export class Collector {
     }
   }
 
-  private _parseTsdocForAstDeclaration(astDeclaration: AstDeclaration): tsdoc.ParserContext | undefined {
+  #parseTsdocForAstDeclaration(astDeclaration: AstDeclaration): tsdoc.ParserContext | undefined {
     const declaration: ts.Declaration = astDeclaration.declaration;
     let nodeForComment: ts.Node = declaration;
 
@@ -967,7 +967,7 @@ export class Collector {
     return parserContext;
   }
 
-  private _collectReferenceDirectives(astEntity: AstEntity): void {
+  #collectReferenceDirectives(astEntity: AstEntity): void {
     // Here, we're collecting reference directives from source files that contain extracted
     // definitions (i.e. - files that contain `export class ...`, `export interface ...`, ...).
     // These references may or may not include the `preserve="true" attribute. In TS < 5.5,
@@ -984,16 +984,16 @@ export class Collector {
       const sourceFiles: ts.SourceFile[] = astEntity.astDeclarations.map((astDeclaration) =>
         astDeclaration.declaration.getSourceFile()
       );
-      return this._collectReferenceDirectivesFromSourceFiles(sourceFiles, false);
+      return this.#collectReferenceDirectivesFromSourceFiles(sourceFiles, false);
     }
 
     if (astEntity instanceof AstNamespaceImport) {
       const sourceFiles: ts.SourceFile[] = [astEntity.astModule.sourceFile];
-      return this._collectReferenceDirectivesFromSourceFiles(sourceFiles, false);
+      return this.#collectReferenceDirectivesFromSourceFiles(sourceFiles, false);
     }
   }
 
-  private _collectReferenceDirectivesFromSourceFiles(
+  #collectReferenceDirectivesFromSourceFiles(
     sourceFiles: Iterable<ts.SourceFile>,
     onlyIncludeExplicitlyPreserved: boolean
   ): void {
@@ -1011,7 +1011,7 @@ export class Collector {
           seenFilenames.add(fileName);
 
           for (const typeReferenceDirective of typeReferenceDirectives) {
-            const name: string | undefined = this._getReferenceDirectiveFromSourceFile(
+            const name: string | undefined = this.#getReferenceDirectiveFromSourceFile(
               sourceFileText,
               typeReferenceDirective,
               onlyIncludeExplicitlyPreserved
@@ -1022,7 +1022,7 @@ export class Collector {
           }
 
           for (const libReferenceDirective of libReferenceDirectives) {
-            const reference: string | undefined = this._getReferenceDirectiveFromSourceFile(
+            const reference: string | undefined = this.#getReferenceDirectiveFromSourceFile(
               sourceFileText,
               libReferenceDirective,
               onlyIncludeExplicitlyPreserved
@@ -1036,7 +1036,7 @@ export class Collector {
     }
   }
 
-  private _getReferenceDirectiveFromSourceFile(
+  #getReferenceDirectiveFromSourceFile(
     sourceFileText: string,
     { pos, end, preserve }: ts.FileReference,
     onlyIncludeExplicitlyPreserved: boolean

@@ -36,16 +36,16 @@ export class Terminal implements ITerminal {
    * {@inheritdoc ITerminal.write}
    */
   public write(...messageParts: TerminalWriteParameters): void {
-    const { parts } = this._normalizeWriteParameters(messageParts);
-    this._writeSegmentsToProviders(parts, TerminalProviderSeverity.log, false);
+    const { parts } = this.#normalizeWriteParameters(messageParts);
+    this.#writeSegmentsToProviders(parts, TerminalProviderSeverity.log, false);
   }
 
   /**
    * {@inheritdoc ITerminal.writeLine}
    */
   public writeLine(...messageParts: TerminalWriteParameters): void {
-    const { parts } = this._normalizeWriteParameters(messageParts);
-    this._writeSegmentsToProviders(parts, TerminalProviderSeverity.log, true);
+    const { parts } = this.#normalizeWriteParameters(messageParts);
+    this.#writeSegmentsToProviders(parts, TerminalProviderSeverity.log, true);
   }
 
   /**
@@ -55,8 +55,8 @@ export class Terminal implements ITerminal {
     const {
       parts,
       options: { doNotOverrideSgrCodes }
-    } = this._normalizeWriteParameters(messageParts);
-    this._writeSegmentsToProviders(
+    } = this.#normalizeWriteParameters(messageParts);
+    this.#writeSegmentsToProviders(
       doNotOverrideSgrCodes
         ? parts
         : parts.map((part): string => Colorize.yellow(AnsiEscape.removeCodes(part))),
@@ -72,8 +72,8 @@ export class Terminal implements ITerminal {
     const {
       parts,
       options: { doNotOverrideSgrCodes }
-    } = this._normalizeWriteParameters(messageParts);
-    this._writeSegmentsToProviders(
+    } = this.#normalizeWriteParameters(messageParts);
+    this.#writeSegmentsToProviders(
       doNotOverrideSgrCodes
         ? parts
         : parts.map((part): string => Colorize.yellow(AnsiEscape.removeCodes(part))),
@@ -89,8 +89,8 @@ export class Terminal implements ITerminal {
     const {
       parts,
       options: { doNotOverrideSgrCodes }
-    } = this._normalizeWriteParameters(messageParts);
-    this._writeSegmentsToProviders(
+    } = this.#normalizeWriteParameters(messageParts);
+    this.#writeSegmentsToProviders(
       doNotOverrideSgrCodes ? parts : parts.map((part): string => Colorize.red(AnsiEscape.removeCodes(part))),
       TerminalProviderSeverity.error,
       false
@@ -104,8 +104,8 @@ export class Terminal implements ITerminal {
     const {
       parts,
       options: { doNotOverrideSgrCodes }
-    } = this._normalizeWriteParameters(messageParts);
-    this._writeSegmentsToProviders(
+    } = this.#normalizeWriteParameters(messageParts);
+    this.#writeSegmentsToProviders(
       doNotOverrideSgrCodes ? parts : parts.map((part): string => Colorize.red(AnsiEscape.removeCodes(part))),
       TerminalProviderSeverity.error,
       true
@@ -116,35 +116,35 @@ export class Terminal implements ITerminal {
    * {@inheritdoc ITerminal.writeVerbose}
    */
   public writeVerbose(...messageParts: TerminalWriteParameters): void {
-    const { parts } = this._normalizeWriteParameters(messageParts);
-    this._writeSegmentsToProviders(parts, TerminalProviderSeverity.verbose, false);
+    const { parts } = this.#normalizeWriteParameters(messageParts);
+    this.#writeSegmentsToProviders(parts, TerminalProviderSeverity.verbose, false);
   }
 
   /**
    * {@inheritdoc ITerminal.writeVerboseLine}
    */
   public writeVerboseLine(...messageParts: TerminalWriteParameters): void {
-    const { parts } = this._normalizeWriteParameters(messageParts);
-    this._writeSegmentsToProviders(parts, TerminalProviderSeverity.verbose, true);
+    const { parts } = this.#normalizeWriteParameters(messageParts);
+    this.#writeSegmentsToProviders(parts, TerminalProviderSeverity.verbose, true);
   }
 
   /**
    * {@inheritdoc ITerminal.writeDebug}
    */
   public writeDebug(...messageParts: TerminalWriteParameters): void {
-    const { parts } = this._normalizeWriteParameters(messageParts);
-    this._writeSegmentsToProviders(parts, TerminalProviderSeverity.debug, false);
+    const { parts } = this.#normalizeWriteParameters(messageParts);
+    this.#writeSegmentsToProviders(parts, TerminalProviderSeverity.debug, false);
   }
 
   /**
    * {@inheritdoc ITerminal.writeDebugLine}
    */
   public writeDebugLine(...messageParts: TerminalWriteParameters): void {
-    const { parts } = this._normalizeWriteParameters(messageParts);
-    this._writeSegmentsToProviders(parts, TerminalProviderSeverity.debug, true);
+    const { parts } = this.#normalizeWriteParameters(messageParts);
+    this.#writeSegmentsToProviders(parts, TerminalProviderSeverity.debug, true);
   }
 
-  private _writeSegmentsToProviders(
+  #writeSegmentsToProviders(
     segments: string[],
     severity: TerminalProviderSeverity,
     followedByEol: boolean
@@ -186,7 +186,7 @@ export class Terminal implements ITerminal {
     }
   }
 
-  private _normalizeWriteParameters(parameters: TerminalWriteParameters): {
+  #normalizeWriteParameters(parameters: TerminalWriteParameters): {
     parts: string[];
     options: ITerminalWriteOptions;
   } {

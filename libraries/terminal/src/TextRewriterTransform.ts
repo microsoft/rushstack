@@ -101,15 +101,15 @@ export class TextRewriterTransform extends TerminalTransform {
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
     if (chunk.kind === TerminalChunkKind.Stderr) {
-      this._processText(chunk, this.#stderrStates);
+      this.#processText(chunk, this.#stderrStates);
     } else if (chunk.kind === TerminalChunkKind.Stdout) {
-      this._processText(chunk, this.#stdoutStates);
+      this.#processText(chunk, this.#stdoutStates);
     } else {
       this.destination.writeChunk(chunk);
     }
   }
 
-  private _processText(chunk: ITerminalChunk, states: TextRewriterState[]): void {
+  #processText(chunk: ITerminalChunk, states: TextRewriterState[]): void {
     let text: string = chunk.text;
     for (let i: number = 0; i < states.length; ++i) {
       if (text.length > 0) {
@@ -129,7 +129,7 @@ export class TextRewriterTransform extends TerminalTransform {
     }
   }
 
-  private _closeRewriters(states: TextRewriterState[], chunkKind: TerminalChunkKind): void {
+  #closeRewriters(states: TextRewriterState[], chunkKind: TerminalChunkKind): void {
     let text: string = '';
     for (let i: number = 0; i < states.length; ++i) {
       if (text.length > 0) {
@@ -146,8 +146,8 @@ export class TextRewriterTransform extends TerminalTransform {
   }
 
   protected onClose(): void {
-    this._closeRewriters(this.#stderrStates, TerminalChunkKind.Stderr);
-    this._closeRewriters(this.#stdoutStates, TerminalChunkKind.Stdout);
+    this.#closeRewriters(this.#stderrStates, TerminalChunkKind.Stderr);
+    this.#closeRewriters(this.#stdoutStates, TerminalChunkKind.Stdout);
 
     this.autocloseDestination();
   }

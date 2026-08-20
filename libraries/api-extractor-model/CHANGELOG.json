@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.33.11",
+      "tag": "@microsoft/api-extractor-model_v7.33.11",
+      "date": "Thu, 20 Aug 2026 00:16:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Require Node.js 20.9 or newer for package consumers."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.33.10",
       "tag": "@microsoft/api-extractor-model_v7.33.10",
       "date": "Fri, 17 Jul 2026 00:15:59 GMT",
