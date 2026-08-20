@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-daemon-transport",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Workspace-keyed socket/pipe transport for the Rush daemon (rushd): path derivation, net listener/connector, and PID/lockfile handling. (public beta)",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
