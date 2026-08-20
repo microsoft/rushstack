@@ -139,7 +139,16 @@ export class TypeScriptInternals {
     if (!typeChecker.getEmitResolver) {
       throw new InternalError('Missing TypeChecker.getEmitResolver');
     }
-    const resolver: any = typeChecker.getEmitResolver();
+
+    // We only need `EmitResolver.hasGlobalName`, which queries the checker's `globals` table.  That
+    // table is fully populated when the checker is created, whereas `getEmitResolver()` by default
+    // first performs a full-program type check, which is expensive.  `skipDiagnostics` is a compiler
+    // internal; older TypeScript versions ignore the extra argument.
+    const resolver: any = typeChecker.getEmitResolver(
+      /*sourceFile*/ undefined,
+      /*cancellationToken*/ undefined,
+      /*skipDiagnostics*/ true
+    );
     if (!resolver.hasGlobalName) {
       throw new InternalError('Missing EmitResolver.hasGlobalName');
     }

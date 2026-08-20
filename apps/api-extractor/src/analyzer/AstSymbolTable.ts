@@ -130,6 +130,18 @@ export class AstSymbolTable {
   }
 
   /**
+   * Returns the set of source files containing declarations that were analyzed, i.e. that are
+   * reachable from the entry point.  Used to scope compiler diagnostics to the API surface.
+   */
+  public collectAnalyzedSourceFiles(): Set<ts.SourceFile> {
+    const sourceFiles: Set<ts.SourceFile> = new Set<ts.SourceFile>();
+    for (const declaration of this._astDeclarationsByDeclaration.keys()) {
+      sourceFiles.add(declaration.getSourceFile());
+    }
+    return sourceFiles;
+  }
+
+  /**
    * Attempts to retrieve an export by name from the specified `AstModule`.
    * Returns undefined if no match was found.
    */
