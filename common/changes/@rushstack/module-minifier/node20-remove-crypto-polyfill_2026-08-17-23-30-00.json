@@ -1,9 +1,0 @@
-{
-  "changes": [
-    {
-      "packageName": "@rushstack/module-minifier",
-      "comment": "Remove the Node.js 18 Web Crypto polyfill.",
-      "type": "patch"
-    }
-  ]
-}

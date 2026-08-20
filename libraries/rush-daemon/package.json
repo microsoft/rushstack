@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-daemon",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "The long-lived Rush workspace daemon host",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",

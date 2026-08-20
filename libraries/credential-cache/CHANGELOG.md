@@ -1,6 +1,13 @@
 # Change Log - @rushstack/credential-cache
 
-This log was last generated on Fri, 14 Aug 2026 00:18:07 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Aug 2026 00:16:38 GMT and should not be manually modified.
+
+## 0.2.24
+Thu, 20 Aug 2026 00:16:38 GMT
+
+### Patches
+
+- Remove the Node.js 18 explicit resource management symbol polyfill.
 
 ## 0.2.23
 Fri, 14 Aug 2026 00:18:07 GMT
