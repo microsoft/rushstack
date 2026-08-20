@@ -42,6 +42,6 @@ describe(WorkspaceSessionFileWatcher.name, () => {
       expect.arrayContaining(subspaceConfigFolders)
     );
 
-    await watcher.disposeAsync();
+    await watcher[Symbol.asyncDispose]();
   });
 });

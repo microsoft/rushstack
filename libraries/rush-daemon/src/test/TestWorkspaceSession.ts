@@ -22,7 +22,7 @@ export const TEST_RUSH_CONFIGURATION: RushConfiguration = RushConfiguration.load
 );
 
 export class TestWorkspaceSession implements IWorkspaceSession {
-  private readonly _onDispose: (() => void) | undefined;
+  readonly #onDispose: (() => unknown) | undefined;
 
   public readonly inputsSnapshot: IInputsSnapshot | undefined;
   public readonly invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
@@ -31,8 +31,8 @@ export class TestWorkspaceSession implements IWorkspaceSession {
   public readonly rushConfiguration: RushConfiguration = TEST_RUSH_CONFIGURATION;
   public readonly rushSession: RushSession | undefined;
 
-  public constructor(repoRoot: string, onDispose?: () => void) {
-    this._onDispose = onDispose;
+  public constructor(repoRoot: string, onDispose?: () => unknown) {
+    this.#onDispose = onDispose;
     this.metadata = {
       projectCount: 0,
       projectNames: [],
@@ -42,8 +42,7 @@ export class TestWorkspaceSession implements IWorkspaceSession {
     };
   }
 
-  public disposeAsync(): Promise<void> {
-    this._onDispose?.();
-    return Promise.resolve();
+  public async [Symbol.asyncDispose](): Promise<void> {
+    await this.#onDispose?.();
   }
 }

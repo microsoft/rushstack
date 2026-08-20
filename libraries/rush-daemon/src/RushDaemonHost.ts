@@ -112,7 +112,7 @@ export class RushDaemonHost {
       });
     } catch (error) {
       try {
-        await workspaceSessionProvider.disposeAsync();
+        await workspaceSessionProvider[Symbol.asyncDispose]();
       } catch (cleanupError) {
         throw new AggregateError(
           [error, cleanupError],
@@ -157,7 +157,7 @@ export class RushDaemonHost {
       errors.push(error);
     }
     try {
-      await this._workspaceSessionProvider.disposeAsync();
+      await this._workspaceSessionProvider[Symbol.asyncDispose]();
     } catch (error) {
       errors.push(error);
     }

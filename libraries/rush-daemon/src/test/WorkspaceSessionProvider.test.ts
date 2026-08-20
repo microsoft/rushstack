@@ -32,7 +32,7 @@ describe(WorkspaceSessionProvider.name, () => {
     await expect(first).resolves.toBe(session);
     await expect(provider.getSessionAsync()).resolves.toBe(session);
     expect(factoryCalls).toBe(1);
-    await provider.disposeAsync();
+    await provider[Symbol.asyncDispose]();
   });
 
   it('clears a failed initialization so a later attempt can retry', async () => {
@@ -48,7 +48,7 @@ describe(WorkspaceSessionProvider.name, () => {
     await expect(provider.getSessionAsync()).rejects.toThrow('initialization failed');
     await expect(provider.getSessionAsync()).resolves.toBe(session);
     expect(factoryCalls).toBe(2);
-    await provider.disposeAsync();
+    await provider[Symbol.asyncDispose]();
   });
 
   it('clears a synchronously thrown initialization so a later attempt can retry', async () => {
@@ -65,7 +65,7 @@ describe(WorkspaceSessionProvider.name, () => {
     await expect(provider.getSessionAsync()).rejects.toThrow('synchronous initialization failed');
     await expect(provider.getSessionAsync()).resolves.toBe(session);
     expect(factoryCalls).toBe(2);
-    await provider.disposeAsync();
+    await provider[Symbol.asyncDispose]();
   });
 
   it('disposes a session that finishes initializing during shutdown', async () => {
@@ -83,12 +83,66 @@ describe(WorkspaceSessionProvider.name, () => {
     );
 
     const initialization: Promise<IWorkspaceSession> = provider.getSessionAsync();
-    const disposal: Promise<void> = provider.disposeAsync();
+    const disposal: Promise<void> = provider[Symbol.asyncDispose]();
     await Promise.resolve();
     resolveFactory?.(session);
 
     await expect(initialization).rejects.toThrow('disposed during initialization');
     await disposal;
     expect(disposalEvents).toEqual(['session']);
+  });
+
+  it('surfaces a disposal failure from a session that finishes initializing during shutdown', async () => {
+    const session: IWorkspaceSession = new TestWorkspaceSession(OPTIONS.repoRoot, () =>
+      Promise.reject(new Error('session cleanup failed'))
+    );
+    let resolveFactory: ((value: IWorkspaceSession) => void) | undefined;
+    const provider: WorkspaceSessionProvider = new WorkspaceSessionProvider(
+      () =>
+        new Promise<IWorkspaceSession>((resolve) => {
+          resolveFactory = resolve;
+        }),
+      OPTIONS
+    );
+
+    const initialization: Promise<IWorkspaceSession> = provider.getSessionAsync();
+    const disposal: Promise<void> = provider[Symbol.asyncDispose]();
+    const initializationExpectation: Promise<void> = expect(initialization).rejects.toThrow(
+      'session cleanup failed'
+    );
+    const disposalExpectation: Promise<void> = expect(disposal).rejects.toThrow(
+      'session cleanup failed'
+    );
+    await Promise.resolve();
+    resolveFactory?.(session);
+
+    await Promise.all([initializationExpectation, disposalExpectation]);
+  });
+
+  it('surfaces a synchronous disposal failure during initialization shutdown', async () => {
+    const session: IWorkspaceSession = new TestWorkspaceSession(OPTIONS.repoRoot, () => {
+      throw new Error('synchronous session cleanup failed');
+    });
+    let resolveFactory: ((value: IWorkspaceSession) => void) | undefined;
+    const provider: WorkspaceSessionProvider = new WorkspaceSessionProvider(
+      () =>
+        new Promise<IWorkspaceSession>((resolve) => {
+          resolveFactory = resolve;
+        }),
+      OPTIONS
+    );
+
+    const initialization: Promise<IWorkspaceSession> = provider.getSessionAsync();
+    const disposal: Promise<void> = provider[Symbol.asyncDispose]();
+    const initializationExpectation: Promise<void> = expect(initialization).rejects.toThrow(
+      'synchronous session cleanup failed'
+    );
+    const disposalExpectation: Promise<void> = expect(disposal).rejects.toThrow(
+      'synchronous session cleanup failed'
+    );
+    await Promise.resolve();
+    resolveFactory?.(session);
+
+    await Promise.all([initializationExpectation, disposalExpectation]);
   });
 });

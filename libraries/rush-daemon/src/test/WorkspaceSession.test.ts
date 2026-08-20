@@ -31,7 +31,7 @@ class TestInvalidationWatcher implements IWorkspaceInvalidationWatcher {
     this._onInvalidation(changedPath);
   }
 
-  public disposeAsync(): Promise<void> {
+  public [Symbol.asyncDispose](): Promise<void> {
     this._events.push('watcher-dispose');
     this._onInvalidation = undefined;
     return Promise.resolve();
@@ -50,7 +50,7 @@ describe(WorkspaceSession.name, () => {
         componentFactoryCalls++;
         return Promise.resolve<IWorkspaceSessionComponents>({
           projectWatcher: watcher,
-          disposeAsync: () => {
+          [Symbol.asyncDispose]: () => {
             events.push('components-dispose');
             return Promise.resolve();
           }
@@ -91,7 +91,7 @@ describe(WorkspaceSession.name, () => {
       sequence: 4
     });
 
-    await session.disposeAsync();
+    await session[Symbol.asyncDispose]();
     expect(events).toEqual(['watcher-start', 'watcher-dispose', 'components-dispose']);
   });
 
@@ -101,7 +101,8 @@ describe(WorkspaceSession.name, () => {
       rushVersion: '5.178.0',
       createComponentsAsync: () =>
         Promise.resolve<IWorkspaceSessionComponents>({
-          projectWatcher: new TestInvalidationWatcher([])
+          projectWatcher: new TestInvalidationWatcher([]),
+          [Symbol.asyncDispose]: () => Promise.resolve()
         })
     });
 
@@ -113,7 +114,7 @@ describe(WorkspaceSession.name, () => {
       hasUnknownChanges: true,
       isWatcherHealthy: false
     });
-    await session.disposeAsync();
+    await session[Symbol.asyncDispose]();
   });
 
   it('compacts excessive path changes into an unknown invalidation', () => {
@@ -145,7 +146,7 @@ describe(WorkspaceSession.name, () => {
     const events: string[] = [];
     const watcher: IWorkspaceInvalidationWatcher = {
       startAsync: () => Promise.reject(new Error('watcher startup failed')),
-      disposeAsync: () => {
+      [Symbol.asyncDispose]: () => {
         events.push('watcher-dispose');
         return Promise.resolve();
       }
@@ -158,7 +159,7 @@ describe(WorkspaceSession.name, () => {
         createComponentsAsync: () =>
           Promise.resolve<IWorkspaceSessionComponents>({
             projectWatcher: watcher,
-            disposeAsync: () => {
+            [Symbol.asyncDispose]: () => {
               events.push('components-dispose');
               return Promise.resolve();
             }
@@ -166,5 +167,34 @@ describe(WorkspaceSession.name, () => {
       })
     ).rejects.toThrow('watcher startup failed');
     expect(events).toEqual(['watcher-dispose', 'components-dispose']);
+  });
+
+  it('preserves initialization and cleanup failures when watcher startup fails', async () => {
+    const watcher: IWorkspaceInvalidationWatcher = {
+      startAsync: () => Promise.reject(new Error('watcher startup failed')),
+      [Symbol.asyncDispose]: () => Promise.reject(new Error('watcher cleanup failed'))
+    };
+
+    let thrownError: unknown;
+    try {
+      await WorkspaceSession.createAsync({
+        repoRoot: TEST_REPO_ROOT,
+        rushVersion: '5.178.0',
+        createComponentsAsync: () =>
+          Promise.resolve<IWorkspaceSessionComponents>({
+            projectWatcher: watcher,
+            [Symbol.asyncDispose]: () => Promise.reject(new Error('component cleanup failed'))
+          })
+      });
+    } catch (error) {
+      thrownError = error;
+    }
+
+    expect(thrownError).toBeInstanceOf(AggregateError);
+    expect((thrownError as AggregateError).errors).toEqual([
+      new Error('watcher startup failed'),
+      new Error('watcher cleanup failed'),
+      new Error('component cleanup failed')
+    ]);
   });
 });

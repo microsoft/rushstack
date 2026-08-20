@@ -7,62 +7,77 @@ import type {
   WorkspaceSessionFactory
 } from './WorkspaceSession';
 
-export class WorkspaceSessionProvider {
-  private readonly _factory: WorkspaceSessionFactory;
-  private readonly _options: IWorkspaceSessionOptions;
-  private _initializationPromise: Promise<IWorkspaceSession> | undefined;
-  private _session: IWorkspaceSession | undefined;
-  private _disposed: boolean = false;
+export class WorkspaceSessionProvider implements AsyncDisposable {
+  readonly #factory: WorkspaceSessionFactory;
+  readonly #options: IWorkspaceSessionOptions;
+  #disposePromise: Promise<void> | undefined;
+  #initializationDisposalPromise: Promise<void> | undefined;
+  #initializationPromise: Promise<IWorkspaceSession> | undefined;
+  #session: IWorkspaceSession | undefined;
+  #disposed: boolean = false;
 
   public constructor(factory: WorkspaceSessionFactory, options: IWorkspaceSessionOptions) {
-    this._factory = factory;
-    this._options = options;
+    this.#factory = factory;
+    this.#options = options;
   }
 
   public getSessionAsync(): Promise<IWorkspaceSession> {
-    if (this._disposed) {
+    if (this.#disposed) {
       return Promise.reject(new Error('The workspace session provider has been disposed.'));
     }
-    if (this._session) {
-      return Promise.resolve(this._session);
+    if (this.#session) {
+      return Promise.resolve(this.#session);
     }
-    if (!this._initializationPromise) {
+    if (!this.#initializationPromise) {
       const initializationPromise: Promise<IWorkspaceSession> = Promise.resolve().then(() =>
-        this._initializeAsync()
+        this.#initializeAsync()
       );
-      this._initializationPromise = initializationPromise;
+      this.#initializationPromise = initializationPromise;
       void initializationPromise.catch(() => {
-        if (this._initializationPromise === initializationPromise) {
-          this._initializationPromise = undefined;
+        if (this.#initializationPromise === initializationPromise) {
+          this.#initializationPromise = undefined;
         }
       });
     }
-    return this._initializationPromise;
+    return this.#initializationPromise;
   }
 
-  public async disposeAsync(): Promise<void> {
-    if (this._disposed) {
-      return;
+  public [Symbol.asyncDispose](): Promise<void> {
+    this.#disposePromise ??= this.#disposeOnceAsync();
+    return this.#disposePromise;
+  }
+
+  async #disposeOnceAsync(): Promise<void> {
+    this.#disposed = true;
+    try {
+      const session: IWorkspaceSession | undefined =
+        this.#session ??
+        (await this.#initializationPromise?.then(
+          (initializedSession: IWorkspaceSession) => initializedSession,
+          () => undefined
+        ));
+      if (session) {
+        await session[Symbol.asyncDispose]();
+      } else {
+        await this.#initializationDisposalPromise;
+      }
+    } finally {
+      this.#session = undefined;
+      this.#initializationPromise = undefined;
+      this.#initializationDisposalPromise = undefined;
     }
-    this._disposed = true;
-    const session: IWorkspaceSession | undefined =
-      this._session ??
-      (await this._initializationPromise?.then(
-        (initializedSession: IWorkspaceSession) => initializedSession,
-        () => undefined
-      ));
-    await session?.disposeAsync();
-    this._session = undefined;
-    this._initializationPromise = undefined;
   }
 
-  private async _initializeAsync(): Promise<IWorkspaceSession> {
-    const session: IWorkspaceSession = await this._factory(this._options);
-    if (this._disposed) {
-      await session.disposeAsync();
+  async #initializeAsync(): Promise<IWorkspaceSession> {
+    const session: IWorkspaceSession = await this.#factory(this.#options);
+    if (this.#disposed) {
+      this.#initializationDisposalPromise = Promise.resolve().then(() =>
+        session[Symbol.asyncDispose]()
+      );
+      await this.#initializationDisposalPromise;
       throw new Error('The workspace session provider was disposed during initialization.');
     }
-    this._session = session;
+    this.#session = session;
     return session;
   }
 }

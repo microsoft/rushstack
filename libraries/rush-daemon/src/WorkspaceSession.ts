@@ -31,8 +31,7 @@ export interface IWorkspaceSessionMetadata {
  *
  * @beta
  */
-export interface IWorkspaceInvalidationWatcher {
-  disposeAsync(): Promise<void>;
+export interface IWorkspaceInvalidationWatcher extends AsyncDisposable {
   startAsync(onInvalidation: (changedPath?: string) => void): Promise<void>;
 }
 
@@ -45,8 +44,7 @@ export interface IWorkspaceInvalidationWatcher {
  *
  * @beta
  */
-export interface IWorkspaceSessionComponents {
-  readonly disposeAsync?: () => Promise<void>;
+export interface IWorkspaceSessionComponents extends AsyncDisposable {
   readonly inputsSnapshot?: IInputsSnapshot;
   readonly operationGraph?: IOperationGraph;
   readonly projectWatcher?: IWorkspaceInvalidationWatcher;
@@ -90,14 +88,13 @@ export interface IWorkspaceSessionOptions {
  *
  * @beta
  */
-export interface IWorkspaceSession {
+export interface IWorkspaceSession extends AsyncDisposable {
   readonly inputsSnapshot: IInputsSnapshot | undefined;
   readonly invalidations: WorkspaceInvalidationTracker;
   readonly metadata: IWorkspaceSessionMetadata;
   readonly operationGraph: IOperationGraph | undefined;
   readonly rushConfiguration: RushConfiguration;
   readonly rushSession: RushSession | undefined;
-  disposeAsync(): Promise<void>;
 }
 
 /**
@@ -107,15 +104,19 @@ export interface IWorkspaceSession {
  */
 export type WorkspaceSessionFactory = (options: IWorkspaceSessionOptions) => Promise<IWorkspaceSession>;
 
+const EMPTY_WORKSPACE_SESSION_COMPONENTS: IWorkspaceSessionComponents = {
+  [Symbol.asyncDispose]: () => Promise.resolve()
+};
+
 /**
  * A warm workspace session with client-independent invalidation tracking.
  *
  * @beta
  */
 export class WorkspaceSession implements IWorkspaceSession {
-  private readonly _components: IWorkspaceSessionComponents;
-  private readonly _projectWatcher: IWorkspaceInvalidationWatcher;
-  private _disposePromise: Promise<void> | undefined;
+  readonly #components: IWorkspaceSessionComponents;
+  readonly #projectWatcher: IWorkspaceInvalidationWatcher;
+  #disposePromise: Promise<void> | undefined;
 
   public readonly inputsSnapshot: IInputsSnapshot | undefined;
   public readonly invalidations: WorkspaceInvalidationTracker;
@@ -134,8 +135,8 @@ export class WorkspaceSession implements IWorkspaceSession {
     this.rushConfiguration = rushConfiguration;
     this.metadata = metadata;
     this.invalidations = invalidations;
-    this._components = components;
-    this._projectWatcher = projectWatcher;
+    this.#components = components;
+    this.#projectWatcher = projectWatcher;
     this.inputsSnapshot = components.inputsSnapshot;
     this.operationGraph = components.operationGraph;
     this.rushSession = components.rushSession;
@@ -157,7 +158,7 @@ export class WorkspaceSession implements IWorkspaceSession {
         invalidations,
         onError: options.onError,
         rushConfiguration
-      })) ?? {};
+      })) ?? EMPTY_WORKSPACE_SESSION_COMPONENTS;
     let projectWatcher: IWorkspaceInvalidationWatcher | undefined = components.projectWatcher;
     try {
       const metadata: IWorkspaceSessionMetadata = createMetadata(
@@ -187,12 +188,12 @@ export class WorkspaceSession implements IWorkspaceSession {
     } catch (error) {
       const cleanupErrors: unknown[] = [];
       try {
-        await projectWatcher?.disposeAsync();
+        await projectWatcher?.[Symbol.asyncDispose]();
       } catch (cleanupError) {
         cleanupErrors.push(cleanupError);
       }
       try {
-        await components.disposeAsync?.();
+        await components[Symbol.asyncDispose]();
       } catch (cleanupError) {
         cleanupErrors.push(cleanupError);
       }
@@ -207,21 +208,21 @@ export class WorkspaceSession implements IWorkspaceSession {
   }
 
   /** Stops invalidation tracking and disposes injected engine resources. */
-  public disposeAsync(): Promise<void> {
-    this._disposePromise ??= this._disposeOnceAsync();
-    return this._disposePromise;
+  public [Symbol.asyncDispose](): Promise<void> {
+    this.#disposePromise ??= this.#disposeOnceAsync();
+    return this.#disposePromise;
   }
 
-  private async _disposeOnceAsync(): Promise<void> {
+  async #disposeOnceAsync(): Promise<void> {
     let watcherError: unknown;
     try {
-      await this._projectWatcher.disposeAsync();
+      await this.#projectWatcher[Symbol.asyncDispose]();
     } catch (error) {
       watcherError = error;
     }
 
     try {
-      await this._components.disposeAsync?.();
+      await this.#components[Symbol.asyncDispose]();
     } catch (componentError) {
       if (watcherError !== undefined) {
         throw new AggregateError(

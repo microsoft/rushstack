@@ -67,17 +67,13 @@ export interface IWorkspaceInvalidationSnapshot {
 }
 
 // @beta
-export interface IWorkspaceInvalidationWatcher {
-    // (undocumented)
-    disposeAsync(): Promise<void>;
+export interface IWorkspaceInvalidationWatcher extends AsyncDisposable {
     // (undocumented)
     startAsync(onInvalidation: (changedPath?: string) => void): Promise<void>;
 }
 
 // @beta
-export interface IWorkspaceSession {
-    // (undocumented)
-    disposeAsync(): Promise<void>;
+export interface IWorkspaceSession extends AsyncDisposable {
     // (undocumented)
     readonly inputsSnapshot: IInputsSnapshot | undefined;
     // (undocumented)
@@ -93,9 +89,7 @@ export interface IWorkspaceSession {
 }
 
 // @beta
-export interface IWorkspaceSessionComponents {
-    // (undocumented)
-    readonly disposeAsync?: () => Promise<void>;
+export interface IWorkspaceSessionComponents extends AsyncDisposable {
     // (undocumented)
     readonly inputsSnapshot?: IInputsSnapshot;
     // (undocumented)
@@ -188,8 +182,8 @@ export class WorkspaceInvalidationTracker {
 
 // @beta
 export class WorkspaceSession implements IWorkspaceSession {
+    [Symbol.asyncDispose](): Promise<void>;
     static createAsync(options: IWorkspaceSessionOptions): Promise<WorkspaceSession>;
-    disposeAsync(): Promise<void>;
     // (undocumented)
     readonly inputsSnapshot: IInputsSnapshot | undefined;
     // (undocumented)

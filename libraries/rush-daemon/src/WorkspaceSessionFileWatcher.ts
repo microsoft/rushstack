@@ -27,62 +27,57 @@ type WorkspaceWatchFactory = (
 ) => fs.FSWatcher;
 
 export class WorkspaceSessionFileWatcher implements IWorkspaceInvalidationWatcher {
-  private readonly _onError: ((error: Error) => void) | undefined;
-  private readonly _watchFactory: WorkspaceWatchFactory;
-  private readonly _watchPaths: ReadonlyArray<IWatchPath>;
-  private readonly _watchers: Set<fs.FSWatcher> = new Set();
-  private _onInvalidation: ((changedPath?: string) => void) | undefined;
-  private _disposed: boolean = false;
+  readonly #onError: ((error: Error) => void) | undefined;
+  readonly #watchFactory: WorkspaceWatchFactory;
+  readonly #watchPaths: ReadonlyArray<IWatchPath>;
+  readonly #watchers: Set<fs.FSWatcher> = new Set();
+  #onInvalidation: ((changedPath?: string) => void) | undefined;
+  #disposed: boolean = false;
 
   public constructor(options: IWorkspaceSessionFileWatcherOptions) {
-    this._onError = options.onError;
-    this._watchFactory = options.watchFactory ?? fs.watch;
-    this._watchPaths = getWatchPaths(options.rushConfiguration);
+    this.#onError = options.onError;
+    this.#watchFactory = options.watchFactory ?? fs.watch;
+    this.#watchPaths = getWatchPaths(options.rushConfiguration);
   }
 
   public async startAsync(onInvalidation: (changedPath?: string) => void): Promise<void> {
-    if (this._disposed) {
+    if (this.#disposed) {
       throw new Error('The workspace watcher has already been disposed.');
     }
-    if (this._onInvalidation) {
+    if (this.#onInvalidation) {
       throw new Error('The workspace watcher has already been started.');
     }
 
-    this._onInvalidation = onInvalidation;
-    try {
-      for (const watchPath of this._watchPaths) {
-        this._watchers.add(this._createWatcher(watchPath));
-      }
-    } catch (error) {
-      await this.disposeAsync();
-      throw error;
+    this.#onInvalidation = onInvalidation;
+    for (const watchPath of this.#watchPaths) {
+      this.#watchers.add(this.#createWatcher(watchPath));
     }
   }
 
-  public async disposeAsync(): Promise<void> {
-    if (this._disposed) {
+  public async [Symbol.asyncDispose](): Promise<void> {
+    if (this.#disposed) {
       return;
     }
-    this._disposed = true;
+    this.#disposed = true;
     const closePromises: Promise<unknown>[] = [];
-    for (const watcher of this._watchers) {
+    for (const watcher of this.#watchers) {
       closePromises.push(once(watcher, 'close'));
       watcher.close();
     }
     await Promise.all(closePromises);
-    this._watchers.clear();
-    this._onInvalidation = undefined;
+    this.#watchers.clear();
+    this.#onInvalidation = undefined;
   }
 
-  private _createWatcher(watchPath: IWatchPath): fs.FSWatcher {
-    const watcher: fs.FSWatcher = this._watchFactory(
+  #createWatcher(watchPath: IWatchPath): fs.FSWatcher {
+    const watcher: fs.FSWatcher = this.#watchFactory(
       watchPath.folderPath,
       { encoding: 'utf8', recursive: watchPath.recursive },
       (eventType: string, filename: string | null) => {
         void eventType;
         const changedFilename: string | undefined = filename ?? undefined;
         if (!isIgnoredPath(changedFilename)) {
-          this._onInvalidation?.(
+          this.#onInvalidation?.(
             changedFilename === undefined
               ? undefined
               : path.resolve(watchPath.folderPath, changedFilename)
@@ -91,10 +86,10 @@ export class WorkspaceSessionFileWatcher implements IWorkspaceInvalidationWatche
       }
     );
     watcher.on('error', (error: Error) => {
-      this._onInvalidation?.();
-      this._onError?.(error);
+      this.#onInvalidation?.();
+      this.#onError?.(error);
     });
-    watcher.once('close', () => this._watchers.delete(watcher));
+    watcher.once('close', () => this.#watchers.delete(watcher));
     watcher.unref();
     return watcher;
   }
