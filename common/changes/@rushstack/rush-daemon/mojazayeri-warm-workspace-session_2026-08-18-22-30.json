@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Add a reusable warm workspace session with stable Rush configuration metadata, retained headless invalidations, and deterministic host lifecycle integration.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "mojazayeri@users.noreply.github.com"
+}
