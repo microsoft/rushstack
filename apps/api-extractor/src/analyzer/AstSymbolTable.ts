@@ -3,7 +3,7 @@
 
 /* eslint-disable no-bitwise */ // for ts.SymbolFlags
 
-import * as ts from 'typescript';
+import * as ts from './TypeScriptApi';
 
 import { type PackageJsonLookup, InternalError } from '@rushstack/node-core-library';
 

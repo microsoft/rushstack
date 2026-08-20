@@ -4,7 +4,7 @@
 import * as path from 'node:path';
 
 import { SourceMapConsumer, type RawSourceMap, type MappingItem, type Position } from 'source-map';
-import type ts from 'typescript';
+import type ts from '../analyzer/TypeScriptApi';
 
 import { FileSystem, InternalError, JsonFile, NewlineKind } from '@rushstack/node-core-library';
 

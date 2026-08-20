@@ -3,7 +3,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import * as ts from 'typescript';
+import * as ts from './TypeScriptApi';
 
 import { InternalError } from '@rushstack/node-core-library';
 

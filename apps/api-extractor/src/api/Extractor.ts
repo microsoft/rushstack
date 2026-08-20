@@ -4,7 +4,7 @@
 import * as path from 'node:path';
 
 import * as semver from 'semver';
-import * as ts from 'typescript';
+import * as ts from '../analyzer/TypeScriptApi';
 import * as resolve from 'resolve';
 
 import type { ApiPackage } from '@microsoft/api-extractor-model';

@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import * as ts from 'typescript';
+import * as ts from '../analyzer/TypeScriptApi';
 
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 

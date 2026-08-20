@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import type * as ts from 'typescript';
+import type * as ts from './TypeScriptApi';
 
 import { Path, Text } from '@rushstack/node-core-library';
 

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type * as ts from 'typescript';
+import type * as ts from '../analyzer/TypeScriptApi';
 
 import type * as tsdoc from '@microsoft/tsdoc';
 import type { INodePackageJson } from '@rushstack/node-core-library';

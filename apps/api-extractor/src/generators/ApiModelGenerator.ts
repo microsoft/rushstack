@@ -5,7 +5,7 @@
 
 import * as path from 'node:path';
 
-import * as ts from 'typescript';
+import * as ts from '../analyzer/TypeScriptApi';
 
 import type * as tsdoc from '@microsoft/tsdoc';
 import {

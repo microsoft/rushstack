@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /* eslint-disable no-bitwise */
-import * as ts from 'typescript';
+import * as ts from '../analyzer/TypeScriptApi';
 
 import {
   DeclarationReference,
