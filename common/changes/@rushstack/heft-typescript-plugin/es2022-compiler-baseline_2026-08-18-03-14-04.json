@@ -1,9 +1,0 @@
-{
-  "changes": [
-    {
-      "packageName": "@rushstack/heft-typescript-plugin",
-      "comment": "Use ES2022 library definitions during TypeScript compilation.",
-      "type": "patch"
-    }
-  ]
-}

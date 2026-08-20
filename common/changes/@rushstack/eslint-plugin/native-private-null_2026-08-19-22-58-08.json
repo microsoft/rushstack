@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/eslint-plugin",
-      "comment": "Compile package output for ES2022.",
+      "comment": "Fix no-new-null false positives for ECMAScript private class members.",
       "type": "patch"
     }
   ]
