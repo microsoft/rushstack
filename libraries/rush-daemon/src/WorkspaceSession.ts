@@ -47,6 +47,13 @@ export interface IWorkspaceInvalidationWatcher extends AsyncDisposable {
 export interface IWorkspaceSessionComponents extends AsyncDisposable {
   readonly inputsSnapshot?: IInputsSnapshot;
   readonly operationGraph?: IOperationGraph;
+  /**
+   * An injected watcher owned by this component bundle.
+   *
+   * @remarks
+   * When provided, the component bundle's async disposer must dispose the watcher.
+   * `WorkspaceSession` directly disposes only the default watcher that it creates itself.
+   */
   readonly projectWatcher?: IWorkspaceInvalidationWatcher;
   readonly rushSession?: RushSession;
 }
@@ -115,7 +122,7 @@ const EMPTY_WORKSPACE_SESSION_COMPONENTS: IWorkspaceSessionComponents = {
  */
 export class WorkspaceSession implements IWorkspaceSession {
   readonly #components: IWorkspaceSessionComponents;
-  readonly #projectWatcher: IWorkspaceInvalidationWatcher;
+  readonly #sessionOwnedProjectWatcher: IWorkspaceInvalidationWatcher | undefined;
   #disposePromise: Promise<void> | undefined;
 
   public readonly inputsSnapshot: IInputsSnapshot | undefined;
@@ -130,13 +137,13 @@ export class WorkspaceSession implements IWorkspaceSession {
     metadata: IWorkspaceSessionMetadata,
     invalidations: WorkspaceInvalidationTracker,
     components: IWorkspaceSessionComponents,
-    projectWatcher: IWorkspaceInvalidationWatcher
+    sessionOwnedProjectWatcher: IWorkspaceInvalidationWatcher | undefined
   ) {
     this.rushConfiguration = rushConfiguration;
     this.metadata = metadata;
     this.invalidations = invalidations;
     this.#components = components;
-    this.#projectWatcher = projectWatcher;
+    this.#sessionOwnedProjectWatcher = sessionOwnedProjectWatcher;
     this.inputsSnapshot = components.inputsSnapshot;
     this.operationGraph = components.operationGraph;
     this.rushSession = components.rushSession;
@@ -160,24 +167,28 @@ export class WorkspaceSession implements IWorkspaceSession {
         rushConfiguration
       })) ?? EMPTY_WORKSPACE_SESSION_COMPONENTS;
     let projectWatcher: IWorkspaceInvalidationWatcher | undefined = components.projectWatcher;
+    let sessionOwnedProjectWatcher: IWorkspaceInvalidationWatcher | undefined;
     try {
       const metadata: IWorkspaceSessionMetadata = createMetadata(
         rushConfiguration,
         options.rushVersion
       );
-      projectWatcher ??= new WorkspaceSessionFileWatcher({
-        onError: (error: Error) => {
-          invalidations.markWatcherUnhealthy();
-          options.onError?.(error);
-        },
-        rushConfiguration
-      });
+      if (!projectWatcher) {
+        projectWatcher = new WorkspaceSessionFileWatcher({
+          onError: (error: Error) => {
+            invalidations.markWatcherUnhealthy();
+            options.onError?.(error);
+          },
+          rushConfiguration
+        });
+        sessionOwnedProjectWatcher = projectWatcher;
+      }
       const session: WorkspaceSession = new WorkspaceSession(
         rushConfiguration,
         metadata,
         invalidations,
         components,
-        projectWatcher
+        sessionOwnedProjectWatcher
       );
       await projectWatcher.startAsync((changedPath: string | undefined) =>
         invalidations.invalidate(changedPath)
@@ -188,7 +199,7 @@ export class WorkspaceSession implements IWorkspaceSession {
     } catch (error) {
       const cleanupErrors: unknown[] = [];
       try {
-        await projectWatcher?.[Symbol.asyncDispose]();
+        await sessionOwnedProjectWatcher?.[Symbol.asyncDispose]();
       } catch (cleanupError) {
         cleanupErrors.push(cleanupError);
       }
@@ -216,7 +227,7 @@ export class WorkspaceSession implements IWorkspaceSession {
   async #disposeOnceAsync(): Promise<void> {
     let watcherError: unknown;
     try {
-      await this.#projectWatcher[Symbol.asyncDispose]();
+      await this.#sessionOwnedProjectWatcher?.[Symbol.asyncDispose]();
     } catch (error) {
       watcherError = error;
     }

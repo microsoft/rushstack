@@ -26,6 +26,8 @@ type WorkspaceWatchFactory = (
   listener: fs.WatchListener<string>
 ) => fs.FSWatcher;
 
+const PATH_SEGMENT_SEPARATOR_REGEXP: RegExp = /[\\/]/;
+
 export class WorkspaceSessionFileWatcher implements IWorkspaceInvalidationWatcher {
   readonly #onError: ((error: Error) => void) | undefined;
   readonly #watchFactory: WorkspaceWatchFactory;
@@ -114,6 +116,6 @@ function isIgnoredPath(filename: string | undefined): boolean {
     return false;
   }
   return filename
-    .split(/[\\/]/)
+    .split(PATH_SEGMENT_SEPARATOR_REGEXP)
     .some((segment: string) => segment === '.git' || segment === 'node_modules');
 }

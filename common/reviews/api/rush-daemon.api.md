@@ -94,7 +94,6 @@ export interface IWorkspaceSessionComponents extends AsyncDisposable {
     readonly inputsSnapshot?: IInputsSnapshot;
     // (undocumented)
     readonly operationGraph?: IOperationGraph;
-    // (undocumented)
     readonly projectWatcher?: IWorkspaceInvalidationWatcher;
     // (undocumented)
     readonly rushSession?: RushSession;

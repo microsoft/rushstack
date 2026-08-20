@@ -25,29 +25,29 @@ const MAX_TRACKED_CHANGED_PATHS: number = 10_000;
  * @beta
  */
 export class WorkspaceInvalidationTracker {
-  private readonly _sequenceByPath: Map<string, number> = new Map();
-  private _latestSequence: number = 0;
-  private _unknownChangeSequence: number | undefined;
-  private _watcherHealthy: boolean = true;
+  readonly #sequenceByPath: Map<string, number> = new Map();
+  #latestSequence: number = 0;
+  #unknownChangeSequence: number | undefined;
+  #watcherHealthy: boolean = true;
 
   /** Records a path-specific or unknown workspace change. */
   public invalidate(changedPath?: string): void {
-    const sequence: number = ++this._latestSequence;
-    if (changedPath === undefined || this._unknownChangeSequence !== undefined) {
-      this._unknownChangeSequence = sequence;
+    const sequence: number = ++this.#latestSequence;
+    if (changedPath === undefined || this.#unknownChangeSequence !== undefined) {
+      this.#unknownChangeSequence = sequence;
       return;
     }
 
     if (
-      !this._sequenceByPath.has(changedPath) &&
-      this._sequenceByPath.size >= MAX_TRACKED_CHANGED_PATHS
+      !this.#sequenceByPath.has(changedPath) &&
+      this.#sequenceByPath.size >= MAX_TRACKED_CHANGED_PATHS
     ) {
-      this._sequenceByPath.clear();
-      this._unknownChangeSequence = sequence;
+      this.#sequenceByPath.clear();
+      this.#unknownChangeSequence = sequence;
       return;
     }
 
-    this._sequenceByPath.set(changedPath, sequence);
+    this.#sequenceByPath.set(changedPath, sequence);
   }
 
   /**
@@ -56,8 +56,8 @@ export class WorkspaceInvalidationTracker {
    * Unknown invalidation remains pending so consumers cannot mistake the workspace for clean.
    */
   public markWatcherUnhealthy(): void {
-    if (this._watcherHealthy) {
-      this._watcherHealthy = false;
+    if (this.#watcherHealthy) {
+      this.#watcherHealthy = false;
       this.invalidate();
     }
   }
@@ -65,10 +65,10 @@ export class WorkspaceInvalidationTracker {
   /** Returns all changes that have not been acknowledged. */
   public getSnapshot(): IWorkspaceInvalidationSnapshot {
     return {
-      changedPaths: Array.from(this._sequenceByPath.keys()).sort(),
-      hasUnknownChanges: this._unknownChangeSequence !== undefined,
-      isWatcherHealthy: this._watcherHealthy,
-      sequence: this._latestSequence
+      changedPaths: Array.from(this.#sequenceByPath.keys()).sort(),
+      hasUnknownChanges: this.#unknownChangeSequence !== undefined,
+      isWatcherHealthy: this.#watcherHealthy,
+      sequence: this.#latestSequence
     };
   }
 
@@ -78,21 +78,21 @@ export class WorkspaceInvalidationTracker {
    * Changes that arrive after that sequence remain pending, including repeated changes to the same path.
    */
   public acknowledgeThrough(sequence: number): void {
-    if (!Number.isSafeInteger(sequence) || sequence < 0 || sequence > this._latestSequence) {
+    if (!Number.isSafeInteger(sequence) || sequence < 0 || sequence > this.#latestSequence) {
       throw new RangeError(`Invalid workspace invalidation sequence: ${sequence}`);
     }
 
-    for (const [changedPath, pathSequence] of this._sequenceByPath) {
+    for (const [changedPath, pathSequence] of this.#sequenceByPath) {
       if (pathSequence <= sequence) {
-        this._sequenceByPath.delete(changedPath);
+        this.#sequenceByPath.delete(changedPath);
       }
     }
     if (
-      this._watcherHealthy &&
-      this._unknownChangeSequence !== undefined &&
-      this._unknownChangeSequence <= sequence
+      this.#watcherHealthy &&
+      this.#unknownChangeSequence !== undefined &&
+      this.#unknownChangeSequence <= sequence
     ) {
-      this._unknownChangeSequence = undefined;
+      this.#unknownChangeSequence = undefined;
     }
   }
 }
