@@ -100,10 +100,10 @@ export function getOperationId(operation: Operation): string {
 }
 
 export class GraphProcessor {
-  private readonly _logger: ILogger;
+  readonly #logger: ILogger;
 
   public constructor(logger: ILogger) {
-    this._logger = logger;
+    this.#logger = logger;
   }
 
   /*
@@ -112,11 +112,11 @@ export class GraphProcessor {
   public processOperations(operations: Set<Operation>): IGraphNode[] {
     const nodeMap: Map<string, IGraphNodeInternal> = new Map();
     for (const operation of operations) {
-      const entry: IGraphNodeInternal = this._operationAsHashedEntry(operation);
+      const entry: IGraphNodeInternal = this.#operationAsHashedEntry(operation);
       nodeMap.set(entry.id, entry);
     }
 
-    return this._pruneNoOps(nodeMap);
+    return this.#pruneNoOps(nodeMap);
   }
 
   /*
@@ -130,25 +130,25 @@ export class GraphProcessor {
     for (const entry of entries) {
       for (const depId of entry.dependencies) {
         if (!entryIDs.has(depId)) {
-          this._logger.emitError(new Error(`${entry.id} has a dependency on ${depId} which does not exist`));
+          this.#logger.emitError(new Error(`${entry.id} has a dependency on ${depId} which does not exist`));
           isValid = false;
         }
       }
 
       if (!entry.command) {
-        this._logger.emitError(new Error(`There is an empty command in ${entry.id}`));
+        this.#logger.emitError(new Error(`There is an empty command in ${entry.id}`));
         isValid = false;
       }
     }
 
     if (isValid) {
-      this._logger.terminal.writeLine(
+      this.#logger.terminal.writeLine(
         Colorize.green('All nodes have non-empty commands and dependencies which exist')
       );
     }
 
     const totalEdges: number = entries.reduce((acc, entry) => acc + entry.dependencies.length, 0);
-    this._logger.terminal.writeLine(`Graph has ${entries.length} nodes, ${totalEdges} edges`);
+    this.#logger.terminal.writeLine(`Graph has ${entries.length} nodes, ${totalEdges} edges`);
     return isValid;
   }
 
@@ -156,7 +156,7 @@ export class GraphProcessor {
    * remove all entries with empty commands
    * if an entry has a dependency with an empty command, it should inherit the dependencies of the empty command
    */
-  private _pruneNoOps(inputNodeMap: NodeMap): IGraphNode[] {
+  #pruneNoOps(inputNodeMap: NodeMap): IGraphNode[] {
     // Cache for the non-empty upstream dependencies of each operation
     const nonEmptyDependenciesByOperation: Map<IGraphNodeInternal, Set<string>> = new Map();
     function getNonEmptyDependencies(node: IGraphNodeInternal): ReadonlySet<string> {
@@ -199,7 +199,7 @@ export class GraphProcessor {
   /*
    * Convert an operation into a graph node
    */
-  private _operationAsHashedEntry(operation: Operation): IGraphNodeInternal {
+  #operationAsHashedEntry(operation: Operation): IGraphNodeInternal {
     const {
       runner,
       associatedPhase: { name: task },
@@ -239,14 +239,14 @@ export class GraphProcessor {
     }
 
     if (missingFields.length > 0) {
-      this._logger.emitError(
+      this.#logger.emitError(
         new Error(`Operation is missing required fields ${missingFields.join(', ')}: ${JSON.stringify(node)}`)
       );
     }
 
     // the runner is a no-op if and only if the command is empty
     if (!!runner?.isNoOp !== !node.command) {
-      this._logger.emitError(
+      this.#logger.emitError(
         new Error(`${node.id}: Operation runner isNoOp does not match commandToRun existence`)
       );
     }

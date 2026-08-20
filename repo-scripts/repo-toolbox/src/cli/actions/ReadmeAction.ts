@@ -14,9 +14,9 @@ const GENERATED_PROJECT_SUMMARY_END_COMMENT_TEXT: string = '<!-- GENERATED PROJE
 const README_FILENAME: string = 'README.md';
 
 export class ReadmeAction extends CommandLineAction {
-  private readonly _verifyParameter: CommandLineFlagParameter;
+  readonly #verifyParameter: CommandLineFlagParameter;
 
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
     super({
@@ -25,9 +25,9 @@ export class ReadmeAction extends CommandLineAction {
       documentation: "Use this to update the repo's README.md"
     });
 
-    this._terminal = terminal;
+    this.#terminal = terminal;
 
-    this._verifyParameter = this.defineFlagParameter({
+    this.#verifyParameter = this.defineFlagParameter({
       parameterLongName: '--verify',
       parameterShortName: '-v',
       description: 'Verify that the README.md file is up-to-date.'
@@ -154,10 +154,10 @@ export class ReadmeAction extends CommandLineAction {
     );
     const readmeIsUpToDate: boolean = diff.hunks.length === 0;
 
-    const terminal: ITerminal = this._terminal;
+    const terminal: ITerminal = this.#terminal;
 
     if (!readmeIsUpToDate) {
-      if (this._verifyParameter.value) {
+      if (this.#verifyParameter.value) {
         terminal.writeLine(Diff.formatPatch(diff));
 
         terminal.writeLine();

@@ -33,11 +33,11 @@ export interface IDaemonListenerOptions {
  * `daemonAlreadyRunning` transport error is thrown.
  * @beta */
 export class DaemonFrameListener {
-  private readonly _server: net.Server;
-  private readonly _paths: IDaemonPaths;
+  readonly #server: net.Server;
+  readonly #paths: IDaemonPaths;
   private constructor(server: net.Server, paths: IDaemonPaths) {
-    this._server = server;
-    this._paths = paths;
+    this.#server = server;
+    this.#paths = paths;
   }
   /** Binds the socket/pipe path and writes the PID lockfile. */
   public static async listenAsync(
@@ -62,8 +62,8 @@ export class DaemonFrameListener {
 
   /** Stops accepting connections and releases the socket/pipe and lockfile. */
   public async closeAsync(): Promise<void> {
-    await new Promise<void>((resolve: () => void) => this._server.close(() => resolve()));
-    removeDaemonArtifacts(this._paths.lockfilePath, this._paths.socketPath);
+    await new Promise<void>((resolve: () => void) => this.#server.close(() => resolve()));
+    removeDaemonArtifacts(this.#paths.lockfilePath, this.#paths.socketPath);
   }
 }
 

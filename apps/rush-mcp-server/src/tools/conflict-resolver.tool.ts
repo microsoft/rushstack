@@ -22,10 +22,10 @@ export class RushConflictResolverTool extends BaseTool {
     });
   }
 
-  private _tryGetSubspaceNameFromLockfilePath(
+  #tryGetSubspaceNameFromLockfilePath(
     lockfilePath: string,
     rushConfiguration: RushConfiguration
-  ): string | null {
+  ): string | null { // eslint-disable-line @rushstack/no-new-null -- The decoupled ESLint plugin does not recognize native private methods yet.
     for (const subspace of rushConfiguration.subspaces) {
       const folderPath: string = subspace.getSubspaceConfigFolderPath();
       if (lockfilePath.startsWith(folderPath)) {
@@ -37,7 +37,7 @@ export class RushConflictResolverTool extends BaseTool {
 
   public async executeAsync({ lockfilePath }: { lockfilePath: string }): Promise<CallToolResult> {
     const rushConfiguration: RushConfiguration = await getRushConfiguration();
-    const subspaceName: string | null = this._tryGetSubspaceNameFromLockfilePath(
+    const subspaceName: string | null = this.#tryGetSubspaceNameFromLockfilePath(
       lockfilePath,
       rushConfiguration
     );

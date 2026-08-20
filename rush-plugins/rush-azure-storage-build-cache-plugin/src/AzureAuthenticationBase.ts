@@ -170,19 +170,19 @@ export abstract class AzureAuthenticationBase {
       }
     | undefined;
 
-  private __credentialCacheId: string | undefined;
+  #_credentialCacheId: string | undefined;
   protected get _credentialCacheId(): string {
-    if (!this.__credentialCacheId) {
+    if (!this.#_credentialCacheId) {
       const cacheIdParts: string[] = [
         this._credentialNameForCache,
         this._azureEnvironment,
         ...this._getCacheIdParts()
       ];
 
-      this.__credentialCacheId = cacheIdParts.join('|');
+      this.#_credentialCacheId = cacheIdParts.join('|');
     }
 
-    return this.__credentialCacheId;
+    return this.#_credentialCacheId;
   }
 
   public constructor(options: IAzureAuthenticationBaseOptions) {
@@ -240,7 +240,7 @@ export abstract class AzureAuthenticationBase {
           }
         }
 
-        const credential: ICredentialResult = await this._getCredentialAsync(
+        const credential: ICredentialResult = await this.#getCredentialAsync(
           terminal,
           this._loginFlow,
           credentialsCache
@@ -322,7 +322,7 @@ export abstract class AzureAuthenticationBase {
     credentialsCache: CredentialCache
   ): Promise<ICredentialResult>;
 
-  private async _getCredentialAsync(
+  async #getCredentialAsync(
     terminal: ITerminal,
     loginFlow: LoginFlowType,
     credentialsCache: CredentialCache

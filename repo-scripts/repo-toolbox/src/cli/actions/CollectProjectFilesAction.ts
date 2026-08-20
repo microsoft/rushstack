@@ -46,10 +46,10 @@ async function* _getFolderItemsRecursiveAsync(
 }
 
 export class CollectProjectFilesAction extends CommandLineAction {
-  private readonly _outputPathParameter: IRequiredCommandLineStringParameter;
-  private readonly _subfolderParameter: IRequiredCommandLineStringParameter;
+  readonly #outputPathParameter: IRequiredCommandLineStringParameter;
+  readonly #subfolderParameter: IRequiredCommandLineStringParameter;
 
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
     super({
@@ -60,16 +60,16 @@ export class CollectProjectFilesAction extends CommandLineAction {
         ' deduplicates by relative path and content, and writes them to the output directory.'
     });
 
-    this._terminal = terminal;
+    this.#terminal = terminal;
 
-    this._subfolderParameter = this.defineStringParameter({
+    this.#subfolderParameter = this.defineStringParameter({
       parameterLongName: '--subfolder',
       description: 'The subfolder within each project to collect files from (e.g. "temp/json-schemas").',
       argumentName: 'SUBFOLDER',
       required: true
     });
 
-    this._outputPathParameter = this.defineStringParameter({
+    this.#outputPathParameter = this.defineStringParameter({
       parameterLongName: '--output-path',
       description: 'Path to the output directory for the collected files.',
       argumentName: 'PATH',
@@ -78,11 +78,11 @@ export class CollectProjectFilesAction extends CommandLineAction {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    const terminal: ITerminal = this._terminal;
+    const terminal: ITerminal = this.#terminal;
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
-    const subfolder: string = this._subfolderParameter.value;
-    const outputPath: string = path.resolve(this._outputPathParameter.value);
+    const subfolder: string = this.#subfolderParameter.value;
+    const outputPath: string = path.resolve(this.#outputPathParameter.value);
 
     const contentByAbsolutePathByRelativePath: Map<string, Map<string, string[]>> = new Map();
 

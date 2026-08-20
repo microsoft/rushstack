@@ -60,16 +60,16 @@ export interface IAzureInteractiveAuthOptions {
  * @public
  */
 export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
-  private readonly _options: IAzureInteractiveAuthOptions | undefined;
+  readonly #options: IAzureInteractiveAuthOptions | undefined;
 
   public readonly pluginName: 'AzureInteractiveAuthPlugin' = PLUGIN_NAME;
 
   public constructor(options: IAzureInteractiveAuthOptions | undefined) {
-    this._options = options;
+    this.#options = options;
   }
 
   public apply(rushSession: RushSession, rushConfig: RushConfiguration): void {
-    const options: IAzureInteractiveAuthOptions | undefined = this._options;
+    const options: IAzureInteractiveAuthOptions | undefined = this.#options;
 
     if (!options) {
       // Plugin is not enabled.

@@ -10,13 +10,13 @@ import type { IFromExtensionMessage, IRootState } from '@rushstack/rush-vscode-c
 let _instance: RushCommandWebViewPanel | undefined;
 
 export class RushCommandWebViewPanel {
-  private _panel: vscode.WebviewView | undefined;
-  private _webViewProvider: vscode.WebviewViewProvider | undefined;
-  private _context: vscode.ExtensionContext;
-  private _extensionPath: string;
+  #panel: vscode.WebviewView | undefined;
+  #webViewProvider: vscode.WebviewViewProvider | undefined;
+  #context: vscode.ExtensionContext;
+  #extensionPath: string;
   private constructor(context: vscode.ExtensionContext) {
-    this._extensionPath = context.extensionPath;
-    this._context = context;
+    this.#extensionPath = context.extensionPath;
+    this.#context = context;
   }
 
   public static getInstance(): RushCommandWebViewPanel {
@@ -37,7 +37,7 @@ export class RushCommandWebViewPanel {
 
   public postMessage(message: IFromExtensionMessage): void {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this._panel?.webview.postMessage(message);
+    this.#panel?.webview.postMessage(message);
   }
 
   public reveal(): void {
@@ -64,7 +64,7 @@ export class RushCommandWebViewPanel {
       thisWebviewContext: vscode.WebviewViewResolveContext,
       thisToken: vscode.CancellationToken
     ): void => {
-      this._panel = thisWebview;
+      this.#panel = thisWebview;
 
       const message: IFromExtensionMessage = {
         command: 'initialize',
@@ -73,7 +73,7 @@ export class RushCommandWebViewPanel {
       // eslint-disable-next-line no-console
       console.log('message', message);
       thisWebview.webview.options = { enableScripts: true };
-      thisWebview.webview.html = this._getWebviewContent();
+      thisWebview.webview.html = this.#getWebviewContent();
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       thisWebview.webview.postMessage(message);
     };
@@ -81,7 +81,7 @@ export class RushCommandWebViewPanel {
     const provider: vscode.WebviewViewProvider = {
       resolveWebviewView
     };
-    this._context.subscriptions.push(
+    this.#context.subscriptions.push(
       vscode.window.registerWebviewViewProvider('rushProjectDetails', provider)
     );
 
@@ -153,21 +153,21 @@ export class RushCommandWebViewPanel {
     // }
   }
 
-  private _setWebviewContent(state: IRootState): void {
-    if (!this._panel) {
+  #setWebviewContent(state: IRootState): void {
+    if (!this.#panel) {
       return;
     }
-    this._panel.webview.html = this._getWebviewContent(state);
+    this.#panel.webview.html = this.#getWebviewContent(state);
   }
 
-  private _getWebviewContent(state: unknown = {}): string {
+  #getWebviewContent(state: unknown = {}): string {
     // eslint-disable-next-line no-console
     console.log('loading rush command webview html and bundle');
     let html: string = FileSystem.readFile(
-      path.join(this._extensionPath, 'webview/rush-command-webview/index.html')
+      path.join(this.#extensionPath, 'webview/rush-command-webview/index.html')
     );
-    const scriptSrc: vscode.Uri = this._panel!.webview.asWebviewUri(
-      vscode.Uri.file(path.join(this._extensionPath, 'webview/rush-command-webview/bundle.js'))
+    const scriptSrc: vscode.Uri = this.#panel!.webview.asWebviewUri(
+      vscode.Uri.file(path.join(this.#extensionPath, 'webview/rush-command-webview/bundle.js'))
     );
 
     // replace bundled js with the correct path
