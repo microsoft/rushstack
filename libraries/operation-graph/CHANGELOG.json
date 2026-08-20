@@ -2,6 +2,31 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.7.1",
+      "tag": "@rushstack/operation-graph_v0.7.1",
+      "date": "Thu, 20 Aug 2026 00:16:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Compile package output for ES2022."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Require Node.js 20.9 or newer for package consumers."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.0",
       "tag": "@rushstack/operation-graph_v0.7.0",
       "date": "Fri, 14 Aug 2026 00:18:07 GMT",

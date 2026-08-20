@@ -1,9 +1,0 @@
-{
-  "changes": [
-    {
-      "packageName": "@rushstack/webpack4-localization-plugin",
-      "comment": "Require Node.js 20.9 or newer for package consumers.",
-      "type": "none"
-    }
-  ]
-}
