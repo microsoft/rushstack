@@ -4,6 +4,7 @@
 import type { TSESLint } from '@typescript-eslint/utils';
 
 import { hoistJestMock } from './hoist-jest-mock';
+import { hoistRegExpRule } from './hoist-regexp';
 import { noBackslashImportsRule } from './no-backslash-imports';
 import { noExternalLocalImportsRule } from './no-external-local-imports';
 import { noNewNullRule } from './no-new-null';
@@ -23,6 +24,9 @@ const plugin: IPlugin = {
   rules: {
     // Full name: "@rushstack/hoist-jest-mock"
     'hoist-jest-mock': hoistJestMock,
+
+    // Full name: "@rushstack/hoist-regexp"
+    'hoist-regexp': hoistRegExpRule,
 
     // Full name: "@rushstack/no-backslash-imports"
     'no-backslash-imports': noBackslashImportsRule,

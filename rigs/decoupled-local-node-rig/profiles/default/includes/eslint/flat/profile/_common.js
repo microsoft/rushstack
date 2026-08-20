@@ -42,6 +42,9 @@ module.exports = {
         // understand where the dependency is coming from.
         '@rushstack/normalized-imports': 'warn',
 
+        // Rationale: Avoid recreating static regular expression objects in frequently executed scopes.
+        '@rushstack/hoist-regexp': 'warn',
+
         // Rationale: Use of `void` to explicitly indicate that a floating promise is expected
         // and allowed.
         '@typescript-eslint/no-floating-promises': [

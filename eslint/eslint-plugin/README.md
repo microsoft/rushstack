@@ -5,6 +5,37 @@ which provides a TypeScript ESLint ruleset tailored for large teams and projects
 Please see [that project's documentation](https://www.npmjs.com/package/@rushstack/eslint-config)
 for details.  To learn about Rush Stack, please visit: [https://rushstack.io/](https://rushstack.io/)
 
+## `@rushstack/hoist-regexp`
+
+Require static regular expressions in loops and functions to be declared at module scope. This avoids creating a
+new `RegExp` object each time the loop iterates or the function is invoked. The rule detects regular expression
+literals and `RegExp` constructor calls whose arguments are literals.
+
+Regular expressions with the global (`g`) or sticky (`y`) flag retain state in their `lastIndex` property. When
+hoisting those expressions, verify that the consumer resets `lastIndex` or otherwise preserves the original behavior.
+
+The following patterns are considered problems:
+
+```ts
+function isMatch(value: string): boolean {
+  return /example/.test(value);
+}
+
+for (const value of values) {
+  new RegExp('example').test(value);
+}
+```
+
+The regular expressions should instead be declared at module scope:
+
+```ts
+const exampleRegExp: RegExp = /example/;
+
+function isMatch(value: string): boolean {
+  return exampleRegExp.test(value);
+}
+```
+
 ## `@rushstack/hoist-jest-mock`
 
 Require Jest module mocking APIs to be called before any other statements in their code block.
