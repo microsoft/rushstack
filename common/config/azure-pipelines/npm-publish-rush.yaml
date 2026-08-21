@@ -32,9 +32,8 @@ variables:
     value: 1
   - name: RushstackVersioningProject
     value: GitHubProjects
-  # Pipeline definition ID of the Rushstack bump-versions pipeline.
-  - name: RushstackVersioningPipelineId
-    value: 0
+  - name: RushstackVersioningPipelineName
+    value: 'rushstack Bump Versions'
   - name: PackagesPath
     value: $(Pipeline.Workspace)/packages
 
@@ -92,7 +91,7 @@ extends:
 
               - template: /common/config/azure-pipelines/templates/find-bump-pipeline-run.yaml@self
                 parameters:
-                  PipelineId: $(RushstackVersioningPipelineId)
+                  PipelineName: $(RushstackVersioningPipelineName)
                   CommitSha: ${{ coalesce(parameters.CommitShaOverride, '$(Build.SourceVersion)') }}
                   TeamProject: $(RushstackVersioningProject)
                   Name: FindBumpRun
@@ -104,7 +103,7 @@ extends:
                   artifactName: package-versions
                   targetPath: $(Agent.TempDirectory)/package-versions
                   project: $(RushstackVersioningProject)
-                  definition: $(RushstackVersioningPipelineId)
+                  definition: $(FindBumpRun.BumpPipelineDefinitionId)
                   pipelineId: $(FindBumpRun.BumpPipelineRunId)
                   buildType: specific
                   buildVersionToDownload: specific
@@ -121,7 +120,7 @@ extends:
                   artifactName: json-schemas
                   targetPath: $(Build.ArtifactStagingDirectory)/json-schemas
                   project: $(RushstackVersioningProject)
-                  definition: $(RushstackVersioningPipelineId)
+                  definition: $(FindBumpRun.BumpPipelineDefinitionId)
                   pipelineId: $(FindBumpRun.BumpPipelineRunId)
                   buildType: specific
                   buildVersionToDownload: specific
@@ -133,7 +132,7 @@ extends:
                   artifactName: api
                   targetPath: $(Build.ArtifactStagingDirectory)/api
                   project: $(RushstackVersioningProject)
-                  definition: $(RushstackVersioningPipelineId)
+                  definition: $(FindBumpRun.BumpPipelineDefinitionId)
                   pipelineId: $(FindBumpRun.BumpPipelineRunId)
                   buildType: specific
                   buildVersionToDownload: specific
@@ -154,6 +153,8 @@ extends:
                 variables:
                   - name: BumpPipelineRunId
                     value: $[ stageDependencies.Prepare.PrepareNpmPublish.outputs['FindBumpRun.BumpPipelineRunId'] ]
+                  - name: BumpPipelineDefinitionId
+                    value: $[ stageDependencies.Prepare.PrepareNpmPublish.outputs['FindBumpRun.BumpPipelineDefinitionId'] ]
                 templateContext:
                   type: releaseJob
                   isProduction: true
@@ -167,7 +168,7 @@ extends:
                       artifactName: packages
                       targetPath: $(PackagesPath)
                       project: $(RushstackVersioningProject)
-                      definition: $(RushstackVersioningPipelineId)
+                      definition: $(BumpPipelineDefinitionId)
                       pipelineId: $(BumpPipelineRunId)
                       buildType: specific
                       buildVersionToDownload: specific
