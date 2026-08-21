@@ -84,10 +84,6 @@ interface IBrowserServerProxy {
 }
 
 /**
- * Hosts a Playwright browser server and forwards traffic over a WebSocket tunnel.
- * @beta
- */
-/**
  * Thrown internally to settle a connection wait that was still pending when the tunnel was stopped.
  */
 class TunnelStoppedError extends Error {
@@ -96,6 +92,10 @@ class TunnelStoppedError extends Error {
   }
 }
 
+/**
+ * Hosts a Playwright browser server and forwards traffic over a WebSocket tunnel.
+ * @beta
+ */
 export class PlaywrightTunnel {
   private readonly _terminal: ITerminal;
   private readonly _onStatusChange: (status: TunnelStatus) => void;
