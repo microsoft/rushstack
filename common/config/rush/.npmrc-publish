@@ -14,12 +14,7 @@
 # It is NOT recommended to store authentication tokens in a text file on a lab machine, because
 # other unrelated processes may be able to read the file.  Also, the file may persist indefinitely,
 # for example if the machine loses power.  A safer practice is to pass the token via an
-# environment variable, which can be referenced from .npmrc using ${} expansion.  For example:
-#
-#   //registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}
-#
+# environment variable, which can be referenced from .npmrc using ${} expansion.
 
-registry=https://registry.npmjs.org/
 always-auth=true
-//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}
-
+registry=https://packagefeedproxy.microsoft.io/npm/
