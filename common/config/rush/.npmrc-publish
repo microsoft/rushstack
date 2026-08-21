@@ -17,3 +17,4 @@
 # environment variable, which can be referenced from .npmrc using ${} expansion.
 
 always-auth=true
+registry=https://packagefeedproxy.microsoft.io/npm/
