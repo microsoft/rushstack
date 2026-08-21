@@ -9,7 +9,7 @@
     "_phase:build": ""
   },
   "dependencies": {
-    "@microsoft/api-extractor": "7.59.0",
+    "@microsoft/api-extractor": "7.58.12",
     "@rushstack/eslint-config": "4.6.4",
     "@rushstack/eslint-patch": "1.16.1",
     "@rushstack/eslint-plugin": "0.23.2",
