@@ -102,8 +102,8 @@ importers:
         version: 5.9.3
     devDependencies:
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       '@types/resolve':
         specifier: 1.20.2
         version: 1.20.2
@@ -182,8 +182,8 @@ importers:
         specifier: workspace:*
         version: link:../api-extractor
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       '@types/watchpack':
         specifier: 2.4.0
         version: 2.4.0
@@ -2997,8 +2997,8 @@ importers:
   ../../../eslint/eslint-patch:
     devDependencies:
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       '@types/eslint-8':
         specifier: npm:@types/eslint@8.56.10
         version: '@types/eslint@8.56.10'
@@ -3034,8 +3034,8 @@ importers:
         version: 8.56.1(eslint@9.37.0)(typescript@5.8.2)
     devDependencies:
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       '@typescript-eslint/parser':
         specifier: ~8.56.1
         version: 8.56.1(eslint@9.37.0)(typescript@5.8.2)
@@ -3065,8 +3065,8 @@ importers:
         version: 8.56.1(eslint@9.37.0)(typescript@5.8.2)
     devDependencies:
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       '@typescript-eslint/parser':
         specifier: ~8.56.1
         version: 8.56.1(eslint@9.37.0)(typescript@5.8.2)
@@ -3090,8 +3090,8 @@ importers:
         version: 8.56.1(eslint@9.37.0)(typescript@5.8.2)
     devDependencies:
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       '@typescript-eslint/parser':
         specifier: ~8.56.1
         version: 8.56.1(eslint@9.37.0)(typescript@5.8.2)
@@ -3148,8 +3148,8 @@ importers:
         version: 5.2.0(eslint@9.37.0)
     devDependencies:
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       decoupled-local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/decoupled-local-node-rig
@@ -3709,8 +3709,8 @@ importers:
         version: link:../node-core-library
     devDependencies:
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       decoupled-local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/decoupled-local-node-rig
@@ -3775,8 +3775,8 @@ importers:
         version: 10.3.0
     devDependencies:
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       decoupled-local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/decoupled-local-node-rig
@@ -3898,8 +3898,8 @@ importers:
         version: 7.7.4
     devDependencies:
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       '@rushstack/problem-matcher':
         specifier: workspace:*
         version: link:../problem-matcher
@@ -3954,8 +3954,8 @@ importers:
         version: link:../terminal
     devDependencies:
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       decoupled-local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/decoupled-local-node-rig
@@ -4040,8 +4040,8 @@ importers:
   ../../../libraries/problem-matcher:
     devDependencies:
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       decoupled-local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/decoupled-local-node-rig
@@ -4059,8 +4059,8 @@ importers:
         version: 1.22.11
     devDependencies:
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       '@types/jju':
         specifier: 1.4.1
         version: 1.4.1
@@ -4530,8 +4530,8 @@ importers:
         version: 8.1.1
     devDependencies:
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       '@types/supports-color':
         specifier: 8.1.3
         version: 8.1.3
@@ -4545,8 +4545,8 @@ importers:
   ../../../libraries/tree-pattern:
     devDependencies:
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       decoupled-local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/decoupled-local-node-rig
@@ -4570,8 +4570,8 @@ importers:
         version: 0.3.2
     devDependencies:
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@22.9.3)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@22.9.3)
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../node-core-library
@@ -4693,8 +4693,8 @@ importers:
   ../../../rigs/decoupled-local-node-rig:
     dependencies:
       '@microsoft/api-extractor':
-        specifier: 7.58.12
-        version: 7.58.12(@types/node@20.17.19)
+        specifier: 8.0.0
+        version: 8.0.0
       '@rushstack/eslint-config':
         specifier: 4.6.4
         version: 4.6.4(eslint@9.37.0)(typescript@5.8.2)
@@ -4705,11 +4705,11 @@ importers:
         specifier: 0.23.2
         version: 0.23.2(eslint@9.37.0)(typescript@5.8.2)
       '@rushstack/heft':
-        specifier: 1.2.22
-        version: 1.2.22(@types/node@20.17.19)
+        specifier: 1.2.23
+        version: 1.2.23(@types/node@20.17.19)
       '@rushstack/heft-node-rig':
-        specifier: 2.11.45
-        version: 2.11.45(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)
+        specifier: 2.11.46
+        version: 2.11.46(@rushstack/heft@1.2.23(@types/node@20.17.19))(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)
       '@types/jest':
         specifier: 30.0.0
         version: 30.0.0
@@ -6947,7 +6947,7 @@ packages:
     hasBin: true
 
   '@colors/colors@1.5.0':
-    resolution: {integrity: sha1-u1BFecHK6SPmV2pPXaQ9Jfl729k=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@colors/colors/-/colors-1.5.0.tgz}
+    resolution: {integrity: sha1-u1BFecHK6SPmV2pPXaQ9Jfl729k=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@colors/colors/-/colors-1.5.0.tgz}
     engines: {node: '>=0.1.90'}
 
   '@csstools/color-helpers@5.1.0':
@@ -6987,13 +6987,13 @@ packages:
     engines: {node: '>=10.0.0'}
 
   '@emnapi/core@1.9.2':
-    resolution: {integrity: sha1-OHAmXs/8c1LQHq1i2Ng9g1ii0DQ=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@emnapi/core/-/core-1.9.2.tgz}
+    resolution: {integrity: sha1-OHAmXs/8c1LQHq1i2Ng9g1ii0DQ=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@emnapi/core/-/core-1.9.2.tgz}
 
   '@emnapi/runtime@1.9.2':
-    resolution: {integrity: sha1-i0aaPbFggXytsd6QUCEanR6oT6I=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@emnapi/runtime/-/runtime-1.9.2.tgz}
+    resolution: {integrity: sha1-i0aaPbFggXytsd6QUCEanR6oT6I=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@emnapi/runtime/-/runtime-1.9.2.tgz}
 
   '@emnapi/wasi-threads@1.2.1':
-    resolution: {integrity: sha1-KP7SGhuhznl8RKBwq8lNQvOuhUg=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@emnapi/wasi-threads/-/wasi-threads-1.2.1.tgz}
+    resolution: {integrity: sha1-KP7SGhuhznl8RKBwq8lNQvOuhUg=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@emnapi/wasi-threads/-/wasi-threads-1.2.1.tgz}
 
   '@emotion/cache@10.0.29':
     resolution: {integrity: sha512-fU2VtSVlHiF27empSbxi1O2JFdNWZO+2NFHfwO0pxgTep6Xa3uGb+3pVKfLww2l/IBGLNEZl5Xf/++A4wAYDYQ==}
@@ -7080,49 +7080,49 @@ packages:
     os: [aix]
 
   '@esbuild/android-arm64@0.25.12':
-    resolution: {integrity: sha1-iqSWX40KeYLcIXNL9mATI6Ztp1I=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/android-arm64/-/android-arm64-0.25.12.tgz}
+    resolution: {integrity: sha1-iqSWX40KeYLcIXNL9mATI6Ztp1I=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/android-arm64/-/android-arm64-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [android]
 
   '@esbuild/android-arm64@0.28.0':
-    resolution: {integrity: sha1-uIKNnt+jqSZgZE643m5PPCA9exc=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/android-arm64/-/android-arm64-0.28.0.tgz}
+    resolution: {integrity: sha1-uIKNnt+jqSZgZE643m5PPCA9exc=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/android-arm64/-/android-arm64-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [android]
 
   '@esbuild/android-arm@0.25.12':
-    resolution: {integrity: sha1-MAcSEB9/UPHSYnoWLm4JsQm2dno=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/android-arm/-/android-arm-0.25.12.tgz}
+    resolution: {integrity: sha1-MAcSEB9/UPHSYnoWLm4JsQm2dno=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/android-arm/-/android-arm-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [arm]
     os: [android]
 
   '@esbuild/android-arm@0.28.0':
-    resolution: {integrity: sha1-XsGEdgXgW12+XfkNuf9+PkxY3Kc=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/android-arm/-/android-arm-0.28.0.tgz}
+    resolution: {integrity: sha1-XsGEdgXgW12+XfkNuf9+PkxY3Kc=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/android-arm/-/android-arm-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [arm]
     os: [android]
 
   '@esbuild/android-x64@0.25.12':
-    resolution: {integrity: sha1-h9+ycWEgK9yVjvSLthsJx1j67hY=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/android-x64/-/android-x64-0.25.12.tgz}
+    resolution: {integrity: sha1-h9+ycWEgK9yVjvSLthsJx1j67hY=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/android-x64/-/android-x64-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [android]
 
   '@esbuild/android-x64@0.28.0':
-    resolution: {integrity: sha1-OQZCF1uI74K61MzgP4qxP+mxkS4=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/android-x64/-/android-x64-0.28.0.tgz}
+    resolution: {integrity: sha1-OQZCF1uI74K61MzgP4qxP+mxkS4=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/android-x64/-/android-x64-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [android]
 
   '@esbuild/darwin-arm64@0.25.12':
-    resolution: {integrity: sha1-eRl4mOwf90XSHAceHHzDyALwwf0=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/darwin-arm64/-/darwin-arm64-0.25.12.tgz}
+    resolution: {integrity: sha1-eRl4mOwf90XSHAceHHzDyALwwf0=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/darwin-arm64/-/darwin-arm64-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [darwin]
 
   '@esbuild/darwin-arm64@0.28.0':
-    resolution: {integrity: sha1-rkUyWWDVlQzWlR5PlzlvTh/32NM=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/darwin-arm64/-/darwin-arm64-0.28.0.tgz}
+    resolution: {integrity: sha1-rkUyWWDVlQzWlR5PlzlvTh/32NM=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/darwin-arm64/-/darwin-arm64-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [darwin]
@@ -7152,25 +7152,25 @@ packages:
     os: [freebsd]
 
   '@esbuild/freebsd-x64@0.25.12':
-    resolution: {integrity: sha1-6mMfSja+qsS5J5+g/MbKKerusrM=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/freebsd-x64/-/freebsd-x64-0.25.12.tgz}
+    resolution: {integrity: sha1-6mMfSja+qsS5J5+g/MbKKerusrM=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/freebsd-x64/-/freebsd-x64-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [freebsd]
 
   '@esbuild/freebsd-x64@0.28.0':
-    resolution: {integrity: sha1-A5lJTByF5DiOm3BAvWDUjypbDSw=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/freebsd-x64/-/freebsd-x64-0.28.0.tgz}
+    resolution: {integrity: sha1-A5lJTByF5DiOm3BAvWDUjypbDSw=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/freebsd-x64/-/freebsd-x64-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [freebsd]
 
   '@esbuild/linux-arm64@0.25.12':
-    resolution: {integrity: sha1-4QZrzlg5TxsRQd7shVel8KIvWXc=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-arm64/-/linux-arm64-0.25.12.tgz}
+    resolution: {integrity: sha1-4QZrzlg5TxsRQd7shVel8KIvWXc=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-arm64/-/linux-arm64-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [linux]
 
   '@esbuild/linux-arm64@0.28.0':
-    resolution: {integrity: sha1-1tnwnvDeVBFr9Fmk1TysfglS/jk=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-arm64/-/linux-arm64-0.28.0.tgz}
+    resolution: {integrity: sha1-1tnwnvDeVBFr9Fmk1TysfglS/jk=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-arm64/-/linux-arm64-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [linux]
@@ -7188,79 +7188,79 @@ packages:
     os: [linux]
 
   '@esbuild/linux-ia32@0.25.12':
-    resolution: {integrity: sha1-sk+KzEW89UGSx/LzvhtT5lUer+A=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-ia32/-/linux-ia32-0.25.12.tgz}
+    resolution: {integrity: sha1-sk+KzEW89UGSx/LzvhtT5lUer+A=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-ia32/-/linux-ia32-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [ia32]
     os: [linux]
 
   '@esbuild/linux-ia32@0.28.0':
-    resolution: {integrity: sha1-3rFdES7Y3WBTRra5U9I6If+BJT8=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-ia32/-/linux-ia32-0.28.0.tgz}
+    resolution: {integrity: sha1-3rFdES7Y3WBTRra5U9I6If+BJT8=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-ia32/-/linux-ia32-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [ia32]
     os: [linux]
 
   '@esbuild/linux-loong64@0.14.54':
-    resolution: {integrity: sha1-3ipL5ni9TQ0f+7hubed5zeWZkCg=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-loong64/-/linux-loong64-0.14.54.tgz}
+    resolution: {integrity: sha1-3ipL5ni9TQ0f+7hubed5zeWZkCg=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-loong64/-/linux-loong64-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [loong64]
     os: [linux]
 
   '@esbuild/linux-loong64@0.25.12':
-    resolution: {integrity: sha1-+c//p/yDIlcfvEyLMmjK8VvYGtA=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-loong64/-/linux-loong64-0.25.12.tgz}
+    resolution: {integrity: sha1-+c//p/yDIlcfvEyLMmjK8VvYGtA=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-loong64/-/linux-loong64-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [loong64]
     os: [linux]
 
   '@esbuild/linux-loong64@0.28.0':
-    resolution: {integrity: sha1-gfuJ0H7sx5sVfephAzdXcm/ODKQ=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-loong64/-/linux-loong64-0.28.0.tgz}
+    resolution: {integrity: sha1-gfuJ0H7sx5sVfephAzdXcm/ODKQ=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-loong64/-/linux-loong64-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [loong64]
     os: [linux]
 
   '@esbuild/linux-mips64el@0.25.12':
-    resolution: {integrity: sha1-V1oUvXRkT/q4ka3H1+YNJ1KW8s0=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-mips64el/-/linux-mips64el-0.25.12.tgz}
+    resolution: {integrity: sha1-V1oUvXRkT/q4ka3H1+YNJ1KW8s0=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-mips64el/-/linux-mips64el-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [mips64el]
     os: [linux]
 
   '@esbuild/linux-mips64el@0.28.0':
-    resolution: {integrity: sha1-0OQmkbP/evn7Ihe3D8AfNDvbYrs=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-mips64el/-/linux-mips64el-0.28.0.tgz}
+    resolution: {integrity: sha1-0OQmkbP/evn7Ihe3D8AfNDvbYrs=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-mips64el/-/linux-mips64el-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [mips64el]
     os: [linux]
 
   '@esbuild/linux-ppc64@0.25.12':
-    resolution: {integrity: sha1-dbmccKlfvV93OddpK+/mBgFZGGk=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-ppc64/-/linux-ppc64-0.25.12.tgz}
+    resolution: {integrity: sha1-dbmccKlfvV93OddpK+/mBgFZGGk=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-ppc64/-/linux-ppc64-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [ppc64]
     os: [linux]
 
   '@esbuild/linux-ppc64@0.28.0':
-    resolution: {integrity: sha1-OJ8+XpjxfUd8RnzIcTbhoHburYc=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-ppc64/-/linux-ppc64-0.28.0.tgz}
+    resolution: {integrity: sha1-OJ8+XpjxfUd8RnzIcTbhoHburYc=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-ppc64/-/linux-ppc64-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [ppc64]
     os: [linux]
 
   '@esbuild/linux-riscv64@0.25.12':
-    resolution: {integrity: sha1-LjJZRAMhpE553fdTXDJQV9qHXNY=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-riscv64/-/linux-riscv64-0.25.12.tgz}
+    resolution: {integrity: sha1-LjJZRAMhpE553fdTXDJQV9qHXNY=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-riscv64/-/linux-riscv64-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [riscv64]
     os: [linux]
 
   '@esbuild/linux-riscv64@0.28.0':
-    resolution: {integrity: sha1-djvWDVmyQr4S2h5n1XKfMCTGBfo=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-riscv64/-/linux-riscv64-0.28.0.tgz}
+    resolution: {integrity: sha1-djvWDVmyQr4S2h5n1XKfMCTGBfo=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-riscv64/-/linux-riscv64-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [riscv64]
     os: [linux]
 
   '@esbuild/linux-s390x@0.25.12':
-    resolution: {integrity: sha1-F2dsq7/lko2lsqDW311YzQjbJmM=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-s390x/-/linux-s390x-0.25.12.tgz}
+    resolution: {integrity: sha1-F2dsq7/lko2lsqDW311YzQjbJmM=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-s390x/-/linux-s390x-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [s390x]
     os: [linux]
 
   '@esbuild/linux-s390x@0.28.0':
-    resolution: {integrity: sha1-qsYGFjSHLkZ33mk7zoAw1zsf0FU=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-s390x/-/linux-s390x-0.28.0.tgz}
+    resolution: {integrity: sha1-qsYGFjSHLkZ33mk7zoAw1zsf0FU=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/linux-s390x/-/linux-s390x-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [s390x]
     os: [linux]
@@ -7278,13 +7278,13 @@ packages:
     os: [linux]
 
   '@esbuild/netbsd-arm64@0.25.12':
-    resolution: {integrity: sha1-8ExAScsuJS/paxb+2Q9wdGsT9KQ=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/netbsd-arm64/-/netbsd-arm64-0.25.12.tgz}
+    resolution: {integrity: sha1-8ExAScsuJS/paxb+2Q9wdGsT9KQ=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/netbsd-arm64/-/netbsd-arm64-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [netbsd]
 
   '@esbuild/netbsd-arm64@0.28.0':
-    resolution: {integrity: sha1-gU3wrlegw4aBRJG4OX7rqCCUqUc=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/netbsd-arm64/-/netbsd-arm64-0.28.0.tgz}
+    resolution: {integrity: sha1-gU3wrlegw4aBRJG4OX7rqCCUqUc=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/netbsd-arm64/-/netbsd-arm64-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [netbsd]
@@ -7302,85 +7302,85 @@ packages:
     os: [netbsd]
 
   '@esbuild/openbsd-arm64@0.25.12':
-    resolution: {integrity: sha1-Ypb1hnrt7yioGyKrIAnHhqlS3M0=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/openbsd-arm64/-/openbsd-arm64-0.25.12.tgz}
+    resolution: {integrity: sha1-Ypb1hnrt7yioGyKrIAnHhqlS3M0=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/openbsd-arm64/-/openbsd-arm64-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [openbsd]
 
   '@esbuild/openbsd-arm64@0.28.0':
-    resolution: {integrity: sha1-ShXDaqzKaNLVpMkLcQwGdZ9MH/o=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/openbsd-arm64/-/openbsd-arm64-0.28.0.tgz}
+    resolution: {integrity: sha1-ShXDaqzKaNLVpMkLcQwGdZ9MH/o=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/openbsd-arm64/-/openbsd-arm64-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [openbsd]
 
   '@esbuild/openbsd-x64@0.25.12':
-    resolution: {integrity: sha1-+NIzAzYOJ7Fs8GWyO7/0PBQUJnk=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/openbsd-x64/-/openbsd-x64-0.25.12.tgz}
+    resolution: {integrity: sha1-+NIzAzYOJ7Fs8GWyO7/0PBQUJnk=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/openbsd-x64/-/openbsd-x64-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [openbsd]
 
   '@esbuild/openbsd-x64@0.28.0':
-    resolution: {integrity: sha1-R15hAUmKjszjAI18OIER16J8F70=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/openbsd-x64/-/openbsd-x64-0.28.0.tgz}
+    resolution: {integrity: sha1-R15hAUmKjszjAI18OIER16J8F70=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/openbsd-x64/-/openbsd-x64-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [openbsd]
 
   '@esbuild/openharmony-arm64@0.25.12':
-    resolution: {integrity: sha1-SeC3aHRKOSS+DX/ZfdbOmykj2I0=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/openharmony-arm64/-/openharmony-arm64-0.25.12.tgz}
+    resolution: {integrity: sha1-SeC3aHRKOSS+DX/ZfdbOmykj2I0=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/openharmony-arm64/-/openharmony-arm64-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [openharmony]
 
   '@esbuild/openharmony-arm64@0.28.0':
-    resolution: {integrity: sha1-z9w5V/C3pp8b3hKarRf8wvb6Az4=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/openharmony-arm64/-/openharmony-arm64-0.28.0.tgz}
+    resolution: {integrity: sha1-z9w5V/C3pp8b3hKarRf8wvb6Az4=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/openharmony-arm64/-/openharmony-arm64-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [openharmony]
 
   '@esbuild/sunos-x64@0.25.12':
-    resolution: {integrity: sha1-pu19Z3jWflKMgfsWWyP0kRubE9Y=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/sunos-x64/-/sunos-x64-0.25.12.tgz}
+    resolution: {integrity: sha1-pu19Z3jWflKMgfsWWyP0kRubE9Y=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/sunos-x64/-/sunos-x64-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [sunos]
 
   '@esbuild/sunos-x64@0.28.0':
-    resolution: {integrity: sha1-oBPIVv7KzRw67Jhciv4dHLAXSX0=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/sunos-x64/-/sunos-x64-0.28.0.tgz}
+    resolution: {integrity: sha1-oBPIVv7KzRw67Jhciv4dHLAXSX0=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/sunos-x64/-/sunos-x64-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [sunos]
 
   '@esbuild/win32-arm64@0.25.12':
-    resolution: {integrity: sha1-msFMN44bZTrxfQjn0840yu9YcyM=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/win32-arm64/-/win32-arm64-0.25.12.tgz}
+    resolution: {integrity: sha1-msFMN44bZTrxfQjn0840yu9YcyM=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/win32-arm64/-/win32-arm64-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [win32]
 
   '@esbuild/win32-arm64@0.28.0':
-    resolution: {integrity: sha1-6uBeDzUnHK04mLQxaNPpo7uvR+U=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/win32-arm64/-/win32-arm64-0.28.0.tgz}
+    resolution: {integrity: sha1-6uBeDzUnHK04mLQxaNPpo7uvR+U=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/win32-arm64/-/win32-arm64-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [win32]
 
   '@esbuild/win32-ia32@0.25.12':
-    resolution: {integrity: sha1-kYlC3LuzXMFPyjmvuRteaj0Scmc=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/win32-ia32/-/win32-ia32-0.25.12.tgz}
+    resolution: {integrity: sha1-kYlC3LuzXMFPyjmvuRteaj0Scmc=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/win32-ia32/-/win32-ia32-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [ia32]
     os: [win32]
 
   '@esbuild/win32-ia32@0.28.0':
-    resolution: {integrity: sha1-BhYevFv3XAjWn+s8ayJWBRWROZg=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/win32-ia32/-/win32-ia32-0.28.0.tgz}
+    resolution: {integrity: sha1-BhYevFv3XAjWn+s8ayJWBRWROZg=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/win32-ia32/-/win32-ia32-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [ia32]
     os: [win32]
 
   '@esbuild/win32-x64@0.25.12':
-    resolution: {integrity: sha1-m9rYF2vngRrRSNH4dyNZBB9GxsU=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/win32-x64/-/win32-x64-0.25.12.tgz}
+    resolution: {integrity: sha1-m9rYF2vngRrRSNH4dyNZBB9GxsU=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/win32-x64/-/win32-x64-0.25.12.tgz}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
 
   '@esbuild/win32-x64@0.28.0':
-    resolution: {integrity: sha1-BNkNV1K0zmXStqwl66CP92JP4Hw=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/win32-x64/-/win32-x64-0.28.0.tgz}
+    resolution: {integrity: sha1-BNkNV1K0zmXStqwl66CP92JP4Hw=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@esbuild/win32-x64/-/win32-x64-0.28.0.tgz}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
@@ -8585,24 +8585,38 @@ packages:
     resolution: {integrity: sha512-H1rQc1ZOHANWBvPcW+JpGwr+juXSxM8Q8YCkm3GhZd8REu1fHR3z99CErO1p9pkcfcxZnMdIZdIsXkOHY0NilA==}
 
   '@microsoft/api-extractor-model@7.33.10':
-    resolution: {integrity: sha512-uPUK17xGxeQ3av6TN7awp+dTTSTvx8fZC0XFL1gyt7hFapYuxND3XLXH8vkmI7UjfW92oogzFAFqHSifmJROaw==}
+    resolution: {integrity: sha1-XM0AwYh3sxUyK4DavEL7ZryciWw=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@microsoft/api-extractor-model/-/api-extractor-model-7.33.10.tgz}
 
   '@microsoft/api-extractor@7.58.12':
-    resolution: {integrity: sha512-VNpgC/1LaroLbn+UKmwDYspq+9r3EHyj4vJ3qUy/g8vB0rKt+1Wgs7WFj/JGpgxhG8SNyXs1XwYwe7nqkk8IDg==}
+    resolution: {integrity: sha1-N8JM1nLyX3t39v84nB1AK2/HoiI=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@microsoft/api-extractor/-/api-extractor-7.58.12.tgz}
+    hasBin: true
+
+  '@microsoft/api-extractor@8.0.0':
+    resolution: {integrity: sha1-TCdLa7h0WrmfQS/9jvJUtxaVusA=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@microsoft/api-extractor/-/api-extractor-8.0.0.tgz}
+    deprecated: DO NOT USE - This release was accidentally published using the wrong version number.
     hasBin: true
 
   '@microsoft/load-themed-styles@1.10.295':
     resolution: {integrity: sha512-W+IzEBw8a6LOOfRJM02dTT7BDZijxm+Z7lhtOAz1+y9vQm1Kdz9jlAO+qCEKsfxtUOmKilW8DIRqFw2aUgKeGg==}
 
+  '@microsoft/node-core-library@3.11.0':
+    resolution: {integrity: sha1-8fDf2PH/SW6DWaH7kSaGiTM2XUk=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@microsoft/node-core-library/-/node-core-library-3.11.0.tgz}
+
   '@microsoft/teams-js@1.3.0-beta.4':
     resolution: {integrity: sha512-AxDfMpiVqh3hsqTxMEYtQoz866WB/sw/Jl0pgTLh6sMHHmIBNMd+E0pVcP9WNk8zTkr9LCphJ5SziU1C8BgZMA==}
     deprecated: Package no longer supported. Use at your own risk
+
+  '@microsoft/ts-command-line@4.2.3':
+    resolution: {integrity: sha1-INahaEFIufwN8l7nM1w7sifUfU8=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@microsoft/ts-command-line/-/ts-command-line-4.2.3.tgz}
 
   '@microsoft/tsdoc-config@0.17.0':
     resolution: {integrity: sha512-v/EYRXnCAIHxOHW+Plb6OWuUoMotxTN0GLatnpOb1xq0KuTNw/WI3pamJx/UbsoJP5k9MCw1QxvvhPcF9pH3Zg==}
 
   '@microsoft/tsdoc-config@0.18.1':
     resolution: {integrity: sha512-9brPoVdfN9k9g0dcWkFeA7IH9bbcttzDJlXvkf8b2OBzd5MueR1V2wkKBL0abn0otvmkHJC6aapBOTJDDeMCZg==}
+
+  '@microsoft/tsdoc@0.12.5':
+    resolution: {integrity: sha1-xEijiQLMtWAcGy7zsaEFAS73cSw=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@microsoft/tsdoc/-/tsdoc-0.12.5.tgz}
 
   '@microsoft/tsdoc@0.15.0':
     resolution: {integrity: sha512-HZpPoABogPvjeJOdzCOSJsXeL/SMCBgBZMVC3X3d7YYp2gf31MfxhUoYUNwf1ERPJOnQc0wkFn9trqI6ZEdZuA==}
@@ -8637,10 +8651,10 @@ packages:
     engines: {node: '>=4'}
 
   '@napi-rs/wasm-runtime@0.2.12':
-    resolution: {integrity: sha1-PniouW5sM6bFF+GJTvvVOFp8tvI=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.12.tgz}
+    resolution: {integrity: sha1-PniouW5sM6bFF+GJTvvVOFp8tvI=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.12.tgz}
 
   '@napi-rs/wasm-runtime@1.0.7':
-    resolution: {integrity: sha1-3P6pmnXwYgmiNfPZQeNGClHpsUw=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@napi-rs/wasm-runtime/-/wasm-runtime-1.0.7.tgz}
+    resolution: {integrity: sha1-3P6pmnXwYgmiNfPZQeNGClHpsUw=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@napi-rs/wasm-runtime/-/wasm-runtime-1.0.7.tgz}
 
   '@noble/hashes@1.4.0':
     resolution: {integrity: sha512-V1JJ1WTRUqHHrOSh597hURcMqVKVGL/ea3kv0gSnEdsEZ0/+VyPghM1lMNGc00z7CIQorSvbKpuJkxvuHbvdbg==}
@@ -8705,7 +8719,7 @@ packages:
     engines: {node: '>=20.0.0'}
 
   '@pkgjs/parseargs@0.11.0':
-    resolution: {integrity: sha1-p36nQvqyV3UUVDTrHSMoz1ATrDM=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pkgjs/parseargs/-/parseargs-0.11.0.tgz}
+    resolution: {integrity: sha1-p36nQvqyV3UUVDTrHSMoz1ATrDM=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pkgjs/parseargs/-/parseargs-0.11.0.tgz}
     engines: {node: '>=14'}
 
   '@pkgr/core@0.2.9':
@@ -8848,7 +8862,7 @@ packages:
     engines: {node: '>=18.12'}
 
   '@pnpm/lockfile.types@1001.1.0':
-    resolution: {integrity: sha1-rhsx7V+7Du0y0CpfVlG8zilTW6E=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/lockfile.types/-/lockfile.types-1001.1.0.tgz}
+    resolution: {integrity: sha1-rhsx7V+7Du0y0CpfVlG8zilTW6E=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/lockfile.types/-/lockfile.types-1001.1.0.tgz}
     engines: {node: '>=18.12'}
 
   '@pnpm/lockfile.types@1002.0.1':
@@ -8900,7 +8914,7 @@ packages:
     engines: {node: '>=18.12'}
 
   '@pnpm/ramda@0.28.1':
-    resolution: {integrity: sha1-DzKrxSddWGoD4Nwd2QoAmsZo/zM=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/ramda/-/ramda-0.28.1.tgz}
+    resolution: {integrity: sha1-DzKrxSddWGoD4Nwd2QoAmsZo/zM=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/ramda/-/ramda-0.28.1.tgz}
 
   '@pnpm/read-modules-dir@2.0.3':
     resolution: {integrity: sha512-i9OgRvSlxrTS9a2oXokhDxvQzDtfqtsooJ9jaGoHkznue5aFCTSrNZFQ6M18o8hC03QWfnxaKi0BtOvNkKu2+A==}
@@ -8927,7 +8941,7 @@ packages:
     engines: {node: '>=18.12'}
 
   '@pnpm/types@1000.7.0':
-    resolution: {integrity: sha1-g1Hkb73+JfgP7Jdb/fWNDKStYkw=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/types/-/types-1000.7.0.tgz}
+    resolution: {integrity: sha1-g1Hkb73+JfgP7Jdb/fWNDKStYkw=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/types/-/types-1000.7.0.tgz}
     engines: {node: '>=18.12'}
 
   '@pnpm/types@1000.8.0':
@@ -8977,7 +8991,7 @@ packages:
     resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
 
   '@pothos/core@3.41.2':
-    resolution: {integrity: sha1-ruJt4pccOHJDU0S8NM4Kv5qUVL0=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pothos/core/-/core-3.41.2.tgz}
+    resolution: {integrity: sha1-ruJt4pccOHJDU0S8NM4Kv5qUVL0=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pothos/core/-/core-3.41.2.tgz}
     peerDependencies:
       graphql: '>=15.1.0'
 
@@ -9218,23 +9232,23 @@ packages:
     engines: {node: '>=14.0.0'}
 
   '@rollup/rollup-linux-x64-gnu@4.53.3':
-    resolution: {integrity: sha1-/Q3qO7mqB+cINXnyXhwihaRsufo=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.53.3.tgz}
+    resolution: {integrity: sha1-/Q3qO7mqB+cINXnyXhwihaRsufo=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.53.3.tgz}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
   '@rspack/binding-darwin-arm64@1.6.8':
-    resolution: {integrity: sha1-Uph8DLxIeiQL3GsaMYODctrd7is=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-darwin-arm64/-/binding-darwin-arm64-1.6.8.tgz}
+    resolution: {integrity: sha1-Uph8DLxIeiQL3GsaMYODctrd7is=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-darwin-arm64/-/binding-darwin-arm64-1.6.8.tgz}
     cpu: [arm64]
     os: [darwin]
 
   '@rspack/binding-darwin-x64@1.6.8':
-    resolution: {integrity: sha1-E8gBzoIQ0Rt7C8Sse/A27DKGKTU=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-darwin-x64/-/binding-darwin-x64-1.6.8.tgz}
+    resolution: {integrity: sha1-E8gBzoIQ0Rt7C8Sse/A27DKGKTU=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-darwin-x64/-/binding-darwin-x64-1.6.8.tgz}
     cpu: [x64]
     os: [darwin]
 
   '@rspack/binding-linux-arm64-gnu@1.6.8':
-    resolution: {integrity: sha1-1wMhrFu9W8EB3potoBxvuYRgFWU=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-linux-arm64-gnu/-/binding-linux-arm64-gnu-1.6.8.tgz}
+    resolution: {integrity: sha1-1wMhrFu9W8EB3potoBxvuYRgFWU=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-linux-arm64-gnu/-/binding-linux-arm64-gnu-1.6.8.tgz}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
@@ -9246,33 +9260,33 @@ packages:
     libc: [musl]
 
   '@rspack/binding-linux-x64-gnu@1.6.8':
-    resolution: {integrity: sha1-t45/YrQVezHhgf6J0xmmAXgqgCs=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-linux-x64-gnu/-/binding-linux-x64-gnu-1.6.8.tgz}
+    resolution: {integrity: sha1-t45/YrQVezHhgf6J0xmmAXgqgCs=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-linux-x64-gnu/-/binding-linux-x64-gnu-1.6.8.tgz}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
   '@rspack/binding-linux-x64-musl@1.6.8':
-    resolution: {integrity: sha1-xXj3MNip+rhm5KFZIEV++df9X1g=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-linux-x64-musl/-/binding-linux-x64-musl-1.6.8.tgz}
+    resolution: {integrity: sha1-xXj3MNip+rhm5KFZIEV++df9X1g=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-linux-x64-musl/-/binding-linux-x64-musl-1.6.8.tgz}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
   '@rspack/binding-wasm32-wasi@1.6.8':
-    resolution: {integrity: sha1-dtI1iewxrWurZ4TaiffMQsffAnU=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-wasm32-wasi/-/binding-wasm32-wasi-1.6.8.tgz}
+    resolution: {integrity: sha1-dtI1iewxrWurZ4TaiffMQsffAnU=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-wasm32-wasi/-/binding-wasm32-wasi-1.6.8.tgz}
     cpu: [wasm32]
 
   '@rspack/binding-win32-arm64-msvc@1.6.8':
-    resolution: {integrity: sha1-tCy6SrdYjOcvDBPJaNPWLophq0Y=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-win32-arm64-msvc/-/binding-win32-arm64-msvc-1.6.8.tgz}
+    resolution: {integrity: sha1-tCy6SrdYjOcvDBPJaNPWLophq0Y=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-win32-arm64-msvc/-/binding-win32-arm64-msvc-1.6.8.tgz}
     cpu: [arm64]
     os: [win32]
 
   '@rspack/binding-win32-ia32-msvc@1.6.8':
-    resolution: {integrity: sha1-KTojRIxqEfJamru5iWEwWcfaPsQ=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-win32-ia32-msvc/-/binding-win32-ia32-msvc-1.6.8.tgz}
+    resolution: {integrity: sha1-KTojRIxqEfJamru5iWEwWcfaPsQ=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-win32-ia32-msvc/-/binding-win32-ia32-msvc-1.6.8.tgz}
     cpu: [ia32]
     os: [win32]
 
   '@rspack/binding-win32-x64-msvc@1.6.8':
-    resolution: {integrity: sha1-9f0/AbZpTuCMvDgsO9QtZJCrlEY=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-win32-x64-msvc/-/binding-win32-x64-msvc-1.6.8.tgz}
+    resolution: {integrity: sha1-9f0/AbZpTuCMvDgsO9QtZJCrlEY=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rspack/binding-win32-x64-msvc/-/binding-win32-x64-msvc-1.6.8.tgz}
     cpu: [x64]
     os: [win32]
 
@@ -9348,19 +9362,19 @@ packages:
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0
 
-  '@rushstack/heft-api-extractor-plugin@1.3.22':
-    resolution: {integrity: sha512-IdZ3rrdsswEbOXYmJUe4+vAqWKhEGwt18/ntIkIXpbpH7/plQxuIqpmnlRVF9cdivIb741AmzBS8fG8Fx23Y3A==}
+  '@rushstack/heft-api-extractor-plugin@1.3.23':
+    resolution: {integrity: sha1-gZA3/Knnc+SoYhbxu8z5+baalpc=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/heft-api-extractor-plugin/-/heft-api-extractor-plugin-1.3.23.tgz}
     peerDependencies:
-      '@rushstack/heft': 1.2.22
+      '@rushstack/heft': 1.2.23
 
   '@rushstack/heft-config-file@0.20.12':
-    resolution: {integrity: sha512-IFbjnQN/slbygZ/zINx5tp1XNKMkpIKOiQCNAy3plcGXTt4iH9CCyOvOct61z1ODI/lPoK1YDDLHCVatFqCXfw==}
+    resolution: {integrity: sha1-HweCRSvjXlebxAAMdDMC/B+HsdU=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/heft-config-file/-/heft-config-file-0.20.12.tgz}
     engines: {node: '>=10.13.0'}
 
-  '@rushstack/heft-jest-plugin@2.0.12':
-    resolution: {integrity: sha512-Z+DdZHMyPl3N7gmzDg2mDdAdofCNyaBWxt/58CVZncf5RHoSvh2mCzxtUIl8gefblPpky30wi1SW638gAPcQZw==}
+  '@rushstack/heft-jest-plugin@2.0.13':
+    resolution: {integrity: sha1-UCesZNEjLUcoQEv/rZC7WhHy7qQ=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/heft-jest-plugin/-/heft-jest-plugin-2.0.13.tgz}
     peerDependencies:
-      '@rushstack/heft': ^1.2.22
+      '@rushstack/heft': ^1.2.23
       '@types/jest': ^30.0.0
       jest-environment-jsdom: ^30.3.0
       jest-environment-node: ^30.3.0
@@ -9372,23 +9386,23 @@ packages:
       jest-environment-node:
         optional: true
 
-  '@rushstack/heft-lint-plugin@1.2.22':
-    resolution: {integrity: sha512-hspUoHH2aaqFYN7hB1wH5tKNbFVNDzu6o8lmBoVWhLw4GqsEIckgMm65pWHbB0/dWJ+5+2nluTpe2g+MryuGBg==}
+  '@rushstack/heft-lint-plugin@1.2.23':
+    resolution: {integrity: sha1-YcrGBOC/+i7qQB5XPDFKoPWjyUc=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/heft-lint-plugin/-/heft-lint-plugin-1.2.23.tgz}
     peerDependencies:
-      '@rushstack/heft': 1.2.22
+      '@rushstack/heft': 1.2.23
 
-  '@rushstack/heft-node-rig@2.11.45':
-    resolution: {integrity: sha512-Th4a+fB20CUtSt5iZi59dTX5ovIRlGfQmwAPReKjYwQ9AEahAtMCVodYLeyNA9q6NnbJNmCuwLLQFaESWn3D4g==}
+  '@rushstack/heft-node-rig@2.11.46':
+    resolution: {integrity: sha1-Zxi3HjPgxw8H+dzq6XwLelAkZ8Y=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/heft-node-rig/-/heft-node-rig-2.11.46.tgz}
     peerDependencies:
-      '@rushstack/heft': ^1.2.22
+      '@rushstack/heft': ^1.2.23
 
-  '@rushstack/heft-typescript-plugin@1.3.17':
-    resolution: {integrity: sha512-AEZ8viO7uTO0Ep6I2qYkTyNC/flBBP1aek1pZVI4sWu6cyx9nPgSE0R7HmR8Mgt+HrE1Vc11iVVjH6CAwGu4iw==}
+  '@rushstack/heft-typescript-plugin@1.3.18':
+    resolution: {integrity: sha1-UxqqfTVMXl+Y9pr8bRUeYPdke24=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/heft-typescript-plugin/-/heft-typescript-plugin-1.3.18.tgz}
     peerDependencies:
-      '@rushstack/heft': 1.2.22
+      '@rushstack/heft': 1.2.23
 
-  '@rushstack/heft@1.2.22':
-    resolution: {integrity: sha512-KqB6DlDOaOibpQDPAztwYrjoRQt/FRWsuu3m2kO6a2Y5Q9/AaAWVxVKJMjHlyMIgGI/Bkt7VXFmogE9lULox4w==}
+  '@rushstack/heft@1.2.23':
+    resolution: {integrity: sha1-YeWOS6ObXTADnszZbPahYa3vOdI=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/heft/-/heft-1.2.23.tgz}
     engines: {node: '>=10.13.0'}
     hasBin: true
 
@@ -9401,15 +9415,15 @@ packages:
         optional: true
 
   '@rushstack/node-core-library@5.23.3':
-    resolution: {integrity: sha512-f6uuza7Um65bwsIJgf0MRs7IPA5IG+A+zs1AYGQvpZmLjtTGdfHowhQw4kwF0pPhJCrU4UHNhK8Qa6tLygYZCA==}
+    resolution: {integrity: sha1-UXOEogpIpjO0pGTDStXFVKVDIN0=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/node-core-library/-/node-core-library-5.23.3.tgz}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
       '@types/node':
         optional: true
 
-  '@rushstack/operation-graph@0.6.11':
-    resolution: {integrity: sha512-m/G3HtCqMi2D+vRoQKPKqyW8U1b7+Cb4PGpB73QWiLrARu34yGBcXiHzss2o3m7nhnT/MumJsdCO+8COsYmDBQ==}
+  '@rushstack/operation-graph@0.7.0':
+    resolution: {integrity: sha1-kwbwp8Zm++pi4Ngu2tNOrO09iEA=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/operation-graph/-/operation-graph-0.7.0.tgz}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -9417,7 +9431,7 @@ packages:
         optional: true
 
   '@rushstack/problem-matcher@0.2.1':
-    resolution: {integrity: sha512-gulfhBs6n+I5b7DvjKRfhMGyUejtSgOHTclF/eONr8hcgF1APEDjhxIsfdUYYMzC3rvLwGluqLjbwCFZ8nxrog==}
+    resolution: {integrity: sha1-6fbKwt1qiC1g52qNRGK30ktPF+U=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/problem-matcher/-/problem-matcher-0.2.1.tgz}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -9425,7 +9439,7 @@ packages:
         optional: true
 
   '@rushstack/rig-package@0.7.3':
-    resolution: {integrity: sha512-aAA518n6wxxjCfnTAOjQnm7ngNE0FVHxHAw2pxKlIhxrMn0XQjGcXKF0oKWpjBgJOmsaJpVob/v+zr3zxgPWuA==}
+    resolution: {integrity: sha1-0opUQLHp9DBGcnunAJ0Y2ZMU8lE=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/rig-package/-/rig-package-0.7.3.tgz}
 
   '@rushstack/set-webpack-public-path-plugin@4.1.16':
     resolution: {integrity: sha512-9YD76OHSYr3pqJwc3wcxIFL1kSxPUyw3xThaZrJDBumMRdAEx7Wj3J0xkPtri5BS06yi49fIC1Di75CxeworzA==}
@@ -9436,7 +9450,7 @@ packages:
         optional: true
 
   '@rushstack/terminal@0.24.2':
-    resolution: {integrity: sha512-KB7PpvzDyKMw/RGU3TxOwxTs3OwZ4gq6+WHlTJN/JfQH4ezliNtWIqver78jTaAJyz/ZAAlJGH7a/M1WyFLFSw==}
+    resolution: {integrity: sha1-lkrTn6heZmj8KrplL8sEK5YTRCU=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/terminal/-/terminal-0.24.2.tgz}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -9450,7 +9464,7 @@ packages:
     resolution: {integrity: sha512-eFuLBUWUfWQ42u5i25qO1VpTOg6nW2PXaLVwpmjm5tHpPREht0k0L2jsYht8iVvQ732odEeVnkXVcf2nIwbGxA==}
 
   '@rushstack/ts-command-line@5.3.12':
-    resolution: {integrity: sha512-Vg2n24arSf7JvUNga2DMHYTbxnVq9L5OtVCp4Gfr8YC/kmL/bmdR8FQhGcpMzMYNY9Vdw3+TaimG11Sf+z1Tpw==}
+    resolution: {integrity: sha1-fW3YB3rn441hrp/lsJBtw/bOplA=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/ts-command-line/-/ts-command-line-5.3.12.tgz}
 
   '@rushstack/webpack-plugin-utilities@0.3.16':
     resolution: {integrity: sha512-0Xb0GESYEyv6Q7hzANZ8RIWa3seiJiCKBNNG83znQwMZ9l0bfnoJzZ3cYODkofoK0E8/nr4hTsn/pWKommf6Mw==}
@@ -10113,19 +10127,19 @@ packages:
       react-dom: ^16.8.0 || ^17.0.0
 
   '@swc/core-darwin-arm64@1.7.10':
-    resolution: {integrity: sha1-PuU+21AbI7EERqmNH21tSH2Iodk=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-darwin-arm64/-/core-darwin-arm64-1.7.10.tgz}
+    resolution: {integrity: sha1-PuU+21AbI7EERqmNH21tSH2Iodk=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-darwin-arm64/-/core-darwin-arm64-1.7.10.tgz}
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [darwin]
 
   '@swc/core-darwin-x64@1.7.10':
-    resolution: {integrity: sha1-cdNUFYDjbr73bTfwCBxJp/Gv6tY=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-darwin-x64/-/core-darwin-x64-1.7.10.tgz}
+    resolution: {integrity: sha1-cdNUFYDjbr73bTfwCBxJp/Gv6tY=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-darwin-x64/-/core-darwin-x64-1.7.10.tgz}
     engines: {node: '>=10'}
     cpu: [x64]
     os: [darwin]
 
   '@swc/core-linux-arm-gnueabihf@1.7.10':
-    resolution: {integrity: sha1-ez86gp2R+FmlAP5gfmgUiY7oGdk=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-linux-arm-gnueabihf/-/core-linux-arm-gnueabihf-1.7.10.tgz}
+    resolution: {integrity: sha1-ez86gp2R+FmlAP5gfmgUiY7oGdk=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-linux-arm-gnueabihf/-/core-linux-arm-gnueabihf-1.7.10.tgz}
     engines: {node: '>=10'}
     cpu: [arm]
     os: [linux]
@@ -10138,7 +10152,7 @@ packages:
     libc: [glibc]
 
   '@swc/core-linux-arm64-musl@1.7.10':
-    resolution: {integrity: sha1-vJgIuyS6Ek++l3KQGadFvV6IWas=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-linux-arm64-musl/-/core-linux-arm64-musl-1.7.10.tgz}
+    resolution: {integrity: sha1-vJgIuyS6Ek++l3KQGadFvV6IWas=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-linux-arm64-musl/-/core-linux-arm64-musl-1.7.10.tgz}
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [linux]
@@ -10152,14 +10166,14 @@ packages:
     libc: [glibc]
 
   '@swc/core-linux-x64-musl@1.7.10':
-    resolution: {integrity: sha1-b8Grv32BgzQ76Ur64L9ZaumNQEg=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-linux-x64-musl/-/core-linux-x64-musl-1.7.10.tgz}
+    resolution: {integrity: sha1-b8Grv32BgzQ76Ur64L9ZaumNQEg=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-linux-x64-musl/-/core-linux-x64-musl-1.7.10.tgz}
     engines: {node: '>=10'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
   '@swc/core-win32-arm64-msvc@1.7.10':
-    resolution: {integrity: sha1-XW7P2kzF6D7IZZEZ8WB7FmP3Cm0=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-win32-arm64-msvc/-/core-win32-arm64-msvc-1.7.10.tgz}
+    resolution: {integrity: sha1-XW7P2kzF6D7IZZEZ8WB7FmP3Cm0=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-win32-arm64-msvc/-/core-win32-arm64-msvc-1.7.10.tgz}
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [win32]
@@ -10171,7 +10185,7 @@ packages:
     os: [win32]
 
   '@swc/core-win32-x64-msvc@1.7.10':
-    resolution: {integrity: sha1-KBQzXAAylcSoCOwbnPGepU+a1uU=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-win32-x64-msvc/-/core-win32-x64-msvc-1.7.10.tgz}
+    resolution: {integrity: sha1-KBQzXAAylcSoCOwbnPGepU+a1uU=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-win32-x64-msvc/-/core-win32-x64-msvc-1.7.10.tgz}
     engines: {node: '>=10'}
     cpu: [x64]
     os: [win32]
@@ -10221,6 +10235,9 @@ packages:
 
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha1-7N3TIFzx4tUnRkn/Du3SmR7X9BQ=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@tybys/wasm-util/-/wasm-util-0.10.1.tgz}
+
+  '@types/argparse@1.0.33':
+    resolution: {integrity: sha1-JyhmlCfN10qZ5TyfRXyihmo3xS0=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@types/argparse/-/argparse-1.0.33.tgz}
 
   '@types/argparse@1.0.38':
     resolution: {integrity: sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==}
@@ -10310,6 +10327,9 @@ packages:
 
   '@types/express@4.17.25':
     resolution: {integrity: sha512-dVd04UKsfpINUnK0yBoYHDF3xu7xVH4BuDotC/xGuycx4CgbP48X/KF/586bcObxT0HENHXEU8Nqtu6NR+eKhw==}
+
+  '@types/fs-extra@5.0.4':
+    resolution: {integrity: sha1-uXETTRYswEl9Ihrd49u2dQIiVZk=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@types/fs-extra/-/fs-extra-5.0.4.tgz}
 
   '@types/fs-extra@7.0.0':
     resolution: {integrity: sha512-ndoMMbGyuToTy4qB6Lex/inR98nPiNHacsgMPvy+zqMLgSxbt8VtWpDArpGp69h1fEDQHn1KB+9DWD++wgbwYA==}
@@ -10429,7 +10449,7 @@ packages:
     resolution: {integrity: sha512-FAYBGwC+W6F9+huFIDtn43cpy7+SzG+atzRiTfdp3inUKL2hXnd4rG8hylJLIh4+hqrQy1P17kvJByE/z825hA==}
 
   '@types/node@14.18.63':
-    resolution: {integrity: sha512-fAtCfv4jJg+ExtXhvCkCqUKZ+4ok/JQk01qDKhL5BDDoS3AxKXhV5/MAVUZyQnSEd2GT92fkgZl0pz0Q0AzcIQ==}
+    resolution: {integrity: sha1-F4j6jag427X56plLg0J4IF22yis=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@types/node/-/node-14.18.63.tgz}
 
   '@types/node@17.0.41':
     resolution: {integrity: sha512-xA6drNNeqb5YyV5fO3OAEsnXLfO7uF0whiOfPTz5AeDo8KeZFmODKnvwPymMNO8qE/an8pVY/O50tig2SQCrGw==}
@@ -10439,6 +10459,9 @@ packages:
 
   '@types/node@22.9.3':
     resolution: {integrity: sha512-F3u1fs/fce3FFk+DAxbxc78DF8x0cY09RRL8GnXLmkJ1jvx3TtPdWoTT5/NiYfI5ASqXBmfqJi9dZ3gxMx4lzw==}
+
+  '@types/node@8.5.8':
+    resolution: {integrity: sha1-klCUImU/EOnArBjYfgYQs5+YIcc=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@types/node/-/node-8.5.8.tgz}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -10601,6 +10624,9 @@ packages:
   '@types/yargs@17.0.35':
     resolution: {integrity: sha512-qUHkeCyQFxMXg79wQfTtfndEC+N9ZZg76HJftDJp+qH2tV7Gj4OJi7l+PiWwJ+pWtW8GwSmqsDj/oymhrTWXjg==}
 
+  '@types/z-schema@3.16.31':
+    resolution: {integrity: sha1-LrHQCl5Ow/pYx2r94S4YK2bcXBw=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@types/z-schema/-/z-schema-3.16.31.tgz}
+
   '@typescript-eslint/eslint-plugin@6.19.1':
     resolution: {integrity: sha512-roQScUGFruWod9CEyoV5KlCYrubC/fvG8/1zXuT0WTcxX87GnMMmnksMwSg99lo1xiKrBzw2icsJPMAw1OtKxg==}
     engines: {node: ^16.0.0 || >=18.0.0}
@@ -10736,17 +10762,17 @@ packages:
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
 
   '@unrs/resolver-binding-android-arm-eabi@1.11.1':
-    resolution: {integrity: sha1-n1sEUDCI5qNUKV6OqP48uZ5Dr4E=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-android-arm-eabi/-/resolver-binding-android-arm-eabi-1.11.1.tgz}
+    resolution: {integrity: sha1-n1sEUDCI5qNUKV6OqP48uZ5Dr4E=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-android-arm-eabi/-/resolver-binding-android-arm-eabi-1.11.1.tgz}
     cpu: [arm]
     os: [android]
 
   '@unrs/resolver-binding-android-arm64@1.11.1':
-    resolution: {integrity: sha1-dBSIVDG9cXi5ia7cTSXMyzhlvJ8=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-android-arm64/-/resolver-binding-android-arm64-1.11.1.tgz}
+    resolution: {integrity: sha1-dBSIVDG9cXi5ia7cTSXMyzhlvJ8=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-android-arm64/-/resolver-binding-android-arm64-1.11.1.tgz}
     cpu: [arm64]
     os: [android]
 
   '@unrs/resolver-binding-darwin-arm64@1.11.1':
-    resolution: {integrity: sha1-tKhVb0IXH7nJ97rII1BF6Cqgy98=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-darwin-arm64/-/resolver-binding-darwin-arm64-1.11.1.tgz}
+    resolution: {integrity: sha1-tKhVb0IXH7nJ97rII1BF6Cqgy98=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-darwin-arm64/-/resolver-binding-darwin-arm64-1.11.1.tgz}
     cpu: [arm64]
     os: [darwin]
 
@@ -10756,7 +10782,7 @@ packages:
     os: [darwin]
 
   '@unrs/resolver-binding-freebsd-x64@1.11.1':
-    resolution: {integrity: sha1-0lEwhNDzfEB3V+IvMr2SSnjP2Zs=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-freebsd-x64/-/resolver-binding-freebsd-x64-1.11.1.tgz}
+    resolution: {integrity: sha1-0lEwhNDzfEB3V+IvMr2SSnjP2Zs=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-freebsd-x64/-/resolver-binding-freebsd-x64-1.11.1.tgz}
     cpu: [x64]
     os: [freebsd]
 
@@ -10766,42 +10792,42 @@ packages:
     os: [linux]
 
   '@unrs/resolver-binding-linux-arm-musleabihf@1.11.1':
-    resolution: {integrity: sha1-IEiSmVzvtr0dAX1S0JcZO8Yd2tM=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-linux-arm-musleabihf/-/resolver-binding-linux-arm-musleabihf-1.11.1.tgz}
+    resolution: {integrity: sha1-IEiSmVzvtr0dAX1S0JcZO8Yd2tM=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-linux-arm-musleabihf/-/resolver-binding-linux-arm-musleabihf-1.11.1.tgz}
     cpu: [arm]
     os: [linux]
 
   '@unrs/resolver-binding-linux-arm64-gnu@1.11.1':
-    resolution: {integrity: sha1-Aj6ww6rEYGahC+ej82Lns087350=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-linux-arm64-gnu/-/resolver-binding-linux-arm64-gnu-1.11.1.tgz}
+    resolution: {integrity: sha1-Aj6ww6rEYGahC+ej82Lns087350=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-linux-arm64-gnu/-/resolver-binding-linux-arm64-gnu-1.11.1.tgz}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
   '@unrs/resolver-binding-linux-arm64-musl@1.11.1':
-    resolution: {integrity: sha1-nm+auwZCTjFApgrJlhOXhvXZm+A=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-linux-arm64-musl/-/resolver-binding-linux-arm64-musl-1.11.1.tgz}
+    resolution: {integrity: sha1-nm+auwZCTjFApgrJlhOXhvXZm+A=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-linux-arm64-musl/-/resolver-binding-linux-arm64-musl-1.11.1.tgz}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
   '@unrs/resolver-binding-linux-ppc64-gnu@1.11.1':
-    resolution: {integrity: sha1-sRFBfxfJ0bAu++yOCDmPDFUnu0Q=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-linux-ppc64-gnu/-/resolver-binding-linux-ppc64-gnu-1.11.1.tgz}
+    resolution: {integrity: sha1-sRFBfxfJ0bAu++yOCDmPDFUnu0Q=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-linux-ppc64-gnu/-/resolver-binding-linux-ppc64-gnu-1.11.1.tgz}
     cpu: [ppc64]
     os: [linux]
     libc: [glibc]
 
   '@unrs/resolver-binding-linux-riscv64-gnu@1.11.1':
-    resolution: {integrity: sha1-kv+/AnSK8+mYc5RcmoperQHVCKk=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-linux-riscv64-gnu/-/resolver-binding-linux-riscv64-gnu-1.11.1.tgz}
+    resolution: {integrity: sha1-kv+/AnSK8+mYc5RcmoperQHVCKk=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-linux-riscv64-gnu/-/resolver-binding-linux-riscv64-gnu-1.11.1.tgz}
     cpu: [riscv64]
     os: [linux]
     libc: [glibc]
 
   '@unrs/resolver-binding-linux-riscv64-musl@1.11.1':
-    resolution: {integrity: sha1-C+xvElj8OQ5rMF6f9EJWyyB94WU=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-linux-riscv64-musl/-/resolver-binding-linux-riscv64-musl-1.11.1.tgz}
+    resolution: {integrity: sha1-C+xvElj8OQ5rMF6f9EJWyyB94WU=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-linux-riscv64-musl/-/resolver-binding-linux-riscv64-musl-1.11.1.tgz}
     cpu: [riscv64]
     os: [linux]
     libc: [musl]
 
   '@unrs/resolver-binding-linux-s390x-gnu@1.11.1':
-    resolution: {integrity: sha1-V3hDoITFlS9ZBncGM8z7idrJvJQ=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-linux-s390x-gnu/-/resolver-binding-linux-s390x-gnu-1.11.1.tgz}
+    resolution: {integrity: sha1-V3hDoITFlS9ZBncGM8z7idrJvJQ=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-linux-s390x-gnu/-/resolver-binding-linux-s390x-gnu-1.11.1.tgz}
     cpu: [s390x]
     os: [linux]
     libc: [glibc]
@@ -10819,22 +10845,22 @@ packages:
     libc: [musl]
 
   '@unrs/resolver-binding-wasm32-wasi@1.11.1':
-    resolution: {integrity: sha1-dSw1ndh1aEsnQpUA2IIm18xy9x0=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-wasm32-wasi/-/resolver-binding-wasm32-wasi-1.11.1.tgz}
+    resolution: {integrity: sha1-dSw1ndh1aEsnQpUA2IIm18xy9x0=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-wasm32-wasi/-/resolver-binding-wasm32-wasi-1.11.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [wasm32]
 
   '@unrs/resolver-binding-win32-arm64-msvc@1.11.1':
-    resolution: {integrity: sha1-zlc15gDkwvu0Cc0FGzt9pKOZrzU=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-win32-arm64-msvc/-/resolver-binding-win32-arm64-msvc-1.11.1.tgz}
+    resolution: {integrity: sha1-zlc15gDkwvu0Cc0FGzt9pKOZrzU=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-win32-arm64-msvc/-/resolver-binding-win32-arm64-msvc-1.11.1.tgz}
     cpu: [arm64]
     os: [win32]
 
   '@unrs/resolver-binding-win32-ia32-msvc@1.11.1':
-    resolution: {integrity: sha1-cvxXvHxk7Fw94NZO4NGBAxe8YKY=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-win32-ia32-msvc/-/resolver-binding-win32-ia32-msvc-1.11.1.tgz}
+    resolution: {integrity: sha1-cvxXvHxk7Fw94NZO4NGBAxe8YKY=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-win32-ia32-msvc/-/resolver-binding-win32-ia32-msvc-1.11.1.tgz}
     cpu: [ia32]
     os: [win32]
 
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
-    resolution: {integrity: sha1-U4seEDv42YZOe4XMlvqNb7bEB3c=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-win32-x64-msvc/-/resolver-binding-win32-x64-msvc-1.11.1.tgz}
+    resolution: {integrity: sha1-U4seEDv42YZOe4XMlvqNb7bEB3c=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@unrs/resolver-binding-win32-x64-msvc/-/resolver-binding-win32-x64-msvc-1.11.1.tgz}
     cpu: [x64]
     os: [win32]
 
@@ -10866,12 +10892,12 @@ packages:
     engines: {node: '>=8.9.3'}
 
   '@vscode/vsce-sign-alpine-arm64@2.0.6':
-    resolution: {integrity: sha1-LNJEyvXo7FQ/QvuR1N87kzZByPo=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@vscode/vsce-sign-alpine-arm64/-/vsce-sign-alpine-arm64-2.0.6.tgz}
+    resolution: {integrity: sha1-LNJEyvXo7FQ/QvuR1N87kzZByPo=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@vscode/vsce-sign-alpine-arm64/-/vsce-sign-alpine-arm64-2.0.6.tgz}
     cpu: [arm64]
     os: [alpine]
 
   '@vscode/vsce-sign-alpine-x64@2.0.6':
-    resolution: {integrity: sha1-sOgKR5IAHGbif+7iwR6CGtH6FoA=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@vscode/vsce-sign-alpine-x64/-/vsce-sign-alpine-x64-2.0.6.tgz}
+    resolution: {integrity: sha1-sOgKR5IAHGbif+7iwR6CGtH6FoA=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@vscode/vsce-sign-alpine-x64/-/vsce-sign-alpine-x64-2.0.6.tgz}
     cpu: [x64]
     os: [alpine]
 
@@ -10881,17 +10907,17 @@ packages:
     os: [darwin]
 
   '@vscode/vsce-sign-darwin-x64@2.0.6':
-    resolution: {integrity: sha1-0skYbZUFSYJyy93YODuwOOvPWCA=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@vscode/vsce-sign-darwin-x64/-/vsce-sign-darwin-x64-2.0.6.tgz}
+    resolution: {integrity: sha1-0skYbZUFSYJyy93YODuwOOvPWCA=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@vscode/vsce-sign-darwin-x64/-/vsce-sign-darwin-x64-2.0.6.tgz}
     cpu: [x64]
     os: [darwin]
 
   '@vscode/vsce-sign-linux-arm64@2.0.6':
-    resolution: {integrity: sha1-s9hWAUQEC5INjG7dQ3QxS1glVIE=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@vscode/vsce-sign-linux-arm64/-/vsce-sign-linux-arm64-2.0.6.tgz}
+    resolution: {integrity: sha1-s9hWAUQEC5INjG7dQ3QxS1glVIE=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@vscode/vsce-sign-linux-arm64/-/vsce-sign-linux-arm64-2.0.6.tgz}
     cpu: [arm64]
     os: [linux]
 
   '@vscode/vsce-sign-linux-arm@2.0.6':
-    resolution: {integrity: sha1-CifEKkrbN+lu7HjNe/o4jNTp++8=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@vscode/vsce-sign-linux-arm/-/vsce-sign-linux-arm-2.0.6.tgz}
+    resolution: {integrity: sha1-CifEKkrbN+lu7HjNe/o4jNTp++8=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@vscode/vsce-sign-linux-arm/-/vsce-sign-linux-arm-2.0.6.tgz}
     cpu: [arm]
     os: [linux]
 
@@ -10901,7 +10927,7 @@ packages:
     os: [linux]
 
   '@vscode/vsce-sign-win32-arm64@2.0.6':
-    resolution: {integrity: sha1-BoiWgUjgPrOSR5yEkcclBnIb7/w=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@vscode/vsce-sign-win32-arm64/-/vsce-sign-win32-arm64-2.0.6.tgz}
+    resolution: {integrity: sha1-BoiWgUjgPrOSR5yEkcclBnIb7/w=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@vscode/vsce-sign-win32-arm64/-/vsce-sign-win32-arm64-2.0.6.tgz}
     cpu: [arm64]
     os: [win32]
 
@@ -11031,11 +11057,11 @@ packages:
     engines: {node: '>=10.13'}
 
   '@zkochan/js-yaml@0.0.11':
-    resolution: {integrity: sha1-T2aH2CGxW1MG1Z391Mu32K5wHI0=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@zkochan/js-yaml/-/js-yaml-0.0.11.tgz}
+    resolution: {integrity: sha1-T2aH2CGxW1MG1Z391Mu32K5wHI0=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@zkochan/js-yaml/-/js-yaml-0.0.11.tgz}
     hasBin: true
 
   '@zkochan/js-yaml@0.0.6':
-    resolution: {integrity: sha1-l18LMG5wXii4BooHc3+kbT/ASCY=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@zkochan/js-yaml/-/js-yaml-0.0.6.tgz}
+    resolution: {integrity: sha1-l18LMG5wXii4BooHc3+kbT/ASCY=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@zkochan/js-yaml/-/js-yaml-0.0.6.tgz}
     hasBin: true
 
   '@zkochan/rimraf@2.1.3':
@@ -11047,7 +11073,7 @@ packages:
     engines: {node: '>=18.12'}
 
   '@zkochan/which@2.0.3':
-    resolution: {integrity: sha1-okOQNZOQ04wVH6YHgbNiC8WhMtA=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@zkochan/which/-/which-2.0.3.tgz}
+    resolution: {integrity: sha1-okOQNZOQ04wVH6YHgbNiC8WhMtA=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@zkochan/which/-/which-2.0.3.tgz}
     engines: {node: '>= 8'}
     hasBin: true
 
@@ -12132,7 +12158,7 @@ packages:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
 
   commander@4.1.1:
-    resolution: {integrity: sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==}
+    resolution: {integrity: sha1-n9YCvZNilOnp70aj9NaWQESxgGg=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/commander/-/commander-4.1.1.tgz}
     engines: {node: '>= 6'}
 
   commander@6.2.1:
@@ -12148,7 +12174,7 @@ packages:
     engines: {node: '>= 12'}
 
   commander@9.5.0:
-    resolution: {integrity: sha1-vAjR61zt98y3l6lhmdQce8PmDTA=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/commander/-/commander-9.5.0.tgz}
+    resolution: {integrity: sha1-vAjR61zt98y3l6lhmdQce8PmDTA=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/commander/-/commander-9.5.0.tgz}
     engines: {node: ^12.20.0 || >=14}
 
   comment-parser@1.4.1:
@@ -12862,7 +12888,7 @@ packages:
     resolution: {integrity: sha1-OW7JesIs5aA3ukSvGZKsnUanuBk=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/encoding-sniffer/-/encoding-sniffer-0.2.1.tgz}
 
   encoding@0.1.13:
-    resolution: {integrity: sha1-VldK/deR9UqOmyeFwFgqLSYhD6k=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/encoding/-/encoding-0.1.13.tgz}
+    resolution: {integrity: sha1-VldK/deR9UqOmyeFwFgqLSYhD6k=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/encoding/-/encoding-0.1.13.tgz}
 
   end-of-stream@1.4.5:
     resolution: {integrity: sha512-ooEGc6HP26xXq/N+GCGOT0JKCLDGrq2bQUZrQ7gyrJiZANJ/8YDTxTpQBXGMn+WbIQXNVpyWymm7KYVICQnyOg==}
@@ -12974,7 +13000,7 @@ packages:
     resolution: {integrity: sha512-Twf7I2v4/1tLoIXMT8HlqaBSS5H2wQTs2wx3MNYCI8K1R1/clXyCazrcVCPm/FuO9cyV8+leEaZOWD5C253NDg==}
 
   esbuild-android-64@0.14.54:
-    resolution: {integrity: sha1-UF9BgyiEMTu6/7J3BLi8qi2GFr4=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-android-64/-/esbuild-android-64-0.14.54.tgz}
+    resolution: {integrity: sha1-UF9BgyiEMTu6/7J3BLi8qi2GFr4=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-android-64/-/esbuild-android-64-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [x64]
     os: [android]
@@ -12986,7 +13012,7 @@ packages:
     os: [android]
 
   esbuild-darwin-64@0.14.54:
-    resolution: {integrity: sha1-JLpnuajLiQo8CNkBj4h8wiHN2iU=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-darwin-64/-/esbuild-darwin-64-0.14.54.tgz}
+    resolution: {integrity: sha1-JLpnuajLiQo8CNkBj4h8wiHN2iU=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-darwin-64/-/esbuild-darwin-64-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [x64]
     os: [darwin]
@@ -12998,61 +13024,61 @@ packages:
     os: [darwin]
 
   esbuild-freebsd-64@0.14.54:
-    resolution: {integrity: sha1-CSUPmXpW7UZQ8+GXnJBf/EC76U0=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-freebsd-64/-/esbuild-freebsd-64-0.14.54.tgz}
+    resolution: {integrity: sha1-CSUPmXpW7UZQ8+GXnJBf/EC76U0=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-freebsd-64/-/esbuild-freebsd-64-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [x64]
     os: [freebsd]
 
   esbuild-freebsd-arm64@0.14.54:
-    resolution: {integrity: sha1-uvtG7QT8X5fL2wFthpR6eVefjkg=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-freebsd-arm64/-/esbuild-freebsd-arm64-0.14.54.tgz}
+    resolution: {integrity: sha1-uvtG7QT8X5fL2wFthpR6eVefjkg=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-freebsd-arm64/-/esbuild-freebsd-arm64-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [arm64]
     os: [freebsd]
 
   esbuild-linux-32@0.14.54:
-    resolution: {integrity: sha1-4qjEqO/cNVQFMlAz/OvrlB94H+U=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-32/-/esbuild-linux-32-0.14.54.tgz}
+    resolution: {integrity: sha1-4qjEqO/cNVQFMlAz/OvrlB94H+U=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-32/-/esbuild-linux-32-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [ia32]
     os: [linux]
 
   esbuild-linux-64@0.14.54:
-    resolution: {integrity: sha1-3l/boclWZs9yNp9StAsDvnEiZlI=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-64/-/esbuild-linux-64-0.14.54.tgz}
+    resolution: {integrity: sha1-3l/boclWZs9yNp9StAsDvnEiZlI=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-64/-/esbuild-linux-64-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [x64]
     os: [linux]
 
   esbuild-linux-arm64@0.14.54:
-    resolution: {integrity: sha1-2uTNQq6Xh0aLalwVjaTIToOwzos=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-arm64/-/esbuild-linux-arm64-0.14.54.tgz}
+    resolution: {integrity: sha1-2uTNQq6Xh0aLalwVjaTIToOwzos=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-arm64/-/esbuild-linux-arm64-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [arm64]
     os: [linux]
 
   esbuild-linux-arm@0.14.54:
-    resolution: {integrity: sha1-osHf9tDyHb6PxpmKEiZ1Uz3fzVk=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-arm/-/esbuild-linux-arm-0.14.54.tgz}
+    resolution: {integrity: sha1-osHf9tDyHb6PxpmKEiZ1Uz3fzVk=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-arm/-/esbuild-linux-arm-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [arm]
     os: [linux]
 
   esbuild-linux-mips64le@0.14.54:
-    resolution: {integrity: sha1-2ZGOnky5cvjW2ujoZVv57hMe2jQ=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-mips64le/-/esbuild-linux-mips64le-0.14.54.tgz}
+    resolution: {integrity: sha1-2ZGOnky5cvjW2ujoZVv57hMe2jQ=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-mips64le/-/esbuild-linux-mips64le-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [mips64el]
     os: [linux]
 
   esbuild-linux-ppc64le@0.14.54:
-    resolution: {integrity: sha1-P5oPbUEHP7GmQGgIRcfeUplfE34=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-ppc64le/-/esbuild-linux-ppc64le-0.14.54.tgz}
+    resolution: {integrity: sha1-P5oPbUEHP7GmQGgIRcfeUplfE34=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-ppc64le/-/esbuild-linux-ppc64le-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [ppc64]
     os: [linux]
 
   esbuild-linux-riscv64@0.14.54:
-    resolution: {integrity: sha1-YYhTwCgXimGDe8eZ0gE9RpXkUcg=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-riscv64/-/esbuild-linux-riscv64-0.14.54.tgz}
+    resolution: {integrity: sha1-YYhTwCgXimGDe8eZ0gE9RpXkUcg=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-riscv64/-/esbuild-linux-riscv64-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [riscv64]
     os: [linux]
 
   esbuild-linux-s390x@0.14.54:
-    resolution: {integrity: sha1-0YhcTFp2u7Wg/hguLIxg654p8qY=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-s390x/-/esbuild-linux-s390x-0.14.54.tgz}
+    resolution: {integrity: sha1-0YhcTFp2u7Wg/hguLIxg654p8qY=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-linux-s390x/-/esbuild-linux-s390x-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [s390x]
     os: [linux]
@@ -13081,25 +13107,25 @@ packages:
       esbuild: '*'
 
   esbuild-sunos-64@0.14.54:
-    resolution: {integrity: sha1-VCh+49pz04RLchwhvIDB3H4b99o=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-sunos-64/-/esbuild-sunos-64-0.14.54.tgz}
+    resolution: {integrity: sha1-VCh+49pz04RLchwhvIDB3H4b99o=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-sunos-64/-/esbuild-sunos-64-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [x64]
     os: [sunos]
 
   esbuild-windows-32@0.14.54:
-    resolution: {integrity: sha1-+Kr5pWZ2MLQPD7OqN78Bu9NAzjE=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-windows-32/-/esbuild-windows-32-0.14.54.tgz}
+    resolution: {integrity: sha1-+Kr5pWZ2MLQPD7OqN78Bu9NAzjE=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-windows-32/-/esbuild-windows-32-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [ia32]
     os: [win32]
 
   esbuild-windows-64@0.14.54:
-    resolution: {integrity: sha1-v1S1G9PpsPGIb/2yJKQXYDHqCvQ=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-windows-64/-/esbuild-windows-64-0.14.54.tgz}
+    resolution: {integrity: sha1-v1S1G9PpsPGIb/2yJKQXYDHqCvQ=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-windows-64/-/esbuild-windows-64-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [x64]
     os: [win32]
 
   esbuild-windows-arm64@0.14.54:
-    resolution: {integrity: sha1-k30VZ1oV5LDk+v26o6Aad2or6YI=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-windows-arm64/-/esbuild-windows-arm64-0.14.54.tgz}
+    resolution: {integrity: sha1-k30VZ1oV5LDk+v26o6Aad2or6YI=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/esbuild-windows-arm64/-/esbuild-windows-arm64-0.14.54.tgz}
     engines: {node: '>=12'}
     cpu: [arm64]
     os: [win32]
@@ -13394,7 +13420,7 @@ packages:
     resolution: {integrity: sha512-nQn+hI3yp+oD0huYhKwvYI32+JFeq+XkNcD1GAo3Y/MjxsfVGmrrzrnzjWiNY6f+pUCP440fThsFh5gZrRAU/w==}
 
   execa@1.0.0:
-    resolution: {integrity: sha1-xiNqW7TfbW8V6I5/AXeYIWdJ3dg=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/execa/-/execa-1.0.0.tgz}
+    resolution: {integrity: sha1-xiNqW7TfbW8V6I5/AXeYIWdJ3dg=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/execa/-/execa-1.0.0.tgz}
     engines: {node: '>=6'}
 
   execa@5.1.1:
@@ -13469,7 +13495,7 @@ packages:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
 
   fast-glob@2.2.7:
-    resolution: {integrity: sha512-g1KuQwHOZAmOZMuBtHdxDtju+T2RT8jgCC9aANsbpdiDDTSnjgfuVsIBNKbUeJI3oKMRExcfNDtJl4OhbffMsw==}
+    resolution: {integrity: sha1-aVOFfDr6R1//ku5gFdUtpwpM050=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fast-glob/-/fast-glob-2.2.7.tgz}
     engines: {node: '>=4.0.0'}
 
   fast-glob@3.3.3:
@@ -13580,7 +13606,7 @@ packages:
     resolution: {integrity: sha512-IzF5MBq+5CR0jXx5RxPe4BICl/oEhBSXKaL9fLhAXrIfIUS77Hr4vzrYyqYMHN6uTt+BOqi3fDCTjjEBCjERKw==}
 
   file-uri-to-path@1.0.0:
-    resolution: {integrity: sha1-VTp7hEb/b2hDWcRF8eN6BdrMM90=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/file-uri-to-path/-/file-uri-to-path-1.0.0.tgz}
+    resolution: {integrity: sha1-VTp7hEb/b2hDWcRF8eN6BdrMM90=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/file-uri-to-path/-/file-uri-to-path-1.0.0.tgz}
 
   fill-range@4.0.0:
     resolution: {integrity: sha512-VcpLTWqWDiTerugjj8e3+esbg+skS3M9e54UuR3iCeIDMXCLTsAH8hTSzDQU/X6/6t3eYkOKoZSef2PlU6U1XQ==}
@@ -13761,7 +13787,7 @@ packages:
     engines: {node: '>=6 <7 || >=8'}
 
   fs-extra@8.1.0:
-    resolution: {integrity: sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g==}
+    resolution: {integrity: sha1-SdQ8RaiM2Wd2aMt74bRu/bjS4cA=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fs-extra/-/fs-extra-8.1.0.tgz}
     engines: {node: '>=6 <7 || >=8'}
 
   fs-extra@9.1.0:
@@ -13786,18 +13812,18 @@ packages:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
 
   fsevents@1.2.13:
-    resolution: {integrity: sha1-8yXLBFVZJCi88Rs4M3DvcOO/zDg=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fsevents/-/fsevents-1.2.13.tgz}
+    resolution: {integrity: sha1-8yXLBFVZJCi88Rs4M3DvcOO/zDg=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fsevents/-/fsevents-1.2.13.tgz}
     engines: {node: '>= 4.0'}
     os: [darwin]
     deprecated: Upgrade to fsevents v2 to mitigate potential security issues
 
   fsevents@2.3.2:
-    resolution: {integrity: sha1-ilJveLj99GI7cJ4Ll1xSwkwC/Ro=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fsevents/-/fsevents-2.3.2.tgz}
+    resolution: {integrity: sha1-ilJveLj99GI7cJ4Ll1xSwkwC/Ro=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fsevents/-/fsevents-2.3.2.tgz}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
   fsevents@2.3.3:
-    resolution: {integrity: sha1-ysZAd4XQNnWipeGlMFxpezR9kNY=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fsevents/-/fsevents-2.3.3.tgz}
+    resolution: {integrity: sha1-ysZAd4XQNnWipeGlMFxpezR9kNY=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fsevents/-/fsevents-2.3.3.tgz}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
@@ -14010,7 +14036,7 @@ packages:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
   graphql@16.13.2:
-    resolution: {integrity: sha1-TStz31eWsgHxvCdl9dcGf2ictV8=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/graphql/-/graphql-16.13.2.tgz}
+    resolution: {integrity: sha1-TStz31eWsgHxvCdl9dcGf2ictV8=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/graphql/-/graphql-16.13.2.tgz}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
 
   gzip-size@6.0.0:
@@ -14327,7 +14353,7 @@ packages:
     engines: {node: '>=6'}
 
   import-lazy@2.1.0:
-    resolution: {integrity: sha512-m7ZEHgtw69qOGw+jwxXkHlrlIPdTGkyh66zXZ1ajZbxkDBNjSY/LGbmjc7h0s2ELsUDTAhFr55TrPSSqJGPG0A==}
+    resolution: {integrity: sha1-BWmOPUXIjo1+nZLLBYTnfwlvPkM=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/import-lazy/-/import-lazy-2.1.0.tgz}
     engines: {node: '>=4'}
 
   import-lazy@4.0.0:
@@ -14870,7 +14896,7 @@ packages:
         optional: true
 
   jest-environment-node@29.7.0:
-    resolution: {integrity: sha512-DOSwCRqXirTOyheM+4d5YZOrWcdu0LNZ87ewUoywbcb2XR4wKgqiG8vNeYwhjFMbEkfju7wx2GYH0P2gevGvFw==}
+    resolution: {integrity: sha1-C5PhEd2o7BILyDAObR+5V24WQ3Y=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/jest-environment-node/-/jest-environment-node-29.7.0.tgz}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
 
   jest-environment-node@30.3.0:
@@ -15201,7 +15227,7 @@ packages:
     resolution: {integrity: sha512-o5kvLbuTF+o326CMVYpjlaykxqYP9DphFQZ2ZpgrvBouyvOxyEB7oqe8nOLFpiV5VCtz0D3pt8gXQYWpLpBnmA==}
 
   keytar@7.9.0:
-    resolution: {integrity: sha1-TGIlcI9RtQy/d8Wq6BchlkwpGMs=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/keytar/-/keytar-7.9.0.tgz}
+    resolution: {integrity: sha1-TGIlcI9RtQy/d8Wq6BchlkwpGMs=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/keytar/-/keytar-7.9.0.tgz}
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
@@ -15392,6 +15418,9 @@ packages:
 
   lodash.uniq@4.5.0:
     resolution: {integrity: sha512-xfBaXQd9ryd9dlSDvnvI0lvxfLJlYAZzXomUYzLKtUeOQvOP5piqAWuGtrhWeqaXK9hhoM/iyJc5AV+XfsX3HQ==}
+
+  lodash@4.17.23:
+    resolution: {integrity: sha1-8ROwN4OGEDvk9okziMc9C95/LFo=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/lodash/-/lodash-4.17.23.tgz}
 
   lodash@4.18.1:
     resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
@@ -15769,7 +15798,7 @@ packages:
     resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
 
   nan@2.26.2:
-    resolution: {integrity: sha1-Ll4ldkIkxze5iXeQtXwylNTc7pw=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/nan/-/nan-2.26.2.tgz}
+    resolution: {integrity: sha1-Ll4ldkIkxze5iXeQtXwylNTc7pw=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/nan/-/nan-2.26.2.tgz}
 
   nanoid@3.3.11:
     resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
@@ -16261,7 +16290,7 @@ packages:
     engines: {node: '>=8'}
 
   path-name@1.0.0:
-    resolution: {integrity: sha1-jKBjpj3nmC36lXYO2v/RAhRJTyQ=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/path-name/-/path-name-1.0.0.tgz}
+    resolution: {integrity: sha1-jKBjpj3nmC36lXYO2v/RAhRJTyQ=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/path-name/-/path-name-1.0.0.tgz}
 
   path-parse@1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
@@ -16855,7 +16884,7 @@ packages:
     resolution: {integrity: sha512-SbiLPU40JuJniHexQSAgad32hfwd+DRUdwF2PlVuI5RZD0/vahUco7R8vD86J/tcEKKF9vZrUVwgtmGCqlCKyA==}
 
   ramda@0.28.0:
-    resolution: {integrity: sha1-rNeFaQEAM36LBjyrNHABm+QnzJc=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/ramda/-/ramda-0.28.0.tgz}
+    resolution: {integrity: sha1-rNeFaQEAM36LBjyrNHABm+QnzJc=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/ramda/-/ramda-0.28.0.tgz}
 
   randombytes@2.1.0:
     resolution: {integrity: sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==}
@@ -17241,6 +17270,9 @@ packages:
     engines: {node: '>= 0.4'}
     hasBin: true
 
+  resolve@1.8.1:
+    resolution: {integrity: sha1-gvHsGaQjrB+9CAsLqwa6NuhKeiY=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/resolve/-/resolve-1.8.1.tgz}
+
   resolve@2.0.0-next.6:
     resolution: {integrity: sha512-3JmVl5hMGtJ3kMmB3zi3DL25KfkCEyy3Tw7Gmw7z5w8M9WlwoPFnIvwChzu1+cF3iaK3sp18hhPz8ANeimdJfA==}
     engines: {node: '>= 0.4'}
@@ -17336,7 +17368,7 @@ packages:
     resolution: {integrity: sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==}
 
   safe-execa@0.1.2:
-    resolution: {integrity: sha1-L7sKbxoAx6RexwM/gmWXV/kb6Mc=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/safe-execa/-/safe-execa-0.1.2.tgz}
+    resolution: {integrity: sha1-L7sKbxoAx6RexwM/gmWXV/kb6Mc=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/safe-execa/-/safe-execa-0.1.2.tgz}
     engines: {node: '>=12'}
 
   safe-push-apply@1.0.0:
@@ -17363,19 +17395,19 @@ packages:
     hasBin: true
 
   sass-embedded-android-arm64@1.85.1:
-    resolution: {integrity: sha1-HKnF4G6hqOz3T/f76mcXBs/lAyA=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-android-arm64/-/sass-embedded-android-arm64-1.85.1.tgz}
+    resolution: {integrity: sha1-HKnF4G6hqOz3T/f76mcXBs/lAyA=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-android-arm64/-/sass-embedded-android-arm64-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [android]
 
   sass-embedded-android-arm@1.85.1:
-    resolution: {integrity: sha1-87zVn7BcKTGuoSaUlqCYj4C5Nq8=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-android-arm/-/sass-embedded-android-arm-1.85.1.tgz}
+    resolution: {integrity: sha1-87zVn7BcKTGuoSaUlqCYj4C5Nq8=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-android-arm/-/sass-embedded-android-arm-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [arm]
     os: [android]
 
   sass-embedded-android-ia32@1.85.1:
-    resolution: {integrity: sha1-C0jPGwoVfAZtjWyPTHz102trIps=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-android-ia32/-/sass-embedded-android-ia32-1.85.1.tgz}
+    resolution: {integrity: sha1-C0jPGwoVfAZtjWyPTHz102trIps=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-android-ia32/-/sass-embedded-android-ia32-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [ia32]
     os: [android]
@@ -17387,7 +17419,7 @@ packages:
     os: [android]
 
   sass-embedded-android-x64@1.85.1:
-    resolution: {integrity: sha1-xTkYMMuzw3jlF3vA4D6Up4LNHME=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-android-x64/-/sass-embedded-android-x64-1.85.1.tgz}
+    resolution: {integrity: sha1-xTkYMMuzw3jlF3vA4D6Up4LNHME=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-android-x64/-/sass-embedded-android-x64-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [android]
@@ -17399,7 +17431,7 @@ packages:
     os: [darwin]
 
   sass-embedded-darwin-x64@1.85.1:
-    resolution: {integrity: sha1-FH7PSb8tGC295s7zN6WKBbepOrE=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-darwin-x64/-/sass-embedded-darwin-x64-1.85.1.tgz}
+    resolution: {integrity: sha1-FH7PSb8tGC295s7zN6WKBbepOrE=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-darwin-x64/-/sass-embedded-darwin-x64-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [darwin]
@@ -17411,37 +17443,37 @@ packages:
     os: [linux]
 
   sass-embedded-linux-arm@1.85.1:
-    resolution: {integrity: sha1-iZy6lLc+sRn2Q0aInkZt4xtvXTw=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-arm/-/sass-embedded-linux-arm-1.85.1.tgz}
+    resolution: {integrity: sha1-iZy6lLc+sRn2Q0aInkZt4xtvXTw=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-arm/-/sass-embedded-linux-arm-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [arm]
     os: [linux]
 
   sass-embedded-linux-ia32@1.85.1:
-    resolution: {integrity: sha1-8bpT8DQ4ljWv6cEFm8Nqd5NkIbg=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-ia32/-/sass-embedded-linux-ia32-1.85.1.tgz}
+    resolution: {integrity: sha1-8bpT8DQ4ljWv6cEFm8Nqd5NkIbg=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-ia32/-/sass-embedded-linux-ia32-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [ia32]
     os: [linux]
 
   sass-embedded-linux-musl-arm64@1.85.1:
-    resolution: {integrity: sha1-sUziYVx6tGJuiMuiZW+Ro6dI4c4=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-musl-arm64/-/sass-embedded-linux-musl-arm64-1.85.1.tgz}
+    resolution: {integrity: sha1-sUziYVx6tGJuiMuiZW+Ro6dI4c4=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-musl-arm64/-/sass-embedded-linux-musl-arm64-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
 
   sass-embedded-linux-musl-arm@1.85.1:
-    resolution: {integrity: sha1-Qo5eKZqf9N/SC1eGHSRAQotfvfY=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-musl-arm/-/sass-embedded-linux-musl-arm-1.85.1.tgz}
+    resolution: {integrity: sha1-Qo5eKZqf9N/SC1eGHSRAQotfvfY=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-musl-arm/-/sass-embedded-linux-musl-arm-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [arm]
     os: [linux]
 
   sass-embedded-linux-musl-ia32@1.85.1:
-    resolution: {integrity: sha1-BwYJr9mc0Pnq5yGGyfSi0M32lE0=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-musl-ia32/-/sass-embedded-linux-musl-ia32-1.85.1.tgz}
+    resolution: {integrity: sha1-BwYJr9mc0Pnq5yGGyfSi0M32lE0=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-musl-ia32/-/sass-embedded-linux-musl-ia32-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [ia32]
     os: [linux]
 
   sass-embedded-linux-musl-riscv64@1.85.1:
-    resolution: {integrity: sha1-D0JkvkAnfXzBgUnJ4PA68JVi5vc=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-musl-riscv64/-/sass-embedded-linux-musl-riscv64-1.85.1.tgz}
+    resolution: {integrity: sha1-D0JkvkAnfXzBgUnJ4PA68JVi5vc=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-musl-riscv64/-/sass-embedded-linux-musl-riscv64-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [riscv64]
     os: [linux]
@@ -17453,31 +17485,31 @@ packages:
     os: [linux]
 
   sass-embedded-linux-riscv64@1.85.1:
-    resolution: {integrity: sha1-Jxh3Mwf5T+uBXk4vu1qnMiao03U=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-riscv64/-/sass-embedded-linux-riscv64-1.85.1.tgz}
+    resolution: {integrity: sha1-Jxh3Mwf5T+uBXk4vu1qnMiao03U=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-riscv64/-/sass-embedded-linux-riscv64-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [riscv64]
     os: [linux]
 
   sass-embedded-linux-x64@1.85.1:
-    resolution: {integrity: sha1-BmTMiGuHgYrJ0pv06fKZ/mxj9SQ=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-x64/-/sass-embedded-linux-x64-1.85.1.tgz}
+    resolution: {integrity: sha1-BmTMiGuHgYrJ0pv06fKZ/mxj9SQ=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-x64/-/sass-embedded-linux-x64-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
 
   sass-embedded-win32-arm64@1.85.1:
-    resolution: {integrity: sha1-0Ht1X4QI193huDCNOlf7/NqdkJw=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-win32-arm64/-/sass-embedded-win32-arm64-1.85.1.tgz}
+    resolution: {integrity: sha1-0Ht1X4QI193huDCNOlf7/NqdkJw=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-win32-arm64/-/sass-embedded-win32-arm64-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [win32]
 
   sass-embedded-win32-ia32@1.85.1:
-    resolution: {integrity: sha1-Xl8W4aMPjfMRSKr2WncimNcDfXA=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-win32-ia32/-/sass-embedded-win32-ia32-1.85.1.tgz}
+    resolution: {integrity: sha1-Xl8W4aMPjfMRSKr2WncimNcDfXA=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-win32-ia32/-/sass-embedded-win32-ia32-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [ia32]
     os: [win32]
 
   sass-embedded-win32-x64@1.85.1:
-    resolution: {integrity: sha1-dY+5bBbncmWkt/JHSkOWLXHvX/0=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-win32-x64/-/sass-embedded-win32-x64-1.85.1.tgz}
+    resolution: {integrity: sha1-dY+5bBbncmWkt/JHSkOWLXHvX/0=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-win32-x64/-/sass-embedded-win32-x64-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [win32]
@@ -17826,7 +17858,7 @@ packages:
     deprecated: See https://github.com/lydell/source-map-url#deprecated
 
   source-map@0.5.7:
-    resolution: {integrity: sha512-LbrmJOMUSdEVxIKvdcJzQC+nQhe8FUZQTXQy6+I75skNgn3OoQ0DZA8YnFa7gp8tqtL3KPf1kmo0R5DoApeSGQ==}
+    resolution: {integrity: sha1-igOdLRAh0i0eoUyA2OpGi6LvP8w=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/source-map/-/source-map-0.5.7.tgz}
     engines: {node: '>=0.10.0'}
 
   source-map@0.6.1:
@@ -18507,6 +18539,11 @@ packages:
     engines: {node: '>=4.2.0'}
     hasBin: true
 
+  typescript@3.1.8:
+    resolution: {integrity: sha1-IHA/OI2fzMViykoEnYp1Z8jpXr0=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/typescript/-/typescript-3.1.8.tgz}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+
   typescript@3.9.10:
     resolution: {integrity: sha512-w6fIxVE/H1PkLKcCPsFqKE7Kv7QUwhU8qQY2MueZXWx5cPZdwFupLgKK3vntcK98BtNHZtAF4LA/yl2a7k8R6Q==}
     engines: {node: '>=4.2.0'}
@@ -18534,7 +18571,7 @@ packages:
     resolution: {integrity: sha512-yDJTmhydvl5lJzBmy/hyOAA0d+aqCBuwl818haVdYCRrWV84o7YyeVm4QlVHStqNrrJSTb6jKuFAVqAFsr+K3Q==}
 
   uglify-js@3.19.3:
-    resolution: {integrity: sha1-gjFem7xvKyWIiFis0f/4RBA1t38=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/uglify-js/-/uglify-js-3.19.3.tgz}
+    resolution: {integrity: sha1-gjFem7xvKyWIiFis0f/4RBA1t38=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/uglify-js/-/uglify-js-3.19.3.tgz}
     engines: {node: '>=0.8.0'}
     hasBin: true
 
@@ -18781,6 +18818,10 @@ packages:
     resolution: {integrity: sha512-TQ5pAGhd5whStmqWvYF4OjQROlmv9SMFVt37qoCBdqRffuuklWYQlCNnEs2ZaIBD1kZRNnikiZOS1eqgkar0iw==}
     engines: {node: '>= 0.10'}
 
+  validator@8.2.0:
+    resolution: {integrity: sha1-PBI3KQ43CSNVNE/veMIxJJ2rd7k=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/validator/-/validator-8.2.0.tgz}
+    engines: {node: '>= 0.10'}
+
   varint@6.0.0:
     resolution: {integrity: sha512-cXEIW6cfr15lFv563k4GuVuW/fiwjknytD37jIOLSdSWuOI6WnO/oKwmP2FQTU2l01LP8/M5TSAJpzUaGe3uWg==}
 
@@ -18811,7 +18852,7 @@ packages:
     resolution: {integrity: sha512-rpJyN222KWIvHJ/F53XSZv0Zl/accqHR8et1kpaMTD/fLCRxtV8iX8czMzY7sVZupTI3zcUTg8eycS2kNF9l6w==}
 
   watchpack-chokidar2@2.0.1:
-    resolution: {integrity: sha1-OFAAcu5uzmbzdpk2lQ6hdxvhyVc=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/watchpack-chokidar2/-/watchpack-chokidar2-2.0.1.tgz}
+    resolution: {integrity: sha1-OFAAcu5uzmbzdpk2lQ6hdxvhyVc=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/watchpack-chokidar2/-/watchpack-chokidar2-2.0.1.tgz}
 
   watchpack@1.7.5:
     resolution: {integrity: sha512-9P3MWk6SrKjHsGkLT2KHXdQ/9SNkyoJbabxnKOoJepsvJjJG8uYTR3yTPxPQvNDI3w4Nz1xnE0TLHK4RIVe/MQ==}
@@ -19221,6 +19262,10 @@ packages:
   yocto-queue@1.2.2:
     resolution: {integrity: sha512-4LCcse/U2MHZ63HAJVE+v71o7yOdIe4cZ70Wpf8D/IyjDKYQLV5GD46B+hSTjJsvV5PztjvHoU580EftxjDZFQ==}
     engines: {node: '>=12.20'}
+
+  z-schema@3.18.4:
+    resolution: {integrity: sha1-6oEysnlTPuYL4khaAvfj5CVBqaI=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/z-schema/-/z-schema-3.18.4.tgz}
+    hasBin: true
 
   z-schema@5.0.5:
     resolution: {integrity: sha512-D7eujBWkLa3p2sIpJA0d1pr7es+a7m0vFAnZLlCEKq/Ij2k0MLi9Br2UPxoxdYystm5K1yeBGzub0FlYUEWj2Q==}
@@ -23684,9 +23729,40 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
+  '@microsoft/api-extractor@8.0.0':
+    dependencies:
+      '@microsoft/node-core-library': 3.11.0
+      '@microsoft/ts-command-line': 4.2.3
+      '@microsoft/tsdoc': 0.12.5
+      '@types/node': 8.5.8
+      '@types/z-schema': 3.16.31
+      colors: 1.2.5
+      lodash: 4.17.23
+      resolve: 1.8.1
+      typescript: 3.1.8
+      z-schema: 3.18.4
+
   '@microsoft/load-themed-styles@1.10.295': {}
 
+  '@microsoft/node-core-library@3.11.0':
+    dependencies:
+      '@types/fs-extra': 5.0.4
+      '@types/jju': 1.4.1
+      '@types/node': 8.5.8
+      '@types/z-schema': 3.16.31
+      colors: 1.2.5
+      fs-extra: 7.0.1
+      jju: 1.4.0
+      z-schema: 3.18.4
+
   '@microsoft/teams-js@1.3.0-beta.4': {}
+
+  '@microsoft/ts-command-line@4.2.3':
+    dependencies:
+      '@types/argparse': 1.0.33
+      '@types/node': 8.5.8
+      argparse: 1.0.10
+      colors: 1.2.5
 
   '@microsoft/tsdoc-config@0.17.0':
     dependencies:
@@ -23701,6 +23777,8 @@ snapshots:
       ajv: 8.18.0
       jju: 1.4.0
       resolve: 1.22.11
+
+  '@microsoft/tsdoc@0.12.5': {}
 
   '@microsoft/tsdoc@0.15.0': {}
 
@@ -24785,9 +24863,9 @@ snapshots:
       - supports-color
       - typescript
 
-  '@rushstack/heft-api-extractor-plugin@1.3.22(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/node@20.17.19)':
+  '@rushstack/heft-api-extractor-plugin@1.3.23(@rushstack/heft@1.2.23(@types/node@20.17.19))(@types/node@20.17.19)':
     dependencies:
-      '@rushstack/heft': 1.2.22(@types/node@20.17.19)
+      '@rushstack/heft': 1.2.23(@types/node@20.17.19)
       '@rushstack/node-core-library': 5.23.3(@types/node@20.17.19)
       semver: 7.7.4
     transitivePeerDependencies:
@@ -24811,12 +24889,12 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft-jest-plugin@2.0.12(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)':
+  '@rushstack/heft-jest-plugin@2.0.13(@rushstack/heft@1.2.23(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)':
     dependencies:
       '@jest/core': 30.3.0(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))
       '@jest/reporters': 30.3.0
       '@jest/transform': 30.3.0
-      '@rushstack/heft': 1.2.22(@types/node@20.17.19)
+      '@rushstack/heft': 1.2.23(@types/node@20.17.19)
       '@rushstack/heft-config-file': 0.20.12(@types/node@20.17.19)
       '@rushstack/node-core-library': 5.23.3(@types/node@20.17.19)
       '@rushstack/terminal': 0.24.2(@types/node@20.17.19)
@@ -24835,24 +24913,24 @@ snapshots:
       - supports-color
       - ts-node
 
-  '@rushstack/heft-lint-plugin@1.2.22(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/node@20.17.19)':
+  '@rushstack/heft-lint-plugin@1.2.23(@rushstack/heft@1.2.23(@types/node@20.17.19))(@types/node@20.17.19)':
     dependencies:
-      '@rushstack/heft': 1.2.22(@types/node@20.17.19)
+      '@rushstack/heft': 1.2.23(@types/node@20.17.19)
       '@rushstack/node-core-library': 5.23.3(@types/node@20.17.19)
       json-stable-stringify-without-jsonify: 1.0.1
       semver: 7.7.4
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft-node-rig@2.11.45(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)':
+  '@rushstack/heft-node-rig@2.11.46(@rushstack/heft@1.2.23(@types/node@20.17.19))(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)':
     dependencies:
       '@microsoft/api-extractor': 7.58.12(@types/node@20.17.19)
       '@rushstack/eslint-config': 4.6.4(eslint@9.37.0)(typescript@5.8.2)
-      '@rushstack/heft': 1.2.22(@types/node@20.17.19)
-      '@rushstack/heft-api-extractor-plugin': 1.3.22(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/node@20.17.19)
-      '@rushstack/heft-jest-plugin': 2.0.12(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)
-      '@rushstack/heft-lint-plugin': 1.2.22(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/node@20.17.19)
-      '@rushstack/heft-typescript-plugin': 1.3.17(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/node@20.17.19)
+      '@rushstack/heft': 1.2.23(@types/node@20.17.19)
+      '@rushstack/heft-api-extractor-plugin': 1.3.23(@rushstack/heft@1.2.23(@types/node@20.17.19))(@types/node@20.17.19)
+      '@rushstack/heft-jest-plugin': 2.0.13(@rushstack/heft@1.2.23(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)
+      '@rushstack/heft-lint-plugin': 1.2.23(@rushstack/heft@1.2.23(@types/node@20.17.19))(@types/node@20.17.19)
+      '@rushstack/heft-typescript-plugin': 1.3.18(@rushstack/heft@1.2.23(@types/node@20.17.19))(@types/node@20.17.19)
       '@types/jest': 30.0.0
       eslint: 9.37.0
       jest-environment-node: 30.3.0
@@ -24867,9 +24945,9 @@ snapshots:
       - supports-color
       - ts-node
 
-  '@rushstack/heft-typescript-plugin@1.3.17(@rushstack/heft@1.2.22(@types/node@20.17.19))(@types/node@20.17.19)':
+  '@rushstack/heft-typescript-plugin@1.3.18(@rushstack/heft@1.2.23(@types/node@20.17.19))(@types/node@20.17.19)':
     dependencies:
-      '@rushstack/heft': 1.2.22(@types/node@20.17.19)
+      '@rushstack/heft': 1.2.23(@types/node@20.17.19)
       '@rushstack/heft-config-file': 0.20.12(@types/node@20.17.19)
       '@rushstack/node-core-library': 5.23.3(@types/node@20.17.19)
       '@types/tapable': 1.0.6
@@ -24878,11 +24956,11 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft@1.2.22(@types/node@20.17.19)':
+  '@rushstack/heft@1.2.23(@types/node@20.17.19)':
     dependencies:
       '@rushstack/heft-config-file': 0.20.12(@types/node@20.17.19)
       '@rushstack/node-core-library': 5.23.3(@types/node@20.17.19)
-      '@rushstack/operation-graph': 0.6.11(@types/node@20.17.19)
+      '@rushstack/operation-graph': 0.7.0(@types/node@20.17.19)
       '@rushstack/rig-package': 0.7.3
       '@rushstack/terminal': 0.24.2(@types/node@20.17.19)
       '@rushstack/ts-command-line': 5.3.12(@types/node@20.17.19)
@@ -24895,11 +24973,11 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft@1.2.22(@types/node@22.9.3)':
+  '@rushstack/heft@1.2.23(@types/node@22.9.3)':
     dependencies:
       '@rushstack/heft-config-file': 0.20.12(@types/node@22.9.3)
       '@rushstack/node-core-library': 5.23.3(@types/node@22.9.3)
-      '@rushstack/operation-graph': 0.6.11(@types/node@22.9.3)
+      '@rushstack/operation-graph': 0.7.0(@types/node@22.9.3)
       '@rushstack/rig-package': 0.7.3
       '@rushstack/terminal': 0.24.2(@types/node@22.9.3)
       '@rushstack/ts-command-line': 5.3.12(@types/node@22.9.3)
@@ -24962,14 +25040,14 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.9.3
 
-  '@rushstack/operation-graph@0.6.11(@types/node@20.17.19)':
+  '@rushstack/operation-graph@0.7.0(@types/node@20.17.19)':
     dependencies:
       '@rushstack/node-core-library': 5.23.3(@types/node@20.17.19)
       '@rushstack/terminal': 0.24.2(@types/node@20.17.19)
     optionalDependencies:
       '@types/node': 20.17.19
 
-  '@rushstack/operation-graph@0.6.11(@types/node@22.9.3)':
+  '@rushstack/operation-graph@0.7.0(@types/node@22.9.3)':
     dependencies:
       '@rushstack/node-core-library': 5.23.3(@types/node@22.9.3)
       '@rushstack/terminal': 0.24.2(@types/node@22.9.3)
@@ -26735,6 +26813,8 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
+  '@types/argparse@1.0.33': {}
+
   '@types/argparse@1.0.38': {}
 
   '@types/aria-query@4.2.2': {}
@@ -26860,6 +26940,10 @@ snapshots:
       '@types/express-serve-static-core': 4.19.8
       '@types/qs': 6.15.0
       '@types/serve-static': 1.15.10
+
+  '@types/fs-extra@5.0.4':
+    dependencies:
+      '@types/node': 22.9.3
 
   '@types/fs-extra@7.0.0':
     dependencies:
@@ -26997,6 +27081,8 @@ snapshots:
   '@types/node@22.9.3':
     dependencies:
       undici-types: 6.19.8
+
+  '@types/node@8.5.8': {}
 
   '@types/normalize-package-data@2.4.4': {}
 
@@ -27164,6 +27250,8 @@ snapshots:
   '@types/yargs@17.0.35':
     dependencies:
       '@types/yargs-parser': 21.0.3
+
+  '@types/z-schema@3.16.31': {}
 
   '@typescript-eslint/eslint-plugin@6.19.1(@typescript-eslint/parser@6.19.1(eslint@7.11.0)(typescript@5.8.2))(eslint@7.11.0)(typescript@5.8.2)':
     dependencies:
@@ -34041,6 +34129,8 @@ snapshots:
 
   lodash.uniq@4.5.0: {}
 
+  lodash@4.17.23: {}
+
   lodash@4.18.1: {}
 
   log-symbols@4.1.0:
@@ -36161,6 +36251,10 @@ snapshots:
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 
+  resolve@1.8.1:
+    dependencies:
+      path-parse: 1.0.7
+
   resolve@2.0.0-next.6:
     dependencies:
       es-errors: 1.3.0
@@ -37697,6 +37791,8 @@ snapshots:
 
   typescript@2.9.2: {}
 
+  typescript@3.1.8: {}
+
   typescript@3.9.10: {}
 
   typescript@4.9.5: {}
@@ -37994,6 +38090,8 @@ snapshots:
       builtins: 1.0.3
 
   validator@13.15.35: {}
+
+  validator@8.2.0: {}
 
   varint@6.0.0: {}
 
@@ -38616,6 +38714,14 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   yocto-queue@1.2.2: {}
+
+  z-schema@3.18.4:
+    dependencies:
+      lodash.get: 4.4.2
+      lodash.isequal: 4.5.0
+      validator: 8.2.0
+    optionalDependencies:
+      commander: 2.20.3
 
   z-schema@5.0.5:
     dependencies:
