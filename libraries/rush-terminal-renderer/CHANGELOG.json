@@ -2,6 +2,24 @@
   "name": "@rushstack/rush-terminal-renderer",
   "entries": [
     {
+      "version": "0.2.2",
+      "tag": "@rushstack/rush-terminal-renderer_v0.2.2",
+      "date": "Fri, 21 Aug 2026 15:16:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-protocol\" to `0.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/stream-collator\" to `4.2.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.25`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.1",
       "tag": "@rushstack/rush-terminal-renderer_v0.2.1",
       "date": "Thu, 20 Aug 2026 00:16:38 GMT",
