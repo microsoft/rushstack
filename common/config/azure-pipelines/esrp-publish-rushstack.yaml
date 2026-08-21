@@ -57,6 +57,7 @@ extends:
     stages:
       - template: /common/config/azure-pipelines/templates/esrp-publish-stages.yaml@self
         parameters:
+          # https://dev.azure.com/RushStack/GitHubProjects/_build?definitionId=10
           BumpPipelineId: 10
           BumpPipelineProject: GitHubProjects
           StageNameSuffix: Rushstack
