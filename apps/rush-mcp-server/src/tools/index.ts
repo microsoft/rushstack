@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 export { BaseTool, type IBaseToolOptions, type CallToolResult } from './base.tool';
+export { RushBuildStatusTool } from './build-status.tool';
 export { RushMigrateProjectTool } from './migrate-project.tool';
 export { RushProjectDetailsTool } from './project-details.tool';
 export { RushCommandValidatorTool } from './rush-command-validator.tool';
