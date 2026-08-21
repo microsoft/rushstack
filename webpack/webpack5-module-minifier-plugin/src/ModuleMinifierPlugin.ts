@@ -176,10 +176,10 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
   public readonly hooks: IModuleMinifierPluginHooks;
   public minifier: IModuleMinifier;
 
-  private readonly _enhancers: WebpackPluginInstance[];
-  private readonly _sourceMap: boolean | undefined;
+  readonly #enhancers: WebpackPluginInstance[];
+  readonly #sourceMap: boolean | undefined;
 
-  private readonly _optionsForHash: IOptionsForHash;
+  readonly #optionsForHash: IOptionsForHash;
 
   public constructor(options: IModuleMinifierPluginOptions) {
     this.hooks = {
@@ -190,18 +190,18 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
 
     const { minifier, sourceMap } = options;
 
-    this._optionsForHash = {
+    this.#optionsForHash = {
       ...options,
       minifier: undefined,
       revision: CODE_GENERATION_REVISION
     };
 
-    this._enhancers = [];
+    this.#enhancers = [];
 
     this.hooks.rehydrateAssets.tap(PLUGIN_NAME, defaultRehydrateAssets);
     this.minifier = minifier;
 
-    this._sourceMap = sourceMap;
+    this.#sourceMap = sourceMap;
   }
 
   public static getCompilationStatistics(compilation: Compilation): IModuleMinifierPluginStats | undefined {
@@ -209,7 +209,7 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
   }
 
   public apply(compiler: Compiler): void {
-    for (const enhancer of this._enhancers) {
+    for (const enhancer of this.#enhancers) {
       enhancer.apply(compiler);
     }
 
@@ -223,14 +223,14 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
     const { CachedSource, ConcatSource, RawSource, ReplaceSource, SourceMapSource } = webpack.sources;
     // The explicit setting is preferred due to accuracy, but try to guess based on devtool
     const useSourceMaps: boolean =
-      typeof this._sourceMap === 'boolean'
-        ? this._sourceMap
+      typeof this.#sourceMap === 'boolean'
+        ? this.#sourceMap
         : typeof devtool === 'string'
           ? devtool.endsWith('source-map')
           : mode === 'production' && devtool !== false;
 
-    this._optionsForHash.sourceMap = useSourceMaps;
-    const binaryConfig: Buffer = Buffer.from(JSON.stringify(this._optionsForHash), 'utf-8');
+    this.#optionsForHash.sourceMap = useSourceMaps;
+    const binaryConfig: Buffer = Buffer.from(JSON.stringify(this.#optionsForHash), 'utf-8');
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation, compilationData) => {
       const { normalModuleFactory } = compilationData;

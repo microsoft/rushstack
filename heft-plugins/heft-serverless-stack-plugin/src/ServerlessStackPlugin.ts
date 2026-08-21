@@ -30,10 +30,10 @@ const WEBPACK5_PLUGIN_NAME: typeof Webpack5PluginName = 'webpack5-plugin';
 const SST_CLI_PACKAGE_NAME: string = '@serverless-stack/cli';
 
 export default class ServerlessStackPlugin implements IHeftTaskPlugin {
-  private _logger!: IScopedLogger;
+  #logger!: IScopedLogger;
 
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
-    this._logger = taskSession.logger;
+    this.#logger = taskSession.logger;
 
     // Once https://github.com/serverless-stack/serverless-stack/issues/1537 is fixed, we may be
     // eliminate the need for this parameter.
@@ -44,7 +44,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     // Only tap if the --sst flag is set.
     if (sstParameter.value) {
       const configureWebpackTap: () => Promise<false> = async () => {
-        this._logger.terminal.writeLine(
+        this.#logger.terminal.writeLine(
           'The command line includes "--sst", redirecting Webpack to Serverless Stack'
         );
         return false;
@@ -66,7 +66,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
 
       taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
         // TODO: Handle watch / serve mode
-        await this._runServerlessStackAsync({
+        await this.#runServerlessStackAsync({
           taskSession,
           heftConfiguration,
           sstStage: sstStageParameter.value
@@ -75,7 +75,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     }
   }
 
-  private async _runServerlessStackAsync(options: {
+  async #runServerlessStackAsync(options: {
     taskSession: IHeftTaskSession;
     heftConfiguration: HeftConfiguration;
     sstStage?: string;
@@ -89,7 +89,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
         useNodeJSResolver: true
       });
     } catch (e) {
-      this._logger.emitError(
+      this.#logger.emitError(
         new Error(
           `The ${options.taskSession.taskName} task cannot start because your project does not seem to have ` +
             `a dependency on the "${SST_CLI_PACKAGE_NAME}" package: ` +
@@ -99,9 +99,9 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
       return;
     }
 
-    const sstCliEntryPoint: string = this._getSstCliEntryPoint(sstCliPackagePath);
+    const sstCliEntryPoint: string = this.#getSstCliEntryPoint(sstCliPackagePath);
 
-    this._logger.terminal.writeVerboseLine('Found SST package in' + sstCliPackagePath);
+    this.#logger.terminal.writeVerboseLine('Found SST package in' + sstCliPackagePath);
 
     const sstCommandArgs: string[] = [];
     sstCommandArgs.push(sstCliEntryPoint);
@@ -119,9 +119,9 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
       sstCommandArgs.push(options.sstStage);
     }
 
-    this._logger.terminal.writeVerboseLine('Launching child process: ' + JSON.stringify(sstCommandArgs));
+    this.#logger.terminal.writeVerboseLine('Launching child process: ' + JSON.stringify(sstCommandArgs));
 
-    const sstCommandEnv: NodeJS.ProcessEnv = this._getWorkaroundEnvironment(sstCliPackagePath);
+    const sstCommandEnv: NodeJS.ProcessEnv = this.#getWorkaroundEnvironment(sstCliPackagePath);
 
     const sstCommandResult: child_process.ChildProcess = child_process.spawn(
       process.execPath,
@@ -145,20 +145,20 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     });
 
     sstCommandResult.stdout?.on('data', (chunk: Buffer) => {
-      this._writeOutput(chunk.toString(), (x) => this._logger.terminal.write(x));
+      this.#writeOutput(chunk.toString(), (x) => this.#logger.terminal.write(x));
     });
     sstCommandResult.stderr?.on('data', (chunk: Buffer) => {
-      this._writeOutput(chunk.toString(), (x) => this._logger.terminal.writeError(x));
+      this.#writeOutput(chunk.toString(), (x) => this.#logger.terminal.writeError(x));
     });
 
     sstCommandResult.on('exit', (code: number | null) => {
       if (options.serveMode) {
         // The child process is not supposed to terminate in watch mode
-        this._logger.terminal.writeErrorLine(`SST process terminated with exit code ${code}`);
+        this.#logger.terminal.writeErrorLine(`SST process terminated with exit code ${code}`);
         // TODO: Provide a Heft facility for this
         process.exit(1);
       } else {
-        this._logger.terminal.writeVerboseLine(`SST process terminated with exit code ${code}`);
+        this.#logger.terminal.writeVerboseLine(`SST process terminated with exit code ${code}`);
         if (!code) {
           completionResolve();
         } else {
@@ -170,7 +170,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     return completionPromise;
   }
 
-  private _writeOutput(chunk: string, write: (message: string) => void): void {
+  #writeOutput(chunk: string, write: (message: string) => void): void {
     const lines: string[] = chunk.split('\n');
     const lastLine: string = lines.pop() || '';
 
@@ -180,7 +180,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     }
   }
 
-  private _getSstCliEntryPoint(sstCliPackagePath: string): string {
+  #getSstCliEntryPoint(sstCliPackagePath: string): string {
     // Entry point for SST prior to v1.2.0
     let sstCliEntryPoint: string = path.join(sstCliPackagePath, 'bin/scripts.js');
     if (FileSystem.exists(sstCliEntryPoint)) {
@@ -208,7 +208,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
   //
   // Since we're invoking the "@serverless-stack/cli/bin/scripts.js" entry point directly, we need to
   // reproduce this workaround.
-  private _getWorkaroundEnvironment(sstCliPackagePath: string): NodeJS.ProcessEnv {
+  #getWorkaroundEnvironment(sstCliPackagePath: string): NodeJS.ProcessEnv {
     const sstCommandEnv: NodeJS.ProcessEnv = {
       ...process.env
     };
