@@ -4693,8 +4693,8 @@ importers:
   ../../../rigs/decoupled-local-node-rig:
     dependencies:
       '@microsoft/api-extractor':
-        specifier: 8.0.0
-        version: 8.0.0
+        specifier: 7.59.0
+        version: 7.59.0(@types/node@20.17.19)
       '@rushstack/eslint-config':
         specifier: 4.6.4
         version: 4.6.4(eslint@9.37.0)(typescript@5.8.2)
@@ -8591,9 +8591,8 @@ packages:
     resolution: {integrity: sha1-N8JM1nLyX3t39v84nB1AK2/HoiI=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@microsoft/api-extractor/-/api-extractor-7.58.12.tgz}
     hasBin: true
 
-  '@microsoft/api-extractor@8.0.0':
-    resolution: {integrity: sha1-TCdLa7h0WrmfQS/9jvJUtxaVusA=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@microsoft/api-extractor/-/api-extractor-8.0.0.tgz}
-    deprecated: DO NOT USE - This release was accidentally published using the wrong version number.
+  '@microsoft/api-extractor@7.59.0':
+    resolution: {integrity: sha1-o0UGvOpvK9fAnA9sg1iQcCkfFjQ=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@microsoft/api-extractor/-/api-extractor-7.59.0.tgz}
     hasBin: true
 
   '@microsoft/load-themed-styles@1.10.295':
@@ -23729,18 +23728,23 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@microsoft/api-extractor@8.0.0':
+  '@microsoft/api-extractor@7.59.0(@types/node@20.17.19)':
     dependencies:
-      '@microsoft/node-core-library': 3.11.0
-      '@microsoft/ts-command-line': 4.2.3
-      '@microsoft/tsdoc': 0.12.5
-      '@types/node': 8.5.8
-      '@types/z-schema': 3.16.31
-      colors: 1.2.5
-      lodash: 4.17.23
-      resolve: 1.8.1
-      typescript: 3.1.8
-      z-schema: 3.18.4
+      '@microsoft/api-extractor-model': 7.33.10(@types/node@20.17.19)
+      '@microsoft/tsdoc': 0.16.0
+      '@microsoft/tsdoc-config': 0.18.1
+      '@rushstack/node-core-library': 5.23.3(@types/node@20.17.19)
+      '@rushstack/rig-package': 0.7.3
+      '@rushstack/terminal': 0.24.2(@types/node@20.17.19)
+      '@rushstack/ts-command-line': 5.3.12(@types/node@20.17.19)
+      diff: 8.0.4
+      minimatch: 10.2.3
+      resolve: 1.22.11
+      semver: 7.7.4
+      source-map: 0.6.1
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - '@types/node'
 
   '@microsoft/load-themed-styles@1.10.295': {}
 
