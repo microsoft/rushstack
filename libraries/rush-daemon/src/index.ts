@@ -15,13 +15,16 @@ export { RushDaemonHost, type IRushDaemonHostOptions } from './RushDaemonHost';
 export { serveRushDaemonAsync, type IRushDaemonServeOptions } from './serveRushDaemon';
 export {
   WorkspaceEngineComponentFactory,
+  WorkspaceEngineRecreationRequiredError,
   type CreateWorkspaceEngineComponentsAsync,
+  type IClassifyWorkspaceInvalidationsOptions,
   type ICreateWorkspaceEngineComponentsOptions,
   type IMapWorkspaceInvalidationsOptions,
   type IWorkspaceEngineComponentFactoryOptions,
   type IWorkspaceEngineComponents,
   type IWorkspaceEngineShape,
   type IWorkspaceInvalidationReconciliation,
+  type IsWorkspaceEngineRecreationRequiredAsync,
   type MapWorkspaceInvalidationsToOperationsAsync
 } from './WorkspaceEngineComponentFactory';
 export {

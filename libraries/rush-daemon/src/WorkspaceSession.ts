@@ -211,7 +211,7 @@ export class WorkspaceSession implements IWorkspaceSession {
         invalidations.invalidate(changedPath)
       );
       // Changes before the watcher registered its callbacks cannot be observed path-by-path.
-      invalidations.invalidate();
+      invalidations.invalidateForInitialization();
       return session;
     } catch (error) {
       const cleanupErrors: unknown[] = [];

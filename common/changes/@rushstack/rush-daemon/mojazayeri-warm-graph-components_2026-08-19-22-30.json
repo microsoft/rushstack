@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/rush-daemon",
-      "comment": "Add an opt-in all-project engine component factory with explicit phase/plugin shape, retained invalidation reconciliation, and a deterministic engine shutdown contract.",
+      "comment": "Add an opt-in all-project engine component factory with explicit phase/plugin shape, retained invalidation reconciliation, fail-closed graph recreation boundaries, and a deterministic engine shutdown contract.",
       "type": "minor"
     }
   ],

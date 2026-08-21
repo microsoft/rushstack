@@ -22,6 +22,14 @@ export type CreateWorkspaceEngineComponentsAsync = (options: ICreateWorkspaceEng
 export type CreateWorkspaceSessionComponentsAsync = (options: ICreateWorkspaceSessionComponentsOptions) => Promise<IWorkspaceSessionComponents>;
 
 // @beta
+export interface IClassifyWorkspaceInvalidationsOptions {
+    // (undocumented)
+    readonly changedPaths: ReadonlyArray<string>;
+    // (undocumented)
+    readonly rushConfiguration: RushConfiguration;
+}
+
+// @beta
 export interface ICreateWorkspaceEngineComponentsOptions extends IWorkspaceEngineShape {
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;
     // (undocumented)
@@ -84,9 +92,14 @@ export interface IRushDaemonServeOptions extends IRushDaemonHostOptions {
 }
 
 // @beta
+export type IsWorkspaceEngineRecreationRequiredAsync = (options: IClassifyWorkspaceInvalidationsOptions) => Promise<boolean>;
+
+// @beta
 export interface IWorkspaceEngineComponentFactoryOptions {
     // (undocumented)
     readonly createEngineComponentsAsync: CreateWorkspaceEngineComponentsAsync;
+    // (undocumented)
+    readonly isEngineRecreationRequiredAsync?: IsWorkspaceEngineRecreationRequiredAsync;
     // (undocumented)
     readonly mapInvalidationsToOperationsAsync: MapWorkspaceInvalidationsToOperationsAsync;
     // (undocumented)
@@ -260,10 +273,19 @@ export class WorkspaceEngineComponentFactory {
 }
 
 // @beta
+export class WorkspaceEngineRecreationRequiredError extends Error {
+    constructor();
+}
+
+// @beta
 export class WorkspaceInvalidationTracker {
     acknowledgeThrough(sequence: number): void;
     getSnapshot(): IWorkspaceInvalidationSnapshot;
+    // @internal (undocumented)
+    get hasUnattributedUnknownChanges(): boolean;
     invalidate(changedPath?: string): void;
+    // @internal (undocumented)
+    invalidateForInitialization(): void;
     markWatcherUnhealthy(): void;
 }
 

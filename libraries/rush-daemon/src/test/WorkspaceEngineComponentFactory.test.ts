@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'node:path';
+
 import type {
   IInputsSnapshot,
   IOperationExecutionResult,
@@ -17,9 +19,11 @@ import {
 } from '@microsoft/rush-lib';
 
 import {
-  WorkspaceEngineComponentFactory
+  WorkspaceEngineComponentFactory,
+  WorkspaceEngineRecreationRequiredError
 } from '../WorkspaceEngineComponentFactory';
 import type {
+  IClassifyWorkspaceInvalidationsOptions,
   ICreateWorkspaceEngineComponentsOptions,
   IMapWorkspaceInvalidationsOptions,
   IWorkspaceEngineComponents,
@@ -432,6 +436,162 @@ describe(WorkspaceEngineComponentFactory.name, () => {
     });
     expect(mapInvalidationsToOperationsAsync).toHaveBeenCalledTimes(1);
     expect(invalidateSpy).toHaveBeenLastCalledWith(undefined, 'workspace-inputs-changed');
+    await disposeComponentsAsync(components);
+  });
+
+  it('retains graph-defining invalidations and requires session recreation', async () => {
+    const getInputsSnapshotAsync: jest.Mock = jest.fn(async () => createInputsSnapshot('next'));
+    const engine: ITestEngine = createTestEngine(
+      TEST_RUSH_CONFIGURATION.projects,
+      getInputsSnapshotAsync
+    );
+    const mapInvalidationsToOperationsAsync: jest.Mock = jest.fn(async () => [
+      engine.operations[0]
+    ]);
+    const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
+      createEngineComponentsAsync: async () => engine.components,
+      mapInvalidationsToOperationsAsync,
+      shape: {
+        phaseNames: [PHASE_NAME],
+        pluginNames: [PLUGIN_NAME]
+      }
+    });
+    const invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
+    const changedPath: string = path.join(
+      TEST_RUSH_CONFIGURATION.projects[0].projectFolder,
+      'package.json'
+    );
+    invalidations.invalidate(changedPath);
+    const components: IWorkspaceSessionComponents = await factory.createAsync({
+      invalidations,
+      rushConfiguration: TEST_RUSH_CONFIGURATION
+    });
+    const invalidateSpy: jest.SpyInstance = jest.spyOn(engine.graph, 'invalidateOperations');
+
+    await expect(getReconcileAsync(components)()).rejects.toBeInstanceOf(
+      WorkspaceEngineRecreationRequiredError
+    );
+    expect(getInputsSnapshotAsync).not.toHaveBeenCalled();
+    expect(mapInvalidationsToOperationsAsync).not.toHaveBeenCalled();
+    expect(invalidateSpy).not.toHaveBeenCalled();
+    expect(components.inputsSnapshot).toBe(engine.components.inputsSnapshot);
+    expect(invalidations.getSnapshot().changedPaths).toEqual([changedPath]);
+    await disposeComponentsAsync(components);
+  });
+
+  it('supports integration-specific graph input classification', async () => {
+    const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, () =>
+      Promise.resolve(createInputsSnapshot('next'))
+    );
+    const changedPath: string = path.join(TEST_REPO_ROOT, 'config', 'test-plugin.json');
+    const isEngineRecreationRequiredAsync: jest.Mock<
+      Promise<boolean>,
+      [IClassifyWorkspaceInvalidationsOptions]
+    > = jest.fn(async (options: IClassifyWorkspaceInvalidationsOptions) => {
+      void options;
+      return true;
+    });
+    const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
+      createEngineComponentsAsync: async () => engine.components,
+      isEngineRecreationRequiredAsync,
+      mapInvalidationsToOperationsAsync: async () => [],
+      shape: {
+        phaseNames: [PHASE_NAME],
+        pluginNames: [PLUGIN_NAME]
+      }
+    });
+    const invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
+    invalidations.invalidate(changedPath);
+    const components: IWorkspaceSessionComponents = await factory.createAsync({
+      invalidations,
+      rushConfiguration: TEST_RUSH_CONFIGURATION
+    });
+
+    await expect(getReconcileAsync(components)()).rejects.toBeInstanceOf(
+      WorkspaceEngineRecreationRequiredError
+    );
+    expect(isEngineRecreationRequiredAsync).toHaveBeenCalledWith({
+      changedPaths: [changedPath],
+      rushConfiguration: TEST_RUSH_CONFIGURATION
+    });
+    expect(invalidations.getSnapshot().changedPaths).toEqual([changedPath]);
+    await disposeComponentsAsync(components);
+  });
+
+  it('requires recreation for unknown changes after the startup baseline', async () => {
+    const getInputsSnapshotAsync: jest.Mock = jest.fn(async () => createInputsSnapshot('next'));
+    const engine: ITestEngine = createTestEngine(
+      TEST_RUSH_CONFIGURATION.projects,
+      getInputsSnapshotAsync
+    );
+    const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
+      createEngineComponentsAsync: async () => engine.components,
+      mapInvalidationsToOperationsAsync: async () => [],
+      shape: {
+        phaseNames: [PHASE_NAME],
+        pluginNames: [PLUGIN_NAME]
+      }
+    });
+    const invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
+    invalidations.invalidateForInitialization();
+    const components: IWorkspaceSessionComponents = await factory.createAsync({
+      invalidations,
+      rushConfiguration: TEST_RUSH_CONFIGURATION
+    });
+
+    await expect(getReconcileAsync(components)()).resolves.toMatchObject({
+      isFullInvalidation: true,
+      sequence: 1
+    });
+    invalidations.invalidate();
+    await expect(getReconcileAsync(components)()).rejects.toBeInstanceOf(
+      WorkspaceEngineRecreationRequiredError
+    );
+    expect(getInputsSnapshotAsync).toHaveBeenCalledTimes(1);
+    expect(invalidations.getSnapshot()).toMatchObject({
+      hasUnknownChanges: true,
+      sequence: 2
+    });
+    await disposeComponentsAsync(components);
+  });
+
+  it('classifies known changes that arrive before the startup baseline', async () => {
+    const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, () =>
+      Promise.resolve(createInputsSnapshot('next'))
+    );
+    const mapInvalidationsToOperationsAsync: jest.Mock = jest.fn(async () => [
+      engine.operations[0]
+    ]);
+    const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
+      createEngineComponentsAsync: async () => engine.components,
+      mapInvalidationsToOperationsAsync,
+      shape: {
+        phaseNames: [PHASE_NAME],
+        pluginNames: [PLUGIN_NAME]
+      }
+    });
+    const invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
+    invalidations.invalidateForInitialization();
+    const changedPath: string = path.join(
+      TEST_RUSH_CONFIGURATION.projects[0].projectFolder,
+      'src',
+      'index.ts'
+    );
+    invalidations.invalidate(changedPath);
+    const components: IWorkspaceSessionComponents = await factory.createAsync({
+      invalidations,
+      rushConfiguration: TEST_RUSH_CONFIGURATION
+    });
+
+    await expect(getReconcileAsync(components)()).resolves.toMatchObject({
+      isFullInvalidation: true,
+      sequence: 2
+    });
+    expect(mapInvalidationsToOperationsAsync).not.toHaveBeenCalled();
+    expect(invalidations.getSnapshot()).toMatchObject({
+      changedPaths: [],
+      hasUnknownChanges: false
+    });
     await disposeComponentsAsync(components);
   });
 

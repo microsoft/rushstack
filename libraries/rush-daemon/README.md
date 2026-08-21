@@ -20,5 +20,10 @@ declare the complete phase and plugin shape because Rush plugins can currently v
 The factory validates graph ownership, serializes retained invalidation reconciliation, and maps path-specific
 changes through the integration. The engine owner must supply one deterministic async disposer because
 `IOperationGraph` does not yet expose an operation that both stops the lifetime and awaits runner cleanup.
+After the initial conservative startup reconciliation, changes to Rush configuration, project package manifests,
+or integration-classified plugin graph inputs fail closed with `WorkspaceEngineRecreationRequiredError` before
+the input baseline advances or the invalidation is acknowledged. The startup watcher-registration boundary has
+no paths to classify and therefore remains a full invalidation. The routing layer must replace the complete
+workspace session rather than run a stale graph.
 The default daemon executable does not construct or route this graph while the command-independent plugin shape and per-iteration runner
 lifetime tracked by [rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) remain incomplete.

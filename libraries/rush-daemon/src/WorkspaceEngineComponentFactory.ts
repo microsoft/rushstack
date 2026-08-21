@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'node:path';
+
 import type {
   GetInputsSnapshotAsyncFn,
   IInputsSnapshot,
@@ -21,7 +23,7 @@ import type {
   WorkspaceInvalidationTracker
 } from './WorkspaceInvalidationTracker';
 
-const INVALIDATION_REASON: string = 'workspace-inputs-changed';
+const INVALIDATION_REASON: 'workspace-inputs-changed' = 'workspace-inputs-changed';
 
 /**
  * The command-dependent phase and plugin shape used to construct a reusable engine graph.
@@ -90,6 +92,29 @@ export interface IMapWorkspaceInvalidationsOptions {
 }
 
 /**
+ * Context for identifying changes that require a new workspace engine.
+ *
+ * @beta
+ */
+export interface IClassifyWorkspaceInvalidationsOptions {
+  readonly changedPaths: ReadonlyArray<string>;
+  readonly rushConfiguration: RushConfiguration;
+}
+
+/**
+ * Identifies integration-specific graph inputs that cannot be reconciled against an existing graph.
+ *
+ * @remarks
+ * Rush configuration files and project package manifests are classified automatically. Use this callback
+ * for plugin-specific graph inputs outside those locations.
+ *
+ * @beta
+ */
+export type IsWorkspaceEngineRecreationRequiredAsync = (
+  options: IClassifyWorkspaceInvalidationsOptions
+) => Promise<boolean>;
+
+/**
  * Maps path-specific watcher invalidations onto operations in the reusable graph.
  *
  * @remarks
@@ -114,26 +139,54 @@ export interface IWorkspaceInvalidationReconciliation {
 }
 
 /**
+ * Indicates that retained changes require the owning workspace session to be recreated.
+ *
+ * @remarks
+ * The invalidations remain unacknowledged. Callers must not execute the existing operation graph after
+ * receiving this error.
+ *
+ * @beta
+ */
+export class WorkspaceEngineRecreationRequiredError extends Error {
+  public constructor() {
+    super('Workspace changes require the reusable engine and session to be recreated.');
+    this.name = 'WorkspaceEngineRecreationRequiredError';
+  }
+}
+
+/**
  * Options for {@link WorkspaceEngineComponentFactory}.
  *
  * @beta
  */
 export interface IWorkspaceEngineComponentFactoryOptions {
   readonly createEngineComponentsAsync: CreateWorkspaceEngineComponentsAsync;
+  readonly isEngineRecreationRequiredAsync?: IsWorkspaceEngineRecreationRequiredAsync;
   readonly mapInvalidationsToOperationsAsync: MapWorkspaceInvalidationsToOperationsAsync;
   readonly shape: IWorkspaceEngineShape;
 }
 
 interface IWorkspaceEngineLifecycleOptions {
   readonly components: IWorkspaceEngineComponents;
+  readonly graphDefiningPaths: IGraphDefiningPaths;
   readonly invalidations: WorkspaceInvalidationTracker;
+  readonly isEngineRecreationRequiredAsync: IsWorkspaceEngineRecreationRequiredAsync | undefined;
   readonly mapInvalidationsToOperationsAsync: MapWorkspaceInvalidationsToOperationsAsync;
+  readonly rushConfiguration: RushConfiguration;
+}
+
+interface IGraphDefiningPaths {
+  readonly filePaths: ReadonlySet<string>;
+  readonly folderPaths: ReadonlyArray<string>;
 }
 
 class WorkspaceEngineLifecycle {
   readonly #components: IWorkspaceEngineComponents;
+  readonly #graphDefiningPaths: IGraphDefiningPaths;
   readonly #invalidations: WorkspaceInvalidationTracker;
+  readonly #isEngineRecreationRequiredAsync: IsWorkspaceEngineRecreationRequiredAsync | undefined;
   readonly #mapInvalidationsToOperationsAsync: MapWorkspaceInvalidationsToOperationsAsync;
+  readonly #rushConfiguration: RushConfiguration;
   #currentInputsSnapshot: IInputsSnapshot;
   #disposePromise: Promise<void> | undefined;
   #isDisposing: boolean = false;
@@ -142,9 +195,12 @@ class WorkspaceEngineLifecycle {
 
   public constructor(options: IWorkspaceEngineLifecycleOptions) {
     this.#components = options.components;
+    this.#graphDefiningPaths = options.graphDefiningPaths;
     this.#currentInputsSnapshot = options.components.inputsSnapshot;
     this.#invalidations = options.invalidations;
+    this.#isEngineRecreationRequiredAsync = options.isEngineRecreationRequiredAsync;
     this.#mapInvalidationsToOperationsAsync = options.mapInvalidationsToOperationsAsync;
+    this.#rushConfiguration = options.rushConfiguration;
   }
 
   public get inputsSnapshot(): IInputsSnapshot {
@@ -173,6 +229,9 @@ class WorkspaceEngineLifecycle {
 
   async #reconcileOnceAsync(): Promise<IWorkspaceInvalidationReconciliation> {
     const invalidationSnapshot: IWorkspaceInvalidationSnapshot = this.#invalidations.getSnapshot();
+    if (await this.#requiresEngineRecreationAsync(invalidationSnapshot)) {
+      throw new WorkspaceEngineRecreationRequiredError();
+    }
     const isFullInvalidation: boolean =
       this.#requiresFullInvalidation ||
       invalidationSnapshot.hasUnknownChanges ||
@@ -229,6 +288,43 @@ class WorkspaceEngineLifecycle {
     await this.#reconciliationTail;
     await this.#components[Symbol.asyncDispose]();
   }
+
+  async #requiresEngineRecreationAsync(
+    invalidationSnapshot: IWorkspaceInvalidationSnapshot
+  ): Promise<boolean> {
+    if (
+      invalidationSnapshot.changedPaths.length === 0 &&
+      !invalidationSnapshot.hasUnknownChanges &&
+      invalidationSnapshot.isWatcherHealthy
+    ) {
+      return false;
+    }
+    if (
+      this.#invalidations.hasUnattributedUnknownChanges ||
+      !invalidationSnapshot.isWatcherHealthy
+    ) {
+      return true;
+    }
+
+    if (
+      invalidationSnapshot.changedPaths.some((changedPath: string) =>
+        isBuiltInGraphDefiningPath(
+          changedPath,
+          this.#rushConfiguration.rushJsonFolder,
+          this.#graphDefiningPaths
+        )
+      )
+    ) {
+      return true;
+    }
+
+    return (
+      (await this.#isEngineRecreationRequiredAsync?.({
+        changedPaths: invalidationSnapshot.changedPaths,
+        rushConfiguration: this.#rushConfiguration
+      })) ?? false
+    );
+  }
 }
 
 /**
@@ -242,6 +338,7 @@ class WorkspaceEngineLifecycle {
  */
 export class WorkspaceEngineComponentFactory {
   readonly #createEngineComponentsAsync: CreateWorkspaceEngineComponentsAsync;
+  readonly #isEngineRecreationRequiredAsync: IsWorkspaceEngineRecreationRequiredAsync | undefined;
   readonly #mapInvalidationsToOperationsAsync: MapWorkspaceInvalidationsToOperationsAsync;
 
   public readonly createAsync: CreateWorkspaceSessionComponentsAsync;
@@ -249,6 +346,7 @@ export class WorkspaceEngineComponentFactory {
 
   public constructor(options: IWorkspaceEngineComponentFactoryOptions) {
     this.#createEngineComponentsAsync = options.createEngineComponentsAsync;
+    this.#isEngineRecreationRequiredAsync = options.isEngineRecreationRequiredAsync;
     this.#mapInvalidationsToOperationsAsync = options.mapInvalidationsToOperationsAsync;
     this.shape = normalizeShape(options.shape);
     this.createAsync = (createOptions: ICreateWorkspaceSessionComponentsOptions) =>
@@ -259,6 +357,9 @@ export class WorkspaceEngineComponentFactory {
     options: ICreateWorkspaceSessionComponentsOptions
   ): Promise<IWorkspaceSessionComponents> {
     const projects: ReadonlySet<RushConfigurationProject> = new Set(options.rushConfiguration.projects);
+    const graphDefiningPaths: IGraphDefiningPaths = createGraphDefiningPaths(
+      options.rushConfiguration
+    );
     const components: IWorkspaceEngineComponents = await this.#createEngineComponentsAsync({
       phaseNames: this.shape.phaseNames,
       pluginNames: this.shape.pluginNames,
@@ -274,8 +375,11 @@ export class WorkspaceEngineComponentFactory {
 
     const lifecycle: WorkspaceEngineLifecycle = new WorkspaceEngineLifecycle({
       components,
+      graphDefiningPaths,
       invalidations: options.invalidations,
-      mapInvalidationsToOperationsAsync: this.#mapInvalidationsToOperationsAsync
+      isEngineRecreationRequiredAsync: this.#isEngineRecreationRequiredAsync,
+      mapInvalidationsToOperationsAsync: this.#mapInvalidationsToOperationsAsync,
+      rushConfiguration: options.rushConfiguration
     });
     return {
       [Symbol.asyncDispose]: () => lifecycle[Symbol.asyncDispose](),
@@ -288,6 +392,50 @@ export class WorkspaceEngineComponentFactory {
       rushSession: components.rushSession
     };
   }
+}
+
+function createGraphDefiningPaths(rushConfiguration: RushConfiguration): IGraphDefiningPaths {
+  const filePaths: Set<string> = new Set([path.resolve(rushConfiguration.rushJsonFile)]);
+  for (const project of rushConfiguration.projects) {
+    filePaths.add(path.join(project.projectFolder, 'package.json'));
+    filePaths.add(path.join(project.projectFolder, 'config', 'rush-project.json'));
+  }
+  return {
+    filePaths,
+    folderPaths: [
+      path.resolve(rushConfiguration.commonRushConfigFolder),
+      ...Array.from(rushConfiguration.subspaces, (subspace) =>
+        path.resolve(subspace.getSubspaceConfigFolderPath())
+      )
+    ]
+  };
+}
+
+function isBuiltInGraphDefiningPath(
+  changedPath: string,
+  rushJsonFolder: string,
+  graphDefiningPaths: IGraphDefiningPaths
+): boolean {
+  const absoluteChangedPath: string = path.resolve(rushJsonFolder, changedPath);
+  if (graphDefiningPaths.filePaths.has(absoluteChangedPath)) {
+    return true;
+  }
+  for (const folderPath of graphDefiningPaths.folderPaths) {
+    if (isPathInside(absoluteChangedPath, folderPath)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isPathInside(candidatePath: string, folderPath: string): boolean {
+  const relativePath: string = path.relative(path.resolve(folderPath), candidatePath);
+  return (
+    relativePath === '' ||
+    (!path.isAbsolute(relativePath) &&
+      relativePath !== '..' &&
+      !relativePath.startsWith(`..${path.sep}`))
+  );
 }
 
 function normalizeShape(shape: IWorkspaceEngineShape): IWorkspaceEngineShape {
