@@ -1,0 +1,19 @@
+{
+  "suppressions": [
+    {
+      "file": "src/test/SourceMapTest.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/SourceMapTest.test.ts",
+      "scopeId": ".mapValueCheck",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/SourceMapTest.test.ts",
+      "scopeId": ".mapValueCheck",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

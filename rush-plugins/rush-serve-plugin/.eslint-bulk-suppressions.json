@@ -1,0 +1,129 @@
+{
+  "suppressions": [
+    {
+      "file": "src/RushProjectServeConfigFile.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/RushProjectServeConfigFile.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/RushProjectServeConfigFile.ts",
+      "scopeId": ".RushServeConfiguration.loadProjectConfigsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RushProjectServeConfigFile.ts",
+      "scopeId": ".RushServeConfiguration.loadProjectConfigsAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RushServePlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/RushServePlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/RushServePlugin.ts",
+      "scopeId": ".RushServePlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/api.types.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/phasedCommandHandler.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/phasedCommandHandler.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/phasedCommandHandler.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/phasedCommandHandler.ts",
+      "scopeId": ".phasedCommandHandler",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/phasedCommandHandler.ts",
+      "scopeId": ".phasedCommandHandler",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/phasedCommandHandler.ts",
+      "scopeId": ".phasedCommandHandler",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/tryEnableBuildStatusWebSocketServer.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/tryEnableBuildStatusWebSocketServer.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/tryEnableBuildStatusWebSocketServer.ts",
+      "scopeId": ".getRepositoryIdentifier",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/tryEnableBuildStatusWebSocketServer.ts",
+      "scopeId": ".getRepositoryIdentifier",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/tryEnableBuildStatusWebSocketServer.ts",
+      "scopeId": ".tryEnableBuildStatusWebSocketServer",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/tryEnableBuildStatusWebSocketServer.ts",
+      "scopeId": ".tryEnableBuildStatusWebSocketServer.connector",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/tryEnableBuildStatusWebSocketServer.ts",
+      "scopeId": ".tryEnableBuildStatusWebSocketServer.connector",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/tryEnableBuildStatusWebSocketServer.ts",
+      "scopeId": ".tryEnableBuildStatusWebSocketServer.connector.namesToOperations",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/tryEnableBuildStatusWebSocketServer.ts",
+      "scopeId": ".tryEnableBuildStatusWebSocketServer.convertToOperationInfo",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/tryEnableBuildStatusWebSocketServer.ts",
+      "scopeId": ".tryEnableBuildStatusWebSocketServer.sendSyncMessage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/types.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

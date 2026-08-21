@@ -1,0 +1,89 @@
+{
+  "suppressions": [
+    {
+      "file": "src/EmbeddedDependenciesWebpackPlugin.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/EmbeddedDependenciesWebpackPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/EmbeddedDependenciesWebpackPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/EmbeddedDependenciesWebpackPlugin.ts",
+      "scopeId": ".EmbeddedDependenciesWebpackPlugin._emitWebpackError",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/EmbeddedDependenciesWebpackPlugin.ts",
+      "scopeId": ".EmbeddedDependenciesWebpackPlugin._getLicenseFilePathAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/EmbeddedDependenciesWebpackPlugin.ts",
+      "scopeId": ".EmbeddedDependenciesWebpackPlugin._getLicenseFilePathAsync.InputFileSystemReadDirResults",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/EmbeddedDependenciesWebpackPlugin.ts",
+      "scopeId": ".EmbeddedDependenciesWebpackPlugin._parseCopyright",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/EmbeddedDependenciesWebpackPlugin.ts",
+      "scopeId": ".EmbeddedDependenciesWebpackPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/EmbeddedDependenciesWebpackPlugin.ts",
+      "scopeId": ".EmbeddedDependenciesWebpackPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/EmbeddedDependenciesWebpackPlugin.ts",
+      "scopeId": ".EmbeddedDependenciesWebpackPlugin.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/EmbeddedDependenciesWebpackPlugin.ts",
+      "scopeId": ".parseLicense",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/EmbeddedDependenciesWebpackPlugin.ts",
+      "scopeId": ".parseLicense",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WebpackEmbeddedDependenciesPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WebpackEmbeddedDependenciesPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WebpackEmbeddedDependenciesPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WebpackEmbeddedDependenciesPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WebpackEmbeddedDependenciesPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

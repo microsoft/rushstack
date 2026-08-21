@@ -1,0 +1,114 @@
+{
+  "suppressions": [
+    {
+      "file": "src/cli/ToolboxCommandLine.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/actions/BumpDecoupledLocalDependencies.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/actions/BumpDecoupledLocalDependencies.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/cli/actions/BumpDecoupledLocalDependencies.ts",
+      "scopeId": ".BumpDecoupledLocalDependencies.onExecuteAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/actions/BumpDecoupledLocalDependencies.ts",
+      "scopeId": ".BumpDecoupledLocalDependencies.onExecuteAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/cli/actions/BumpDecoupledLocalDependencies.ts",
+      "scopeId": ".BumpDecoupledLocalDependencies.onExecuteAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/actions/CollectProjectFilesAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/actions/CollectProjectFilesAction.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/cli/actions/CollectProjectFilesAction.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/cli/actions/CollectProjectFilesAction.ts",
+      "scopeId": ".CollectProjectFilesAction.onExecuteAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/cli/actions/CollectProjectFilesAction.ts",
+      "scopeId": ".CollectProjectFilesAction.onExecuteAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/actions/CollectProjectFilesAction.ts",
+      "scopeId": ".CollectProjectFilesAction.onExecuteAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/cli/actions/CollectProjectFilesAction.ts",
+      "scopeId": ".CollectProjectFilesAction.onExecuteAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/actions/CollectProjectFilesAction.ts",
+      "scopeId": "._getFolderItemsRecursiveAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/actions/ReadmeAction.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/cli/actions/ReadmeAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/actions/ReadmeAction.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/cli/actions/ReadmeAction.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/cli/actions/ReadmeAction.ts",
+      "scopeId": ".ReadmeAction.onExecuteAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/cli/actions/ReadmeAction.ts",
+      "scopeId": ".ReadmeAction.onExecuteAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/actions/ReadmeAction.ts",
+      "scopeId": ".ReadmeAction.onExecuteAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/cli/actions/ReadmeAction.ts",
+      "scopeId": ".ReadmeAction.onExecuteAsync",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

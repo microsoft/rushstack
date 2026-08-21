@@ -1,0 +1,184 @@
+{
+  "suppressions": [
+    {
+      "file": "src/KnownDescriptionFilePlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/KnownDescriptionFilePlugin.ts",
+      "scopeId": ".KnownDescriptionFilePlugin.apply",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/KnownDescriptionFilePlugin.ts",
+      "scopeId": ".KnownDescriptionFilePlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/KnownDescriptionFilePlugin.ts",
+      "scopeId": ".KnownDescriptionFilePlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/KnownDescriptionFilePlugin.ts",
+      "scopeId": ".ResolveRequest",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/KnownPackageDependenciesPlugin.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/KnownPackageDependenciesPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/KnownPackageDependenciesPlugin.ts",
+      "scopeId": ".KnownPackageDependenciesPlugin.apply",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/KnownPackageDependenciesPlugin.ts",
+      "scopeId": ".KnownPackageDependenciesPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/KnownPackageDependenciesPlugin.ts",
+      "scopeId": ".KnownPackageDependenciesPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/KnownPackageDependenciesPlugin.ts",
+      "scopeId": ".ResolveRequest",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceLayoutCache.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/WorkspaceLayoutCache.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/WorkspaceLayoutCache.ts",
+      "scopeId": ".WorkspaceLayoutCache.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceLayoutCache.ts",
+      "scopeId": ".WorkspaceLayoutCache.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceLayoutCache.ts",
+      "scopeId": ".WorkspaceLayoutCache.constructor.ResolveContext.descriptionFileRoot",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceLayoutCache.ts",
+      "scopeId": ".WorkspaceLayoutCache.constructor.ResolveContext.findDependency",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceResolvePlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/WorkspaceResolvePlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/WorkspaceResolvePlugin.ts",
+      "scopeId": ".WorkspaceResolvePlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceResolvePlugin.ts",
+      "scopeId": ".WorkspaceResolvePlugin.apply.handler",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/KnownDescriptionFilePlugin.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/KnownDescriptionFilePlugin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/KnownDescriptionFilePlugin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/KnownDescriptionFilePlugin.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/KnownPackageDependenciesPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/KnownPackageDependenciesPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/KnownPackageDependenciesPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/createResolveForTests.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/createResolveForTests.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/createResolveForTests.ts",
+      "scopeId": ".ResolveCallback",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/createResolveForTests.ts",
+      "scopeId": ".ResolveContext",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/createResolveForTests.ts",
+      "scopeId": ".ResolveRequest",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/createResolveForTests.ts",
+      "scopeId": ".createResolveForTests",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/createResolveForTests.ts",
+      "scopeId": ".createResolveForTests",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/createResolveForTests.ts",
+      "scopeId": ".createResolveForTests.doResolve",
+      "rule": "max-params"
+    }
+  ]
+}

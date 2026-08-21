@@ -1,0 +1,134 @@
+{
+  "suppressions": [
+    {
+      "file": "src/ResourceAssetsPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/ResourceAssetsPlugin.ts",
+      "scopeId": ".ResourceAssetsPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ResourceAssetsPlugin.ts",
+      "scopeId": ".ResourceAssetsPlugin.apply.createAndRunGeneratorAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/SourceAssetsPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/SourceAssetsPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/SourceAssetsPlugin.ts",
+      "scopeId": ".SourceAssetsPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SourceAssetsPlugin.ts",
+      "scopeId": ".SourceAssetsPlugin.apply.createAndRunGeneratorAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/SourceAssetsPlugin.ts",
+      "scopeId": ".SourceAssetsPlugin.apply.initializeGeneratorAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SourceAssetsPlugin.ts",
+      "scopeId": ".SourceAssetsPlugin.apply.initializeGeneratorAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SourceAssetsPlugin.ts",
+      "scopeId": ".SourceAssetsPlugin.apply.initializeGeneratorAsync.getVersionAndEmitOutputFilesAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SourceAssetsPlugin.ts",
+      "scopeId": ".SourceAssetsPlugin.apply.initializeGeneratorAsync.getVersionAndEmitOutputFilesAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/StaticAssetTypingsGenerator.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/StaticAssetTypingsGenerator.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/StaticAssetTypingsGenerator.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/StaticAssetTypingsGenerator.ts",
+      "scopeId": ".",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/StaticAssetTypingsGenerator.ts",
+      "scopeId": ".createTypingsGeneratorAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StaticAssetTypingsGenerator.ts",
+      "scopeId": ".createTypingsGeneratorAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/StaticAssetTypingsGenerator.ts",
+      "scopeId": ".hasChanges",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StaticAssetTypingsGenerator.ts",
+      "scopeId": ".runTypingsGeneratorIncrementalAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/StaticAssetTypingsGenerator.ts",
+      "scopeId": ".runTypingsGeneratorIncrementalAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StaticAssetTypingsGenerator.ts",
+      "scopeId": ".runTypingsGeneratorIncrementalAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/StaticAssetTypingsGenerator.ts",
+      "scopeId": ".runTypingsGeneratorIncrementalAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/StaticAssetTypingsGenerator.ts",
+      "scopeId": ".tryGetConfigFromPluginOptionsAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/getConfigFromConfigFileAsync.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/getConfigFromConfigFileAsync.ts",
+      "scopeId": ".getConfigFromConfigFileAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/test/StaticAssetTypingsGenerator.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "suppressions": [
+    {
+      "file": "src/HashedFolderCopyPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/HashedFolderCopyPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/HashedFolderCopyPlugin.ts",
+      "scopeId": ".HashedFolderCopyPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HashedFolderCopyPlugin.ts",
+      "scopeId": ".HashedFolderCopyPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/HashedFolderCopyPlugin.ts",
+      "scopeId": ".HashedFolderCopyPlugin.apply.handler",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/HashedFolderCopyPlugin.ts",
+      "scopeId": ".HashedFolderCopyPlugin.apply.handler",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HashedFolderCopyPlugin.ts",
+      "scopeId": ".HashedFolderCopyPlugin.apply.handler",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/HashedFolderCopyPlugin.ts",
+      "scopeId": ".HashedFolderCopyPlugin.apply.handler",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/HashedFolderDependency.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/HashedFolderDependency.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/HashedFolderDependency.ts",
+      "scopeId": "._getHashedFolderDependencyForWebpackInstance",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/HashedFolderDependency.ts",
+      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency._collectAssetsAndGetExpressionAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/HashedFolderDependency.ts",
+      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency._collectAssetsAndGetExpressionAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/HashedFolderDependency.ts",
+      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency._collectAssetsAndGetExpressionAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HashedFolderDependency.ts",
+      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency._collectAssetsAndGetExpressionAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/HashedFolderDependency.ts",
+      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency._collectAssetsAndGetExpressionAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/HashedFolderDependency.ts",
+      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency.processAssetsAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/HashedFolderDependency.ts",
+      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependencyTemplate.apply",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/HashedFolderCopyPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/HashedFolderCopyPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/HashedFolderCopyPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/HashedFolderCopyPlugin.test.ts",
+      "scopeId": ".enumerateFilesAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/HashedFolderCopyPlugin.test.ts",
+      "scopeId": ".runTestAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/webpackTypes.ts",
+      "scopeId": ".DependencyTemplateContext",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/webpackTypes.ts",
+      "scopeId": ".ObjectDeserializerContext",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/webpackTypes.ts",
+      "scopeId": ".ObjectSerializerContext",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/webpackTypes.ts",
+      "scopeId": ".ResolverWithOptions",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/webpackTypes.ts",
+      "scopeId": ".UpdateHashContextDependency",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/webpackTypes.ts",
+      "scopeId": ".WebpackHash",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    }
+  ]
+}

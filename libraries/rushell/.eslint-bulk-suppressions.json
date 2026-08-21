@@ -1,0 +1,189 @@
+{
+  "suppressions": [
+    {
+      "file": "src/AstNode.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/AstNode.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/AstNode.ts",
+      "scopeId": ".AstBaseNode.getDump",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ParseError.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/ParseError.ts",
+      "scopeId": "._formatMessage",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ParseError.ts",
+      "scopeId": "._formatMessage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Parser.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/Parser.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/Parser.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/Parser.ts",
+      "scopeId": ".Parser._parseCommand",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Parser.ts",
+      "scopeId": ".Parser._parseCompoundWord",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Parser.ts",
+      "scopeId": ".Parser._parseCompoundWord",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Parser.ts",
+      "scopeId": ".Parser._peekToken",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/Rushell.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/Rushell.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/Rushell.ts",
+      "scopeId": ".Rushell._evaluateNode",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TextRange.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/TextRange.ts",
+      "scopeId": ".TextRange",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TextRange.ts",
+      "scopeId": ".TextRange._validateBounds",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TextRange.ts",
+      "scopeId": ".TextRange._validateBounds",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TextRange.ts",
+      "scopeId": ".TextRange.fromString",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TextRange.ts",
+      "scopeId": ".TextRange.getEncompassingRange",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TextRange.ts",
+      "scopeId": ".TextRange.getEncompassingRange",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TextRange.ts",
+      "scopeId": ".TextRange.getLocation",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TextRange.ts",
+      "scopeId": ".TextRange.getLocation",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TextRange.ts",
+      "scopeId": ".TextRange.getLocation",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Tokenizer.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/Tokenizer.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/Tokenizer.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/Tokenizer.ts",
+      "scopeId": ".Token.constructor",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/Tokenizer.ts",
+      "scopeId": ".Tokenizer._peekCharacterAfter",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Tokenizer.ts",
+      "scopeId": ".Tokenizer.readToken",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Tokenizer.ts",
+      "scopeId": ".Tokenizer.readToken",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Tokenizer.ts",
+      "scopeId": ".Tokenizer.readToken",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/TextRange.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/TextRange.test.ts",
+      "scopeId": ".matchSnapshot",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Tokenizer.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

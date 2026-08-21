@@ -1,0 +1,34 @@
+{
+  "suppressions": [
+    {
+      "file": "src/LocalizationTypingsPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/LocalizationTypingsPlugin.ts",
+      "scopeId": ".LocalizationTypingsPlugin._runLocalizationTypingsGeneratorAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LocalizationTypingsPlugin.ts",
+      "scopeId": ".LocalizationTypingsPlugin._runLocalizationTypingsGeneratorAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LocalizationTypingsPlugin.ts",
+      "scopeId": ".LocalizationTypingsPlugin._runLocalizationTypingsGeneratorAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LocalizationTypingsPlugin.ts",
+      "scopeId": ".LocalizationTypingsPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LocalizationTypingsPlugin.ts",
+      "scopeId": ".LocalizationTypingsPlugin.apply",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

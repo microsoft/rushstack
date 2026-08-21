@@ -1,0 +1,74 @@
+{
+  "suppressions": [
+    {
+      "file": "src/CredentialCache.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/CredentialCache.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/CredentialCache.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/CredentialCache.ts",
+      "scopeId": ".CredentialCache._validate",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CredentialCache.ts",
+      "scopeId": ".CredentialCache.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CredentialCache.ts",
+      "scopeId": ".CredentialCache.initializeAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CredentialCache.ts",
+      "scopeId": ".CredentialCache.initializeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CredentialCache.ts",
+      "scopeId": ".CredentialCache.initializeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/CredentialCache.ts",
+      "scopeId": ".CredentialCache.setCacheEntry",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CredentialCache.ts",
+      "scopeId": ".CredentialCache.setCacheEntry",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/CredentialCache.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/CredentialCache.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/CredentialCache.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/CredentialCache.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

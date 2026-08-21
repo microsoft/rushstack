@@ -1,0 +1,24 @@
+{
+  "suppressions": [
+    {
+      "file": "src/RushStackFeature.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/RushStackFeature.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/RushStackFeature.ts",
+      "scopeId": ".RushStackFeature._buildNavigation",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RushStackFeature.ts",
+      "scopeId": ".RushStackFeature._buildNavigation",
+      "rule": "complexity"
+    }
+  ]
+}
