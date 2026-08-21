@@ -1,6 +1,28 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 05 Aug 2026 19:31:07 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Aug 2026 22:29:43 GMT and should not be manually modified.
+
+## 5.178.2
+Fri, 21 Aug 2026 22:29:43 GMT
+
+### Minor changes
+
+- Add early validation to `rush install`/`rush update` that immediately fails with a meaningful error message if an undeclared cycle is detected among workspace packages, specifying the cycle path.
+- Add a per-iteration, host-driven runner persist policy so IPC runners can be kept hot or torn down per operation per iteration, instead of fixing persistence at plugin construction.
+
+### Patches
+
+- In PnpmShrinkwrapFile getIntegrityForImporter, remove the external filter and include workspace-local link: dependencies by recursing into their importer entries, so shrinkwrap-deps.json hashes cover the full dependency tree.
+- Fix cross-subspace `workspace:*` dependency failures with pnpm 11.
+- Fix `file:` dependency context resolution to use canonical dependency keys for pnpm v9/v10.
+- Allow Ctrl+A and Command+A to select text in Rush serve dashboard fields.
+- Add an optional internal IOperationGraphEventSink dual-emit hook to OperationGraph/OperationExecutionRecord: structured operation registration/status/header/activity events and an id-tagged per-operation raw output tap, with no change to existing terminal output.
+
+### Updates
+
+- Update class field declarations for ES2022 emit semantics.
+- Add support for Node 26.
+- Require Node.js 20.9 or newer for the Rush bootstrap and runtime.
 
 ## 5.178.1
 Wed, 05 Aug 2026 19:31:07 GMT
