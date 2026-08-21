@@ -20,7 +20,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
   /** {@inheritDoc ICommandLineStringDefinition.defaultValue} */
   public readonly defaultValue: number | undefined;
 
-  private _value: number | undefined = undefined;
+  #value: number | undefined = undefined;
 
   /** {@inheritDoc CommandLineParameterBase.kind} */
   public readonly kind: CommandLineParameterKind.Integer = CommandLineParameterKind.Integer;
@@ -42,7 +42,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
       if (typeof data !== 'number') {
         this.reportInvalidData(data);
       }
-      this._value = data;
+      this.#value = data;
       return;
     }
 
@@ -57,17 +57,17 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
               ` ${this.environmentVariable}.  It must be an integer value.`
           );
         }
-        this._value = parsed;
+        this.#value = parsed;
         return;
       }
     }
 
     if (this.defaultValue !== undefined) {
-      this._value = this.defaultValue;
+      this.#value = this.defaultValue;
       return;
     }
 
-    this._value = undefined;
+    this.#value = undefined;
   }
 
   /**
@@ -90,7 +90,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
    * or if the parameter was omitted and has no default value.
    */
   public get value(): number | undefined {
-    return this._value;
+    return this.#value;
   }
 
   /** {@inheritDoc CommandLineParameterBase.appendToArgList} */
