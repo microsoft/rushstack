@@ -77,7 +77,12 @@ export {
   isReporterProtocolCompatible
 } from './protocol/ReporterProtocol';
 export type { INdjsonOptions } from './protocol/Ndjson';
-export { NdjsonRecordTooLargeError, encodeNdjsonRecord, NdjsonDecoder } from './protocol/Ndjson';
+export {
+  NdjsonInvalidRecordError,
+  NdjsonRecordTooLargeError,
+  encodeNdjsonRecord,
+  NdjsonDecoder
+} from './protocol/Ndjson';
 export type {
   IReporterHello,
   IReporterHelloAck,
@@ -85,7 +90,12 @@ export type {
   IReporterHandshakeResult,
   ReporterCapability
 } from './protocol/ReporterHandshake';
-export { negotiateReporterHello, REPORTER_KNOWN_CAPABILITIES } from './protocol/ReporterHandshake';
+export {
+  InvalidReporterHelloError,
+  negotiateReporterHello,
+  parseReporterHello,
+  REPORTER_KNOWN_CAPABILITIES
+} from './protocol/ReporterHandshake';
 
 export type { IReporter, IReporterContext } from './manager/IReporter';
 export type { IReporterRegistrationOptions, IReporterManagerOptions } from './manager/ReporterManager';
@@ -150,4 +160,7 @@ export type {
   IScopedReporter
 } from './producers/IScopedReporter';
 export type { ReporterExtensionEventName } from './producers/ReporterExtensionEventName';
-export { isReporterExtensionEventName } from './producers/ReporterExtensionEventName';
+export {
+  isReporterExtensionEventName,
+  parseReporterExtensionEventName
+} from './producers/ReporterExtensionEventName';

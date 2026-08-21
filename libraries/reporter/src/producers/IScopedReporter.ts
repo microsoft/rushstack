@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { ReporterPrivacyClassification } from '../events/ReporterPrivacyClassification';
+import type { ReporterJsonValue } from '../events/ReporterJsonValue';
 import type { IRushDiagnostic } from '../diagnostics/IRushDiagnostic';
 import type { ReporterExtensionEventName } from './ReporterExtensionEventName';
 
@@ -68,8 +69,8 @@ export interface IScopedReporter {
    * Emits a namespaced extension event with a JSON-serializable payload and
    * returns its assigned event id.
    *
-   * @param name - a namespaced beta identifier, see {@link ReporterExtensionEventName}
+   * @param name - a runtime-validated namespaced beta identifier
    * @param payload - a JSON-serializable payload
    */
-  emitExtension<TPayload>(name: ReporterExtensionEventName, payload: TPayload): string;
+  emitExtension(name: ReporterExtensionEventName, payload: ReporterJsonValue): string;
 }

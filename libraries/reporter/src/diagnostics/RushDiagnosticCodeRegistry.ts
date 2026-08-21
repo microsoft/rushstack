@@ -54,6 +54,88 @@ export interface IRushDiagnosticCodeDefinition {
   readonly detailKey: RushDiagnosticDetailKey | undefined;
 }
 
+type UppercaseAlphanumeric =
+  | 'A'
+  | 'B'
+  | 'C'
+  | 'D'
+  | 'E'
+  | 'F'
+  | 'G'
+  | 'H'
+  | 'I'
+  | 'J'
+  | 'K'
+  | 'L'
+  | 'M'
+  | 'N'
+  | 'O'
+  | 'P'
+  | 'Q'
+  | 'R'
+  | 'S'
+  | 'T'
+  | 'U'
+  | 'V'
+  | 'W'
+  | 'X'
+  | 'Y'
+  | 'Z'
+  | '0'
+  | '1'
+  | '2'
+  | '3'
+  | '4'
+  | '5'
+  | '6'
+  | '7'
+  | '8'
+  | '9';
+
+type IsValidRushDiagnosticCodeSegment<TSegment extends string> = TSegment extends ''
+  ? false
+  : TSegment extends `${UppercaseAlphanumeric}${infer Rest}`
+    ? Rest extends ''
+      ? true
+      : IsValidRushDiagnosticCodeSegment<Rest>
+    : false;
+
+type AreValidRushDiagnosticCodeSegments<
+  TSegments extends string,
+  THasPriorSegment extends boolean = false
+> = TSegments extends `${infer Segment}_${infer Rest}`
+  ? IsValidRushDiagnosticCodeSegment<Segment> extends true
+    ? AreValidRushDiagnosticCodeSegments<Rest, true>
+    : false
+  : THasPriorSegment extends true
+    ? IsValidRushDiagnosticCodeSegment<TSegments>
+    : false;
+
+type ValidateRushDiagnosticCode<TCode extends string> =
+  TCode extends `RUSH_${infer Segments}`
+    ? AreValidRushDiagnosticCodeSegments<Segments> extends true
+      ? TCode
+      : never
+    : never;
+
+type ValidatedRushDiagnosticCodeDefinitions<
+  TDefinitions extends readonly IRushDiagnosticCodeDefinition[]
+> = {
+  readonly [K in keyof TDefinitions]: TDefinitions[K] extends IRushDiagnosticCodeDefinition
+    ? TDefinitions[K] & {
+        readonly code: ValidateRushDiagnosticCode<TDefinitions[K]['code']>;
+      }
+    : TDefinitions[K];
+};
+
+function defineRushDiagnosticCodeDefinitions<
+  const TDefinitions extends readonly IRushDiagnosticCodeDefinition[]
+>(
+  definitions: TDefinitions & ValidatedRushDiagnosticCodeDefinitions<TDefinitions>
+): TDefinitions {
+  return definitions;
+}
+
 /**
  * The stable code used for unexpected internal (programmer) failures.
  *
@@ -68,13 +150,13 @@ export const RUSH_INTERNAL_ERROR_CODE: 'RUSH_INTERNAL_UNEXPECTED' = 'RUSH_INTERN
  * Codes are append-only. A code is never removed or repurposed, so consumers can
  * rely on a code always meaning the same thing. The `as const satisfies` typing
  * lets {@link RushDiagnosticCodes} and {@link RushDiagnosticTemplateKey} be
- * derived from this list, so adding a code without its templates is a
- * compile-time error.
+ * derived from this list, so malformed codes and missing templates are
+ * compile-time errors.
  *
  * @beta
  */
-// eslint-disable-next-line @typescript-eslint/typedef -- literal inference feeds the derived RushDiagnosticCodes/RushDiagnosticTemplateKey unions
-export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS = [
+// eslint-disable-next-line @typescript-eslint/typedef -- literal inference feeds the validated code/template unions
+export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS = defineRushDiagnosticCodeDefinitions([
   {
     code: 'RUSH_CONFIG_INVALID_JSON',
     category: 'configuration',
@@ -131,7 +213,7 @@ export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS = [
     summaryKey: 'diagnostic.RUSH_INTERNAL_UNEXPECTED.summary',
     detailKey: 'diagnostic.RUSH_INTERNAL_UNEXPECTED.detail'
   }
-] as const satisfies readonly IRushDiagnosticCodeDefinition[];
+]);
 
 /**
  * The union of every registered Rush diagnostic code.

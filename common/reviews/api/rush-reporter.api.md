@@ -161,6 +161,11 @@ export interface INdjsonOptions {
 }
 
 // @beta
+export class InvalidReporterHelloError extends Error {
+    constructor(reason: string);
+}
+
+// @beta
 export interface IOldEngineOutputAdapterOptions {
     readonly maxChunkBytes?: number;
     readonly protocolVersion?: IReporterProtocolVersion;
@@ -378,7 +383,7 @@ export interface IScopedMessageOptions {
 // @beta
 export interface IScopedReporter {
     emitDiagnostic(diagnostic: IRushDiagnostic): string;
-    emitExtension<TPayload>(name: ReporterExtensionEventName, payload: TPayload): string;
+    emitExtension(name: ReporterExtensionEventName, payload: ReporterJsonValue): string;
     emitMessage(options: IScopedMessageOptions): string;
 }
 
@@ -386,7 +391,7 @@ export interface IScopedReporter {
 export function isReporterEventRequired(type: ReporterEventType): boolean;
 
 // @beta
-export function isReporterExtensionEventName(name: string): boolean;
+export function isReporterExtensionEventName(name: string): name is ReporterExtensionEventName;
 
 // @beta
 export function isReporterProtocolCompatible(consumer: IReporterProtocolVersion, producer: IReporterProtocolVersion): boolean;
@@ -417,13 +422,21 @@ export class NdjsonDecoder {
 }
 
 // @beta
+export class NdjsonInvalidRecordError extends Error {
+    constructor(decodedRecords: readonly unknown[], parseError: Error);
+    readonly decodedRecords: readonly unknown[];
+    readonly parseError: Error;
+}
+
+// @beta
 export class NdjsonRecordTooLargeError extends Error {
-    constructor(maxRecordBytes: number);
+    constructor(maxRecordBytes: number, decodedRecords?: readonly unknown[]);
+    readonly decodedRecords: readonly unknown[];
     readonly maxRecordBytes: number;
 }
 
 // @beta
-export function negotiateReporterHello(hello: IReporterHello, options: IReporterHandshakeOptions): IReporterHandshakeResult;
+export function negotiateReporterHello(helloValue: unknown, options: IReporterHandshakeOptions): IReporterHandshakeResult;
 
 // @beta
 export class OldEngineOutputAdapter {
@@ -432,10 +445,16 @@ export class OldEngineOutputAdapter {
 }
 
 // @beta
-export type OneOrMoreRushDiagnosticCodeSegments<S extends string = RushDiagnosticCodeSegment> = S extends string ? S | `${S}${RushDiagnosticCodeSegment}` : never;
+export type OneOrMoreRushDiagnosticCodeSegments<TSegments extends string = string> = string extends TSegments ? `_${Uppercase<string>}` : TSegments extends `_${infer Segments}` ? Segments extends '' ? never : TSegments extends Uppercase<TSegments> ? TSegments : never : never;
 
 // @beta
 export function parseEarlyReporterControls(argv: readonly string[], env: Record<string, string | undefined>): IEarlyReporterControls;
+
+// @beta
+export function parseReporterExtensionEventName(name: string): ReporterExtensionEventName;
+
+// @beta
+export function parseReporterHello(value: unknown): IReporterHello;
 
 // @beta
 export function readBootstrapHandoffFileAsync(filePath: string): Promise<{
@@ -468,7 +487,9 @@ export type ReporterCompatibilityMode = 'structured' | 'new-frontend-old-engine'
 export type ReporterEventType = (typeof REPORTER_EVENT_TYPES)[number];
 
 // @beta
-export type ReporterExtensionEventName = `${Lowercase<string>}.${Lowercase<string>}`;
+export type ReporterExtensionEventName = `${string}.${string}` & {
+    readonly __reporterExtensionEventNameBrand: 'ReporterExtensionEventName';
+};
 
 // @beta
 export class ReporterHost {
@@ -592,13 +613,13 @@ export const RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_NO
 export type RushDiagnosticCategory = KnownRushDiagnosticCategory | (string & {});
 
 // @beta
-export type RushDiagnosticCode = `RUSH${RushDiagnosticCodeSegment}${OneOrMoreRushDiagnosticCodeSegments}`;
+export type RushDiagnosticCode<TCode extends string = string> = string extends TCode ? `RUSH_${Uppercase<string>}_${Uppercase<string>}` : TCode extends `RUSH_${infer Domain}_${infer Name}` ? Domain extends '' ? never : Name extends '' ? never : TCode extends Uppercase<TCode> ? TCode : never : never;
 
 // @beta
 export type RushDiagnosticCodes = (typeof RUSH_DIAGNOSTIC_CODE_DEFINITIONS)[number]['code'];
 
 // @beta
-export type RushDiagnosticCodeSegment = `_${Uppercase<string>}`;
+export type RushDiagnosticCodeSegment<TSegment extends string = string> = string extends TSegment ? `_${Uppercase<string>}` : TSegment extends `_${infer Segment}` ? Segment extends '' ? never : TSegment extends Uppercase<TSegment> ? TSegment : never : never;
 
 // @beta
 export type RushDiagnosticDetailKey = `diagnostic.${RushDiagnosticCode}.detail`;

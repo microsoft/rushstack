@@ -4,6 +4,7 @@
 import {
   isReporterEventRequired,
   isReporterExtensionEventName,
+  parseReporterExtensionEventName,
   type IReporterEmitEventInput,
   type IReporterEventEnvelope,
   type IReporterEventSink,
@@ -90,13 +91,35 @@ describe('IScopedReporter', () => {
 
     expect(reporter.emitMessage({ severity: 'info', text: 'Building...' })).toBe('evt_1');
     expect(reporter.emitDiagnostic(diagnostic)).toBe('evt_2');
-    expect(reporter.emitExtension('acme.cache-warmed', { hits: 3 })).toBe('evt_3');
+    expect(reporter.emitExtension(parseReporterExtensionEventName('acme.cache-warmed'), { hits: 3 })).toBe(
+      'evt_3'
+    );
     expect(ids).toEqual(['evt_1', 'evt_2', 'evt_3']);
   });
 
   it('exposes only emit methods, not reporter instances, destinations, or thresholds', () => {
     const reporter: IScopedReporter = createScopedReporter([]);
     expect(Object.keys(reporter).sort()).toEqual(['emitDiagnostic', 'emitExtension', 'emitMessage']);
+  });
+
+  it('enforces extension names and JSON payloads at compile time', () => {
+    const reporter: IScopedReporter = createScopedReporter([]);
+    const compileOnly = (dynamicName: string): void => {
+      reporter.emitExtension(parseReporterExtensionEventName('acme.cache-warmed'), { hits: 3 });
+
+      // @ts-expect-error -- unchecked strings cannot cross the producer API
+      reporter.emitExtension('Acme.Event', {});
+      // @ts-expect-error -- an arbitrary dynamic string must be validated first
+      reporter.emitExtension(dynamicName, {});
+      // @ts-expect-error -- functions are not JSON-serializable payloads
+      reporter.emitExtension('acme.callback', () => undefined);
+
+      if (isReporterExtensionEventName(dynamicName)) {
+        reporter.emitExtension(dynamicName, {});
+      }
+    };
+
+    expect(compileOnly).toBeDefined();
   });
 });
 
@@ -114,5 +137,8 @@ describe('isReporterExtensionEventName', () => {
     expect(isReporterExtensionEventName('acme.')).toBe(false); // trailing dot
     expect(isReporterExtensionEventName('acme..event')).toBe(false); // empty segment
     expect(isReporterExtensionEventName('acme.event-')).toBe(false); // trailing hyphen
+    expect(() => parseReporterExtensionEventName('Acme.Event')).toThrow(
+      /Invalid reporter extension event name/
+    );
   });
 });

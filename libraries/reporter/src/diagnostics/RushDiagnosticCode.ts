@@ -2,35 +2,62 @@
 // See LICENSE in the project root for license information.
 
 /**
- * A single underscore-prefixed uppercase segment of a Rush diagnostic code,
- * for example `_CONFIG`.
+ * A single underscore-prefixed uppercase alphanumeric segment of a Rush
+ * diagnostic code, for example `_CONFIG`.
  *
  * @beta
  */
-export type RushDiagnosticCodeSegment = `_${Uppercase<string>}`;
+export type RushDiagnosticCodeSegment<TSegment extends string = string> = string extends TSegment
+  ? `_${Uppercase<string>}`
+  : TSegment extends `_${infer Segment}`
+    ? Segment extends ''
+      ? never
+      : TSegment extends Uppercase<TSegment>
+        ? TSegment
+        : never
+    : never;
 
 /**
- * One or more {@link RushDiagnosticCodeSegment} values, for example
+ * One or more valid {@link RushDiagnosticCodeSegment} values, for example
  * `_INVALID_JSON`.
  *
  * @beta
  */
-export type OneOrMoreRushDiagnosticCodeSegments<
-  S extends string = RushDiagnosticCodeSegment
-> = S extends string ? S | `${S}${RushDiagnosticCodeSegment}` : never;
+export type OneOrMoreRushDiagnosticCodeSegments<TSegments extends string = string> =
+  string extends TSegments
+    ? `_${Uppercase<string>}`
+    : TSegments extends `_${infer Segments}`
+      ? Segments extends ''
+        ? never
+        : TSegments extends Uppercase<TSegments>
+          ? TSegments
+          : never
+      : never;
 
 /**
  * The shape of a stable, never-reused Rush diagnostic code:
  * `RUSH_<DOMAIN>_<NAME>`, for example `RUSH_DEPENDENCY_TOOL_FAILED`.
  *
  * @remarks
- * The type system enforces the naming convention for Rush-owned code.
+ * Supplying a string literal as the type parameter enforces every segment at
+ * compile time. The central registry applies this validation to every authored
+ * code before it can be registered.
  * {@link isValidRushDiagnosticCode} performs the equivalent runtime check for
  * untrusted wire data, where types have been erased.
  *
  * @beta
  */
-export type RushDiagnosticCode = `RUSH${RushDiagnosticCodeSegment}${OneOrMoreRushDiagnosticCodeSegments}`;
+export type RushDiagnosticCode<TCode extends string = string> = string extends TCode
+  ? `RUSH_${Uppercase<string>}_${Uppercase<string>}`
+  : TCode extends `RUSH_${infer Domain}_${infer Name}`
+    ? Domain extends ''
+      ? never
+      : Name extends ''
+        ? never
+        : TCode extends Uppercase<TCode>
+          ? TCode
+          : never
+    : never;
 
 const CODE_PREFIX: 'RUSH_' = 'RUSH_';
 
