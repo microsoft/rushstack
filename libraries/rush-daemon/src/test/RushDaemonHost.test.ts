@@ -17,8 +17,10 @@ import type {
   IDaemonFrame
 } from '@rushstack/rush-daemon-protocol';
 import {
+  computeDaemonWorkspaceKey,
   connectDaemonAsync,
-  readDaemonLockfile
+  readDaemonLockfile,
+  resolveDaemonPathsFromProcess
 } from '@rushstack/rush-daemon-transport';
 import type {
   DaemonFrameConnection,
@@ -26,7 +28,10 @@ import type {
 } from '@rushstack/rush-daemon-transport';
 
 import { RushDaemonHost } from '../RushDaemonHost';
+import type { IRushDaemonHostOptions } from '../RushDaemonHost';
 import { serveRushDaemonAsync } from '../serveRushDaemon';
+import type { IWorkspaceSession } from '../WorkspaceSession';
+import { TestWorkspaceSession } from './TestWorkspaceSession';
 
 const RUSH_VERSION: string = '5.178.1';
 const DAEMON_VERSION: string = '0.1.0-test';
@@ -48,12 +53,17 @@ function createTestRepoRoot(): string {
   return repoRoot;
 }
 
-function createHostOptions(repoRoot: string): {
-  daemonVersion: string;
-  repoRoot: string;
-  rushVersion: string;
-} {
-  return { daemonVersion: DAEMON_VERSION, repoRoot, rushVersion: RUSH_VERSION };
+function createHostOptions(
+  repoRoot: string,
+  overrides: Partial<IRushDaemonHostOptions> = {}
+): IRushDaemonHostOptions {
+  return {
+    daemonVersion: DAEMON_VERSION,
+    repoRoot,
+    rushVersion: RUSH_VERSION,
+    createWorkspaceSessionAsync: () => Promise.resolve(new TestWorkspaceSession(repoRoot)),
+    ...overrides
+  };
 }
 
 async function exchangeControlAsync(
@@ -134,16 +144,99 @@ describe(RushDaemonHost.name, () => {
   });
 
   it('closes active connections and removes transport artifacts', async () => {
+    const disposalEvents: string[] = [];
+    const repoRoot: string = createTestRepoRoot();
     const host: RushDaemonHost = await RushDaemonHost.startAsync(
-      createHostOptions(createTestRepoRoot())
+      createHostOptions(repoRoot, {
+        createWorkspaceSessionAsync: () =>
+          Promise.resolve(
+            new TestWorkspaceSession(repoRoot, () => disposalEvents.push('workspace-session'))
+          )
+      })
     );
     const client: DaemonFrameConnection = await connectDaemonAsync(host.paths.socketPath);
-    const closed: Promise<void> = new Promise((resolve: () => void) => client.onClosed(() => resolve()));
+    const closed: Promise<void> = new Promise((resolve: () => void) =>
+      client.onClosed(() => {
+        disposalEvents.push('client');
+        resolve();
+      })
+    );
     await host.closeAsync();
     await closed;
+    expect(disposalEvents).toHaveLength(2);
+    expect(disposalEvents).toContain('client');
+    expect(disposalEvents).toContain('workspace-session');
     expect(readDaemonLockfile(host.paths.lockfilePath)).toBeUndefined();
     await expect(connectDaemonAsync(host.paths.socketPath)).rejects.toMatchObject({
       code: 'connectionRefused'
     });
+  });
+
+  it('initializes one workspace session and reuses it', async () => {
+    const repoRoot: string = createTestRepoRoot();
+    const workspaceSession: IWorkspaceSession = new TestWorkspaceSession(repoRoot);
+    let factoryCalls: number = 0;
+    const host: RushDaemonHost = await RushDaemonHost.startAsync(
+      createHostOptions(repoRoot, {
+        createWorkspaceSessionAsync: () => {
+          factoryCalls++;
+          return Promise.resolve(workspaceSession);
+        }
+      })
+    );
+    try {
+      const [first, second] = await Promise.all([
+        host.getWorkspaceSessionAsync(),
+        host.getWorkspaceSessionAsync()
+      ]);
+      expect(first).toBe(workspaceSession);
+      expect(second).toBe(workspaceSession);
+      expect(factoryCalls).toBe(1);
+    } finally {
+      await host.closeAsync();
+    }
+  });
+
+  it('removes transport artifacts when workspace initialization fails', async () => {
+    const repoRoot: string = createTestRepoRoot();
+    const workspaceKey: string = computeDaemonWorkspaceKey({
+      canonicalRepoRoot: fs.realpathSync(repoRoot),
+      rushVersion: RUSH_VERSION
+    });
+    const paths: IDaemonPaths = resolveDaemonPathsFromProcess(workspaceKey);
+
+    await expect(
+      RushDaemonHost.startAsync(
+        createHostOptions(repoRoot, {
+          createWorkspaceSessionAsync: () => Promise.reject(new Error('workspace failed'))
+        })
+      )
+    ).rejects.toThrow('workspace failed');
+
+    expect(readDaemonLockfile(paths.lockfilePath)).toBeUndefined();
+    await expect(connectDaemonAsync(paths.socketPath)).rejects.toMatchObject({
+      code: 'connectionRefused'
+    });
+  });
+
+  it('disposes the workspace session when listener binding fails', async () => {
+    const repoRoot: string = createTestRepoRoot();
+    const firstHost: RushDaemonHost = await RushDaemonHost.startAsync(createHostOptions(repoRoot));
+    const disposalEvents: string[] = [];
+    try {
+      await expect(
+        RushDaemonHost.startAsync(
+          createHostOptions(repoRoot, {
+            createWorkspaceSessionAsync: () =>
+              Promise.resolve(
+                new TestWorkspaceSession(repoRoot, () => disposalEvents.push('workspace-session'))
+              )
+          })
+        )
+      ).rejects.toMatchObject({ code: 'daemonAlreadyRunning' });
+      expect(disposalEvents).toEqual(['workspace-session']);
+    } finally {
+      await firstHost.closeAsync();
+    }
   });
 });

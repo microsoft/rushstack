@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "comment": "Report a new `ae-unresolved-import-path` message when an inline `import()` type with a relative path cannot be resolved, instead of silently emitting the unusable path into the .d.ts rollup.",
+      "type": "minor",
+      "packageName": "@microsoft/api-extractor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}

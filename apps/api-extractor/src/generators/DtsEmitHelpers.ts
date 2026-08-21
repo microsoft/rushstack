@@ -13,6 +13,7 @@ import type { Span } from '../analyzer/Span';
 import type { IndentedWriter } from './IndentedWriter';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
+import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 /**
  * Some common code shared between DtsRollupGenerator and ApiReportGenerator.
@@ -169,6 +170,20 @@ export class DtsEmitHelpers {
         // Replace with internal symbol or AstImport
         span.modification.skipAll();
         span.modification.prefix = `${referencedEntity.nameForEmit}${typeArgumentsText}${separatorAfter}`;
+      }
+    } else if (ts.isLiteralTypeNode(node.argument) && ts.isStringLiteral(node.argument.literal)) {
+      // The import was not resolved to a rolled up entity, so its span gets emitted verbatim. A relative
+      // path is meaningless in the rollup, which does not preserve the original file layout, so the
+      // emitted .d.ts would not compile. Report that instead of leaving the user to discover it later.
+      const modulePath: string = node.argument.literal.text;
+      if (modulePath.startsWith('.')) {
+        collector.messageRouter.addAnalyzerIssue(
+          ExtractorMessageId.UnresolvedImportPath,
+          `The inline import path "${modulePath}" could not be resolved, so it would be emitted unchanged` +
+            ` into the .d.ts rollup, where it does not resolve to anything. Import the symbol at the top` +
+            ` of the file instead of using an inline import() type.`,
+          astDeclaration
+        );
       }
     }
   }
