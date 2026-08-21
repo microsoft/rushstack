@@ -43,20 +43,20 @@ interface ISelectionParameterSetOptions {
  * It is a separate component such that unrelated actions can share the same parameters.
  */
 export class SelectionParameterSet {
-  private readonly _rushConfiguration: RushConfiguration;
+  readonly #rushConfiguration: RushConfiguration;
 
-  private readonly _fromProject: CommandLineStringListParameter;
-  private readonly _impactedByProject: CommandLineStringListParameter;
-  private readonly _impactedByExceptProject: CommandLineStringListParameter;
-  private readonly _onlyProject: CommandLineStringListParameter;
-  private readonly _toProject: CommandLineStringListParameter;
-  private readonly _toExceptProject: CommandLineStringListParameter;
-  private readonly _subspaceParameter: CommandLineStringParameter | undefined;
+  readonly #fromProject: CommandLineStringListParameter;
+  readonly #impactedByProject: CommandLineStringListParameter;
+  readonly #impactedByExceptProject: CommandLineStringListParameter;
+  readonly #onlyProject: CommandLineStringListParameter;
+  readonly #toProject: CommandLineStringListParameter;
+  readonly #toExceptProject: CommandLineStringListParameter;
+  readonly #subspaceParameter: CommandLineStringParameter | undefined;
 
-  private readonly _fromVersionPolicy: CommandLineStringListParameter;
-  private readonly _toVersionPolicy: CommandLineStringListParameter;
+  readonly #fromVersionPolicy: CommandLineStringListParameter;
+  readonly #toVersionPolicy: CommandLineStringListParameter;
 
-  private readonly _selectorParserByScope: Map<string, ISelectorParser<RushConfigurationProject>>;
+  readonly #selectorParserByScope: Map<string, ISelectorParser<RushConfigurationProject>>;
 
   public constructor(
     rushConfiguration: RushConfiguration,
@@ -64,7 +64,7 @@ export class SelectionParameterSet {
     options: ISelectionParameterSetOptions
   ) {
     const { gitOptions, includeSubspaceSelector, cwd } = options;
-    this._rushConfiguration = rushConfiguration;
+    this.#rushConfiguration = rushConfiguration;
 
     const selectorParsers: Map<string, ISelectorParser<RushConfigurationProject>> = new Map<
       string,
@@ -79,7 +79,7 @@ export class SelectionParameterSet {
     selectorParsers.set('subspace', new SubspaceSelectorParser(rushConfiguration));
     selectorParsers.set('path', new PathProjectSelectorParser(rushConfiguration, cwd));
 
-    this._selectorParserByScope = selectorParsers;
+    this.#selectorParserByScope = selectorParsers;
 
     const getCompletionsAsync: () => Promise<string[]> = async (): Promise<string[]> => {
       const completions: string[] = ['.'];
@@ -97,7 +97,7 @@ export class SelectionParameterSet {
       return completions;
     };
 
-    this._toProject = action.defineStringListParameter({
+    this.#toProject = action.defineStringListParameter({
       parameterLongName: '--to',
       parameterShortName: '-t',
       argumentName: 'PROJECT',
@@ -109,7 +109,7 @@ export class SelectionParameterSet {
         ' For details, refer to the website article "Selecting subsets of projects".',
       getCompletionsAsync
     });
-    this._toExceptProject = action.defineStringListParameter({
+    this.#toExceptProject = action.defineStringListParameter({
       parameterLongName: '--to-except',
       parameterShortName: '-T',
       argumentName: 'PROJECT',
@@ -123,7 +123,7 @@ export class SelectionParameterSet {
       getCompletionsAsync
     });
 
-    this._fromProject = action.defineStringListParameter({
+    this.#fromProject = action.defineStringListParameter({
       parameterLongName: '--from',
       parameterShortName: '-f',
       argumentName: 'PROJECT',
@@ -136,7 +136,7 @@ export class SelectionParameterSet {
         ' For details, refer to the website article "Selecting subsets of projects".',
       getCompletionsAsync
     });
-    this._onlyProject = action.defineStringListParameter({
+    this.#onlyProject = action.defineStringListParameter({
       parameterLongName: '--only',
       parameterShortName: '-o',
       argumentName: 'PROJECT',
@@ -150,7 +150,7 @@ export class SelectionParameterSet {
       getCompletionsAsync
     });
 
-    this._impactedByProject = action.defineStringListParameter({
+    this.#impactedByProject = action.defineStringListParameter({
       parameterLongName: '--impacted-by',
       parameterShortName: '-i',
       argumentName: 'PROJECT',
@@ -165,7 +165,7 @@ export class SelectionParameterSet {
       getCompletionsAsync
     });
 
-    this._impactedByExceptProject = action.defineStringListParameter({
+    this.#impactedByExceptProject = action.defineStringListParameter({
       parameterLongName: '--impacted-by-except',
       parameterShortName: '-I',
       argumentName: 'PROJECT',
@@ -180,7 +180,7 @@ export class SelectionParameterSet {
       getCompletionsAsync
     });
 
-    this._toVersionPolicy = action.defineStringListParameter({
+    this.#toVersionPolicy = action.defineStringListParameter({
       parameterLongName: '--to-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
       description:
@@ -190,7 +190,7 @@ export class SelectionParameterSet {
         ' belonging to VERSION_POLICY_NAME.' +
         ' For details, refer to the website article "Selecting subsets of projects".'
     });
-    this._fromVersionPolicy = action.defineStringListParameter({
+    this.#fromVersionPolicy = action.defineStringListParameter({
       parameterLongName: '--from-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
       description:
@@ -202,7 +202,7 @@ export class SelectionParameterSet {
     });
 
     if (includeSubspaceSelector) {
-      this._subspaceParameter = action.defineStringParameter({
+      this.#subspaceParameter = action.defineStringParameter({
         parameterLongName: SUBSPACE_LONG_ARG_NAME,
         argumentName: 'SUBSPACE_NAME',
         description:
@@ -220,19 +220,19 @@ export class SelectionParameterSet {
    * such as `rush install --from thing-that-everything-depends-on`.
    */
   public didUserSelectAnything(): boolean {
-    if (this._subspaceParameter?.value) {
+    if (this.#subspaceParameter?.value) {
       return true;
     }
 
     return [
-      this._impactedByProject,
-      this._impactedByExceptProject,
-      this._onlyProject,
-      this._toProject,
-      this._fromProject,
-      this._toExceptProject,
-      this._fromVersionPolicy,
-      this._toVersionPolicy
+      this.#impactedByProject,
+      this.#impactedByExceptProject,
+      this.#onlyProject,
+      this.#toProject,
+      this.#fromProject,
+      this.#toExceptProject,
+      this.#fromVersionPolicy,
+      this.#toVersionPolicy
     ].some((x) => x.values.length > 0);
   }
 
@@ -246,30 +246,30 @@ export class SelectionParameterSet {
     allowEmptySelection?: boolean
   ): Promise<Set<RushConfigurationProject>> {
     // Hack out the old version-policy parameters
-    for (const value of this._fromVersionPolicy.values) {
-      (this._fromProject.values as string[]).push(`version-policy:${value}`);
+    for (const value of this.#fromVersionPolicy.values) {
+      (this.#fromProject.values as string[]).push(`version-policy:${value}`);
     }
-    for (const value of this._toVersionPolicy.values) {
-      (this._toProject.values as string[]).push(`version-policy:${value}`);
+    for (const value of this.#toVersionPolicy.values) {
+      (this.#toProject.values as string[]).push(`version-policy:${value}`);
     }
 
     const selectors: CommandLineStringListParameter[] = [
-      this._onlyProject,
-      this._fromProject,
-      this._toProject,
-      this._toExceptProject,
-      this._impactedByProject,
-      this._impactedByExceptProject
+      this.#onlyProject,
+      this.#fromProject,
+      this.#toProject,
+      this.#toExceptProject,
+      this.#impactedByProject,
+      this.#impactedByExceptProject
     ];
 
     // Check if any of the selection parameters have a value specified on the command line
     const isSelectionSpecified: boolean =
       selectors.some((param: CommandLineStringListParameter) => param.values.length > 0) ||
-      !!this._subspaceParameter?.value;
+      !!this.#subspaceParameter?.value;
 
     // If no selection parameters are specified, return everything
     if (!isSelectionSpecified) {
-      return allowEmptySelection ? new Set() : new Set(this._rushConfiguration.projects);
+      return allowEmptySelection ? new Set() : new Set(this.#rushConfiguration.projects);
     }
 
     const [
@@ -287,14 +287,14 @@ export class SelectionParameterSet {
       impactedByExceptProjects
     ] = await Promise.all(
       selectors.map((param: CommandLineStringListParameter) => {
-        return this._evaluateProjectParameterAsync(param, terminal);
+        return this.#evaluateProjectParameterAsync(param, terminal);
       })
     );
 
     let subspaceProjects: Iterable<RushConfigurationProject> = [];
 
-    if (this._subspaceParameter?.value) {
-      if (!this._rushConfiguration.subspacesFeatureEnabled) {
+    if (this.#subspaceParameter?.value) {
+      if (!this.#rushConfiguration.subspacesFeatureEnabled) {
         // eslint-disable-next-line no-console
         console.log();
         // eslint-disable-next-line no-console
@@ -307,7 +307,7 @@ export class SelectionParameterSet {
         throw new AlreadyReportedError();
       }
 
-      const subspace: Subspace = this._rushConfiguration.getSubspace(this._subspaceParameter.value);
+      const subspace: Subspace = this.#rushConfiguration.getSubspace(this.#subspaceParameter.value);
       subspaceProjects = subspace.getProjects();
     }
 
@@ -352,20 +352,20 @@ export class SelectionParameterSet {
     const args: string[] = [];
 
     // Include exactly these projects (--only)
-    for (const project of await this._evaluateProjectParameterAsync(this._onlyProject, terminal)) {
+    for (const project of await this.#evaluateProjectParameterAsync(this.#onlyProject, terminal)) {
       args.push(project.packageName);
     }
 
     // Include all projects that depend on these projects, and all dependencies thereof
     const fromProjects: Set<RushConfigurationProject> = Selection.union(
       // --from
-      await this._evaluateProjectParameterAsync(this._fromProject, terminal)
+      await this.#evaluateProjectParameterAsync(this.#fromProject, terminal)
     );
 
     // All specified projects and all projects that they depend on
     for (const project of Selection.union(
       // --to
-      await this._evaluateProjectParameterAsync(this._toProject, terminal),
+      await this.#evaluateProjectParameterAsync(this.#toProject, terminal),
       // --from / --from-version-policy
       Selection.expandAllConsumers(fromProjects)
     )) {
@@ -374,20 +374,20 @@ export class SelectionParameterSet {
 
     // --to-except
     // All projects that the project directly or indirectly declares as a dependency
-    for (const project of await this._evaluateProjectParameterAsync(this._toExceptProject, terminal)) {
+    for (const project of await this.#evaluateProjectParameterAsync(this.#toExceptProject, terminal)) {
       args.push(`${project.packageName}^...`);
     }
 
     // --impacted-by
     // The project and all projects directly or indirectly declare it as a dependency
-    for (const project of await this._evaluateProjectParameterAsync(this._impactedByProject, terminal)) {
+    for (const project of await this.#evaluateProjectParameterAsync(this.#impactedByProject, terminal)) {
       args.push(`...${project.packageName}`);
     }
 
     // --impacted-by-except
     // All projects that directly or indirectly declare the specified project as a dependency
-    for (const project of await this._evaluateProjectParameterAsync(
-      this._impactedByExceptProject,
+    for (const project of await this.#evaluateProjectParameterAsync(
+      this.#impactedByExceptProject,
       terminal
     )) {
       args.push(`...^${project.packageName}`);
@@ -401,15 +401,15 @@ export class SelectionParameterSet {
    */
   public getTelemetry(): { [key: string]: string } {
     return {
-      command_from: `${this._fromProject.values.length > 0}`,
-      command_impactedBy: `${this._impactedByProject.values.length > 0}`,
-      command_impactedByExcept: `${this._impactedByExceptProject.values.length > 0}`,
-      command_only: `${this._onlyProject.values.length > 0}`,
-      command_to: `${this._toProject.values.length > 0}`,
-      command_toExcept: `${this._toExceptProject.values.length > 0}`,
+      command_from: `${this.#fromProject.values.length > 0}`,
+      command_impactedBy: `${this.#impactedByProject.values.length > 0}`,
+      command_impactedByExcept: `${this.#impactedByExceptProject.values.length > 0}`,
+      command_only: `${this.#onlyProject.values.length > 0}`,
+      command_to: `${this.#toProject.values.length > 0}`,
+      command_toExcept: `${this.#toExceptProject.values.length > 0}`,
 
-      command_fromVersionPolicy: `${this._fromVersionPolicy.values.length > 0}`,
-      command_toVersionPolicy: `${this._toVersionPolicy.values.length > 0}`
+      command_fromVersionPolicy: `${this.#fromVersionPolicy.values.length > 0}`,
+      command_toVersionPolicy: `${this.#toVersionPolicy.values.length > 0}`
     };
   }
 
@@ -417,7 +417,7 @@ export class SelectionParameterSet {
    * Computes the referents of parameters that accept a project identifier.
    * Handles '.', unscoped names, and scoped names.
    */
-  private async _evaluateProjectParameterAsync(
+  async #evaluateProjectParameterAsync(
     listParameter: CommandLineStringListParameter,
     terminal: ITerminal
   ): Promise<Set<RushConfigurationProject>> {
@@ -456,12 +456,12 @@ export class SelectionParameterSet {
       }
 
       const handler: ISelectorParser<RushConfigurationProject> | undefined =
-        this._selectorParserByScope.get(scope);
+        this.#selectorParserByScope.get(scope);
       if (!handler) {
         terminal.writeErrorLine(
           `Unsupported selector prefix "${scope}" passed to "${parameterName}": "${rawSelector}".` +
             ` Supported prefixes: ${Array.from(
-              this._selectorParserByScope.keys(),
+              this.#selectorParserByScope.keys(),
               (selectorParserScope: string) => `"${selectorParserScope}:"`
             ).join(', ')}`
         );

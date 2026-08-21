@@ -9,17 +9,17 @@ import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { DependencySpecifier } from './DependencySpecifier';
 
 export class ApprovedPackagesChecker {
-  private readonly _rushConfiguration: RushConfiguration;
-  private _approvedPackagesPolicy: ApprovedPackagesPolicy;
-  private _filesAreOutOfDate: boolean;
+  readonly #rushConfiguration: RushConfiguration;
+  #approvedPackagesPolicy: ApprovedPackagesPolicy;
+  #filesAreOutOfDate: boolean;
 
   public constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
-    this._approvedPackagesPolicy = this._rushConfiguration.approvedPackagesPolicy;
-    this._filesAreOutOfDate = false;
+    this.#rushConfiguration = rushConfiguration;
+    this.#approvedPackagesPolicy = this.#rushConfiguration.approvedPackagesPolicy;
+    this.#filesAreOutOfDate = false;
 
-    if (this._approvedPackagesPolicy.enabled) {
-      this._updateApprovedPackagesPolicy();
+    if (this.#approvedPackagesPolicy.enabled) {
+      this.#updateApprovedPackagesPolicy();
     }
   }
 
@@ -27,7 +27,7 @@ export class ApprovedPackagesChecker {
    * If true, the files on disk are out of date.
    */
   public get approvedPackagesFilesAreOutOfDate(): boolean {
-    return this._filesAreOutOfDate;
+    return this.#filesAreOutOfDate;
   }
 
   /**
@@ -39,25 +39,25 @@ export class ApprovedPackagesChecker {
    * If the "approvedPackagesPolicy" feature is not enabled, then no action is taken.
    */
   public rewriteConfigFiles(): void {
-    const approvedPackagesPolicy: ApprovedPackagesPolicy = this._rushConfiguration.approvedPackagesPolicy;
+    const approvedPackagesPolicy: ApprovedPackagesPolicy = this.#rushConfiguration.approvedPackagesPolicy;
     if (approvedPackagesPolicy.enabled) {
       approvedPackagesPolicy.browserApprovedPackages.saveToFile();
       approvedPackagesPolicy.nonbrowserApprovedPackages.saveToFile();
     }
   }
 
-  private _updateApprovedPackagesPolicy(): void {
-    for (const rushProject of this._rushConfiguration.projects) {
+  #updateApprovedPackagesPolicy(): void {
+    for (const rushProject of this.#rushConfiguration.projects) {
       const packageJson: IPackageJson = rushProject.packageJson;
 
-      this._collectDependencies(packageJson.dependencies, this._approvedPackagesPolicy, rushProject);
-      this._collectDependencies(packageJson.devDependencies, this._approvedPackagesPolicy, rushProject);
-      this._collectDependencies(packageJson.peerDependencies, this._approvedPackagesPolicy, rushProject);
-      this._collectDependencies(packageJson.optionalDependencies, this._approvedPackagesPolicy, rushProject);
+      this.#collectDependencies(packageJson.dependencies, this.#approvedPackagesPolicy, rushProject);
+      this.#collectDependencies(packageJson.devDependencies, this.#approvedPackagesPolicy, rushProject);
+      this.#collectDependencies(packageJson.peerDependencies, this.#approvedPackagesPolicy, rushProject);
+      this.#collectDependencies(packageJson.optionalDependencies, this.#approvedPackagesPolicy, rushProject);
     }
   }
 
-  private _collectDependencies(
+  #collectDependencies(
     dependencies: { [key: string]: string } | undefined,
     approvedPackagesPolicy: ApprovedPackagesPolicy,
     rushProject: RushConfigurationProject
@@ -80,7 +80,7 @@ export class ApprovedPackagesChecker {
           referencedPackageName = dependencySpecifier.aliasTarget.packageName;
         }
 
-        const scope: string = this._rushConfiguration.packageNameParser.getScope(referencedPackageName);
+        const scope: string = this.#rushConfiguration.packageNameParser.getScope(referencedPackageName);
 
         // Make sure the scope isn't something like "@types" which should be ignored
         if (!approvedPackagesPolicy.ignoredNpmScopes.has(scope) && rushProject.reviewCategory) {
@@ -102,7 +102,7 @@ export class ApprovedPackagesChecker {
             );
           }
 
-          this._filesAreOutOfDate = this._filesAreOutOfDate || updated;
+          this.#filesAreOutOfDate = this.#filesAreOutOfDate || updated;
         }
       }
     }

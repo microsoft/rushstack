@@ -39,7 +39,7 @@ export interface IBaseRushActionOptions extends ICommandLineActionOptions {
  * can be used without a rush.json configuration.
  */
 export abstract class BaseConfiglessRushAction extends CommandLineAction implements IRushCommand {
-  private _safeForSimultaneousRushProcesses: boolean;
+  #safeForSimultaneousRushProcesses: boolean;
 
   protected readonly rushConfiguration: RushConfiguration | undefined;
   protected readonly terminal: ITerminal;
@@ -53,7 +53,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
     const { parser, safeForSimultaneousRushProcesses } = options;
     this.parser = parser;
     const { rushConfiguration, terminal, rushSession, rushGlobalFolder } = parser;
-    this._safeForSimultaneousRushProcesses = !!safeForSimultaneousRushProcesses;
+    this.#safeForSimultaneousRushProcesses = !!safeForSimultaneousRushProcesses;
     this.rushConfiguration = rushConfiguration;
     this.terminal = terminal;
     this.rushSession = rushSession;
@@ -61,10 +61,10 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    this._ensureEnvironment();
+    this.#ensureEnvironment();
 
     if (this.rushConfiguration) {
-      if (!this._safeForSimultaneousRushProcesses) {
+      if (!this.#safeForSimultaneousRushProcesses) {
         if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
           this.terminal.writeLine(
             Colorize.red(`Another Rush command is already running in this repository.`)
@@ -87,7 +87,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
    */
   protected abstract runAsync(): Promise<void>;
 
-  private _ensureEnvironment(): void {
+  #ensureEnvironment(): void {
     if (this.rushConfiguration) {
       // eslint-disable-next-line dot-notation
       let environmentPath: string | undefined = process.env['PATH'];
@@ -105,14 +105,14 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
  * The base class that most Rush command-line actions should extend.
  */
 export abstract class BaseRushAction extends BaseConfiglessRushAction {
-  private _eventHooksManager: EventHooksManager | undefined;
+  #eventHooksManager: EventHooksManager | undefined;
 
   protected get eventHooksManager(): EventHooksManager {
-    if (!this._eventHooksManager) {
-      this._eventHooksManager = new EventHooksManager(this.rushConfiguration);
+    if (!this.#eventHooksManager) {
+      this.#eventHooksManager = new EventHooksManager(this.rushConfiguration);
     }
 
-    return this._eventHooksManager;
+    return this.#eventHooksManager;
   }
 
   protected declare readonly rushConfiguration: RushConfiguration;
@@ -122,13 +122,13 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
       throw Utilities.getRushConfigNotFoundError();
     }
 
-    this._throwPluginErrorIfNeed();
+    this.#throwPluginErrorIfNeed();
 
     await measureAsyncFn(`${PERF_PREFIX}:initializePluginsAsync`, () =>
       this.parser.pluginManager.tryInitializeAssociatedCommandPluginsAsync(this.actionName)
     );
 
-    this._throwPluginErrorIfNeed();
+    this.#throwPluginErrorIfNeed();
 
     const { hooks: sessionHooks } = this.rushSession;
     await measureAsyncFn(`${PERF_PREFIX}:initializePlugins`, async () => {
@@ -145,7 +145,7 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
    * If an error is encountered while trying to load plugins, it is saved in the `PluginManager.error`
    * property, so we can defer throwing it until when `_throwPluginErrorIfNeed()` is called.
    */
-  private _throwPluginErrorIfNeed(): void {
+  #throwPluginErrorIfNeed(): void {
     // If the plugin configuration is broken, these three commands are used to fix the problem:
     //
     //   "rush update"

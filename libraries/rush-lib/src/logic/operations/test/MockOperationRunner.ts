@@ -7,7 +7,7 @@ import { OperationStatus } from '../OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 
 export class MockOperationRunner implements IOperationRunner {
-  private readonly _action: ((terminal: CollatedTerminal) => Promise<OperationStatus>) | undefined;
+  readonly #action: ((terminal: CollatedTerminal) => Promise<OperationStatus>) | undefined;
   public readonly name: string;
   public readonly reportTiming: boolean = true;
   public readonly silent: boolean = false;
@@ -23,14 +23,14 @@ export class MockOperationRunner implements IOperationRunner {
   ) {
     this.isNoOp = isNoOp;
     this.name = name;
-    this._action = action;
+    this.#action = action;
     this.warningsAreAllowed = warningsAreAllowed;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
     let result: OperationStatus | undefined;
-    if (this._action) {
-      result = await this._action(context.collatedWriter.terminal);
+    if (this.#action) {
+      result = await this.#action(context.collatedWriter.terminal);
     }
     return result || OperationStatus.Success;
   }

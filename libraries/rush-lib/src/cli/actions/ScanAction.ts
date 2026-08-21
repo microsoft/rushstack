@@ -27,8 +27,8 @@ export interface IJsonOutput {
 }
 
 export class ScanAction extends BaseConfiglessRushAction {
-  private readonly _jsonFlag: CommandLineFlagParameter;
-  private readonly _allFlag: CommandLineFlagParameter;
+  readonly #jsonFlag: CommandLineFlagParameter;
+  readonly #allFlag: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -49,11 +49,11 @@ export class ScanAction extends BaseConfiglessRushAction {
       parser
     });
 
-    this._jsonFlag = this.defineFlagParameter({
+    this.#jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',
       description: 'If this flag is specified, output will be in JSON format.'
     });
-    this._allFlag = this.defineFlagParameter({
+    this.#allFlag = this.defineFlagParameter({
       parameterLongName: '--all',
       description: 'If this flag is specified, output will list all detected dependencies.'
     });
@@ -207,10 +207,10 @@ export class ScanAction extends BaseConfiglessRushAction {
       unusedDependencies: unusedDependencies
     };
 
-    if (this._jsonFlag.value) {
+    if (this.#jsonFlag.value) {
       // eslint-disable-next-line no-console
       console.log(JSON.stringify(output, undefined, 2));
-    } else if (this._allFlag.value) {
+    } else if (this.#allFlag.value) {
       if (detectedPackageNames.length !== 0) {
         // eslint-disable-next-line no-console
         console.log('Dependencies that seem to be imported by this project:');

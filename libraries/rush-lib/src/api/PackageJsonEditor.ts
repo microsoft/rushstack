@@ -22,29 +22,29 @@ export enum DependencyType {
  * @public
  */
 export class PackageJsonDependency {
-  private _version: string;
-  private _onChange: () => void;
+  #version: string;
+  #onChange: () => void;
 
   public readonly name: string;
   public readonly dependencyType: DependencyType;
 
   public constructor(name: string, version: string, type: DependencyType, onChange: () => void) {
     this.name = name;
-    this._version = version;
+    this.#version = version;
     this.dependencyType = type;
-    this._onChange = onChange;
+    this.#onChange = onChange;
   }
 
   public get version(): string {
-    return this._version;
+    return this.#version;
   }
 
   public setVersion(newVersion: string): void {
     if (!semver.valid(newVersion) && !semver.validRange(newVersion)) {
       throw new Error(`Cannot set version to invalid value: "${newVersion}"`);
     }
-    this._version = newVersion;
-    this._onChange();
+    this.#version = newVersion;
+    this.#onChange();
   }
 }
 
@@ -52,19 +52,19 @@ export class PackageJsonDependency {
  * @public
  */
 export class PackageJsonDependencyMeta {
-  private _injected: boolean;
-  private _onChange: () => void;
+  #injected: boolean;
+  #onChange: () => void;
 
   public readonly name: string;
 
   public constructor(name: string, injected: boolean, onChange: () => void) {
     this.name = name;
-    this._injected = injected;
-    this._onChange = onChange;
+    this.#injected = injected;
+    this.#onChange = onChange;
   }
 
   public get injected(): boolean {
-    return this._injected;
+    return this.#injected;
   }
 }
 
@@ -72,20 +72,20 @@ export class PackageJsonDependencyMeta {
  * @public
  */
 export class PackageJsonEditor {
-  private readonly _dependencies: Map<string, PackageJsonDependency>;
+  readonly #dependencies: Map<string, PackageJsonDependency>;
   // NOTE: The "devDependencies" section is tracked separately because sometimes people
   // will specify a specific version for development, while *also* specifying a broader
   // SemVer range in one of the other fields for consumers.  Thus "dependencies", "optionalDependencies",
   // and "peerDependencies" are mutually exclusive, but "devDependencies" is not.
-  private readonly _devDependencies: Map<string, PackageJsonDependency>;
+  readonly #devDependencies: Map<string, PackageJsonDependency>;
 
-  private readonly _dependenciesMeta: Map<string, PackageJsonDependencyMeta>;
+  readonly #dependenciesMeta: Map<string, PackageJsonDependencyMeta>;
 
   // NOTE: The "resolutions" field is a yarn specific feature that controls package
   // resolution override within yarn.
-  private readonly _resolutions: Map<string, PackageJsonDependency>;
-  private _modified: boolean;
-  private _sourceData: IPackageJson;
+  readonly #resolutions: Map<string, PackageJsonDependency>;
+  #modified: boolean;
+  #sourceData: IPackageJson;
 
   public readonly filePath: string;
 
@@ -94,8 +94,8 @@ export class PackageJsonEditor {
    */
   protected constructor(filepath: string, data: IPackageJson) {
     this.filePath = filepath;
-    this._sourceData = data;
-    this._modified = false;
+    this.#sourceData = data;
+    this.#modified = false;
 
     const {
       dependencies = {},
@@ -106,7 +106,7 @@ export class PackageJsonEditor {
       dependenciesMeta = {}
     } = data;
 
-    const _onChange: () => void = this._onChange.bind(this);
+    const _onChange: () => void = this.#onChange.bind(this);
 
     const optionalDependenciesSet: Set<string> = new Set(Object.keys(optionalDependencies));
     const peerDependenciesSet: Set<string> = new Set(Object.keys(peerDependencies));
@@ -154,27 +154,27 @@ export class PackageJsonEditor {
         new PackageJsonDependency(packageName, version, DependencyType.Peer, _onChange)
       ]);
 
-      this._dependencies = new Map([
+      this.#dependencies = new Map([
         ...dependenciesMapEntries,
         ...optionalDependenciesMapEntries,
         ...peerDependenciesMapEntries
       ]);
 
-      this._devDependencies = new Map(
+      this.#devDependencies = new Map(
         Object.entries(devDependencies).map(([packageName, version]) => [
           packageName,
           new PackageJsonDependency(packageName, version, DependencyType.Dev, _onChange)
         ])
       );
 
-      this._resolutions = new Map(
+      this.#resolutions = new Map(
         Object.entries(resolutions).map(([packageName, version]) => [
           packageName,
           new PackageJsonDependency(packageName, version, DependencyType.YarnResolutions, _onChange)
         ])
       );
 
-      this._dependenciesMeta = new Map(
+      this.#dependenciesMeta = new Map(
         Object.entries(dependenciesMeta).map(([packageName, { injected = false }]) => [
           packageName,
           new PackageJsonDependencyMeta(packageName, injected, _onChange)
@@ -182,8 +182,8 @@ export class PackageJsonEditor {
       );
 
       // (Do not sort this._resolutions because order may be significant; the RFC is unclear about that.)
-      Sort.sortMapKeys(this._dependencies);
-      Sort.sortMapKeys(this._devDependencies);
+      Sort.sortMapKeys(this.#dependencies);
+      Sort.sortMapKeys(this.#devDependencies);
     } catch (e) {
       throw new Error(`Error loading "${filepath}": ${(e as Error).message}`);
     }
@@ -207,32 +207,32 @@ export class PackageJsonEditor {
   }
 
   public get name(): string {
-    return this._sourceData.name;
+    return this.#sourceData.name;
   }
 
   public get version(): string {
-    return this._sourceData.version;
+    return this.#sourceData.version;
   }
 
   /**
    * The list of dependencies of type DependencyType.Regular, DependencyType.Optional, or DependencyType.Peer.
    */
   public get dependencyList(): ReadonlyArray<PackageJsonDependency> {
-    return [...this._dependencies.values()];
+    return [...this.#dependencies.values()];
   }
 
   /**
    * The list of dependencies of type DependencyType.Dev.
    */
   public get devDependencyList(): ReadonlyArray<PackageJsonDependency> {
-    return [...this._devDependencies.values()];
+    return [...this.#devDependencies.values()];
   }
 
   /**
    * The list of dependenciesMeta in package.json.
    */
   public get dependencyMetaList(): ReadonlyArray<PackageJsonDependencyMeta> {
-    return [...this._dependenciesMeta.values()];
+    return [...this.#dependenciesMeta.values()];
   }
 
   /**
@@ -243,15 +243,15 @@ export class PackageJsonEditor {
    * | 0000-selective-versions-resolutions.md RFC} for details.
    */
   public get resolutionsList(): ReadonlyArray<PackageJsonDependency> {
-    return [...this._resolutions.values()];
+    return [...this.#resolutions.values()];
   }
 
   public tryGetDependency(packageName: string): PackageJsonDependency | undefined {
-    return this._dependencies.get(packageName);
+    return this.#dependencies.get(packageName);
   }
 
   public tryGetDevDependency(packageName: string): PackageJsonDependency | undefined {
-    return this._devDependencies.get(packageName);
+    return this.#devDependencies.get(packageName);
   }
 
   public addOrUpdateDependency(
@@ -263,7 +263,7 @@ export class PackageJsonEditor {
       packageName,
       newVersion,
       dependencyType,
-      this._onChange.bind(this)
+      this.#onChange.bind(this)
     );
 
     // Rush collapses everything that isn't a devDependency into the dependencies
@@ -272,17 +272,17 @@ export class PackageJsonEditor {
       case DependencyType.Regular:
       case DependencyType.Optional:
       case DependencyType.Peer: {
-        this._dependencies.set(packageName, dependency);
+        this.#dependencies.set(packageName, dependency);
         break;
       }
 
       case DependencyType.Dev: {
-        this._devDependencies.set(packageName, dependency);
+        this.#devDependencies.set(packageName, dependency);
         break;
       }
 
       case DependencyType.YarnResolutions: {
-        this._resolutions.set(packageName, dependency);
+        this.#resolutions.set(packageName, dependency);
         break;
       }
 
@@ -291,7 +291,7 @@ export class PackageJsonEditor {
       }
     }
 
-    this._modified = true;
+    this.#modified = true;
   }
 
   public removeDependency(packageName: string, dependencyType: DependencyType): void {
@@ -299,17 +299,17 @@ export class PackageJsonEditor {
       case DependencyType.Regular:
       case DependencyType.Optional:
       case DependencyType.Peer: {
-        this._dependencies.delete(packageName);
+        this.#dependencies.delete(packageName);
         break;
       }
 
       case DependencyType.Dev: {
-        this._devDependencies.delete(packageName);
+        this.#devDependencies.delete(packageName);
         break;
       }
 
       case DependencyType.YarnResolutions: {
-        this._resolutions.delete(packageName);
+        this.#resolutions.delete(packageName);
         break;
       }
 
@@ -318,17 +318,17 @@ export class PackageJsonEditor {
       }
     }
 
-    this._modified = true;
+    this.#modified = true;
   }
 
   /**
    * @deprecated Use {@link PackageJsonEditor.saveIfModifiedAsync} method instead.
    */
   public saveIfModified(): boolean {
-    if (this._modified) {
-      this._modified = false;
-      this._sourceData = this._normalize(this._sourceData);
-      JsonFile.save(this._sourceData, this.filePath, {
+    if (this.#modified) {
+      this.#modified = false;
+      this.#sourceData = this.#normalize(this.#sourceData);
+      JsonFile.save(this.#sourceData, this.filePath, {
         updateExistingFile: true,
         jsonSyntax: JsonSyntax.Strict
       });
@@ -339,10 +339,10 @@ export class PackageJsonEditor {
   }
 
   public async saveIfModifiedAsync(): Promise<boolean> {
-    if (this._modified) {
-      this._modified = false;
-      this._sourceData = this._normalize(this._sourceData);
-      await JsonFile.saveAsync(this._sourceData, this.filePath, {
+    if (this.#modified) {
+      this.#modified = false;
+      this.#sourceData = this.#normalize(this.#sourceData);
+      await JsonFile.saveAsync(this.#sourceData, this.filePath, {
         updateExistingFile: true,
         jsonSyntax: JsonSyntax.Strict
       });
@@ -360,13 +360,13 @@ export class PackageJsonEditor {
    */
   public saveToObject(): IPackageJson {
     // Only normalize if we need to
-    const sourceData: IPackageJson = this._modified ? this._normalize(this._sourceData) : this._sourceData;
+    const sourceData: IPackageJson = this.#modified ? this.#normalize(this.#sourceData) : this.#sourceData;
     // Provide a clone to avoid reference back to the original data object
     return cloneDeep(sourceData);
   }
 
-  private _onChange(): void {
-    this._modified = true;
+  #onChange(): void {
+    this.#modified = true;
   }
 
   /**
@@ -375,7 +375,7 @@ export class PackageJsonEditor {
    * it will still need to be deep-cloned to avoid propogating changes back to the
    * original dataset.
    */
-  private _normalize(source: IPackageJson): IPackageJson {
+  #normalize(source: IPackageJson): IPackageJson {
     const normalizedData: IPackageJson = { ...source };
     delete normalizedData.dependencies;
     delete normalizedData.optionalDependencies;
@@ -383,10 +383,10 @@ export class PackageJsonEditor {
     delete normalizedData.devDependencies;
     delete normalizedData.resolutions;
 
-    const keys: string[] = [...this._dependencies.keys()].sort();
+    const keys: string[] = [...this.#dependencies.keys()].sort();
 
     for (const packageName of keys) {
-      const { dependencyType, name, version }: PackageJsonDependency = this._dependencies.get(packageName)!;
+      const { dependencyType, name, version }: PackageJsonDependency = this.#dependencies.get(packageName)!;
 
       switch (dependencyType) {
         case DependencyType.Regular: {
@@ -424,9 +424,9 @@ export class PackageJsonEditor {
       }
     }
 
-    const devDependenciesKeys: string[] = [...this._devDependencies.keys()].sort();
+    const devDependenciesKeys: string[] = [...this.#devDependencies.keys()].sort();
     for (const packageName of devDependenciesKeys) {
-      const { name, version }: PackageJsonDependency = this._devDependencies.get(packageName)!;
+      const { name, version }: PackageJsonDependency = this.#devDependencies.get(packageName)!;
 
       if (!normalizedData.devDependencies) {
         normalizedData.devDependencies = {};
@@ -436,8 +436,8 @@ export class PackageJsonEditor {
     }
 
     // (Do not sort this._resolutions because order may be significant; the RFC is unclear about that.)
-    for (const packageName of this._resolutions.keys()) {
-      const { name, version }: PackageJsonDependency = this._resolutions.get(packageName)!;
+    for (const packageName of this.#resolutions.keys()) {
+      const { name, version }: PackageJsonDependency = this.#resolutions.get(packageName)!;
 
       if (!normalizedData.resolutions) {
         normalizedData.resolutions = {};

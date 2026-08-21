@@ -29,26 +29,26 @@ export interface ICustomCommandLineConfigurationInfo {
 }
 
 export class PluginManager {
-  private readonly _terminal: ITerminal;
-  private readonly _rushConfiguration: RushConfiguration;
-  private readonly _rushSession: RushSession;
-  private readonly _restrictConsoleOutput: boolean;
-  private readonly _builtInPluginLoaders: BuiltInPluginLoader[];
-  private readonly _autoinstallerPluginLoaders: AutoinstallerPluginLoader[];
-  private readonly _installedAutoinstallerNames: Set<string>;
-  private readonly _loadedPluginNames: Set<string> = new Set<string>();
-  private readonly _rushGlobalFolder: RushGlobalFolder;
+  readonly #terminal: ITerminal;
+  readonly #rushConfiguration: RushConfiguration;
+  readonly #rushSession: RushSession;
+  readonly #restrictConsoleOutput: boolean;
+  readonly #builtInPluginLoaders: BuiltInPluginLoader[];
+  readonly #autoinstallerPluginLoaders: AutoinstallerPluginLoader[];
+  readonly #installedAutoinstallerNames: Set<string>;
+  readonly #loadedPluginNames: Set<string> = new Set<string>();
+  readonly #rushGlobalFolder: RushGlobalFolder;
 
-  private _error: Error | undefined;
+  #error: Error | undefined;
 
   public constructor(options: IPluginManagerOptions) {
-    this._terminal = options.terminal;
-    this._rushConfiguration = options.rushConfiguration;
-    this._rushSession = options.rushSession;
-    this._restrictConsoleOutput = options.restrictConsoleOutput;
-    this._rushGlobalFolder = options.rushGlobalFolder;
+    this.#terminal = options.terminal;
+    this.#rushConfiguration = options.rushConfiguration;
+    this.#rushSession = options.rushSession;
+    this.#restrictConsoleOutput = options.restrictConsoleOutput;
+    this.#rushGlobalFolder = options.rushGlobalFolder;
 
-    this._installedAutoinstallerNames = new Set<string>();
+    this.#installedAutoinstallerNames = new Set<string>();
 
     // Eventually we will require end users to explicitly configure all Rush plugins in use, regardless of
     // whether they are first party or third party plugins.  However, we're postponing that requirement
@@ -89,23 +89,23 @@ export class PluginManager {
       '@rushstack/rush-azure-storage-build-cache-plugin'
     );
 
-    this._builtInPluginLoaders = builtInPluginConfigurations.map((pluginConfiguration) => {
+    this.#builtInPluginLoaders = builtInPluginConfigurations.map((pluginConfiguration) => {
       return new BuiltInPluginLoader({
         pluginConfiguration,
-        rushConfiguration: this._rushConfiguration,
-        terminal: this._terminal
+        rushConfiguration: this.#rushConfiguration,
+        terminal: this.#terminal
       });
     });
 
-    this._autoinstallerPluginLoaders = (
-      this._rushConfiguration?._rushPluginsConfiguration.configuration.plugins ?? []
+    this.#autoinstallerPluginLoaders = (
+      this.#rushConfiguration?._rushPluginsConfiguration.configuration.plugins ?? []
     ).map((pluginConfiguration) => {
       return new AutoinstallerPluginLoader({
         pluginConfiguration,
-        rushConfiguration: this._rushConfiguration,
-        terminal: this._terminal,
-        restrictConsoleOutput: this._restrictConsoleOutput,
-        rushGlobalFolder: this._rushGlobalFolder
+        rushConfiguration: this.#rushConfiguration,
+        terminal: this.#terminal,
+        restrictConsoleOutput: this.#restrictConsoleOutput,
+        rushGlobalFolder: this.#rushGlobalFolder
       });
     });
   }
@@ -116,74 +116,74 @@ export class PluginManager {
    * (unless we are invoking a command that is used to fix plugin problems).
    */
   public get error(): Error | undefined {
-    return this._error;
+    return this.#error;
   }
 
   public async updateAsync(): Promise<void> {
-    await this._preparePluginAutoinstallersAsync(this._autoinstallerPluginLoaders);
+    await this._preparePluginAutoinstallersAsync(this.#autoinstallerPluginLoaders);
     const preparedAutoinstallerNames: Set<string> = new Set<string>();
-    for (const { autoinstaller } of this._autoinstallerPluginLoaders) {
+    for (const { autoinstaller } of this.#autoinstallerPluginLoaders) {
       const storePath: string = AutoinstallerPluginLoader.getPluginAutoinstallerStorePath(autoinstaller);
       if (!preparedAutoinstallerNames.has(autoinstaller.name)) {
         FileSystem.ensureEmptyFolder(storePath);
         preparedAutoinstallerNames.add(autoinstaller.name);
       }
     }
-    for (const pluginLoader of this._autoinstallerPluginLoaders) {
+    for (const pluginLoader of this.#autoinstallerPluginLoaders) {
       pluginLoader.update();
     }
   }
 
   public async reinitializeAllPluginsForCommandAsync(commandName: string): Promise<void> {
-    this._error = undefined;
+    this.#error = undefined;
     await this.tryInitializeUnassociatedPluginsAsync();
     await this.tryInitializeAssociatedCommandPluginsAsync(commandName);
   }
 
   public async _preparePluginAutoinstallersAsync(pluginLoaders: AutoinstallerPluginLoader[]): Promise<void> {
     for (const { autoinstaller } of pluginLoaders) {
-      if (!this._installedAutoinstallerNames.has(autoinstaller.name)) {
+      if (!this.#installedAutoinstallerNames.has(autoinstaller.name)) {
         await autoinstaller.prepareAsync();
-        this._installedAutoinstallerNames.add(autoinstaller.name);
+        this.#installedAutoinstallerNames.add(autoinstaller.name);
       }
     }
   }
 
   public async tryInitializeUnassociatedPluginsAsync(): Promise<void> {
     try {
-      const autoinstallerPluginLoaders: AutoinstallerPluginLoader[] = this._getUnassociatedPluginLoaders(
-        this._autoinstallerPluginLoaders
+      const autoinstallerPluginLoaders: AutoinstallerPluginLoader[] = this.#getUnassociatedPluginLoaders(
+        this.#autoinstallerPluginLoaders
       );
       await this._preparePluginAutoinstallersAsync(autoinstallerPluginLoaders);
-      const builtInPluginLoaders: BuiltInPluginLoader[] = this._getUnassociatedPluginLoaders(
-        this._builtInPluginLoaders
+      const builtInPluginLoaders: BuiltInPluginLoader[] = this.#getUnassociatedPluginLoaders(
+        this.#builtInPluginLoaders
       );
-      this._initializePlugins([...builtInPluginLoaders, ...autoinstallerPluginLoaders]);
+      this.#initializePlugins([...builtInPluginLoaders, ...autoinstallerPluginLoaders]);
     } catch (e) {
-      this._error = e as Error;
+      this.#error = e as Error;
     }
   }
 
   public async tryInitializeAssociatedCommandPluginsAsync(commandName: string): Promise<void> {
     try {
-      const autoinstallerPluginLoaders: AutoinstallerPluginLoader[] = this._getPluginLoadersForCommand(
+      const autoinstallerPluginLoaders: AutoinstallerPluginLoader[] = this.#getPluginLoadersForCommand(
         commandName,
-        this._autoinstallerPluginLoaders
+        this.#autoinstallerPluginLoaders
       );
       await this._preparePluginAutoinstallersAsync(autoinstallerPluginLoaders);
-      const builtInPluginLoaders: BuiltInPluginLoader[] = this._getPluginLoadersForCommand(
+      const builtInPluginLoaders: BuiltInPluginLoader[] = this.#getPluginLoadersForCommand(
         commandName,
-        this._builtInPluginLoaders
+        this.#builtInPluginLoaders
       );
-      this._initializePlugins([...builtInPluginLoaders, ...autoinstallerPluginLoaders]);
+      this.#initializePlugins([...builtInPluginLoaders, ...autoinstallerPluginLoaders]);
     } catch (e) {
-      this._error = e as Error;
+      this.#error = e as Error;
     }
   }
 
   public tryGetCustomCommandLineConfigurationInfos(): ICustomCommandLineConfigurationInfo[] {
     const commandLineConfigurationInfos: ICustomCommandLineConfigurationInfo[] = [];
-    for (const pluginLoader of this._autoinstallerPluginLoaders) {
+    for (const pluginLoader of this.#autoinstallerPluginLoaders) {
       const commandLineConfiguration: CommandLineConfiguration | undefined =
         pluginLoader.getCommandLineConfiguration();
       if (commandLineConfiguration) {
@@ -196,21 +196,21 @@ export class PluginManager {
     return commandLineConfigurationInfos;
   }
 
-  private _initializePlugins(pluginLoaders: PluginLoaderBase[]): void {
+  #initializePlugins(pluginLoaders: PluginLoaderBase[]): void {
     for (const pluginLoader of pluginLoaders) {
       const pluginName: string = pluginLoader.pluginName;
-      if (this._loadedPluginNames.has(pluginName)) {
+      if (this.#loadedPluginNames.has(pluginName)) {
         throw new Error(`Error applying plugin: A plugin with name "${pluginName}" has already been applied`);
       }
       const plugin: IRushPlugin | undefined = pluginLoader.load();
-      this._loadedPluginNames.add(pluginName);
+      this.#loadedPluginNames.add(pluginName);
       if (plugin) {
-        this._applyPlugin(plugin, pluginName);
+        this.#applyPlugin(plugin, pluginName);
       }
     }
   }
 
-  private _getUnassociatedPluginLoaders<T extends AutoinstallerPluginLoader | BuiltInPluginLoader>(
+  #getUnassociatedPluginLoaders<T extends AutoinstallerPluginLoader | BuiltInPluginLoader>(
     pluginLoaders: T[]
   ): T[] {
     return pluginLoaders.filter((pluginLoader) => {
@@ -218,7 +218,7 @@ export class PluginManager {
     });
   }
 
-  private _getPluginLoadersForCommand<T extends AutoinstallerPluginLoader | BuiltInPluginLoader>(
+  #getPluginLoadersForCommand<T extends AutoinstallerPluginLoader | BuiltInPluginLoader>(
     commandName: string,
     pluginLoaders: T[]
   ): T[] {
@@ -227,9 +227,9 @@ export class PluginManager {
     });
   }
 
-  private _applyPlugin(plugin: IRushPlugin, pluginName: string): void {
+  #applyPlugin(plugin: IRushPlugin, pluginName: string): void {
     try {
-      plugin.apply(this._rushSession, this._rushConfiguration);
+      plugin.apply(this.#rushSession, this.#rushConfiguration);
     } catch (e) {
       throw new InternalError(`Error applying "${pluginName}": ${e}`);
     }

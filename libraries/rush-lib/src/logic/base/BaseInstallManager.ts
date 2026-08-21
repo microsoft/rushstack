@@ -75,9 +75,9 @@ const gitLfsHooks: ReadonlySet<string> = new Set(['post-checkout', 'post-commit'
  * This class implements common logic between "rush install" and "rush update".
  */
 export abstract class BaseInstallManager {
-  private readonly _commonTempLinkFlag: FlagFile;
-  private _npmSetupValidated: boolean = false;
-  private _syncNpmrcAlreadyCalled: boolean = false;
+  readonly #commonTempLinkFlag: FlagFile;
+  #npmSetupValidated: boolean = false;
+  #syncNpmrcAlreadyCalled: boolean = false;
 
   protected readonly _terminal: ITerminal;
 
@@ -100,7 +100,7 @@ export abstract class BaseInstallManager {
     this.installRecycler = purgeManager.commonTempFolderRecycler;
     this.options = options;
 
-    this._commonTempLinkFlag = new FlagFile(
+    this.#commonTempLinkFlag = new FlagFile(
       options.subspace.getSubspaceTempFolderPath(),
       RushConstants.lastLinkFlagFilename,
       {}
@@ -224,7 +224,7 @@ export abstract class BaseInstallManager {
       if (!this.rushConfiguration.rushConfigurationJson.suppressRushIsPublicVersionCheck) {
         let publishedRelease: boolean | undefined;
         try {
-          publishedRelease = await this._checkIfReleaseIsPublishedAsync();
+          publishedRelease = await this.#checkIfReleaseIsPublishedAsync();
         } catch {
           // If the user is working in an environment that can't reach the registry,
           // don't bother them with errors.
@@ -244,7 +244,7 @@ export abstract class BaseInstallManager {
 
         // Since we're going to be tampering with common/node_modules, delete the "rush link" flag file if it exists;
         // this ensures that a full "rush link" is required next time
-        await this._commonTempLinkFlag.clearAsync();
+        await this.#commonTempLinkFlag.clearAsync();
       }
 
       // Give plugins an opportunity to act before invoking the installation process
@@ -448,7 +448,7 @@ export abstract class BaseInstallManager {
     // than whatever pnpm would emit.
     detectAndReportWorkspaceCycles(this.rushConfiguration, terminal);
 
-    await this._installGitHooksAsync();
+    await this.#installGitHooksAsync();
 
     const approvedPackagesChecker: ApprovedPackagesChecker = new ApprovedPackagesChecker(
       this.rushConfiguration
@@ -561,7 +561,7 @@ export abstract class BaseInstallManager {
       createIfMissing: this.rushConfiguration.subspacesFeatureEnabled,
       supportEnvVarFallbackSyntax: this.rushConfiguration.isPnpm
     });
-    this._syncNpmrcAlreadyCalled = true;
+    this.#syncNpmrcAlreadyCalled = true;
 
     const npmrcHash: string | undefined = npmrcText
       ? crypto.createHash('sha1').update(npmrcText).digest('hex')
@@ -648,7 +648,7 @@ export abstract class BaseInstallManager {
       ]);
     shrinkwrapIsUpToDate = shrinkwrapIsUpToDate && !this.options.recheckShrinkwrap;
 
-    this._syncTempShrinkwrap(subspace, variant, shrinkwrapFile);
+    this.#syncTempShrinkwrap(subspace, variant, shrinkwrapFile);
 
     // Write out the reported warnings
     if (shrinkwrapWarnings.length > 0) {
@@ -698,7 +698,7 @@ export abstract class BaseInstallManager {
   /**
    * Git hooks are only installed if the repo opts in by including files in /common/git-hooks
    */
-  private async _installGitHooksAsync(): Promise<void> {
+  async #installGitHooksAsync(): Promise<void> {
     const hookSource: string = path.join(this.rushConfiguration.commonFolder, 'git-hooks');
     const git: Git = new Git(this.rushConfiguration);
     const hookDestination: string | undefined = git.getHooksFolder();
@@ -1026,7 +1026,7 @@ ${gitLfsHookHandling}
     }
   }
 
-  private async _checkIfReleaseIsPublishedAsync(): Promise<boolean> {
+  async #checkIfReleaseIsPublishedAsync(): Promise<boolean> {
     const lastCheckFile: string = path.join(
       this.rushGlobalFolder.nodeSpecificPath,
       'rush-' + Rush.version,
@@ -1064,7 +1064,7 @@ ${gitLfsHookHandling}
 
     try {
       // For this check we use the official registry, not the private registry
-      const publishedRelease: boolean = await this._queryIfReleaseIsPublishedAsync(
+      const publishedRelease: boolean = await this.#queryIfReleaseIsPublishedAsync(
         'https://registry.npmjs.org:443'
       );
       // Cache the result
@@ -1077,7 +1077,7 @@ ${gitLfsHookHandling}
   }
 
   // Helper for checkIfReleaseIsPublished()
-  private async _queryIfReleaseIsPublishedAsync(registryUrl: string): Promise<boolean> {
+  async #queryIfReleaseIsPublishedAsync(registryUrl: string): Promise<boolean> {
     let queryUrl: string = registryUrl;
     if (queryUrl[-1] !== '/') {
       queryUrl += '/';
@@ -1129,7 +1129,7 @@ ${gitLfsHookHandling}
     return true;
   }
 
-  private _syncTempShrinkwrap(
+  #syncTempShrinkwrap(
     subspace: Subspace,
     variant: string | undefined,
     shrinkwrapFile: BaseShrinkwrapFile | undefined
@@ -1160,7 +1160,7 @@ ${gitLfsHookHandling}
   }
 
   protected async validateNpmSetupAsync(): Promise<void> {
-    if (this._npmSetupValidated) {
+    if (this.#npmSetupValidated) {
       return;
     }
 
@@ -1168,7 +1168,7 @@ ${gitLfsHookHandling}
       const setupPackageRegistry: SetupPackageRegistry = new SetupPackageRegistry({
         rushConfiguration: this.rushConfiguration,
         isDebug: this.options.debug,
-        syncNpmrcAlreadyCalled: this._syncNpmrcAlreadyCalled
+        syncNpmrcAlreadyCalled: this.#syncNpmrcAlreadyCalled
       });
       const valid: boolean = await setupPackageRegistry.checkOnlyAsync();
       if (!valid) {
@@ -1189,6 +1189,6 @@ ${gitLfsHookHandling}
       }
     }
 
-    this._npmSetupValidated = true;
+    this.#npmSetupValidated = true;
   }
 }

@@ -9,10 +9,10 @@ import type { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParse
 import { RushConstants } from '../RushConstants';
 
 export class NamedProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {
-  private readonly _rushConfiguration: RushConfiguration;
+  readonly #rushConfiguration: RushConfiguration;
 
   public constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
+    this.#rushConfiguration = rushConfiguration;
   }
 
   public async evaluateSelectorAsync({
@@ -21,7 +21,7 @@ export class NamedProjectSelectorParser implements ISelectorParser<RushConfigura
     parameterName
   }: IEvaluateSelectorOptions): Promise<Iterable<RushConfigurationProject>> {
     const project: RushConfigurationProject | undefined =
-      this._rushConfiguration.findProjectByShorthandName(unscopedSelector);
+      this.#rushConfiguration.findProjectByShorthandName(unscopedSelector);
     if (!project) {
       terminal.writeErrorLine(
         `The project name "${unscopedSelector}" passed to "${parameterName}" does not exist in ` +
@@ -37,7 +37,7 @@ export class NamedProjectSelectorParser implements ISelectorParser<RushConfigura
     const unscopedNamesMap: Map<string, number> = new Map<string, number>();
 
     const scopedNames: Set<string> = new Set();
-    for (const project of this._rushConfiguration.rushConfigurationJson.projects) {
+    for (const project of this.#rushConfiguration.rushConfigurationJson.projects) {
       scopedNames.add(project.packageName);
       const unscopedName: string = PackageName.getUnscopedName(project.packageName);
       const count: number = unscopedNamesMap.get(unscopedName) || 0;

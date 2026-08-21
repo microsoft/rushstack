@@ -8,16 +8,16 @@ import { RushConstants } from '../RushConstants';
 import type { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser';
 
 export class SubspaceSelectorParser implements ISelectorParser<RushConfigurationProject> {
-  private readonly _rushConfiguration: RushConfiguration;
+  readonly #rushConfiguration: RushConfiguration;
 
   public constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
+    this.#rushConfiguration = rushConfiguration;
   }
 
   public async evaluateSelectorAsync({
     unscopedSelector
   }: IEvaluateSelectorOptions): Promise<Iterable<RushConfigurationProject>> {
-    const subspace: Subspace = this._rushConfiguration.getSubspace(unscopedSelector);
+    const subspace: Subspace = this.#rushConfiguration.getSubspace(unscopedSelector);
 
     return subspace.getProjects();
   }
@@ -25,8 +25,8 @@ export class SubspaceSelectorParser implements ISelectorParser<RushConfiguration
   public getCompletions(): Iterable<string> {
     // Tab completion is a performance sensitive operation, so avoid loading all the projects
     const subspaceNames: string[] = [];
-    if (this._rushConfiguration.subspacesConfiguration) {
-      subspaceNames.push(...this._rushConfiguration.subspacesConfiguration.subspaceNames);
+    if (this.#rushConfiguration.subspacesConfiguration) {
+      subspaceNames.push(...this.#rushConfiguration.subspacesConfiguration.subspaceNames);
     }
     if (!subspaceNames.indexOf(RushConstants.defaultSubspaceName)) {
       subspaceNames.push(RushConstants.defaultSubspaceName);

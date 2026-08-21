@@ -299,7 +299,7 @@ export class RushProjectConfiguration {
 
   public readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
 
-  private readonly _validationCache: WeakSet<object> = new WeakSet();
+  readonly #validationCache: WeakSet<object> = new WeakSet();
 
   private constructor(
     project: RushConfigurationProject,
@@ -321,7 +321,7 @@ export class RushProjectConfiguration {
    */
   public validatePhaseConfiguration(phases: Iterable<IPhase>, terminal: ITerminal): void {
     // Don't repeatedly validate the same set of phases for the same project.
-    if (this._validationCache.has(phases)) {
+    if (this.#validationCache.has(phases)) {
       return;
     }
 
@@ -397,7 +397,7 @@ export class RushProjectConfiguration {
       }
     }
 
-    this._validationCache.add(phases);
+    this.#validationCache.add(phases);
 
     if (hasErrors) {
       throw new AlreadyReportedError();

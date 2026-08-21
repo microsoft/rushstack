@@ -144,33 +144,33 @@ const MAX_FILE_COUNT: number = 100;
 const ONE_MEGABYTE_IN_BYTES: 1048576 = 1048576;
 
 export class Telemetry {
-  private _enabled: boolean;
-  private _store: ITelemetryData[];
-  private _dataFolder: string;
-  private _rushConfiguration: RushConfiguration;
-  private _rushSession: RushSession;
-  private _flushAsyncTasks: Set<Promise<void>> = new Set();
-  private _telemetryStartTime: number = 0;
+  #enabled: boolean;
+  #store: ITelemetryData[];
+  #dataFolder: string;
+  #rushConfiguration: RushConfiguration;
+  #rushSession: RushSession;
+  private readonly _flushAsyncTasks: Set<Promise<void>> = new Set();
+  #telemetryStartTime: number = 0;
 
   public constructor(rushConfiguration: RushConfiguration, rushSession: RushSession) {
-    this._rushConfiguration = rushConfiguration;
-    this._rushSession = rushSession;
-    this._enabled = this._rushConfiguration.telemetryEnabled;
-    this._store = [];
+    this.#rushConfiguration = rushConfiguration;
+    this.#rushSession = rushSession;
+    this.#enabled = this.#rushConfiguration.telemetryEnabled;
+    this.#store = [];
 
     const folderName: string = 'telemetry';
-    this._dataFolder = path.join(this._rushConfiguration.commonTempFolder, folderName);
+    this.#dataFolder = path.join(this.#rushConfiguration.commonTempFolder, folderName);
   }
 
   public log(telemetryData: ITelemetryData): void {
-    if (!this._enabled) {
+    if (!this.#enabled) {
       return;
     }
     const cpus: os.CpuInfo[] = os.cpus();
     const data: ITelemetryData = {
       ...telemetryData,
       performanceEntries:
-        telemetryData.performanceEntries || collectPerformanceEntries(this._telemetryStartTime),
+        telemetryData.performanceEntries || collectPerformanceEntries(this.#telemetryStartTime),
       machineInfo: telemetryData.machineInfo || {
         machineArchitecture: os.arch(),
         // The Node.js model is sometimes padded, for example:
@@ -184,23 +184,23 @@ export class Telemetry {
       platform: telemetryData.platform || process.platform,
       rushVersion: telemetryData.rushVersion || Rush.version
     };
-    this._telemetryStartTime = performance.now();
-    this._store.push(data);
+    this.#telemetryStartTime = performance.now();
+    this.#store.push(data);
   }
 
   public flush(): void {
-    if (!this._enabled || this._store.length === 0) {
+    if (!this.#enabled || this.#store.length === 0) {
       return;
     }
 
-    const fullPath: string = this._getFilePath();
-    JsonFile.save(this._store, fullPath, { ensureFolderExists: true, ignoreUndefinedValues: true });
-    if (this._rushSession.hooks.flushTelemetry.isUsed()) {
+    const fullPath: string = this.#getFilePath();
+    JsonFile.save(this.#store, fullPath, { ensureFolderExists: true, ignoreUndefinedValues: true });
+    if (this.#rushSession.hooks.flushTelemetry.isUsed()) {
       /**
        * User defined flushTelemetry should not block anything, so we don't await here,
        * and store the promise into a list so that we can await it later.
        */
-      const asyncTaskPromise: Promise<void> = this._rushSession.hooks.flushTelemetry.promise(this._store);
+      const asyncTaskPromise: Promise<void> = this.#rushSession.hooks.flushTelemetry.promise(this.#store);
       this._flushAsyncTasks.add(asyncTaskPromise);
       asyncTaskPromise.then(
         () => {
@@ -212,8 +212,8 @@ export class Telemetry {
       );
     }
 
-    this._store = [];
-    this._cleanUp();
+    this.#store = [];
+    this.#cleanUp();
   }
 
   /**
@@ -224,19 +224,19 @@ export class Telemetry {
   }
 
   public get store(): ITelemetryData[] {
-    return this._store;
+    return this.#store;
   }
 
   /**
    * When there are too many log files, delete the old ones.
    */
-  private _cleanUp(): void {
-    if (FileSystem.exists(this._dataFolder)) {
-      const files: string[] = FileSystem.readFolderItemNames(this._dataFolder);
+  #cleanUp(): void {
+    if (FileSystem.exists(this.#dataFolder)) {
+      const files: string[] = FileSystem.readFolderItemNames(this.#dataFolder);
       if (files.length > MAX_FILE_COUNT) {
         const sortedFiles: string[] = files
           .map((fileName) => {
-            const filePath: string = path.join(this._dataFolder, fileName);
+            const filePath: string = path.join(this.#dataFolder, fileName);
             const stats: FileSystemStats = FileSystem.getStatistics(filePath);
             return {
               filePath: filePath,
@@ -262,9 +262,9 @@ export class Telemetry {
     }
   }
 
-  private _getFilePath(): string {
+  #getFilePath(): string {
     let fileName: string = `telemetry_${new Date().toISOString()}`;
     fileName = fileName.replace(/[\-\:\.]/g, '_') + '.json';
-    return path.join(this._dataFolder, fileName);
+    return path.join(this.#dataFolder, fileName);
   }
 }

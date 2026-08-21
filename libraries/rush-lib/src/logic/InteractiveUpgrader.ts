@@ -14,31 +14,31 @@ interface IUpgradeInteractiveDeps {
 }
 
 export class InteractiveUpgrader {
-  private readonly _rushConfiguration: RushConfiguration;
+  readonly #rushConfiguration: RushConfiguration;
 
   public constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
+    this.#rushConfiguration = rushConfiguration;
   }
 
   public async upgradeAsync(): Promise<IUpgradeInteractiveDeps> {
-    const rushProject: RushConfigurationProject = await this._getUserSelectedProjectForUpgradeAsync();
+    const rushProject: RushConfigurationProject = await this.#getUserSelectedProjectForUpgradeAsync();
 
     const dependenciesState: INpmCheckPackageSummary[] =
-      await this._getPackageDependenciesStatusAsync(rushProject);
+      await this.#getPackageDependenciesStatusAsync(rushProject);
 
     const depsToUpgrade: IDepsToUpgradeAnswers =
-      await this._getUserSelectedDependenciesToUpgradeAsync(dependenciesState);
+      await this.#getUserSelectedDependenciesToUpgradeAsync(dependenciesState);
     return { projects: [rushProject], depsToUpgrade };
   }
 
-  private async _getUserSelectedDependenciesToUpgradeAsync(
+  async #getUserSelectedDependenciesToUpgradeAsync(
     packages: INpmCheckPackageSummary[]
   ): Promise<IDepsToUpgradeAnswers> {
     return upgradeInteractive(packages);
   }
 
-  private async _getUserSelectedProjectForUpgradeAsync(): Promise<RushConfigurationProject> {
-    const projects: RushConfigurationProject[] | undefined = this._rushConfiguration.projects;
+  async #getUserSelectedProjectForUpgradeAsync(): Promise<RushConfigurationProject> {
+    const projects: RushConfigurationProject[] | undefined = this.#rushConfiguration.projects;
 
     const { default: search } = await import('@inquirer/search');
 
@@ -62,7 +62,7 @@ export class InteractiveUpgrader {
     });
   }
 
-  private async _getPackageDependenciesStatusAsync(
+  async #getPackageDependenciesStatusAsync(
     rushProject: RushConfigurationProject
   ): Promise<INpmCheckPackageSummary[]> {
     const { projectFolder } = rushProject;

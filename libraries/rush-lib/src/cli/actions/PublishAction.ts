@@ -32,31 +32,31 @@ import { IS_WINDOWS } from '../../utilities/executionUtilities';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 
 export class PublishAction extends BaseRushAction {
-  private readonly _addCommitDetails: CommandLineFlagParameter;
-  private readonly _apply: CommandLineFlagParameter;
-  private readonly _includeAll: CommandLineFlagParameter;
-  private readonly _npmAuthToken: CommandLineStringParameter;
-  private readonly _npmTag: CommandLineStringParameter;
-  private readonly _npmAccessLevel: CommandLineChoiceParameter;
-  private readonly _publish: CommandLineFlagParameter;
-  private readonly _regenerateChangelogs: CommandLineFlagParameter;
-  private readonly _registryUrl: CommandLineStringParameter;
-  private readonly _targetBranch: CommandLineStringParameter;
-  private readonly _prereleaseName: CommandLineStringParameter;
-  private readonly _partialPrerelease: CommandLineFlagParameter;
-  private readonly _suffix: CommandLineStringParameter;
-  private readonly _force: CommandLineFlagParameter;
-  private readonly _versionPolicy: CommandLineStringParameter;
-  private readonly _applyGitTagsOnPack: CommandLineFlagParameter;
-  private readonly _commitId: CommandLineStringParameter;
-  private readonly _releaseFolder: CommandLineStringParameter;
-  private readonly _pack: CommandLineFlagParameter;
-  private readonly _ignoreGitHooksParameter: CommandLineFlagParameter;
+  readonly #addCommitDetails: CommandLineFlagParameter;
+  readonly #apply: CommandLineFlagParameter;
+  readonly #includeAll: CommandLineFlagParameter;
+  readonly #npmAuthToken: CommandLineStringParameter;
+  readonly #npmTag: CommandLineStringParameter;
+  readonly #npmAccessLevel: CommandLineChoiceParameter;
+  readonly #publish: CommandLineFlagParameter;
+  readonly #regenerateChangelogs: CommandLineFlagParameter;
+  readonly #registryUrl: CommandLineStringParameter;
+  readonly #targetBranch: CommandLineStringParameter;
+  readonly #prereleaseName: CommandLineStringParameter;
+  readonly #partialPrerelease: CommandLineFlagParameter;
+  readonly #suffix: CommandLineStringParameter;
+  readonly #force: CommandLineFlagParameter;
+  readonly #versionPolicy: CommandLineStringParameter;
+  readonly #applyGitTagsOnPack: CommandLineFlagParameter;
+  readonly #commitId: CommandLineStringParameter;
+  readonly #releaseFolder: CommandLineStringParameter;
+  readonly #pack: CommandLineFlagParameter;
+  readonly #ignoreGitHooksParameter: CommandLineFlagParameter;
 
-  private _prereleaseToken!: PrereleaseToken;
-  private _hotfixTagOverride!: string;
-  private _targetNpmrcPublishFolder!: string;
-  private _targetNpmrcPublishPath!: string;
+  #prereleaseToken!: PrereleaseToken;
+  #hotfixTagOverride!: string;
+  #targetNpmrcPublishFolder!: string;
+  #targetNpmrcPublishPath!: string;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -69,12 +69,12 @@ export class PublishAction extends BaseRushAction {
       parser
     });
 
-    this._apply = this.defineFlagParameter({
+    this.#apply = this.defineFlagParameter({
       parameterLongName: '--apply',
       parameterShortName: '-a',
       description: 'If this flag is specified, the change requests will be applied to package.json files.'
     });
-    this._targetBranch = this.defineStringParameter({
+    this.#targetBranch = this.defineStringParameter({
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
       argumentName: 'BRANCH',
@@ -82,24 +82,24 @@ export class PublishAction extends BaseRushAction {
         'If this flag is specified, applied changes and deleted change requests will be ' +
         'committed and merged into the target branch.'
     });
-    this._publish = this.defineFlagParameter({
+    this.#publish = this.defineFlagParameter({
       parameterLongName: '--publish',
       parameterShortName: '-p',
       description: 'If this flag is specified, applied changes will be published to the NPM registry.'
     });
-    this._addCommitDetails = this.defineFlagParameter({
+    this.#addCommitDetails = this.defineFlagParameter({
       parameterLongName: '--add-commit-details',
       parameterShortName: undefined,
       description: 'Adds commit author and hash to the changelog.json files for each change.'
     });
-    this._regenerateChangelogs = this.defineFlagParameter({
+    this.#regenerateChangelogs = this.defineFlagParameter({
       parameterLongName: '--regenerate-changelogs',
       parameterShortName: undefined,
       description: 'Regenerates all changelog files based on the current JSON content.'
     });
 
     // NPM registry related parameters
-    this._registryUrl = this.defineStringParameter({
+    this.#registryUrl = this.defineStringParameter({
       parameterLongName: '--registry',
       parameterShortName: '-r',
       argumentName: 'REGISTRY',
@@ -107,7 +107,7 @@ export class PublishAction extends BaseRushAction {
         `Publishes to a specified NPM registry. If this is specified, it will prevent the current commit will not be ` +
         'tagged.'
     });
-    this._npmAuthToken = this.defineStringParameter({
+    this.#npmAuthToken = this.defineStringParameter({
       parameterLongName: '--npm-auth-token',
       parameterShortName: '-n',
       argumentName: 'TOKEN',
@@ -117,7 +117,7 @@ export class PublishAction extends BaseRushAction {
         ' safer practice is to pass the token via an environment variable and reference it from your ' +
         ' common/config/rush/.npmrc-publish file.'
     });
-    this._npmTag = this.defineStringParameter({
+    this.#npmTag = this.defineStringParameter({
       parameterLongName: '--tag',
       parameterShortName: '-t',
       argumentName: 'TAG',
@@ -126,7 +126,7 @@ export class PublishAction extends BaseRushAction {
         `the package is older than the current latest, so in publishing workflows for older releases, providing ` +
         `a tag is important. When hotfix changes are made, this parameter defaults to 'hotfix'.`
     });
-    this._npmAccessLevel = this.defineChoiceParameter({
+    this.#npmAccessLevel = this.defineChoiceParameter({
       alternatives: ['public', 'restricted'],
       parameterLongName: '--set-access-level',
       parameterShortName: undefined,
@@ -139,13 +139,13 @@ export class PublishAction extends BaseRushAction {
     });
 
     // NPM pack tarball related parameters
-    this._pack = this.defineFlagParameter({
+    this.#pack = this.defineFlagParameter({
       parameterLongName: '--pack',
       description:
         `Packs projects into tarballs instead of publishing to npm repository. It can only be used when ` +
         `--include-all is specified. If this flag is specified, NPM registry related parameters will be ignored.`
     });
-    this._releaseFolder = this.defineStringParameter({
+    this.#releaseFolder = this.defineStringParameter({
       parameterLongName: '--release-folder',
       argumentName: 'FOLDER',
       description:
@@ -154,7 +154,7 @@ export class PublishAction extends BaseRushAction {
     });
     // End of NPM pack tarball related parameters
 
-    this._includeAll = this.defineFlagParameter({
+    this.#includeAll = this.defineFlagParameter({
       parameterLongName: '--include-all',
       parameterShortName: undefined,
       description:
@@ -162,42 +162,42 @@ export class PublishAction extends BaseRushAction {
         'or with a specified version policy ' +
         'will be published if their version is newer than published version.'
     });
-    this._versionPolicy = this.defineStringParameter({
+    this.#versionPolicy = this.defineStringParameter({
       parameterLongName: '--version-policy',
       argumentName: 'POLICY',
       description:
         'Version policy name. Only projects with this version policy will be published if used ' +
         'with --include-all.'
     });
-    this._prereleaseName = this.defineStringParameter({
+    this.#prereleaseName = this.defineStringParameter({
       parameterLongName: '--prerelease-name',
       argumentName: 'NAME',
       description:
         'Bump up to a prerelease version with the provided prerelease name. Cannot be used with --suffix'
     });
-    this._partialPrerelease = this.defineFlagParameter({
+    this.#partialPrerelease = this.defineFlagParameter({
       parameterLongName: '--partial-prerelease',
       parameterShortName: undefined,
       description:
         'Used with --prerelease-name. Only bump packages to a prerelease version if they have changes.'
     });
-    this._suffix = this.defineStringParameter({
+    this.#suffix = this.defineStringParameter({
       parameterLongName: '--suffix',
       argumentName: 'SUFFIX',
       description: 'Append a suffix to all changed versions. Cannot be used with --prerelease-name.'
     });
-    this._force = this.defineFlagParameter({
+    this.#force = this.defineFlagParameter({
       parameterLongName: '--force',
       parameterShortName: undefined,
       description: 'If this flag is specified with --publish, packages will be published with --force on npm'
     });
-    this._applyGitTagsOnPack = this.defineFlagParameter({
+    this.#applyGitTagsOnPack = this.defineFlagParameter({
       parameterLongName: '--apply-git-tags-on-pack',
       description:
         `If specified with --publish and --pack, git tags will be applied for packages` +
         ` as if a publish was being run without --pack.`
     });
-    this._commitId = this.defineStringParameter({
+    this.#commitId = this.defineStringParameter({
       parameterLongName: '--commit',
       parameterShortName: '-c',
       argumentName: 'COMMIT_ID',
@@ -205,7 +205,7 @@ export class PublishAction extends BaseRushAction {
         `Used in conjunction with git tagging -- apply git tags at the commit hash` +
         ` specified. If not provided, the current HEAD will be tagged.`
     });
-    this._ignoreGitHooksParameter = this.defineFlagParameter({
+    this.#ignoreGitHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-git-hooks',
       description: `Skips execution of all git hooks. Make sure you know what you are skipping.`
     });
@@ -225,35 +225,35 @@ export class PublishAction extends BaseRushAction {
     );
 
     // Example: "common\temp\publish-home"
-    this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
+    this.#targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
 
     // Example: "common\temp\publish-home\.npmrc"
-    this._targetNpmrcPublishPath = path.join(this._targetNpmrcPublishFolder, '.npmrc');
+    this.#targetNpmrcPublishPath = path.join(this.#targetNpmrcPublishFolder, '.npmrc');
 
     const allPackages: ReadonlyMap<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
 
-    if (this._regenerateChangelogs.value) {
+    if (this.#regenerateChangelogs.value) {
       // eslint-disable-next-line no-console
       console.log('Regenerating changelogs');
       ChangelogGenerator.regenerateChangelogs(allPackages, this.rushConfiguration);
       return;
     }
 
-    this._validate();
+    this.#validate();
 
-    this._addNpmPublishHome(this.rushConfiguration.isPnpm);
+    this.#addNpmPublishHome(this.rushConfiguration.isPnpm);
 
     const git: Git = new Git(this.rushConfiguration);
-    const publishGit: PublishGit = new PublishGit(git, this._targetBranch.value);
-    if (this._includeAll.value) {
-      await this._publishAllAsync(publishGit, allPackages);
+    const publishGit: PublishGit = new PublishGit(git, this.#targetBranch.value);
+    if (this.#includeAll.value) {
+      await this.#publishAllAsync(publishGit, allPackages);
     } else {
-      this._prereleaseToken = new PrereleaseToken(
-        this._prereleaseName.value,
-        this._suffix.value,
-        this._partialPrerelease.value
+      this.#prereleaseToken = new PrereleaseToken(
+        this.#prereleaseName.value,
+        this.#suffix.value,
+        this.#partialPrerelease.value
       );
-      await this._publishChangesAsync(git, publishGit, allPackages);
+      await this.#publishChangesAsync(git, publishGit, allPackages);
     }
 
     // eslint-disable-next-line no-console
@@ -263,25 +263,25 @@ export class PublishAction extends BaseRushAction {
   /**
    * Validate some input parameters
    */
-  private _validate(): void {
-    if (this._pack.value && !this._includeAll.value) {
+  #validate(): void {
+    if (this.#pack.value && !this.#includeAll.value) {
       throw new Error('--pack can only be used with --include-all');
     }
-    if (this._releaseFolder.value && !this._pack.value) {
+    if (this.#releaseFolder.value && !this.#pack.value) {
       throw new Error(`--release-folder can only be used with --pack`);
     }
-    if (this._applyGitTagsOnPack.value && !this._pack.value) {
-      throw new Error(`${this._applyGitTagsOnPack.longName} must be used with ${this._pack.longName}`);
+    if (this.#applyGitTagsOnPack.value && !this.#pack.value) {
+      throw new Error(`${this.#applyGitTagsOnPack.longName} must be used with ${this.#pack.longName}`);
     }
   }
 
-  private async _publishChangesAsync(
+  async #publishChangesAsync(
     git: Git,
     publishGit: PublishGit,
     allPackages: ReadonlyMap<string, RushConfigurationProject>
   ): Promise<void> {
     const changeManager: ChangeManager = new ChangeManager(this.rushConfiguration);
-    await changeManager.loadAsync(this._prereleaseToken, this._addCommitDetails.value);
+    await changeManager.loadAsync(this.#prereleaseToken, this.#addCommitDetails.value);
 
     if (changeManager.hasChanges()) {
       const orderedChanges: IChangeInfo[] = changeManager.packageChanges;
@@ -290,29 +290,29 @@ export class PublishAction extends BaseRushAction {
       // Make changes in temp branch.
       await publishGit.checkoutAsync(tempBranchName, true);
 
-      await this._setDependenciesBeforePublishAsync();
+      await this.#setDependenciesBeforePublishAsync();
 
       // Make changes to package.json and change logs.
-      changeManager.apply(this._apply.value);
-      await changeManager.updateChangelogAsync(this.terminal, this._apply.value);
+      changeManager.apply(this.#apply.value);
+      await changeManager.updateChangelogAsync(this.terminal, this.#apply.value);
 
-      await this._setDependenciesBeforeCommitAsync();
+      await this.#setDependenciesBeforeCommitAsync();
 
       if (await git.hasUncommittedChangesAsync()) {
         // Stage, commit, and push the changes to remote temp branch.
         await publishGit.addChangesAsync(':/*');
         await publishGit.commitAsync(
           this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE,
-          !this._ignoreGitHooksParameter.value
+          !this.#ignoreGitHooksParameter.value
         );
-        await publishGit.pushAsync(tempBranchName, !this._ignoreGitHooksParameter.value);
+        await publishGit.pushAsync(tempBranchName, !this.#ignoreGitHooksParameter.value);
 
-        await this._setDependenciesBeforePublishAsync();
+        await this.#setDependenciesBeforePublishAsync();
 
         // Override tag parameter if there is a hotfix change.
         for (const change of orderedChanges) {
           if (change.changeType === ChangeType.hotfix) {
-            this._hotfixTagOverride = 'hotfix';
+            this.#hotfixTagOverride = 'hotfix';
             break;
           }
         }
@@ -322,8 +322,8 @@ export class PublishAction extends BaseRushAction {
           if (change.changeType && change.changeType > ChangeType.dependency) {
             const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);
             if (project) {
-              if (!(await this._packageExistsAsync(project))) {
-                await this._npmPublishAsync(change.packageName, project.publishFolder);
+              if (!(await this.#packageExistsAsync(project))) {
+                await this.#npmPublishAsync(change.packageName, project.publishFolder);
               } else {
                 // eslint-disable-next-line no-console
                 console.log(`Skip ${change.packageName}. Package exists.`);
@@ -335,38 +335,38 @@ export class PublishAction extends BaseRushAction {
           }
         }
 
-        await this._setDependenciesBeforeCommitAsync();
+        await this.#setDependenciesBeforeCommitAsync();
 
         // Create and push appropriate Git tags.
-        await this._gitAddTagsAsync(publishGit, orderedChanges);
-        await publishGit.pushAsync(tempBranchName, !this._ignoreGitHooksParameter.value);
+        await this.#gitAddTagsAsync(publishGit, orderedChanges);
+        await publishGit.pushAsync(tempBranchName, !this.#ignoreGitHooksParameter.value);
 
         // Now merge to target branch.
-        await publishGit.checkoutAsync(this._targetBranch.value!);
-        await publishGit.pullAsync(!this._ignoreGitHooksParameter.value);
-        await publishGit.mergeAsync(tempBranchName, !this._ignoreGitHooksParameter.value);
-        await publishGit.pushAsync(this._targetBranch.value!, !this._ignoreGitHooksParameter.value);
-        await publishGit.deleteBranchAsync(tempBranchName, true, !this._ignoreGitHooksParameter.value);
+        await publishGit.checkoutAsync(this.#targetBranch.value!);
+        await publishGit.pullAsync(!this.#ignoreGitHooksParameter.value);
+        await publishGit.mergeAsync(tempBranchName, !this.#ignoreGitHooksParameter.value);
+        await publishGit.pushAsync(this.#targetBranch.value!, !this.#ignoreGitHooksParameter.value);
+        await publishGit.deleteBranchAsync(tempBranchName, true, !this.#ignoreGitHooksParameter.value);
       } else {
-        await publishGit.checkoutAsync(this._targetBranch.value!);
-        await publishGit.deleteBranchAsync(tempBranchName, false, !this._ignoreGitHooksParameter.value);
+        await publishGit.checkoutAsync(this.#targetBranch.value!);
+        await publishGit.deleteBranchAsync(tempBranchName, false, !this.#ignoreGitHooksParameter.value);
       }
     }
   }
 
-  private async _publishAllAsync(
+  async #publishAllAsync(
     git: PublishGit,
     allPackages: ReadonlyMap<string, RushConfigurationProject>
   ): Promise<void> {
     // eslint-disable-next-line no-console
-    console.log(`Rush publish starts with includeAll and version policy ${this._versionPolicy.value}`);
+    console.log(`Rush publish starts with includeAll and version policy ${this.#versionPolicy.value}`);
 
     let updated: boolean = false;
 
     for (const [packageName, packageConfig] of allPackages) {
       if (
         packageConfig.shouldPublish &&
-        (!this._versionPolicy.value || this._versionPolicy.value === packageConfig.versionPolicyName)
+        (!this.#versionPolicy.value || this.#versionPolicy.value === packageConfig.versionPolicyName)
       ) {
         const applyTagAsync: (apply: boolean) => Promise<void> = async (apply: boolean): Promise<void> => {
           if (!apply) {
@@ -385,22 +385,22 @@ export class PublishAction extends BaseRushAction {
           }
 
           await git.addTagAsync(
-            !!this._publish.value,
+            !!this.#publish.value,
             packageName,
             packageVersion,
-            this._commitId.value,
-            this._prereleaseName.value
+            this.#commitId.value,
+            this.#prereleaseName.value
           );
           updated = true;
         };
 
-        if (this._pack.value) {
+        if (this.#pack.value) {
           // packs to tarball instead of publishing to NPM repository
-          await this._npmPackAsync(packageName, packageConfig);
-          await applyTagAsync(this._applyGitTagsOnPack.value);
-        } else if (this._force.value || !(await this._packageExistsAsync(packageConfig))) {
+          await this.#npmPackAsync(packageName, packageConfig);
+          await applyTagAsync(this.#applyGitTagsOnPack.value);
+        } else if (this.#force.value || !(await this.#packageExistsAsync(packageConfig))) {
           // Publish to npm repository
-          await this._npmPublishAsync(packageName, packageConfig.publishFolder);
+          await this.#npmPublishAsync(packageName, packageConfig.publishFolder);
           await applyTagAsync(true);
         } else {
           // eslint-disable-next-line no-console
@@ -410,11 +410,11 @@ export class PublishAction extends BaseRushAction {
     }
 
     if (updated) {
-      await git.pushAsync(this._targetBranch.value!, !this._ignoreGitHooksParameter.value);
+      await git.pushAsync(this.#targetBranch.value!, !this.#ignoreGitHooksParameter.value);
     }
   }
 
-  private async _gitAddTagsAsync(git: PublishGit, orderedChanges: IChangeInfo[]): Promise<void> {
+  async #gitAddTagsAsync(git: PublishGit, orderedChanges: IChangeInfo[]): Promise<void> {
     for (const change of orderedChanges) {
       if (
         change.changeType &&
@@ -422,35 +422,35 @@ export class PublishAction extends BaseRushAction {
         this.rushConfiguration.projectsByName.get(change.packageName)!.shouldPublish
       ) {
         await git.addTagAsync(
-          !!this._publish.value && !this._registryUrl.value,
+          !!this.#publish.value && !this.#registryUrl.value,
           change.packageName,
           change.newVersion!,
-          this._commitId.value,
-          this._prereleaseName.value
+          this.#commitId.value,
+          this.#prereleaseName.value
         );
       }
     }
   }
 
-  private async _npmPublishAsync(packageName: string, packagePath: string): Promise<void> {
+  async #npmPublishAsync(packageName: string, packagePath: string): Promise<void> {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     const args: string[] = ['publish'];
 
     if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
-      this._addSharedNpmConfig(env, args);
+      this.#addSharedNpmConfig(env, args);
 
-      if (this._npmTag.value) {
-        args.push(`--tag`, this._npmTag.value);
-      } else if (this._hotfixTagOverride) {
-        args.push(`--tag`, this._hotfixTagOverride);
+      if (this.#npmTag.value) {
+        args.push(`--tag`, this.#npmTag.value);
+      } else if (this.#hotfixTagOverride) {
+        args.push(`--tag`, this.#hotfixTagOverride);
       }
 
-      if (this._force.value) {
+      if (this.#force.value) {
         args.push(`--force`);
       }
 
-      if (this._npmAccessLevel.value) {
-        args.push(`--access`, this._npmAccessLevel.value);
+      if (this.#npmAccessLevel.value) {
+        args.push(`--access`, this.#npmAccessLevel.value);
       }
 
       if (this.rushConfiguration.isPnpm) {
@@ -468,10 +468,10 @@ export class PublishAction extends BaseRushAction {
           : this.rushConfiguration.packageManagerToolFilename;
 
       // If the auth token was specified via the command line, avoid printing it on the console
-      const secretSubstring: string | undefined = this._npmAuthToken.value;
+      const secretSubstring: string | undefined = this.#npmAuthToken.value;
 
       await PublishUtilities.execCommandAsync({
-        shouldExecute: this._publish.value,
+        shouldExecute: this.#publish.value,
         command: packageManagerToolFilename,
         args,
         workingDirectory: packagePath,
@@ -481,10 +481,10 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private async _packageExistsAsync(packageConfig: RushConfigurationProject): Promise<boolean> {
+  async #packageExistsAsync(packageConfig: RushConfigurationProject): Promise<boolean> {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     const args: string[] = [];
-    this._addSharedNpmConfig(env, args);
+    this.#addSharedNpmConfig(env, args);
 
     const publishedVersions: string[] = await Npm.getPublishedVersionsAsync(
       packageConfig.packageName,
@@ -515,24 +515,24 @@ export class PublishAction extends BaseRushAction {
     return publishedVersions.indexOf(normalizedVersion) >= 0;
   }
 
-  private async _npmPackAsync(packageName: string, project: RushConfigurationProject): Promise<void> {
+  async #npmPackAsync(packageName: string, project: RushConfigurationProject): Promise<void> {
     const args: string[] = ['pack'];
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
 
     await PublishUtilities.execCommandAsync({
-      shouldExecute: this._publish.value,
+      shouldExecute: this.#publish.value,
       command: this.rushConfiguration.packageManagerToolFilename,
       args,
       workingDirectory: project.publishFolder,
       environment: env
     });
 
-    if (this._publish.value) {
+    if (this.#publish.value) {
       // Copy the tarball the release folder
-      const tarballName: string = this._calculateTarballName(project);
+      const tarballName: string = this.#calculateTarballName(project);
       const tarballPath: string = path.join(project.publishFolder, tarballName);
-      const destFolder: string = this._releaseFolder.value
-        ? this._releaseFolder.value
+      const destFolder: string = this.#releaseFolder.value
+        ? this.#releaseFolder.value
         : path.join(this.rushConfiguration.commonTempFolder, 'artifacts', 'packages');
 
       FileSystem.move({
@@ -543,7 +543,7 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _calculateTarballName(project: RushConfigurationProject): string {
+  #calculateTarballName(project: RushConfigurationProject): string {
     // Same logic as how npm forms the tarball name
     const packageName: string = project.packageName;
     const name: string = packageName[0] === '@' ? packageName.substr(1).replace(/\//g, '-') : packageName;
@@ -556,12 +556,12 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private async _setDependenciesBeforePublishAsync(): Promise<void> {
+  async #setDependenciesBeforePublishAsync(): Promise<void> {
     const rushConfiguration: RushConfiguration = this.rushConfiguration;
     await Async.forEachAsync(
       rushConfiguration.projects,
       async ({ versionPolicy, versionPolicyName, packageName }) => {
-        if (!this._versionPolicy.value || this._versionPolicy.value === versionPolicyName) {
+        if (!this.#versionPolicy.value || this.#versionPolicy.value === versionPolicyName) {
           await versionPolicy?.setDependenciesBeforePublishAsync(packageName, rushConfiguration);
         }
       },
@@ -569,12 +569,12 @@ export class PublishAction extends BaseRushAction {
     );
   }
 
-  private async _setDependenciesBeforeCommitAsync(): Promise<void> {
+  async #setDependenciesBeforeCommitAsync(): Promise<void> {
     const rushConfiguration: RushConfiguration = this.rushConfiguration;
     await Async.forEachAsync(
       rushConfiguration.projects,
       async ({ versionPolicy, versionPolicyName, packageName }) => {
-        if (!this._versionPolicy.value || this._versionPolicy.value === versionPolicyName) {
+        if (!this.#versionPolicy.value || this.#versionPolicy.value === versionPolicyName) {
           await versionPolicy?.setDependenciesBeforeCommitAsync(packageName, rushConfiguration);
         }
       },
@@ -582,38 +582,38 @@ export class PublishAction extends BaseRushAction {
     );
   }
 
-  private _addNpmPublishHome(supportEnvVarFallbackSyntax: boolean): void {
+  #addNpmPublishHome(supportEnvVarFallbackSyntax: boolean): void {
     // Create "common\temp\publish-home" folder, if it doesn't exist
-    Utilities.createFolderWithRetry(this._targetNpmrcPublishFolder);
+    Utilities.createFolderWithRetry(this.#targetNpmrcPublishFolder);
 
     // Copy down the committed "common\config\rush\.npmrc-publish" file, if there is one
     Utilities.syncNpmrc({
       sourceNpmrcFolder: this.rushConfiguration.commonRushConfigFolder,
-      targetNpmrcFolder: this._targetNpmrcPublishFolder,
+      targetNpmrcFolder: this.#targetNpmrcPublishFolder,
       useNpmrcPublish: true,
       supportEnvVarFallbackSyntax
     });
   }
 
-  private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {
+  #addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {
     const userHomeEnvVariable: string = IS_WINDOWS ? 'USERPROFILE' : 'HOME';
     let registry: string = '//registry.npmjs.org/';
 
     // Check if .npmrc file exists in "common\temp\publish-home"
-    if (FileSystem.exists(this._targetNpmrcPublishPath)) {
+    if (FileSystem.exists(this.#targetNpmrcPublishPath)) {
       // Redirect userHomeEnvVariable, NPM will use config in "common\temp\publish-home\.npmrc"
-      env[userHomeEnvVariable] = this._targetNpmrcPublishFolder;
+      env[userHomeEnvVariable] = this.#targetNpmrcPublishFolder;
     }
 
     // Check if registryUrl and token are specified via command-line
-    if (this._registryUrl.value) {
-      const registryUrl: string = this._registryUrl.value;
+    if (this.#registryUrl.value) {
+      const registryUrl: string = this.#registryUrl.value;
       env['npm_config_registry'] = registryUrl; // eslint-disable-line dot-notation
       registry = registryUrl.substring(registryUrl.indexOf('//'));
     }
 
-    if (this._npmAuthToken.value) {
-      args.push(`--${registry}:_authToken=${this._npmAuthToken.value}`);
+    if (this.#npmAuthToken.value) {
+      args.push(`--${registry}:_authToken=${this.#npmAuthToken.value}`);
     }
   }
 }

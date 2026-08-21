@@ -44,10 +44,10 @@ BY PHASE:
  * Phased command plugin that emits a timeline to the console.
  */
 export class ConsoleTimelinePlugin implements IPhasedCommandPlugin {
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
-    this._terminal = terminal;
+    this.#terminal = terminal;
   }
 
   public apply(hooks: PhasedCommandHooks): void {
@@ -59,7 +59,7 @@ export class ConsoleTimelinePlugin implements IPhasedCommandPlugin {
           operationResults: ReadonlyMap<Operation, IOperationExecutionResult>
         ): OperationStatus => {
           _printTimeline({
-            terminal: this._terminal,
+            terminal: this.#terminal,
             result: { status, operationResults },
             cobuildConfiguration: context.cobuildConfiguration
           });

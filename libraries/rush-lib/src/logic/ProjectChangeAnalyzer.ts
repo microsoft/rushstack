@@ -77,12 +77,12 @@ export interface IRawRepoState {
  * @beta
  */
 export class ProjectChangeAnalyzer {
-  private readonly _rushConfiguration: RushConfiguration;
-  private readonly _git: Git;
+  readonly #rushConfiguration: RushConfiguration;
+  readonly #git: Git;
 
   public constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
-    this._git = new Git(this._rushConfiguration);
+    this.#rushConfiguration = rushConfiguration;
+    this.#git = new Git(this.#rushConfiguration);
   }
 
   /**
@@ -93,7 +93,7 @@ export class ProjectChangeAnalyzer {
   public async getChangedProjectsAsync(
     options: IGetChangedProjectsOptions
   ): Promise<Set<RushConfigurationProject>> {
-    const { _rushConfiguration: rushConfiguration } = this;
+    const rushConfiguration: RushConfiguration = this.#rushConfiguration;
 
     const {
       targetBranchName,
@@ -105,14 +105,14 @@ export class ProjectChangeAnalyzer {
       excludeVersionOnlyChanges
     } = options;
 
-    const gitPath: string = this._git.getGitPathOrThrow();
+    const gitPath: string = this.#git.getGitPathOrThrow();
     const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
 
     // if the given targetBranchName is a commit, we assume it is the merge base
-    const isTargetBranchACommit: boolean = await this._git.determineIfRefIsACommitAsync(targetBranchName);
+    const isTargetBranchACommit: boolean = await this.#git.determineIfRefIsACommitAsync(targetBranchName);
     const mergeCommit: string = isTargetBranchACommit
       ? targetBranchName
-      : await this._git.getMergeBaseAsync(targetBranchName, terminal, shouldFetch);
+      : await this.#git.getMergeBaseAsync(targetBranchName, terminal, shouldFetch);
 
     const changedFiles: Map<string, IFileDiffStatus> = getRepoChanges(repoRoot, mergeCommit, gitPath);
     const lookup: LookupByPath<RushConfigurationProject> =
@@ -165,7 +165,7 @@ export class ProjectChangeAnalyzer {
             const isVersionOnlyChange: boolean = await isVersionOnlyChangeAsync(
               diffStatus,
               repoRoot,
-              this._git
+              this.#git
             );
             if (isVersionOnlyChange) {
               continue; // Skip version-only package.json changes
@@ -186,7 +186,7 @@ export class ProjectChangeAnalyzer {
       : [rushConfiguration.defaultSubspace];
 
     const variantToUse: string | undefined = includeExternalDependencies
-      ? (variant ?? (await this._rushConfiguration.getCurrentlyInstalledVariantAsync()))
+      ? (variant ?? (await this.#rushConfiguration.getCurrentlyInstalledVariantAsync()))
       : undefined;
 
     await Async.forEachAsync(subspaces, async (subspace: Subspace) => {
@@ -194,7 +194,7 @@ export class ProjectChangeAnalyzer {
 
       // Detect changes to pnpm catalog entries in pnpm-config.json
       if (rushConfiguration.isPnpm) {
-        await this._detectCatalogChangesAsync(
+        await this.#detectCatalogChangesAsync(
           subspace,
           rushConfiguration,
           changedFiles,
@@ -245,7 +245,7 @@ export class ProjectChangeAnalyzer {
               throw new Error(`Unable to obtain current shrinkwrap file.`);
             }
 
-            const oldShrinkwrapText: string = await this._git.getBlobContentAsync({
+            const oldShrinkwrapText: string = await this.#git.getBlobContentAsync({
               // <ref>:<path> syntax: https://git-scm.com/docs/gitrevisions
               blobSpec: `${mergeCommit}:${relativeShrinkwrapFilePath}`,
               repositoryRoot: repoRoot
@@ -305,9 +305,9 @@ export class ProjectChangeAnalyzer {
     projectSelection?: ReadonlySet<RushConfigurationProject>
   ): Promise<GetInputsSnapshotAsyncFn | undefined> {
     try {
-      const gitPath: string = this._git.getGitPathOrThrow();
+      const gitPath: string = this.#git.getGitPathOrThrow();
 
-      if (!this._git.isPathUnderGitWorkingTree()) {
+      if (!this.#git.isPathUnderGitWorkingTree()) {
         terminal.writeLine(
           `The Rush monorepo is not in a Git repository. Rush will proceed without incremental build support.`
         );
@@ -315,7 +315,7 @@ export class ProjectChangeAnalyzer {
         return;
       }
 
-      const rushConfiguration: RushConfiguration = this._rushConfiguration;
+      const rushConfiguration: RushConfiguration = this.#rushConfiguration;
 
       // Do not use getGitInfo().root; it is the root of the *primary* worktree, not the *current* one.
       const rootDirectory: string = getRepoRoot(rushConfiguration.rushJsonFolder, gitPath);
@@ -379,7 +379,7 @@ export class ProjectChangeAnalyzer {
       } else {
         // Add the shrinkwrap file to every project's dependencies
         const currentVariant: string | undefined =
-          await this._rushConfiguration.getCurrentlyInstalledVariantAsync();
+          await this.#rushConfiguration.getCurrentlyInstalledVariantAsync();
 
         const shrinkwrapFile: string = Path.convertToSlashes(
           path.relative(
@@ -392,14 +392,14 @@ export class ProjectChangeAnalyzer {
       }
 
       const lookupByPath: IReadonlyLookupByPath<RushConfigurationProject> =
-        this._rushConfiguration.getProjectLookupForRoot(rootDirectory);
+        this.#rushConfiguration.getProjectLookupForRoot(rootDirectory);
 
       let filterPath: string[] = [];
 
       if (
         projectSelection &&
         projectSelection.size > 0 &&
-        this._rushConfiguration.experimentsConfiguration.configuration.enableSubpathScan
+        this.#rushConfiguration.experimentsConfiguration.configuration.enableSubpathScan
       ) {
         filterPath = Array.from(projectSelection, ({ projectFolder }) => projectFolder);
       }
@@ -476,7 +476,7 @@ export class ProjectChangeAnalyzer {
     rootDir: string,
     terminal: ITerminal
   ): Promise<Map<string, T>> {
-    const ignoreMatcher: Ignore | undefined = await this._getIgnoreMatcherForProjectAsync(project, terminal);
+    const ignoreMatcher: Ignore | undefined = await this.#getIgnoreMatcherForProjectAsync(project, terminal);
     if (!ignoreMatcher) {
       return unfilteredProjectData;
     }
@@ -498,7 +498,7 @@ export class ProjectChangeAnalyzer {
     return filteredProjectData;
   }
 
-  private async _getIgnoreMatcherForProjectAsync(
+  async #getIgnoreMatcherForProjectAsync(
     project: RushConfigurationProject,
     terminal: ITerminal
   ): Promise<Ignore | undefined> {
@@ -516,7 +516,7 @@ export class ProjectChangeAnalyzer {
    * Detects changes to pnpm catalog entries in a subspace's pnpm-config.json and marks
    * affected projects as changed.
    */
-  private async _detectCatalogChangesAsync(
+  async #detectCatalogChangesAsync(
     subspace: Subspace,
     rushConfiguration: RushConfiguration,
     changedFiles: Map<string, IFileDiffStatus>,
@@ -541,7 +541,7 @@ export class ProjectChangeAnalyzer {
     // Maps catalogNamespace (e.g. "default", "react17") → Set of changed package names
     let oldCatalogs: Record<string, Record<string, string>> | undefined;
     try {
-      const oldPnpmConfigText: string = await this._git.getBlobContentAsync({
+      const oldPnpmConfigText: string = await this.#git.getBlobContentAsync({
         blobSpec: `${mergeCommit}:${pnpmConfigRelativePath}`,
         repositoryRoot: repoRoot
       });
