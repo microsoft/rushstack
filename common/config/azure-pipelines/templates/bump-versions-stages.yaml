@@ -1,0 +1,121 @@
+# Shared stage definition for the "bump versions" pipelines.
+#
+# There is one bump pipeline per version policy; each of them builds the repo, bumps the versions
+# for its own version policy, packs the resulting tarballs and opens a GitHub PR with the changes.
+# The packed tarballs are published to the npm feed later by the matching "esrp publish" pipeline,
+# which locates this pipeline run via the "bump-versions|<sha>" build tag.
+
+parameters:
+  - name: VersionPolicyName
+    type: string
+  - name: StageName
+    type: string
+  - name: StageDisplayName
+    type: string
+  - name: FeatureBranch
+    type: string
+  - name: PrTitle
+    type: string
+  - name: PrDescription
+    type: string
+
+stages:
+  - stage: ${{ parameters.StageName }}
+    displayName: ${{ parameters.StageDisplayName }}
+    jobs:
+      - job: BumpVersions
+        displayName: 'Bump Versions'
+        pool:
+          name: publish-rushstack
+          os: linux
+        templateContext:
+          outputParentDirectory: $(Build.ArtifactStagingDirectory)
+          outputs:
+            - output: pipelineArtifact
+              targetPath: $(Build.ArtifactStagingDirectory)/published-versions
+              artifactName: published-versions
+            - output: pipelineArtifact
+              targetPath: $(Build.ArtifactStagingDirectory)/json-schemas
+              artifactName: json-schemas
+            - output: pipelineArtifact
+              targetPath: $(Build.ArtifactStagingDirectory)/packages
+              artifactName: packages
+            - output: pipelineArtifact
+              targetPath: $(Build.ArtifactStagingDirectory)/api
+              artifactName: api
+            - output: pipelineArtifact
+              targetPath: $(Build.ArtifactStagingDirectory)/artifact-metadata.json
+              artifactName: metadata
+            - output: pipelineArtifact
+              targetPath: $(Build.ArtifactStagingDirectory)/package-versions
+              artifactName: package-versions
+        steps:
+          - checkout: self
+            persistCredentials: true
+
+          - template: /common/config/azure-pipelines/templates/configure-git-user.yaml@self
+
+          - bash: |
+              git checkout -b ${{ parameters.FeatureBranch }}
+              echo "Created feature branch: ${{ parameters.FeatureBranch }}"
+            displayName: 'Create Feature Branch'
+
+          - template: /common/config/azure-pipelines/templates/install-node.yaml@self
+
+          - template: /common/config/azure-pipelines/templates/build.yaml@self
+
+          - template: /common/config/azure-pipelines/templates/bump-versions.yaml@self
+            parameters:
+              VersionPolicyName: ${{ parameters.VersionPolicyName }}
+
+          - bash: |
+              git add -u -- common/changes
+              git add -- '**/CHANGELOG.*' '**/package.json'
+
+              if [ -n "$(git diff --cached --numstat)" ]; then
+                git commit -m "Applying package version bumps
+
+              Pipeline Run: $(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
+              Run ID: $(Build.BuildId)"
+                echo "Changes committed"
+                echo "##vso[task.setvariable variable=HasChanges]true"
+              else
+                echo "No changes to commit"
+                echo "##vso[task.setvariable variable=HasChanges]false"
+              fi
+            displayName: 'Commit Version Bumps'
+
+          - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
+            displayName: 'Prepublish workaround for rush-lib'
+
+          - template: /common/config/azure-pipelines/templates/pack.yaml@self
+            parameters:
+              VersionPolicyName: ${{ parameters.VersionPolicyName }}
+
+          - template: /common/config/azure-pipelines/templates/post-publish.yaml@self
+
+          - template: /common/config/azure-pipelines/templates/push-and-create-github-pr.yaml@self
+            parameters:
+              BranchName: ${{ parameters.FeatureBranch }}
+              PrTitle: ${{ parameters.PrTitle }}
+              PrDescription: ${{ parameters.PrDescription }}
+
+          - bash: |
+              set -e
+              BUMP_SHA=$(git rev-parse HEAD)
+              echo "##vso[task.setvariable variable=BumpSha;isOutput=true]${BUMP_SHA}"
+              echo "##vso[build.addbuildtag]bump-versions|${BUMP_SHA}"
+              echo "Tagged build with bump SHA: ${BUMP_SHA}"
+            name: TagBuild
+            displayName: 'Tag build with bump commit SHA'
+            condition: and(succeeded(), eq(variables['HasChanges'], 'true'))
+
+          - bash: |
+              mkdir -p "$(Build.ArtifactStagingDirectory)/packages"
+              mkdir -p "$(Build.ArtifactStagingDirectory)/package-versions"
+            displayName: 'Create artifact staging directories'
+            condition: always()
+
+          - template: /common/config/azure-pipelines/templates/prepare-publish-artifacts.yaml@self
+
+          - template: /common/config/azure-pipelines/templates/record-versions.yaml@self
