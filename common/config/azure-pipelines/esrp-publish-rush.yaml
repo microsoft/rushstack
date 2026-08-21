@@ -1,6 +1,6 @@
 # Pipeline: rushstack ESRP Publish (rush)
-# Trigger: Automatically when a "rushstack Bump Versions (rush)" version bump PR merges to main.
-# Purpose: Publish the tarballs packed by the "rushstack Bump Versions (rush)" pipeline to the npm feed via ESRP.
+# Trigger: Automatically when a version bump PR from the Rush bump pipeline (definition 12) merges to main.
+# Purpose: Publish the tarballs packed by that bump pipeline run to the npm feed via ESRP.
 
 trigger:
   branches:
@@ -57,7 +57,7 @@ extends:
     stages:
       - template: /common/config/azure-pipelines/templates/esrp-publish-stages.yaml@self
         parameters:
-          BumpPipelineName: 'rushstack Bump Versions (rush)'
+          BumpPipelineId: 12
           BumpPipelineProject: GitHubProjects
           StageNameSuffix: Rush
           DisplayNameSuffix: Rush

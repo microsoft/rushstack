@@ -6,9 +6,9 @@
 # by that run to the npm feed via ESRP.
 
 parameters:
-  # Name of the bump pipeline that packed the tarballs to publish.
-  - name: BumpPipelineName
-    type: string
+  # Definition ID of the bump pipeline that packed the tarballs to publish.
+  - name: BumpPipelineId
+    type: number
   # Azure DevOps team project that hosts the bump pipeline.
   - name: BumpPipelineProject
     type: string
@@ -62,7 +62,7 @@ stages:
 
           - template: /common/config/azure-pipelines/templates/find-bump-pipeline-run.yaml@self
             parameters:
-              PipelineName: ${{ parameters.BumpPipelineName }}
+              PipelineId: ${{ parameters.BumpPipelineId }}
               CommitSha: ${{ coalesce(parameters.CommitShaOverride, '$(Build.SourceVersion)') }}
               TeamProject: ${{ parameters.BumpPipelineProject }}
               Name: FindBumpRun

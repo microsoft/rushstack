@@ -1,4 +1,4 @@
-# Pipeline: rushstack Bump Versions (rush)
+# Pipeline: Bump Versions (Rush) -- AzDO definition 12 in the GitHubProjects project
 # Trigger: Automatically when changes merge to main that include change files or pipeline YAML.
 # Purpose: Bump versions for the "rush" version policy, build, pack, create/update GitHub PR.
 #          The packed tarballs are published by the "esrp-publish-rush.yaml" pipeline once the
