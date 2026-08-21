@@ -3,12 +3,22 @@ parameters:
     displayName: 'Publish to npm feed'
     type: boolean
     default: true
+  - name: NpmTag
+    displayName: 'NPM dist-tag'
+    type: string
+    default: latest
+  - name: DryRun
+    displayName: 'Dry run'
+    type: boolean
+    default: false
 
 variables:
   - name: FORCE_COLOR
     value: 1
   - name: SourceBranch
     value: $[ replace(replace(resources.repositories.self.ref, 'refs/heads/', ''), 'refs/pull/', 'refs/remotes/pull/') ]
+  - name: PackagesPath
+    value: $(Pipeline.Workspace)/packages
 
 resources:
   repositories:
@@ -16,6 +26,10 @@ resources:
       type: git
       name: 1ESPipelineTemplates/1ESPipelineTemplates
       ref: refs/tags/release
+    - repository: publishConfig
+      type: git
+      name: GitHubProjectsPublish/GitHubProjectsPublish
+      ref: refs/heads/main
 
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
@@ -24,9 +38,11 @@ extends:
       name: Azure-Pipelines-1ESPT-ExDShared
       os: windows
     stages:
-      - stage:
+      - stage: Prepare
+        displayName: 'Prepare NPM Packages'
         jobs:
-          - job:
+          - job: PrepareNpmPublish
+            displayName: 'Prepare NPM Packages'
             pool:
               name: publish-rushstack
               os: linux
@@ -63,10 +79,43 @@ extends:
 
               - template: /common/config/azure-pipelines/templates/pack.yaml@self
 
-              - ${{ if eq(parameters.publishToNpmFeed, true) }}:
-                  - template: /common/config/azure-pipelines/templates/publish.yaml@self
-                    parameters:
-                      VersionPolicyName: noRush
-                      BranchName: $(SourceBranch)
-
               - template: /common/config/azure-pipelines/templates/post-publish.yaml@self
+
+      - ${{ if eq(parameters.publishToNpmFeed, true) }}:
+          - stage: Publish
+            displayName: 'Publish NPM Packages'
+            dependsOn:
+              - Prepare
+            condition: succeeded('Prepare')
+            jobs:
+              - job: PublishNpmPackages
+                displayName: 'Publish NPM Packages'
+                pool:
+                  name: publish-rushstack
+                  os: linux
+                templateContext:
+                  type: releaseJob
+                  isProduction: true
+                steps:
+                  - checkout: none
+
+                  - template: /common/config/azure-pipelines/templates/install-node.yaml@self
+
+                  - task: 1ES.DownloadPipelineArtifact@1
+                    inputs:
+                      buildType: current
+                      project: $(System.TeamProject)
+                      definition: $(System.DefinitionId)
+                      artifactName: packages
+                      targetPath: $(PackagesPath)
+                    displayName: 'Download packed npm packages'
+
+                  - bash: |
+                      ls -la "$(PackagesPath)"
+                    displayName: 'List downloaded packages'
+
+                  - template: /common/config/azure-pipelines/templates/esrp-release.yaml@publishConfig
+                    parameters:
+                      packagesPath: $(PackagesPath)
+                      npmTag: ${{ parameters.NpmTag }}
+                      dryRun: ${{ parameters.DryRun }}
