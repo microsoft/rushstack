@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Playwright Plugin Configuration",
+  "description": "Configuration for the Heft Playwright plugin",
+  "type": "object",
+  "properties": {
+    "configPath": {
+      "type": "string",
+      "description": "Path to the Playwright configuration file (relative to project root). Defaults to config/playwright.config.js"
+    }
+  },
+  "additionalProperties": false
+}
