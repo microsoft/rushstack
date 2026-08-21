@@ -1,4 +1,4 @@
-# Pipeline: rushstack ESRP Publish (rushstack)
+# Pipeline: rushstack-esrp-publish (AzDO project GitHubProjectsPublish)
 # Trigger: Automatically when a version bump PR from the non-Rush bump pipeline (definition 10) merges to main.
 # Purpose: Publish the tarballs packed by that bump pipeline run to the npm feed via ESRP.
 

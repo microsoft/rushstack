@@ -18,14 +18,16 @@ pr: none
 resources:
   pipelines:
     - pipeline: esrpPublishRushstack
-      source: 'rushstack ESRP Publish (rushstack)'
+      source: 'rushstack-esrp-publish'
+      project: GitHubProjectsPublish
       trigger:
         enabled: true
         branches:
           include:
             - refs/heads/main
     - pipeline: esrpPublishRush
-      source: 'rushstack ESRP Publish (rush)'
+      source: 'rushstack-esrp-publish-rush'
+      project: GitHubProjectsPublish
       trigger:
         enabled: true
         branches:
@@ -222,8 +224,8 @@ extends:
                 displayName: 'Download API review files'
                 inputs:
                   source: specific
-                  project: GitHubProjects
-                  pipeline: 'rushstack ESRP Publish (rushstack)'
+                  project: GitHubProjectsPublish
+                  pipeline: 'rushstack-esrp-publish'
                   preferTriggeringPipeline: true
                   runVersion: latest
                   artifact: api
