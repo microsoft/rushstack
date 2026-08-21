@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/rig-package"
+    }
+  ],
+  "packageName": "@rushstack/rig-package",
+  "email": "rushbot@users.noreply.github.com"
+}
