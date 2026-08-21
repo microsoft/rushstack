@@ -1,10 +1,6 @@
 parameters:
   - name: PipelineId
-    type: object
-    default: 0
-  - name: PipelineName
-    type: string
-    default: ''
+    type: number
   - name: CommitSha
     type: string
   - name: TeamProject
@@ -60,23 +56,6 @@ steps:
       }
 
       PIPELINE_ID="${{ parameters.PipelineId }}"
-      if [ "$PIPELINE_ID" = "0" ]; then
-        if [ -z "${{ parameters.PipelineName }}" ]; then
-          echo "##[error]Either PipelineId or PipelineName must be provided."
-          exit 1
-        fi
-
-        ENCODED_PIPELINE_NAME=$(url_encode "${{ parameters.PipelineName }}")
-        DEFINITIONS_URL="${SYSTEM_COLLECTIONURI}${{ parameters.TeamProject }}/_apis/build/definitions?name=${ENCODED_PIPELINE_NAME}&api-version=7.1"
-        echo "Resolving bump pipeline definition named ${{ parameters.PipelineName }}"
-        DEFINITIONS_RESPONSE=$(curl -sS -u ":${SYSTEM_ACCESSTOKEN}" "$DEFINITIONS_URL")
-        PIPELINE_ID=$(echo "$DEFINITIONS_RESPONSE" | jq -r '.value[0].id // empty')
-
-        if [ -z "$PIPELINE_ID" ]; then
-          echo "##[error]Could not find a bump pipeline definition named ${{ parameters.PipelineName }}."
-          exit 1
-        fi
-      fi
 
       set_output_variable BumpPipelineDefinitionId "$PIPELINE_ID"
 
