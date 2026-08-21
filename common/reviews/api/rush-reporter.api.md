@@ -263,9 +263,9 @@ export class NdjsonDecoder {
 
 // @beta
 export class NdjsonInvalidRecordError extends Error {
-    constructor(decodedRecords: readonly unknown[], cause: Error);
-    readonly cause: Error;
+    constructor(decodedRecords: readonly unknown[], parseError: Error);
     readonly decodedRecords: readonly unknown[];
+    readonly parseError: Error;
 }
 
 // @beta

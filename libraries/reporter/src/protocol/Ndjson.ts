@@ -45,13 +45,13 @@ export class NdjsonInvalidRecordError extends Error {
   /**
    * The JSON parser error that caused this failure.
    */
-  public readonly cause: Error;
+  public readonly parseError: Error;
 
-  public constructor(decodedRecords: readonly unknown[], cause: Error) {
+  public constructor(decodedRecords: readonly unknown[], parseError: Error) {
     super('The NDJSON record is not valid JSON.');
     this.name = 'NdjsonInvalidRecordError';
     this.decodedRecords = [...decodedRecords];
-    this.cause = cause;
+    this.parseError = parseError;
 
     Object.setPrototypeOf(this, NdjsonInvalidRecordError.prototype);
   }
@@ -168,9 +168,9 @@ export class NdjsonDecoder {
     try {
       records.push(JSON.parse(trimmed));
     } catch (error) {
-      const cause: Error =
+      const parseError: Error =
         error instanceof Error ? error : new Error('An unknown JSON parsing failure occurred.');
-      throw new NdjsonInvalidRecordError(records, cause);
+      throw new NdjsonInvalidRecordError(records, parseError);
     }
   }
 }
