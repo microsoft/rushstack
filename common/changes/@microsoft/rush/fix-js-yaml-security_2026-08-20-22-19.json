@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update js-yaml to ~4.3.1 to address CVE-2026-59869 and GHSA-5p4m-2wfm-xmqj.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

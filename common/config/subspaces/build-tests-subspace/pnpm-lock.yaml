@@ -2599,8 +2599,8 @@ packages:
     resolution: {integrity: sha512-PMSmkqxr106Xa156c2M265Z+FTrPl+oxd/rgOQy2tijQeK5TxQ43psO1ZCwhVOSdnn+RzkzlRz/eY4BgJBYVpg==}
     hasBin: true
 
-  js-yaml@4.1.1:
-    resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
+  js-yaml@4.3.1:
+    resolution: {integrity: sha512-CY6crGq313MX8GkwvB7tzgp99vjQxY1++5y10/BKN/GUfHqWaOGQMNZkBvqSzsZKWk/ijwHlWzzkLulsGHhjWQ==}
     hasBin: true
 
   jsdoc-type-pratt-parser@4.1.0:
@@ -3952,7 +3952,7 @@ snapshots:
       globals: 14.0.0
       ignore: 5.3.2
       import-fresh: 3.3.1
-      js-yaml: 4.1.1
+      js-yaml: 4.3.1
       minimatch: 3.1.5
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
@@ -4339,7 +4339,7 @@ snapshots:
       git-repo-info: 2.1.1
       https-proxy-agent: 5.0.1
       ignore: 5.1.9
-      js-yaml: 4.1.1
+      js-yaml: 4.3.1
       npm-package-arg: 6.1.1
       object-hash: 3.0.0
       pnpm-sync-lib: 0.3.4
@@ -7093,7 +7093,7 @@ snapshots:
       argparse: 1.0.10
       esprima: 4.0.1
 
-  js-yaml@4.1.1:
+  js-yaml@4.3.1:
     dependencies:
       argparse: 2.0.1
 
@@ -7622,7 +7622,7 @@ snapshots:
 
   read-yaml-file@2.1.0:
     dependencies:
-      js-yaml: 4.1.1
+      js-yaml: 4.3.1
       strip-bom: 4.0.0
 
   readable-stream@2.3.8:
@@ -8335,7 +8335,7 @@ snapshots:
 
   write-yaml-file@4.2.0:
     dependencies:
-      js-yaml: 4.1.1
+      js-yaml: 4.3.1
       write-file-atomic: 3.0.3
 
   xml@1.0.1: {}
