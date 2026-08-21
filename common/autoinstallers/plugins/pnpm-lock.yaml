@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@rushstack/rush-published-versions-json-plugin':
-        specifier: 0.1.15
-        version: 0.1.15
+        specifier: 0.1.16
+        version: 0.1.16
 
 packages:
 
@@ -23,14 +23,14 @@ packages:
     engines: {node: '>=18.12'}
 
   '@pnpm/types@900.0.0':
-    resolution: {integrity: sha1-og6LnKAgZjsCLATRKM0Ve492oFo=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/types/-/types-900.0.0.tgz}
+    resolution: {integrity: sha1-og6LnKAgZjsCLATRKM0Ve492oFo=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/types/-/types-900.0.0.tgz}
     engines: {node: '>=18.12'}
 
-  '@rushstack/credential-cache@0.2.21':
-    resolution: {integrity: sha1-fGTHlklfvveDcQvIvB9ZD0KP+iU=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/credential-cache/-/credential-cache-0.2.21.tgz}
+  '@rushstack/credential-cache@0.2.22':
+    resolution: {integrity: sha1-2QXB0nvafBlMBiQAu0J6d5J+s1s=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/credential-cache/-/credential-cache-0.2.22.tgz}
 
-  '@rushstack/lookup-by-path@0.10.10':
-    resolution: {integrity: sha1-5Fn9mHfGIczYkiWZcVgRZ6D/r2U=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/lookup-by-path/-/lookup-by-path-0.10.10.tgz}
+  '@rushstack/lookup-by-path@0.10.11':
+    resolution: {integrity: sha1-FpYSGPLwmVdI4aE2CP0K+wZJCcA=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/lookup-by-path/-/lookup-by-path-0.10.11.tgz}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -38,29 +38,29 @@ packages:
         optional: true
 
   '@rushstack/node-core-library@5.23.3':
-    resolution: {integrity: sha1-UXOEogpIpjO0pGTDStXFVKVDIN0=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/node-core-library/-/node-core-library-5.23.3.tgz}
+    resolution: {integrity: sha1-UXOEogpIpjO0pGTDStXFVKVDIN0=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/node-core-library/-/node-core-library-5.23.3.tgz}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
       '@types/node':
         optional: true
 
-  '@rushstack/package-deps-hash@4.7.23':
-    resolution: {integrity: sha1-iZX7F6jLXlEh6GT4Joxunj7GJuE=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/package-deps-hash/-/package-deps-hash-4.7.23.tgz}
+  '@rushstack/package-deps-hash@4.7.24':
+    resolution: {integrity: sha1-8BB/063FH8usGrPHTKb74W4lOLk=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/package-deps-hash/-/package-deps-hash-4.7.24.tgz}
 
   '@rushstack/problem-matcher@0.2.1':
-    resolution: {integrity: sha1-6fbKwt1qiC1g52qNRGK30ktPF+U=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/problem-matcher/-/problem-matcher-0.2.1.tgz}
+    resolution: {integrity: sha1-6fbKwt1qiC1g52qNRGK30ktPF+U=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/problem-matcher/-/problem-matcher-0.2.1.tgz}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
       '@types/node':
         optional: true
 
-  '@rushstack/rush-published-versions-json-plugin@0.1.15':
-    resolution: {integrity: sha1-M6Obx7NFTzUMWS9JD0pHJwD9X88=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/rush-published-versions-json-plugin/-/rush-published-versions-json-plugin-0.1.15.tgz}
+  '@rushstack/rush-published-versions-json-plugin@0.1.16':
+    resolution: {integrity: sha1-pRylMSKCfYzdJ80CP4GQVpuubik=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/rush-published-versions-json-plugin/-/rush-published-versions-json-plugin-0.1.16.tgz}
 
-  '@rushstack/rush-sdk@5.178.0':
-    resolution: {integrity: sha1-4VMVxk7Pn1CFVOae1p+/9axIQh8=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/rush-sdk/-/rush-sdk-5.178.0.tgz}
+  '@rushstack/rush-sdk@5.178.1':
+    resolution: {integrity: sha1-f/23byNSeLVYWHEBIxO+ORgI4Qs=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/rush-sdk/-/rush-sdk-5.178.1.tgz}
 
   '@rushstack/terminal@0.24.2':
     resolution: {integrity: sha1-lkrTn6heZmj8KrplL8sEK5YTRCU=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/terminal/-/terminal-0.24.2.tgz}
@@ -71,7 +71,7 @@ packages:
         optional: true
 
   ajv-draft-04@1.0.0:
-    resolution: {integrity: sha1-O2R2GyaLoLnmaPC0G6U/zgrXf8g=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/ajv-draft-04/-/ajv-draft-04-1.0.0.tgz}
+    resolution: {integrity: sha1-O2R2GyaLoLnmaPC0G6U/zgrXf8g=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/ajv-draft-04/-/ajv-draft-04-1.0.0.tgz}
     peerDependencies:
       ajv: ^8.5.0
     peerDependenciesMeta:
@@ -87,30 +87,30 @@ packages:
         optional: true
 
   ajv@8.20.0:
-    resolution: {integrity: sha1-MEs2Nq3Yi6fZNnYN1Q7OAG3qlfk=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/ajv/-/ajv-8.20.0.tgz}
+    resolution: {integrity: sha1-MEs2Nq3Yi6fZNnYN1Q7OAG3qlfk=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/ajv/-/ajv-8.20.0.tgz}
 
   es-errors@1.3.0:
-    resolution: {integrity: sha1-BfdaJdq5jk+x3NXhRywFRtUFfI8=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/es-errors/-/es-errors-1.3.0.tgz}
+    resolution: {integrity: sha1-BfdaJdq5jk+x3NXhRywFRtUFfI8=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/es-errors/-/es-errors-1.3.0.tgz}
     engines: {node: '>= 0.4'}
 
   fast-deep-equal@3.1.3:
-    resolution: {integrity: sha1-On1WtVnWy8PrUSMlJE5hmmXGxSU=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz}
+    resolution: {integrity: sha1-On1WtVnWy8PrUSMlJE5hmmXGxSU=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz}
 
   fast-uri@3.1.5:
-    resolution: {integrity: sha1-YQ83QZoDAnBDDOzWjXTj1NlnJdA=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fast-uri/-/fast-uri-3.1.5.tgz}
+    resolution: {integrity: sha1-YQ83QZoDAnBDDOzWjXTj1NlnJdA=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fast-uri/-/fast-uri-3.1.5.tgz}
 
   fs-extra@11.3.6:
     resolution: {integrity: sha1-98uA6d9VDNHbb1N/pc3VaNPnDRA=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fs-extra/-/fs-extra-11.3.6.tgz}
     engines: {node: '>=14.14'}
 
   function-bind@1.1.2:
-    resolution: {integrity: sha1-LALYZNl/PqbIgwxGTL0Rq26rehw=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/function-bind/-/function-bind-1.1.2.tgz}
+    resolution: {integrity: sha1-LALYZNl/PqbIgwxGTL0Rq26rehw=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/function-bind/-/function-bind-1.1.2.tgz}
 
   graceful-fs@4.2.11:
-    resolution: {integrity: sha1-QYPk6L8Iu24Fu7L30uDI9xLKQOM=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/graceful-fs/-/graceful-fs-4.2.11.tgz}
+    resolution: {integrity: sha1-QYPk6L8Iu24Fu7L30uDI9xLKQOM=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/graceful-fs/-/graceful-fs-4.2.11.tgz}
 
   has-flag@4.0.0:
-    resolution: {integrity: sha1-lEdx/ZyByBJlxNaUGGDaBrtZR5s=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/has-flag/-/has-flag-4.0.0.tgz}
+    resolution: {integrity: sha1-lEdx/ZyByBJlxNaUGGDaBrtZR5s=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/has-flag/-/has-flag-4.0.0.tgz}
     engines: {node: '>=8'}
 
   hasown@2.0.4:
@@ -118,27 +118,27 @@ packages:
     engines: {node: '>= 0.4'}
 
   import-lazy@4.0.0:
-    resolution: {integrity: sha1-6OtidIOgpD2jwD8+NVSL5csMwVM=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/import-lazy/-/import-lazy-4.0.0.tgz}
+    resolution: {integrity: sha1-6OtidIOgpD2jwD8+NVSL5csMwVM=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/import-lazy/-/import-lazy-4.0.0.tgz}
     engines: {node: '>=8'}
 
   is-core-module@2.16.2:
-    resolution: {integrity: sha1-PgdFCoCA684/vwysSU9NKrMk4II=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/is-core-module/-/is-core-module-2.16.2.tgz}
+    resolution: {integrity: sha1-PgdFCoCA684/vwysSU9NKrMk4II=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/is-core-module/-/is-core-module-2.16.2.tgz}
     engines: {node: '>= 0.4'}
 
   jju@1.4.0:
     resolution: {integrity: sha1-o6vicYryQaKykE+EpiWXDzia4yo=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/jju/-/jju-1.4.0.tgz}
 
   json-schema-traverse@1.0.0:
-    resolution: {integrity: sha1-rnvLNlard6c7pcSb9lTzjmtoYOI=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/json-schema-traverse/-/json-schema-traverse-1.0.0.tgz}
+    resolution: {integrity: sha1-rnvLNlard6c7pcSb9lTzjmtoYOI=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/json-schema-traverse/-/json-schema-traverse-1.0.0.tgz}
 
   jsonfile@6.2.1:
-    resolution: {integrity: sha1-tuMXF/Isw3MwsIHOAFHtXeU68vY=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/jsonfile/-/jsonfile-6.2.1.tgz}
+    resolution: {integrity: sha1-tuMXF/Isw3MwsIHOAFHtXeU68vY=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/jsonfile/-/jsonfile-6.2.1.tgz}
 
   path-parse@1.0.7:
     resolution: {integrity: sha1-+8EUtgykKzDZ2vWFjkvWi77bZzU=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/path-parse/-/path-parse-1.0.7.tgz}
 
   require-from-string@2.0.2:
-    resolution: {integrity: sha1-iaf92TgmEmcxjq/hT5wy5ZjDaQk=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/require-from-string/-/require-from-string-2.0.2.tgz}
+    resolution: {integrity: sha1-iaf92TgmEmcxjq/hT5wy5ZjDaQk=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/require-from-string/-/require-from-string-2.0.2.tgz}
     engines: {node: '>=0.10.0'}
 
   resolve@1.22.12:
@@ -147,16 +147,16 @@ packages:
     hasBin: true
 
   semver@7.7.4:
-    resolution: {integrity: sha1-KEZONgYOmR+noR0CedLT87V6foo=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/semver/-/semver-7.7.4.tgz}
+    resolution: {integrity: sha1-KEZONgYOmR+noR0CedLT87V6foo=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/semver/-/semver-7.7.4.tgz}
     engines: {node: '>=10'}
     hasBin: true
 
   supports-color@8.1.1:
-    resolution: {integrity: sha1-zW/BfihQDP9WwbhsCn/UpUpzAFw=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/supports-color/-/supports-color-8.1.1.tgz}
+    resolution: {integrity: sha1-zW/BfihQDP9WwbhsCn/UpUpzAFw=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/supports-color/-/supports-color-8.1.1.tgz}
     engines: {node: '>=10'}
 
   supports-preserve-symlinks-flag@1.0.0:
-    resolution: {integrity: sha1-btpL00SjyUrqN21MwxvHcxEDngk=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz}
+    resolution: {integrity: sha1-btpL00SjyUrqN21MwxvHcxEDngk=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz}
     engines: {node: '>= 0.4'}
 
   tapable@2.2.1:
@@ -164,7 +164,7 @@ packages:
     engines: {node: '>=6'}
 
   universalify@2.0.1:
-    resolution: {integrity: sha1-Fo78IYCWTmOG0GHglN9hr+I5sY0=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/universalify/-/universalify-2.0.1.tgz}
+    resolution: {integrity: sha1-Fo78IYCWTmOG0GHglN9hr+I5sY0=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/universalify/-/universalify-2.0.1.tgz}
     engines: {node: '>= 10.0.0'}
 
 snapshots:
@@ -178,13 +178,13 @@ snapshots:
 
   '@pnpm/types@900.0.0': {}
 
-  '@rushstack/credential-cache@0.2.21':
+  '@rushstack/credential-cache@0.2.22':
     dependencies:
       '@rushstack/node-core-library': 5.23.3
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/lookup-by-path@0.10.10': {}
+  '@rushstack/lookup-by-path@0.10.11': {}
 
   '@rushstack/node-core-library@5.23.3':
     dependencies:
@@ -197,7 +197,7 @@ snapshots:
       resolve: 1.22.12
       semver: 7.7.4
 
-  '@rushstack/package-deps-hash@4.7.23':
+  '@rushstack/package-deps-hash@4.7.24':
     dependencies:
       '@rushstack/node-core-library': 5.23.3
     transitivePeerDependencies:
@@ -205,21 +205,21 @@ snapshots:
 
   '@rushstack/problem-matcher@0.2.1': {}
 
-  '@rushstack/rush-published-versions-json-plugin@0.1.15':
+  '@rushstack/rush-published-versions-json-plugin@0.1.16':
     dependencies:
       '@rushstack/node-core-library': 5.23.3
-      '@rushstack/rush-sdk': 5.178.0
+      '@rushstack/rush-sdk': 5.178.1
       '@rushstack/terminal': 0.24.2
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/rush-sdk@5.178.0':
+  '@rushstack/rush-sdk@5.178.1':
     dependencies:
       '@pnpm/lockfile.types-900': '@pnpm/lockfile.types@900.0.0'
-      '@rushstack/credential-cache': 0.2.21
-      '@rushstack/lookup-by-path': 0.10.10
+      '@rushstack/credential-cache': 0.2.22
+      '@rushstack/lookup-by-path': 0.10.11
       '@rushstack/node-core-library': 5.23.3
-      '@rushstack/package-deps-hash': 4.7.23
+      '@rushstack/package-deps-hash': 4.7.24
       '@rushstack/terminal': 0.24.2
       tapable: 2.2.1
     transitivePeerDependencies:
