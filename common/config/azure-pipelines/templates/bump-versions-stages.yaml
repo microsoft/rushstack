@@ -67,20 +67,10 @@ stages:
           - template: /common/config/azure-pipelines/templates/bump-versions.yaml@self
             parameters:
               VersionPolicyName: ${{ parameters.VersionPolicyName }}
-              BranchName: $(BaseBranch)
-
-          - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
-            displayName: 'Prepublish workaround for rush-lib'
-
-          - template: /common/config/azure-pipelines/templates/pack.yaml@self
-            parameters:
-              VersionPolicyName: ${{ parameters.VersionPolicyName }}
-
-          - template: /common/config/azure-pipelines/templates/post-publish.yaml@self
 
           - bash: |
-              git add -u
-              git add -- '**/CHANGELOG.md' '**/CHANGELOG.json'
+              git add -u -- common/changes
+              git add -- '**/CHANGELOG.*' '**/package.json'
 
               if [ -n "$(git diff --cached --numstat)" ]; then
                 git commit -m "Applying package version bumps
@@ -94,6 +84,15 @@ stages:
                 echo "##vso[task.setvariable variable=HasChanges]false"
               fi
             displayName: 'Commit Version Bumps'
+
+          - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
+            displayName: 'Prepublish workaround for rush-lib'
+
+          - template: /common/config/azure-pipelines/templates/pack.yaml@self
+            parameters:
+              VersionPolicyName: ${{ parameters.VersionPolicyName }}
+
+          - template: /common/config/azure-pipelines/templates/post-publish.yaml@self
 
           - template: /common/config/azure-pipelines/templates/push-and-create-github-pr.yaml@self
             parameters:
