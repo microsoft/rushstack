@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin",
+      "comment": "Fix no-new-null false positives for ECMAScript private class members.",
+      "type": "patch"
+    }
+  ]
+}
