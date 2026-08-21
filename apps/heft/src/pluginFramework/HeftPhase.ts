@@ -25,86 +25,86 @@ export interface IHeftPhase {
  * @internal
  */
 export class HeftPhase implements IHeftPhase {
-  private _internalHeftSession: InternalHeftSession;
-  private _phaseName: string;
-  private _phaseSpecifier: IHeftConfigurationJsonPhaseSpecifier;
-  private _consumingPhases: Set<HeftPhase> | undefined;
-  private _dependencyPhases: Set<HeftPhase> | undefined;
-  private _cleanFiles: Set<IDeleteOperation> | undefined;
-  private _tasks: Set<HeftTask> | undefined;
-  private _tasksByName: Map<string, HeftTask> | undefined;
+  #internalHeftSession: InternalHeftSession;
+  #phaseName: string;
+  #phaseSpecifier: IHeftConfigurationJsonPhaseSpecifier;
+  #consumingPhases: Set<HeftPhase> | undefined;
+  #dependencyPhases: Set<HeftPhase> | undefined;
+  #cleanFiles: Set<IDeleteOperation> | undefined;
+  #tasks: Set<HeftTask> | undefined;
+  #tasksByName: Map<string, HeftTask> | undefined;
 
   public constructor(
     internalHeftSession: InternalHeftSession,
     phaseName: string,
     phaseSpecifier: IHeftConfigurationJsonPhaseSpecifier
   ) {
-    this._internalHeftSession = internalHeftSession;
-    this._phaseName = phaseName;
-    this._phaseSpecifier = phaseSpecifier;
+    this.#internalHeftSession = internalHeftSession;
+    this.#phaseName = phaseName;
+    this.#phaseSpecifier = phaseSpecifier;
 
-    this._validate();
+    this.#validate();
   }
 
   /**
    * The name of the phase.
    */
   public get phaseName(): string {
-    return this._phaseName;
+    return this.#phaseName;
   }
 
   /**
    * The description of the phase.
    */
   public get phaseDescription(): string | undefined {
-    return this._phaseSpecifier.phaseDescription;
+    return this.#phaseSpecifier.phaseDescription;
   }
 
   /**
    * Returns delete operations that are specified on the phase.
    */
   public get cleanFiles(): ReadonlySet<IDeleteOperation> {
-    if (!this._cleanFiles) {
-      this._cleanFiles = new Set(this._phaseSpecifier.cleanFiles || []);
+    if (!this.#cleanFiles) {
+      this.#cleanFiles = new Set(this.#phaseSpecifier.cleanFiles || []);
     }
-    return this._cleanFiles;
+    return this.#cleanFiles;
   }
 
   /**
    * Returns the set of phases that depend on this phase.
    */
   public get consumingPhases(): ReadonlySet<HeftPhase> {
-    if (!this._consumingPhases) {
+    if (!this.#consumingPhases) {
       // Force initialize all dependency relationships
       // This needs to operate on every phase in the set because the relationships are only specified
       // in the consuming phase.
-      const { phases } = this._internalHeftSession;
+      const { phases } = this.#internalHeftSession;
 
       for (const phase of phases) {
-        phase._consumingPhases = new Set();
+        phase.#consumingPhases = new Set();
       }
 
       for (const phase of phases) {
         for (const dependency of phase.dependencyPhases) {
-          dependency._consumingPhases!.add(phase);
+          dependency.#consumingPhases!.add(phase);
         }
       }
     }
-    return this._consumingPhases!;
+    return this.#consumingPhases!;
   }
 
   /**
    * Returns the set of phases that this phase depends on.
    */
   public get dependencyPhases(): ReadonlySet<HeftPhase> {
-    let dependencyPhases: Set<HeftPhase> | undefined = this._dependencyPhases;
+    let dependencyPhases: Set<HeftPhase> | undefined = this.#dependencyPhases;
     if (!dependencyPhases) {
-      this._dependencyPhases = dependencyPhases = new Set();
-      const dependencyNamesSet: Set<string> = new Set(this._phaseSpecifier.phaseDependencies || []);
+      this.#dependencyPhases = dependencyPhases = new Set();
+      const dependencyNamesSet: Set<string> = new Set(this.#phaseSpecifier.phaseDependencies || []);
       for (const dependencyName of dependencyNamesSet) {
         // Skip if we can't find the dependency
         const dependencyPhase: HeftPhase | undefined =
-          this._internalHeftSession.phasesByName.get(dependencyName);
+          this.#internalHeftSession.phasesByName.get(dependencyName);
         if (!dependencyPhase) {
           throw new Error(`Could not find dependency phase ${JSON.stringify(dependencyName)}.`);
         }
@@ -118,31 +118,31 @@ export class HeftPhase implements IHeftPhase {
    * Returns the set of tasks contained by this phase.
    */
   public get tasks(): ReadonlySet<HeftTask> {
-    this._ensureTasks();
-    return this._tasks!;
+    this.#ensureTasks();
+    return this.#tasks!;
   }
 
   /**
    * Returns a map of tasks by name.
    */
   public get tasksByName(): ReadonlyMap<string, HeftTask> {
-    this._ensureTasks();
-    return this._tasksByName!;
+    this.#ensureTasks();
+    return this.#tasksByName!;
   }
 
-  private _ensureTasks(): void {
-    if (!this._tasks || !this._tasksByName) {
-      this._tasks = new Set();
-      this._tasksByName = new Map();
-      for (const [taskName, taskSpecifier] of Object.entries(this._phaseSpecifier.tasksByName || {})) {
+  #ensureTasks(): void {
+    if (!this.#tasks || !this.#tasksByName) {
+      this.#tasks = new Set();
+      this.#tasksByName = new Map();
+      for (const [taskName, taskSpecifier] of Object.entries(this.#phaseSpecifier.tasksByName || {})) {
         const task: HeftTask = new HeftTask(this, taskName, taskSpecifier);
-        this._tasks.add(task);
-        this._tasksByName.set(taskName, task);
+        this.#tasks.add(task);
+        this.#tasksByName.set(taskName, task);
       }
     }
   }
 
-  private _validate(): void {
+  #validate(): void {
     if (RESERVED_PHASE_NAMES.has(this.phaseName)) {
       throw new Error(
         `Phase name ${JSON.stringify(this.phaseName)} is reserved and cannot be used as a phase name.`
