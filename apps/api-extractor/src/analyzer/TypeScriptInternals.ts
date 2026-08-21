@@ -14,6 +14,16 @@ export interface IGlobalVariableAnalyzer {
   hasGlobalName(name: string): boolean;
 }
 
+export interface ICommentDirective {
+  range: ts.TextRange;
+  type: CommentDirectiveType;
+}
+
+export enum CommentDirectiveType {
+  ExpectError,
+  Ignore
+}
+
 export class TypeScriptInternals {
   public static getImmediateAliasedSymbol(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
     // Compiler internal:
@@ -152,5 +162,24 @@ export class TypeScriptInternals {
   public static isVarConst(node: ts.VariableDeclaration | ts.VariableDeclarationList): boolean {
     // Compiler internal: https://github.com/microsoft/TypeScript/blob/71286e3d49c10e0e99faac360a6bbd40f12db7b6/src/compiler/utilities.ts#L925
     return (ts as any).isVarConst(node);
+  }
+
+  /**
+   * Retrieves typescript directive comments from a SourceFile.
+   */
+  public static getCommentDirectives(sourceFile: ts.SourceFile): ICommentDirective[] {
+    const sourceFileText: string = sourceFile.getText();
+    return ((sourceFile as any).commentDirectives ?? []).map(
+      (directive: ICommentDirective): ICommentDirective => {
+        const commentText: string = sourceFileText.slice(directive.range.pos, directive.range.end);
+        return {
+          range: directive.range,
+          /* Get `type` ourselves in case Typescript changes the enum members. */
+          type: commentText.includes('@ts-expect-error')
+            ? CommentDirectiveType.ExpectError
+            : CommentDirectiveType.Ignore
+        };
+      }
+    );
   }
 }
