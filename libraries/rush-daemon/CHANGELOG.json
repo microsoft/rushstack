@@ -2,6 +2,18 @@
   "name": "@rushstack/rush-daemon",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@rushstack/rush-daemon_v0.4.0",
+      "date": "Fri, 21 Aug 2026 00:15:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a reusable warm workspace session with stable Rush configuration metadata, retained headless invalidations, and deterministic host lifecycle integration."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.0",
       "tag": "@rushstack/rush-daemon_v0.3.0",
       "date": "Thu, 20 Aug 2026 00:16:38 GMT",
