@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add OperationStreamEmitter and grouping helpers that replace StreamCollator with a raw, uncollated operation event stream, letting reporters own grouping and problem matchers consume the source stream",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
