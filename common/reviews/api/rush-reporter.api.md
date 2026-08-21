@@ -5,7 +5,41 @@
 ```ts
 
 // @beta
+export const BOOTSTRAP_BUFFER_MAX_BYTES: number;
+
+// @beta
+export const BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME: 'rush.reporter.bufferTruncated';
+
+// @beta
+export const BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES: number;
+
+// @beta
+export const BOOTSTRAP_HANDOFF_FILE_PREFIX: 'rush-reporter-bootstrap-';
+
+// @beta
+export const BOOTSTRAP_HANDOFF_FILE_SUFFIX: '.ndjson';
+
+// @beta
+export const BOOTSTRAP_PROTOCOL_MAJOR: number;
+
+// @beta
+export class BootstrapEventBuffer {
+    constructor(options: IBootstrapEventBufferOptions);
+    addExternalOutput(stream: 'stdout' | 'stderr', text: string): void;
+    emit(input: IBootstrapEventInput): string;
+    get failed(): boolean;
+    serialize(): string;
+    get truncation(): IBootstrapTruncation;
+}
+
+// @beta
+export type BootstrapPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
+
+// @beta
 export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPrivacyClassification>): ReporterPrivacyClassification;
+
+// @beta
+export function createEngineSink(providedSink?: IReporterEventSink): IEngineSinkResolution;
 
 // @beta
 export function createRushDiagnostic(code: RushDiagnosticCodes, options?: ICreateRushDiagnosticOptions): IRushDiagnostic;
@@ -14,13 +48,73 @@ export function createRushDiagnostic(code: RushDiagnosticCodes, options?: ICreat
 export const DEFAULT_FLUSH_TIMEOUT_MS: number;
 
 // @beta
+export const DEFAULT_HANDOFF_RETENTION_MS: number;
+
+// @beta
 export const DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS: number;
+
+// @beta
+export function deleteBootstrapHandoffFileAsync(filePath: string): Promise<void>;
 
 // @beta
 export function encodeNdjsonRecord(value: unknown, options?: INdjsonOptions): string;
 
 // @beta
 export function getPrivacyClassificationRank(classification: ReporterPrivacyClassification): number;
+
+// @beta
+export interface IBootstrapEventBufferOptions {
+    readonly maxBytes?: number;
+    readonly now?: () => string;
+    readonly sessionId: string;
+    readonly source: IBootstrapEventSource;
+}
+
+// @beta
+export interface IBootstrapEventInput {
+    readonly payload?: unknown;
+    readonly privacy?: BootstrapPrivacyClassification;
+    readonly required: boolean;
+    readonly type: string;
+}
+
+// @beta
+export interface IBootstrapEventSource {
+    // (undocumented)
+    readonly packageName: string;
+    // (undocumented)
+    readonly packageVersion: string;
+}
+
+// @beta
+export interface IBootstrapHandoffHeader {
+    readonly kind: 'bootstrapHandoff';
+    readonly nonce: string;
+}
+
+// @beta
+export interface IBootstrapHandoffWriteResult {
+    readonly handoffPath: string;
+    readonly nonce: string;
+}
+
+// @beta
+export interface IBootstrapReplayResult {
+    readonly direct: boolean;
+    readonly eventCount: number;
+    readonly handoffPath?: string;
+    readonly replayed: boolean;
+    readonly skipReason?: 'unreadable' | 'nonce-mismatch';
+}
+
+// @beta
+export interface IBootstrapTruncation {
+    readonly droppedOther: number;
+    readonly droppedReplaceable: number;
+    readonly droppedRequired: number;
+    readonly failed: boolean;
+    readonly truncated: boolean;
+}
 
 // @beta
 export interface IClassifiedDiagnosticValue {
@@ -43,6 +137,18 @@ export interface ICreateRushDiagnosticOptions {
 }
 
 // @beta
+export interface IEarlyReporterControls {
+    readonly logLevel?: string;
+    readonly reporter?: string;
+}
+
+// @beta
+export interface IEngineSinkResolution {
+    readonly mode: 'structured' | 'legacy-fallback';
+    readonly sink: IReporterEventSink;
+}
+
+// @beta
 export interface IMessageEmittedPayload {
     readonly privacy?: ReporterPrivacyClassification;
     readonly severity: ReporterMessageSeverity;
@@ -55,12 +161,30 @@ export interface INdjsonOptions {
 }
 
 // @beta
+export interface IOldEngineOutputAdapterOptions {
+    readonly maxChunkBytes?: number;
+    readonly protocolVersion?: IReporterProtocolVersion;
+    readonly sessionId: string;
+    readonly sink: IReporterEventSink;
+    readonly source: IReporterEventSource;
+}
+
+// @beta
 export interface IReporter {
     closeAsync(): Promise<void>;
     flushAsync(): Promise<void>;
     initializeAsync(context: IReporterContext): Promise<void>;
     readonly name: string;
     report(event: IReporterEventEnvelope<unknown>): void;
+}
+
+// @beta
+export interface IReporterCompatibilityDecision {
+    readonly engineRendersLegacy: boolean;
+    readonly legacyRenderingVisible: boolean;
+    readonly mode: ReporterCompatibilityMode;
+    readonly provideSinkToEngine: boolean;
+    readonly reason: string;
 }
 
 // @beta
@@ -71,6 +195,12 @@ export interface IReporterContext {
 
 // @beta
 export type IReporterEmitEventInput<TPayload> = Omit<IReporterEventEnvelope<TPayload>, 'eventId' | 'sequence' | 'sourceSequence' | 'timestamp' | 'required'>;
+
+// @beta
+export interface IReporterEngineDescriptor {
+    readonly protocolMajor?: number;
+    readonly supportsStructuredSink: boolean;
+}
 
 // @beta
 export interface IReporterEventEnvelope<TPayload = unknown> {
@@ -111,6 +241,12 @@ export interface IReporterEventSource {
 }
 
 // @beta
+export interface IReporterFrontendDescriptor {
+    readonly hasManager: boolean;
+    readonly protocolMajor: number;
+}
+
+// @beta
 export interface IReporterHandshakeOptions {
     readonly supportedCapabilities?: readonly ReporterCapability[];
     readonly supportedProtocolVersion: IReporterProtocolVersion;
@@ -138,6 +274,15 @@ export interface IReporterHelloAck {
     readonly kind: 'helloAck';
     readonly protocolVersion: IReporterProtocolVersion;
     readonly rejectedRequiredFeatures: readonly string[];
+}
+
+// @beta
+export interface IReporterHostOptions {
+    readonly env?: Record<string, string | undefined>;
+    readonly handoffDirectory?: string;
+    readonly manager?: ReporterManager;
+    readonly nowMs?: () => number;
+    readonly retentionMs?: number;
 }
 
 // @beta
@@ -221,6 +366,9 @@ export interface IRushToolDiagnosticSource {
 }
 
 // @beta
+export function isBootstrapHandoffFileName(fileName: string): boolean;
+
+// @beta
 export interface IScopedMessageOptions {
     readonly privacy?: ReporterPrivacyClassification;
     readonly severity: ReporterMessageSeverity;
@@ -247,7 +395,19 @@ export function isReporterProtocolCompatible(consumer: IReporterProtocolVersion,
 export function isValidRushDiagnosticCode(code: string): boolean;
 
 // @beta
+export interface IWriteBootstrapHandoffOptions {
+    readonly directory?: string;
+    readonly pid?: number;
+}
+
+// @beta
 export type KnownRushDiagnosticCategory = 'configuration' | 'input' | 'dependency-tool' | 'environment' | 'network-auth' | 'operation' | 'internal';
+
+// @beta
+export class LegacyFallbackSink implements IReporterEventSink {
+    // (undocumented)
+    emit(): string;
+}
 
 // @beta
 export class NdjsonDecoder {
@@ -266,7 +426,22 @@ export class NdjsonRecordTooLargeError extends Error {
 export function negotiateReporterHello(hello: IReporterHello, options: IReporterHandshakeOptions): IReporterHandshakeResult;
 
 // @beta
+export class OldEngineOutputAdapter {
+    constructor(options: IOldEngineOutputAdapterOptions);
+    capture(stream: 'stdout' | 'stderr', text: string): string[];
+}
+
+// @beta
 export type OneOrMoreRushDiagnosticCodeSegments<S extends string = RushDiagnosticCodeSegment> = S extends string ? S | `${S}${RushDiagnosticCodeSegment}` : never;
+
+// @beta
+export function parseEarlyReporterControls(argv: readonly string[], env: Record<string, string | undefined>): IEarlyReporterControls;
+
+// @beta
+export function readBootstrapHandoffFileAsync(filePath: string): Promise<{
+    header: IBootstrapHandoffHeader | undefined;
+    events: unknown[];
+}>;
 
 // @beta
 export const REPORTER_EVENT_TYPES: readonly ["sessionStarted", "sessionCompleted", "commandStarted", "commandCompleted", "operationRegistered", "operationStatusChanged", "activityChanged", "watchCycleCompleted", "diagnosticEmitted", "messageEmitted", "externalProcessStarted", "externalOutput", "externalProcessCompleted", "artifactAvailable", "commandResult", "extension"];
@@ -287,10 +462,22 @@ export const REPORTER_PROTOCOL_VERSION: IReporterProtocolVersion;
 export type ReporterCapability = (typeof REPORTER_KNOWN_CAPABILITIES)[number] | (string & {});
 
 // @beta
+export type ReporterCompatibilityMode = 'structured' | 'new-frontend-old-engine' | 'old-frontend-new-engine' | 'legacy';
+
+// @beta
 export type ReporterEventType = (typeof REPORTER_EVENT_TYPES)[number];
 
 // @beta
 export type ReporterExtensionEventName = `${Lowercase<string>}.${Lowercase<string>}`;
+
+// @beta
+export class ReporterHost {
+    constructor(options?: IReporterHostOptions);
+    cleanAbandonedHandoffFilesAsync(): Promise<string[]>;
+    getSink(): IReporterEventSink;
+    get manager(): ReporterManager;
+    replayBootstrapHandoffAsync(): Promise<IBootstrapReplayResult>;
+}
 
 // @beta
 export type ReporterJsonNull = null;
@@ -331,6 +518,9 @@ export class ReporterMultiplexer implements IReporter {
 
 // @beta
 export type ReporterPrivacyClassification = 'public' | 'local-sensitive' | 'secret';
+
+// @beta
+export function resolveReporterCompatibility(frontend: IReporterFrontendDescriptor, engine: IReporterEngineDescriptor): IReporterCompatibilityDecision;
 
 // @beta
 export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly [{
@@ -393,6 +583,12 @@ export const RUSH_DIAGNOSTIC_TEMPLATES: Readonly<Record<RushDiagnosticTemplateKe
 export const RUSH_INTERNAL_ERROR_CODE: 'RUSH_INTERNAL_UNEXPECTED';
 
 // @beta
+export const RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_HANDOFF';
+
+// @beta
+export const RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_NONCE';
+
+// @beta
 export type RushDiagnosticCategory = KnownRushDiagnosticCategory | (string & {});
 
 // @beta
@@ -425,5 +621,8 @@ export class RushError extends Error {
 
 // @beta
 export type RushRemediationSafety = 'safe' | 'requires-confirmation' | 'unsafe';
+
+// @beta
+export function writeBootstrapHandoffFileAsync(buffer: BootstrapEventBuffer, options?: IWriteBootstrapHandoffOptions): Promise<IBootstrapHandoffWriteResult>;
 
 ```
