@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/reporter",
+      "comment": "Add the daemon-aligned major default-flip migration model: the reporter migration phases, pre-flip and post-flip major default sets, and a plugin apply gate that fails incompatible plugins before apply() with a structured migration diagnostic",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
