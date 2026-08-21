@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 20 Aug 2026 00:16:38 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Aug 2026 15:16:34 GMT and should not be manually modified.
+
+## 7.59.0
+Fri, 21 Aug 2026 15:16:34 GMT
+
+### Minor changes
+
+- Report a new `ae-unresolved-import-path` message when an inline `import()` type with a relative path cannot be resolved, instead of silently emitting the unusable path into the .d.ts rollup.
 
 ## 7.58.13
 Thu, 20 Aug 2026 00:16:38 GMT

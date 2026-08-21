@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.59.0",
+      "tag": "@microsoft/api-extractor_v7.59.0",
+      "date": "Fri, 21 Aug 2026 15:16:34 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Report a new `ae-unresolved-import-path` message when an inline `import()` type with a relative path cannot be resolved, instead of silently emitting the unusable path into the .d.ts rollup."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.58.13",
       "tag": "@microsoft/api-extractor_v7.58.13",
       "date": "Thu, 20 Aug 2026 00:16:38 GMT",
