@@ -3,7 +3,7 @@
 # There is one bump pipeline per version policy; each of them builds the repo, bumps the versions
 # for its own version policy, packs the resulting tarballs and opens a GitHub PR with the changes.
 # The packed tarballs are published to the npm feed later by the matching "esrp publish" pipeline,
-# which locates this pipeline run via the "bump-versions:<sha>" build tag.
+# which locates this pipeline run via the "bump-versions|<sha>" build tag.
 
 parameters:
   - name: VersionPolicyName
@@ -104,7 +104,7 @@ stages:
               set -e
               BUMP_SHA=$(git rev-parse HEAD)
               echo "##vso[task.setvariable variable=BumpSha;isOutput=true]${BUMP_SHA}"
-              echo "##vso[build.addbuildtag]bump-versions:${BUMP_SHA}"
+              echo "##vso[build.addbuildtag]bump-versions|${BUMP_SHA}"
               echo "Tagged build with bump SHA: ${BUMP_SHA}"
             name: TagBuild
             displayName: 'Tag build with bump commit SHA'

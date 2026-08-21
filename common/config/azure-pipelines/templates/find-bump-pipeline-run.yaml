@@ -71,7 +71,7 @@ steps:
 
       echo "Found merged PR #${PR_NUMBER}; head SHA: ${HEAD_SHA}"
 
-      BUMP_TAG="bump-versions:${HEAD_SHA}"
+      BUMP_TAG="bump-versions|${HEAD_SHA}"
       ENCODED_TAG=$(url_encode "$BUMP_TAG")
       BUILDS_URL="${SYSTEM_COLLECTIONURI}${{ parameters.TeamProject }}/_apis/build/builds?definitions=${PIPELINE_ID}&tagFilters=${ENCODED_TAG}&queryOrder=finishTimeDescending&\$top=1&api-version=7.1"
 

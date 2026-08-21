@@ -2,7 +2,7 @@
 #
 # There is one publish pipeline per version policy. Each of them is triggered when the version bump
 # PR produced by the matching bump pipeline is merged to main; it locates the originating bump
-# pipeline run (via the "bump-versions:<sha>" build tag) and publishes the tarballs that were packed
+# pipeline run (via the "bump-versions|<sha>" build tag) and publishes the tarballs that were packed
 # by that run to the npm feed via ESRP.
 
 parameters:
