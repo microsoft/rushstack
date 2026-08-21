@@ -20,6 +20,9 @@ export class AiReporter implements IReporter {
 }
 
 // @beta
+export function allocateChildDescriptor(fdNumber?: number): IChildDescriptorPlan;
+
+// @beta
 export const ALREADY_REPORTED_ERROR_NAME: 'AlreadyReportedError';
 
 // @beta @deprecated
@@ -168,6 +171,30 @@ export function getPrivacyClassificationRank(classification: ReporterPrivacyClas
 export function getSignalExitCode(signal: NodeJS.Signals): number;
 
 // @beta
+export class HeftChildEmitter {
+    constructor(options: IHeftChildEmitterOptions);
+    emitEvent(input: IHeftChildEventInput): string | undefined;
+    readonly mode: HeftChildReporterMode;
+    sendHello(): boolean;
+    writeRaw(stream: 'stdout' | 'stderr', text: string): void;
+}
+
+// @beta
+export type HeftChildReporterMode = 'structured' | 'raw-fallback';
+
+// @beta
+export class HeftDescriptorHost {
+    constructor(options: IHeftDescriptorHostOptions);
+    createStreamProcessor(): {
+        write(chunk: string): void;
+        flush(): IHeftChildResult;
+    };
+    processChildNdjson(ndjson: string): IHeftChildResult;
+    processChildRecord(record: unknown): boolean;
+    processChildRecords(records: readonly unknown[]): IHeftChildResult;
+}
+
+// @beta
 export interface IAiDiagnostic {
     // (undocumented)
     readonly category: string;
@@ -298,6 +325,13 @@ export interface IBootstrapTruncation {
 }
 
 // @beta
+export interface IChildDescriptorPlan {
+    readonly env: Record<string, string>;
+    readonly fdNumber: number;
+    readonly stdio: (string | number)[];
+}
+
+// @beta
 export interface IClassifiedDiagnosticValue {
     readonly privacy: ReporterPrivacyClassification;
     readonly value: ReporterJsonValue;
@@ -415,6 +449,53 @@ export interface IFileReporterOptions {
 export interface IGetMatchersOptions {
     readonly includeDisabled?: boolean;
     readonly version?: string;
+}
+
+// @beta
+export interface IHeftChildEmitterOptions {
+    readonly capabilities?: readonly string[];
+    readonly childSessionId: string;
+    readonly env: Record<string, string | undefined>;
+    readonly now?: () => string;
+    readonly producerVersion: string;
+    readonly protocolVersion?: IReporterProtocolVersion;
+    readonly requiredFeatures?: readonly string[];
+    readonly source: IReporterEventSource;
+    readonly writeDescriptor?: (text: string) => void;
+    readonly writeStderr?: (text: string) => void;
+    readonly writeStdout?: (text: string) => void;
+}
+
+// @beta
+export interface IHeftChildEventInput {
+    // (undocumented)
+    readonly payload?: unknown;
+    // (undocumented)
+    readonly privacy?: 'public' | 'local-sensitive' | 'secret';
+    // (undocumented)
+    readonly required: boolean;
+    // (undocumented)
+    readonly scope?: IReporterEventScope;
+    // (undocumented)
+    readonly type: string;
+}
+
+// @beta
+export interface IHeftChildResult {
+    readonly accepted: boolean;
+    readonly ack?: IReporterHelloAck;
+    readonly diagnostic?: IRushDiagnostic;
+    readonly eventCount: number;
+}
+
+// @beta
+export interface IHeftDescriptorHostOptions {
+    readonly forwardEnvelope: (envelope: IReporterEventEnvelope<unknown>) => void;
+    readonly onNegotiation?: (result: IReporterHandshakeResult) => void;
+    readonly parentOperationId?: string;
+    readonly parentSessionId: string;
+    readonly supportedCapabilities?: readonly string[];
+    readonly supportedProtocolVersion: IReporterProtocolVersion;
 }
 
 // @beta
@@ -1110,6 +1191,9 @@ export function readBootstrapHandoffFileAsync(filePath: string): Promise<{
 }>;
 
 // @beta
+export function readChildDescriptorFd(env: Record<string, string | undefined>): number | undefined;
+
+// @beta
 export function regroupOperationOutput(events: readonly IReporterEventEnvelope<unknown>[]): Map<string, string>;
 
 // @beta
@@ -1301,6 +1385,9 @@ export const RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_
 
 // @beta
 export const RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_NONCE';
+
+// @beta
+export const RUSH_REPORTER_CHILD_FD_ENV_VAR: '_RUSH_REPORTER_CHILD_FD';
 
 // @beta
 export const RUSH_REPORTER_ENV_VAR: 'RUSH_REPORTER';
